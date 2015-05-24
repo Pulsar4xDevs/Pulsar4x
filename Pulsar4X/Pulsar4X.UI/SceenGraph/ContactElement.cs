@@ -197,7 +197,7 @@ namespace Pulsar4X.UI.SceenGraph
                             PassiveSensorDefTN pSensorDef = TaskGroup.BestEM.pSensorDef;
 #warning all of these 10000.0's are related to the fact that distance is done by 10k km in Aurora.
                             double factor = Constants.Units.KmPerAu / 10000.0;
-                            double AURadius = (double)pSensorDef.range / factor;
+                            double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                             Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
@@ -209,7 +209,7 @@ namespace Pulsar4X.UI.SceenGraph
                         {
                             PassiveSensorDefTN pSensorDef = TaskGroup.BestThermal.pSensorDef;
                             double factor = Constants.Units.KmPerAu / 10000.0;
-                            double AURadius = (double)pSensorDef.range / factor;
+                            double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                             Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
@@ -264,7 +264,7 @@ namespace Pulsar4X.UI.SceenGraph
                         int ScanStrength = DSTS * Constants.Colony.DeepSpaceStrength[SensorTech] * 100;
 
                         double factor = Constants.Units.KmPerAu / 10000.0;
-                        double AURadius = (double)ScanStrength / factor;
+                        double AURadius = (double)ScanStrength * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                         Vector3 PopPosition = new Vector3((float)CurrentPop.Contact.Position.X, (float)CurrentPop.Contact.Position.Y, 0.0f);
 
@@ -302,7 +302,7 @@ namespace Pulsar4X.UI.SceenGraph
                         if (OrdDef.tHD != null && ParentSceen.ShowPassives == true)
                         {
                             double factor = Constants.Units.KmPerAu / 10000.0;
-                            double AURadius = (double)OrdDef.tHD.range / factor;
+                            double AURadius = (double)OrdDef.tHD.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                             Vector3 MGPos = new Vector3((float)MissileGroup.contact.Position.X, (float)MissileGroup.contact.Position.Y, 0.0f);
 
@@ -314,7 +314,7 @@ namespace Pulsar4X.UI.SceenGraph
                         if (OrdDef.eMD != null && ParentSceen.ShowPassives == true)
                         {
                             double factor = Constants.Units.KmPerAu / 10000.0;
-                            double AURadius = (double)OrdDef.eMD.range / factor;
+                            double AURadius = (double)OrdDef.eMD.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                             Vector3 MGPos = new Vector3((float)MissileGroup.contact.Position.X, (float)MissileGroup.contact.Position.Y, 0.0f);
 

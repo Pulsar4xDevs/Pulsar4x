@@ -180,6 +180,11 @@ namespace Pulsar4X.UI.SceenGraph
         public bool ShowPassives { get; set; }
 
         /// <summary>
+        /// What signature strength should the display show current passives as searching for. The size of the sensor bubble indicates the extent to which this signature strength can be detected.
+        /// </summary>
+        public int ShowPassiveSignatureRange { get; set; }
+
+        /// <summary>
         /// Default Constructor.
         /// </summary>
         public Sceen(Pulsar4X.UI.Handlers.SystemMap ParentSM)
@@ -191,6 +196,7 @@ namespace Pulsar4X.UI.SceenGraph
 
             ShowActives = true;
             ShowPassives = true;
+            ShowPassiveSignatureRange = 1000;
         }
 
         public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect, Pulsar4X.UI.Handlers.SystemMap ParentSM)
@@ -202,8 +208,12 @@ namespace Pulsar4X.UI.SceenGraph
             ParentSystemMap = ParentSM;
             SceenDefaultEffect = a_oDefaultEffect;
 
+            /// <summary>
+            /// These have to be initialized before the contactElements are created as contactElement uses these.
+            /// </summary>
             ShowActives = true;
             ShowPassives = true;
+            ShowPassiveSignatureRange = (int)Constants.SensorTN.DefaultPassiveSignature;
 
             // Set Sceen Vars:
             m_oSceenEntity = a_oStarSystem;

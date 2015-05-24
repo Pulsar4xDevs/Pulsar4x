@@ -144,7 +144,7 @@ namespace Pulsar4X.UI.Panels
         #endregion
 
         #region Sensors Tab
-
+#warning Only the show actives and show passives checkboxes are implemented for the sensor tab
         /// <summary>
         /// Attempt to increment time by specified increment.
         /// </summary>

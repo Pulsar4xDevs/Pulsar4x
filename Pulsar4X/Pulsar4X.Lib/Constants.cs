@@ -714,6 +714,11 @@ namespace Pulsar4X
         {
             public static byte[] ActiveStrength = { 10, 12, 16, 21, 28, 36, 48, 60, 80, 100, 135, 180 };
             public static byte[] PassiveStrength = { 5, 6, 8, 11, 14, 18, 24, 32, 40, 50, 60, 75 };
+
+            /// <summary>
+            /// What value are sensors calibrated around searching for?
+            /// </summary>
+            public const uint DefaultPassiveSignature = 1000;
         }
 
         /// <summary>
