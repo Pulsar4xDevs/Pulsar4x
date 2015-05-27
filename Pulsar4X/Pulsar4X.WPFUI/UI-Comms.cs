@@ -9,7 +9,8 @@ using System.Windows.Threading;
 
 namespace Pulsar4X.WPFUI
 {
-    internal delegate void StatusUpdate(string message);
+
+
     internal class UIComms
     {
         internal static UIComms Instance { get; private set; }

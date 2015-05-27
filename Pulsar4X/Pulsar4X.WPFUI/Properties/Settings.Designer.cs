@@ -46,5 +46,17 @@ namespace Pulsar4X.WPFUI.Properties {
                 this["WindowStyle"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClientGuid {
+            get {
+                return ((string)(this["ClientGuid"]));
+            }
+            set {
+                this["ClientGuid"] = value;
+            }
+        }
     }
 }

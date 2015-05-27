@@ -16,7 +16,7 @@ namespace Pulsar4X.Tests
         [TestFixtureSetUp]
         public void GlobalInit()
         {
-            _game = new Game(); // init the game class as we will need it for these tests.
+            _game = new Game(new LibProcessLayer(), "Unit Test Game"); // init the game class as we will need it for these tests.
             GalaxyFactory.InitToDefaultSettings(); // make sure default settings are loaded.
         }
 

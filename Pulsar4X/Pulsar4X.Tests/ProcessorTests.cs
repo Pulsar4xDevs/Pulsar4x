@@ -21,7 +21,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game();
+            _game = new Game(new LibProcessLayer(), "Unit Test Game");
             StaticDataManager.LoadFromDefaultDataDirectory();
             _entityManager = new EntityManager();
             _faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terrian");

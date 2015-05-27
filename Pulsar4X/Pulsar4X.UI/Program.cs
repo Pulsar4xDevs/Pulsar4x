@@ -30,11 +30,6 @@ namespace Pulsar4X.UI
             logger.Info("Program Started");
 #endif
 
-            Game game = new Game();
-
-            game.StarSystems.Add(new StarSystem("Sol", -1));
-            game.StarSystems.Add(new StarSystem("Sol", -1));
-
             // gen star system:
             Entities.StarSystem sol = SystemGen.CreateSol();
             SystemGen.CreateStressTest();

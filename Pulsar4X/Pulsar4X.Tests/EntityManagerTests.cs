@@ -18,7 +18,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            Game game = new Game();
+            Game game = new Game(new LibProcessLayer(), "Unit Test Game");
             //StaticDataManager.LoadFromDefaultDataDirectory();
             _entityManager = new EntityManager();           
             _species1 = Entity.Create(_entityManager, new List<BaseDataBlob> { new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });

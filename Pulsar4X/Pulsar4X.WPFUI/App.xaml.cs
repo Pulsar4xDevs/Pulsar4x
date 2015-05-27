@@ -16,7 +16,7 @@ namespace Pulsar4X.WPFUI
     /// </summary>
     public partial class App
     {
-        public static Game GameInstance;
+        private LocalClientTransportLayer _localClient;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -36,17 +36,20 @@ namespace Pulsar4X.WPFUI
 
         App()
         {
-            /* Stuff to replace */
-            Game game = new Game();
-            Entity playerFaction = game.GlobalManager.GetFirstEntityWithDataBlob<FactionDB>();
-            if (playerFaction.IsValid)
-                playerFaction = FactionFactory.CreateFaction(game.GlobalManager, "playerFaction");
-            game.EngineComms.AddFaction(playerFaction.Guid);
-            Guid faction = game.EngineComms.FirstOrDefault().Faction; //just get the first one for now, till we've got ui to select.
-            /* Stuff to replace */
 
-            UIComms uicomms = new UIComms(game.EngineComms, faction);
-            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => uicomms.CheckEngineMessageQueue()));
+            if (string.IsNullOrEmpty(WPFUI.Properties.Settings.Default.ClientGuid))
+            {
+                WPFUI.Properties.Settings.Default.ClientGuid = Guid.NewGuid().ToString();
+            }
+            Guid clientGuid;
+            if (!Guid.TryParse(WPFUI.Properties.Settings.Default.ClientGuid, out clientGuid))
+            {
+                clientGuid = Guid.NewGuid();
+                WPFUI.Properties.Settings.Default.ClientGuid = clientGuid.ToString();
+            }
+            _localClient = new LocalClientTransportLayer(, clientGuid);
+
+            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(Target));
         }
     }
 }

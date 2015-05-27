@@ -17,7 +17,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            game = new Game();
+            game = new Game(new LibProcessLayer(), "Unit Test Game");
 
             // set date time:
             testTime = DateTime.Now;
@@ -92,7 +92,7 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(File.Exists(file));
 
             // now lets give ourselves a clean game:
-            game = new Game();
+            game = new Game(new LibProcessLayer(), "Unit Test Game");
 
             //and load the saved data:
             save.Load();

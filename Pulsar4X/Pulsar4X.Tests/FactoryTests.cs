@@ -14,7 +14,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game();
+            _game = new Game(new LibProcessLayer(), "Unit Test Game");
         }
 
         [Test]

@@ -55,7 +55,9 @@
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
     <Compile Include="DataBlobs\TechDB.cs" />
-    <Compile Include="EngineComms\Message.cs" />
+    <Compile Include="EngineComms\CommDefinitions.cs" />
+    <Compile Include="EngineComms\CommonComms.cs" />
+    <Compile Include="EngineComms\LocalComms.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
     <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
     <Compile Include="Factories\SystemGen\StarFactory.cs" />
@@ -100,7 +102,6 @@
     <Compile Include="DataBlobs\ShipDBs\TroopTransportDB.cs" />
     <Compile Include="DataBlobs\SpeciesDB.cs" />
     <Compile Include="DataBlobs\TreeHierarchyDB.cs" />
-    <Compile Include="EngineComms\Engine-Comms.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="EntityManager.cs" />
     <Compile Include="Factories\ColonyFactory.cs" />

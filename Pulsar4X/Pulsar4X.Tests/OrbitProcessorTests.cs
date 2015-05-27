@@ -21,7 +21,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            Game game = new Game(); // init the game class as we will need it for these tests.
+            Game game = new Game(new LibProcessLayer(), "Unit Test Game"); // init the game class as we will need it for these tests.
             GalaxyFactory.InitToDefaultSettings(); // make sure default settings are loaded.
 
             OrbitProcessor.Initialize();

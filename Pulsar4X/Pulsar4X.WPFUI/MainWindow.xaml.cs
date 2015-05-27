@@ -24,16 +24,13 @@ namespace Pulsar4X.WPFUI
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         double _customAdvSimValue = 5;
 
-        // ReSharper disable once MemberCanBePrivate.Global
-        // Used by WPF during initialzation, hidden from ReSharper.
+        [UsedImplicitly]
         public string CustomAdvSimValue
         {
-            // ReSharper disable once UnusedMember.Local
-            // Used by WPF during initialzation, hidden from ReSharper.
             get
             {
                 return _customAdvSimValue.ToString(CultureInfo.CurrentCulture);

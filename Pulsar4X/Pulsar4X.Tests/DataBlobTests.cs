@@ -18,7 +18,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            Game game = new Game();
+            Game game = new Game(new LibProcessLayer(), "TestGame");
             _manager = new EntityManager();
         }
 

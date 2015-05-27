@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -23,8 +25,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public List<StarSystem> StarSystems { get; set; }
         public DateTime CurrentDateTime { get; set; }
-
-        public EngineComms EngineComms { get; private set; }       
 
         public SubpulseLimitRequest NextSubpulse
         {
@@ -66,12 +66,42 @@ namespace Pulsar4X.ECSLib
 
         public bool IsLoaded { get; private set; }
 
-        public Game()
+        public string GameName;
+        public string SavePath;
+
+        [JsonIgnore]
+        public SaveGame SaveGame;
+
+        [JsonIgnore] 
+        public List<IServerTransportLayer> Servers;
+
+        [JsonIgnore] 
+        private LibProcessLayer _currentComms;
+
+        [JsonIgnore] 
+        internal bool QuitMessageReceived;
+
+        [JsonIgnore] 
+        private Thread _commsThread;
+        
+
+        public Game(LibProcessLayer comms, string gameName, string savePath = null)
         {
+            _currentComms = comms;
+
+            GameName = gameName;
+            if (savePath == null)
+            {
+                SavePath = Directory.GetCurrentDirectory() + "//" + GameName;
+            }
+            else
+            {
+                SavePath = savePath;
+            }
+
             IsLoaded = false;
             GlobalManager = new EntityManager();
             GlobalManager.Clear(true);
-            Instance = this;
 
             StarSystems = new List<StarSystem>();
 
@@ -81,13 +111,15 @@ namespace Pulsar4X.ECSLib
 
             CurrentInterrupt = new Interrupt();
 
-            EngineComms = new EngineComms();
-
             // make sure we have defalt galaxy settings:
             GalaxyFactory.InitToDefaultSettings();
 
             // Setup processors.
             InitializeProcessors();
+
+            SaveGame = new SaveGame(SavePath + "//" + GameName + ".json");
+
+            QuitMessageReceived = false;
         }
 
         /// <summary>
@@ -110,117 +142,17 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void MainGameLoop()
         {
-            bool quit = false;
-            bool messageProcessed = false;
+            _commsThread = Thread.CurrentThread;
 
-            while (!quit)
+            while (!QuitMessageReceived)
             {
-                // lets first check if there are things waiting in a queue:
-                if (EngineComms.LibMessagesWaiting() == false)
+                if (!_currentComms.ProcessMessages())
                 {
-                    // there is nothing from the UI, so lets sleep for a while before checking again.
-                    Wait();
-                    continue; // go back and check again.
-                }
-
-                // start by checking the default queue, this queue always exisits and is used 
-                // for init and important, faction neutral, messages.
-                Message message;
-                if (EngineComms.LibPeekFactionInQueue(Guid.Empty, out message) && IsMessageValid(message))
-                {
-                    // we have a valid message we had better take it out of the queue:
-                    message = EngineComms.LibReadFactionInQueue(Guid.Empty);
-
-                    // process it:
-                    ProcessMessage(null, message, ref quit);
-                    messageProcessed = true;
-                }
-
-                // loop through all the incoming queues looking for a new message:
-                List<Entity> factions = GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>();
-                foreach (Entity faction in factions)
-                {
-                    // lets just take a peek first:
-                    if (EngineComms.LibPeekFactionInQueue(faction.Guid, out message) && IsMessageValid(message))
-                    {
-                        // we have a valid message we had better take it out of the queue:
-                        message = EngineComms.LibReadFactionInQueue(faction.Guid);
-
-                        // process it:
-                        ProcessMessage(faction, message, ref quit);
-                        messageProcessed = true;
-                    }
-                }
-
-                // lets check if we processed a valid message this time around:
-                if (messageProcessed)
-                {
-                    // so we processed a valid message, better check for a new one right away:
-                    messageProcessed = false;
-                }
-                else
-                {
-                    // we didn't process a valid message... 
-                    // we should probably wait for a while for the pulse to finish or new stuff to queue up
-                    Wait();
+                    // we don't have waiting messages. 
+                    // we should probably wait for a while for new stuff to queue up
+                    Thread.Sleep(5);
                 }
             }
-        }
-
-        private bool IsMessageValid(Message message)
-        {
-            return true; // we will do this until we have messages that can be invalid!!
-        }
-
-        /// <summary>
-        /// Process messages. Note that Faction can be null if the message cam in through the default queue.
-        /// </summary>
-        private void ProcessMessage(Entity faction, Message message, ref bool quit)
-        {
-            if (message == null)
-            {
-                return;
-            }
-
-            switch (message.Type)
-            {
-                case MessageType.Quit:
-                    quit = true;                                        // cause the game to quit!
-                    break;
-                case MessageType.Save:
-                    string savePath = message.Data as string;
-                    if(string.IsNullOrWhiteSpace(savePath))
-                        break;
-                    SaveGame saveGame = new SaveGame(savePath);
-                    saveGame.Save();
-                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(MessageType.GameStatusUpdate, "Saved to " + savePath));
-                    break;
-                case MessageType.Load:
-                    string loadPath = message.Data as string;
-                    if(string.IsNullOrWhiteSpace(loadPath))
-                        break;
-                    SaveGame loadGame = new SaveGame(loadPath);
-                    loadGame.Load(loadPath);
-                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(MessageType.GameStatusUpdate, "Loaded from " + loadPath));
-                    break;
-                case MessageType.Echo:
-                    if (faction == null)
-                        EngineComms.LibWriteOutQueue(Guid.Empty, message);     // echo chamber ;)
-                    else
-                        EngineComms.LibWriteOutQueue(faction.Guid, message);     // echo chamber ;)
-                    break;
-                default:
-                    throw new System.Exception("Message of type: " + message.Type.ToString() + ", Went unprocessed.");
-            }
-        }
-
-        private void Wait()
-        {
-            // we should have a better way of doing this
-            // is there a way for the EnginComs class to fire an event to wake the thread when 
-            // a new message come is??
-            // that would be the ideal way to do it, no wasted time, no wasted CPU usage.
-            Thread.Sleep(5);  
         }
 
         /// <summary>
