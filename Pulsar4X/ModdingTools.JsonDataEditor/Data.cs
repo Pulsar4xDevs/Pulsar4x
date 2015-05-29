@@ -14,6 +14,7 @@ namespace ModdingTools.JsonDataEditor
     {
         private static bool _loading;
         public static DataHolderAndEvents<TechSD> TechData = new DataHolderAndEvents<TechSD>("Techs");
+        public static DataHolderAndEvents<InstallationSD> InstallationData = new DataHolderAndEvents<InstallationSD>("Installations");
 
         //stolen from StaticDataManager
         private static JsonSerializer serializer = new JsonSerializer
@@ -63,6 +64,10 @@ namespace ModdingTools.JsonDataEditor
         private static void LoadData(JDictionary<Guid, TechSD> dict, string filePath)
         {
             TechData.Load(dict, filePath);
+        }
+        private static void LoadData(JDictionary<Guid, InstallationSD> dict, string filePath)
+        {
+            InstallationData.Load(dict, filePath);
         }
 
         public static bool SaveData()
