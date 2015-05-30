@@ -13,25 +13,22 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class MineralsCostsUC : UserControl
     {
-        public List<DataHolder> AllMineralSds { get; set; }
+        public BindingList<DataHolder> AllMineralSds { get; set; }
         public Dictionary<DataHolder, int> MineralsCosts { get; set; } 
         public MineralsCostsUC()
         {
             InitializeComponent();
+            UpdateMineralList();
             MineralsCosts = new Dictionary<DataHolder, int>();
             dataGridView_MineralCosts.DataSource = MineralsCosts.ToArray();
             Data.MineralData.ListChanged += UpdateMineralList;
-        }
-
-        public MineralsCostsUC(List<DataHolder> mineralData)
-        {
-            AllMineralSds = mineralData;
             listBox_MineralsAll.DataSource = AllMineralSds;
         }
+
 
         private void UpdateMineralList()
         {
-            listBox_MineralsAll.DataSource = AllMineralSds;
+            AllMineralSds = new BindingList<DataHolder>(Data.MineralData.GetDataHolders().ToList());
         }
 
         private void listBox_MineralsAll_SelectedIndexChanged(object sender, EventArgs e)

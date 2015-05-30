@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstallationsWindow));
             this.mainMenuButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
@@ -54,8 +55,8 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.33463F));
             this.tableLayoutPanel1.Controls.Add(this.genericDataUC1, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.mainMenuButton, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.techRequirementsUC1, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.mineralsCostsUC1, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.techRequirementsUC1, 2, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -76,14 +77,17 @@
             // 
             // techRequirementsUC1
             // 
-            this.techRequirementsUC1.Location = new System.Drawing.Point(89, 179);
+            this.techRequirementsUC1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.techRequirementsUC1.Location = new System.Drawing.Point(334, 179);
             this.techRequirementsUC1.Name = "techRequirementsUC1";
-            this.techRequirementsUC1.Size = new System.Drawing.Size(239, 150);
+            this.techRequirementsUC1.Size = new System.Drawing.Size(263, 235);
             this.techRequirementsUC1.TabIndex = 2;
             // 
             // mineralsCostsUC1
             // 
+            this.mineralsCostsUC1.AllMineralSds = null;
             this.mineralsCostsUC1.Location = new System.Drawing.Point(334, 3);
+            this.mineralsCostsUC1.MineralsCosts = ((System.Collections.Generic.Dictionary<ModdingTools.JsonDataEditor.DataHolder, int>)(resources.GetObject("mineralsCostsUC1.MineralsCosts")));
             this.mineralsCostsUC1.Name = "mineralsCostsUC1";
             this.mineralsCostsUC1.Size = new System.Drawing.Size(263, 170);
             this.mineralsCostsUC1.TabIndex = 3;
