@@ -29,9 +29,9 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.dataGridView_MineralCosts = new System.Windows.Forms.DataGridView();
             this.label1 = new System.Windows.Forms.Label();
             this.listBox_MineralsAll = new System.Windows.Forms.ListBox();
+            this.dataGridView_MineralCosts = new System.Windows.Forms.DataGridView();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView_MineralCosts)).BeginInit();
             this.SuspendLayout();
@@ -52,15 +52,6 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(191, 150);
             this.tableLayoutPanel1.TabIndex = 0;
-            // 
-            // dataGridView_MineralCosts
-            // 
-            this.dataGridView_MineralCosts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView_MineralCosts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView_MineralCosts.Location = new System.Drawing.Point(3, 23);
-            this.dataGridView_MineralCosts.Name = "dataGridView_MineralCosts";
-            this.dataGridView_MineralCosts.Size = new System.Drawing.Size(89, 124);
-            this.dataGridView_MineralCosts.TabIndex = 0;
             // 
             // label1
             // 
@@ -83,6 +74,17 @@
             this.listBox_MineralsAll.Size = new System.Drawing.Size(90, 144);
             this.listBox_MineralsAll.TabIndex = 2;
             this.listBox_MineralsAll.SelectedIndexChanged += new System.EventHandler(this.listBox_MineralsAll_SelectedIndexChanged);
+            this.listBox_MineralsAll.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_MineralsAll_MouseDoubleClick);
+            // 
+            // dataGridView_MineralCosts
+            // 
+            this.dataGridView_MineralCosts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView_MineralCosts.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridView_MineralCosts.Location = new System.Drawing.Point(3, 23);
+            this.dataGridView_MineralCosts.Name = "dataGridView_MineralCosts";
+            this.dataGridView_MineralCosts.RowHeadersVisible = false;
+            this.dataGridView_MineralCosts.Size = new System.Drawing.Size(89, 124);
+            this.dataGridView_MineralCosts.TabIndex = 0;
             // 
             // MineralsCostsUC
             // 

@@ -17,10 +17,10 @@ namespace ModdingTools.JsonDataEditor
         public InstallationsWindow()
         {
             InitializeComponent();
-            Data.MineralData.LoadedFilesListChanged += setLists;
+            Data.MineralData.LoadedFilesListChanged += SetLists;
         }
 
-        public void setLists()
+        public void SetLists()
         {
             mineralsCostsUC1.listBox_MineralsAll.Items.Clear();
             foreach (DataHolder mineral in Data.MineralData.GetDataHolders())
