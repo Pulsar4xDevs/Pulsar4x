@@ -10,12 +10,12 @@ using Pulsar4X.ECSLib;
 
 namespace ModdingTools.JsonDataEditor
 {
-    static class Data
+    public class Data
     {
         private static bool _loading;
         public static DataHolderAndEvents<TechSD> TechData = new DataHolderAndEvents<TechSD>("Techs");
         public static DataHolderAndEvents<InstallationSD> InstallationData = new DataHolderAndEvents<InstallationSD>("Installations");
-
+        public static DataHolderAndEvents<MineralSD> MineralData = new DataHolderAndEvents<MineralSD>("Minerals"); 
         //stolen from StaticDataManager
         private static JsonSerializer serializer = new JsonSerializer
         {
@@ -59,6 +59,8 @@ namespace ModdingTools.JsonDataEditor
             
             //Send message to all subscribers
             TechData.OnListChangeEvent(filePath);
+            InstallationData.OnListChangeEvent(filePath);
+            MineralData.OnListChangeEvent(filePath);
         }
 
         private static void LoadData(JDictionary<Guid, TechSD> dict, string filePath)
@@ -69,7 +71,11 @@ namespace ModdingTools.JsonDataEditor
         {
             InstallationData.Load(dict, filePath);
         }
-
+        private static void LoadData(List<MineralSD> list, string filePath)
+        {
+            MineralData.Load(list, filePath);
+            
+        }
         public static bool SaveData()
         {
             return TechData.Save();
@@ -112,6 +118,14 @@ namespace ModdingTools.JsonDataEditor
             public void Load(JDictionary<Guid, T> dict, string filePath)
             {
                 foreach (dynamic sd in dict.Values)
+                {
+                    _allSDs[sd.ID] = sd;
+                    _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
+                }
+            }
+            public void Load(List<T> list, string filePath)
+            {
+                foreach (dynamic sd in list)
                 {
                     _allSDs[sd.ID] = sd;
                     _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
