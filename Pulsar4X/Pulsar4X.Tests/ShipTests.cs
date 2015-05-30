@@ -702,8 +702,8 @@ namespace Pulsar4X.Tests
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
 
-            PlayerFaction1.SensorSweep();
-            PlayerFaction2.SensorSweep();
+            SensorModel.SensorSweep(PlayerFaction1);
+            SensorModel.SensorSweep(PlayerFaction2);
 
             Console.WriteLine("Time: 5 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
@@ -715,8 +715,8 @@ namespace Pulsar4X.Tests
 
             GameState.Instance.CurrentSecond = 10;
 
-            PlayerFaction1.SensorSweep();
-            PlayerFaction2.SensorSweep();
+            SensorModel.SensorSweep(PlayerFaction1);
+            SensorModel.SensorSweep(PlayerFaction2);
 
             Console.WriteLine("Time: 10 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
@@ -754,8 +754,8 @@ namespace Pulsar4X.Tests
 
             GameState.Instance.CurrentSecond = 15;
 
-            PlayerFaction1.SensorSweep();
-            PlayerFaction2.SensorSweep();
+            SensorModel.SensorSweep(PlayerFaction1);
+            SensorModel.SensorSweep(PlayerFaction2);
 
             Console.WriteLine("Time: 15 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
@@ -1645,7 +1645,7 @@ namespace Pulsar4X.Tests
                 /// </summary>
                 for (int loop = 0; loop < factionCount; loop++)
                 {
-                    P[loop].SensorSweep();
+                    SensorModel.SensorSweep(P[loop]);
                 }
 
 
@@ -2047,7 +2047,7 @@ namespace Pulsar4X.Tests
             GameState.Instance.CurrentSecond += 10;
             GameState.Instance.LastTimestep = 10;
 
-            PlayerFaction1.SensorSweep();
+            SensorModel.SensorSweep(PlayerFaction1);
 
 
 
@@ -2062,7 +2062,7 @@ namespace Pulsar4X.Tests
             {
                 Console.WriteLine("TimeStep:{0} {1} Detected Contacts:{2}", GameState.Instance.CurrentSecond, GameState.Instance.LastTimestep, PlayerFaction1.DetectedContactLists.Count);
 
-                PlayerFaction1.SensorSweep();
+                SensorModel.SensorSweep(PlayerFaction1);
 
                 PlayerFaction1.MissileGroups[0].ProcessOrder((uint)GameState.Instance.LastTimestep, RNG);
 

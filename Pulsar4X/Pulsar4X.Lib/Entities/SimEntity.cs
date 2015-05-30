@@ -676,7 +676,8 @@ namespace Pulsar4X.Entities
             /// </summary>
             foreach (Faction faction in P)
             {
-                faction.SensorSweep();
+                SensorModel.SensorSweep(faction);
+                //faction.SensorSweep();
             }
 
             /// <summary>
