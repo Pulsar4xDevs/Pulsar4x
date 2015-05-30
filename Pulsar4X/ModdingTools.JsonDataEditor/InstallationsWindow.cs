@@ -22,12 +22,11 @@ namespace ModdingTools.JsonDataEditor
 
         public void setLists()
         {
-            List<string>minerals = new List<string>();
-            foreach (var mineralSD in Data.MineralData.GetDataHolders())
+            mineralsCostsUC1.listBox_MineralsAll.Items.Clear();
+            foreach (DataHolder mineral in Data.MineralData.GetDataHolders())
             {
-                minerals.Add(mineralSD.Name);
-            }
-            this.mineralsCostsUC1.AllMineralSds = minerals;
+                mineralsCostsUC1.listBox_MineralsAll.Items.Add(mineral);
+            }            
         }
 
         private void mainMenuButton_Click(object sender, EventArgs e)
