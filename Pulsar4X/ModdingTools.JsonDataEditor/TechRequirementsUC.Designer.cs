@@ -71,6 +71,7 @@
             this.tableLayoutPanel1.SetRowSpan(this.listBox_allTechs, 2);
             this.listBox_allTechs.Size = new System.Drawing.Size(69, 144);
             this.listBox_allTechs.TabIndex = 2;
+            this.listBox_allTechs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_allTechs_MouseDoubleClick);
             // 
             // listBox_requredTechs
             // 
@@ -80,6 +81,7 @@
             this.listBox_requredTechs.Name = "listBox_requredTechs";
             this.listBox_requredTechs.Size = new System.Drawing.Size(69, 124);
             this.listBox_requredTechs.TabIndex = 3;
+            this.listBox_requredTechs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_requredTechs_MouseDoubleClick);
             // 
             // TechRequirementsUC
             // 

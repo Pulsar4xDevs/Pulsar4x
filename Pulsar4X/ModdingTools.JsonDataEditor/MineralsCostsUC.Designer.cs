@@ -62,7 +62,6 @@
             this.label1.Size = new System.Drawing.Size(73, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "Mineral Costs:";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // listBox_MineralsAll
             // 
@@ -85,6 +84,7 @@
             this.dataGridView_MineralCosts.RowHeadersVisible = false;
             this.dataGridView_MineralCosts.Size = new System.Drawing.Size(89, 124);
             this.dataGridView_MineralCosts.TabIndex = 0;
+            this.dataGridView_MineralCosts.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_MineralCosts_CellMouseClick);
             // 
             // MineralsCostsUC
             // 
