@@ -56,10 +56,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data.cs" />
-    <Compile Include="GenericDataUC.cs">
+    <Compile Include="UserControls\AbilitiesListUC.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GenericDataUC.Designer.cs">
+    <Compile Include="UserControls\AbilitiesListUC.Designer.cs">
+      <DependentUpon>AbilitiesListUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\GenericDataUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\GenericDataUC.Designer.cs">
       <DependentUpon>GenericDataUC.cs</DependentUpon>
     </Compile>
     <Compile Include="InstallationsWindow.cs">
@@ -80,10 +86,16 @@
     <Compile Include="MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="MineralsCostsUC.cs">
+    <Compile Include="UserControls\InstallationUC.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MineralsCostsUC.Designer.cs">
+    <Compile Include="UserControls\InstallationUC.Designer.cs">
+      <DependentUpon>InstallationUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\MineralsCostsUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\MineralsCostsUC.Designer.cs">
       <DependentUpon>MineralsCostsUC.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -94,13 +106,16 @@
     <Compile Include="TechnologiesWindow.Designer.cs">
       <DependentUpon>TechnologiesWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="TechRequirementsUC.cs">
+    <Compile Include="UserControls\TechRequirementsUC.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TechRequirementsUC.Designer.cs">
+    <Compile Include="UserControls\TechRequirementsUC.Designer.cs">
       <DependentUpon>TechRequirementsUC.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="GenericDataUC.resx">
+    <EmbeddedResource Include="UserControls\AbilitiesListUC.resx">
+      <DependentUpon>AbilitiesListUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\GenericDataUC.resx">
       <DependentUpon>GenericDataUC.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="InstallationsWindow.resx">
@@ -112,7 +127,10 @@
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MineralsCostsUC.resx">
+    <EmbeddedResource Include="UserControls\InstallationUC.resx">
+      <DependentUpon>InstallationUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\MineralsCostsUC.resx">
       <DependentUpon>MineralsCostsUC.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -127,7 +145,7 @@
     <EmbeddedResource Include="TechnologiesWindow.resx">
       <DependentUpon>TechnologiesWindow.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TechRequirementsUC.resx">
+    <EmbeddedResource Include="UserControls\TechRequirementsUC.resx">
       <DependentUpon>TechRequirementsUC.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">

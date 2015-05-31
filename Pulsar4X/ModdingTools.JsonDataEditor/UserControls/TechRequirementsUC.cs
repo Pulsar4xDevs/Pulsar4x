@@ -12,7 +12,7 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class TechRequirementsUC : UserControl
     {
-        public BindingList<DataHolder> AllTechs { get; set; }
+        private BindingList<DataHolder> AllTechs { get; set; }
 
         public TechRequirementsUC()
         {

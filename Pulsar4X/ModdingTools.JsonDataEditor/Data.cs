@@ -234,7 +234,7 @@ namespace ModdingTools.JsonDataEditor
             }
         }
     }
-    
+
     public class DataHolder
     {
         public string Name { get; set; }

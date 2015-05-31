@@ -28,13 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstallationsWindow));
             this.mainMenuButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
             this.mineralsCostsUC1 = new ModdingTools.JsonDataEditor.MineralsCostsUC();
             this.techRequirementsUC1 = new ModdingTools.JsonDataEditor.TechRequirementsUC();
             this.listBox_AllInstalations = new System.Windows.Forms.ListBox();
+            this.installationUC1 = new ModdingTools.JsonDataEditor.UserControls.InstallationUC();
+            this.abilitiesListUC1 = new ModdingTools.JsonDataEditor.AbilitiesListUC();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,16 +56,19 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.58221F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.41779F));
             this.tableLayoutPanel1.Controls.Add(this.genericDataUC1, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.mainMenuButton, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.mainMenuButton, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.mineralsCostsUC1, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.techRequirementsUC1, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.listBox_AllInstalations, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.installationUC1, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.abilitiesListUC1, 1, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 42.21636F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 57.78364F));
+            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 42F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(692, 460);
             this.tableLayoutPanel1.TabIndex = 1;
@@ -75,24 +79,24 @@
             this.genericDataUC1.Location = new System.Drawing.Point(178, 3);
             this.genericDataUC1.MinimumSize = new System.Drawing.Size(240, 0);
             this.genericDataUC1.Name = "genericDataUC1";
-            this.genericDataUC1.Size = new System.Drawing.Size(240, 170);
+            this.genericDataUC1.Size = new System.Drawing.Size(240, 133);
             this.genericDataUC1.TabIndex = 1;
             // 
             // mineralsCostsUC1
             // 
             this.mineralsCostsUC1.AllMineralSds = null;
             this.mineralsCostsUC1.Location = new System.Drawing.Point(424, 3);
-            this.mineralsCostsUC1.MineralsCosts = ((System.Collections.Generic.Dictionary<ModdingTools.JsonDataEditor.DataHolder, int>)(resources.GetObject("mineralsCostsUC1.MineralsCosts")));
+            this.mineralsCostsUC1.MineralsCosts = null;
             this.mineralsCostsUC1.Name = "mineralsCostsUC1";
-            this.mineralsCostsUC1.Size = new System.Drawing.Size(263, 170);
+            this.mineralsCostsUC1.Size = new System.Drawing.Size(263, 133);
             this.mineralsCostsUC1.TabIndex = 3;
             // 
             // techRequirementsUC1
             // 
             this.techRequirementsUC1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.techRequirementsUC1.Location = new System.Drawing.Point(424, 179);
+            this.techRequirementsUC1.Location = new System.Drawing.Point(424, 142);
             this.techRequirementsUC1.Name = "techRequirementsUC1";
-            this.techRequirementsUC1.Size = new System.Drawing.Size(265, 235);
+            this.techRequirementsUC1.Size = new System.Drawing.Size(265, 133);
             this.techRequirementsUC1.TabIndex = 2;
             // 
             // listBox_AllInstalations
@@ -102,9 +106,24 @@
             this.listBox_AllInstalations.Location = new System.Drawing.Point(3, 3);
             this.listBox_AllInstalations.Name = "listBox_AllInstalations";
             this.tableLayoutPanel1.SetRowSpan(this.listBox_AllInstalations, 2);
-            this.listBox_AllInstalations.Size = new System.Drawing.Size(169, 411);
+            this.listBox_AllInstalations.Size = new System.Drawing.Size(169, 272);
             this.listBox_AllInstalations.TabIndex = 4;
             this.listBox_AllInstalations.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_AllInstalations_MouseDoubleClick);
+            // 
+            // installationUC1
+            // 
+            this.installationUC1.Location = new System.Drawing.Point(178, 142);
+            this.installationUC1.Name = "installationUC1";
+            this.installationUC1.Size = new System.Drawing.Size(150, 104);
+            this.installationUC1.TabIndex = 5;
+            // 
+            // abilitiesListUC1
+            // 
+            this.abilitiesListUC1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.abilitiesListUC1.Location = new System.Drawing.Point(178, 281);
+            this.abilitiesListUC1.Name = "abilitiesListUC1";
+            this.abilitiesListUC1.Size = new System.Drawing.Size(240, 133);
+            this.abilitiesListUC1.TabIndex = 6;
             // 
             // InstallationsWindow
             // 
@@ -126,5 +145,7 @@
         private TechRequirementsUC techRequirementsUC1;
         private MineralsCostsUC mineralsCostsUC1;
         private System.Windows.Forms.ListBox listBox_AllInstalations;
+        private UserControls.InstallationUC installationUC1;
+        private AbilitiesListUC abilitiesListUC1;
     }
 }

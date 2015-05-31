@@ -117,22 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="mineralsCostsUC1.MineralsCosts" mimetype="application/x-microsoft.net.object.binary.base64">
-    <value>
-        AAEAAAD/////AQAAAAAAAAAMAgAAAP0BTW9kZGluZ1Rvb2xzLkpzb25EYXRhRWRpdG9yLCBWZXJzaW9u
-        PTEuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49bnVsbF0sW1N5c3RlbS5JbnQz
-        MiwgbXNjb3JsaWIsIFZlcnNpb249NC4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tl
-        bj1iNzdhNWM1NjE5MzRlMDg5XV0sIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1
-        dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OQwDAAAAoQFNb2RkaW5nVG9vbHMuSnNv
-        bkRhdGFFZGl0b3IsIFZlcnNpb249MS4wLjAuMCwgQ3VsdHVyZT1uZXV0cmFsLCBQdWJsaWNLZXlUb2tl
-        bj1udWxsXV0sIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGlj
-        S2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OQUBAAAAT1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLkRp
-        Y3Rpb25hcnlgMltbTW9kZGluZ1Rvb2xzLkpzb25EYXRhRWRpdG9yLkRhdGFIb2xkZXIDAAAAB1ZlcnNp
-        b24IQ29tcGFyZXIISGFzaFNpemUABAAIW1N5c3RlbS5Db2xsZWN0aW9ucy5HZW5lcmljLk9iamVjdEVx
-        dWFsaXR5Q29tcGFyZXJgMVtbTW9kZGluZ1Rvb2xzLkpzb25EYXRhRWRpdG9yLkRhdGFIb2xkZXIDAAAA
-        CAIAAAAAAAAACQQAAAAAAAAABQQAAABbU3lzdGVtLkNvbGxlY3Rpb25zLkdlbmVyaWMuT2JqZWN0RXF1
-        YWxpdHlDb21wYXJlcmAxW1tNb2RkaW5nVG9vbHMuSnNvbkRhdGFFZGl0b3IuRGF0YUhvbGRlcgAAAAAD
-        AAAACw==
-</value>
-  </data>
 </root>
