@@ -12,8 +12,17 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class GenericDataUC : UserControl
     {
-        private DataHolder _Item { get; set; }
-
+        private DataHolder _item { get; set; }
+        
+        /// <summary>
+        /// consider handling this differently. maybe Dataholder
+        /// should hold a description? except not all static data has it. 
+        /// </summary>
+        public string Description 
+        {
+            get { return textBox_Description.Text;}
+            set { textBox_Description.Text = value; }
+        }
         public GenericDataUC()
         {
             InitializeComponent();           
@@ -21,9 +30,9 @@ namespace ModdingTools.JsonDataEditor
 
         public void Item(DataHolder item)
         {
-            _Item = item;
-            label_Guid.Text = _Item.Guid.ToString();
-            textBox_Name.Text = _Item.Name;
+            _item = item;
+            label_Guid.Text = _item.Guid.ToString();
+            textBox_Name.Text = _item.Name;
             //textBox_Description.Text = _Item.?????????
 
         }

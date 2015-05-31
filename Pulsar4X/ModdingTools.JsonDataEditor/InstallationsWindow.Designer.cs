@@ -84,9 +84,9 @@
             // 
             // mineralsCostsUC1
             // 
-            this.mineralsCostsUC1.AllMineralSds = null;
+            //this.mineralsCostsUC1._allMinerals = null;
             this.mineralsCostsUC1.Location = new System.Drawing.Point(424, 3);
-            this.mineralsCostsUC1.MineralsCosts = null;
+            //this.mineralsCostsUC1._mineralsCosts = null;
             this.mineralsCostsUC1.Name = "mineralsCostsUC1";
             this.mineralsCostsUC1.Size = new System.Drawing.Size(263, 133);
             this.mineralsCostsUC1.TabIndex = 3;

@@ -13,22 +13,30 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class AbilitiesListUC : UserControl
     {
-        private Dictionary<AbilityType, int> AbilityAmounts { get; set; } 
+        private Dictionary<AbilityType, int> _abilityAmounts; 
+        public Dictionary<AbilityType,int> AbilityAmount
+        {
+            get { return _abilityAmounts; }
+            set
+            {
+                _abilityAmounts = value;
+                dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
+            }
+        }
         public AbilitiesListUC()
         {
             InitializeComponent();
-            AbilityAmounts = new Dictionary<AbilityType, int>();
-            dataGridView_addedAbilities.DataSource = AbilityAmounts.ToArray();
+            AbilityAmount = new Dictionary<AbilityType, int>();            
             listBox_allAbilities.DataSource = Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>();           
         }
 
         private void listBox_allAbilities_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (!AbilityAmounts.ContainsKey((AbilityType)listBox_allAbilities.SelectedItem))
+            if (!_abilityAmounts.ContainsKey((AbilityType)listBox_allAbilities.SelectedItem))
             {
-                AbilityAmounts.Add((AbilityType)listBox_allAbilities.SelectedItem, 0);         
+                _abilityAmounts.Add((AbilityType)listBox_allAbilities.SelectedItem, 0);         
             }
-            dataGridView_addedAbilities.DataSource = AbilityAmounts.ToArray();
+            dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
         }
 
         private void dataGridView_addedAbilities_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)

@@ -13,22 +13,31 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class MineralsCostsUC : UserControl
     {
-        public BindingList<DataHolder> AllMineralSds { get; set; }
-        public Dictionary<DataHolder, int> MineralsCosts { get; set; } 
+        private BindingList<DataHolder> _allMinerals { get; set; }
+        private Dictionary<DataHolder, int> _mineralsCosts;
+        public Dictionary<DataHolder, int> MineralCosts
+        {
+            get { return _mineralsCosts; }
+            set
+            {
+                _mineralsCosts = value;           
+                dataGridView_MineralCosts.DataSource = _mineralsCosts.ToArray();
+            }
+        }
         public MineralsCostsUC()
         {
             InitializeComponent();
             UpdateMineralList();
-            MineralsCosts = new Dictionary<DataHolder, int>();
-            dataGridView_MineralCosts.DataSource = MineralsCosts.ToArray();
+            MineralCosts = new Dictionary<DataHolder, int>();
+            
             Data.MineralData.ListChanged += UpdateMineralList;
-            listBox_MineralsAll.DataSource = AllMineralSds;
+            listBox_MineralsAll.DataSource = _allMinerals;
         }
 
 
         private void UpdateMineralList()
         {
-            AllMineralSds = new BindingList<DataHolder>(Data.MineralData.GetDataHolders().ToList());
+            _allMinerals = new BindingList<DataHolder>(Data.MineralData.GetDataHolders().ToList());
         }
 
 
@@ -39,13 +48,13 @@ namespace ModdingTools.JsonDataEditor
 
         private void listBox_MineralsAll_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (!MineralsCosts.ContainsKey((DataHolder)listBox_MineralsAll.SelectedItem))
+            if (!_mineralsCosts.ContainsKey((DataHolder)listBox_MineralsAll.SelectedItem))
             {
-                MineralsCosts.Add((DataHolder)listBox_MineralsAll.SelectedItem, 0);
+                _mineralsCosts.Add((DataHolder)listBox_MineralsAll.SelectedItem, 0);
                 //dataGridView_MineralCosts.CurrentCell = dataGridView_MineralCosts.CurrentRow.Cells[1];
                 //dataGridView_MineralCosts.BeginEdit(true);
             }
-            dataGridView_MineralCosts.DataSource = MineralsCosts.ToArray();
+            dataGridView_MineralCosts.DataSource = _mineralsCosts.ToArray();
         }
 
         private void dataGridView_MineralCosts_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)

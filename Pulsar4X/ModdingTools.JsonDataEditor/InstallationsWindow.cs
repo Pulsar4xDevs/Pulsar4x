@@ -14,6 +14,19 @@ namespace ModdingTools.JsonDataEditor
     public partial class InstallationsWindow : UserControl
     {
         BindingList<DataHolder> AllInstallations { get; set; }
+        
+        InstallationSD SelectedInstallation
+        {
+            get { return installationUC1.StaticData; }
+            set 
+            { 
+                installationUC1.StaticData = value;
+                genericDataUC1.Description = value.Description;
+                abilitiesListUC1.AbilityAmount = value.BaseAbilityAmounts;
+                //techRequirementsUC1.RequredTechs = value.TechRequirements;
+                //mineralsCostsUC1.MineralCosts = value.ResourceCosts;
+            }
+        }
         public InstallationsWindow()
         {
             InitializeComponent();
@@ -27,6 +40,7 @@ namespace ModdingTools.JsonDataEditor
             AllInstallations = new BindingList<DataHolder>(Data.InstallationData.GetDataHolders().ToList());
         }
 
+
         private void mainMenuButton_Click(object sender, EventArgs e)
         {
             Data.MainWindow.SetMode(WindowModes.LoadingWindow);
@@ -34,7 +48,9 @@ namespace ModdingTools.JsonDataEditor
 
         private void listBox_AllInstalations_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            genericDataUC1.Item((DataHolder)listBox_AllInstalations.SelectedItem);
+            DataHolder selectedItem = (DataHolder)listBox_AllInstalations.SelectedItem;
+            genericDataUC1.Item(selectedItem);
+            SelectedInstallation = Data.InstallationData.Get(selectedItem.Guid);
         }
     }
 }

@@ -12,7 +12,13 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class TechRequirementsUC : UserControl
     {
-        private BindingList<DataHolder> AllTechs { get; set; }
+        private BindingList<DataHolder> _allTechs { get; set; }
+
+        public List<DataHolder> RequredTechs
+        {
+            get { return listBox_requredTechs.Items.Cast<DataHolder>().ToList(); }
+            set { listBox_requredTechs.DataSource = value; }
+        }
 
         public TechRequirementsUC()
         {
@@ -20,12 +26,12 @@ namespace ModdingTools.JsonDataEditor
             UpdateTechlist();          
             //listBox_allTechs.DataSource = Data.TechData.GetDataHolders().ToList();
             Data.TechData.ListChanged += UpdateTechlist;
-            listBox_allTechs.DataSource = AllTechs;
+            listBox_allTechs.DataSource = _allTechs;
         }
 
         private void UpdateTechlist()
         {
-            AllTechs = new BindingList<DataHolder>(Data.TechData.GetDataHolders().ToList());
+            _allTechs = new BindingList<DataHolder>(Data.TechData.GetDataHolders().ToList());
         }
 
         private void listBox_requredTechs_MouseDoubleClick(object sender, MouseEventArgs e)
