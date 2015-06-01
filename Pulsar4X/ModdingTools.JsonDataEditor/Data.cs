@@ -102,6 +102,11 @@ namespace ModdingTools.JsonDataEditor
                 _typeString = type;
             } 
 
+            /// <summary>
+            /// Gets a dataholder from a given guid
+            /// </summary>
+            /// <param name="guid"></param>
+            /// <returns></returns>
             public DataHolder GetDataHolder(Guid guid)
             {
                 DataHolder dataHolder;
@@ -110,9 +115,27 @@ namespace ModdingTools.JsonDataEditor
                 throw new Exception("Guid not found");
             }
 
+            /// <summary>
+            /// returns all dataholders
+            /// </summary>
+            /// <returns></returns>
             public IEnumerable<DataHolder> GetDataHolders()
             {
                 return _allDataHolders.Values.AsEnumerable();
+            }
+            /// <summary>
+            /// returns dataholders that match a list of given guid.
+            /// </summary>
+            /// <param name="guids">List of guid</param>
+            /// <returns></returns>
+            public IEnumerable<DataHolder> GetDataHolders(List<Guid> guids)
+            {
+                List<DataHolder> dataHolders = new List<DataHolder>();
+                foreach (Guid guid in guids)
+                {
+                    dataHolders.Add(GetDataHolder(guid));
+                }
+                return dataHolders.AsEnumerable();
             }
 
             public void Load(JDictionary<Guid, T> dict, string filePath)
