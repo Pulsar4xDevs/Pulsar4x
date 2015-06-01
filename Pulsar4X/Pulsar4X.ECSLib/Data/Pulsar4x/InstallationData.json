@@ -77,7 +77,7 @@
                 "Value": {
                     "Name": "Sorium Refinary",
                     "Description": "Refines Sorium into fuel",
-                    "ID": "9F32788E-95F1-468A-AAD2-07846278B26A",
+                    "ID": "717DE5F0-17B9-44E9-BB6A-E62BDB0A499D",
                     "PopulationRequired": 50000,
                     "CargoSize": 25000,
                     "BaseAbilityAmounts": {
