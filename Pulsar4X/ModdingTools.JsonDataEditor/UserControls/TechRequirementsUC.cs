@@ -24,7 +24,8 @@ namespace ModdingTools.JsonDataEditor
         {
             InitializeComponent();
             UpdateTechlist();          
-            //listBox_allTechs.DataSource = Data.TechData.GetDataHolders().ToList();
+     
+            RequredTechs = new List<DataHolder>();
             Data.TechData.ListChanged += UpdateTechlist;
             listBox_allTechs.DataSource = _allTechs;
         }

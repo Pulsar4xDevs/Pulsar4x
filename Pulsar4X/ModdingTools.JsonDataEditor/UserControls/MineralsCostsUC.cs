@@ -15,6 +15,7 @@ namespace ModdingTools.JsonDataEditor
     {
         private BindingList<DataHolder> _allMinerals { get; set; }
         private Dictionary<DataHolder, int> _mineralsCosts;
+
         public Dictionary<DataHolder, int> MineralCosts
         {
             get { return _mineralsCosts; }
