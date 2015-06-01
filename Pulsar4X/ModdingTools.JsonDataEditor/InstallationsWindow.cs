@@ -23,8 +23,8 @@ namespace ModdingTools.JsonDataEditor
                 installationUC1.StaticData = value;
                 genericDataUC1.Description = value.Description;
                 abilitiesListUC1.AbilityAmount = value.BaseAbilityAmounts;
-                //techRequirementsUC1.RequredTechs = value.TechRequirements;
-                //mineralsCostsUC1.MineralCosts = value.ResourceCosts;
+                techRequirementsUC1.RequredTechs = Data.TechData.GetDataHolders(value.TechRequirements).ToList();
+                mineralsCostsUC1.MineralCosts = MineralCostsDictionary(value.ResourceCosts);
             }
         }
         public InstallationsWindow()
@@ -40,6 +40,16 @@ namespace ModdingTools.JsonDataEditor
             AllInstallations = new BindingList<DataHolder>(Data.InstallationData.GetDataHolders().ToList());
         }
 
+        private Dictionary<DataHolder, int> MineralCostsDictionary(Dictionary<Guid, int> guidDictionary  )
+        {
+            Dictionary<DataHolder, int> dataHandlerDictionary = new Dictionary<DataHolder, int>();
+            foreach (var kvp in guidDictionary)
+            {
+                DataHolder mineral = Data.MineralData.GetDataHolder(kvp.Key);
+                dataHandlerDictionary.Add(mineral, kvp.Value);
+            }
+            return dataHandlerDictionary;
+        }
 
         private void mainMenuButton_Click(object sender, EventArgs e)
         {
