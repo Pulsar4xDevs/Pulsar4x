@@ -196,7 +196,7 @@ namespace Pulsar4X.UI.SceenGraph
 
             ShowActives = true;
             ShowPassives = true;
-            ShowPassiveSignatureRange = 1000;
+            ShowPassiveSignatureRange = (int)Constants.SensorTN.DefaultPassiveSignature;
         }
 
         public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect, Pulsar4X.UI.Handlers.SystemMap ParentSM)

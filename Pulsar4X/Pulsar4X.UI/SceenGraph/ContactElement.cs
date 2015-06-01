@@ -261,7 +261,8 @@ namespace Pulsar4X.UI.SceenGraph
                         int SensorTech = CurrentPop.Faction.FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength];
                         if (SensorTech > Constants.Colony.DeepSpaceMax)
                             SensorTech = Constants.Colony.DeepSpaceMax;
-                        int ScanStrength = DSTS * Constants.Colony.DeepSpaceStrength[SensorTech] * 100;
+#warning if EM strength differs from Thermal handle that here.
+                        int ScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech] * 100;
 
                         double factor = Constants.Units.KmPerAu / 10000.0;
                         double AURadius = (double)ScanStrength * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;

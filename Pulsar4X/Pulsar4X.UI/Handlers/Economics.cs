@@ -2202,7 +2202,8 @@ namespace Pulsar4X.UI.Handlers
                         if (DSTS > Constants.Colony.DeepSpaceMax)
                             DSTS = Constants.Colony.DeepSpaceMax;
 
-                        int Strength = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number) * Constants.Colony.DeepSpaceStrength[DSTS];
+#warning if EM strength differs from Thermal, handle that here in the UI.
+                        int Strength = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number) * Constants.Colony.ThermalDeepSpaceStrength[DSTS];
                         Entry = String.Format("Deep Space Tracking Station - Strength {0}", Strength);
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = Entry;
                         Entry = String.Format("Level {0}", Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number));

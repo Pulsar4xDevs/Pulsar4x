@@ -554,8 +554,6 @@ namespace Pulsar4X.Entities
                     int SensorTech = FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength];
                     if (SensorTech > Constants.Colony.DeepSpaceMax)
                         SensorTech = Constants.Colony.DeepSpaceMax;
-                    int ScanStrength = DSTS * Constants.Colony.DeepSpaceStrength[SensorTech];
-
                     /// <summary>
                     /// iterate through every contact, thermal.Count will be equal to systemContacts.Count
                     /// </summary>
@@ -593,7 +591,9 @@ namespace Pulsar4X.Entities
                                     if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] !=  GameState.Instance.CurrentSecond)
                                     {
                                         sig = DetectedPopulation.ThermalSignature;
-                                        double rangeAdj = (((double)sig) / 1000.0);
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+
+                                        int ThermalScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech];
 
                                         /// <summary>
                                         /// Detection is ScanStrength multiplied by the range adjustment, multiplied by 100. These numbers come from the overall scan 
@@ -601,7 +601,7 @@ namespace Pulsar4X.Entities
                                         /// signatures smaller than 1000 are harder to detect, planets will often be much much larger), and the 100, for the adjustment 
                                         /// to 1M km. it is only 100 though because units are assumed to be in 10k lots, so 100 * 10,000 = 1,000,000
                                         /// </summary>
-                                        detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                        detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
 
                                         /// <summary>
                                         /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
@@ -630,8 +630,11 @@ namespace Pulsar4X.Entities
                                         /// sure how useful that would be however.
                                         /// </summary>
                                         sig = DetectedPopulation.EMSignature;
-                                        double rangeAdj = (((double)sig) / 1000.0);
-                                        detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+
+                                        int EMScanStrength = DSTS * Constants.Colony.EMDeepSpaceStrength[SensorTech];
+
+                                        detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
 
                                         bool det = LargeDetection(dist, detection);
 
@@ -665,14 +668,16 @@ namespace Pulsar4X.Entities
                                         ShipTN scratch = DetectedTaskGroup.Ships[ShipID];
                                         sig = scratch.CurrentThermalSignature;
 
-                                        double rangeAdj = (((double)sig) / 1000.0);
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+
+                                        int ThermalScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech];
 
                                         /// <summary>
                                         /// Detection is ScanStrength multiplied by the range adjustment, multiplied by 100. These numbers come from the overall scan strength of a population's
                                         /// DSTS arrays, the signature adjustment(signatures larger than 1000 are easier to detect, while signatures smaller than 1000 are harder to detect, planets will
                                         /// often be much much larger), and the 100, for the adjustment to 1M km. it is only 100 though because units are assumed to be in 10k lots, so 100 * 10,000 = 1,000,000
                                         /// </summary>
-                                        detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                        detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
 
                                         /// <summary>
                                         /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
@@ -696,8 +701,8 @@ namespace Pulsar4X.Entities
                                             scratch = DetectedTaskGroup.Ships[ShipID];
                                             sig = scratch.CurrentThermalSignature;
 
-                                            rangeAdj = (((double)sig) / 1000.0);
-                                            detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                            rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                            detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
                                             det = LargeDetection(dist, detection);
 
                                             /// <summary>
@@ -736,7 +741,7 @@ namespace Pulsar4X.Entities
                                                         {
                                                             sig = scratch.CurrentThermalSignature;
                                                             rangeAdj = (((double)sig) / 1000.0);
-                                                            detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                                            detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
 
                                                             /// <summary>
                                                             /// Test each ship until I get to one I don't see.
@@ -791,8 +796,10 @@ namespace Pulsar4X.Entities
                                         ShipTN scratch = DetectedTaskGroup.Ships[ShipID];
                                         sig = scratch.CurrentEMSignature;
 
-                                        double rangeAdj = (((double)sig) / 1000.0);
-                                        detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                        int EMScanStrength = DSTS * Constants.Colony.EMDeepSpaceStrength[SensorTech];
+
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                        detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
 
                                         /// <summary>
                                         /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
@@ -816,8 +823,8 @@ namespace Pulsar4X.Entities
                                             scratch = DetectedTaskGroup.Ships[ShipID];
                                             sig = scratch.CurrentEMSignature;
 
-                                            rangeAdj = (((double)sig) / 1000.0);
-                                            detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                            rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                            detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
 
                                             /// <summary>
                                             /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
@@ -881,8 +888,8 @@ namespace Pulsar4X.Entities
                                                                 break;
                                                             }
 
-                                                            rangeAdj = (((double)sig) / 1000.0);
-                                                            detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                                            rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                                            detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
 
                                                             det = LargeDetection(dist, detection);
 
@@ -934,15 +941,17 @@ namespace Pulsar4X.Entities
                                     OrdnanceTN Missile = MissileGroup.missiles[0];
                                     if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond)
                                     {
+                                        int ThermalScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech];
+
                                         sig = (int)Math.Ceiling(Missile.missileDef.totalThermalSignature);
-                                        double rangeAdj = (((double)sig) / 1000.0);
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
 
                                         /// <summary>
                                         /// Detection is ScanStrength multiplied by the range adjustment, multiplied by 100. These numbers come from the overall scan strength of a population's
                                         /// DSTS arrays, the signature adjustment(signatures larger than 1000 are easier to detect, while signatures smaller than 1000 are harder to detect, planets will
                                         /// often be much much larger), and the 100, for the adjustment to 1M km. it is only 100 though because units are assumed to be in 10k lots, so 100 * 10,000 = 1,000,000
                                         /// </summary>
-                                        detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+                                        detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
 
                                         /// <summary>
                                         /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
@@ -982,8 +991,11 @@ namespace Pulsar4X.Entities
                                             /// sure how useful that would be however.
                                             /// </summary>
                                             sig = EMSignature;
-                                            double rangeAdj = (((double)sig) / 1000.0);
-                                            detection = (int)Math.Floor(ScanStrength * rangeAdj * 100.0);
+
+                                            int EMScanStrength = DSTS * Constants.Colony.EMDeepSpaceStrength[SensorTech];
+
+                                            double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                            detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
 
                                             bool det = LargeDetection(dist, detection);
 
