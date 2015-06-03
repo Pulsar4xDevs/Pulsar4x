@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstallationsWindow));
             this.mainMenuButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
@@ -75,6 +76,7 @@
             // 
             // genericDataUC1
             // 
+            this.genericDataUC1.Description = "";
             this.genericDataUC1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.genericDataUC1.Location = new System.Drawing.Point(178, 3);
             this.genericDataUC1.MinimumSize = new System.Drawing.Size(240, 0);
@@ -84,9 +86,8 @@
             // 
             // mineralsCostsUC1
             // 
-            //this.mineralsCostsUC1._allMinerals = null;
             this.mineralsCostsUC1.Location = new System.Drawing.Point(424, 3);
-            //this.mineralsCostsUC1._mineralsCosts = null;
+            this.mineralsCostsUC1.MineralCosts = ((System.Collections.Generic.Dictionary<ModdingTools.JsonDataEditor.DataHolder, int>)(resources.GetObject("mineralsCostsUC1.MineralCosts")));
             this.mineralsCostsUC1.Name = "mineralsCostsUC1";
             this.mineralsCostsUC1.Size = new System.Drawing.Size(263, 133);
             this.mineralsCostsUC1.TabIndex = 3;
@@ -119,6 +120,7 @@
             // 
             // abilitiesListUC1
             // 
+            this.abilitiesListUC1.AbilityAmount = ((System.Collections.Generic.Dictionary<Pulsar4X.ECSLib.AbilityType, int>)(resources.GetObject("abilitiesListUC1.AbilityAmount")));
             this.abilitiesListUC1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.abilitiesListUC1.Location = new System.Drawing.Point(178, 281);
             this.abilitiesListUC1.Name = "abilitiesListUC1";

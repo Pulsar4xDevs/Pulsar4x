@@ -12,7 +12,7 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class TechRequirementsUC : UserControl
     {
-        private BindingList<DataHolder> _allTechs { get; set; }
+        private BindingList<DataHolder> _allTechs  = new BindingList<DataHolder>();
 
         public List<DataHolder> RequredTechs
         {
@@ -24,8 +24,7 @@ namespace ModdingTools.JsonDataEditor
         {
             InitializeComponent();
             UpdateTechlist();          
-     
-            RequredTechs = new List<DataHolder>();
+                 
             Data.TechData.ListChanged += UpdateTechlist;
             listBox_allTechs.DataSource = _allTechs;
         }

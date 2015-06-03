@@ -20,7 +20,8 @@ namespace ModdingTools.JsonDataEditor
             set
             {
                 _abilityAmounts = value;
-                dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
+                if (_abilityAmounts != null)
+                    dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
             }
         }
         public AbilitiesListUC()

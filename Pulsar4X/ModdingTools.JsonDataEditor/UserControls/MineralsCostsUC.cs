@@ -14,15 +14,16 @@ namespace ModdingTools.JsonDataEditor
     public partial class MineralsCostsUC : UserControl
     {
         private BindingList<DataHolder> _allMinerals { get; set; }
-        private Dictionary<DataHolder, int> _mineralsCosts;
+        private Dictionary<DataHolder, int> _mineralsCosts = new Dictionary<DataHolder, int>();
 
         public Dictionary<DataHolder, int> MineralCosts
         {
             get { return _mineralsCosts; }
             set
             {
-                _mineralsCosts = value;           
-                dataGridView_MineralCosts.DataSource = _mineralsCosts.ToArray();
+                _mineralsCosts = value;   
+                if (_mineralsCosts != null)
+                    dataGridView_MineralCosts.DataSource = _mineralsCosts.ToArray();
             }
         }
         public MineralsCostsUC()
