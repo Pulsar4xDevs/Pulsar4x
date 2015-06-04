@@ -14,6 +14,10 @@ namespace ModdingTools.JsonDataEditor
     {
         private BindingList<DataHolder> _allTechs  = new BindingList<DataHolder>();
 
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<DataHolder> RequredTechs
         {
             get { return listBox_requredTechs.Items.Cast<DataHolder>().ToList(); }

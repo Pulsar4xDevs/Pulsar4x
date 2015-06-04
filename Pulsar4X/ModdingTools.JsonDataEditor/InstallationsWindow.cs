@@ -62,5 +62,20 @@ namespace ModdingTools.JsonDataEditor
             genericDataUC1.Item(selectedItem);
             SelectedInstallation = Data.InstallationData.Get(selectedItem.Guid);
         }
+
+        private void button_clearSelection_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_saveNew_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button_updateExsisting_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
