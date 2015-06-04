@@ -76,9 +76,11 @@ namespace ModdingTools.JsonDataEditor
             MineralData.Load(list, filePath);
             
         }
+
         public static bool SaveData()
         {
-            return TechData.Save();
+            bool success = TechData.Save() && InstallationData.Save() && MineralData.Save();
+            return success;          
         }
 
         #endregion

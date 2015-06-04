@@ -33,6 +33,19 @@ namespace ModdingTools.JsonDataEditor
             listBox_allTechs.DataSource = _allTechs;
         }
 
+        public List<Guid> GetData
+        {
+            get
+            {
+                List<Guid> list = new List<Guid>();
+                foreach (var item in RequredTechs)
+                {
+                    list.Add(item.Guid);
+                }
+                return list;
+            }
+        }
+
         private void UpdateTechlist()
         {
             _allTechs = new BindingList<DataHolder>(Data.TechData.GetDataHolders().ToList());

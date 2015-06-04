@@ -36,6 +36,19 @@ namespace ModdingTools.JsonDataEditor
             listBox_MineralsAll.DataSource = _allMinerals;
         }
 
+        public Dictionary<Guid, int> GetData
+        {
+            get
+            {
+                Dictionary<Guid, int> dict = new Dictionary<Guid, int>();
+                foreach (var kvp in _mineralsCosts)
+                {
+                    dict.Add(kvp.Key.Guid,kvp.Value);
+                }
+                return dict;
+            }
+        }
+
 
         private void UpdateMineralList()
         {

@@ -32,6 +32,8 @@ namespace ModdingTools.JsonDataEditor
             dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
         }
 
+        public Dictionary<AbilityType, int> GetData {get{return _abilityAmounts;} }
+
         private void listBox_allAbilities_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (!_abilityAmounts.ContainsKey((AbilityType)listBox_allAbilities.SelectedItem))

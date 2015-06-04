@@ -14,17 +14,15 @@ namespace ModdingTools.JsonDataEditor
     public partial class InstallationsWindow : UserControl
     {
         BindingList<DataHolder> AllInstallations { get; set; }
-        
+        InstallationSD CurrentInstallation { get; set; }
+
         InstallationSD SelectedInstallation
         {
             get { return installationUC1.StaticData; }
-            set 
-            { 
-                installationUC1.StaticData = value;
-                genericDataUC1.Description = value.Description;
-                abilitiesListUC1.AbilityAmount = value.BaseAbilityAmounts;
-                techRequirementsUC1.RequredTechs = Data.TechData.GetDataHolders(value.TechRequirements).ToList();
-                mineralsCostsUC1.MineralCosts = MineralCostsDictionary(value.ResourceCosts);
+            set
+            {
+                CurrentInstallation = value; 
+                SetCurrentInstalation();
             }
         }
         public InstallationsWindow()
@@ -33,6 +31,16 @@ namespace ModdingTools.JsonDataEditor
             UpdateInstallationlist();            
             Data.InstallationData.ListChanged += UpdateInstallationlist;
             listBox_AllInstalations.DataSource = AllInstallations;
+            CurrentInstallation = new InstallationSD();
+        }
+
+        private void SetCurrentInstalation()
+        {
+            installationUC1.StaticData = CurrentInstallation;
+            genericDataUC1.Description = CurrentInstallation.Description;
+            abilitiesListUC1.AbilityAmount = CurrentInstallation.BaseAbilityAmounts;
+            techRequirementsUC1.RequredTechs = Data.TechData.GetDataHolders(CurrentInstallation.TechRequirements).ToList();
+            mineralsCostsUC1.MineralCosts = MineralCostsDictionary(CurrentInstallation.ResourceCosts);
         }
 
         private void UpdateInstallationlist()
@@ -65,17 +73,25 @@ namespace ModdingTools.JsonDataEditor
 
         private void button_clearSelection_Click(object sender, EventArgs e)
         {
-
+            CurrentInstallation = new InstallationSD();
+            SelectedInstallation = CurrentInstallation;
         }
 
         private void button_saveNew_Click(object sender, EventArgs e)
         {
 
+            InstallationSD newSD = CurrentInstallation;          
+            newSD.ID = Guid.NewGuid();
+            CurrentInstallation = newSD;
+            Data.InstallationData.Update(CurrentInstallation);
+            SelectedInstallation = CurrentInstallation;
+
+
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
-
+            Data.InstallationData.Update(CurrentInstallation);
         }
     }
 }
