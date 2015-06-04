@@ -13,7 +13,7 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class AbilitiesListUC : UserControl
     {
-        private Dictionary<AbilityType, int> _abilityAmounts; 
+        private Dictionary<AbilityType, int> _abilityAmounts = new Dictionary<AbilityType, int>();
         public Dictionary<AbilityType,int> AbilityAmount
         {
             get { return _abilityAmounts; }
@@ -27,8 +27,9 @@ namespace ModdingTools.JsonDataEditor
         public AbilitiesListUC()
         {
             InitializeComponent();
-            AbilityAmount = new Dictionary<AbilityType, int>();            
-            listBox_allAbilities.DataSource = Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>();           
+                        
+            listBox_allAbilities.DataSource = Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>();
+            dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
         }
 
         private void listBox_allAbilities_MouseDoubleClick(object sender, MouseEventArgs e)

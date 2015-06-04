@@ -77,6 +77,9 @@
             // 
             // dataGridView_MineralCosts
             // 
+            this.dataGridView_MineralCosts.AllowUserToAddRows = false;
+            this.dataGridView_MineralCosts.AllowUserToDeleteRows = false;
+            this.dataGridView_MineralCosts.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView_MineralCosts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView_MineralCosts.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView_MineralCosts.Location = new System.Drawing.Point(3, 23);
