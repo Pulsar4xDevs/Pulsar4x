@@ -32,7 +32,7 @@ namespace ModdingTools.JsonDataEditor
             dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
         }
 
-        public Dictionary<AbilityType, int> GetData {get{return _abilityAmounts;} }
+        public JDictionary<AbilityType, int> GetData {get { return new JDictionary<AbilityType, int>(_abilityAmounts); } }
 
         private void listBox_allAbilities_MouseDoubleClick(object sender, MouseEventArgs e)
         {

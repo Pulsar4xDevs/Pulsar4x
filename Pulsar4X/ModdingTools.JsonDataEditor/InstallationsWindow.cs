@@ -77,20 +77,39 @@ namespace ModdingTools.JsonDataEditor
             SelectedInstallation = CurrentInstallation;
         }
 
+        /// <summary>
+        /// creates newSD
+        /// </summary>
+        /// <param name="guid">guid: current or new</param>
+        /// <returns></returns>
+        private InstallationSD staticData(Guid guid)
+        {
+            InstallationSD newSD = new InstallationSD
+            {
+                ID = Guid.NewGuid(),
+                Name = genericDataUC1.GetName,
+                Description = genericDataUC1.Description,
+                PopulationRequired = installationUC1.GetPopReqirement,
+                CargoSize = installationUC1.GetCargoSize,
+                BuildPoints = installationUC1.GetBuildPoints,
+                WealthCost = installationUC1.GetWealthCost,
+                BaseAbilityAmounts = abilitiesListUC1.GetData,
+                TechRequirements = techRequirementsUC1.GetData,
+                ResourceCosts = mineralsCostsUC1.GetData
+            };
+            return newSD;
+        }
+
         private void button_saveNew_Click(object sender, EventArgs e)
         {
-
-            InstallationSD newSD = CurrentInstallation;          
-            newSD.ID = Guid.NewGuid();
-            CurrentInstallation = newSD;
+            CurrentInstallation = staticData(Guid.NewGuid());
             Data.InstallationData.Update(CurrentInstallation);
             SelectedInstallation = CurrentInstallation;
-
-
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
+            CurrentInstallation = staticData(CurrentInstallation.ID);
             Data.InstallationData.Update(CurrentInstallation);
         }
     }

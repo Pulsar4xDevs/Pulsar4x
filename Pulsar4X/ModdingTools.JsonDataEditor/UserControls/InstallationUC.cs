@@ -20,6 +20,15 @@ namespace ModdingTools.JsonDataEditor.UserControls
             InitializeComponent();
         }
 
+        public int GetPopReqirement
+        { get { return (int)numericUpDown_Population.Value; }}
+        public int GetWealthCost
+        { get { return (int)numericUpDown_Wealth.Value; } }
+        public int GetCargoSize
+        { get { return (int)numericUpDown_CargoSize.Value; } }
+        public int GetBuildPoints
+        { get { return (int)numericUpDown_BuildPoints.Value; } }
+
         void setData()
         {
             numericUpDown_Population.Value = StaticData.PopulationRequired;

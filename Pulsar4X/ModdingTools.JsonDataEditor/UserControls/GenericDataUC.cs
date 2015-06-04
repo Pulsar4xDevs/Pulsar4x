@@ -28,6 +28,18 @@ namespace ModdingTools.JsonDataEditor
             InitializeComponent();           
         }
 
+        public Guid GetGuid {
+            get { return _item.Guid; }
+        }
+        public string GetName
+        {
+            get { return _item.Name; }
+        }
+        public string GetDescription
+        {
+            get { return textBox_Description.Text; }
+        }
+
         public void Item(DataHolder item)
         {
             _item = item;
