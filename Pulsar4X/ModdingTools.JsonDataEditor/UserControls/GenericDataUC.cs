@@ -40,13 +40,16 @@ namespace ModdingTools.JsonDataEditor
             get { return textBox_Description.Text; }
         }
 
-        public void Item(DataHolder item)
+        public DataHolder Item
         {
-            _item = item;
-            label_Guid.Text = _item.Guid.ToString();
-            textBox_Name.Text = _item.Name;
-            //textBox_Description.Text = _Item.?????????
-
+            get{return _item;}
+            set
+            {
+                _item = value;
+                label_Guid.Text = _item.Guid.ToString();
+                textBox_Name.Text = _item.Name;
+                //textBox_Description.Text = _Item.?????????
+            }
         }
 
     }

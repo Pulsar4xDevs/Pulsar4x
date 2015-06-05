@@ -16,15 +16,15 @@ namespace ModdingTools.JsonDataEditor
         BindingList<DataHolder> AllInstallations { get; set; }
         InstallationSD CurrentInstallation { get; set; }
 
-        InstallationSD SelectedInstallation
-        {
-            get { return installationUC1.StaticData; }
-            set
-            {
-                CurrentInstallation = value; 
-                SetCurrentInstalation();
-            }
-        }
+        //InstallationSD SelectedInstallation
+        //{
+        //    get { return installationUC1.StaticData; }
+        //    set
+        //    {
+        //        CurrentInstallation = value; 
+        //        SetCurrentInstalation();
+        //    }
+        //}
         public InstallationsWindow()
         {
             InitializeComponent();
@@ -34,9 +34,11 @@ namespace ModdingTools.JsonDataEditor
             CurrentInstallation = new InstallationSD();
         }
 
-        private void SetCurrentInstalation()
+        private void SetCurrentInstallation(InstallationSD installationSD)
         {
+            CurrentInstallation = installationSD;
             installationUC1.StaticData = CurrentInstallation;
+            genericDataUC1.Item = Data.InstallationData.GetDataHolder(CurrentInstallation.ID);
             genericDataUC1.Description = CurrentInstallation.Description;
             abilitiesListUC1.AbilityAmount = CurrentInstallation.BaseAbilityAmounts;
             techRequirementsUC1.RequredTechs = Data.TechData.GetDataHolders(CurrentInstallation.TechRequirements).ToList();
@@ -67,14 +69,25 @@ namespace ModdingTools.JsonDataEditor
         private void listBox_AllInstalations_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             DataHolder selectedItem = (DataHolder)listBox_AllInstalations.SelectedItem;
-            genericDataUC1.Item(selectedItem);
-            SelectedInstallation = Data.InstallationData.Get(selectedItem.Guid);
+            SetCurrentInstallation(Data.InstallationData.Get(selectedItem.Guid));
         }
 
         private void button_clearSelection_Click(object sender, EventArgs e)
         {
-            CurrentInstallation = new InstallationSD();
-            SelectedInstallation = CurrentInstallation;
+            InstallationSD newEmptySD = new InstallationSD 
+            {
+                ID = new Guid(),
+                Name = "",
+                Description = "",
+                PopulationRequired = 0,
+                CargoSize = 0,
+                BuildPoints = 0,
+                WealthCost = 0,
+                BaseAbilityAmounts = new JDictionary<AbilityType,int>(),
+                TechRequirements = new List<Guid>(),
+                ResourceCosts = new JDictionary<Guid,int>()
+            };
+            SetCurrentInstallation(newEmptySD);
         }
 
         /// <summary>
@@ -102,9 +115,9 @@ namespace ModdingTools.JsonDataEditor
 
         private void button_saveNew_Click(object sender, EventArgs e)
         {
-            CurrentInstallation = staticData(Guid.NewGuid());
+            SetCurrentInstallation(staticData(Guid.NewGuid()));
             Data.InstallationData.Update(CurrentInstallation);
-            SelectedInstallation = CurrentInstallation;
+             
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
