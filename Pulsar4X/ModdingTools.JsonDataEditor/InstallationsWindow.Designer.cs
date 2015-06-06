@@ -90,7 +90,7 @@
             // mineralsCostsUC1
             // 
             this.mineralsCostsUC1.Location = new System.Drawing.Point(424, 3);
-            this.mineralsCostsUC1.MineralCosts = null;
+            //this.mineralsCostsUC1.MineralCosts = null;
             this.mineralsCostsUC1.Name = "mineralsCostsUC1";
             this.mineralsCostsUC1.Size = new System.Drawing.Size(263, 133);
             this.mineralsCostsUC1.TabIndex = 3;
@@ -123,7 +123,7 @@
             // 
             // abilitiesListUC1
             // 
-            this.abilitiesListUC1.AbilityAmount = null;
+            //this.abilitiesListUC1.AbilityAmount = null;
             this.abilitiesListUC1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.abilitiesListUC1.Location = new System.Drawing.Point(178, 309);
             this.abilitiesListUC1.Name = "abilitiesListUC1";

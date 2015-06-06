@@ -118,6 +118,18 @@ namespace ModdingTools.JsonDataEditor
             }
 
             /// <summary>
+            /// another way of doing this. 
+            /// </summary>
+            /// <param name="guid"></param>
+            /// <returns></returns>
+            public DataHolder GetDataHolderOrNull(Guid guid)
+            {
+                DataHolder dh = null;
+                _allDataHolders.TryGetValue(guid, out dh);
+                return dh;
+            }
+
+            /// <summary>
             /// Gets a dataholder from a given guid, throws an exception if not found.
             /// </summary>
             /// <param name="guid"></param>
