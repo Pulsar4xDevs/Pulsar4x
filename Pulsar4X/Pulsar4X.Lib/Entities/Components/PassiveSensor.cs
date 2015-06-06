@@ -211,7 +211,7 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Range at which that signature is detected.</returns>
         public int CalcUnknownSignature(int Signature)
         {
-            double rangeAdj = (((double)Signature) / 1000.0);
+            double rangeAdj = (((double)Signature) / (double)Constants.SensorTN.DefaultPassiveSignature);
             int newRange = (int)((double)Range * rangeAdj);
 
             return newRange;

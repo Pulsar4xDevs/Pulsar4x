@@ -195,6 +195,15 @@ namespace Pulsar4X.Entities
         /// </summary>
         public bool IsInShipyard { get; set; }
 
+
+        /// <summary>
+        /// When was the last time this taskgroup had its sensors changed? Activation, deactivation, ships joining or leaving, and sensor component destruction should be everything.
+        /// This is not actually a timer, it is merely a counter that will be incremented every time a sensor change happens. there is a similar counter in the UI that should track this, and
+        /// this lets the UI know when to update the sensor display.
+#warning Sensor component destruction should be looked at. for now SensorUpdateAck will be handled inside TaskGroup.cs
+        /// </summary>
+        public uint SensorUpdateAck { get; set; }
+
         /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
@@ -297,6 +306,8 @@ namespace Pulsar4X.Entities
             TaskGroupPDL = new PointDefenseList();
 
             IsInShipyard = false;
+
+            SensorUpdateAck = 0;
 
             //add default legal order for targeting TGs.
             _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
@@ -555,6 +566,11 @@ namespace Pulsar4X.Entities
             UpdatePassiveSensors(ship);
 
             AddShipToSort(ship);
+
+            /// <summary>
+            /// Let the UI know it should re check this taskgroup's sensors.
+            /// </summary>
+            SensorUpdateAck++;
         }
 
         /// <summary>
@@ -619,6 +635,11 @@ namespace Pulsar4X.Entities
             /// </summary>
             UpdatePassiveSensors(Ship);
             AddShipToSort(Ship);
+
+            /// <summary>
+            /// Let the UI know it should re check this taskgroup's sensors.
+            /// </summary>
+            SensorUpdateAck++;
         }
 
         /// <summary>
@@ -683,6 +704,11 @@ namespace Pulsar4X.Entities
             {
                 Ships[loop].SetSpeed(CurrentSpeed);
             }
+
+            /// <summary>
+            /// Let the UI know it should re check this taskgroup's sensors.
+            /// </summary>
+            SensorUpdateAck++;
         }
 
         /// <summary>
@@ -1099,6 +1125,11 @@ namespace Pulsar4X.Entities
             {
                 SortShipBySignature(Ships[ShipIndex].EMList, EMSortList, 1);
             }
+
+            /// <summary>
+            /// Let the UI know it should re check this taskgroup's sensors.
+            /// </summary>
+            SensorUpdateAck++;
         }
         /// <summary>
         /// End SetActiveSensor
@@ -1452,6 +1483,12 @@ namespace Pulsar4X.Entities
                     done = true;
 
             }
+
+            /// <summary>
+            /// Let the UI know it should re check this taskgroup's sensors. SimEntity can call just this function by itself for ship destruction. while ship transfers call this
+            /// as part of another function. So SensorUpdateTick can be set twice. this shouldn't cause any issues.
+            /// </summary>
+            SensorUpdateAck++;
 
             return false;
         }
@@ -2943,7 +2980,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Decrement the installation count on the planet.
             /// </summary>
-            Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number - (float)(MassToLoad / TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
+            Pop.LoadInstallation(InstType, MassToLoad);
 
             /// <summary>
             /// Now start loading mass onto each ship.
@@ -3011,7 +3048,7 @@ namespace Pulsar4X.Entities
                     CLE.tons = CLE.tons - ShipMassToUnload;
                     CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
 
-                    Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(ShipMassToUnload / TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
+                    Pop.UnloadInstallation(InstType, ShipMassToUnload);
                 }
             }
 

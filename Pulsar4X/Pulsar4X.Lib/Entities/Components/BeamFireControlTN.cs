@@ -878,14 +878,73 @@ namespace Pulsar4X.Entities.Components
 
                     return weaponFired;
                 }
-                else
+                else if(m_oTarget.targetType == StarSystemEntityType.Population)
                 {
-#warning Beam Fire control on planet/population section not implemented.
                     /// <summary>
-                    /// SystemBody section eventually goes here.
+                    /// Planets can't dodge and will always be hit.
                     /// </summary>
+                    foreach (BeamTN LinkedWeapon in m_lLinkedWeapons)
+                    {
+                        if (LinkedWeapon.beamDef.range > DistanceToTarget && LinkedWeapon.readyToFire() == true)
+                        {
+                            RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
+
+                            weaponFired = LinkedWeapon.Fire();
+
+                            if (weaponFired == true)
+                            {
+                                for (int BeamShotIterator = 0; BeamShotIterator < LinkedWeapon.beamDef.shotCount; BeamShotIterator++)
+                                {
+                                    bool PopDamaged = m_oTarget.pop.OnDamaged(LinkedWeapon.beamDef.damageType, LinkedWeapon.beamDef.damage[RangeIncrement], FiringShip);
+                                    return weaponFired;
+                                }
+                            }
+                        }
+                        else if (LinkedWeapon.isDestroyed == false)
+                        {
+                            String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapon.Name, LinkedWeapon.currentCapacitor, LinkedWeapon.beamDef.weaponCapacitor);
+
+                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
+                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, WeaponFireS);
+
+                            FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                        }
+                    }
+
+                    foreach (TurretTN LinkedTurret in m_lLinkedTurrets)
+                    {
+                        if (LinkedTurret.turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedTurret.readyToFire() == true)
+                        {
+                            RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
+
+                            weaponFired = LinkedTurret.Fire();
+
+                            if (weaponFired == true)
+                            {
+                                for (int TurretShotIterator = 0; TurretShotIterator < LinkedTurret.turretDef.totalShotCount; TurretShotIterator++)
+                                {
+                                    bool ShipDest = m_oTarget.pop.OnDamaged(LinkedTurret.turretDef.baseBeamWeapon.damageType, LinkedTurret.turretDef.baseBeamWeapon.damage[RangeIncrement], FiringShip); 
+                                }
+                            }
+                            else if (LinkedTurret.isDestroyed == false)
+                            {
+                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedTurret.Name, LinkedTurret.currentCapacitor,
+                                                                                                  (LinkedTurret.turretDef.baseBeamWeapon.weaponCapacitor * LinkedTurret.turretDef.multiplier));
+
+                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
+                                                                     GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, WeaponFireS);
+
+                                FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                            }
+                        }
+                    }
                     return weaponFired;
                 }
+
+                /// <summary>
+                /// If I am targetting something that BFCs can't handle yet or shouldn't be able to handle just return false for now.
+                /// </summary>
+                return false;
             }
         }
 

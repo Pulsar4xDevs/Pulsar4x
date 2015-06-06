@@ -30,7 +30,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// For now this is a stub for where ships will be created.
         /// </summary>
-        public SystemBody Capitol { get; set; }
+        public Population Capitol { get; set; }
 
         public FactionTheme FactionTheme { get; set; }
         public FactionCommanderTheme CommanderTheme { get; set; }
@@ -366,6 +366,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<OrdnanceGroupTN> DetMissileList { get; set; }
 
+        /// <summary>
+        /// Persistent population detection list.
+        /// </summary>
+        public BindingList<Population> DetPopList { get; set; }
+
 
         /// <summary>
         /// Constructor for basic faction.
@@ -465,6 +470,7 @@ namespace Pulsar4X.Entities
             /// </summary>
             DetShipList = new BindingList<ShipTN>();
             DetMissileList = new BindingList<OrdnanceGroupTN>();
+            DetPopList = new BindingList<Population>();
 
             GameState.Instance.Factions.Add(this);
 
@@ -532,8 +538,489 @@ namespace Pulsar4X.Entities
             GameState.SE.ClearFleetPreemptList();
 
             /// <summary>
-            /// Loop through all DSTS. ***
+            /// Loop through all population centers with deep space tracking arrays.
             /// </summary>
+            for (int loop = 0; loop < Populations.Count; loop++)
+            {
+                /// <summary>
+                /// No point in running the detection statistics if this population does not have a DSTS.
+                /// </summary>
+                int DSTS = (int)Math.Floor(Populations[loop].Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number);
+                if (DSTS != 0)
+                {
+                    Population CurrentPopulation = Populations[loop];
+                    StarSystem System = CurrentPopulation.Planet.Position.System;
+
+                    int SensorTech = FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength];
+                    if (SensorTech > Constants.Colony.DeepSpaceMax)
+                        SensorTech = Constants.Colony.DeepSpaceMax;
+                    /// <summary>
+                    /// iterate through every contact, thermal.Count will be equal to systemContacts.Count
+                    /// </summary>
+                    for(int detListIterator = 0; detListIterator < System.FactionDetectionLists[FactionID].Thermal.Count; detListIterator++)
+                    {
+                        /// <summary>
+                        /// This System contact is not owned by my faction, and it isn't fully detected yet. Populations only have thermal and EM detection characteristics here.
+                        /// </summary>
+                        if (this != System.SystemContactList[detListIterator].faction && (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond ||
+                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond))
+                        {
+                            /// <summary>
+                            /// Get the distance from the current population to systemContactList[detListIterator] and store it for this tick.
+                            /// </summary>
+                            float dist = -1.0f;
+                            CurrentPopulation.Contact.DistTable.GetDistance(System.SystemContactList[detListIterator], out dist);
+                            
+                                /// <summary>
+                                /// Now to find the biggest thermal signature in the contact. The biggest for planets is just the planetary pop itself since
+                                /// multiple colonies really shouldn't happen.
+                                /// </summary>
+                                int sig = -1;
+                                int detection = -1;
+
+                                /// <summary>
+                                /// Planetary Detection.
+                                /// </summary>
+                                #region Population to Population Detection
+                                if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.Population)
+                                {
+                                    Population DetectedPopulation = System.SystemContactList[detListIterator].Entity as Population;
+                                    /// <summary>
+                                    /// If this population has already been detected via thermals do not attempt to recalculate whether it has been detected or not.
+                                    /// </summary>
+                                    if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] !=  GameState.Instance.CurrentSecond)
+                                    {
+                                        sig = DetectedPopulation.ThermalSignature;
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+
+                                        int ThermalScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech];
+
+                                        /// <summary>
+                                        /// Detection is ScanStrength multiplied by the range adjustment, multiplied by 100. These numbers come from the overall scan 
+                                        /// strength of a population's DSTS arrays, the signature adjustment(signatures larger than 1000 are easier to detect, while 
+                                        /// signatures smaller than 1000 are harder to detect, planets will often be much much larger), and the 100, for the adjustment 
+                                        /// to 1M km. it is only 100 though because units are assumed to be in 10k lots, so 100 * 10,000 = 1,000,000
+                                        /// </summary>
+                                        detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
+
+                                        /// <summary>
+                                        /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
+                                        /// </summary>
+                                        bool det = LargeDetection(dist, detection);
+
+                                        /// <summary>
+                                        /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
+                                        /// </summary>
+                                        if (det == true)
+                                        {
+                                            DetectedPopulation.ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
+                                            System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;
+                                            if (DetPopList.Contains(DetectedPopulation) == false)
+                                                DetPopList.Add(DetectedPopulation);
+                                        }
+                                    }
+                                    
+                                    /// <summary>
+                                    /// if this population has already been detected in EM then obviously there is no need to attempt to find it again.
+                                    /// </summary>
+                                    if (System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond)
+                                    {
+                                        /// <summary>
+                                        /// As signature can be different, detection should be recalculated. passive population based detection can be put into a table if need be, I am not
+                                        /// sure how useful that would be however.
+                                        /// </summary>
+                                        sig = DetectedPopulation.EMSignature;
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+
+                                        int EMScanStrength = DSTS * Constants.Colony.EMDeepSpaceStrength[SensorTech];
+
+                                        detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
+
+                                        bool det = LargeDetection(dist, detection);
+
+                                        if (det == true)
+                                        {
+                                            DetectedPopulation.EMDetection[FactionID] = GameState.Instance.CurrentSecond;
+                                            System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
+                                            if (DetPopList.Contains(DetectedPopulation) == false)
+                                                DetPopList.Add(DetectedPopulation);
+                                        }
+                                    }  
+                                }
+                                #endregion
+
+                                /// <summary>
+                                /// Taskgroup Detection.
+                                /// </summary>
+                                #region Population To TaskGroup Detection
+                                if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup && (System.SystemContactList[detListIterator].Entity as TaskGroupTN).Ships.Count != 0)
+                                {
+                                    TaskGroupTN DetectedTaskGroup = System.SystemContactList[detListIterator].Entity as TaskGroupTN;
+                                    bool noDetection = false;
+                                    bool allDetection = false;
+                                    #region Population to Taskgroup thermal detection
+                                    if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond)
+                                    {
+                                        /// <summary>
+                                        /// Get the best detection range for thermal signatures in loop.
+                                        /// </summary>
+                                        int ShipID = DetectedTaskGroup.ThermalSortList.Last();
+                                        ShipTN scratch = DetectedTaskGroup.Ships[ShipID];
+                                        sig = scratch.CurrentThermalSignature;
+
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+
+                                        int ThermalScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech];
+
+                                        /// <summary>
+                                        /// Detection is ScanStrength multiplied by the range adjustment, multiplied by 100. These numbers come from the overall scan strength of a population's
+                                        /// DSTS arrays, the signature adjustment(signatures larger than 1000 are easier to detect, while signatures smaller than 1000 are harder to detect, planets will
+                                        /// often be much much larger), and the 100, for the adjustment to 1M km. it is only 100 though because units are assumed to be in 10k lots, so 100 * 10,000 = 1,000,000
+                                        /// </summary>
+                                        detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
+
+                                        /// <summary>
+                                        /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
+                                        /// </summary>
+                                        bool det = LargeDetection(dist, detection);
+
+                                        /// <summary>
+                                        /// Good case, none of the ships are detected.
+                                        /// </summary>
+                                        if (det == false)
+                                        {
+                                            noDetection = true;
+                                        }
+
+                                        /// <summary>
+                                        /// Atleast the biggest ship is detected.
+                                        /// </summary
+                                        if (noDetection == false)
+                                        {
+                                            ShipID = DetectedTaskGroup.ThermalSortList.First();
+                                            scratch = DetectedTaskGroup.Ships[ShipID];
+                                            sig = scratch.CurrentThermalSignature;
+
+                                            rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                            detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
+                                            det = LargeDetection(dist, detection);
+
+                                            /// <summary>
+                                            /// Best case, everything is detected.
+                                            /// </summary>
+                                            if (det == true)
+                                            {
+                                                allDetection = true;
+
+                                                for (int loop3 = 0; loop3 < DetectedTaskGroup.Ships.Count; loop3++)
+                                                {
+                                                    DetectedTaskGroup.Ships[loop3].ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
+
+                                                    if (DetShipList.Contains(DetectedTaskGroup.Ships[loop3]) == false)
+                                                    {
+                                                        DetShipList.Add(DetectedTaskGroup.Ships[loop3]);
+                                                    }
+                                                }
+                                                System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;  
+                                            }
+                                            else if (noDetection == false && allDetection == false)
+                                            {
+                                                /// <summary>
+                                                /// Worst case. some are detected, some aren't.
+                                                /// </summary>
+                                                for (int loop3 = 0; loop3 < DetectedTaskGroup.Ships.Count; loop3++)
+                                                {
+                                                    LinkedListNode<int> node = DetectedTaskGroup.ThermalSortList.Last;
+                                                    bool done = false;
+
+                                                    while (!done)
+                                                    {
+                                                        scratch = DetectedTaskGroup.Ships[node.Value];
+
+                                                        if (scratch.ThermalDetection[FactionID] != GameState.Instance.CurrentSecond)
+                                                        {
+                                                            sig = scratch.CurrentThermalSignature;
+                                                            rangeAdj = (((double)sig) / 1000.0);
+                                                            detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
+
+                                                            /// <summary>
+                                                            /// Test each ship until I get to one I don't see.
+                                                            /// </summary>
+                                                            det = LargeDetection(dist, detection);
+
+                                                            if (det == true)
+                                                            {
+                                                                scratch.ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
+
+                                                                if (DetShipList.Contains(scratch) == false)
+                                                                {
+                                                                    DetShipList.Add(scratch);
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                done = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                        if (node == DetectedTaskGroup.ThermalSortList.First)
+                                                        {
+                                                            /// <summary>
+                                                            /// This should not happen.
+                                                            /// </summary>
+                                                            String ErrorMessage = string.Format("Partial Thermal detect for Pops looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
+                                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, Populations[loop].Position.System, Populations[loop].Contact,
+                                                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, ErrorMessage);
+                                                            MessageLog.Add(NMsg);
+                                                            done = true;
+                                                            break;
+                                                        }
+                                                        node = node.Previous;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    #endregion
+
+                                    #region Population to taskgroup EM detection
+                                    if (System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond)
+                                    {
+                                        noDetection = false;
+                                        allDetection = false;
+
+                                        /// <summary>
+                                        /// Get the best detection range for EM signatures in loop.
+                                        /// </summary>
+                                        int ShipID = DetectedTaskGroup.EMSortList.Last();
+                                        ShipTN scratch = DetectedTaskGroup.Ships[ShipID];
+                                        sig = scratch.CurrentEMSignature;
+
+                                        int EMScanStrength = DSTS * Constants.Colony.EMDeepSpaceStrength[SensorTech];
+
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                        detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
+
+                                        /// <summary>
+                                        /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
+                                        /// </summary>
+                                        bool det = LargeDetection(dist, detection);
+
+                                        /// <summary>
+                                        /// Good case, none of the ships are detected.
+                                        /// </summary>
+                                        if (det == false)
+                                        {
+                                            noDetection = true;
+                                        }
+
+                                        /// <summary>
+                                        /// Atleast the biggest ship is detected.
+                                        /// </summary
+                                        if (noDetection == false)
+                                        {
+                                            ShipID = DetectedTaskGroup.EMSortList.First();
+                                            scratch = DetectedTaskGroup.Ships[ShipID];
+                                            sig = scratch.CurrentEMSignature;
+
+                                            rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                            detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
+
+                                            /// <summary>
+                                            /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
+                                            /// </summary>
+                                            det = LargeDetection(dist, detection);
+
+                                            /// <summary>
+                                            /// Best case, everything is detected.
+                                            /// </summary>
+                                            if (det == true)
+                                            {
+                                                allDetection = true;
+
+                                                for (int loop3 = 0; loop3 < DetectedTaskGroup.Ships.Count; loop3++)
+                                                {
+                                                    DetectedTaskGroup.Ships[loop3].EMDetection[FactionID] = GameState.Instance.CurrentSecond;
+
+                                                    if (DetShipList.Contains(DetectedTaskGroup.Ships[loop3]) == false)
+                                                    {
+                                                        DetShipList.Add(DetectedTaskGroup.Ships[loop3]);
+                                                    }
+                                                }
+                                                System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
+                                            }
+                                            else if (noDetection == false && allDetection == false)
+                                            {
+                                                /// <summary>
+                                                /// Worst case. some are detected, some aren't.
+                                                /// </summary>
+                                                for (int loop3 = 0; loop3 < DetectedTaskGroup.Ships.Count; loop3++)
+                                                {
+                                                    LinkedListNode<int> node = DetectedTaskGroup.EMSortList.Last;
+                                                    bool done = false;
+
+                                                    while (!done)
+                                                    {
+                                                        scratch = DetectedTaskGroup.Ships[node.Value];
+
+                                                        if (scratch.EMDetection[FactionID] != GameState.Instance.CurrentSecond)
+                                                        {
+                                                            sig = scratch.CurrentEMSignature;
+
+                                                            /// <summary>
+                                                            /// here is where EM detection differs from Thermal detection:
+                                                            /// If a ship has a signature of 0 by this point(and we didn't already hit noDetection above,
+                                                            /// it means that one ship is emitting a signature, but that no other ships are.
+                                                            /// Mark the group as totally detected, but not the ships, this serves to tell me that the ships are undetectable
+                                                            /// in this case.
+                                                            /// </summary>
+                                                            if (sig == 0)
+                                                            {
+                                                                /// <summary>
+                                                                /// The last signature we looked at was the ship emitting an EM sig, and this one is not.
+                                                                /// Mark the entire group as "spotted" because no other detection will occur.
+                                                                /// </summary>
+                                                                if (DetectedTaskGroup.Ships[node.Next.Value].EMDetection[FactionID] == GameState.Instance.CurrentSecond)
+                                                                {
+                                                                    System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
+                                                                    //since the ships aren't actually detected, don't add them to the detected ships list.
+                                                                }
+                                                                break;
+                                                            }
+
+                                                            rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                                            detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
+
+                                                            det = LargeDetection(dist, detection);
+
+                                                            if (det == true)
+                                                            {
+                                                                scratch.EMDetection[FactionID] = GameState.Instance.CurrentSecond;
+
+                                                                if (DetShipList.Contains(scratch) == false)
+                                                                {
+                                                                    DetShipList.Add(scratch);
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                done = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                        if (node == DetectedTaskGroup.EMSortList.First)
+                                                        {
+                                                            /// <summary>
+                                                            /// This should not happen.
+                                                            /// </summary>
+                                                            String ErrorMessage = string.Format("Partial EM detect for Pops looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
+                                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, Populations[loop].Position.System, Populations[loop].Contact,
+                                                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, ErrorMessage);
+                                                            MessageLog.Add(NMsg);
+                                                            done = true;
+                                                            break;
+                                                        }
+                                                        node = node.Previous;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    #endregion
+
+                                }
+                                #endregion
+
+                                /// <summary>
+                                /// Missile Detection.
+                                /// </summary>
+                                #region Population To Missile Detection
+                                if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.Missile)
+                                {
+                                    OrdnanceGroupTN MissileGroup = (System.SystemContactList[detListIterator].Entity as OrdnanceGroupTN);
+                                    OrdnanceTN Missile = MissileGroup.missiles[0];
+                                    if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond)
+                                    {
+                                        int ThermalScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech];
+
+                                        sig = (int)Math.Ceiling(Missile.missileDef.totalThermalSignature);
+                                        double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+
+                                        /// <summary>
+                                        /// Detection is ScanStrength multiplied by the range adjustment, multiplied by 100. These numbers come from the overall scan strength of a population's
+                                        /// DSTS arrays, the signature adjustment(signatures larger than 1000 are easier to detect, while signatures smaller than 1000 are harder to detect, planets will
+                                        /// often be much much larger), and the 100, for the adjustment to 1M km. it is only 100 though because units are assumed to be in 10k lots, so 100 * 10,000 = 1,000,000
+                                        /// </summary>
+                                        detection = (int)Math.Floor(ThermalScanStrength * rangeAdj * 100.0);
+
+                                        /// <summary>
+                                        /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
+                                        /// </summary>
+                                        bool det = LargeDetection(dist, detection);
+
+                                        /// <summary>
+                                        /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
+                                        /// </summary>
+                                        if (det == true)
+                                        {
+                                            for (int loop3 = 0; loop3 < MissileGroup.missiles.Count; loop3++)
+                                            {
+                                                MissileGroup.missiles[loop3].ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
+                                            }
+
+                                            if (DetMissileList.Contains(MissileGroup) == false)
+                                            {
+                                                DetMissileList.Add(MissileGroup);
+                                            }
+
+                                            System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;
+                                        }
+                                    }
+                                    if (System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond)
+                                    {
+                                        int EMSignature = 0;
+                                        if (Missile.missileDef.activeStr != 0.0f)
+                                        {
+                                            EMSignature = Missile.missileDef.aSD.gps;
+                                        }
+
+                                        if (EMSignature != 0)
+                                        {
+                                            /// <summary>
+                                            /// As signature can be different, detection should be recalculated. passive population based detection can be put into a table if need be, I am not
+                                            /// sure how useful that would be however.
+                                            /// </summary>
+                                            sig = EMSignature;
+
+                                            int EMScanStrength = DSTS * Constants.Colony.EMDeepSpaceStrength[SensorTech];
+
+                                            double rangeAdj = (((double)sig) / (double)Constants.SensorTN.DefaultPassiveSignature);
+                                            detection = (int)Math.Floor(EMScanStrength * rangeAdj * 100.0);
+
+                                            bool det = LargeDetection(dist, detection);
+
+                                            if (det == true)
+                                            {
+                                                for (int loop3 = 0; loop3 < MissileGroup.missiles.Count; loop3++)
+                                                {
+                                                    MissileGroup.missiles[loop3].EMDetection[FactionID] = GameState.Instance.CurrentSecond;
+                                                }
+
+                                                if (DetMissileList.Contains(MissileGroup) == false)
+                                                {
+                                                    DetMissileList.Add(MissileGroup);
+                                                }
+
+                                                System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
+                                            }
+                                        }
+                                    }   
+                                }
+                                #endregion
+                        }//end if not owned and not detected
+                    }//end for thermal.Count
+                }//end if DSTS != 0
+            }//end for populations
 
             /// <summary>
             /// Loop through all faction taskgroups.
@@ -548,6 +1035,12 @@ namespace Pulsar4X.Entities
                 if (CurrentTaskGroup.IsJumpSick())
                     continue;
 
+                /// <summary>
+                /// A taskgroup with no ships cannot detect anything.
+                /// </summary>
+                if (CurrentTaskGroup.Ships.Count == 0)
+                    continue;
+
                 StarSystem System = CurrentTaskGroup.Contact.Position.System;
                 /// <summary>
                 /// Loop through the global contacts list for the system. thermal.Count is equal to SystemContacts.Count. or should be.
@@ -557,11 +1050,10 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Check if System.SystemContactList[detListIterator] is in the same faction, and it hasn't been fully detected yet.
                     /// </summary>
-                    if (this != System.SystemContactList[detListIterator].faction && System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond &&
-                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond)
+                    if (this != System.SystemContactList[detListIterator].faction && (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond ||
+                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond || System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond))
                     {
                         float dist;
-
                         // Check to see if our distance table is updated for this contact.
                         if (!CurrentTaskGroup.Contact.DistTable.GetDistance(System.SystemContactList[detListIterator], out dist))
                         {
@@ -574,42 +1066,47 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// player created empty taskgroups should not get checked here.
                                 /// </summary>
-                                if (TaskGroup.Ships.Count == 0)
-                                    continue;
-
-                                /// <summary>
-                                /// how far could this TG travel within a single day?
-                                /// </summary>
-                                float TaskGroupDistance = (float)Distance.ToAU(CurrentTaskGroup.CurrentSpeed) * Constants.TimeInSeconds.Day;
-
-
+                                if (TaskGroup.Ships.Count != 0)
+                                {
+                                    /// <summary>
+                                    /// how far could this TG travel within a single day?
+                                    /// </summary>
+                                    float TaskGroupDistance = (float)Distance.ToAU(CurrentTaskGroup.CurrentSpeed) * Constants.TimeInSeconds.Day;
 
 #warning fleet intercept preemption magic number here, if less than 5 days travel time currently.
 #warning fleet intercept needs to only process for hostile or unknown taskgroups, not all taskgroups.
 
-                                int ShipID = TaskGroup.ActiveSortList.Last();
-                                ShipTN LargestContactTCS = TaskGroup.Ships[ShipID];
+                                    int ShipID = TaskGroup.ActiveSortList.Last();
+                                    ShipTN LargestContactTCS = TaskGroup.Ships[ShipID];
 
-                                /// <summary>
-                                /// If this Taskgroup isn't already detected, and the distance is short enough, put it in the fleet intercept preempt list.
-                                /// </summary>
-                                if (TaskGroupDistance >= (dist / 5.0) && (DetectedContactLists.ContainsKey(System) == false ||
-                                    (DetectedContactLists.ContainsKey(System) == true && (!DetectedContactLists[System].DetectedContacts.ContainsKey(LargestContactTCS) ||
-                                     DetectedContactLists[System].DetectedContacts[LargestContactTCS].active == false))))
-                                {
-#warning Update this fleet intercept list for planets/populations
-                                    GameState.SE.FleetInterceptionPreemptTick = GameState.Instance.CurrentSecond;
-
-                                    GameState.SE.AddFleetToPreemptList(CurrentTaskGroup);
-                                    if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
+                                    /// <summary>
+                                    /// If this Taskgroup isn't already detected, and the distance is short enough, put it in the fleet intercept preempt list.
+                                    /// </summary>
+                                    if (TaskGroupDistance >= (dist / 5.0) && (DetectedContactLists.ContainsKey(System) == false ||
+                                        (DetectedContactLists.ContainsKey(System) == true && (!DetectedContactLists[System].DetectedContacts.ContainsKey(LargestContactTCS) ||
+                                         DetectedContactLists[System].DetectedContacts[LargestContactTCS].active == false))))
                                     {
+#warning Update this fleet intercept list for planets/populations
+                                        GameState.SE.FleetInterceptionPreemptTick = GameState.Instance.CurrentSecond;
 
-                                        GameState.SE.AddFleetToPreemptList(TaskGroup);
+                                        GameState.SE.AddFleetToPreemptList(CurrentTaskGroup);
+                                        if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
+                                        {
+                                            GameState.SE.AddFleetToPreemptList(TaskGroup);
+                                        }
                                     }
+                                }
+                                else
+                                {
+                                    /// <summary>
+                                    /// TaskGroupToTest is going to be empty so it can't be detected.
+                                    /// </summary>
+                                    continue;
                                 }
 
                             } // /Fleet Interception Check
                         } // distance Table Update.
+
 
                         /// <summary>
                         /// Now to find the biggest signature in the contact. The biggest for planets is just the planetary pop itself since
@@ -623,51 +1120,68 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.Population)
                         {
+                            #region TaskGroup to Population detection
                             Population Pop = System.SystemContactList[detListIterator].Entity as Population;
-                            sig = Pop.ThermalSignature;
-                            detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
-
-                            /// <summary>
-                            /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
-                            /// </summary>
-                            bool det = LargeDetection(dist, detection);
-
-                            /// <summary>
-                            /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
-                            /// </summary>
-                            if (det == true)
+                            if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond)
                             {
-                                Pop.ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
-                                System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;
+                                sig = Pop.ThermalSignature;
+                                detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                /// <summary>
+                                /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
+                                /// </summary>
+                                bool det = LargeDetection(dist, detection);
+
+                                /// <summary>
+                                /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
+                                /// </summary>
+                                if (det == true)
+                                {
+                                    Pop.ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
+                                    System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;
+                                    if (DetPopList.Contains(Pop) == false)
+                                        DetPopList.Add(Pop);
+                                }
                             }
 
-                            sig = Pop.EMSignature;
-                            detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
-
-                            det = LargeDetection(dist, detection);
-
-                            if (det == true)
+                            if (System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond)
                             {
-                                Pop.EMDetection[FactionID] = GameState.Instance.CurrentSecond;
-                                System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
+                                sig = Pop.EMSignature;
+                                detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                bool det = LargeDetection(dist, detection);
+
+                                if (det == true)
+                                {
+                                    Pop.EMDetection[FactionID] = GameState.Instance.CurrentSecond;
+                                    System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
+                                    if (DetPopList.Contains(Pop) == false)
+                                        DetPopList.Add(Pop);
+                                }
                             }
 
-                            sig = Constants.ShipTN.ResolutionMax - 1;
-                            /// <summary>
-                            /// The -1 is because a planet is most certainly not a missile.
-                            /// </summary>
-                            detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
-
-                            /// <summary>
-                            /// Do detection calculations here.
-                            /// </summary>
-                            det = LargeDetection(dist, detection);
-
-                            if (det == true)
+                            if (System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond && CurrentTaskGroup.ActiveSensorQue.Count > 0)
                             {
-                                Pop.ActiveDetection[FactionID] = GameState.Instance.CurrentSecond;
-                                System.FactionDetectionLists[FactionID].Active[detListIterator] = GameState.Instance.CurrentSecond;
+                                sig = Constants.ShipTN.ResolutionMax - 1;
+                                /// <summary>
+                                /// The -1 is because a planet is most certainly not a missile.
+                                /// </summary>
+                                detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+
+                                /// <summary>
+                                /// Do detection calculations here.
+                                /// </summary>
+                                bool det = LargeDetection(dist, detection);
+
+                                if (det == true)
+                                {
+                                    Pop.ActiveDetection[FactionID] = GameState.Instance.CurrentSecond;
+                                    System.FactionDetectionLists[FactionID].Active[detListIterator] = GameState.Instance.CurrentSecond;
+                                    if (DetPopList.Contains(Pop) == false)
+                                        DetPopList.Add(Pop);
+                                }
                             }
+                            #endregion
                         }
                         else if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
                         {
@@ -869,8 +1383,8 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Loop through all missile groups.
             /// </summary>
-            for (int loop = 0; loop < MissileGroups.Count; loop++)
             #region Faction Missile Loop
+            for (int loop = 0; loop < MissileGroups.Count; loop++)
             {
                 /// <summary>
                 /// Hopefully I won't get into this situation ever. 
@@ -905,12 +1419,12 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// I don't own loop2, and it hasn't been fully detected yet. And this missile can actually detect things.
                     /// </summary>
-                    if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond &&
-                        System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond &&
+                    if (this != System.SystemContactList[loop2].faction && (System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond ||
+                        System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond || System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond )&&
                         (Missile.missileDef.thermalStr != 0.0f || Missile.missileDef.eMStr != 0.0f || Missile.missileDef.activeStr != 0.0f))
                     {
                         float dist;
-                        TaskGroups[loop].Contact.DistTable.GetDistance(System.SystemContactList[loop2], out dist);
+                        MissileGroups[loop].contact.DistTable.GetDistance(System.SystemContactList[loop2], out dist);
 
                         /// <summary>
                         /// Now to find the biggest thermal signature in the contact. The biggest for planets is just the planetary pop itself since
@@ -930,7 +1444,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Does this missile have a thermal sensor suite? by default the answer is no, this is different from Aurora which gives them the basic ship suite.
                             /// </summary>
-                            if (Missile.missileDef.tHD != null)
+                            if (Missile.missileDef.tHD != null && System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond)
                             {
                                 sig = Pop.ThermalSignature;
                                 detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
@@ -944,13 +1458,15 @@ namespace Pulsar4X.Entities
                                 {
                                     Pop.ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
                                     System.FactionDetectionLists[FactionID].Thermal[loop2] = GameState.Instance.CurrentSecond;
+                                    if (DetPopList.Contains(Pop) == false)
+                                        DetPopList.Add(Pop);
                                 }
                             }
 
                             /// <summary>
                             /// Does this missile have an EM sensor suite? by default again the answer is no, which is again different from Aurora.
                             /// </summary>
-                            if (Missile.missileDef.eMD != null)
+                            if (Missile.missileDef.eMD != null && System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond)
                             {
                                 sig = Pop.EMSignature;
                                 detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
@@ -964,13 +1480,15 @@ namespace Pulsar4X.Entities
                                 {
                                     Pop.EMDetection[FactionID] = GameState.Instance.CurrentSecond;
                                     System.FactionDetectionLists[FactionID].EM[loop2] = GameState.Instance.CurrentSecond;
+                                    if (DetPopList.Contains(Pop) == false)
+                                        DetPopList.Add(Pop);
                                 }
                             }
 
                             /// <summary>
                             /// Lastly does this missile have an active sensor?
                             /// </summary>
-                            if (Missile.missileDef.aSD != null)
+                            if (Missile.missileDef.aSD != null && System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond)
                             {
                                 sig = Constants.ShipTN.ResolutionMax - 1;
                                 detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
@@ -984,6 +1502,8 @@ namespace Pulsar4X.Entities
                                 {
                                     Pop.ActiveDetection[FactionID] = GameState.Instance.CurrentSecond;
                                     System.FactionDetectionLists[FactionID].Active[loop2] = GameState.Instance.CurrentSecond;
+                                    if (DetPopList.Contains(Pop) == false)
+                                        DetPopList.Add(Pop);
                                 }
                             }
                             #endregion
@@ -1604,6 +2124,44 @@ namespace Pulsar4X.Entities
                     {
                         FactionContact newContact = new FactionContact(this, Missile.missileGroup, th, em, ac, (uint)GameState.Instance.CurrentSecond);
                         DetectedContactLists[System].DetectedMissileContacts.Add(Missile.missileGroup, newContact);
+                    }
+                }
+            }
+
+            for (int loop3 = 0; loop3 < DetPopList.Count; loop3++)
+            {
+                Population CurrentPopulation = DetPopList[loop3];
+                StarSystem System = DetPopList[loop3].Contact.Position.System;
+
+                if (CurrentPopulation.Faction != this)
+                {
+                    bool inDict = DetectedContactLists.ContainsKey(System);
+
+                    if (inDict == false)
+                    {
+                        DetectedContactsList newDCL = new DetectedContactsList();
+                        DetectedContactLists.Add(System, newDCL);
+                    }
+
+                    inDict = DetectedContactLists[System].DetectedPopContacts.ContainsKey(CurrentPopulation);
+
+                    bool th = (CurrentPopulation.ThermalDetection[FactionID] == GameState.Instance.CurrentSecond);
+                    bool em = (CurrentPopulation.EMDetection[FactionID] == GameState.Instance.CurrentSecond);
+                    bool ac = (CurrentPopulation.ActiveDetection[FactionID] == GameState.Instance.CurrentSecond);
+
+                    if (inDict == true)
+                    {
+                        DetectedContactLists[System].DetectedPopContacts[CurrentPopulation].updateFactionContact(this, th, em, CurrentPopulation.EMSignature, ac, (uint)GameState.Instance.CurrentSecond);
+
+                        if (th == false && em == false && ac == false)
+                        {
+                            DetectedContactLists[System].DetectedPopContacts.Remove(CurrentPopulation);
+                        }
+                    }
+                    else if (inDict == false && (th == true || em == true || ac == true))
+                    {
+                        FactionContact newContact = new FactionContact(this, CurrentPopulation, th, em, ac, (uint)GameState.Instance.CurrentSecond);
+                        DetectedContactLists[System].DetectedPopContacts.Add(CurrentPopulation, newContact);
                     }
                 }
             }

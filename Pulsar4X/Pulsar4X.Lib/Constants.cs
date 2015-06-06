@@ -520,7 +520,12 @@ namespace Pulsar4X
             /// <summary>
             /// What sensor strength will a single DSTS add? This is about equal to a full sized thermal sensor array at each tech level.
             /// </summary>
-            public static int[] DeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
+            public static int[] ThermalDeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
+
+            /// <summary>
+            /// What sensor strength will a single DSTS add? This is about equal to a full sized thermal sensor array at each tech level.
+            /// </summary>
+            public static int[]EMDeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
 
             /// <summary>
             /// Maximum index to DeepSpaceStrength
@@ -552,6 +557,16 @@ namespace Pulsar4X
             /// YearsOfProduction here being greater than 5K means that this project will essentially never finish under current conditions. so don't bother printing an estimated completion date.
             /// </summary>
             public const int TimerYearMax = 5000;
+
+            /// <summary>
+            /// About 1 point per 5 days. experimentation shows it varies between 1 and 2.
+            /// </summary>
+            public const int RadiationDecayPerYear = 72;
+
+            /// <summary>
+            /// About 3 points per 5 days. experimentation shows it varies between 3 and 4.
+            /// </summary>
+            public const int AtmosphericDustDecayPerYear = 216;
         }
 
         public static class ShipyardInfo
@@ -704,6 +719,11 @@ namespace Pulsar4X
         {
             public static byte[] ActiveStrength = { 10, 12, 16, 21, 28, 36, 48, 60, 80, 100, 135, 180 };
             public static byte[] PassiveStrength = { 5, 6, 8, 11, 14, 18, 24, 32, 40, 50, 60, 75 };
+
+            /// <summary>
+            /// What value are sensors calibrated around searching for?
+            /// </summary>
+            public const uint DefaultPassiveSignature = 1000;
         }
 
         /// <summary>

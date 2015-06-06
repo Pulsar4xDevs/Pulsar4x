@@ -249,6 +249,24 @@ namespace Pulsar4X
             set { _planets = value; }
         }
 
+        /// <summary>
+        /// List of every world that has been hit with atmospheric dust or radiation.
+        /// </summary>
+        private BindingList<SystemBody> _damagedPlanets;
+        public BindingList<SystemBody> DamagedPlanets
+        {
+            get
+            {
+                if (_damagedPlanets == null)
+                {
+                    // Load from DB here
+                    _damagedPlanets = new BindingList<SystemBody>();
+                }
+                return _damagedPlanets;
+            }
+            set { _damagedPlanets = value; }
+        }
+
         private BindingList<String> _compResearchTechs;
         public BindingList<String> CompResearchTechs
         {

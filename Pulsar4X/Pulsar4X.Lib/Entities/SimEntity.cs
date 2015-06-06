@@ -567,6 +567,27 @@ namespace Pulsar4X.Entities
                 ConstructionCycle.OrdnanceFactoryBuild(P);
                 ConstructionCycle.RefineFuel(P);
                 ConstructionCycle.ProcessShipyards(P);
+
+                /// <summary>
+                /// Planetary cleanup should happen last. The planet was damaged last tick, so this tick that damage should be represented in reduced mining, construction, and so on.
+                /// </summary>
+                ConstructionCycle.CleanUpPlanets();
+            }
+
+            /// <summary>
+            /// Update the thermal and EM signatures of every population.
+            /// Detection characteristics will change as a result of construction cycle activity, and as a result of ships completing orders. Combat will also effect detection characteristics.
+            /// This can be updated to only run for populations that have constructed something, and to only run if a population had something put on it or taken off of it.
+            /// For now it will just be calculated here.
+            /// </summary>
+#warning update and potentially optimize this. see comments just above.
+            foreach (Faction faction in P)
+            {
+                foreach (Population CurrentPopulation in faction.Populations)
+                {
+                    CurrentPopulation.CalcThermalSignature();
+                    CurrentPopulation.CalcEMSignature();
+                }
             }
 
             /// <summary>

@@ -791,8 +791,8 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
 
             System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 3.0f;
             System1.Stars[0].Planets[0].Populations[1].Installations[(int)Installation.InstallationType.Infrastructure].Number = 0.0f;
@@ -847,8 +847,8 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1,0);
 
             System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 3.0f;
             System1.Stars[0].Planets[1].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 0.0f;
@@ -916,8 +916,8 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1,0);
 
             System1.Stars[0].Planets[0].Populations[0].CivilianPopulation = 5.0f;
             System1.Stars[0].Planets[1].Populations[0].CivilianPopulation = 1.0f;
@@ -1004,8 +1004,8 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].Ships[1].Refuel(50000.0f);
             PlayerFaction1.TaskGroups[1].Ships[0].Refuel(1000000.0f);
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1,0);
 
             System1.Stars[0].Planets[0].Populations[0].FuelStockpile = 10000000.0f;
             System1.Stars[0].Planets[1].Populations[0].FuelStockpile = 10.0f;
@@ -1119,8 +1119,8 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[2].Ships[0].CurrentMSP = 60;
 
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1,0);
 
             System1.Stars[0].Planets[0].Populations[0].MaintenanceSupplies = 1000000;
             System1.Stars[0].Planets[1].Populations[0].MaintenanceSupplies = 10;
@@ -1204,8 +1204,8 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1,0);
 
             System1.Stars[0].Planets[0].Populations[0].AddComponentsToStockpile(PlayerFaction1.ComponentList.Engines[0], 500.0f);
 
@@ -1877,8 +1877,8 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1,0);
 
             System1.Stars[0].Planets[0].Populations[0].LoadMissileToStockpile(TestMissile, 4);
 
@@ -1969,8 +1969,8 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
-            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
-            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction2);
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1,0);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction2,0);
 
             System1.Stars[0].Planets[0].Position.X = 1.0;
             System1.Stars[0].Planets[0].Position.Y = 1.0;

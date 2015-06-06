@@ -24,6 +24,11 @@ namespace Pulsar4X.Entities
         public OrdnanceGroupTN missileGroup { get; set; }
 
         /// <summary>
+        /// lastly populations can be detected.
+        /// </summary>
+        public Population pop { get; set; }
+
+        /// <summary>
         /// Detected via thermal.
         /// </summary>
         public bool thermal { get; set; }
@@ -71,6 +76,7 @@ namespace Pulsar4X.Entities
         {
             ship = DetectedShip;
             missileGroup = null;
+            pop = null;
             thermal = Thermal;
             EM = em;
             EMSignature = EMSig;
@@ -124,6 +130,7 @@ namespace Pulsar4X.Entities
         {
             missileGroup = DetectedMissileGroup;
             ship = null;
+            pop = null;
             thermal = Thermal;
             EM = em;
             EMSignature = 0;
@@ -177,7 +184,58 @@ namespace Pulsar4X.Entities
             GameState.SE.SetInterrupt(InterruptType.NewSensorContact);
         }
 
+        /// <summary>
+        /// Populations can be detected as well, handle that constructor here.
+        /// </summary>
+        /// <param name="CurrentFaction">Faction that has detected this contact</param>
+        /// <param name="DetectedPopulation">Population detected by faction.</param>
+        /// <param name="Thermal">Whether detection was by thermal characteristics</param>
+        /// <param name="em">Was it detected via em?</param>
+        /// <param name="Active">was this population detected via actives?</param>
+        /// <param name="tick">Tick this happened on.</param>
+        public FactionContact(Faction CurrentFaction, Population DetectedPopulation, bool Thermal, bool em, bool Active, uint tick)
+        {
+            pop = DetectedPopulation;
+            ship = null;
+            missileGroup = null;
+            thermal = Thermal;
+            EM = em;
+            EMSignature = pop.EMSignature;
+            active = Active;
 
+            String Contact = "New contact detected:";
+
+            if (thermal == true)
+            {
+                thermalTick = tick;
+                Contact = String.Format("{0} Thermal Signature {1}", Contact, pop.ThermalSignature);
+            }
+
+            if (EM == true)
+            {
+                EMTick = tick;
+                Contact = String.Format("{0} EM Signature {1}", Contact, EMSignature);
+            }
+
+            if (active == true)
+            {
+                activeTick = tick;
+                Contact = String.Format("{0} Active Ping", Contact);
+            }
+
+            /// <summary>
+            /// Print to the message log.
+            /// </summary>
+            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew,pop.Position.System, pop.Contact,
+                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Contact);
+
+            CurrentFaction.MessageLog.Add(NMsg);
+
+            /// <summary>
+            /// Inform SimEntity.
+            /// </summary>
+            GameState.SE.SetInterrupt(InterruptType.NewSensorContact);
+        }
 
         /// <summary>
         /// Each tick every faction contact should be updated on the basis of collected sensor data.
@@ -217,10 +275,12 @@ namespace Pulsar4X.Entities
                         Contact = String.Format("{0} Thermal Signature {1}", Contact, ship.CurrentThermalSignature);
                     else if (missileGroup != null)
                         Contact = String.Format("{0} Thermal Signature {1} x{2}", Contact, (int)Math.Ceiling(missileGroup.missiles[0].missileDef.totalThermalSignature), missileGroup.missiles.Count);
+                    else if (pop != null)
+                        Contact = String.Format("{0} Thermal Signature {1}", Contact, pop.ThermalSignature);
                     else
                     {
                         type = MessageEntry.MessageType.Error;
-                        Contact = "Error: Both ship and missile are null in UpdateFactionContact.";
+                        Contact = "Error: ship,missile, and pop are null in UpdateFactionContact.";
                     }
                 }
                 else if (thermal == true && Thermal == false)
@@ -255,10 +315,12 @@ namespace Pulsar4X.Entities
                             Contact = "Error: Missile lacks a sensor, but is emitting EM in UpdateFactionContact.";
                         }
                     }
+                    else if (pop != null)
+                        Contact = String.Format("{0} EM Signature {1}", Contact, pop.EMSignature);
                     else
                     {
                         type = MessageEntry.MessageType.Error;
-                        Contact = "Error: Both ship and missile are null in UpdateFactionContact.";
+                        Contact = "Error: ship,missile, and pop are null in UpdateFactionContact.";
                     }
                 }
                 if (EM == true && Em == false)
@@ -283,10 +345,12 @@ namespace Pulsar4X.Entities
                         Contact = String.Format("{0} TCS {1}", Contact, ship.TotalCrossSection);
                     else if (missileGroup != null)
                         Contact = String.Format("{0} TCS_MSP {1} x{2}", Contact, (int)Math.Ceiling(missileGroup.missiles[0].missileDef.size), missileGroup.missiles.Count);
+                    else if(pop != null)
+                        Contact = String.Format("{0} Active Ping", Contact); //don't bother printing TCS for planets.
                     else
                     {
                         type = MessageEntry.MessageType.Error;
-                        Contact = "Error: Both ship and missile are null in UpdateFactionContact.";
+                        Contact = "Error: ship,missile, and pop are null in UpdateFactionContact.";
                     }
                 }
                 if (active == true && Active == false)
@@ -302,12 +366,24 @@ namespace Pulsar4X.Entities
 
             SystemContact SysCon = null;
 
-            if (ship == null)
-                SysCon = missileGroup.contact;
-            else if (missileGroup == null)
+            if (ship != null)
                 SysCon = ship.ShipsTaskGroup.Contact;
+            else if (missileGroup != null)
+                SysCon = missileGroup.contact;
+            else if (pop != null)
+                SysCon = pop.Contact;
+            else
+            {
+                type = MessageEntry.MessageType.Error;
+                Contact = "Error: ship,missile, and pop are null in UpdateFactionContact.";
+            }
 
-            MessageEntry NMsg = new MessageEntry(type, SysCon.Position.System, SysCon,
+            MessageEntry NMsg;
+
+            if (type == MessageEntry.MessageType.Error)
+                NMsg = new MessageEntry(type, null, null, GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Contact);
+            else
+                NMsg = new MessageEntry(type, SysCon.Position.System, SysCon,
                                                  GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
@@ -334,12 +410,18 @@ namespace Pulsar4X.Entities
         public Dictionary<OrdnanceGroupTN, FactionContact> DetectedMissileContacts { get; set; }
 
         /// <summary>
+        /// Populations can also be detected.
+        /// </summary>
+        public Dictionary<Population, FactionContact> DetectedPopContacts { get; set; }
+
+        /// <summary>
         /// Constructor for this new list.
         /// </summary>
         public DetectedContactsList()
         {
             DetectedContacts = new Dictionary<ShipTN, FactionContact>();
             DetectedMissileContacts = new Dictionary<OrdnanceGroupTN, FactionContact>();
+            DetectedPopContacts = new Dictionary<Population, FactionContact>();
         }
     }
 
