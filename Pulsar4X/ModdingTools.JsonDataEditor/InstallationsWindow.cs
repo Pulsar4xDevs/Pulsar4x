@@ -16,15 +16,6 @@ namespace ModdingTools.JsonDataEditor
         BindingList<DataHolder> AllInstallations { get; set; }
         InstallationSD CurrentInstallation { get; set; }
 
-        //InstallationSD SelectedInstallation
-        //{
-        //    get { return installationUC1.StaticData; }
-        //    set
-        //    {
-        //        CurrentInstallation = value; 
-        //        SetCurrentInstalation();
-        //    }
-        //}
         public InstallationsWindow()
         {
             InitializeComponent();
@@ -38,15 +29,12 @@ namespace ModdingTools.JsonDataEditor
         {
             CurrentInstallation = installationSD;
             installationUC1.StaticData = CurrentInstallation;
-            //DataHolder dh;
-            //if (!Data.InstallationData.TryGetDataHolder(CurrentInstallation.ID, out dh))
-            //{
-            //    dh = new DataHolder("", "", new Guid());
-            //}
-            DataHolder dh = Data.InstallationData.GetDataHolderOrNull(CurrentInstallation.ID);
+
+            DataHolder dh = Data.InstallationData.GetDataHolder(CurrentInstallation.ID, false);
             if (dh == null)
             {
-                dh = new DataHolder("", "", new Guid());
+                string file = Data.InstallationData.GetLoadedFiles()[0];
+                dh = new DataHolder("", file, new Guid());
             }
             genericDataUC1.Item = dh;
             genericDataUC1.Description = CurrentInstallation.Description;
