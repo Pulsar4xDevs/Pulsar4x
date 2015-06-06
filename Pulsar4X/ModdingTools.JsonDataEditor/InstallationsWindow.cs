@@ -82,7 +82,7 @@ namespace ModdingTools.JsonDataEditor
         /// </summary>
         /// <param name="guid">guid: current or new</param>
         /// <returns></returns>
-        private InstallationSD staticData(Guid guid)
+        private InstallationSD StaticData(Guid guid)
         {
             InstallationSD newSD = new InstallationSD
             {
@@ -102,14 +102,14 @@ namespace ModdingTools.JsonDataEditor
 
         private void button_saveNew_Click(object sender, EventArgs e)
         {
-            CurrentInstallation = staticData(Guid.NewGuid());
+            CurrentInstallation = StaticData(Guid.NewGuid());
             Data.InstallationData.Update(CurrentInstallation);
             SelectedInstallation = CurrentInstallation;
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
-            CurrentInstallation = staticData(CurrentInstallation.ID);
+            CurrentInstallation = StaticData(CurrentInstallation.ID);
             Data.InstallationData.Update(CurrentInstallation);
         }
     }

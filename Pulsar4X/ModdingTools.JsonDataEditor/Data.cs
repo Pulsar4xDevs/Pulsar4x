@@ -102,10 +102,23 @@ namespace ModdingTools.JsonDataEditor
             public DataHolderAndEvents(string type)
             {
                 _typeString = type;
-            } 
+            }
 
             /// <summary>
-            /// Gets a dataholder from a given guid
+            /// returns True if guid exsists and passes out the dataHolder;
+            /// see also GetDataHolder
+            /// </summary>
+            /// <param name="guid"></param>
+            /// <param name="dataHolder"></param>
+            /// <returns></returns>
+            public bool TryGetDataHolder(Guid guid, out DataHolder dataHolder)
+            {
+                bool found = _allDataHolders.TryGetValue(guid, out dataHolder);
+                return found;
+            }
+
+            /// <summary>
+            /// Gets a dataholder from a given guid, throws an exception if not found.
             /// </summary>
             /// <param name="guid"></param>
             /// <returns></returns>
