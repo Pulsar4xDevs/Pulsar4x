@@ -10,11 +10,12 @@ using Pulsar4X.ECSLib;
 
 namespace ModdingTools.JsonDataEditor
 {
-    static class Data
+    public class Data
     {
         private static bool _loading;
         public static DataHolderAndEvents<TechSD> TechData = new DataHolderAndEvents<TechSD>("Techs");
-
+        public static DataHolderAndEvents<InstallationSD> InstallationData = new DataHolderAndEvents<InstallationSD>("Installations");
+        public static DataHolderAndEvents<MineralSD> MineralData = new DataHolderAndEvents<MineralSD>("Minerals"); 
         //stolen from StaticDataManager
         private static JsonSerializer serializer = new JsonSerializer
         {
@@ -58,16 +59,28 @@ namespace ModdingTools.JsonDataEditor
             
             //Send message to all subscribers
             TechData.OnListChangeEvent(filePath);
+            InstallationData.OnListChangeEvent(filePath);
+            MineralData.OnListChangeEvent(filePath);
         }
 
         private static void LoadData(JDictionary<Guid, TechSD> dict, string filePath)
         {
             TechData.Load(dict, filePath);
         }
+        private static void LoadData(JDictionary<Guid, InstallationSD> dict, string filePath)
+        {
+            InstallationData.Load(dict, filePath);
+        }
+        private static void LoadData(List<MineralSD> list, string filePath)
+        {
+            MineralData.Load(list, filePath);
+            
+        }
 
         public static bool SaveData()
         {
-            return TechData.Save();
+            bool success = TechData.Save() && InstallationData.Save() && MineralData.Save();
+            return success;          
         }
 
         #endregion
@@ -89,24 +102,70 @@ namespace ModdingTools.JsonDataEditor
             public DataHolderAndEvents(string type)
             {
                 _typeString = type;
-            } 
-
-            public DataHolder GetDataHolder(Guid guid)
-            {
-                DataHolder dataHolder;
-                if (_allDataHolders.TryGetValue(guid, out dataHolder))
-                    return dataHolder;
-                throw new Exception("Guid not found");
             }
 
+            /// <summary>
+            /// returns True if guid exsists and passes out the dataHolder;
+            /// see also GetDataHolder
+            /// </summary>
+            /// <param name="guid"></param>
+            /// <param name="dataHolder"></param>
+            /// <returns></returns>
+            public bool TryGetDataHolder(Guid guid, out DataHolder dataHolder)
+            {
+                bool found = _allDataHolders.TryGetValue(guid, out dataHolder);
+                return found;
+            }
+
+            /// <summary>
+            /// Gets a dataholder from a given guid, throws an exception if not found.
+            /// </summary>
+            /// <param name="guid"></param>
+            /// <returns></returns>
+            public DataHolder GetDataHolder(Guid guid, bool throwException = true)
+            {
+                DataHolder dataHolder;
+                bool found = _allDataHolders.TryGetValue(guid, out dataHolder);
+                if(!found && throwException)    
+                    throw new Exception("Guid not found");
+                else
+                    return dataHolder;
+            }
+
+            /// <summary>
+            /// returns all dataholders
+            /// </summary>
+            /// <returns></returns>
             public IEnumerable<DataHolder> GetDataHolders()
             {
                 return _allDataHolders.Values.AsEnumerable();
+            }
+            /// <summary>
+            /// returns dataholders that match a list of given guid.
+            /// </summary>
+            /// <param name="guids">List of guid</param>
+            /// <returns></returns>
+            public IEnumerable<DataHolder> GetDataHolders(List<Guid> guids, bool throwException = true)
+            {
+                List<DataHolder> dataHolders = new List<DataHolder>();
+                foreach (Guid guid in guids)
+                {
+                    dataHolders.Add(GetDataHolder(guid, throwException));
+                }
+                return dataHolders.AsEnumerable();
             }
 
             public void Load(JDictionary<Guid, T> dict, string filePath)
             {
                 foreach (dynamic sd in dict.Values)
+                {
+                    _allSDs[sd.ID] = sd;
+                    _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
+                }
+            }
+            public void Load(List<T> list, string filePath)
+            {
+                foreach (dynamic sd in list)
                 {
                     _allSDs[sd.ID] = sd;
                     _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
@@ -215,7 +274,7 @@ namespace ModdingTools.JsonDataEditor
             }
         }
     }
-    
+
     public class DataHolder
     {
         public string Name { get; set; }

@@ -19,6 +19,8 @@ namespace Pulsar4X.ECSLib
 
         public Random RNG { get; private set; }
 
+        public int EconLastTickRun { get; set; }
+
         public StarSystem(string name, int seed)
         {
             SystemManager = new EntityManager();
@@ -26,6 +28,7 @@ namespace Pulsar4X.ECSLib
             NameDB = new NameDB(Entity.InvalidEntity, name);
             Seed = seed;
             RNG = new Random(seed);
+            EconLastTickRun = 0;
         }
     }
 }

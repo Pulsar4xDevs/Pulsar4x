@@ -8,6 +8,7 @@ namespace Pulsar4X.ECSLib
         public string Name;
         public string Description;
         public Guid ID;
+
         public JDictionary<BodyType, double> Abundance;
     }
 }

@@ -9,6 +9,7 @@ namespace Pulsar4X.ECSLib
         public string Name;
         public string Description;
         public Guid ID;
+
         public AbilityType Ability;
         public List<float> AbilityAmount;
         public List<float> CrewAmount;
@@ -24,6 +25,7 @@ namespace Pulsar4X.ECSLib
         public string Name;
         public string Description;
         public Guid ID;
+
         public List<Guid> ComponentAbilitySDs;
     }
 }

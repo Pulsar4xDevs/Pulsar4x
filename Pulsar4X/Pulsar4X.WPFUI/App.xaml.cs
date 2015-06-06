@@ -36,7 +36,6 @@ namespace Pulsar4X.WPFUI
 
         App()
         {
-
             if (string.IsNullOrEmpty(WPFUI.Properties.Settings.Default.ClientGuid))
             {
                 WPFUI.Properties.Settings.Default.ClientGuid = Guid.NewGuid().ToString();
