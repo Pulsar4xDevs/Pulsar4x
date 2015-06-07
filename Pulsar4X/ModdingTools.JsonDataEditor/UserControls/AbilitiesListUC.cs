@@ -14,6 +14,10 @@ namespace ModdingTools.JsonDataEditor
     public partial class AbilitiesListUC : UserControl
     {
         private Dictionary<AbilityType, int> _abilityAmounts = new Dictionary<AbilityType, int>();
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Dictionary<AbilityType,int> AbilityAmount
         {
             get { return _abilityAmounts; }

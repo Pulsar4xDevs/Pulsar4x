@@ -12,7 +12,7 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class GenericDataUC : UserControl
     {
-        private DataHolder _item { get; set; }
+        private DataHolder _item;
         
         /// <summary>
         /// consider handling this differently. maybe Dataholder
@@ -40,6 +40,9 @@ namespace ModdingTools.JsonDataEditor
             get { return textBox_Description.Text; }
         }
 
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DataHolder Item
         {
             get{return _item;}

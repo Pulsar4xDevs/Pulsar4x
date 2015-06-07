@@ -13,9 +13,12 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class MineralsCostsUC : UserControl
     {
-        private BindingList<DataHolder> _allMinerals { get; set; }
+        private BindingList<DataHolder> _allMinerals = new BindingList<DataHolder>();
         private Dictionary<DataHolder, int> _mineralsCosts = new Dictionary<DataHolder, int>();
 
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Dictionary<DataHolder, int> MineralCosts
         {
             get { return _mineralsCosts; }
@@ -30,7 +33,6 @@ namespace ModdingTools.JsonDataEditor
         {
             InitializeComponent();
             UpdateMineralList();
-            MineralCosts = new Dictionary<DataHolder, int>();
             
             Data.MineralData.ListChanged += UpdateMineralList;
             listBox_MineralsAll.DataSource = _allMinerals;

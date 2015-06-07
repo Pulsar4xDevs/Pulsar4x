@@ -52,6 +52,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComponentsWindow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ComponentsWindow.Designer.cs">
+      <DependentUpon>ComponentsWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data.cs" />
     <Compile Include="UserControls\AbilitiesListUC.cs">
       <SubType>UserControl</SubType>
@@ -109,6 +115,9 @@
     <Compile Include="UserControls\TechRequirementsUC.Designer.cs">
       <DependentUpon>TechRequirementsUC.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="ComponentsWindow.resx">
+      <DependentUpon>ComponentsWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UserControls\AbilitiesListUC.resx">
       <DependentUpon>AbilitiesListUC.cs</DependentUpon>
     </EmbeddedResource>
