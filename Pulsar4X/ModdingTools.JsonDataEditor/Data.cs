@@ -118,28 +118,18 @@ namespace ModdingTools.JsonDataEditor
             }
 
             /// <summary>
-            /// another way of doing this. 
-            /// </summary>
-            /// <param name="guid"></param>
-            /// <returns></returns>
-            public DataHolder GetDataHolderOrNull(Guid guid)
-            {
-                DataHolder dh = null;
-                _allDataHolders.TryGetValue(guid, out dh);
-                return dh;
-            }
-
-            /// <summary>
             /// Gets a dataholder from a given guid, throws an exception if not found.
             /// </summary>
             /// <param name="guid"></param>
             /// <returns></returns>
-            public DataHolder GetDataHolder(Guid guid)
+            public DataHolder GetDataHolder(Guid guid, bool throwException = true)
             {
                 DataHolder dataHolder;
-                if (_allDataHolders.TryGetValue(guid, out dataHolder))
+                bool found = _allDataHolders.TryGetValue(guid, out dataHolder);
+                if(!found && throwException)    
+                    throw new Exception("Guid not found");
+                else
                     return dataHolder;
-                throw new Exception("Guid not found");
             }
 
             /// <summary>
@@ -155,12 +145,12 @@ namespace ModdingTools.JsonDataEditor
             /// </summary>
             /// <param name="guids">List of guid</param>
             /// <returns></returns>
-            public IEnumerable<DataHolder> GetDataHolders(List<Guid> guids)
+            public IEnumerable<DataHolder> GetDataHolders(List<Guid> guids, bool throwException = true)
             {
                 List<DataHolder> dataHolders = new List<DataHolder>();
                 foreach (Guid guid in guids)
                 {
-                    dataHolders.Add(GetDataHolder(guid));
+                    dataHolders.Add(GetDataHolder(guid, throwException));
                 }
                 return dataHolders.AsEnumerable();
             }
