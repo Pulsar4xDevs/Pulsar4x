@@ -15,7 +15,9 @@ namespace ModdingTools.JsonDataEditor
         private static bool _loading;
         public static DataHolderAndEvents<TechSD> TechData = new DataHolderAndEvents<TechSD>("Techs");
         public static DataHolderAndEvents<InstallationSD> InstallationData = new DataHolderAndEvents<InstallationSD>("Installations");
-        public static DataHolderAndEvents<MineralSD> MineralData = new DataHolderAndEvents<MineralSD>("Minerals"); 
+        public static DataHolderAndEvents<MineralSD> MineralData = new DataHolderAndEvents<MineralSD>("Minerals");
+        public static DataHolderAndEvents<ComponentSD> ComponentData = new DataHolderAndEvents<ComponentSD>("Components"); 
+
         //stolen from StaticDataManager
         private static JsonSerializer serializer = new JsonSerializer
         {
@@ -75,6 +77,11 @@ namespace ModdingTools.JsonDataEditor
         {
             MineralData.Load(list, filePath);
             
+        }
+        private static void LoadData(List<ComponentSD> list, string filePath)
+        {
+            ComponentData.Load(list, filePath);
+
         }
 
         public static bool SaveData()

@@ -59,35 +59,6 @@ namespace ModdingTools.JsonDataEditor
             return dataHandlerDictionary;
         }
 
-        private void mainMenuButton_Click(object sender, EventArgs e)
-        {
-            Data.MainWindow.SetMode(WindowModes.LoadingWindow);
-        }
-
-        private void listBox_AllInstalations_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            DataHolder selectedItem = (DataHolder)listBox_AllInstalations.SelectedItem;
-            SetCurrentInstallation(Data.InstallationData.Get(selectedItem.Guid));
-        }
-
-        private void button_clearSelection_Click(object sender, EventArgs e)
-        {
-            InstallationSD newEmptySD = new InstallationSD 
-            {
-                ID = new Guid(),
-                Name = "",
-                Description = "",
-                PopulationRequired = 0,
-                CargoSize = 0,
-                BuildPoints = 0,
-                WealthCost = 0,
-                BaseAbilityAmounts = new JDictionary<AbilityType,int>(),
-                TechRequirements = new List<Guid>(),
-                ResourceCosts = new JDictionary<Guid,int>()
-            };
-            SetCurrentInstallation(newEmptySD);
-        }
-
         /// <summary>
         /// creates newSD
         /// </summary>
@@ -109,6 +80,35 @@ namespace ModdingTools.JsonDataEditor
                 ResourceCosts = mineralsCostsUC1.GetData
             };
             return newSD;
+        }
+
+        private void listBox_AllInstalations_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            DataHolder selectedItem = (DataHolder)listBox_AllInstalations.SelectedItem;
+            SetCurrentInstallation(Data.InstallationData.Get(selectedItem.Guid));
+        }
+
+        private void mainMenuButton_Click(object sender, EventArgs e)
+        {
+            Data.MainWindow.SetMode(WindowModes.LoadingWindow);
+        }
+
+        private void button_clearSelection_Click(object sender, EventArgs e)
+        {
+            InstallationSD newEmptySD = new InstallationSD 
+            {
+                ID = new Guid(),
+                Name = "",
+                Description = "",
+                PopulationRequired = 0,
+                CargoSize = 0,
+                BuildPoints = 0,
+                WealthCost = 0,
+                BaseAbilityAmounts = new JDictionary<AbilityType,int>(),
+                TechRequirements = new List<Guid>(),
+                ResourceCosts = new JDictionary<Guid,int>()
+            };
+            SetCurrentInstallation(newEmptySD);
         }
 
         private void button_saveNew_Click(object sender, EventArgs e)
