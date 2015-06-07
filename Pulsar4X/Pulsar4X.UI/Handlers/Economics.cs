@@ -8,6 +8,7 @@ using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
+using Pulsar4X.Helpers.GameMath;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -338,6 +339,16 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.SYAPauseTaskButton.Click += new EventHandler(SYAPauseTaskButton_Click);
             m_oSummaryPanel.SYALowerPriorityButton.Click += new EventHandler(SYALowerPriorityButton_Click);
             m_oSummaryPanel.SYARaisePriorityButton.Click += new EventHandler(SYARaisePriorityButton_Click);
+            #endregion
+
+            #region Terraforming Tab
+            m_oSummaryPanel.TerraformingSaveAtmButton.Click += new EventHandler(TerraformingSaveAtmButton_Click);
+
+            foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
+            {
+                m_oSummaryPanel.TerraformingGasComboBox.Items.Add(Gas.Value.Name);
+            }
+            m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = 0;
             #endregion
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
@@ -971,6 +982,46 @@ namespace Pulsar4X.UI.Handlers
             }
         }
         #endregion
+
+        #region Terraforming Tab event handlers
+        /// <summary>
+        /// confirm the terraforming orders from the terrafroming tab.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TerraformingSaveAtmButton_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// True = add gas, false = subtract gas.
+            /// </summary>
+            if (m_oSummaryPanel.TerraformingAddGasCheckBox.Checked == true)
+                CurrentPopulation._GasAddSubtract = true;
+            else
+                CurrentPopulation._GasAddSubtract = false;
+
+            float getAtm;
+            bool r1 = float.TryParse(m_oSummaryPanel.TerraformingMaxGasTextBox.Text, out getAtm);
+
+            if (r1 == true)
+            {
+                CurrentPopulation._GasAmt = getAtm;
+            }
+
+            if (m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex != -1)
+            {
+                int Count = 0;
+                foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
+                {
+                    if (Count == m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex)
+                    {
+                        CurrentPopulation._GasToAdd = Gas.Value;
+                        break;
+                    }
+                    Count++;
+                }
+            }
+        }
+        #endregion
         #endregion
 
         #region PublicMethods
@@ -1451,6 +1502,11 @@ namespace Pulsar4X.UI.Handlers
                 ClassesInOrbit = CIO;
                 DamagedShipList = DSL;
                 ShipsOfClassInOrbit = SCO;
+
+                /// <summary>
+                /// Terraforming Tab:
+                /// </summary>
+                BuildTerraformingTab();
             }
         }
 
@@ -1519,6 +1575,11 @@ namespace Pulsar4X.UI.Handlers
                 ClassesInOrbit = CIO;
                 DamagedShipList = DSL;
                 ShipsOfClassInOrbit = SCO;
+
+                /// <summary>
+                /// Terraforming Tab:
+                /// </summary>
+                BuildTerraformingTab();
             }
         }
 
@@ -4319,6 +4380,68 @@ namespace Pulsar4X.UI.Handlers
 
         #endregion
 
+        #region Terraforming Tab
+        /// <summary>
+        /// Build the terraforming tab based on the currently selected population.
+        /// </summary>
+        private void BuildTerraformingTab()
+        {
+            if (CurrentPopulation != null)
+            {
+                SystemBody CurrentPlanet = CurrentPopulation.Planet;
+                Atmosphere CurrentAtmosphere = CurrentPlanet.Atmosphere;
+                m_oSummaryPanel.TerraformingAtmosphereListBox.Items.Clear();
+                float TotalGas = CurrentAtmosphere.Pressure;
+                String Entry = "N/A";
+
+                float GHP = 0.0f;
+                float AGHP = 0.0f;
+
+                foreach (KeyValuePair<AtmosphericGas,float> pair in CurrentAtmosphere.Composition)
+                {
+                    if (pair.Key.GreenhouseEffect == 1)
+                    {
+                        GHP = GHP + pair.Value;
+                    }
+                    if (pair.Key.GreenhouseEffect == -1)
+                    {
+                        AGHP = AGHP + pair.Value;
+                    }
+
+                    //Nitrogen 79% 0.79 atm
+                    float partial = (pair.Value / TotalGas) * 100.0f;
+                    Entry = String.Format("{0} {1}% {2:N4} atm",pair.Key.Name,partial,pair.Value);
+                    m_oSummaryPanel.TerraformingAtmosphereListBox.Items.Add(Entry);
+                }
+                Entry = String.Format("Total Atmospheric Pressure: {0:N4}",TotalGas);
+                m_oSummaryPanel.TerraformingAtmosphereListBox.Items.Add(Entry);
+
+                Entry = String.Format("{0:N2}",CurrentPlanet.BaseTemperature);
+                m_oSummaryPanel.TerraformingBaseTempCelsiusTextBox.Text = Entry;
+
+                Entry = String.Format("{0:N2}", (CurrentPlanet.BaseTemperature + 273.0f));
+                m_oSummaryPanel.TerraformingBaseTempKelvinTextBox.Text = Entry;
+
+                Entry = String.Format("{0:N2}", CurrentAtmosphere.SurfaceTemperature);
+                m_oSummaryPanel.TerraformingSurfaceTempCelsiusTextBox.Text = Entry;
+
+                Entry = String.Format("{0:N2}", (CurrentAtmosphere.SurfaceTemperature + 273.0f));
+                m_oSummaryPanel.TerraformingSurfaceTempKelvinTextBox.Text = Entry;
+
+                Entry = String.Format("{0:N2}", GHP);
+                m_oSummaryPanel.TerraforminGreenhousePressureTextBox.Text = Entry;
+
+                Entry = String.Format("{0:N2}", AGHP);
+                m_oSummaryPanel.TerraformingAntiGHPressureTextBox.Text = Entry;
+
+                Entry = String.Format("{0:N2}", CurrentAtmosphere.GreenhouseFactor);
+                m_oSummaryPanel.TerraformingGreenhouseFactorTextBox.Text = Entry;
+
+                Entry = String.Format("{0:N2}", CurrentAtmosphere.Albedo);
+                m_oSummaryPanel.TerraformingPlanetaryAlbedoTextBox.Text = Entry;
+            }
+        }
+        #endregion
         #endregion
 
     }

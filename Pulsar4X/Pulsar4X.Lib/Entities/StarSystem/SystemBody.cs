@@ -197,6 +197,9 @@ namespace Pulsar4X.Entities
 
 #warning planet generation needs minerals, anomalies, and ruins generation.
             PlanetaryRuins = new Ruins();
+
+
+            Atmosphere = new Atmosphere(this);
         }
 
 

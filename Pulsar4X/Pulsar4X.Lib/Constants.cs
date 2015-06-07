@@ -523,7 +523,7 @@ namespace Pulsar4X
             public static int[] ThermalDeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
 
             /// <summary>
-            /// What sensor strength will a single DSTS add? This is about equal to a full sized thermal sensor array at each tech level.
+            /// What sensor strength will a single DSTS add? This is about equal to a full sized em sensor array at each tech level.
             /// </summary>
             public static int[]EMDeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
 

@@ -510,6 +510,21 @@ namespace Pulsar4X.Entities
             set { _SensorUpdateAck = value; }
         }
 
+
+        /// <summary>
+        /// True = Add gas, False = Subtract gas.
+        /// </summary>
+        public bool _GasAddSubtract { get; set; }
+        /// <summary>
+        /// How much Gas should be added or subtracted?
+        /// </summary>
+        public float _GasAmt { get; set; }
+
+        /// <summary>
+        /// What gas should be altered on this world by terraforming?
+        /// </summary>
+        public AtmosphericGas _GasToAdd { get; set; }
+
         #endregion
 
         /// <summary>
@@ -621,6 +636,13 @@ namespace Pulsar4X.Entities
             MissilesInFlight = new BindingList<OrdnanceGroupTN>();
 
             _SensorUpdateAck = 0;
+
+            /// <summary>
+            /// Terraforming Section:
+            /// </summary>
+            _GasAddSubtract = false;
+            _GasAmt = 0.0f;
+            _GasToAdd = null;
         }
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
