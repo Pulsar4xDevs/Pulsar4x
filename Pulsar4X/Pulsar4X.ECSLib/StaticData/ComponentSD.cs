@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         public List<Guid> TechRequiremets;
     }
 
-    [StaticDataAttribute(true, IDPropertyName = "ID")]
+    [StaticDataAttribute(false)]
     public struct ComponentSD
     {
         public string Name;

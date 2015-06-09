@@ -121,7 +121,7 @@ namespace Pulsar4X.Tests
             launchAbility.Ability = AbilityType.LaunchMissileSize;
             launchAbility.AbilityAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
             launchAbility.CrewAmount = new List<float>() { 3, 6, 9, 12, 15, 18, 21, 24, 27, 30};
-            launchAbility.ID = Guid.NewGuid();
+            //launchAbility.ID = Guid.NewGuid();
             launchAbility.Name = "Missile Launcher Size";
             launchAbility.Description = "Can fire a missile of this size or smaller";
             launchAbility.WeightAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
@@ -130,20 +130,20 @@ namespace Pulsar4X.Tests
             ComponentAbilitySD reloadAbility = new ComponentAbilitySD();
             reloadAbility.Name = "Missile Launcher Reload Rate";
             reloadAbility.Description = "Speed at which this launcher can reload from a magazine";
-            reloadAbility.ID = Guid.NewGuid();
+            //reloadAbility.ID = Guid.NewGuid();
             reloadAbility.Ability = AbilityType.ReloadRateFromMag;
             reloadAbility.AbilityAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             reloadAbility.CrewAmount = new List<float>() { };
 
             ComponentSD missileLauncher = new ComponentSD();
-            missileLauncher.ComponentAbilitySDs = new List<Guid>() { launchAbility.ID, reloadAbility.ID };
+            missileLauncher.ComponentAbilitySDs = new List<ComponentAbilitySD>() { launchAbility, reloadAbility};
             missileLauncher.Name = "MissileLauncher";
             missileLauncher.Description = "Can launch Missiles and be reloaded via a magazine";
             missileLauncher.ID = Guid.NewGuid();
 
-            StaticDataManager.ExportStaticData(launchAbility, "./launcherabilitytest.json");
-            StaticDataManager.ExportStaticData(reloadAbility, "./launcherabilitytest.json");
-            StaticDataManager.ExportStaticData(missileLauncher, "./launchertest.json");
+            //StaticDataManager.ExportStaticData(launchAbility, "./launcherabilitytest.json");
+            //StaticDataManager.ExportStaticData(reloadAbility, "./launcherabilitytest.json");
+            StaticDataManager.ExportStaticData(missileLauncher, "./Launchertest.json");
         }
 
         [Test]
