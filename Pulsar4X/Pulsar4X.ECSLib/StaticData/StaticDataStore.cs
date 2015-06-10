@@ -56,6 +56,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public JDictionary<Guid, ConstructableObjSD> ConstructableObjects = new JDictionary<Guid, ConstructableObjSD>();
 
+        /// <summary>
+        /// Dictionary which stores all Components.
+        /// </summary>
         public JDictionary<Guid, ComponentSD> Components = new JDictionary<Guid, ComponentSD>(); 
 
         ///< @todo add a whole bunch more static data.

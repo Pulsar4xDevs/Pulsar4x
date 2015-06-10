@@ -143,7 +143,9 @@ namespace Pulsar4X.Tests
 
             //StaticDataManager.ExportStaticData(launchAbility, "./launcherabilitytest.json");
             //StaticDataManager.ExportStaticData(reloadAbility, "./launcherabilitytest.json");
-            StaticDataManager.ExportStaticData(missileLauncher, "./Launchertest.json");
+            JDictionary<Guid, ComponentSD> components = new JDictionary<Guid, ComponentSD>();
+            components.Add(missileLauncher.ID, missileLauncher);
+            StaticDataManager.ExportStaticData(components, "./Componentstest.json");
         }
 
         [Test]

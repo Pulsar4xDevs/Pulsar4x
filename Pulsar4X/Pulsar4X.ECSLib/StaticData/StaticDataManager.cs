@@ -204,6 +204,8 @@ namespace Pulsar4X.ECSLib
         {
             var data = new DataExportContainer();
             data.Data = staticData;
+            dynamic sdType = staticData.GetType();
+            string strType = StaticDataStore.GetTypeString(sdType);
             data.Type = StaticDataStore.GetTypeString(staticData.GetType());
 
             if (String.IsNullOrEmpty(data.Type) == false)

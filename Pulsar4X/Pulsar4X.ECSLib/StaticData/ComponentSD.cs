@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    [StaticDataAttribute(true, IDPropertyName = "ID")]
+    [StaticDataAttribute(false)]
     public struct ComponentAbilitySD
     {
         public string Name;
@@ -18,7 +18,8 @@ namespace Pulsar4X.ECSLib
         public List<Guid> TechRequiremets;
     }
 
-    [StaticDataAttribute(false)]
+   
+    [StaticDataAttribute(true, IDPropertyName = "ID")]
     public struct ComponentSD
     {
         public string Name;
