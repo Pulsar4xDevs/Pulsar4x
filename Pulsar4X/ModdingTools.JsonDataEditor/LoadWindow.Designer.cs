@@ -35,6 +35,7 @@
             this.techButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.installationsButton = new System.Windows.Forms.Button();
+            this.ComponentButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // loadFileButton
@@ -99,10 +100,21 @@
             this.installationsButton.UseVisualStyleBackColor = true;
             this.installationsButton.Click += new System.EventHandler(this.installationsButton_Click);
             // 
+            // ComponentButton
+            // 
+            this.ComponentButton.Location = new System.Drawing.Point(3, 242);
+            this.ComponentButton.Name = "ComponentButton";
+            this.ComponentButton.Size = new System.Drawing.Size(97, 23);
+            this.ComponentButton.TabIndex = 6;
+            this.ComponentButton.Text = "Components";
+            this.ComponentButton.UseVisualStyleBackColor = true;
+            this.ComponentButton.Click += new System.EventHandler(this.ComponentButton_Click);
+            // 
             // LoadWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.ComponentButton);
             this.Controls.Add(this.installationsButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.techButton);
@@ -125,5 +137,6 @@
         private System.Windows.Forms.Button techButton;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button installationsButton;
+        private System.Windows.Forms.Button ComponentButton;
     }
 }

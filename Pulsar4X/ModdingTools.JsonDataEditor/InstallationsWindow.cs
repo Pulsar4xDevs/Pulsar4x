@@ -34,7 +34,7 @@ namespace ModdingTools.JsonDataEditor
             if (dh == null)
             {
                 string file = Data.InstallationData.GetLoadedFiles()[0];
-                dh = new DataHolder("", file, new Guid());
+                dh = new DataHolder(installationSD, file);
             }
             genericDataUC1.Item = dh;
             genericDataUC1.Description = CurrentInstallation.Description;

@@ -78,10 +78,9 @@ namespace ModdingTools.JsonDataEditor
             MineralData.Load(list, filePath);
             
         }
-        private static void LoadData(List<ComponentSD> list, string filePath)
+        private static void LoadData(JDictionary<Guid, ComponentSD> list, string filePath)
         {
             ComponentData.Load(list, filePath);
-
         }
 
         public static bool SaveData()
@@ -128,6 +127,7 @@ namespace ModdingTools.JsonDataEditor
             /// Gets a dataholder from a given guid, throws an exception if not found.
             /// </summary>
             /// <param name="guid"></param>
+            /// <param name="throwException">on guid not found will throw exception if true, if false will return null</param>
             /// <returns></returns>
             public DataHolder GetDataHolder(Guid guid, bool throwException = true)
             {
@@ -167,7 +167,7 @@ namespace ModdingTools.JsonDataEditor
                 foreach (dynamic sd in dict.Values)
                 {
                     _allSDs[sd.ID] = sd;
-                    _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
+                    _allDataHolders[sd.ID] = new DataHolder(sd, filePath);
                 }
             }
             public void Load(List<T> list, string filePath)
@@ -175,7 +175,7 @@ namespace ModdingTools.JsonDataEditor
                 foreach (dynamic sd in list)
                 {
                     _allSDs[sd.ID] = sd;
-                    _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
+                    _allDataHolders[sd.ID] = new DataHolder(sd, filePath);
                 }
             }
 
@@ -234,7 +234,7 @@ namespace ModdingTools.JsonDataEditor
             private void Create(dynamic sd)
             {
                 _allSDs[sd.ID] = sd;
-                _allDataHolders[sd.ID] = new DataHolder(sd.Name, _selectedFile, sd.ID);
+                _allDataHolders[sd.ID] = new DataHolder(sd, _selectedFile); //new DataHolder(sd.Name, _selectedFile, sd.ID);
             }
 
             public void Remove(Guid guid)
@@ -284,17 +284,32 @@ namespace ModdingTools.JsonDataEditor
 
     public class DataHolder
     {
-        public string Name { get; set; }
+        public dynamic StaticData { get; private set; }
         public string File { get; private set; }
-        public Guid Guid { get; private set; }
 
-        public DataHolder(string name, string file, Guid guid)
-        {
-            Name = name;
-            File = file;
-            Guid = guid;
+
+        public string Name { get { return StaticData.Name; } }       
+        public Guid Guid { get { return StaticData.ID; } }
+        public string Description { get { return StaticData.Description; } }
+        
+
+
+        public DataHolder(dynamic staticData, string file)
+        {   
+            File = file;   
+            StaticData = staticData;
         }
 
+        public DataHolder(ComponentAbilitySD staticData)
+        {
+            File = null;
+            StaticData = staticData;
+        }
+
+        /// <summary>
+        /// this is what will get displayed in listboxes etc. 
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return Name;

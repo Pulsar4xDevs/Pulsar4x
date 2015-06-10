@@ -42,5 +42,10 @@ namespace ModdingTools.JsonDataEditor
         {
             Data.MainWindow.SetMode(WindowModes.InstallationsWindow);
         }
+
+        private void ComponentButton_Click(object sender, EventArgs e)
+        {
+            Data.MainWindow.SetMode(WindowModes.ComponentsWindow);
+        }
     }
 }

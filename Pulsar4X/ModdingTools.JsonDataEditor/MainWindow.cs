@@ -14,13 +14,15 @@ namespace ModdingTools.JsonDataEditor
     {
         LoadingWindow,
         TechWindow,
-        InstallationsWindow
+        InstallationsWindow,
+        ComponentsWindow
     }
     public partial class MainWindow : Form
     {
         private LoadWindow _loadWindow;
         private TechnologiesWindow _technologiesWindow;
         private InstallationsWindow _installationsWindow;
+        private ComponentsWindow _componentsWindow;
 
         private const int BorderWidth = 20;
         private const int BorderHeight = 40;
@@ -57,6 +59,13 @@ namespace ModdingTools.JsonDataEditor
                     Width = _installationsWindow.Width + BorderWidth;
                     Height = _installationsWindow.Height + BorderHeight;
                     Controls.Add(_installationsWindow);
+                    break;
+                case WindowModes.ComponentsWindow:
+                    if (_componentsWindow == null)
+                        _componentsWindow = new ComponentsWindow();
+                    Width = _componentsWindow.Width + BorderWidth;
+                    Height = _componentsWindow.Height + BorderHeight;
+                    Controls.Add(_componentsWindow);
                     break;
             }
         }

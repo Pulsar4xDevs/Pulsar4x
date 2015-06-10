@@ -15,14 +15,18 @@ namespace ModdingTools.JsonDataEditor
     {
         BindingList<DataHolder> AllComponents { get; set; }
         ComponentSD CurrentComponent { get; set; }
+ 
+        private BindingList<DataHolder> _selectedComponentAbilites = new BindingList<DataHolder>();
 
         public ComponentsWindow()
         {
             InitializeComponent();
-            //UpdateInstallationlist();
-            //Data.InstallationData.ListChanged += UpdateInstallationlist;
+            UpdateComponentslist();
+            Data.InstallationData.ListChanged += UpdateComponentslist;
             listBox_allComponents.DataSource = AllComponents;
             CurrentComponent = new ComponentSD();
+
+            listBox_Abilities.DataSource = _selectedComponentAbilites;
         }
 
 
@@ -30,17 +34,36 @@ namespace ModdingTools.JsonDataEditor
         {
             CurrentComponent = componentSD;
             
-            DataHolder dh = Data.InstallationData.GetDataHolder(CurrentComponent.ID, false);
+            DataHolder dh = Data.ComponentData.GetDataHolder(CurrentComponent.ID, false);
             if (dh == null)
             {
-                string file = Data.InstallationData.GetLoadedFiles()[0];
-                dh = new DataHolder("", file, new Guid());
+                string file = Data.ComponentData.GetLoadedFiles()[0];
+                dh = new DataHolder(componentSD, file);
             }
             genericDataUC1.Item = dh;
             genericDataUC1.Description = CurrentComponent.Description;
-   
+            _selectedComponentAbilites.Clear();
+            foreach (var abilitySD in CurrentComponent.ComponentAbilitySDs)
+            {
+                _selectedComponentAbilites.Add(new DataHolder(abilitySD));
+            }
+            
         }
 
+        private void SetCurrentAbility(ComponentAbilitySD componentAbility)
+        {
+            //dataGridView_Abilitys.DataSource = componentAbility;
+            dataGridView_Abilitys.Columns.Add("","");
+            dataGridView_Abilitys.Rows.Add(componentAbility.Name);
+            dataGridView_Abilitys.Rows.Add(componentAbility.Description);
+            dataGridView_Abilitys.Rows.Add(componentAbility.Ability);
+            dataGridView_Abilitys.Rows.Add(componentAbility.AbilityAmount);
+        }
+
+        private void UpdateComponentslist()
+        {
+            AllComponents = new BindingList<DataHolder>(Data.ComponentData.GetDataHolders().ToList());
+        }
 
 
 
@@ -49,7 +72,7 @@ namespace ModdingTools.JsonDataEditor
         /// </summary>
         /// <param name="guid">guid: current or new</param>
         /// <returns></returns>
-        private ComponentSD staticData(Guid guid)
+        private ComponentSD StaticData(Guid guid)
         {
             ComponentSD newSD = new ComponentSD
             {
@@ -61,6 +84,16 @@ namespace ModdingTools.JsonDataEditor
             return newSD;
         }
 
+        private ComponentAbilitySD AbilityStaticData()
+        {
+            return new ComponentAbilitySD();
+        }
+
+        private void listBox_AllComponents_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            DataHolder selectedItem = (DataHolder)listBox_allComponents.SelectedItem;
+            SetCurrentComponent(Data.ComponentData.Get(selectedItem.Guid));
+        }
 
         private void button_mainMenu_Click(object sender, EventArgs e)
         {
@@ -81,15 +114,22 @@ namespace ModdingTools.JsonDataEditor
 
         private void button_saveNew_Click(object sender, EventArgs e)
         {
-            SetCurrentComponent(staticData(Guid.NewGuid()));
+            SetCurrentComponent(StaticData(Guid.NewGuid()));
             Data.InstallationData.Update(CurrentComponent);
 
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
-            CurrentComponent = staticData(CurrentComponent.ID);
+            CurrentComponent = StaticData(CurrentComponent.ID);
             Data.InstallationData.Update(CurrentComponent);
+        }
+
+        private void listBox_Abilities_DoubleClick(object sender, EventArgs e)
+        {
+            DataHolder selectedItem = (DataHolder)listBox_Abilities.SelectedItem;
+            ComponentAbilitySD selectedSD = selectedItem.StaticData;
+            SetCurrentAbility(selectedSD);
         }
     }
 }
