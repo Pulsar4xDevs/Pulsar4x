@@ -162,6 +162,17 @@ namespace ModdingTools.JsonDataEditor
                 return dataHolders.AsEnumerable();
             }
 
+            
+            public IEnumerable<Guid> GetGuids(List<DataHolder> dataHolders)
+            {
+                List<Guid> guids = new List<Guid>();
+                foreach (DataHolder dataHolder in dataHolders)
+                {
+                    guids.Add(dataHolder.Guid);
+                }
+                return guids;
+            }
+
             public void Load(JDictionary<Guid, T> dict, string filePath)
             {
                 foreach (dynamic sd in dict.Values)

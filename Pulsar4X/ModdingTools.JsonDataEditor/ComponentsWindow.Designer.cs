@@ -36,8 +36,7 @@
             this.button_saveNew = new System.Windows.Forms.Button();
             this.listBox_allComponents = new System.Windows.Forms.ListBox();
             this.listBox_Abilities = new System.Windows.Forms.ListBox();
-            this.listBox_AbilityProperties = new System.Windows.Forms.ListBox();
-            this.panel_AbiltyProperty = new System.Windows.Forms.Panel();
+            this.propertyGrid_PropertyEditor = new System.Windows.Forms.PropertyGrid();
             this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -53,8 +52,7 @@
             this.tableLayoutPanel1.Controls.Add(this.listBox_allComponents, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.genericDataUC1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.listBox_Abilities, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.listBox_AbilityProperties, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.panel_AbiltyProperty, 2, 1);
+            this.tableLayoutPanel1.Controls.Add(this.propertyGrid_PropertyEditor, 1, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -147,23 +145,15 @@
             this.listBox_Abilities.TabIndex = 4;
             this.listBox_Abilities.DoubleClick += new System.EventHandler(this.listBox_Abilities_DoubleClick);
             // 
-            // listBox_AbilityProperties
+            // propertyGrid_PropertyEditor
             // 
-            this.listBox_AbilityProperties.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listBox_AbilityProperties.FormattingEnabled = true;
-            this.listBox_AbilityProperties.Location = new System.Drawing.Point(249, 155);
-            this.listBox_AbilityProperties.Name = "listBox_AbilityProperties";
-            this.listBox_AbilityProperties.Size = new System.Drawing.Size(234, 283);
-            this.listBox_AbilityProperties.TabIndex = 5;
-            this.listBox_AbilityProperties.SelectedIndexChanged += new System.EventHandler(this.listBox_AbilityProperties_SelectedIndexChanged);
-            // 
-            // panel_AbiltyProperty
-            // 
-            this.panel_AbiltyProperty.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_AbiltyProperty.Location = new System.Drawing.Point(489, 155);
-            this.panel_AbiltyProperty.Name = "panel_AbiltyProperty";
-            this.panel_AbiltyProperty.Size = new System.Drawing.Size(235, 283);
-            this.panel_AbiltyProperty.TabIndex = 6;
+            this.tableLayoutPanel1.SetColumnSpan(this.propertyGrid_PropertyEditor, 2);
+            this.propertyGrid_PropertyEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGrid_PropertyEditor.Location = new System.Drawing.Point(249, 155);
+            this.propertyGrid_PropertyEditor.Name = "propertyGrid_PropertyEditor";
+            this.tableLayoutPanel1.SetRowSpan(this.propertyGrid_PropertyEditor, 2);
+            this.propertyGrid_PropertyEditor.Size = new System.Drawing.Size(475, 350);
+            this.propertyGrid_PropertyEditor.TabIndex = 7;
             // 
             // genericDataUC1
             // 
@@ -198,7 +188,6 @@
         private System.Windows.Forms.Button button_mainMenu;
         private System.Windows.Forms.Button button_saveNew;
         private System.Windows.Forms.ListBox listBox_Abilities;
-        private System.Windows.Forms.ListBox listBox_AbilityProperties;
-        private System.Windows.Forms.Panel panel_AbiltyProperty;
+        private System.Windows.Forms.PropertyGrid propertyGrid_PropertyEditor;
     }
 }
