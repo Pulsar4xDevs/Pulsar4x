@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media.Animation;
 
 namespace ModdingTools.JsonDataEditor
 {
@@ -24,11 +25,14 @@ namespace ModdingTools.JsonDataEditor
             set { listBox_requredTechs.DataSource = value; }
         }
 
+        public bool AllowDuplicates { get; set; }
+
         public TechRequirementsUC()
         {
             InitializeComponent();
-            UpdateTechlist();          
-                 
+            UpdateTechlist();
+
+            AllowDuplicates = false;
             Data.TechData.ListChanged += UpdateTechlist;
             listBox_allTechs.DataSource = _allTechs;
         }
@@ -59,8 +63,16 @@ namespace ModdingTools.JsonDataEditor
         private void listBox_allTechs_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             object selectedItem = listBox_allTechs.SelectedItem;            
-            if (selectedItem != null && !listBox_requredTechs.Items.Contains(selectedItem))
-                listBox_requredTechs.Items.Add(selectedItem);
+            if (selectedItem != null)
+                if (!AllowDuplicates && listBox_requredTechs.Items.Contains(selectedItem))
+                {
+                    //do nothing.
+                }
+                else
+                {
+                    listBox_requredTechs.Items.Add(selectedItem);
+                }
+           
         }
     }
 }

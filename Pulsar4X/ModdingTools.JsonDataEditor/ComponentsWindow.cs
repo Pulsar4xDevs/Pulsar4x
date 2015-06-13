@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
+using System.Drawing.Design;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 using Pulsar4X.ECSLib;
 
 namespace ModdingTools.JsonDataEditor
@@ -179,7 +181,7 @@ namespace ModdingTools.JsonDataEditor
             [DisplayName("Tech Requrements")]
             [Description("This is the Required Techs for the selected Levels")]
             [Category("Tech Requrements")]
-            [Editor(typeof(List<DataHolder>), typeof(List<DataHolder>))]
+            [Editor(typeof(TechListEditor), typeof(UITypeEditor))]
             public List<DataHolder> TechReqs
             {
                 get { return Data.TechData.GetDataHolders(_abilitySD.TechRequiremets).ToList(); }
@@ -187,73 +189,56 @@ namespace ModdingTools.JsonDataEditor
             }
         }
 
-        //private void SetCurrentAbilityProperty(AbilityPropertiesData propety)
-        //{
-        //    switch (propety.Displayname)
-        //    {
-        //        case "Name":
-        //        case "Description":
-        //        {
-        //            currentAbilityString((string)propety.ValueObject);
-        //            break;
-        //        }
-        //        case "Ability":
-        //        case"Affects Ability":
-        //        {
-        //            currentAbilityAbilityItem((AbilityType)propety.ValueObject);
-        //            break;
-        //        }
-        //        case "Ability Amount":
-        //        case "CrewAmount":
-        //        case "SizeAmount":
-        //        case "Affected Amount":
-        //        {
-        //            currentAbilitysListItems((List<float>)propety.ValueObject);
-        //            break;
-        //        }
+        
+        class TechListEditor : UITypeEditor
+        {
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
+            {
+                return UITypeEditorEditStyle.Modal;
+            }
+            public override object EditValue(ITypeDescriptorContext context, System.IServiceProvider provider, object value)
+            {
+                IWindowsFormsEditorService svc = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
+                List<DataHolder> dataHolders = value as List<DataHolder>;
+                if (svc != null && dataHolders != null)
+                {            
+                    using (RequredTechsForm form = new RequredTechsForm())
+                    {
+                        form.ValueList = dataHolders;
+                        if (svc.ShowDialog(form) == DialogResult.OK)
+                        {
+                            //foo.Guid = form.Value; // update object
+                        }
+                    }
+                }
+                return value; // can also replace the wrapper object here
+            }
+        }
 
+        class RequredTechsForm : Form
+        {
+            private TechRequirementsUC techucUc;
+            private Button okButton;
+            public RequredTechsForm()
+            {
+                techucUc = new TechRequirementsUC();
+                techucUc.AllowDuplicates = true;
+                Controls.Add(techucUc);
+                
+                okButton = new Button();
+                okButton.Text = "OK";
+                okButton.Dock = DockStyle.Bottom;
+                okButton.DialogResult = DialogResult.OK;
+                Controls.Add(okButton);
+                techucUc.Dock = DockStyle.Fill;
+            }
+            public List<DataHolder> ValueList
+            {
+                get { return techucUc.RequredTechs; }
+                set { techucUc.RequredTechs = value; }
+            }
+        }
 
-        //    }
-        //}
-
-
-        //private void currentAbilityString(string stringitem)
-        //{
-        //    panel_AbiltyProperty.Controls.Clear();
-            
-        //    TextBox stringentry = new TextBox();
-        //    panel_AbiltyProperty.Controls.Add(stringentry);
-        //    stringentry.Text = stringitem;
-        //    stringentry.Anchor = (AnchorStyles.Left | AnchorStyles.Right); //wtf is this syntax, I've not seen it before.
-        //}
-
-        //private void currentAbilityAbilityItem(AbilityType abiltyitem)
-        //{
-        //    panel_AbiltyProperty.Controls.Clear();
-        //    ComboBox abilitysComboBox = new ComboBox();
-        //    BindingList<AbilityType> abilitys = new BindingList<AbilityType>(Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>().ToList());          
-        //    abilitysComboBox.DataSource = abilitys;
-        //    panel_AbiltyProperty.Controls.Add(abilitysComboBox);
-        //    abilitysComboBox.SelectedIndex = abilitys.IndexOf(abiltyitem);
-        //    abilitysComboBox.Anchor = (AnchorStyles.Left | AnchorStyles.Right);
-        //}
-
-        //private void currentAbilitysListItems(List<float> listitem)
-        //{
-        //    panel_AbiltyProperty.Controls.Clear();
-        //    ListBox abilityListBox = new ListBox();
-        //    BindingList<float> floatitems = new BindingList<float>(listitem);
-        //    abilityListBox.DataSource = floatitems;
-        //    panel_AbiltyProperty.Controls.Add(abilityListBox);
-
-        //    abilityListBox.Dock = DockStyle.Fill;
-            
-        //}
-
-        //private void currentAbilityTechItems(List<Guid> techitems)
-        //{
-
-        //}
 
         private DataGridViewCell[] dataGridViewCells_FromList(List<float> list)
         {
