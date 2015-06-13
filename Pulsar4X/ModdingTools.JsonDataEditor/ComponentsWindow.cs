@@ -53,11 +53,114 @@ namespace ModdingTools.JsonDataEditor
         private void SetCurrentAbility(ComponentAbilitySD componentAbility)
         {
             //dataGridView_Abilitys.DataSource = componentAbility;
-            dataGridView_Abilitys.Columns.Add("","");
-            dataGridView_Abilitys.Rows.Add(componentAbility.Name);
-            dataGridView_Abilitys.Rows.Add(componentAbility.Description);
-            dataGridView_Abilitys.Rows.Add(componentAbility.Ability);
-            dataGridView_Abilitys.Rows.Add(componentAbility.AbilityAmount);
+            List<AbilityPropertiesData> abilityProperties = new List<AbilityPropertiesData>();
+            abilityProperties.Add(new AbilityPropertiesData("Name", componentAbility.Name));
+            abilityProperties.Add(new AbilityPropertiesData("Ability", componentAbility.Ability));
+            abilityProperties.Add(new AbilityPropertiesData("Ability Amount", componentAbility.AbilityAmount));
+            abilityProperties.Add(new AbilityPropertiesData("Description", componentAbility.Description));
+            abilityProperties.Add(new AbilityPropertiesData("CrewAmount", componentAbility.CrewAmount));
+            abilityProperties.Add(new AbilityPropertiesData("SizeAmount", componentAbility.WeightAmount));
+            abilityProperties.Add(new AbilityPropertiesData("Affects Ability", componentAbility.AffectsAbility));
+            abilityProperties.Add(new AbilityPropertiesData("Affected Amount", componentAbility.AffectedAmount));
+            abilityProperties.Add(new AbilityPropertiesData("Tech Requrements", componentAbility.TechRequiremets));
+            listBox_AbilityProperties.DataSource = abilityProperties;
+        }
+
+        private class AbilityPropertiesData
+        {
+            public string Displayname { get; set; }
+            public object ValueObject { get; set; }
+
+            internal AbilityPropertiesData(string name, object item)
+            {
+                Displayname = name;
+                ValueObject = item;
+            }
+
+            public override string ToString()
+            {
+                return Displayname;
+            }
+        }
+
+        private void SetCurrentAbilityProperty(AbilityPropertiesData propety)
+        {
+            switch (propety.Displayname)
+            {
+                case "Name":
+                case "Description":
+                {
+                    currentAbilityString((string)propety.ValueObject);
+                    break;
+                }
+                case "Ability":
+                case"Affects Ability":
+                {
+                    currentAbilityAbilityItem((AbilityType)propety.ValueObject);
+                    break;
+                }
+                case "Ability Amount":
+                case "CrewAmount":
+                case "SizeAmount":
+                case "Affected Amount":
+                {
+                    currentAbilitysListItems((List<float>)propety.ValueObject);
+                    break;
+                }
+
+
+            }
+        }
+
+
+        private void currentAbilityString(string stringitem)
+        {
+            panel_AbiltyProperty.Controls.Clear();
+            
+            TextBox stringentry = new TextBox();
+            panel_AbiltyProperty.Controls.Add(stringentry);
+            stringentry.Text = stringitem;
+            stringentry.Anchor = (AnchorStyles.Left | AnchorStyles.Right); //wtf is this syntax, I've not seen it before.
+        }
+
+        private void currentAbilityAbilityItem(AbilityType abiltyitem)
+        {
+            panel_AbiltyProperty.Controls.Clear();
+            ComboBox abilitysComboBox = new ComboBox();
+            BindingList<AbilityType> abilitys = new BindingList<AbilityType>(Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>().ToList());          
+            abilitysComboBox.DataSource = abilitys;
+            panel_AbiltyProperty.Controls.Add(abilitysComboBox);
+            abilitysComboBox.SelectedIndex = abilitys.IndexOf(abiltyitem);
+            abilitysComboBox.Anchor = (AnchorStyles.Left | AnchorStyles.Right);
+        }
+
+        private void currentAbilitysListItems(List<float> listitem)
+        {
+            panel_AbiltyProperty.Controls.Clear();
+            ListBox abilityListBox = new ListBox();
+            BindingList<float> floatitems = new BindingList<float>(listitem);
+            abilityListBox.DataSource = floatitems;
+            panel_AbiltyProperty.Controls.Add(abilityListBox);
+
+            abilityListBox.Dock = DockStyle.Fill;
+            
+        }
+
+        private void currentAbilityTechItems(List<Guid> techitems)
+        {
+
+        }
+
+        private DataGridViewCell[] dataGridViewCells_FromList(List<float> list)
+        {
+            List<DataGridViewCell> cellList = new List<DataGridViewCell>();
+            foreach (float ability in list)
+            {
+                DataGridViewCell cell = new DataGridViewTextBoxCell();
+                cell.Value = ability.ToString();
+                cellList.Add(cell);
+            }
+            return cellList.ToArray();
         }
 
         private void UpdateComponentslist()
@@ -130,6 +233,11 @@ namespace ModdingTools.JsonDataEditor
             DataHolder selectedItem = (DataHolder)listBox_Abilities.SelectedItem;
             ComponentAbilitySD selectedSD = selectedItem.StaticData;
             SetCurrentAbility(selectedSD);
+        }
+
+        private void listBox_AbilityProperties_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SetCurrentAbilityProperty((AbilityPropertiesData)listBox_AbilityProperties.SelectedItem);
         }
     }
 }

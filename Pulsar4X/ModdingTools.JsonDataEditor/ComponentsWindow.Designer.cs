@@ -28,9 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.button_clear = new System.Windows.Forms.Button();
@@ -38,13 +35,12 @@
             this.button_mainMenu = new System.Windows.Forms.Button();
             this.button_saveNew = new System.Windows.Forms.Button();
             this.listBox_allComponents = new System.Windows.Forms.ListBox();
-            this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
-            this.dataGridView_Abilitys = new System.Windows.Forms.DataGridView();
             this.listBox_Abilities = new System.Windows.Forms.ListBox();
-            this.listBox2 = new System.Windows.Forms.ListBox();
+            this.listBox_AbilityProperties = new System.Windows.Forms.ListBox();
+            this.panel_AbiltyProperty = new System.Windows.Forms.Panel();
+            this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Abilitys)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -56,9 +52,9 @@
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.listBox_allComponents, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.genericDataUC1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.dataGridView_Abilitys, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.listBox_Abilities, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.listBox2, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.listBox_AbilityProperties, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.panel_AbiltyProperty, 2, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -141,50 +137,6 @@
             this.listBox_allComponents.TabIndex = 0;
             this.listBox_allComponents.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_AllComponents_MouseDoubleClick);
             // 
-            // genericDataUC1
-            // 
-            this.genericDataUC1.Description = "";
-            this.genericDataUC1.Location = new System.Drawing.Point(3, 3);
-            this.genericDataUC1.MinimumSize = new System.Drawing.Size(240, 0);
-            this.genericDataUC1.Name = "genericDataUC1";
-            this.genericDataUC1.Size = new System.Drawing.Size(240, 146);
-            this.genericDataUC1.TabIndex = 2;
-            // 
-            // dataGridView_Abilitys
-            // 
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView_Abilitys.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.dataGridView_Abilitys.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.tableLayoutPanel1.SetColumnSpan(this.dataGridView_Abilitys, 2);
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView_Abilitys.DefaultCellStyle = dataGridViewCellStyle2;
-            this.dataGridView_Abilitys.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView_Abilitys.Location = new System.Drawing.Point(249, 155);
-            this.dataGridView_Abilitys.Name = "dataGridView_Abilitys";
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView_Abilitys.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            this.tableLayoutPanel1.SetRowSpan(this.dataGridView_Abilitys, 2);
-            this.dataGridView_Abilitys.Size = new System.Drawing.Size(475, 350);
-            this.dataGridView_Abilitys.TabIndex = 3;
-            // 
             // listBox_Abilities
             // 
             this.listBox_Abilities.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -195,13 +147,32 @@
             this.listBox_Abilities.TabIndex = 4;
             this.listBox_Abilities.DoubleClick += new System.EventHandler(this.listBox_Abilities_DoubleClick);
             // 
-            // listBox2
+            // listBox_AbilityProperties
             // 
-            this.listBox2.FormattingEnabled = true;
-            this.listBox2.Location = new System.Drawing.Point(489, 3);
-            this.listBox2.Name = "listBox2";
-            this.listBox2.Size = new System.Drawing.Size(120, 95);
-            this.listBox2.TabIndex = 5;
+            this.listBox_AbilityProperties.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listBox_AbilityProperties.FormattingEnabled = true;
+            this.listBox_AbilityProperties.Location = new System.Drawing.Point(249, 155);
+            this.listBox_AbilityProperties.Name = "listBox_AbilityProperties";
+            this.listBox_AbilityProperties.Size = new System.Drawing.Size(234, 283);
+            this.listBox_AbilityProperties.TabIndex = 5;
+            this.listBox_AbilityProperties.SelectedIndexChanged += new System.EventHandler(this.listBox_AbilityProperties_SelectedIndexChanged);
+            // 
+            // panel_AbiltyProperty
+            // 
+            this.panel_AbiltyProperty.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel_AbiltyProperty.Location = new System.Drawing.Point(489, 155);
+            this.panel_AbiltyProperty.Name = "panel_AbiltyProperty";
+            this.panel_AbiltyProperty.Size = new System.Drawing.Size(235, 283);
+            this.panel_AbiltyProperty.TabIndex = 6;
+            // 
+            // genericDataUC1
+            // 
+            this.genericDataUC1.Description = "";
+            this.genericDataUC1.Location = new System.Drawing.Point(3, 3);
+            this.genericDataUC1.MinimumSize = new System.Drawing.Size(240, 0);
+            this.genericDataUC1.Name = "genericDataUC1";
+            this.genericDataUC1.Size = new System.Drawing.Size(240, 146);
+            this.genericDataUC1.TabIndex = 2;
             // 
             // ComponentsWindow
             // 
@@ -212,7 +183,6 @@
             this.Size = new System.Drawing.Size(727, 508);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Abilitys)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -227,8 +197,8 @@
         private System.Windows.Forms.Button button_saveUpdate;
         private System.Windows.Forms.Button button_mainMenu;
         private System.Windows.Forms.Button button_saveNew;
-        private System.Windows.Forms.DataGridView dataGridView_Abilitys;
         private System.Windows.Forms.ListBox listBox_Abilities;
-        private System.Windows.Forms.ListBox listBox2;
+        private System.Windows.Forms.ListBox listBox_AbilityProperties;
+        private System.Windows.Forms.Panel panel_AbiltyProperty;
     }
 }
