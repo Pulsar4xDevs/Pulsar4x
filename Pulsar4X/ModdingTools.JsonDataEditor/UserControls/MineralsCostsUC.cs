@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Pulsar4X.ECSLib;
 
@@ -16,6 +12,8 @@ namespace ModdingTools.JsonDataEditor
         private BindingList<DataHolder> _allMinerals = new BindingList<DataHolder>();
         private Dictionary<DataHolder, int> _mineralsCosts = new Dictionary<DataHolder, int>();
 
+            
+            
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -24,18 +22,22 @@ namespace ModdingTools.JsonDataEditor
             get { return _mineralsCosts; }
             set
             {
-                _mineralsCosts = value;   
+                _mineralsCosts = value;
                 if (_mineralsCosts != null)
-                    dataGridView_MineralCosts.DataSource = _mineralsCosts.ToArray();
+                {
+                    UpdateMineralCosts();
+                }
             }
         }
         public MineralsCostsUC()
         {
             InitializeComponent();
-            UpdateMineralList();
-            
             Data.MineralData.ListChanged += UpdateMineralList;
-            listBox_MineralsAll.DataSource = _allMinerals;
+            UpdateMineralList();
+
+            dataGridView_MineralCosts.Columns.Add("Key", "Mineral");
+            dataGridView_MineralCosts.Columns.Add("Values", "Amount");
+            UpdateMineralCosts();
         }
 
         public JDictionary<Guid, int> GetData
@@ -50,6 +52,18 @@ namespace ModdingTools.JsonDataEditor
                 return dict;
             }
         }
+
+        private void UpdateMineralCosts()
+        {
+            dataGridView_MineralCosts.DataSource = null;
+            dataGridView_MineralCosts.Rows.Clear();
+
+            foreach (KeyValuePair<DataHolder, int> item in _mineralsCosts)
+            {
+                dataGridView_MineralCosts.Rows.Add(item.Key, item.Value);
+            }
+        }
+
 
 
         private void UpdateMineralList()
@@ -70,9 +84,10 @@ namespace ModdingTools.JsonDataEditor
             {
                 _mineralsCosts.Add((DataHolder)listBox_MineralsAll.SelectedItem, 0);
                 //dataGridView_MineralCosts.CurrentCell = dataGridView_MineralCosts.CurrentRow.Cells[1];
+                //dataGridView_MineralCosts.CurrentCell.ReadOnly = false;
                 //dataGridView_MineralCosts.BeginEdit(true);
             }
-            dataGridView_MineralCosts.DataSource = _mineralsCosts.ToArray();
+            UpdateMineralCosts();
         }
 
         private void dataGridView_MineralCosts_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -82,6 +97,25 @@ namespace ModdingTools.JsonDataEditor
                 dataGridView_MineralCosts.CurrentCell.ReadOnly = false;
                 dataGridView_MineralCosts.BeginEdit(true);
             }
+        }
+
+        private void dataGridView_MineralCosts_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            DataHolder key = (DataHolder)dataGridView_MineralCosts.Rows[e.RowIndex].Cells[0].Value;
+            DataGridViewCell cell = dataGridView_MineralCosts.Rows[e.RowIndex].Cells[1];
+            object cellValue = dataGridView_MineralCosts.Rows[e.RowIndex].Cells[1].Value;
+            if (cellValue is int)
+            {
+                _mineralsCosts[key] = (int)cellValue;
+            }
+            else if (cellValue is string)
+            {
+                int amount;
+                if (Int32.TryParse((string)cell.Value, out amount))
+                    _mineralsCosts[key] = amount;
+            }
+            else
+                cell.Value = _mineralsCosts[key];
         }
     }
 }

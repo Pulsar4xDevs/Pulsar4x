@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Pulsar4X.ECSLib;
 
@@ -25,7 +21,7 @@ namespace ModdingTools.JsonDataEditor
             {
                 _abilityAmounts = value;
                 if (_abilityAmounts != null)
-                    dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
+                    UpdateAbilityAmounts();
             }
         }
         public AbilitiesListUC()
@@ -33,7 +29,21 @@ namespace ModdingTools.JsonDataEditor
             InitializeComponent();
                         
             listBox_allAbilities.DataSource = Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>();
-            dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
+
+            dataGridView_addedAbilities.Columns.Add("Key", "Ability Type");
+            dataGridView_addedAbilities.Columns.Add("Values", "Amount");
+            UpdateAbilityAmounts();
+        }
+
+        private void UpdateAbilityAmounts()
+        {
+            dataGridView_addedAbilities.DataSource = null;
+            dataGridView_addedAbilities.Rows.Clear();
+
+            foreach (KeyValuePair<AbilityType, int> item in _abilityAmounts)
+            {
+                dataGridView_addedAbilities.Rows.Add(item.Key, item.Value);
+            }
         }
 
         public JDictionary<AbilityType, int> GetData {get { return new JDictionary<AbilityType, int>(_abilityAmounts); } }
@@ -44,7 +54,7 @@ namespace ModdingTools.JsonDataEditor
             {
                 _abilityAmounts.Add((AbilityType)listBox_allAbilities.SelectedItem, 0);         
             }
-            dataGridView_addedAbilities.DataSource = _abilityAmounts.ToArray();
+            UpdateAbilityAmounts();
         }
 
         private void dataGridView_addedAbilities_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
@@ -54,6 +64,25 @@ namespace ModdingTools.JsonDataEditor
                 dataGridView_addedAbilities.CurrentCell.ReadOnly = false;
                 dataGridView_addedAbilities.BeginEdit(true);
             }
+        }
+
+        private void dataGridView_addedAbilities_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        {
+            AbilityType key = (AbilityType)dataGridView_addedAbilities.Rows[e.RowIndex].Cells[0].Value;
+            DataGridViewCell cell = dataGridView_addedAbilities.Rows[e.RowIndex].Cells[1];
+            object cellValue = dataGridView_addedAbilities.Rows[e.RowIndex].Cells[1].Value;
+            if (cellValue is int)
+            {
+                _abilityAmounts[key] = (int)cellValue;
+            }
+            else if (cellValue is string)
+            {
+                int amount;
+                if (Int32.TryParse((string)cell.Value, out amount))
+                    _abilityAmounts[key] = amount;
+            }
+            else
+                cell.Value = _abilityAmounts[key];
         }
     }
 }
