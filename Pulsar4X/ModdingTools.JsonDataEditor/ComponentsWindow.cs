@@ -54,39 +54,8 @@ namespace ModdingTools.JsonDataEditor
 
         private void SetCurrentAbility(ComponentAbilitySD componentAbility)
         {
-            //dataGridView_Abilitys.DataSource = componentAbility;
-            //List<AbilityPropertiesData> abilityProperties = new List<AbilityPropertiesData>();
-            //abilityProperties.Add(new AbilityPropertiesData("Name", componentAbility.Name));
-            //abilityProperties.Add(new AbilityPropertiesData("Ability", componentAbility.Ability));
-            //abilityProperties.Add(new AbilityPropertiesData("Ability Amount", componentAbility.AbilityAmount));
-            //abilityProperties.Add(new AbilityPropertiesData("Description", componentAbility.Description));
-            //abilityProperties.Add(new AbilityPropertiesData("CrewAmount", componentAbility.CrewAmount));
-            //abilityProperties.Add(new AbilityPropertiesData("SizeAmount", componentAbility.WeightAmount));
-            //abilityProperties.Add(new AbilityPropertiesData("Affects Ability", componentAbility.AffectsAbility));
-            //abilityProperties.Add(new AbilityPropertiesData("Affected Amount", componentAbility.AffectedAmount));
-            //abilityProperties.Add(new AbilityPropertiesData("Tech Requrements", componentAbility.TechRequiremets));
-            //listBox_AbilityProperties.DataSource = abilityProperties;
-
             propertyGrid_PropertyEditor.SelectedObject =  new AbilitysDisplayer(componentAbility);
-
         }
-
-        //private class AbilityPropertiesData
-        //{
-        //    public string Displayname { get; set; }
-        //    public object ValueObject { get; set; }
-
-        //    internal AbilityPropertiesData(string name, object item)
-        //    {
-        //        Displayname = name;
-        //        ValueObject = item;
-        //    }
-
-        //    public override string ToString()
-        //    {
-        //        return Displayname;
-        //    }
-        //}
 
         /// <summary>
         /// sets how the propertygrid displays TODO: setters should create a new SD.
@@ -223,6 +192,7 @@ namespace ModdingTools.JsonDataEditor
             {
                 techucUc = new TechRequirementsUC();
                 techucUc.AllowDuplicates = true;
+                techucUc.Dock = DockStyle.Fill;
                 Controls.Add(techucUc);
                 
                 okButton = new Button();
@@ -230,7 +200,7 @@ namespace ModdingTools.JsonDataEditor
                 okButton.Dock = DockStyle.Bottom;
                 okButton.DialogResult = DialogResult.OK;
                 Controls.Add(okButton);
-                techucUc.Dock = DockStyle.Fill;
+                
             }
             public List<DataHolder> ValueList
             {
@@ -322,11 +292,6 @@ namespace ModdingTools.JsonDataEditor
             DataHolder selectedItem = (DataHolder)listBox_Abilities.SelectedItem;
             ComponentAbilitySD selectedSD = selectedItem.StaticData;
             SetCurrentAbility(selectedSD);
-        }
-
-        private void listBox_AbilityProperties_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //SetCurrentAbilityProperty((AbilityPropertiesData)listBox_AbilityProperties.SelectedItem);
         }
     }
 }

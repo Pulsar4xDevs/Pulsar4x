@@ -14,15 +14,19 @@ namespace ModdingTools.JsonDataEditor
     public partial class TechRequirementsUC : UserControl
     {
         private BindingList<DataHolder> _allTechs  = new BindingList<DataHolder>();
-
-
+        private BindingList<DataHolder> _requredTechs = new BindingList<DataHolder>();
+            
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public List<DataHolder> RequredTechs
         {
-            get { return listBox_requredTechs.Items.Cast<DataHolder>().ToList(); }
-            set { listBox_requredTechs.DataSource = value; }
+            get { return _requredTechs.ToList(); }
+            set
+            {
+                _requredTechs = new BindingList<DataHolder>(value);
+                listBox_requredTechs.DataSource = _requredTechs;
+            }
         }
 
         public bool AllowDuplicates { get; set; }
@@ -35,6 +39,7 @@ namespace ModdingTools.JsonDataEditor
             AllowDuplicates = false;
             Data.TechData.ListChanged += UpdateTechlist;
             listBox_allTechs.DataSource = _allTechs;
+            listBox_requredTechs.DataSource = _requredTechs;
         }
 
         public List<Guid> GetData
@@ -53,6 +58,7 @@ namespace ModdingTools.JsonDataEditor
         private void UpdateTechlist()
         {
             _allTechs = new BindingList<DataHolder>(Data.TechData.GetDataHolders().ToList());
+            listBox_allTechs.DataSource = _allTechs;
         }
 
         private void listBox_requredTechs_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -70,7 +76,7 @@ namespace ModdingTools.JsonDataEditor
                 }
                 else
                 {
-                    listBox_requredTechs.Items.Add(selectedItem);
+                    _requredTechs.Add((DataHolder)selectedItem);
                 }
            
         }

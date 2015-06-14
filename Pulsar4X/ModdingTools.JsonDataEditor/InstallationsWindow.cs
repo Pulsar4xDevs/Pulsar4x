@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Pulsar4X.ECSLib;
 
@@ -13,39 +9,40 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class InstallationsWindow : UserControl
     {
-        BindingList<DataHolder> AllInstallations { get; set; }
-        InstallationSD CurrentInstallation { get; set; }
+        private BindingList<DataHolder> _allInstallations = new BindingList<DataHolder>();
+        private InstallationSD _currentInstallation;
 
         public InstallationsWindow()
         {
             InitializeComponent();
             UpdateInstallationlist();            
             Data.InstallationData.ListChanged += UpdateInstallationlist;
-            listBox_AllInstalations.DataSource = AllInstallations;
-            CurrentInstallation = new InstallationSD();
+            listBox_AllInstalations.DataSource = _allInstallations;
+            _currentInstallation = new InstallationSD();
         }
 
         private void SetCurrentInstallation(InstallationSD installationSD)
         {
-            CurrentInstallation = installationSD;
-            installationUC1.StaticData = CurrentInstallation;
+            _currentInstallation = installationSD;
+            installationUC1.StaticData = _currentInstallation;
 
-            DataHolder dh = Data.InstallationData.GetDataHolder(CurrentInstallation.ID, false);
+            DataHolder dh = Data.InstallationData.GetDataHolder(_currentInstallation.ID, false);
             if (dh == null)
             {
                 string file = Data.InstallationData.GetLoadedFiles()[0];
                 dh = new DataHolder(installationSD, file);
             }
             genericDataUC1.Item = dh;
-            genericDataUC1.Description = CurrentInstallation.Description;
-            abilitiesListUC1.AbilityAmount = CurrentInstallation.BaseAbilityAmounts;
-            techRequirementsUC1.RequredTechs = Data.TechData.GetDataHolders(CurrentInstallation.TechRequirements).ToList();
-            mineralsCostsUC1.MineralCosts = MineralCostsDictionary(CurrentInstallation.ResourceCosts);
+            genericDataUC1.Description = _currentInstallation.Description;
+            abilitiesListUC1.AbilityAmount = _currentInstallation.BaseAbilityAmounts;
+            techRequirementsUC1.RequredTechs = Data.TechData.GetDataHolders(_currentInstallation.TechRequirements).ToList();
+            mineralsCostsUC1.MineralCosts = MineralCostsDictionary(_currentInstallation.ResourceCosts);
         }
 
         private void UpdateInstallationlist()
         {
-            AllInstallations = new BindingList<DataHolder>(Data.InstallationData.GetDataHolders().ToList());
+            _allInstallations = new BindingList<DataHolder>(Data.InstallationData.GetDataHolders().ToList());
+            listBox_AllInstalations.DataSource = _allInstallations;
         }
 
         private Dictionary<DataHolder, int> MineralCostsDictionary(Dictionary<Guid, int> guidDictionary  )
@@ -64,11 +61,11 @@ namespace ModdingTools.JsonDataEditor
         /// </summary>
         /// <param name="guid">guid: current or new</param>
         /// <returns></returns>
-        private InstallationSD staticData(Guid guid)
+        private InstallationSD StaticData(Guid guid)
         {
             InstallationSD newSD = new InstallationSD
             {
-                ID = Guid.NewGuid(),
+                ID = guid,
                 Name = genericDataUC1.GetName,
                 Description = genericDataUC1.Description,
                 PopulationRequired = installationUC1.GetPopReqirement,
@@ -113,15 +110,15 @@ namespace ModdingTools.JsonDataEditor
 
         private void button_saveNew_Click(object sender, EventArgs e)
         {
-            SetCurrentInstallation(staticData(Guid.NewGuid()));
-            Data.InstallationData.Update(CurrentInstallation);
+            SetCurrentInstallation(StaticData(Guid.NewGuid()));
+            Data.InstallationData.Update(_currentInstallation);
              
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
-            CurrentInstallation = staticData(CurrentInstallation.ID);
-            Data.InstallationData.Update(CurrentInstallation);
+            _currentInstallation = StaticData(_currentInstallation.ID);
+            Data.InstallationData.Update(_currentInstallation);
         }
     }
 }

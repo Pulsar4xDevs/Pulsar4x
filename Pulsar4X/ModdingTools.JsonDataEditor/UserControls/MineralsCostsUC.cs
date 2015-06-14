@@ -55,6 +55,7 @@ namespace ModdingTools.JsonDataEditor
         private void UpdateMineralList()
         {
             _allMinerals = new BindingList<DataHolder>(Data.MineralData.GetDataHolders().ToList());
+            listBox_MineralsAll.DataSource = _allMinerals;
         }
 
 
