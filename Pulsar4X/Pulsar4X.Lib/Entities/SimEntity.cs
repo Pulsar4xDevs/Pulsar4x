@@ -567,6 +567,7 @@ namespace Pulsar4X.Entities
                 ConstructionCycle.OrdnanceFactoryBuild(P);
                 ConstructionCycle.RefineFuel(P);
                 ConstructionCycle.ProcessShipyards(P);
+                ConstructionCycle.TerraformPlanets(P);
 
                 /// <summary>
                 /// Planetary cleanup should happen last. The planet was damaged last tick, so this tick that damage should be represented in reduced mining, construction, and so on.

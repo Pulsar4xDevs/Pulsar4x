@@ -498,6 +498,63 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// Handle all terraform orders. Were there an explicit order system it would not be necessary to loop through all worlds, likewise all of these loops
+        /// should be combined at a later date.
+        /// </summary>
+        /// <param name="P">List of factions</param>
+        public static void TerraformPlanets(BindingList<Faction> P)
+        {
+#warning take all of these faction/population loops and make a single loop and make secondary functions to handle what to do for each population construction cycle task. Do Terraforming orders?
+            foreach (Faction fact in P)
+            {
+                foreach (Population pop in fact.Populations)
+                {
+                    /// <summary>
+                    /// If gas to add is null, or if the colony can't do any terraforming then do not run terraforming.
+                    /// </summary>
+                    if (pop._GasToAdd != null && (pop._OrbitalTerraformModules != 0 || (int)Math.Floor(pop.Installations[(int)Installation.InstallationType.TerraformingInstallation].Number) >= 1))
+                    {
+                        float CurrentGasAmt = pop.Planet.Atmosphere.Composition[pop._GasToAdd];
+                        if (pop._GasAddSubtract == true)
+                        {
+                            if (CurrentGasAmt < pop._GasAmt)
+                            {
+                                float CurrentTerraforming = pop.CalcTotalTerraforming() * Constants.Colony.ConstructionCycleFraction;
+
+                                /// <summary>
+                                /// Terraforming will go over the limit specified by the user.
+                                /// </summary>
+                                if (CurrentTerraforming + CurrentGasAmt > pop._GasAmt)
+                                {
+                                    CurrentTerraforming = pop._GasAmt - CurrentGasAmt;
+                                }
+
+                                pop.Planet.Atmosphere.Composition[pop._GasToAdd] = pop.Planet.Atmosphere.Composition[pop._GasToAdd] + CurrentTerraforming;
+                            }
+                        }
+                        else if (pop._GasAddSubtract == false)
+                        {
+                            if (CurrentGasAmt > pop._GasAmt)
+                            {
+                                float CurrentTerraforming = pop.CalcTotalTerraforming() * Constants.Colony.ConstructionCycleFraction;
+
+                                /// <summary>
+                                /// Terraforming will go under the limit specified by the user.
+                                /// </summary>
+                                if (CurrentTerraforming - CurrentGasAmt < pop._GasAmt)
+                                {
+                                    CurrentTerraforming = CurrentGasAmt - pop._GasAmt;
+                                }
+
+                                pop.Planet.Atmosphere.Composition[pop._GasToAdd] = pop.Planet.Atmosphere.Composition[pop._GasToAdd] - CurrentTerraforming;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         #region Private Methods related to shipyard work.
         /// <summary>
         /// Do all of the tasks that this shipyard has assigned to it.

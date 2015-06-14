@@ -567,6 +567,9 @@ namespace Pulsar4X
             /// About 3 points per 5 days. experimentation shows it varies between 3 and 4.
             /// </summary>
             public const int AtmosphericDustDecayPerYear = 216;
+
+            public static float[] TerraformRate = { 0.001f, 0.0012f, 0.0015f, 0.002f, 0.0025f, 0.003f, 0.0035f, 0.004f, 0.0045f, 0.005f, 0.006f, 0.007f, 0.008f };
+            public const int TerraformRateMax = 13;
         }
 
         public static class ShipyardInfo

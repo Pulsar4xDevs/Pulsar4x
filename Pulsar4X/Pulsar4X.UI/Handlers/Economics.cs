@@ -1769,9 +1769,9 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Orbital Terraforming modules. a planet with ships in orbit that will terraform it.
                     /// </summary>
-                    else if (Pop.OrbitalTerraformModules >= 1)
+                    else if (Pop._OrbitalTerraformModules >= 1)
                     {
-                        Class = String.Format(": {0:n1}x Orbital Terraform", Pop.OrbitalTerraformModules);
+                        Class = String.Format(": {0:n1}x Orbital Terraform", Pop._OrbitalTerraformModules);
 
                         String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
@@ -1876,9 +1876,9 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Orbital Terraforming modules. a planet with ships in orbit that will terraform it.
                     /// </summary>
-                    else if (Pop.OrbitalTerraformModules >= 1)
+                    else if (Pop._OrbitalTerraformModules >= 1)
                     {
-                        Class = String.Format(": {0:n1}x Orbital Terraform", Pop.OrbitalTerraformModules);
+                        Class = String.Format(": {0:n1}x Orbital Terraform", Pop._OrbitalTerraformModules);
                     }
 
                     /// <summary>
@@ -4439,6 +4439,22 @@ namespace Pulsar4X.UI.Handlers
 
                 Entry = String.Format("{0:N2}", CurrentAtmosphere.Albedo);
                 m_oSummaryPanel.TerraformingPlanetaryAlbedoTextBox.Text = Entry;
+
+                Entry = String.Format("Terraforming Installations:{0}", ((int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.TerraformingInstallation].Number)));
+                if (CurrentPopulation._OrbitalTerraformModules != 0.0f)
+                    Entry = String.Format("{0} Effective Terraform Modules in Orbit (including Commander Bonuses):{1:N2}", Entry, CurrentPopulation._OrbitalTerraformModules);
+                Entry = String.Format("{0}  Annual Production:{1:N4} atm", Entry, CurrentPopulation.CalcTotalTerraforming());
+                m_oSummaryPanel.TerraformingInstProdLabel.Text = Entry;
+
+                if (CurrentPlanet.AtmosphericDust == 0.0f && CurrentPlanet.RadiationLevel == 0.0f)
+                {
+                    Entry = "No Radiation or Atmospheric Dust";
+                }
+                else
+                {
+                    Entry = String.Format("Radiation Level:{0:N1} Dust Level:{0:N1}", CurrentPlanet.RadiationLevel, CurrentPlanet.AtmosphericDust);
+                }
+                m_oSummaryPanel.TerraformingDustRadLabel.Text = Entry;
             }
         }
         #endregion

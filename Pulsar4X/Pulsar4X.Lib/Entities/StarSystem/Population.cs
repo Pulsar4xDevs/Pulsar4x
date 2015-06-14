@@ -349,9 +349,10 @@ namespace Pulsar4X.Entities
         public int ThermalSignature { get; set; }
 
         /// <summary>
-        /// How many orbital terraforming modules are in orbit around this planet?
+        /// How many orbital terraforming modules are in orbit around this population? (NOTE: orbital terraformers should always have an assigned population, and hence this variable is here and not on
+        /// planet)
         /// </summary>
-        public float OrbitalTerraformModules { get; set; }
+        public float _OrbitalTerraformModules { get; set; }
 
 
         public float CivilianPopulation { get; set; }
@@ -510,7 +511,6 @@ namespace Pulsar4X.Entities
             set { _SensorUpdateAck = value; }
         }
 
-
         /// <summary>
         /// True = Add gas, False = Subtract gas.
         /// </summary>
@@ -524,7 +524,6 @@ namespace Pulsar4X.Entities
         /// What gas should be altered on this world by terraforming?
         /// </summary>
         public AtmosphericGas _GasToAdd { get; set; }
-
         #endregion
 
         /// <summary>
@@ -594,7 +593,7 @@ namespace Pulsar4X.Entities
             ComponentStockpileLookup = new Dictionary<Guid, int>();
             MissileStockpile = new Dictionary<OrdnanceDefTN, float>();
 
-            OrbitalTerraformModules = 0.0f;
+            _OrbitalTerraformModules = 0.0f;
 
             PoliticalPopStatus = PoliticalStatus.Imperial;
 
@@ -1170,6 +1169,18 @@ namespace Pulsar4X.Entities
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FuelRefinery].Number) * Constants.Colony.SoriumToFuel * 10.0f) +
                        (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number * Constants.Colony.SoriumToFuel);
             return BP;
+        }
+        
+        /// <summary>
+        /// Add Terraforming installations to orbital terraforming modules.
+        /// </summary>
+        /// <returns></returns>
+        public float CalcTotalTerraforming()
+        {
+            int modules = (int)Math.Floor(_OrbitalTerraformModules);
+            float TP = (float)((int)Math.Floor(Installations[(int)Installation.InstallationType.TerraformingInstallation].Number) + modules) * Constants.Colony.TerraformRate[0];
+
+            return TP;
         }
         #endregion
 
