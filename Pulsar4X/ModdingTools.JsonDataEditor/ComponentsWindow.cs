@@ -58,11 +58,24 @@ namespace ModdingTools.JsonDataEditor
         }
 
         /// <summary>
-        /// sets how the propertygrid displays TODO: setters should create a new SD.
+        /// sets how the propertygrid displays ComponentAbilitySD Data
         /// </summary>
         public class AbilitysDisplayer
         {
             private ComponentAbilitySD _abilitySD;
+
+            private string _name;
+            private string _description;
+
+            private AbilityType _ability;
+            private List<float> _abilityAmount;
+            private List<float> _crewAmount;
+            private List<float> _weightAmount;
+            private AbilityType _affectsAbility;
+            private List<float> _affectedAmount;
+            private List<Guid> _techRequiremets;
+
+
             public AbilitysDisplayer(ComponentAbilitySD abilitySD)
             {
                 _abilitySD = abilitySD;
@@ -74,7 +87,11 @@ namespace ModdingTools.JsonDataEditor
             [Editor(typeof(String), typeof(string))]
             public String Name {
                 get { return _abilitySD.Name; }
-                set { _abilitySD.Name = value; }
+                set
+                {
+                    _name = value; 
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Description")]
@@ -84,7 +101,11 @@ namespace ModdingTools.JsonDataEditor
             public String Description
             {
                 get { return _abilitySD.Description; }
-                set { _abilitySD.Description = value; }
+                set
+                {
+                    _description = value;
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Ability Type")]
@@ -94,7 +115,11 @@ namespace ModdingTools.JsonDataEditor
             public AbilityType AbilityType
             {
                 get { return _abilitySD.Ability; }
-                set { _abilitySD.Ability = value; }
+                set
+                {
+                    _ability = value;
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Ability Amount")]
@@ -104,7 +129,11 @@ namespace ModdingTools.JsonDataEditor
             public List<float> AbilityAmounts
             {
                 get { return _abilitySD.AbilityAmount; }
-                set { _abilitySD.AbilityAmount = value; }
+                set
+                {
+                    _abilityAmount = value;
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Crew Amount")]
@@ -114,7 +143,11 @@ namespace ModdingTools.JsonDataEditor
             public List<float> CrewAmounts
             {
                 get { return _abilitySD.CrewAmount; }
-                set { _abilitySD.CrewAmount = value; }
+                set
+                {
+                    _crewAmount = value;
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Size Amount")]
@@ -124,7 +157,11 @@ namespace ModdingTools.JsonDataEditor
             public List<float> SizeAmounts
             {
                 get { return _abilitySD.WeightAmount; }
-                set { _abilitySD.WeightAmount = value; }
+                set
+                {
+                    _weightAmount = value;
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Affected Ability Type")]
@@ -134,7 +171,11 @@ namespace ModdingTools.JsonDataEditor
             public AbilityType AffectedType
             {
                 get { return _abilitySD.AffectsAbility; }
-                set { _abilitySD.AffectsAbility = value; }
+                set
+                {
+                    _affectsAbility = value;
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Affected Amount")]
@@ -144,7 +185,11 @@ namespace ModdingTools.JsonDataEditor
             public List<float> AffectedAmount
             {
                 get { return _abilitySD.AffectedAmount; }
-                set { _abilitySD.AffectedAmount = value; }
+                set
+                {
+                    _affectedAmount = value;
+                    UpdateAbilityStaticData();
+                }
             }
 
             [DisplayName("Tech Requrements")]
@@ -154,10 +199,33 @@ namespace ModdingTools.JsonDataEditor
             public List<DataHolder> TechReqs
             {
                 get { return Data.TechData.GetDataHolders(_abilitySD.TechRequiremets).ToList(); }
-                set { _abilitySD.TechRequiremets = Data.TechData.GetGuids(value).ToList(); }
+                set
+                {
+                    _techRequiremets = Data.TechData.GetGuids(value).ToList();
+                    UpdateAbilityStaticData();
+                }
+            }
+
+            private void UpdateAbilityStaticData()
+            {
+                ComponentAbilitySD newSD = new ComponentAbilitySD
+                {
+                    Name = this._name,
+                    Description = this._description,
+
+                    Ability = this._ability,
+                    AbilityAmount = this._abilityAmount,
+                    CrewAmount = this._crewAmount,
+                    WeightAmount = this._weightAmount,
+                    AffectsAbility = this._affectsAbility,
+                    AffectedAmount = this._affectedAmount,
+                    TechRequiremets = this._techRequiremets
+                };
+                _abilitySD = newSD;
             }
         }
 
+        
         
         class TechListEditor : UITypeEditor
         {
@@ -176,11 +244,11 @@ namespace ModdingTools.JsonDataEditor
                         form.ValueList = dataHolders;
                         if (svc.ShowDialog(form) == DialogResult.OK)
                         {
-                            //foo.Guid = form.Value; // update object
+                            dataHolders = form.ValueList; // update object
                         }
                     }
                 }
-                return value; // can also replace the wrapper object here
+                return dataHolders; // can also replace the wrapper object here
             }
         }
 
@@ -209,19 +277,6 @@ namespace ModdingTools.JsonDataEditor
             }
         }
 
-
-        private DataGridViewCell[] dataGridViewCells_FromList(List<float> list)
-        {
-            List<DataGridViewCell> cellList = new List<DataGridViewCell>();
-            foreach (float ability in list)
-            {
-                DataGridViewCell cell = new DataGridViewTextBoxCell();
-                cell.Value = ability.ToString();
-                cellList.Add(cell);
-            }
-            return cellList.ToArray();
-        }
-
         private void UpdateComponentslist()
         {
             AllComponents = new BindingList<DataHolder>(Data.ComponentData.GetDataHolders().ToList());
@@ -238,7 +293,7 @@ namespace ModdingTools.JsonDataEditor
         {
             ComponentSD newSD = new ComponentSD
             {
-                ID = Guid.NewGuid(),
+                ID =guid,
                 Name = genericDataUC1.GetName,
                 Description = genericDataUC1.Description,
                 //ComponentAbilitySDs = new List<ComponentAbilitySD>( listBox_Abilities.Items);
@@ -246,10 +301,7 @@ namespace ModdingTools.JsonDataEditor
             return newSD;
         }
 
-        private ComponentAbilitySD AbilityStaticData()
-        {
-            return new ComponentAbilitySD();
-        }
+
 
         private void listBox_AllComponents_MouseDoubleClick(object sender, MouseEventArgs e)
         {
