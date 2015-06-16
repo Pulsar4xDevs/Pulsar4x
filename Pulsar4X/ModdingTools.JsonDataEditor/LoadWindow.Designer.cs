@@ -36,6 +36,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.installationsButton = new System.Windows.Forms.Button();
             this.ComponentButton = new System.Windows.Forms.Button();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.SuspendLayout();
             // 
             // loadFileButton
@@ -44,7 +45,7 @@
             this.loadFileButton.Name = "loadFileButton";
             this.loadFileButton.Size = new System.Drawing.Size(75, 23);
             this.loadFileButton.TabIndex = 0;
-            this.loadFileButton.Text = "Load File";
+            this.loadFileButton.Text = "Load Directory";
             this.loadFileButton.UseVisualStyleBackColor = true;
             this.loadFileButton.Click += new System.EventHandler(this.loadFileButton_Click);
             // 
@@ -110,6 +111,10 @@
             this.ComponentButton.UseVisualStyleBackColor = true;
             this.ComponentButton.Click += new System.EventHandler(this.ComponentButton_Click);
             // 
+            // folderBrowserDialog1
+            // 
+            this.folderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            // 
             // LoadWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -138,5 +143,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button installationsButton;
         private System.Windows.Forms.Button ComponentButton;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
     }
 }

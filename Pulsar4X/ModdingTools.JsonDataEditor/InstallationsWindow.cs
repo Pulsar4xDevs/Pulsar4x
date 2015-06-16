@@ -16,7 +16,7 @@ namespace ModdingTools.JsonDataEditor
         {
             InitializeComponent();
             UpdateInstallationlist();            
-            Data.InstallationData.ListChanged += UpdateInstallationlist;
+            //Data.InstallationData.ListChanged += UpdateInstallationlist;
             listBox_AllInstalations.DataSource = _allInstallations;
             _currentInstallation = new InstallationSD();
         }
@@ -25,23 +25,22 @@ namespace ModdingTools.JsonDataEditor
         {
             _currentInstallation = installationSD;
             installationUC1.StaticData = _currentInstallation;
-
-            DataHolder dh = Data.InstallationData.GetDataHolder(_currentInstallation.ID, false);
-            if (dh == null)
-            {
-                string file = Data.InstallationData.GetLoadedFiles()[0];
-                dh = new DataHolder(installationSD, file);
-            }
+            DataHolder dh;
+            if (Data.InstallationData.ContainsKey(_currentInstallation.ID))
+                dh = Data.InstallationData[_currentInstallation.ID];
+            else            
+                dh = new DataHolder(installationSD);
+            
             genericDataUC1.Item = dh;
             genericDataUC1.Description = _currentInstallation.Description;
             abilitiesListUC1.AbilityAmount = _currentInstallation.BaseAbilityAmounts;
-            techRequirementsUC1.RequredTechs = Data.TechData.GetDataHolders(_currentInstallation.TechRequirements).ToList();
+            techRequirementsUC1.RequredTechs = Data.TechData.Values.ToList();
             mineralsCostsUC1.MineralCosts = MineralCostsDictionary(_currentInstallation.ResourceCosts);
         }
 
         private void UpdateInstallationlist()
         {
-            _allInstallations = new BindingList<DataHolder>(Data.InstallationData.GetDataHolders().ToList());
+            _allInstallations = new BindingList<DataHolder>(Data.InstallationData.Values.ToList());
             listBox_AllInstalations.DataSource = _allInstallations;
         }
 
@@ -50,7 +49,7 @@ namespace ModdingTools.JsonDataEditor
             Dictionary<DataHolder, int> dataHandlerDictionary = new Dictionary<DataHolder, int>();
             foreach (var kvp in guidDictionary)
             {
-                DataHolder mineral = Data.MineralData.GetDataHolder(kvp.Key);
+                DataHolder mineral = Data.MineralData[kvp.Key];
                 dataHandlerDictionary.Add(mineral, kvp.Value);
             }
             return dataHandlerDictionary;
@@ -82,7 +81,7 @@ namespace ModdingTools.JsonDataEditor
         private void listBox_AllInstalations_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             DataHolder selectedItem = (DataHolder)listBox_AllInstalations.SelectedItem;
-            SetCurrentInstallation(Data.InstallationData.Get(selectedItem.Guid));
+            SetCurrentInstallation(Data.InstallationData[selectedItem.Guid].StaticData);
         }
 
         private void mainMenuButton_Click(object sender, EventArgs e)
@@ -110,15 +109,18 @@ namespace ModdingTools.JsonDataEditor
 
         private void button_saveNew_Click(object sender, EventArgs e)
         {
+            
             SetCurrentInstallation(StaticData(Guid.NewGuid()));
-            Data.InstallationData.Update(_currentInstallation);
+            if (StaticDataManager.StaticDataStore.Installations.ContainsKey(_currentInstallation.ID))
+                SetCurrentInstallation(StaticData(Guid.NewGuid()));
+            StaticDataManager.StaticDataStore.Installations.Add(_currentInstallation.ID, _currentInstallation);
              
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
             _currentInstallation = StaticData(_currentInstallation.ID);
-            Data.InstallationData.Update(_currentInstallation);
+            StaticDataManager.StaticDataStore.Installations[_currentInstallation.ID] = _currentInstallation;
         }
     }
 }

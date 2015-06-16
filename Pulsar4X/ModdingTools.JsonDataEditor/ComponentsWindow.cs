@@ -15,8 +15,8 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class ComponentsWindow : UserControl
     {
-        BindingList<DataHolder> AllComponents { get; set; }
-        ComponentSD CurrentComponent { get; set; }
+        BindingList<DataHolder> _allComponents = new BindingList<DataHolder>();
+        private ComponentSD _currentComponent = new ComponentSD();
  
         private BindingList<DataHolder> _selectedComponentAbilites = new BindingList<DataHolder>();
 
@@ -24,9 +24,8 @@ namespace ModdingTools.JsonDataEditor
         {
             InitializeComponent();
             UpdateComponentslist();
-            Data.InstallationData.ListChanged += UpdateComponentslist;
-            listBox_allComponents.DataSource = AllComponents;
-            CurrentComponent = new ComponentSD();
+            //Data.InstallationData.ListChanged += UpdateComponentslist;
+            listBox_allComponents.DataSource = _allComponents;
 
             listBox_Abilities.DataSource = _selectedComponentAbilites;
         }
@@ -34,18 +33,18 @@ namespace ModdingTools.JsonDataEditor
 
         private void SetCurrentComponent(ComponentSD componentSD)
         {
-            CurrentComponent = componentSD;
+            _currentComponent = componentSD;
             
-            DataHolder dh = Data.ComponentData.GetDataHolder(CurrentComponent.ID, false);
-            if (dh == null)
-            {
-                string file = Data.ComponentData.GetLoadedFiles()[0];
-                dh = new DataHolder(componentSD, file);
-            }
+            DataHolder dh;
+            if (Data.ComponentData.ContainsKey(_currentComponent.ID))
+                dh = Data.ComponentData[_currentComponent.ID];
+            else
+                dh = new DataHolder(componentSD);
+
             genericDataUC1.Item = dh;
-            genericDataUC1.Description = CurrentComponent.Description;
+            genericDataUC1.Description = _currentComponent.Description;
             _selectedComponentAbilites.Clear();
-            foreach (var abilitySD in CurrentComponent.ComponentAbilitySDs)
+            foreach (var abilitySD in _currentComponent.ComponentAbilitySDs)
             {
                 _selectedComponentAbilites.Add(new DataHolder(abilitySD));
             }
@@ -198,10 +197,10 @@ namespace ModdingTools.JsonDataEditor
             [Editor(typeof(TechListEditor), typeof(UITypeEditor))]
             public List<DataHolder> TechReqs
             {
-                get { return Data.TechData.GetDataHolders(_abilitySD.TechRequiremets).ToList(); }
+                get { return Data.TechData.Values.ToList(); }
                 set
                 {
-                    _techRequiremets = Data.TechData.GetGuids(value).ToList();
+                    _techRequiremets = Data.GetGuidList(value);
                     UpdateAbilityStaticData();
                 }
             }
@@ -210,16 +209,16 @@ namespace ModdingTools.JsonDataEditor
             {
                 ComponentAbilitySD newSD = new ComponentAbilitySD
                 {
-                    Name = this._name,
-                    Description = this._description,
+                    Name = _name,
+                    Description = _description,
 
-                    Ability = this._ability,
-                    AbilityAmount = this._abilityAmount,
-                    CrewAmount = this._crewAmount,
-                    WeightAmount = this._weightAmount,
-                    AffectsAbility = this._affectsAbility,
-                    AffectedAmount = this._affectedAmount,
-                    TechRequiremets = this._techRequiremets
+                    Ability = _ability,
+                    AbilityAmount = _abilityAmount,
+                    CrewAmount = _crewAmount,
+                    WeightAmount = _weightAmount,
+                    AffectsAbility = _affectsAbility,
+                    AffectedAmount = _affectedAmount,
+                    TechRequiremets = _techRequiremets
                 };
                 _abilitySD = newSD;
             }
@@ -279,7 +278,8 @@ namespace ModdingTools.JsonDataEditor
 
         private void UpdateComponentslist()
         {
-            AllComponents = new BindingList<DataHolder>(Data.ComponentData.GetDataHolders().ToList());
+            _allComponents = new BindingList<DataHolder>(Data.ComponentData.Values.ToList());
+
         }
 
 
@@ -306,7 +306,7 @@ namespace ModdingTools.JsonDataEditor
         private void listBox_AllComponents_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             DataHolder selectedItem = (DataHolder)listBox_allComponents.SelectedItem;
-            SetCurrentComponent(Data.ComponentData.Get(selectedItem.Guid));
+            SetCurrentComponent(Data.ComponentData[selectedItem.Guid].StaticData);
         }
 
         private void button_mainMenu_Click(object sender, EventArgs e)
@@ -329,14 +329,13 @@ namespace ModdingTools.JsonDataEditor
         private void button_saveNew_Click(object sender, EventArgs e)
         {
             SetCurrentComponent(StaticData(Guid.NewGuid()));
-            Data.InstallationData.Update(CurrentComponent);
-
+            Data.SaveToDataStore(_currentComponent);
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
-            CurrentComponent = StaticData(CurrentComponent.ID);
-            Data.InstallationData.Update(CurrentComponent);
+            _currentComponent = StaticData(_currentComponent.ID);
+            Data.SaveToDataStore(_currentComponent);
         }
 
         private void listBox_Abilities_DoubleClick(object sender, EventArgs e)

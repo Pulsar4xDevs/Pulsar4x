@@ -19,17 +19,21 @@ namespace ModdingTools.JsonDataEditor
 
         private void saveAllButton_Click(object sender, EventArgs e)
         {
-            if (!Data.SaveData())
-                MessageBox.Show("Error occured during saving. Data could be corrupted.");
-            else
-                MessageBox.Show("Saved.");
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Data.SaveDataToDirectory(folderBrowserDialog1.SelectedPath);
+            }
+            //if (!Data.SaveData())
+            //    MessageBox.Show("Error occured during saving. Data could be corrupted.");
+            //else
+            //    MessageBox.Show("Saved.");
         }
 
         private void loadFileButton_Click(object sender, EventArgs e)
         {
-            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                Data.LoadFile(openFileDialog.FileName);
+                Data.loadDatafromDirectory(folderBrowserDialog1.SelectedPath);
             }
         }
 

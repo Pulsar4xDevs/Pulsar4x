@@ -37,7 +37,7 @@ namespace ModdingTools.JsonDataEditor
             UpdateTechlist();
 
             AllowDuplicates = false;
-            Data.TechData.ListChanged += UpdateTechlist;
+            //Data.TechData.ListChanged += UpdateTechlist;
             listBox_allTechs.DataSource = _allTechs;
             listBox_requredTechs.DataSource = _requredTechs;
         }
@@ -57,7 +57,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void UpdateTechlist()
         {
-            _allTechs = new BindingList<DataHolder>(Data.TechData.GetDataHolders().ToList());
+            _allTechs = new BindingList<DataHolder>(Data.TechData.Values.ToList());
             listBox_allTechs.DataSource = _allTechs;
         }
 

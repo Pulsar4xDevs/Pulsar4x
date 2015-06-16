@@ -32,7 +32,7 @@ namespace ModdingTools.JsonDataEditor
         public MineralsCostsUC()
         {
             InitializeComponent();
-            Data.MineralData.ListChanged += UpdateMineralList;
+            //Data.MineralData.ListChanged += UpdateMineralList;
             UpdateMineralList();
 
             dataGridView_MineralCosts.Columns.Add("Key", "Mineral");
@@ -68,7 +68,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void UpdateMineralList()
         {
-            _allMinerals = new BindingList<DataHolder>(Data.MineralData.GetDataHolders().ToList());
+            _allMinerals = new BindingList<DataHolder>(Data.MineralData.Values.ToList());
             listBox_MineralsAll.DataSource = _allMinerals;
         }
 
