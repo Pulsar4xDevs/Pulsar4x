@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
                 double accessibility = depositKeyValuePair.Value.Accessibility;
                 double abilitiestoMine = totalMineingAbility * accessibility;
                 int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
-                colonyMineralStockpile.SafeValueAdd<Guid, float>(mineralGuid, amounttomine);             
+                colonyMineralStockpile.SafeValueAdd<Guid>(mineralGuid, amounttomine);             
                 MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
                 mineralDeposit.Amount -= amounttomine;
                 double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
@@ -142,7 +142,7 @@ namespace Pulsar4X.ECSLib
                 //check how many complete installations we have by turning a float into an int;
                 int fullColInstallations = (int)installations.Installations[facilityPair.Key]; 
                 //add to the installations
-                installations.Installations.SafeValueAdd<Guid, float>(facilityPair.Key, (float)facilityPair.Value);
+                installations.Installations.SafeValueAdd<Guid>(facilityPair.Key, (float)facilityPair.Value);
                 //compare how many complete we had then, vs now.
                 if ((int)installations.Installations[facilityPair.Key] > fullColInstallations)
                 {
@@ -240,7 +240,7 @@ namespace Pulsar4X.ECSLib
                 double itemsCreated = percentPerItem * percentthisjob;
                 double itemsLeft = job.ItemsRemaining - itemsCreated;
 
-                stockpileOut.SafeValueAdd<Guid, float>(job.Type, (float)(job.ItemsRemaining - itemsLeft));             
+                stockpileOut.SafeValueAdd<Guid>(job.Type, (float)(job.ItemsRemaining - itemsLeft));             
                 
                 if (itemsLeft > 0)
                 {
@@ -316,13 +316,13 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="colonyEntity"></param>
         /// <param name="neworder"></param>
-        public static void ConstructionPriority(Entity colonyEntity, Message neworder)
+        public static void ConstructionPriority(Entity colonyEntity)
         {
             //idk... needs to be something in the message about whether it's Construction, Ordnance or Fighers...  
             //I think if it's a valid list we can just chuck it straight in.
             try
             {
-                colonyEntity.GetDataBlob<InstallationsDB>().InstallationJobs = (List<ConstructionJob>)neworder.Data;                
+               //colonyEntity.GetDataBlob<InstallationsDB>().InstallationJobs = (List<ConstructionJob>)neworder.Data;                
             }
             catch (Exception)
             {

@@ -9,6 +9,7 @@ namespace Pulsar4X.ECSLib
     public abstract class BaseDataBlob : ICloneable
     {
         [CanBeNull]
+        [JsonIgnore]
         public virtual Entity OwningEntity
         {
             get { return _owningEntity; }

@@ -2,30 +2,40 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public static class StarSystemFactory
+    public class StarSystemFactory
     {
-        public static StarSystem CreateSystem(string name, int seed = -1)
+        private GalaxyFactory _galaxyGen;
+        private SystemBodyFactory _systemBodyFactory;
+        private StarFactory _starFactory;
+
+        public StarSystemFactory(GalaxyFactory galaxyGen)
+        {
+            _galaxyGen = galaxyGen;
+            _systemBodyFactory = new SystemBodyFactory(_galaxyGen);
+            _starFactory = new StarFactory(_galaxyGen);
+        }
+
+        public StarSystem CreateSystem(Game game, string name, int seed = -1)
         {
             // create new RNG with Seed.
             if (seed == -1)
             {
-                seed = GalaxyFactory.SeedRNG.Next();
+                seed = _galaxyGen.SeedRNG.Next();
             }
 
-            StarSystem newSystem = new StarSystem(name, seed);
+            StarSystem newSystem = new StarSystem(game, name, seed);
 
             int numStars = newSystem.RNG.Next(1, 5);
-            List<Entity> stars = StarFactory.CreateStarsForSystem(newSystem, numStars);
+            List<Entity> stars = _starFactory.CreateStarsForSystem(newSystem, numStars);
 
             foreach (Entity star in stars)
             {
-                SystemBodyFactory.GenerateSystemBodiesForStar(newSystem, star);
+                _systemBodyFactory.GenerateSystemBodiesForStar(newSystem, star);
             }
 
             // < @todo generate JumpPoints
             //JumpPointFactory.GenerateJumpPoints(newSystem, numJumpPoints);
 
-            Game.Instance.StarSystems.Add(newSystem);
             return newSystem;
         }
 
@@ -34,22 +44,22 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Creates our own solar system.
         /// </summary>
-        public static StarSystem CreateSol()
+        public StarSystem CreateSol(Game game)
         {
             // WIP Function. Not complete.
-            StarSystem sol = new StarSystem("Sol", -1);
+            StarSystem sol = new StarSystem(game, "Sol", -1);
 
-            Entity sun = StarFactory.CreateStar(sol, GameSettings.Units.SolarMassInKG, GameSettings.Units.SolarRadiusInKm, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
+            Entity sun = _starFactory.CreateStar(sol, GameSettings.Units.SolarMassInKG, GameSettings.Units.SolarRadiusInKm, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
 
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
             SystemBodyDB mercuryBodyDB = new SystemBodyDB {Type = BodyType.Terrestrial, SupportsPopulations = true};
             MassVolumeDB mercuryMVDB = new MassVolumeDB(3.3022E23, MassVolumeDB.GetVolumeFromRadius(2439.7));
             NameDB mercuryNameDB = new NameDB(Entity.InvalidEntity, "Mercury");
-            OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB, mercuryMVDB, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, GalaxyFactory.Settings.J2000);
+            OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB, mercuryMVDB, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, _galaxyGen.Settings.J2000);
             PositionDB mercuryPositionDB = new PositionDB();
 
-            Entity mercury = Entity.Create(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
+            Entity mercury = new Entity(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
 
             /*
             SystemBody Venus = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);

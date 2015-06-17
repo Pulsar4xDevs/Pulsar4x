@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
             blobs.Add(factionDB);
             blobs.Add(factionAbilitiesDB);
             blobs.Add(techDB);
-            Entity factionEntity = Entity.Create(globalManager, blobs);
+            Entity factionEntity = new Entity(globalManager, blobs);
 
             //factionEntity didn't exsist when we created the NameDB, so we have to recreate the name dictionary here.
             name.Name = new JDictionary<Entity, string>() { { factionEntity, factionName } };

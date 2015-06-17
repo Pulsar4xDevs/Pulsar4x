@@ -36,6 +36,15 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28No Tests|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug %28No Tests\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -55,9 +64,6 @@
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
     <Compile Include="DataBlobs\TechDB.cs" />
-    <Compile Include="EngineComms\CommDefinitions.cs" />
-    <Compile Include="EngineComms\CommonComms.cs" />
-    <Compile Include="EngineComms\LocalComms.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
     <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
     <Compile Include="Factories\SystemGen\StarFactory.cs" />
@@ -65,6 +71,7 @@
     <Compile Include="Factories\SystemGen\SystemFactory.cs" />
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
+    <Compile Include="Helpers\Pulse.cs" />
     <Compile Include="Processors\InstallationProcessor.cs" />
     <Compile Include="Processors\TechProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
@@ -112,9 +119,7 @@
     <Compile Include="GameSettings.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
     <Compile Include="Helpers\GameMath.cs" />
-    <Compile Include="Helpers\Interrupt.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />
-    <Compile Include="Helpers\SubpulseLimitRequest.cs" />
     <Compile Include="Helpers\Vector4.cs" />
     <Compile Include="Processors\OrbitProcessor.cs" />
     <Compile Include="Processors\RuinsProcessor.cs" />

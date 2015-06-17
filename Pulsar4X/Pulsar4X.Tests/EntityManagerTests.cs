@@ -21,7 +21,7 @@ namespace Pulsar4X.Tests
             Game game = new Game(new LibProcessLayer(), "Unit Test Game");
             //StaticDataManager.LoadFromDefaultDataDirectory();
             _entityManager = new EntityManager();           
-            _species1 = Entity.Create(_entityManager, new List<BaseDataBlob> { new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });
+            _species1 = new Entity(_entityManager, new List<BaseDataBlob> { new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });
             _pop1 = new JDictionary<Entity, long> { { _species1, 10 } };
             _pop2 = new JDictionary<Entity, long> { { _species1, 5 } };
         }
@@ -51,7 +51,7 @@ namespace Pulsar4X.Tests
         public void CreateEntity()
         {
             // create entity with no data blobs:
-            Entity testEntity = Entity.Create(_entityManager);
+            Entity testEntity = new Entity(_entityManager);
             Assert.IsTrue(testEntity.IsValid);
             Assert.AreEqual(1, testEntity.ID);
             Assert.AreSame(_entityManager, testEntity.Manager);
@@ -61,7 +61,7 @@ namespace Pulsar4X.Tests
 
             // Create entity with existing datablobs:
             var dataBlobs = new List<BaseDataBlob> {new OrbitDB(), new ColonyInfoDB(_pop1, Entity.InvalidEntity)};
-            testEntity = Entity.Create(_entityManager, dataBlobs);
+            testEntity = new Entity(_entityManager, dataBlobs);
             Assert.IsTrue(testEntity.IsValid);
             Assert.AreEqual(2, testEntity.ID);
 
@@ -76,7 +76,7 @@ namespace Pulsar4X.Tests
 
             // Create entity with existing datablobs, but provide an empty list:
             dataBlobs.Clear();
-            testEntity = Entity.Create(_entityManager, dataBlobs);
+            testEntity = new Entity(_entityManager, dataBlobs);
             Assert.IsTrue(testEntity.IsValid);
             Assert.AreEqual(3, testEntity.ID);
         }
@@ -84,7 +84,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void SetDataBlobs()
         {
-            Entity testEntity = Entity.Create(_entityManager);
+            Entity testEntity = new Entity(_entityManager);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1,Entity.InvalidEntity));
             testEntity.SetDataBlob(new PositionDB(0, 0, 0), EntityManager.GetTypeIndex<PositionDB>());
@@ -134,7 +134,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(2, dataBlobs.Count);
 
             // empty entity mean empty list.
-            testEntity = Entity.Create(_entityManager);  // create empty entity.
+            testEntity = new Entity(_entityManager);  // create empty entity.
             dataBlobs = testEntity.GetAllDataBlobs();
             Assert.AreEqual(0, dataBlobs.Count);
         }
@@ -217,7 +217,7 @@ namespace Pulsar4X.Tests
             Assert.Catch<ArgumentException>(() => { ComparableBitArray mask = testEntity.DataBlobMask; });
 
             // add a new entity:
-            testEntity = Entity.Create(_entityManager);
+            testEntity = new Entity(_entityManager);
 
             // now lets clear the entity manager:
             _entityManager.Clear();
@@ -237,7 +237,7 @@ namespace Pulsar4X.Tests
         public void RemoveDataBlobs()
         {
             // a little setup:
-            Entity testEntity = Entity.Create(_entityManager);
+            Entity testEntity = new Entity(_entityManager);
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
 
             Assert.IsTrue(testEntity.GetDataBlob<ColonyInfoDB>() != null);  // check that it has the data blob
@@ -348,7 +348,7 @@ namespace Pulsar4X.Tests
         public void EntityGuid()
         {
             Entity foundEntity;
-            Entity testEntity = Entity.Create(_entityManager);
+            Entity testEntity = new Entity(_entityManager);
 
             Assert.IsTrue(testEntity.IsValid);
             // Check Guid local lookup.
@@ -462,17 +462,17 @@ namespace Pulsar4X.Tests
             _entityManager.Clear();
 
             // Create an entity with individual DataBlobs.
-            Entity testEntity = Entity.Create(_entityManager);
+            Entity testEntity = new Entity(_entityManager);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
 
             // Create an entity with a DataBlobList.
             var dataBlobs = new List<BaseDataBlob> { new OrbitDB() };
-            Entity.Create(_entityManager, dataBlobs);
+            new Entity(_entityManager, dataBlobs);
 
             // Create one more, just for kicks.
             dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new ColonyInfoDB(_pop2, Entity.InvalidEntity) };
-            Entity.Create(_entityManager, dataBlobs);
+            new Entity(_entityManager, dataBlobs);
 
             return testEntity;
         }

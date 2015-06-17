@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib
 {
-    public static class GameSettings
+    public class GameSettings
     {
         /// <summary>
         /// Scientific Constants

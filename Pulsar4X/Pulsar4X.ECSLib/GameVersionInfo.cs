@@ -3,8 +3,8 @@
 namespace Pulsar4X.ECSLib
 {
     /// <summary>
-    /// Thius struct is used to prepend the gmae/mode version information in json files. This allows the game to
-    /// make decisions on weither or not imported data is compatible.
+    /// This struct is used to prepend the game/mode version information in json files. This allows the game to
+    /// make decisions on whether or not imported data is compatible.
     /// </summary>
     public struct VersionInfo
     {
@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public string VersionString;
 
-        // Interger versions of each section of the build number:
+        // Integer versions of each section of the build number:
         public int MajorVersion;
         public int MinorVersion;
         
@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
         /// A comma seperate list of compatible version numbers, numbers in this list will be deem compatible with the current version in VersionString.
         /// For example: "0.8,0.7,0.9,0.10,0.11,1.0". Note that there is no spaces in the string.
         /// </summary>
-        public string CompatibileVersions;
+        public string CompatibleVersions;
 
         /// <summary>
         /// Returns a VersionInfo struct for the Game.
@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
                 gameVersionInfo.VersionString = assName.Version.Major + "." + assName.Version.Minor;
                 gameVersionInfo.MajorVersion = assName.Version.Major;
                 gameVersionInfo.MinorVersion = assName.Version.Minor;
-                gameVersionInfo.CompatibileVersions = gameVersionInfo.VersionString;
+                gameVersionInfo.CompatibleVersions = gameVersionInfo.VersionString;
                 return gameVersionInfo;
             }
         }
@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public bool IsCompatibleWith(VersionInfo info)
         {
-            var versions = info.CompatibileVersions.Split(',');
+            var versions = info.CompatibleVersions.Split(',');
             foreach (var ver in versions)
             {
                 if (ver == VersionString)

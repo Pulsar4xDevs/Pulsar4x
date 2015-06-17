@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
             return ship;
         }
 
-        public static Entity CreateNewShipClass(Entity faction, string className = null)
+        public static Entity CreateNewShipClass(Game game, Entity faction, string className = null)
         {
             //check className before any to use it in NameDB constructor
             if (string.IsNullOrEmpty(className))
@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
             };
 
             // now lets create the ship class:
-            Entity shipClassEntity = Entity.Create(Game.Instance.GlobalManager, shipDBList); 
+            Entity shipClassEntity = new Entity(game.GlobalManager, shipDBList); 
 
             // also gets factionDB:
             FactionDB factionDB = faction.GetDataBlob<FactionDB>();

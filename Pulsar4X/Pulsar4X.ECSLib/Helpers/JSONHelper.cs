@@ -9,44 +9,45 @@ namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// The following is a special dictionay. It should be used whenever you have a dictionary 
-    /// that will be serilized/deserilized by json.
-    /// This is because by default JSON.net will save the key as a string only or will fail to deserilize, 
+    /// that will be serialized/deserialized by json.
+    /// This is because by default JSON.net will save the key as a string only or will fail to deserialized, 
     /// this Dictionay forces it to save the full type (if it is a custom type) or to serilize as a Json array of key/value pairs.
     /// </summary>
     [JsonArrayAttribute]
-    public class JDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializable
+    public class JDictionary<TKey, TValue> : Dictionary<TKey, TValue>
     {
         /// <summary>
-        /// Initializes a new instance of Pulsar4X.ECSLib.JDicitonary<TKey, TValue> class that is empty, has the default initial capacity, and uses the default equality comparer for the key type.
+        /// Initializes a new instance of Pulsar4X.ECSLib.JDictionary class that is empty, has the default initial capacity, and uses the default equality comparer for the key type.
         /// </summary>
         public JDictionary()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the Pulsar4X.ESCLib.JDictionary<TKey, TValue> class that contains elements copied from the specified System.Collections.Generic.IDictionary<TKey, TValue> and uses the default equality comparer for the key type.
+        /// Initializes a new instance of the Pulsar4X.ESCLib.JDictionary class that contains elements copied from the specified System.Collections.Generic.IDictionary and uses the default equality comparer for the key type.
         /// </summary>
         public JDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary)
         {
         }
 
         /// <summary>
-        /// Deserilizes the dictionary from a json list.
+        /// Deserializes the dictionary from a json list.
         /// </summary>
+        [UsedImplicitly]
         public JDictionary(SerializationInfo info, StreamingContext context)
         {
             var list = (List<KeyValuePair<TKey, TValue>>)info.GetValue("List", typeof(List<KeyValuePair<TKey, TValue>>));
 
-            foreach (var item in list)
+            foreach (KeyValuePair<TKey, TValue> item in list)
             {
-                this.Add(item.Key, item.Value);
+                Add(item.Key, item.Value);
             }
         }
 
         /// <summary>
         /// Serializes the Dictionary to a json list.
         /// </summary>
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("List", this.ToList());
         }
@@ -54,7 +55,8 @@ namespace Pulsar4X.ECSLib
 
     public static class JDictionaryExtension
     {
-        public static void SafeValueAdd<TKey, TValue>(this JDictionary<TKey, int> jDict, TKey key, int toAdd)
+        [PublicAPI]
+        public static void SafeValueAdd<TKey>(this JDictionary<TKey, int> jDict, TKey key, int toAdd)
         {
             if(!jDict.ContainsKey(key))
                 jDict.Add(key, toAdd);
@@ -63,7 +65,9 @@ namespace Pulsar4X.ECSLib
                 jDict[key] += toAdd;
             }
         }
-        public static void SafeValueAdd<TKey, TValue>(this JDictionary<TKey, float> jDict, TKey key, float toAdd)
+
+        [PublicAPI]
+        public static void SafeValueAdd<TKey>(this JDictionary<TKey, float> jDict, TKey key, float toAdd)
         {
             if (!jDict.ContainsKey(key))
                 jDict.Add(key, toAdd);
@@ -72,7 +76,9 @@ namespace Pulsar4X.ECSLib
                 jDict[key] += toAdd;
             }
         }
-        public static void SafeValueAdd<TKey, TValue>(this JDictionary<TKey, double> jDict, TKey key, double toAdd)
+
+        [PublicAPI]
+        public static void SafeValueAdd<TKey>(this JDictionary<TKey, double> jDict, TKey key, double toAdd)
         {
             if (!jDict.ContainsKey(key))
                 jDict.Add(key, toAdd);

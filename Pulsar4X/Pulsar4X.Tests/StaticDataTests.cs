@@ -227,8 +227,8 @@ namespace Pulsar4X.Tests
         {
             JDictionary<int, int> dict = new JDictionary<int, int>();
             dict.Add(1,1);
-            dict.SafeValueAdd<int, int>(1, 2); //add to exsisting
-            dict.SafeValueAdd<int, int>(2, 5); //add to non exsisting.
+            dict.SafeValueAdd<int>(1, 2); //add to exsisting
+            dict.SafeValueAdd<int>(2, 5); //add to non exsisting.
 
             Assert.AreEqual(dict[1], 3);
             Assert.AreEqual(dict[2], 5);

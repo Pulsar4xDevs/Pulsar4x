@@ -3,15 +3,22 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public static class StarFactory
+    public class StarFactory
     {
+        private GalaxyFactory _galaxyGen;
+
+        public StarFactory(GalaxyFactory galaxyGen)
+        {
+            _galaxyGen = galaxyGen;
+        }
+
         /// <summary>
         /// Creates a star entity in the system.
         /// Does not initialize an orbit.
         /// </summary>
-        public static Entity CreateStar(StarSystem system, double mass, double radius, double age, string starClass, double temperature, float luminosity, SpectralType spectralType, string starName = null)
+        public Entity CreateStar(StarSystem system, double mass, double radius, double age, string starClass, double temperature, float luminosity, SpectralType spectralType, string starName = null)
         {
-            double tempRange = temperature / GalaxyFactory.Settings.StarTemperatureBySpectralType[spectralType].Max; // temp range from 0 to 1.
+            double tempRange = temperature / _galaxyGen.Settings.StarTemperatureBySpectralType[spectralType].Max; // temp range from 0 to 1.
             ushort subDivision = (ushort)Math.Round((1 - tempRange) * 10);
             LuminosityClass luminosityClass = LuminosityClass.V;
 
@@ -30,7 +37,7 @@ namespace Pulsar4X.ECSLib
             NameDB starNameDB = new NameDB(Entity.InvalidEntity, starName);
             OrbitDB starOrbitDB = new OrbitDB();
 
-            return Entity.Create(system.SystemManager, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB});
+            return new Entity(system.SystemManager, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB});
         }
 
         /// <summary>
@@ -43,7 +50,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="system">The Star System the new stars belongs to.</param>
         /// <param name="numStars">The number of stars to create.</param>
         /// <returns>A mass-sorted list of entity ID's for the generated stars.</returns>
-        public static List<Entity> CreateStarsForSystem(StarSystem system, int numStars)
+        public List<Entity> CreateStarsForSystem(StarSystem system, int numStars)
         {
             // Argument Validation.
             if (system == null)
@@ -63,22 +70,22 @@ namespace Pulsar4X.ECSLib
             {
                 // Generate a SpectralType for the star.
                 SpectralType starType;
-                if (GalaxyFactory.Settings.RealStarSystems)
+                if (_galaxyGen.Settings.RealStarSystems)
                 {
-                    starType = GalaxyFactory.Settings.StarTypeDistributionForRealStars.Select(system.RNG.NextDouble());
+                    starType = _galaxyGen.Settings.StarTypeDistributionForRealStars.Select(system.RNG.NextDouble());
                 }
                 else
                 {
-                    starType = GalaxyFactory.Settings.StarTypeDistributionForFakeStars.Select(system.RNG.NextDouble());
+                    starType = _galaxyGen.Settings.StarTypeDistributionForFakeStars.Select(system.RNG.NextDouble());
                 }
 
                 // We will use the one random number to select from all the spectral type ranges. Should give us saner numbers for stars.
                 double randomSelection = system.RNG.NextDouble();
 
                 // Generate the star's datablobs.
-                MassVolumeDB starMVDB = new MassVolumeDB {Mass = GMath.SelectFromRange(GalaxyFactory.Settings.StarMassBySpectralType[starType], randomSelection)};
+                MassVolumeDB starMVDB = new MassVolumeDB { Mass = GMath.SelectFromRange(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection) };
 
-                starMVDB.Volume = MassVolumeDB.GetVolume(starMVDB.Mass, GMath.SelectFromRange(GalaxyFactory.Settings.StarRadiusBySpectralType[starType], randomSelection));
+                starMVDB.Volume = MassVolumeDB.GetVolume(starMVDB.Mass, GMath.SelectFromRange(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
 
                 StarInfoDB starData = GenerateStarInfo(starMVDB, starType, randomSelection);
 
@@ -87,7 +94,7 @@ namespace Pulsar4X.ECSLib
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
 
-                stars.Add(Entity.Create(system.SystemManager, baseDataBlobs));
+                stars.Add(new Entity(system.SystemManager, baseDataBlobs));
             }
 
             // The root star must be the most massive. Find it.
@@ -136,12 +143,12 @@ namespace Pulsar4X.ECSLib
                 StarInfoDB previousStarInfo = previousStar.GetDataBlob<StarInfoDB>();
                 MassVolumeDB currentStarMVDB = currentStar.GetDataBlob<MassVolumeDB>();
 
-                double minDistance = GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max + GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis;
+                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis;
 
                 double sma = minDistance * Math.Pow(system.RNG.NextDouble(), 3);
                 double eccentricity = Math.Pow(system.RNG.NextDouble() * 0.8, 3);
 
-                OrbitDB currentOrbit = new OrbitDB(anchorOrbit.OwningEntity, anchorMVDB, currentStarMVDB, sma, eccentricity, GalaxyFactory.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, Game.Instance.CurrentDateTime);
+                OrbitDB currentOrbit = new OrbitDB(anchorOrbit.OwningEntity, anchorMVDB, currentStarMVDB, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, _galaxyGen.Settings.J2000);
                 currentStar.SetDataBlob(currentOrbit);
 
                 previousStar = currentStar;
@@ -180,18 +187,22 @@ namespace Pulsar4X.ECSLib
         /// <param name="spectralType">The Spectral Type of the star.</param>
         /// <param name="randomSelection">Random selection to generate consistent values.</param>
         /// <returns>A StarInfoDB Populated with data generated based on Spectral Type and SystemBodyDB information provided.</returns>
-        private static StarInfoDB GenerateStarInfo(MassVolumeDB starMVDB, SpectralType spectralType, double randomSelection)
+        private StarInfoDB GenerateStarInfo(MassVolumeDB starMVDB, SpectralType spectralType, double randomSelection)
         {
-            double maxStarAge = GalaxyFactory.Settings.StarAgeBySpectralType[spectralType].Max;
+            double maxStarAge = _galaxyGen.Settings.StarAgeBySpectralType[spectralType].Max;
 
             StarInfoDB starData = new StarInfoDB {// for star age we will make it propertional to the inverse of the stars mass ratio (for that type of star).
                 // while this will produce the same age for the same mass/type of star the chances of getting the same
                 // mass/type are tiny. Tho there will still be the obivious inverse relationship here.
-                Age = (1 - starMVDB.Mass / GalaxyFactory.Settings.StarMassBySpectralType[spectralType].Max) * maxStarAge, SpectralType = spectralType, Temperature = (uint)Math.Round(GMath.SelectFromRange(GalaxyFactory.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)), Luminosity = (float)GMath.SelectFromRange(GalaxyFactory.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)};
+                Age = (1 - starMVDB.Mass / _galaxyGen.Settings.StarMassBySpectralType[spectralType].Max) * maxStarAge,
+                SpectralType = spectralType,
+                Temperature = (uint)Math.Round(GMath.SelectFromRange(_galaxyGen.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)),
+                Luminosity = (float)GMath.SelectFromRange(_galaxyGen.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)
+            };
 
             // Generate a string specifing the full spectral class form a star.
             // start by getting the sub-division, which is based on temp.
-            double sub = starData.Temperature / GalaxyFactory.Settings.StarTemperatureBySpectralType[starData.SpectralType].Max; // temp range from 0 to 1.
+            double sub = starData.Temperature / _galaxyGen.Settings.StarTemperatureBySpectralType[starData.SpectralType].Max; // temp range from 0 to 1.
             starData.SpectralSubDivision = (ushort)Math.Round((1 - sub) * 10); // invert temp range as 0 is hottest, 9 is coolest.
 
             // now get the luminosity class

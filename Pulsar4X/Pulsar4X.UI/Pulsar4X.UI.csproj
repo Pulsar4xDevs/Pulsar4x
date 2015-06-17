@@ -35,6 +35,15 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28No Tests|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug %28No Tests\</OutputPath>
+    <DefineConstants>DEBUG;OPENGL;SPLASHSCREEN;LOG4NET_ENABLED</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
       <Project>{e716fa06-ecdf-b446-96b4-b790aab5713b}</Project>

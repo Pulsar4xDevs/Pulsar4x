@@ -1,125 +1,156 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using Newtonsoft.Json;
 using System.IO;
+using System.IO.Compression;
+using System.Text;
+using System.Threading;
+using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.ECSLib
 {
     /// <summary>
-    /// This cals is responsible for saving a game to/from disk.
+    /// This class is responsible for saving a game to/from disk.
     /// </summary>
     // use: http://www.newtonsoft.com/json/help/html/SerializationAttributes.htm
-    public class SaveGame
+    public static class SaveGame
     {
-        public string File
+        private static readonly JsonSerializer DefaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable() };
+
+        internal static Game CurrentGame { get; private set; }
+        private static readonly object SyncRoot = new object();
+
+        /// <summary>
+        /// Saves the game to a file defined by filePath using the default serializer.
+        /// </summary>
+        [PublicAPI]
+        public static void Save([NotNull] Game game, [NotNull] string filePath, bool compress = false)
         {
-            get; set; 
-        }
+            CheckFile(filePath, FileAccess.Write);
 
-        private struct SaveData
-        {
-            public VersionInfo Version;
-            public DateTime GameDateTime;
-            public EntityManager GlobalEntityManager;
-            public List<StarSystem> StarSystems;
-            public StaticDataStore StaticData;
-        }
-
-        private SaveData _data;
-        private JsonSerializer _serializer;
-
-        public SaveGame(string file = null)
-        {
-            File = file;
-            _serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable() };
-        }
-
-        public void Save(string file = null)
-        {
-            CheckAndUpdateFile(file);
-
-            // first collect the data:
-            CollectGameData();
-
-            using (StreamWriter sw = new StreamWriter(File))
-            using (JsonWriter writer = new JsonTextWriter(sw))
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
-                _serializer.Serialize(writer, _data);
+                Save(game, fileStream, compress);
             }
-        }
-
-        public void Load(string file = null)
-        {
-            CheckAndUpdateFile(file);
-
-            using (StreamReader sr = new StreamReader(File))
-            using (JsonReader reader = new JsonTextReader(sr))
-            {
-                _data = (SaveData)_serializer.Deserialize(reader, typeof(SaveData));
-            }
-
-            // check the version info:
-            if (_data.Version.IsCompatibleWith(VersionInfo.PulsarVersionInfo) == false)
-            {
-                string e = String.Format("The save file is not supported. the save is from version {0}, the game only supports versions: {1}", _data.Version.VersionString, VersionInfo.PulsarVersionInfo.CompatibileVersions);
-
-                throw new System.NotSupportedException(e);
-            }
-
-            // set the static data:
-            StaticDataManager.StaticDataStore = _data.StaticData;
-
-            // get the game to do its post load stuff
-            Game.Instance.PostGameLoad(_data.GameDateTime, _data.GlobalEntityManager, _data.StarSystems);
         }
 
         /// <summary>
-        /// Check if we have a valid file, if we do it updates the cached file record.
+        /// Saves the game to the provided stream using the default serializer.
         /// </summary>
-        /// <param name="file">file to check.</param>
-        private void CheckAndUpdateFile(string file)
+        [PublicAPI]
+        public static void Save([NotNull] Game game, [NotNull] Stream outputStream, bool compress = false)
         {
-            if (string.IsNullOrEmpty(file))
+            CompressionLevel compressionLevel = compress ? CompressionLevel.Optimal : CompressionLevel.NoCompression;
+
+            lock (SyncRoot)
             {
-                // check if cached file valid: 
-                if (string.IsNullOrEmpty(File))
+                using (MemoryStream intermediateStream = new MemoryStream())
                 {
-                    throw new ArgumentNullException("No valid file path provided.");
+                    using (StreamWriter streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                    {
+                        using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                        {
+                            CurrentGame = game;
+                            DefaultSerializer.Serialize(writer, game);
+                            CurrentGame = null;
+                        }
+                    }
+                    using (GZipStream compressionStream = new GZipStream(outputStream, compressionLevel))
+                    {
+                        // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
+                        intermediateStream.Position = 0;
+                        intermediateStream.CopyTo(compressionStream);
+                    }
                 }
             }
-            else
-            {
-                // @todo add more validity checks here.
+        }
 
-                // if we have a problem with the file we should throw before this...
-                File = file;
+        /// <summary>
+        /// Loads the game from the file at the provided filePath using the default serializer.
+        /// </summary>
+        [PublicAPI]
+        public static Game Load([NotNull] string filePath)
+        {
+            CheckFile(filePath, FileAccess.Read);
+
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                return Load(fileStream);
             }
         }
 
-        private void CollectGameData()
-        {
-            _data.Version = VersionInfo.PulsarVersionInfo;
-            _data.GlobalEntityManager = Game.Instance.GlobalManager;
-            _data.StarSystems = Game.Instance.StarSystems;
-            _data.GameDateTime = Game.Instance.CurrentDateTime;
-            _data.StaticData = StaticDataManager.StaticDataStore;
-        }
-    }
-
-    /// <summary>
-    /// A small interface that defines the PostLaod function for datablobs and other classes to use for post de-serialization work.
-    /// It also defines the RegisterPostLoad function that should be called in all an implimenters constructors.
-    /// </summary>
-    public interface IPostLoad
-    {
         /// <summary>
-        /// This function is called after the game has been loaded/Deserialized.
-        /// Make sure you subscribe to the post Load event in your dataBlob constructor using the following:
-        /// <code>Game.Instance.PostLoad += PostLoad;</code>
+        /// Loads the game from the provided stream using the default serializer.
         /// </summary>
-        void PostLoad(object sender, EventArgs e);
+        [PublicAPI]
+        private static Game Load(Stream inputStream)
+        {
+            Game game = new Game();
+
+            lock (SyncRoot)
+            {
+                CurrentGame = game;
+                using (GZipStream compressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                {
+                    using (MemoryStream intermediateStream = new MemoryStream())
+                    {
+                        compressionStream.CopyTo(intermediateStream);
+
+                        intermediateStream.Position = 0;
+
+                        using (StreamReader sr = new StreamReader(intermediateStream))
+                        {
+                            using (JsonReader reader = new JsonTextReader(sr))
+                            {
+                                DefaultSerializer.Populate(reader, game);
+                            }
+                        }
+                    }
+                }
+
+                // check the version info:
+                if (game.Version.IsCompatibleWith(VersionInfo.PulsarVersionInfo) == false)
+                {
+                    string e = string.Format("The save file is not supported. the save is from version {0}, the game only supports versions: {1}", game.Version.VersionString, VersionInfo.PulsarVersionInfo.CompatibleVersions);
+
+                    throw new NotSupportedException(e);
+                }
+
+                // get the game to do its post load stuff
+                game.PostGameLoad();
+                CurrentGame = null;
+            }
+            return game;
+        }
+
+        /// <summary>
+        /// Check if we have a valid file.
+        /// </summary>
+        /// <param name="filePath">Path to the file to check.</param>
+        /// <param name="fileAccess">Type of access to check for.</param>
+        private static void CheckFile(string filePath, FileAccess fileAccess)
+        {
+            // Test writing the file. If there's any issues with the file, this will cause them to throw.
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentNullException("filePath", "No valid file path provided.");
+            }
+
+            if ((fileAccess & FileAccess.Write) == FileAccess.Write)
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                {
+                    byte[] bytes = Encoding.ASCII.GetBytes("Pulsar4X write text.");
+                    fs.Write(bytes, 0, bytes.Length);
+                }
+            }
+            if ((fileAccess & FileAccess.Read) == FileAccess.Read)
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                {
+                    fs.ReadByte();
+                }
+            }
+        }
     }
 }

@@ -35,6 +35,15 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28No Tests|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug %28No Tests\</OutputPath>
+    <DefineConstants>DEBUG;LOG4NET_ENABLED</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.Lib\Pulsar4X.Lib.csproj">
       <Project>{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}</Project>

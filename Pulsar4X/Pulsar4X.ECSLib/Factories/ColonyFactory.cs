@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
             InstallationsDB colonyInstalationsDB = new InstallationsDB();
             blobs.Add(colonyInstalationsDB);
 
-            Entity colonyEntity = Entity.Create(planetEntity.Manager, blobs);
+            Entity colonyEntity = new Entity(planetEntity.Manager, blobs);
             factionEntity.GetDataBlob<FactionDB>().Colonies.Add(colonyEntity);
             return colonyEntity;
         }

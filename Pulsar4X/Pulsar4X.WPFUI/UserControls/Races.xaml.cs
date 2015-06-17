@@ -31,7 +31,8 @@ namespace Pulsar4X.WPFUI
             InitializeComponent();
             //quick hack to get the player faction
             //todo fix this, maybe generate the window with a faction to view
-            _faction = Game.Instance.GlobalManager.GetFirstEntityWithDataBlob<FactionDB>();
+            //_faction = Game.Instance.GlobalManager.GetFirstEntityWithDataBlob<FactionDB>();
+            // Bug: This causes a NullRef exception because I broke Game.Instance.GlobalManager
             _abilities = _faction.GetDataBlob<FactionAbilitiesDB>();
             FactionAbilities_GroupBox.DataContext = _abilities;
         }

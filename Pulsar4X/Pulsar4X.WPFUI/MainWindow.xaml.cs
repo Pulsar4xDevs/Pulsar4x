@@ -1,22 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 using Pulsar4X.ECSLib;
+using Pulsar4X.WPFUI.Properties;
 using Xceed.Wpf.AvalonDock.Layout;
 
 namespace Pulsar4X.WPFUI
@@ -26,7 +18,9 @@ namespace Pulsar4X.WPFUI
     /// </summary>
     public partial class MainWindow
     {
-        double _customAdvSimValue = 5;
+        private double _customAdvSimValue = 5;
+        internal Game CurrentGame;
+        private readonly CancellationToken _pulseCancellationToken;
 
         [UsedImplicitly]
         public string CustomAdvSimValue
@@ -51,43 +45,61 @@ namespace Pulsar4X.WPFUI
             MenuItem_Fullscreen.IsChecked = WindowState == WindowState.Maximized;
             MenuItem_Boarderless.IsChecked = WindowStyle == WindowStyle.None;
 
-            // Temporary so I can test layout without messing with UI/Engine comms.
-            TBT_Toolbar.IsEnabled = true;
+            _pulseCancellationToken = new CancellationToken();
         }
 
         private void NewGame_Click(object sender, RoutedEventArgs e)
         {
-            if(UIComms.Instance.IsEngineFired())
+            // Todo: New Game window to set the game parameters.
+            CurrentGame = new Game("TestGame", 100);
+
+            if (CurrentGame.IsLoaded)
             {
-                MessageBoxResult result = MessageBox.Show("Game is already started. Are you sure you want start a new game?", "New Game", MessageBoxButton.YesNo);
-                if(result == MessageBoxResult.No)
-                    return;
-                UIComms.Instance.HaltEngine();
+                TBT_Toolbar.IsEnabled = true;
+                MessageBox.Show(this, "Game Created.", "Result");
             }
-            UIComms.Instance.FireEngine();
+
             e.Handled = true;
         }
 
-        private void LoadGame_Click(object sender, RoutedEventArgs e)
+        private async void LoadGame_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
             fileDialog.Filter = "json Save File|*.json";
             if(fileDialog.ShowDialog() == true)
             {
                 string pathToFile = fileDialog.FileName;
-                UIComms.Instance.SendMessage(new Message(MessageType.Load, pathToFile));
+                try
+                {
+                    await Task.Run(() => SaveGame.Load(pathToFile));
+                    MessageBox.Show(this, "Game Loaded.", "Result");
+                }
+                catch (Exception exception)
+                {
+                    DisplayException("loading the game", exception);
+                }
             }
             e.Handled = true;
         }
 
-        private void SaveGame_Click(object sender, RoutedEventArgs e)
+        private async void SaveGame_Click(object sender, RoutedEventArgs e)
         {
             SaveFileDialog fileDialog = new SaveFileDialog();
             fileDialog.Filter = "json Save File|*.json";
             if(fileDialog.ShowDialog() == true)
             {
                 string pathToFile = fileDialog.FileName;
-                UIComms.Instance.SendMessage(new Message(MessageType.Save, pathToFile));
+                try
+                {
+                    await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile));
+                    //await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, true)); // Compressed
+                    MessageBox.Show(this, "Game Saved.", "Result");
+                }
+                catch (Exception exception)
+                {
+                    DisplayException("saving the game", exception);
+                }
+
             }
             e.Handled = true;
         }
@@ -105,19 +117,19 @@ namespace Pulsar4X.WPFUI
                 // TODO: Stop using Properties.Settings.Default.
                 // It places files in %appdata% folder, leaving orphaned files on uninstallation.
                 MenuItem_Boarderless.IsChecked = false;
-                Properties.Settings.Default.WindowStyle = 1;
+                Settings.Default.WindowStyle = 1;
                 WindowStyle = WindowStyle.SingleBorderWindow;
-                Properties.Settings.Default.Save();
+                Settings.Default.Save();
             }
             else
             {
                 MenuItem_Boarderless.IsChecked = true;
-                Properties.Settings.Default.WindowStyle = 0;
+                Settings.Default.WindowStyle = 0;
                 WindowStyle = WindowStyle.None;
                 //Minimizing, then maximizing gets the taskbar out of our way.
                 WindowState = WindowState.Minimized;
-                WindowState = (WindowState)Properties.Settings.Default.WindowState;
-                Properties.Settings.Default.Save();
+                WindowState = (WindowState)Settings.Default.WindowState;
+                Settings.Default.Save();
             }
             e.Handled = true;
         }
@@ -126,16 +138,16 @@ namespace Pulsar4X.WPFUI
             if (MenuItem_Fullscreen.IsChecked)
             {
                 MenuItem_Fullscreen.IsChecked = false;
-                Properties.Settings.Default.WindowStyle = 0;
+                Settings.Default.WindowStyle = 0;
                 WindowState = WindowState.Normal;
-                Properties.Settings.Default.Save();
+                Settings.Default.Save();
             }
             else
             {
                 MenuItem_Fullscreen.IsChecked = true;
-                Properties.Settings.Default.WindowState = 2;
+                Settings.Default.WindowState = 2;
                 WindowState = WindowState.Maximized;
-                Properties.Settings.Default.Save();
+                Settings.Default.Save();
             }
             e.Handled = true;
         }
@@ -227,58 +239,80 @@ namespace Pulsar4X.WPFUI
         /// <summary>
         /// Handles all button clicks from AdvSim toolbar.
         /// </summary>
-        private void TBB_AdvSim_Click(object sender, RoutedEventArgs e)
+        private async void TBB_AdvSim_Click(object sender, RoutedEventArgs e)
         {
-            TimeSpan pulseLength = TimeSpan.Zero;
-            Button button = e.Source as Button;
-            if (button != null)
+            TimeSpan pulseLength = GetPulseLength(e.Source as Button);
+
+            if (pulseLength == TimeSpan.Zero)
             {
-                switch (button.Name)
-                {
-                    case "TBB_AdvSim_5Sec":
-                        pulseLength = TimeSpan.FromSeconds(5);
-                        break;
-                    case "TBB_AdvSim_30Sec":
-                        pulseLength = TimeSpan.FromSeconds(30);
-                        break;
-                    case "TBB_AdvSim_2Min":
-                        pulseLength = TimeSpan.FromMinutes(2);
-                        break;
-                    case "TBB_AdvSim_5Min":
-                        pulseLength = TimeSpan.FromMinutes(5);
-                        break;
-                    case "TBB_AdvSim_1Hour":
-                        pulseLength = TimeSpan.FromHours(1);
-                        break;
-                    case "TBB_AdvSim_3Hour":
-                        pulseLength = TimeSpan.FromHours(3);
-                        break;
-                    case "TBB_AdvSim_8Hour":
-                        pulseLength = TimeSpan.FromHours(8);
-                        break;
-                    case "TBB_AdvSim_1Day":
-                        pulseLength = TimeSpan.FromDays(1);
-                        break;
-                    case "TBB_AdvSim_5Day":
-                        pulseLength = TimeSpan.FromDays(5);
-                        break;
-                    case "TBB_AdvSim_30Day":
-                        pulseLength = TimeSpan.FromDays(30);
-                        break;
-                    case "TBB_AdvSim_Cust":
-                        pulseLength = GetCustomPulseLength();
-                        break;
-                }
+                return;
             }
-            else
+
+            var pulseProgress = new Progress<double>(UpdatePulseProgress);
+
+            int secondsPulsed;
+
+            try
             {
-                pulseLength = GetCustomPulseLength();
+                secondsPulsed = await Task.Run(() => CurrentGame.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
             }
-            if (pulseLength != TimeSpan.Zero)
+            catch (Exception exception)
             {
-                // Message the lib to pulse.
-                e.Handled = true;
+                DisplayException("executing a pulse", exception);
             }
+            e.Handled = true;
+        }
+
+        private void DisplayException(string activity, Exception exception)
+        {
+            MessageBox.Show("Exception thrown while " + activity + ":\n\n" +
+                    exception.GetType() + "\n" +
+                    exception.Message +
+                    "\n\nThrown in function:\n" +
+                    exception.TargetSite +
+                    "\n\nStack Trace:\n" +
+                    exception.StackTrace,
+                    "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private TimeSpan GetPulseLength(Button button)
+        {
+            if (button == null)
+            {
+                return GetCustomPulseLength();
+            }
+            switch (button.Name)
+            {
+                case "TBB_AdvSim_5Sec":
+                    return TimeSpan.FromSeconds(5);
+                case "TBB_AdvSim_30Sec":
+                    return TimeSpan.FromSeconds(30);
+                case "TBB_AdvSim_2Min":
+                    return TimeSpan.FromMinutes(2);
+                case "TBB_AdvSim_5Min":
+                    return TimeSpan.FromMinutes(5);
+                case "TBB_AdvSim_1Hour":
+                    return TimeSpan.FromHours(1);
+                case "TBB_AdvSim_3Hour":
+                    return TimeSpan.FromHours(3);
+                case "TBB_AdvSim_8Hour":
+                    return TimeSpan.FromHours(8);
+                case "TBB_AdvSim_1Day":
+                    return TimeSpan.FromDays(1);
+                case "TBB_AdvSim_5Day":
+                    return TimeSpan.FromDays(5);
+                case "TBB_AdvSim_30Day":
+                    return TimeSpan.FromDays(30);
+                case "TBB_AdvSim_Cust":
+                    return GetCustomPulseLength();
+                default:
+                    throw new ArgumentException("Invalid AdvSim Button");
+            }
+        }
+
+        private void UpdatePulseProgress(double progressPercent)
+        {
+            // Do some UI stuff with Progress percent
         }
 
         /// <summary>

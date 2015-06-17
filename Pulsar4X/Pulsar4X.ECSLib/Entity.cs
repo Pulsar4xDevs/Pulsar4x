@@ -1,217 +1,248 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Channels;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Pulsar4X.ECSLib
 {
-
-    public delegate void EntityManagerChangeEvent(object sender, EntityManagerChangeEventArgs args);
-
-    public class EntityManagerChangeEventArgs
-    {
-        public readonly EntityManager OldManager;
-        public readonly EntityManager NewManager;
-
-        public EntityManagerChangeEventArgs(EntityManager oldManager, EntityManager newManager)
-        {
-            OldManager = oldManager;
-            NewManager = newManager;
-        }
-    }
-
     [JsonConverter(typeof(EntityConverter))]
     public class Entity
     {
-        public Guid Guid { get; private set; }
-        public int ID { get; private set; }
+        [PublicAPI]
+        public Guid Guid { get; internal set; }
+
+        [CanBeNull]
+        [PublicAPI]
         public EntityManager Manager { get; private set; }
-        public ComparableBitArray DataBlobMask { get { return Manager.GetMask(this); } }
 
-        public event EventHandler Deleting;
-        public event EventHandler Deleted;
+        [NotNull]
+        [PublicAPI]
+        public ComparableBitArray DataBlobMask { get; private set; }
 
-        public event EntityManagerChangeEvent ChangingManagers;
-        public event EntityManagerChangeEvent ChangedManagers;
+        [NotNull]
+        [PublicAPI]
+        public ReadOnlyCollection<BaseDataBlob> DataBlobs { get { return new ReadOnlyCollection<BaseDataBlob>(DataBlobList); } }
+        internal readonly List<BaseDataBlob> DataBlobList;
 
-        private static EntityManager _invalidManager;
+        [NotNull]
+        [PublicAPI]
         public static Entity InvalidEntity
         {
             get
             {
-                lock (lockObj)
+                lock (LockObj)
                 {
                     if (_invalidEntity == null)
-                        _invalidEntity = new Entity(Guid.Empty, _invalidManager);
+                        _invalidEntity = new Entity();
                     return _invalidEntity;
                 }
             }
         }
         private static Entity _invalidEntity;
 
-        private static object lockObj = new object();
+        private static readonly object LockObj = new object();
 
-
-        internal Entity(Guid guid, EntityManager currentManager)
+        [PublicAPI]
+        public Entity(IEnumerable<BaseDataBlob> dataBlobs = null)
         {
-            Guid = guid;
-            Manager = currentManager;
+            Guid = Guid.Empty;
+            Manager = null;
+            DataBlobMask = EntityManager.BlankDataBlobMask();
 
-            if (_invalidManager == null)
-                _invalidManager = new EntityManager();
+            DataBlobList = new List<BaseDataBlob>(EntityManager.DataBlobTypes.Count);
 
-        }
-
-        public bool IsValid { get { return Manager.IsValidEntity(this); } }
-
-        public List<BaseDataBlob> GetAllDataBlobs()
-        {
-            return Manager.GetAllDataBlobsOfEntity(this);
-        }
-
-        public T GetDataBlob<T>() where T : BaseDataBlob
-        {
-            return Manager.GetDataBlob<T>(ID);
-        }
-
-        public T GetDataBlob<T>(int typeIndex) where T : BaseDataBlob
-        {
-            return Manager.GetDataBlob<T>(ID, typeIndex);
-        }
-
-        public void SetDataBlob<T>(T dataBlob) where T : BaseDataBlob
-        {
-            Manager.SetDataBlob(ID, dataBlob);
-        }
-
-        public void SetDataBlob(BaseDataBlob dataBlob, int typeIndex)
-        {
-            Manager.SetDataBlob(ID, dataBlob, typeIndex);
-        }
-
-        public void RemoveDataBlob<T>() where T : BaseDataBlob
-        {
-            Manager.RemoveDataBlob<T>(ID);
-        }
-
-        public void RemoveDataBlob(int typeIndex)
-        {
-            Manager.RemoveDataBlob(ID, typeIndex);
-        }
-
-        public void Delete()
-        {
-            if (Deleting != null)
+            for (int i = 0; i < EntityManager.DataBlobTypes.Count; i++)
             {
-                Deleting(this, EventArgs.Empty);
+                DataBlobList.Add(null);
             }
 
-            Manager.RemoveEntity(this);
-
-            if (Deleted != null)
+            if (dataBlobs == null)
             {
-                Deleted(this, EventArgs.Empty);
+                return;
+            }
+
+            foreach (BaseDataBlob dataBlob in dataBlobs)
+            {
+                int typeIndex;
+                EntityManager.TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
+
+                SetDataBlob(dataBlob);
             }
         }
 
-        public void Transfer(EntityManager newManager)
+        internal Entity([NotNull] EntityManager entityManager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.Empty, entityManager, dataBlobs)
         {
-            if (newManager == null)
-            {
-                throw new ArgumentNullException("newManager");
-            }
+        }
 
-            if (ChangingManagers != null)
-            {
-                ChangingManagers(this, new EntityManagerChangeEventArgs(Manager, newManager));
-            }
+        internal Entity(Guid entityGuid, [NotNull] EntityManager entityManager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(dataBlobs)
+        {
+            Guid = entityGuid;
 
-            Manager.TransferEntity(this, newManager);
-            Manager = newManager;
+            Register(entityManager);
+        }
 
-            if (ChangedManagers != null)
-            {
-                ChangedManagers(this, new EntityManagerChangeEventArgs(Manager, newManager));
-            }
+        [PublicAPI]
+        public bool IsValid
+        {
+            get { return this != InvalidEntity && Manager != null && Manager.IsValidEntity(this); }
         }
 
         /// <summary>
-        /// Clones this entity into the specified entity manager, returns the new clone.
+        /// Direct lookup of an entity's DataBlob.
+        /// Slower than GetDataBlob(int typeIndex)
         /// </summary>
-        /// <param name="toManager">Manager you want to place the new clone into.</param>
-        /// <returns>The new clone.</returns>
-        /// <exception cref="System.ArgumentNullException"></exception>
-        public Entity Clone(EntityManager toManager)
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        [PublicAPI]
+        public T GetDataBlob<T>() where T : BaseDataBlob
         {
-            List<BaseDataBlob> dataBlobs = GetAllDataBlobs();
-            List<BaseDataBlob> clonedDataBlobs = new List<BaseDataBlob>(dataBlobs.Count);
+            int typeIndex = EntityManager.GetTypeIndex<T>();
+            return (T)DataBlobList[typeIndex];
+        }
 
-            foreach (BaseDataBlob baseDataBlob in dataBlobs)
+        /// <summary>
+        /// Direct lookup of an entity's DataBlob.
+        /// Slower than directly accessing the DataBlob list.
+        /// </summary>
+        /// <typeparam name="T">Non-abstract derivative of BaseDataBlob</typeparam>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entityID is passed.</exception>
+        [PublicAPI]
+        public T GetDataBlob<T>(int typeIndex) where T : BaseDataBlob
+        {
+            return (T)DataBlobList[typeIndex];
+        }
+
+        [PublicAPI]
+        public void SetDataBlob<T>([NotNull] T dataBlob) where T : BaseDataBlob
+        {
+            int typeIndex;
+            EntityManager.TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
+
+            SetDataBlob(dataBlob, typeIndex);
+        }
+
+        [PublicAPI]
+        public void SetDataBlob([NotNull] BaseDataBlob dataBlob, int typeIndex)
+        {
+            DataBlobList[typeIndex] = dataBlob;
+            DataBlobMask[typeIndex] = true;
+            dataBlob.OwningEntity = this;
+        }
+
+        [PublicAPI]
+        public void RemoveDataBlob<T>() where T : BaseDataBlob
+        {
+            int typeIndex = EntityManager.GetTypeIndex<T>();
+            
+            DataBlobList[typeIndex] = null;
+            DataBlobMask[typeIndex] = false;
+        }
+
+        [PublicAPI]
+        public void RemoveDataBlob(int typeIndex)
+        {
+            DataBlobList[typeIndex] = null;
+            DataBlobMask[typeIndex] = false;
+        }
+
+        [PublicAPI]
+        public void Register([NotNull] EntityManager manager)
+        {
+            if (this == InvalidEntity)
             {
-                clonedDataBlobs.Add((BaseDataBlob) baseDataBlob.Clone());
-            } 
-
-            return Create(toManager, clonedDataBlobs);
-        }
-
-        internal void SetID(int newID)
-        {
-            ID = newID;
-        }
-
-        public static Entity Create(EntityManager manager, List<BaseDataBlob> dataBlobs = null)
-        {
+                throw new InvalidOperationException("Cannot register the static invalid entity.");
+            }
             if (manager == null)
             {
                 throw new ArgumentNullException("manager");
             }
-            return manager.CreateEntity(dataBlobs);
+            if (Manager != null)
+            {
+                throw new InvalidOperationException("Cannot register an entity twice.");
+            }
+
+            Entity checkEntity;
+            while (Guid == Guid.Empty || manager.FindEntityByGuid(Guid, out checkEntity))
+            {
+                Guid = Guid.NewGuid();
+            }
+            manager.Register(this);
+            Manager = manager;
+
         }
 
-#if DEBUG
+        internal void Transfer([NotNull] EntityManager newManager)
+        {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot transfer an invalid entity. Try registering it instead.");
+            }
+            if (newManager == null)
+            {
+                throw new ArgumentNullException("newManager");
+            }
+            // ReSharper disable once PossibleNullReferenceException
+            // IsValid verifies that Manager is not null.
+            Manager.TransferEntity(this, newManager);
+        }
+
         public override string ToString()
         {
             return Guid.ToString();
         }
-#endif
 
+        [PublicAPI]
         public bool HasDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = EntityManager.GetTypeIndex<T>();
             return DataBlobMask[typeIndex];
         }
+
+        [PublicAPI]
+        public Entity Clone()
+        {
+            List<BaseDataBlob> clonedDataBlobs = 
+                (from dataBlob in DataBlobList
+                                   where dataBlob != null
+                                   select (BaseDataBlob)dataBlob.Clone()).ToList();
+
+            return new Entity(clonedDataBlobs);
+        }
+
+        [PublicAPI]
+        public Entity Clone(EntityManager manager)
+        {
+            Entity clone = Clone();
+            clone.Register(manager);
+            return clone;
+        }
     }
 
-    public class EntityConverter : JsonConverter
+    internal class EntityConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
-            return (objectType == typeof(Guid));
+            return objectType == typeof(Entity);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Entity entity;
             Guid entityGuid = Guid.Parse(reader.Value.ToString());
+     
             if (entityGuid == Guid.Empty)
                 return Entity.InvalidEntity;
-            if (EntityManager.FindEntityByGuid(entityGuid, out entity))
+            if (SaveGame.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                 return entity;
 
-            // If we couldn't find the Guid (Entity is in a manager that hasn't loaded)
-            // create the entity in the Global Manager. We'll transfer it to the correct manager
-            // when we deserialize it.
-            return new Entity(entityGuid, Game.Instance.GlobalManager);
+            entity = new Entity(entityGuid, SaveGame.CurrentGame.GlobalManager);
+            return entity;
         }
-
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            writer.WriteValue(((Entity)value).Guid);
+            Entity entity = (Entity)value;
+            serializer.Serialize(writer, entity.Guid);
         }
     }
 }

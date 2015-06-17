@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
             blobs.Add(scientist);
             blobs.Add(bonus);
 
-            Entity officer = Entity.Create(entityManager, blobs);
+            Entity officer = new Entity(entityManager, blobs);
 
             return officer;    
         }

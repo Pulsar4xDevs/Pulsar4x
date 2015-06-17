@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace Pulsar4X.ECSLib
 {
@@ -21,9 +17,9 @@ namespace Pulsar4X.ECSLib
 
         public int EconLastTickRun { get; set; }
 
-        public StarSystem(string name, int seed)
+        public StarSystem(Game game, string name, int seed)
         {
-            SystemManager = new EntityManager();
+            SystemManager = new EntityManager(game);
             Neighbors = new List<StarSystem>();
             NameDB = new NameDB(Entity.InvalidEntity, name);
             Seed = seed;

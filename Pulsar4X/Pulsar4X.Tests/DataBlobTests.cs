@@ -171,7 +171,7 @@ namespace Pulsar4X.Tests
         private Entity CreateNode(Entity parentEntity)
         {
             ConcreteTreeHierarchyDB nodeDB = new ConcreteTreeHierarchyDB(parentEntity);
-            Entity nodeEntity = Entity.Create(_manager);
+            Entity nodeEntity = new Entity(_manager);
             nodeEntity.SetDataBlob(nodeDB);
 
             return nodeEntity;

@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
             if (!(obj is Vector4))
                 return false;
 
-            return this.Equals((Vector4)obj);
+            return Equals((Vector4)obj);
         }
 
         /// <summary>

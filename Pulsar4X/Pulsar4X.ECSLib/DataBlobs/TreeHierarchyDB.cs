@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public abstract class TreeHierarchyDB : BaseDataBlob, IPostLoad
+    public abstract class TreeHierarchyDB : BaseDataBlob
     {
         [CanBeNull]
         public Entity Parent
@@ -43,7 +44,8 @@ namespace Pulsar4X.ECSLib
                 return GetSameTypeDB(Parent);
             }
         }
-
+        
+        [JsonIgnore]
         [NotNull]
         public Entity Root
         {
@@ -81,7 +83,6 @@ namespace Pulsar4X.ECSLib
             Children = new List<Entity>();
 
             PropertyChanged += OnPropertyChanged;
-            Game.Instance.PostLoad += PostLoad;
         }
 
         private void AddChild(Entity child)
@@ -90,18 +91,16 @@ namespace Pulsar4X.ECSLib
             GetSameTypeDB(child).PropertyChanged += OnPropertyChanged;
         }
 
-        private bool RemoveChild(Entity child)
+        private void RemoveChild(Entity child)
         {
             bool removed = Children.Remove(child);
             if (!removed)
             {
-                return false;
+                return;
             }
 
             // Unsubscribe from the event.
             GetSameTypeDB(child).PropertyChanged -= OnPropertyChanged;
-
-            return true;
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -121,21 +120,20 @@ namespace Pulsar4X.ECSLib
 
         private TreeHierarchyDB GetSameTypeDB(Entity entity)
         {
-            if (!entity.IsValid)
-            {
-                throw new ArgumentException("Invalid Entity");
-            }
-
             int typeIndex;
             EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
 
             return entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
         }
 
-        public void PostLoad(object sender, EventArgs e)
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
         {
-            Game.Instance.PostLoad -= PostLoad;
+            SaveGame.CurrentGame.PostLoad += PostLoadHandler;
+        }
 
+        private void PostLoadHandler(object sender, EventArgs e)
+        {
             if (Parent != null && ParentDB != null && OwningEntity != null)
             {
                 ParentDB.AddChild(OwningEntity);
@@ -148,26 +146,14 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public sealed class ConcreteTreeHierarchyDB : TreeHierarchyDB
     {
-        public ConcreteTreeHierarchyDB() 
-            : base(null)
-        {
-
-        }
-
         public ConcreteTreeHierarchyDB(Entity parent)
             : base(parent)
-        {
-
-        }
-
-        public ConcreteTreeHierarchyDB(ConcreteTreeHierarchyDB concreteTreeHierarchyDB)
-            : base(concreteTreeHierarchyDB.Parent)
         {
         }
 
         public override object Clone()
         {
-            return new ConcreteTreeHierarchyDB(this);
+            return new ConcreteTreeHierarchyDB(Parent);
         }
     }
 }

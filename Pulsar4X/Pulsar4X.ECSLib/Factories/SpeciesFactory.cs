@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             blobs.Add(name);
             blobs.Add(speciesDB);
-            Entity species = Entity.Create(systemEntityManager, blobs);
+            Entity species = new Entity(systemEntityManager, blobs);
 
             return species;
         }
@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             blobs.Add(name);
             blobs.Add(speciesDB);
-            Entity species = Entity.Create(systemEntityManager, blobs);
+            Entity species = new Entity(systemEntityManager, blobs);
 
             return species;
         }

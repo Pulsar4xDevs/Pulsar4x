@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private bool Equals(ComparableBitArray other)
         {
-            return Length == other.Length && _backingValues.SequenceEqual(other._backingValues);
+            return other != null && Length == other.Length && _backingValues.SequenceEqual(other._backingValues);
         }
 
         /// <summary>

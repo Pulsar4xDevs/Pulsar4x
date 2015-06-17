@@ -15,11 +15,6 @@ namespace Pulsar4X.ECSLib
         private static int _starInfoTypeIndex = -1;
 
         /// <summary>
-        /// Number of orbits updated last time the processor was run.
-        /// </summary>
-        public static int OrbitsUpdatedLastProcess = -1;
-
-        /// <summary>
         /// Determines if this processor should use multithreading.
         /// </summary>
         private const bool UseMultiThread = true;
@@ -27,7 +22,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Initializes this Processor.
         /// </summary>
-        public static void Initialize()
+        internal static void Initialize()
         {
             // Resolve TypeIndexes.
             _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
@@ -36,15 +31,12 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Function called by Game.AdvanceTime to run this processor.
+        /// Function called by Game.RunProcessors to run this processor.
         /// </summary>
-        /// <param name="systems"></param>
-        /// <param name="deltaSeconds"></param>
-        public static void Process(List<StarSystem> systems, int deltaSeconds)
+        internal static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
-            OrbitsUpdatedLastProcess = 0;
 
-            DateTime currentTime = Game.Instance.CurrentDateTime;
+            DateTime currentTime = game.CurrentDateTime;
 
             if (UseMultiThread)
             {
@@ -81,7 +73,6 @@ namespace Pulsar4X.ECSLib
 
         private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime)
         {
-            OrbitsUpdatedLastProcess++;
             OrbitDB entityOrbitDB = entity.GetDataBlob<OrbitDB>(_orbitTypeIndex);
             PositionDB entityPosition = entity.GetDataBlob<PositionDB>(_positionTypeIndex);
 

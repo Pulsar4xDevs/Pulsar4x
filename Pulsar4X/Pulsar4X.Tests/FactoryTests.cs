@@ -14,7 +14,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new LibProcessLayer(), "Unit Test Game");
+            _game = new Game("Unit Test Game");
         }
 
         [Test]
@@ -45,8 +45,8 @@ namespace Pulsar4X.Tests
         public void CreateNewColony()
         {
             Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terran");
-            Entity starSystem = Entity.Create(_game.GlobalManager);
-            Entity planet = Entity.Create(starSystem.Manager, new List<BaseDataBlob>());
+            Entity starSystem = new Entity(_game.GlobalManager);
+            Entity planet = new Entity(starSystem.Manager, new List<BaseDataBlob>());
             Entity species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
             var requiredDataBlobs = new List<Type>()
             {

@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
             // get list of default sub-directories:
             var dataDirs = Directory.GetDirectories(DefaultDataDirectory);
 
-            // safty check:
+            // safety check:
             if (dataDirs.GetLength(0) < 1)
             {
                 return;
@@ -116,7 +116,7 @@ namespace Pulsar4X.ECSLib
             }
             catch (Exception e)
             {
-                if (e.GetType() == typeof(Newtonsoft.Json.JsonSerializationException))
+                if (e.GetType() == typeof(JsonSerializationException))
                     throw new StaticDataLoadException("Bad Json provided in directory: " + directory, e);
 
                 if (e.GetType() == typeof(DirectoryNotFoundException))
@@ -243,8 +243,8 @@ namespace Pulsar4X.ECSLib
 
     /// <summary>
     /// This is a simple attribute that should be attached to Static Data structs. It assists reflection in finding 
-    /// Static data and dealing with it. It has two peroperties, HasID and IDPropertyName, that are used to 
-    /// signel that this peice of static data has a unique guid that repesents it.
+    /// Static data and dealing with it. It has two properties, HasID and IDPropertyName, that are used to 
+    /// signal that this piece of static data has a unique guid that represents it.
     /// </summary>
     [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
     public class StaticDataAttribute : Attribute

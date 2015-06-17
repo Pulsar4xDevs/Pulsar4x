@@ -16,7 +16,6 @@ namespace Pulsar4X.WPFUI
     /// </summary>
     public partial class App
     {
-        private LocalClientTransportLayer _localClient;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -46,9 +45,6 @@ namespace Pulsar4X.WPFUI
                 clientGuid = Guid.NewGuid();
                 WPFUI.Properties.Settings.Default.ClientGuid = clientGuid.ToString();
             }
-            _localClient = new LocalClientTransportLayer(, clientGuid);
-
-            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(Target));
         }
     }
 }

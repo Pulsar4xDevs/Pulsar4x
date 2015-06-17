@@ -37,7 +37,7 @@ namespace Pulsar4X.Tests
             planetDB.SupportsPopulations = true;
 
             blobs.Add(planetDB);
-            Entity planetEntity = Entity.Create(_entityManager, blobs);
+            Entity planetEntity = new Entity(_entityManager, blobs);
 
             JDictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
 
