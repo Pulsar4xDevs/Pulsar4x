@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -14,34 +13,38 @@ namespace Pulsar4X.ECSLib
     [JsonConverter(typeof(EntityManagerConverter))]
     public class EntityManager
     {
-        public class EntityManagerConverter : JsonConverter
+        private class EntityManagerConverter : JsonConverter
         {
+            /// <summary>
+            /// Serializes the EntityManager by manually serializing the Entities in the _localEntityDictionary.
+            /// Manual entity serialization is done because the Entity class has a JsonConverter to serialize Entities as Guids only.
+            /// </summary>
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
                 EntityManager manager = (EntityManager)value;
-                writer.WriteStartObject();
-                writer.WritePropertyName("Entities");
-                writer.WriteStartArray();
+                writer.WriteStartObject(); // Start of our EntityManager object.
+                writer.WritePropertyName("Entities"); // Write Entities list PropertyName
+                writer.WriteStartArray(); // Start the Entities array.
                 foreach (Entity entity in manager._localEntityDictionary.Values)
                 {
-                    writer.WriteStartObject();
-                    writer.WritePropertyName("Guid");
-                    serializer.Serialize(writer, entity.Guid);
+                    writer.WriteStartObject(); // Start the Entity.
+                    writer.WritePropertyName("Guid"); // Write the Guid PropertyName
+                    serializer.Serialize(writer, entity.Guid); // Write the Entity's guid.
 
-                    foreach (BaseDataBlob dataBlob in entity.DataBlobList)
+                    foreach (BaseDataBlob dataBlob in entity.DataBlobList.Where(dataBlob => dataBlob != null))
                     {
-                        if (dataBlob != null)
-                        {
-                            writer.WritePropertyName(dataBlob.GetType().Name);
-                            serializer.Serialize(writer, dataBlob);
-                        }
+                        writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
+                        serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
                     }
-                    writer.WriteEndObject();
+                    writer.WriteEndObject(); // End then Entity.
                 }
-                writer.WriteEndArray();
-                writer.WriteEndObject();
+                writer.WriteEndArray(); // End the Entities array.
+                writer.WriteEndObject(); // End the EntityManager object.
             }
 
+            /// <summary>
+            /// Reconstructs the EntityManager from the JsonRead.
+            /// </summary>
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
                 EntityManager manager = new EntityManager(SaveGame.CurrentGame);
@@ -54,15 +57,18 @@ namespace Pulsar4X.ECSLib
                     reader.Read(); // ACTUAL GUID
                     Guid entityGuid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
 
+                    // Attempt a global Guid lookup of the Guid.
                     Entity entity;
                     if (manager.FindEntityByGuid(entityGuid, out entity))
                     {
+                        // An Entity reference for this Guid was previously created during deserialization.
+                        // Transfer the Entity to this manager, and populate it's dataBlobs.
                         entity.Transfer(manager);
                     }
                     else
                     {
-                        entity = new Entity { Guid = entityGuid };
-                        entity.Register(manager);
+                        // No previous entity found. Create our own with the Guid and register it to this manager.
+                        entity = new Entity(entityGuid, manager);
                     }
 
                     reader.Read(); // PropertyName DATABLOB
@@ -92,7 +98,7 @@ namespace Pulsar4X.ECSLib
 
         private readonly Game _game;
         [JsonProperty]
-        private readonly Dictionary<Guid, Entity> _localEntityDictionary = new JDictionary<Guid, Entity>();
+        private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
         private readonly object _entityLock = new object();
 
         /// <summary>
@@ -239,6 +245,20 @@ namespace Pulsar4X.ECSLib
         public static ComparableBitArray BlankDataBlobMask()
         {
             return new ComparableBitArray(DataBlobTypes.Count);
+        }
+
+        /// <summary>
+        /// Returns a blank list used for storing datablobs by typeIndex.
+        /// </summary>
+        /// <returns></returns>
+        internal static List<BaseDataBlob> BlankDataBlobList()
+        {
+            var blankList = new List<BaseDataBlob>(DataBlobTypes.Count);
+            for (int i = 0; i < DataBlobTypes.Count; i++)
+            {
+                blankList.Add(null);
+            }
+            return blankList;
         }
 
         /// <summary>

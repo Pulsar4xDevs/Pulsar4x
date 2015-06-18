@@ -17,6 +17,7 @@ namespace Pulsar4X.ECSLib
         public VersionInfo Version { get { return VersionInfo.PulsarVersionInfo;} }
 
         [PublicAPI]
+        [JsonIgnore]
         public bool IsLoaded { get; internal set; }
 
         [PublicAPI]

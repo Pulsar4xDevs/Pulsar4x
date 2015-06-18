@@ -5,17 +5,17 @@ namespace Pulsar4X.ECSLib
 {
     public class StarSystem
     {
-        public EntityManager SystemManager { get; private set; }
-
-        public List<StarSystem> Neighbors { get; private set; }
+        public int Seed { get; private set; }
 
         public NameDB NameDB { get; private set; }
-
-        public int Seed { get; private set; }
 
         public Random RNG { get; private set; }
 
         public int EconLastTickRun { get; set; }
+
+        public EntityManager SystemManager { get; private set; }
+
+        public List<StarSystem> Neighbors { get; private set; }
 
         public StarSystem(Game game, string name, int seed)
         {

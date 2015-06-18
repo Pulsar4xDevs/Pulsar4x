@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// The version string. For example 1.1 or Major.Minor
-        /// The version number should only contain numeric digits with periods seperating the different sections.
+        /// The version number should only contain numeric digits with periods separating the different sections.
         /// </summary>
         public string VersionString;
 
@@ -37,8 +37,7 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                VersionInfo gameVersionInfo = new VersionInfo();
-                gameVersionInfo.Name = "Pulsar4x";
+                VersionInfo gameVersionInfo = new VersionInfo {Name = "Pulsar4X Alpha"};
                 AssemblyName assName = Assembly.GetAssembly(typeof(VersionInfo)).GetName();
                 gameVersionInfo.VersionString = assName.Version.Major + "." + assName.Version.Minor;
                 gameVersionInfo.MajorVersion = assName.Version.Major;
@@ -54,7 +53,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public bool IsCompatibleWith(VersionInfo info)
         {
-            var versions = info.CompatibleVersions.Split(',');
+            string[] versions = info.CompatibleVersions.Split(',');
             foreach (var ver in versions)
             {
                 if (ver == VersionString)
