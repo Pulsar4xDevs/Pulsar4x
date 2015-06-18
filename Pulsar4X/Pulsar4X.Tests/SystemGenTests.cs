@@ -172,6 +172,10 @@ namespace Pulsar4X.Tests
             }
 
             // add orbit details:
+            varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "SemiMajorAxis", "NS");
+            varNdoe.InnerText = orbit.SemiMajorAxis.ToString("N4");
+            bodyNode.AppendChild(varNdoe);
+
             varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Apoapsis", "NS");
             varNdoe.InnerText = orbit.Apoapsis.ToString("N4");
             bodyNode.AppendChild(varNdoe);
