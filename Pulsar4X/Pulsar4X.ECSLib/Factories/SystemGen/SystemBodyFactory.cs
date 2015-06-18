@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
                 atmo,
                 ruins
             };
-            Entity newPlanet = new Entity(system.SystemManager, planetDBs);
+            Entity newPlanet = new Entity(planetDBs);
 
             return newPlanet;
         }
@@ -143,6 +143,7 @@ namespace Pulsar4X.ECSLib
             foreach (Entity body in systemBodies)
             {
                 FinalizeBodies(system, body, bodyCount);
+                body.Register(system.SystemManager);
                 bodyCount++;
             }
 
@@ -182,6 +183,8 @@ namespace Pulsar4X.ECSLib
                 GenerateCometOrbit(system, star, newComet);
 
                 FinalizeSystemBodyDB(system, newComet);
+
+                newComet.Register(system.SystemManager);
             }
         }
 
@@ -438,10 +441,21 @@ namespace Pulsar4X.ECSLib
 
             // Recursive call to finalize children.
             int recursiveBodyCount = 1;
-            foreach (Entity child in bodyOrbit.Children)
+            int numChildren = bodyOrbit.Children.Count;
+            for (int i = 0; i < numChildren; i++)
             {
-                FinalizeBodies(system, child, recursiveBodyCount);
-                recursiveBodyCount++;
+                Entity child = bodyOrbit.Children[i];
+                if (child.IsValid)
+                {
+                    FinalizeBodies(system, child, recursiveBodyCount);
+                    recursiveBodyCount++;
+                }
+                else
+                {
+                    // Prune rejected children.
+                    bodyOrbit.Children.RemoveAt(i);
+                    i--;
+                }
             }
         }
 
@@ -501,7 +515,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 newMoonMVDB.Mass = GMath.SelectFromRange(moonMassMinMax, system.RNG.NextDouble());
-
+                newMoonMVDB.Volume = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNG.NextDouble());
                 moons.Add(newMoon);
                 numMoons--;
             }
@@ -520,6 +534,7 @@ namespace Pulsar4X.ECSLib
             while (beltMVDB.Mass > 0)
             {
                 Entity newBody = CreateBaseBody(system);
+                newBody.Register(system.SystemManager);
                 SystemBodyDB newBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
                 if (system.RNG.NextDouble() > (1.0 / _galaxyGen.Settings.NumberOfAsteroidsPerDwarfPlanet))

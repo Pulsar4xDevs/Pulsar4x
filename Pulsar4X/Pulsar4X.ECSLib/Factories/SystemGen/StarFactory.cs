@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException("system");
             }
 
-            if (!(numStars > 0))
+            if (numStars <= 0)
             {
                 throw new ArgumentOutOfRangeException("numStars", "numStars must be greater than 0.");
             }
@@ -94,7 +94,7 @@ namespace Pulsar4X.ECSLib
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
 
-                stars.Add(new Entity(system.SystemManager, baseDataBlobs));
+                stars.Add(new Entity(baseDataBlobs));
             }
 
             // The root star must be the most massive. Find it.
@@ -136,6 +136,8 @@ namespace Pulsar4X.ECSLib
                 if (previousStar == currentStar)
                 {
                     // This is the "Anchor Star"
+
+                    currentStar.Register(system.SystemManager);
                     continue;
                 }
 
@@ -150,6 +152,8 @@ namespace Pulsar4X.ECSLib
 
                 OrbitDB currentOrbit = new OrbitDB(anchorOrbit.OwningEntity, anchorMVDB, currentStarMVDB, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, _galaxyGen.Settings.J2000);
                 currentStar.SetDataBlob(currentOrbit);
+
+                currentStar.Register(system.SystemManager);
 
                 previousStar = currentStar;
                 starIndex++;
