@@ -54,6 +54,19 @@ namespace Pulsar4X.ECSLib
         public JDictionary<AtmosphericGasSD, float> Composition;
 
         /// <summary>
+        /// A sting describing the Atmosphere in Percentages, like this:
+        /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
+        /// By Default ToString return this.
+        /// </summary>
+        public string AtomsphereDescriptionInPercent { get; internal set; }
+
+        /// <summary>
+        /// A sting describing the Atmosphere in Atmospheres (atm), like this:
+        /// "0.75atm Nitrogen (N), 0.21atm Oxygen (O), 0.03atm Carbon dioxide (CO2), 0.01atm Argon (Ar)"
+        /// </summary>
+        public string AtomsphereDescriptionATM { get; internal set; }
+
+        /// <summary>
         /// indicates if the body as a valid atmosphere.
         /// </summary>
         public bool Exists
@@ -109,6 +122,31 @@ namespace Pulsar4X.ECSLib
             ))
         {
 
+        }
+
+        /// <summary>
+        /// This function generates the different text discriptions of the atmosphere.
+        /// It should be run after any changes to the atmopshere which may effect the description.
+        /// </summary>
+        public void GenerateDescriptions()
+        {
+            if (Exists == false)
+            {
+                AtomsphereDescriptionInPercent = "This body has no Atmosphere.";
+                AtomsphereDescriptionATM = AtomsphereDescriptionInPercent;
+            }
+
+            foreach (var gas in Composition)
+            {
+                AtomsphereDescriptionATM += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
+
+                if (Pressure != 0) // for extra safty.
+                    AtomsphereDescriptionInPercent += (gas.Value / Pressure).ToString("P0") + " " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
+            }
+
+            // trim trailing", " from the strings.
+            AtomsphereDescriptionATM = AtomsphereDescriptionATM.Remove(AtomsphereDescriptionATM.Length - 2);
+            AtomsphereDescriptionInPercent = AtomsphereDescriptionInPercent.Remove(AtomsphereDescriptionInPercent.Length - 2);
         }
 
         public override object Clone()

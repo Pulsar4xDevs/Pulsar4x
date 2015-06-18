@@ -195,7 +195,11 @@ namespace Pulsar4X.Tests
             if (atmosphereDB != null)
             {
                 varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Atmosphere", "NS");
-                varNdoe.InnerText = atmosphereDB.ToString();
+                varNdoe.InnerText = atmosphereDB.AtomsphereDescriptionInPercent;
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "AtmosphereInATM", "NS");
+                varNdoe.InnerText = atmosphereDB.AtomsphereDescriptionATM;
                 bodyNode.AppendChild(varNdoe);
 
                 varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Pressure", "NS");

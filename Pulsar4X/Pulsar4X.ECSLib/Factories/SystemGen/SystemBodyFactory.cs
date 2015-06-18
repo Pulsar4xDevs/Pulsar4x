@@ -607,7 +607,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// This function puts all the finishing touiches on a system body.
+        /// This function puts all the finishing touiches on a system body data blob.
         /// </summary>
         private void FinalizeSystemBodyDB(StarSystem system, Entity body)
         {
@@ -670,6 +670,9 @@ namespace Pulsar4X.ECSLib
             bodyInfo.MagneticField = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
             if (bodyInfo.Tectonics == TectonicActivity.Dead)
                 bodyInfo.MagneticField *= 0.1F; // reduce magnetic field of a dead world.
+
+            // Generate atmosphere:
+            GenerateAtmosphere(system, body);
 
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;
@@ -838,6 +841,21 @@ namespace Pulsar4X.ECSLib
 
                 bodyInfo.Minerals.Add(min.ID, mdi);
             }
+        }
+
+        /// <summary>
+        /// Todo
+        /// </summary>
+        public void GenerateAtmosphere(StarSystem system, Entity body)
+        {
+            var atmoDB = body.GetDataBlob<AtmosphereDB>();
+            if (atmoDB == null)
+                return; // no atmosphere for this body.
+
+            // gen atmosphere here...
+
+            // finally generate a description:
+            atmoDB.GenerateDescriptions();
         }
 
     }
