@@ -15,6 +15,13 @@ namespace Pulsar4X.ECSLib
             _starFactory = new StarFactory(_galaxyGen);
         }
 
+        public StarSystemFactory(Game game)
+        {
+            _galaxyGen = game.GalaxyGen;
+            _systemBodyFactory = new SystemBodyFactory(_galaxyGen);
+            _starFactory = new StarFactory(_galaxyGen);
+        }
+
         public StarSystem CreateSystem(Game game, string name, int seed = -1)
         {
             // create new RNG with Seed.
