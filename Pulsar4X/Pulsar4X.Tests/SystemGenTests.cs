@@ -16,15 +16,15 @@ namespace Pulsar4X.Tests
         [TestFixtureSetUp]
         public void GlobalInit()
         {
-            _game = new Game(new LibProcessLayer(), "Unit Test Game"); // init the game class as we will need it for these tests.
-            GalaxyFactory.InitToDefaultSettings(); // make sure default settings are loaded.
+            _game = new Game("Unit Test Game", 10); // init the game class as we will need it for these tests.
         }
 
         [Test]
         [Description("Creates and tests a single star sytem")]
         public void CreateAndFillStarSystem()
         {
-            var system = StarSystemFactory.CreateSystem("Argon Prime"); // Keeping with the X3 theme :P
+            StarSystemFactory ssf = new StarSystemFactory(_game);
+            var system = ssf.CreateSystem(_game, "Argon Prime"); // Keeping with the X3 theme :P
 
             // lets test that the stars generated okay:
             var stars = system.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>();
@@ -56,20 +56,22 @@ namespace Pulsar4X.Tests
 
             const int numSystems = 1000;
 
+            StarSystemFactory ssf = new StarSystemFactory(_game);
+
             // lets get our memory before starting:
             long startMemory = GC.GetTotalMemory(true); 
             timer.Start();
 
             for (int i = 0; i < numSystems; i++)
             {
-                StarSystemFactory.CreateSystem("Performance Test No " + i, i);
+                ssf.CreateSystem(_game, "Performance Test No " + i, i);
             }
 
             timer.Stop();
             double totalTime = timer.Elapsed.TotalSeconds;
 
             int totalEntitys = 0;
-            foreach (StarSystem system in _game.StarSystems)
+            foreach (StarSystem system in _game.Systems)
             {
                 List<Entity> entities = system.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>();
                 totalEntitys += entities.Count;
