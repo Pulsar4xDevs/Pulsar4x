@@ -6,10 +6,12 @@ namespace Pulsar4X.ECSLib
     public class SystemBodyFactory
     {
         private GalaxyFactory _galaxyGen;
+        private DateTime _currDateTime;
 
         public SystemBodyFactory(GalaxyFactory galaxyGen)
         {
             _galaxyGen = galaxyGen;
+            _currDateTime = DateTime.Now;
         }
 
         /// <summary>
@@ -68,8 +70,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Generate all bodies for the specified star.
         /// </summary>
-        internal void GenerateSystemBodiesForStar(StarSystem system, Entity star)
+        internal void GenerateSystemBodiesForStar(StarSystem system, Entity star, DateTime currentDateTime)
         {
+            // cache date/time for later use:
+            _currDateTime = currentDateTime;
+
             // Get required info from the star.
             MassVolumeDB starMassInfo = star.GetDataBlob<MassVolumeDB>();
             StarInfoDB starInfo = star.GetDataBlob<StarInfoDB>();
@@ -601,6 +606,9 @@ namespace Pulsar4X.ECSLib
                                                     longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000));
         }
 
+        /// <summary>
+        /// This function puts all the finishing touiches on a system body.
+        /// </summary>
         private void FinalizeSystemBodyDB(StarSystem system, Entity body)
         {
             SystemBodyDB bodyInfo = body.GetDataBlob<SystemBodyDB>();
@@ -653,14 +661,10 @@ namespace Pulsar4X.ECSLib
             bodyInfo.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, starInfo, bodyOrbit.SemiMajorAxis + parentSMA);
 
             // generate Plate tectonics
-            if (bodyInfo.Type != BodyType.Terrestrial && bodyInfo.Type != BodyType.Terrestrial)
-            {
-                bodyInfo.Tectonics = TectonicActivity.NA;  // We are not a Terrestrial body, we have no Tectonics!!!
-            }
-            else
-            {
+            if (bodyInfo.Type == BodyType.Terrestrial)
                 bodyInfo.Tectonics = GenerateTectonicActivity(system, starInfo, bodyMVDB);
-            }
+            else
+                bodyInfo.Tectonics = TectonicActivity.NA;  // We are not a Terrestrial body, we have no Tectonics!!!
 
             // Generate Magnetic field:
             bodyInfo.MagneticField = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
@@ -675,6 +679,10 @@ namespace Pulsar4X.ECSLib
 
             // generate ruins:
             GenerateRuins(system, body);
+
+            // run orbit for current date/time to get an initial position ofr the body:
+            var positionDB = body.GetDataBlob<PositionDB>();
+            positionDB.Position = OrbitProcessor.GetPosition(bodyOrbit, _currDateTime);
         }
 
         /// <summary>
@@ -693,16 +701,16 @@ namespace Pulsar4X.ECSLib
             double tectonicsChance = bodyMass.Mass / GameSettings.Units.EarthMassInKG / starInfo.Age * 100000000;
             tectonicsChance = GMath.Clamp(tectonicsChance, 0, 1);
 
-            TectonicActivity t = TectonicActivity.NA;
+            TectonicActivity t = TectonicActivity.Dead;
 
             // step down the thresholds to get the correct activity:
-            if (tectonicsChance < _galaxyGen.Settings.BodyTectonicsThresholds[TectonicActivity.Major])
+            if (tectonicsChance >= _galaxyGen.Settings.BodyTectonicsThresholds[TectonicActivity.Major])
                 t = TectonicActivity.Major;
-            if (tectonicsChance < _galaxyGen.Settings.BodyTectonicsThresholds[TectonicActivity.EarthLike])
+            else if (tectonicsChance >= _galaxyGen.Settings.BodyTectonicsThresholds[TectonicActivity.EarthLike])
                 t = TectonicActivity.EarthLike;
-            if (tectonicsChance < _galaxyGen.Settings.BodyTectonicsThresholds[TectonicActivity.Minor])
+            else if (tectonicsChance >= _galaxyGen.Settings.BodyTectonicsThresholds[TectonicActivity.Minor])
                 t = TectonicActivity.Minor;
-            if (tectonicsChance < _galaxyGen.Settings.BodyTectonicsThresholds[TectonicActivity.Dead])
+            else
                 t = TectonicActivity.Dead;
 
             return t;

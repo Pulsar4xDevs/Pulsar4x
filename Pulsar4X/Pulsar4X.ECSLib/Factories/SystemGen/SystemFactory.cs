@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity star in stars)
             {
-                _systemBodyFactory.GenerateSystemBodiesForStar(newSystem, star);
+                _systemBodyFactory.GenerateSystemBodiesForStar(newSystem, star, game.CurrentDateTime);
             }
 
             // < @todo generate JumpPoints
