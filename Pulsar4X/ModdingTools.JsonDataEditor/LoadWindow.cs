@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Pulsar4X.ECSLib;
 
 namespace ModdingTools.JsonDataEditor
 {
@@ -15,6 +17,9 @@ namespace ModdingTools.JsonDataEditor
         public LoadWindow()
         {
             InitializeComponent();
+
+            folderBrowserDialog1.SelectedPath = System.IO.Path.GetFullPath("Data/");
+            
         }
 
         private void saveAllButton_Click(object sender, EventArgs e)
@@ -31,6 +36,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void loadFileButton_Click(object sender, EventArgs e)
         {
+            
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
                 Data.loadDatafromDirectory(folderBrowserDialog1.SelectedPath);

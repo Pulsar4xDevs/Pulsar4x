@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
                 {"Minerals", Minerals.GetType()},
                 {"Techs", Techs.GetType()},
                 {"Installations", Installations.GetType()},
-                {"ConstrutableObj", ConstructableObjects.GetType()},
+                {"ConstructableObj", ConstructableObjects.GetType()},
                 {"Components", Components.GetType()}
             };
             TypesToStrings = StringsToTypes.ToDictionary(x => x.Value, x => x.Key);

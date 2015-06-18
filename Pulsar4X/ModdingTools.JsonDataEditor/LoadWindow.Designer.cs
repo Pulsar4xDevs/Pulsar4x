@@ -114,6 +114,7 @@
             // folderBrowserDialog1
             // 
             this.folderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.folderBrowserDialog1.SelectedPath = "\"./\"";
             // 
             // LoadWindow
             // 

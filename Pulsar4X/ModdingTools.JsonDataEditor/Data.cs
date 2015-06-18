@@ -334,10 +334,10 @@ namespace ModdingTools.JsonDataEditor
 
         public static void SaveDataToDirectory(string dir)
         {
-            StaticDataManager.ExportStaticData(InstallationData, dir + ".InstallationData.json");
-            StaticDataManager.ExportStaticData(ComponentData, dir + ".ComponentData.json");
-            StaticDataManager.ExportStaticData(MineralData, dir + ".MineralData.json");
-            StaticDataManager.ExportStaticData(TechData, dir + ".TechnologyData.json");
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Installations, dir + ".InstallationData.json");
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Components, dir + ".ComponentData.json");
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Minerals, dir + ".MineralData.json");
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Techs, dir + ".TechnologyData.json");
         }
 
         /// <summary>

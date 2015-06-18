@@ -197,9 +197,18 @@ namespace ModdingTools.JsonDataEditor
             [Editor(typeof(TechListEditor), typeof(UITypeEditor))]
             public List<DataHolder> TechReqs
             {
-                get { return Data.TechData.Values.ToList(); }
+                get
+                {
+                    List<DataHolder> techlist = new List<DataHolder>();
+                    foreach (var guid in _abilitySD.TechRequiremets)
+                    {
+                        techlist.Add(Data.TechData[guid]);
+                    }
+                    return techlist;
+                }
                 set
                 {
+
                     _techRequiremets = Data.GetGuidList(value);
                     UpdateAbilityStaticData();
                 }
@@ -291,12 +300,17 @@ namespace ModdingTools.JsonDataEditor
         /// <returns></returns>
         private ComponentSD StaticData(Guid guid)
         {
+            List<ComponentAbilitySD> abilitysList = new List<ComponentAbilitySD>();
+            foreach (var abilityDH in _selectedComponentAbilites)
+            {
+                abilitysList.Add(abilityDH.StaticData);
+            }
             ComponentSD newSD = new ComponentSD
             {
                 ID =guid,
                 Name = genericDataUC1.GetName,
                 Description = genericDataUC1.Description,
-                //ComponentAbilitySDs = new List<ComponentAbilitySD>( listBox_Abilities.Items);
+                ComponentAbilitySDs = new List<ComponentAbilitySD>(abilitysList)
             };
             return newSD;
         }

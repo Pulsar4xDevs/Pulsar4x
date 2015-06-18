@@ -63,7 +63,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void listBox_requredTechs_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            listBox_requredTechs.Items.Remove(listBox_requredTechs.SelectedItem);
+            listBox_requredTechs.Items.Remove(_requredTechs.Remove((DataHolder)listBox_requredTechs.SelectedItem));
         }
 
         private void listBox_allTechs_MouseDoubleClick(object sender, MouseEventArgs e)

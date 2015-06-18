@@ -34,7 +34,12 @@ namespace ModdingTools.JsonDataEditor
             genericDataUC1.Item = dh;
             genericDataUC1.Description = _currentInstallation.Description;
             abilitiesListUC1.AbilityAmount = _currentInstallation.BaseAbilityAmounts;
-            techRequirementsUC1.RequredTechs = Data.TechData.Values.ToList();
+            List<DataHolder> techlist = new List<DataHolder>();
+            foreach (var guid in _currentInstallation.TechRequirements)
+            {
+                techlist.Add(Data.TechData[guid]);
+            }
+            techRequirementsUC1.RequredTechs = techlist;
             mineralsCostsUC1.MineralCosts = MineralCostsDictionary(_currentInstallation.ResourceCosts);
         }
 
