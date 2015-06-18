@@ -40,7 +40,17 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void Save([NotNull] Game game, [NotNull] Stream outputStream, bool compress = false)
         {
-            CompressionLevel compressionLevel = compress ? CompressionLevel.Optimal : CompressionLevel.NoCompression;
+            CompressionLevel compressionLevel;
+            if (compress)
+            {
+                DefaultSerializer.Formatting = Formatting.None;
+                compressionLevel = CompressionLevel.Optimal;
+            }
+            else
+            {
+                DefaultSerializer.Formatting = Formatting.Indented;
+                compressionLevel = CompressionLevel.NoCompression;
+            }
 
             lock (SyncRoot)
             {
