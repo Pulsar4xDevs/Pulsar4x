@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Entities;
@@ -17,6 +20,258 @@ namespace Pulsar4X.Tests
         public void GlobalInit()
         {
             _game = new Game("Unit Test Game", 10); // init the game class as we will need it for these tests.
+        }
+
+        [Test]
+        [Description("Outputs all the systems generated in the init of this test to XML")]
+        public void OutputToXML()
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(XmlNode));
+            TextWriter writer = new StreamWriter(".\\test.xml");
+
+            XmlDocument xmlDoc = new XmlDocument();
+            XmlNode toplevelNode = xmlDoc.CreateNode(XmlNodeType.Element, "Systems", "NS");
+
+            foreach (var system in _game.Systems)
+            {
+                var systemBody = system.SystemManager.GetFirstEntityWithDataBlob<OrbitDB>();
+
+                // get root star:
+                var tree = systemBody.GetDataBlob<OrbitDB>();
+                while (tree.ParentDB != null)
+                {
+                    tree = tree.ParentDB as OrbitDB;
+                }
+                systemBody = tree.OwningEntity;
+
+                XmlNode systemNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "System", "NS");
+
+                // the following we serilize the body to xml, and will do the same for all child bodies:
+                SerilizeBodyToXML(xmlDoc, systemNdoe, systemBody, tree);
+
+                // add xml to to level node:
+                toplevelNode.AppendChild(systemNdoe);
+            }
+
+            // save xml to file:
+            ser.Serialize(writer, toplevelNode);
+            writer.Close();
+        }
+
+        private void SerilizeBodyToXML(XmlDocument xmlDoc, XmlNode systemNdoe, Entity systemBody, OrbitDB orbit)
+        {
+            // get the datablobs:
+            var systemBodyDB = systemBody.GetDataBlob<SystemBodyDB>();
+            var starIfnoDB = systemBody.GetDataBlob<StarInfoDB>();
+            var positionDB = systemBody.GetDataBlob<PositionDB>();
+            var massVolumeDB = systemBody.GetDataBlob<MassVolumeDB>();
+            var nameDB = systemBody.GetDataBlob<NameDB>();
+            var atmosphereDB = systemBody.GetDataBlob<AtmosphereDB>();
+            var ruinsDB = systemBody.GetDataBlob<RuinsDB>();
+
+            // create the body node:
+            XmlNode bodyNode = xmlDoc.CreateNode(XmlNodeType.Element, "Body", "NS");
+
+            // save parent id first:
+            XmlNode varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "ParentID", "NS");
+            if (orbit.Parent != null)
+                varNdoe.InnerText = orbit.Parent.Guid.ToString();
+            else
+                varNdoe.InnerText = Guid.Empty.ToString();
+            bodyNode.AppendChild(varNdoe);
+
+            if (nameDB != null)
+            {
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Name", "NS");
+                string temp = "";
+
+                foreach (var name in nameDB.Name)
+                {
+                    temp += name.Value + ", ";
+                }
+
+                varNdoe.InnerText = temp;
+                bodyNode.AppendChild(varNdoe);
+            }
+
+            if (systemBodyDB != null)
+            {
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Type", "NS");
+                varNdoe.InnerText = systemBodyDB.Type.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "AxialTilt", "NS");
+                varNdoe.InnerText = systemBodyDB.AxialTilt.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "BaseTemperature", "NS");
+                varNdoe.InnerText = systemBodyDB.BaseTemperature.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "LengthOfDay", "NS");
+                varNdoe.InnerText = systemBodyDB.LengthOfDay.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "MagneticField", "NS");
+                varNdoe.InnerText = systemBodyDB.MagneticField.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Tectonics", "NS");
+                varNdoe.InnerText = systemBodyDB.Tectonics.ToString();
+                bodyNode.AppendChild(varNdoe);
+            }
+            
+            if (starIfnoDB != null)
+            {
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Class", "NS");
+                varNdoe.InnerText = starIfnoDB.Class;
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Age", "NS");
+                varNdoe.InnerText = starIfnoDB.Age.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "EcoSphereRadius", "NS");
+                varNdoe.InnerText = starIfnoDB.EcoSphereRadius.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Luminosity", "NS");
+                varNdoe.InnerText = starIfnoDB.Luminosity.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "SpectralType", "NS");
+                varNdoe.InnerText = starIfnoDB.SpectralType.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Temperature", "NS");
+                varNdoe.InnerText = starIfnoDB.Temperature.ToString();
+                bodyNode.AppendChild(varNdoe);
+            }
+
+            if (massVolumeDB != null)
+            {
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Mass", "NS");
+                varNdoe.InnerText = massVolumeDB.Mass.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Radius", "NS");
+                varNdoe.InnerText = massVolumeDB.Radius.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");
+                varNdoe.InnerText = massVolumeDB.Density.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Volume", "NS");
+                varNdoe.InnerText = massVolumeDB.Volume.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceGravity", "NS");
+                varNdoe.InnerText = massVolumeDB.SurfaceGravity.ToString();
+                bodyNode.AppendChild(varNdoe);
+            }
+
+            // add orbit details:
+            varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Apoapsis", "NS");
+            varNdoe.InnerText = orbit.Apoapsis.ToString();
+            bodyNode.AppendChild(varNdoe);
+
+            varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Periapsis", "NS");
+            varNdoe.InnerText = orbit.Periapsis.ToString();
+            bodyNode.AppendChild(varNdoe);
+
+            varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Year", "NS");
+            varNdoe.InnerText = orbit.OrbitalPeriod.ToString();
+            bodyNode.AppendChild(varNdoe);
+
+            varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Eccentricity", "NS");
+            varNdoe.InnerText = orbit.Eccentricity.ToString();
+            bodyNode.AppendChild(varNdoe);
+
+            varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Inclination", "NS");
+            varNdoe.InnerText = orbit.Inclination.ToString();
+            bodyNode.AppendChild(varNdoe);
+
+            if (atmosphereDB != null)
+            {
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Atmosphere", "NS");
+                varNdoe.InnerText = atmosphereDB.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Pressure", "NS");
+                varNdoe.InnerText = atmosphereDB.Pressure.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Albedo", "NS");
+                varNdoe.InnerText = atmosphereDB.Albedo.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceTemperature", "NS");
+                varNdoe.InnerText = atmosphereDB.SurfaceTemperature.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "GreenhouseFactor", "NS");
+                varNdoe.InnerText = atmosphereDB.GreenhouseFactor.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "GreenhousePressure", "NS");
+                varNdoe.InnerText = atmosphereDB.GreenhousePressure.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Hydrosphere", "NS");
+                varNdoe.InnerText = atmosphereDB.Hydrosphere.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "HydrosphereExtent", "NS");
+                varNdoe.InnerText = atmosphereDB.HydrosphereExtent.ToString();
+                bodyNode.AppendChild(varNdoe);
+            }
+
+            if (positionDB != null)
+            {
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "PosX", "NS");
+                varNdoe.InnerText = positionDB.X.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "PosY", "NS");
+                varNdoe.InnerText = positionDB.Y.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "PosZ", "NS");
+                varNdoe.InnerText = positionDB.Z.ToString();
+                bodyNode.AppendChild(varNdoe);
+            }
+
+            if (ruinsDB != null)
+            {
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "RuinCount", "NS");
+                varNdoe.InnerText = ruinsDB.RuinCount.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "RuinQuality", "NS");
+                varNdoe.InnerText = ruinsDB.RuinQuality.ToString();
+                bodyNode.AppendChild(varNdoe);
+
+                varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "RuinSize", "NS");
+                varNdoe.InnerText = ruinsDB.RuinSize.ToString();
+                bodyNode.AppendChild(varNdoe);
+            }
+
+            // add our ID to at the end:
+            varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "ID", "NS");
+            varNdoe.InnerText = systemBody.Guid.ToString();
+            bodyNode.AppendChild(varNdoe);
+
+            // add body node to system node:
+            systemNdoe.AppendChild(bodyNode);
+
+            // call recursivly for children:
+            foreach (var child in orbit.Children)
+            {
+                OrbitDB o = child.GetDataBlob<OrbitDB>();
+                if (o != null)
+                    SerilizeBodyToXML(xmlDoc, systemNdoe, o.OwningEntity, o);
+            }
         }
 
         [Test]
