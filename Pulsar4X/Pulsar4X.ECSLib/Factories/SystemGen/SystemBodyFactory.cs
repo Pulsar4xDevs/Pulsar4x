@@ -183,7 +183,7 @@ namespace Pulsar4X.ECSLib
 
                 MassVolumeDB cometMVDB = newComet.GetDataBlob<MassVolumeDB>();
                 cometMVDB.Mass = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[BodyType.Comet], system.RNG.NextDouble());
-                cometMVDB.Volume = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNG.NextDouble());
+                cometMVDB.Volume = MassVolumeDB.GetVolume(cometMVDB.Mass, GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNG.NextDouble()));
 
                 GenerateCometOrbit(system, star, newComet);
 
@@ -472,6 +472,9 @@ namespace Pulsar4X.ECSLib
             body.GetDataBlob<NameDB>().Name.Add(Entity.InvalidEntity, bodyName);
         }
 
+
+        ///> @todo is this function even needed??? it is run too late as densitity is used several times before this and it is now calculated from volume... wtf??
+        /// wait wtf??
         private void FinalizeMassVolumeDB(StarSystem system, Entity body)
         {
             MassVolumeDB massVolumeDB = body.GetDataBlob<MassVolumeDB>();
@@ -520,7 +523,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 newMoonMVDB.Mass = GMath.SelectFromRange(moonMassMinMax, system.RNG.NextDouble());
-                newMoonMVDB.Volume = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNG.NextDouble());
+                newMoonMVDB.Volume = MassVolumeDB.GetVolume(newMoonMVDB.Mass, GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNG.NextDouble()));
                 moons.Add(newMoon);
                 numMoons--;
             }
