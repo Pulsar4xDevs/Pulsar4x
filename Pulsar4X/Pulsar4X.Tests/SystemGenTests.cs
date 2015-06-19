@@ -155,7 +155,7 @@ namespace Pulsar4X.Tests
                 bodyNode.AppendChild(varNdoe);
 
                 varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Radius", "NS");
-                varNdoe.InnerText = massVolumeDB.Radius.ToString("N4");
+                varNdoe.InnerText = massVolumeDB.RadiusInKM.ToString("N4");
                 bodyNode.AppendChild(varNdoe);
 
                 varNdoe = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");

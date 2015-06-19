@@ -56,12 +56,12 @@ namespace Pulsar4X.ECSLib
             // WIP Function. Not complete.
             StarSystem sol = new StarSystem(game, "Sol", -1);
 
-            Entity sun = _starFactory.CreateStar(sol, GameSettings.Units.SolarMassInKG, GameSettings.Units.SolarRadiusInKm, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
+            Entity sun = _starFactory.CreateStar(sol, GameSettings.Units.SolarMassInKG, GameSettings.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
 
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
             SystemBodyDB mercuryBodyDB = new SystemBodyDB {Type = BodyType.Terrestrial, SupportsPopulations = true};
-            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, 2439.7);
+            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
             NameDB mercuryNameDB = new NameDB(Entity.InvalidEntity, "Mercury");
             OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB, mercuryMVDB, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, _galaxyGen.Settings.J2000);
             PositionDB mercuryPositionDB = new PositionDB();
