@@ -181,9 +181,10 @@ namespace Pulsar4X.ECSLib
                 SystemBodyDB cometBodyDB = newComet.GetDataBlob<SystemBodyDB>();
                 cometBodyDB.Type = BodyType.Comet;
 
-                MassVolumeDB cometMVDB = newComet.GetDataBlob<MassVolumeDB>();
-                cometMVDB.Mass = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[BodyType.Comet], system.RNG.NextDouble());
-                cometMVDB.Volume = MassVolumeDB.GetVolume(cometMVDB.Mass, GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNG.NextDouble()));
+                MassVolumeDB cometMVDB = MassVolumeDB.NewFromMassAndDensity(
+                    GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[BodyType.Comet], system.RNG.NextDouble()),
+                    GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNG.NextDouble()));
+                newComet.SetDataBlob(cometMVDB, EntityManager.GetTypeIndex<MassVolumeDB>());
 
                 GenerateCometOrbit(system, star, newComet);
 
@@ -439,27 +440,24 @@ namespace Pulsar4X.ECSLib
             }
 
             FinalizeSystemBodyDB(system, body);
-            FinalizeMassVolumeDB(system, body);
             FinalizeNameDB(body, bodyOrbit.Parent, bodyCount);
 
             GenerateMoons(system, body);
 
-            // Recursive call to finalize children.
-            int recursiveBodyCount = 1;
-            int numChildren = bodyOrbit.Children.Count;
-            for (int i = 0; i < numChildren; i++)
+            // if there were any moons generated, finilize them:
+            if (bodyOrbit.Children.Count > 0)
             {
-                Entity child = bodyOrbit.Children[i];
-                if (child.IsValid)
+                // Remove any invalid children (ones that faild generation).
+                bodyOrbit.Children.RemoveAll(child => !child.IsValid);
+
+                // Recursive call to finalize children.
+                int numChildren = bodyOrbit.Children.Count; // update as the count may have changed.
+                int recursiveBodyCount = 1;
+                for (int i = 0; i < numChildren; i++)
                 {
+                    Entity child = bodyOrbit.Children[i];
                     FinalizeBodies(system, child, recursiveBodyCount);
                     recursiveBodyCount++;
-                }
-                else
-                {
-                    // Prune rejected children.
-                    bodyOrbit.Children.RemoveAt(i);
-                    i--;
                 }
             }
         }
@@ -470,18 +468,6 @@ namespace Pulsar4X.ECSLib
             string parentName = parent.GetDataBlob<NameDB>().Name[Entity.InvalidEntity];
             string bodyName = parentName + " - " + bodyCount;
             body.GetDataBlob<NameDB>().Name.Add(Entity.InvalidEntity, bodyName);
-        }
-
-
-        ///> @todo is this function even needed??? it is run too late as densitity is used several times before this and it is now calculated from volume... wtf??
-        /// wait wtf??
-        private void FinalizeMassVolumeDB(StarSystem system, Entity body)
-        {
-            MassVolumeDB massVolumeDB = body.GetDataBlob<MassVolumeDB>();
-            SystemBodyDB systemBodyDB = body.GetDataBlob<SystemBodyDB>();
-
-            // Fill the MVDB.Volume property by solving from a density selection.
-            massVolumeDB.Volume = MassVolumeDB.GetVolume(massVolumeDB.Mass, GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[systemBodyDB.Type], system.RNG.NextDouble()));
         }
 
         private void GenerateMoons(StarSystem system, Entity parent)
@@ -508,8 +494,6 @@ namespace Pulsar4X.ECSLib
             while (numMoons > 0)
             {
                 Entity newMoon = CreateBaseBody(system);
-
-                MassVolumeDB newMoonMVDB = newMoon.GetDataBlob<MassVolumeDB>();
                 SystemBodyDB newMoonBodyDB = newMoon.GetDataBlob<SystemBodyDB>();
 
                 newMoonBodyDB.Type = BodyType.Moon;
@@ -522,8 +506,11 @@ namespace Pulsar4X.ECSLib
                     moonMassMinMax.Max = maxRelativeMass;
                 }
 
-                newMoonMVDB.Mass = GMath.SelectFromRange(moonMassMinMax, system.RNG.NextDouble());
-                newMoonMVDB.Volume = MassVolumeDB.GetVolume(newMoonMVDB.Mass, GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNG.NextDouble()));
+                MassVolumeDB newMoonMVDB = MassVolumeDB.NewFromMassAndDensity(
+                    GMath.SelectFromRange(moonMassMinMax, system.RNG.NextDouble()),
+                    GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNG.NextDouble()));
+                newMoon.SetDataBlob(newMoonMVDB, EntityManager.GetTypeIndex<MassVolumeDB>());
+
                 moons.Add(newMoon);
                 numMoons--;
             }
@@ -560,7 +547,6 @@ namespace Pulsar4X.ECSLib
 
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
                 FinalizeSystemBodyDB(system, newBody);
-                FinalizeMassVolumeDB(system, newBody);
                 FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount);
 
                 beltMVDB.Mass -= newBodyMVDB.Mass;
