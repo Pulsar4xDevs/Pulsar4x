@@ -1,17 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public class Game
     {
         #region Properties
 
         [PublicAPI]
-        public string GameName { get; internal set; }
+        public string GameName
+        {
+            get { return _gameName; }
+            internal set { _gameName = value; }
+        }
+        [JsonProperty]
+        private string _gameName;
 
         [PublicAPI]
         public VersionInfo Version { get { return VersionInfo.PulsarVersionInfo;} }
@@ -21,7 +29,13 @@ namespace Pulsar4X.ECSLib
         public bool IsLoaded { get; internal set; }
 
         [PublicAPI]
-        public DateTime CurrentDateTime { get; internal set; }
+        public DateTime CurrentDateTime
+        {
+            get { return _currentDateTime; }
+            internal set { _currentDateTime = value; }
+        }
+        [JsonProperty]
+        private DateTime _currentDateTime;
 
         [PublicAPI]
         [JsonIgnore]
@@ -31,17 +45,17 @@ namespace Pulsar4X.ECSLib
         /// Global Entity Manager.
         /// </summary>
         [PublicAPI]
-        public EntityManager GlobalManager { get; private set; }
+        public EntityManager GlobalManager { get { return _globalManager; } }
+        [JsonProperty]
+        private EntityManager _globalManager;
 
         [PublicAPI]
         public StaticDataStore StaticData { get; private set; }
 
         [CanBeNull]
-        [JsonIgnore]
         [PublicAPI]
         public PulseInterrupt CurrentInterrupt { get; private set; }
 
-        [JsonIgnore]
         [PublicAPI]
         public SubpulseLimit NextSubpulse { get; private set; }
 
@@ -71,7 +85,7 @@ namespace Pulsar4X.ECSLib
         {
 
             IsLoaded = false;
-            GlobalManager = new EntityManager(this);
+            _globalManager = new EntityManager(this);
             StarSystems = new List<StarSystem>();
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);

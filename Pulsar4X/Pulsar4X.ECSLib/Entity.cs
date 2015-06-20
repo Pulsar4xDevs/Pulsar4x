@@ -320,8 +320,8 @@ namespace Pulsar4X.ECSLib
 
             // Add myself the the new manager.
             ID = newManager.SetupEntity(this);
-            ProtectedDataBlobMask = Manager.EntityMasks[ID];
             Manager = newManager;
+            ProtectedDataBlobMask = Manager.EntityMasks[ID];
 
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
