@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -71,7 +72,10 @@ namespace Pulsar4X.WPFUI
                 string pathToFile = fileDialog.FileName;
                 try
                 {
-                    await Task.Run(() => SaveGame.Load(pathToFile));
+                    Stopwatch timer = new Stopwatch();
+                    timer.Start();
+                    CurrentGame = await Task.Run(() => SaveGame.Load(pathToFile));
+                    timer.Stop();
                     MessageBox.Show(this, "Game Loaded.", "Result");
                 }
                 catch (Exception exception)

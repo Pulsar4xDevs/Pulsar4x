@@ -8,12 +8,12 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
-            Entity ship = classEntity.Clone(systemEntityManager);
+            ProtoEntity protoShip = classEntity.Clone();
 
-            ShipInfoDB shipInfoDB = ship.GetDataBlob<ShipInfoDB>();
+            ShipInfoDB shipInfoDB = protoShip.GetDataBlob<ShipInfoDB>();
             shipInfoDB.ShipClassDefinition = classEntity.Guid;
 
-            NameDB nameDB = ship.GetDataBlob<NameDB>();
+            NameDB nameDB = protoShip.GetDataBlob<NameDB>();
             if (shipName == null)
             {
                 shipName = "Ship Name";
@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
             nameDB.Name.Clear();
             nameDB.Name.Add(ownerFaction, shipName);
 
-            return ship;
+            return new Entity(systemEntityManager, protoShip);
         }
 
         public static Entity CreateNewShipClass(Game game, Entity faction, string className = null)
@@ -93,7 +93,7 @@ namespace Pulsar4X.ECSLib
             // now lets add some components:
             ///< @todo Add ship components
             // -- basic armour of current faction tech level
-            // -- mimium crew quaters defaulting to 3 months deployment time.
+            // -- minimum crew quaters defaulting to 3 months deployment time.
             // -- a bridge
             // -- an engineering space
             // -- a fuel tank

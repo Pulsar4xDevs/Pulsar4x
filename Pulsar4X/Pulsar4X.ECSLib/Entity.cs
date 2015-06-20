@@ -6,25 +6,91 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    [JsonConverter(typeof(EntityConverter))]
-    public class Entity
+    [PublicAPI]
+    public class ProtoEntity
     {
+        [PublicAPI]
+        public List<BaseDataBlob> DataBlobs { get; set; }
+
+        [NotNull]
+        [PublicAPI]
+        public ComparableBitArray DataBlobMask { get { return ProtectedDataBlobMask; } }
+        protected ComparableBitArray ProtectedDataBlobMask = EntityManager.BlankDataBlobMask();
+
+        [PublicAPI]
+        public static ProtoEntity Create(IEnumerable<BaseDataBlob> dataBlobs)
+        {
+            ProtoEntity protoEntity = new ProtoEntity { DataBlobs = EntityManager.BlankDataBlobList() };
+
+            foreach (BaseDataBlob dataBlob in dataBlobs)
+            {
+                protoEntity.SetDataBlob(dataBlob);
+            }
+
+            return protoEntity;
+        }
+
+        [PublicAPI]
+        public virtual T GetDataBlob<T>() where T : BaseDataBlob
+        {
+            return (T)DataBlobs[EntityManager.GetTypeIndex<T>()];
+        }
+
+        [PublicAPI]
+        public virtual T GetDataBlob<T>(int typeIndex) where T : BaseDataBlob
+        {
+            return (T)DataBlobs[typeIndex];
+        }
+
+        [PublicAPI]
+        public virtual void SetDataBlob<T>(T dataBlob) where T : BaseDataBlob
+        {
+            int typeIndex;
+            EntityManager.TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
+            DataBlobs[typeIndex] = dataBlob;
+            ProtectedDataBlobMask[typeIndex] = true;
+        }
+
+        [PublicAPI]
+        public virtual void SetDataBlob<T>(T dataBlob, int typeIndex) where T : BaseDataBlob
+        {
+            DataBlobs[typeIndex] = dataBlob;
+            ProtectedDataBlobMask[typeIndex] = true;
+        }
+
+        [PublicAPI]
+        public virtual void RemoveDataBlob<T>() where T : BaseDataBlob
+        {
+            int typeIndex = EntityManager.GetTypeIndex<T>();
+            DataBlobs[typeIndex] = null;
+            ProtectedDataBlobMask[typeIndex] = false;
+        }
+
+        [PublicAPI]
+        public virtual void RemoveDataBlob(int typeIndex)
+        {
+            DataBlobs[typeIndex] = null;
+            ProtectedDataBlobMask[typeIndex] = false;
+        }
+    }
+
+    [JsonConverter(typeof(EntityConverter))]
+    public sealed class Entity : ProtoEntity
+    {
+        internal int ID;
+
+        [NotNull]
+        [JsonIgnore]
+        public EntityManager Manager { get; private set; }
+
         [PublicAPI]
         public Guid Guid { get; private set; }
 
-        [CanBeNull]
-        [PublicAPI]
-        public EntityManager Manager { get; private set; }
-
         [NotNull]
         [PublicAPI]
-        public ComparableBitArray DataBlobMask { get; private set; }
+        public new ReadOnlyCollection<BaseDataBlob> DataBlobs { get { return new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)); } }
 
-        [NotNull]
-        [PublicAPI]
-        public ReadOnlyCollection<BaseDataBlob> DataBlobs { get { return new ReadOnlyCollection<BaseDataBlob>(DataBlobList.Where(dataBlob => dataBlob != null).ToList()); } }
-        internal readonly List<BaseDataBlob> DataBlobList;
-
+        private static readonly EntityManager InvalidManager = new EntityManager(null);
         /// <summary>
         /// Static entity reference to an invalid entity.
         /// 
@@ -35,17 +101,26 @@ namespace Pulsar4X.ECSLib
         public static readonly Entity InvalidEntity = new Entity();
 
         #region Entity Constructors
-
-        /// <summary>
-        /// Creates an unregistered entity with the optionally provided dataBlobs.
-        /// </summary>
-        [PublicAPI]
-        public Entity(IEnumerable<BaseDataBlob> dataBlobs = null)
+        private Entity()
         {
-            Guid = Guid.Empty;
-            Manager = null;
-            DataBlobMask = EntityManager.BlankDataBlobMask();
-            DataBlobList = EntityManager.BlankDataBlobList();
+            Manager = InvalidManager;
+        }
+
+        internal Entity([NotNull] EntityManager manager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(manager, Guid.NewGuid(), dataBlobs) { }
+
+        internal Entity([NotNull] EntityManager manager, Guid id, IEnumerable<BaseDataBlob> dataBlobs = null)
+        {
+            Manager = manager;
+            Guid = id;
+
+            Entity checkEntity;
+            while (Guid == Guid.Empty || manager.FindEntityByGuid(Guid, out checkEntity))
+            {
+                Guid = Guid.NewGuid();
+            }
+
+            ID = Manager.SetupEntity(this);
+            ProtectedDataBlobMask = Manager.EntityMasks[ID];
 
             if (dataBlobs == null)
             {
@@ -54,23 +129,14 @@ namespace Pulsar4X.ECSLib
 
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
-                int typeIndex;
-                EntityManager.TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
-
-                SetDataBlob(dataBlob);
+                if (dataBlob != null)
+                {
+                    SetDataBlob(dataBlob);
+                }
             }
         }
 
-        internal Entity([NotNull] EntityManager entityManager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.Empty, entityManager, dataBlobs)
-        {
-        }
-
-        internal Entity(Guid entityGuid, [NotNull] EntityManager entityManager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(dataBlobs)
-        {
-            Guid = entityGuid;
-            Register(entityManager);
-        }
-
+        internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(manager, Guid.NewGuid(), protoEntity.DataBlobs) { }
         #endregion
 
         #region Public API Functions
@@ -82,20 +148,43 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool IsValid
         {
-            get { return this != InvalidEntity && Manager != null && Manager.IsValidEntity(this); }
+            get { return this != InvalidEntity && Manager.IsValidEntity(this); }
+        }
+
+        /// <summary>
+        /// Creates a new entity with a randomly generated Guid, registered with the provided manager with the optionally provided dataBlobs.
+        /// </summary>
+        [PublicAPI]
+        public static Entity Create([NotNull] EntityManager manager, [CanBeNull] IEnumerable<BaseDataBlob> dataBlobs = null)
+        {
+            if (manager == null)
+            {
+                throw new ArgumentNullException("manager");
+            }
+
+            return new Entity(manager, dataBlobs);
+        }
+
+        public static Entity Create(EntityManager manager, ProtoEntity protoEntity)
+        {
+            return Create(manager, protoEntity.DataBlobs);
+        }
+
+        [PublicAPI]
+        public void Destroy()
+        {
+            Manager.RemoveEntity(ID);
         }
 
         /// <summary>
         /// Direct lookup of an entity's DataBlob.
         /// Slower than GetDataBlob(int typeIndex)
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">Non-abstract derivative of BaseDataBlob</typeparam>
         [PublicAPI]
-        public T GetDataBlob<T>() where T : BaseDataBlob
+        public override T GetDataBlob<T>()
         {
-            int typeIndex = EntityManager.GetTypeIndex<T>();
-            return (T)DataBlobList[typeIndex];
+            return Manager.GetDataBlob<T>(ID);
         }
 
         /// <summary>
@@ -105,9 +194,9 @@ namespace Pulsar4X.ECSLib
         /// <typeparam name="T">Non-abstract derivative of BaseDataBlob</typeparam>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entityID is passed.</exception>
         [PublicAPI]
-        public T GetDataBlob<T>(int typeIndex) where T : BaseDataBlob
+        public override T GetDataBlob<T>(int typeIndex)
         {
-            return (T)DataBlobList[typeIndex];
+            return Manager.GetDataBlob<T>(ID, typeIndex);
         }
 
         /// <summary>
@@ -116,19 +205,14 @@ namespace Pulsar4X.ECSLib
         /// <typeparam name="T">Non-abstract derivative of BaseDataBlob</typeparam>
         /// <exception cref="ArgumentNullException">Thrown is dataBlob is null.</exception>
         [PublicAPI]
-        public void SetDataBlob<T>([NotNull] T dataBlob) where T : BaseDataBlob
+        public override void SetDataBlob<T>([NotNull] T dataBlob)
         {
             if (dataBlob == null)
             {
                 throw new ArgumentNullException("dataBlob", "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
             }
 
-            int typeIndex;
-            EntityManager.TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
-
-            DataBlobList[typeIndex] = dataBlob;
-            DataBlobMask[typeIndex] = true;
-            dataBlob.OwningEntity = this;
+            Manager.SetDataBlob(ID, dataBlob);
         }
 
         /// <summary>
@@ -137,16 +221,14 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException">Thrown is dataBlob is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if typeIndex is not a valid typeIndex.</exception>
         [PublicAPI]
-        public void SetDataBlob([NotNull] BaseDataBlob dataBlob, int typeIndex)
+        public override void SetDataBlob<T>([NotNull] T dataBlob, int typeIndex)
         {
             if (dataBlob == null)
             {
                 throw new ArgumentNullException("dataBlob", "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
             }
 
-            DataBlobList[typeIndex] = dataBlob;
-            DataBlobMask[typeIndex] = true;
-            dataBlob.OwningEntity = this;
+            Manager.SetDataBlob(ID, dataBlob, typeIndex);
         }
 
         /// <summary>
@@ -154,12 +236,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <typeparam name="T">Non-abstract derivative of BaseDataBlob</typeparam>
         [PublicAPI]
-        public void RemoveDataBlob<T>() where T : BaseDataBlob
+        public override void RemoveDataBlob<T>()
         {
-            int typeIndex = EntityManager.GetTypeIndex<T>();
-            
-            DataBlobList[typeIndex] = null;
-            DataBlobMask[typeIndex] = false;
+            Manager.RemoveDataBlob<T>(ID);
         }
 
         /// <summary>
@@ -167,41 +246,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if typeIndex is not a valid typeIndex.</exception>
         [PublicAPI]
-        public void RemoveDataBlob(int typeIndex)
+        public override void RemoveDataBlob(int typeIndex)
         {
-            DataBlobList[typeIndex] = null;
-            DataBlobMask[typeIndex] = false;
-        }
-
-        /// <summary>
-        /// Registers this entity with the provided manager.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown when attempting to register the static InvalidEntity, or if this Entity has already been registered.</exception>
-        /// <exception cref="ArgumentNullException">Thrown when the provided manager is null.</exception>
-        [PublicAPI]
-        public void Register([NotNull] EntityManager manager)
-        {
-            if (this == InvalidEntity)
-            {
-                throw new InvalidOperationException("Cannot register the static invalid entity.");
-            }
-            if (manager == null)
-            {
-                throw new ArgumentNullException("manager");
-            }
-            if (Manager != null)
-            {
-                throw new InvalidOperationException("Cannot register an entity twice.");
-            }
-
-            Entity checkEntity;
-            while (Guid == Guid.Empty || manager.FindEntityByGuid(Guid, out checkEntity))
-            {
-                Guid = Guid.NewGuid();
-            }
-            manager.Register(this);
-            Manager = manager;
-
+            Manager.RemoveDataBlob(ID, typeIndex);
         }
 
         /// <summary>
@@ -228,30 +275,14 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Clones the entity, including datablobs.
+        /// Clones the entity's dataBlobs into a new ProtoEntity.
         /// </summary>
         /// <returns>The cloned entity.</returns>
         [PublicAPI]
-        public Entity Clone()
+        public ProtoEntity Clone()
         {
-            List<BaseDataBlob> clonedDataBlobs = 
-                (from dataBlob in DataBlobList
-                                   where dataBlob != null
-                                   select (BaseDataBlob)dataBlob.Clone()).ToList();
-
-            return new Entity(clonedDataBlobs);
-        }
-
-        /// <summary>
-        /// Clones the entity, including datablobs, and registers the clone with the provided EntityManager.
-        /// </summary>
-        /// <returns>The cloned entity.</returns>
-        [PublicAPI]
-        public Entity Clone(EntityManager manager)
-        {
-            Entity clone = Clone();
-            clone.Register(manager);
-            return clone;
+            List<BaseDataBlob> clonedDataBlobs = DataBlobs.Select(dataBlob => dataBlob.Clone()).Cast<BaseDataBlob>().ToList();
+            return ProtoEntity.Create(clonedDataBlobs);
         }
 
         #endregion
@@ -275,15 +306,27 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsValid)
             {
-                throw new InvalidOperationException("Cannot transfer an invalid entity. Try registering it instead.");
+                throw new InvalidOperationException("Cannot transfer an invalid entity.");
             }
             if (newManager == null)
             {
                 throw new ArgumentNullException("newManager");
             }
-            // ReSharper disable once PossibleNullReferenceException
-            // IsValid verifies that Manager is not null.
-            Manager.TransferEntity(this, newManager);
+            // Store dataBlobs.
+            List<BaseDataBlob> dataBlobs = Manager.GetAllDataBlobs(ID);
+
+            // Remove myself from the old manager.
+            Manager.RemoveEntity(ID);
+
+            // Add myself the the new manager.
+            ID = newManager.SetupEntity(this);
+            ProtectedDataBlobMask = Manager.EntityMasks[ID];
+            Manager = newManager;
+
+            foreach (BaseDataBlob dataBlob in dataBlobs)
+            {
+                SetDataBlob(dataBlob);
+            }
         }
 
         /// <summary>
@@ -312,12 +355,12 @@ namespace Pulsar4X.ECSLib
 
                 // Lookup the entity using a global Guid lookup.
                 if (entityGuid == Guid.Empty)
-                    return Entity.InvalidEntity;
+                    return InvalidEntity;
                 if (SaveGame.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                     return entity;
 
                 // If no entity was found, create a new entity in the global manager.
-                entity = new Entity(entityGuid, SaveGame.CurrentGame.GlobalManager);
+                entity = new Entity(SaveGame.CurrentGame.GlobalManager, entityGuid);
                 return entity;
             }
 
@@ -328,7 +371,6 @@ namespace Pulsar4X.ECSLib
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
                 Entity entity = (Entity)value;
-
                 serializer.Serialize(writer, entity.Guid);
             }
         }

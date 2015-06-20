@@ -40,6 +40,11 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void Save([NotNull] Game game, [NotNull] Stream outputStream, bool compress = false)
         {
+            if (game == null)
+            {
+                throw new ArgumentNullException("game");
+            }
+
             CompressionLevel compressionLevel;
             if (compress)
             {

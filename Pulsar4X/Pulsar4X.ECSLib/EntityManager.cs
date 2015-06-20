@@ -1,136 +1,251 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    [PublicAPI]
     public class GuidNotFoundException : Exception
     {
+        [PublicAPI]
+        public Guid MissingGuid { get; private set; }
+
+        [PublicAPI]
+        public GuidNotFoundException(Guid missingGuid)
+        {
+            MissingGuid = missingGuid;
+        }
     }
 
-    [JsonConverter(typeof(EntityManagerConverter))]
-    public class EntityManager
+    public class EntityManager : ISerializable
     {
-        private class EntityManagerConverter : JsonConverter
+        private class EntityConverter : JsonConverter
         {
-            /// <summary>
-            /// Serializes the EntityManager by manually serializing the Entities in the _localEntityDictionary.
-            /// Manual entity serialization is done because the Entity class has a JsonConverter to serialize Entities as Guids only.
-            /// </summary>
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
-                EntityManager manager = (EntityManager)value;
-                writer.WriteStartObject(); // Start of our EntityManager object.
-                writer.WritePropertyName("Entities"); // Write Entities list PropertyName
-                writer.WriteStartArray(); // Start the Entities array.
-                foreach (Entity entity in manager._localEntityDictionary.Values)
-                {
-                    writer.WriteStartObject(); // Start the Entity.
-                    writer.WritePropertyName("Guid"); // Write the Guid PropertyName
-                    serializer.Serialize(writer, entity.Guid); // Write the Entity's guid.
+                Entity entity = ((StoredEntity)value).EntityStored;
 
-                    foreach (BaseDataBlob dataBlob in entity.DataBlobList.Where(dataBlob => dataBlob != null))
+                writer.WriteStartObject(); // Start the Entity.
+                writer.WritePropertyName("Guid"); // Write the Guid PropertyName
+                serializer.Serialize(writer, entity.Guid); // Write the Entity's guid.
+                    foreach (BaseDataBlob dataBlob in entity.DataBlobs)
                     {
                         writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
                         serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
                     }
                     writer.WriteEndObject(); // End then Entity.
-                }
-                writer.WriteEndArray(); // End the Entities array.
-                writer.WriteEndObject(); // End the EntityManager object.
             }
 
-            /// <summary>
-            /// Reconstructs the EntityManager from the JsonRead.
-            /// </summary>
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
-                EntityManager manager = new EntityManager(SaveGame.CurrentGame);
-                reader.Read(); // PropertyName Entities
-                reader.Read(); // StartArray
-                reader.Read(); // StartObject OR EndArray
-                while (reader.TokenType == JsonToken.StartObject)
+                StoredEntity deserializedEntity;
+                //StarObject (Entity)
+                reader.Read(); // PropertyName Guid
+                reader.Read(); // Actual Guid
+                Guid entityGuid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
+
+                // Deserialize the dataBlobs
+                var dataBlobs = new List<BaseDataBlob>();
+                reader.Read(); // PropertyName DATABLOB
+                while (reader.TokenType == JsonToken.PropertyName)
                 {
-                    reader.Read(); // PropertyName Guid
-                    reader.Read(); // ACTUAL GUID
-                    Guid entityGuid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
-
-                    // Attempt a global Guid lookup of the Guid.
-                    Entity entity;
-                    if (manager.FindEntityByGuid(entityGuid, out entity))
-                    {
-                        // An Entity reference for this Guid was previously created during deserialization.
-                        // Transfer the Entity to this manager, and populate it's dataBlobs.
-                        entity.Transfer(manager);
-                    }
-                    else
-                    {
-                        // No previous entity found. Create our own with the Guid and register it to this manager.
-                        entity = new Entity(entityGuid, manager);
-                    }
-
-                    reader.Read(); // PropertyName DATABLOB
-                    while (reader.TokenType == JsonToken.PropertyName)
-                    {
-                        Type dataBlobType = Type.GetType("Pulsar4X.ECSLib." +(string)reader.Value);
-                        reader.Read(); // StartObject
-                        BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType);
-                        entity.SetDataBlob(dataBlob);
-
-                        reader.Read(); // PropertyName OR EndObject
-                    }
-                    reader.Read(); //StartObject OR EndArray
+                    Type dataBlobType = Type.GetType("Pulsar4X.ECSLib." + (string)reader.Value);
+                    reader.Read(); // StartObject (dataBlob)
+                    BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
+                    dataBlobs.Add(dataBlob);
+                    reader.Read(); // PropertyName DATABLOB OR EndObject (Entity)
                 }
-                reader.Read(); //EndObject
 
-                return manager;
+
+                // Attempt a global Guid lookup of the Guid.
+                Entity entity;
+                if (SaveGame.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                {
+                    foreach (BaseDataBlob dataBlob in dataBlobs)
+                    {
+                        entity.SetDataBlob(dataBlob);
+                    }
+                }
+                else
+                {
+                    entity = new Entity(SaveGame.CurrentGame.GlobalManager, entityGuid, dataBlobs);
+                }
+
+                deserializedEntity = new StoredEntity(entity);
+
+                return deserializedEntity;
             }
 
             public override bool CanConvert(Type objectType)
             {
-                return objectType == typeof(EntityManager);
+                return objectType == typeof(StoredEntity);
             }
         }
 
-        internal static Dictionary<Type, int> DataBlobTypes;
+        [JsonConverter(typeof(EntityConverter))]
+        private class StoredEntity : ISerializable
+        {
+            public readonly Entity EntityStored;
+
+            public StoredEntity(Entity entity)
+            {
+                EntityStored = entity;
+            }
+
+            private StoredEntity(SerializationInfo info, StreamingContext context)
+            {
+                Guid entityGuid = (Guid)info.GetValue("Guid", typeof(Guid));
+                Entity entity;
+
+                var dataBlobs = new List<BaseDataBlob>();
+
+                foreach (KeyValuePair<Type, int> dataBlobTypeEntry in DataBlobTypes)
+                {
+                    Type dataBlobType = dataBlobTypeEntry.Key;
+
+                    try
+                    {
+                        dataBlobs.Add((BaseDataBlob)info.GetValue(dataBlobType.Name, dataBlobType));
+                    }
+                    catch (SerializationException e)
+                    {
+                        if (e.Message == "Member '" + dataBlobType.Name + "' was not found.")
+                        {
+                            // Harmless. If an EntityManager is storing 0 of a type of datablob, it wont serialize anything for it.
+                            // When we go to deserialize "nothing", we get this exception.
+                        }
+                        else
+                        {
+                            // Not harmless. This could be any number of normal deserialization problems.
+                            // Most likely malformed input.
+                            throw;
+                        }
+                    }
+                }
+
+                if (SaveGame.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                {
+                    EntityStored = entity;
+                    foreach (BaseDataBlob dataBlob in dataBlobs)
+                    {
+                        EntityStored.SetDataBlob(dataBlob);
+                    }
+                }
+                else
+                {
+                    EntityStored = Entity.Create(SaveGame.CurrentGame.GlobalManager, dataBlobs);
+                }
+
+            }
+
+            public void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                info.AddValue("Guid", EntityStored.Guid);
+                foreach (BaseDataBlob dataBlob in EntityStored.DataBlobs)
+                {
+                    info.AddValue(dataBlob.GetType().Name, dataBlob);   
+                }
+            }
+        }
+
+        private static int _numLoaded = 0;
 
         private readonly Game _game;
-        [JsonProperty]
+        private readonly List<Entity> _entities = new List<Entity>();
+        private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
-        private readonly object _entityLock = new object();
 
-        /// <summary>
-        /// Lock to ensure only one transfer happens at a time.
-        /// Two concurrent transfers can create a deadlock.
-        /// 
-        /// Note: This lock is static and shared between all EntityManagers,
-        /// regardless of what game they are in. Transfers should be fast and rare
-        /// enought that this lock should not adversly affect other games.
-        /// </summary>
-        private static readonly object TransferLock = new object();
+        private int _nextID;
+
+        internal readonly List<ComparableBitArray> EntityMasks = new List<ComparableBitArray>();
+
+        private static readonly Dictionary<Type, int> InternalDataBlobTypes = InitializeDataBlobTypes();
+        [PublicAPI]
+        public static ReadOnlyDictionary<Type, int> DataBlobTypes = new ReadOnlyDictionary<Type, int>(InternalDataBlobTypes);
+
+        #region Constructors
 
         internal EntityManager(Game game)
         {
-            // Initialize our static variables.
-            if (DataBlobTypes == null)
-            {
-                DataBlobTypes = new Dictionary<Type, int>();
-
-                int i = 0;
-                // Use reflection to Find all types that implement BaseDataBlob
-                foreach (Type type in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract))
-                {
-                    DataBlobTypes.Add(type, i);
-                    i++;
-                }
-            }
             _game = game;
+
+            for (int i = 0; i < DataBlobTypes.Keys.Count; i++)
+            {
+                _dataBlobMap.Add(new List<BaseDataBlob>());
+            }
         }
 
-        private EntityManager()
-        { }
+        private static Dictionary<Type, int> InitializeDataBlobTypes()
+        {
+            var dbTypes = new Dictionary<Type, int>();
+
+            int i = 0;
+            // Use reflection to Find all types that implement BaseDataBlob
+            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract))
+            {
+                dbTypes.Add(type, i);
+                i++;
+            }
+            return dbTypes;
+        }
+
+        #endregion
+
+        #region Entity Management Functions
+
+        internal int SetupEntity(Entity entity)
+        {
+            // Find an entity slot.
+            int entityID;
+
+            for (entityID = _nextID; entityID < _entities.Count; entityID++)
+            {
+                if (_entities[entityID] == null)
+                {
+                    break;
+                }
+            }
+            _nextID = entityID + 1;
+
+            if (entityID == _entities.Count)
+            {
+                _entities.Add(entity);
+                EntityMasks.Add(BlankDataBlobMask());
+                foreach (List<BaseDataBlob> dataBlobList in _dataBlobMap)
+                {
+                    dataBlobList.Add(null);
+                }
+            }
+            else
+            {
+                _entities[entityID] = entity;
+                EntityMasks[entityID] = BlankDataBlobMask();
+                foreach (List<BaseDataBlob> dataBlobList in _dataBlobMap)
+                {
+                    dataBlobList[entityID] = null;
+                }
+            }
+
+            // Setup the global dictionary.
+            _game.GuidDictionaryLock.EnterWriteLock();
+            try
+            {
+                _game.GlobalGuidDictionary.Add(entity.Guid, this);
+                _localEntityDictionary.Add(entity.Guid, entity);
+            }
+            finally
+            {
+                _game.GuidDictionaryLock.ExitWriteLock();
+            }
+
+            return entityID;
+        }
 
         /// <summary>
         /// Verifies that the supplied entity is valid in this manager.
@@ -142,11 +257,100 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentNullException("entity");
             }
-            lock (_entityLock)
+
+            return IsValidID(entity.ID) && _entities[entity.ID] == entity;
+        }
+
+        private bool IsValidID(int entityID)
+        {
+            return entityID >= 0 && entityID < _entities.Count;
+        }
+
+        internal void RemoveEntity(int entityID)
+        {
+            Entity entity = _entities[entityID];
+            _entities[entityID] = null;
+            EntityMasks[entityID] = null;
+
+            _nextID = entityID;
+
+            for (int i = 0; i < DataBlobTypes.Count; i++)
             {
-                return entity.Manager == this && _localEntityDictionary.ContainsKey(entity.Guid);
+                _dataBlobMap[i][entityID] = null;
+            }
+
+            _game.GuidDictionaryLock.EnterWriteLock();
+            try
+            {
+                _localEntityDictionary.Remove(entity.Guid);
+                _game.GlobalGuidDictionary.Remove(entity.Guid);
+            }
+            finally
+            {
+                _game.GuidDictionaryLock.ExitWriteLock();
             }
         }
+
+        internal List<BaseDataBlob> GetAllDataBlobs(int id)
+        {
+            var dataBlobs = new List<BaseDataBlob>();
+            for (int i = 0; i < DataBlobTypes.Count; i++)
+            {
+                BaseDataBlob dataBlob = _dataBlobMap[i][id];
+                if (dataBlob != null)
+                {
+                    dataBlobs.Add(dataBlob);
+                }
+            }
+
+            return dataBlobs;
+        }
+
+        internal T GetDataBlob<T>(int entityID) where T : BaseDataBlob
+        {
+            return (T)_dataBlobMap[GetTypeIndex<T>()][entityID];
+        }
+
+        internal T GetDataBlob<T>(int entityID, int typeIndex) where T : BaseDataBlob
+        {
+            return (T)_dataBlobMap[typeIndex][entityID];
+        }
+
+        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob)
+        {
+            int typeIndex;
+            TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
+
+            _dataBlobMap[typeIndex][entityID] = dataBlob;
+            EntityMasks[entityID][typeIndex] = true;
+            dataBlob.OwningEntity = _entities[entityID];
+        }
+
+        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, int typeIndex)
+        {
+            _dataBlobMap[typeIndex][entityID] = dataBlob;
+            EntityMasks[entityID][typeIndex] = true;
+            dataBlob.OwningEntity = _entities[entityID];
+        }
+
+        internal void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob
+        {
+            int typeIndex = GetTypeIndex<T>();
+            _dataBlobMap[typeIndex][entityID].OwningEntity = null;
+            _dataBlobMap[typeIndex][entityID] = null;
+            EntityMasks[entityID][typeIndex] = false;
+        }
+
+        internal void RemoveDataBlob(int entityID, int typeIndex)
+        {
+            _dataBlobMap[typeIndex][entityID].OwningEntity = null;
+            _dataBlobMap[typeIndex][entityID] = null;
+            EntityMasks[entityID][typeIndex] = false;
+        }
+
+        #endregion
+
+        #region Public API Functions
 
         /// <summary>
         /// Returns a list of entities that have datablob type T.
@@ -193,12 +397,9 @@ namespace Pulsar4X.ECSLib
 
             var entities = new List<Entity>();
 
-            lock (_entityLock)
-            {
-                entities.AddRange(_localEntityDictionary.Values.Where(entity => (entity.DataBlobMask & dataBlobMask) == dataBlobMask));
+            entities.AddRange(_localEntityDictionary.Values.Where(entity => (entity.DataBlobMask & dataBlobMask) == dataBlobMask));
 
-                return entities;
-            }
+            return entities;
         }
 
         /// <summary>
@@ -224,14 +425,11 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public Entity GetFirstEntityWithDataBlob(int typeIndex)
         {
-            lock (_entityLock)
+            foreach (Entity entity in _localEntityDictionary.Values)
             {
-                foreach (Entity entity in _localEntityDictionary.Values)
+                if (entity.DataBlobMask.SetBits.Contains(typeIndex))
                 {
-                    if (entity.DataBlobMask.SetBits.Contains(typeIndex))
-                    {
-                        return entity;
-                    }
+                    return entity;
                 }
             }
             return Entity.InvalidEntity;
@@ -251,7 +449,8 @@ namespace Pulsar4X.ECSLib
         /// Returns a blank list used for storing datablobs by typeIndex.
         /// </summary>
         /// <returns></returns>
-        internal static List<BaseDataBlob> BlankDataBlobList()
+        [PublicAPI]
+        public static List<BaseDataBlob> BlankDataBlobList()
         {
             var blankList = new List<BaseDataBlob>(DataBlobTypes.Count);
             for (int i = 0; i < DataBlobTypes.Count; i++)
@@ -259,51 +458,6 @@ namespace Pulsar4X.ECSLib
                 blankList.Add(null);
             }
             return blankList;
-        }
-
-        /// <summary>
-        /// Transfers an entity to the specified manager.
-        /// 
-        /// NOT FOR USE OUTSIDE ENTITY.CS
-        /// 
-        /// Use entity.Transfer(newManager);
-        /// </summary>
-        /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        internal void TransferEntity([NotNull] Entity entity, [NotNull] EntityManager manager)
-        {
-            if (manager == null)
-            {
-                throw new ArgumentNullException("manager");
-            }
-
-            if (!IsValidEntity(entity))
-            {
-                throw new ArgumentException("Entity is not valid in this manager.");
-            }
-
-            // Since we lock both our entity lock, and the other manager's entity lock,
-            // we must prevent deadlocks. This is the only place where we take out two locks,
-            // so we take out this static lock first.
-            lock (TransferLock)
-            {
-                lock (_entityLock)
-                {
-                    lock (manager._entityLock)
-                    {
-                        _game.GuidDictionaryLock.EnterWriteLock();
-                        try
-                        {
-                            _localEntityDictionary.Remove(entity.Guid);
-                            manager._localEntityDictionary.Add(entity.Guid, entity);
-                            _game.GlobalGuidDictionary[entity.Guid] = manager;
-                        }
-                        finally
-                        {
-                            _game.GuidDictionaryLock.ExitWriteLock();
-                        }
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -328,7 +482,7 @@ namespace Pulsar4X.ECSLib
                 {
                     // Can only be reached if memory corruption or somehow the _guidLock thread synchronization fails.
                     // Entity must be removed from the local manager, but not the global list. Should not be possible.
-                    throw new GuidNotFoundException();
+                    throw new GuidNotFoundException(entityGuid);
                 }
             }
             finally
@@ -347,22 +501,19 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool TryGetEntityByGuid(Guid entityGuid, out Entity entity)
         {
-            lock (_entityLock)
+            _game.GuidDictionaryLock.EnterReadLock();
+            try
             {
-                _game.GuidDictionaryLock.EnterReadLock();
-                try
+                if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
                 {
-                    if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
-                    {
-                        return true;
-                    }
-                    entity = Entity.InvalidEntity;
-                    return false;
+                    return true;
                 }
-                finally
-                {
-                    _game.GuidDictionaryLock.ExitReadLock();
-                }
+                entity = Entity.InvalidEntity;
+                return false;
+            }
+            finally
+            {
+                _game.GuidDictionaryLock.ExitReadLock();
             }
         }
 
@@ -388,21 +539,31 @@ namespace Pulsar4X.ECSLib
             return DataBlobTypes[typeof(T)];
         }
 
-        public void Register(Entity entity)
+        #endregion
+
+        #region ISerializable interface
+
+        public EntityManager(SerializationInfo info, StreamingContext context) : this(SaveGame.CurrentGame)
         {
-            lock (_entityLock)
+            var entities = (List<StoredEntity>)info.GetValue("Entities", typeof(List<StoredEntity>));
+
+            foreach (StoredEntity entity in entities)
             {
-                _localEntityDictionary.Add(entity.Guid, entity);
-                _game.GuidDictionaryLock.EnterWriteLock();
-                try
-                {
-                    _game.GlobalGuidDictionary.Add(entity.Guid, this);
-                }
-                finally
-                {
-                    _game.GuidDictionaryLock.ExitWriteLock();
-                }
+                entity.EntityStored.Transfer(this);
             }
+            _numLoaded++;
         }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            List<StoredEntity> storedEntities = (from entity in _entities
+                                  where entity != null
+                                  select new StoredEntity(entity)).ToList();
+
+            info.AddValue("Entities", storedEntities);
+        }
+
+        #endregion
+
     }
 }
