@@ -1,36 +1,66 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using Newtonsoft.Json;
+
+namespace Pulsar4X.ECSLib
 {
     public class NameDB : BaseDataBlob
     {
+
         /// <summary>
         /// Each faction can have a different name for whatever entity has this blob.
         /// </summary>
-        public JDictionary<Entity, string> Name { get; set; }
+        [JsonProperty]
+        private readonly JDictionary<Entity, string> _names = new JDictionary<Entity, string>();
+
+        [PublicAPI]
+        public string DefaultName { get { return _names[Entity.InvalidEntity]; } }
 
         public NameDB()
         {
-            Name = new JDictionary<Entity, string>();
         }
 
-        /// <summary>
-        /// Each faction can have a different name for whatever entity has this blob.
-        /// </summary>
-        /// <param name="primaryFaction">This entities faction</param>
-        /// <param name="primaryName">The name this faction uses for this entity</param>
-        public NameDB(Entity primaryFaction, string primaryName)
+        public NameDB(string defaultName)
         {
-            Name = new JDictionary<Entity, string>();
-            Name.Add(primaryFaction, primaryName);
+            _names.Add(Entity.InvalidEntity, defaultName);
         }
+
+        #region Cloning Interface.
 
         public NameDB(NameDB nameDB)
         {
-            Name = new JDictionary<Entity, string>(nameDB.Name);
+            _names = new JDictionary<Entity, string>(nameDB._names);
         }
 
         public override object Clone()
         {
             return new NameDB(this);
+        }
+
+        #endregion
+
+        [PublicAPI]
+        public string GetName(Entity requestingFaction)
+        {
+            string name;
+            if (!_names.TryGetValue(requestingFaction, out name))
+            {
+                // Entry not found for the specific entity.
+                // Return the default name.
+                name = _names[Entity.InvalidEntity];
+            }
+            return name;
+        }
+
+        [PublicAPI]
+        public void SetName(Entity requestingFaction, string specifiedName)
+        {
+            if (_names.ContainsKey(requestingFaction))
+            {
+                _names[requestingFaction] = specifiedName;
+            }
+            else
+            {
+                _names.Add(requestingFaction, specifiedName);
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using Newtonsoft.Json;
+
+namespace Pulsar4X.ECSLib
 {
     public class RuinsDB : BaseDataBlob
     {
@@ -31,22 +33,46 @@
         /// <summary>
         /// How many ruins are on this world. or something.
         /// </summary>
-        public uint RuinCount;
+        public uint RuinCount
+        {
+            get { return _ruinCount; }
+            internal set { _ruinCount = value; }
+        }
+        [JsonProperty]
+        private uint _ruinCount;
 
         /// <summary>
         /// What kinds of things should be found in this ruin? including sophistication of killbots?
         /// </summary>
-        public int RuinTechLevel;
+        public int RuinTechLevel
+        {
+            get { return _ruinTechLevel; }
+            internal set { _ruinTechLevel = value; }
+        }
+        [JsonProperty]
+        private int _ruinTechLevel;
 
         /// <summary>
         /// How big are these ruins?
         /// </summary>
-        public RSize RuinSize;
+        public RSize RuinSize
+        {
+            get { return _ruinSize; }
+            internal set { _ruinSize = value; }
+        }
+        [JsonProperty]
+        private RSize _ruinSize;
 
         /// <summary>
         /// What shape are these ruins in?
         /// </summary>
-        public RQuality RuinQuality;
+        public RQuality RuinQuality
+        {
+            get { return _ruinQuality; }
+            internal set { _ruinQuality = value; }
+        }
+        [JsonProperty]
+        private RQuality _ruinQuality;
 
         /// <summary>
         /// Empty constructor for RuinsDataBlob.

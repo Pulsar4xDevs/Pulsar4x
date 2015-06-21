@@ -5,8 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -44,7 +42,6 @@ namespace Pulsar4X.ECSLib
 
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
-                StoredEntity deserializedEntity;
                 //StarObject (Entity)
                 reader.Read(); // PropertyName Guid
                 reader.Read(); // Actual Guid
@@ -77,7 +74,7 @@ namespace Pulsar4X.ECSLib
                     entity = new Entity(SaveGame.CurrentGame.GlobalManager, entityGuid, dataBlobs);
                 }
 
-                deserializedEntity = new StoredEntity(entity);
+                StoredEntity deserializedEntity = new StoredEntity(entity);
 
                 return deserializedEntity;
             }
@@ -98,6 +95,7 @@ namespace Pulsar4X.ECSLib
                 EntityStored = entity;
             }
 
+            [UsedImplicitly]
             private StoredEntity(SerializationInfo info, StreamingContext context)
             {
                 Guid entityGuid = (Guid)info.GetValue("Guid", typeof(Guid));
@@ -154,8 +152,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static int _numLoaded = 0;
-
+        [CanBeNull]
         private readonly Game _game;
         private readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
@@ -233,15 +230,23 @@ namespace Pulsar4X.ECSLib
             }
 
             // Setup the global dictionary.
-            _game.GuidDictionaryLock.EnterWriteLock();
-            try
+            if (_game != null)
             {
-                _game.GlobalGuidDictionary.Add(entity.Guid, this);
-                _localEntityDictionary.Add(entity.Guid, entity);
+                _game.GuidDictionaryLock.EnterWriteLock();
+                try
+                {
+                    _game.GlobalGuidDictionary.Add(entity.Guid, this);
+                    _localEntityDictionary.Add(entity.Guid, entity);
+                }
+                finally
+                {
+                    _game.GuidDictionaryLock.ExitWriteLock();
+                }
             }
-            finally
+            else
             {
-                _game.GuidDictionaryLock.ExitWriteLock();
+                // THis is a "fake" manager, that does not link to other managers.
+                _localEntityDictionary.Add(entity.Guid, entity);
             }
 
             return entityID;
@@ -279,15 +284,23 @@ namespace Pulsar4X.ECSLib
                 _dataBlobMap[i][entityID] = null;
             }
 
-            _game.GuidDictionaryLock.EnterWriteLock();
-            try
+            if (_game != null)
             {
-                _localEntityDictionary.Remove(entity.Guid);
-                _game.GlobalGuidDictionary.Remove(entity.Guid);
+                _game.GuidDictionaryLock.EnterWriteLock();
+                try
+                {
+                    _localEntityDictionary.Remove(entity.Guid);
+                    _game.GlobalGuidDictionary.Remove(entity.Guid);
+                }
+                finally
+                {
+                    _game.GuidDictionaryLock.ExitWriteLock();
+                }
             }
-            finally
+            else
             {
-                _game.GuidDictionaryLock.ExitWriteLock();
+                // This is a "fake" manager that does not link to other managers.
+                _localEntityDictionary.Remove(entity.Guid);
             }
         }
 
@@ -467,6 +480,12 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool FindEntityByGuid(Guid entityGuid, out Entity entity)
         {
+            if (_game == null)
+            {
+                // This is a "fake" manager not connected to other managers.
+                // This manager can only perform local Guid lookups.
+                return _localEntityDictionary.TryGetValue(entityGuid, out entity);
+            }
             _game.GuidDictionaryLock.EnterReadLock();
             try
             {
@@ -484,12 +503,12 @@ namespace Pulsar4X.ECSLib
                     // Entity must be removed from the local manager, but not the global list. Should not be possible.
                     throw new GuidNotFoundException(entityGuid);
                 }
+                return true;
             }
             finally
             {
                 _game.GuidDictionaryLock.ExitReadLock();
             }
-            return true;
         }
 
         /// <summary>
@@ -501,20 +520,30 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool TryGetEntityByGuid(Guid entityGuid, out Entity entity)
         {
-            _game.GuidDictionaryLock.EnterReadLock();
-            try
+            if (_game != null)
             {
-                if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
+                _game.GuidDictionaryLock.EnterReadLock();
+                try
                 {
-                    return true;
+                    if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
+                    {
+                        return true;
+                    }
+                    entity = Entity.InvalidEntity;
+                    return false;
                 }
-                entity = Entity.InvalidEntity;
-                return false;
+                finally
+                {
+                    _game.GuidDictionaryLock.ExitReadLock();
+                }
             }
-            finally
+            // This is a "fake" manager that does not link to other managers.
+            if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
             {
-                _game.GuidDictionaryLock.ExitReadLock();
+                return true;
             }
+            entity = Entity.InvalidEntity;
+            return false;
         }
 
         /// <summary>
@@ -543,6 +572,7 @@ namespace Pulsar4X.ECSLib
 
         #region ISerializable interface
 
+        // ReSharper disable once UnusedParameter.Local
         public EntityManager(SerializationInfo info, StreamingContext context) : this(SaveGame.CurrentGame)
         {
             var entities = (List<StoredEntity>)info.GetValue("Entities", typeof(List<StoredEntity>));
@@ -551,7 +581,6 @@ namespace Pulsar4X.ECSLib
             {
                 entity.EntityStored.Transfer(this);
             }
-            _numLoaded++;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

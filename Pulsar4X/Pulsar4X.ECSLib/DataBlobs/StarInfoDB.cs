@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -31,22 +32,83 @@ namespace Pulsar4X.ECSLib
 
     public class StarInfoDB : BaseDataBlob
     {
-        public double Age { get; set; }
-        public double Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.
-        public double Luminosity { get; set; }
-        public string Class { get; set; }
+        [PublicAPI]
+        public double Age
+        {
+            get { return _age; }
+            internal set { _age = value; }
+        }
+        [JsonProperty]
+        private double _age;
+
+        // Effective ("Photosphere") temperature in Degrees C.
+        [PublicAPI]
+        public double Temperature
+        {
+            get { return _temperature; }
+            internal set { _temperature = value; }
+        }
+        [JsonProperty]
+        private double _temperature;
+
+        [PublicAPI]
+        public double Luminosity
+        {
+            get { return _luminosity; }
+            internal set { _luminosity = value; }
+        }
+        [JsonProperty]
+        private double _luminosity;
+
+        [PublicAPI]
+        public string Class
+        {
+            get { return _class; }
+            internal set { _class = value; }
+        }
+        [JsonProperty]
+        private string _class;
+
+
+
+        [PublicAPI]
+        public SpectralType SpectralType
+        {
+            get { return _spectralType; }
+            internal set { _spectralType = value; }
+        }
+        [JsonProperty]
+        private SpectralType _spectralType;
+
+        // number from  0 (hottest) to 9 (coolest)
+        [PublicAPI]
+        public ushort SpectralSubDivision
+        {
+            get { return _spectralSubDivision; }
+            internal set { _spectralSubDivision = value; }
+        }
+        [JsonProperty]
+        private ushort _spectralSubDivision;
+
+        [PublicAPI]
+        public LuminosityClass LuminosityClass
+        {
+            get { return _luminosityClass; }
+            internal set { _luminosityClass = value; }
+        }
+        [JsonProperty]
+        private LuminosityClass _luminosityClass;
 
         /// <summary>
         /// Calculates and sets the Habitable Zone of this star based on it Luminosity.
         /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
         /// </summary>
+        [PublicAPI]
         public double EcoSphereRadius { get { return (MinHabitableRadius + MaxHabitableRadius) / 2; } } // Average Habitable Radius, in AU.
+        [PublicAPI]
         public double MinHabitableRadius { get { return Math.Sqrt(Luminosity / 1.1); } }  // in au
+        [PublicAPI]
         public double MaxHabitableRadius { get { return Math.Sqrt(Luminosity / 0.53); } }  // in au
-
-        public SpectralType SpectralType { get; set; }
-        public ushort SpectralSubDivision { get; set; }       // number from  0 (hottest) to 9 (coolest)
-        public LuminosityClass LuminosityClass { get; set; }
 
         public StarInfoDB()
         {

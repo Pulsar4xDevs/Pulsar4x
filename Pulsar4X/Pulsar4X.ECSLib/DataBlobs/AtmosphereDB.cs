@@ -10,22 +10,46 @@ namespace Pulsar4X.ECSLib
         /// Atmospheric Pressure
         /// In Earth Atmospheres (atm).
         /// </summary>
-        public float Pressure;
+        public float Pressure
+        {
+            get { return _pressure; }
+            internal set { _pressure = value; }
+        }
+        [JsonProperty]
+        private float _pressure;
 
         /// <summary>
         /// Weather or not the planet has abundent water.
         /// </summary>
-        public bool Hydrosphere;
+        public bool Hydrosphere
+        {
+            get { return _hydrosphere; }
+            internal set { _hydrosphere = value; }
+        }
+        [JsonProperty]
+        private bool _hydrosphere;
 
         /// <summary>
         /// The percentage of the bodies sureface covered by water.
         /// </summary>
-        public short HydrosphereExtent;
+        public short HydrosphereExtent
+        {
+            get { return _hydrosphereExtent; }
+            internal set { _hydrosphereExtent = value; }
+        }
+        [JsonProperty]
+        private short _hydrosphereExtent;
 
         /// <summary>
         /// A measure of the greenhouse factor provided by this Atmosphere.
         /// </summary>
-        public float GreenhouseFactor;
+        public float GreenhouseFactor
+        {
+            get { return _greenhouseFactor; }
+            internal set { _greenhouseFactor = value; }
+        }
+        [JsonProperty]
+        private float _greenhouseFactor;
 
         /// <summary>
         /// Pressure (in atm) of greenhouse gasses. but not really.
@@ -33,53 +57,63 @@ namespace Pulsar4X.ECSLib
         /// in the atmosphere and times it by the gasses GreenhouseEffect 
         /// which is a number between 1 and -1 normally.
         /// </summary>
-        public float GreenhousePressure;
+        public float GreenhousePressure
+        {
+            get { return _greenhousePressure; }
+            internal set { _greenhousePressure = value; }
+        }
+        [JsonProperty]
+        private float _greenhousePressure;
 
         /// <summary>
         /// How much light the body reflects. Affects temp.
         /// a number from 0 to 1.
         /// </summary>
-        public float Albedo;
+        public float Albedo
+        {
+            get { return _albedo; }
+            internal set { _albedo = value; }
+        }
+        [JsonProperty]
+        private float _albedo;
 
         /// <summary>
         /// Temperature of the planet AFTER greenhouse effects are taken into consideration. 
         /// This is a factor of the base temp and Green House effects.
         /// In Degrees C.
         /// </summary>
-        public float SurfaceTemperature;
+        public float SurfaceTemperature
+        {
+            get { return _surfaceTemperature; }
+            internal set { _surfaceTemperature = value; }
+        }
+        [JsonProperty]
+        private float _surfaceTemperature;
 
-         //<summary>
-         //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
-         //In Earth Atmospheres (atm).
-         //</summary>
-        public JDictionary<AtmosphericGasSD, float> Composition;
+        //<summary>
+        //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
+        //In Earth Atmospheres (atm).
+        //</summary>
+        public JDictionary<AtmosphericGasSD, float> Composition
+        {
+            get { return _composition; }
+            internal set { _composition = value; }
+        }
+        [JsonProperty]
+        private JDictionary<AtmosphericGasSD, float> _composition;
 
         /// <summary>
         /// A sting describing the Atmosphere in Percentages, like this:
         /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
         /// By Default ToString return this.
         /// </summary>
-        [JsonIgnore]
-        public string AtomsphereDescriptionInPercent
-        {
-            get { return _atomsphereDescriptionInPercent; }
-            internal set { _atomsphereDescriptionInPercent = value; }
-        }
-        [JsonProperty("AtomsphereDescriptionInPercent")]
-        private string _atomsphereDescriptionInPercent;
+        public string AtomsphereDescriptionInPercent { get; internal set; }
 
         /// <summary>
         /// A sting describing the Atmosphere in Atmospheres (atm), like this:
         /// "0.75atm Nitrogen (N), 0.21atm Oxygen (O), 0.03atm Carbon dioxide (CO2), 0.01atm Argon (Ar)"
         /// </summary>
-        [JsonIgnore]
-        public string AtomsphereDescriptionATM
-        {
-            get { return _atomsphereDescriptionAtm; }
-            internal set { _atomsphereDescriptionAtm = value; }
-        }
-        [JsonProperty("AtomsphereDescriptionATM")]
-        private string _atomsphereDescriptionAtm;
+        public string AtomsphereDescriptionAtm { get; internal set; }
 
         /// <summary>
         /// indicates if the body as a valid atmosphere.
@@ -114,7 +148,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, JDictionary<AtmosphericGasSD,float> composition)
+        internal AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, JDictionary<AtmosphericGasSD,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
@@ -124,7 +158,6 @@ namespace Pulsar4X.ECSLib
             Albedo = albedo;
             SurfaceTemperature = surfaceTemp;
             Composition = composition;
-
         }
 
         public AtmosphereDB(AtmosphereDB atmosphereDB)
@@ -141,26 +174,26 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// This function generates the different text discriptions of the atmosphere.
-        /// It should be run after any changes to the atmopshere which may effect the description.
+        /// It should be run after any changes to the atmosphere which may effect the description.
         /// </summary>
         public void GenerateDescriptions()
         {
             if (Exists == false)
             {
                 AtomsphereDescriptionInPercent = "This body has no Atmosphere.";
-                AtomsphereDescriptionATM = AtomsphereDescriptionInPercent;
+                AtomsphereDescriptionAtm = AtomsphereDescriptionInPercent;
             }
 
-            foreach (var gas in Composition)
+            foreach (KeyValuePair<AtmosphericGasSD, float> gas in Composition)
             {
-                AtomsphereDescriptionATM += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
+                AtomsphereDescriptionAtm += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
 
-                if (Pressure != 0) // for extra safty.
+                if (Pressure != 0) // for extra safety.
                     AtomsphereDescriptionInPercent += (gas.Value / Pressure).ToString("P0") + " " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
             }
 
             // trim trailing", " from the strings.
-            AtomsphereDescriptionATM = AtomsphereDescriptionATM.Remove(AtomsphereDescriptionATM.Length - 2);
+            AtomsphereDescriptionAtm = AtomsphereDescriptionAtm.Remove(AtomsphereDescriptionAtm.Length - 2);
             AtomsphereDescriptionInPercent = AtomsphereDescriptionInPercent.Remove(AtomsphereDescriptionInPercent.Length - 2);
         }
 

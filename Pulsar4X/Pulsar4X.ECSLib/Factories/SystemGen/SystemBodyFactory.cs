@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Pulsar4X.ECSLib
 {
@@ -176,7 +177,7 @@ namespace Pulsar4X.ECSLib
 
                 ProtoEntity newCometProto = CreateBaseBody();
                 NameDB cometName = newCometProto.GetDataBlob<NameDB>();
-                cometName.Name[Entity.InvalidEntity] = starName.Name[Entity.InvalidEntity] + " - Comet " + (i + 1);
+                cometName.SetName(Entity.InvalidEntity, starName.DefaultName + " - Comet " + (i + 1));
 
                 SystemBodyDB cometBodyDB = newCometProto.GetDataBlob<SystemBodyDB>();
                 cometBodyDB.Type = BodyType.Comet;
@@ -200,6 +201,9 @@ namespace Pulsar4X.ECSLib
         private void GenerateCometOrbit(StarSystem system, Entity star, ProtoEntity comet)
         {
             StarInfoDB starInfo = star.GetDataBlob<StarInfoDB>();
+            MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
+            MassVolumeDB cometMVDB = comet.GetDataBlob<MassVolumeDB>();
+
             double semiMajorAxis = GMath.SelectFromRange(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType], system.RNG.NextDouble());
             double eccentricity = GMath.SelectFromRange(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNG.NextDouble());
             double inclination = system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination;
@@ -207,8 +211,8 @@ namespace Pulsar4X.ECSLib
             double argumentOfPeriapsis = system.RNG.NextDouble() * 360;
             double meanAnomaly = system.RNG.NextDouble() * 360;
 
-            comet.SetDataBlob(new OrbitDB(star, star.GetDataBlob<MassVolumeDB>(), comet.GetDataBlob<MassVolumeDB>(), semiMajorAxis,
-                                            eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000));
+            comet.SetDataBlob(new OrbitDB(star, starMVDB.Mass, cometMVDB.Mass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode,
+                                            argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000));
         }
 
         /// <summary>
@@ -367,11 +371,12 @@ namespace Pulsar4X.ECSLib
             double parentMass = parentMVDB.Mass;
 
             MassVolumeDB myMVDB = body.GetDataBlob<MassVolumeDB>();
+            double myMass = myMVDB.Mass;
 
             // Adjust minDistance
-            double gravAttractionInsiderNumerator = GameSettings.Science.GravitationalConstant * myMVDB.Mass * insideMass;
-            double gravAttractionOutsideNumerator = GameSettings.Science.GravitationalConstant * myMVDB.Mass * outsideMass;
-            double gravAttractionParentNumerator = GameSettings.Science.GravitationalConstant * myMVDB.Mass * parentMass;
+            double gravAttractionInsiderNumerator = GameSettings.Science.GravitationalConstant * myMass * insideMass;
+            double gravAttractionOutsideNumerator = GameSettings.Science.GravitationalConstant * myMass * outsideMass;
+            double gravAttractionParentNumerator = GameSettings.Science.GravitationalConstant * myMass * parentMass;
             double gravAttractionToInsideOrbit = gravAttractionInsiderNumerator / ((minDistance - insideApoapsis) * (minDistance - insideApoapsis));
             double gravAttractionToOutsideOrbit = gravAttractionOutsideNumerator / ((outsidePeriapsis - maxDistance) * (outsidePeriapsis - maxDistance));
             double gravAttractionToParent = gravAttractionParentNumerator / (minDistance * minDistance);
@@ -425,7 +430,7 @@ namespace Pulsar4X.ECSLib
             // Now select a random eccentricity within the limits.
             double eccentricity = GMath.SelectFromRange(eccentricityMinMax, system.RNG.NextDouble());
 
-            return new OrbitDB(parent, parentMVDB, myMVDB, sma, eccentricity, system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, _galaxyGen.Settings.J2000);
+            return new OrbitDB(parent, parentMass, myMass, sma, eccentricity, system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, _galaxyGen.Settings.J2000);
         }
 
         private void FinalizeBodies(StarSystem system, Entity body, int bodyCount)
@@ -465,9 +470,9 @@ namespace Pulsar4X.ECSLib
         private static void FinalizeNameDB(ProtoEntity body, Entity parent, int bodyCount)
         {
             // Set this body's name.
-            string parentName = parent.GetDataBlob<NameDB>().Name[Entity.InvalidEntity];
+            string parentName = parent.GetDataBlob<NameDB>().DefaultName;
             string bodyName = parentName + " - " + bodyCount;
-            body.GetDataBlob<NameDB>().Name.Add(Entity.InvalidEntity, bodyName);
+            body.GetDataBlob<NameDB>().SetName(Entity.InvalidEntity, bodyName);
         }
 
         private void GenerateMoons(StarSystem system, Entity parent)
@@ -558,6 +563,10 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private void FinalizeAsteroidOrbit(StarSystem system, Entity newBody, OrbitDB referenceOrbit)
         {
+            if (referenceOrbit.Parent == null)
+            {
+                throw new InvalidOperationException("Invalid Reference Orbit.");
+            }
             // we will use the reference orbit + MaxAsteroidOrbitDeviation to constrain the orbit values:
 
             // Create semiMajorAxis:
@@ -590,8 +599,9 @@ namespace Pulsar4X.ECSLib
             double meanAnomaly = system.RNG.NextDouble() * 360;
 
             // now Create the orbit:
-            newBody.SetDataBlob(OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, referenceOrbit.Parent.GetDataBlob<MassVolumeDB>(),
-                                                    newBody.GetDataBlob<MassVolumeDB>(), semiMajorAxis, eccentricity, inclination,
+            MassVolumeDB parentMVDB = referenceOrbit.Parent.GetDataBlob<MassVolumeDB>();
+            MassVolumeDB myMVDB = newBody.GetDataBlob<MassVolumeDB>();
+            newBody.SetDataBlob(OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, parentMVDB.Mass, myMVDB.Mass, semiMajorAxis, eccentricity, inclination,
                                                     longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000));
         }
 
@@ -605,6 +615,10 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB bodyMVDB = body.GetDataBlob<MassVolumeDB>();
 
             Entity parent = bodyOrbit.Parent;
+            if (parent == null)
+            {
+                throw new InvalidOperationException("Body cannot be finalized without a parent.");
+            }
             double parentSMA = 0;
 
             Entity star;
@@ -617,6 +631,10 @@ namespace Pulsar4X.ECSLib
             {
                 OrbitDB parentOrbit = parent.GetDataBlob<OrbitDB>();
                 parentSMA += parentOrbit.SemiMajorAxis;
+                if (parentOrbit.Parent == null)
+                {
+                    throw new InvalidOperationException("Body cannot be finalized without a root star.");
+                }
                 star = parentOrbit.Parent;
             }
 

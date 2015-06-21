@@ -8,36 +8,34 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The Position as a Vec4, in AU.
         /// </summary>
-        public Vector4 Position;
+        [JsonProperty]
+        internal Vector4 Position;
 
         /// <summary>
         /// System X coordinate in AU
         /// </summary>
-        [JsonIgnore]
         public double X
         {
             get { return Position.X; }
-            set { Position.X = value; }
+            internal set { Position.X = value; }
         }
 
         /// <summary>
         /// System Y coordinate in AU
         /// </summary>
-        [JsonIgnore]
         public double Y
         {
             get { return Position.Y; }
-            set { Position.Y = value; }
+            internal set { Position.Y = value; }
         }
 
         /// <summary>
         /// System Z coordinate in AU
         /// </summary>
-        [JsonIgnore]
         public double Z
         {
             get { return Position.Z; }
-            set { Position.Z = value; }
+            internal set { Position.Z = value; }
         }
 
         #region Unit Conversion Properties

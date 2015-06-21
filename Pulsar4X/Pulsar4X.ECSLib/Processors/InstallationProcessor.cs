@@ -122,7 +122,7 @@ namespace Pulsar4X.ECSLib
             
 
             //Refine stuff.
-            var refinaryJobs = installations.RefinaryJobs;
+            var refinaryJobs = installations.RefineryJobs;
             float refinaryPoints = InstallationAbilityofType(installations, AbilityType.Refinery);
             refinaryPoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.Refinery);
 
@@ -160,7 +160,7 @@ namespace Pulsar4X.ECSLib
             float ordnancePoints = InstallationAbilityofType(installations, AbilityType.Refinery);
             ordnancePoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.OrdnanceConstruction);
 
-            GenericConstructionJobs(ordnancePoints, ordnanceJobs, colonyInfo, colonyInfo.OrdananceStockpile);
+            GenericConstructionJobs(ordnancePoints, ordnanceJobs, colonyInfo, colonyInfo.OrdinanceStockpile);
 
             //Build Fighters
             var fighterJobs = installations.FigherJobs;
@@ -276,7 +276,7 @@ namespace Pulsar4X.ECSLib
             foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
             {
                 TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
-                int numProjectLabs = scientist.GetDataBlob<TeamsDB>().Teamsize;
+                int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
                 float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
                 int researchmax = research.Cost;

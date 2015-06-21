@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         Research,
         Commercial, //ie aurora "Finance Center" 
         Industrial, //intend to use this later on for civ economy and creating random tradegoods.
-        Agrucultural, //as above.
+        Agricultural, //as above.
         MassDriver,
         SpacePort, //loading/unloading speed;
         GeneratesNavalOfficers,
@@ -28,8 +28,8 @@ namespace Pulsar4X.ECSLib
         GeneratesCivilianLeaders,
         DetectionThermal, //radar
         DetectionEM,    //radar
-        Teraforming,
-        BasicLiving, //ie Auroras infrustructure will have this ability. 
+        Terraforming,
+        BasicLiving, //ie Auroras infrastructure will have this ability. 
         //shipcomponent
         ReducedSize,
         LaunchMissileSize,
@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
 
     }
 
-    public class FactionAbilitiesDB : BaseDataBlob, INotifyPropertyChanged
+    public class FactionAbilitiesDB : BaseDataBlob
     {
         public int BasePlanetarySensorStrength
         {
@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
                     return;
                 }
                 _basePlanetarySensorStrength = value;
-                OnPropertyChanged();
+                //OnPropertyChanged();
             }
         }
 
@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
                     return;
                 }
                 _baseGroundUnitStrengthBonus = value;
-                OnPropertyChanged();
+                //OnPropertyChanged();
             }
         }
 
@@ -116,7 +116,7 @@ namespace Pulsar4X.ECSLib
             AbilityBonuses.Add(AbilityType.OrdnanceConstruction, ordnanceConstructionBonus);
             AbilityBonuses.Add(AbilityType.Research, researchBonus);
             AbilityBonuses.Add(AbilityType.ShipAssembly, shipAsseblyBonus);
-            AbilityBonuses.Add(AbilityType.Teraforming, terraformingBonus);
+            AbilityBonuses.Add(AbilityType.Terraforming, terraformingBonus);
 
         }
 

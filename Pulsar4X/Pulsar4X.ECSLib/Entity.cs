@@ -12,22 +12,39 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public List<BaseDataBlob> DataBlobs { get; set; }
 
+        [PublicAPI]
+        public Guid Guid { get; protected set; }
+
         [NotNull]
         [PublicAPI]
-        public ComparableBitArray DataBlobMask { get { return ProtectedDataBlobMask; } }
-        protected ComparableBitArray ProtectedDataBlobMask = EntityManager.BlankDataBlobMask();
+        public ComparableBitArray DataBlobMask { get { return _protectedDataBlobMask_; } }
+        protected ComparableBitArray _protectedDataBlobMask_ = EntityManager.BlankDataBlobMask();
 
         [PublicAPI]
-        public static ProtoEntity Create(IEnumerable<BaseDataBlob> dataBlobs)
+        public static ProtoEntity Create(Guid guid, IEnumerable<BaseDataBlob> dataBlobs = null)
         {
-            ProtoEntity protoEntity = new ProtoEntity { DataBlobs = EntityManager.BlankDataBlobList() };
+            ProtoEntity protoEntity = new ProtoEntity
+            {
+                DataBlobs = EntityManager.BlankDataBlobList(),
+                Guid = guid
+            };
 
+            if (dataBlobs == null)
+            {
+                return protoEntity;
+            }
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
                 protoEntity.SetDataBlob(dataBlob);
             }
 
             return protoEntity;
+        }
+
+        [PublicAPI]
+        public static ProtoEntity Create(IEnumerable<BaseDataBlob> dataBlobs = null)
+        {
+            return Create(Guid.Empty, dataBlobs);
         }
 
         [PublicAPI]
@@ -48,14 +65,14 @@ namespace Pulsar4X.ECSLib
             int typeIndex;
             EntityManager.TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
             DataBlobs[typeIndex] = dataBlob;
-            ProtectedDataBlobMask[typeIndex] = true;
+            _protectedDataBlobMask_[typeIndex] = true;
         }
 
         [PublicAPI]
         public virtual void SetDataBlob<T>(T dataBlob, int typeIndex) where T : BaseDataBlob
         {
             DataBlobs[typeIndex] = dataBlob;
-            ProtectedDataBlobMask[typeIndex] = true;
+            _protectedDataBlobMask_[typeIndex] = true;
         }
 
         [PublicAPI]
@@ -63,14 +80,14 @@ namespace Pulsar4X.ECSLib
         {
             int typeIndex = EntityManager.GetTypeIndex<T>();
             DataBlobs[typeIndex] = null;
-            ProtectedDataBlobMask[typeIndex] = false;
+            _protectedDataBlobMask_[typeIndex] = false;
         }
 
         [PublicAPI]
         public virtual void RemoveDataBlob(int typeIndex)
         {
             DataBlobs[typeIndex] = null;
-            ProtectedDataBlobMask[typeIndex] = false;
+            _protectedDataBlobMask_[typeIndex] = false;
         }
     }
 
@@ -83,14 +100,12 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public EntityManager Manager { get; private set; }
 
-        [PublicAPI]
-        public Guid Guid { get; private set; }
-
         [NotNull]
         [PublicAPI]
         public new ReadOnlyCollection<BaseDataBlob> DataBlobs { get { return new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)); } }
 
         private static readonly EntityManager InvalidManager = new EntityManager(null);
+
         /// <summary>
         /// Static entity reference to an invalid entity.
         /// 
@@ -120,7 +135,7 @@ namespace Pulsar4X.ECSLib
             }
 
             ID = Manager.SetupEntity(this);
-            ProtectedDataBlobMask = Manager.EntityMasks[ID];
+            _protectedDataBlobMask_ = Manager.EntityMasks[ID];
 
             if (dataBlobs == null)
             {
@@ -321,7 +336,7 @@ namespace Pulsar4X.ECSLib
             // Add myself the the new manager.
             ID = newManager.SetupEntity(this);
             Manager = newManager;
-            ProtectedDataBlobMask = Manager.EntityMasks[ID];
+            _protectedDataBlobMask_ = Manager.EntityMasks[ID];
 
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {

@@ -9,37 +9,34 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
-        [JsonIgnore]
         public double Mass
         {
             get { return _mass; }
             internal set { _mass = value; }
         }
-        [JsonProperty("Mass")]
+        [JsonProperty]
         private double _mass;
 
         /// <summary>
         /// Volume of this entity in Km^3.
         /// </summary>
-        [JsonIgnore]
         public double Volume
         {
             get { return _volume; }
             internal set { _volume = value; }
         }
-        [JsonProperty("Volume")]
+        [JsonProperty]
         private double _volume;
 
         /// <summary>
         /// The density of the body in kg/cm^3
         /// </summary> 
-        [JsonIgnore]
         public double Density
         {
             get { return _density; }
             internal set { _density = value; }
         }
-        [JsonProperty("Density")]
+        [JsonProperty]
         private double _density;
 
         /// <summary>
@@ -51,13 +48,12 @@ namespace Pulsar4X.ECSLib
             get { return _radius; }
             internal set { _radius = value; }
         }
-        [JsonProperty("Radius")]
+        [JsonProperty]
         private double _radius;
 
         /// <summary>
         /// The Average Radius in Km.
         /// </summary>
-        [JsonIgnore]
         public double RadiusInKM
         {
             get { return Distance.ToKm(Radius); }
@@ -68,7 +64,6 @@ namespace Pulsar4X.ECSLib
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
-        [JsonIgnore]
         public double SurfaceGravity
         {
             get { return GMath.GetStandardGravitationAttraction(Mass, RadiusInKM * 1000); }  // radius needs to be i meters here.

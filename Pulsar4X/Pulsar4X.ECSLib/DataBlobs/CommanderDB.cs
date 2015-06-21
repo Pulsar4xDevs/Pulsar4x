@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -11,12 +12,29 @@ namespace Pulsar4X.ECSLib
 
     public class CommanderDB : BaseDataBlob
     {
-        public CommanderNameSD Name { get; set; }
+        public CommanderNameSD Name
+        {
+            get { return _name; }
+            internal set { _name = value; }
+        }
+        [JsonProperty]
+        private CommanderNameSD _name;
 
-        public int Rank { get; set; }//maybe rank/title should be part of name
+        public int Rank //maybe rank/title should be part of name
+        {
+            get { return _rank; }
+            internal set { _rank = value; }
+        } 
+        [JsonProperty]
+        private int _rank;
 
-        public CommanderTypes Type { get; set; }
-
+        public CommanderTypes Type
+        {
+            get { return _type; }
+            internal set { _type = value; }
+        }
+        [JsonProperty]
+        private CommanderTypes _type;
 
         public CommanderDB()
         {

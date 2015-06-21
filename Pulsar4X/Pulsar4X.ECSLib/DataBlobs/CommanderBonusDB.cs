@@ -1,14 +1,29 @@
 ﻿using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public class ScientistBonusDB : BaseDataBlob
     {
-        public Dictionary<ResearchCategories, float> Bonuses { get; set; }
-        public int MaxLabs { get; set; }
+        [PublicAPI]
+        public Dictionary<ResearchCategories, float> Bonuses
+        {
+            get { return _bonuses; }
+            internal set { _bonuses = value; }
+        }
+        [JsonProperty]
+        private Dictionary<ResearchCategories, float> _bonuses;
 
+        [PublicAPI]
+        public int MaxLabs
+        {
+            get { return _maxLabs; }
+            internal set { _maxLabs = value; }
+        }
+        [JsonProperty]
+        private int _maxLabs;
+
+        [UsedImplicitly]
         public ScientistBonusDB() { } // needed by json
 
         public ScientistBonusDB(Dictionary<ResearchCategories,float> bonuses, int maxLabs )

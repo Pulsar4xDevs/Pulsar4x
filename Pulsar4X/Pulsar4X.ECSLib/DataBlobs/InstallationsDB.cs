@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
 
     /// <summary>
     /// this is used to turn installations on and off, 
-    /// and also used by the Processor to check pop requrements.
+    /// and also used by the Processor to check pop requirements.
     /// </summary>
     public struct InstallationEmployment
     {
@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
     public class InstallationsDB : BaseDataBlob
     {
         /// <summary>
-        /// a dictionary of installationtype, and the number of that specific type including partial instalations.
+        /// a dictionary of installationtype, and the number of that specific type including partial installations.
         /// </summary>
         public JDictionary<Guid, float> Installations { get; set; }
 
@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
         public List<ConstructionJob> OrdnanceJobs { get; set; }
         public List<ConstructionJob> ComponentJobs { get; set; }
         public List<ConstructionJob> FigherJobs { get; set; }
-        public List<ConstructionJob> RefinaryJobs { get; set; }
+        public List<ConstructionJob> RefineryJobs { get; set; }
         public InstallationsDB()
         {
             Installations = new JDictionary<Guid, float>();
@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib
             ComponentJobs = new List<ConstructionJob>(); 
             OrdnanceJobs = new List<ConstructionJob>();
             FigherJobs = new List<ConstructionJob>();
-            RefinaryJobs = new List<ConstructionJob>();
+            RefineryJobs = new List<ConstructionJob>();
         }
 
         public InstallationsDB(InstallationsDB db)
@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
             ComponentJobs = new List<ConstructionJob>(db.ComponentJobs);
             OrdnanceJobs = new List<ConstructionJob>(db.OrdnanceJobs);
             FigherJobs = new List<ConstructionJob>(db.FigherJobs);
-            RefinaryJobs = new List<ConstructionJob>(db.RefinaryJobs);
+            RefineryJobs = new List<ConstructionJob>(db.RefineryJobs);
         }
 
         public override object Clone()

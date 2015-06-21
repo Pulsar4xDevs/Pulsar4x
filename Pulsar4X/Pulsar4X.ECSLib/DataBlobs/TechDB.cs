@@ -1,31 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public class TechDB : BaseDataBlob
     {
+        [JsonProperty]
+        private List<Guid> _researchedTechs;
+        [JsonProperty]
+        private Dictionary<TechSD, int> _researchableTechs;
+        [JsonProperty]
+        private List<TechSD> _unavailableTechs;
+        [JsonProperty]
+        private int _researchPoints;
+
         /// <summary>
         /// list of technolagies that have been fully researched.
-        /// techs will be added to this list by the processor once research is compleate.
+        /// techs will be added to this list by the processor once research is complete.
         /// </summary>
-        public List<Guid> ResearchedTechs{get;set;}
+        [PublicAPI]
+        public List<Guid> ResearchedTechs
+        {
+            get { return _researchedTechs; }
+            internal set { _researchedTechs = value; }
+        }
 
         /// <summary>
-        /// dictionary of technowlagies that are availible to research, or are being researched. 
-        /// techs will get added to this dict as they become availible by the processor.
+        /// dictionary of technologies that are available to research, or are being researched. 
+        /// techs will get added to this dict as they become available by the processor.
         /// </summary>
-        public Dictionary<TechSD, int> ResearchableTechs {get;set;}
+        [PublicAPI]
+        public Dictionary<TechSD, int> ResearchableTechs
+        {
+            get { return _researchableTechs; }
+            internal set { _researchableTechs = value; }
+        }
 
         /// <summary>
-        /// a list of techs not yet meeting the reqirements to research
+        /// a list of techs not yet meeting the requirements to research
         /// </summary>
-        public List<TechSD> UnavailableTechs { get; set; }
+        [PublicAPI]
+        public List<TechSD> UnavailableTechs
+        {
+            get { return _unavailableTechs; }
+            internal set { _unavailableTechs = value; }
+        }
 
-        public int ReserchPoints { get; set; }
+        [PublicAPI]
+        public int ResearchPoints
+        {
+            get { return _researchPoints; }
+            internal set { _researchPoints = value; }
+        }
 
         /// <summary>
         /// Constructor for datablob, this should only be used when a new faction is created.
@@ -36,7 +64,7 @@ namespace Pulsar4X.ECSLib
             UnavailableTechs = alltechs.ToList();
             ResearchedTechs = new List<Guid>();
             ResearchableTechs = new Dictionary<TechSD, int>();
-            ReserchPoints = 0;
+            ResearchPoints = 0;
         }
 
         public TechDB(TechDB techDB)
@@ -44,7 +72,7 @@ namespace Pulsar4X.ECSLib
             UnavailableTechs = techDB.UnavailableTechs.ToList();
             ResearchedTechs = techDB.ResearchedTechs.ToList();
             ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
-            ReserchPoints = techDB.ReserchPoints;
+            ResearchPoints = techDB.ResearchPoints;
         }
 
         public TechDB()
@@ -52,7 +80,7 @@ namespace Pulsar4X.ECSLib
             UnavailableTechs = new List<TechSD>();
             ResearchedTechs = new List<Guid>();
             ResearchableTechs = new Dictionary<TechSD, int>();
-            ReserchPoints = 0;
+            ResearchPoints = 0;
         }
 
         public override object Clone()

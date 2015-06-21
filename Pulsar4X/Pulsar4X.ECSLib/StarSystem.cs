@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
         {
             _systemManager = new EntityManager(game);
             _neighbors = new List<StarSystem>();
-            _nameDB = new NameDB(Entity.InvalidEntity, name);
+            _nameDB = new NameDB(name);
             _seed = seed;
             RNG = new Random(seed);
             EconLastTickRun = 0;

@@ -14,12 +14,12 @@ namespace Pulsar4X.ECSLib
         {
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
 
-            NameDB name = new NameDB(factionEntity, "somestring");
+            NameDB name = new NameDB("somestring"); // TODO: Review default name.
             blobs.Add(name);
             ColonyInfoDB colonyInfoDB = new ColonyInfoDB(Entity.InvalidEntity, 0, planetEntity);
             blobs.Add(colonyInfoDB);
-            InstallationsDB colonyInstalationsDB = new InstallationsDB();
-            blobs.Add(colonyInstalationsDB);
+            InstallationsDB colonyInstallationsDB = new InstallationsDB();
+            blobs.Add(colonyInstallationsDB);
 
             Entity colonyEntity = new Entity(planetEntity.Manager, blobs);
             factionEntity.GetDataBlob<FactionDB>().Colonies.Add(colonyEntity);

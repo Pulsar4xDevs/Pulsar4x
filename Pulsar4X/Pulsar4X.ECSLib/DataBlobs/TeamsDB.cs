@@ -1,29 +1,44 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public class TeamsDB : BaseDataBlob
     {
+        [JsonProperty]
+        private int _teamSize;
+        [JsonProperty]
+        private object _teamTask;
 
-        public int Teamsize { get; set; }
+        [PublicAPI]
+        public int TeamSize
+        {
+            get { return _teamSize; }
+            internal set { _teamSize = value; }
+        }
 
         /// <summary>
         /// not sure if this should be a blob, entity or guid. and maybe a queue as well. 
         /// </summary>
-        public object TeamTask { get; set; }
+        [PublicAPI]
+        public object TeamTask
+        {
+            get { return _teamTask; }
+            internal set { _teamTask = value; }
+        }
 
         public TeamsDB() { } // need by json
 
         public TeamsDB(int maxTeamsize)
         {
-            Teamsize = 0;
+            TeamSize = 0;
             TeamTask = null;
         }
 
         public TeamsDB(TeamsDB teamsdb)
         {
-            Teamsize = teamsdb.Teamsize;
+            TeamSize = teamsdb.TeamSize;
             TeamTask = teamsdb.TeamTask;
         }
         public override object Clone()

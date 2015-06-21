@@ -13,13 +13,13 @@ namespace Pulsar4X.ECSLib
             ShipInfoDB shipInfoDB = protoShip.GetDataBlob<ShipInfoDB>();
             shipInfoDB.ShipClassDefinition = classEntity.Guid;
 
-            NameDB nameDB = protoShip.GetDataBlob<NameDB>();
             if (shipName == null)
             {
                 shipName = "Ship Name";
-            }
-            nameDB.Name.Clear();
-            nameDB.Name.Add(ownerFaction, shipName);
+            } 
+
+            NameDB nameDB = new NameDB(shipName);
+            protoShip.SetDataBlob(nameDB);
 
             return new Entity(systemEntityManager, protoShip);
         }
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
             var shields = new ShieldsDB();
             var tractor = new TractorDB();
             var troopTransport = new TroopTransportDB();
-            var name = new NameDB(faction, className);
+            var name = new NameDB(className);
 
             // now lets create a list of all these datablobs so we can create our new entity:
             List<BaseDataBlob> shipDBList = new List<BaseDataBlob>()

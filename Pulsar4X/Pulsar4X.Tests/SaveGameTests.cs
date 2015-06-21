@@ -31,9 +31,9 @@ namespace Pulsar4X.Tests
             Entity greyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(greyAlienFaction, game.GlobalManager);
 
             // Greys Name the Humans.
-            humanSpecies.GetDataBlob<NameDB>().Name.Add(greyAlienFaction, "Stupid Terrans");
+            humanSpecies.GetDataBlob<NameDB>().SetName(greyAlienFaction, "Stupid Terrans");
             // Humans name the Greys.
-            greyAlienSpecies.GetDataBlob<NameDB>().Name.Add(humanFaction, "Space bugs");
+            greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction, "Space bugs");
         }
 
         [TearDown]
@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
             NameDB speciesName = species.GetDataBlob<NameDB>();
             Assert.AreSame(speciesName.OwningEntity, species);
 
-            // <?TODO: Expand this out to cover many more DB's, entities, and cases.
+            // <?TODO: Expand this out to cover many more DBs, entities, and cases.
         }
     }
 }

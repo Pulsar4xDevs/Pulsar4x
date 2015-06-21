@@ -7,13 +7,11 @@ namespace Pulsar4X.ECSLib
     {
         public static Entity CreateSpeciesHuman(Entity faction, EntityManager systemEntityManager)
         {
-            NameDB name = new NameDB(faction, "Human");
+            NameDB name = new NameDB("Human");
             SpeciesDB speciesDB = CreateSpeciesDB_Human();
-            List<BaseDataBlob> blobs = new List<BaseDataBlob>();
-            blobs.Add(name);
-            blobs.Add(speciesDB);
+            var blobs = new List<BaseDataBlob> {name, speciesDB};
             Entity species = new Entity(systemEntityManager, blobs);
-
+            // TODO: Add specieis to faction upon creation.
             return species;
         }
 
@@ -40,13 +38,11 @@ namespace Pulsar4X.ECSLib
 
         public static Entity CreateSpeciesForPlanet(Entity faction, EntityManager systemEntityManager, Entity planetEntity)
         {
-            NameDB name = new NameDB(faction, "somename"); //where should we get the name from? maybe we shoudl pass a string here.
+            NameDB name = new NameDB("somename"); //where should we get the name from? maybe we should pass a string here.
             SpeciesDB speciesDB = CreateSpeciesDB_FromPlanet(planetEntity);
-            List<BaseDataBlob> blobs = new List<BaseDataBlob>();
-            blobs.Add(name);
-            blobs.Add(speciesDB);
+            var blobs = new List<BaseDataBlob> {name, speciesDB};
             Entity species = new Entity(systemEntityManager, blobs);
-
+            // TODO: Add specieis to faction upon creation.
             return species;
         }
 
