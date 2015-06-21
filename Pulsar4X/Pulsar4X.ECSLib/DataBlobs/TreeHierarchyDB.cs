@@ -118,6 +118,7 @@ namespace Pulsar4X.ECSLib
                 return;
             }
             Children.Add(child);
+            Children.Sort((entity1, entity2) => entity1.Guid.CompareTo(entity2.Guid));
         }
 
         private void RemoveChild(Entity child)
@@ -134,7 +135,11 @@ namespace Pulsar4X.ECSLib
         }
 
         [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
+        private void Deserialized(StreamingContext context)
+        {
+            OnDeserialized();
+        }
+        protected virtual void OnDeserialized()
         {
             SaveGame.CurrentGame.PostLoad += PostLoadHandler;
         }

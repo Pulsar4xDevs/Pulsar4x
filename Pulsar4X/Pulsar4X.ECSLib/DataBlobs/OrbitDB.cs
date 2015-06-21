@@ -100,61 +100,31 @@ namespace Pulsar4X.ECSLib
         /// 2-Body gravitational parameter of system.
         /// </summary>
         [PublicAPI]
-        public double GravitationalParameter
-        {
-            get { return _gravitationalParameter; }
-            private set { _gravitationalParameter = value; }
-        }
-        [JsonProperty]
-        private double _gravitationalParameter;
+        public double GravitationalParameter { get; private set; }
 
         /// <summary>
         /// Orbital Period of orbit.
         /// </summary>
         [PublicAPI]
-        public TimeSpan OrbitalPeriod
-        {
-            get { return _orbitalPeriod; }
-            private set { _orbitalPeriod = value; }
-        }
-        [JsonProperty]
-        private TimeSpan _orbitalPeriod;
+        public TimeSpan OrbitalPeriod { get; private set; }
 
         /// <summary>
         /// Mean Motion of orbit. Stored as Degrees/Sec.
         /// </summary>
         [PublicAPI]
-        public double MeanMotion
-        {
-            get { return _meanMotion; }
-            private set { _meanMotion = value; }
-        }
-        [JsonProperty]
-        private double _meanMotion;
+        public double MeanMotion { get; private set; }
 
         /// <summary>
         /// Point in orbit furthest from the ParentBody. Measured in AU.
         /// </summary>
         [PublicAPI]
-        public double Apoapsis
-        {
-            get { return _apoapsis; }
-            private set { _apoapsis = value; }
-        }
-        [JsonProperty]
-        private double _apoapsis;
+        public double Apoapsis { get; private set; }
 
         /// <summary>
         /// Point in orbit closest to the ParentBody. Measured in AU.
         /// </summary>
         [PublicAPI]
-        public double Periapsis
-        {
-            get { return _periapsis; }
-            private set { _periapsis = value; }
-        }
-        [JsonProperty]
-        private double _periapsis;
+        public double Periapsis { get; private set; }
 
         /// <summary>
         /// Stationary orbits don't have all of the data to update. They always return (0, 0).
@@ -236,7 +206,7 @@ namespace Pulsar4X.ECSLib
             _parentMass = parentMass;
             _myMass = myMass;
 
-            CalculateExtendedParameters(new StreamingContext(StreamingContextStates.Other));
+            CalculateExtendedParameters();
         }
 
         public OrbitDB()
@@ -264,16 +234,19 @@ namespace Pulsar4X.ECSLib
         }
         #endregion
 
-        [OnDeserialized]
-        private void CalculateExtendedParameters(StreamingContext context)
+        private void CalculateExtendedParameters()
         {
+            if (IsStationary)
+            {
+                return;
+            }
             // Calculate extended parameters.
             // http://en.wikipedia.org/wiki/Standard_gravitational_parameter#Two_bodies_orbiting_each_other
             GravitationalParameter = GameSettings.Science.GravitationalConstant * (_parentMass + _myMass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
 
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
             double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.ToKm(SemiMajorAxis), 3) / (GravitationalParameter));
-            if (orbitalPeriod * 10000000 > Int64.MaxValue)
+            if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 OrbitalPeriod = TimeSpan.MaxValue;
             }
@@ -288,6 +261,12 @@ namespace Pulsar4X.ECSLib
 
             Apoapsis = (1 + Eccentricity) * SemiMajorAxis;
             Periapsis = (1 - Eccentricity) * SemiMajorAxis;
+        }
+
+        protected override void OnDeserialized()
+        {
+            base.OnDeserialized();
+            CalculateExtendedParameters();
         }
 
         public override object Clone()
