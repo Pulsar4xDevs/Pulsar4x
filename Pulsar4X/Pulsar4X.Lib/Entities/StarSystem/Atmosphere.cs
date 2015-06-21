@@ -117,6 +117,15 @@ namespace Pulsar4X.Entities
         /// </summary>
         public SystemBody ParentBody { get { return _parentBody; } }
 
+        /// <summary>
+        /// Is a gas responsible for setting hab rating to a minimum 2.0 present?
+        /// </summary>
+        public bool HazardOne { get; set; }
+        /// <summary>
+        /// Is a gas responsible for setting hab rating to a minimum 3.0 present?
+        /// </summary>
+        public bool HazardTwo { get; set; }
+
 
         /// <summary>
         /// Atmosphere Constructor
@@ -125,6 +134,8 @@ namespace Pulsar4X.Entities
             : base()
         {
             _parentBody = parentBody;
+            HazardOne = false;
+            HazardTwo = false;
         }
 
         public override string ToString()
@@ -212,7 +223,7 @@ namespace Pulsar4X.Entities
         /// <param name="ammount">The ammount of gass to add in atm. Provide a negative number to remove gas.</param>
         public void AddGas(AtmosphericGas gas, float ammount)
         {
-            if (CanModify == false)
+            if (CanModify == false && Constants.GameSettings.TNTerraformingRules == false)
                 return; // we dont care!!
 
             if (_composition.ContainsKey(gas))

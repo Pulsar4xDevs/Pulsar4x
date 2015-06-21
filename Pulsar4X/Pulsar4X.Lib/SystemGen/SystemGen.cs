@@ -1430,7 +1430,7 @@ namespace Pulsar4X
 
         /// <summary>
         /// This function generate ruins for the specified system Body.
-        /// @todo Make Ruins Generation take star age/type into consideration??
+        /// @todo Make Ruins Generation take star age/type into consideration?? why? ruins in game will yield TN artifacts, which means that the host civ had space travel at a bare minimum.
         /// </summary>
         private static void GenerateRuins(Star star, SystemBody body)
         {
@@ -1442,7 +1442,7 @@ namespace Pulsar4X
             }
             else if (body.Atmosphere.Exists == false && (body.Atmosphere.Pressure > 2.5 || body.Atmosphere.Pressure < 0.01))
             {
-                return; // no valid atmosphere!
+                return; // no valid atmosphere! why is that a problem? bodies without atmospheres can be colonized.
             }
             else if (m_RNG.NextDouble() > 0.5)
             {
@@ -1727,7 +1727,7 @@ namespace Pulsar4X
 
         #region Util Functions
 
-        private static bool IsMoon(SystemBody.PlanetType pt)
+        public static bool IsMoon(SystemBody.PlanetType pt)
         {
             if (pt == SystemBody.PlanetType.Moon
                 || pt == SystemBody.PlanetType.IceMoon)
@@ -1831,6 +1831,7 @@ namespace Pulsar4X
         /// <returns>Temperature in Degrees C</returns>
         public static double CalculateBaseTemperatureOfBody(Star parentStar, double distanceFromStar)
         {
+#warning Does this take into account multiple stars? should it? TN does not.
             double temp = Temperature.ToKelvin(parentStar.Temperature);
             temp = temp * Math.Sqrt(parentStar.Radius / (2 * distanceFromStar));
             return Temperature.ToCelsius(temp);

@@ -550,27 +550,10 @@ namespace Pulsar4X.Entities
             {
                 ConstructionTick = ConstructionTick - (int)Constants.Colony.ConstructionCycle;
 
-                /// <summary>
-                /// There are some floating point normalization issues with ConstructionFactoryBuild. I could fix them by making only integer construction possible however. Not sure if I want to do that.
-                /// maybe changing construction to decimals and not floats could work. or some kind of normalization kludge.
-                /// </summary>
-                
-                /// <summary>
-                /// Mining should happen "first" since these should all happen quasi-simultaneously and mining is the only one that they all depend on to produce mineral resources.
-                /// </summary>
-                ConstructionCycle.MinePlanets(P);
+                ConstructionCycle.DoConstructionCycle(P);
 
                 /// <summary>
-                /// The rest of these don't particularly depend on one another so they can happen at any time.
-                /// </summary>
-                ConstructionCycle.ConstructionFactoryBuild(P);
-                ConstructionCycle.OrdnanceFactoryBuild(P);
-                ConstructionCycle.RefineFuel(P);
-                ConstructionCycle.ProcessShipyards(P);
-                ConstructionCycle.TerraformPlanets(P);
-
-                /// <summary>
-                /// Planetary cleanup should happen last. The planet was damaged last tick, so this tick that damage should be represented in reduced mining, construction, and so on.
+                /// Planetary cleanup should happen after the construction cycle proper. The planet was damaged last tick, so this tick that damage should be represented in reduced mining, construction, and so on.
                 /// </summary>
                 ConstructionCycle.CleanUpPlanets();
             }

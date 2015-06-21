@@ -2112,7 +2112,7 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[1].Value = CurrentPopulation.Species.Name;
 
                     // need planetary hab rating vs species tolerance
-                    double ColCost = CurrentPopulation.Species.ColonyCost(CurrentPopulation.Planet);
+                    double ColCost = CurrentPopulation.Species.GetTNHabRating(CurrentPopulation.Planet);
 
                     m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[1].Value = ColCost.ToString();
                     m_oSummaryPanel.SummaryDataGrid.Rows[3].Cells[1].Value = CurrentPopulation.AdminRating;

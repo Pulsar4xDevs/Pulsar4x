@@ -1053,6 +1053,8 @@ namespace Pulsar4X
             /// Jumppoints will not appear on secondary stars if true.
             /// </summary>
             public static bool PrimaryOnlyJumpPoints = false;
+
+            public static bool TNTerraformingRules = false;
         }
     }
 }
