@@ -25,9 +25,6 @@ namespace Pulsar4X.ECSLib
         }
         private Entity _owningEntity;
 
-        [JsonIgnore]
-        public readonly object LockObject = new object();
-
         // Partial implementation of INotifyPropertyChanged.
         // Note, derived datablobs are NOT fully required to implement.
         public event PropertyChangedEventHandler PropertyChanged;

@@ -87,8 +87,11 @@ namespace Pulsar4X.ECSLib
 
         private void AddChild(Entity child)
         {
-            Children.Add(child);
-            GetSameTypeDB(child).PropertyChanged += OnPropertyChanged;
+            if (!Children.Contains(child))
+            {
+                Children.Add(child);
+                GetSameTypeDB(child).PropertyChanged += OnPropertyChanged;
+            }
         }
 
         private void RemoveChild(Entity child)

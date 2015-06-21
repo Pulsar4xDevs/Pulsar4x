@@ -5,25 +5,54 @@ namespace Pulsar4X.ECSLib
 {
     public class MassVolumeDB : BaseDataBlob
     {
+
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
-        public double Mass { get; internal set; }
+        [JsonIgnore]
+        public double Mass
+        {
+            get { return _mass; }
+            internal set { _mass = value; }
+        }
+        [JsonProperty("Mass")]
+        private double _mass;
 
         /// <summary>
         /// Volume of this entity in Km^3.
         /// </summary>
-        public double Volume { get; internal set; }
+        [JsonIgnore]
+        public double Volume
+        {
+            get { return _volume; }
+            internal set { _volume = value; }
+        }
+        [JsonProperty("Volume")]
+        private double _volume;
 
         /// <summary>
         /// The density of the body in kg/cm^3
         /// </summary> 
-        public double Density { get; internal set; }
+        [JsonIgnore]
+        public double Density
+        {
+            get { return _density; }
+            internal set { _density = value; }
+        }
+        [JsonProperty("Density")]
+        private double _density;
 
         /// <summary>
         /// The Average Radius in AU.
         /// </summary>
-        public double Radius { get; internal set; }
+        [JsonIgnore]
+        public double Radius
+        {
+            get { return _radius; }
+            internal set { _radius = value; }
+        }
+        [JsonProperty("Radius")]
+        private double _radius;
 
         /// <summary>
         /// The Average Radius in Km.

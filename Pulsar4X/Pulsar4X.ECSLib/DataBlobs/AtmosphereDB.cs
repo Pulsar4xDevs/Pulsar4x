@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -58,13 +59,27 @@ namespace Pulsar4X.ECSLib
         /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
         /// By Default ToString return this.
         /// </summary>
-        public string AtomsphereDescriptionInPercent { get; internal set; }
+        [JsonIgnore]
+        public string AtomsphereDescriptionInPercent
+        {
+            get { return _atomsphereDescriptionInPercent; }
+            internal set { _atomsphereDescriptionInPercent = value; }
+        }
+        [JsonProperty("AtomsphereDescriptionInPercent")]
+        private string _atomsphereDescriptionInPercent;
 
         /// <summary>
         /// A sting describing the Atmosphere in Atmospheres (atm), like this:
         /// "0.75atm Nitrogen (N), 0.21atm Oxygen (O), 0.03atm Carbon dioxide (CO2), 0.01atm Argon (Ar)"
         /// </summary>
-        public string AtomsphereDescriptionATM { get; internal set; }
+        [JsonIgnore]
+        public string AtomsphereDescriptionATM
+        {
+            get { return _atomsphereDescriptionAtm; }
+            internal set { _atomsphereDescriptionAtm = value; }
+        }
+        [JsonProperty("AtomsphereDescriptionATM")]
+        private string _atomsphereDescriptionAtm;
 
         /// <summary>
         /// indicates if the body as a valid atmosphere.
