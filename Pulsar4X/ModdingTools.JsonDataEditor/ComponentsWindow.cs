@@ -19,6 +19,7 @@ namespace ModdingTools.JsonDataEditor
         private ComponentSD _currentComponent = new ComponentSD();
  
         private BindingList<DataHolder> _selectedComponentAbilites = new BindingList<DataHolder>();
+       
 
         public ComponentsWindow()
         {
@@ -51,9 +52,9 @@ namespace ModdingTools.JsonDataEditor
             
         }
 
-        private void SetCurrentAbility(ComponentAbilitySD componentAbility)
-        {
-            propertyGrid_PropertyEditor.SelectedObject =  new AbilitysDisplayer(componentAbility);
+        private void SetCurrentAbility(DataHolder componentAbilityDH)
+        {            
+            propertyGrid_PropertyEditor.SelectedObject = new AbilitysDisplayer(componentAbilityDH);
         }
 
         /// <summary>
@@ -61,8 +62,11 @@ namespace ModdingTools.JsonDataEditor
         /// </summary>
         public class AbilitysDisplayer
         {
-            private ComponentAbilitySD _abilitySD;
-
+            private DataHolder _abilityDH;
+            private ComponentAbilitySD _abilitySD { 
+                get { return _abilityDH.StaticData; } 
+                set { _abilityDH.StaticData = value; } }
+            
             private string _name;
             private string _description;
 
@@ -75,9 +79,19 @@ namespace ModdingTools.JsonDataEditor
             private List<Guid> _techRequiremets;
 
 
-            public AbilitysDisplayer(ComponentAbilitySD abilitySD)
+            public AbilitysDisplayer(DataHolder abilityDH)
             {
-                _abilitySD = abilitySD;
+                _abilityDH = abilityDH;
+                _name = _abilitySD.Name;
+                _description = _abilitySD.Description;
+                _ability = _abilitySD.Ability;
+                _abilityAmount = _abilitySD.AbilityAmount;
+                _crewAmount = _abilitySD.CrewAmount;
+                _weightAmount = _abilitySD.WeightAmount;
+                _affectsAbility = _abilitySD.AffectsAbility;
+                _affectedAmount = _abilitySD.AffectedAmount;
+                _techRequiremets = _abilitySD.TechRequiremets;
+
             }
 
             [DisplayName("Name")]
@@ -230,6 +244,7 @@ namespace ModdingTools.JsonDataEditor
                     TechRequiremets = _techRequiremets
                 };
                 _abilitySD = newSD;
+
             }
         }
 
@@ -355,8 +370,9 @@ namespace ModdingTools.JsonDataEditor
         private void listBox_Abilities_DoubleClick(object sender, EventArgs e)
         {
             DataHolder selectedItem = (DataHolder)listBox_Abilities.SelectedItem;
-            ComponentAbilitySD selectedSD = selectedItem.StaticData;
-            SetCurrentAbility(selectedSD);
+            StaticData(_currentComponent.ID); //recreate the SD so any changes are updated.
+            
+            SetCurrentAbility(selectedItem);
         }
     }
 }

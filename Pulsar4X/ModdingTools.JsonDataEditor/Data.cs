@@ -411,7 +411,7 @@ namespace ModdingTools.JsonDataEditor
 
     public class DataHolder
     {
-        public dynamic StaticData { get; private set; }
+        public dynamic StaticData { get; set; }
         public string File { get; private set; }
 
 
