@@ -56,7 +56,7 @@ namespace Pulsar4X.ECSLib
             // WIP Function. Not complete.
             StarSystem sol = new StarSystem(game, "Sol", -1);
 
-            Entity sun = _starFactory.CreateStar(sol, GameSettings.Units.SolarMassInKG, GameSettings.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
+            Entity sun = _starFactory.CreateStar(sol, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
 
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 

@@ -16,7 +16,7 @@ namespace Pulsar4X.Tests
         [TestFixtureSetUp]
         public void GlobalInit()
         {
-            _game = new Game("Unit Test Game", 10); // init the game class as we will need it for these tests.
+            _game = Game.NewGame("Unit Test Game", DateTime.Now, 10); // init the game class as we will need it for these tests.
         }
 
         [Test]

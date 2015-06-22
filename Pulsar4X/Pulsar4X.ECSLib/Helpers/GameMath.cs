@@ -30,22 +30,22 @@ namespace Pulsar4X.ECSLib
     {
         public static double ToKelvin(double celsius)
         {
-            return celsius + GameSettings.Units.DegreesCToKelvin;
+            return celsius + GameConstants.Units.DegreesCToKelvin;
         }
 
         public static float ToKelvin(float celsius)
         {
-            return (float)(celsius + GameSettings.Units.DegreesCToKelvin);
+            return (float)(celsius + GameConstants.Units.DegreesCToKelvin);
         }
 
         public static double ToCelsius(double kelvin)
         {
-            return kelvin + GameSettings.Units.KelvinToDegreesC;
+            return kelvin + GameConstants.Units.KelvinToDegreesC;
         }
 
         public static float ToCelsius(float kelvin)
         {
-            return (float)(kelvin + GameSettings.Units.KelvinToDegreesC);
+            return (float)(kelvin + GameConstants.Units.KelvinToDegreesC);
         }
     }
 
@@ -56,12 +56,12 @@ namespace Pulsar4X.ECSLib
     {
         public static double ToAU(double km)
         {
-            return km / GameSettings.Units.KmPerAu;
+            return km / GameConstants.Units.KmPerAu;
         }
 
         public static double ToKm(double au)
         {
-            return au * GameSettings.Units.KmPerAu;
+            return au * GameConstants.Units.KmPerAu;
         }
     }
 
@@ -298,7 +298,7 @@ namespace Pulsar4X.ECSLib
         public static double GetGravitationalAttraction(double mass1, double mass2, double distance)
         {
             // http://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
-            return GameSettings.Science.GravitationalConstant * mass1 * mass2 / (distance * distance);
+            return GameConstants.Science.GravitationalConstant * mass1 * mass2 / (distance * distance);
         }
 
         /// <summary>

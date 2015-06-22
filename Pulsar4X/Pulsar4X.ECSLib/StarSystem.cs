@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -12,19 +11,26 @@ namespace Pulsar4X.ECSLib
         {
             get { return _seed; }
         }
-        [JsonProperty("Seed")]
+        [JsonProperty]
         private readonly int _seed;
 
+        [PublicAPI]
         public NameDB NameDB
         {
             get { return _nameDB; }
         }
-        [JsonProperty("NameDB")]
+        [JsonProperty]
         private readonly NameDB _nameDB;
 
-        public Random RNG { get; private set; }
+        internal Random RNG { get; private set; }
 
-        public int EconLastTickRun { get; set; }
+        internal int EconLastTickRun
+        {
+            get { return _econLastTickRun; }
+            set { _econLastTickRun = value; }
+        }
+        [JsonProperty]
+        private int _econLastTickRun;
 
         public EntityManager SystemManager
         {
@@ -33,18 +39,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty("SystemManager")]
         private readonly EntityManager _systemManager;
 
-
-        public List<StarSystem> Neighbors
-        {
-            get { return _neighbors; }
-        }
-        [JsonProperty("Neighbors")]
-        private readonly List<StarSystem> _neighbors;
-
         public StarSystem(Game game, string name, int seed)
         {
             _systemManager = new EntityManager(game);
-            _neighbors = new List<StarSystem>();
             _nameDB = new NameDB(name);
             _seed = seed;
             RNG = new Random(seed);

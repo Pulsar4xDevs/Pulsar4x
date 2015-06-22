@@ -5,8 +5,10 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib
 {
-    public class GameSettings
+    public static class GameConstants
     {
+        public const int MinimumTimestep = 5;
+
         /// <summary>
         /// Scientific Constants
         /// </summary>
@@ -15,7 +17,6 @@ namespace Pulsar4X.ECSLib
             // Gravitation Constant
             public const double GravitationalConstant = 6.67384E-11;
         }
-
 
         /// <summary>
         /// Constants dealing with units and measurements
@@ -63,10 +64,9 @@ namespace Pulsar4X.ECSLib
             /// </summary>
             public const double KelvinToDegreesC = -273.15;
         }
+    }
 
-        public static class GameConstants
-        {
-            public const int MinimumTimestep = 5;
-        }
+    public class GameSettings
+    {
     }
 }

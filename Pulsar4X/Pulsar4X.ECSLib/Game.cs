@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -25,7 +24,6 @@ namespace Pulsar4X.ECSLib
         public VersionInfo Version { get { return VersionInfo.PulsarVersionInfo;} }
 
         [PublicAPI]
-        [JsonIgnore]
         public bool IsLoaded { get; internal set; }
 
         [PublicAPI]
@@ -41,7 +39,6 @@ namespace Pulsar4X.ECSLib
         internal int NumSystems;
 
         [PublicAPI]
-        [JsonIgnore]
         public ReadOnlyCollection<StarSystem> Systems { get { return new ReadOnlyCollection<StarSystem>(StarSystems); } }
 
         /// <summary>
@@ -50,7 +47,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public EntityManager GlobalManager { get { return _globalManager; } }
         [JsonProperty]
-        private EntityManager _globalManager;
+        private readonly EntityManager _globalManager;
 
         [PublicAPI]
         public StaticDataStore StaticData { get; private set; }
@@ -193,10 +190,10 @@ namespace Pulsar4X.ECSLib
             int timeAdvanced = 0;
 
             // Clamp deltaSeconds to a multiple of our MinimumTimestep.
-            deltaSeconds = deltaSeconds - (deltaSeconds % GameSettings.GameConstants.MinimumTimestep);
+            deltaSeconds = deltaSeconds - (deltaSeconds % GameConstants.MinimumTimestep);
             if (deltaSeconds == 0)
             {
-                deltaSeconds = GameSettings.GameConstants.MinimumTimestep;
+                deltaSeconds = GameConstants.MinimumTimestep;
             }
 
             // Clear any interrupt flag before starting the pulse.

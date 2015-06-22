@@ -17,7 +17,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            game = new Game("Unit Test Game", 1);
+            game = Game.NewGame("Unit Test Game", DateTime.Now, 10);
 
             // add a faction:
             Entity humanFaction = FactionFactory.CreateFaction(game.GlobalManager, "New Terran Utopian Empire");

@@ -388,9 +388,9 @@ namespace Pulsar4X.ECSLib
             double myMass = myMVDB.Mass;
 
             // Adjust minDistance
-            double gravAttractionInsiderNumerator = GameSettings.Science.GravitationalConstant * myMass * insideMass;
-            double gravAttractionOutsideNumerator = GameSettings.Science.GravitationalConstant * myMass * outsideMass;
-            double gravAttractionParentNumerator = GameSettings.Science.GravitationalConstant * myMass * parentMass;
+            double gravAttractionInsiderNumerator = GameConstants.Science.GravitationalConstant * myMass * insideMass;
+            double gravAttractionOutsideNumerator = GameConstants.Science.GravitationalConstant * myMass * outsideMass;
+            double gravAttractionParentNumerator = GameConstants.Science.GravitationalConstant * myMass * parentMass;
             double gravAttractionToInsideOrbit = gravAttractionInsiderNumerator / ((minDistance - insideApoapsis) * (minDistance - insideApoapsis));
             double gravAttractionToOutsideOrbit = gravAttractionOutsideNumerator / ((outsidePeriapsis - maxDistance) * (outsidePeriapsis - maxDistance));
             double gravAttractionToParent = gravAttractionParentNumerator / (minDistance * minDistance);
@@ -734,7 +734,7 @@ namespace Pulsar4X.ECSLib
             // this planet has some plate tectonics:
             // the following should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
             // we converge in billion years instead of years (otherwise we get tiny numbers).
-            double tectonicsChance = bodyMass.Mass / GameSettings.Units.EarthMassInKG / starInfo.Age * 100000000;
+            double tectonicsChance = bodyMass.Mass / GameConstants.Units.EarthMassInKG / starInfo.Age * 100000000;
             tectonicsChance = GMath.Clamp(tectonicsChance, 0, 1);
 
             TectonicActivity t;
@@ -816,7 +816,7 @@ namespace Pulsar4X.ECSLib
             var bodyMass = body.GetDataBlob<MassVolumeDB>();
 
             // get the mass ratio for this body to earth:
-            double massRatio = bodyMass.Mass / GameSettings.Units.EarthMassInKG;
+            double massRatio = bodyMass.Mass / GameConstants.Units.EarthMassInKG;
             double genChance = massRatio * system.RNG.NextDouble();
             double genChanceThreshold = _galaxyGen.Settings.MineralGenerationChanceByBodyType[bodyInfo.Type];
 
