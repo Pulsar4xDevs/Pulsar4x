@@ -76,8 +76,15 @@ namespace Pulsar4X.Tests
             if (nameDB != null)
             {
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Name", "NS");
-
-                varNode.InnerText = nameDB.DefaultName;
+                try
+                {
+                    varNode.InnerText = nameDB.DefaultName;
+                }
+                catch (Exception)
+                {
+                    varNode.InnerText = "Error, no default Name!";
+                }
+                
                 bodyNode.AppendChild(varNode);
             }
 
