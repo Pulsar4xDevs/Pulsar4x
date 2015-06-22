@@ -236,11 +236,11 @@ namespace Pulsar4X.ECSLib
             {
                 ProtoEntity newBody = CreateBaseBody();
 
-                MassVolumeDB newBodyMVDB = newBody.GetDataBlob<MassVolumeDB>();
-                newBodyMVDB.Mass = 1; // Later we do some multiplication.
+                double massMultiplyer = 1; // Later we do some multiplication.
                 SystemBodyDB newBodyBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
                 newBodyBodyDB.Type = _galaxyGen.Settings.GetBandBodyTypeWeight(systemBand).Select(system.RNG.NextDouble());
+                
 
                 if (newBodyBodyDB.Type == BodyType.Asteroid)
                 {
@@ -258,12 +258,27 @@ namespace Pulsar4X.ECSLib
                         // Note, this "numOfAsteroids" is not the final number. When we 
                         // finalize this asteroid belt, we'll generate asteroids until we run out of mass.
                         double noOfAsteroids = system.RNG.NextDouble() * _galaxyGen.Settings.MaxNoOfAsteroidsPerBelt;
-                        newBodyMVDB.Mass = noOfAsteroids;
+                        massMultiplyer = noOfAsteroids;
                     }
                 }
 
-                // Mass multiplication here. This allows us to set the mass to the correct value for both asteroid belts and other bodies.
-                newBodyMVDB.Mass *= GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.Type], system.RNG.NextDouble());
+                // generate Mass volume DB in full here, to avoid problems later:
+                double density = 1;
+                if (newBodyBodyDB.Type == BodyType.Asteroid)
+                {
+                    // Mass multiplication here. This allows us to set the mass to the correct value for both asteroid belts and other bodies.
+                    massMultiplyer *= GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.Type], system.RNG.NextDouble());  // cache final mass in massMultiplyer.
+                    var minMaxDensity = _galaxyGen.Settings.SystemBodyDensityByType[newBodyBodyDB.Type];
+                    density = (minMaxDensity.Min + minMaxDensity.Max) / 2.0;
+                }
+                else
+                {
+                    massMultiplyer *= GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.Type], system.RNG.NextDouble()); // cache mass...
+                    density = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyBodyDB.Type], system.RNG.NextDouble());
+                }
+                
+                var mvDB = MassVolumeDB.NewFromMassAndDensity(massMultiplyer, density);
+                newBody.SetDataBlob(mvDB);
 
                 bodies.Add(newBody);
                 numBodies--;
@@ -467,11 +482,11 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void FinalizeNameDB(ProtoEntity body, Entity parent, int bodyCount)
+        private static void FinalizeNameDB(ProtoEntity body, Entity parent, int bodyCount, string suffix = "")
         {
             // Set this body's name.
             string parentName = parent.GetDataBlob<NameDB>().DefaultName;
-            string bodyName = parentName + " - " + bodyCount;
+            string bodyName = parentName + " - " + bodyCount + suffix;
             body.GetDataBlob<NameDB>().SetName(Entity.InvalidEntity, bodyName);
         }
 
@@ -526,11 +541,12 @@ namespace Pulsar4X.ECSLib
             GenerateOrbitsForBodies(system, parent, ref moons, new MinMaxStruct(minMoonOrbitDist, maxMoonDistance), new List<ProtoEntity>());
         }
 
-        private void FinalizeAsteroidBelt(StarSystem system, ProtoEntity body, int bodyCount)
+        private void FinalizeAsteroidBelt(StarSystem system, Entity body, int bodyCount)
         {
             MassVolumeDB beltMVDB = body.GetDataBlob<MassVolumeDB>();
             OrbitDB referenceOrbit = body.GetDataBlob<OrbitDB>();
 
+            int asteriodCount = 1;
             while (beltMVDB.Mass > 0)
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
@@ -546,16 +562,22 @@ namespace Pulsar4X.ECSLib
                     newBodyDB.Type = BodyType.DwarfPlanet;
                 }
 
-                MassVolumeDB newBodyMVDB = newBody.GetDataBlob<MassVolumeDB>();
-
-                newBodyMVDB.Mass = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyDB.Type], system.RNG.NextDouble());
+                MassVolumeDB mvDB = MassVolumeDB.NewFromMassAndDensity(
+                    GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyDB.Type], system.RNG.NextDouble()),
+                    GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyDB.Type], system.RNG.NextDouble()));
+                newBody.SetDataBlob(mvDB, EntityManager.GetTypeIndex<MassVolumeDB>());
 
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
                 FinalizeSystemBodyDB(system, newBody);
-                FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount);
+                FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount, "-A" + asteriodCount.ToString());
 
-                beltMVDB.Mass -= newBodyMVDB.Mass;
+                beltMVDB.Mass -= mvDB.Mass;
+                asteriodCount++;
             }
+
+            // now we are finished with the belt reference asteriod, remove it:
+            referenceOrbit.ParentDB.Children.Remove(body);
+            body.Destroy();
         }
 
         /// <summary>
