@@ -12,12 +12,12 @@ namespace Pulsar4X.Tests
     {
         private Game game;
         private const string file = "./testSave.json";
-        private DateTime testTime;
+        private readonly DateTime testTime = DateTime.Now;
 
         [SetUp]
         public void Init()
         {
-            game = Game.NewGame("Unit Test Game", DateTime.Now, 10);
+            game = Game.NewGame("Unit Test Game", testTime, 1);
 
             // add a faction:
             Entity humanFaction = FactionFactory.CreateFaction(game.GlobalManager, "New Terran Utopian Empire");
@@ -90,7 +90,7 @@ namespace Pulsar4X.Tests
             game = SaveGame.Load(file);
 
             Assert.AreEqual(1, game.Systems.Count);
-            //Assert.AreEqual(testTime, game.CurrentDateTime); // TODO: Fix this
+            Assert.AreEqual(testTime, game.CurrentDateTime);
             List<Entity> entities = game.GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>();
             Assert.AreEqual(2, entities.Count);
             entities = game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>();
