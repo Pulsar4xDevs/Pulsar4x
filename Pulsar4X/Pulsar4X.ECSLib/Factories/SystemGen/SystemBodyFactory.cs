@@ -539,6 +539,12 @@ namespace Pulsar4X.ECSLib
             double maxMoonDistance = _galaxyGen.Settings.MaxMoonOrbitDistanceByPlanetType[parentBodyDB.Type] * massRatioOfParent;
 
             GenerateOrbitsForBodies(system, parent, ref moons, new MinMaxStruct(minMoonOrbitDist, maxMoonDistance), new List<ProtoEntity>());
+
+            // create proper entities:
+            foreach (var moon in moons)
+            {
+                Entity.Create(system.SystemManager, moon);
+            }
         }
 
         private void FinalizeAsteroidBelt(StarSystem system, Entity body, int bodyCount)
