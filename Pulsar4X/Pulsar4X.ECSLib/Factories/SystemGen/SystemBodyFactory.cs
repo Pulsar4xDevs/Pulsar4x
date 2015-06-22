@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace Pulsar4X.ECSLib
 {
@@ -263,7 +262,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // generate Mass volume DB in full here, to avoid problems later:
-                double density = 1;
+                double density;
                 if (newBodyBodyDB.Type == BodyType.Asteroid)
                 {
                     // Mass multiplication here. This allows us to set the mass to the correct value for both asteroid belts and other bodies.
@@ -492,7 +491,7 @@ namespace Pulsar4X.ECSLib
 
         private void GenerateMoons(StarSystem system, Entity parent)
         {
-            // BUG: Moons are not currently generating, or being excessively rejected.
+            // BUG: Moons are currently taking a large ratio of mass compared to parents, and when formed on GasGiants can be extremely large.
             SystemBodyDB parentBodyDB = parent.GetDataBlob<SystemBodyDB>();
 
             // first lets see if this planet gets moons:
@@ -552,7 +551,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB beltMVDB = body.GetDataBlob<MassVolumeDB>();
             OrbitDB referenceOrbit = body.GetDataBlob<OrbitDB>();
 
-            int asteriodCount = 1;
+            int asteroidCount = 1;
             while (beltMVDB.Mass > 0)
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
@@ -575,14 +574,13 @@ namespace Pulsar4X.ECSLib
 
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
                 FinalizeSystemBodyDB(system, newBody);
-                FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount, "-A" + asteriodCount.ToString());
+                FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount, "-A" + asteroidCount.ToString());
 
                 beltMVDB.Mass -= mvDB.Mass;
-                asteriodCount++;
+                asteroidCount++;
             }
 
-            // now we are finished with the belt reference asteriod, remove it:
-            referenceOrbit.ParentDB.Children.Remove(body);
+            // now we are finished with the belt reference asteroid, remove it:
             body.Destroy();
         }
 

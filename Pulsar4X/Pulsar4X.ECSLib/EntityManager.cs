@@ -281,7 +281,11 @@ namespace Pulsar4X.ECSLib
 
             for (int i = 0; i < DataBlobTypes.Count; i++)
             {
-                _dataBlobMap[i][entityID] = null;
+                if (_dataBlobMap[i][entityID] != null)
+                {
+                    _dataBlobMap[i][entityID].OwningEntity = null;
+                    _dataBlobMap[i][entityID] = null;
+                }
             }
 
             if (_game != null)
