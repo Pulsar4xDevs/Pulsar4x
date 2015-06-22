@@ -20,6 +20,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        [Ignore]
         [Description("Outputs all the systems generated in the init of this test to XML")]
         public void OutputToXML()
         {
@@ -346,7 +347,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        [Description("generates 1000 test systems to test performance of the run.")]
+        [Description("generates 1000 test systems using pre-ECS system Gen to test performance of the run.")]
         [Ignore]
         public void OldSystemGenPerformanceTest()
         {
