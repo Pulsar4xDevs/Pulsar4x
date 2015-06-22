@@ -85,6 +85,7 @@ namespace Pulsar4X.ECSLib
             mvDB.Mass = mass;
             mvDB.Radius = radius;
             mvDB.Volume = CalculateVolume(radius);
+            mvDB.Density = CalculateDensity(mass, mvDB.Volume);
 
             return mvDB;
         }
