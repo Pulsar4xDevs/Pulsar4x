@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI.Properties;
@@ -20,7 +22,28 @@ namespace Pulsar4X.WPFUI
     public partial class MainWindow
     {
         private double _customAdvSimValue = 5;
-        internal Game CurrentGame;
+        delegate void ProgressUpdate(double progress);
+
+        internal Game CurrentGame
+        {
+            get { return _currentGame; }
+            set
+            {
+                _currentGame = value;
+                if (_currentGame == null)
+                {
+                    TBT_Toolbar.IsEnabled = false;
+                    MI_SaveGame.IsEnabled = false;
+                }
+                else
+                {
+                    TBT_Toolbar.IsEnabled = true;
+                    MI_SaveGame.IsEnabled = true;
+                }
+            }
+        }
+        private Game _currentGame;
+
         private readonly CancellationToken _pulseCancellationToken;
 
         [UsedImplicitly]
@@ -56,7 +79,6 @@ namespace Pulsar4X.WPFUI
 
             if (CurrentGame.IsLoaded)
             {
-                TBT_Toolbar.IsEnabled = true;
                 MessageBox.Show(this, "Game Created.", "Result");
             }
 
@@ -72,11 +94,11 @@ namespace Pulsar4X.WPFUI
                 string pathToFile = fileDialog.FileName;
                 try
                 {
-                    Stopwatch timer = new Stopwatch();
-                    timer.Start();
-                    CurrentGame = await Task.Run(() => SaveGame.Load(pathToFile));
-                    timer.Stop();
+                    Status_TextBlock.Text = "Game Loading...";
+                    CurrentGame = await Task.Run(() => SaveGame.Load(pathToFile, new Progress<double>(OnProgressUpdate)));
                     MessageBox.Show(this, "Game Loaded.", "Result");
+                    Status_TextBlock.Text = "Game Loaded.";
+                    Status_ProgressBar.Value = 0;
                 }
                 catch (Exception exception)
                 {
@@ -95,9 +117,12 @@ namespace Pulsar4X.WPFUI
                 string pathToFile = fileDialog.FileName;
                 try
                 {
-                    await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile));
+                    Status_TextBlock.Text = "Game Saving...";
+                    await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, new Progress<double>(OnProgressUpdate)));
                     //await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, true)); // Compressed
                     MessageBox.Show(this, "Game Saved.", "Result");
+                    Status_TextBlock.Text = "Game Saved.";
+                    Status_ProgressBar.Value = 0;
                 }
                 catch (Exception exception)
                 {
@@ -106,6 +131,22 @@ namespace Pulsar4X.WPFUI
 
             }
             e.Handled = true;
+        }
+
+        /// <summary>
+        /// OnProgressUpdate eventhandler for the Progress class.
+        /// Called from the task thread, this call must be marshalled to the UI thread.
+        /// </summary>
+        private void OnProgressUpdate(double progress)
+        {
+            // The Dispatcher contains the UI thread. Make sure we are on the UI thread.
+            if (Thread.CurrentThread != Dispatcher.Thread)
+            {
+                Dispatcher.BeginInvoke(new ProgressUpdate(OnProgressUpdate), progress);
+                return;
+            }
+
+            Status_ProgressBar.Value = progress * 100;
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)

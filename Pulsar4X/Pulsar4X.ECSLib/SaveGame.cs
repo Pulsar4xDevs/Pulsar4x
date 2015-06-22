@@ -3,9 +3,6 @@ using Newtonsoft.Json;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using System.Threading;
-using Newtonsoft.Json.Bson;
-using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -18,19 +15,21 @@ namespace Pulsar4X.ECSLib
         private static readonly JsonSerializer DefaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable() };
 
         internal static Game CurrentGame { get; private set; }
+        internal static IProgress<double> Progress { get; private set; }
+        internal static int ManagersProcessed { get; set; }
         private static readonly object SyncRoot = new object();
 
         /// <summary>
         /// Saves the game to a file defined by filePath using the default serializer.
         /// </summary>
         [PublicAPI]
-        public static void Save([NotNull] Game game, [NotNull] string filePath, bool compress = false)
+        public static void Save([NotNull] Game game, [NotNull] string filePath, IProgress<double> progress = null, bool compress = false)
         {
             CheckFile(filePath, FileAccess.Write);
 
             using (FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
-                Save(game, fileStream, compress);
+                Save(game, fileStream, progress, compress);
             }
         }
 
@@ -38,7 +37,7 @@ namespace Pulsar4X.ECSLib
         /// Saves the game to the provided stream using the default serializer.
         /// </summary>
         [PublicAPI]
-        public static void Save([NotNull] Game game, [NotNull] Stream outputStream, bool compress = false)
+        public static void Save([NotNull] Game game, [NotNull] Stream outputStream,  IProgress<double> progress = null, bool compress = false)
         {
             if (game == null)
             {
@@ -59,6 +58,9 @@ namespace Pulsar4X.ECSLib
 
             lock (SyncRoot)
             {
+                Progress = progress;
+                ManagersProcessed = 0;
+                game.NumSystems = game.StarSystems.Count;
                 using (MemoryStream intermediateStream = new MemoryStream())
                 {
                     using (StreamWriter streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
@@ -84,13 +86,13 @@ namespace Pulsar4X.ECSLib
         /// Loads the game from the file at the provided filePath using the default serializer.
         /// </summary>
         [PublicAPI]
-        public static Game Load([NotNull] string filePath)
+        public static Game Load([NotNull] string filePath, IProgress<double> progress = null)
         {
             CheckFile(filePath, FileAccess.Read);
 
             using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                return Load(fileStream);
+                return Load(fileStream, progress);
             }
         }
 
@@ -98,12 +100,14 @@ namespace Pulsar4X.ECSLib
         /// Loads the game from the provided stream using the default serializer.
         /// </summary>
         [PublicAPI]
-        private static Game Load(Stream inputStream)
+        private static Game Load(Stream inputStream, IProgress<double> progress = null)
         {
             Game game = new Game();
 
             lock (SyncRoot)
             {
+                Progress = progress;
+                ManagersProcessed = 0;
                 CurrentGame = game;
                 using (GZipStream compressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
                 {

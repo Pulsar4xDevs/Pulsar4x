@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -35,6 +36,9 @@ namespace Pulsar4X.ECSLib
         }
         [JsonProperty]
         private DateTime _currentDateTime;
+
+        [JsonProperty]
+        internal int NumSystems;
 
         [PublicAPI]
         [JsonIgnore]

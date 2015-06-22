@@ -596,6 +596,43 @@ namespace Pulsar4X.ECSLib
             info.AddValue("Entities", storedEntities);
         }
 
+        /// <summary>
+        /// OnSerialized callback, called by the JSON serializer. Used to report saving progress back to the application.
+        /// </summary>
+        /// <param name="context"></param>
+        [OnSerialized]
+        private void OnSerialized(StreamingContext context)
+        {
+            if (_game == null)
+            {
+                throw new InvalidOperationException("Fake managers cannot be serialized.");
+            }
+
+            SaveGame.ManagersProcessed++;
+            if (SaveGame.Progress != null)
+            {
+                SaveGame.Progress.Report((double)SaveGame.ManagersProcessed / (_game.NumSystems + 1));
+            }
+        }
+
+        /// <summary>
+        /// OnDeserialized callback, called by the JSON loader. Used to report loading progress back to the application.
+        /// </summary>
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            if (_game == null)
+            {
+                throw new InvalidOperationException("Fake managers cannot be deserialized.");
+            }
+
+            SaveGame.ManagersProcessed++;
+            if (SaveGame.Progress != null)
+            {
+                SaveGame.Progress.Report((double)SaveGame.ManagersProcessed / (_game.NumSystems + 1));
+            }
+        }
+
         #endregion
 
     }
