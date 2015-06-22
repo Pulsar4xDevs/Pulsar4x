@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
         public List<Guid> TechRequirements;
 
         /// <summary>
-        /// The resources requred to build this facility
+        /// The resources required to build this facility
         /// </summary>
         public JDictionary<Guid,int> ResourceCosts;
         /// <summary>
@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
         public int WealthCost;
 
         /// <summary>
-        /// related to how long it will take to build this faclity, I think aurora uses mass for this, but hey why not be more flexable.
+        /// related to how long it will take to build this facility, I think aurora uses mass for this, but hey why not be more flexable.
         /// </summary>
         public int BuildPoints;
     }

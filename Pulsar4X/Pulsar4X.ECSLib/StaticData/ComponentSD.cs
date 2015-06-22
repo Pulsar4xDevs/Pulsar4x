@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
         public List<float> WeightAmount;
         public AbilityType AffectsAbility;
         public List<float> AffectedAmount;
-        public List<Guid> TechRequiremets;
+        public List<Guid> TechRequirements;
     }
 
     [StaticDataAttribute(true, IDPropertyName = "ID")]

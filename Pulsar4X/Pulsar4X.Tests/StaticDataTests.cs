@@ -125,7 +125,7 @@
 //            launchAbility.Name = "Missile Launcher Size";
 //            launchAbility.Description = "Can fire a missile of this size or smaller";
 //            launchAbility.WeightAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-//            launchAbility.TechRequiremets = new List<Guid>() { };
+//            launchAbility.TechRequirements = new List<Guid>() { };
 
 //            ComponentAbilitySD reloadAbility = new ComponentAbilitySD();
 //            reloadAbility.Name = "Missile Launcher Reload Rate";

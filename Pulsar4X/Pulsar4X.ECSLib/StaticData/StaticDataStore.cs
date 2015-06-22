@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Dictionary which stores all the Technologies.
-        /// stored in a dictionary to allow fast lookup of a specifc Technology based on its guid.
+        /// stored in a dictionary to allow fast lookup of a specific Technology based on its guid.
         /// </summary>
         public JDictionary<Guid, TechSD> Techs = new JDictionary<Guid, TechSD>();
 
@@ -70,7 +70,7 @@ namespace Pulsar4X.ECSLib
                 {"Minerals", Minerals.GetType()},
                 {"Techs", Techs.GetType()},
                 {"Installations", Installations.GetType()},
-                {"ConstrutableObj", ConstructableObjects.GetType()}
+                {"ConstructableObj", ConstructableObjects.GetType()}
             };
             TypesToStrings = StringsToTypes.ToDictionary(x => x.Value, x => x.Key);
         }
@@ -138,11 +138,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores ConstructableObj Static Data. Will overwrite any existing ConstructableObjs with the same ID.
         /// </summary>
-        public void Store(JDictionary<Guid, ConstructableObjSD> recipies)
+        public void Store(JDictionary<Guid, ConstructableObjSD> recipes)
         {
-            if (recipies != null)
+            if (recipes != null)
             {
-                foreach (var recipe in recipies)
+                foreach (var recipe in recipes)
                     ConstructableObjects[recipe.Key] = recipe.Value;
             }
         }

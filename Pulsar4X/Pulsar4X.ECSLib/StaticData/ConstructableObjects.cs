@@ -12,6 +12,6 @@ namespace Pulsar4X.ECSLib
         public JDictionary<Guid, int> Ingredients;
         public int BuildPoints;
         public int WealthCost;
-        public AbilityType ConstructionTypeRequrement;
+        public AbilityType ConstructionTypeRequirement;
     }
 }

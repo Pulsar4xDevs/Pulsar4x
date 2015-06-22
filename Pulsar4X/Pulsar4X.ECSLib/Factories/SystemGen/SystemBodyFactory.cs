@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
             double starMassRatio = GMath.GetPercentage(starMassInfo.Mass, _galaxyGen.Settings.StarMassBySpectralType[starInfo.SpectralType]);
 
             // Star type Multiplier.
-            double starSpectralTypeRatio = _galaxyGen.Settings.StarSpecralTypePlanetGenerationRatio[starInfo.SpectralType];
+            double starSpectralTypeRatio = _galaxyGen.Settings.StarSpectralTypePlanetGenerationRatio[starInfo.SpectralType];
 
             // Random value.
             double randomMultiplier = system.RNG.NextDouble();
@@ -726,7 +726,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private TectonicActivity GenerateTectonicActivity(StarSystem system, StarInfoDB starInfo, MassVolumeDB bodyMass)
         {
-            if (system.RNG.NextDouble() > _galaxyGen.Settings.TerrestrialBodyTectonicActiviyChance)
+            if (system.RNG.NextDouble() > _galaxyGen.Settings.TerrestrialBodyTectonicActivityChance)
             {
                 return TectonicActivity.Dead;
             }
@@ -793,16 +793,16 @@ namespace Pulsar4X.ECSLib
             }
 
             // now if we have survived the gauntlet lets gen some Ruins!!
-            ruins.RuinSize = _galaxyGen.Settings.RuinsSizeDisrubution.Select(system.RNG.Next(0, 100));
+            ruins.RuinSize = _galaxyGen.Settings.RuinsSizeDistribution.Select(system.RNG.Next(0, 100));
 
             int quality = system.RNG.Next(0, 100);
-            ruins.RuinQuality = _galaxyGen.Settings.RuinsQuilityDisrubution.Select(quality);
+            ruins.RuinQuality = _galaxyGen.Settings.RuinsQualityDistribution.Select(quality);
             if (ruins.RuinSize == RuinsDB.RSize.City && quality >= 95)
                 ruins.RuinQuality = RuinsDB.RQuality.MultipleIntact;  // special case!!
 
             // Ruins count:
             ruins.RuinCount = (uint)GMath.SelectFromRange(_galaxyGen.Settings.RuinsCountRangeBySize[ruins.RuinSize], system.RNG.NextDouble());
-            ruins.RuinCount = (uint)Math.Round(_galaxyGen.Settings.RuinsQuilityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
+            ruins.RuinCount = (uint)Math.Round(_galaxyGen.Settings.RuinsQualityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
         }
 
         /// <summary>

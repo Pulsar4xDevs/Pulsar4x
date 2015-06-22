@@ -84,6 +84,8 @@ namespace Pulsar4X.ECSLib
         internal event EventHandler PostLoad;
         #endregion
 
+        #region Constructors
+
         internal Game()
         {
 
@@ -96,25 +98,30 @@ namespace Pulsar4X.ECSLib
             PostLoad += (sender, args) => { InitializeProcessors(); };
         }
 
-        [PublicAPI]
-        public Game(string gameName, int numSystems)
-            : this()
-        {
-            GameName = gameName;
-            for (int i = 0; i < numSystems; i++)
-            {
-                StarSystem newSystem = GalaxyGen.StarSystemFactory.CreateSystem(this, "System #" + i);
-                StarSystems.Add(newSystem);
-            }
-
-            PostGameLoad();
-        }
+        #endregion
 
         #region Functions
+
+        #region Internal Functions
+
         internal void RunProcessors(List<StarSystem> systems, int deltaSeconds)
         {
             OrbitProcessor.Process(this, systems, deltaSeconds);
             InstallationProcessor.Process(systems, deltaSeconds);
+        }
+
+        internal void PostGameLoad()
+        {
+            // Invoke the Post Load event down the chain.
+            if (PostLoad != null)
+                PostLoad(this, EventArgs.Empty);
+
+            // set isLoaded to true:
+            IsLoaded = true;
+
+            // Post load event completed. Drop all handlers.
+            PostLoad = null;
+
         }
 
         /// <summary>
@@ -124,6 +131,34 @@ namespace Pulsar4X.ECSLib
         {
             OrbitProcessor.Initialize();
             InstallationProcessor.Initialize();
+        }
+
+        #endregion
+
+        #region Public API
+
+        [PublicAPI]
+        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, IProgress<double> progress = null)
+        {
+            if (gameName == null)
+            {
+                throw new ArgumentNullException("gameName");
+            }
+
+            Game newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
+
+            for (int i = 0; i < numSystems; i++)
+            {
+                StarSystem newSystem = newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
+                newGame.StarSystems.Add(newSystem);
+                if (progress != null)
+                {
+                    progress.Report((double)newGame.StarSystems.Count / numSystems);
+                }
+            }
+
+            newGame.PostGameLoad();
+            return newGame;
         }
 
         /// <summary>
@@ -197,19 +232,9 @@ namespace Pulsar4X.ECSLib
             return timeAdvanced;
         }
 
-        internal void PostGameLoad()
-        {
-            // Invoke the Post Load event down the chain.
-            if (PostLoad != null)
-                PostLoad(this, EventArgs.Empty);
+        #endregion
 
-            // set isLoaded to true:
-            IsLoaded = true;
 
-            // Post load event completed. Drop all handlers.
-            PostLoad = null;
-
-        }
         #endregion
     }
 }

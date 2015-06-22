@@ -72,14 +72,20 @@ namespace Pulsar4X.WPFUI
             _pulseCancellationToken = new CancellationToken();
         }
 
-        private void NewGame_Click(object sender, RoutedEventArgs e)
+        private async void NewGame_Click(object sender, RoutedEventArgs e)
         {
             // Todo: New Game window to set the game parameters.
-            CurrentGame = new Game("TestGame", 100);
-
-            if (CurrentGame.IsLoaded)
+            try
             {
+                Status_TextBlock.Text = "Creating new game...";
+                CurrentGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 100, new Progress<double>(OnProgressUpdate)));
                 MessageBox.Show(this, "Game Created.", "Result");
+                Status_TextBlock.Text = "Game Created.";
+                Status_ProgressBar.Value = 0;
+            }
+            catch (Exception exception)
+            {
+                DisplayException("creating a new game", exception);
             }
 
             e.Handled = true;
