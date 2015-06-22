@@ -25,7 +25,7 @@ namespace Pulsar4X.Tests
         public void OutputToXML()
         {
             XmlSerializer ser = new XmlSerializer(typeof(XmlNode));
-            TextWriter writer = new StreamWriter(".\\test.xml");
+            TextWriter writer = new StreamWriter(".\\SystemsExport.xml");
 
             XmlDocument xmlDoc = new XmlDocument();
             XmlNode toplevelNode = xmlDoc.CreateNode(XmlNodeType.Element, "Systems", "NS");
@@ -74,12 +74,113 @@ namespace Pulsar4X.Tests
                 varNode.InnerText = Guid.Empty.ToString();
             bodyNode.AppendChild(varNode);
 
+            // then add our ID to at the end:
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "ID", "NS");
+            varNode.InnerText = systemBody.Guid.ToString();
+            bodyNode.AppendChild(varNode);
+
             if (nameDB != null)
             {
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Name", "NS");
-
                 varNode.InnerText = nameDB.DefaultName;
-                
+                bodyNode.AppendChild(varNode);
+            }
+            
+            if (starIfnoDB != null)
+            {
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Type", "NS");
+                varNode.InnerText = starIfnoDB.SpectralType.ToString();
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Class", "NS");
+                varNode.InnerText = starIfnoDB.Class;
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Age", "NS");
+                varNode.InnerText = starIfnoDB.Age.ToString("N0");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "AverageEcoSphereRadius", "NS");
+                varNode.InnerText = starIfnoDB.EcoSphereRadius.ToString("N3");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MinEcoSphereRadius", "NS");
+                varNode.InnerText = starIfnoDB.MinHabitableRadius.ToString("N4");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MaxEcoSphereRadius", "NS");
+                varNode.InnerText = starIfnoDB.MaxHabitableRadius.ToString("N4");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Luminosity", "NS");
+                varNode.InnerText = starIfnoDB.Luminosity.ToString("N4");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Temperature", "NS");
+                varNode.InnerText = starIfnoDB.Temperature.ToString("N0");
+                bodyNode.AppendChild(varNode);
+            }
+
+            if (massVolumeDB != null)
+            {
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MassInKG", "NS");
+                varNode.InnerText = massVolumeDB.Mass.ToString("N0");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MassInEarthMasses", "NS");
+                varNode.InnerText = (massVolumeDB.Mass / GameConstants.Units.EarthMassInKG).ToString("N2");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");
+                varNode.InnerText = massVolumeDB.Density.ToString("N4");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Radius", "NS");
+                varNode.InnerText = massVolumeDB.RadiusInKM.ToString("N0");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Volume", "NS");
+                varNode.InnerText = massVolumeDB.Volume.ToString("N0");
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceGravity", "NS");
+                varNode.InnerText = massVolumeDB.SurfaceGravity.ToString("N4");
+                bodyNode.AppendChild(varNode);
+            }
+
+            // add orbit details:
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SemiMajorAxis", "NS");
+            varNode.InnerText = orbit.SemiMajorAxis.ToString("N3");
+            bodyNode.AppendChild(varNode);
+
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Apoapsis", "NS");
+            varNode.InnerText = orbit.Apoapsis.ToString("N3");
+            bodyNode.AppendChild(varNode);
+
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Periapsis", "NS");
+            varNode.InnerText = orbit.Periapsis.ToString("N3");
+            bodyNode.AppendChild(varNode);
+
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Year", "NS");
+            varNode.InnerText = orbit.OrbitalPeriod.ToString("dd\\:hh\\:mm");
+            bodyNode.AppendChild(varNode);
+
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Eccentricity", "NS");
+            varNode.InnerText = orbit.Eccentricity.ToString("N3");
+            bodyNode.AppendChild(varNode);
+
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Inclination", "NS");
+            varNode.InnerText = orbit.Inclination.ToString("N2");
+            bodyNode.AppendChild(varNode);
+
+            if (positionDB != null)
+            {
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PositionInAU", "NS");
+                varNode.InnerText = "(" + positionDB.X.ToString("N3") + ", " + positionDB.Y.ToString("N3") + ", " + positionDB.Z.ToString("N3") + ")";
+                bodyNode.AppendChild(varNode);
+
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PositionInKm", "NS");
+                varNode.InnerText = "(" + positionDB.XInKm.ToString("N3") + ", " + positionDB.YInKm.ToString("N3") + ", " + positionDB.ZInKm.ToString("N3") + ")";
                 bodyNode.AppendChild(varNode);
             }
 
@@ -90,100 +191,25 @@ namespace Pulsar4X.Tests
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "AxialTilt", "NS");
-                varNode.InnerText = systemBodyDB.AxialTilt.ToString("N4");
+                varNode.InnerText = systemBodyDB.AxialTilt.ToString("N1");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "BaseTemperature", "NS");
-                varNode.InnerText = systemBodyDB.BaseTemperature.ToString("N4");
+                varNode.InnerText = systemBodyDB.BaseTemperature.ToString("N1");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "LengthOfDay", "NS");
-                varNode.InnerText = systemBodyDB.LengthOfDay.ToString();
+                varNode.InnerText = systemBodyDB.LengthOfDay.ToString("g");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MagneticField", "NS");
-                varNode.InnerText = systemBodyDB.MagneticField.ToString("N4");
+                varNode.InnerText = systemBodyDB.MagneticField.ToString("N2");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Tectonics", "NS");
                 varNode.InnerText = systemBodyDB.Tectonics.ToString();
                 bodyNode.AppendChild(varNode);
             }
-            
-            if (starIfnoDB != null)
-            {
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Class", "NS");
-                varNode.InnerText = starIfnoDB.Class;
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Age", "NS");
-                varNode.InnerText = starIfnoDB.Age.ToString("N4");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "EcoSphereRadius", "NS");
-                varNode.InnerText = starIfnoDB.EcoSphereRadius.ToString("N4");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Luminosity", "NS");
-                varNode.InnerText = starIfnoDB.Luminosity.ToString("N4");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SpectralType", "NS");
-                varNode.InnerText = starIfnoDB.SpectralType.ToString();
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Temperature", "NS");
-                varNode.InnerText = starIfnoDB.Temperature.ToString("N4");
-                bodyNode.AppendChild(varNode);
-            }
-
-            if (massVolumeDB != null)
-            {
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Mass", "NS");
-                varNode.InnerText = massVolumeDB.Mass.ToString("N4");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Radius", "NS");
-                varNode.InnerText = massVolumeDB.RadiusInKM.ToString("N4");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");
-                varNode.InnerText = massVolumeDB.Density.ToString("N4");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Volume", "NS");
-                varNode.InnerText = massVolumeDB.Volume.ToString("N4");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceGravity", "NS");
-                varNode.InnerText = massVolumeDB.SurfaceGravity.ToString("N4");
-                bodyNode.AppendChild(varNode);
-            }
-
-            // add orbit details:
-            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SemiMajorAxis", "NS");
-            varNode.InnerText = orbit.SemiMajorAxis.ToString("N4");
-            bodyNode.AppendChild(varNode);
-
-            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Apoapsis", "NS");
-            varNode.InnerText = orbit.Apoapsis.ToString("N4");
-            bodyNode.AppendChild(varNode);
-
-            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Periapsis", "NS");
-            varNode.InnerText = orbit.Periapsis.ToString("N4");
-            bodyNode.AppendChild(varNode);
-
-            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Year", "NS");
-            varNode.InnerText = orbit.OrbitalPeriod.ToString();
-            bodyNode.AppendChild(varNode);
-
-            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Eccentricity", "NS");
-            varNode.InnerText = orbit.Eccentricity.ToString("N4");
-            bodyNode.AppendChild(varNode);
-
-            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Inclination", "NS");
-            varNode.InnerText = orbit.Inclination.ToString("N4");
-            bodyNode.AppendChild(varNode);
 
             if (atmosphereDB != null)
             {
@@ -196,46 +222,31 @@ namespace Pulsar4X.Tests
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Pressure", "NS");
-                varNode.InnerText = atmosphereDB.Pressure.ToString("N4");
+                varNode.InnerText = atmosphereDB.Pressure.ToString("N2");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Albedo", "NS");
-                varNode.InnerText = atmosphereDB.Albedo.ToString("N4");
+                varNode.InnerText = atmosphereDB.Albedo.ToString("p1");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceTemperature", "NS");
-                varNode.InnerText = atmosphereDB.SurfaceTemperature.ToString("N4");
+                varNode.InnerText = atmosphereDB.SurfaceTemperature.ToString("N1");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "GreenhouseFactor", "NS");
-                varNode.InnerText = atmosphereDB.GreenhouseFactor.ToString("N4");
+                varNode.InnerText = atmosphereDB.GreenhouseFactor.ToString("N2");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "GreenhousePressure", "NS");
-                varNode.InnerText = atmosphereDB.GreenhousePressure.ToString("N4");
+                varNode.InnerText = atmosphereDB.GreenhousePressure.ToString("N2");
                 bodyNode.AppendChild(varNode);
 
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Hydrosphere", "NS");
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "HasHydrosphere", "NS");
                 varNode.InnerText = atmosphereDB.Hydrosphere.ToString();
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "HydrosphereExtent", "NS");
                 varNode.InnerText = atmosphereDB.HydrosphereExtent.ToString();
-                bodyNode.AppendChild(varNode);
-            }
-
-            if (positionDB != null)
-            {
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PosX", "NS");
-                varNode.InnerText = positionDB.X.ToString("N5");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PosY", "NS");
-                varNode.InnerText = positionDB.Y.ToString("N5");
-                bodyNode.AppendChild(varNode);
-
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PosZ", "NS");
-                varNode.InnerText = positionDB.Z.ToString("N5");
                 bodyNode.AppendChild(varNode);
             }
 
@@ -253,11 +264,6 @@ namespace Pulsar4X.Tests
                 varNode.InnerText = ruinsDB.RuinSize.ToString();
                 bodyNode.AppendChild(varNode);
             }
-
-            // add our ID to at the end:
-            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "ID", "NS");
-            varNode.InnerText = systemBody.Guid.ToString();
-            bodyNode.AppendChild(varNode);
 
             // add body node to system node:
             systemNode.AppendChild(bodyNode);
