@@ -144,6 +144,12 @@
       <DependentUpon>TaskGroups.xaml</DependentUpon>
     </Compile>
     <Compile Include="EntityHolder.cs" />
+    <Compile Include="ViewModels\FactionVM.cs" />
+    <Compile Include="ViewModels\GameVM.cs" />
+    <Compile Include="ViewModels\IViewModel.cs" />
+    <Compile Include="ViewModels\PlanetVM.cs" />
+    <Compile Include="ViewModels\StarVM.cs" />
+    <Compile Include="ViewModels\SystemVM.cs" />
     <Page Include="About.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
