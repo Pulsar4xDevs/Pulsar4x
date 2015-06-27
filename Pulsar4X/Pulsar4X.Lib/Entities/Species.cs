@@ -61,8 +61,7 @@ namespace Pulsar4X.Entities
         /// <returns>habitability rating for this species</returns>
         public float GetTNHabRating(SystemBody planet)
         {
-#warning implement orbhabs and specialized infrastructure in TN hab rating, also do hazard stuff in addGas, likewise implement this and infrastructure in civilian population growth.
-#warning Chase down all the appropriate hazard ratings and set them here for the atmosphere when gas is added or removed.
+#warning implement orbhabs and specialized infrastructure in TN hab rating, likewise implement this and infrastructure in civilian population growth.
 
             /// <summary>
             /// This planet is not habitable at all without orbhabs or specialized infrastructure(neither implemented as yet).
@@ -140,6 +139,7 @@ namespace Pulsar4X.Entities
 
             /// <summary>
             /// Does this gas exist in the atmosphere? is there enough of it to breathe? and is the partial pressure of the breatheable gas not too high?
+            /// </summary>
             bool isBreathable = false;
             if (planet.Atmosphere.Composition.ContainsKey(GasRespired) == true)
             {
