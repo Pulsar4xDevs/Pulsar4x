@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System.IO;
 using System.IO.Compression;
+using System.Net.Sockets;
 using System.Text;
 
 namespace Pulsar4X.ECSLib
@@ -43,19 +44,17 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentNullException("game");
             }
-            if (compress)
-            {
-                DefaultSerializer.Formatting = Formatting.None;
-            }
-            else
-            {
-                DefaultSerializer.Formatting = Formatting.Indented;
-            }
+
+            DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+
             lock (SyncRoot)
             {
                 Progress = progress;
                 ManagersProcessed = 0;
                 game.NumSystems = game.StarSystems.Count;
+
+                // Wrap the outputStream in a BufferedStream.
+                // This will improves performance if the outputStream does not have an internal buffer. (E.G. NetworkStream)
                 using (BufferedStream outputBuffer = new BufferedStream(outputStream))
                 {
                     using (MemoryStream intermediateStream = new MemoryStream())
@@ -75,7 +74,7 @@ namespace Pulsar4X.ECSLib
 
                         if (compress)
                         {
-                            using (GZipStream compressionStream = new GZipStream(outputStream, CompressionLevel.Optimal))
+                            using (GZipStream compressionStream = new GZipStream(outputBuffer, CompressionLevel.Optimal))
                             {
                                 intermediateStream.CopyTo(compressionStream);
                             }
@@ -195,7 +194,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Checks the stream for compression by looking for GZip header numbers.
         /// </summary>
-        /// <param name="inputStream"></param>
         /// <returns></returns>
         private static bool HasGZipHeader(BufferedStream inputStream)
         {
