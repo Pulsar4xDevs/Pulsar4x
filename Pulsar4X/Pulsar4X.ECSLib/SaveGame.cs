@@ -43,40 +43,47 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentNullException("game");
             }
-
-            CompressionLevel compressionLevel;
             if (compress)
             {
                 DefaultSerializer.Formatting = Formatting.None;
-                compressionLevel = CompressionLevel.Optimal;
             }
             else
             {
                 DefaultSerializer.Formatting = Formatting.Indented;
-                compressionLevel = CompressionLevel.NoCompression;
             }
-
             lock (SyncRoot)
             {
                 Progress = progress;
                 ManagersProcessed = 0;
                 game.NumSystems = game.StarSystems.Count;
-                using (MemoryStream intermediateStream = new MemoryStream())
+                using (BufferedStream outputBuffer = new BufferedStream(outputStream))
                 {
-                    using (StreamWriter streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                    using (MemoryStream intermediateStream = new MemoryStream())
                     {
-                        using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                        using (StreamWriter streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
                         {
-                            CurrentGame = game;
-                            DefaultSerializer.Serialize(writer, game);
-                            CurrentGame = null;
+                            using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                            {
+                                CurrentGame = game;
+                                DefaultSerializer.Serialize(writer, game);
+                                CurrentGame = null;
+                            }
                         }
-                    }
-                    using (GZipStream compressionStream = new GZipStream(outputStream, compressionLevel))
-                    {
+
                         // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
                         intermediateStream.Position = 0;
-                        intermediateStream.CopyTo(compressionStream);
+
+                        if (compress)
+                        {
+                            using (GZipStream compressionStream = new GZipStream(outputStream, CompressionLevel.Optimal))
+                            {
+                                intermediateStream.CopyTo(compressionStream);
+                            }
+                        }
+                        else
+                        {
+                            intermediateStream.CopyTo(outputBuffer);
+                        }
                     }
                 }
             }
@@ -109,21 +116,34 @@ namespace Pulsar4X.ECSLib
                 Progress = progress;
                 ManagersProcessed = 0;
                 CurrentGame = game;
-                using (GZipStream compressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                // Use a BufferedStream to allow reading and seeking from any stream.
+                // Example: If inputStream is a NetworkStream, then we can only read once.
+                using (BufferedStream inputBuffer = new BufferedStream(inputStream))
                 {
-                    using (MemoryStream intermediateStream = new MemoryStream())
+                    // Check if our stream is compressed.
+                    if (HasGZipHeader(inputBuffer))
                     {
-                        compressionStream.CopyTo(intermediateStream);
-
-                        intermediateStream.Position = 0;
-
-                        using (StreamReader sr = new StreamReader(intermediateStream))
+                        // File is compressed. Decompress using GZip.
+                        using (GZipStream compressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
                         {
-                            using (JsonReader reader = new JsonTextReader(sr))
+                            // Decompress into a MemoryStream.
+                            using (MemoryStream intermediateStream = new MemoryStream())
                             {
-                                DefaultSerializer.Populate(reader, game);
+                                // Decompress the file into an intermediate MemoryStream.
+                                compressionStream.CopyTo(intermediateStream);
+
+                                // Reset the position of the MemoryStream so it can be read from the beginning.
+                                intermediateStream.Position = 0;
+
+                                // Populate the game from the uncompressed MemoryStream.
+                                PopulateGame(intermediateStream);
                             }
                         }
+                    }
+                    else
+                    {
+                        // Populate the game from the uncompressed inputStream.
+                        PopulateGame(inputBuffer);
                     }
                 }
 
@@ -168,6 +188,41 @@ namespace Pulsar4X.ECSLib
                 using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     fs.ReadByte();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks the stream for compression by looking for GZip header numbers.
+        /// </summary>
+        /// <param name="inputStream"></param>
+        /// <returns></returns>
+        private static bool HasGZipHeader(BufferedStream inputStream)
+        {
+            var headerBytes = new byte[2];
+
+            int numBytes = inputStream.Read(headerBytes, 0, 2);
+            inputStream.Position = 0;
+            if (numBytes != 2)
+            {
+                return false;
+            }
+            // First two bytes should be 31 and 139 according to the GZip file format.
+            // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
+            return headerBytes[0] == 31 && headerBytes[1] == 139;
+        }
+
+        /// <summary>
+        /// Populates the currently loading game from the passed uncompressed inputStream.
+        /// </summary>
+        /// <param name="inputStream">Uncompressed stream containing the game data.</param>
+        private static void PopulateGame(Stream inputStream)
+        {
+            using (StreamReader sr = new StreamReader(inputStream))
+            {
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    DefaultSerializer.Populate(reader, CurrentGame);
                 }
             }
         }
