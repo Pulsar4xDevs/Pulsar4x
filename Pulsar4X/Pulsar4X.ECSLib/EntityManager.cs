@@ -283,7 +283,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (_dataBlobMap[i][entityID] != null)
                 {
-                    _dataBlobMap[i][entityID].OwningEntity = null;
+                    _dataBlobMap[i][entityID].OwningEntity = Entity.InvalidEntity;
                     _dataBlobMap[i][entityID] = null;
                 }
             }
@@ -437,7 +437,6 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Returns -1 if no entities have the specified DataBlobType.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when passed an invalid typeIndex</exception>
         [NotNull]
         [PublicAPI]
         public Entity GetFirstEntityWithDataBlob(int typeIndex)
@@ -481,6 +480,7 @@ namespace Pulsar4X.ECSLib
         /// Attempts to find the entity with the associated Guid.
         /// </summary>
         /// <returns>True if entityID is found.</returns>
+        /// <exception cref="GuidNotFoundException">Guid was found in Global list, but not locally. Should not be possible.</exception>
         [PublicAPI]
         public bool FindEntityByGuid(Guid entityGuid, out Entity entity)
         {

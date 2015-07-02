@@ -70,7 +70,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Generate all bodies for the specified star.
         /// </summary>
-        internal void GenerateSystemBodiesForStar(StarSystem system, Entity star, DateTime currentDateTime)
+        internal void GenerateSystemBodiesForStar(StaticDataStore staticData, StarSystem system, Entity star, DateTime currentDateTime)
         {
             // cache date/time for later use:
             _currDateTime = currentDateTime;
@@ -148,19 +148,19 @@ namespace Pulsar4X.ECSLib
             foreach (ProtoEntity protoBody in systemBodies)
             {
                 Entity body = Entity.Create(system.SystemManager, protoBody);
-                FinalizeBodies(system, body, bodyCount);
+                FinalizeBodies(staticData, system, body, bodyCount);
                 bodyCount++;
             }
 
             // Finally, comets!
-            GenerateComets(system, star);
+            GenerateComets(staticData, system, star);
         }
 
         /// <summary>
         /// Generates a random number of comets for a given star. The number of generated will 
         /// be at least GalaxyGen.MiniumCometsPerSystem and never more then GalaxyGen.MaxNoOfComets.
         /// </summary>
-        private void GenerateComets(StarSystem system, Entity star)
+        private void GenerateComets(StaticDataStore staticData, StarSystem system, Entity star)
         {
             // first lets get a random number between our minium nad maximum number of comets:
             int min = _galaxyGen.Settings.MiniumCometsPerSystem;
@@ -188,7 +188,7 @@ namespace Pulsar4X.ECSLib
 
                 GenerateCometOrbit(system, star, newCometProto);
 
-                FinalizeSystemBodyDB(system, newCometProto);
+                FinalizeSystemBodyDB(staticData, system, newCometProto);
 
                 Entity.Create(system.SystemManager, newCometProto);
             }
@@ -447,18 +447,18 @@ namespace Pulsar4X.ECSLib
             return new OrbitDB(parent, parentMass, myMass, sma, eccentricity, system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, _galaxyGen.Settings.J2000);
         }
 
-        private void FinalizeBodies(StarSystem system, Entity body, int bodyCount)
+        private void FinalizeBodies(StaticDataStore staticData, StarSystem system, Entity body, int bodyCount)
         {
             OrbitDB bodyOrbit = body.GetDataBlob<OrbitDB>();
             SystemBodyDB systemBodyDB = body.GetDataBlob<SystemBodyDB>();
 
             if (systemBodyDB.Type == BodyType.Asteroid)
             {
-                FinalizeAsteroidBelt(system, body, bodyCount);
+                FinalizeAsteroidBelt(staticData, system, body, bodyCount);
                 return;
             }
 
-            FinalizeSystemBodyDB(system, body);
+            FinalizeSystemBodyDB(staticData, system, body);
             FinalizeNameDB(body, bodyOrbit.Parent, bodyCount);
 
             GenerateMoons(system, body);
@@ -475,7 +475,7 @@ namespace Pulsar4X.ECSLib
                 for (int i = 0; i < numChildren; i++)
                 {
                     Entity child = bodyOrbit.Children[i];
-                    FinalizeBodies(system, child, recursiveBodyCount);
+                    FinalizeBodies(staticData, system, child, recursiveBodyCount);
                     recursiveBodyCount++;
                 }
             }
@@ -546,7 +546,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private void FinalizeAsteroidBelt(StarSystem system, Entity body, int bodyCount)
+        private void FinalizeAsteroidBelt(StaticDataStore staticData, StarSystem system, Entity body, int bodyCount)
         {
             MassVolumeDB beltMVDB = body.GetDataBlob<MassVolumeDB>();
             OrbitDB referenceOrbit = body.GetDataBlob<OrbitDB>();
@@ -573,7 +573,7 @@ namespace Pulsar4X.ECSLib
                 newBody.SetDataBlob(mvDB, EntityManager.GetTypeIndex<MassVolumeDB>());
 
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
-                FinalizeSystemBodyDB(system, newBody);
+                FinalizeSystemBodyDB(staticData, system, newBody);
                 FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount, "-A" + asteroidCount.ToString());
 
                 beltMVDB.Mass -= mvDB.Mass;
@@ -634,7 +634,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// This function puts all the finishing touiches on a system body data blob.
         /// </summary>
-        private void FinalizeSystemBodyDB(StarSystem system, ProtoEntity body)
+        private void FinalizeSystemBodyDB(StaticDataStore staticData, StarSystem system, ProtoEntity body)
         {
             SystemBodyDB bodyInfo = body.GetDataBlob<SystemBodyDB>();
             OrbitDB bodyOrbit = body.GetDataBlob<OrbitDB>();
@@ -711,7 +711,7 @@ namespace Pulsar4X.ECSLib
             bodyInfo.RadiationLevel = 0;
 
             // generat Minerals:
-            MineralGeneration(system, body);
+            MineralGeneration(staticData, system, body);
 
             // generate ruins:
             GenerateRuins(system, body);
@@ -810,7 +810,7 @@ namespace Pulsar4X.ECSLib
         /// Generation take into consideration the abundance of the mineral 
         /// and the bodies ratio of mass vs earth.
         /// </summary>
-        public void MineralGeneration(StarSystem system, ProtoEntity body)
+        public void MineralGeneration(StaticDataStore staticData, StarSystem system, ProtoEntity body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyDB>();
             var bodyMass = body.GetDataBlob<MassVolumeDB>();
@@ -829,7 +829,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // this body has at least some minerals, lets generate them:
-            foreach (var min in StaticDataManager.StaticDataStore.Minerals)
+            foreach (var min in staticData.Minerals)
             {
                 // create a MineralDepositInfo
                 MineralDepositInfo mdi = new MineralDepositInfo();
@@ -856,12 +856,12 @@ namespace Pulsar4X.ECSLib
         /// This function ensures that there is at least 50000 of every mineral and that every mineral has 
         /// an accessibility of at least 0.5.
         /// </summary>
-        public void HomeworldMineralGeneration(StarSystem system, Entity body)
+        public void HomeworldMineralGeneration(StaticDataStore staticData, StarSystem system, Entity body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyDB>();
             bodyInfo.Minerals.Clear();  // because this function can be called on existing bodies we need to clear any existing minerals.
 
-            foreach (var min in StaticDataManager.StaticDataStore.Minerals)
+            foreach (var min in staticData.Minerals)
             {
                 // create a MineralDepositInfo
                 MineralDepositInfo mdi = new MineralDepositInfo

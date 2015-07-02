@@ -116,16 +116,16 @@ namespace ModdingTools.JsonDataEditor
         {
             
             SetCurrentInstallation(StaticData(Guid.NewGuid()));
-            if (StaticDataManager.StaticDataStore.Installations.ContainsKey(_currentInstallation.ID))
+            if (Program.staticData.Installations.ContainsKey(_currentInstallation.ID))
                 SetCurrentInstallation(StaticData(Guid.NewGuid()));
-            StaticDataManager.StaticDataStore.Installations.Add(_currentInstallation.ID, _currentInstallation);
+            Program.staticData.Installations.Add(_currentInstallation.ID, _currentInstallation);
              
         }
 
         private void button_updateExsisting_Click(object sender, EventArgs e)
         {
             _currentInstallation = StaticData(_currentInstallation.ID);
-            StaticDataManager.StaticDataStore.Installations[_currentInstallation.ID] = _currentInstallation;
+            Program.staticData.Installations[_currentInstallation.ID] = _currentInstallation;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class BaseDataBlob : ICloneable
     {
-        [CanBeNull]
+        [NotNull]
         public virtual Entity OwningEntity { get; internal set; }
 
         public abstract object Clone();

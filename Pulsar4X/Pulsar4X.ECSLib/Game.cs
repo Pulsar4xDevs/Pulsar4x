@@ -50,6 +50,7 @@ namespace Pulsar4X.ECSLib
         private readonly EntityManager _globalManager;
 
         [PublicAPI]
+        [JsonProperty]
         public StaticDataStore StaticData { get; private set; }
 
         [CanBeNull]
@@ -91,6 +92,7 @@ namespace Pulsar4X.ECSLib
             StarSystems = new List<StarSystem>();
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);
+            StaticData = new StaticDataStore();
 
             PostLoad += (sender, args) => { InitializeProcessors(); };
         }
@@ -104,7 +106,7 @@ namespace Pulsar4X.ECSLib
         internal void RunProcessors(List<StarSystem> systems, int deltaSeconds)
         {
             OrbitProcessor.Process(this, systems, deltaSeconds);
-            InstallationProcessor.Process(systems, deltaSeconds);
+            InstallationProcessor.Process(this, systems, deltaSeconds);
         }
 
         internal void PostGameLoad()
@@ -134,6 +136,14 @@ namespace Pulsar4X.ECSLib
 
         #region Public API
 
+        /// <summary>
+        /// </summary>
+        /// <param name="gameName"></param>
+        /// <param name="startDateTime"></param>
+        /// <param name="numSystems"></param>
+        /// <param name="progress"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="gameName"/> is <see langword="null" />.</exception>
+        /// <exception cref="StaticDataLoadException">Thrown in a variety of situations when StaticData could not be loaded.</exception>
         [PublicAPI]
         public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, IProgress<double> progress = null)
         {
@@ -143,6 +153,8 @@ namespace Pulsar4X.ECSLib
             }
 
             Game newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
+            // TODO: Provide options for loading other Static Data DataSets.
+            newGame.StaticData.LoadDataSet(StaticDataStore.DefaultDataSet);
 
             for (int i = 0; i < numSystems; i++)
             {
@@ -161,12 +173,12 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Time advancement code. Attempts to advance time by the number of seconds
         /// passed to it.
-        /// 
         /// Interrupts may prevent the entire requested timeframe from being advanced.
         /// </summary>
         /// <param name="deltaSeconds">Time Advance Requested</param>
         /// <param name="progress">IProgress implementation to report progress.</param>
         /// <returns>Total Time Advanced</returns>
+        /// <exception cref="OperationCanceledException">Thrown when a cancellation request is honored.</exception>
         [PublicAPI]
         public int AdvanceTime(int deltaSeconds, IProgress<double> progress = null)
         {

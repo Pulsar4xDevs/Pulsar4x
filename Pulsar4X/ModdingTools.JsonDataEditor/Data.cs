@@ -51,7 +51,7 @@ namespace ModdingTools.JsonDataEditor
             }
 
             //Check which type of json data file is it
-            Type type = StaticDataManager.StaticDataStore.GetType(obj["Type"].ToString());
+            Type type = Program.staticData.GetType(obj["Type"].ToString());
 
             //Load data using dynamic
             dynamic data = obj["Data"].ToObject(type, serializer);
@@ -308,25 +308,25 @@ namespace ModdingTools.JsonDataEditor
 
         public static void loadDatafromDirectory(string dir)
         {
-            StaticDataManager.LoadFromDirectory(dir);
+            Program.staticData.LoadDataSet(Path.GetFileName(dir));
 
-            foreach (var installationKVP in StaticDataManager.StaticDataStore.Installations)
+            foreach (var installationKVP in Program.staticData.Installations)
             {
                 InstallationData.Add(installationKVP.Key, new DataHolder(installationKVP.Value));
             }
-            foreach (var componentKVP in StaticDataManager.StaticDataStore.Components)
+            foreach (var componentKVP in Program.staticData.Components)
             {
                 ComponentData.Add(componentKVP.Key, new DataHolder(componentKVP.Value));
             }
-            foreach (var mineralSD in StaticDataManager.StaticDataStore.Minerals)
+            foreach (var mineralSD in Program.staticData.Minerals)
             {
                 MineralData.Add(mineralSD.ID, new DataHolder(mineralSD));
             }
-            foreach (var techKVP in StaticDataManager.StaticDataStore.Techs)
+            foreach (var techKVP in Program.staticData.Techs)
             {
                 TechData.Add(techKVP.Key, new DataHolder(techKVP.Value));
             }
-            //foreach (var refinedData in StaticDataManager.StaticDataStore.RefinedMats)
+            //foreach (var refinedData in Program.staticData.RefinedMats)
             //{
             //    RefinedObjData.Add(refinedData.Key, new DataHolder(refinedData.Value));
             //}
@@ -334,10 +334,10 @@ namespace ModdingTools.JsonDataEditor
 
         public static void SaveDataToDirectory(string dir)
         {
-            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Installations, dir + ".InstallationData.json");
-            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Components, dir + ".ComponentData.json");
-            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Minerals, dir + ".MineralData.json");
-            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Techs, dir + ".TechnologyData.json");
+            StaticDataStore.ExportStaticData(Program.staticData.Installations, dir + ".InstallationData.json");
+            StaticDataStore.ExportStaticData(Program.staticData.Components, dir + ".ComponentData.json");
+            StaticDataStore.ExportStaticData(Program.staticData.Minerals, dir + ".MineralData.json");
+            StaticDataStore.ExportStaticData(Program.staticData.Techs, dir + ".TechnologyData.json");
         }
 
         /// <summary>
@@ -351,32 +351,32 @@ namespace ModdingTools.JsonDataEditor
         {
             if (staticData is InstallationSD)
             {
-                if (!StaticDataManager.StaticDataStore.Installations.ContainsKey(staticData.ID))
-                    StaticDataManager.StaticDataStore.Installations.Add(staticData.ID, staticData);
+                if (!Program.staticData.Installations.ContainsKey(staticData.ID))
+                    Program.staticData.Installations.Add(staticData.ID, staticData);
                 else
-                    StaticDataManager.StaticDataStore.Installations[staticData.ID] = staticData;
+                    Program.staticData.Installations[staticData.ID] = staticData;
             }
             else if (staticData is ComponentSD)
             {
-                if (!StaticDataManager.StaticDataStore.Components.ContainsKey(staticData.ID))
-                    StaticDataManager.StaticDataStore.Components.Add(staticData.ID, staticData);
+                if (!Program.staticData.Components.ContainsKey(staticData.ID))
+                    Program.staticData.Components.Add(staticData.ID, staticData);
                 else
-                    StaticDataManager.StaticDataStore.Components[staticData.ID] = staticData;
+                    Program.staticData.Components[staticData.ID] = staticData;
             }
             else if (staticData is MineralSD)
             {
-                int index = StaticDataManager.StaticDataStore.Minerals.IndexOf(staticData);
+                int index = Program.staticData.Minerals.IndexOf(staticData);
                 if (index == -1) //if its not in the store
-                    StaticDataManager.StaticDataStore.Minerals.Add(staticData);
+                    Program.staticData.Minerals.Add(staticData);
                 else
-                    StaticDataManager.StaticDataStore.Minerals[index] = staticData;
+                    Program.staticData.Minerals[index] = staticData;
             }
             else if (staticData is TechSD)
             {
-                if (!StaticDataManager.StaticDataStore.Techs.ContainsKey(staticData.ID))
-                    StaticDataManager.StaticDataStore.Techs.Add(staticData.ID, staticData);
+                if (!Program.staticData.Techs.ContainsKey(staticData.ID))
+                    Program.staticData.Techs.Add(staticData.ID, staticData);
                 else
-                    StaticDataManager.StaticDataStore.Techs[staticData.ID] = staticData;
+                    Program.staticData.Techs[staticData.ID] = staticData;
             }
         }
 

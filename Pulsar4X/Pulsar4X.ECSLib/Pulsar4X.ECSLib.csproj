@@ -135,7 +135,6 @@
     <Compile Include="StaticData\InstallationSD.cs" />
     <Compile Include="StaticData\PlayerSD.cs" />
     <Compile Include="StaticData\ConstructableObjects.cs" />
-    <Compile Include="StaticData\StaticDataManager.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
     <Compile Include="StaticData\MineralSD.cs" />
     <Compile Include="StaticData\SystemGenSettingsSD.cs" />

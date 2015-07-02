@@ -20,13 +20,13 @@ namespace Pulsar4X.Tests
             game = Game.NewGame("Unit Test Game", testTime, 1);
 
             // add a faction:
-            Entity humanFaction = FactionFactory.CreateFaction(game.GlobalManager, "New Terran Utopian Empire");
+            Entity humanFaction = FactionFactory.CreateFaction(game, "New Terran Utopian Empire");
 
             // add a species:
             Entity humanSpecies = SpeciesFactory.CreateSpeciesHuman(humanFaction, game.GlobalManager);
 
             // add another faction:
-            Entity greyAlienFaction = FactionFactory.CreateFaction(game.GlobalManager, "The Grey Empire");
+            Entity greyAlienFaction = FactionFactory.CreateFaction(game, "The Grey Empire");
             // Add another species:
             Entity greyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(greyAlienFaction, game.GlobalManager);
 
