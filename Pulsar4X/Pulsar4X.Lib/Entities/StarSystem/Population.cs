@@ -95,7 +95,6 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
             /// </summary>
-#warning magic number here.
             if (m_BuildCapcity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
             {
                 DateTime EstTime = GameState.Instance.GameDateTime;
@@ -489,11 +488,39 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// List of every task at every shipyard at this population center.
         /// </summary>
-        public Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation> ShipyardTasks { get; set; } 
+        public Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation> ShipyardTasks { get; set; }
+
+        /// <summary>
+        /// Populations can't be "destroyed" by enemy action, but they can be deleted
+        /// </summary>
+        public BindingList<ShipTN> ShipsTargetting { get; set; }
+
+        /// <summary>
+        /// Missiles targeted on this population.
+        /// </summary>
+        public BindingList<OrdnanceGroupTN> MissilesInFlight { get; set; }
+
+        /// <summary>
+        /// Has this population changes its sensor coverage? Building/moving(getting and taking)/destroying DSTS will cause this to increment. This is totally handled here in this function.
+        /// </summary>
+        private uint _SensorUpdateAck;
+        public uint _sensorUpdateAck
+        { 
+            get { return _SensorUpdateAck; }
+            set { _SensorUpdateAck = value; }
+        }
 
         #endregion
 
-        public Population(SystemBody a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
+        /// <summary>
+        /// Constructor for population.
+        /// </summary>
+        /// <param name="a_oPlanet">Planet this population is on</param>
+        /// <param name="a_oFaction">Faction this population belongs to</param>
+        /// <param name="CurrentTimeSlice">Tick this population was created</param>
+        /// <param name="a_oName">Name of the population</param>
+        /// <param name="a_oSpecies">Species that will reside on this population.</param>
+        public Population(SystemBody a_oPlanet, Faction a_oFaction, int CurrentTimeSlice, String a_oName = "Earth", Species a_oSpecies = null)
         {
             Id = Guid.NewGuid();
             // initialise minerials:
@@ -533,9 +560,16 @@ namespace Pulsar4X.Entities
             {
                 Species = a_oSpecies;
             }
+
+            SSEntity = StarSystemEntityType.Population;
+
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
             Planet.Position.System.Populations.Add(this);
             Contact = new SystemContact(Faction, this);
+            Contact.Position.System = Planet.Position.System;
+            Contact.Position.X = Planet.Position.X;
+            Contact.Position.Y = Planet.Position.Y;
+            Planet.Position.System.SystemContactList.Add(Contact);
 
             GovernorPresent = false;
             AdminRating = 0;
@@ -572,7 +606,21 @@ namespace Pulsar4X.Entities
 
             ShipyardTasks = new Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation>();
 
-            SSEntity = StarSystemEntityType.Population;
+            ThermalDetection = new BindingList<int>();
+            EMDetection = new BindingList<int>();
+            ActiveDetection = new BindingList<int>();
+
+            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
+            {
+                ThermalDetection.Add(CurrentTimeSlice);
+                EMDetection.Add(CurrentTimeSlice);
+                ActiveDetection.Add(CurrentTimeSlice);
+            }
+
+            ShipsTargetting = new BindingList<ShipTN>();
+            MissilesInFlight = new BindingList<OrdnanceGroupTN>();
+
+            _SensorUpdateAck = 0;
         }
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
@@ -637,6 +685,11 @@ namespace Pulsar4X.Entities
             CivilianPopulation = 500.0f;
 
             IsRefining = true;
+
+            /// <summary>
+            /// A DSTS was given to this population, so tell the UI to display it.
+            /// </summary>
+            _SensorUpdateAck++; 
         }
 
         /// <summary>
@@ -767,8 +820,52 @@ namespace Pulsar4X.Entities
                         Adjustment = Adjustment - 1.0f;
                     }
                     break;
+                case Installation.InstallationType.DeepSpaceTrackingStation:
+                    /// <summary>
+                    /// A DSTS was given to this population, so tell the UI to display it.
+                    /// </summary>
+                    _SensorUpdateAck++; 
+                    break;
             }
             Installations[Index].Number = Installations[Index].Number + increment;
+        }
+
+        /// <summary>
+        /// On loading an installation decrement the installation[].number, and handle other conditions such as potential sensor UI updates.
+        /// </summary>
+        /// <param name="iType">Type of installation/</param>
+        /// <param name="massToLoad">Total mass of the installation of type iType to take from the planet.</param>
+        public void LoadInstallation(Installation.InstallationType iType, int massToLoad)
+        {
+            Installations[(int)iType].Number =Installations[(int)iType].Number - (float)(massToLoad / Faction.InstallationTypes[(int)iType].Mass);
+            switch (iType)
+            {
+                case Installation.InstallationType.DeepSpaceTrackingStation:
+                    /// <summary>
+                    /// A DSTS was given to this population, so tell the UI to display it.
+                    /// </summary>
+                    _SensorUpdateAck++;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// When an installation is unloaded to this population run this function to handle incremented installation[].number and other conditions.
+        /// </summary>
+        /// <param name="iType">Type of installation</param>
+        /// <param name="massToUnload">Total mass of said installation to unload. this can result in fractional changes to installation[].number</param>
+        public void UnloadInstallation(Installation.InstallationType iType, int massToUnload)
+        {
+            Installations[(int)iType].Number = Installations[(int)iType].Number + (float)(massToUnload / Faction.InstallationTypes[(int)iType].Mass);
+            switch(iType)
+            {
+                case Installation.InstallationType.DeepSpaceTrackingStation:
+                    /// <summary>
+                    /// A DSTS was given to this population, so tell the UI to display it.
+                    /// </summary>
+                    _SensorUpdateAck++;
+                break;
+            }
         }
 
         /// <summary>
@@ -1178,6 +1275,128 @@ namespace Pulsar4X.Entities
                     m_aiMinerials[mineralIterator] = m_aiMinerials[mineralIterator] - ((float)MineralCost[mineralIterator] * Completion);
                 }
             }
+        }
+        #endregion
+
+        #region Population damage due to combat
+        public bool OnDamaged(DamageTypeTN TypeOfDamage, ushort Value, ShipTN FiringShip, int RadLevel = 0)
+        {
+            /// <summary>
+            /// Check damage type to see if atmosphere blocks it.
+            /// Populations are damaged in several ways.
+            /// Civilian Population will die off, about 50k per point of damage.
+            /// Atmospheric dust will be kicked into the atmosphere(regardless of whether or not there is an atmosphere) lowering temperature for a while.
+            /// Some beam weapons are blocked(partially or in whole) by atmosphere(Lasers,Gauss,Railguns,particle beams, plasma), some are not(Mesons), and some have no effect(microwaves) on populations.
+            /// PDCs will be similarly defended by this atmospheric blocking but are vulnerable to microwaves.
+            /// Missiles will increase the radiation value of the colony. Enhanced Radiation warheads will add more for less overall damage done. Radiation is of course harmful to life on the world. but
+            /// not immediately so.
+            /// Installations will have a chance at being destroyed. bigger installations should be more resilient to damage, but even infrastructure should have a chance to survive.
+            /// Shipyards must be targetted in orbit around the colony. Special handling will be required for that.
+            /// </summary>
+
+            ushort ActualDamage;
+            switch (TypeOfDamage)
+            {
+                /// <summary>
+                /// Neither missile nor meson damage is effected by atmospheric pressure.
+                /// </summary>
+                case DamageTypeTN.Missile:
+                case DamageTypeTN.Meson:
+                    ActualDamage = Value;
+                break;
+                /// <summary>
+                /// All other damage types must be adjusted by atmospheric pressure.
+                /// </summary>
+                default:
+                    ActualDamage = (ushort)Math.Round((float)Value * Planet.Atmosphere.Pressure);
+                break;
+            }
+
+            /// <summary>
+            /// No damage was done. either all damage was absorbed by the atmosphere or the missile had no warhead. Missiles with no warhead should "probably" be sensor missiles that loiter in orbit
+            /// until their fuel is gone.
+            /// </summary>
+            if (ActualDamage == 0)
+            {
+                return false;
+            }
+
+            /// <summary>
+            /// Each point of damage kills off 50,000 people, or 0.05f as 1.0f = 1M people.
+            /// </summary>
+            float PopulationDamage = 0.05f * ActualDamage;
+            CivilianPopulation = CivilianPopulation - PopulationDamage;
+
+            /// <summary>
+            /// Increase the atmospheric dust and radiation of the planet.
+            /// </summary>
+            Planet.AtmosphericDust = Planet.AtmosphericDust + ActualDamage;
+            Planet.RadiationLevel = Planet.RadiationLevel + RadLevel;
+
+            if (GameState.Instance.DamagedPlanets.Contains(Planet) == false)
+                GameState.Instance.DamagedPlanets.Add(Planet);
+
+            String IndustrialDamage = "Industrial Damage:";
+            while (ActualDamage > 0)
+            {
+                ActualDamage = (ushort)(ActualDamage - 5);
+                /// <summary>
+                /// Installation destruction will be naive. pick an installation at random.
+                /// </summary>
+                int Inst = GameState.RNG.Next(0, (int)Installation.InstallationType.InstallationCount);
+                if (Inst == (int)Installation.InstallationType.CommercialShipyard || Inst == (int)Installation.InstallationType.NavalShipyardComplex)
+                {
+                    /// <summary>
+                    /// Damage was done, but installations escaped unharmed. Shipyards must be damaged from orbit.
+                    /// </summary>
+                    continue;
+                }
+                else if (Inst >= (int)Installation.InstallationType.ConvertCIToConstructionFactory && Inst <= (int)Installation.InstallationType.ConvertMineToAutomated)
+                {
+                    /// <summary>
+                    /// These "installations" can't be damaged, so again, lucky planet.
+                    /// </summary>
+                    continue;
+                }
+                else
+                {
+                    int InstCount = (int)Math.Floor(Installations[Inst].Number);
+
+                    /// <summary>
+                    /// Luckily for the planet it had none of the installations that just got targetted.
+                    /// </summary>
+                    if (InstCount == 0)
+                    {
+                        continue;
+                    }
+
+                    switch ((Installation.InstallationType)Inst)
+                    {
+                        case Installation.InstallationType.DeepSpaceTrackingStation:
+                            /// <summary>
+                            /// A DSTS was destroyed at this population, inform the UI to update the display.
+                            /// </summary>
+                            _SensorUpdateAck++; 
+                            break;
+                    }
+
+                    /// <summary>
+                    /// Installation destroyed.
+                    /// </summary>
+                    Installations[Inst].Number = Installations[Inst].Number - 1.0f;
+
+#warning Industry damage should be reworked to have differing resilience ratings, and logging should compress industrial damage.
+                    IndustrialDamage = String.Format("{0} {1}: {2}", IndustrialDamage, Installations[Inst].Name, 1);
+                }
+            }
+
+            String Entry = String.Format("{0} hit by {1} points of damage. Casualties: {2}{3}Environment Update: Atmospheric Dust:{4}, Radiation:{5}", Name,ActualDamage,PopulationDamage,
+                                         IndustrialDamage,Planet.AtmosphericDust, Planet.RadiationLevel);
+            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.PopulationDamage, Planet.Position.System, Contact,
+            GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
+            Faction.MessageLog.Add(NMsg);
+
+            return false;
         }
         #endregion
     }

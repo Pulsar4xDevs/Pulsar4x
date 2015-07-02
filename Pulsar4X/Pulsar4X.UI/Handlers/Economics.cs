@@ -1622,7 +1622,10 @@ namespace Pulsar4X.UI.Handlers
                             SystemPopulation[CurrentSystem] = SystemPopulation[CurrentSystem] + Pop.CivilianPopulation;
                         }
 
-                        Class = String.Format(": {0:n2}m", Pop.CivilianPopulation);
+                        if (m_oCurrnetFaction.Capitol == Pop)
+                            Class = String.Format("(Capitol)");
+
+                        Class = String.Format("{0}: {1:n2}m",Class, Pop.CivilianPopulation);
 
                         String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
@@ -1769,7 +1772,10 @@ namespace Pulsar4X.UI.Handlers
                             SystemPopulation[CurrentSystem] = SystemPopulation[CurrentSystem] + Pop.CivilianPopulation;
                         }
 
-                        Class = String.Format(": {0:n2}m", Pop.CivilianPopulation);
+                        if (m_oCurrnetFaction.Capitol == Pop)
+                            Class = String.Format("(Capitol)");
+
+                        Class = String.Format("{0}: {1:n2}m", Class, Pop.CivilianPopulation);
                     }
                     /// <summary>
                     /// Automining colony will only mine, but may have CMCs listening posts, terraforming gear and ruins
@@ -2196,7 +2202,8 @@ namespace Pulsar4X.UI.Handlers
                         if (DSTS > Constants.Colony.DeepSpaceMax)
                             DSTS = Constants.Colony.DeepSpaceMax;
 
-                        int Strength = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number) * Constants.Colony.DeepSpaceStrength[DSTS];
+#warning if EM strength differs from Thermal, handle that here in the UI.
+                        int Strength = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number) * Constants.Colony.ThermalDeepSpaceStrength[DSTS];
                         Entry = String.Format("Deep Space Tracking Station - Strength {0}", Strength);
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = Entry;
                         Entry = String.Format("Level {0}", Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number));
@@ -2607,12 +2614,6 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = CurrentPopulation.MaintenanceSupplies.ToString();
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = "";
-
-
-
-#warning Calcluate these signatures in simEntity
-                    CurrentPopulation.CalcThermalSignature();
-                    CurrentPopulation.CalcEMSignature();
 
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Thermal Signature of Colony";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = CurrentPopulation.ThermalSignature.ToString();

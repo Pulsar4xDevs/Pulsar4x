@@ -170,6 +170,21 @@ namespace Pulsar4X.UI.SceenGraph
         public GLEffect SceenDefaultEffect { get; set; }
 
         /// <summary>
+        /// Should Active Sensors be shown in the display.
+        /// </summary>
+        public bool ShowActives { get; set; }
+
+        /// <summary>
+        /// Should Passive Sensors be shown in the display.
+        /// </summary>
+        public bool ShowPassives { get; set; }
+
+        /// <summary>
+        /// What signature strength should the display show current passives as searching for. The size of the sensor bubble indicates the extent to which this signature strength can be detected.
+        /// </summary>
+        public int ShowPassiveSignatureRange { get; set; }
+
+        /// <summary>
         /// Default Constructor.
         /// </summary>
         public Sceen(Pulsar4X.UI.Handlers.SystemMap ParentSM)
@@ -178,6 +193,10 @@ namespace Pulsar4X.UI.SceenGraph
             m_v3ViewOffset = Vector3.Zero;
 
             ParentSystemMap = ParentSM;
+
+            ShowActives = true;
+            ShowPassives = true;
+            ShowPassiveSignatureRange = (int)Constants.SensorTN.DefaultPassiveSignature;
         }
 
         public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect, Pulsar4X.UI.Handlers.SystemMap ParentSM)
@@ -188,6 +207,13 @@ namespace Pulsar4X.UI.SceenGraph
 
             ParentSystemMap = ParentSM;
             SceenDefaultEffect = a_oDefaultEffect;
+
+            /// <summary>
+            /// These have to be initialized before the contactElements are created as contactElement uses these.
+            /// </summary>
+            ShowActives = true;
+            ShowPassives = true;
+            ShowPassiveSignatureRange = (int)Constants.SensorTN.DefaultPassiveSignature;
 
             // Set Sceen Vars:
             m_oSceenEntity = a_oStarSystem;
@@ -573,6 +599,30 @@ namespace Pulsar4X.UI.SceenGraph
                     this.AddElement(oContactElement);
                     (oContactElement as ContactElement).ParentSceen = this;
                     break;
+                case StarSystemEntityType.Population:
+                    Population CurrentPopulation = oContact.Entity as Population;
+                    oContactElement = new ContactElement(a_oDefaultEffect, oContact);
+                    oContactElement.EntityID = oContact.Id;
+
+                    v3ContactPos = new Vector3((float)CurrentPopulation.Contact.Position.X, (float)CurrentPopulation.Contact.Position.Y, 0.0f);
+
+                    oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                v3ContactPos,
+                                                                new Vector2(0.0001f, 0.0001f),                   // what size is a population?
+                                                                oContact.faction.FactionColor,
+                                                                UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
+
+                    oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
+                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, CurrentPopulation.Name);
+
+                    oContactElement.Lable = oNameLable;
+                    oContactElement.Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / m_fZoomScaler; //Same problem may exist with population labels.
+                    oContactElement.PrimaryPrimitive = oContactQuad;
+                    oContactElement.AddPrimitive(oContactQuad);
+                    oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                    this.AddElement(oContactElement);
+                    (oContactElement as ContactElement).ParentSceen = this;
+                    break;
             }
 
         }
@@ -597,6 +647,36 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Public member for setting whether active sensors should be displayed.
+        /// </summary>
+        /// <param name="show">true or false</param>
+        public void SetShowActives(bool show)
+        {
+            ShowActives = show;
+            foreach (SceenElement oElement in m_lElements)
+            {
+                ContactElement cElement = oElement as ContactElement;
+                if (cElement != null)
+                    cElement.ForceSensorUpdate();
+            }
+        }
+
+        /// <summary>
+        /// Public member for setting whether passive sensors should be displayed.
+        /// </summary>
+        /// <param name="show">true or false</param>
+        public void SetShowPassives(bool show)
+        {
+            ShowPassives = show;
+            foreach (SceenElement oElement in m_lElements)
+            {
+                ContactElement cElement = oElement as ContactElement;
+                if (cElement != null)
+                    cElement.ForceSensorUpdate();
+            }
         }
 
         /// <summary>

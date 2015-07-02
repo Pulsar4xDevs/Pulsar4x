@@ -164,6 +164,9 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.CreateMapMarkerButton.Click += new EventHandler(CreateMapMarkerButton_Click);
             m_oControlsPanel.DeleteMapMarkerButton.Click += new EventHandler(DeleteMapMarkerButton_Click);
             m_oControlsPanel.SystemSelectionComboBox.SelectedIndexChanged += new EventHandler(SystemSelectComboBox_SelectedIndexChanged);
+
+            m_oControlsPanel.ShowActiveSensorsCheckBox.CheckedChanged += new EventHandler(ShowActiveSensorsCheckBox_CheckedChanged);
+            m_oControlsPanel.ShowPassiveSensorsCheckBox.CheckedChanged += new EventHandler(ShowPassiveSensorsCheckBox_CheckedChanged);
         }
 
         #region EventHandlers
@@ -628,6 +631,28 @@ namespace Pulsar4X.UI.Handlers
         {
             UpdateScaleLabels();
         }
+
+        #region SensorTab
+        /// <summary>
+        /// Alter whether or not actives should be displayed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void  ShowActiveSensorsCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            m_oCurrentSceen.SetShowActives(m_oControlsPanel.ShowActiveSensorsCheckBox.Checked);
+        }
+
+        /// <summary>
+        /// Alter whether or not passives should be displayed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ShowPassiveSensorsCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            m_oCurrentSceen.SetShowPassives(m_oControlsPanel.ShowPassiveSensorsCheckBox.Checked);
+        }
+        #endregion
 
         #endregion
 
