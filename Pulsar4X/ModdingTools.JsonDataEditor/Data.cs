@@ -10,12 +10,15 @@ using Pulsar4X.ECSLib;
 
 namespace ModdingTools.JsonDataEditor
 {
+    /* Old Data Class
     public class Data
     {
         private static bool _loading;
         public static DataHolderAndEvents<TechSD> TechData = new DataHolderAndEvents<TechSD>("Techs");
         public static DataHolderAndEvents<InstallationSD> InstallationData = new DataHolderAndEvents<InstallationSD>("Installations");
-        public static DataHolderAndEvents<MineralSD> MineralData = new DataHolderAndEvents<MineralSD>("Minerals"); 
+        public static DataHolderAndEvents<MineralSD> MineralData = new DataHolderAndEvents<MineralSD>("Minerals");
+        public static DataHolderAndEvents<ComponentSD> ComponentData = new DataHolderAndEvents<ComponentSD>("Components"); 
+
         //stolen from StaticDataManager
         private static JsonSerializer serializer = new JsonSerializer
         {
@@ -76,6 +79,10 @@ namespace ModdingTools.JsonDataEditor
             MineralData.Load(list, filePath);
             
         }
+        private static void LoadData(JDictionary<Guid, ComponentSD> list, string filePath)
+        {
+            ComponentData.Load(list, filePath);
+        }
 
         public static bool SaveData()
         {
@@ -121,6 +128,7 @@ namespace ModdingTools.JsonDataEditor
             /// Gets a dataholder from a given guid, throws an exception if not found.
             /// </summary>
             /// <param name="guid"></param>
+            /// <param name="throwException">on guid not found will throw exception if true, if false will return null</param>
             /// <returns></returns>
             public DataHolder GetDataHolder(Guid guid, bool throwException = true)
             {
@@ -155,12 +163,23 @@ namespace ModdingTools.JsonDataEditor
                 return dataHolders.AsEnumerable();
             }
 
+            
+            public IEnumerable<Guid> GetGuids(List<DataHolder> dataHolders)
+            {
+                List<Guid> guids = new List<Guid>();
+                foreach (DataHolder dataHolder in dataHolders)
+                {
+                    guids.Add(dataHolder.Guid);
+                }
+                return guids;
+            }
+
             public void Load(JDictionary<Guid, T> dict, string filePath)
             {
                 foreach (dynamic sd in dict.Values)
                 {
                     _allSDs[sd.ID] = sd;
-                    _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
+                    _allDataHolders[sd.ID] = new DataHolder(sd, filePath);
                 }
             }
             public void Load(List<T> list, string filePath)
@@ -168,7 +187,7 @@ namespace ModdingTools.JsonDataEditor
                 foreach (dynamic sd in list)
                 {
                     _allSDs[sd.ID] = sd;
-                    _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
+                    _allDataHolders[sd.ID] = new DataHolder(sd, filePath);
                 }
             }
 
@@ -227,7 +246,7 @@ namespace ModdingTools.JsonDataEditor
             private void Create(dynamic sd)
             {
                 _allSDs[sd.ID] = sd;
-                _allDataHolders[sd.ID] = new DataHolder(sd.Name, _selectedFile, sd.ID);
+                _allDataHolders[sd.ID] = new DataHolder(sd, _selectedFile); //new DataHolder(sd.Name, _selectedFile, sd.ID);
             }
 
             public void Remove(Guid guid)
@@ -274,20 +293,154 @@ namespace ModdingTools.JsonDataEditor
             }
         }
     }
+    */
+
+
+    public class Data
+    {
+        public static Dictionary<Guid, DataHolder> InstallationData = new Dictionary<Guid, DataHolder>();
+        public static Dictionary<Guid, DataHolder> ComponentData = new Dictionary<Guid, DataHolder>();
+        public static Dictionary<Guid, DataHolder> MineralData = new Dictionary<Guid, DataHolder>();
+        public static Dictionary<Guid, DataHolder> TechData = new Dictionary<Guid, DataHolder>();
+        public static Dictionary<Guid, DataHolder> RefinedObjData = new Dictionary<Guid, DataHolder>();
+
+        public static MainWindow MainWindow;
+
+        public static void loadDatafromDirectory(string dir)
+        {
+            StaticDataManager.LoadFromDirectory(dir);
+
+            foreach (var installationKVP in StaticDataManager.StaticDataStore.Installations)
+            {
+                InstallationData.Add(installationKVP.Key, new DataHolder(installationKVP.Value));
+            }
+            foreach (var componentKVP in StaticDataManager.StaticDataStore.Components)
+            {
+                ComponentData.Add(componentKVP.Key, new DataHolder(componentKVP.Value));
+            }
+            foreach (var mineralSD in StaticDataManager.StaticDataStore.Minerals)
+            {
+                MineralData.Add(mineralSD.ID, new DataHolder(mineralSD));
+            }
+            foreach (var techKVP in StaticDataManager.StaticDataStore.Techs)
+            {
+                TechData.Add(techKVP.Key, new DataHolder(techKVP.Value));
+            }
+            //foreach (var refinedData in StaticDataManager.StaticDataStore.RefinedMats)
+            //{
+            //    RefinedObjData.Add(refinedData.Key, new DataHolder(refinedData.Value));
+            //}
+        }
+
+        public static void SaveDataToDirectory(string dir)
+        {
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Installations, dir + ".InstallationData.json");
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Components, dir + ".ComponentData.json");
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Minerals, dir + ".MineralData.json");
+            StaticDataManager.ExportStaticData(StaticDataManager.StaticDataStore.Techs, dir + ".TechnologyData.json");
+        }
+
+        /// <summary>
+        /// saves the given staticData to the datastore, if the staticData.ID exsits it will update the exsisting with the new,
+        /// if the staticData.ID does not exsist it will create a new entry. 
+        /// *NOTE* this does not export(save) the json file to disk. 
+        /// TODO: should this throw an exception, or return a bool if there is a problem? 
+        /// </summary>
+        /// <param name="staticData"></param>
+        public static void SaveToDataStore(dynamic staticData)
+        {
+            if (staticData is InstallationSD)
+            {
+                if (!StaticDataManager.StaticDataStore.Installations.ContainsKey(staticData.ID))
+                    StaticDataManager.StaticDataStore.Installations.Add(staticData.ID, staticData);
+                else
+                    StaticDataManager.StaticDataStore.Installations[staticData.ID] = staticData;
+            }
+            else if (staticData is ComponentSD)
+            {
+                if (!StaticDataManager.StaticDataStore.Components.ContainsKey(staticData.ID))
+                    StaticDataManager.StaticDataStore.Components.Add(staticData.ID, staticData);
+                else
+                    StaticDataManager.StaticDataStore.Components[staticData.ID] = staticData;
+            }
+            else if (staticData is MineralSD)
+            {
+                int index = StaticDataManager.StaticDataStore.Minerals.IndexOf(staticData);
+                if (index == -1) //if its not in the store
+                    StaticDataManager.StaticDataStore.Minerals.Add(staticData);
+                else
+                    StaticDataManager.StaticDataStore.Minerals[index] = staticData;
+            }
+            else if (staticData is TechSD)
+            {
+                if (!StaticDataManager.StaticDataStore.Techs.ContainsKey(staticData.ID))
+                    StaticDataManager.StaticDataStore.Techs.Add(staticData.ID, staticData);
+                else
+                    StaticDataManager.StaticDataStore.Techs[staticData.ID] = staticData;
+            }
+        }
+
+        /// <summary>
+        /// returns all the guid for a list of dataholders.
+        /// </summary>
+        /// <param name="listOfDataHolders"></param>
+        /// <returns></returns>
+        public static List<Guid> GetGuidList(List<DataHolder> listOfDataHolders)
+        {
+            List<Guid> list = new List<Guid>();
+            foreach (var dataholder in listOfDataHolders)
+            {
+                list.Add(dataholder.Guid);
+            }
+            return list;
+        }
+
+        private Dictionary<Guid, DataHolder> GetTypeStore(DataHolder dataHolder)
+        {
+            if(dataHolder.StaticData is InstallationSD)
+                return InstallationData;
+            if(dataHolder.StaticData is ComponentSD)
+                return ComponentData;
+            if(dataHolder.StaticData is MineralSD)
+                return MineralData;
+            if (dataHolder.StaticData is TechSD)
+                return TechData;
+            return null;
+        }
+    }
 
     public class DataHolder
     {
-        public string Name { get; set; }
+        public dynamic StaticData { get; set; }
         public string File { get; private set; }
-        public Guid Guid { get; private set; }
 
-        public DataHolder(string name, string file, Guid guid)
+
+        public string Name { get { return StaticData.Name; } }       
+        public Guid Guid { get { return StaticData.ID; } }
+        public string Description { get { return StaticData.Description; } }
+        
+
+
+        //public DataHolder(dynamic staticData, string file)
+        //{   
+        //    File = file;   
+        //    StaticData = staticData;
+        //}
+        public DataHolder(dynamic staticData)
         {
-            Name = name;
-            File = file;
-            Guid = guid;
+            StaticData = staticData;
         }
 
+        public DataHolder(ComponentAbilitySD staticData)
+        {
+            File = null;
+            StaticData = staticData;
+        }
+
+        /// <summary>
+        /// this is what will get displayed in listboxes etc. 
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return Name;

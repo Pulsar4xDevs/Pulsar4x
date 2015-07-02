@@ -35,9 +35,10 @@ namespace Pulsar4X.ECSLib
         LaunchMissileSize,
         ReloadRateFromMag,
         ReloadRateFromHanger,
+        ReloadRateMultiplyer,
         MissileMagazine,
 
-
+        Nothing
 
     }
 

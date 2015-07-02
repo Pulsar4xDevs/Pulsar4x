@@ -87,6 +87,7 @@
             this.dataGridView_MineralCosts.RowHeadersVisible = false;
             this.dataGridView_MineralCosts.Size = new System.Drawing.Size(89, 124);
             this.dataGridView_MineralCosts.TabIndex = 0;
+            this.dataGridView_MineralCosts.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView_MineralCosts_CellEndEdit);
             this.dataGridView_MineralCosts.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_MineralCosts_CellMouseClick);
             // 
             // MineralsCostsUC

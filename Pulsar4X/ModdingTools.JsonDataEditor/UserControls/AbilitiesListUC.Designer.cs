@@ -87,6 +87,7 @@
             this.dataGridView_addedAbilities.RowHeadersVisible = false;
             this.dataGridView_addedAbilities.Size = new System.Drawing.Size(69, 124);
             this.dataGridView_addedAbilities.TabIndex = 3;
+            this.dataGridView_addedAbilities.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView_addedAbilities_CellEndEdit);
             this.dataGridView_addedAbilities.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView_addedAbilities_CellMouseClick);
             // 
             // AbilitiesListUC

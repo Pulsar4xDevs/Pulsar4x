@@ -1,0 +1,83 @@
+{
+    "Type": "Components",
+    "Data": {
+        "List": [
+            {
+                "Key": "b0400874-0ef8-4f39-81cc-431e6311afcc",
+                "Value": {
+                    "Name": "MissileLauncher",
+                    "Description": "Can launch Missiles and be reloaded via a magazine",
+                    "ID": "b0400874-0ef8-4f39-81cc-431e6311afcc",
+                    "ComponentAbilitySDs": [
+                        {
+                            "Name": "Missile Launcher Size",
+                            "Description": "Can fire a missile of this size or smaller",
+                            "Ability": "LaunchMissileSize",
+                            "AbilityAmount": [
+                                1.0,
+                                2.0,
+                                3.0,
+                                4.0,
+                                5.0,
+                                6.0,
+                                7.0,
+                                8.0,
+                                9.0,
+                                10.0
+                            ],
+                            "CrewAmount": [
+                                3.0,
+                                6.0,
+                                9.0,
+                                12.0,
+                                15.0,
+                                18.0,
+                                21.0,
+                                24.0,
+                                27.0,
+                                30.0
+                            ],
+                            "WeightAmount": [
+                                1.0,
+                                2.0,
+                                3.0,
+                                4.0,
+                                5.0,
+                                6.0,
+                                7.0,
+                                8.0,
+                                9.0,
+                                10.0
+                            ],
+                            "AffectsAbility": "ReloadRateFromMag",
+                            "AffectedAmount": [ ],
+                            "TechRequiremets": [ ]
+                        },
+                        {
+                            "Name": "Missile Launcher Reload Rate",
+                            "Description": "Speed at which this launcher can reload from a magazine",
+                            "Ability": "ReloadRateMultiplyer",
+                            "AbilityAmount": [
+                                1.0,
+                                0.9,
+                                0.8,
+                                0.7,
+                                0.6,
+                                0.5,
+                                0.4,
+                                0.3,
+                                0.2,
+                                0.1
+                            ],
+                            "CrewAmount": [ ],
+                            "AffectsAbility": "Nothing",
+                            "AffectedAmount": [],
+                            "TechRequiremets": ["0d923d96-e9d5-4d33-bf27-8f97efbab173"]
+
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

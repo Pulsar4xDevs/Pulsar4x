@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Pulsar4X.ECSLib;
 
 namespace ModdingTools.JsonDataEditor
 {
@@ -15,21 +17,29 @@ namespace ModdingTools.JsonDataEditor
         public LoadWindow()
         {
             InitializeComponent();
+
+            folderBrowserDialog1.SelectedPath = System.IO.Path.GetFullPath("Data/");
+            
         }
 
         private void saveAllButton_Click(object sender, EventArgs e)
         {
-            if (!Data.SaveData())
-                MessageBox.Show("Error occured during saving. Data could be corrupted.");
-            else
-                MessageBox.Show("Saved.");
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                Data.SaveDataToDirectory(folderBrowserDialog1.SelectedPath);
+            }
+            //if (!Data.SaveData())
+            //    MessageBox.Show("Error occured during saving. Data could be corrupted.");
+            //else
+            //    MessageBox.Show("Saved.");
         }
 
         private void loadFileButton_Click(object sender, EventArgs e)
         {
-            if(openFileDialog.ShowDialog() == DialogResult.OK)
+            
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                Data.LoadFile(openFileDialog.FileName);
+                Data.loadDatafromDirectory(folderBrowserDialog1.SelectedPath);
             }
         }
 
@@ -41,6 +51,11 @@ namespace ModdingTools.JsonDataEditor
         private void installationsButton_Click(object sender, EventArgs e)
         {
             Data.MainWindow.SetMode(WindowModes.InstallationsWindow);
+        }
+
+        private void ComponentButton_Click(object sender, EventArgs e)
+        {
+            Data.MainWindow.SetMode(WindowModes.ComponentsWindow);
         }
     }
 }

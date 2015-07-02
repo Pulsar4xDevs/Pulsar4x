@@ -56,6 +56,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public JDictionary<Guid, ConstructableObjSD> ConstructableObjects = new JDictionary<Guid, ConstructableObjSD>();
 
+        /// <summary>
+        /// Dictionary which stores all Components.
+        /// </summary>
+        public JDictionary<Guid, ComponentSD> Components = new JDictionary<Guid, ComponentSD>(); 
+
         ///< @todo add a whole bunch more static data.
 
         /// <summary>
@@ -70,7 +75,8 @@ namespace Pulsar4X.ECSLib
                 {"Minerals", Minerals.GetType()},
                 {"Techs", Techs.GetType()},
                 {"Installations", Installations.GetType()},
-                {"ConstructableObj", ConstructableObjects.GetType()}
+                {"ConstructableObj", ConstructableObjects.GetType()},
+                {"Components", Components.GetType()}
             };
             TypesToStrings = StringsToTypes.ToDictionary(x => x.Value, x => x.Key);
         }
@@ -148,6 +154,18 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Stores Component Static Data. Will overwrite any existing Component with the same ID.
+        /// </summary>
+        public void Store(JDictionary<Guid, ComponentSD> components)
+        {
+            if (components != null)
+            {
+                foreach (var component in components)
+                    Components[component.Key] = component.Value;
+            }
+        }
+
+        /// <summary>
         /// Returns a type custom string for a type of static data. This string is used to tell 
         /// what type of static data is being imported (and is thus exported as well). 
         /// </summary>
@@ -188,6 +206,9 @@ namespace Pulsar4X.ECSLib
 
             if (ConstructableObjects.ContainsKey(id))
                 return ConstructableObjects[id];
+
+            if (Components.ContainsKey(id))
+                return Components[id];
 
             return null;
         }
