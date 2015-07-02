@@ -18,7 +18,7 @@ namespace ModdingTools.JsonDataEditor
         BindingList<DataHolder> _allComponents = new BindingList<DataHolder>();
         private ComponentSD _currentComponent = new ComponentSD();
  
-        private BindingList<DataHolder> _selectedComponentAbilites = new BindingList<DataHolder>();
+        private BindingList<DataHolder> _selectedComponentAbilities = new BindingList<DataHolder>();
        
 
         public ComponentsWindow()
@@ -28,7 +28,7 @@ namespace ModdingTools.JsonDataEditor
             //Data.InstallationData.ListChanged += UpdateComponentslist;
             listBox_allComponents.DataSource = _allComponents;
 
-            listBox_Abilities.DataSource = _selectedComponentAbilites;
+            listBox_Abilities.DataSource = _selectedComponentAbilities;
         }
 
 
@@ -44,23 +44,23 @@ namespace ModdingTools.JsonDataEditor
 
             genericDataUC1.Item = dh;
             genericDataUC1.Description = _currentComponent.Description;
-            _selectedComponentAbilites.Clear();
+            _selectedComponentAbilities.Clear();
             foreach (var abilitySD in _currentComponent.ComponentAbilitySDs)
             {
-                _selectedComponentAbilites.Add(new DataHolder(abilitySD));
+                _selectedComponentAbilities.Add(new DataHolder(abilitySD));
             }
             
         }
 
         private void SetCurrentAbility(DataHolder componentAbilityDH)
         {            
-            propertyGrid_PropertyEditor.SelectedObject = new AbilitysDisplayer(componentAbilityDH);
+            propertyGrid_PropertyEditor.SelectedObject = new AbilitiesDisplayer(componentAbilityDH);
         }
 
         /// <summary>
         /// sets how the propertygrid displays ComponentAbilitySD Data
         /// </summary>
-        public class AbilitysDisplayer
+        public class AbilitiesDisplayer
         {
             private DataHolder _abilityDH;
             private ComponentAbilitySD _abilitySD { 
@@ -76,10 +76,10 @@ namespace ModdingTools.JsonDataEditor
             private List<float> _weightAmount;
             private AbilityType _affectsAbility;
             private List<float> _affectedAmount;
-            private List<Guid> _techRequiremets;
+            private List<Guid> _techRequirements;
 
 
-            public AbilitysDisplayer(DataHolder abilityDH)
+            public AbilitiesDisplayer(DataHolder abilityDH)
             {
                 _abilityDH = abilityDH;
                 _name = _abilitySD.Name;
@@ -90,7 +90,7 @@ namespace ModdingTools.JsonDataEditor
                 _weightAmount = _abilitySD.WeightAmount;
                 _affectsAbility = _abilitySD.AffectsAbility;
                 _affectedAmount = _abilitySD.AffectedAmount;
-                _techRequiremets = _abilitySD.TechRequirements;
+                _techRequirements = _abilitySD.TechRequirements;
 
             }
 
@@ -223,7 +223,7 @@ namespace ModdingTools.JsonDataEditor
                 set
                 {
 
-                    _techRequiremets = Data.GetGuidList(value);
+                    _techRequirements = Data.GetGuidList(value);
                     UpdateAbilityStaticData();
                 }
             }
@@ -241,7 +241,7 @@ namespace ModdingTools.JsonDataEditor
                     WeightAmount = _weightAmount,
                     AffectsAbility = _affectsAbility,
                     AffectedAmount = _affectedAmount,
-                    TechRequirements = _techRequiremets
+                    TechRequirements = _techRequirements
                 };
                 _abilitySD = newSD;
 
@@ -262,7 +262,7 @@ namespace ModdingTools.JsonDataEditor
                 List<DataHolder> dataHolders = value as List<DataHolder>;
                 if (svc != null && dataHolders != null)
                 {            
-                    using (RequredTechsForm form = new RequredTechsForm())
+                    using (RequiredTechsForm form = new RequiredTechsForm())
                     {
                         form.ValueList = dataHolders;
                         if (svc.ShowDialog(form) == DialogResult.OK)
@@ -275,11 +275,11 @@ namespace ModdingTools.JsonDataEditor
             }
         }
 
-        class RequredTechsForm : Form
+        class RequiredTechsForm : Form
         {
             private TechRequirementsUC techucUc;
             private Button okButton;
-            public RequredTechsForm()
+            public RequiredTechsForm()
             {
                 techucUc = new TechRequirementsUC();
                 techucUc.AllowDuplicates = true;
@@ -315,17 +315,17 @@ namespace ModdingTools.JsonDataEditor
         /// <returns></returns>
         private ComponentSD StaticData(Guid guid)
         {
-            List<ComponentAbilitySD> abilitysList = new List<ComponentAbilitySD>();
-            foreach (var abilityDH in _selectedComponentAbilites)
+            List<ComponentAbilitySD> abilityList = new List<ComponentAbilitySD>();
+            foreach (var abilityDH in _selectedComponentAbilities)
             {
-                abilitysList.Add(abilityDH.StaticData);
+                abilityList.Add(abilityDH.StaticData);
             }
             ComponentSD newSD = new ComponentSD
             {
                 ID =guid,
                 Name = genericDataUC1.GetName,
                 Description = genericDataUC1.Description,
-                ComponentAbilitySDs = new List<ComponentAbilitySD>(abilitysList)
+                ComponentAbilitySDs = new List<ComponentAbilitySD>(abilityList)
             };
             return newSD;
         }
@@ -361,7 +361,7 @@ namespace ModdingTools.JsonDataEditor
             Data.SaveToDataStore(_currentComponent);
         }
 
-        private void button_updateExsisting_Click(object sender, EventArgs e)
+        private void button_updateExisting_Click(object sender, EventArgs e)
         {
             _currentComponent = StaticData(_currentComponent.ID);
             Data.SaveToDataStore(_currentComponent);

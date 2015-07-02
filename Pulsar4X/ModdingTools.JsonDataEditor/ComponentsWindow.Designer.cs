@@ -101,7 +101,7 @@
             this.button_saveUpdate.TabIndex = 1;
             this.button_saveUpdate.Text = "Save (Update)";
             this.button_saveUpdate.UseVisualStyleBackColor = true;
-            this.button_saveUpdate.Click += new System.EventHandler(this.button_updateExsisting_Click);
+            this.button_saveUpdate.Click += new System.EventHandler(this.button_updateExisting_Click);
             // 
             // button_mainMenu
             // 
