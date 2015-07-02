@@ -358,6 +358,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Armor represents the chance that a missile won't die to a particular weaponstrike. works the same as HTK.
         /// </summary>
+#warning Missile Armour is not yet implemented.
         private float Armor;
         public float armor
         {
@@ -1044,7 +1045,13 @@ namespace Pulsar4X.Entities.Components
                         return false;
                     break;
                 case StarSystemEntityType.Population:
-#warning implement population MFC tracking here
+                    /// <summary>
+                    /// MFCs may always fire on populations and will always have tracking for them.
+                    /// <summary>
+                    break;
+                case StarSystemEntityType.Waypoint:
+                    /// <summary>
+                    /// MFCs may always fire on waypoints, and will always have tracking for them.
                     break;
             }
             return true;
@@ -1198,6 +1205,16 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Ordnance groups never change their sensor status, but the check for this will need to be run once regardless.
+        /// </summary>
+        private uint _SensorUpdateAck;
+        public uint _sensorUpdateAck
+        {
+            get { return _SensorUpdateAck; }
+            set { _SensorUpdateAck = value; }
+        }
+
+        /// <summary>
         /// Constructor for missile groups.
         /// </summary>
         /// <param name="LaunchedFrom">TG this launched from. additional missiles may be added this tick but afterwards no more.</param>
@@ -1251,6 +1268,11 @@ namespace Pulsar4X.Entities.Components
             MissilesDestroyed = 0;
 
             OrdGroupsTargetting = new BindingList<OrdnanceGroupTN>();
+
+            /// <summary>
+            /// Tell the sensor contact element to determine what if any sensors should be displayed.
+            /// </summary>
+            _SensorUpdateAck = 1;
         }
 
         /// <summary>
@@ -1449,7 +1471,8 @@ namespace Pulsar4X.Entities.Components
                 Contact.LastPosition.Y = Contact.Position.Y;
 
 #warning yet another place with body and pop missile targetting that needs to be looked at
-                switch (Missiles[0].target.targetType)
+                TargetTN MissileTarget = Missiles[0].target;
+                switch (MissileTarget.targetType)
                 {
                     case StarSystemEntityType.TaskGroup:
 
@@ -1457,7 +1480,7 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Impact time. If the ship is already destroyed.
                         /// </summary>
-                        if (Missiles[0].target.ship.IsDestroyed == true)
+                        if (MissileTarget.ship.IsDestroyed == true)
                         {
                             CheckTracking();
                             if (Missiles[0].onOwnSensors == true)
@@ -1469,13 +1492,16 @@ namespace Pulsar4X.Entities.Components
                             /// <summary>
                             /// I want to attempt to destroy enemy missiles by hitting them.
                             /// </summary>
-                            Contact.Position.X = Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.X;
-                            Contact.Position.Y = Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.Y;
+                            Contact.Position.X = MissileTarget.ship.ShipsTaskGroup.Contact.Position.X;
+                            Contact.Position.Y = MissileTarget.ship.ShipsTaskGroup.Contact.Position.Y;
                             ProcessImpact(RNG);
                         }
 
                         break;
                     case StarSystemEntityType.Population:
+                        Contact.Position.X = MissileTarget.pop.Contact.Position.X;
+                        Contact.Position.Y = MissileTarget.pop.Contact.Position.Y;
+                        ProcessPopulationImpact(RNG);
                         break;
                     case StarSystemEntityType.Body:
                         break;
@@ -1484,7 +1510,7 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// All of these target missiles are already gone.
                         /// </summary>
-                        if (Missiles[0].target.missileGroup.missilesDestroyed == Missiles[0].target.missileGroup.missiles.Count)
+                        if (MissileTarget.missileGroup.missilesDestroyed == MissileTarget.missileGroup.missiles.Count)
                         {
                             CheckTracking();
                             if (Missiles[0].onOwnSensors == true)
@@ -1496,8 +1522,8 @@ namespace Pulsar4X.Entities.Components
                             /// <summary>
                             /// I want to attempt to destroy enemy missiles by hitting them.
                             /// </summary>
-                            Contact.Position.X = Missiles[0].target.missileGroup.contact.Position.X;
-                            Contact.Position.Y = Missiles[0].target.missileGroup.contact.Position.Y;
+                            Contact.Position.X = MissileTarget.missileGroup.contact.Position.X;
+                            Contact.Position.Y = MissileTarget.missileGroup.contact.Position.Y;
                             ProcessMissileImpact(RNG);
                         }
 
@@ -1507,8 +1533,10 @@ namespace Pulsar4X.Entities.Components
                         /// If missiles are targetted on a waypoint, and are set to OnOwnSensors = true, that means they are looking for a target.
                         /// Do I want special handling for timeReq = 0 and waypoint/planet target?
                         /// </summary>
-                        Contact.Position.X = Missiles[0].target.wp.Position.X;
-                        Contact.Position.Y = Missiles[0].target.wp.Position.Y;
+                        Contact.Position.X = MissileTarget.wp.Position.X;
+                        Contact.Position.Y = MissileTarget.wp.Position.Y;
+
+#warning there may be a requirement for special waypoint handling for secondary release submunitions here such as geosurvey buoys or mines.
 
                         if (Missiles[0].onOwnSensors == true)
                             SearchForNewTarget();
@@ -1613,11 +1641,15 @@ namespace Pulsar4X.Entities.Components
 #warning and another pop/body targetting place for missiles
                     else if (Missiles[0].target.targetType == StarSystemEntityType.Population)
                     {
-
+                        /// <summary>
+                        /// Do nothing and continue on towards the planet.
+                        /// </summary>
                     }
                     else if (Missiles[0].target.targetType == StarSystemEntityType.Body)
                     {
-
+                        /// <summary>
+                        /// Do nothing and continue on towards the planet.
+                        /// </summary>
                     }
                 }
 
@@ -1910,6 +1942,50 @@ namespace Pulsar4X.Entities.Components
                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                        GameState.Instance.LastTimestep, Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle the case of a missile group hitting a planet.
+        /// </summary>
+        /// <param name="RNG"></param>
+        private void ProcessPopulationImpact(Random RNG)
+        {
+            MissilesDestroyed = Missiles.Count;
+            for (int loop = 0; loop < Missiles.Count; loop++)
+            {
+                /// <summary>
+                /// Is this planet defended by any point defense?
+                /// </summary>
+                bool Intercept = PointDefense.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
+
+                /// <summary>
+                /// Either the missiles will be intercepted or they will strike the planet.
+                /// </summary>
+                if (Intercept == true)
+                {
+                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} shot down by point blank defensive fire", Missiles[loop].Name, loop, Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
+                                                       GameState.Instance.LastTimestep, Entry);
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
+                }
+                else
+                {
+
+                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit {3}", Missiles[loop].Name, loop, Name, Missiles[loop].target.pop.Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
+                                                       GameState.Instance.LastTimestep, Entry);
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
+
+
+                    ///<summary>
+                    ///Missile damage type always? laser damage type if implemented will need to change this.
+                    ///PopDamaged is also currently unused.
+                    ///</summary>
+#warning Implement Missile Laser damage here
+                    bool PopDamaged = Missiles[loop].target.pop.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, Missiles[loop].firingShip, Missiles[loop].missileDef.radValue);
+
                 }
             }
         }

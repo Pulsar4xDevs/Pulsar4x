@@ -445,6 +445,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
         /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
+        /// <param name="CurrentTimeSlice">tick when this ship is created.</param>
+        /// <param name="ShipTG">TG this ship belongs to.</param>
+        /// <param name="ShipFact">Faction this ship belongs to.</param>
+        /// <param name="Title">Name of the ship.</param>
         public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice, TaskGroupTN ShipTG, Faction ShipFact, String Title)
         {
             int index;
@@ -1204,19 +1208,30 @@ namespace Pulsar4X.Entities
                     left = (short)(HitLocation - 1);
                     right = (short)(HitLocation + 1);
 
+                    /// <summary>
+                    /// What is the column damage level at Hit Location?
+                    /// </summary>
                     if (ShipArmor.isDamaged == true)
                     {
                         LastColumnValue = ShipArmor.armorColumns[HitLocation];
                     }
 
+                    /// <summary>
+                    /// internalDamage is all damage that passed through the armour.
+                    /// </summary>
                     internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
 
+                    /// <summary>
+                    /// If this is a new penetration note this fact.
+                    /// </summary>
                     if (LastColumnValue != 0 && internalDamage != 0)
                     {
                         ColumnPenetration = true;
                     }
 
-
+                    /// <summary>
+                    /// The plasma template is a little wierd and requires handling this condition. basically it has two maximum strength penetration attacks.
+                    /// </summary>
                     if (Type == DamageTypeTN.Plasma && Table.hitPoint + 1 < Table.damageTemplate.Count)
                     {
 
@@ -1236,6 +1251,9 @@ namespace Pulsar4X.Entities
                         right++;
                     }
 
+                    /// <summary>
+                    /// Calculate the armour damage to the left and right of the hitLocation.
+                    /// </summary>
                     for (int loop = 1; loop <= Table.halfSpread; loop++)
                     {
                         if (left < 0)
@@ -1356,6 +1374,9 @@ namespace Pulsar4X.Entities
 
             if (Type != DamageTypeTN.Microwave)
             {
+                /// <summary>
+                /// If 20 attempts to damage a component are made unsuccessfully the ship is considered destroyed. Does this scale well with larger ships?
+                /// </summary>
                 while (Attempts < 20 && internalDamage > 0)
                 {
                     int DACHit = DacRNG.Next(1, ShipClass.DamageAllocationChart[ShipClass.ListOfComponentDefs[ShipClass.ListOfComponentDefs.Count - 1]]);
@@ -2849,15 +2870,16 @@ namespace Pulsar4X.Entities
             {
                 if (ShipBFC[loop].openFire == true && ShipBFC[loop].isDestroyed == false && ShipBFC[loop].target != null)
                 {
-                    if (ShipBFC[loop].target.targetType == StarSystemEntityType.TaskGroup)
+                    TargetTN BFCTarget = ShipBFC[loop].target;
+                    if (BFCTarget.targetType == StarSystemEntityType.TaskGroup)
                     {
                         /// <summary>
                         /// Sanity Check. Make sure both are in the same system before checking distance.
                         /// </summary>
-                        if (ShipsTaskGroup.Contact.Position.System == ShipBFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System)
+                        if (ShipsTaskGroup.Contact.Position.System == BFCTarget.ship.ShipsTaskGroup.Contact.Position.System)
                         {
                             float distance;
-                            ShipsTaskGroup.Contact.DistTable.GetDistance(ShipBFC[loop].target.ship.ShipsTaskGroup.Contact, out distance);
+                            ShipsTaskGroup.Contact.DistTable.GetDistance(BFCTarget.ship.ShipsTaskGroup.Contact, out distance);
 
                             int track = ShipsFaction.BaseTracking;
                             if (CurrentSpeed > ShipsFaction.BaseTracking)
@@ -2873,15 +2895,15 @@ namespace Pulsar4X.Entities
                             }
                         }
                     }
-                    else if (ShipBFC[loop].target.targetType == StarSystemEntityType.Missile)
+                    else if (BFCTarget.targetType == StarSystemEntityType.Missile)
                     {
                         /// <summary>
                         /// Sanity Check. Make sure both are in the same system before checking distance.
                         /// </summary>
-                        if (ShipsTaskGroup.Contact.Position.System == ShipBFC[loop].target.missileGroup.contact.Position.System)
+                        if (ShipsTaskGroup.Contact.Position.System == BFCTarget.missileGroup.contact.Position.System)
                         {
                             float distance;
-                            ShipsTaskGroup.Contact.DistTable.GetDistance(ShipBFC[loop].target.missileGroup.contact, out distance);
+                            ShipsTaskGroup.Contact.DistTable.GetDistance(BFCTarget.missileGroup.contact, out distance);
 
                             int track = ShipsFaction.BaseTracking;
                             if (CurrentSpeed > ShipsFaction.BaseTracking)
@@ -2892,6 +2914,35 @@ namespace Pulsar4X.Entities
                             if (distance < Constants.Units.BEAM_AU_MAX)
                             {
                                 float DistKM = (float)Distance.ToKm(distance);
+
+                                fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track, this);
+                            }
+                        }
+                    }
+                    else if (BFCTarget.targetType == StarSystemEntityType.Population)
+                    {
+                        /// <summary>
+                        /// Sanity Check
+                        /// </summary>
+                        if (ShipsTaskGroup.Contact.Position.System == BFCTarget.pop.Planet.Position.System)
+                        {
+                            float distance;
+                            ShipsTaskGroup.Contact.DistTable.GetDistance(BFCTarget.pop.Contact, out distance);
+
+                            /// <summary>
+                            /// Simple check to see if the maximum beam distance is exceeded by this attempt to fire.
+                            if (distance < Constants.Units.BEAM_AU_MAX)
+                            {
+                                float DistKM = (float)Distance.ToKm(distance);
+
+                                /// <summary>
+                                /// Track doesn't matter for planets, but including it here since FireWeapons wants it.
+                                /// </summary>
+                                int track = ShipsFaction.BaseTracking;
+                                if (CurrentSpeed > ShipsFaction.BaseTracking)
+                                {
+                                    track = CurrentSpeed;
+                                }
 
                                 fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track, this);
                             }
@@ -2907,12 +2958,44 @@ namespace Pulsar4X.Entities
             {
                 if (ShipMFC[loop].openFire == true && ShipMFC[loop].isDestroyed == false && ShipMFC[loop].target != null)
                 {
-                    /// <summary>
-                    /// Sanity Check. Make sure both are in the same system before firing.
-                    /// </summary>
-                    if (ShipsTaskGroup.Contact.Position.System == ShipMFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System)
+                    TargetTN MFCTarget = ShipMFC[loop].target;
+
+                    if (MFCTarget.targetType == StarSystemEntityType.TaskGroup)
                     {
-                        fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
+                        /// <summary>
+                        /// Sanity Check. Make sure both are in the same system before firing.
+                        /// </summary>
+                        if (ShipsTaskGroup.Contact.Position.System == MFCTarget.ship.ShipsTaskGroup.Contact.Position.System)
+                        {
+                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
+                        }
+                    }
+                    else if (MFCTarget.targetType == StarSystemEntityType.Missile)
+                    {
+                        /// <summary>
+                        /// Sanity Check. Make sure both are in the same system before firing.
+                        /// </summary>
+                        if (ShipsTaskGroup.Contact.Position.System == MFCTarget.missileGroup.contact.Position.System)
+                        {
+                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
+                        }
+                    }
+                    else if (MFCTarget.targetType == StarSystemEntityType.Population)
+                    {
+                        /// <summary>
+                        /// Sanity Check. Make sure both are in the same system before firing.
+                        /// </summary>
+                        if (ShipsTaskGroup.Contact.Position.System == MFCTarget.pop.Contact.Position.System)
+                        {
+                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
+                        }
+                    }
+                    else if (MFCTarget.targetType == StarSystemEntityType.Waypoint)
+                    {
+                        if (ShipsTaskGroup.Contact.Position.System == MFCTarget.wp.Position.System)
+                        {
+                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
+                        }
                     }
                 }
             }

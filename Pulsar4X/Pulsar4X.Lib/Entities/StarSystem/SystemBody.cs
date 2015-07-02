@@ -110,7 +110,16 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// < @todo Decide if we want RadiationLevel and AtmosphericDust game play features.
         /// </summary>
+        /// </summary>
+        /// Radiation Level adversely effects population growth and industrial production: Each point of radiation decreases industrial production by 0.01% and growth by 0.0025%
+        /// radiation decreases at a baseline 1 per 5 days.
+        /// </summary>
+#warning Implement RadiationLevel, Atmospheric dust in UI, and in reduced population growth, industrial percentage, and lowered planetary temperature.
         public float RadiationLevel { get; set; }
+
+        /// <summary>
+        /// Atmospheric dust decreases temperature by (dust / 100) degrees C. dust decreases at a baseline 3 points per 5 days.
+        /// </summary>
         public float AtmosphericDust { get; set; }
 
         public BindingList<SystemBody> Moons { get; set; } //moons orbiting the planet
@@ -229,6 +238,15 @@ namespace Pulsar4X.Entities
             foreach (SystemBody CurrentMoon in Moons)
             {
                 CurrentMoon.UpdatePosition(tickValue);
+            }
+
+            /// <summary>
+            /// update every population on this planet.
+            /// </summary>
+            foreach (Population Pops in Populations)
+            {
+                Pops.Contact.Position.X = Position.X;
+                Pops.Contact.Position.Y = Position.Y;
             }
 
             ///<summary>

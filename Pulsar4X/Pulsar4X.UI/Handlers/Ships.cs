@@ -393,7 +393,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// PD mode and range will be handled in this function
+        /// PD mode and range will be handled in this function.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -480,6 +480,8 @@ namespace Pulsar4X.UI.Handlers
             {
                 if (index != 0)
                     index = index + 3;
+
+
                 if (index == 0 || (index >= (int)PointDefenseState.AMM1v2 && index <= (int)PointDefenseState.AMM5v1))
                 {
                     if (res)
@@ -487,6 +489,10 @@ namespace Pulsar4X.UI.Handlers
                     _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseMode((PointDefenseState)index);
 
                     StarSystem CurrentSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
+
+                    /// <summary>
+                    /// Clear Point defense. ClearTarget() further down also clears point defense so make any relevant changes there as well.
+                    /// </summary>
 
                     if (index != 0)
                     {
@@ -546,8 +552,6 @@ namespace Pulsar4X.UI.Handlers
                                 }
                             }
                         }
-
-
                     }
                 }
                 else
@@ -711,25 +715,25 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void AssignTargetButton_Click(object sender, EventArgs e)
         {
-#warning Planetary targetting not yet implemented.
             if (m_oDetailsPanel.ContactListBox.SelectedIndex != -1 && _CurrnetFC != null)
             {
-
-
+                StarSystem CurrentSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
                 if (isBFC == true)
                 {
                     int count = 0;
-                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.Position.System) == true)
+                    
+                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(CurrentSystem) == true)
                     {
 
-                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedContacts)
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[CurrentSystem].DetectedContacts)
                         {
                             if (pair.Value.active == true)
                             {
                                 if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                                 {
                                     _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                    pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                    if(pair.Key.ShipsTargetting.Contains(_CurrnetShip) == false)
+                                        pair.Key.ShipsTargetting.Add(_CurrnetShip);
                                     count++;
                                     break;
                                 }
@@ -749,16 +753,20 @@ namespace Pulsar4X.UI.Handlers
                             }
                         }
 
+                        /// <summary>
+                        /// Is this a missile target assignment?
+                        /// </summary>
                         if (count <= m_oDetailsPanel.ContactListBox.SelectedIndex)
                         {
-                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedMissileContacts)
+                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[CurrentSystem].DetectedMissileContacts)
                             {
                                 if (pair.Value.active == true)
                                 {
                                     if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                                     {
                                         _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                        pair.Key.shipsTargetting.Add(_CurrnetShip);
+                                        if (pair.Key.shipsTargetting.Contains(_CurrnetShip) == false)
+                                            pair.Key.shipsTargetting.Add(_CurrnetShip);
                                         count++;
                                         break;
                                     }
@@ -778,14 +786,51 @@ namespace Pulsar4X.UI.Handlers
                                 }
                             }
                         }
+
+                        /// <summary>
+                        /// it could be a population contact. nothing should be after this. BFCs can only fire on ships, missiles and populations.
+                        /// </summary>
+                        if (count <= m_oDetailsPanel.ContactListBox.SelectedIndex)
+                        {
+                            foreach (KeyValuePair<Population, FactionContact> pair in _CurrnetFaction.DetectedContactLists[CurrentSystem].DetectedPopContacts)
+                            {
+                                /// <summary>
+                                /// the colony itself is big enough, but presumably we want to hit something important down there.
+                                /// </summary>
+                                if (pair.Value.active == true)
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                        if (pair.Key.ShipsTargetting.Contains(_CurrnetShip) == false)
+                                            pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                        count++;
+                                        break;
+
+                                    }
+                                }
+                                else
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        /// <summary>
+                                        /// Not a valid assignment. just exit.
+                                        /// </summary>
+                                        count++;
+                                        break;
+                                    }
+                                    count++;
+                                }
+                            }
+                        }
                     }
                 }
                 else
                 {
                     int count = 0;
-                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.Position.System) == true)
+                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(CurrentSystem) == true)
                     {
-                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedContacts)
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[CurrentSystem].DetectedContacts)
                         {
                             float distance;
                             _CurrnetShip.ShipsTaskGroup.Contact.DistTable.GetDistance(pair.Key.ShipsTaskGroup.Contact, out distance);
@@ -807,7 +852,8 @@ namespace Pulsar4X.UI.Handlers
                                     if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                                     {
                                         _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                        pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                        if (pair.Key.ShipsTargetting.Contains(_CurrnetShip) == false)
+                                            pair.Key.ShipsTargetting.Add(_CurrnetShip);
                                         count++;
                                         break;
                                     }
@@ -828,9 +874,12 @@ namespace Pulsar4X.UI.Handlers
                             }
                         }
 
+                        /// <summary>
+                        /// Missile target?
+                        /// </summary>
                         if (count <= m_oDetailsPanel.ContactListBox.SelectedIndex)
                         {
-                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedMissileContacts)
+                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[CurrentSystem].DetectedMissileContacts)
                             {
                                 float distance;
                                 _CurrnetShip.ShipsTaskGroup.Contact.DistTable.GetDistance(pair.Key.contact, out distance);
@@ -874,7 +923,8 @@ namespace Pulsar4X.UI.Handlers
                                         if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                                         {
                                             _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                            pair.Key.shipsTargetting.Add(_CurrnetShip);
+                                            if (pair.Key.shipsTargetting.Contains(_CurrnetShip) == false)
+                                                pair.Key.shipsTargetting.Add(_CurrnetShip);
                                             count++;
                                             break;
                                         }
@@ -894,7 +944,48 @@ namespace Pulsar4X.UI.Handlers
                                     }
                                 }
                             }//end foreach contact
-                        }//end if count < selection
+                        }//end if missile target
+
+                        /// <summary>
+                        /// is this a population target?
+                        /// </summary>
+                        if (count <= m_oDetailsPanel.ContactListBox.SelectedIndex)
+                        {
+                            foreach (KeyValuePair<Population, FactionContact> pair in _CurrnetFaction.DetectedContactLists[CurrentSystem].DetectedPopContacts)
+                            {
+                                /// <summary>
+                                /// the colony itself is big enough that any FC can target it, but presumably we want to hit something important down there, hence the need for active scanning. 
+                                /// waypoints should be used for general planetary targetting.
+                                /// </summary>
+                                if (pair.Value.active == true)
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                        if (pair.Key.ShipsTargetting.Contains(_CurrnetShip) == false)
+                                            pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                        count++;
+                                        break;
+
+                                    }
+                                }
+                                else
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        /// <summary>
+                                        /// Not a valid assignment. just exit.
+                                        /// </summary>
+                                        count++;
+                                        break;
+                                    }
+                                    count++;
+                                }
+                            }
+                        }//end if population target
+
+
+#warning Handle Waypoint target assignment here. maybe planetary assignment as well.
                     }//end if detectedlist contains system
                 }//end else if not BFC
             }//end if FC and there is a selection.
@@ -942,19 +1033,28 @@ namespace Pulsar4X.UI.Handlers
                         }
                     }
 
+                    /// <summary>
+                    /// Remove the BFC from the taskgroup point defense list.
+                    /// </summary>
+                    if (_CurrnetShip.ShipsTaskGroup.TaskGroupPDL.PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
+                    {
+                        _CurrnetShip.ShipsTaskGroup.TaskGroupPDL.RemoveComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                    }
 
-
+                    /// <summary>
+                    /// remove this ship from the shipsTargetting lists for whatever the target is if appropriate.
+                    /// </summary>
                     TargetTN Target = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget();
                     if (Target != null)
                     {
                         switch (Target.targetType)
                         {
                             case StarSystemEntityType.Population:
-                                /// <summary>
-                                /// Populations are not yet implemented. I may have a shipsTargetting list for population as well, in which case remove that here.
-                                /// If I don't do that however, just delete this.
-                                /// </summary>
-#warning Pop Not Yet Implemented
+                                Population colony = Target.pop;
+                                if (colony.ShipsTargetting.Contains(_CurrnetShip) == true)
+                                {
+                                    colony.ShipsTargetting.Remove(_CurrnetShip);
+                                }
                                 break;
                             case StarSystemEntityType.TaskGroup:
                                 ShipTN vessel = Target.ship;
@@ -1005,17 +1105,25 @@ namespace Pulsar4X.UI.Handlers
                         }
                     }
 
+                    /// <summary>
+                    /// Remove the MFC from the taskgroup point defense list.
+                    /// </summary>
+                    if (_CurrnetShip.ShipsTaskGroup.TaskGroupPDL.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
+                    {
+                        _CurrnetShip.ShipsTaskGroup.TaskGroupPDL.RemoveComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                    }
+
                     TargetTN Target = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget();
                     if (Target != null)
                     {
                         switch (Target.targetType)
                         {
                             case StarSystemEntityType.Population:
-                                /// <summary>
-                                /// Populations are not yet implemented. I may have a shipsTargetting list for population as well, in which case remove that here.
-                                /// If I don't do that however, just delete this.
-                                /// </summary>
-#warning Pop Not Yet Implemented
+                                Population colony = Target.pop;
+                                if (colony.ShipsTargetting.Contains(_CurrnetShip) == true)
+                                {
+                                    colony.ShipsTargetting.Remove(_CurrnetShip);
+                                }
                                 break;
                             case StarSystemEntityType.TaskGroup:
                                 ShipTN vessel = Target.ship;
@@ -1036,15 +1144,6 @@ namespace Pulsar4X.UI.Handlers
                                 break;
                             case StarSystemEntityType.Body:
                                 break;
-                        }
-
-                        if (_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().targetType == StarSystemEntityType.TaskGroup)
-                        {
-                            ShipTN vessel = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().ship;
-                            if (vessel.ShipsTargetting.Contains(_CurrnetShip) == true)
-                            {
-                                vessel.ShipsTargetting.Remove(_CurrnetShip);
-                            }
                         }
 
                         _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].clearTarget();
@@ -1356,14 +1455,10 @@ namespace Pulsar4X.UI.Handlers
         private void BuildDamagedSystemsList()
         {
             m_oDetailsPanel.DamagedSystemsListBox.Items.Clear();
-
             if (_CurrnetShip != null)
             {
-
                 for (int loop = 0; loop < _CurrnetShip.DestroyedComponents.Count; loop++)
                 {
-
-
                     m_oDetailsPanel.DamagedSystemsListBox.Items.Add(_CurrnetShip.ShipComponents[_CurrnetShip.DestroyedComponents[loop]].Name);
                 }
             }
@@ -1730,6 +1825,33 @@ namespace Pulsar4X.UI.Handlers
 
                             m_oDetailsPanel.ContactListBox.Items.Add(Entry);
                         }
+
+                        /// <summary>
+                        /// Display all population contacts.
+                        /// </summary>
+                        foreach (KeyValuePair<Population, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedPopContacts)
+                        {
+                            String TH = "";
+                            if (pair.Value.thermal == true)
+                            {
+                                TH = String.Format("[Thermal {0}]", pair.Key.ThermalSignature);
+                            }
+
+                            String EM = "";
+                            if (pair.Value.EM == true)
+                            {
+                                EM = String.Format("[EM {0}]", pair.Value.EMSignature);
+                            }
+
+                            String ACT = "";
+                            if (pair.Value.active == true)
+                            {
+                                ACT = String.Format("[Active Ping]");
+                            }
+
+                            String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
+                            m_oDetailsPanel.ContactListBox.Items.Add(Entry);
+                        }
                         #endregion
                     }
                 }
@@ -1857,6 +1979,36 @@ namespace Pulsar4X.UI.Handlers
                                 m_oDetailsPanel.ContactListBox.Items.Add(Entry);
                             }
                         }
+
+
+                        /// <summary>
+                        /// Display all population contacts, MFCs can always target planets and populations.
+                        /// </summary>
+                        foreach (KeyValuePair<Population, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedPopContacts)
+                        {
+                            String TH = "";
+                            if (pair.Value.thermal == true)
+                            {
+                                TH = String.Format("[Thermal {0}]", pair.Key.ThermalSignature);
+                            }
+
+                            String EM = "";
+                            if (pair.Value.EM == true)
+                            {
+                                EM = String.Format("[EM {0}]", pair.Value.EMSignature);
+                            }
+
+                            String ACT = "";
+                            if (pair.Value.active == true)
+                            {
+                                ACT = String.Format("[Active Ping]");
+                            }
+
+                            String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
+                            m_oDetailsPanel.ContactListBox.Items.Add(Entry);
+                        }
+
+#warning Also print all waypoints as potential missile targets.
                     }
                 }
             }
