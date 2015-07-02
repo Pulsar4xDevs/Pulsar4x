@@ -102,7 +102,7 @@ namespace Pulsar4X.ECSLib
 
         [NotNull]
         [PublicAPI]
-        public new ReadOnlyCollection<BaseDataBlob> DataBlobs { get { return new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)); } }
+        public new ReadOnlyCollection<BaseDataBlob> DataBlobs { get { return IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>()); } }
 
         private static readonly EntityManager InvalidManager = new EntityManager(null);
 
@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool IsValid
         {
-            get { return this != InvalidEntity && Manager.IsValidEntity(this); }
+            get { return this != InvalidEntity && Manager != InvalidManager && Manager.IsValidEntity(this); }
         }
 
         /// <summary>
@@ -188,7 +188,14 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public void Destroy()
         {
-            Manager.RemoveEntity(ID);
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot destroy an invalid entity.");
+            }
+
+            Manager.RemoveEntity(this);
+            Manager = InvalidManager;
+            _protectedDataBlobMask_ = EntityManager.BlankDataBlobMask();
         }
 
         /// <summary>
@@ -199,6 +206,10 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public override T GetDataBlob<T>()
         {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot get a datablob from an invalid entity.");
+            }
             return Manager.GetDataBlob<T>(ID);
         }
 
@@ -211,6 +222,10 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public override T GetDataBlob<T>(int typeIndex)
         {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot get a datablob from an invalid entity.");
+            }
             return Manager.GetDataBlob<T>(ID, typeIndex);
         }
 
@@ -225,6 +240,10 @@ namespace Pulsar4X.ECSLib
             if (dataBlob == null)
             {
                 throw new ArgumentNullException("dataBlob", "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
+            }
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot set a datablob to an invalid entity.");
             }
 
             Manager.SetDataBlob(ID, dataBlob);
@@ -242,6 +261,10 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentNullException("dataBlob", "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
             }
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot set a datablob to an invalid entity.");
+            }
 
             Manager.SetDataBlob(ID, dataBlob, typeIndex);
         }
@@ -253,6 +276,14 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public override void RemoveDataBlob<T>()
         {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot remove a datablob from an invalid entity.");
+            }
+            if (!HasDataBlob<T>())
+            {
+                throw new InvalidOperationException("Entity does not contain this datablob.");
+            }
             Manager.RemoveDataBlob<T>(ID);
         }
 
@@ -263,6 +294,14 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public override void RemoveDataBlob(int typeIndex)
         {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot remove a datablob from an invalid entity.");
+            } 
+            if (!HasDataBlob(typeIndex))
+            {
+                throw new InvalidOperationException("Entity does not contain this datablob.");
+            }
             Manager.RemoveDataBlob(ID, typeIndex);
         }
 
@@ -274,6 +313,10 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool HasDataBlob<T>() where T : BaseDataBlob
         {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot query an invalid entity.");
+            }
             int typeIndex = EntityManager.GetTypeIndex<T>();
             return DataBlobMask[typeIndex];
         }
@@ -286,18 +329,37 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool HasDataBlob(int typeIndex)
         {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot query an invalid entity.");
+            }
             return DataBlobMask[typeIndex];
         }
 
         /// <summary>
         /// Clones the entity's dataBlobs into a new ProtoEntity.
         /// </summary>
-        /// <returns>The cloned entity.</returns>
+        /// <returns>A new ProtoEntity with cloned datablobs from this entity.</returns>
         [PublicAPI]
         public ProtoEntity Clone()
         {
+            if (!IsValid)
+            {
+                throw new InvalidOperationException("Cannot clone an invalid entity.");
+            }
             List<BaseDataBlob> clonedDataBlobs = DataBlobs.Select(dataBlob => dataBlob.Clone()).Cast<BaseDataBlob>().ToList();
             return ProtoEntity.Create(clonedDataBlobs);
+        }
+
+        /// <summary>
+        /// Clones the entity into a new Entity in the specified entit
+        /// </summary>
+        /// <param name="manager"></param>
+        /// <returns>The newly created entity.</returns>
+        [PublicAPI]
+        public Entity Clone(EntityManager manager)
+        {
+            return new Entity(manager, Clone());
         }
 
         #endregion
@@ -317,7 +379,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when trying to transfer the static InvalidEntity.</exception>
         /// <exception cref="ArgumentNullException">Thrown when the provided manager is null.</exception>
-        internal void Transfer([NotNull] EntityManager newManager)
+        public void Transfer([NotNull] EntityManager newManager)
         {
             if (!IsValid)
             {
@@ -331,7 +393,7 @@ namespace Pulsar4X.ECSLib
             List<BaseDataBlob> dataBlobs = Manager.GetAllDataBlobs(ID);
 
             // Remove myself from the old manager.
-            Manager.RemoveEntity(ID);
+            Manager.RemoveEntity(this);
 
             // Add myself the the new manager.
             ID = newManager.SetupEntity(this);

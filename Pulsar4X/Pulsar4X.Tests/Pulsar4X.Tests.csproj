@@ -45,13 +45,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Pulsar4X.Lib\Pulsar4X.Lib.csproj">
-      <Project>{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}</Project>
-      <Name>Pulsar4X.Lib</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
       <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
       <Name>Pulsar4X.ECSLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Pulsar4X.Lib\Pulsar4X.Lib.csproj">
+      <Project>{bfaae0e4-05bf-4d42-8411-a92ca05a39e2}</Project>
+      <Name>Pulsar4X.Lib</Name>
     </ProjectReference>
     <Reference Include="dotMemory.Unit">
       <HintPath>..\packages\JetBrains.DotMemoryUnit.1.0.20150408.170258\Lib\dotMemory.Unit.dll</HintPath>

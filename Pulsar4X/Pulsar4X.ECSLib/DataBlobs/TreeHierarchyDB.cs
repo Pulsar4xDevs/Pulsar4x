@@ -160,6 +160,8 @@ namespace Pulsar4X.ECSLib
             {
             }
 
+            private ConcreteTreeHierarchyDB() : base(null) { }
+
             public override object Clone()
             {
                 throw new NotImplementedException();
@@ -224,10 +226,14 @@ namespace Pulsar4X.ECSLib
                 var parent1Children = new List<ConcreteTreeHierarchyDB> {parent1Child1DB, parent1Child2DB};
                 var parent2Children = new List<ConcreteTreeHierarchyDB> {parent2Child1DB, parent2Child2DB};
 
+                parent1ChildEntities.Sort((entity1, entity2) => entity1.Guid.CompareTo(entity2.Guid));
+                parent2ChildEntities.Sort((entity1, entity2) => entity1.Guid.CompareTo(entity2.Guid));
                 // Ensure listed child entities concur with our child list.
                 Assert.AreEqual(parent1ChildEntities, parent1DB.Children);
                 Assert.AreEqual(parent2ChildEntities, parent2DB.Children);
 
+                parent1Children.Sort((entity1, entity2) => entity1.OwningEntity.Guid.CompareTo(entity2.OwningEntity.Guid));
+                parent2Children.Sort((entity1, entity2) => entity1.OwningEntity.Guid.CompareTo(entity2.OwningEntity.Guid));
                 // Ensure listen child DBs concur with our stored list.
                 Assert.AreEqual(parent1Children, parent1DB.ChildrenDBs);
                 Assert.AreEqual(parent2Children, parent2DB.ChildrenDBs);
@@ -240,6 +246,7 @@ namespace Pulsar4X.ECSLib
 
                 // Make sure P1's children list updated.
                 parent1ChildEntities.Add(parent2Child1);
+                parent1ChildEntities.Sort((entity1, entity2) => entity1.Guid.CompareTo(entity2.Guid));
                 Assert.AreEqual(parent1ChildEntities, parent1DB.Children);
 
                 // Make sure P2's children list updated.

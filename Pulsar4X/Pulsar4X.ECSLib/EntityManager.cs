@@ -166,6 +166,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static ReadOnlyDictionary<Type, int> DataBlobTypes = new ReadOnlyDictionary<Type, int>(InternalDataBlobTypes);
 
+        [PublicAPI]
+        public ReadOnlyCollection<Entity> Entities { get { return new ReadOnlyCollection<Entity>(_entities); } } 
+
         #region Constructors
 
         internal EntityManager(Game game)
@@ -271,9 +274,13 @@ namespace Pulsar4X.ECSLib
             return entityID >= 0 && entityID < _entities.Count;
         }
 
-        internal void RemoveEntity(int entityID)
+        internal void RemoveEntity(Entity entity)
         {
-            Entity entity = _entities[entityID];
+            if (!IsValidEntity(entity))
+            {
+                throw new ArgumentException("Provided Entity is not valid in this manager.");
+            }
+            int entityID = entity.ID;
             _entities[entityID] = null;
             EntityMasks[entityID] = null;
 
