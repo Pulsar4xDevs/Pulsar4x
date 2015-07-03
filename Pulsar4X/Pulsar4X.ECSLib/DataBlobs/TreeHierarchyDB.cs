@@ -21,10 +21,12 @@ namespace Pulsar4X.ECSLib
                     ParentDB.RemoveChild(_owningEntity_);
                 }
                 _owningEntity_ = value;
-                if (OwningEntity != null && ParentDB != null)
+
+                if (OwningEntity != Entity.InvalidEntity && ParentDB != null)
                 {
                     ParentDB.AddChild(value);
                 }
+                
             }
         }
         protected Entity _owningEntity_;
@@ -113,6 +115,10 @@ namespace Pulsar4X.ECSLib
 
         private void AddChild(Entity child)
         {
+            if (child.Guid == Guid.Empty)
+            {
+                
+            }
             if (Children.Contains(child))
             {
                 return;
