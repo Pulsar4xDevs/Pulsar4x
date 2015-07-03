@@ -448,7 +448,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public Entity GetFirstEntityWithDataBlob(int typeIndex)
         {
-            foreach (Entity entity in _localEntityDictionary.Values)
+            foreach (Entity entity in _entities)
             {
                 if (entity.DataBlobMask.SetBits.Contains(typeIndex))
                 {

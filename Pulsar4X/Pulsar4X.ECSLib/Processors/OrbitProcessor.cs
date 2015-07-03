@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.dotMemoryUnit;
+using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {
@@ -17,7 +21,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Determines if this processor should use multithreading.
         /// </summary>
-        private const bool UseMultiThread = true;
+        public const bool UseMultiThread = false;
 
         /// <summary>
         /// Initializes this Processor.
@@ -33,25 +37,28 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Function called by Game.RunProcessors to run this processor.
         /// </summary>
-        internal static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        internal static int Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
 
             DateTime currentTime = game.CurrentDateTime;
 
+            int orbitsProcessed = 0;
+
             if (UseMultiThread)
             {
-                Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime));
+                Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime, ref orbitsProcessed));
             }
             else
             {
                 foreach (StarSystem system in systems)
                 {
-                    UpdateSystemOrbits(system, currentTime);
+                    UpdateSystemOrbits(system, currentTime, ref orbitsProcessed);
                 }
             }
+            return orbitsProcessed;
         }
 
-        private static void UpdateSystemOrbits(StarSystem system, DateTime currentTime)
+        private static void UpdateSystemOrbits(StarSystem system, DateTime currentTime, ref int orbitsProcessed)
         {
             EntityManager currentManager = system.SystemManager;
 
@@ -68,10 +75,10 @@ namespace Pulsar4X.ECSLib
             PositionDB rootPositionDB = root.GetDataBlob<PositionDB>(_positionTypeIndex);
 
             // Call recursive function to update every orbit in this system.
-            UpdateOrbit(root, rootPositionDB, currentTime);
+            UpdateOrbit(root, rootPositionDB, currentTime, ref orbitsProcessed);
         }
 
-        private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime)
+        private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime, ref int orbitsProcessed)
         {
             OrbitDB entityOrbitDB = entity.GetDataBlob<OrbitDB>(_orbitTypeIndex);
             PositionDB entityPosition = entity.GetDataBlob<PositionDB>(_positionTypeIndex);
@@ -82,11 +89,13 @@ namespace Pulsar4X.ECSLib
             // Get our Absolute coordinates.
             entityPosition.Position = parentPositionDB.Position + newPosition;
 
+            Interlocked.Increment(ref orbitsProcessed);
+
             // Update our children.
             foreach (Entity child in entityOrbitDB.Children)
             {
                 // RECURSION!
-                UpdateOrbit(child, entityPosition, currentTime);
+                UpdateOrbit(child, entityPosition, currentTime, ref orbitsProcessed);
             }
         }
 
@@ -200,5 +209,48 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
+    }
+
+    public class OrbitProcessorTests
+    {
+        private Game _game;
+        private List<StarSystem> _systems;
+        private const int NumSystems = 10;
+
+        Stopwatch timer = new Stopwatch();
+
+        // Declare variables before usage to keep memory usage constant.
+        long startMemory;
+        long endMemory;
+        int orbitsProcessed;
+        private string output;
+
+        public void Init()
+        {
+            _game = Game.NewGame("Unit Test Game", DateTime.Now, NumSystems); // init the game class as we will need it for these tests.
+        }
+
+        // Note: This is a memory test, and is designed to be used with an external profiler called from the UI.
+        public void OrbitStressTest()
+        {
+            // use a stop watch to get more accurate time.
+            timer = new Stopwatch();
+
+            // Declare variables before usage to keep memory usage constant.
+
+            // lets get our memory before starting:
+            GC.Collect();
+            startMemory = GC.GetTotalMemory(true);
+
+            timer.Start();
+
+            orbitsProcessed = OrbitProcessor.Process(_game, _game.StarSystems, 60);
+
+            timer.Stop();
+
+            // Check memory afterwords.
+            // Note: dotMemory.Check doesn't work unless run with dotMemory unit.
+            GC.Collect();
+        }
     }
 }

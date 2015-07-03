@@ -220,6 +220,11 @@ namespace Pulsar4X.WPFUI
         #region Testing Menu Functions
         private void CurrentTest_Click(object sender, RoutedEventArgs e)
         {
+            OrbitProcessorTests test = new OrbitProcessorTests();
+            test.Init();
+            MessageBox.Show("Ready for snapshot");
+            test.OrbitStressTest();
+            MessageBox.Show("Test Completed.");
         }
         #endregion
 
