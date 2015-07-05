@@ -40,6 +40,11 @@ namespace Pulsar4X.Entities
                     ConstructionCycle.RefineFuel(CurrentFaction, CurrentPopulation);
                     ConstructionCycle.ProcessShipyards(CurrentFaction, CurrentPopulation);
                     ConstructionCycle.TerraformPlanets(CurrentFaction, CurrentPopulation);
+
+                    /// <summary>
+                    /// Population growth should happen after production, or else the statistics printed to the UI regarding any employment based penalties could be inaccurate.
+                    /// </summary>
+                    ConstructionCycle.PopulationGrowth(CurrentFaction, CurrentPopulation);
                 }
             }
         }
@@ -539,6 +544,60 @@ namespace Pulsar4X.Entities
                     }
                 }
             }            
+        }
+
+        /// <summary>
+        /// Handle population growth for this world. Get the colony rating, infrastructure, radiation,etc and then calculate whether the population should grow or shrink based
+        /// on those factors.
+        /// </summary>
+        /// <param name="CurrentFaction">Current faction this population belongs to</param>
+        /// <param name="CurrentPopulation">The Population in question.</param>
+        public static void PopulationGrowth(Faction CurrentFaction, Population CurrentPopulation)
+        {
+#warning Update the UI to reflect dieoff if present.
+            if (CurrentPopulation.CivilianPopulation > 0.0f)
+            {
+                float CurrentPopGrowth = CurrentPopulation.CalcPopulationGrowth() * Constants.Colony.ConstructionCycleFraction;
+
+                float ColonyCost = CurrentPopulation.Species.GetTNHabRating(CurrentPopulation.Planet);
+
+                if (ColonyCost == 0.0f)
+                {
+                    CurrentPopulation.AddPopulation(CurrentPopGrowth);
+                }
+                else
+                {
+                    /// <summary>
+                    /// How much Infra does this colony need per 1M colonists?
+                    /// </summary>
+                    int InfrastructureRequirement = (int)Math.Floor(ColonyCost * 100.0f);
+
+                    /// <summary>
+                    /// How much infra is currently on the planet?
+                    /// </summary>
+                    int CurrentInfrastructure = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+                    /// <summary>
+                    /// How much does this planet need? if the planet does need some it should generate a little on its own.
+                    /// </summary>
+                    int TotalInfraRequirement = (int)Math.Floor(InfrastructureRequirement * CurrentPopulation.CivilianPopulation);
+
+                    if (TotalInfraRequirement < CurrentInfrastructure)
+                    {
+                        CurrentPopulation.AddPopulation(CurrentPopGrowth);
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Calculate how much population should die off instead of be added.
+                        /// </summary>
+#warning Is this ok for the dieoff calculation for population?
+                        float CurrentDieoff = -1.0f *( ((float)CurrentInfrastructure / (float)TotalInfraRequirement) * Constants.Colony.ConstructionCycleFraction);
+
+                        CurrentPopulation.AddPopulation(CurrentDieoff);
+                    }
+                }
+            }
         }
 
         #region Private Methods related to shipyard work.

@@ -115,7 +115,7 @@ namespace Pulsar4X.Entities
         /// Radiation Level adversely effects population growth and industrial production: Each point of radiation decreases industrial production by 0.01% and growth by 0.0025%
         /// radiation decreases at a baseline 1 per 5 days.
         /// </summary>
-#warning Implement RadiationLevel, Atmospheric dust in UI, and in reduced population growth, industrial percentage, and lowered planetary temperature.
+#warning Implement RadiationLevel, Atmospheric dust in reduced population growth, industrial percentage, and lowered planetary temperature.
         public float RadiationLevel { get; set; }
 
         /// <summary>

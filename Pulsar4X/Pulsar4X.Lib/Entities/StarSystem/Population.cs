@@ -1124,6 +1124,7 @@ namespace Pulsar4X.Entities
         public float CalcTotalIndustry()
         {
 #warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled. also efficiencies. also for OF and FF, mining and refining.
+#warning implement radiation in addition to governor/sector bonuses. industrial penalty is Rad / 100(45 = -0.45%)
             float BP = (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number) * 10.0f + (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
             return BP;
         }
@@ -1181,6 +1182,35 @@ namespace Pulsar4X.Entities
             float TP = (float)((int)Math.Floor(Installations[(int)Installation.InstallationType.TerraformingInstallation].Number) + modules) * Constants.Colony.TerraformRate[0];
 
             return TP;
+        }
+
+        /// <summary>
+        /// Calculates the population growth of this colony
+        /// </summary>
+        /// <returns></returns>
+        public float CalcPopulationGrowth()
+        {
+            /// <summary>
+            /// Don't want a divide by zero from this.
+            /// </summary>
+            if (CivilianPopulation == 0.0f)
+                return 0.0f;
+
+            /// <summary>
+            /// This is the AuroraTN population growth rate formula: 20 / cubed root(Population)
+            /// </summary>
+            float AnnualColonyGrowthRate = 20.0f / (float)Math.Pow((double)CivilianPopulation, (1.0 / 3.0));
+
+            float RadGrowthAdjust = Planet.RadiationLevel / 400.0f;
+
+            AnnualColonyGrowthRate = AnnualColonyGrowthRate - RadGrowthAdjust;
+
+            if (AnnualColonyGrowthRate > 10.0f)
+                AnnualColonyGrowthRate = 10.0f;
+
+#warning sector bonuses come after cap for pop growth.
+
+            return AnnualColonyGrowthRate;
         }
         #endregion
 
@@ -1308,6 +1338,15 @@ namespace Pulsar4X.Entities
                     m_aiMinerials[mineralIterator] = m_aiMinerials[mineralIterator] - ((float)MineralCost[mineralIterator] * Completion);
                 }
             }
+        }
+
+        /// <summary>
+        /// Changes the population and handles anything resulting from that for the colony.
+        /// </summary>
+        /// <param name="Growth">Amount of population to add/Subtract to this colony.</param>
+        public void AddPopulation(float Growth)
+        {
+            CivilianPopulation = CivilianPopulation + Growth;
         }
         #endregion
 
