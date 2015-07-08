@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -23,26 +24,6 @@ namespace Pulsar4X.WPFUI
     {
         private double _customAdvSimValue = 5;
         delegate void ProgressUpdate(double progress);
-
-        internal Game CurrentGame
-        {
-            get { return _currentGame; }
-            set
-            {
-                _currentGame = value;
-                if (_currentGame == null)
-                {
-                    TBT_Toolbar.IsEnabled = false;
-                    MI_SaveGame.IsEnabled = false;
-                }
-                else
-                {
-                    TBT_Toolbar.IsEnabled = true;
-                    MI_SaveGame.IsEnabled = true;
-                }
-            }
-        }
-        private Game _currentGame;
 
         private readonly CancellationToken _pulseCancellationToken;
 
@@ -70,6 +51,27 @@ namespace Pulsar4X.WPFUI
             MenuItem_Boarderless.IsChecked = WindowStyle == WindowStyle.None;
 
             _pulseCancellationToken = new CancellationToken();
+
+            App.Current.PropertyChanged += AppOnPropertyChanged;
+            // Get the initial state of the game from the app. (This fires the PropertyChanged event we just hooked into.
+            App.Current.Game = App.Current.Game;
+        }
+
+        /// <summary>
+        /// PropertyChanged handler for the App class.
+        /// 
+        /// Currently handles changes to the current game.
+        /// </summary>
+        private void AppOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+        {
+            switch (propertyChangedEventArgs.PropertyName)
+            {
+                case "Game":
+                    bool isEnabled = App.Current.Game == null;
+                    TBT_Toolbar.IsEnabled = isEnabled;
+                    MI_SaveGame.IsEnabled = isEnabled;
+                    break;
+            }
         }
 
         private async void NewGame_Click(object sender, RoutedEventArgs e)
@@ -78,7 +80,7 @@ namespace Pulsar4X.WPFUI
             try
             {
                 Status_TextBlock.Text = "Creating new game...";
-                CurrentGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 100, new Progress<double>(OnProgressUpdate)));
+                App.Current.Game = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 100, new Progress<double>(OnProgressUpdate)));
                 MessageBox.Show(this, "Game Created.", "Result");
                 Status_TextBlock.Text = "Game Created.";
                 Status_ProgressBar.Value = 0;
@@ -101,7 +103,7 @@ namespace Pulsar4X.WPFUI
                 try
                 {
                     Status_TextBlock.Text = "Game Loading...";
-                    CurrentGame = await Task.Run(() => SaveGame.Load(pathToFile, new Progress<double>(OnProgressUpdate)));
+                    App.Current.Game = await Task.Run(() => SaveGame.Load(pathToFile, new Progress<double>(OnProgressUpdate)));
                     MessageBox.Show(this, "Game Loaded.", "Result");
                     Status_TextBlock.Text = "Game Loaded.";
                     Status_ProgressBar.Value = 0;
@@ -124,7 +126,7 @@ namespace Pulsar4X.WPFUI
                 try
                 {
                     Status_TextBlock.Text = "Game Saving...";
-                    await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, new Progress<double>(OnProgressUpdate)));
+                    await Task.Run(() => SaveGame.Save(App.Current.Game, pathToFile, new Progress<double>(OnProgressUpdate)));
                     //await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, true)); // Compressed
                     MessageBox.Show(this, "Game Saved.", "Result");
                     Status_TextBlock.Text = "Game Saved.";
@@ -310,7 +312,7 @@ namespace Pulsar4X.WPFUI
 
             try
             {
-                secondsPulsed = await Task.Run(() => CurrentGame.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
+                secondsPulsed = await Task.Run(() => App.Current.Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
             }
             catch (Exception exception)
             {

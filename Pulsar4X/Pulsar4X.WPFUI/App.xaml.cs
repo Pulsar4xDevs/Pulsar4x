@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,8 +16,9 @@ namespace Pulsar4X.WPFUI
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App
+    public partial class App : INotifyPropertyChanged
     {
+        public new static App Current { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -33,8 +36,30 @@ namespace Pulsar4X.WPFUI
             ((TextBox)sender).SelectAll();
         }
 
+        internal Game Game
+        {
+            get { return _game; }
+            set
+            {
+                _game = value;
+                OnPropertyChanged();
+            }
+        }
+        private Game _game;
+
+        internal Entity Faction
+        {
+            get { return _faction; }
+            set {
+                _faction = value; 
+                OnPropertyChanged(); }
+        }
+        private Entity _faction;
+
         App()
         {
+            Current = this;
+            
             if (string.IsNullOrEmpty(WPFUI.Properties.Settings.Default.ClientGuid))
             {
                 WPFUI.Properties.Settings.Default.ClientGuid = Guid.NewGuid().ToString();
@@ -44,6 +69,17 @@ namespace Pulsar4X.WPFUI
             {
                 clientGuid = Guid.NewGuid();
                 WPFUI.Properties.Settings.Default.ClientGuid = clientGuid.ToString();
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
