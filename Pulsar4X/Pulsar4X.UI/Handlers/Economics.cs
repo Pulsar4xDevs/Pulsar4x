@@ -2124,7 +2124,8 @@ namespace Pulsar4X.UI.Handlers
                     if (Expand > 12)
                         Expand = 12;
                     double Wealth = CurrentPopulation.CivilianPopulation * Expand * 20.0;
-                    m_oSummaryPanel.SummaryDataGrid.Rows[5].Cells[1].Value = Wealth.ToString();
+                    String WealthStr = String.Format("{0:N0}", Wealth);
+                    m_oSummaryPanel.SummaryDataGrid.Rows[5].Cells[1].Value = WealthStr.ToString();
 
                     /// <summary>
                     /// Population Breakdown
@@ -2148,7 +2149,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[1].Value = Entry;
                         Entry = String.Format("{0:N2}m", CurrentPopulation.PopulationWorkingInManufacturing);
                         m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[1].Value = Entry;
-                        m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = CurrentPopulation.PopulationGrowthRate.ToString() + "%";
+                        Entry = String.Format("{0:N2}%", CurrentPopulation.PopulationGrowthRate);
+                        m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = Entry;
 
                         Adjust1 = 5;
                     }
@@ -4410,7 +4412,7 @@ namespace Pulsar4X.UI.Handlers
 
                     //Nitrogen 79% 0.79 atm
                     float partial = (pair.Value / TotalGas) * 100.0f;
-                    Entry = String.Format("{0} {1}% {2:N4} atm",pair.Key.Name,partial,pair.Value);
+                    Entry = String.Format("{0} {1:N2}% {2:N4} atm",pair.Key.Name,partial,pair.Value);
                     m_oSummaryPanel.TerraformingAtmosphereListBox.Items.Add(Entry);
                 }
                 Entry = String.Format("Total Atmospheric Pressure: {0:N4}",TotalGas);

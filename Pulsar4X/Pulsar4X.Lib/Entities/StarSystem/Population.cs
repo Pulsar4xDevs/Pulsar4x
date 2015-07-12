@@ -1210,6 +1210,12 @@ namespace Pulsar4X.Entities
 
 #warning sector bonuses come after cap for pop growth.
 
+
+            /// <summary>
+            /// Set the population growth rate here.
+            /// </summary>
+            PopulationGrowthRate = AnnualColonyGrowthRate;
+
             return AnnualColonyGrowthRate;
         }
         #endregion
