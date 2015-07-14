@@ -13,13 +13,13 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="62*"/>
-            <RowDefinition Height="30*"/>
-            <RowDefinition Height="33*"/>
-            <RowDefinition Height="38*"/>
+            <RowDefinition Height="32*"/>
+            <RowDefinition Height="32*"/>
+            <RowDefinition Height="32*"/>
             <RowDefinition Height="137*"/>
         </Grid.RowDefinitions>
         <CheckBox x:Name="chkBx_RealStarSystems" Content="Real Star Systems" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" VerticalAlignment="Top" Height="13" Width="102"/>
-        <xctk:DoubleUpDown FormatString="F3" Value="1564.6749586" Increment=".001"  Maximum="200000.599" Grid.Row="2" Grid.Column="1"/>
+        <xctk:DoubleUpDown FormatString="F3" Value="0.3333" Increment=".001"  Maximum="1.0" Grid.Row="2" Grid.Column="1"/>
         <Label Content="NPR Generation Chance" HorizontalAlignment="Left" Margin="0,10,0,0" Grid.Row="2" VerticalAlignment="Top" Height="23" Width="131"/>
     </Grid>
 </UserControl>

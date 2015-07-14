@@ -35,9 +35,10 @@
             this.button_mainMenu = new System.Windows.Forms.Button();
             this.button_saveNew = new System.Windows.Forms.Button();
             this.listBox_allComponents = new System.Windows.Forms.ListBox();
+            this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
             this.listBox_Abilities = new System.Windows.Forms.ListBox();
             this.propertyGrid_PropertyEditor = new System.Windows.Forms.PropertyGrid();
-            this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
+            this.listBox_allAbilities = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -53,6 +54,7 @@
             this.tableLayoutPanel1.Controls.Add(this.genericDataUC1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.listBox_Abilities, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.propertyGrid_PropertyEditor, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.listBox_allAbilities, 2, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -135,6 +137,15 @@
             this.listBox_allComponents.TabIndex = 0;
             this.listBox_allComponents.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_AllComponents_MouseDoubleClick);
             // 
+            // genericDataUC1
+            // 
+            this.genericDataUC1.Description = "";
+            this.genericDataUC1.Location = new System.Drawing.Point(3, 3);
+            this.genericDataUC1.MinimumSize = new System.Drawing.Size(240, 0);
+            this.genericDataUC1.Name = "genericDataUC1";
+            this.genericDataUC1.Size = new System.Drawing.Size(240, 146);
+            this.genericDataUC1.TabIndex = 2;
+            // 
             // listBox_Abilities
             // 
             this.listBox_Abilities.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -155,14 +166,15 @@
             this.propertyGrid_PropertyEditor.Size = new System.Drawing.Size(475, 350);
             this.propertyGrid_PropertyEditor.TabIndex = 7;
             // 
-            // genericDataUC1
+            // listBox_allAbilities
             // 
-            this.genericDataUC1.Description = "";
-            this.genericDataUC1.Location = new System.Drawing.Point(3, 3);
-            this.genericDataUC1.MinimumSize = new System.Drawing.Size(240, 0);
-            this.genericDataUC1.Name = "genericDataUC1";
-            this.genericDataUC1.Size = new System.Drawing.Size(240, 146);
-            this.genericDataUC1.TabIndex = 2;
+            this.listBox_allAbilities.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listBox_allAbilities.FormattingEnabled = true;
+            this.listBox_allAbilities.Location = new System.Drawing.Point(489, 3);
+            this.listBox_allAbilities.Name = "listBox_allAbilities";
+            this.listBox_allAbilities.Size = new System.Drawing.Size(235, 146);
+            this.listBox_allAbilities.TabIndex = 8;
+            this.listBox_allAbilities.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_allAbilities_MouseDoubleClick);
             // 
             // ComponentsWindow
             // 
@@ -189,5 +201,6 @@
         private System.Windows.Forms.Button button_saveNew;
         private System.Windows.Forms.ListBox listBox_Abilities;
         private System.Windows.Forms.PropertyGrid propertyGrid_PropertyEditor;
+        private System.Windows.Forms.ListBox listBox_allAbilities;
     }
 }

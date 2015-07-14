@@ -27,7 +27,7 @@ namespace ModdingTools.JsonDataEditor
             UpdateComponentslist();
             //Data.InstallationData.ListChanged += UpdateComponentslist;
             listBox_allComponents.DataSource = _allComponents;
-
+            listBox_allAbilities.DataSource = Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>();
             listBox_Abilities.DataSource = _selectedComponentAbilities;
         }
 
@@ -373,6 +373,20 @@ namespace ModdingTools.JsonDataEditor
             StaticData(_currentComponent.ID); //recreate the SD so any changes are updated.
             
             SetCurrentAbility(selectedItem);
+        }
+
+        private void listBox_allAbilities_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            List<AbilityType> abilityTypeslistList = new List<AbilityType>();
+            foreach (var abilityDH in _selectedComponentAbilities)
+            {
+                abilityTypeslistList.Add(abilityDH.StaticData);
+            }
+            if (!abilityTypeslistList.Contains((AbilityType)listBox_allAbilities.SelectedItem))
+            {
+                //abilityTypeslistList.Add((AbilityType)listBox_allAbilities.SelectedItem, 0);
+            }
+            //UpdateAbilityAmounts();
         }
     }
 }
