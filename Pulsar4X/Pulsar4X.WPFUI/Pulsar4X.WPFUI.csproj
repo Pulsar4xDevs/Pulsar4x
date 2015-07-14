@@ -143,7 +143,6 @@
     <Compile Include="UserControls\TaskGroups.xaml.cs">
       <DependentUpon>TaskGroups.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EntityHolder.cs" />
     <Compile Include="ViewModels\FactionVM.cs" />
     <Compile Include="ViewModels\GameVM.cs" />
     <Compile Include="ViewModels\IViewModel.cs" />

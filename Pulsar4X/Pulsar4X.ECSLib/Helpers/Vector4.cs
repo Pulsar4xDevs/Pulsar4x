@@ -38,6 +38,15 @@ namespace Pulsar4X.ECSLib
             W = w;
         }
 
+        public Vector4(Vector4 position)
+        {
+            X = position.X;
+            Y = position.Y;
+            Z = position.Z;
+            W = position.W;
+
+        }
+
         #endregion
 
         #region Static Properties

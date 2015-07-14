@@ -8,8 +8,13 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The Position as a Vec4, in AU.
         /// </summary>
+        public Vector4 Position
+        {
+            get { return new Vector4(_position); }
+            internal set { _position = value; }
+        }
         [JsonProperty]
-        internal Vector4 Position;
+        internal Vector4 _position;
 
         /// <summary>
         /// System X coordinate in AU
@@ -17,7 +22,7 @@ namespace Pulsar4X.ECSLib
         public double X
         {
             get { return Position.X; }
-            internal set { Position.X = value; }
+            internal set { _position.X = value; }
         }
 
         /// <summary>
@@ -26,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public double Y
         {
             get { return Position.Y; }
-            internal set { Position.Y = value; }
+            internal set { _position.Y = value; }
         }
 
         /// <summary>
@@ -35,7 +40,7 @@ namespace Pulsar4X.ECSLib
         public double Z
         {
             get { return Position.Z; }
-            internal set { Position.Z = value; }
+            internal set { _position.Z = value; }
         }
 
         #region Unit Conversion Properties
@@ -57,7 +62,7 @@ namespace Pulsar4X.ECSLib
         public double XInKm
         {
             get { return Distance.ToKm(Position.X); }
-            set { Position.X = Distance.ToAU(value); }
+            set { _position.X = Distance.ToAU(value); }
         }
 
         /// <summary>
@@ -67,7 +72,7 @@ namespace Pulsar4X.ECSLib
         public double YInKm
         {
             get { return Distance.ToKm(Position.Y); }
-            set { Position.Y = Distance.ToAU(value); }
+            set { _position.Y = Distance.ToAU(value); }
         }
 
         /// <summary>
@@ -77,7 +82,7 @@ namespace Pulsar4X.ECSLib
         public double ZInKm
         {
             get { return Distance.ToKm(Position.Z); }
-            set { Position.Z = Distance.ToAU(value); }
+            set { _position.Z = Distance.ToAU(value); }
         }
 
         #endregion

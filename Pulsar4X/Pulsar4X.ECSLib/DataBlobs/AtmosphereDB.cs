@@ -182,6 +182,7 @@ namespace Pulsar4X.ECSLib
             {
                 AtomsphereDescriptionInPercent = "This body has no Atmosphere.";
                 AtomsphereDescriptionAtm = AtomsphereDescriptionInPercent;
+                return;
             }
 
             foreach (KeyValuePair<AtmosphericGasSD, float> gas in Composition)
