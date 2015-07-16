@@ -9,7 +9,7 @@ namespace ModdingTools.JsonDataEditor
 {
     static class Program
     {
-        internal static StaticDataStore staticData;
+        internal static StaticDataStore staticData = new StaticDataStore();
 
         /// <summary>
         /// The main entry point for the application.
