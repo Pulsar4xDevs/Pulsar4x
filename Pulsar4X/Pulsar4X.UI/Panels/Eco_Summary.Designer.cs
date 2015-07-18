@@ -387,6 +387,7 @@ namespace Pulsar4X.UI.Panels
             get { return m_oRepairRefitScrapLabel; }
         }
 
+
         /// <summary>
         /// Shipyard complex required resources listbox.
         /// </summary>
@@ -402,6 +403,7 @@ namespace Pulsar4X.UI.Panels
         {
             get { return m_oShipRequiredMaterialsListBox; }
         }
+
 
         /// <summary>
         /// This textbox will display the name of the new ship to be built. Its visibility will also change.
@@ -451,10 +453,11 @@ namespace Pulsar4X.UI.Panels
             get { return m_oSYTaskCompletionDateTextBox; }
         }
 
+
+
         #endregion
 
         #region Shipyard Tasks Tab
-
         /// <summary>
         /// Pause the selected Ship Task
         /// </summary>
@@ -477,6 +480,145 @@ namespace Pulsar4X.UI.Panels
         public Button SYALowerPriorityButton
         {
             get { return m_oSYALowerPriorityButton; }
+        }
+
+        #endregion
+
+        #region Terraforming Tab
+
+        /// <summary>
+        /// Confirm the currently inputted terraforming settings.
+        /// </summary>
+        public Button TerraformingSaveAtmButton
+        {
+            get { return m_oTerraformingSaveAtmButton; }
+        }
+
+        /// <summary>
+        /// Should the selected gas be added or subtracted from the population?
+        /// </summary>
+        public CheckBox TerraformingAddGasCheckBox
+        {
+            get { return m_oTerraformingAddGasCheckBox; }
+        }
+        /// <summary>
+        /// Select Which gas to add/subtract from the planet in question.
+        /// </summary>
+        public ComboBox TerraformingGasComboBox
+        {
+            get { return m_oTerraformingGasComboBox; }
+        }
+
+        /// <summary>
+        /// GM centre species selection box.
+        /// </summary>
+        public ComboBox TerraformingNewSpeciesComboBox
+        {
+            get { return m_oTerraformingNewSpeciesComboBox; }
+        }
+
+        /// <summary>
+        /// How many terraforming installations are there, and how much are they producing(also orbital terraformers).
+        /// </summary>
+        public Label TerraformingInstProdLabel
+        {
+            get { return m_oTerraformingInstProdLabel; }
+        }
+
+        /// <summary>
+        /// How much atmospheric dust and radiation is present on this world?
+        /// </summary>
+        public Label TerraformingDustRadLabel
+        {
+            get { return m_oTerraformingDustRadLabel; }
+        }
+
+        /// <summary>
+        /// List of atmospheric gasses on this world.
+        /// </summary>
+        public ListBox TerraformingAtmosphereListBox
+        {
+            get { return m_oTerraformingAtmosphereListBox; }
+        }
+
+        /// <summary>
+        /// Summary details for the selected species.
+        /// </summary>
+        public RichTextBox TerraformingSpeciesSummaryRichTextBox
+        {
+            get { return m_oTerraformingSpeciesSummaryRichTextBox; }
+        }
+
+        /// <summary>
+        /// What is the maximum/minimum gas that should be added or subtracted from this world. zero if all gas should be subtracted.
+        /// </summary>
+        public TextBox TerraformingMaxGasTextBox
+        {
+            get { return m_oTerraformingMaxGasTextBox; }
+        }
+
+        /// <summary>
+        /// Current GH Pressure
+        /// </summary>
+        public TextBox TerraforminGreenhousePressureTextBox
+        {
+            get { return m_oTerraforminGreenhousePressureTextBox; }
+        }
+
+        /// <summary>
+        /// Current AGH Pressure
+        /// </summary>
+        public TextBox TerraformingAntiGHPressureTextBox
+        {
+            get { return m_oTerraformingAntiGHPressureTextBox; }
+        }
+
+        /// <summary>
+        /// Current GH Factor
+        /// </summary>
+        public TextBox TerraformingGreenhouseFactorTextBox
+        {
+            get { return m_oTerraformingGreenhouseFactorTextBox; }
+        }
+
+        /// <summary>
+        /// Current Albedo
+        /// </summary>
+        public TextBox TerraformingPlanetaryAlbedoTextBox
+        {
+            get { return m_oTerraformingPlanetaryAlbedoTextBox; }
+        }
+
+        /// <summary>
+        /// Current Temp in Celsius excluding atmospheric effects
+        /// </summary>
+        public TextBox TerraformingBaseTempCelsiusTextBox
+        {
+            get { return m_oTerraformingBaseTempCelsiusTextBox; }
+        }
+
+        /// <summary>
+        /// Current Surface Temp in Celsius
+        /// </summary>
+        public TextBox TerraformingSurfaceTempCelsiusTextBox
+        {
+            get { return m_oTerraformingSurfaceTempCelsiusTextBox; }
+        }
+        
+        /// <summary>
+        /// Current Temp in Kelvin excluding atmospheric effects
+        /// </summary>
+        public TextBox TerraformingBaseTempKelvinTextBox
+        {
+            get { return m_oTerraformingBaseTempKelvinTextBox; }
+        }
+
+        /// <summary>
+        /// Current Temp in Kelvin
+        /// </summary>
+        public TextBox TerraformingSurfaceTempKelvinTextBox
+        {
+            get { return m_oTerraformingSurfaceTempKelvinTextBox; }
         }
         #endregion
 
@@ -645,6 +787,38 @@ namespace Pulsar4X.UI.Panels
             this.m_oSYActivityGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oResearchTab = new System.Windows.Forms.TabPage();
             this.m_oEnvironmentTab = new System.Windows.Forms.TabPage();
+            this.m_oTerraformingDustRadLabel = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.m_oTerraformingSpeciesSummaryRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.m_oTerraformingNewSpeciesComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSurfaceTempFormulaGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSurfTempFormulaTextBox = new System.Windows.Forms.RichTextBox();
+            this.m_oAtmosphericDataGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSurfaceTempKelvinLabel = new System.Windows.Forms.Label();
+            this.m_oBaseTempKelvinLabel = new System.Windows.Forms.Label();
+            this.m_oSurfTempCelsiusLabel = new System.Windows.Forms.Label();
+            this.m_oBaseTempCelsiusLabel = new System.Windows.Forms.Label();
+            this.m_oTerraformingSurfaceTempKelvinTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraformingBaseTempKelvinTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraformingSurfaceTempCelsiusTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraformingBaseTempCelsiusTextBox = new System.Windows.Forms.TextBox();
+            this.m_oPlanetaryAlbedoLabel = new System.Windows.Forms.Label();
+            this.m_oGreenhouseFactorLabel = new System.Windows.Forms.Label();
+            this.m_oAntiGHPressure = new System.Windows.Forms.Label();
+            this.m_oGreenhousePressureLabel = new System.Windows.Forms.Label();
+            this.m_oTerraformingPlanetaryAlbedoTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraformingGreenhouseFactorTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraformingAntiGHPressureTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraforminGreenhousePressureTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraformingAtmosphereListBox = new System.Windows.Forms.ListBox();
+            this.m_oAtmosphericTerraformingGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oTerraformingMaxGasTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTerraformingSaveAtmButton = new System.Windows.Forms.Button();
+            this.m_oMaxAtmLabel = new System.Windows.Forms.Label();
+            this.m_oTerraformingAddGasCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oTerraformingGasComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSelectGasLabel = new System.Windows.Forms.Label();
+            this.m_oTerraformingInstProdLabel = new System.Windows.Forms.Label();
             this.m_oTeamsTab = new System.Windows.Forms.TabPage();
             this.m_oCivTab = new System.Windows.Forms.TabPage();
             this.m_oGUTab = new System.Windows.Forms.TabPage();
@@ -673,6 +847,11 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardTaskGroupBox.SuspendLayout();
             this.m_oShipyardTaskTab.SuspendLayout();
             this.m_oSYActivityButtonGroupBox.SuspendLayout();
+            this.m_oEnvironmentTab.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.m_oSurfaceTempFormulaGroupBox.SuspendLayout();
+            this.m_oAtmosphericDataGroupBox.SuspendLayout();
+            this.m_oAtmosphericTerraformingGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oEmpireGroupBox
@@ -2092,6 +2271,11 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oEnvironmentTab
             // 
+            this.m_oEnvironmentTab.Controls.Add(this.m_oTerraformingDustRadLabel);
+            this.m_oEnvironmentTab.Controls.Add(this.groupBox4);
+            this.m_oEnvironmentTab.Controls.Add(this.m_oSurfaceTempFormulaGroupBox);
+            this.m_oEnvironmentTab.Controls.Add(this.m_oAtmosphericDataGroupBox);
+            this.m_oEnvironmentTab.Controls.Add(this.m_oAtmosphericTerraformingGroupBox);
             this.m_oEnvironmentTab.Location = new System.Drawing.Point(4, 40);
             this.m_oEnvironmentTab.Name = "m_oEnvironmentTab";
             this.m_oEnvironmentTab.Padding = new System.Windows.Forms.Padding(3);
@@ -2099,6 +2283,330 @@ namespace Pulsar4X.UI.Panels
             this.m_oEnvironmentTab.TabIndex = 6;
             this.m_oEnvironmentTab.Text = "Environment / GMC";
             this.m_oEnvironmentTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oTerraformingDustRadLabel
+            // 
+            this.m_oTerraformingDustRadLabel.AutoSize = true;
+            this.m_oTerraformingDustRadLabel.Location = new System.Drawing.Point(10, 372);
+            this.m_oTerraformingDustRadLabel.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTerraformingDustRadLabel.Name = "m_oTerraformingDustRadLabel";
+            this.m_oTerraformingDustRadLabel.Size = new System.Drawing.Size(155, 13);
+            this.m_oTerraformingDustRadLabel.TabIndex = 2;
+            this.m_oTerraformingDustRadLabel.Text = "Radiation Level:X Dust Level:X";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.m_oTerraformingSpeciesSummaryRichTextBox);
+            this.groupBox4.Controls.Add(this.m_oTerraformingNewSpeciesComboBox);
+            this.groupBox4.Location = new System.Drawing.Point(6, 398);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(819, 286);
+            this.groupBox4.TabIndex = 1;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Genetic Modification Centres - Select New Species";
+            // 
+            // m_oTerraformingSpeciesSummaryRichTextBox
+            // 
+            this.m_oTerraformingSpeciesSummaryRichTextBox.Location = new System.Drawing.Point(7, 48);
+            this.m_oTerraformingSpeciesSummaryRichTextBox.Name = "m_oTerraformingSpeciesSummaryRichTextBox";
+            this.m_oTerraformingSpeciesSummaryRichTextBox.Size = new System.Drawing.Size(806, 232);
+            this.m_oTerraformingSpeciesSummaryRichTextBox.TabIndex = 1;
+            this.m_oTerraformingSpeciesSummaryRichTextBox.Text = "";
+            // 
+            // m_oTerraformingNewSpeciesComboBox
+            // 
+            this.m_oTerraformingNewSpeciesComboBox.FormattingEnabled = true;
+            this.m_oTerraformingNewSpeciesComboBox.Location = new System.Drawing.Point(7, 20);
+            this.m_oTerraformingNewSpeciesComboBox.Name = "m_oTerraformingNewSpeciesComboBox";
+            this.m_oTerraformingNewSpeciesComboBox.Size = new System.Drawing.Size(347, 21);
+            this.m_oTerraformingNewSpeciesComboBox.TabIndex = 0;
+            // 
+            // m_oSurfaceTempFormulaGroupBox
+            // 
+            this.m_oSurfaceTempFormulaGroupBox.Controls.Add(this.m_oSurfTempFormulaTextBox);
+            this.m_oSurfaceTempFormulaGroupBox.Location = new System.Drawing.Point(6, 279);
+            this.m_oSurfaceTempFormulaGroupBox.Name = "m_oSurfaceTempFormulaGroupBox";
+            this.m_oSurfaceTempFormulaGroupBox.Size = new System.Drawing.Size(819, 80);
+            this.m_oSurfaceTempFormulaGroupBox.TabIndex = 1;
+            this.m_oSurfaceTempFormulaGroupBox.TabStop = false;
+            this.m_oSurfaceTempFormulaGroupBox.Text = "Surface Temperature Formula";
+            // 
+            // m_oSurfTempFormulaTextBox
+            // 
+            this.m_oSurfTempFormulaTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oSurfTempFormulaTextBox.Location = new System.Drawing.Point(8, 24);
+            this.m_oSurfTempFormulaTextBox.Name = "m_oSurfTempFormulaTextBox";
+            this.m_oSurfTempFormulaTextBox.Size = new System.Drawing.Size(806, 46);
+            this.m_oSurfTempFormulaTextBox.TabIndex = 0;
+            this.m_oSurfTempFormulaTextBox.Text = "Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x " +
+                "Albedo\nGreenhouse Factor = 1 + (Atmospheric Pressure /10) + Greenhouse Pressure " +
+                "  (Maximum = 3.0)";
+            // 
+            // m_oAtmosphericDataGroupBox
+            // 
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oSurfaceTempKelvinLabel);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oBaseTempKelvinLabel);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oSurfTempCelsiusLabel);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oBaseTempCelsiusLabel);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingSurfaceTempKelvinTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingBaseTempKelvinTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingSurfaceTempCelsiusTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingBaseTempCelsiusTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oPlanetaryAlbedoLabel);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oGreenhouseFactorLabel);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oAntiGHPressure);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oGreenhousePressureLabel);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingPlanetaryAlbedoTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingGreenhouseFactorTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingAntiGHPressureTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraforminGreenhousePressureTextBox);
+            this.m_oAtmosphericDataGroupBox.Controls.Add(this.m_oTerraformingAtmosphereListBox);
+            this.m_oAtmosphericDataGroupBox.Location = new System.Drawing.Point(6, 120);
+            this.m_oAtmosphericDataGroupBox.Margin = new System.Windows.Forms.Padding(3, 10, 3, 10);
+            this.m_oAtmosphericDataGroupBox.Name = "m_oAtmosphericDataGroupBox";
+            this.m_oAtmosphericDataGroupBox.Size = new System.Drawing.Size(819, 146);
+            this.m_oAtmosphericDataGroupBox.TabIndex = 1;
+            this.m_oAtmosphericDataGroupBox.TabStop = false;
+            this.m_oAtmosphericDataGroupBox.Text = "Atmospheric Data";
+            // 
+            // m_oSurfaceTempKelvinLabel
+            // 
+            this.m_oSurfaceTempKelvinLabel.AutoSize = true;
+            this.m_oSurfaceTempKelvinLabel.Location = new System.Drawing.Point(345, 112);
+            this.m_oSurfaceTempKelvinLabel.Name = "m_oSurfaceTempKelvinLabel";
+            this.m_oSurfaceTempKelvinLabel.Size = new System.Drawing.Size(153, 13);
+            this.m_oSurfaceTempKelvinLabel.TabIndex = 23;
+            this.m_oSurfaceTempKelvinLabel.Text = "Surface Temperature in Kelvin:";
+            // 
+            // m_oBaseTempKelvinLabel
+            // 
+            this.m_oBaseTempKelvinLabel.AutoSize = true;
+            this.m_oBaseTempKelvinLabel.Location = new System.Drawing.Point(345, 86);
+            this.m_oBaseTempKelvinLabel.Name = "m_oBaseTempKelvinLabel";
+            this.m_oBaseTempKelvinLabel.Size = new System.Drawing.Size(140, 13);
+            this.m_oBaseTempKelvinLabel.TabIndex = 22;
+            this.m_oBaseTempKelvinLabel.Text = "Base Temperature in Kelvin:";
+            // 
+            // m_oSurfTempCelsiusLabel
+            // 
+            this.m_oSurfTempCelsiusLabel.AutoSize = true;
+            this.m_oSurfTempCelsiusLabel.Location = new System.Drawing.Point(345, 60);
+            this.m_oSurfTempCelsiusLabel.Name = "m_oSurfTempCelsiusLabel";
+            this.m_oSurfTempCelsiusLabel.Size = new System.Drawing.Size(157, 13);
+            this.m_oSurfTempCelsiusLabel.TabIndex = 21;
+            this.m_oSurfTempCelsiusLabel.Text = "Surface Temperature in Celsius:\r\n";
+            // 
+            // m_oBaseTempCelsiusLabel
+            // 
+            this.m_oBaseTempCelsiusLabel.AutoSize = true;
+            this.m_oBaseTempCelsiusLabel.Location = new System.Drawing.Point(345, 34);
+            this.m_oBaseTempCelsiusLabel.Name = "m_oBaseTempCelsiusLabel";
+            this.m_oBaseTempCelsiusLabel.Size = new System.Drawing.Size(144, 13);
+            this.m_oBaseTempCelsiusLabel.TabIndex = 20;
+            this.m_oBaseTempCelsiusLabel.Text = "Base Temperature in Celsius:";
+            // 
+            // m_oTerraformingSurfaceTempKelvinTextBox
+            // 
+            this.m_oTerraformingSurfaceTempKelvinTextBox.Location = new System.Drawing.Point(521, 109);
+            this.m_oTerraformingSurfaceTempKelvinTextBox.Name = "m_oTerraformingSurfaceTempKelvinTextBox";
+            this.m_oTerraformingSurfaceTempKelvinTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingSurfaceTempKelvinTextBox.TabIndex = 19;
+            this.m_oTerraformingSurfaceTempKelvinTextBox.Text = "0";
+            this.m_oTerraformingSurfaceTempKelvinTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraformingBaseTempKelvinTextBox
+            // 
+            this.m_oTerraformingBaseTempKelvinTextBox.Location = new System.Drawing.Point(521, 83);
+            this.m_oTerraformingBaseTempKelvinTextBox.Name = "m_oTerraformingBaseTempKelvinTextBox";
+            this.m_oTerraformingBaseTempKelvinTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingBaseTempKelvinTextBox.TabIndex = 18;
+            this.m_oTerraformingBaseTempKelvinTextBox.Text = "0";
+            this.m_oTerraformingBaseTempKelvinTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraformingSurfaceTempCelsiusTextBox
+            // 
+            this.m_oTerraformingSurfaceTempCelsiusTextBox.Location = new System.Drawing.Point(521, 57);
+            this.m_oTerraformingSurfaceTempCelsiusTextBox.Name = "m_oTerraformingSurfaceTempCelsiusTextBox";
+            this.m_oTerraformingSurfaceTempCelsiusTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingSurfaceTempCelsiusTextBox.TabIndex = 17;
+            this.m_oTerraformingSurfaceTempCelsiusTextBox.Text = "0";
+            this.m_oTerraformingSurfaceTempCelsiusTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraformingBaseTempCelsiusTextBox
+            // 
+            this.m_oTerraformingBaseTempCelsiusTextBox.Location = new System.Drawing.Point(521, 31);
+            this.m_oTerraformingBaseTempCelsiusTextBox.Name = "m_oTerraformingBaseTempCelsiusTextBox";
+            this.m_oTerraformingBaseTempCelsiusTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingBaseTempCelsiusTextBox.TabIndex = 16;
+            this.m_oTerraformingBaseTempCelsiusTextBox.Text = "0";
+            this.m_oTerraformingBaseTempCelsiusTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oPlanetaryAlbedoLabel
+            // 
+            this.m_oPlanetaryAlbedoLabel.AutoSize = true;
+            this.m_oPlanetaryAlbedoLabel.Location = new System.Drawing.Point(615, 112);
+            this.m_oPlanetaryAlbedoLabel.Name = "m_oPlanetaryAlbedoLabel";
+            this.m_oPlanetaryAlbedoLabel.Size = new System.Drawing.Size(90, 13);
+            this.m_oPlanetaryAlbedoLabel.TabIndex = 15;
+            this.m_oPlanetaryAlbedoLabel.Text = "Planetary Albedo:";
+            // 
+            // m_oGreenhouseFactorLabel
+            // 
+            this.m_oGreenhouseFactorLabel.AutoSize = true;
+            this.m_oGreenhouseFactorLabel.Location = new System.Drawing.Point(615, 86);
+            this.m_oGreenhouseFactorLabel.Name = "m_oGreenhouseFactorLabel";
+            this.m_oGreenhouseFactorLabel.Size = new System.Drawing.Size(101, 13);
+            this.m_oGreenhouseFactorLabel.TabIndex = 14;
+            this.m_oGreenhouseFactorLabel.Text = "Greenhouse Factor:";
+            // 
+            // m_oAntiGHPressure
+            // 
+            this.m_oAntiGHPressure.AutoSize = true;
+            this.m_oAntiGHPressure.Location = new System.Drawing.Point(615, 60);
+            this.m_oAntiGHPressure.Name = "m_oAntiGHPressure";
+            this.m_oAntiGHPressure.Size = new System.Drawing.Size(91, 13);
+            this.m_oAntiGHPressure.TabIndex = 13;
+            this.m_oAntiGHPressure.Text = "Anti-GH Pressure:";
+            // 
+            // m_oGreenhousePressureLabel
+            // 
+            this.m_oGreenhousePressureLabel.AutoSize = true;
+            this.m_oGreenhousePressureLabel.Location = new System.Drawing.Point(615, 34);
+            this.m_oGreenhousePressureLabel.Name = "m_oGreenhousePressureLabel";
+            this.m_oGreenhousePressureLabel.Size = new System.Drawing.Size(112, 13);
+            this.m_oGreenhousePressureLabel.TabIndex = 12;
+            this.m_oGreenhousePressureLabel.Text = "Greenhouse Pressure:";
+            // 
+            // m_oTerraformingPlanetaryAlbedoTextBox
+            // 
+            this.m_oTerraformingPlanetaryAlbedoTextBox.Location = new System.Drawing.Point(732, 109);
+            this.m_oTerraformingPlanetaryAlbedoTextBox.Name = "m_oTerraformingPlanetaryAlbedoTextBox";
+            this.m_oTerraformingPlanetaryAlbedoTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingPlanetaryAlbedoTextBox.TabIndex = 11;
+            this.m_oTerraformingPlanetaryAlbedoTextBox.Text = "0";
+            this.m_oTerraformingPlanetaryAlbedoTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraformingGreenhouseFactorTextBox
+            // 
+            this.m_oTerraformingGreenhouseFactorTextBox.Location = new System.Drawing.Point(733, 83);
+            this.m_oTerraformingGreenhouseFactorTextBox.Name = "m_oTerraformingGreenhouseFactorTextBox";
+            this.m_oTerraformingGreenhouseFactorTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingGreenhouseFactorTextBox.TabIndex = 10;
+            this.m_oTerraformingGreenhouseFactorTextBox.Text = "0";
+            this.m_oTerraformingGreenhouseFactorTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraformingAntiGHPressureTextBox
+            // 
+            this.m_oTerraformingAntiGHPressureTextBox.Location = new System.Drawing.Point(732, 57);
+            this.m_oTerraformingAntiGHPressureTextBox.Name = "m_oTerraformingAntiGHPressureTextBox";
+            this.m_oTerraformingAntiGHPressureTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingAntiGHPressureTextBox.TabIndex = 9;
+            this.m_oTerraformingAntiGHPressureTextBox.Text = "0";
+            this.m_oTerraformingAntiGHPressureTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraforminGreenhousePressureTextBox
+            // 
+            this.m_oTerraforminGreenhousePressureTextBox.Location = new System.Drawing.Point(733, 31);
+            this.m_oTerraforminGreenhousePressureTextBox.Name = "m_oTerraforminGreenhousePressureTextBox";
+            this.m_oTerraforminGreenhousePressureTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraforminGreenhousePressureTextBox.TabIndex = 8;
+            this.m_oTerraforminGreenhousePressureTextBox.Text = "0";
+            this.m_oTerraforminGreenhousePressureTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraformingAtmosphereListBox
+            // 
+            this.m_oTerraformingAtmosphereListBox.FormattingEnabled = true;
+            this.m_oTerraformingAtmosphereListBox.Location = new System.Drawing.Point(7, 20);
+            this.m_oTerraformingAtmosphereListBox.Name = "m_oTerraformingAtmosphereListBox";
+            this.m_oTerraformingAtmosphereListBox.Size = new System.Drawing.Size(285, 121);
+            this.m_oTerraformingAtmosphereListBox.TabIndex = 0;
+            // 
+            // m_oAtmosphericTerraformingGroupBox
+            // 
+            this.m_oAtmosphericTerraformingGroupBox.Controls.Add(this.m_oTerraformingMaxGasTextBox);
+            this.m_oAtmosphericTerraformingGroupBox.Controls.Add(this.m_oTerraformingSaveAtmButton);
+            this.m_oAtmosphericTerraformingGroupBox.Controls.Add(this.m_oMaxAtmLabel);
+            this.m_oAtmosphericTerraformingGroupBox.Controls.Add(this.m_oTerraformingAddGasCheckBox);
+            this.m_oAtmosphericTerraformingGroupBox.Controls.Add(this.m_oTerraformingGasComboBox);
+            this.m_oAtmosphericTerraformingGroupBox.Controls.Add(this.m_oSelectGasLabel);
+            this.m_oAtmosphericTerraformingGroupBox.Controls.Add(this.m_oTerraformingInstProdLabel);
+            this.m_oAtmosphericTerraformingGroupBox.Location = new System.Drawing.Point(6, 7);
+            this.m_oAtmosphericTerraformingGroupBox.Name = "m_oAtmosphericTerraformingGroupBox";
+            this.m_oAtmosphericTerraformingGroupBox.Size = new System.Drawing.Size(819, 100);
+            this.m_oAtmosphericTerraformingGroupBox.TabIndex = 0;
+            this.m_oAtmosphericTerraformingGroupBox.TabStop = false;
+            this.m_oAtmosphericTerraformingGroupBox.Text = "Atmospheric Terraforming";
+            // 
+            // m_oTerraformingMaxGasTextBox
+            // 
+            this.m_oTerraformingMaxGasTextBox.Location = new System.Drawing.Point(598, 56);
+            this.m_oTerraformingMaxGasTextBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTerraformingMaxGasTextBox.Name = "m_oTerraformingMaxGasTextBox";
+            this.m_oTerraformingMaxGasTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oTerraformingMaxGasTextBox.TabIndex = 6;
+            this.m_oTerraformingMaxGasTextBox.Text = "0";
+            this.m_oTerraformingMaxGasTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTerraformingSaveAtmButton
+            // 
+            this.m_oTerraformingSaveAtmButton.Location = new System.Drawing.Point(699, 54);
+            this.m_oTerraformingSaveAtmButton.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTerraformingSaveAtmButton.Name = "m_oTerraformingSaveAtmButton";
+            this.m_oTerraformingSaveAtmButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oTerraformingSaveAtmButton.TabIndex = 5;
+            this.m_oTerraformingSaveAtmButton.Text = "Save Atm";
+            this.m_oTerraformingSaveAtmButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oMaxAtmLabel
+            // 
+            this.m_oMaxAtmLabel.AutoSize = true;
+            this.m_oMaxAtmLabel.Location = new System.Drawing.Point(503, 59);
+            this.m_oMaxAtmLabel.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oMaxAtmLabel.Name = "m_oMaxAtmLabel";
+            this.m_oMaxAtmLabel.Size = new System.Drawing.Size(75, 13);
+            this.m_oMaxAtmLabel.TabIndex = 4;
+            this.m_oMaxAtmLabel.Text = "Maximum Atm:";
+            // 
+            // m_oTerraformingAddGasCheckBox
+            // 
+            this.m_oTerraformingAddGasCheckBox.AutoSize = true;
+            this.m_oTerraformingAddGasCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oTerraformingAddGasCheckBox.Location = new System.Drawing.Point(341, 58);
+            this.m_oTerraformingAddGasCheckBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTerraformingAddGasCheckBox.Name = "m_oTerraformingAddGasCheckBox";
+            this.m_oTerraformingAddGasCheckBox.Size = new System.Drawing.Size(142, 17);
+            this.m_oTerraformingAddGasCheckBox.TabIndex = 3;
+            this.m_oTerraformingAddGasCheckBox.Text = "Add Gas To Atmosphere";
+            this.m_oTerraformingAddGasCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oTerraformingGasComboBox
+            // 
+            this.m_oTerraformingGasComboBox.FormattingEnabled = true;
+            this.m_oTerraformingGasComboBox.Location = new System.Drawing.Point(92, 56);
+            this.m_oTerraformingGasComboBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTerraformingGasComboBox.Name = "m_oTerraformingGasComboBox";
+            this.m_oTerraformingGasComboBox.Size = new System.Drawing.Size(229, 21);
+            this.m_oTerraformingGasComboBox.TabIndex = 2;
+            // 
+            // m_oSelectGasLabel
+            // 
+            this.m_oSelectGasLabel.AutoSize = true;
+            this.m_oSelectGasLabel.Location = new System.Drawing.Point(13, 59);
+            this.m_oSelectGasLabel.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oSelectGasLabel.Name = "m_oSelectGasLabel";
+            this.m_oSelectGasLabel.Size = new System.Drawing.Size(62, 13);
+            this.m_oSelectGasLabel.TabIndex = 1;
+            this.m_oSelectGasLabel.Text = "Select Gas:";
+            // 
+            // m_oTerraformingInstProdLabel
+            // 
+            this.m_oTerraformingInstProdLabel.AutoSize = true;
+            this.m_oTerraformingInstProdLabel.Location = new System.Drawing.Point(13, 26);
+            this.m_oTerraformingInstProdLabel.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTerraformingInstProdLabel.Name = "m_oTerraformingInstProdLabel";
+            this.m_oTerraformingInstProdLabel.Size = new System.Drawing.Size(261, 13);
+            this.m_oTerraformingInstProdLabel.TabIndex = 0;
+            this.m_oTerraformingInstProdLabel.Text = "Terraforming Installations:X  Annual Production: X Atm";
             // 
             // m_oTeamsTab
             // 
@@ -2196,6 +2704,14 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardTaskTab.ResumeLayout(false);
             this.m_oShipyardTaskTab.PerformLayout();
             this.m_oSYActivityButtonGroupBox.ResumeLayout(false);
+            this.m_oEnvironmentTab.ResumeLayout(false);
+            this.m_oEnvironmentTab.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.m_oSurfaceTempFormulaGroupBox.ResumeLayout(false);
+            this.m_oAtmosphericDataGroupBox.ResumeLayout(false);
+            this.m_oAtmosphericDataGroupBox.PerformLayout();
+            this.m_oAtmosphericTerraformingGroupBox.ResumeLayout(false);
+            this.m_oAtmosphericTerraformingGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2349,5 +2865,38 @@ namespace Pulsar4X.UI.Panels
         private TextBox m_oExpandCapUntilXTextBox;
         private ComboBox m_oRepairRefitScrapClassComboBox;
         private Label m_oRepairRefitScrapLabel;
+        private Label m_oTerraformingDustRadLabel;
+        private GroupBox groupBox4;
+        private RichTextBox m_oTerraformingSpeciesSummaryRichTextBox;
+        private ComboBox m_oTerraformingNewSpeciesComboBox;
+        private GroupBox m_oSurfaceTempFormulaGroupBox;
+        private RichTextBox m_oSurfTempFormulaTextBox;
+        private GroupBox m_oAtmosphericDataGroupBox;
+        private GroupBox m_oAtmosphericTerraformingGroupBox;
+        private TextBox m_oTerraformingMaxGasTextBox;
+        private Button m_oTerraformingSaveAtmButton;
+        private Label m_oMaxAtmLabel;
+        private CheckBox m_oTerraformingAddGasCheckBox;
+        private ComboBox m_oTerraformingGasComboBox;
+        private Label m_oSelectGasLabel;
+        private Label m_oTerraformingInstProdLabel;
+        private Label m_oPlanetaryAlbedoLabel;
+        private Label m_oGreenhouseFactorLabel;
+        private Label m_oAntiGHPressure;
+        private Label m_oGreenhousePressureLabel;
+        private TextBox m_oTerraformingPlanetaryAlbedoTextBox;
+        private TextBox m_oTerraformingGreenhouseFactorTextBox;
+        private TextBox m_oTerraformingAntiGHPressureTextBox;
+        private TextBox m_oTerraforminGreenhousePressureTextBox;
+        private ListBox m_oTerraformingAtmosphereListBox;
+        private Label m_oSurfaceTempKelvinLabel;
+        private Label m_oBaseTempKelvinLabel;
+        private Label m_oSurfTempCelsiusLabel;
+        private Label m_oBaseTempCelsiusLabel;
+        private TextBox m_oTerraformingSurfaceTempKelvinTextBox;
+        private TextBox m_oTerraformingBaseTempKelvinTextBox;
+        private TextBox m_oTerraformingSurfaceTempCelsiusTextBox;
+        private TextBox m_oTerraformingBaseTempCelsiusTextBox;
+
     }
 }

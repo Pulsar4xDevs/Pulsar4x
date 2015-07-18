@@ -49,7 +49,7 @@ namespace Pulsar4X.UI
             /// <summary>
             /// This following section should probably be moved to the Faction constructor at some point.
             /// </summary>
-            oNewFaction.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction, 0));
+            oNewFaction.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets[2], oNewFaction, 0)); //.FirstOrDefault() for planets.
             oNewFaction.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction.Populations[0].ConventionalStart();
             /// <summary>
@@ -70,7 +70,7 @@ namespace Pulsar4X.UI
 
             Entities.Faction oNewFaction2 = new Entities.Faction(1);
             oNewFaction2.Name = "Terran Federation";
-            oNewFaction2.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction2, 0));
+            oNewFaction2.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets[2], oNewFaction2, 0)); //.FirstOrDefault()
             oNewFaction2.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction2.Populations[0].ConventionalStart();
 

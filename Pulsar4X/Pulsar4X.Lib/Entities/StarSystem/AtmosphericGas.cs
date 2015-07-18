@@ -16,6 +16,16 @@ namespace Pulsar4X.Entities
         public string Name { get; set; }
         public string ChemicalSymbol { get; set; }
         public bool IsToxic { get; set; }
+
+        /// <summary>
+        /// These gases pose a moderate problem for colonization.
+        /// </summary>
+        public bool HazardOne { get; set; }
+        /// <summary>
+        /// These gases pose a much more severe problem.
+        /// </summary>
+        public bool HazardTwo { get; set; }
+
         public double BoilingPoint { get; set; }
         public double MeltingPoint { get; set; }
 
@@ -33,12 +43,14 @@ namespace Pulsar4X.Entities
             Name = "BadGas";
         }
 
-        public AtmosphericGas(string name, string chemicalSym, bool isToxic,
+        public AtmosphericGas(string name, string chemicalSym, bool isToxic, bool hazardOne, bool hazardTwo,
             double boilingPoint, double meltingPoint, double greenhouseEffect)
         {
             Name = name;
             ChemicalSymbol = chemicalSym;
             IsToxic = isToxic;
+            HazardOne = hazardOne;
+            HazardTwo = hazardTwo;
             BoilingPoint = boilingPoint;
             MeltingPoint = meltingPoint;
             GreenhouseEffect = greenhouseEffect;
@@ -55,6 +67,8 @@ namespace Pulsar4X.Entities
                  Name = "Hydrogen", 
                  ChemicalSymbol = "H",
                  IsToxic = false,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = -259.16,
                  BoilingPoint = -252.879,
                  GreenhouseEffect = 1
@@ -65,6 +79,8 @@ namespace Pulsar4X.Entities
                  Name = "Helium", 
                  ChemicalSymbol = "He",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = -272.20,
                  BoilingPoint = -268.928,
                  GreenhouseEffect = 0
@@ -75,6 +91,8 @@ namespace Pulsar4X.Entities
                  Name = "Methane", 
                  ChemicalSymbol = "CH4",
                  IsToxic = true,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = -182.5,
                  BoilingPoint = -161.49,
                  GreenhouseEffect = 1
@@ -85,6 +103,8 @@ namespace Pulsar4X.Entities
                  Name = "Water", 
                  ChemicalSymbol = "H2O",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = 0,
                  BoilingPoint = 100,
                  GreenhouseEffect = 1
@@ -95,6 +115,8 @@ namespace Pulsar4X.Entities
                  Name = "Ammonia", 
                  ChemicalSymbol = "NH3",
                  IsToxic = true,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = -77.73,
                  BoilingPoint = -33.34,
                  GreenhouseEffect = 1
@@ -105,6 +127,8 @@ namespace Pulsar4X.Entities
                  Name = "Neon", 
                  ChemicalSymbol = "Ne",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = -248.59,
                  BoilingPoint = -246.046,
                  GreenhouseEffect = 0
@@ -115,6 +139,8 @@ namespace Pulsar4X.Entities
                  Name = "Nitrogen", 
                  ChemicalSymbol = "N",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = -210.00,
                  BoilingPoint = -195.795,
                  GreenhouseEffect = 0
@@ -125,6 +151,8 @@ namespace Pulsar4X.Entities
                  Name = "Carbon monoxide", 
                  ChemicalSymbol = "CO",
                  IsToxic = true,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = -205.02,
                  BoilingPoint = -191.5,
                  GreenhouseEffect = 1
@@ -135,6 +163,8 @@ namespace Pulsar4X.Entities
                  Name = "Nitrogen oxide", 
                  ChemicalSymbol = "NO",
                  IsToxic = false,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = -164,
                  BoilingPoint = -152,
                  GreenhouseEffect = 1
@@ -145,6 +175,8 @@ namespace Pulsar4X.Entities
                  Name = "Oxygen", 
                  ChemicalSymbol = "O",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = -218.79,
                  BoilingPoint = -182.962,
                  GreenhouseEffect = 0
@@ -155,6 +187,8 @@ namespace Pulsar4X.Entities
                  Name = "Hydrogen sulfide", 
                  ChemicalSymbol = "H2S",
                  IsToxic = true,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = -82,
                  BoilingPoint = -60,
                  GreenhouseEffect = 1
@@ -165,6 +199,8 @@ namespace Pulsar4X.Entities
                  Name = "Argon", 
                  ChemicalSymbol = "Ar",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = -189.34,
                  BoilingPoint = -185.848,
                  GreenhouseEffect = 0
@@ -175,6 +211,8 @@ namespace Pulsar4X.Entities
                  Name = "Carbon dioxide", 
                  ChemicalSymbol = "CO2",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = -56.6,
                  BoilingPoint = -56.6,  // no boiling point on Wikipedia!!
                  GreenhouseEffect = 1
@@ -185,6 +223,8 @@ namespace Pulsar4X.Entities
                  Name = "Nitrogen dioxide", 
                  ChemicalSymbol = "NO2",
                  IsToxic = false,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = -11.2,
                  BoilingPoint = 21.2,
                  GreenhouseEffect = 1
@@ -195,6 +235,8 @@ namespace Pulsar4X.Entities
                  Name = "Sulfur dioxide", 
                  ChemicalSymbol = "SO2",
                  IsToxic = false,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = -72,
                  BoilingPoint = -10,
                  GreenhouseEffect = 1
@@ -205,6 +247,8 @@ namespace Pulsar4X.Entities
                  Name = "Chlorine", 
                  ChemicalSymbol = "Cl",
                  IsToxic = true,
+                 HazardOne = false,
+                 HazardTwo = true,
                  MeltingPoint = -101.5,
                  BoilingPoint = -34.04,
                  GreenhouseEffect = 1
@@ -215,6 +259,8 @@ namespace Pulsar4X.Entities
                  Name = "Fluorine", 
                  ChemicalSymbol = "F",
                  IsToxic = true,
+                 HazardOne = false,
+                 HazardTwo = true,
                  MeltingPoint = -219.67,
                  BoilingPoint = -188.11,
                  GreenhouseEffect = 1
@@ -225,6 +271,8 @@ namespace Pulsar4X.Entities
                  Name = "Bromine", 
                  ChemicalSymbol = "Br",
                  IsToxic = true,
+                 HazardOne = false,
+                 HazardTwo = true,
                  MeltingPoint = -7.2,
                  BoilingPoint = 58.8,
                  GreenhouseEffect = 1
@@ -235,6 +283,8 @@ namespace Pulsar4X.Entities
                  Name = "Iodine", 
                  ChemicalSymbol = "I",
                  IsToxic = true,
+                 HazardOne = true,
+                 HazardTwo = false,
                  MeltingPoint = 113.7,
                  BoilingPoint = 184.3,
                  GreenhouseEffect = 1
@@ -245,6 +295,8 @@ namespace Pulsar4X.Entities
                  Name = "Safe Greenhouse Gas", 
                  ChemicalSymbol = "SGG",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = 0,
                  BoilingPoint = 100,
                  GreenhouseEffect = 1
@@ -255,6 +307,8 @@ namespace Pulsar4X.Entities
                  Name = "Anti-Greenhouse Gas", 
                  ChemicalSymbol = "AGG",
                  IsToxic = false,
+                 HazardOne = false,
+                 HazardTwo = false,
                  MeltingPoint = 0,
                  BoilingPoint = 100,
                  GreenhouseEffect = -1

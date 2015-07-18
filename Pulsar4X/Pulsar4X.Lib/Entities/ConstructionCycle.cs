@@ -15,417 +15,418 @@ namespace Pulsar4X.Entities
     /// </summary>
     public class ConstructionCycle
     {
+        public static void DoConstructionCycle(BindingList<Faction> P)
+        {
+            foreach (Faction CurrentFaction in P)
+            {
+#warning Implement gas giant harvesters, they should be separate from the population based refineries below.
+                foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                {
+                    /// <summary>
+                    /// There are some floating point normalization issues with ConstructionFactoryBuild. I could fix them by making only integer construction possible however. Not sure if I want to do that.
+                    /// maybe changing construction to decimals and not floats could work. or some kind of normalization kludge.
+                    /// </summary>
+
+                    /// <summary>
+                    /// Mining should happen "first" since these should all happen quasi-simultaneously and mining is the only one that they all depend on to produce mineral resources.
+                    /// </summary>
+                    ConstructionCycle.MinePlanets(CurrentFaction,CurrentPopulation);
+
+                    /// <summary>
+                    /// The rest of these don't particularly depend on one another so they can happen at any time.
+                    /// </summary>
+                    ConstructionCycle.ConstructionFactoryBuild(CurrentFaction, CurrentPopulation);
+                    ConstructionCycle.OrdnanceFactoryBuild(CurrentFaction, CurrentPopulation);
+                    ConstructionCycle.RefineFuel(CurrentFaction, CurrentPopulation);
+                    ConstructionCycle.ProcessShipyards(CurrentFaction, CurrentPopulation);
+                    ConstructionCycle.TerraformPlanets(CurrentFaction, CurrentPopulation);
+
+                    /// <summary>
+                    /// Population growth should happen after production, or else the statistics printed to the UI regarding any employment based penalties could be inaccurate.
+                    /// </summary>
+                    ConstructionCycle.PopulationGrowth(CurrentFaction, CurrentPopulation);
+                }
+            }
+        }
+
         /// <summary>
         /// Processes construction factory work for every faction.
         /// </summary>
         /// <param name="P">List of factions.</param>
-        public static void ConstructionFactoryBuild(BindingList<Faction> P)
+        public static void ConstructionFactoryBuild(Faction CurrentFaction, Population CurrentPopulation)
         {
             /// <summary>
-            /// Subtract the construction cycle from the construction tick.
+            /// How much construction work per day does this colony do? default should be 5 day construction cycle.
             /// </summary>
+            float CurrentIndustry = CurrentPopulation.CalcTotalIndustry() * Constants.Colony.ConstructionCycleFraction;
+            float BuildPercentage = 0.0f;
 
-            foreach (Faction CurrentFaction in P)
+            foreach (ConstructionBuildQueueItem CurrentConstruction in CurrentPopulation.ConstructionBuildQueue)
             {
-                foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                /// <summary>
+                /// Check to see if this item is in the current build queue, or has to wait for capacity to free up.
+                /// </summary>
+                if ((BuildPercentage + CurrentConstruction.buildCapacity) <= 100.0f)
                 {
-                    /// <summary>
-                    /// How much construction work per day does this colony do? default should be 5 day construction cycle.
-                    /// </summary>
-                    float CurrentIndustry = CurrentPopulation.CalcTotalIndustry() * Constants.Colony.ConstructionCycleFraction;
-                    float BuildPercentage = 0.0f;
+                    BuildPercentage = BuildPercentage + CurrentConstruction.buildCapacity;
+                }
+                else
+                {
+                    break;
+                }
 
-                    foreach (ConstructionBuildQueueItem CurrentConstruction in CurrentPopulation.ConstructionBuildQueue)
+                /// <summary>
+                /// Calculate Completion Estimate:
+                /// </summary>
+                float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
+                float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+
+                if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
+                {
+                    int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                    DateTime EstTime = GameState.Instance.GameDateTime;
+                    TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                    EstTime = EstTime.Add(TS);
+                    CurrentConstruction.completionDate = EstTime;
+                }
+
+                /// <summary>
+                /// This construction project is paused right now.
+                /// </summary>
+                if (CurrentConstruction.inProduction == false)
+                {
+                    continue;
+                }
+
+                /// <summary>
+                /// how much of total industry does this build project use?
+                /// </summary>
+                float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
+                float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
+
+                bool CIRequired = false;
+                bool MineRequired = false;
+                bool CanBuild = false;
+
+                /// <summary>
+                /// Conventional industry must also be used.
+                /// </summary>
+                if (CurrentConstruction.buildType == ConstructionBuildQueueItem.CBType.PlanetaryInstallation)
+                {
+                    if ((int)CurrentConstruction.installationBuild.Type >= (int)Installation.InstallationType.ConvertCIToConstructionFactory &&
+                       (int)CurrentConstruction.installationBuild.Type <= (int)Installation.InstallationType.ConvertCIToOrdnanceFactory)
                     {
-                        /// <summary>
-                        /// Check to see if this item is in the current build queue, or has to wait for capacity to free up.
-                        /// </summary>
-                        if ((BuildPercentage + CurrentConstruction.buildCapacity) <= 100.0f)
-                        {
-                            BuildPercentage = BuildPercentage + CurrentConstruction.buildCapacity;
-                        }
-                        else
-                        {
-                            break;
-                        }
-
-                        /// <summary>
-                        /// Calculate Completion Estimate:
-                        /// </summary>
-                        float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
-                        float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-                        float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
-
-                        if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
-                        {
-                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
-                            DateTime EstTime = GameState.Instance.GameDateTime;
-                            TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
-                            EstTime = EstTime.Add(TS);
-                            CurrentConstruction.completionDate = EstTime;
-                        }
-
-                        /// <summary>
-                        /// This construction project is paused right now.
-                        /// </summary>
-                        if (CurrentConstruction.inProduction == false)
-                        {
-                            continue;
-                        }
-
-                        /// <summary>
-                        /// how much of total industry does this build project use?
-                        /// </summary>
-                        float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
-                        float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
-
-                        bool CIRequired = false;
-                        bool MineRequired = false;
-                        bool CanBuild = false;
-
-                        /// <summary>
-                        /// Conventional industry must also be used.
-                        /// </summary>
-                        if (CurrentConstruction.buildType == ConstructionBuildQueueItem.CBType.PlanetaryInstallation)
-                        {
-                            if ((int)CurrentConstruction.installationBuild.Type >= (int)Installation.InstallationType.ConvertCIToConstructionFactory &&
-                               (int)CurrentConstruction.installationBuild.Type <= (int)Installation.InstallationType.ConvertCIToOrdnanceFactory)
-                            {
-                                CIRequired = true;
-                                CanBuild = CurrentPopulation.CIRequirement(Completion);
-
-                                if (CanBuild == false)
-                                {
-                                    String Entry = String.Format("Insufficent Conventional Industry to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
-                                        CurrentConstruction.Name);
-                                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                                        GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
-                                    CurrentFaction.MessageLog.Add(Msg);
-                                    continue;
-                                }
-                            }
-
-                            if ((int)CurrentConstruction.installationBuild.Type == (int)Installation.InstallationType.ConvertMineToAutomated)
-                            {
-                                MineRequired = true;
-                                CanBuild = CurrentPopulation.MineRequirement(Completion);
-
-                                if (CanBuild == false)
-                                {
-                                    String Entry = String.Format("Insufficent Mines to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
-                                        CurrentConstruction.Name);
-                                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                                        GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
-                                    CurrentFaction.MessageLog.Add(Msg);
-                                    continue;
-                                }
-                            }
-                        }
-
-
-                        /// <summary>
-                        /// Check mineral costs to see if this can be built.
-                        /// </summary>
-                        switch (CurrentConstruction.buildType)
-                        {
-#warning PDC construction needs to be implemented here and slightly further down.
-                            case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
-                                CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.installationBuild.MinerialsCost, Completion);
-                                break;
-                            case ConstructionBuildQueueItem.CBType.ShipComponent:
-                                CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.componentBuild.minerialsCost, Completion);
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCConstruction:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCPrefab:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCAssembly:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCRefit:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
-                                CanBuild = CurrentPopulation.MineralRequirement(Constants.Colony.MaintenanceMineralCost, Completion);
-                                break;
-                        }
+                        CIRequired = true;
+                        CanBuild = CurrentPopulation.CIRequirement(Completion);
 
                         if (CanBuild == false)
                         {
-                            String Entry = String.Format("Insufficent Minerals to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
-                                        CurrentConstruction.Name);
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
+                            String Entry = String.Format("Insufficent Conventional Industry to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
+                                CurrentConstruction.Name);
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
                             CurrentFaction.MessageLog.Add(Msg);
                             continue;
                         }
-
-
-                        /// <summary>
-                        /// Adjust number to build downward to reflect construction happening.
-                        /// </summary>
-                        CurrentConstruction.numToBuild = CurrentConstruction.numToBuild - Completion;
-
-                        /// <summary>
-                        /// Handle the cost and build the item.
-                        /// </summary>
-                        switch (CurrentConstruction.buildType)
-                        {
-                            case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
-                                if (CIRequired == false && MineRequired == false)
-                                    CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion);
-                                else if (CIRequired == true && MineRequired == false)
-                                    CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
-                                else if (CIRequired == false && MineRequired == true)
-                                    CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
-                                CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion);
-                                break;
-                            case ConstructionBuildQueueItem.CBType.ShipComponent:
-                                CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.componentBuild.minerialsCost, Completion);
-                                CurrentPopulation.AddComponentsToStockpile(CurrentConstruction.componentBuild, Completion);
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCConstruction:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCPrefab:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCAssembly:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.PDCRefit:
-                                break;
-                            case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
-                                CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, Constants.Colony.MaintenanceMineralCost, Completion);
-                                CurrentPopulation.AddMSP(Completion);
-                                break;
-                        }
-
                     }
 
-                    /// <summary>
-                    /// Cleanup the CBQ here.
-                    /// </summary>
-                    for (int CBQIterator = 0; CBQIterator < CurrentPopulation.ConstructionBuildQueue.Count; CBQIterator++)
+                    if ((int)CurrentConstruction.installationBuild.Type == (int)Installation.InstallationType.ConvertMineToAutomated)
                     {
-                        if (CurrentPopulation.ConstructionBuildQueue[CBQIterator].numToBuild <= 0.0f)
-                        {
-                            CurrentPopulation.ConstructionBuildQueue.RemoveAt(CBQIterator);
-                            CBQIterator--;
-                        }
+                        MineRequired = true;
+                        CanBuild = CurrentPopulation.MineRequirement(Completion);
 
+                        if (CanBuild == false)
+                        {
+                            String Entry = String.Format("Insufficent Mines to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
+                                CurrentConstruction.Name);
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
+                                                                GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
+                            CurrentFaction.MessageLog.Add(Msg);
+                            continue;
+                        }
                     }
                 }
+
+
+                /// <summary>
+                /// Check mineral costs to see if this can be built.
+                /// </summary>
+                switch (CurrentConstruction.buildType)
+                {
+#warning PDC construction needs to be implemented here and slightly further down.
+                    case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
+                        CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.installationBuild.MinerialsCost, Completion);
+                        break;
+                    case ConstructionBuildQueueItem.CBType.ShipComponent:
+                        CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.componentBuild.minerialsCost, Completion);
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCConstruction:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCPrefab:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCAssembly:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCRefit:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
+                        CanBuild = CurrentPopulation.MineralRequirement(Constants.Colony.MaintenanceMineralCost, Completion);
+                        break;
+                }
+
+                if (CanBuild == false)
+                {
+                    String Entry = String.Format("Insufficent Minerals to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
+                                CurrentConstruction.Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
+                                                        GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
+                    CurrentFaction.MessageLog.Add(Msg);
+                    continue;
+                }
+
+
+                /// <summary>
+                /// Adjust number to build downward to reflect construction happening.
+                /// </summary>
+                CurrentConstruction.numToBuild = CurrentConstruction.numToBuild - Completion;
+
+                /// <summary>
+                /// Handle the cost and build the item.
+                /// </summary>
+                switch (CurrentConstruction.buildType)
+                {
+                    case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
+                        if (CIRequired == false && MineRequired == false)
+                            CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion);
+                        else if (CIRequired == true && MineRequired == false)
+                            CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
+                        else if (CIRequired == false && MineRequired == true)
+                            CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
+                        CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion);
+                        break;
+                    case ConstructionBuildQueueItem.CBType.ShipComponent:
+                        CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.componentBuild.minerialsCost, Completion);
+                        CurrentPopulation.AddComponentsToStockpile(CurrentConstruction.componentBuild, Completion);
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCConstruction:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCPrefab:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCAssembly:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.PDCRefit:
+                        break;
+                    case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
+                        CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, Constants.Colony.MaintenanceMineralCost, Completion);
+                        CurrentPopulation.AddMSP(Completion);
+                        break;
+                }
+
             }
+
+            /// <summary>
+            /// Cleanup the CBQ here.
+            /// </summary>
+            for (int CBQIterator = 0; CBQIterator < CurrentPopulation.ConstructionBuildQueue.Count; CBQIterator++)
+            {
+                if (CurrentPopulation.ConstructionBuildQueue[CBQIterator].numToBuild <= 0.0f)
+                {
+                    CurrentPopulation.ConstructionBuildQueue.RemoveAt(CBQIterator);
+                    CBQIterator--;
+                }
+
+            }            
         }
 
         /// <summary>
         /// Handles ordnance factory construction.
         /// </summary>
         /// <param name="P">List of factions.</param>
-        public static void OrdnanceFactoryBuild(BindingList<Faction> P)
+        public static void OrdnanceFactoryBuild(Faction CurrentFaction, Population CurrentPopulation)
         {
             /// <summary>
-            /// Subtract the construction cycle from the construction tick.
+            /// How much construction work per day does this colony do? default should be 5 day construction cycle.
             /// </summary>
+            float CurrentIndustry = CurrentPopulation.CalcTotalOrdnanceIndustry() * Constants.Colony.ConstructionCycleFraction;
+            float BuildPercentage = 0.0f;
 
-            foreach (Faction CurrentFaction in P)
+            foreach (MissileBuildQueueItem CurrentConstruction in CurrentPopulation.MissileBuildQueue)
             {
-                foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                /// <summary>
+                /// Check to see if this item is in the current build queue, or has to wait for capacity to free up.
+                /// </summary>
+                if ((BuildPercentage + CurrentConstruction.buildCapacity) <= 100.0f)
                 {
-                    /// <summary>
-                    /// How much construction work per day does this colony do? default should be 5 day construction cycle.
-                    /// </summary>
-                    float CurrentIndustry = CurrentPopulation.CalcTotalOrdnanceIndustry() * Constants.Colony.ConstructionCycleFraction;
-                    float BuildPercentage = 0.0f;
-
-                    foreach (MissileBuildQueueItem CurrentConstruction in CurrentPopulation.MissileBuildQueue)
-                    {
-                        /// <summary>
-                        /// Check to see if this item is in the current build queue, or has to wait for capacity to free up.
-                        /// </summary>
-                        if ((BuildPercentage + CurrentConstruction.buildCapacity) <= 100.0f)
-                        {
-                            BuildPercentage = BuildPercentage + CurrentConstruction.buildCapacity;
-                        }
-                        else
-                        {
-                            break;
-                        }
-
-                        /// <summary>
-                        /// Calculate Completion Estimate:
-                        /// </summary>
-                        float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
-                        float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-                        float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
-                        
-                        if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
-                        {
-                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
-                            DateTime EstTime = GameState.Instance.GameDateTime;
-                            TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
-                            EstTime = EstTime.Add(TS);
-                            CurrentConstruction.completionDate = EstTime;
-                        }
-
-                        /// <summary>
-                        /// This construction project is paused right now.
-                        /// </summary>
-                        if (CurrentConstruction.inProduction == false)
-                        {
-                            continue;
-                        }
-
-                        /// <summary>
-                        /// how much of total industry does this build project use?
-                        /// </summary>
-                        float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
-                        float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
-                        
-                        /// <summary>
-                        /// Do I have the minerals to build this missile?
-                        /// </summary>
-                        bool CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.ordnanceDef.minerialsCost, Completion);
-
-                        if (CanBuild == false)
-                        {
-                            String Entry = String.Format("Insufficent Minerals to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
-                                        CurrentConstruction.Name);
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                                GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
-                            CurrentFaction.MessageLog.Add(Msg);
-                            continue;
-                        }
-
-
-                        /// <summary>
-                        /// Adjust number to build downward to reflect construction happening.
-                        /// </summary>
-                        CurrentConstruction.numToBuild = CurrentConstruction.numToBuild - Completion;
-
-                        CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.ordnanceDef.minerialsCost, Completion);
-
-                        CurrentPopulation.LoadMissileToStockpile(CurrentConstruction.ordnanceDef, Completion);
-                    }
-
-                    /// <summary>
-                    /// Cleanup the CBQ here.
-                    /// </summary>
-                    for (int MBQIterator = 0; MBQIterator < CurrentPopulation.MissileBuildQueue.Count; MBQIterator++)
-                    {
-                        if (CurrentPopulation.MissileBuildQueue[MBQIterator].numToBuild <= 0.0f)
-                        {
-                            CurrentPopulation.MissileBuildQueue.RemoveAt(MBQIterator);
-                            MBQIterator--;
-                        }
-
-                    }
+                    BuildPercentage = BuildPercentage + CurrentConstruction.buildCapacity;
                 }
+                else
+                {
+                    break;
+                }
+
+                /// <summary>
+                /// Calculate Completion Estimate:
+                /// </summary>
+                float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
+                float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+
+                if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
+                {
+                    int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                    DateTime EstTime = GameState.Instance.GameDateTime;
+                    TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                    EstTime = EstTime.Add(TS);
+                    CurrentConstruction.completionDate = EstTime;
+                }
+
+                /// <summary>
+                /// This construction project is paused right now.
+                /// </summary>
+                if (CurrentConstruction.inProduction == false)
+                {
+                    continue;
+                }
+
+                /// <summary>
+                /// how much of total industry does this build project use?
+                /// </summary>
+                float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
+                float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
+
+                /// <summary>
+                /// Do I have the minerals to build this missile?
+                /// </summary>
+                bool CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.ordnanceDef.minerialsCost, Completion);
+
+                if (CanBuild == false)
+                {
+                    String Entry = String.Format("Insufficent Minerals to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
+                                CurrentConstruction.Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
+                                                        GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
+                    CurrentFaction.MessageLog.Add(Msg);
+                    continue;
+                }
+
+
+                /// <summary>
+                /// Adjust number to build downward to reflect construction happening.
+                /// </summary>
+                CurrentConstruction.numToBuild = CurrentConstruction.numToBuild - Completion;
+
+                CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.ordnanceDef.minerialsCost, Completion);
+
+                CurrentPopulation.LoadMissileToStockpile(CurrentConstruction.ordnanceDef, Completion);
             }
+
+            /// <summary>
+            /// Cleanup the CBQ here.
+            /// </summary>
+            for (int MBQIterator = 0; MBQIterator < CurrentPopulation.MissileBuildQueue.Count; MBQIterator++)
+            {
+                if (CurrentPopulation.MissileBuildQueue[MBQIterator].numToBuild <= 0.0f)
+                {
+                    CurrentPopulation.MissileBuildQueue.RemoveAt(MBQIterator);
+                    MBQIterator--;
+                }
+
+            }            
         }
 
         /// <summary>
         /// Perform mining on all faction owned colonies.
         /// </summary>
         /// <param name="P">Binding list of factions</param>
-        public static void MinePlanets(BindingList<Faction> P)
+        public static void MinePlanets(Faction CurrentFaction, Population CurrentPopulation)
         {
-            foreach (Faction CurrentFaction in P)
+            if (CurrentPopulation.Planet.GeoSurveyList.ContainsKey(CurrentFaction) == true)
             {
-                foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                /// <summary>
+                /// see what I mean about superflous? going to keep it like this for right now however.
+                /// </summary>
+                if (CurrentPopulation.Planet.GeoSurveyList[CurrentFaction] == true)
                 {
-                    if (CurrentPopulation.Planet.GeoSurveyList.ContainsKey(CurrentFaction) == true)
+                    /// <summary>
+                    /// Calculate the construction time cycle sliver of the year to use. all production is done annually so this must be adjusted here.
+                    /// </summary>
+                    float CurrentMining = CurrentPopulation.CalcTotalMining() * Constants.Colony.ConstructionCycleFraction;
+
+                    /// <summary>
+                    /// Don't run this loop if no mining can be done.
+                    /// </summary>
+                    if (CurrentMining > 0.0f)
                     {
-                        /// <summary>
-                        /// see what I mean about superflous? going to keep it like this for right now however.
-                        /// </summary>
-                        if (CurrentPopulation.Planet.GeoSurveyList[CurrentFaction] == true)
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                         {
-                            /// <summary>
-                            /// Calculate the construction time cycle sliver of the year to use. all production is done annually so this must be adjusted here.
-                            /// </summary>
-                            float CurrentMining = CurrentPopulation.CalcTotalMining() * Constants.Colony.ConstructionCycleFraction;
+                            float MineAmount = CurrentMining * CurrentPopulation.Planet.MinerialAccessibility[mineralIterator];
 
                             /// <summary>
-                            /// Don't run this loop if no mining can be done.
+                            /// no negative minerals. hopefully.
                             /// </summary>
-                            if (CurrentMining > 0.0f)
+                            if (CurrentPopulation.Planet.MinerialReserves[mineralIterator] < MineAmount)
                             {
-                                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
-                                {
-                                    float MineAmount = CurrentMining * CurrentPopulation.Planet.MinerialAccessibility[mineralIterator];
-
-                                    /// <summary>
-                                    /// no negative minerals. hopefully.
-                                    /// </summary>
-                                    if (CurrentPopulation.Planet.MinerialReserves[mineralIterator] < MineAmount)
-                                    {
-                                        MineAmount = CurrentPopulation.Planet.MinerialReserves[mineralIterator];
-                                    }
-
-                                    /// <summary>
-                                    /// Add to population stockpile and take from planetary reserves.
-                                    /// </summary>
-                                    CurrentPopulation.Minerials[mineralIterator] = CurrentPopulation.Minerials[mineralIterator] + MineAmount;
-                                    CurrentPopulation.Planet.MinerialReserves[mineralIterator] = CurrentPopulation.Planet.MinerialReserves[mineralIterator] - MineAmount;
-
-                                    /// <summary>
-                                    /// Ultra-paranoia check here.
-                                    /// </summary>
-                                    if (CurrentPopulation.Planet.MinerialReserves[mineralIterator] < 0.0f)
-                                        CurrentPopulation.Planet.MinerialReserves[mineralIterator] = 0.0f;
-                                }
+                                MineAmount = CurrentPopulation.Planet.MinerialReserves[mineralIterator];
                             }
+
+                            /// <summary>
+                            /// Add to population stockpile and take from planetary reserves.
+                            /// </summary>
+                            CurrentPopulation.Minerials[mineralIterator] = CurrentPopulation.Minerials[mineralIterator] + MineAmount;
+                            CurrentPopulation.Planet.MinerialReserves[mineralIterator] = CurrentPopulation.Planet.MinerialReserves[mineralIterator] - MineAmount;
+
+                            /// <summary>
+                            /// Ultra-paranoia check here.
+                            /// </summary>
+                            if (CurrentPopulation.Planet.MinerialReserves[mineralIterator] < 0.0f)
+                                CurrentPopulation.Planet.MinerialReserves[mineralIterator] = 0.0f;
                         }
                     }
                 }
-            }
+            }            
         }
 
         /// <summary>
         /// Do all fuel refining on planets and later on gas giant harvesters.
         /// </summary>
         /// <param name="P">list of factions.</param>
-        public static void RefineFuel(BindingList<Faction> P)
+        public static void RefineFuel(Faction CurrentFaction, Population CurrentPopulation)
         {
-            foreach (Faction CurrentFaction in P)
+            /// <summary>
+            /// Skip this population.
+            /// </summary>
+            if (CurrentPopulation.IsRefining == false)
+                return;
+
+            float CurrentRefining = CurrentPopulation.CalcTotalRefining() * Constants.Colony.ConstructionCycleFraction;
+
+            /// <summary>
+            /// If the planet has no refineries or no sorium then no refining happens.
+            /// </summary>
+            if (CurrentRefining > 0.0f && CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] > 0.0f)
             {
-#warning Implement gas giant harvesters here.
-                foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                /// <summary>
+                /// 1 sorium = 2000 fuel
+                /// </summary>
+                float SoriumRequirement = CurrentRefining / Constants.Colony.SoriumToFuel;
+                if (CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] < SoriumRequirement)
                 {
-                    /// <summary>
-                    /// Skip this population.
-                    /// </summary>
-                    if (CurrentPopulation.IsRefining == false)
-                        continue;
-
-                    float CurrentRefining = CurrentPopulation.CalcTotalRefining() * Constants.Colony.ConstructionCycleFraction;
-
-                    /// <summary>
-                    /// If the planet has no refineries or no sorium then no refining happens.
-                    /// </summary>
-                    if (CurrentRefining > 0.0f && CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] > 0.0f)
-                    {
-                        /// <summary>
-                        /// 1 sorium = 2000 fuel
-                        /// </summary>
-                        float SoriumRequirement = CurrentRefining / Constants.Colony.SoriumToFuel;
-                        if (CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] < SoriumRequirement)
-                        {
-                            SoriumRequirement = CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium];
-                            CurrentRefining = SoriumRequirement * Constants.Colony.SoriumToFuel;
-                        }
-
-                        /// <summary>
-                        /// Convert Sorium into fuel.
-                        /// </summary>
-                        CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] = CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] - SoriumRequirement;
-                        CurrentPopulation.FuelStockpile = CurrentPopulation.FuelStockpile + CurrentRefining;
-                    }
-                    else if (CurrentRefining > 0.0f)
-                    {
-                        String Entry = String.Format("Insufficient Sorium on {0} to continue refining.", CurrentPopulation);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                            GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
-                        CurrentFaction.MessageLog.Add(Msg);
-                    }
+                    SoriumRequirement = CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium];
+                    CurrentRefining = SoriumRequirement * Constants.Colony.SoriumToFuel;
                 }
+
+                /// <summary>
+                /// Convert Sorium into fuel.
+                /// </summary>
+                CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] = CurrentPopulation.Minerials[(int)Constants.Minerals.MinerialNames.Sorium] - SoriumRequirement;
+                CurrentPopulation.FuelStockpile = CurrentPopulation.FuelStockpile + CurrentRefining;
+            }
+            else if (CurrentRefining > 0.0f)
+            {
+                String Entry = String.Format("Insufficient Sorium on {0} to continue refining.", CurrentPopulation);
+                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
+                                                    GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
+                CurrentFaction.MessageLog.Add(Msg);
             }
         }
 
@@ -434,36 +435,30 @@ namespace Pulsar4X.Entities
         /// *** also missing the shipyard tabs grid work that displays ship construction progress.
         /// </summary>
         /// <param name="P">List of factions.</param>
-        public static void ProcessShipyards(BindingList<Faction> P)
+        public static void ProcessShipyards(Faction CurrentFaction, Population CurrentPopulation)
         {
-            foreach (Faction CurrentFaction in P)
+            int CY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number);
+            int NY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+
+            List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o => o.Priority).ToList();
+
+            BuildShips(CurrentFaction, CurrentPopulation, SortedList);
+
+            for (int SYIterator = 0; SYIterator < CY; SYIterator++)
             {
-                foreach (Population CurrentPopulation in CurrentFaction.Populations)
-                {
-                    int CY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number);
-                    int NY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+                Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[SYIterator];
+                PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
 
-                    List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o=>o.Priority).ToList();
-
-                    BuildShips(CurrentFaction, CurrentPopulation, SortedList);
-
-                    for (int SYIterator = 0; SYIterator < CY; SYIterator++)
-                    {
-                        Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[SYIterator];
-                        PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
-
-                        //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
-                    }
-
-                    for (int SYIterator = 0; SYIterator < NY; SYIterator++)
-                    {
-                        Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[SYIterator];
-                        PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
-
-                        //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
-                    }
-                }
+                //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
             }
+
+            for (int SYIterator = 0; SYIterator < NY; SYIterator++)
+            {
+                Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[SYIterator];
+                PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
+
+                //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
+            }            
         }
 
         /// <summary>
@@ -494,6 +489,113 @@ namespace Pulsar4X.Entities
                 foreach (SystemBody CleanPlanet in CleanupList)
                 {
                     GameState.Instance.DamagedPlanets.Remove(CleanPlanet);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle all terraform orders. Were there an explicit order system it would not be necessary to loop through all worlds, likewise all of these loops
+        /// should be combined at a later date.
+        /// </summary>
+        /// <param name="P">List of factions</param>
+        public static void TerraformPlanets(Faction CurrentFaction, Population pop)
+        {
+#warning How should terraforming orders be handled? see above comments.
+            /// <summary>
+            /// If gas to add is null, or if the colony can't do any terraforming then do not run terraforming.
+            /// </summary>
+            if (pop._GasToAdd != null && (pop._OrbitalTerraformModules != 0 || (int)Math.Floor(pop.Installations[(int)Installation.InstallationType.TerraformingInstallation].Number) >= 1))
+            {
+                float CurrentGasAmt = 0.0f;
+                if (pop.Planet.Atmosphere.Composition.ContainsKey(pop._GasToAdd) == true)
+                    CurrentGasAmt = pop.Planet.Atmosphere.Composition[pop._GasToAdd];
+
+                if (pop._GasAddSubtract == true)
+                {
+                    if (CurrentGasAmt < pop._GasAmt)
+                    {
+                        float CurrentTerraforming = pop.CalcTotalTerraforming() * Constants.Colony.ConstructionCycleFraction;
+
+                        /// <summary>
+                        /// Terraforming will go over the limit specified by the user.
+                        /// </summary>
+                        if (CurrentTerraforming + CurrentGasAmt > pop._GasAmt)
+                        {
+                            CurrentTerraforming = pop._GasAmt - CurrentGasAmt;
+                        }
+
+                        pop.Planet.Atmosphere.AddGas(pop._GasToAdd, CurrentTerraforming);
+                    }
+                }
+                else if (pop._GasAddSubtract == false)
+                {
+                    if (CurrentGasAmt > pop._GasAmt)
+                    {
+                        float CurrentTerraforming = pop.CalcTotalTerraforming() * Constants.Colony.ConstructionCycleFraction;
+
+                        /// <summary>
+                        /// Terraforming will go under the limit specified by the user.
+                        /// </summary>
+                        if (CurrentTerraforming - CurrentGasAmt < pop._GasAmt)
+                        {
+                            CurrentTerraforming = CurrentGasAmt - pop._GasAmt;
+                        }
+                        pop.Planet.Atmosphere.AddGas(pop._GasToAdd, CurrentTerraforming);
+                    }
+                }
+            }            
+        }
+
+        /// <summary>
+        /// Handle population growth for this world. Get the colony rating, infrastructure, radiation,etc and then calculate whether the population should grow or shrink based
+        /// on those factors.
+        /// </summary>
+        /// <param name="CurrentFaction">Current faction this population belongs to</param>
+        /// <param name="CurrentPopulation">The Population in question.</param>
+        public static void PopulationGrowth(Faction CurrentFaction, Population CurrentPopulation)
+        {
+#warning Update the UI to reflect dieoff if present.
+            if (CurrentPopulation.CivilianPopulation > 0.0f)
+            {
+                float CurrentPopGrowth = CurrentPopulation.CalcPopulationGrowth() * Constants.Colony.ConstructionCycleFraction;
+
+                float ColonyCost = CurrentPopulation.Species.GetTNHabRating(CurrentPopulation.Planet);
+
+                if (ColonyCost == 0.0f)
+                {
+                    CurrentPopulation.AddPopulation(CurrentPopGrowth);
+                }
+                else
+                {
+                    /// <summary>
+                    /// How much Infra does this colony need per 1M colonists?
+                    /// </summary>
+                    int InfrastructureRequirement = (int)Math.Floor(ColonyCost * 100.0f);
+
+                    /// <summary>
+                    /// How much infra is currently on the planet?
+                    /// </summary>
+                    int CurrentInfrastructure = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+                    /// <summary>
+                    /// How much does this planet need? if the planet does need some it should generate a little on its own.
+                    /// </summary>
+                    int TotalInfraRequirement = (int)Math.Floor(InfrastructureRequirement * CurrentPopulation.CivilianPopulation);
+
+                    if (TotalInfraRequirement < CurrentInfrastructure)
+                    {
+                        CurrentPopulation.AddPopulation(CurrentPopGrowth);
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Calculate how much population should die off instead of be added.
+                        /// </summary>
+#warning Is this ok for the dieoff calculation for population?
+                        float CurrentDieoff = -1.0f *( ((float)CurrentInfrastructure / (float)TotalInfraRequirement) * Constants.Colony.ConstructionCycleFraction);
+
+                        CurrentPopulation.AddPopulation(CurrentDieoff);
+                    }
                 }
             }
         }

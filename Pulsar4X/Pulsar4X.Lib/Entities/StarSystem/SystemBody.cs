@@ -59,7 +59,8 @@ namespace Pulsar4X.Entities
         /// 3.) If the pressure is too high, the colony cost will be equal to the Atmospheric Pressure divided by the species maximum pressure with a minimum of 2.0 
         /// 4.) If the oxygen percentage is above 30%, the colony cost will be 2.0 
         /// 5.) The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation. So if the deviation was 22 and the temperature was 48 degrees below the minimum, the colony cost would be 48/22 = 2.18 
-        /// Some (or all) of these need to be implimented.
+        /// Some (or all) of these need to be implimented. 
+        /// Update: All done in species now, each species has its own colony cost, so this may not be appropriate for SystemBody(Planet), which means that SystemGenandDisplay should be reworked.
         /// </summary>
         public float ColonyCost { get; set; }
 
@@ -114,7 +115,7 @@ namespace Pulsar4X.Entities
         /// Radiation Level adversely effects population growth and industrial production: Each point of radiation decreases industrial production by 0.01% and growth by 0.0025%
         /// radiation decreases at a baseline 1 per 5 days.
         /// </summary>
-#warning Implement RadiationLevel, Atmospheric dust in UI, and in reduced population growth, industrial percentage, and lowered planetary temperature.
+#warning Implement RadiationLevel, Atmospheric dust in reduced population growth, industrial percentage, and lowered planetary temperature.
         public float RadiationLevel { get; set; }
 
         /// <summary>
@@ -197,6 +198,9 @@ namespace Pulsar4X.Entities
 
 #warning planet generation needs minerals, anomalies, and ruins generation.
             PlanetaryRuins = new Ruins();
+
+
+            Atmosphere = new Atmosphere(this);
         }
 
 
