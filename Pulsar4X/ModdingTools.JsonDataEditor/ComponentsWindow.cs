@@ -45,7 +45,7 @@ namespace ModdingTools.JsonDataEditor
             genericDataUC1.Item = dh;
             genericDataUC1.Description = _currentComponent.Description;
             _selectedComponentAbilities.Clear();
-            foreach (var abilitySD in _currentComponent.ComponentAbilitySDs)
+            foreach (ComponentAbilitySD abilitySD in _currentComponent.ComponentAbilitySDs)
             {
                 _selectedComponentAbilities.Add(new DataHolder(abilitySD));
             }
@@ -377,14 +377,31 @@ namespace ModdingTools.JsonDataEditor
 
         private void listBox_allAbilities_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            //create a list of AbilityTypes from the abilitys this component has so I can check if it's already in the list or not. 
             List<AbilityType> abilityTypeslistList = new List<AbilityType>();
             foreach (var abilityDH in _selectedComponentAbilities)
             {
-                abilityTypeslistList.Add(abilityDH.StaticData);
+                ComponentAbilitySD abilitySD = abilityDH.StaticData;
+                abilityTypeslistList.Add(abilitySD.Ability);
             }
-            if (!abilityTypeslistList.Contains((AbilityType)listBox_allAbilities.SelectedItem))
+
+            if (!abilityTypeslistList.Contains((AbilityType)listBox_allAbilities.SelectedItem)) //check if it's in the list
             {
-                //abilityTypeslistList.Add((AbilityType)listBox_allAbilities.SelectedItem, 0);
+                ComponentAbilitySD abilitySD = new ComponentAbilitySD();
+                abilitySD.Name = listBox_allAbilities.SelectedItem.ToString();
+                abilitySD.Ability = (AbilityType)listBox_allAbilities.SelectedItem;
+                abilitySD.AbilityAmount = new List<float>();
+
+                abilitySD.AffectsAbility = AbilityType.Nothing;
+                abilitySD.AffectedAmount = new List<float>();
+                
+                abilitySD.CrewAmount = new List<float>();
+                abilitySD.Description = "";
+                abilitySD.TechRequirements = new List<Guid>();
+                abilitySD.WeightAmount = new List<float>();
+
+                _selectedComponentAbilities.Add(new DataHolder(abilitySD));
+
             }
             //UpdateAbilityAmounts();
         }
