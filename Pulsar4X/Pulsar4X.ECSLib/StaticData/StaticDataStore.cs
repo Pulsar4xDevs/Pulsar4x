@@ -183,8 +183,15 @@ namespace Pulsar4X.ECSLib
 
                 foreach (var file in files)
                 {
-                    JObject obj = Load(file);
-                    StoreObject(obj);
+                    try
+                    {
+                        JObject obj = Load(file);
+                        StoreObject(obj);
+                    }
+                    catch (JsonSerializationException e)
+                    {
+                        throw new StaticDataLoadException(string.Format("Bad Json provided in file: ", file), e);
+                    }
                 }
             }
 // TODO: Review exceptions in this function. I followed the established exception pattern during implementation here, but I think we should throw more specific exceptions to allow the UI to handle them better.
