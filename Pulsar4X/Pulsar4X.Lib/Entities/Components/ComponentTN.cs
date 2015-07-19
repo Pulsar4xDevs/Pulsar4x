@@ -78,6 +78,8 @@ namespace Pulsar4X.Entities.Components
 
         JumpEngine,
 
+        SurveySensor,
+
         TypeCount
     }
 

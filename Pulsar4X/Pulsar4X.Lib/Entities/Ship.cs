@@ -424,18 +424,35 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int JumpSickness { get; set; }
 
+        #region Survey Sensor Info
+        /// <summary>
+        /// All of the survey sensors on this ship.
+        /// </summary>
+        public BindingList<SurveySensorTN> ShipSurvey { get; set; }
+
+        /// <summary>
+        /// What is the current ability of this ship to perform geosurveys?
+        /// </summary>
+        public float CurrentGeoSurveyStrength { get; set; }
+
+        /// <summary>
+        /// What is the current ability of this ship to perform gravsurveys?
+        /// </summary>
+        public float CurrentGravSurveyStrength { get; set; }
+        #endregion
+
         /// <summary>
         /// If this ship has been destroyed. this will need more sophisticated handling.
         /// </summary>
         public bool IsDestroyed { get; set; }
 
         /// <summary>
-        /// List of ships targeted on this vessel.
+        /// List of ships targeted on this vessel. On ship destruction this is needed for cleanup.
         /// </summary>
         public BindingList<ShipTN> ShipsTargetting { get; set; }
 
         /// <summary>
-        /// Taskgroups with orders to this ship.
+        /// Taskgroups with orders to this ship. On ship destruction this is needed for cleanup.
         /// </summary>
         public BindingList<TaskGroupTN> TaskGroupsOrdered { get; set; }
 
@@ -916,6 +933,26 @@ namespace Pulsar4X.Entities
                 }
             }
             JumpSickness = 0;
+
+            ShipSurvey = new BindingList<SurveySensorTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipSurveyDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipSurveyDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipSurveyCount[loop]; loop2++)
+                {
+                    SurveySensorTN Survey = new SurveySensorTN(ClassDefinition.ShipSurveyDef[loop]);
+                    Survey.componentIndex = ShipSurvey.Count;
+
+                    int SurveyIndex = loop2 + 1;
+                    Survey.Name = Survey.surveyDef.Name + " #" + SurveyIndex.ToString();
+
+                    ShipSurvey.Add(Survey);
+                    ShipComponents.Add(Survey);
+                }
+            }
+            CurrentGeoSurveyStrength = ShipClass.ShipGeoSurveyStrength;
+            CurrentGravSurveyStrength = ShipClass.ShipGravSurveyStrength;
 
             IsDestroyed = false;
 
@@ -2152,6 +2189,22 @@ namespace Pulsar4X.Entities
                     /// Nothing special needs to be done to ship in this case.
                     /// </summary>
                     break;
+
+                case ComponentTypeTN.SurveySensor:
+                    SurveySensorDefTN sDef = ShipSurvey[ShipComponents[ID].componentIndex].surveyDef;
+                    if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Geological)
+                    {
+                        CurrentGeoSurveyStrength = CurrentGeoSurveyStrength - sDef.sensorStrength;
+                        if (CurrentGeoSurveyStrength < 0)
+                            CurrentGeoSurveyStrength = 0;
+                    }
+                    else if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Gravitational)
+                    {
+                        CurrentGravSurveyStrength = CurrentGravSurveyStrength - sDef.sensorStrength;
+                        if (CurrentGravSurveyStrength < 0)
+                            CurrentGravSurveyStrength = 0;
+                    }
+                    break;
             }
             return DamageReturn;
         }
@@ -2354,6 +2407,22 @@ namespace Pulsar4X.Entities
 
                 case ComponentTypeTN.JumpEngine:
                     break;
+
+                case ComponentTypeTN.SurveySensor:
+                    SurveySensorDefTN sDef = ShipSurvey[ShipComponents[ComponentIndex].componentIndex].surveyDef;
+                    if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Geological)
+                    {
+                        CurrentGeoSurveyStrength = CurrentGeoSurveyStrength + sDef.sensorStrength;
+                        if (CurrentGeoSurveyStrength < 0)
+                            CurrentGeoSurveyStrength = 0;
+                    }
+                    else if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Gravitational)
+                    {
+                        CurrentGravSurveyStrength = CurrentGravSurveyStrength + sDef.sensorStrength;
+                        if (CurrentGravSurveyStrength < 0)
+                            CurrentGravSurveyStrength = 0;
+                    }
+                    break;
             }
         }
 
@@ -2448,6 +2517,9 @@ namespace Pulsar4X.Entities
 
                 case ComponentTypeTN.JumpEngine:
                     return ShipJumpEngine[ShipComponents[ID].componentIndex].jumpEngineDef.cost;
+
+                case ComponentTypeTN.SurveySensor:
+                    return ShipSurvey[ShipComponents[ID].componentIndex].surveyDef.cost;
             }
 
             return 0.0m;

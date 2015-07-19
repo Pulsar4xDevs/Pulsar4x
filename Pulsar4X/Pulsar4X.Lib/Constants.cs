@@ -724,6 +724,12 @@ namespace Pulsar4X
             public static byte[] PassiveStrength = { 5, 6, 8, 11, 14, 18, 24, 32, 40, 50, 60, 75 };
 
             /// <summary>
+            /// Strength of geological and gravitational survey sensors for standard,improved,advanced, and phased sensors.
+            /// </summary>
+            public static byte[] SurveyStrength = { 1, 2, 3, 5 };
+            public const int SurveyStrengthMax = 4;
+
+            /// <summary>
             /// What value are sensors calibrated around searching for?
             /// </summary>
             public const uint DefaultPassiveSignature = 1000;
@@ -1054,6 +1060,9 @@ namespace Pulsar4X
             /// </summary>
             public static bool PrimaryOnlyJumpPoints = false;
 
+            /// <summary>
+            /// Follow TN terraforming rules regarding what can be terraformed, and what gases generate what hostile effects.
+            /// </summary>
             public static bool TNTerraformingRules = false;
         }
     }
