@@ -37,7 +37,8 @@
             this.displayLabel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.displayLabel.Location = new System.Drawing.Point(0, 0);
             this.displayLabel.Name = "displayLabel";
-            this.displayLabel.Size = new System.Drawing.Size(35, 13);
+            this.displayLabel.Padding = new System.Windows.Forms.Padding(1);
+            this.displayLabel.Size = new System.Drawing.Size(37, 15);
             this.displayLabel.TabIndex = 0;
             this.displayLabel.Text = "label1";
             // 
@@ -45,9 +46,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Window;
+            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Controls.Add(this.displayLabel);
+            this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "ItemGridCell";
-            this.Size = new System.Drawing.Size(43, 21);
+            this.Size = new System.Drawing.Size(41, 19);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -55,6 +59,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Label displayLabel;
+        protected System.Windows.Forms.Label displayLabel;
+
     }
 }

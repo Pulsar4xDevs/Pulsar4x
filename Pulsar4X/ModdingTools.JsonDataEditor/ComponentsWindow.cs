@@ -62,24 +62,37 @@ namespace ModdingTools.JsonDataEditor
         private void SetupItemGrid(DataHolder componentAbilityDH)
         {
             ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
+
+            ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name");
             ItemGridCell_String nameCell = new ItemGridCell_String(abilitySD.Name);
-            itemGridUC1.AddRow(new List<ItemGridCell>() { nameCell });
+            itemGridUC1.AddRow(new List<ItemGridCell>() {rowHeader, nameCell });
 
+            rowHeader = new ItemGridCell_HeaderType("Description");
             ItemGridCell_String descCell = new ItemGridCell_String(abilitySD.Description);
-            itemGridUC1.AddRow(new List<ItemGridCell>() { descCell });
+            itemGridUC1.AddRow(new List<ItemGridCell>() {rowHeader, descCell });
 
+            rowHeader = new ItemGridCell_HeaderType("Ability");
             ItemGridCell_AbilityType abilityCell = new ItemGridCell_AbilityType(abilitySD.Ability);
-            itemGridUC1.AddRow(new List<ItemGridCell>() { abilityCell });
+            itemGridUC1.AddRow(new List<ItemGridCell>() {rowHeader, abilityCell });
 
-            List<ItemGridCell> abilityAmountCells = new List<ItemGridCell>();
-            foreach (float ammount in abilitySD.AbilityAmount)
+            rowHeader = new ItemGridCell_HeaderType("AbilityAmount");
+            List<ItemGridCell> abilityAmountCells = new List<ItemGridCell>(){rowHeader};
+            if (abilitySD.AbilityAmount != null)
             {
-                ItemGridCell_FloatType abilityAmountCell = new ItemGridCell_FloatType(ammount);
-                abilityAmountCells.Add(abilityAmountCell);
+                foreach (float ammount in abilitySD.AbilityAmount)
+                {
+                    ItemGridCell_FloatType abilityAmountCell = new ItemGridCell_FloatType(ammount);
+                    abilityAmountCells.Add(abilityAmountCell);
+                }
+            }
+            else
+            {
+                abilityAmountCells.Add(new ItemGridCell_FloatType(0));
             }
             itemGridUC1.AddRow(abilityAmountCells);
 
-            List<ItemGridCell> crewAmountCells = new List<ItemGridCell>();
+            rowHeader = new ItemGridCell_HeaderType("CrewAmount");
+            List<ItemGridCell> crewAmountCells = new List<ItemGridCell>(){rowHeader};
             if (abilitySD.CrewAmount != null)
             foreach (float crew in abilitySD.CrewAmount)
             {
@@ -92,8 +105,8 @@ namespace ModdingTools.JsonDataEditor
             }
             itemGridUC1.AddRow(crewAmountCells);
 
-
-            List<ItemGridCell> weightAmountCells = new List<ItemGridCell>();
+            rowHeader = new ItemGridCell_HeaderType("WeightAmount");
+            List<ItemGridCell> weightAmountCells = new List<ItemGridCell>(){rowHeader};
             if (abilitySD.WeightAmount != null)
             {
                 foreach (float weight in abilitySD.WeightAmount)
@@ -108,17 +121,40 @@ namespace ModdingTools.JsonDataEditor
             }
             itemGridUC1.AddRow(weightAmountCells);
 
-
+            rowHeader = new ItemGridCell_HeaderType("AffectsAbility");
             ItemGridCell_AbilityType abilityAffectedCell = new ItemGridCell_AbilityType(abilitySD.AffectsAbility);
-            itemGridUC1.AddRow(new List<ItemGridCell>() { abilityAffectedCell });
+            itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, abilityAffectedCell });
 
-            List<ItemGridCell> affectedAmountCells = new List<ItemGridCell>();
-            foreach (float affect in abilitySD.AffectedAmount)
+            rowHeader = new ItemGridCell_HeaderType("AffectedAmount");
+            List<ItemGridCell> affectedAmountCells = new List<ItemGridCell>{rowHeader};
+            if (abilitySD.AffectedAmount != null)
             {
-                ItemGridCell_FloatType cell = new ItemGridCell_FloatType(affect);
-                affectedAmountCells.Add(cell);
+                foreach (float affect in abilitySD.AffectedAmount)
+                {
+                    ItemGridCell_FloatType cell = new ItemGridCell_FloatType(affect);
+                    affectedAmountCells.Add(cell);
+                }
+            }
+            else
+            {
+                affectedAmountCells.Add(new ItemGridCell_FloatType(0));
             }
             itemGridUC1.AddRow(affectedAmountCells);
+
+            rowHeader = new ItemGridCell_HeaderType("TechReqirements");
+            List<ItemGridCell> techRequrementCells = new List<ItemGridCell>{rowHeader};
+            if (abilitySD.TechRequirements != null)
+            {
+                foreach (Guid techGuid in abilitySD.TechRequirements)
+                {
+                    ItemGridCell_TechGuidType cell = new ItemGridCell_TechGuidType(techGuid, Data.TechData.Values.ToList());
+                }
+            }
+            else
+            {
+                techRequrementCells.Add(new ItemGridCell_TechGuidType(Guid.Empty, Data.TechData.Values.ToList()));
+            }
+            itemGridUC1.AddRow(techRequrementCells);
         }
 
         /// <summary>

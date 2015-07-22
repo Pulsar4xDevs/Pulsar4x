@@ -39,9 +39,10 @@ namespace ModdingTools.JsonDataEditor.UserControls
             get
             {
                 string returnstring = "";
-                if (_editControl_ != null)
+                if (Data != null)
                     returnstring = _getText_;
                 return returnstring;
+                
             } 
         }
 
@@ -81,6 +82,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
         protected void StartEditing(object o, EventArgs e)
         {
             _activeControl = _editControl_;
+            
+            _editControl_.Dock = DockStyle.Fill;
+            
             Controls.Remove(displayLabel);
             Controls.Add(_editControl_);            
         }
@@ -217,6 +221,48 @@ namespace ModdingTools.JsonDataEditor.UserControls
             if (float.TryParse(_editControl_.Text, out newdata))
             {
                 Data = newdata;
+                success = true;
+            }
+            return success;
+        }
+    }
+
+    public class ItemGridCell_HeaderType : ItemGridCell
+    {
+        public ItemGridCell_HeaderType(string text) : base(text)
+        {
+            _editControl_ = null;
+            displayLabel.BackColor = DefaultBackColor;
+            BackColor = DefaultBackColor;
+            Refresh();
+        }
+
+        protected override string _getText_
+        {
+            get { return Data; }
+        }
+    }
+
+    public class ItemGridCell_TechGuidType : ItemGridCell
+    {
+        List<DataHolder> _selectionList = new List<DataHolder>();
+
+        public ItemGridCell_TechGuidType(Guid guid, List<DataHolder> selectionList)
+            : base(guid)
+        {
+            _selectionList = selectionList;
+
+        }
+
+        protected override string _getText_ { get { return Data.ToString(); } }
+
+        protected override bool ValadateInput()
+        {
+            bool success = false;
+            Guid newGuid;
+            if (Guid.TryParse(_editControl_.Text, out newGuid))
+            {
+                Data = newGuid;
                 success = true;
             }
             return success;

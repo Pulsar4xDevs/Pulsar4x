@@ -25,13 +25,26 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public ItemGridUC()
         {
             InitializeComponent();
+            //tableLayoutPanel1.CellPaint += tableLayoutPanel_CellPaint;
+        }
+
+        /// <summary>
+        /// draws lines. it's way too slow though.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tableLayoutPanel_CellPaint(object sender, TableLayoutCellPaintEventArgs e)
+        {
+            e.Graphics.DrawLine(Pens.Black, e.CellBounds.Location, new Point(e.CellBounds.Right, e.CellBounds.Top));
+            e.Graphics.DrawLine(Pens.Black, e.CellBounds.Location, new Point(e.CellBounds.Left, e.CellBounds.Bottom));
         }
 
         private void Update()
         {
+            //tableLayoutPanel1.Controls.Clear();
             tableLayoutPanel1.ColumnCount = _colomnCount;
-            tableLayoutPanel1.RowCount = 0;
             tableLayoutPanel1.RowStyles.Clear();
+            tableLayoutPanel1.RowCount = 0;
             int y = 0;
             foreach (List<ItemGridCell> row in _grid)
             {
@@ -42,6 +55,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 {
                     
                     tableLayoutPanel1.Controls.Add(cell, x, y);
+                    cell.Dock = DockStyle.Fill;
                     x++;
                 }
                 y++;
