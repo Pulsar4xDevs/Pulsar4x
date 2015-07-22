@@ -37,10 +37,17 @@
             this.listBox_allComponents = new System.Windows.Forms.ListBox();
             this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
             this.listBox_Abilities = new System.Windows.Forms.ListBox();
-            this.propertyGrid_PropertyEditor = new System.Windows.Forms.PropertyGrid();
             this.listBox_allAbilities = new System.Windows.Forms.ListBox();
+            this.propertyGrid_PropertyEditor = new System.Windows.Forms.PropertyGrid();
+            this.itemGridUC1 = new ModdingTools.JsonDataEditor.UserControls.ItemGridUC();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -53,8 +60,8 @@
             this.tableLayoutPanel1.Controls.Add(this.listBox_allComponents, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.genericDataUC1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.listBox_Abilities, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.propertyGrid_PropertyEditor, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.listBox_allAbilities, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tabControl1, 1, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -62,6 +69,8 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 152F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 67F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(727, 508);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
@@ -156,16 +165,6 @@
             this.listBox_Abilities.TabIndex = 4;
             this.listBox_Abilities.DoubleClick += new System.EventHandler(this.listBox_Abilities_DoubleClick);
             // 
-            // propertyGrid_PropertyEditor
-            // 
-            this.tableLayoutPanel1.SetColumnSpan(this.propertyGrid_PropertyEditor, 2);
-            this.propertyGrid_PropertyEditor.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGrid_PropertyEditor.Location = new System.Drawing.Point(249, 155);
-            this.propertyGrid_PropertyEditor.Name = "propertyGrid_PropertyEditor";
-            this.tableLayoutPanel1.SetRowSpan(this.propertyGrid_PropertyEditor, 2);
-            this.propertyGrid_PropertyEditor.Size = new System.Drawing.Size(475, 350);
-            this.propertyGrid_PropertyEditor.TabIndex = 7;
-            // 
             // listBox_allAbilities
             // 
             this.listBox_allAbilities.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -176,6 +175,57 @@
             this.listBox_allAbilities.TabIndex = 8;
             this.listBox_allAbilities.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_allAbilities_MouseDoubleClick);
             // 
+            // propertyGrid_PropertyEditor
+            // 
+            this.propertyGrid_PropertyEditor.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.propertyGrid_PropertyEditor.Location = new System.Drawing.Point(3, 3);
+            this.propertyGrid_PropertyEditor.Name = "propertyGrid_PropertyEditor";
+            this.propertyGrid_PropertyEditor.Size = new System.Drawing.Size(461, 251);
+            this.propertyGrid_PropertyEditor.TabIndex = 7;
+            // 
+            // itemGridUC1
+            // 
+            this.itemGridUC1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.itemGridUC1.Location = new System.Drawing.Point(3, 3);
+            this.itemGridUC1.Name = "itemGridUC1";
+            this.itemGridUC1.Size = new System.Drawing.Size(461, 318);
+            this.itemGridUC1.TabIndex = 9;
+            // 
+            // tabControl1
+            // 
+            this.tableLayoutPanel1.SetColumnSpan(this.tabControl1, 2);
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(249, 155);
+            this.tabControl1.Name = "tabControl1";
+            this.tableLayoutPanel1.SetRowSpan(this.tabControl1, 2);
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(475, 350);
+            this.tabControl1.TabIndex = 10;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.itemGridUC1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(467, 324);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.propertyGrid_PropertyEditor);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(467, 257);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
             // ComponentsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -185,6 +235,9 @@
             this.Size = new System.Drawing.Size(727, 508);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -202,5 +255,9 @@
         private System.Windows.Forms.ListBox listBox_Abilities;
         private System.Windows.Forms.PropertyGrid propertyGrid_PropertyEditor;
         private System.Windows.Forms.ListBox listBox_allAbilities;
+        private UserControls.ItemGridUC itemGridUC1;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
     }
 }

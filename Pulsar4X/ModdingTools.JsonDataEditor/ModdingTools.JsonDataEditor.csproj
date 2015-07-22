@@ -105,6 +105,18 @@
     <Compile Include="UserControls\InstallationUC.Designer.cs">
       <DependentUpon>InstallationUC.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ItemGridCell.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ItemGridCell.Designer.cs">
+      <DependentUpon>ItemGridCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ItemGridUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ItemGridUC.Designer.cs">
+      <DependentUpon>ItemGridUC.cs</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\MineralsCostsUC.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -145,6 +157,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\InstallationUC.resx">
       <DependentUpon>InstallationUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ItemGridCell.resx">
+      <DependentUpon>ItemGridCell.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ItemGridUC.resx">
+      <DependentUpon>ItemGridUC.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UserControls\MineralsCostsUC.resx">
       <DependentUpon>MineralsCostsUC.cs</DependentUpon>

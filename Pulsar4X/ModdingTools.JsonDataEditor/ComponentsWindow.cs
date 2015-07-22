@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using ModdingTools.JsonDataEditor.UserControls;
 using Pulsar4X.ECSLib;
 
 namespace ModdingTools.JsonDataEditor
@@ -55,6 +56,69 @@ namespace ModdingTools.JsonDataEditor
         private void SetCurrentAbility(DataHolder componentAbilityDH)
         {            
             propertyGrid_PropertyEditor.SelectedObject = new AbilitiesDisplayer(componentAbilityDH);
+            SetupItemGrid(componentAbilityDH);
+        }
+
+        private void SetupItemGrid(DataHolder componentAbilityDH)
+        {
+            ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
+            ItemGridCell_String nameCell = new ItemGridCell_String(abilitySD.Name);
+            itemGridUC1.AddRow(new List<ItemGridCell>() { nameCell });
+
+            ItemGridCell_String descCell = new ItemGridCell_String(abilitySD.Description);
+            itemGridUC1.AddRow(new List<ItemGridCell>() { descCell });
+
+            ItemGridCell_AbilityType abilityCell = new ItemGridCell_AbilityType(abilitySD.Ability);
+            itemGridUC1.AddRow(new List<ItemGridCell>() { abilityCell });
+
+            List<ItemGridCell> abilityAmountCells = new List<ItemGridCell>();
+            foreach (float ammount in abilitySD.AbilityAmount)
+            {
+                ItemGridCell_FloatType abilityAmountCell = new ItemGridCell_FloatType(ammount);
+                abilityAmountCells.Add(abilityAmountCell);
+            }
+            itemGridUC1.AddRow(abilityAmountCells);
+
+            List<ItemGridCell> crewAmountCells = new List<ItemGridCell>();
+            if (abilitySD.CrewAmount != null)
+            foreach (float crew in abilitySD.CrewAmount)
+            {
+                ItemGridCell_FloatType cell = new ItemGridCell_FloatType(crew);
+                crewAmountCells.Add(cell);
+            }
+            else
+            {
+                crewAmountCells.Add(new ItemGridCell_FloatType(0));
+            }
+            itemGridUC1.AddRow(crewAmountCells);
+
+
+            List<ItemGridCell> weightAmountCells = new List<ItemGridCell>();
+            if (abilitySD.WeightAmount != null)
+            {
+                foreach (float weight in abilitySD.WeightAmount)
+                {
+                    ItemGridCell_FloatType cell = new ItemGridCell_FloatType(weight);
+                    weightAmountCells.Add(cell);
+                }
+            }
+            else
+            {
+                weightAmountCells.Add(new ItemGridCell_FloatType(0));
+            }
+            itemGridUC1.AddRow(weightAmountCells);
+
+
+            ItemGridCell_AbilityType abilityAffectedCell = new ItemGridCell_AbilityType(abilitySD.AffectsAbility);
+            itemGridUC1.AddRow(new List<ItemGridCell>() { abilityAffectedCell });
+
+            List<ItemGridCell> affectedAmountCells = new List<ItemGridCell>();
+            foreach (float affect in abilitySD.AffectedAmount)
+            {
+                ItemGridCell_FloatType cell = new ItemGridCell_FloatType(affect);
+                affectedAmountCells.Add(cell);
+            }
+            itemGridUC1.AddRow(affectedAmountCells);
         }
 
         /// <summary>
@@ -214,10 +278,12 @@ namespace ModdingTools.JsonDataEditor
                 get
                 {
                     List<DataHolder> techlist = new List<DataHolder>();
-                    foreach (var guid in _abilitySD.TechRequirements)
-                    {
-                        techlist.Add(Data.TechData[guid]);
-                    }
+                    if (_abilitySD.TechRequirements != null)                       
+                        foreach (Guid? guid in _abilitySD.TechRequirements)
+                        {
+                            if(guid != null)
+                                techlist.Add(Data.TechData[(Guid)guid]);
+                        }
                     return techlist;
                 }
                 set
