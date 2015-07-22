@@ -61,6 +61,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void SetupItemGrid(DataHolder componentAbilityDH)
         {
+            itemGridUC1.Clear();
             ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
 
             ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name");

@@ -41,10 +41,10 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         private void Update()
         {
-            //tableLayoutPanel1.Controls.Clear();
-            tableLayoutPanel1.ColumnCount = _colomnCount;
+            tableLayoutPanel1.Controls.Clear();
             tableLayoutPanel1.RowStyles.Clear();
             tableLayoutPanel1.RowCount = 0;
+            tableLayoutPanel1.ColumnCount = _colomnCount;
             int y = 0;
             foreach (List<ItemGridCell> row in _grid)
             {
@@ -61,6 +61,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 y++;
             }
             
+        }
+
+        public void Clear()
+        {
+            _grid = new List<List<ItemGridCell>>();
+            _colomnCount = 1;
+            _rowCount = 1;
         }
 
         public void AddRow(List<ItemGridCell> rowlist)
