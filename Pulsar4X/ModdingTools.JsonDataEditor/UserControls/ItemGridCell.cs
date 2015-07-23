@@ -1,13 +1,6 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using Pulsar4X.ECSLib;
 
@@ -16,11 +9,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
     public partial class ItemGridCell : UserControl
     {
         public dynamic Data { get; protected set; }
-        protected dynamic _editControl_ { get; set; }
-        private dynamic _activeControl { get; set; }
+        protected dynamic _editControl_;
+        private dynamic _activeControl;
         public ItemGridUC ParentGrid { get; set; }
-        public int x { get; set; }
-        public int y { get; set; }
+        public int Colomn { get; set; }
+        public int Row { get; set; }
 
         public ItemGridCell() 
         {
@@ -223,12 +216,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
             : base(ability)
         {
             ListBox listBox = new ListBox();
+            listBox.DataSource = Enum.GetValues(typeof(AbilityType));
 
-            foreach (object abilitytype in Enum.GetValues(typeof(AbilityType)))
-            {
-                listBox.Items.Add(abilitytype);
-            }
-
+            //listBox.Dock = DockStyle.Fill;
             Data = ability;
             listBox.SelectedItem = Data;
             _editControl_ = listBox;
@@ -265,17 +255,20 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// </summary>
     public class ItemGridCell_TechStaticDataType : ItemGridCell
     {
-        List<TechSD> _selectionList = new List<TechSD>();
-
+ 
+        Dictionary<string, TechSD> _selectionDictionary = new Dictionary<string, TechSD>(); 
         public ItemGridCell_TechStaticDataType(TechSD? techSD, List<TechSD> selectionList)
             : base(techSD)
         {
-            _selectionList = selectionList;
-            ListBox listBox = new ListBox();
-            foreach (var tech in _selectionList)
+            foreach (var tech in selectionList)
             {
-                listBox.Items.Add(_selectionList);
+                _selectionDictionary.Add(tech.Name, tech);
             }
+            ListBox listBox = new ListBox();
+            listBox.DataSource = new BindingSource(_selectionDictionary, null);
+            listBox.DisplayMember = "Key";
+            listBox.ValueMember = "Value";
+            //listBox.Dock = DockStyle.Fill;
             Data = techSD;
             listBox.SelectedItem = techSD;
             _editControl_ = listBox;
@@ -293,10 +286,14 @@ namespace ModdingTools.JsonDataEditor.UserControls
         protected override bool ValadateInput()
         {
             bool success = false;
-            if (_editControl_.SelectedItem != null)
+            try
             {
                 Data = (TechSD)_editControl_.SelectedItem;
                 success = true;
+            }
+            catch
+            {
+                success = false;
             }
             return success;
         }

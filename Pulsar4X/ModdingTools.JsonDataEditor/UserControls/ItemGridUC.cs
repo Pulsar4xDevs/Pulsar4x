@@ -58,8 +58,8 @@ namespace ModdingTools.JsonDataEditor.UserControls
                         tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                     tableLayoutPanel1.Controls.Add(cell, x, y);
                     cell.ParentGrid = this;
-                    cell.x = x;
-                    cell.y = y;
+                    cell.Colomn = x;
+                    cell.Row = y;
                     cell.Dock = DockStyle.Fill;
                     x++;
                 }
@@ -80,8 +80,8 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         public void Resize(ItemGridCell cell)
         {
-            tableLayoutPanel1.RowStyles[cell.x].Height = cell.Size.Height;
-            tableLayoutPanel1.ColumnStyles[cell.y].Width = cell.Size.Width;
+            tableLayoutPanel1.RowStyles[cell.Colomn].Height = cell.Size.Height;
+            tableLayoutPanel1.ColumnStyles[cell.Row].Width = cell.Size.Width;
         }
 
         public void Clear()

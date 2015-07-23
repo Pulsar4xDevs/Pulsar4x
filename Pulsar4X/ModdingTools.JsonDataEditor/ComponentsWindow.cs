@@ -17,7 +17,7 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class ComponentsWindow : UserControl
     {
-        BindingList<DataHolder> _allComponents = new BindingList<DataHolder>();
+        private BindingList<DataHolder> _allComponents = new BindingList<DataHolder>();
         private ComponentSD _currentComponent = new ComponentSD();
  
         private BindingList<DataHolder> _selectedComponentAbilities = new BindingList<DataHolder>();
@@ -69,21 +69,21 @@ namespace ModdingTools.JsonDataEditor
             ItemGridCell_String nameCell = new ItemGridCell_String(null);
             if (!String.IsNullOrEmpty(abilitySD.Name))
                 nameCell = new ItemGridCell_String(abilitySD.Name);
-            itemGridUC1.AddRow(new List<ItemGridCell>() {rowHeader, nameCell });
+            itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, nameCell });
 
 
             rowHeader = new ItemGridCell_HeaderType("Description");
             ItemGridCell_String descCell = new ItemGridCell_String(null);
             if (!String.IsNullOrEmpty(abilitySD.Description))
                 descCell = new ItemGridCell_String(abilitySD.Description);
-            itemGridUC1.AddRow(new List<ItemGridCell>() {rowHeader, descCell });
+            itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, descCell });
 
 
             rowHeader = new ItemGridCell_HeaderType("Ability");
             ItemGridCell_AbilityType abilityCell = new ItemGridCell_AbilityType(null);
             if (abilitySD.Ability != null)
                 abilityCell = new ItemGridCell_AbilityType(abilitySD.Ability);
-            itemGridUC1.AddRow(new List<ItemGridCell>() {rowHeader, abilityCell });
+            itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, abilityCell });
 
             rowHeader = new ItemGridCell_HeaderType("AbilityAmount");
             List<ItemGridCell> abilityAmountCells = new List<ItemGridCell>(){rowHeader};
@@ -375,7 +375,7 @@ namespace ModdingTools.JsonDataEditor
             {
                 return UITypeEditorEditStyle.Modal;
             }
-            public override object EditValue(ITypeDescriptorContext context, System.IServiceProvider provider, object value)
+            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
                 IWindowsFormsEditorService svc = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
                 List<DataHolder> dataHolders = value as List<DataHolder>;
