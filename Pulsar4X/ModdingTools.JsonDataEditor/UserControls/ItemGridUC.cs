@@ -44,6 +44,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             tableLayoutPanel1.Controls.Clear();
             tableLayoutPanel1.RowStyles.Clear();
             tableLayoutPanel1.RowCount = 0;
+            tableLayoutPanel1.ColumnStyles.Clear();
             tableLayoutPanel1.ColumnCount = _colomnCount;
             int y = 0;
             foreach (List<ItemGridCell> row in _grid)
@@ -53,14 +54,34 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.AutoSize)); //(row[0].Height));
                 foreach (ItemGridCell cell in row)
                 {
-                    
+                    if (x == 0)
+                        tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                     tableLayoutPanel1.Controls.Add(cell, x, y);
+                    cell.ParentGrid = this;
+                    cell.x = x;
+                    cell.y = y;
                     cell.Dock = DockStyle.Fill;
                     x++;
                 }
                 y++;
             }
             
+        }
+
+        public void RowResize(int row, int height)
+        {
+            tableLayoutPanel1.RowStyles[row].Height = height;
+        }
+
+        public void ColomnResize(int colomn, int width)
+        {
+            tableLayoutPanel1.ColumnStyles[colomn].Width = width;
+        }
+
+        public void Resize(ItemGridCell cell)
+        {
+            tableLayoutPanel1.RowStyles[cell.x].Height = cell.Size.Height;
+            tableLayoutPanel1.ColumnStyles[cell.y].Width = cell.Size.Width;
         }
 
         public void Clear()

@@ -15,9 +15,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
 {
     public partial class ItemGridCell : UserControl
     {
-        public dynamic Data { get; set; }
+        public dynamic Data { get; protected set; }
         protected dynamic _editControl_ { get; set; }
         private dynamic _activeControl { get; set; }
+        public ItemGridUC ParentGrid { get; set; }
+        public int x { get; set; }
+        public int y { get; set; }
+
         public ItemGridCell() 
         {
             InitializeComponent();
@@ -59,7 +63,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public override void Refresh()
         {
             displayLabel.Text = Text;
-            Size = displayLabel.Size;
+            Size = _activeControl.Size;
+            if (ParentGrid !=  null)
+                ParentGrid.Resize(this);
             base.Refresh();
         }
 
@@ -83,10 +89,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
         {
             _activeControl = _editControl_;
             
-            _editControl_.Dock = DockStyle.Fill;
-            
             Controls.Remove(displayLabel);
-            Controls.Add(_editControl_);            
+            Controls.Add(_editControl_);
+            Refresh();
         }
 
         /// <summary>
@@ -100,6 +105,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             _activeControl = displayLabel;
             Controls.Remove(_editControl_);
             Controls.Add(displayLabel);
+            Refresh();
         }
 
         /// <summary>
@@ -159,8 +165,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             Data = ability;
             listBox.SelectedItem = Data;
             _editControl_ = listBox;
-  
-            listBox.SelectedIndexChanged += new EventHandler(StartEditing);
+            listBox.SelectedIndexChanged += new EventHandler(StopEditing);
             Refresh();
         }
 

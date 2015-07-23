@@ -149,6 +149,7 @@ namespace ModdingTools.JsonDataEditor
                 foreach (Guid techGuid in abilitySD.TechRequirements)
                 {
                     ItemGridCell_TechGuidType cell = new ItemGridCell_TechGuidType(techGuid, Data.TechData.Values.ToList());
+                    techRequrementCells.Add(cell);
                 }
             }
             else
