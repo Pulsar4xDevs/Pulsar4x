@@ -28,7 +28,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             _activeControl = displayLabel;
             displayLabel.Text = Text;
             displayLabel.MouseClick += new MouseEventHandler(OnMouseClick);
-
+            MouseClick += new MouseEventHandler(OnMouseClick);
         }
 
         public ItemGridCell(dynamic data) : this()
@@ -43,10 +43,12 @@ namespace ModdingTools.JsonDataEditor.UserControls
             get
             {
                 string returnstring = "";
-                if (Data != null)
+
+                //canot use //if (Data != null) here due to the possiblity that Data is a struct. 
+                if (!ReferenceEquals(null, Data))
                     returnstring = _getText_;
-                return returnstring;
-                
+
+                return returnstring;  
             } 
         }
 
@@ -76,8 +78,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// <param name="e"></param>
         protected void OnMouseClick(object o, MouseEventArgs e)
         {
-            if(_editControl_ != null)
-                StartEditing(this, e);         
+            if(_editControl_ != null) //ie a headertype cell won't be editable
+                StartEditing(this, e);
+
         }
 
         /// <summary>
@@ -87,8 +90,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// <param name="e"></param>
         protected void StartEditing(object o, EventArgs e)
         {
-            _activeControl = _editControl_;
-            
+            _activeControl = _editControl_;           
             Controls.Remove(displayLabel);
             Controls.Add(_editControl_);
             Refresh();
@@ -123,6 +125,26 @@ namespace ModdingTools.JsonDataEditor.UserControls
     }
 
     /// <summary>
+    /// this is a special cell type for headers, ie use as the first cell in a row. 
+    /// </summary>
+    public class ItemGridCell_HeaderType : ItemGridCell
+    {
+        public ItemGridCell_HeaderType(string text)
+            : base(text)
+        {
+            _editControl_ = null;
+            displayLabel.BackColor = DefaultBackColor;
+            BackColor = DefaultBackColor;
+            Refresh();
+        }
+
+        protected override string _getText_
+        {
+            get { return Data; }
+        }
+    }
+
+    /// <summary>
     /// String Entry version of ItemGridCell
     /// This version uses TextBox as editing mode.
     /// </summary>
@@ -147,50 +169,6 @@ namespace ModdingTools.JsonDataEditor.UserControls
     }
 
 
-    /// <summary>
-    /// AbilityType version of ItemGridCell
-    /// This version uses Listbox to display a list of possible enum AbilityType during Editing Mode
-    /// </summary>
-    public class ItemGridCell_AbilityType : ItemGridCell
-    {      
-        public ItemGridCell_AbilityType(AbilityType ability) : base(ability)
-        {
-            ListBox listBox = new ListBox();
-
-            foreach (object abilitytype in Enum.GetValues(typeof(AbilityType)))
-            {
-                listBox.Items.Add(abilitytype);
-            }
-            
-            Data = ability;
-            listBox.SelectedItem = Data;
-            _editControl_ = listBox;
-            listBox.SelectedIndexChanged += new EventHandler(StopEditing);
-            Refresh();
-        }
-
-
-        protected override string _getText_
-        {
-            get
-            {            
-                return Enum.GetName(typeof(AbilityType), (AbilityType)Data);
-            } 
-        }
-
-        protected override bool ValadateInput()
-        {
-            bool success = false;
-
-            ListBox listBox = _editControl_;
-            if (listBox.SelectedItem != null)
-            {
-                Data = (AbilityType)listBox.SelectedItem;
-                success = true;
-            }
-            return success;
-        }
-    }
 
     /// <summary>
     /// float version of the ItemGridCell
@@ -232,42 +210,92 @@ namespace ModdingTools.JsonDataEditor.UserControls
         }
     }
 
-    public class ItemGridCell_HeaderType : ItemGridCell
+
+
+    /// <summary>
+    /// AbilityType version of ItemGridCell this version is pulsar specific. 
+    /// This version uses Listbox to display a list of possible enum AbilityType during Editing Mode
+    /// despite being pulsar specific, it should be a good example of getting a list of enums.
+    /// </summary>
+    public class ItemGridCell_AbilityType : ItemGridCell
     {
-        public ItemGridCell_HeaderType(string text) : base(text)
+        public ItemGridCell_AbilityType(AbilityType? ability)
+            : base(ability)
         {
-            _editControl_ = null;
-            displayLabel.BackColor = DefaultBackColor;
-            BackColor = DefaultBackColor;
+            ListBox listBox = new ListBox();
+
+            foreach (object abilitytype in Enum.GetValues(typeof(AbilityType)))
+            {
+                listBox.Items.Add(abilitytype);
+            }
+
+            Data = ability;
+            listBox.SelectedItem = Data;
+            _editControl_ = listBox;
+            listBox.SelectedIndexChanged += new EventHandler(StopEditing);
             Refresh();
         }
 
+
         protected override string _getText_
         {
-            get { return Data; }
+            get
+            {
+                return Enum.GetName(typeof(AbilityType), (AbilityType)Data);
+            }
         }
-    }
-
-    public class ItemGridCell_TechGuidType : ItemGridCell
-    {
-        List<DataHolder> _selectionList = new List<DataHolder>();
-
-        public ItemGridCell_TechGuidType(Guid guid, List<DataHolder> selectionList)
-            : base(guid)
-        {
-            _selectionList = selectionList;
-
-        }
-
-        protected override string _getText_ { get { return Data.ToString(); } }
 
         protected override bool ValadateInput()
         {
             bool success = false;
-            Guid newGuid;
-            if (Guid.TryParse(_editControl_.Text, out newGuid))
+
+            ListBox listBox = _editControl_;
+            if (listBox.SelectedItem != null)
             {
-                Data = newGuid;
+                Data = (AbilityType)listBox.SelectedItem;
+                success = true;
+            }
+            return success;
+        }
+    }
+
+
+    /// <summary>
+    /// this version is pulsar specific.
+    /// </summary>
+    public class ItemGridCell_TechStaticDataType : ItemGridCell
+    {
+        List<TechSD> _selectionList = new List<TechSD>();
+
+        public ItemGridCell_TechStaticDataType(TechSD? techSD, List<TechSD> selectionList)
+            : base(techSD)
+        {
+            _selectionList = selectionList;
+            ListBox listBox = new ListBox();
+            foreach (var tech in _selectionList)
+            {
+                listBox.Items.Add(_selectionList);
+            }
+            Data = techSD;
+            listBox.SelectedItem = techSD;
+            _editControl_ = listBox;
+            listBox.SelectedIndexChanged += new EventHandler(StopEditing);
+            Refresh();
+        }
+
+        public override sealed void Refresh()
+        {
+            base.Refresh();
+        }
+
+        protected override string _getText_ { get { return Data.Name; } }
+
+        protected override bool ValadateInput()
+        {
+            bool success = false;
+            if (_editControl_.SelectedItem != null)
+            {
+                Data = (TechSD)_editControl_.SelectedItem;
                 success = true;
             }
             return success;

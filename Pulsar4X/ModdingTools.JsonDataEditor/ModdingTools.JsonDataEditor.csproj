@@ -69,6 +69,7 @@
       <DependentUpon>ComponentsWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Data.cs" />
+    <Compile Include="MiscHelpers.cs" />
     <Compile Include="UserControls\AbilitiesListUC.cs">
       <SubType>UserControl</SubType>
     </Compile>

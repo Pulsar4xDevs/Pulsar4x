@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -391,6 +392,16 @@ namespace ModdingTools.JsonDataEditor
             foreach (var dataholder in listOfDataHolders)
             {
                 list.Add(dataholder.Guid);
+            }
+            return list;
+        }
+
+        public static List<TechSD> GetllistoftTechSds()
+        {
+            List<TechSD> list = new List<TechSD>();
+            foreach (var techDH in TechData)
+            {
+                list.Add(techDH.Value.StaticData);
             }
             return list;
         }
