@@ -291,13 +291,14 @@ namespace ModdingTools.JsonDataEditor.UserControls
             bool success = false;
             try
             {
-                Data = (TechSD)_editControl_.SelectedItem;
+                Data = (TechSD)_editControl_.SelectedItem.Value;
                 success = true;
             }
-            catch
+            catch (Exception e)
             {
-                success = false;
+                throw e;
             }
+
             return success;
         }
     }
