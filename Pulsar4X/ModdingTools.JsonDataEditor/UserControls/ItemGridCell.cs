@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Pulsar4X.ECSLib;
@@ -35,7 +34,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public new string Text {
             get
             {
-                string returnstring = "";
+                string returnstring = "null";
 
                 //canot use //if (Data != null) here due to the possiblity that Data is a struct. 
                 if (!ReferenceEquals(null, Data))
@@ -59,8 +58,8 @@ namespace ModdingTools.JsonDataEditor.UserControls
         {
             displayLabel.Text = Text;
             Size = _activeControl.Size;
-            if (ParentGrid !=  null)
-                ParentGrid.Resize(this);
+            //if (ParentGrid !=  null)
+            //    ParentGrid.ResizeXY(this);
             base.Refresh();
         }
 
@@ -131,6 +130,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
             Refresh();
         }
 
+        public override sealed void Refresh()
+        {            
+            base.Refresh();
+        }
+
         protected override string _getText_
         {
             get { return Data; }
@@ -148,11 +152,16 @@ namespace ModdingTools.JsonDataEditor.UserControls
             TextBox textbox = new TextBox();
 
             textbox.Text = str;
-
+            textbox.Dock = DockStyle.Fill;
             _editControl_ = textbox; //set the _editControl
             textbox.Leave += new EventHandler(StopEditing); //subscribe to the correct event handler (textbox.Leave) to stop editing.
 
             Refresh();
+        }
+
+        public override sealed void Refresh()
+        {
+            base.Refresh();
         }
 
         protected override string _getText_
@@ -226,7 +235,6 @@ namespace ModdingTools.JsonDataEditor.UserControls
             Refresh();
         }
 
-
         protected override string _getText_
         {
             get
@@ -274,11 +282,6 @@ namespace ModdingTools.JsonDataEditor.UserControls
             _editControl_ = listBox;
             listBox.SelectedIndexChanged += new EventHandler(StopEditing);
             Refresh();
-        }
-
-        public override sealed void Refresh()
-        {
-            base.Refresh();
         }
 
         protected override string _getText_ { get { return Data.Name; } }
