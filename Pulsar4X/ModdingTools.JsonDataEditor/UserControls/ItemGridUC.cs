@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -60,11 +62,17 @@ namespace ModdingTools.JsonDataEditor.UserControls
                     cell.Colomn = x;
                     cell.Row = y;
                     cell.Dock = DockStyle.Fill;
+                    cell.PropertyChanged += cell_PropertyChanged;
                     x++;
                 }
                 y++;
             }
             
+        }
+
+        void cell_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            //throw new System.NotImplementedException();
         }
 
         public void RowResize(int row, int height)
@@ -153,6 +161,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         }
 
         /// <summary>
+        /// Replaces a cell at the given colomn and row with the given cell.
         /// not tested, this will crash if the row and or colomn are out of bounds..
         /// </summary>
         /// <param name="x">colomn</param>
@@ -161,6 +170,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public void SetCellItem(int x, int y, ItemGridCell cell)
         {
             _grid[y][x] = cell;
+            cell.PropertyChanged += cell_PropertyChanged;
         }
 
         /// <summary>
@@ -172,6 +182,44 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public object Data(int x, int y)
         {
             return _grid[y][x].Data;
+        }
+
+        /// <summary>
+        /// returns a row of data as a generic object
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="ignoreHeader">if true, checks the first cell type and ignores it if it's ItemGridCell_HeaderType</param>
+        /// <returns></returns>
+        public List<object> RowData(int row, bool ignoreHeader = true)
+        {
+            List<object> rowdataList = new List<object>();
+            int start = 0;
+            int upper = _grid[row].Count;
+            if (_grid[row][0] is ItemGridCell_HeaderType)
+                start = 1;
+            for (int i = start; i < upper; i++)
+            {
+                rowdataList.Add(_grid[row][i].Data);
+            }
+            return rowdataList;
+        }
+
+        /// <summary>
+        /// a static which returns a list of Data in a given row that matches the data type T
+        /// </summary>
+        /// <typeparam name="T">type of data expected</typeparam>
+        /// <param name="itemGridUC">the ItemGridUC</param>
+        /// <param name="row">the row of data to get</param>
+        /// <returns></returns>
+        public static List<T> RowDataofType<T>(ItemGridUC itemGridUC, int row)
+        {
+            List<T> rowdataList = new List<T>();
+            foreach (var cell in itemGridUC._grid[row])
+            {
+                if(cell.Data is T)
+                    rowdataList.Add((T)cell.Data);
+            }
+            return rowdataList;
         }
     }
 }

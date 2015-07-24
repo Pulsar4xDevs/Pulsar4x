@@ -18,7 +18,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             get {return _data;}
             protected set
             {
-                if (_data != value)
+                if (!ReferenceEquals(value, _data))
                 {
                     _data = value;
                     NotifyPropertyChanged();
