@@ -18,7 +18,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             get {return _data;}
             protected set
             {
-                if (!ReferenceEquals(value, _data))
+                if (!ReferenceEquals(value, _data)) //cannot use if (value != _data) here due to the possiblity that _data is a struct. 
                 {
                     _data = value;
                     NotifyPropertyChanged();
@@ -38,7 +38,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             {
                 string returnstring = "null";
 
-                //canot use //if (Data != null) here due to the possiblity that Data is a struct. 
+                //cannot use if (Data != null) here due to the possiblity that Data is a struct. 
                 if (!ReferenceEquals(null, Data))
                     returnstring = _getText_;
 
@@ -223,7 +223,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             TextBox textbox = new TextBox();
 
             textbox.Text = num.ToString();
-
+            textbox.Dock = DockStyle.Fill;
             _editControl_ = textbox; //set the _editControl
             textbox.Leave += new EventHandler(StopEditing); //subscribe to the correct event handler (textbox.Leave) to stop editing.
 
@@ -267,7 +267,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             ListBox listBox = new ListBox();
             listBox.DataSource = Enum.GetValues(typeof(AbilityType));
 
-            //listBox.Dock = DockStyle.Fill;
+            //listBox.Dock = DockStyle.Fill; //DockStyle.fill really does not work well with the listbox for this is seems. 
             Data = ability;
             listBox.SelectedItem = Data;
             _editControl_ = listBox;
