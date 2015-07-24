@@ -2,31 +2,33 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Pulsar4X.ECSLib;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ModdingTools.JsonDataEditor.UserControls
 {
-    public partial class ItemGridCell : UserControl
+    public partial class ItemGridCell : UserControl , INotifyPropertyChanged
     {
-        public dynamic Data { get; protected set; }
-        protected dynamic _editControl_;
+        private dynamic _data;
         private dynamic _activeControl;
+        protected dynamic _editControl_;
+
+        public dynamic Data
+        {
+            get {return _data;}
+            protected set
+            {
+                if (_data != value)
+                {
+                    _data = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+     
         public ItemGridUC ParentGrid { get; set; }
         public int Colomn { get; set; }
         public int Row { get; set; }
-
-        public ItemGridCell() 
-        {
-            InitializeComponent();
-            _activeControl = displayLabel;
-            displayLabel.Text = Text;
-            displayLabel.MouseClick += new MouseEventHandler(OnMouseClick);
-            MouseClick += new MouseEventHandler(OnMouseClick);
-        }
-
-        public ItemGridCell(dynamic data) : this()
-        {
-            Data = data;
-        }
 
         /// <summary>
         /// The display text for this control
@@ -53,6 +55,29 @@ namespace ModdingTools.JsonDataEditor.UserControls
         {
             get { return Data.Text; }
         }
+
+
+        /// <summary>
+        /// Constructor. 
+        /// </summary>
+        private ItemGridCell() 
+        {
+            InitializeComponent();
+            _activeControl = displayLabel;
+            displayLabel.Text = Text;
+            displayLabel.MouseClick += (OnMouseClick);
+            MouseClick += (OnMouseClick);
+        }
+
+        /// <summary>
+        /// This constructor should be used.
+        /// </summary>
+        /// <param name="data"></param>
+        public ItemGridCell(dynamic data) : this()
+        {
+            Data = data;
+        }
+
 
         public override void Refresh()
         {
@@ -114,7 +139,22 @@ namespace ModdingTools.JsonDataEditor.UserControls
             displayLabel.Text = Text;
             return true;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        // This method is called by the Set accessor of each property. 
+        // The CallerMemberName attribute that is applied to the optional propertyName 
+        // parameter causes the property name of the caller to be substituted as an argument. 
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
     }
+
+
 
     /// <summary>
     /// this is a special cell type for headers, ie use as the first cell in a row. 
