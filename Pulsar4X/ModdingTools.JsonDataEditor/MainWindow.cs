@@ -65,6 +65,7 @@ namespace ModdingTools.JsonDataEditor
                         _componentsWindow = new ComponentsWindow();
                     Width = _componentsWindow.Width + BorderWidth;
                     Height = _componentsWindow.Height + BorderHeight;
+                    _componentsWindow.Dock = DockStyle.Fill;
                     Controls.Add(_componentsWindow);
                     break;
             }

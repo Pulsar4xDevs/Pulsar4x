@@ -25,17 +25,18 @@ namespace ModdingTools.JsonDataEditor
         private BindingList<DataHolder> _allComponents = new BindingList<DataHolder>();
         private ComponentSD _currentComponent = new ComponentSD();
  
-        private BindingList<DataHolder> _selectedComponentAbilities = new BindingList<DataHolder>();
-        private ComponentAbilityWrapper _currentAbility; 
+        private BindingList<ComponentAbilityWrapper> _selectedComponentAbilityWrappers = new BindingList<ComponentAbilityWrapper>();
+        private int _currentAbility = 0;
 
         public ComponentsWindow()
         {
             InitializeComponent();
             UpdateComponentslist();
-            //Data.InstallationData.ListChanged += UpdateComponentslist;
+
             listBox_allComponents.DataSource = _allComponents;
             listBox_allAbilities.DataSource = Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>();
-            listBox_Abilities.DataSource = _selectedComponentAbilities;
+            listBox_Abilities.DataSource = _selectedComponentAbilityWrappers;
+            listBox_Abilities.DisplayMember = "Name";
             itemGridUC1.RowChanged += (OnRowChanged);
         }
 
@@ -52,22 +53,26 @@ namespace ModdingTools.JsonDataEditor
 
             genericDataUC1.Item = dh;
             genericDataUC1.Description = _currentComponent.Description;
-            _selectedComponentAbilities.Clear();
+ 
             foreach (ComponentAbilitySD abilitySD in _currentComponent.ComponentAbilitySDs)
             {
-                _selectedComponentAbilities.Add(new DataHolder(abilitySD));
-            }
-            
+  
+                _selectedComponentAbilityWrappers.Add(new ComponentAbilityWrapper(abilitySD));
+            }            
         }
 
-        private void SetCurrentAbility(DataHolder componentAbilityDH)
+        private void SetCurrentAbility(int index)
         {
-            _currentAbility = new ComponentAbilityWrapper(componentAbilityDH.StaticData);
-            propertyGrid_PropertyEditor.SelectedObject = new AbilitiesDisplayer(componentAbilityDH);
-            SetupItemGrid(componentAbilityDH);
-            
+            _currentAbility = index;
+            SetupItemGrid(_selectedComponentAbilityWrappers[index].AbilityStaticData());
         }
 
+        /// <summary>
+        /// itemgrid stuff. gets cell data and updates the _currentAbility ComponentAbilityWrapper type. 
+        /// is invoked when the row is changed in the itemgridUC. 
+        /// </summary>
+        /// <param name="rowNum"></param>
+        /// <param name="e"></param>
         private void OnRowChanged(object rowNum, EventArgs e)
         {
             int row = (int)rowNum;
@@ -80,8 +85,6 @@ namespace ModdingTools.JsonDataEditor
             Type t1 = pinfo.PropertyType; //this does not valadate as a list. 
             dynamic value = pinfo.GetValue(_currentAbility, null);
             Type t3 = value.GetType();
-
-
 
             if (value is IList)
             {
@@ -110,13 +113,20 @@ namespace ModdingTools.JsonDataEditor
             
 
             //header.RowData = itemGridUC1.RowData(row);
-            ComponentAbilitySD abilitySD = _currentAbility.AbilityStaticData();
+            ComponentAbilitySD abilitySD = _selectedComponentAbilityWrappers[_currentAbility].AbilityStaticData();
         }
 
-        private void SetupItemGrid(DataHolder componentAbilityDH)
+        /// <summary>
+        /// this sets up the itemGrid controll by selecting the correct cell type
+        /// creating the cells
+        /// creating the headders
+        /// adding them to the itemGrid control.
+        /// </summary>
+        /// <param name="componentAbilityDH"></param>
+        private void SetupItemGrid(ComponentAbilitySD abilitySD)
         {
             itemGridUC1.Clear();
-            ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
+            //ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
 
             Type t = _currentAbility.GetType();
             ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name", t.GetProperty("Name"));
@@ -229,250 +239,6 @@ namespace ModdingTools.JsonDataEditor
             itemGridUC1.AddRow(techRequrementCells);
         }
 
-        /// <summary>
-        /// sets how the propertygrid displays ComponentAbilitySD Data
-        /// </summary>
-        public class AbilitiesDisplayer
-        {
-            private DataHolder _abilityDH;
-            private ComponentAbilitySD _abilitySD { 
-                get { return _abilityDH.StaticData; } 
-                set { _abilityDH.StaticData = value; } }
-            
-            private string _name;
-            private string _description;
-
-            private AbilityType _ability;
-            private List<float> _abilityAmount;
-            private List<float> _crewAmount;
-            private List<float> _weightAmount;
-            private AbilityType _affectsAbility;
-            private List<float> _affectedAmount;
-            private List<Guid> _techRequirements;
-
-
-            public AbilitiesDisplayer(DataHolder abilityDH)
-            {
-                _abilityDH = abilityDH;
-                _name = _abilitySD.Name;
-                _description = _abilitySD.Description;
-                _ability = _abilitySD.Ability;
-                _abilityAmount = _abilitySD.AbilityAmount;
-                _crewAmount = _abilitySD.CrewAmount;
-                _weightAmount = _abilitySD.WeightAmount;
-                _affectsAbility = _abilitySD.AffectsAbility;
-                _affectedAmount = _abilitySD.AffectedAmount;
-                _techRequirements = _abilitySD.TechRequirements;
-
-            }
-
-            [DisplayName("Name")]
-            [Description("This is the displayed name for this ability")]
-            [Category("Name")]
-            [Editor(typeof(String), typeof(string))]
-            public String Name {
-                get { return _abilitySD.Name; }
-                set
-                {
-                    _name = value; 
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Description")]
-            [Description("This is the displayed Description for this ability")]
-            [Category("Description")]
-            [Editor(typeof(String), typeof(string))]
-            public String Description
-            {
-                get { return _abilitySD.Description; }
-                set
-                {
-                    _description = value;
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Ability Type")]
-            [Description("This is the Ability Type")]
-            [Category("AbilityType")]
-            [Editor(typeof(AbilityType), typeof(AbilityType))]
-            public AbilityType AbilityType
-            {
-                get { return _abilitySD.Ability; }
-                set
-                {
-                    _ability = value;
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Ability Amount")]
-            [Description("This is the selectable Ability Amounts")]
-            [Category("AbilityAmount")]
-            [Editor(typeof(List<float>), typeof(List<float>))]
-            public List<float> AbilityAmounts
-            {
-                get { return _abilitySD.AbilityAmount; }
-                set
-                {
-                    _abilityAmount = value;
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Crew Amount")]
-            [Description("This is the Crew Amounts")]
-            [Category("CrewAmount")]
-            [Editor(typeof(List<float>), typeof(List<float>))]
-            public List<float> CrewAmounts
-            {
-                get { return _abilitySD.CrewAmount; }
-                set
-                {
-                    _crewAmount = value;
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Size Amount")]
-            [Description("This is the size/weight Amounts")]
-            [Category("Size")]
-            [Editor(typeof(List<float>), typeof(List<float>))]
-            public List<float> SizeAmounts
-            {
-                get { return _abilitySD.WeightAmount; }
-                set
-                {
-                    _weightAmount = value;
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Affected Ability Type")]
-            [Description("This is the Affected Ability Type")]
-            [Category("Affected AbilityType")]
-            [Editor(typeof(AbilityType), typeof(AbilityType))]
-            public AbilityType AffectedType
-            {
-                get { return _abilitySD.AffectsAbility; }
-                set
-                {
-                    _affectsAbility = value;
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Affected Amount")]
-            [Description("This is the affected Ability Amounts")]
-            [Category("Affect amount")]
-            [Editor(typeof(List<float>), typeof(List<float>))]
-            public List<float> AffectedAmount
-            {
-                get { return _abilitySD.AffectedAmount; }
-                set
-                {
-                    _affectedAmount = value;
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            [DisplayName("Tech Requrements")]
-            [Description("This is the Required Techs for the selected Levels")]
-            [Category("Tech Requrements")]
-            [Editor(typeof(TechListEditor), typeof(UITypeEditor))]
-            public List<DataHolder> TechReqs
-            {
-                get
-                {
-                    List<DataHolder> techlist = new List<DataHolder>();
-                    if (_abilitySD.TechRequirements != null)                       
-                        foreach (Guid? guid in _abilitySD.TechRequirements)
-                        {
-                            if(guid != null)
-                                techlist.Add(Data.TechData[(Guid)guid]);
-                        }
-                    return techlist;
-                }
-                set
-                {
-
-                    _techRequirements = Data.GetGuidList(value);
-                    UpdateAbilityStaticData();
-                }
-            }
-
-            private void UpdateAbilityStaticData()
-            {
-                ComponentAbilitySD newSD = new ComponentAbilitySD
-                {
-                    Name = _name,
-                    Description = _description,
-
-                    Ability = _ability,
-                    AbilityAmount = _abilityAmount,
-                    CrewAmount = _crewAmount,
-                    WeightAmount = _weightAmount,
-                    AffectsAbility = _affectsAbility,
-                    AffectedAmount = _affectedAmount,
-                    TechRequirements = _techRequirements
-                };
-                _abilitySD = newSD;
-
-            }
-        }
-
-        
-        
-        class TechListEditor : UITypeEditor
-        {
-            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
-            {
-                return UITypeEditorEditStyle.Modal;
-            }
-            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
-            {
-                IWindowsFormsEditorService svc = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
-                List<DataHolder> dataHolders = value as List<DataHolder>;
-                if (svc != null && dataHolders != null)
-                {            
-                    using (RequiredTechsForm form = new RequiredTechsForm())
-                    {
-                        form.ValueList = dataHolders;
-                        if (svc.ShowDialog(form) == DialogResult.OK)
-                        {
-                            dataHolders = form.ValueList; // update object
-                        }
-                    }
-                }
-                return dataHolders; // can also replace the wrapper object here
-            }
-        }
-
-        class RequiredTechsForm : Form
-        {
-            private TechRequirementsUC techucUc;
-            private Button okButton;
-            public RequiredTechsForm()
-            {
-                techucUc = new TechRequirementsUC();
-                techucUc.AllowDuplicates = true;
-                techucUc.Dock = DockStyle.Fill;
-                Controls.Add(techucUc);
-                
-                okButton = new Button();
-                okButton.Text = "OK";
-                okButton.Dock = DockStyle.Bottom;
-                okButton.DialogResult = DialogResult.OK;
-                Controls.Add(okButton);
-                
-            }
-            public List<DataHolder> ValueList
-            {
-                get { return techucUc.RequredTechs; }
-                set { techucUc.RequredTechs = value; }
-            }
-        }
 
         private void UpdateComponentslist()
         {
@@ -480,19 +246,17 @@ namespace ModdingTools.JsonDataEditor
 
         }
 
-
-
         /// <summary>
-        /// creates newSD
+        /// creates new ComponentSD
         /// </summary>
         /// <param name="guid">guid: current or new</param>
         /// <returns></returns>
         private ComponentSD ComponentStaticData(Guid guid)
         {
             List<ComponentAbilitySD> abilityList = new List<ComponentAbilitySD>();
-            foreach (var abilityDH in _selectedComponentAbilities)
+            foreach (var ability in _selectedComponentAbilityWrappers)
             {
-                abilityList.Add(abilityDH.StaticData);
+                abilityList.Add(ability.AbilityStaticData());
             }
             ComponentSD newSD = new ComponentSD
             {
@@ -505,7 +269,10 @@ namespace ModdingTools.JsonDataEditor
         }
 
 
-
+        /// <summary>
+        /// this is a wrapper class for the ComponentAbilitySD
+        /// can be gotten rid of when ComponentAbilitySD is changed from a struct to a class. 
+        /// </summary>
         public class ComponentAbilityWrapper
         {
             public string Name { get; set; }
@@ -588,19 +355,17 @@ namespace ModdingTools.JsonDataEditor
 
         private void listBox_Abilities_DoubleClick(object sender, EventArgs e)
         {
-            DataHolder selectedItem = (DataHolder)listBox_Abilities.SelectedItem;
-            ComponentStaticData(_currentComponent.ID); //recreate the SD so any changes are updated.
-            
-            SetCurrentAbility(selectedItem);
+
+            SetCurrentAbility(listBox_Abilities.SelectedIndex);
         }
 
         private void listBox_allAbilities_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             //create a list of AbilityTypes from the abilitys this component has so I can check if it's already in the list or not. 
             List<AbilityType> abilityTypeslistList = new List<AbilityType>();
-            foreach (var abilityDH in _selectedComponentAbilities)
+            foreach (var abilityWrapper in _selectedComponentAbilityWrappers)
             {
-                ComponentAbilitySD abilitySD = abilityDH.StaticData;
+                ComponentAbilitySD abilitySD = abilityWrapper.AbilityStaticData();
                 abilityTypeslistList.Add(abilitySD.Ability);
             }
 
@@ -619,10 +384,11 @@ namespace ModdingTools.JsonDataEditor
                 abilitySD.TechRequirements = new List<Guid>();
                 abilitySD.WeightAmount = new List<float>();
 
-                _selectedComponentAbilities.Add(new DataHolder(abilitySD));
+                _selectedComponentAbilityWrappers.Add(new ComponentAbilityWrapper(abilitySD));
 
             }
             //UpdateAbilityAmounts();
         }
     }
+
 }
