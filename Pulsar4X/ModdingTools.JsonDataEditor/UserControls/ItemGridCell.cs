@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Pulsar4X.ECSLib;
 using System.ComponentModel;
+using System.Drawing;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace ModdingTools.JsonDataEditor.UserControls
@@ -65,8 +67,8 @@ namespace ModdingTools.JsonDataEditor.UserControls
             InitializeComponent();
             _activeControl = displayLabel;
             displayLabel.Text = Text;
-            displayLabel.MouseClick += (OnMouseClick);
-            MouseClick += (OnMouseClick);
+            displayLabel.MouseClick += OnMouseClick;
+            MouseClick += OnMouseClick;
         }
 
         /// <summary>
@@ -161,8 +163,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// </summary>
     public class ItemGridCell_HeaderType : ItemGridCell
     {
-        public object RowData { get; set; } 
-        public ItemGridCell_HeaderType(string text, object rowData )
+        /// <summary>
+        /// this is for fancy reflection stuff...
+        /// </summary>
+        public PropertyInfo RowData { get; set; }
+        public ItemGridCell_HeaderType(string text, PropertyInfo rowData = null)
             : base(text)
         {
             RowData = rowData;
@@ -197,8 +202,19 @@ namespace ModdingTools.JsonDataEditor.UserControls
             textbox.Dock = DockStyle.Fill;
             _editControl_ = textbox; //set the _editControl
             textbox.Leave += new EventHandler(StopEditing); //subscribe to the correct event handler (textbox.Leave) to stop editing.
-
+            textbox.KeyDown += new KeyEventHandler(OnKeyDown);
             Refresh();
+        }
+
+        private void OnKeyDown(object o, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                StopEditing(o, e);
+            if (e.KeyCode == Keys.Escape)
+            {
+                _editControl_.Text = Data;
+                StopEditing(o, e);
+            }
         }
 
         public override sealed void Refresh()
@@ -227,9 +243,20 @@ namespace ModdingTools.JsonDataEditor.UserControls
             textbox.Text = num.ToString();
             textbox.Dock = DockStyle.Fill;
             _editControl_ = textbox; //set the _editControl
-            textbox.Leave += new EventHandler(StopEditing); //subscribe to the correct event handler (textbox.Leave) to stop editing.
-
+            textbox.Leave += StopEditing; //subscribe to the correct event handler (textbox.Leave) to stop editing.
+            textbox.KeyDown += OnKeyDown;
             Refresh();
+        }
+
+        private void OnKeyDown(object o, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                StopEditing(o, e);
+            if (e.KeyCode == Keys.Escape)
+            {
+                _editControl_.Text = Data;
+                StopEditing(o, e);
+            }
         }
 
         protected override string _getText_
@@ -270,6 +297,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
             listBox.DataSource = Enum.GetValues(typeof(AbilityType));
 
             //listBox.Dock = DockStyle.Fill; //DockStyle.fill really does not work well with the listbox for this is seems. 
+            listBox.Width = Width;
+            listBox.Height = 500;
+
             Data = ability;
             listBox.SelectedItem = Data;
             _editControl_ = listBox;
@@ -306,42 +336,39 @@ namespace ModdingTools.JsonDataEditor.UserControls
     public class ItemGridCell_TechStaticDataType : ItemGridCell
     {
  
-        Dictionary<string, TechSD> _selectionDictionary = new Dictionary<string, TechSD>(); 
-        public ItemGridCell_TechStaticDataType(TechSD? techSD, List<TechSD> selectionList)
-            : base(techSD)
+        Dictionary<Guid, TechSD> _guidDictionary = new Dictionary<Guid, TechSD>(); 
+        Dictionary<string, Guid> _selectionDictionary = new Dictionary<string, Guid>(); 
+        public ItemGridCell_TechStaticDataType(Guid? techGuid, List<TechSD> selectionList)
+            : base(techGuid)
         {
-            foreach (var tech in selectionList)
+            foreach (TechSD tech in selectionList)
             {
-                _selectionDictionary.Add(tech.Name, tech);
+                _guidDictionary.Add(tech.ID, tech);
+                _selectionDictionary.Add(tech.Name, tech.ID);
             }
             ListBox listBox = new ListBox();
-            listBox.DataSource = new BindingSource(_selectionDictionary, null);
-            listBox.DisplayMember = "Key";
-            listBox.ValueMember = "Value";
-            //listBox.Dock = DockStyle.Fill;
-            Data = techSD;
-            listBox.SelectedItem = techSD;
+            listBox.DataSource = new BindingSource(_selectionDictionary.Keys, null);
+
+            
+            listBox.Width = 400;
+            listBox.Height = 500;
+
+            Data = techGuid;
+            listBox.SelectedItem = techGuid;
             _editControl_ = listBox;
             listBox.SelectedIndexChanged += new EventHandler(StopEditing);
             Refresh();
         }
 
-        protected override string _getText_ { get { return Data.Name; } }
+        protected override string _getText_ { get { return _guidDictionary[Data].Name; } }
 
         protected override bool ValadateInput()
         {
-            bool success = false;
-            try
-            {
-                Data = (TechSD)_editControl_.SelectedItem.Value;
-                success = true;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
 
-            return success;
+
+                Data = _selectionDictionary[_editControl_.SelectedItem];
+                
+            return true;
         }
     }
 }

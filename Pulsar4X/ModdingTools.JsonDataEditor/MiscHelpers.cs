@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,6 +52,16 @@ namespace ModdingTools.JsonDataEditor
                 return true;
             }
             return collection.Count < 1;
+        }
+
+        public static object ConvertList(List<object> value, Type type)
+        {
+            IList list = (IList)Activator.CreateInstance(type);
+            foreach (var item in value)
+            {
+                list.Add(item);
+            }
+            return list;
         }
     }
 

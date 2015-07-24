@@ -1,10 +1,13 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Drawing.Design;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Documents;
@@ -72,7 +75,41 @@ namespace ModdingTools.JsonDataEditor
             
             //Type dataType = header.RowData.GetType();
             //List<object> datalist = header.RowData;
-            header.RowData = itemGridUC1.RowData(row);
+            
+            PropertyInfo pinfo = header.RowData; 
+            Type t1 = pinfo.PropertyType; //this does not valadate as a list. 
+            dynamic value = pinfo.GetValue(_currentAbility, null);
+            Type t3 = value.GetType();
+
+
+
+            if (value is IList)
+            {
+                var listType = t3.GetTypeInfo().GenericTypeArguments[0];
+                if (listType == typeof(IConvertible))
+                {     
+                    pinfo.SetValue(_currentAbility, Extensions.ConvertList(itemGridUC1.RowData(row), value));
+                }
+                else if (listType == typeof(Guid)) 
+                {
+                    List<Guid> newlist = new List<Guid>();
+                    foreach (Guid item in itemGridUC1.RowData(row))
+                    {
+                        newlist.Add(item);
+                    }
+                    pinfo.SetValue(_currentAbility, newlist);
+                }
+                else
+                {
+                    throw new Exception("Unknown type that does not implement IConvertable, make boilerplate as per the Guid example");
+                }
+                
+            }
+              else 
+                pinfo.SetValue(_currentAbility, itemGridUC1.RowData(row)[0]);
+            
+
+            //header.RowData = itemGridUC1.RowData(row);
             ComponentAbilitySD abilitySD = _currentAbility.AbilityStaticData();
         }
 
@@ -81,27 +118,29 @@ namespace ModdingTools.JsonDataEditor
             itemGridUC1.Clear();
             ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
 
-            ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name", _currentAbility.Name);
+            Type t = _currentAbility.GetType();
+            ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name", t.GetProperty("Name"));
+            
             ItemGridCell_String nameCell = new ItemGridCell_String(null);
             if (!String.IsNullOrEmpty(abilitySD.Name))
                 nameCell = new ItemGridCell_String(abilitySD.Name);
             itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, nameCell });
 
 
-            rowHeader = new ItemGridCell_HeaderType("Description", _currentAbility.Description);
+            rowHeader = new ItemGridCell_HeaderType("Description", t.GetProperty("Description"));
             ItemGridCell_String descCell = new ItemGridCell_String(null);
             if (!String.IsNullOrEmpty(abilitySD.Description))
                 descCell = new ItemGridCell_String(abilitySD.Description);
             itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, descCell });
 
 
-            rowHeader = new ItemGridCell_HeaderType("Ability", _currentAbility.Ability);
+            rowHeader = new ItemGridCell_HeaderType("Ability", t.GetProperty("Ability"));
             ItemGridCell_AbilityType abilityCell = new ItemGridCell_AbilityType(null);
             if (abilitySD.Ability != null)
                 abilityCell = new ItemGridCell_AbilityType(abilitySD.Ability);
             itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, abilityCell });
 
-            rowHeader = new ItemGridCell_HeaderType("AbilityAmount", _currentAbility.AbilityAmount);
+            rowHeader = new ItemGridCell_HeaderType("AbilityAmount", t.GetProperty("AbilityAmount"));
             List<ItemGridCell> abilityAmountCells = new List<ItemGridCell>(){rowHeader};
             if (!abilitySD.AbilityAmount.IsNullOrEmpty())
             {
@@ -117,7 +156,7 @@ namespace ModdingTools.JsonDataEditor
             }
             itemGridUC1.AddRow(abilityAmountCells);
 
-            rowHeader = new ItemGridCell_HeaderType("CrewAmount", _currentAbility.CrewAmount);
+            rowHeader = new ItemGridCell_HeaderType("CrewAmount", t.GetProperty("CrewAmount"));
             List<ItemGridCell> crewAmountCells = new List<ItemGridCell>(){rowHeader};
             if (!abilitySD.CrewAmount.IsNullOrEmpty())
             foreach (float crew in abilitySD.CrewAmount)
@@ -131,7 +170,7 @@ namespace ModdingTools.JsonDataEditor
             }
             itemGridUC1.AddRow(crewAmountCells);
 
-            rowHeader = new ItemGridCell_HeaderType("WeightAmount", _currentAbility.WeightAmount);
+            rowHeader = new ItemGridCell_HeaderType("WeightAmount", t.GetProperty("WeightAmount"));
             List<ItemGridCell> weightAmountCells = new List<ItemGridCell>(){rowHeader};
             if (!abilitySD.WeightAmount.IsNullOrEmpty())
             {
@@ -148,14 +187,14 @@ namespace ModdingTools.JsonDataEditor
             itemGridUC1.AddRow(weightAmountCells);
 
 
-            rowHeader = new ItemGridCell_HeaderType("AffectsAbility", _currentAbility.AffectsAbility);
+            rowHeader = new ItemGridCell_HeaderType("AffectsAbility", t.GetProperty("AffectsAbility"));
             ItemGridCell_AbilityType abilityAffectedCell = new ItemGridCell_AbilityType(null);
             if (abilitySD.AffectsAbility != null)
                 abilityAffectedCell = new ItemGridCell_AbilityType(abilitySD.AffectsAbility);    
             itemGridUC1.AddRow(new List<ItemGridCell>{rowHeader, abilityAffectedCell });
 
 
-            rowHeader = new ItemGridCell_HeaderType("AffectedAmount", _currentAbility.AffectedAmount);
+            rowHeader = new ItemGridCell_HeaderType("AffectedAmount", t.GetProperty("AffectedAmount"));
             List<ItemGridCell> affectedAmountCells = new List<ItemGridCell>{rowHeader};
             if (!abilitySD.AffectedAmount.IsNullOrEmpty())
             {
@@ -172,13 +211,13 @@ namespace ModdingTools.JsonDataEditor
             itemGridUC1.AddRow(affectedAmountCells);
 
 
-            rowHeader = new ItemGridCell_HeaderType("TechReqirements", _currentAbility.TechRequirements);
+            rowHeader = new ItemGridCell_HeaderType("TechRequirements", t.GetProperty("TechRequirements"));
             List<ItemGridCell> techRequrementCells = new List<ItemGridCell>{rowHeader};
             if (!abilitySD.TechRequirements.IsNullOrEmpty())
             {
                 foreach (Guid techGuid in abilitySD.TechRequirements)
                 {
-                    ItemGridCell_TechStaticDataType cell = new ItemGridCell_TechStaticDataType(Data.TechData[techGuid].StaticData, Data.GetllistoftTechSds());
+                    ItemGridCell_TechStaticDataType cell = new ItemGridCell_TechStaticDataType(techGuid, Data.GetllistoftTechSds());
                     techRequrementCells.Add(cell);
                 }
             }
