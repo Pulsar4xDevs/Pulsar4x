@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace ModdingTools.JsonDataEditor.UserControls
@@ -9,9 +10,20 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// <summary>
     /// a horrible attempt at a more usable grid control for multiple data types.
     /// </summary>
-    public partial class ItemGridUC : UserControl
+    public partial class ItemGridUC : UserControl , INotifyPropertyChanged
     {
-        
+        /// <summary>
+        /// this gets invoked when a cell's Data changes. 
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+         
+        /// <summary>
+        /// this gets invoked when a row changes. 
+        /// This is the same as PropertyChanged, however it returns the row number.
+        /// (cast to an int)
+        /// </summary>
+        public event PropertyChangedEventHandler RowChanged;
+
         private List<List<ItemGridCell>> _grid = new List<List<ItemGridCell>>();
 
         private int _colomnCount = 1;
@@ -73,6 +85,33 @@ namespace ModdingTools.JsonDataEditor.UserControls
         void cell_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             //throw new System.NotImplementedException();
+            NotifyCellPropertyChanged(sender);
+            NotifyRowPropertyChanged(sender as ItemGridCell);
+        }
+
+        //private void row_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        //{
+        //    NotifyRowPropertyChanged(sender);
+        //}
+
+        private void NotifyRowPropertyChanged(ItemGridCell cell, [CallerMemberName] String propertyName = "")
+        {
+            
+            if (RowChanged != null)
+            {
+                RowChanged(cell.Row, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        // This method is called by the Set accessor of each property. 
+        // The CallerMemberName attribute that is applied to the optional propertyName 
+        // parameter causes the property name of the caller to be substituted as an argument. 
+        private void NotifyCellPropertyChanged(object cell, [CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(cell, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         public void RowResize(int row, int height)
@@ -134,6 +173,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public void AddRow(List<ItemGridCell> rowlist)
         {
             _grid.Add(rowlist);
+            
             if (rowlist.Count > _colomnCount)
                 _colomnCount = rowlist.Count;
             UpdateTable();
@@ -221,5 +261,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             }
             return rowdataList;
         }
+
+        
     }
 }

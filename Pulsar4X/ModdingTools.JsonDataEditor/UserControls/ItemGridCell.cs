@@ -161,9 +161,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// </summary>
     public class ItemGridCell_HeaderType : ItemGridCell
     {
-        public ItemGridCell_HeaderType(string text)
+        public object RowData { get; set; } 
+        public ItemGridCell_HeaderType(string text, object rowData )
             : base(text)
         {
+            RowData = rowData;
             _editControl_ = null;
             displayLabel.BackColor = DefaultBackColor;
             BackColor = DefaultBackColor;
