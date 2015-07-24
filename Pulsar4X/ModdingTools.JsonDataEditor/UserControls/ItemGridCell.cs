@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using Pulsar4X.ECSLib;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -95,7 +96,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// </summary>
         /// <param name="o"></param>
         /// <param name="e"></param>
-        protected void OnMouseClick(object o, MouseEventArgs e)
+        public virtual void OnMouseClick(object o, MouseEventArgs e)
         {
             if(_editControl_ != null) //ie a headertype cell won't be editable
                 StartEditing(this, e);
@@ -154,6 +155,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+
+        public virtual object Copy()
+        {
+            return new ItemGridCell(_data);           
+        }
     }
 
 
@@ -166,8 +172,17 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// <summary>
         /// this is for fancy reflection stuff...
         /// </summary>
-        public PropertyInfo RowData { get; set; }
-        public ItemGridCell_HeaderType(string text, PropertyInfo rowData = null)
+        private PropertyInfo _rowData;
+        public PropertyInfo RowData
+        {
+            get {return _rowData; }
+            private set
+            {
+                if (value != null)
+                    _rowData = value;
+            }
+        }
+        public ItemGridCell_HeaderType(string text, PropertyInfo rowData)
             : base(text)
         {
             RowData = rowData;
@@ -185,6 +200,39 @@ namespace ModdingTools.JsonDataEditor.UserControls
         protected override string _getText_
         {
             get { return Data; }
+        }
+
+        public override object Copy()
+        {
+            return new ItemGridCell_HeaderType(Data, RowData);
+        }
+    }
+
+
+    public class ItemGridCell_EmptyCellType : ItemGridCell
+    {
+        private ItemGridCell _newcell;
+        /// <summary>
+        /// an empty cell, this special cell type creates a new cell of teh defaultcell (copies the given) when clicked,
+        /// adding it to the grid. 
+        /// </summary>
+        /// <param name="defaultCell"></param>
+        public ItemGridCell_EmptyCellType(ItemGridCell defaultCell) : base(null)
+        {
+            _newcell = defaultCell;
+        }
+
+        public override void OnMouseClick(object o, MouseEventArgs e)
+        {
+
+            ItemGridCell newCell = (ItemGridCell)_newcell.Copy();
+            ParentGrid.InsertCellAt(this.Colomn,this.Row,newCell);
+            newCell.OnMouseClick(o,e);
+        }
+
+        public override object Copy()
+        {
+            return new ItemGridCell_EmptyCellType(_newcell);
         }
     }
 
@@ -225,6 +273,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
         protected override string _getText_
         {
             get { return Data; }
+        }
+
+        public override object Copy()
+        {
+            return new ItemGridCell_String(Data);
         }
     }
 
@@ -279,6 +332,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
             }
             return success;
         }
+
+        public override object Copy()
+        {
+            return new ItemGridCell_FloatType(Data);
+        }
     }
 
 
@@ -327,6 +385,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
             }
             return success;
         }
+
+        public override object Copy()
+        {
+            return new ItemGridCell_AbilityType(Data);
+        }
     }
 
 
@@ -364,11 +427,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         protected override bool ValadateInput()
         {
-
-
-                Data = _selectionDictionary[_editControl_.SelectedItem];
-                
+                Data = _selectionDictionary[_editControl_.SelectedItem];                
             return true;
+        }
+
+        public override object Copy()
+        {
+            return new ItemGridCell_TechStaticDataType(Data, _guidDictionary.Values.ToList());
         }
     }
 }

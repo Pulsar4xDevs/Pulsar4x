@@ -170,12 +170,28 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// adds a row of ItemGridCells (or children).
         /// </summary>
         /// <param name="rowlist"></param>
-        public void AddRow(List<ItemGridCell> rowlist)
+        public void AddRow(ItemGridCell_HeaderType headerCell, List<ItemGridCell> rowlist)
         {
+            if (rowlist.IsNullOrEmpty() )
+            {
+                throw new Exception("Row must contain at least one item, consider using an ItemGridCell_EmptyType");
+            }
+
+            if (!(rowlist[rowlist.Count-1] is ItemGridCell_EmptyCellType))
+            {   if (!(rowlist[0] is ItemGridCell_HeaderType))
+                    rowlist.Add(new ItemGridCell_EmptyCellType(rowlist[0]));
+                else
+                    rowlist.Add(new ItemGridCell_EmptyCellType(rowlist[1]));
+            }
+            if (rowlist[0] is ItemGridCell_HeaderType)
+                rowlist[0] = headerCell;
+            else
+                rowlist.Insert(0,headerCell);
+
             _grid.Add(rowlist);
-            
             if (rowlist.Count > _colomnCount)
                 _colomnCount = rowlist.Count;
+
             UpdateTable();
         }
 
@@ -211,6 +227,18 @@ namespace ModdingTools.JsonDataEditor.UserControls
         {
             _grid[y][x] = cell;
             cell.PropertyChanged += cell_PropertyChanged;
+        }
+
+        /// <summary>
+        /// inserts a cell in a row.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="cell"></param>
+        public void InsertCellAt(int x, int y, ItemGridCell cell)
+        {
+            _grid[y].Insert(x, cell);
+            UpdateTable();
         }
 
         /// <summary>
