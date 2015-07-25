@@ -524,7 +524,7 @@ namespace Pulsar4X.ECSLib
                 // Enforce GalaxyFactory mass limits.
                 MinMaxStruct moonMassMinMax = _galaxyGen.Settings.SystemBodyMassByType[newMoonBodyDB.Type];
                 double maxRelativeMass = parentMVDB.Mass * _galaxyGen.Settings.MaxMoonMassRelativeToParentBody;
-                if (maxRelativeMass > moonMassMinMax.Max)
+                if (maxRelativeMass < moonMassMinMax.Max)
                 {
                     moonMassMinMax.Max = maxRelativeMass;
                 }
