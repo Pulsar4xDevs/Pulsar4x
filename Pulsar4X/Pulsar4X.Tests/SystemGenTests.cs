@@ -317,6 +317,8 @@ namespace Pulsar4X.Tests
             System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
 
             const int numSystems = 1000;
+            _game = Game.NewGame("Unit Test Game", DateTime.Now, 0); // reinit with empty game, so we can do a clean test.
+            GC.Collect();
 
             StarSystemFactory ssf = new StarSystemFactory(_game);
 
@@ -335,7 +337,7 @@ namespace Pulsar4X.Tests
             int totalEntities = 0;
             foreach (StarSystem system in _game.Systems)
             {
-                List<Entity> entities = system.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>();
+                List<Entity> entities = system.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>();
                 totalEntities += entities.Count;
             }
 
