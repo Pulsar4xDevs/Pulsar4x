@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Runtime.Remoting.Messaging;
 
 namespace Pulsar4X.ECSLib
 {
@@ -705,7 +709,7 @@ namespace Pulsar4X.ECSLib
                 bodyInfo.MagneticField *= 0.1F; // reduce magnetic field of a dead world.
 
             // Generate atmosphere:
-            GenerateAtmosphere(system, body);
+            GenerateAtmosphere(system, body, staticData);
 
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;
@@ -878,17 +882,142 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Todo Finish atmosphere generation.
         /// </summary>
-        public void GenerateAtmosphere(StarSystem system, ProtoEntity body)
+        public void GenerateAtmosphere(StarSystem system, ProtoEntity body, StaticDataStore staticData)
         {
             var atmoDB = body.GetDataBlob<AtmosphereDB>();
             if (atmoDB == null)
                 return; // no atmosphere for this body.
 
-            // gen atmosphere here...
+            SystemBodyDB bodyDB = body.GetDataBlob<SystemBodyDB>();
+            MassVolumeDB mvDB = body.GetDataBlob<MassVolumeDB>();
+            OrbitDB orbit = body.GetDataBlob<OrbitDB>();
+
+            // We first need to decid if this body has an atmosphere, the bigger the mor likly it is to have one.
+            // if it does then we need to add a primary gas (e.g. Nitrigen), a secondary gas (e.g. oxygen)
+            // Followed by up to 5 trace gases (e.g. Argon). 
+            // The bigger the body the more likly it is to have an atmo gas it should have and the more trace gases.
+
+            // Atmo modifer is used to determine how thick the atmosphere should be, higher = thicker.
+            double atmoModifer = _galaxyGen.Settings.AtmosphereGenerationModifier[bodyDB.Type] * (mvDB.Mass / GameConstants.Units.EarthMassInKG);
+            double atmoGenChance = GMath.Clamp(atmoModifer, 0, 1); // used to detmine if we should haver an atmosphere at all.
+
+            if (atmoGenChance > system.RNG.NextDouble())
+            {
+                // we can generate an atmosphere!
+                // first we should decide how thick it should be:
+                double newATM = GenAtmosphereThickness(mvDB.Mass, bodyDB, orbit, atmoModifer, system.RNG.NextDouble());
+
+                // now we will want to select gasses for the atmosphere:
+                SelectGases(newATM, atmoModifer, mvDB.Mass, bodyDB.Type, atmoDB, system, staticData);
+
+                // set final pressure:
+                foreach (var gas in atmoDB.Composition)
+                {
+                    atmoDB.Pressure += gas.Value; // add pressure of each gas.
+                }
+
+                // Set Albeado:
+                atmoDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.Type], system.RNG.NextDouble());
+
+                // Add hydrospher and other Terrestrial woprld only stuff:
+                if (bodyDB.Type == BodyType.Terrestrial || bodyDB.Type == BodyType.Terrestrial)
+                {
+                    if (system.RNG.NextDouble() > 0.5)
+                    {
+                        atmoDB.Hydrosphere = true;
+                        atmoDB.HydrosphereExtent = (short)(system.RNG.NextDouble() * 100);
+                    }
+                }
+            }
 
             // finally generate a description:
             atmoDB.GenerateDescriptions();
         }
 
+        double GenAtmosphereThickness(double bodyMass, SystemBodyDB body, OrbitDB orbit,  double atmoModifer, double randomModifer)
+        {
+            switch (body.Type)
+            {
+                case BodyType.GasDwarf:
+                case BodyType.GasGiant:
+                case BodyType.IceGiant:
+                    return 1;   // gas planet types always have an atmosphere of 1 atm.
+                case BodyType.Moon:
+                case BodyType.Terrestrial:
+                case BodyType.Asteroid:
+                case BodyType.Comet:
+                case BodyType.DwarfPlanet:
+                default:
+                    // this will produce 1 atm for earth like planets, less for smaller planets, more for larger:
+                    double massRatio = (bodyMass / GameConstants.Units.EarthMassInKG);
+                    double atm = massRatio * massRatio * atmoModifer;
+                    
+                    // now we have a nice starting atm, lets modify it:
+                    // first we will reduce it if the planet is closer to the star, increase it if it is further away using the ewchosphere of the star:
+                    StarInfoDB starInfo;
+                    double ecosphereRatio = 1;
+                    if (body.Type == BodyType.Moon)
+                    {
+                        // if moon get planet orbit, then star
+                        var parentOrbitDB = orbit.ParentDB as OrbitDB;
+                        starInfo = parentOrbitDB.Parent.GetDataBlob<StarInfoDB>();
+                        ecosphereRatio = (parentOrbitDB.SemiMajorAxis / starInfo.EcoSphereRadius);
+                    }
+                    else
+                    {
+                        // if planet get star:
+                        starInfo = orbit.Parent.GetDataBlob<StarInfoDB>();
+                        ecosphereRatio = (orbit.SemiMajorAxis / starInfo.EcoSphereRadius);
+                    }
+
+                    atm = atm * ecosphereRatio;  // if inside eco sphere this will reduce atmo, increase it if outside.
+                    
+                    // now we will see if this planet should be venus like pressure cooker:
+                    // if the planet is very close it will 
+                    double inverseEchoshpereRatio = 1 - (GMath.Clamp(ecosphereRatio, 0, 1));
+                    if (randomModifer < _galaxyGen.Settings.RunawayGreenhouseEffectChance * inverseEchoshpereRatio)
+                    {
+                        atm *= 100;
+                    }
+
+                    // finally clamp the atmosphere to a resonable value:
+                    return GMath.Clamp(atm, _galaxyGen.Settings.MinMaxAtmosphericPressure.Min, _galaxyGen.Settings.MinMaxAtmosphericPressure.Max);
+            }
+        }
+
+        void SelectGases(double atm, double atmoModifer, double bodyMass, BodyType type, AtmosphereDB atmoDB, StarSystem system, StaticDataStore staticData)
+        {
+            // do a quick safty check:
+            if (staticData.AtmosphericGases.Count() < 7)
+                return; // bauil on selecting gases.
+
+            // get the gas list:
+            var gases = new WeightedList<AtmosphericGasSD>();
+            gases.AddRange(staticData.AtmosphericGases);
+
+            // get the primary gass:
+            double percentage = 0.6 + 0.3 * system.RNG.NextDouble();
+            var gas = gases.Select(system.RNG.NextDouble());
+            atmoDB.Composition.Add(gas, (float)(percentage * atm));
+            gases.Remove(gas);
+
+            // get the secondary gas:
+            percentage = 0.98 - percentage;
+            gas = gases.Select(system.RNG.NextDouble());
+            atmoDB.Composition.Add(gas, (float)(percentage * atm));
+            gases.Remove(gas);
+
+            // get the trace gases, note that we will not care so much about 
+            int noOfTraceGases = (int)GMath.Clamp(Math.Round(5 * atmoModifer), 1, 5);
+            double remainingPercentage = 0.02;
+            percentage = 0;
+            for (int i = 0; i < noOfTraceGases + 1; ++i)
+            {
+                percentage = (remainingPercentage - percentage) * system.RNG.NextDouble();  // just use random numbers, it will be close enough.
+                gas = gases.Select(system.RNG.NextDouble()); 
+                atmoDB.Composition.Add(gas, (float)(percentage * atm));
+                gases.Remove(gas);
+            }
+        }
     }
 }
