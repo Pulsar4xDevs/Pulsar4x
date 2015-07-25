@@ -880,8 +880,14 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Todo Finish atmosphere generation.
+        /// This function generates atmosphere for a body, including it's albedo and surface temp.
         /// </summary>
+        /// <remarks>
+        /// We first need to decid if this body has an atmosphere, the bigger the mor likly it is to have one.
+        /// if it does then we need to add a primary gas (e.g. Nitrigen), a secondary gas (e.g. oxygen)
+        /// Followed by up to 5 trace gases (e.g. Argon). 
+        /// The bigger the body the more likly it is to have an atmo gas it should have and the more trace gases.
+        /// </remarks>
         public void GenerateAtmosphere(StarSystem system, ProtoEntity body, StaticDataStore staticData)
         {
             var atmoDB = body.GetDataBlob<AtmosphereDB>();
@@ -892,10 +898,8 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB mvDB = body.GetDataBlob<MassVolumeDB>();
             OrbitDB orbit = body.GetDataBlob<OrbitDB>();
 
-            // We first need to decid if this body has an atmosphere, the bigger the mor likly it is to have one.
-            // if it does then we need to add a primary gas (e.g. Nitrigen), a secondary gas (e.g. oxygen)
-            // Followed by up to 5 trace gases (e.g. Argon). 
-            // The bigger the body the more likly it is to have an atmo gas it should have and the more trace gases.
+            // Set Albeado (all bodies have an albedo):
+            atmoDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.Type], system.RNG.NextDouble());
 
             // Atmo modifer is used to determine how thick the atmosphere should be, higher = thicker.
             double atmoModifer = _galaxyGen.Settings.AtmosphereGenerationModifier[bodyDB.Type] * (mvDB.Mass / GameConstants.Units.EarthMassInKG);
@@ -910,14 +914,8 @@ namespace Pulsar4X.ECSLib
                 // now we will want to select gasses for the atmosphere:
                 SelectGases(newATM, atmoModifer, mvDB.Mass, bodyDB.Type, atmoDB, system, staticData);
 
-                // set final pressure:
-                foreach (var gas in atmoDB.Composition)
-                {
-                    atmoDB.Pressure += gas.Value; // add pressure of each gas.
-                }
-
-                // Set Albeado:
-                atmoDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.Type], system.RNG.NextDouble());
+                // set an initial surface temp to the base temp, adjusted for albedo:
+                atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - atmoDB.Albedo);
 
                 // Add hydrospher and other Terrestrial woprld only stuff:
                 if (bodyDB.Type == BodyType.Terrestrial || bodyDB.Type == BodyType.Terrestrial)
@@ -930,8 +928,9 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            // finally generate a description:
-            atmoDB.GenerateDescriptions();
+            // finally Run the atmo processor over it to create the greenhous factors and descriptions etc.
+            // We want to run this even for bodies without an atmosphere.
+            AtmosphereProcessor.UpdateAtmosphere(atmoDB, bodyDB);
         }
 
         double GenAtmosphereThickness(double bodyMass, SystemBodyDB body, OrbitDB orbit,  double atmoModifer, double randomModifer)
