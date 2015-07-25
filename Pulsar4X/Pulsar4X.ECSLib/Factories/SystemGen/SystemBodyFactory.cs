@@ -276,7 +276,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    massMultiplyer *= GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.Type], system.RNG.NextDouble()); // cache mass...
+                    massMultiplyer *= GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.Type], Math.Pow(system.RNG.NextDouble(), 3)); // cache mass, alos cube random nuber to make smaller bodies more likly.
                     density = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyBodyDB.Type], system.RNG.NextDouble());
                 }
                 
