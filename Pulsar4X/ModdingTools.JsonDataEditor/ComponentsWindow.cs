@@ -26,8 +26,8 @@ namespace ModdingTools.JsonDataEditor
         private ComponentSD _currentComponent = new ComponentSD();
  
         private BindingList<ComponentAbilityWrapper> _selectedComponentAbilityWrappers = new BindingList<ComponentAbilityWrapper>();
-        private int _currentAbility = 0;
-
+        private int _currentAbilityIndex = 0;
+        private ComponentAbilityWrapper CurrentAbility { get { return _selectedComponentAbilityWrappers[_currentAbilityIndex]; } }
         public ComponentsWindow()
         {
             InitializeComponent();
@@ -63,7 +63,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void SetCurrentAbility(int index)
         {
-            _currentAbility = index;
+            _currentAbilityIndex = index;
             SetupItemGrid(_selectedComponentAbilityWrappers[index].AbilityStaticData());
         }
 
@@ -76,44 +76,37 @@ namespace ModdingTools.JsonDataEditor
         private void OnRowChanged(object rowNum, EventArgs e)
         {
             int row = (int)rowNum;
-            ItemGridCell_HeaderType header = itemGridUC1.GetCellItem(row,0) as ItemGridCell_HeaderType;
+            ItemGridCell_HeaderType header = (ItemGridCell_HeaderType)itemGridUC1.GetCellItem(row,0);
             
             //Type dataType = header.RowData.GetType();
             //List<object> datalist = header.RowData;
             
             PropertyInfo pinfo = header.RowData; 
             Type t1 = pinfo.PropertyType; //this does not valadate as a list. 
-            dynamic value = pinfo.GetValue(_currentAbility, null);
-            Type t3 = value.GetType();
 
-            if (value is IList)
+            //this is an componentAbilityProperty.
+            dynamic abilityPropertyObject = pinfo.GetValue(CurrentAbility, null);
+            //this is the componentAbilityPropery type.
+            Type abilityPropertyType = abilityPropertyObject.GetType();
+
+            if (abilityPropertyObject is IList)
             {
-                var listType = t3.GetTypeInfo().GenericTypeArguments[0];
-                if (listType == typeof(IConvertible))
-                {     
-                    pinfo.SetValue(_currentAbility, Extensions.ConvertList(itemGridUC1.RowData(row), value));
-                }
-                else if (listType == typeof(Guid)) 
+                Type listObjectType = itemGridUC1.RowData(row)[0].GetType();
+                IList list = (IList)Activator.CreateInstance(abilityPropertyType);
+                foreach (var item in itemGridUC1.RowData(row))
                 {
-                    List<Guid> newlist = new List<Guid>();
-                    foreach (Guid item in itemGridUC1.RowData(row))
-                    {
-                        newlist.Add(item);
-                    }
-                    pinfo.SetValue(_currentAbility, newlist);
+                    list.Add(item);
                 }
-                else
-                {
-                    throw new Exception("Unknown type that does not implement IConvertable, make boilerplate as per the Guid example");
-                }
-                
+                pinfo.SetValue(CurrentAbility, list);                
             }
-              else 
-                pinfo.SetValue(_currentAbility, itemGridUC1.RowData(row)[0]);
+            else 
+            { 
+                pinfo.SetValue(CurrentAbility, itemGridUC1.RowData(row)[0]); //if is not a list,
+            }
             
 
             //header.RowData = itemGridUC1.RowData(row);
-            ComponentAbilitySD abilitySD = _selectedComponentAbilityWrappers[_currentAbility].AbilityStaticData();
+            ComponentAbilitySD abilitySD = CurrentAbility.AbilityStaticData();
         }
 
         /// <summary>
@@ -128,8 +121,9 @@ namespace ModdingTools.JsonDataEditor
             itemGridUC1.Clear();
             //ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
 
-            Type t = _currentAbility.GetType();
-            ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name", t.GetProperty("Name"));
+            Type t = _selectedComponentAbilityWrappers[_currentAbilityIndex].GetType();
+            PropertyInfo pinfo = t.GetProperty("Name");
+            ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name", pinfo);
             
             ItemGridCell_String nameCell = new ItemGridCell_String(null);
             if (!String.IsNullOrEmpty(abilitySD.Name))

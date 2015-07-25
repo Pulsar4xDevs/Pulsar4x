@@ -261,11 +261,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public List<object> RowData(int row, bool ignoreHeader = true)
         {
             List<object> rowdataList = new List<object>();
-            int start = 0;
-            int upper = _grid[row].Count;
-            if (_grid[row][0] is ItemGridCell_HeaderType)
-                start = 1;
-            for (int i = start; i < upper; i++)
+
+            int upper = _grid[row].Count -1;
+            for (int i = 1; i < upper; i++)
             {
                 rowdataList.Add(_grid[row][i].Data);
             }
