@@ -307,9 +307,12 @@ namespace ModdingTools.JsonDataEditor
 
         public static MainWindow MainWindow;
 
+        public static int LoadedDataSets { get; set; }
+
         public static void loadDatafromDirectory(string dir)
         {
             Program.staticData.LoadDataSet(Path.GetFileName(dir));
+            LoadedDataSets = Program.staticData.LoadedDataSets.Count;
 
             foreach (var installationKVP in Program.staticData.Installations)
             {

@@ -40,6 +40,7 @@ namespace ModdingTools.JsonDataEditor
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
                 Data.loadDatafromDirectory(folderBrowserDialog1.SelectedPath);
+                loadedDataSetsCount.Text = @"Loaded DataSets: " + Data.LoadedDataSets.ToString();
             }
         }
 
