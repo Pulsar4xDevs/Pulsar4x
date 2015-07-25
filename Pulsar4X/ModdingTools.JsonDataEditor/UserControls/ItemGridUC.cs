@@ -238,6 +238,8 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public void InsertCellAt(int x, int y, ItemGridCell cell)
         {
             _grid[y].Insert(x, cell);
+            if (_colomnCount < _grid[y].Count)
+                _colomnCount = _grid[y].Count;
             UpdateTable();
         }
 

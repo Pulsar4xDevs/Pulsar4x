@@ -227,7 +227,8 @@ namespace ModdingTools.JsonDataEditor
             }
             else
             {
-                techRequrementCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_TechStaticDataType(null, Data.GetllistoftTechSds())));
+                Guid defaultTech = new Guid("2832a0d5-3660-4417-9066-08c06c2c4991"); //transnewtonion tech.
+                techRequrementCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_TechStaticDataType(defaultTech, Data.GetllistoftTechSds())));
             }
             itemGridUC1.AddRow(rowHeader, techRequrementCells);
         }

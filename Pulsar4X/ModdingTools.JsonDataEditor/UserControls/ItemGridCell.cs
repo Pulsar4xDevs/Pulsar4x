@@ -113,7 +113,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
             _activeControl = _editControl_;           
             Controls.Remove(displayLabel);
             Controls.Add(_editControl_);
+            TextBox txtBox = _editControl_ as TextBox;
             Refresh();
+            if (txtBox != null)
+            {
+                txtBox.SelectAll();
+            }
+            
         }
 
         /// <summary>
