@@ -703,7 +703,7 @@ namespace Pulsar4X.ECSLib
             else
                 bodyInfo.Tectonics = TectonicActivity.NA;  // We are not a Terrestrial body, we have no Tectonics!!!
 
-            // Generate Magnetic field:
+            // Generate Magnetic field, must be done before atmosphere:
             bodyInfo.MagneticField = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
             if (bodyInfo.Tectonics == TectonicActivity.Dead)
                 bodyInfo.MagneticField *= 0.1F; // reduce magnetic field of a dead world.
@@ -977,6 +977,12 @@ namespace Pulsar4X.ECSLib
                     if (randomModifer < _galaxyGen.Settings.RunawayGreenhouseEffectChance * inverseEchoshpereRatio)
                     {
                         atm *= _galaxyGen.Settings.RunawayGreenhouseEffectMultiplyer;
+                    }
+                    else
+                    {
+                        // if we arn't a pressure cooker planet, then lets modify the atmosphere pressure according to the magnetic feild:
+                        double magneticFieldRatio = body.MagneticField / _galaxyGen.Settings.PlanetMagneticFieldByType[body.Type].Max;
+                        atm *= magneticFieldRatio;
                     }
 
                     // finally clamp the atmosphere to a resonable value:
