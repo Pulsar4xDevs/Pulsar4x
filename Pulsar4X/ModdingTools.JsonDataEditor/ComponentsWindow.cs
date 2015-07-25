@@ -78,21 +78,14 @@ namespace ModdingTools.JsonDataEditor
             int row = (int)rowNum;
             ItemGridCell_HeaderType header = (ItemGridCell_HeaderType)itemGridUC1.GetCellItem(row,0);
             
-            //Type dataType = header.RowData.GetType();
-            //List<object> datalist = header.RowData;
-            
             PropertyInfo pinfo = header.RowData; 
-            Type t1 = pinfo.PropertyType; //this does not valadate as a list. 
+            Type propertyType = pinfo.PropertyType; 
 
-            //this is an componentAbilityProperty.
-            dynamic abilityPropertyObject = pinfo.GetValue(CurrentAbility, null);
-            //this is the componentAbilityPropery type.
-            Type abilityPropertyType = abilityPropertyObject.GetType();
 
-            if (abilityPropertyObject is IList)
+            if (typeof(IList).IsAssignableFrom(propertyType))
             {
-                Type listObjectType = itemGridUC1.RowData(row)[0].GetType();
-                IList list = (IList)Activator.CreateInstance(abilityPropertyType);
+                //Type listObjectType = itemGridUC1.RowData(row)[0].GetType();
+                IList list = (IList)Activator.CreateInstance(propertyType);
                 foreach (var item in itemGridUC1.RowData(row))
                 {
                     list.Add(item);
@@ -103,9 +96,7 @@ namespace ModdingTools.JsonDataEditor
             { 
                 pinfo.SetValue(CurrentAbility, itemGridUC1.RowData(row)[0]); //if is not a list,
             }
-            
 
-            //header.RowData = itemGridUC1.RowData(row);
             ComponentAbilitySD abilitySD = CurrentAbility.AbilityStaticData();
         }
 
@@ -227,8 +218,7 @@ namespace ModdingTools.JsonDataEditor
             }
             else
             {
-                Guid defaultTech = new Guid("2832a0d5-3660-4417-9066-08c06c2c4991"); //transnewtonion tech.
-                techRequrementCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_TechStaticDataType(defaultTech, Data.GetllistoftTechSds())));
+                techRequrementCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_TechStaticDataType(null, Data.GetllistoftTechSds())));
             }
             itemGridUC1.AddRow(rowHeader, techRequrementCells);
         }
