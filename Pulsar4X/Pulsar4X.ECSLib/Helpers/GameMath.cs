@@ -168,6 +168,35 @@ namespace Pulsar4X.ECSLib
             TotalWeight += otherList.TotalWeight;
         }
 
+        /// <summary>
+        /// Removes the specified value from the list.
+        /// </summary>
+        public void Remove(T value)
+        {
+            int removeAtIndex = -1;
+            for (int i = 0; i < _valueList.Count; i++)
+            {
+                if (_valueList[i].Value.Equals(value))
+                {
+                    removeAtIndex = i;
+                    break;
+                }
+            }
+
+            RemoveAt(removeAtIndex);
+        }
+
+        /// <summary>
+        /// Remove the value at the specified index.
+        /// </summary>
+        public void RemoveAt(int index)
+        {
+            double weight = _valueList[index].Weight;
+            _valueList.RemoveAt(index);
+
+            TotalWeight -= weight;
+        }
+
         public IEnumerator<WeightedValue<T>> GetEnumerator() 
         {
             return _valueList.GetEnumerator();
