@@ -966,7 +966,7 @@ namespace Pulsar4X.ECSLib
                     {
                         // if planet get star:
                         starInfo = orbit.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = (orbit.SemiMajorAxis / starInfo.EcoSphereRadius);
+                        ecosphereRatio = GMath.Clamp(orbit.SemiMajorAxis / starInfo.EcoSphereRadius, 0.1, 2);
                     }
 
                     atm = atm * ecosphereRatio;  // if inside eco sphere this will reduce atmo, increase it if outside.
@@ -976,7 +976,7 @@ namespace Pulsar4X.ECSLib
                     double inverseEchoshpereRatio = 1 - (GMath.Clamp(ecosphereRatio, 0, 1));
                     if (randomModifer < _galaxyGen.Settings.RunawayGreenhouseEffectChance * inverseEchoshpereRatio)
                     {
-                        atm *= 100;
+                        atm *= _galaxyGen.Settings.RunawayGreenhouseEffectMultiplyer;
                     }
 
                     // finally clamp the atmosphere to a resonable value:
