@@ -207,10 +207,24 @@ namespace Pulsar4X.ECSLib
         public JDictionary<BodyType, MinMaxStruct> PlanetMagneticFieldByType;
 
         /// <summary>
-        /// This value is multiplied by (SystemBody Mass / Max Mass for SystemBody Type) i.e. a mass ratio, to get the chance of an atmosphere for this planet.
+        /// This value is multiplied by (SystemBody Mass / Earth's Mass), then clamped between 0 and 1, to get the chance of an atmosphere for this planet. 
+        /// a result of 1 will always have an atmosphere (use large numbers to always produce 1), and a result of 0 will never gen an atmoisphere
+        /// (use 0 to force this result). 
         /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of atmosphere generation.
+        /// @note On some body types this number can also impact how thick an atmosphere will be, the higher the pre-clamped value the thicker the atmosphere.
         /// </summary>
         public JDictionary<BodyType, double> AtmosphereGenerationModifier;
+
+        /// <summary>
+        /// This value is used to determine the percentage of generated atmoispheres that will have a Venus like atmosphere.
+        /// It is further modified by the distace from the star, the closer planet the higher the chance.
+        /// </summary>
+        public double RunawayGreenhouseEffectChance;
+
+        /// <summary>
+        /// Determins the minimum and maximum pressure of a generated atmosphere.
+        /// </summary>
+        public MinMaxStruct MinMaxAtmosphericPressure;
 
         /// <summary>
         /// This value is used to determin if a planet gets moons. If a random number between 0 and 1 is less then this number then the planet geets moons.
@@ -938,6 +952,11 @@ namespace Pulsar4X.ECSLib
                 {BodyType.Asteroid, 0},
                 {BodyType.Comet, 0},
             };
+
+            // note that this number can be tweaked for gameplay. it affects the chance of venus like planets.
+            settings.RunawayGreenhouseEffectChance = 0.3;
+
+            settings.MinMaxAtmosphericPressure = new MinMaxStruct(0.000000001, 500);
 
             // note These numbers can be tweaked as desired for gameplay. They effect the chances of a planet having moons.
             settings.MoonGenerationChanceByPlanetType = new JDictionary<BodyType, double>

@@ -180,7 +180,7 @@ namespace Pulsar4X.ECSLib
         {
             if (Exists == false)
             {
-                AtomsphereDescriptionInPercent = "This body has no Atmosphere.";
+                AtomsphereDescriptionInPercent = "This body has no Atmosphere.  ";
                 AtomsphereDescriptionAtm = AtomsphereDescriptionInPercent;
                 return;
             }
@@ -190,7 +190,13 @@ namespace Pulsar4X.ECSLib
                 AtomsphereDescriptionAtm += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
 
                 if (Pressure != 0) // for extra safety.
-                    AtomsphereDescriptionInPercent += (gas.Value / Pressure).ToString("P0") + " " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
+                    AtomsphereDescriptionInPercent += (gas.Value / Pressure).ToString("P0") + " " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", "; ///< @todo this is not right!!
+                else
+                {
+                    // this is here for safty, to prevent any oif these being null.
+                    AtomsphereDescriptionAtm = "This body has no Atmosphere.  ";
+                    AtomsphereDescriptionInPercent = AtomsphereDescriptionAtm;
+                }
             }
 
             // trim trailing", " from the strings.

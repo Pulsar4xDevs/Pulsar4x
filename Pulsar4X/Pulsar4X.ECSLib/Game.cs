@@ -154,7 +154,7 @@ namespace Pulsar4X.ECSLib
 
             Game newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
             // TODO: Provide options for loading other Static Data DataSets.
-            newGame.StaticData.LoadDataSet(StaticDataStore.DefaultDataSet);
+            newGame.StaticData = StaticDataManager.LoadFromDefaultDataDirectory();
 
             for (int i = 0; i < numSystems; i++)
             {

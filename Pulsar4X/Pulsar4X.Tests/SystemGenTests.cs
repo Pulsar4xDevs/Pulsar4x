@@ -173,6 +173,10 @@ namespace Pulsar4X.Tests
             varNode.InnerText = orbit.Inclination.ToString("N2");
             bodyNode.AppendChild(varNode);
 
+            varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Children", "NS");
+            varNode.InnerText = orbit.Children.Count.ToString();
+            bodyNode.AppendChild(varNode);
+
             if (positionDB != null)
             {
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PositionInAU", "NS");
@@ -194,7 +198,7 @@ namespace Pulsar4X.Tests
                 varNode.InnerText = systemBodyDB.AxialTilt.ToString("N1");
                 bodyNode.AppendChild(varNode);
 
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "BaseTemperature", "NS");
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Temperature", "NS");
                 varNode.InnerText = systemBodyDB.BaseTemperature.ToString("N1");
                 bodyNode.AppendChild(varNode);
 
