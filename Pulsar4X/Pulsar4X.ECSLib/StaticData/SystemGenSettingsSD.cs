@@ -961,7 +961,7 @@ namespace Pulsar4X.ECSLib
             };
 
             // note that this number can be tweaked for gameplay. it affects the chance of venus like planets.
-            settings.RunawayGreenhouseEffectChance = 0.3;
+            settings.RunawayGreenhouseEffectChance = 0.25;
 
             settings.MinMaxAtmosphericPressure = new MinMaxStruct(0.000000001, 200);
 
