@@ -1,83 +1,156 @@
 {
-    "Type": "Components",
-    "Data": {
-        "List": [
+  "Type": "Components",
+  "Data": {
+    "List": [
+      {
+        "Key": "b0400874-0ef8-4f39-81cc-431e6311afcc",
+        "Value": {
+          "Name": "MissileLauncher",
+          "Description": "Can launch Missiles and be reloaded via a magazine",
+          "ID": "b0400874-0ef8-4f39-81cc-431e6311afcc",
+          "ComponentAbilitySDs": [
             {
-                "Key": "b0400874-0ef8-4f39-81cc-431e6311afcc",
-                "Value": {
-                    "Name": "MissileLauncher",
-                    "Description": "Can launch Missiles and be reloaded via a magazine",
-                    "ID": "b0400874-0ef8-4f39-81cc-431e6311afcc",
-                    "ComponentAbilitySDs": [
-                        {
-                            "Name": "Missile Launcher Size",
-                            "Description": "Can fire a missile of this size or smaller",
-                            "Ability": "LaunchMissileSize",
-                            "AbilityAmount": [
-                                1.0,
-                                2.0,
-                                3.0,
-                                4.0,
-                                5.0,
-                                6.0,
-                                7.0,
-                                8.0,
-                                9.0,
-                                10.0
-                            ],
-                            "CrewAmount": [
-                                3.0,
-                                6.0,
-                                9.0,
-                                12.0,
-                                15.0,
-                                18.0,
-                                21.0,
-                                24.0,
-                                27.0,
-                                30.0
-                            ],
-                            "WeightAmount": [
-                                1.0,
-                                2.0,
-                                3.0,
-                                4.0,
-                                5.0,
-                                6.0,
-                                7.0,
-                                8.0,
-                                9.0,
-                                10.0
-                            ],
-                            "AffectsAbility": "ReloadRateFromMag",
-                            "AffectedAmount": [ ],
-                            "TechRequiremets": [ ]
-                        },
-                        {
-                            "Name": "Missile Launcher Reload Rate",
-                            "Description": "Speed at which this launcher can reload from a magazine",
-                            "Ability": "ReloadRateMultiplyer",
-                            "AbilityAmount": [
-                                1.0,
-                                0.9,
-                                0.8,
-                                0.7,
-                                0.6,
-                                0.5,
-                                0.4,
-                                0.3,
-                                0.2,
-                                0.1
-                            ],
-                            "CrewAmount": [ ],
-                            "AffectsAbility": "Nothing",
-                            "AffectedAmount": [],
-                            "TechRequiremets": ["0d923d96-e9d5-4d33-bf27-8f97efbab173"]
-
-                        }
-                    ]
-                }
+              "Name": "Missile Launcher Size",
+              "Description": "Can fire a missile of this size or smaller",
+              "Ability": "LaunchMissileSize",
+              "AbilityAmount": [
+                1.0,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+                14.0,
+                16.0,
+                18.0,
+                20.0,
+                24.0
+              ],
+              "CrewAmount": [
+                3.0,
+                6.0,
+                9.0,
+                12.0,
+                15.0,
+                18.0,
+                21.0,
+                24.0,
+                27.0,
+                30.0,
+                33.0,
+                36.0,
+                42.0,
+                48.0,
+                54.0,
+                60.0,
+                72.0
+              ],
+              "WeightAmount": [
+                1.0,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+                14.0,
+                16.0,
+                18.0,
+                20.0,
+                24.0
+              ],
+              "AffectsAbility": "ReloadRateFromMag",
+              "AffectedAmount": [
+                30.0,
+                60.0,
+                90.0,
+                120.0,
+                150.0,
+                180.0,
+                210.0,
+                240.0,
+                270.0,
+                300.0,
+                330.0,
+                360.0,
+                420.0,
+                480.0,
+                540.0,
+                600.0,
+                720.0
+              ]
+            },
+            {
+              "Name": "Missile Launcher Reload Rate",
+              "Description": "Speed at which this launcher can reload from a magazine",
+              "Ability": "ReloadRateMultiplyer",
+              "AbilityAmount": [
+                1.0,
+                0.9,
+                0.8,
+                0.7,
+                0.6,
+                0.5,
+                0.4,
+                0.3,
+                0.2,
+                0.1
+              ],
+              "CrewAmount": [],
+              "AffectsAbility": "Nothing",
+              "AffectedAmount": [],
+              "TechRequirements": [
+                "0d923d96-e9d5-4d33-bf27-8f97efbab173",
+                "5d72b998-aa01-43b1-adbe-06f1f81053e5",
+                "731ae6b2-b6d2-4505-8508-244da475202a",
+                "e190c590-e913-4f85-8fdd-fb085ec6aeda",
+                "b9481509-c4d4-4697-aa9f-81ed0ad82417",
+                "042fe568-b714-4697-be74-a99b65f19e73",
+                "cf399ecb-f5bf-47ba-9a18-18154256a492",
+                "3fb63c80-0f5b-4b15-a96f-5d6b629744c1",
+                "570e9a25-eded-4271-99bd-283a394aba48",
+                "c11a6097-7164-400c-af3a-9f115470f36a"
+              ]
+            },
+            {
+              "Name": "ReducedSize",
+              "Description": "Reduced Size Launcers at the cost of reload rate.",
+              "Ability": "ReducedSize",
+              "AbilityAmount": [
+                1.0,
+                0.75,
+                0.5,
+                0.33,
+                0.25,
+                0.15
+              ],
+              "CrewAmount": [],
+              "WeightAmount": [],
+              "AffectsAbility": "ReloadRateFromMag",
+              "AffectedAmount": [
+                1.0,
+                2.0,
+                5.0,
+                20.0,
+                100.0,
+                0.0
+              ],
+              "TechRequirements": []
             }
-        ]
-    }
+          ]
+        }
+      }
+    ]
+  }
 }
