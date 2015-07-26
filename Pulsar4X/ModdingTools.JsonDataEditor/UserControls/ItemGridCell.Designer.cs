@@ -28,7 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.displayLabel = new System.Windows.Forms.Label();
+            this.contextMenuStrip_Cell = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem_Edit = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_DelCell = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_Insert = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip_Cell.SuspendLayout();
             this.SuspendLayout();
             // 
             // displayLabel
@@ -42,6 +48,34 @@
             this.displayLabel.TabIndex = 0;
             this.displayLabel.Text = "label1";
             // 
+            // contextMenuStrip_Cell
+            // 
+            this.contextMenuStrip_Cell.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem_Edit,
+            this.toolStripMenuItem_DelCell,
+            this.toolStripMenuItem_Insert});
+            this.contextMenuStrip_Cell.Name = "contextMenuStrip_Cell";
+            this.contextMenuStrip_Cell.Size = new System.Drawing.Size(148, 70);
+            this.contextMenuStrip_Cell.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip_Cell_ItemClicked);
+            // 
+            // toolStripMenuItem_Edit
+            // 
+            this.toolStripMenuItem_Edit.Name = "toolStripMenuItem_Edit";
+            this.toolStripMenuItem_Edit.Size = new System.Drawing.Size(147, 22);
+            this.toolStripMenuItem_Edit.Text = "Edit";
+            // 
+            // toolStripMenuItem_DelCell
+            // 
+            this.toolStripMenuItem_DelCell.Name = "toolStripMenuItem_DelCell";
+            this.toolStripMenuItem_DelCell.Size = new System.Drawing.Size(147, 22);
+            this.toolStripMenuItem_DelCell.Text = "Delete This Cell";
+            // 
+            // toolStripMenuItem_Insert
+            // 
+            this.toolStripMenuItem_Insert.Name = "toolStripMenuItem_Insert";
+            this.toolStripMenuItem_Insert.Size = new System.Drawing.Size(147, 22);
+            this.toolStripMenuItem_Insert.Text = "Insert Cell";
+            // 
             // ItemGridCell
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -52,6 +86,7 @@
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "ItemGridCell";
             this.Size = new System.Drawing.Size(41, 19);
+            this.contextMenuStrip_Cell.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -60,6 +95,10 @@
         #endregion
 
         protected System.Windows.Forms.Label displayLabel;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_Edit;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_DelCell;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_Insert;
+        protected System.Windows.Forms.ContextMenuStrip contextMenuStrip_Cell;
 
     }
 }

@@ -76,7 +76,7 @@ namespace ModdingTools.JsonDataEditor
         private void OnRowChanged(object rowNum, EventArgs e)
         {
             int row = (int)rowNum;
-            ItemGridCell_HeaderType header = (ItemGridCell_HeaderType)itemGridUC1.GetCellItem(row,0);
+            ItemGridHeaderCell header = (ItemGridHeaderCell)itemGridUC1.GetCellItem(row,0);
             
             PropertyInfo pinfo = header.RowData; 
             Type propertyType = pinfo.PropertyType; 
@@ -97,130 +97,125 @@ namespace ModdingTools.JsonDataEditor
                 pinfo.SetValue(CurrentAbility, itemGridUC1.RowData(row)[0]); //if is not a list,
             }
 
-            ComponentAbilitySD abilitySD = CurrentAbility.AbilityStaticData();
         }
 
+
+
         /// <summary>
-        /// this sets up the itemGrid controll by selecting the correct cell type
-        /// creating the cells
-        /// creating the headders
-        /// adding them to the itemGrid control.
+        /// This sets up the itemGrid control by 
+        /// Creating the headers
+        /// Creating the footers
+        /// Selecting the correct cell type
+        /// Creating the cells and adding the data
+        /// Adding them to the itemGrid control.
         /// </summary>
-        /// <param name="componentAbilityDH"></param>
+        /// <param name="abilitySD"></param>
         private void SetupItemGrid(ComponentAbilitySD abilitySD)
         {
             itemGridUC1.Clear();
-            //ComponentAbilitySD abilitySD = componentAbilityDH.StaticData;
 
             Type t = _selectedComponentAbilityWrappers[_currentAbilityIndex].GetType();
             PropertyInfo pinfo = t.GetProperty("Name");
-            ItemGridCell_HeaderType rowHeader = new ItemGridCell_HeaderType("Name", pinfo);
-            
+            ItemGridHeaderCell rowHeader = null;
+            ItemGridFooterCell rowFooter = null;
+            List<ItemGridDataCell> dataCells = new List<ItemGridDataCell>();     
+
+            rowHeader = new ItemGridHeaderCell("Name", pinfo);
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_String(null));
             ItemGridCell_String nameCell = new ItemGridCell_String(null);
             if (!String.IsNullOrEmpty(abilitySD.Name))
-                nameCell = new ItemGridCell_String(abilitySD.Name);
-            itemGridUC1.AddRow(rowHeader, new List<ItemGridCell>{nameCell });
+                dataCells.Add( new ItemGridCell_String(abilitySD.Name));
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
 
-            rowHeader = new ItemGridCell_HeaderType("Description", t.GetProperty("Description"));
+            rowHeader = new ItemGridHeaderCell("Description", t.GetProperty("Description"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_String(null));
             ItemGridCell_String descCell = new ItemGridCell_String(null);
             if (!String.IsNullOrEmpty(abilitySD.Description))
-                descCell = new ItemGridCell_String(abilitySD.Description);
-            itemGridUC1.AddRow(rowHeader, new List<ItemGridCell>{descCell });
+               dataCells.Add( new ItemGridCell_String(abilitySD.Description));
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
 
-            rowHeader = new ItemGridCell_HeaderType("Ability", t.GetProperty("Ability"));
-            ItemGridCell_AbilityType abilityCell = new ItemGridCell_AbilityType(null);
+            rowHeader = new ItemGridHeaderCell("Ability", t.GetProperty("Ability"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_AbilityType(null));            
             if (abilitySD.Ability != null)
-                abilityCell = new ItemGridCell_AbilityType(abilitySD.Ability);
-            itemGridUC1.AddRow(rowHeader, new List<ItemGridCell>{abilityCell });
+                dataCells.Add(new ItemGridCell_AbilityType(abilitySD.Ability));
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
-            rowHeader = new ItemGridCell_HeaderType("AbilityAmount", t.GetProperty("AbilityAmount"));
-            List<ItemGridCell> abilityAmountCells = new List<ItemGridCell>();
+
+            rowHeader = new ItemGridHeaderCell("AbilityAmount", t.GetProperty("AbilityAmount"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_FloatType(0));
             if (!abilitySD.AbilityAmount.IsNullOrEmpty())
             {
                 foreach (float ammount in abilitySD.AbilityAmount)
-                {
-                    ItemGridCell_FloatType abilityAmountCell = new ItemGridCell_FloatType(ammount);
-                    abilityAmountCells.Add(abilityAmountCell);
+                {                 
+                    dataCells.Add(new ItemGridCell_FloatType(ammount));
                 }
             }
-            else
-            {
-                abilityAmountCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_FloatType(0)));
-            }
-            itemGridUC1.AddRow(rowHeader, abilityAmountCells);
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
-            rowHeader = new ItemGridCell_HeaderType("CrewAmount", t.GetProperty("CrewAmount"));
-            List<ItemGridCell> crewAmountCells = new List<ItemGridCell>();
+
+            rowHeader = new ItemGridHeaderCell("CrewAmount", t.GetProperty("CrewAmount"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_FloatType(0));
             if (!abilitySD.CrewAmount.IsNullOrEmpty())
             foreach (float crew in abilitySD.CrewAmount)
             {
-                ItemGridCell_FloatType cell = new ItemGridCell_FloatType(crew);
-                crewAmountCells.Add(cell);
+              
+                dataCells.Add(new ItemGridCell_FloatType(crew));
             }
-            else
-            {
-                crewAmountCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_FloatType(0)));
-            }
-            itemGridUC1.AddRow(rowHeader, crewAmountCells);
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
-            rowHeader = new ItemGridCell_HeaderType("WeightAmount", t.GetProperty("WeightAmount"));
-            List<ItemGridCell> weightAmountCells = new List<ItemGridCell>();
+
+            rowHeader = new ItemGridHeaderCell("WeightAmount", t.GetProperty("WeightAmount"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_FloatType(0));
             if (!abilitySD.WeightAmount.IsNullOrEmpty())
             {
                 foreach (float weight in abilitySD.WeightAmount)
                 {
-                    ItemGridCell_FloatType cell = new ItemGridCell_FloatType(weight);
-                    weightAmountCells.Add(cell);
+                    dataCells.Add(new ItemGridCell_FloatType(weight));
                 }
             }
-            else
-            {
-                weightAmountCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_FloatType(0)));
-            }
-            itemGridUC1.AddRow(rowHeader, weightAmountCells);
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
 
-            rowHeader = new ItemGridCell_HeaderType("AffectsAbility", t.GetProperty("AffectsAbility"));
-            ItemGridCell_AbilityType abilityAffectedCell = new ItemGridCell_AbilityType(null);
+            rowHeader = new ItemGridHeaderCell("AffectsAbility", t.GetProperty("AffectsAbility"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_AbilityType(null));     
             if (abilitySD.AffectsAbility != null)
-                abilityAffectedCell = new ItemGridCell_AbilityType(abilitySD.AffectsAbility);
-            itemGridUC1.AddRow(rowHeader, new List<ItemGridCell> {abilityAffectedCell });
+                dataCells.Add(new ItemGridCell_AbilityType(abilitySD.AffectsAbility));
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
 
-            rowHeader = new ItemGridCell_HeaderType("AffectedAmount", t.GetProperty("AffectedAmount"));
-            List<ItemGridCell> affectedAmountCells = new List<ItemGridCell>{rowHeader};
+            rowHeader = new ItemGridHeaderCell("AffectedAmount", t.GetProperty("AffectedAmount"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_FloatType(0));
             if (!abilitySD.AffectedAmount.IsNullOrEmpty())
             {
                 foreach (float affect in abilitySD.AffectedAmount)
                 {
-                    ItemGridCell_FloatType cell = new ItemGridCell_FloatType(affect);
-                    affectedAmountCells.Add(cell);
+                    dataCells.Add(new ItemGridCell_FloatType(affect));
                 }
             }
-            else
-            {
-                affectedAmountCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_FloatType(0)));
-            }
-            itemGridUC1.AddRow(rowHeader, affectedAmountCells);
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
 
-            rowHeader = new ItemGridCell_HeaderType("TechRequirements", t.GetProperty("TechRequirements"));
-            List<ItemGridCell> techRequrementCells = new List<ItemGridCell>{rowHeader};
+            rowHeader = new ItemGridHeaderCell("TechRequirements", t.GetProperty("TechRequirements"));
+            dataCells = new List<ItemGridDataCell>();
+            rowFooter = new ItemGridFooterCell(new ItemGridCell_TechStaticDataType(null, Data.GetllistoftTechSds()));
             if (!abilitySD.TechRequirements.IsNullOrEmpty())
             {
                 foreach (Guid techGuid in abilitySD.TechRequirements)
                 {
-                    ItemGridCell_TechStaticDataType cell = new ItemGridCell_TechStaticDataType(techGuid, Data.GetllistoftTechSds());
-                    techRequrementCells.Add(cell);
+                    dataCells.Add(new ItemGridCell_TechStaticDataType(techGuid, Data.GetllistoftTechSds()));
                 }
             }
-            else
-            {
-                techRequrementCells.Add(new ItemGridCell_EmptyCellType(new ItemGridCell_TechStaticDataType(null, Data.GetllistoftTechSds())));
-            }
-            itemGridUC1.AddRow(rowHeader, techRequrementCells);
+            itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
         }
 
 

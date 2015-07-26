@@ -10,84 +10,56 @@ using System.Runtime.CompilerServices;
 
 namespace ModdingTools.JsonDataEditor.UserControls
 {
-    public partial class ItemGridCell : UserControl , INotifyPropertyChanged
+    public partial class ItemGridCell : UserControl 
     {
-        private dynamic _data;
-        private dynamic _activeControl;
-        protected dynamic _editControl_;
-
-        public dynamic Data
-        {
-            get {return _data;}
-            protected set
-            {
-                if (!ReferenceEquals(value, _data)) //cannot use if (value != _data) here due to the possiblity that _data is a struct. 
-                {
-                    _data = value;
-                    NotifyPropertyChanged();
-                }
-            }
-        }
-     
-        public ItemGridUC ParentGrid { get; set; }
-        public int Colomn { get; set; }
-        public int Row { get; set; }
-
-        /// <summary>
-        /// The display text for this control
-        /// </summary>
-        public new string Text {
-            get
-            {
-                string returnstring = "null";
-
-                //cannot use if (Data != null) here due to the possiblity that Data is a struct. 
-                if (!ReferenceEquals(null, Data))
-                    returnstring = _getText_;
-
-                return returnstring;  
-            } 
-        }
+        protected dynamic _activeControl;
 
         /// <summary>
         /// a virtual method to return the wanted text
         /// this will be dependant on the type of _editControl_
         /// and therefor should be overriden.
         /// </summary>
-        protected virtual string _getText_
+        protected virtual string _get_Text_
         {
-            get { return Data.Text; }
+            get { return displayLabel.Text; }
         }
 
+        public new string Text {
+            get { return _get_Text_; }
+            set { displayLabel.Text = value; } }
+
+        public ItemGridUC ParentGrid { get; set; }
+        public int Colomn { get; set; }
+        public int Row { get; set; }
 
         /// <summary>
         /// Constructor. 
         /// </summary>
-        private ItemGridCell() 
+        protected ItemGridCell()
         {
             InitializeComponent();
             _activeControl = displayLabel;
-            displayLabel.Text = Text;
+            
             displayLabel.MouseClick += OnMouseClick;
             MouseClick += OnMouseClick;
+            
         }
 
         /// <summary>
-        /// This constructor should be used.
         /// </summary>
         /// <param name="data"></param>
-        public ItemGridCell(dynamic data) : this()
-        {
-            Data = data;
+        protected ItemGridCell(string text) : this()
+        {           
+            Text = text;
+            Refresh();
         }
+
 
 
         public override void Refresh()
         {
             displayLabel.Text = Text;
             Size = _activeControl.Size;
-            //if (ParentGrid !=  null)
-            //    ParentGrid.ResizeXY(this);
             base.Refresh();
         }
 
@@ -98,9 +70,107 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// <param name="e"></param>
         public virtual void OnMouseClick(object o, MouseEventArgs e)
         {
-            if(_editControl_ != null) //ie a headertype cell won't be editable
-                StartEditing(this, e);
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
 
+                    //StartEditing(o, e);
+                    break;
+                case MouseButtons.Right:
+                    //contextMenuStrip_Cell.Show(this, new Point(e.X, e.Y));
+                    break;
+            }
+        }
+
+        protected virtual void contextMenuStrip_Cell_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            switch (e.ClickedItem.ToString())
+            {
+
+            }
+        }
+    }
+
+
+
+    public class ItemGridDataCell : ItemGridCell, INotifyPropertyChanged
+    {
+        
+        protected dynamic _editControl_;
+        private dynamic _data;
+
+        public dynamic Data
+        {
+            get { return _data; }
+            protected set
+            {
+                if (!ReferenceEquals(value, _data)) //cannot use if (value != _data) here due to the possiblity that _data is a struct. 
+                {
+                    _data = value;
+                    NotifyPropertyChanged();
+                }
+            }
+        }
+
+        protected ItemGridDataCell(dynamic data):base()
+        {
+            _data = data;
+            _activeControl = displayLabel;
+        }
+
+        protected ItemGridDataCell(string data) : base()
+        {
+            _data = data;
+            _activeControl = displayLabel;
+        }
+
+        protected sealed override string _get_Text_
+        {
+            get
+            {
+                string returnstring = "null!";
+                //cannot use if (Data != null) here due to the possiblity that Data is a struct. 
+                if (!ReferenceEquals(null, Data))
+                    returnstring = _getText_;
+                else
+                {
+                    ;
+                }
+                return returnstring;
+            }
+        }
+
+        protected virtual string _getText_ 
+        {
+            get { return Data.Text; }
+
+        }
+
+        public override void OnMouseClick(object o, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    StartEditing(o, e);
+                    break;
+                case MouseButtons.Right:
+                    contextMenuStrip_Cell.Show(this, new Point(e.X, e.Y));
+                    break;
+            }
+        }
+
+        protected override void contextMenuStrip_Cell_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            switch (e.ClickedItem.ToString())
+            {
+                case "Edit":
+                    StartEditing(sender, e);
+                    break;
+                case "Delete Cell":
+                    break;
+                case "Insert":
+                    break;
+            }
         }
 
         /// <summary>
@@ -110,15 +180,19 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// <param name="e"></param>
         protected void StartEditing(object o, EventArgs e)
         {
-            _activeControl = _editControl_;           
-            Controls.Remove(displayLabel);
-            Controls.Add(_editControl_);
-            TextBox txtBox = _editControl_ as TextBox;
-            Refresh();
-            if (txtBox != null)
-            {
-                txtBox.SelectAll();
-            }
+
+                _activeControl = _editControl_;
+                Controls.Remove(displayLabel);
+                Controls.Add(_editControl_);
+
+                //an attempt to get it to select the contents if editcontrol is a textbox
+                TextBox txtBox = _editControl_ as TextBox;
+                Refresh();
+                if (txtBox != null)
+                {
+                    txtBox.Focus();
+                    txtBox.SelectAll();
+                }
             
         }
 
@@ -164,81 +238,70 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         public virtual object Copy()
         {
-            return new ItemGridCell(_data);           
+            return new ItemGridDataCell(_data);
         }
     }
 
-
-
     /// <summary>
-    /// this is a special cell type for headers, ie use as the first cell in a row. 
-    /// </summary>
-    public class ItemGridCell_HeaderType : ItemGridCell
+    /// This is a special cell type for headers, ie use as the first cell in a row. 
+    /// </summary>    
+    public class ItemGridHeaderCell : ItemGridCell
     {
         /// <summary>
         /// this is for fancy reflection stuff...
         /// </summary>
         private PropertyInfo _rowData;
+
         public PropertyInfo RowData
         {
-            get {return _rowData; }
+            get { return _rowData; }
             private set
             {
                 if (value != null)
                     _rowData = value;
             }
         }
-        public ItemGridCell_HeaderType(string text, PropertyInfo rowData)
-            : base(text)
+
+        public ItemGridHeaderCell(string text, PropertyInfo rowData) : base(text)
         {
             RowData = rowData;
-            _editControl_ = null;
             displayLabel.BackColor = DefaultBackColor;
             BackColor = DefaultBackColor;
             Refresh();
         }
 
         public override sealed void Refresh()
-        {            
+        {
             base.Refresh();
         }
 
-        protected override string _getText_
-        {
-            get { return Data; }
-        }
-
-        public override object Copy()
-        {
-            return new ItemGridCell_HeaderType(Data, RowData);
-        }
     }
 
-
-    public class ItemGridCell_EmptyCellType : ItemGridCell
+    /// <summary>
+    /// This is a special cell type which gets added to the end of each row.
+    /// It creates a new cell when clicked.
+    /// </summary>
+    public class ItemGridFooterCell : ItemGridCell
     {
-        private ItemGridCell _newcell;
+        private ItemGridDataCell _newcell;
+
         /// <summary>
         /// an empty cell, this special cell type creates a new cell of teh defaultcell (copies the given) when clicked,
         /// adding it to the grid. 
         /// </summary>
         /// <param name="defaultCell"></param>
-        public ItemGridCell_EmptyCellType(ItemGridCell defaultCell) : base(null)
+        public ItemGridFooterCell(ItemGridDataCell defaultCell) : base("Add Cell")
         {
             _newcell = defaultCell;
+            
         }
 
         public override void OnMouseClick(object o, MouseEventArgs e)
         {
 
-            ItemGridCell newCell = (ItemGridCell)_newcell.Copy();
-            ParentGrid.InsertCellAt(this.Colomn,this.Row,newCell);
-            newCell.OnMouseClick(o,e);
-        }
-
-        public override object Copy()
-        {
-            return new ItemGridCell_EmptyCellType(_newcell);
+            ItemGridDataCell newCell = (ItemGridDataCell)_newcell.Copy();
+            ParentGrid.InsertCellAt(this.Colomn, this.Row, newCell);
+            newCell.OnMouseClick(o, e);
         }
     }
 
@@ -246,7 +309,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// String Entry version of ItemGridCell
     /// This version uses TextBox as editing mode.
     /// </summary>
-    public class ItemGridCell_String : ItemGridCell
+    public class ItemGridCell_String : ItemGridDataCell
     {
         public ItemGridCell_String(string str) : base(str)
         {
@@ -288,12 +351,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
     }
 
 
-
     /// <summary>
     /// float version of the ItemGridCell
     /// this version uses a textbox as the edit control and checks wheather casting the textbox.text is valid.
     /// </summary>
-    public class ItemGridCell_FloatType : ItemGridCell
+    public class ItemGridCell_FloatType : ItemGridDataCell
     {
         public ItemGridCell_FloatType(float num) : base(num)
         {
@@ -320,13 +382,10 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         protected override string _getText_
         {
-            get
-            {              
-                return Data.ToString();
-            }
+            get { return Data.ToString(); }
         }
 
- 
+
         protected override bool ValadateInput()
         {
             bool success = false;
@@ -352,10 +411,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// This version uses Listbox to display a list of possible enum AbilityType during Editing Mode
     /// despite being pulsar specific, it should be a good example of getting a list of enums.
     /// </summary>
-    public class ItemGridCell_AbilityType : ItemGridCell
+    public class ItemGridCell_AbilityType : ItemGridDataCell
     {
-        public ItemGridCell_AbilityType(AbilityType? ability)
-            : base(ability)
+        public ItemGridCell_AbilityType(AbilityType? ability) : base(ability)
         {
             ListBox listBox = new ListBox();
             listBox.DataSource = Enum.GetValues(typeof(AbilityType));
@@ -373,10 +431,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         protected override string _getText_
         {
-            get
-            {
-                return Enum.GetName(typeof(AbilityType), (AbilityType)Data);
-            }
+            get { return Enum.GetName(typeof(AbilityType), (AbilityType)Data); }
         }
 
         protected override bool ValadateInput()
@@ -402,13 +457,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// <summary>
     /// this version is pulsar specific.
     /// </summary>
-    public class ItemGridCell_TechStaticDataType : ItemGridCell
+    public class ItemGridCell_TechStaticDataType : ItemGridDataCell
     {
- 
-        Dictionary<Guid, TechSD> _guidDictionary = new Dictionary<Guid, TechSD>(); 
-        Dictionary<string, Guid> _selectionDictionary = new Dictionary<string, Guid>(); 
-        public ItemGridCell_TechStaticDataType(Guid? techGuid, List<TechSD> selectionList)
-            : base(techGuid)
+
+        private Dictionary<Guid, TechSD> _guidDictionary = new Dictionary<Guid, TechSD>();
+        private Dictionary<string, Guid> _selectionDictionary = new Dictionary<string, Guid>();
+
+        public ItemGridCell_TechStaticDataType(Guid? techGuid, List<TechSD> selectionList) : base(techGuid)
         {
             foreach (TechSD tech in selectionList)
             {
@@ -418,7 +473,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             ListBox listBox = new ListBox();
             listBox.DataSource = new BindingSource(_selectionDictionary.Keys, null);
 
-            
+
             listBox.Width = 400;
             listBox.Height = 500;
 
@@ -429,11 +484,14 @@ namespace ModdingTools.JsonDataEditor.UserControls
             Refresh();
         }
 
-        protected override string _getText_ { get { return _guidDictionary[Data].Name; } }
+        protected override string _getText_
+        {
+            get { return _guidDictionary[Data].Name; }
+        }
 
         protected override bool ValadateInput()
         {
-                Data = _selectionDictionary[_editControl_.SelectedItem];                
+            Data = _selectionDictionary[_editControl_.SelectedItem];
             return true;
         }
 
