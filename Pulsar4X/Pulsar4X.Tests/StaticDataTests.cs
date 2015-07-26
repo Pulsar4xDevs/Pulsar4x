@@ -4,7 +4,7 @@ using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
-/*
+
 namespace Pulsar4X.Tests
 {
     [TestFixture, Description("Tests the static data import/export/manager/store")]
@@ -125,7 +125,7 @@ namespace Pulsar4X.Tests
             launchAbility.Name = "Missile Launcher Size";
             launchAbility.Description = "Can fire a missile of this size or smaller";
             launchAbility.WeightAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            launchAbility.TechRequiremets = new List<Guid>() { };
+            launchAbility.TechRequirements = new List<Guid>() { };
 
             ComponentAbilitySD reloadAbility = new ComponentAbilitySD();
             reloadAbility.Name = "Missile Launcher Reload Rate";
@@ -151,74 +151,74 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestLoadDefaultData()
         {
-            StaticDataManager.LoadFromDefaultDataDirectory();
+            var staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
 
             // store counts for later:
-            int mineralsNum = StaticDataManager.StaticDataStore.Minerals.Count;  
-            int techNum = StaticDataManager.StaticDataStore.Techs.Count;
-            int installationsNum = StaticDataManager.StaticDataStore.Installations.Count;
-            int constructableObjectsNum = StaticDataManager.StaticDataStore.ConstructableObjects.Count;
+            int mineralsNum = staticDataStore.Minerals.Count;
+            int techNum = staticDataStore.Techs.Count;
+            int installationsNum = staticDataStore.Installations.Count;
+            int constructableObjectsNum = staticDataStore.ConstructableObjects.Count;
 
             // check that data was loaded:
-            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
-            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.AtmosphericGases);
-            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
-            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
-            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Techs);
-            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Installations);
+            Assert.IsNotEmpty(staticDataStore.Minerals);
+            Assert.IsNotEmpty(staticDataStore.AtmosphericGases);
+            Assert.IsNotEmpty(staticDataStore.CommanderNameThemes);
+            Assert.IsNotEmpty(staticDataStore.Minerals);
+            Assert.IsNotEmpty(staticDataStore.Techs);
+            Assert.IsNotEmpty(staticDataStore.Installations);
 
             // now lets re-load the same data, to test that duplicates don't occure as required:
             StaticDataManager.LoadFromDefaultDataDirectory();
 
             // now check that overwriting occured and that there were no duplicates:
-            Assert.AreEqual(mineralsNum, StaticDataManager.StaticDataStore.Minerals.Count);
-            Assert.AreEqual(techNum, StaticDataManager.StaticDataStore.Techs.Count);
-            Assert.AreEqual(installationsNum, StaticDataManager.StaticDataStore.Installations.Count);
-            Assert.AreEqual(constructableObjectsNum, StaticDataManager.StaticDataStore.ConstructableObjects.Count);
+            Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
+            Assert.AreEqual(techNum, staticDataStore.Techs.Count);
+            Assert.AreEqual(installationsNum, staticDataStore.Installations.Count);
+            Assert.AreEqual(constructableObjectsNum, staticDataStore.ConstructableObjects.Count);
 
             // now lets test some malformed data folders.
             Assert.Catch(typeof(StaticDataLoadException), () =>
             {
-                StaticDataManager.LoadFromDirectory("./TestData/MalformedData");
+                StaticDataManager.LoadFromDirectory("./TestData/MalformedData", staticDataStore);
             });
 
             // now ,lets try for a directory that does not exist.
             Assert.Catch(typeof(StaticDataLoadException), () =>
             {
-                StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist");
+                StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist", staticDataStore);
             });
         }
 
         [Test]
         public void TestIDLookup()
         {
-            // make sure the store is clear:
-            StaticDataManager.ClearAllData();
+            // Create an empty data store:
+            var staticDataStore = new StaticDataStore();
 
             // test when the store is empty:
-            object testNullObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(Guid.NewGuid());
+            object testNullObj = staticDataStore.FindDataObjectUsingID(Guid.NewGuid());
             Assert.IsNull(testNullObj);
 
             // Load the default static data to test against:
-            StaticDataManager.LoadFromDefaultDataDirectory();
+            staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
 
             // test with a guid that is not in the store:
-            object testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(Guid.Empty);  // empty guid should never be in the store.
+            object testObj = staticDataStore.FindDataObjectUsingID(Guid.Empty);  // empty guid should never be in the store.
             Assert.IsNull(testObj);
 
-            // noew lets test for values that are in the store:
-            Guid testID = StaticDataManager.StaticDataStore.Minerals[0].ID;
-            testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(testID);
+            // now lets test for values that are in the store:
+            Guid testID = staticDataStore.Minerals[0].ID;
+            testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
             Assert.AreEqual(testID, ((MineralSD)testObj).ID);
 
-            testID = StaticDataManager.StaticDataStore.Installations.First().Key;
-            testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(testID);
+            testID = staticDataStore.Installations.First().Key;
+            testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
             Assert.AreEqual(testID, ((InstallationSD)testObj).ID);
 
-            testID = StaticDataManager.StaticDataStore.Techs.First().Key;
-            testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(testID);
+            testID = staticDataStore.Techs.First().Key;
+            testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
             Assert.AreEqual(testID, ((TechSD)testObj).ID);
         }
@@ -237,4 +237,3 @@ namespace Pulsar4X.Tests
         }
     }
 }
-*/
