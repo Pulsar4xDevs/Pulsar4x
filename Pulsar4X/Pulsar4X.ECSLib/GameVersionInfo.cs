@@ -3,7 +3,7 @@
 namespace Pulsar4X.ECSLib
 {
     /// <summary>
-    /// This struct is used to prepend the game/mode version information in json files. This allows the game to
+    /// This struct is used to prepend the game/mod version information in json files. This allows the game to
     /// make decisions on whether or not imported data is compatible.
     /// </summary>
     public struct VersionInfo
@@ -30,6 +30,11 @@ namespace Pulsar4X.ECSLib
         public string CompatibleVersions;
 
         /// <summary>
+        /// A comma seperated list of game library versions the mod is compatible with. 
+        /// </summary>
+        public string CompatibleLibVersions;
+
+        /// <summary>
         /// Returns a VersionInfo struct for the Game.
         /// @todo need a better way of doing this, the compatible versions string is a big problem.
         /// </summary>
@@ -43,6 +48,7 @@ namespace Pulsar4X.ECSLib
                 gameVersionInfo.MajorVersion = assName.Version.Major;
                 gameVersionInfo.MinorVersion = assName.Version.Minor;
                 gameVersionInfo.CompatibleVersions = gameVersionInfo.VersionString;
+                gameVersionInfo.CompatibleLibVersions = gameVersionInfo.VersionString;
                 return gameVersionInfo;
             }
         }
@@ -57,6 +63,26 @@ namespace Pulsar4X.ECSLib
             foreach (var ver in versions)
             {
                 if (ver == VersionString)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks that this version info is compatible with the main game library currently running. 
+        /// </summary>
+        public bool IsCompatibleWithLib()
+        {
+            AssemblyName assName = Assembly.GetAssembly(typeof(VersionInfo)).GetName();
+            string libVersion = assName.Version.Major + "." + assName.Version.Minor;
+
+            string[] versions = CompatibleLibVersions.Split(',');
+            foreach (var ver in versions)
+            {
+                if (ver == libVersion)
                 {
                     return true;
                 }

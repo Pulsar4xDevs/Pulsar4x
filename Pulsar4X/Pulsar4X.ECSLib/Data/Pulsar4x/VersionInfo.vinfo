@@ -1,7 +1,11 @@
 {
-  "Name": "Pulsar4x",
-  "VersionString": "0.4",
-  "MajorVersion": 0,
-  "MinorVersion": 4,
-  "CompatibileVersions": "0.4"
+  "Type": "VersionInfo",
+  "Data": {
+    "Name": "Pulsar4X",
+    "VersionString": "0.4",
+    "MajorVersion": 0,
+    "MinorVersion": 4,
+    "CompatibleVersions": "0.4",
+    "CompatibleLibVersions": "0.4"
+  }
 }
