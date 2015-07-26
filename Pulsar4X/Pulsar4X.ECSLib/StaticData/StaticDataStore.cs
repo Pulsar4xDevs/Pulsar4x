@@ -105,6 +105,9 @@ namespace Pulsar4X.ECSLib
                 },
                 {
                     "Components", typeof(JDictionary<Guid, ComponentSD>)
+                },
+                {
+                    "SystemGenSettings", typeof(SystemGenSettingsSD)
                 }
             };
         }
@@ -138,6 +141,9 @@ namespace Pulsar4X.ECSLib
                 },
                 {
                     typeof(JDictionary<Guid, ComponentSD>), "Components"
+                },
+                {
+                    typeof(SystemGenSettingsSD), "SystemGenSettings"
                 }
             };
         }

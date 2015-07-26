@@ -158,11 +158,16 @@
     <None Include="Data\Pulsar4x\Commander Name Theme - The Creators.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Pulsar4x\ComponentData.json" />
+    <None Include="Data\Pulsar4x\ComponentData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Pulsar4x\InstallationData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Pulsar4x\Minerals.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Pulsar4x\SystemGenSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Pulsar4x\TechnologyData.json">

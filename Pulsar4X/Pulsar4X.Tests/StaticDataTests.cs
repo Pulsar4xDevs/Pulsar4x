@@ -146,6 +146,10 @@ namespace Pulsar4X.Tests
             JDictionary<Guid, ComponentSD> components = new JDictionary<Guid, ComponentSD>();
             components.Add(missileLauncher.ID, missileLauncher);
             StaticDataManager.ExportStaticData(components, "./Componentstest.json");
+
+            // test export of galaxy settings:
+            GalaxyFactory gf = new GalaxyFactory(true, 1);
+            StaticDataManager.ExportStaticData(gf.Settings, "./SystemGenSettings.json");
         }
 
         [Test]

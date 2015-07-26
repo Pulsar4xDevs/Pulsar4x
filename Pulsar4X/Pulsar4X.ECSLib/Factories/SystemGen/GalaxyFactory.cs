@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
 
         internal readonly StarSystemFactory StarSystemFactory;
 
-        internal GalaxyFactory(bool initToDefault = false, int rngSeed = -1)
+        public GalaxyFactory(bool initToDefault = false, int rngSeed = -1)
         {
             if (initToDefault)
             {
