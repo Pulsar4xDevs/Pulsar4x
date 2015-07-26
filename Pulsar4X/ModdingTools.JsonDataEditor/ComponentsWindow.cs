@@ -37,6 +37,7 @@ namespace ModdingTools.JsonDataEditor
             listBox_allAbilities.DataSource = Enum.GetValues(typeof(AbilityType)).Cast<AbilityType>();
             listBox_Abilities.DataSource = _selectedComponentAbilityWrappers;
             listBox_Abilities.DisplayMember = "Name";
+            
             itemGridUC1.RowChanged += (OnRowChanged);
         }
 
@@ -367,6 +368,17 @@ namespace ModdingTools.JsonDataEditor
 
             }
             //UpdateAbilityAmounts();
+        }
+
+
+        private void listBox_Abilities_MouseClick(object sender, MouseEventArgs e)
+        {
+            listBox_Abilities.SelectedIndex = listBox_Abilities.IndexFromPoint(e.X, e.Y);
+            if (e.Button == MouseButtons.Right)
+                _selectedComponentAbilityWrappers.Remove((ComponentAbilityWrapper)listBox_Abilities.SelectedItem);
+            else if (e.Button == MouseButtons.Left)
+                SetCurrentAbility(listBox_Abilities.SelectedIndex);
+
         }
     }
 

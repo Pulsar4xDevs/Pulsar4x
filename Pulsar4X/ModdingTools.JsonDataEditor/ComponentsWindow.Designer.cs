@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.button_clear = new System.Windows.Forms.Button();
@@ -37,6 +38,7 @@
             this.listBox_allComponents = new System.Windows.Forms.ListBox();
             this.listBox_Abilities = new System.Windows.Forms.ListBox();
             this.listBox_allAbilities = new System.Windows.Forms.ListBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.itemGridUC1 = new ModdingTools.JsonDataEditor.UserControls.ItemGridUC();
             this.genericDataUC1 = new ModdingTools.JsonDataEditor.GenericDataUC();
             this.tableLayoutPanel1.SuspendLayout();
@@ -137,6 +139,7 @@
             this.listBox_allComponents.Name = "listBox_allComponents";
             this.listBox_allComponents.Size = new System.Drawing.Size(240, 283);
             this.listBox_allComponents.TabIndex = 0;
+            this.toolTip1.SetToolTip(this.listBox_allComponents, "List of Loaded Components.\r\nDouble click an item to select.\r\n");
             this.listBox_allComponents.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_AllComponents_MouseDoubleClick);
             // 
             // listBox_Abilities
@@ -147,7 +150,10 @@
             this.listBox_Abilities.Name = "listBox_Abilities";
             this.listBox_Abilities.Size = new System.Drawing.Size(234, 146);
             this.listBox_Abilities.TabIndex = 4;
+            this.toolTip1.SetToolTip(this.listBox_Abilities, "List of abilities for a Component\r\nDouble Click to select and edit. ");
+            this.listBox_Abilities.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listBox_Abilities_MouseClick);
             this.listBox_Abilities.DoubleClick += new System.EventHandler(this.listBox_Abilities_DoubleClick);
+            this.listBox_Abilities.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBox_Abilities_MouseClick);
             // 
             // listBox_allAbilities
             // 
@@ -157,6 +163,8 @@
             this.listBox_allAbilities.Name = "listBox_allAbilities";
             this.listBox_allAbilities.Size = new System.Drawing.Size(235, 146);
             this.listBox_allAbilities.TabIndex = 8;
+            this.toolTip1.SetToolTip(this.listBox_allAbilities, "Big List of Abilities. \r\nThis is from Ecslib.AbilitiesList enum\r\nDouble click an " +
+        "ability to add \r\n");
             this.listBox_allAbilities.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listBox_allAbilities_MouseDoubleClick);
             // 
             // itemGridUC1
@@ -168,6 +176,7 @@
             this.tableLayoutPanel1.SetRowSpan(this.itemGridUC1, 2);
             this.itemGridUC1.Size = new System.Drawing.Size(475, 350);
             this.itemGridUC1.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.itemGridUC1, "Grid of Abilities for this component\r\n");
             // 
             // genericDataUC1
             // 
@@ -204,5 +213,6 @@
         private System.Windows.Forms.ListBox listBox_Abilities;
         private System.Windows.Forms.ListBox listBox_allAbilities;
         private UserControls.ItemGridUC itemGridUC1;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
