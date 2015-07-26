@@ -218,8 +218,15 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// This value is used to determine the percentage of generated atmoispheres that will have a Venus like atmosphere.
         /// It is further modified by the distace from the star, the closer planet the higher the chance.
+        /// @note this number can be tweaked as desired for gameplay. They affect the chance of Venus like planets.
         /// </summary>
         public double RunawayGreenhouseEffectChance;
+
+        /// <summary>
+        /// This number is multiplyed by the generated atm of the body to produce the final atmospheric pressure.
+        /// @note this number can be tweaked as desired for gameplay. it determins how high the prssure of venus like worlds ends up.
+        /// </summary>
+        public double RunawayGreenhouseEffectMultiplyer;
 
         /// <summary>
         /// Determins the minimum and maximum pressure of a generated atmosphere.
@@ -946,7 +953,7 @@ namespace Pulsar4X.ECSLib
                 {BodyType.GasGiant, 100000000},
                 {BodyType.IceGiant, 100000000},
                 {BodyType.GasDwarf, 100000000},
-                {BodyType.Terrestrial, 2},
+                {BodyType.Terrestrial, 1},
                 {BodyType.Moon, 0.5},
                 {BodyType.DwarfPlanet, 0},
                 {BodyType.Asteroid, 0},
@@ -954,9 +961,12 @@ namespace Pulsar4X.ECSLib
             };
 
             // note that this number can be tweaked for gameplay. it affects the chance of venus like planets.
-            settings.RunawayGreenhouseEffectChance = 0.3;
+            settings.RunawayGreenhouseEffectChance = 0.25;
 
-            settings.MinMaxAtmosphericPressure = new MinMaxStruct(0.000000001, 500);
+            settings.MinMaxAtmosphericPressure = new MinMaxStruct(0.000000001, 200);
+
+            // note that this number can be tweaked for gameplay. It affects the chance of venus like planets.
+            settings.RunawayGreenhouseEffectMultiplyer = 10;
 
             // note These numbers can be tweaked as desired for gameplay. They effect the chances of a planet having moons.
             settings.MoonGenerationChanceByPlanetType = new JDictionary<BodyType, double>

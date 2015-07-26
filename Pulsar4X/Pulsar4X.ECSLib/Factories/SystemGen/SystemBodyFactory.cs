@@ -276,7 +276,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    massMultiplyer *= GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.Type], system.RNG.NextDouble()); // cache mass...
+                    massMultiplyer *= GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.Type], Math.Pow(system.RNG.NextDouble(), 3)); // cache mass, alos cube random nuber to make smaller bodies more likly.
                     density = GMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyBodyDB.Type], system.RNG.NextDouble());
                 }
                 
@@ -524,7 +524,7 @@ namespace Pulsar4X.ECSLib
                 // Enforce GalaxyFactory mass limits.
                 MinMaxStruct moonMassMinMax = _galaxyGen.Settings.SystemBodyMassByType[newMoonBodyDB.Type];
                 double maxRelativeMass = parentMVDB.Mass * _galaxyGen.Settings.MaxMoonMassRelativeToParentBody;
-                if (maxRelativeMass > moonMassMinMax.Max)
+                if (maxRelativeMass < moonMassMinMax.Max)
                 {
                     moonMassMinMax.Max = maxRelativeMass;
                 }
@@ -703,7 +703,7 @@ namespace Pulsar4X.ECSLib
             else
                 bodyInfo.Tectonics = TectonicActivity.NA;  // We are not a Terrestrial body, we have no Tectonics!!!
 
-            // Generate Magnetic field:
+            // Generate Magnetic field, must be done before atmosphere:
             bodyInfo.MagneticField = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
             if (bodyInfo.Tectonics == TectonicActivity.Dead)
                 bodyInfo.MagneticField *= 0.1F; // reduce magnetic field of a dead world.
@@ -880,8 +880,14 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Todo Finish atmosphere generation.
+        /// This function generates atmosphere for a body, including it's albedo and surface temp.
         /// </summary>
+        /// <remarks>
+        /// We first need to decid if this body has an atmosphere, the bigger the mor likly it is to have one.
+        /// if it does then we need to add a primary gas (e.g. Nitrigen), a secondary gas (e.g. oxygen)
+        /// Followed by up to 5 trace gases (e.g. Argon). 
+        /// The bigger the body the more likly it is to have an atmo gas it should have and the more trace gases.
+        /// </remarks>
         public void GenerateAtmosphere(StarSystem system, ProtoEntity body, StaticDataStore staticData)
         {
             var atmoDB = body.GetDataBlob<AtmosphereDB>();
@@ -892,10 +898,8 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB mvDB = body.GetDataBlob<MassVolumeDB>();
             OrbitDB orbit = body.GetDataBlob<OrbitDB>();
 
-            // We first need to decid if this body has an atmosphere, the bigger the mor likly it is to have one.
-            // if it does then we need to add a primary gas (e.g. Nitrigen), a secondary gas (e.g. oxygen)
-            // Followed by up to 5 trace gases (e.g. Argon). 
-            // The bigger the body the more likly it is to have an atmo gas it should have and the more trace gases.
+            // Set Albeado (all bodies have an albedo):
+            atmoDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.Type], system.RNG.NextDouble());
 
             // Atmo modifer is used to determine how thick the atmosphere should be, higher = thicker.
             double atmoModifer = _galaxyGen.Settings.AtmosphereGenerationModifier[bodyDB.Type] * (mvDB.Mass / GameConstants.Units.EarthMassInKG);
@@ -910,14 +914,8 @@ namespace Pulsar4X.ECSLib
                 // now we will want to select gasses for the atmosphere:
                 SelectGases(newATM, atmoModifer, mvDB.Mass, bodyDB.Type, atmoDB, system, staticData);
 
-                // set final pressure:
-                foreach (var gas in atmoDB.Composition)
-                {
-                    atmoDB.Pressure += gas.Value; // add pressure of each gas.
-                }
-
-                // Set Albeado:
-                atmoDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.Type], system.RNG.NextDouble());
+                // set an initial surface temp to the base temp, adjusted for albedo:
+                atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - atmoDB.Albedo);
 
                 // Add hydrospher and other Terrestrial woprld only stuff:
                 if (bodyDB.Type == BodyType.Terrestrial || bodyDB.Type == BodyType.Terrestrial)
@@ -930,8 +928,9 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            // finally generate a description:
-            atmoDB.GenerateDescriptions();
+            // finally Run the atmo processor over it to create the greenhous factors and descriptions etc.
+            // We want to run this even for bodies without an atmosphere.
+            AtmosphereProcessor.UpdateAtmosphere(atmoDB, bodyDB);
         }
 
         double GenAtmosphereThickness(double bodyMass, SystemBodyDB body, OrbitDB orbit,  double atmoModifer, double randomModifer)
@@ -967,7 +966,7 @@ namespace Pulsar4X.ECSLib
                     {
                         // if planet get star:
                         starInfo = orbit.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = (orbit.SemiMajorAxis / starInfo.EcoSphereRadius);
+                        ecosphereRatio = GMath.Clamp(orbit.SemiMajorAxis / starInfo.EcoSphereRadius, 0.1, 2);
                     }
 
                     atm = atm * ecosphereRatio;  // if inside eco sphere this will reduce atmo, increase it if outside.
@@ -977,7 +976,13 @@ namespace Pulsar4X.ECSLib
                     double inverseEchoshpereRatio = 1 - (GMath.Clamp(ecosphereRatio, 0, 1));
                     if (randomModifer < _galaxyGen.Settings.RunawayGreenhouseEffectChance * inverseEchoshpereRatio)
                     {
-                        atm *= 100;
+                        atm *= _galaxyGen.Settings.RunawayGreenhouseEffectMultiplyer;
+                    }
+                    else
+                    {
+                        // if we arn't a pressure cooker planet, then lets modify the atmosphere pressure according to the magnetic feild:
+                        double magneticFieldRatio = body.MagneticField / _galaxyGen.Settings.PlanetMagneticFieldByType[body.Type].Max;
+                        atm *= magneticFieldRatio;
                     }
 
                     // finally clamp the atmosphere to a resonable value:
