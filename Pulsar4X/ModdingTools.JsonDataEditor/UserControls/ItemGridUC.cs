@@ -48,39 +48,35 @@ namespace ModdingTools.JsonDataEditor.UserControls
             e.Graphics.DrawLine(Pens.Black, e.CellBounds.Location, new Point(e.CellBounds.Left, e.CellBounds.Bottom));
         }
 
+        private void UpdateTLP()
+        {
+            tableLayoutPanel1.Controls.Clear();
+            tableLayoutPanel1.RowStyles.Clear();
+            tableLayoutPanel1.RowCount = _grid.Count +1;// add an extra row for the end to make it look nicer.
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.AutoSize)); 
+            tableLayoutPanel1.ColumnStyles.Clear();           
+            tableLayoutPanel1.ColumnCount = _colomnCount;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        }
+
         /// <summary>
         /// this redraws the table layout pannel.
         /// could probbily be more efficent, esp since it's called every time a row is added.
         /// </summary>
         private void UpdateTable()
         {
-            tableLayoutPanel1.Controls.Clear();
-            tableLayoutPanel1.RowStyles.Clear();
-            tableLayoutPanel1.RowCount = 0;
-            tableLayoutPanel1.ColumnStyles.Clear();
-            tableLayoutPanel1.ColumnCount = _colomnCount;
-            //add correct number of column styles.
-            for (int i = 0; i < _colomnCount; i++)
-            {
-                tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-            }
+            UpdateTLP();
+
             int y = 0;
             foreach (List<ItemGridCell> row in _grid)
             {
                 
-                tableLayoutPanel1.RowCount++;
-                tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-                
                 //for each cell
                 for (int x = 0; x < row.Count; x++)
                 {
-                    tableLayoutPanel1.Controls.Add(row[x], x, y);
-                    row[x].ParentGrid = this;
-                    row[x].Colomn = x;
-                    row[x].Row = y;
-                    row[x].Dock = DockStyle.Fill;
-                    
-                 
+                   //UpdateCellGridData(row[x], x, y);      
+                    SetCellGridData(row[x], x, y);
+                    UpdateCellGridData(row[x], x, y);
                 }
                 //for each datagridcell
                 for (int x = 1; x < row.Count -1; x++)
@@ -94,9 +90,37 @@ namespace ModdingTools.JsonDataEditor.UserControls
             
         }
 
-        private void UpdateRow(int row)
+        public void HardRedraw()
         {
-            if (_grid[row].Count > _colomnCount)
+            UpdateTable();
+        }
+
+        private void SetCellGridData(ItemGridCell cell, int x, int y)
+        {
+            if (x > tableLayoutPanel1.ColumnCount)
+                UpdateColumnCount();
+            
+            tableLayoutPanel1.Controls.Add(cell, x, y);
+            cell.ParentGrid = this;
+            cell.Colomn = x;
+            cell.Row = y;
+            cell.Dock = DockStyle.Fill;
+        }
+
+        private void UpdateCellGridData(ItemGridCell cell, int x, int y)
+        {
+            if (x > tableLayoutPanel1.ColumnCount)
+                UpdateColumnCount();
+            tableLayoutPanel1.SetRow(cell, y);
+            tableLayoutPanel1.SetColumn(cell,x);
+            cell.Colomn = x;
+            cell.Row = y;
+        }
+
+        private void UpdateRow(int rowNum)
+        {
+            List<ItemGridCell> row = _grid[rowNum];
+            if (row.Count > _colomnCount)
             {
                 tableLayoutPanel1.ColumnStyles.Clear();
                 tableLayoutPanel1.ColumnCount = _colomnCount;
@@ -104,6 +128,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 {
                     tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
                 }
+
+                for (int x = 0; x < row.Count; x++)
+                {
+                    tableLayoutPanel1.SetColumn(row[x], x);
+                    row[x].Colomn = x;
+                }
+
             }
         }
 
@@ -201,26 +232,34 @@ namespace ModdingTools.JsonDataEditor.UserControls
             {
                 throw new Exception("Row must contain at least one item or a footerCell included");
             }
-
+            
+            //create a list of ItemGridCell 
             List<ItemGridCell> rowGridCells = new List<ItemGridCell>();
-            rowGridCells.Add(headerCell);
-            rowGridCells.AddRange(rowlist);
-
+            rowGridCells.Add(headerCell); //populate with the header.
+            rowGridCells.AddRange(rowlist); //populate with the datacells
+            //if the footer cell was given, add the footer, else create a new footer and add that.
             if(footerCell != null)
                 rowGridCells.Add(footerCell);
             else 
                 rowGridCells.Add(new ItemGridFooterCell(rowlist[0]));
 
 
+            //add the row to the _grid.
             _grid.Add(rowGridCells);
-            if (rowGridCells.Count > _colomnCount)
-                _colomnCount = rowGridCells.Count;
 
-            UpdateTable();
+            int x = 1;
+            int y = _grid.Count -1;
+            foreach (var cell in rowGridCells)
+            {
+                SetCellGridData(cell, x++, y);
+            }
+            //UpdateRow(_grid.Count -1);
+    
         }
 
         /// <summary>
         /// this is not properly tested.
+        /// probibly don't use this.
         /// </summary>
         /// <param name="colomnlist"></param>
         public void AddColomn(List<ItemGridCell> colomnlist)
@@ -283,14 +322,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// returns a row of data as a generic object
         /// </summary>
         /// <param name="row"></param>
-        /// <param name="ignoreHeader">if true, checks the first cell type and ignores it if it's ItemGridCell_HeaderType</param>
         /// <returns></returns>
         public List<object> RowData(int row)
         {
             List<object> rowdataList = new List<object>();
 
-            int upper = _grid[row].Count -1;
-            for (int i = 1; i < upper; i++)
+            int upper = _grid[row].Count -1; // count-1 so we don't get the footer.
+            for (int i = 1; i < upper; i++) // start at +1 so we don't get the header.
             {
                 ItemGridDataCell cell = (ItemGridDataCell)_grid[row][i];
                 rowdataList.Add(cell.Data);
@@ -314,10 +352,10 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 if (row.Count > count)
                     count = row.Count;
             }
-            if (_colomnCount != count)
+            if (tableLayoutPanel1.ColumnCount != count)
             {
                 _colomnCount = count;
-                UpdateTable();
+                tableLayoutPanel1.ColumnCount = count;
                 ischanged = true;
             }
             return ischanged;

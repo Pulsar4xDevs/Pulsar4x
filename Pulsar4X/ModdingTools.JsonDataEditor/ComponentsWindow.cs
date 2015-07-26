@@ -217,6 +217,8 @@ namespace ModdingTools.JsonDataEditor
                 }
             }
             itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
+
+            itemGridUC1.HardRedraw();
         }
 
 

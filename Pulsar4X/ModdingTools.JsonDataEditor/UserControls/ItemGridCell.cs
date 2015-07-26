@@ -73,11 +73,8 @@ namespace ModdingTools.JsonDataEditor.UserControls
             switch (e.Button)
             {
                 case MouseButtons.Left:
-
-                    //StartEditing(o, e);
                     break;
                 case MouseButtons.Right:
-                    //contextMenuStrip_Cell.Show(this, new Point(e.X, e.Y));
                     break;
             }
         }
@@ -300,13 +297,24 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         public override void OnMouseClick(object o, MouseEventArgs e)
         {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                {
+                    ItemGridCell cell = o as ItemGridCell;
+                    ItemGridDataCell newCell = (ItemGridDataCell)_newcell.Copy();
+                    if (cell != null)
+                        ParentGrid.InsertCellAt(cell.Colomn, cell.Row, newCell);
+                    else
+                        ParentGrid.InsertCellAt(this.Colomn, this.Row, newCell);
+                    
+                    newCell.StartEditing(o, e);
+                }
+                    break;
+                case MouseButtons.Right:
+                    break;
+            }
 
-            ItemGridCell cell = o as ItemGridCell;
-            ItemGridDataCell newCell = (ItemGridDataCell)_newcell.Copy();
-            if (cell != null)
-                ParentGrid.InsertCellAt(cell.Colomn, cell.Row, newCell);
-            //newCell.OnMouseClick(o, e);
-            newCell.StartEditing(o, e);
 
         }
     }
@@ -425,7 +433,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             listBox.DataSource = Enum.GetValues(typeof(AbilityType));
 
             //listBox.Dock = DockStyle.Fill; //DockStyle.fill really does not work well with the listbox for this is seems. 
-            listBox.Width = Width;
+            listBox.Width = 200;
             listBox.Height = 500;
 
             Data = ability;
