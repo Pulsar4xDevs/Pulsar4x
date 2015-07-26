@@ -205,6 +205,15 @@ namespace Pulsar4X.Entities
                         CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion);
                         break;
                     case ConstructionBuildQueueItem.CBType.ShipComponent:
+
+                        /// <summary>
+                        /// Component issues seem more blatant than construction issues.
+                        /// </summary>
+                        if (CurrentConstruction.numToBuild < 0.0f)
+                        {
+                            Completion = Completion + CurrentConstruction.numToBuild;
+                        }
+
                         CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.componentBuild.minerialsCost, Completion);
                         CurrentPopulation.AddComponentsToStockpile(CurrentConstruction.componentBuild, Completion);
                         break;
@@ -217,6 +226,15 @@ namespace Pulsar4X.Entities
                     case ConstructionBuildQueueItem.CBType.PDCRefit:
                         break;
                     case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
+
+                        /// <summary>
+                        /// Component issues seem more blatant than construction issues.
+                        /// </summary>
+                        if (CurrentConstruction.numToBuild < 0.0f)
+                        {
+                            Completion = Completion + CurrentConstruction.numToBuild;
+                        }
+
                         CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, Constants.Colony.MaintenanceMineralCost, Completion);
                         CurrentPopulation.AddMSP(Completion);
                         break;

@@ -54,7 +54,7 @@ namespace Pulsar4X.Entities.Components
 
             size = 5.0f;
             crew = 25;
-            cost = 50.0m * ((decimal)sStrength * 50.0m);
+            cost = 50.0m + ((decimal)sStrength * 50.0m);
             htk = 1;
 
             minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];

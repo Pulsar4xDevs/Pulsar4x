@@ -3226,6 +3226,42 @@ namespace Pulsar4X.UI.Handlers
                         }
                     }
 
+                    foreach (SurveySensorDefTN Survey in CurrentFaction.ComponentList.SurveySensorDef)
+                    {
+                        if (Survey.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Survey);
+                                BuildLocationDisplayDict.Add(Survey.Id, Survey.Name);
+                                BuildLocationDict.Add(Survey.Id, Temp);
+
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Survey.Name;
+                                row++;
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Survey);
+                                BuildLocationDisplayDict.Add(Survey.Id, Survey.Name);
+                                BuildLocationDict.Add(Survey.Id, Temp);
+
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Survey.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                        
+                    }
+
                     foreach (ActiveSensorDefTN Active in CurrentFaction.ComponentList.ActiveSensorDef)
                     {
                         if (Active.isObsolete == false)

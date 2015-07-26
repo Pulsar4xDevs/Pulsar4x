@@ -449,13 +449,13 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// GeoSurvey specific orders:
             /// </summary>
-            //if (hasgeo)
-            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
+            if (CalcGeoSurveyPoints() != 0.0f)
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
             /// <summary>
             /// Grav survey specific orders:
             /// </summary>
-            //if (hasGrav)
-            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
+            if (CalcGravSurveyPoints() != 0.0f)
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
 
 
             /// <summary>
@@ -3300,7 +3300,6 @@ namespace Pulsar4X.Entities
 
         #endregion
 
-
         #region Fire Control targetting
         /// <summary>
         /// Clear all targeting info for this taskgroup
@@ -3361,7 +3360,6 @@ namespace Pulsar4X.Entities
             return min;
         }
         #endregion
-
 
         #region Jump Transit taskgroup functions.
         /// <summary>
@@ -3491,6 +3489,37 @@ namespace Pulsar4X.Entities
             }
 
             return false;
+        }
+        #endregion
+
+        #region Survey Point Count
+        /// <summary>
+        /// How many Geo Survey points can this Taskgroup generate?
+        /// </summary>
+        /// <returns></returns>
+        public float CalcGeoSurveyPoints()
+        {
+            float TotalGeoSurveyPoints = 0.0f;
+            foreach (ShipTN Ship in Ships)
+            {
+                TotalGeoSurveyPoints = TotalGeoSurveyPoints + Ship.CurrentGeoSurveyStrength;
+            }
+
+            return TotalGeoSurveyPoints;
+        }
+        /// <summary>
+        /// How many Geo Survey points can this Taskgroup generate?
+        /// </summary>
+        /// <returns></returns>
+        public float CalcGravSurveyPoints()
+        {
+            float TotalGravSurveyPoints = 0.0f;
+            foreach (ShipTN Ship in Ships)
+            {
+                TotalGravSurveyPoints = TotalGravSurveyPoints + Ship.CurrentGravSurveyStrength;
+            }
+
+            return TotalGravSurveyPoints;
         }
         #endregion
 

@@ -363,6 +363,18 @@ namespace Pulsar4X.Entities.Components
             MissileDef.Add(MissileAMMDef);
 
 
+            /// <summary>
+            /// Sensor components should be added upon researching the appropriate technology, as they cannot be designed, Count should be at 46
+            /// </summary>
+            SurveySensorDefTN GeoSurvey = new SurveySensorDefTN("Geological Survey Sensor", SurveySensorDefTN.SurveySensorType.Geological, 1.0f);
+            SurveySensorDefTN GravSurvey = new SurveySensorDefTN("Gravitational Survey Sensor", SurveySensorDefTN.SurveySensorType.Gravitational, 1.0f);
+
+            SurveySensorDef.Add(GeoSurvey);
+            SurveySensorDef.Add(GravSurvey);
+
+            TotalComponents = TotalComponents + 2;
+
+
 
         }
 
