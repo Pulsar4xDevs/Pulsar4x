@@ -110,9 +110,10 @@ namespace Pulsar4X.ECSLib
             {
                 if (e.GetType() == typeof(JsonSerializationException))
                     throw new StaticDataLoadException("Bad Json provided in directory: " + directory, e);
-
                 if (e.GetType() == typeof(DirectoryNotFoundException))
                     throw new StaticDataLoadException("Directory not found: " + directory, e);
+                
+                throw e;  // rethrow exception if not known ;)
             }
         }
 
@@ -134,6 +135,7 @@ namespace Pulsar4X.ECSLib
 
             dataVInfo = LoadVinfo(vInfoFile[0]);
 
+            ///< @todo make this check against saved data for that mod or against the game library.
             return dataVInfo.IsCompatibleWith(pulsarVInfo);
         }
 
@@ -175,12 +177,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         static VersionInfo LoadVinfo(string file)
         {
-            VersionInfo info;
-            using (StreamReader sr = new StreamReader(file))
-            using (JsonReader reader = new JsonTextReader(sr))
-            {
-                info = (VersionInfo)_serializer.Deserialize(reader, typeof(VersionInfo));
-            }
+            var obj = Load(file); // load into json data.
+            VersionInfo info = (VersionInfo)obj["Data"].ToObject(typeof(VersionInfo), _serializer);
 
             return info;
         }

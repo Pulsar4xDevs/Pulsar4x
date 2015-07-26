@@ -63,6 +63,11 @@ namespace Pulsar4X.ECSLib
         public JDictionary<Guid, ComponentSD> Components = new JDictionary<Guid, ComponentSD>();
 
         /// <summary>
+        /// Settings used by system generation. 
+        /// </summary>
+        public SystemGenSettingsSD SystemGenSettings;
+
+        /// <summary>
         /// This list holds the version info of all the loaded data sets.
         /// </summary>
         [PublicAPI]
@@ -108,6 +113,9 @@ namespace Pulsar4X.ECSLib
                 },
                 {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
+                },
+                {
+                    "VersionInfo", typeof(VersionInfo)
                 }
             };
         }
@@ -144,6 +152,9 @@ namespace Pulsar4X.ECSLib
                 },
                 {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
+                },
+                {
+                    typeof(VersionInfo), "VersionInfo"
                 }
             };
         }
@@ -271,6 +282,11 @@ namespace Pulsar4X.ECSLib
                 foreach (var component in components)
                     Components[component.Key] = component.Value;
             }
+        }
+
+        internal void Store(SystemGenSettingsSD settings)
+        {
+            SystemGenSettings = settings;
         }
 
         #endregion

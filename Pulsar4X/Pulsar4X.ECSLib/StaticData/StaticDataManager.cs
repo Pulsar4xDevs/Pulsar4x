@@ -208,6 +208,10 @@ namespace Pulsar4X.ECSLib
                     _serializer.Serialize(writer, data);
                 }
             }
+            else
+            {
+                throw new System.ArgumentException("Cannot Export. Unknown static data type.");
+            }
         }
     }
 
