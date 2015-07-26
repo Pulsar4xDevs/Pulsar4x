@@ -373,9 +373,12 @@ namespace ModdingTools.JsonDataEditor
 
         private void listBox_Abilities_MouseClick(object sender, MouseEventArgs e)
         {
-            listBox_Abilities.SelectedIndex = listBox_Abilities.IndexFromPoint(e.X, e.Y);
+            int clickedItemIndex = listBox_Abilities.IndexFromPoint(e.X, e.Y);
             if (e.Button == MouseButtons.Right)
-                _selectedComponentAbilityWrappers.Remove((ComponentAbilityWrapper)listBox_Abilities.SelectedItem);
+            {
+                if (listBox_Abilities.SelectedIndex == clickedItemIndex) //only remove if clicked on the selected item
+                    _selectedComponentAbilityWrappers.Remove((ComponentAbilityWrapper)listBox_Abilities.SelectedItem);
+            }
             else if (e.Button == MouseButtons.Left)
                 SetCurrentAbility(listBox_Abilities.SelectedIndex);
 

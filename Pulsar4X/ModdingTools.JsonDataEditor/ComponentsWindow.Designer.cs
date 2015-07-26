@@ -150,7 +150,8 @@
             this.listBox_Abilities.Name = "listBox_Abilities";
             this.listBox_Abilities.Size = new System.Drawing.Size(234, 146);
             this.listBox_Abilities.TabIndex = 4;
-            this.toolTip1.SetToolTip(this.listBox_Abilities, "List of abilities for a Component\r\nDouble Click to select and edit. ");
+            this.toolTip1.SetToolTip(this.listBox_Abilities, "List of abilities for a Component\r\nClick to select and edit.\r\nRight Click a selec" +
+        "ted item to remove.  ");
             this.listBox_Abilities.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listBox_Abilities_MouseClick);
             this.listBox_Abilities.DoubleClick += new System.EventHandler(this.listBox_Abilities_DoubleClick);
             this.listBox_Abilities.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBox_Abilities_MouseClick);
