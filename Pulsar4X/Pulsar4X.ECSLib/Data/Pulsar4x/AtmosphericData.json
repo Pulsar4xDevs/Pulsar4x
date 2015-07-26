@@ -3,24 +3,26 @@
   "Data": {
     "Values": [
 	    {
-            "Weight": 50.0,
+            "Weight": 500.0,
             "Value": {
                 "Name": "Hydrogen",
                 "ChemicalSymbol": "H",
                 "IsToxic": false,
                 "BoilingPoint": -252.879,
                 "MeltingPoint": -259.16,
+                "MinGravity": 3.0,
                 "GreenhouseEffect": 1.0
             }
         },
         {
-            "Weight": 50.0,
+            "Weight": 150.0,
             "Value": {
                 "Name": "Helium",
                 "ChemicalSymbol": "He",
                 "IsToxic": false,
                 "BoilingPoint": -268.928,
                 "MeltingPoint": -272.20,
+                "MinGravity": 2.5,
                 "GreenhouseEffect": 0.0
             }
         },
@@ -32,6 +34,7 @@
                 "IsToxic": true,
                 "BoilingPoint": -161.49,
                 "MeltingPoint": -182.5,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -43,6 +46,7 @@
                 "IsToxic": false,
                 "BoilingPoint": 100.0,
                 "MeltingPoint": 0.0,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -54,6 +58,7 @@
                 "IsToxic": true,
                 "BoilingPoint": -33.34,
                 "MeltingPoint": -77.73,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -65,6 +70,7 @@
                 "IsToxic": false,
                 "BoilingPoint": -246.046,
                 "MeltingPoint": -248.59,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 0.0
             }
         },
@@ -76,6 +82,7 @@
                 "IsToxic": false,
                 "BoilingPoint": -195.795,
                 "MeltingPoint": -210.00,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 0.0
             }
         },
@@ -87,6 +94,7 @@
                 "IsToxic": true,
                 "BoilingPoint": -191.5,
                 "MeltingPoint": -205.02,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -98,6 +106,7 @@
                 "IsToxic": false,
                 "BoilingPoint": -152.0,
                 "MeltingPoint": -164.0,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -109,6 +118,7 @@
                 "IsToxic": false,
                 "BoilingPoint": -182.962,
                 "MeltingPoint": -218.79,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 0.0
             }
         },
@@ -120,6 +130,7 @@
                 "IsToxic": true,
                 "BoilingPoint": -60.0,
                 "MeltingPoint": -82.0,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -131,6 +142,7 @@
                 "IsToxic": false,
                 "BoilingPoint": -185.848,
                 "MeltingPoint": -189.34,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 0.0
             }
         },
@@ -142,6 +154,7 @@
                 "IsToxic": false,
                 "BoilingPoint": -87.5,
                 "MeltingPoint": -87.5,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -153,6 +166,7 @@
                 "IsToxic": false,
                 "BoilingPoint": 21.2,
                 "MeltingPoint": -11.2,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -164,6 +178,7 @@
                 "IsToxic": false,
                 "BoilingPoint": -10.0,
                 "MeltingPoint": -72.0,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -175,6 +190,7 @@
                 "IsToxic": true,
                 "BoilingPoint": -34.04,
                 "MeltingPoint": -101.5,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -186,6 +202,7 @@
                 "IsToxic": true,
                 "BoilingPoint": -188.11,
                 "MeltingPoint": -219.67,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -197,6 +214,7 @@
                 "IsToxic": true,
                 "BoilingPoint": 58.8,
                 "MeltingPoint": -7.2,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
@@ -208,28 +226,31 @@
                 "IsToxic": true,
                 "BoilingPoint": 184.3,
                 "MeltingPoint": 113.7,
+                "MinGravity": 0.001,
                 "GreenhouseEffect": 1.0
             }
         },
         {
-            "Weight": 0.0,
+            "Weight": 0.0000001,
             "Value": {
                 "Name": "Safe Greenhouse Gas",
                 "ChemicalSymbol": "SGG",
                 "IsToxic": false,
                 "BoilingPoint": 100.0,
                 "MeltingPoint": 0.0,
+                "MinGravity": 1000,
                 "GreenhouseEffect": 1.0
             }
         },
         {
-            "Weight": 0.0,
+            "Weight": 0.0000001,
             "Value": {
                 "Name": "Anti-Greenhouse Gas",
                 "ChemicalSymbol": "AGG",
                 "IsToxic": false,
                 "BoilingPoint": 100.0,
                 "MeltingPoint": 0.0,
+                "MinGravity": 10000,
                 "GreenhouseEffect": -1.0
             }
         }

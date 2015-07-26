@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
                 {
                     atmoDB.Pressure += gas.Value;
 
-                    // only add a greenhouse gas if it is not frozen:
+                    // only add a greenhouse gas if it is not frozen or liquid:
                     if (atmoDB.SurfaceTemperature >= gas.Key.BoilingPoint)
                     {
                         // actual greenhouse pressure adjusted by gas GreenhouseEffect.

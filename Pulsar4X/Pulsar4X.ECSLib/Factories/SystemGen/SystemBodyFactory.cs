@@ -911,28 +911,31 @@ namespace Pulsar4X.ECSLib
                 // first we should decide how thick it should be:
                 double newATM = GenAtmosphereThickness(mvDB.Mass, bodyDB, orbit, atmoModifer, system.RNG.NextDouble());
 
-                // now we will want to select gasses for the atmosphere:
-                SelectGases(newATM, atmoModifer, mvDB.Mass, bodyDB.Type, atmoDB, system, staticData);
-
                 // set an initial surface temp to the base temp, adjusted for albedo:
                 atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - atmoDB.Albedo);
 
-                // Add hydrospher and other Terrestrial woprld only stuff:
-                if (bodyDB.Type == BodyType.Terrestrial || bodyDB.Type == BodyType.Terrestrial)
-                {
-                    if (system.RNG.NextDouble() > 0.5)
-                    {
-                        atmoDB.Hydrosphere = true;
-                        atmoDB.HydrosphereExtent = (short)(system.RNG.NextDouble() * 100);
-                    }
-                }
+                // now we will want to select gasses for the atmosphere:
+                SelectGases(newATM, atmoModifer, bodyDB, mvDB, atmoDB, system, staticData);
             }
 
             // finally Run the atmo processor over it to create the greenhous factors and descriptions etc.
             // We want to run this even for bodies without an atmosphere.
             AtmosphereProcessor.UpdateAtmosphere(atmoDB, bodyDB);
+
+            // Add hydrospher if terra like world that has an atmosphere:
+            if ((bodyDB.Type == BodyType.Terrestrial || bodyDB.Type == BodyType.Terrestrial) && atmoDB.Exists)
+            {
+                if (system.RNG.NextDouble() > 0.75)
+                {
+                    atmoDB.Hydrosphere = true;
+                    atmoDB.HydrosphereExtent = (short)(system.RNG.NextDouble() * 100);
+                }
+            }
         }
 
+        /// <summary>
+        /// Works out how thick the atmosphere for the body should be, returns the value in atm.
+        /// </summary>
         double GenAtmosphereThickness(double bodyMass, SystemBodyDB body, OrbitDB orbit,  double atmoModifer, double randomModifer)
         {
             switch (body.Type)
@@ -990,15 +993,30 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        void SelectGases(double atm, double atmoModifer, double bodyMass, BodyType type, AtmosphereDB atmoDB, StarSystem system, StaticDataStore staticData)
+        /// <summary>
+        /// Selects suitable gases to make up an atmosphere.
+        /// </summary>
+        void SelectGases(double atm, double atmoModifer, SystemBodyDB body, MassVolumeDB bodyMassDB, AtmosphereDB atmoDB, StarSystem system, StaticDataStore staticData)
         {
-            // do a quick safty check:
-            if (staticData.AtmosphericGases.Count() < 7)
-                return; // bauil on selecting gases.
-
             // get the gas list:
             var gases = new WeightedList<AtmosphericGasSD>();
-            gases.AddRange(staticData.AtmosphericGases);
+
+            // creat a gas list for this planet, it should not include any gases that are too light or which would boil away due to too high temp.
+            foreach (var possibleGas in staticData.AtmosphericGases)
+            {
+                if (Temperature.ToKelvin(possibleGas.Value.BoilingPoint) * 5 > Temperature.ToKelvin(body.BaseTemperature))
+                {
+                    // then it is too cold for this gas to boil off
+                    if (possibleGas.Value.MinGravity < bodyMassDB.SurfaceGravity)
+                    {
+                        gases.Add(possibleGas.Weight, possibleGas.Value);
+                    }
+                }
+            }
+
+            // do a quick safty check:
+            if (gases.Count() < 2)
+                return; // bail on selecting gases, we don't have enough!!
 
             // get the primary gass:
             double percentage = 0.6 + 0.3 * system.RNG.NextDouble();
@@ -1014,6 +1032,11 @@ namespace Pulsar4X.ECSLib
 
             // get the trace gases, note that we will not care so much about 
             int noOfTraceGases = (int)GMath.Clamp(Math.Round(5 * atmoModifer), 1, 5);
+
+            // do another quick safty check:
+            if (gases.Count() < noOfTraceGases + 1)
+                return; // bail, not enough gases left to select trace gases.
+
             double remainingPercentage = 0.02;
             percentage = 0;
             for (int i = 0; i < noOfTraceGases + 1; ++i)
