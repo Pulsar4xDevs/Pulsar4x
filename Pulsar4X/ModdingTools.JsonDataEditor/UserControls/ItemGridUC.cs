@@ -298,6 +298,41 @@ namespace ModdingTools.JsonDataEditor.UserControls
             return rowdataList;
         }
 
+        public void DeleteCell(int row, int column)
+        {
+            _grid[row].RemoveAt(column);
+            if(!UpdateColumnCount())
+                UpdateTable();
+        }
+
+        private bool UpdateColumnCount()
+        {
+            int count = 0;
+            bool ischanged = false;
+            foreach (var row in _grid)
+            {
+                if (row.Count > count)
+                    count = row.Count;
+            }
+            if (_colomnCount != count)
+            {
+                _colomnCount = count;
+                UpdateTable();
+                ischanged = true;
+            }
+            return ischanged;
+        }
+
+        public ItemGridHeaderCell GetHeaderCell(int row)
+        {
+            return (ItemGridHeaderCell)_grid[row][0];
+        }
+
+        public ItemGridFooterCell GetFooterCell(int row)
+        {
+            return (ItemGridFooterCell)_grid[row][_grid[row].Count - 1];
+        }
+
         /// <summary>
         /// a static which returns a list of Data in a given row that matches the data type T
         /// </summary>
@@ -320,6 +355,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
     }
 
     /// <summary>
+    /// TODO: future make the _grid be List<ItemGridRow>
     /// should this be ItemGridRow T ?
     /// should it inheret from List T?
     /// </summary>

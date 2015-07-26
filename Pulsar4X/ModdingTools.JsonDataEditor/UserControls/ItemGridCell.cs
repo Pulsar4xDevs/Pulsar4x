@@ -166,9 +166,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 case "Edit":
                     StartEditing(sender, e);
                     break;
-                case "Delete Cell":
+                case "Delete This Cell":
+                    ParentGrid.DeleteCell(this.Row,this.Colomn);
                     break;
-                case "Insert":
+                case "Insert Cell":
+                    ParentGrid.GetFooterCell(Row).OnMouseClick(this, null);
                     break;
             }
         }
@@ -178,7 +180,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// </summary>
         /// <param name="o"></param>
         /// <param name="e"></param>
-        protected void StartEditing(object o, EventArgs e)
+        public void StartEditing(object o, EventArgs e)
         {
 
                 _activeControl = _editControl_;
@@ -299,9 +301,13 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public override void OnMouseClick(object o, MouseEventArgs e)
         {
 
+            ItemGridCell cell = o as ItemGridCell;
             ItemGridDataCell newCell = (ItemGridDataCell)_newcell.Copy();
-            ParentGrid.InsertCellAt(this.Colomn, this.Row, newCell);
-            newCell.OnMouseClick(o, e);
+            if (cell != null)
+                ParentGrid.InsertCellAt(cell.Colomn, cell.Row, newCell);
+            //newCell.OnMouseClick(o, e);
+            newCell.StartEditing(o, e);
+
         }
     }
 
