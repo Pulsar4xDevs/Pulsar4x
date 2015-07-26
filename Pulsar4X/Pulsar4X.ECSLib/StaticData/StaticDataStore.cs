@@ -64,6 +64,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Settings used by system generation. 
+        /// @todo make Galaxy gen use this instead of default data (DO NOT DELETE THE HARD CODED DATA THO, that should be a fall back).
         /// </summary>
         public SystemGenSettingsSD SystemGenSettings;
 
