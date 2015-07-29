@@ -302,6 +302,9 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 case MouseButtons.Left:
                 {
                     ItemGridCell cell = o as ItemGridCell;
+                    _newcell.ParentGrid = ParentGrid;
+                    _newcell.Row = Row;
+                    _newcell.Colomn = Colomn;
                     ItemGridDataCell newCell = (ItemGridDataCell)_newcell.Copy();
                     if (cell != null)
                         ParentGrid.InsertCellAt(cell.Colomn, cell.Row, newCell);
@@ -434,7 +437,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
             //listBox.Dock = DockStyle.Fill; //DockStyle.fill really does not work well with the listbox for this is seems. 
             listBox.Width = 200;
-            listBox.Height = 500;
+            listBox.Height = GetHeight;
 
             Data = ability;
             listBox.SelectedItem = Data;
@@ -446,6 +449,17 @@ namespace ModdingTools.JsonDataEditor.UserControls
         protected override string _getText_
         {
             get { return Enum.GetName(typeof(AbilityType), (AbilityType)Data); }
+        }
+
+        private int GetHeight
+        {
+            get
+            {
+                int height = 200;
+                if (ParentGrid != null)
+                    height = ParentGrid.Height;
+                return height;
+            }
         }
 
         protected override bool ValadateInput()
@@ -489,14 +503,15 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
 
             listBox.Width = 400;
-            listBox.Height = 500;
+            listBox.Height = 200;
 
             Data = techGuid;
-            listBox.SelectedItem = techGuid;
+            listBox.SelectedItem = techGuid;            
             _editControl_ = listBox;
             listBox.SelectedIndexChanged += new EventHandler(StopEditing);
             Refresh();
         }
+
 
         protected override string _getText_
         {
@@ -511,7 +526,52 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         public override object Copy()
         {
-            return new ItemGridCell_TechStaticDataType(Data, _guidDictionary.Values.ToList());
+            Guid? nextTech = ParentGrid.GetCellData(this.Colomn -1, this.Row) as Guid?;
+            if (nextTech != null)
+            {
+                List<Guid> keyList = _guidDictionary.Keys.ToList();
+                int index = keyList.IndexOf((Guid)nextTech);
+                nextTech = keyList[index + 1];
+            }
+            return new ItemGridCell_TechStaticDataType(nextTech, _guidDictionary.Values.ToList());
+        }
+    }
+
+    public class ItemGridCell_MineralDictionary : ItemGridDataCell
+    {
+        private Dictionary<Guid, MineralSD> _guidDictionary = new Dictionary<Guid, MineralSD>();
+        private Dictionary<string, Guid> _selectionDictionary = new Dictionary<string, Guid>();
+        public ItemGridCell_MineralDictionary(Dictionary<Guid, float> mineralDict, List<MineralSD> mineralList) :base("Multiple")
+        {
+            foreach (MineralSD mineral in mineralList)
+            {
+                _guidDictionary.Add(mineral.ID, mineral);
+                _selectionDictionary.Add(mineral.Name, mineral.ID);
+            }
+            MineralsCostsUC mineralsCosts = new MineralsCostsUC();
+            mineralsCosts.Width = 400;
+            mineralsCosts.Height = 200;
+
+            
+            _editControl_ = mineralsCosts;
+            Refresh();
+        }
+
+        protected override string _getText_
+        {
+            get { return "multiple"; }
+        }
+
+        protected override bool ValadateInput()
+        {
+            //Data = _selectionDictionary[_editControl_.SelectedItem];
+            return true;
+        }
+
+        public override object Copy()
+        {
+            List<MineralSD> minslist = _guidDictionary.Values.ToList();
+            return new ItemGridCell_MineralDictionary(null, minslist);
         }
     }
 }

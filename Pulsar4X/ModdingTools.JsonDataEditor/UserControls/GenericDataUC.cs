@@ -33,7 +33,7 @@ namespace ModdingTools.JsonDataEditor
         }
         public string GetName
         {
-            get { return _item.Name; }
+            get { return textBox_Name.Text; }
         }
         public string GetDescription
         {
@@ -53,6 +53,11 @@ namespace ModdingTools.JsonDataEditor
                 textBox_Name.Text = _item.Name;
                 //textBox_Description.Text = _Item.?????????
             }
+        }
+
+        private void textBox_Name_TextChanged(object sender, EventArgs e)
+        {
+   
         }
 
     }

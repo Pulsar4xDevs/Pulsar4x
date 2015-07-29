@@ -25,7 +25,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         public event PropertyChangedEventHandler RowChanged;
 
         private List<List<ItemGridCell>> _grid = new List<List<ItemGridCell>>();
-
+        private List<ItemGridRow<dynamic>> _grid2 = new List<ItemGridRow<dynamic>>(); 
         private int _colomnCount = 1;
         private int _rowCount = 1;
 
@@ -247,7 +247,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
             //add the row to the _grid.
             _grid.Add(rowGridCells);
 
-            int x = 1;
+            int x = 0;
             int y = _grid.Count -1;
             foreach (var cell in rowGridCells)
             {
@@ -312,7 +312,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// <param name="x">column</param>
         /// <param name="y">row</param>
         /// <returns>data object</returns>
-        public object Data(int x, int y)
+        public object GetCellData(int x, int y)
         {
             ItemGridDataCell cell = (ItemGridDataCell)_grid[y][x];
             return cell.Data;
@@ -323,7 +323,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         /// </summary>
         /// <param name="row"></param>
         /// <returns></returns>
-        public List<object> RowData(int row)
+        public List<object> GetRowData(int row)
         {
             List<object> rowdataList = new List<object>();
 
@@ -395,15 +395,145 @@ namespace ModdingTools.JsonDataEditor.UserControls
     /// <summary>
     /// TODO: future make the _grid be List<ItemGridRow>
     /// should this be ItemGridRow T ?
-    /// should it inheret from List T?
+    /// should it inheret from List? 
     /// </summary>
     public class ItemGridRow<T>
     {
         public ItemGridHeaderCell HeaderCell { get; set; }
         public ItemGridFooterCell FooterCell { get; set; }
-        public List<ItemGridDataCell> Cells { get; set; } 
-        public ItemGridRow(ItemGridHeaderCell header, List<ItemGridDataCell> dataCells, ItemGridFooterCell footer )
+        private List<ItemGridDataCell> _dataCells = new List<ItemGridDataCell>();
+        private ItemGridUC ParentGrid { get; set; }
+        private int Row { get; set; }
+
+        public List<ItemGridDataCell> DataCells
         {
+            get { return _dataCells; }
+            set
+            {
+                foreach (var cell in value)
+                {
+                    try
+                    {
+                        AddCell(cell);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception(e.Message + "At index: " + value.IndexOf(cell));
+                    }
+                    
+                }
+            }
         }
+
+        public ItemGridRow(ItemGridUC parentGrid, int row, ItemGridHeaderCell header, List<ItemGridDataCell> dataCells, ItemGridFooterCell footer)
+        {
+            ParentGrid = parentGrid;
+            HeaderCell = header;
+            FooterCell = footer;
+            DataCells = dataCells;
+        }
+
+
+        /// <summary>
+        /// Adds a cell to the datagrid list, sets the cells parentGrid, Row, and Column.
+        /// </summary>
+        /// <param name="cell"></param>
+        public void AddCell(ItemGridDataCell cell)
+        {
+            if (cell.Data is T)
+            {
+                cell.ParentGrid = ParentGrid;
+                cell.Row = Row;
+                cell.Colomn = _dataCells.Count;
+                _dataCells.Add(cell);
+                FooterCell.Colomn = _dataCells.Count;
+            }
+            else
+            {
+                throw new Exception("Cell Data Type: " + cell.Data.GetType().ToString() + " does not match the Row Data Type: " + typeof(T).ToString());
+            }
+        }
+
+        /// <summary>
+        /// Removes the given cell
+        /// </summary>
+        /// <param name="cell"></param>
+        public void RemoveCell(ItemGridDataCell cell)
+        {
+            _dataCells.Remove(cell);
+            UpdateColumnNums();
+        }
+        /// <summary>
+        /// Removes the cell at given index
+        /// </summary>
+        /// <param name="index"></param>
+        public void RemoveCell(int index)
+        {
+            _dataCells.RemoveAt(index);
+            UpdateColumnNums();
+        }
+
+        public void InsertCell(int index, ItemGridDataCell cell)
+        {
+            if (cell.Data is T)
+            {
+                cell.ParentGrid = ParentGrid;
+                cell.Row = Row;
+                cell.Colomn = index;
+                _dataCells.Insert(index, cell);
+                UpdateColumnNums();
+            }
+            else
+            {
+                throw new Exception("Cell Data Type: " + cell.Data.GetType().ToString() + " does not match the Row Data Type: " + typeof(T).ToString());
+            }
+        }
+
+        private void UpdateColumnNums()
+        {
+            int i = 0;
+            foreach (var cell in _dataCells)
+            {
+                cell.Colomn = i;
+                i++;
+            }
+            FooterCell.Colomn = _dataCells.Count;
+        }
+
+        /// <summary>
+        /// returns the number of datacells (not counting header and footer cell)
+        /// </summary>
+        public int Count
+        {
+            get { return DataCells.Count; }
+        }
+
+        /// <summary>
+        /// returns a list of this Rows Data.
+        /// </summary>
+        public List<T> GetRowData
+        {
+            get
+            {
+                List<T> dataList = new List<T>();
+                foreach (var cell in DataCells)
+                {
+                    dataList.Add(cell.Data);
+                }
+                return dataList;
+            }
+        }
+
+        /// <summary>
+        /// returns a single cells data. 
+        /// </summary>
+        /// <param name="x">column (not counting header), ie first data cell is x=0</param>
+        /// <returns></returns>
+        public T GetCellData(int x)
+        {
+            return DataCells[x].Data;
+        }
+
+        
     }
 }

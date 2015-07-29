@@ -62,10 +62,14 @@ namespace ModdingTools.JsonDataEditor
             }            
         }
 
+
         private void SetCurrentAbility(int index)
         {
-            _currentAbilityIndex = index;
-            SetupItemGrid(_selectedComponentAbilityWrappers[index].AbilityStaticData());
+            if (index > -1)
+            {
+                _currentAbilityIndex = index;
+                SetupItemGrid(_selectedComponentAbilityWrappers[index].AbilityStaticData());
+            }
         }
 
         /// <summary>
@@ -87,7 +91,7 @@ namespace ModdingTools.JsonDataEditor
             {
                 //Type listObjectType = itemGridUC1.RowData(row)[0].GetType();
                 IList list = (IList)Activator.CreateInstance(propertyType);
-                foreach (var item in itemGridUC1.RowData(row))
+                foreach (var item in itemGridUC1.GetRowData(row))
                 {
                     list.Add(item);
                 }
@@ -95,7 +99,7 @@ namespace ModdingTools.JsonDataEditor
             }
             else 
             { 
-                pinfo.SetValue(CurrentAbility, itemGridUC1.RowData(row)[0]); //if is not a list,
+                pinfo.SetValue(CurrentAbility, itemGridUC1.GetRowData(row)[0]); //if is not a list,
             }
 
         }
@@ -218,6 +222,11 @@ namespace ModdingTools.JsonDataEditor
             }
             itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
 
+            //rowHeader = new ItemGridHeaderCell("MineralCosts", t.GetProperty("MineralCosts"));
+            //dataCells = new List<ItemGridDataCell>();
+            //rowFooter = new ItemGridFooterCell(new ItemGridCell_MineralDictionary(null, Data.GetListofMineralSds()));
+            //itemGridUC1.AddRow(rowHeader, dataCells, rowFooter);
+
             itemGridUC1.HardRedraw();
         }
 
@@ -267,6 +276,7 @@ namespace ModdingTools.JsonDataEditor
             public AbilityType AffectsAbility { get; set; }
             public List<float> AffectedAmount { get; set; }
             public List<Guid> TechRequirements { get; set; }
+            public Dictionary<Guid, float> MineralCosts { get; set; }  
 
             public ComponentAbilityWrapper(ComponentAbilitySD _abilitySD)
             {
@@ -302,6 +312,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void listBox_AllComponents_MouseDoubleClick(object sender, MouseEventArgs e)
         {
+            _selectedComponentAbilityWrappers.Clear();
             DataHolder selectedItem = (DataHolder)listBox_allComponents.SelectedItem;
             SetCurrentComponent(Data.ComponentData[selectedItem.Guid].StaticData);
         }
@@ -313,20 +324,29 @@ namespace ModdingTools.JsonDataEditor
 
         private void button_clearSelection_Click(object sender, EventArgs e)
         {
+            _selectedComponentAbilityWrappers.Clear();
+            ComponentAbilitySD newemptyabilitySD = new ComponentAbilitySD
+            {
+                
+            };
+
+
             ComponentSD newEmptySD = new ComponentSD
             {
                 ID = new Guid(),
                 Name = "",
                 Description = "",
-
+                ComponentAbilitySDs = new List<ComponentAbilitySD>(),
             };
             SetCurrentComponent(newEmptySD);
         }
 
         private void button_saveNew_Click(object sender, EventArgs e)
         {
+      
             SetCurrentComponent(ComponentStaticData(Guid.NewGuid()));
             Data.SaveToDataStore(_currentComponent);
+            UpdateComponentslist();
         }
 
         private void button_updateExisting_Click(object sender, EventArgs e)

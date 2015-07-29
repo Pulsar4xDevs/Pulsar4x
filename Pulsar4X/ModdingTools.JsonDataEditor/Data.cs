@@ -304,7 +304,7 @@ namespace ModdingTools.JsonDataEditor
         public static Dictionary<Guid, DataHolder> MineralData = new Dictionary<Guid, DataHolder>();
         public static Dictionary<Guid, DataHolder> TechData = new Dictionary<Guid, DataHolder>();
         public static Dictionary<Guid, DataHolder> RefinedObjData = new Dictionary<Guid, DataHolder>();
-
+        public static Dictionary<Guid, DataHolder> SysGen = new Dictionary<Guid, DataHolder>();
         public static MainWindow MainWindow;
 
         public static int LoadedDataSets { get; set; }
@@ -334,6 +334,8 @@ namespace ModdingTools.JsonDataEditor
             //{
             //    RefinedObjData.Add(refinedData.Key, new DataHolder(refinedData.Value));
             //}
+            SysGen.Add(new Guid(), new DataHolder(Program.staticData.SystemGenSettings));
+            
         }
 
         public static void SaveDataToDirectory(string dir)
@@ -342,6 +344,7 @@ namespace ModdingTools.JsonDataEditor
             StaticDataManager.ExportStaticData(Program.staticData.Components, dir + "\\ComponentData.json");
             StaticDataManager.ExportStaticData(Program.staticData.Minerals, dir + "\\MineralData.json");
             StaticDataManager.ExportStaticData(Program.staticData.Techs, dir + "\\TechnologyData.json");
+            StaticDataManager.ExportStaticData(Program.staticData.SystemGenSettings, dir + "\\SystemGenSettings.json");
         }
 
         /// <summary>
@@ -405,6 +408,16 @@ namespace ModdingTools.JsonDataEditor
             foreach (var techDH in TechData)
             {
                 list.Add(techDH.Value.StaticData);
+            }
+            return list;
+        }
+
+        public static List<MineralSD> GetListofMineralSds()
+        {
+            List<MineralSD> list = new List<MineralSD>();
+            foreach (var minDH in MineralData)
+            {
+                list.Add(minDH.Value.StaticData);
             }
             return list;
         }

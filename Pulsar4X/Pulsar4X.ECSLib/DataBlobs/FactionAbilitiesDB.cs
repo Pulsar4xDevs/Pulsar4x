@@ -38,6 +38,13 @@ namespace Pulsar4X.ECSLib
         ReloadRateMultiplyer,
         MissileMagazine,
 
+        ComponentSize,
+        EnginePower,
+        EngineEfficency,
+        FuelConsumption,
+        ThermalSignature,
+        EMSignature,
+
         Nothing
 
     }
