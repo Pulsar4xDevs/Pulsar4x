@@ -81,7 +81,7 @@ namespace ModdingTools.JsonDataEditor
         private void OnRowChanged(object rowNum, EventArgs e)
         {
             int row = (int)rowNum;
-            ItemGridHeaderCell header = (ItemGridHeaderCell)itemGridUC1.GetCellItem(row,0);
+            ItemGridHeaderCell header = (ItemGridHeaderCell)itemGridUC1.GetHeaderCell(row);
             
             PropertyInfo pinfo = header.RowData; 
             Type propertyType = pinfo.PropertyType; 

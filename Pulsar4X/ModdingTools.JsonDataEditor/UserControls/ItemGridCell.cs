@@ -42,7 +42,8 @@ namespace ModdingTools.JsonDataEditor.UserControls
             
             displayLabel.MouseClick += OnMouseClick;
             MouseClick += OnMouseClick;
-            
+            Dock = DockStyle.Fill;
+
         }
 
         /// <summary>
@@ -170,6 +171,11 @@ namespace ModdingTools.JsonDataEditor.UserControls
                     ParentGrid.GetFooterCell(Row).OnMouseClick(this, null);
                     break;
             }
+        }
+
+        public void SetData(object data)
+        {
+            _data = data;
         }
 
         /// <summary>
@@ -304,21 +310,23 @@ namespace ModdingTools.JsonDataEditor.UserControls
                     ItemGridCell cell = o as ItemGridCell;
                     _newcell.ParentGrid = ParentGrid;
                     _newcell.Row = Row;
-                    _newcell.Colomn = Colomn;
+                    _newcell.Colomn = Colomn;                    
                     ItemGridDataCell newCell = (ItemGridDataCell)_newcell.Copy();
-                    if (cell != null)
-                        ParentGrid.InsertCellAt(cell.Colomn, cell.Row, newCell);
+                    if (cell == this || cell == null)
+                    {
+                        ParentGrid.AddCellAt(this.Row, newCell);
+                    }
                     else
-                        ParentGrid.InsertCellAt(this.Colomn, this.Row, newCell);
-                    
+                    {
+                        ParentGrid.InsertCellAt(cell.Colomn, cell.Row, newCell);
+                    }
+
                     newCell.StartEditing(o, e);
                 }
                     break;
                 case MouseButtons.Right:
                     break;
             }
-
-
         }
     }
 
