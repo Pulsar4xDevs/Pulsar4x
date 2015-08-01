@@ -31,9 +31,16 @@ namespace ModdingTools.JsonDataEditor.UserControls
         private int _colomnCountTLP { get { return _columnCountData + 2;} }
         private int _rowCount = 1;
 
+        //private TableLayoutPannelDoubleBuffered tableLayoutPanel1 = new TableLayoutPannelDoubleBuffered();
+
         public ItemGridUC()
         {
             InitializeComponent();
+            RedrawTLP();
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Show();
+            tableLayoutPanel1.Visible = true;
+            tableLayoutPanel1.CellBorderStyle = TableLayoutPanelCellBorderStyle.None;
             //tableLayoutPanel1.CellPaint += tableLayoutPanel_CellPaint;
         }
 
@@ -86,16 +93,20 @@ namespace ModdingTools.JsonDataEditor.UserControls
 
         public void HardRedraw()
         {
+            tableLayoutPanel1.Visible = false;
             RedrawTLP();
             ResetCells();
+            tableLayoutPanel1.Visible = true;
         }
 
         public void SoftRefresh()
         {
+            tableLayoutPanel1.Visible = false;
             UpdateColumnCount();
             tableLayoutPanel1.RowCount = _rowCount + 1;
             tableLayoutPanel1.ColumnCount = _colomnCountTLP;
             ResetCells();
+            tableLayoutPanel1.Visible = true;
         }
 
 
@@ -229,7 +240,7 @@ namespace ModdingTools.JsonDataEditor.UserControls
         {
             ItemGridRow<dynamic> row = new ItemGridRow<dynamic>(this, _grid.Count, header, dataCells, footer);
             _grid.Add(row);
-            SoftRefresh();
+            //SoftRefresh();
         }
 
         /// <summary>
@@ -513,5 +524,61 @@ namespace ModdingTools.JsonDataEditor.UserControls
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
+    }
+
+
+
+    public class TableLayoutPannelDoubleBuffered : TableLayoutPanel
+    {
+        public TableLayoutPannelDoubleBuffered()
+        {
+            InitializeComponent();        
+   
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
+              ControlStyles.OptimizedDoubleBuffer |
+              ControlStyles.UserPaint, true);
+        }
+
+        public TableLayoutPannelDoubleBuffered(IContainer container)
+        {
+            InitializeComponent();
+      
+            container.Add(this);
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
+              ControlStyles.OptimizedDoubleBuffer |
+              ControlStyles.UserPaint, true);
+        }
+
+        /// <summary> 
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Component Designer generated code
+
+        /// <summary> 
+        /// Required method for Designer support - do not modify 
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            components = new System.ComponentModel.Container();
+            //this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+        }
+
+        #endregion
     }
 }
