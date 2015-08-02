@@ -42,6 +42,18 @@ namespace Pulsar4X.Entities
             NA
         }
 
+        public enum MineralType
+        {
+            NoMinerals,        //Nothing.
+            Asteroid,          //500-10k of each mineral, above 1.0 accessibility? 1-5 minerals
+            Comet,             //10-100k 6-10 minerals high accessibility.
+            FewGood,           //Rich world with few but decent quality mineral reserves. 500k-4M range, 2-4 minerals.
+            ManyGood,          //Rich world with many high quality mineral deposits, but not truly massive deposits 500k-4M range 4-8 minerals
+            MassiveReserves,   //Gargantuan amount of resources, low accessibility. 10-150M 8-11 minerals.
+            Homeworld,         //50k-150k of every resource in good amounts. Everything a starting faction will need.
+            Count,
+        }
+
         public PlanetType Type { get; set; }
 
         /// <summary>
@@ -210,7 +222,7 @@ namespace Pulsar4X.Entities
             legalOrders.AddRange(_legalOrders);
             if (this.GeoSurveyList.ContainsKey(faction) == true)
             {
-                if (this.GeoSurveyList[faction] == false)
+                if (this.GeoSurveyList[faction] == false || this.GeoSurveyList.ContainsKey(faction) == false)
                     legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
             }
             return legalOrders;
@@ -267,6 +279,7 @@ namespace Pulsar4X.Entities
         /// This generates the rich assortment of all minerals for a homeworld. non-hw planets have less, or even no resources.
         /// should some resources be scarcer than others?
         /// </summary>
+#warning More of a bellcurve distribution of minerals would be better, with the lowest and highest results relatively rare. Accessibility, and even mineral type should be the same.
         public void HomeworldMineralGeneration()
         {
             m_aiMinerialReserves[0] = 150000.0f + (100000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
@@ -276,6 +289,143 @@ namespace Pulsar4X.Entities
                 m_aiMinerialReserves[mineralIterator] = 50000.0f + (70000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
                 m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
             }
+        }
+
+        /// <summary>
+        /// Asteroids have a small amount of a few types of minerals. but accessibility will be very high.
+        /// </summary>
+        public void AsteroidMineralGeneration()
+        {
+            int mCount = 1 + GameState.RNG.Next(4);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 500.0f + (9500.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(8, 10) / 10.0f);
+
+                        mCount--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Comets are fairly rich and have a good assortment of minerals
+        /// </summary>
+        public void CometMineralGeneration()
+        {
+            int mCount = 6 + GameState.RNG.Next(4);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 10000.0f + (90000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(4, 10) / 10.0f);
+
+                        mCount--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Low Planet means that this world should have only a few deposits, though there should be a good amount of resources on them.
+        /// </summary>
+        public void LowPlanetMineralGeneration()
+        {
+            int mCount = 2 + GameState.RNG.Next(2);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 500000.0f + (3500000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
+
+                        mCount--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// High planet indicates that this will be a fairly desirable mining spot.
+        /// </summary>
+        public void HighPlanetMineralGeneration()
+        {
+            int mCount = 4 + GameState.RNG.Next(4);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 500000.0f + (3500000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
+
+                        mCount--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Planets with truly stupendous amounts of resources, but at low accessibility.
+        /// </summary>
+        public void MassiveMineralGeneration()
+        {
+            int mCount = 8 + GameState.RNG.Next(3);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 10000000.0f + (140000000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 0.1f;
+
+                        mCount--;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// determine what type of world this is with regards to mineral generation and generate those minerals.
+        /// </summary>
+        /// <param name="MineralType">Type of mineral generation this world should get.</param>
+        public void GenerateMinerals(SystemBody.MineralType MineralType)
+        {
+            switch (MineralType)
+            {
+                case SystemBody.MineralType.NoMinerals:
+                    break;
+                case SystemBody.MineralType.Asteroid:
+                    AsteroidMineralGeneration();
+                    break;
+                case SystemBody.MineralType.Comet:
+                    CometMineralGeneration();
+                    break;
+                case SystemBody.MineralType.FewGood:
+                    LowPlanetMineralGeneration();
+                    break;
+                case SystemBody.MineralType.ManyGood:
+                    HighPlanetMineralGeneration();
+                    break;
+                case SystemBody.MineralType.MassiveReserves:
+                    MassiveMineralGeneration();
+                    break;
+                case SystemBody.MineralType.Homeworld:
+                    HomeworldMineralGeneration();
+                    break;
+            }
+
         }
     }
 

@@ -3126,6 +3126,14 @@ namespace Pulsar4X.Entities
                 control = true;
             }
 
+            for (int loop = 0; loop < ShipSurveyDef.Count; loop++)
+            {
+                Entry = String.Format("{0} ({1})   {2:N0} Survey Points Per Hour\n", ShipSurveyDef[loop].Name, ShipSurveyCount[loop], ShipSurveyDef[loop].sensorStrength);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+
+                control = true;
+            }
+
             if (control == true)
             {
                 Entry = "\n";

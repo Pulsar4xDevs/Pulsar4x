@@ -2413,14 +2413,10 @@ namespace Pulsar4X.Entities
                     if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Geological)
                     {
                         CurrentGeoSurveyStrength = CurrentGeoSurveyStrength + sDef.sensorStrength;
-                        if (CurrentGeoSurveyStrength < 0)
-                            CurrentGeoSurveyStrength = 0;
                     }
                     else if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Gravitational)
                     {
                         CurrentGravSurveyStrength = CurrentGravSurveyStrength + sDef.sensorStrength;
-                        if (CurrentGravSurveyStrength < 0)
-                            CurrentGravSurveyStrength = 0;
                     }
                     break;
             }
