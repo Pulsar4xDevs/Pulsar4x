@@ -177,5 +177,14 @@ namespace Pulsar4X.Entities
                 }
             }
         }
+
+        /// <summary>
+        /// The cost for Gravitational survey points as per Aurora is: square root ( System Primary's solar masses ) * 400 
+        /// </summary>
+        /// <returns>Number of survey points that must be generated to survey each gravitational survey point.</returns>
+        public int GetSurveyCost()
+        {
+            return (int)Math.Floor((float)Math.Sqrt(Stars[0].Orbit.MassRelativeToSol) * 400.0f);
+        }
     }
 }

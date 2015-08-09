@@ -44,6 +44,7 @@ namespace Pulsar4X.Entities
 
         public enum MineralType
         {
+            NotGenerated,
             NoMinerals,        //Nothing.
             Asteroid,          //500-10k of each mineral, above 1.0 accessibility? 1-5 minerals
             Comet,             //10-100k 6-10 minerals high accessibility.
@@ -174,6 +175,24 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// Has mineral generation been run for this world?
+        /// </summary>
+        private bool _MineralsGenerated;
+        public bool _mineralsGenerated
+        {
+            get { return _MineralsGenerated; }
+        }
+
+        /// <summary>
+        /// What type of minerals should be generated for this world?
+        /// </summary>
+        private MineralType _BodyMineralType;
+        public MineralType _bodyMineralType
+        {
+            get { return _BodyMineralType; }
+        }
+
         public SystemBody(OrbitingEntity parent, PlanetType type)
             : base()
         {
@@ -207,6 +226,8 @@ namespace Pulsar4X.Entities
                 m_aiMinerialReserves[mineralIterator] = 0.0f;
                 m_aiMinerialAccessibility[mineralIterator] = 0.0f;
             }
+            _MineralsGenerated = false;
+            _BodyMineralType = MineralType.NotGenerated;
 
 #warning planet generation needs minerals, anomalies, and ruins generation.
             PlanetaryRuins = new Ruins();
@@ -220,9 +241,13 @@ namespace Pulsar4X.Entities
         {
             List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
             legalOrders.AddRange(_legalOrders);
-            if (this.GeoSurveyList.ContainsKey(faction) == true)
+            if (this.GeoSurveyList.ContainsKey(faction) == false)
             {
-                if (this.GeoSurveyList[faction] == false || this.GeoSurveyList.ContainsKey(faction) == false)
+                legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
+            }
+            else if (this.GeoSurveyList.ContainsKey(faction) == true)
+            {
+                if (this.GeoSurveyList[faction] == false)
                     legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
             }
             return legalOrders;
@@ -399,10 +424,16 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// determine what type of world this is with regards to mineral generation and generate those minerals.
         /// </summary>
-        /// <param name="MineralType">Type of mineral generation this world should get.</param>
-        public void GenerateMinerals(SystemBody.MineralType MineralType)
+        /// <param name="isHomeworld">Should this world have homeworld mineral generation?</param>
+        public void GenerateMinerals(bool isHomeWorld = false)
         {
-            switch (MineralType)
+
+            MineralType MType = MineralType.Homeworld;
+
+            if(isHomeWorld == false)
+                MType = (MineralType)GameState.RNG.Next((int)SystemBody.MineralType.NoMinerals, (int)SystemBody.MineralType.Homeworld);
+
+            switch (MType)
             {
                 case SystemBody.MineralType.NoMinerals:
                     break;
@@ -425,7 +456,16 @@ namespace Pulsar4X.Entities
                     HomeworldMineralGeneration();
                     break;
             }
+            _MineralsGenerated = true;
+        }
 
+        /// <summary>
+        /// Survey cost for bodies is based on their radius relative to that of Earth.
+        /// </summary>
+        /// <returns>Cost in geopoints to survey this world.</returns>
+        public int GetSurveyCost()
+        {
+            return (int)Math.Floor((float)Constants.SensorTN.EarthSurvey * ((float)Radius / Constants.SensorTN.EarthRadius));
         }
     }
 

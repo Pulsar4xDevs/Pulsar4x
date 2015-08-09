@@ -733,6 +733,16 @@ namespace Pulsar4X
             /// What value are sensors calibrated around searching for?
             /// </summary>
             public const uint DefaultPassiveSignature = 1000;
+
+            /// <summary>
+            /// Survey point requirement will be based on body radius relative to earth.
+            /// </summary>
+            public const float EarthRadius = (float)(6378.1 / Constants.Units.KmPerAu);
+
+            /// <summary>
+            /// And relative to earth's point value from Aurora.
+            /// </summary>
+            public const uint EarthSurvey = 637;
         }
 
         /// <summary>

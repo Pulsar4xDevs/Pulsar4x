@@ -205,6 +205,21 @@ namespace Pulsar4X.Entities
         public uint SensorUpdateAck { get; set; }
 
         /// <summary>
+        /// How many GP has this taskgroup accumulated thus far?
+        /// </summary>
+        public int _GeoSurveyPoints { get; set; }
+
+        /// <summary>
+        /// How many SP has this taskgroup accumulated from surveying gravitational survey points thus far?
+        /// </summary>
+        public int _GravSurveyPoints { get; set; }
+
+        /// <summary>
+        /// GP and SP are incremented by the hour, so how long has it been since the last hour?
+        /// </summary>
+        public float _SurveyHourFraction { get; set; }
+
+        /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
         /// <param name="Title">Name</param>
@@ -308,6 +323,10 @@ namespace Pulsar4X.Entities
             IsInShipyard = false;
 
             SensorUpdateAck = 0;
+
+            _GeoSurveyPoints = 0;
+            _GravSurveyPoints = 0;
+            _SurveyHourFraction = 0.0f;
 
             //add default legal order for targeting TGs.
             _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
@@ -450,12 +469,18 @@ namespace Pulsar4X.Entities
             /// GeoSurvey specific orders:
             /// </summary>
             if (CalcGeoSurveyPoints() != 0.0f)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
                 legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
+            }
             /// <summary>
             /// Grav survey specific orders:
             /// </summary>
             if (CalcGravSurveyPoints() != 0.0f)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.GravSurvey);
                 legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
+            }
 
 
             /// <summary>
@@ -2847,6 +2872,46 @@ namespace Pulsar4X.Entities
                                 Contact.UpdateLocationAfterTransit();
                             }
                         }
+                        break;
+                    #endregion
+
+                    #region GeoSurvey
+                        case (int)Constants.ShipTN.OrderType.GeoSurvey:
+                           SystemBody OB = OrbitingBody as SystemBody;
+                           int BodySurveyCost = OB.GetSurveyCost();
+
+                           float hourFract = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
+                           int hours = (int)Math.Floor(hourFract);
+                           int RemainderGP = BodySurveyCost - _GeoSurveyPoints;
+                           int TotalGP = (int)(CalcGeoSurveyPoints() * (float)hours);
+                           if (TotalGP < RemainderGP)
+                           {
+                               _GeoSurveyPoints = _GeoSurveyPoints + TotalGP;
+                               TimeSlice = 0;
+                           }
+                           else
+                           {
+                               /// <summary>
+                               /// Some time will be left over, return that fraction of time.
+                               /// </summary>
+                               int hoursToComplete = (int)Math.Ceiling((float)RemainderGP / CalcGeoSurveyPoints());
+                               TimeSlice = TimeSlice - ((uint)hoursToComplete * Constants.TimeInSeconds.Hour);
+                           }
+                           
+                           
+                           if (_GeoSurveyPoints >= BodySurveyCost)
+                           {
+                               if (OB.GeoSurveyList.ContainsKey(TaskGroupFaction) == false)
+                               {
+                                   OB.GeoSurveyList.Add(TaskGroupFaction, true);
+                                   if(OB._mineralsGenerated == false)
+                                       OB.GenerateMinerals();
+                               }
+                               //handle adding the faction to the survey list when complete 
+                               //generate minerals?
+                               _GeoSurveyPoints = 0;
+                           }
+                           
                         break;
                     #endregion
 
