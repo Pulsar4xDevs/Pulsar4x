@@ -743,6 +743,11 @@ namespace Pulsar4X
             /// And relative to earth's point value from Aurora.
             /// </summary>
             public const uint EarthSurvey = 637;
+
+            /// <summary>
+            /// Each survey ring is 2B km out for every 1.0 unit of solar mass present. solar mass is sqrted for this calculation as per survey cost and then multiplied by this value. units in AU.
+            /// </summary>
+            public const double EarthRingDistance = 13.36917422;
         }
 
         /// <summary>

@@ -14,6 +14,7 @@ namespace Pulsar4X.Entities
         TaskGroup,
         Population,
         Missile,
+        SurveyPoint,
         TypeCount
     }
 
