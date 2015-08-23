@@ -63,6 +63,14 @@ namespace Pulsar4X.Entities
         private int m_seed;
         public int Seed { get { return m_seed; } }
 
+
+        /// <summary>
+        /// Each starsystem will have 30 suvery points under TN rules.
+        /// Also, I'll need to track which faction has surveyed which point. I could do this at the survey point level, but I think it better to have a starsystem list of factions
+        /// that have completely surveyed this starsystem, along with a way of handling incomplete surveys.
+        /// </summary>
+        public BindingList<SurveyPoint> _SurveyPoints { get; set; }
+
         public StarSystem(string name, int seed)
             : base()
         {
@@ -77,6 +85,8 @@ namespace Pulsar4X.Entities
             TaskGroups = new BindingList<TaskGroupTN>();
             Populations = new BindingList<Population>();
             OrdnanceGroups = new BindingList<OrdnanceGroupTN>();
+
+            _SurveyPoints = new BindingList<SurveyPoint>();
 
             m_seed = seed;
 
@@ -185,6 +195,154 @@ namespace Pulsar4X.Entities
         public int GetSurveyCost()
         {
             return (int)Math.Floor((float)Math.Sqrt(Stars[0].Orbit.MassRelativeToSol) * 400.0f);
+        }
+
+
+        /// <summary>
+        /// This should be done after mass has been assigned to Stars[0]. The pattern here is the one in use in TN Aurora.
+        /// </summary>
+        public void GenerateSurveyPoints()
+        {
+            double RingValue = Math.Sqrt(Stars[0].Orbit.MassRelativeToSol) * Constants.SensorTN.EarthRingDistance;
+
+            /// <summary>
+            /// Ring one is 0,60,120,180,240,300.
+            /// </summary>
+            for (int surveyPointIterator = 0; surveyPointIterator < 360; surveyPointIterator += 60)
+            {
+                double dAngle = surveyPointIterator * ((Math.PI) / 180.0); //this would be 2 * PI / 360
+                double fX = Math.Cos(dAngle) * RingValue;
+                double fY = Math.Sin(dAngle) * RingValue;
+
+                SurveyPoint SP = new SurveyPoint(this, fX, fY);
+                _SurveyPoints.Add(SP);
+            }
+
+            /// <summary>
+            /// Ring two is 15,45,75,105,135,165,195,225,255,285,315,345.
+            /// </summary>
+            for (int surveyPointIterator = 15; surveyPointIterator < 360; surveyPointIterator += 30)
+            {
+                double dAngle = surveyPointIterator * ((Math.PI) / 180.0); //this would be 2 * PI / 360
+                double fX = Math.Cos(dAngle) * (RingValue * 2);
+                double fY = Math.Sin(dAngle) * (RingValue * 2);
+
+                SurveyPoint SP = new SurveyPoint(this, fX, fY);
+                _SurveyPoints.Add(SP);
+            }
+
+            /// <summary>
+            /// Ring three is 0,30,60,90,120,150,180,210,240,270,300,330.
+            /// </summary>
+            for (int surveyPointIterator = 0; surveyPointIterator < 360; surveyPointIterator += 30)
+            {
+                double dAngle = surveyPointIterator * ((Math.PI) / 180.0); //this would be 2 * PI / 360
+                double fX = Math.Cos(dAngle) * (RingValue * 32);
+                double fY = Math.Sin(dAngle) * (RingValue * 3);
+
+                SurveyPoint SP = new SurveyPoint(this, fX, fY);
+                _SurveyPoints.Add(SP);
+            }
+        }
+
+
+        /// <summary>
+        /// Which survey point will X,Y be within the area of? Between 0 to RingValue is ring one, RingValue to 2 * RingValue is ring 2, and 3 * RingValue is ring 3.
+        /// </summary>
+        /// <param name="X">X position</param>
+        /// <param name="Y">Y Position</param>
+        /// <returns>Survey Point Index. -1 means that no survey point should correspond to this location. 0-29 mean 1 through 30 in display terms. index is 0 through 29 however.</returns>
+        public int GetSurveyPointArea(double X, double Y)
+        {
+            double RingValue = Math.Sqrt(Stars[0].Orbit.MassRelativeToSol) * Constants.SensorTN.EarthRingDistance;
+            double distanceFromPrimary = Math.Sqrt(((X * X) + (Y * Y)));
+            double Angle = (Math.Atan((X / Y)) / Constants.Units.Radian);
+
+            int SurveyIndex = -1;
+
+            if (distanceFromPrimary < (3 * RingValue))
+            {
+                /// <summary>
+                /// Ring 3 contains survey indices 19 through 30, but these are addressed starting from zero.
+                /// </summary>
+                SurveyIndex = 29;
+                for (int surveyPointIterator = 330; surveyPointIterator >= 0; surveyPointIterator -= 30)
+                {
+                    if (surveyPointIterator != 0)
+                    {
+                        int highAngle = surveyPointIterator + 15;
+                        int lowAngle = surveyPointIterator - 15;
+                        if (Angle <= highAngle && Angle >= lowAngle)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            SurveyIndex--;
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Point zero is a special case here, though this calculation should be unnecessary.
+                        /// </summary>
+                        if (Angle >= 345.0 || Angle <= 15.0)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// This is an error condition. The entire circle has been progressed through and we didn't get a match between our angle and survey index.
+                            /// </summary>
+                            SurveyIndex = -1;
+                        }
+                    }
+                }
+            }
+            else if (distanceFromPrimary < (2 * RingValue))
+            {
+                /// <summary>
+                /// Ring 2 contains survey indices 7 through 18.
+                /// </summary>
+                SurveyIndex = 17;
+                for (int surveyPointIterator = 345; surveyPointIterator >= 15; surveyPointIterator -= 30)
+                {
+                    int highAngle = surveyPointIterator + 15;
+                    int lowAngle = surveyPointIterator - 15;
+                    if (Angle <= highAngle && Angle >= lowAngle)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        SurveyIndex--;
+                    }
+                }
+            }
+            else if(distanceFromPrimary < RingValue)
+            {
+                /// <summary>
+                /// Ring 1 contains survey indices 1 through 6, again, subtract 1 to address from the survey point List which starts at index 0.
+                /// because there are fewer points, each point covers more total area, 60 degrees here instead of 30.
+                /// </summary>
+                SurveyIndex = 5;
+                for (int surveyPointIterator = 300; surveyPointIterator >= 0; surveyPointIterator -= 60)
+                {
+                    int highAngle = surveyPointIterator + 30;
+                    int lowAngle = surveyPointIterator - 30;
+                    if (Angle <= highAngle && Angle >= lowAngle)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        SurveyIndex--;
+                    }
+                }
+            }
+
+            return SurveyIndex;
         }
     }
 }

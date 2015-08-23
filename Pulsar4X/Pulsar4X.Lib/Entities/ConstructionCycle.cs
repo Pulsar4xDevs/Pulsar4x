@@ -61,6 +61,9 @@ namespace Pulsar4X.Entities
             float CurrentIndustry = CurrentPopulation.CalcTotalIndustry() * Constants.Colony.ConstructionCycleFraction;
             float BuildPercentage = 0.0f;
 
+            if (CurrentIndustry == 0.0f)
+                return;
+
             foreach (ConstructionBuildQueueItem CurrentConstruction in CurrentPopulation.ConstructionBuildQueue)
             {
                 /// <summary>
@@ -268,6 +271,9 @@ namespace Pulsar4X.Entities
             float CurrentIndustry = CurrentPopulation.CalcTotalOrdnanceIndustry() * Constants.Colony.ConstructionCycleFraction;
             float BuildPercentage = 0.0f;
 
+            if (CurrentIndustry == 0.0f)
+                return;
+
             foreach (MissileBuildQueueItem CurrentConstruction in CurrentPopulation.MissileBuildQueue)
             {
                 /// <summary>
@@ -457,6 +463,9 @@ namespace Pulsar4X.Entities
         {
             int CY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number);
             int NY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+
+            if (CY == 0 && NY == 0)
+                return;
 
             List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o => o.Priority).ToList();
 
