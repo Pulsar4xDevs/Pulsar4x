@@ -237,7 +237,7 @@ namespace Pulsar4X.Entities
             for (int surveyPointIterator = 0; surveyPointIterator < 360; surveyPointIterator += 30)
             {
                 double dAngle = surveyPointIterator * ((Math.PI) / 180.0); //this would be 2 * PI / 360
-                double fX = Math.Cos(dAngle) * (RingValue * 32);
+                double fX = Math.Cos(dAngle) * (RingValue * 3);
                 double fY = Math.Sin(dAngle) * (RingValue * 3);
 
                 SurveyPoint SP = new SurveyPoint(this, fX, fY);
