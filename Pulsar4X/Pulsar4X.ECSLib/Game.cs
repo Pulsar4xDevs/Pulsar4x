@@ -106,6 +106,7 @@ namespace Pulsar4X.ECSLib
         internal void RunProcessors(List<StarSystem> systems, int deltaSeconds)
         {
             OrbitProcessor.Process(this, systems, deltaSeconds);
+            ShipMovementProcessor.Process(this, systems,deltaSeconds);
             InstallationProcessor.Process(this, systems, deltaSeconds);
         }
 
@@ -129,6 +130,7 @@ namespace Pulsar4X.ECSLib
         private static void InitializeProcessors()
         {
             OrbitProcessor.Initialize();
+            ShipMovementProcessor.Initialize();
             InstallationProcessor.Initialize();
         }
 
