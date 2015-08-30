@@ -12,7 +12,7 @@ using log4net;
 
 namespace Pulsar4X.Entities
 {
-    public class SurveyPoint : StarSystemEntity
+    public class SurveyPoint : OrbitingEntity
     {
         /// <summary>
         /// List of factions that have surveyed this point.
@@ -46,6 +46,15 @@ namespace Pulsar4X.Entities
             Position.System = SystemOfPoint;
             Position.X = xPosition;
             Position.Y = yPosition;
+
+            SSEntity = StarSystemEntityType.SurveyPoint;
+
+            /// <sumamry>
+            /// Unused Orbiting Entity data here.
+            /// </summary>
+            Parent = SystemOfPoint.Stars[0];
+            SupportsPopulations = false;
+            Radius = 0.0;
 
             _GravSurveyList = new BindingList<Faction>();
             _JPList = new BindingList<JumpPoint>();

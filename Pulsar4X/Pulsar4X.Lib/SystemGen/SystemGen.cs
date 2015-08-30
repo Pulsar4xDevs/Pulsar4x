@@ -198,6 +198,7 @@ namespace Pulsar4X
             Sun.Class = "G2";
             SetHabitableZone(Sun);
             Sol.Stars.Add(Sun);
+            Sol.GenerateSurveyPoints(); //must be done after the construction of orbit,and after stars[0] is created as that is where the mass value in use is created.
 
             SystemBody Mercury = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
             Mercury.Name = "Mercury";
@@ -737,6 +738,7 @@ namespace Pulsar4X
             Star star = PopulateStarDataBasedOnSpectralType(st, starName, system);
 
             system.Stars.Add(star);
+            system.GenerateSurveyPoints(); //must happen after mass is created. PopulateStarData sets the mass value among other things up properly.
             return star;
         }
 

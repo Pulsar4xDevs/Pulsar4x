@@ -359,6 +359,13 @@ namespace Pulsar4X.UI.SceenGraph
                     CreateJumpPoint(oCurrStar, oJumpPoint);
                 }
 
+                int SPIndex = 1;
+                foreach (Pulsar4X.Entities.SurveyPoint oSurveyPoint in a_oStarSystem._SurveyPoints)
+                {
+                    CreateSurveyPoint(oCurrStar, oSurveyPoint, a_oDefaultEffect, SPIndex);
+                    SPIndex++;
+                }
+
                 iStarCounter++;
             }
 
@@ -428,6 +435,37 @@ namespace Pulsar4X.UI.SceenGraph
             oJumpPointElement.AddPrimitive(oJPQuad);
             oJumpPointElement.RealSize = new Vector2(0.0001f, 0.0001f);
             parent.AddChildElement(oJumpPointElement);
+        }
+
+        /// <summary>
+        /// Create a survey element by making a default circle element, then creating the GLCircle, and then adding this to the parent element list.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="oSurveyPoint"></param>
+        /// <param name="a_oDefaultEffect"></param>
+        /// <param name="SPIndex"></param>
+        private void CreateSurveyPoint(SceenElement parent, SurveyPoint oSurveyPoint, GLEffect a_oDefaultEffect, int SPIndex)
+        {
+            Vector3 v3SPPos = new Vector3((float)oSurveyPoint.Position.X, (float)oSurveyPoint.Position.Y, 0.0f);
+
+            SceenElement oSurveyPointElement = new CircleElement();
+            oSurveyPointElement.EntityID = oSurveyPoint.Id;
+
+            GLCircle oSPCircle = new GLCircle(a_oDefaultEffect,
+                        v3SPPos,
+                        0.1f,
+                        Color.White,
+                        UIConstants.Textures.DEFAULT_TEXTURE);
+
+
+            GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(SceenDefaultEffect, v3SPPos,
+            UIConstants.DEFAULT_TEXT_SIZE, Color.White, UIConstants.Textures.DEFAULT_GLFONT2, SPIndex.ToString());
+
+            oSurveyPointElement.Lable = oNameLable;
+            oSurveyPointElement.RealSize = new Vector2(0.0001f, 0.0001f);
+            oSurveyPointElement.PrimaryPrimitive = oSPCircle;
+            oSurveyPointElement.AddPrimitive(oSPCircle);
+            parent.AddChildElement(oSurveyPointElement);
         }
 
         /// <summary>

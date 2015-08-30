@@ -199,7 +199,8 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
-        /// This should be done after mass has been assigned to Stars[0]. The pattern here is the one in use in TN Aurora.
+        /// This should be done after mass has been assigned to Stars[0]. The pattern here is the one in use in TN Aurora. I am using angle from top, for my numbers, but
+        /// that is 90 degrees internally.
         /// </summary>
         public void GenerateSurveyPoints()
         {
@@ -208,7 +209,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Ring one is 0,60,120,180,240,300.
             /// </summary>
-            for (int surveyPointIterator = 0; surveyPointIterator < 360; surveyPointIterator += 60)
+            for (int surveyPointIterator = 30; surveyPointIterator < 360; surveyPointIterator += 60)
             {
                 double dAngle = surveyPointIterator * ((Math.PI) / 180.0); //this would be 2 * PI / 360
                 double fX = Math.Cos(dAngle) * RingValue;
