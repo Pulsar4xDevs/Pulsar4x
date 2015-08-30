@@ -63,6 +63,11 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBlobs\AbilityDBs\EnginePowerDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\FuelStorageDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\FuelUseDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\MissileLauncherSize.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\SensorSignatureDB.cs" />
     <Compile Include="DataBlobs\ComponentDB.cs" />
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
@@ -71,6 +76,7 @@
     <Compile Include="DataBlobs\TeamsDB.cs" />
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
+    <Compile Include="Factories\ShipComponents\EngineFactory.cs" />
     <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
     <Compile Include="Factories\SystemGen\StarFactory.cs" />
     <Compile Include="Factories\SystemGen\SystemBodyFactory.cs" />
@@ -148,7 +154,6 @@
     <Compile Include="StaticData\TechSD.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DataBlobs\AbilityDBs\" />
     <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
   </ItemGroup>
   <ItemGroup>

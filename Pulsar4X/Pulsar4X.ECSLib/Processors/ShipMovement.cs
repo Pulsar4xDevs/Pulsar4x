@@ -17,6 +17,7 @@ namespace Pulsar4X.ECSLib
                 {
                     //TODO: do we need to check if the ship has an orbitDB?
                     shipEntity.GetDataBlob<PositionDB>().Position += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
+                    //TODO: use fuel.
                 }
             }
         }
