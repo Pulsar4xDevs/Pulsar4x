@@ -68,6 +68,8 @@
     <Compile Include="DataBlobs\AbilityDBs\FuelUseDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\MissileLauncherSize.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorSignatureDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\SensorStrengthDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\ComponentInfoDB.cs" />
     <Compile Include="DataBlobs\ComponentDB.cs" />
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
@@ -77,6 +79,7 @@
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
     <Compile Include="Factories\ShipComponents\EngineFactory.cs" />
+    <Compile Include="Factories\ShipComponents\GenericComponent.cs" />
     <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
     <Compile Include="Factories\SystemGen\StarFactory.cs" />
     <Compile Include="Factories\SystemGen\SystemBodyFactory.cs" />
