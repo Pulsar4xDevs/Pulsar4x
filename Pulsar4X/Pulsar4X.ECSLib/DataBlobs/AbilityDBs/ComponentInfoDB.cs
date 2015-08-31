@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
         public int HTK { get { return _htk; } internal set { _htk = value; } }
 
         [JsonProperty]
-        private JDictionary<Guid, int> _materialCosts = new JDictionary<Guid, int>();
+        private JDictionary<Guid, int> _materialCosts;
         public JDictionary<Guid, int> MaterialCosts { get { return _materialCosts; } internal set { _materialCosts = value; } }
 
         [JsonProperty]
@@ -27,12 +27,16 @@ namespace Pulsar4X.ECSLib
         private int _crewRequirement = 0;
         public int CrewRequrements { get { return _crewRequirement; } internal set { _crewRequirement = value; } }
 
-        public ComponentInfoDB(int size, int htk, JDictionary<Guid,int> materialCosts, Guid techRequrement)
+        //this should maybe be a list of delegates, for if there's multiple component abilitys...
+        public Delegate StatRecalcDelegate;
+
+        public ComponentInfoDB(int size, int htk, JDictionary<Guid,int> materialCosts, Guid techRequrement, int crewReqirement)
         {
             _size = size;
             _htk = htk;
             _materialCosts = materialCosts;
             _techReqToBuild = techRequrement;
+            _crewRequirement = crewReqirement;
         }
 
         public ComponentInfoDB(ComponentInfoDB db)

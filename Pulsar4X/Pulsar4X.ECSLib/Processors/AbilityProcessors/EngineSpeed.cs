@@ -4,9 +4,12 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-
-    internal static class EnginePowerProcessor 
+    
+    internal static class EnginePowerProcessor
     {
+        public delegate void StatRecalc(Entity ship);
+
+
         public static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
             

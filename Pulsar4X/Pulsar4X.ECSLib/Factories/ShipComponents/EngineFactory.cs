@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-
 
 namespace Pulsar4X.ECSLib
 {
@@ -8,13 +6,15 @@ namespace Pulsar4X.ECSLib
     {
         //this should be more generic, and take a json file I think. 
         //idealy we want to define a component compleatly from mod/json files.
-        public static Entity CreateEngineComponent(EntityManager systemEntityManager, int size, int htk, JDictionary<Guid,int> costs, Guid techreq, int enginePower, double fuelPerHour, int thermalSig)
+        public static Entity CreateEngineComponent(EntityManager systemEntityManager, int size, int htk, JDictionary<Guid,int> costs, Guid techreq, int crew, int enginePower, double fuelPerHour, int thermalSig)
         {
-            ComponentInfoDB genericInfo = new ComponentInfoDB(size, htk, costs, techreq);
+            ComponentInfoDB genericInfo = new ComponentInfoDB(size, htk, costs, techreq, crew);
             
             EnginePowerDB drivePower = new EnginePowerDB(enginePower);
             FuelUseDB fuelUse = new FuelUseDB(fuelPerHour);
             SensorSignatureDB sensorSig = new SensorSignatureDB(thermalSig, 0);
+
+            genericInfo.StatRecalcDelegate = new EnginePowerProcessor.StatRecalc(EnginePowerProcessor.CalcMaxSpeed);
 
             Entity engine = new Entity(systemEntityManager);
             engine.SetDataBlob(genericInfo);
@@ -31,27 +31,27 @@ namespace Pulsar4X.ECSLib
         #region need to find a way to jsonise this:
         public static void EngineRules()
         {
-            int EngineSizeinHS = 1; //from Engine Design UI (player input)
+            int engineSizeinHS = 1; //from Engine Design UI (player input)
             double powerMultiplier = 1;  //from Engine Design UI (player input)
             int baseEnginePowerVsSize = 5; //from research/tech - maybe techSD should have an int Level; 
             int basefuelConsumption = 1; //from research/tech - maybe techSD should have an int Level; 
             int thermalMod = 1; //from research/tech & Engine Design UI (player input) - maybe techSD should have an int Level; 
             double consumptionPerHour = basefuelConsumption * EnginePowerEfficencyFunc(powerMultiplier); 
-            consumptionPerHour -= consumptionPerHour * SizeConsumptionModFunc(EngineSizeinHS);
+            consumptionPerHour -= consumptionPerHour * SizeConsumptionModFunc(engineSizeinHS);
 
-            int totalPower = baseEnginePowerVsSize * EngineSizeinHS;
+            int totalPower = baseEnginePowerVsSize * engineSizeinHS;
 
             int thermalSig = ThermalSigFunc(totalPower, thermalMod);
 
-            int hitTokill = HitToKillFunc(EngineSizeinHS);
+            int hitTokill = HitToKillFunc(engineSizeinHS);
 
-            JDictionary<Guid, int> costs = cost(EngineSizeinHS);
+            JDictionary<Guid, int> costs = cost(engineSizeinHS);
 
-            int crew = CrewReq(EngineSizeinHS);
+            int crew = CrewReq(engineSizeinHS);
             
             Guid tech = new Guid();
 
-            CreateEngineComponent(null,EngineSizeinHS, hitTokill,costs, tech ,totalPower, consumptionPerHour, thermalSig);
+            CreateEngineComponent(null,engineSizeinHS, hitTokill, costs, tech, crew ,totalPower, consumptionPerHour, thermalSig);
         }
 
         //how do we jsonise math, especialy when we've got variables like power, size, etc etc.

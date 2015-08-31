@@ -7,9 +7,9 @@ namespace Pulsar4X.ECSLib
     {
 
         [JsonProperty]
-        private int _gravSensorStrenght;
+        private int _gravSensorStrength;
 
-        public int GravSensorStrenght { get { return _gravSensorStrenght; } internal set { _gravSensorStrenght = value; } } 
+        public int GravSensorStrength { get { return _gravSensorStrength; } internal set { _gravSensorStrength = value; } } 
 
         public GravSensorStrenghtDB()
         {
@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
 
         public GravSensorStrenghtDB(GravSensorStrenghtDB db)
         {
-            _gravSensorStrenght = db.GravSensorStrenght;
+            _gravSensorStrength = db.GravSensorStrength;
         }
 
         public override object Clone()

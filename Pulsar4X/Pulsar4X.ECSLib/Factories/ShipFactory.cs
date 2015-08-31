@@ -103,5 +103,22 @@ namespace Pulsar4X.ECSLib
             
             return shipClassEntity;
         }
+
+        public static Entity AddShipComponent(Entity ship, Entity component)
+        {
+            if(!ship.HasDataBlob<ShipInfoDB>())
+                throw new Exception("Entity is not a ship or does not contain a ShipInfoDB datablob");
+            ShipInfoDB shipinfo = ship.GetDataBlob<ShipInfoDB>();
+
+            if(!component.HasDataBlob<ComponentInfoDB>())
+                throw new Exception("Entity is not a ShipComponent or does not contain a ShipComponent datablob");
+            ComponentInfoDB componentInfo = component.GetDataBlob<ComponentInfoDB>();
+            
+            shipinfo.ComponentList.Add(component);
+            shipinfo.InternalHTK += componentInfo.HTK;
+            componentInfo.StatRecalcDelegate.DynamicInvoke(ship);
+
+            return ship;
+        }
     }
 }
