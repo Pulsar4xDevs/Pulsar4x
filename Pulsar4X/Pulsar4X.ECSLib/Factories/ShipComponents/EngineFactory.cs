@@ -14,8 +14,8 @@ namespace Pulsar4X.ECSLib
             FuelUseDB fuelUse = new FuelUseDB(fuelPerHour);
             SensorSignatureDB sensorSig = new SensorSignatureDB(thermalSig, 0);
 
-            genericInfo.StatRecalcDelegate = new EnginePowerProcessor.StatRecalc(EnginePowerProcessor.CalcMaxSpeed);
-
+            genericInfo.StatRecalcDelegate = new StatRecalc(EnginePowerProcessor.CalcMaxSpeed);
+            
             Entity engine = new Entity(systemEntityManager);
             engine.SetDataBlob(genericInfo);
             engine.SetDataBlob(drivePower);

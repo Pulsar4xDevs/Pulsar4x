@@ -20,9 +20,7 @@ namespace Pulsar4X.ECSLib
             {
                 ComponentInfoDB componentInfo = componentEntity.GetDataBlob<ComponentInfoDB>();
                 componentInfo.StatRecalcDelegate.DynamicInvoke(ship);
-            }
-            
+            }            
         }
-
     }
 }
