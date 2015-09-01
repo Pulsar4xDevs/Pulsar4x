@@ -9,8 +9,8 @@ namespace Pulsar4X.ECSLib
     public class ComponentInfoDB : BaseDataBlob
     {
         [JsonProperty]
-        private int _size;
-        public int Size { get { return _size; } internal set { _size = value; } }
+        private int _sizeInTons;
+        public int SizeInTons { get { return _sizeInTons; } internal set { _sizeInTons = value; } }
 
         [JsonProperty]
         private int _htk;
@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
 
         public ComponentInfoDB(int size, int htk, JDictionary<Guid,int> materialCosts, Guid techRequrement, int crewReqirement)
         {
-            _size = size;
+            _sizeInTons = size;
             _htk = htk;
             _materialCosts = materialCosts;
             _techReqToBuild = techRequrement;
@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
 
         public ComponentInfoDB(ComponentInfoDB db)
         {
-            _size = db.Size;
+            _sizeInTons = db.SizeInTons;
             _htk = db.HTK;
             _materialCosts = db.MaterialCosts;
             _techReqToBuild = db.TechRequirementToBuild;

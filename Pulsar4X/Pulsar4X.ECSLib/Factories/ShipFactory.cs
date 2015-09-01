@@ -116,6 +116,7 @@ namespace Pulsar4X.ECSLib
             
             shipinfo.ComponentList.Add(component);
             shipinfo.InternalHTK += componentInfo.HTK;
+            shipinfo.Tonnage += componentInfo.SizeInTons; 
             componentInfo.StatRecalcDelegate.DynamicInvoke(ship);
 
             return ship;

@@ -30,6 +30,10 @@ namespace Pulsar4X.ECSLib
 
         public bool IsMilitary { get; set; }
 
+        public int Tonnage { get; set; }
+
+        public double TCS { get {return Tonnage * 0.02;} }
+
         /// <summary>
         /// List of the ships components. 
         /// The Components should be in the same EntityManager as the Ship.

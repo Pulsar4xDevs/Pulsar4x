@@ -31,37 +31,37 @@ namespace Pulsar4X.ECSLib
         #region need to find a way to jsonise this:
         public static void EngineRules()
         {
-            int engineSizeinHS = 1; //from Engine Design UI (player input)
+            int engineSizeinTons = 1; //from Engine Design UI (player input)
             double powerMultiplier = 1;  //from Engine Design UI (player input)
             int baseEnginePowerVsSize = 5; //from research/tech - maybe techSD should have an int Level; 
             int basefuelConsumption = 1; //from research/tech - maybe techSD should have an int Level; 
             int thermalMod = 1; //from research/tech & Engine Design UI (player input) - maybe techSD should have an int Level; 
             double consumptionPerHour = basefuelConsumption * EnginePowerEfficencyFunc(powerMultiplier); 
-            consumptionPerHour -= consumptionPerHour * SizeConsumptionModFunc(engineSizeinHS);
+            consumptionPerHour -= consumptionPerHour * SizeConsumptionModFunc(engineSizeinTons);
 
-            int totalPower = baseEnginePowerVsSize * engineSizeinHS;
+            int totalPower = baseEnginePowerVsSize * engineSizeinTons;
 
             int thermalSig = ThermalSigFunc(totalPower, thermalMod);
 
-            int hitTokill = HitToKillFunc(engineSizeinHS);
+            int hitTokill = HitToKillFunc(engineSizeinTons);
 
-            JDictionary<Guid, int> costs = cost(engineSizeinHS);
+            JDictionary<Guid, int> costs = Cost(engineSizeinTons);
 
-            int crew = CrewReq(engineSizeinHS);
+            int crew = CrewReq(engineSizeinTons);
             
             Guid tech = new Guid();
 
-            CreateEngineComponent(null,engineSizeinHS, hitTokill, costs, tech, crew ,totalPower, consumptionPerHour, thermalSig);
+            CreateEngineComponent(null,engineSizeinTons, hitTokill, costs, tech, crew ,totalPower, consumptionPerHour, thermalSig);
         }
 
         //how do we jsonise math, especialy when we've got variables like power, size, etc etc.
 
         //I think this changes with thermal mod as well...
-        private static JDictionary<Guid, int> cost(int size)
+        private static JDictionary<Guid, int> Cost(int size)
         {
             JDictionary<Guid,int> costs = new JDictionary<Guid, int>();
             Guid gallicite = new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"); //Gallicite.
-            costs.Add(gallicite, 8 * size);
+            costs.Add(gallicite, (int)(size * 0.016));
             return costs;
         }
         private static int CrewReq(int size)
@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
 
         private static double SizeConsumptionModFunc(int size)
         {
-            double consumption = size * 0.1;
+            double consumption = size * 0.002;
             return consumption;
         }
 
@@ -88,7 +88,7 @@ namespace Pulsar4X.ECSLib
 
         private static int HitToKillFunc(int size)
         {
-            return Math.Min(1, size / 2);
+            return Math.Min(1, size / 25);
         }
 
         #endregion

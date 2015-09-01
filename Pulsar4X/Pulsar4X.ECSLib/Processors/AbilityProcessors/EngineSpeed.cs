@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    //public delegate void StatRecalc(Entity ship);
 
     internal static class EnginePowerProcessor
     {
@@ -33,8 +32,7 @@ namespace Pulsar4X.ECSLib
             }
 
             //Note: TN aurora uses the TCS for max speed calcs. 
-            //TODO: NutonionAurora will use Mass.(will have to figure out what math makes sense for the whole calc)
-            ship.GetDataBlob<PropulsionDB>().MaximumSpeed = (totalEnginePower / ship.GetDataBlob<SensorProfileDB>().TotalCrossSection) * 1000;
+            ship.GetDataBlob<PropulsionDB>().MaximumSpeed = (int)(totalEnginePower / ship.GetDataBlob<ShipInfoDB>().Tonnage) * 20;
             
         }
     }
