@@ -78,7 +78,7 @@ namespace Pulsar4X.Tests
             JDictionary<Guid, TechSD> techs = new JDictionary<Guid, TechSD>();
             TechSD tech1 = new TechSD();
             tech1.Name = "Trans-Newtonian Technology";
-            tech1.Requirements = new List<Guid>();
+            tech1.Requirements = new Dictionary<Guid, int>();
             tech1.Description = "Unlocks almost all other technology.";
             tech1.Cost = 1000;
             tech1.Category = ResearchCategories.ConstructionProduction;
@@ -86,8 +86,8 @@ namespace Pulsar4X.Tests
 
             TechSD tech2 = new TechSD();
             tech2.Name = "Construction Rate";
-            tech2.Requirements = new List<Guid>();
-            tech2.Requirements.Add(tech1.ID);
+            tech2.Requirements = new Dictionary<Guid, int>();
+            tech2.Requirements.Add(tech1.ID, 0);
             tech2.Description = "Boosts Construction Rate by 12 BP";
             tech2.Cost = 3000;
             tech2.Category = ResearchCategories.ConstructionProduction;

@@ -301,7 +301,7 @@ namespace Pulsar4X.ECSLib
                     factionTechs.ResearchableTechs[research] += researchPoints;
                     if (factionTechs.ResearchableTechs[research] >= researchmax)
                     {
-                        TechProcessor.ApplyTech(factionAbilities, factionTechs, research); //apply effects from tech, and add it to researched techs
+                        TechProcessor.ApplyTech(factionTechs, research); //apply effects from tech, and add it to researched techs
                         scientist.GetDataBlob<TeamsDB>().TeamTask = null; //team task is now nothing. 
                     }
                 }

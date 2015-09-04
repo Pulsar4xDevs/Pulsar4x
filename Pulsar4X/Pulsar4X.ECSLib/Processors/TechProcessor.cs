@@ -11,12 +11,14 @@
         /// <param name="techdb"></param>
         internal static void MakeResearchable(TechDB techdb)
         {
-            foreach (var tech in techdb.UnavailableTechs)
+            foreach (var kvpTech in techdb.UnavailableTechs)
             {
                 bool requrementsMet = false;
-                foreach (var requrement in tech.Requirements)
+
+                foreach (var kvpRequrement in kvpTech.Key.Requirements)
                 {                       
-                    if (techdb.ResearchedTechs.Contains(requrement))
+                    if (techdb.ResearchedTechs.ContainsKey(kvpRequrement.Key) 
+                        && techdb.ResearchedTechs[kvpRequrement.Key] >= kvpRequrement.Value)
                     {
                         requrementsMet = true;
                     }
@@ -28,8 +30,7 @@
                 }
                 if (requrementsMet)
                 {
-                    techdb.ResearchableTechs.Add(tech, 0);
-                    techdb.UnavailableTechs.Remove(tech);
+                    ApplyTech(techdb, kvpTech.Key);
                 }
             }
         }
@@ -37,18 +38,33 @@
 
         /// <summary>
         /// Applies the researched tech to the faction. Can be used when tech is gifted, stolen, researched...
-        /// Does not check if anyone is researching it.
+        /// Increases the specific TechSD by one level for the given faction.
         /// </summary>
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
         /// <param name="research"></param>
-        public static void ApplyTech(FactionAbilitiesDB factionAbilities, TechDB factionTechs, TechSD research)
+        public static void ApplyTech(TechDB factionTechs, TechSD research)
         {
-            factionTechs.ResearchedTechs.Add(research.ID); //add the tech to researched list
-            factionTechs.ResearchableTechs.Remove(research); //remove the tech from researchable dict
-            MakeResearchable(factionTechs);//check for new researchable techs
 
-            //todo read the tech you researched and apply it to the faction
+
+            factionTechs.ResearchedTechs[research.ID] += 1;
+
+           
+            if (factionTechs.LevelforTech(research) >= research.MaxLevel)
+            {
+                factionTechs.ResearchableTechs.Remove(research);
+            }
+            else if (!factionTechs.ResearchableTechs.ContainsKey(research))
+                factionTechs.ResearchableTechs.Add(research, 0); 
+
+            if (factionTechs.UnavailableTechs[research] >= research.MaxLevel)
+                factionTechs.UnavailableTechs.Remove(research); //if we've reached the max value for this tech remove it from the unavailbile list
+            else                                             //else if we've not reached max value, increase the level.
+                factionTechs.UnavailableTechs[research] += 1;
+            
+            //check if it's opened up other reasearch.
+            MakeResearchable(factionTechs);
         }
+
     }
 }

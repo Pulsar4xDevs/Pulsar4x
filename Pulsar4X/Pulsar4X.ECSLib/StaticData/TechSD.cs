@@ -31,9 +31,11 @@ namespace Pulsar4X.ECSLib
         public string Name;
         public string Description;
         public Guid ID;
+        public int MaxLevel;
+        public string ExpressionData;
 
         public ResearchCategories Category;        
-        public List<Guid> Requirements;
+        public Dictionary<Guid,int> Requirements;        
         public int Cost;
     }
 }

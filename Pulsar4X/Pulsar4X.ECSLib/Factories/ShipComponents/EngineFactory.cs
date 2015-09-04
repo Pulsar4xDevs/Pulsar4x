@@ -29,13 +29,28 @@ namespace Pulsar4X.ECSLib
 
 
         #region need to find a way to jsonise this:
-        public static void EngineRules()
+
+
+        public static void DataForUI(TechDB factionTechDB)
+        {
+            double componentSizeMin = 1;
+            double componentSizeMax = 50;
+
+            //double maxEnginePowerMod = factionTechDB.ResearchedTechs[]??? how the fuck is this suposed to work?
+            //double minEnginePowerMod = factionTechDB.ResearchedTechs[]??? how the fuck is this suposed to work?
+
+        }
+
+        public static void EngineRules(TechDB factionTechDB)
         {
             int engineSizeinTons = 1; //from Engine Design UI (player input)
             double powerMultiplier = 1;  //from Engine Design UI (player input)
             int baseEnginePowerVsSize = 5; //from research/tech - maybe techSD should have an int Level; 
             int basefuelConsumption = 1; //from research/tech - maybe techSD should have an int Level; 
             int thermalMod = 1; //from research/tech & Engine Design UI (player input) - maybe techSD should have an int Level; 
+            
+            
+            
             double consumptionPerHour = basefuelConsumption * EnginePowerEfficencyFunc(powerMultiplier); 
             consumptionPerHour -= consumptionPerHour * SizeConsumptionModFunc(engineSizeinTons);
 
