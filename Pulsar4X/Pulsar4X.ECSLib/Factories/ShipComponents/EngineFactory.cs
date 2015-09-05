@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
             ComponentAbilitySD2 engineTypeAbility = new ComponentAbilitySD2();
             engineTypeAbility.Name = "Engine Type";
             engineTypeAbility.Description = "Type of engine Tech";
-            engineTypeAbility.AbilityDataBlob = "";
+            engineTypeAbility.AbilityDataBlob = null;
             engineTypeAbility.AbilityFormula = "[GUIListSelection] " + 
                 "Guid(35608fe6-0d65-4a5f-b452-78a3e5e6ce2c)," + 
                 "Guid(c827d369-3f16-43ef-b112-7d5bcafb74c7)," + 
@@ -196,26 +196,26 @@ namespace Pulsar4X.ECSLib
             ComponentAbilitySD2 enginePowerEfficency = new ComponentAbilitySD2();
             enginePowerEfficency.Name = "Engine Consumption vs Power";
             enginePowerEfficency.Description = "More Powerfull engines are less efficent for a given size";
-            enginePowerEfficency.AbilityDataBlob = "";
-            enginePowerEfficency.AbilityFormula = "[GUIMinMax] [Min][Tech]Guid(08fa4c4b-0ddb-4b3a-9190-724d715694de [Max][Tech]Guid(b8ef73c7-2ef0-445e-8461-1e0508958a0e) ";
+            enginePowerEfficency.AbilityDataBlob = null;
+            enginePowerEfficency.AbilityFormula = "GUIMinMax(Tech(08fa4c4b-0ddb-4b3a-9190-724d715694de),Tech(b8ef73c7-2ef0-445e-8461-1e0508958a0e), 1";
 
             ComponentAbilitySD2 enginePowerAbility = new ComponentAbilitySD2();
             enginePowerAbility.Name = "Engine Power";
             enginePowerAbility.Description = "Move Power for ship";
-            enginePowerAbility.AbilityDataBlob = "EnginePowerDB";
-            enginePowerAbility.AbilityFormula = "[Ability]0.ExpressionData * [Size]";
+            enginePowerAbility.AbilityDataBlob = typeof(EnginePowerDB);
+            enginePowerAbility.AbilityFormula = "Ability(0) * [Size]";
 
             ComponentAbilitySD2 fuelConsumptionBase = new ComponentAbilitySD2();
             enginePowerAbility.Name = "Fuel Consumption";
             enginePowerAbility.Description = "From Tech";
-            enginePowerAbility.AbilityDataBlob = "";
-            enginePowerAbility.AbilityFormula = "[Tech]Guid(8557acb9-c764-44e7-8ee4-db2c2cebf0bc) * Pow([Ability]2, 2.25)";
+            enginePowerAbility.AbilityDataBlob = null;
+            enginePowerAbility.AbilityFormula = "Tech(8557acb9-c764-44e7-8ee4-db2c2cebf0bc) * Pow((Ability)2, 2.25)";
 
             ComponentAbilitySD2 fuelConsumptionSizeMod = new ComponentAbilitySD2();
             enginePowerAbility.Name = "Fuel Consumption";
             enginePowerAbility.Description = "Size Mod";
-            enginePowerAbility.AbilityDataBlob = "FuelUseDB";
-            enginePowerAbility.AbilityFormula = "[Ability]2 - [Ability]2 * [Size] * 0.002";
+            enginePowerAbility.AbilityDataBlob = typeof(FuelUseDB);
+            enginePowerAbility.AbilityFormula = "Ability(2) - (Ability)2 * [Size] * 0.002";
 
         }
     }
