@@ -1,4 +1,7 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System;
+using NCalc;
+
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// See also the Installation Processors for DoResearch
@@ -64,6 +67,16 @@
             
             //check if it's opened up other reasearch.
             MakeResearchable(factionTechs);
+        }
+
+        public static double ExpresionDataEval(TechDB factionTechs, TechSD tech)
+        {
+            string stringExpression = tech.ExpressionData;
+
+            Expression expression = new Expression(stringExpression);
+            expression.Parameters.Add("Level", factionTechs.LevelforTech(tech));
+            double result = (double)expression.Evaluate();
+
         }
 
     }
