@@ -76,6 +76,7 @@
     <Compile Include="EntityManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveGameTests.cs" />
+    <Compile Include="ShipComponentTests.cs" />
     <Compile Include="ShipTests.cs" />
     <Compile Include="StaticDataTests.cs" />
     <Compile Include="SystemGenTests.cs" />

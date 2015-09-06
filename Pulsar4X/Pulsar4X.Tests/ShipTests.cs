@@ -5,8 +5,8 @@ using Pulsar4X.ECSLib;
 namespace Pulsar4X.Tests
 {
     [TestFixture]
-    [Description("Processor Tests")]
-    internal class ProcessorTests
+    [Description("Ship Entity Tests")]
+    internal class ShipEntityTests
     {
         private Game _game;
         private EntityManager _entityManager;

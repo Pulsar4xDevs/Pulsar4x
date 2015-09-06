@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
             Expression expression = new Expression(stringExpression);
             expression.Parameters.Add("Level", factionTechs.LevelforTech(tech));
             double result = (double)expression.Evaluate();
-
+            return result;
         }
 
     }
