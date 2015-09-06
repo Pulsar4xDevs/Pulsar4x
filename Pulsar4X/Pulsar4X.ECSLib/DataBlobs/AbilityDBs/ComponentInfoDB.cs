@@ -30,7 +30,11 @@ namespace Pulsar4X.ECSLib
 
         //this should maybe be a list of delegates, for if there's multiple component abilitys...
         public Delegate StatRecalcDelegate;
-        
+
+
+        public ComponentInfoDB()
+        {
+        }
 
         public ComponentInfoDB(int size, int htk, JDictionary<Guid,int> materialCosts, Guid techRequrement, int crewReqirement)
         {
