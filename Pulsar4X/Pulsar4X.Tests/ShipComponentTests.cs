@@ -40,7 +40,7 @@ namespace Pulsar4X.Tests
             TechSD enginePowerModMax = new TechSD();
             enginePowerModMax.ID = new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e");
             enginePowerModMax.MaxLevel = 7;
-            enginePowerModMax.ExpressionData = "[Level] * 1.5";
+            enginePowerModMax.DataFormula = "[Level] * 1.5";
             enginePowerModMax.Name = "Maximum Engine Power Modifier";
             enginePowerModMax.Description = "";
             enginePowerModMax.Category = ResearchCategories.PowerAndPropulsion;
@@ -52,7 +52,7 @@ namespace Pulsar4X.Tests
             TechSD enginePowerModMin = new TechSD();
             enginePowerModMin.ID = new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de");
             enginePowerModMin.MaxLevel = 7;
-            enginePowerModMin.ExpressionData = "0.5 - [Level] * 0.1";
+            enginePowerModMin.DataFormula = "0.5 - [Level] * 0.1";
             enginePowerModMin.Name = "Minimum Engine Power Modifier";
             enginePowerModMin.Description = "";
             enginePowerModMin.Category = ResearchCategories.PowerAndPropulsion;

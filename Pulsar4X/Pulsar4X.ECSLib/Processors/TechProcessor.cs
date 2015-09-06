@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
 
         public static double ExpresionDataEval(TechDB factionTechs, TechSD tech)
         {
-            string stringExpression = tech.ExpressionData;
+            string stringExpression = tech.DataFormula;
 
             Expression expression = new Expression(stringExpression);
             expression.Parameters.Add("Level", factionTechs.LevelforTech(tech));

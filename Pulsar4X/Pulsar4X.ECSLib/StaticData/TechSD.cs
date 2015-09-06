@@ -32,10 +32,10 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public Guid ID;
         public int MaxLevel;
-        public string ExpressionData;
+        public string DataFormula;
 
         public ResearchCategories Category;        
         public Dictionary<Guid,int> Requirements;        
-        public int Cost;
+        public int Cost; //todo change this to a string CostFormula
     }
 }
