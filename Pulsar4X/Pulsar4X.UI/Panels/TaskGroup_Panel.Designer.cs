@@ -113,9 +113,20 @@ namespace Pulsar4X.UI.Panels
             get { return m_oWaypointCheckBox; }
         }
 
+        /// <summary>
+        /// Filter orders based on what is possible to accomplish given the selected place and taskgroup?
+        /// </summary>
         public CheckBox OrderFilteringCheckBox
         {
             get { return m_oOrderFilteringCheckBox; }  
+        }
+
+        /// <summary>
+        /// Display survey points as taskgroup move orders targets.
+        /// </summary>
+        public CheckBox DisplaySurveyLocationsCheckBox
+        {
+            get { return m_oSurveyLocationsCheckBox; }
         }
 
         /// <summary>

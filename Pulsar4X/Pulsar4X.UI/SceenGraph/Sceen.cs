@@ -448,12 +448,12 @@ namespace Pulsar4X.UI.SceenGraph
         {
             Vector3 v3SPPos = new Vector3((float)oSurveyPoint.Position.X, (float)oSurveyPoint.Position.Y, 0.0f);
 
-            SceenElement oSurveyPointElement = new CircleElement();
+            CircleElement oSurveyPointElement = new CircleElement();
             oSurveyPointElement.EntityID = oSurveyPoint.Id;
 
             GLCircle oSPCircle = new GLCircle(a_oDefaultEffect,
                         v3SPPos,
-                        0.1f,
+                        4.0f/m_fZoomScaler,
                         Color.White,
                         UIConstants.Textures.DEFAULT_TEXTURE);
 
@@ -461,8 +461,10 @@ namespace Pulsar4X.UI.SceenGraph
             GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(SceenDefaultEffect, v3SPPos,
             UIConstants.DEFAULT_TEXT_SIZE, Color.White, UIConstants.Textures.DEFAULT_GLFONT2, SPIndex.ToString());
 
+            oSurveyPointElement._isSurveyPoint = true;
             oSurveyPointElement.Lable = oNameLable;
-            oSurveyPointElement.RealSize = new Vector2(0.0001f, 0.0001f);
+            oSurveyPointElement.Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / m_fZoomScaler; //Initial taskgroup names weren't being scaled properly for whatever reason.
+            oSurveyPointElement.RealSize = new Vector2(0.0001f, 0.0001f) / m_fZoomScaler;
             oSurveyPointElement.PrimaryPrimitive = oSPCircle;
             oSurveyPointElement.AddPrimitive(oSPCircle);
             parent.AddChildElement(oSurveyPointElement);

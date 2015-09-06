@@ -36,6 +36,7 @@ namespace Pulsar4X.UI.Handlers
             TaskGroups,
             Waypoints,
             JumpPoint,
+            SurveyPoints,
             Count,
         }
 
@@ -201,10 +202,11 @@ namespace Pulsar4X.UI.Handlers
             SetupShipDataGrid();
 
             m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndexChanged += new EventHandler(SystemLocationListBox_SelectedIndexChanged);
-            m_oTaskGroupPanel.DisplayContactsCheckBox.CheckStateChanged += new EventHandler(DisplayContactsCheckBox_CheckChanged);
-            m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayTaskGroupsCheckBox_CheckChanged);
-            m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayWaypointsCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayContactsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
             m_oTaskGroupPanel.OrderFilteringCheckBox.CheckStateChanged += new EventHandler(OrderFilteringCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplaySurveyLocationsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
 
             m_oTaskGroupPanel.NewTaskGroupButton.Click += new EventHandler(NewTaskGroupButton_Click);
             m_oTaskGroupPanel.RenameTaskGroupButton.Click += new EventHandler(RenameTaskGroupButton_Click);
@@ -264,33 +266,11 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// If the contacts checkbox is changed:
+        /// If any checkbox gets checked or unchecked clear the action list and build the system location list
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void DisplayContactsCheckBox_CheckChanged(object sender, EventArgs e)
-        {
-            BuildSystemLocationList();
-            ClearActionList();
-        }
-
-        /// <summary>
-        /// If Taskgroups checkbox is changed:
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DisplayTaskGroupsCheckBox_CheckChanged(object sender, EventArgs e)
-        {
-            BuildSystemLocationList();
-            ClearActionList();
-        }
-
-        /// <summary>
-        /// If Waypoints checkbox is changed:
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DisplayWaypointsCheckBox_CheckChanged(object sender, EventArgs e)
+        private void DisplayCheckBox_CheckChanged(object sender, EventArgs e)
         {
             BuildSystemLocationList();
             ClearActionList();
@@ -891,6 +871,9 @@ namespace Pulsar4X.UI.Handlers
 
                 if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
                     AddWaypointsToList(targetsystem);
+
+                if (m_oTaskGroupPanel.DisplaySurveyLocationsCheckBox.Checked == true)
+                    AddSurveyPointsToList(targetsystem);
             }
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
@@ -1192,7 +1175,23 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-
+        /// <summary>
+        /// Adds grav survey points to the location list.
+        /// </summary>
+        /// <param name="starsystem"></param>
+        private void AddSurveyPointsToList(StarSystem starsystem)
+        {
+            int SPIndex = 1;
+            foreach (SurveyPoint SP in starsystem._SurveyPoints)
+            {
+                string keyName = String.Format("Survey Location #{0}",SPIndex);
+                StarSystemEntity entObj = SP;
+                SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.SurveyPoints, entObj);
+                SystemLocationGuidDict.Add(entObj.Id, keyName);
+                SystemLocationDict.Add(entObj.Id, valueObj);
+                SPIndex++;
+            }
+        }
 
         /// <summary>
         /// Time and distance or orders should be calculated here based on the radio button selection choices.

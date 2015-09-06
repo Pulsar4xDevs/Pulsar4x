@@ -2914,6 +2914,16 @@ namespace Pulsar4X.Entities
                            
                         break;
                     #endregion
+#warning implement GravSurvey
+                    #region GravSurvey to be implemented
+                        case (int)Constants.ShipTN.OrderType.GravSurvey:
+                        /// <summary>
+                        /// Figure out how to store survey results with a star. I think that Partial for each point, and then a full system wide 0% or 100% bool will work.
+                        /// get the cost to survey this system, see above geo survey costs.
+                        /// reveal detected jumppoints. how will this work? also jumppoint generation needs to be looked at.
+                        /// </summary>
+                        break;
+                    #endregion
 
 
 
