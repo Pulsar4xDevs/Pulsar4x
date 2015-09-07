@@ -69,13 +69,23 @@ namespace Pulsar4X.ECSLib
             MakeResearchable(factionTechs);
         }
 
-        public static double ExpresionDataEval(TechDB factionTechs, TechSD tech)
+        public static double DataFormula(TechDB factionTechs, TechSD tech)
         {
             string stringExpression = tech.DataFormula;
 
             Expression expression = new Expression(stringExpression);
             expression.Parameters.Add("Level", factionTechs.LevelforTech(tech));
             double result = (double)expression.Evaluate();
+            return result;
+        }
+
+        public static int CostFormula(TechDB factionTechs, TechSD tech)
+        {
+            string stringExpression = tech.CostFormula;
+
+            Expression expression = new Expression(stringExpression);
+            expression.Parameters.Add("Level", factionTechs.LevelforTech(tech));
+            int result = (int)expression.Evaluate();
             return result;
         }
 

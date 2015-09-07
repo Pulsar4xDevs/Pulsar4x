@@ -11,6 +11,10 @@ namespace Pulsar4X.ECSLib
 
         public double FuelUsePerHour {get { return _fuelUsePerHour; } internal set { _fuelUsePerHour = value; }}
 
+        public FuelUseDB()
+        {
+        }
+
         public FuelUseDB(double fuelUsagePerHour)
         {
             _fuelUsePerHour = fuelUsagePerHour;

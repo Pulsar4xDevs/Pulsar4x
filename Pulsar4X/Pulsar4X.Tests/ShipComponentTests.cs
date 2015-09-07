@@ -23,46 +23,31 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _game = Game.NewGame("Test Game", DateTime.Now, 1);
-            Tech();
+            //Tech();
             _faction = FactionFactory.CreateFaction(_game, "Terran");
-
+            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e"),3);
+            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de"), 3);
+            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("8557acb9-c764-44e7-8ee4-db2c2cebf0bc"), 5);
+            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"), 1);
+            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"), 1);
+            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
             _starSystem = new StarSystem(_game, "Sol", -1);
             /////Ship Class/////
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "TestClass");
-
-
-
-
         }
 
-        private void Tech()
+ 
+
+        [Test]
+        public void TestEngineComponentFactory()
         {
-            TechSD enginePowerModMax = new TechSD();
-            enginePowerModMax.ID = new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e");
-            enginePowerModMax.MaxLevel = 7;
-            enginePowerModMax.DataFormula = "[Level] * 1.5";
-            enginePowerModMax.Name = "Maximum Engine Power Modifier";
-            enginePowerModMax.Description = "";
-            enginePowerModMax.Category = ResearchCategories.PowerAndPropulsion;
-            enginePowerModMax.Cost = 1;
-            enginePowerModMax.Requirements = new Dictionary<Guid, int>();
+            ComponentSD2 engine = EngineFactory.engineasComponentSD();
 
-            _game.StaticData.Techs.Add(enginePowerModMax.ID, enginePowerModMax);
+            ComponentDesign design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<TechDB>(), _game.StaticData);
 
-            TechSD enginePowerModMin = new TechSD();
-            enginePowerModMin.ID = new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de");
-            enginePowerModMin.MaxLevel = 7;
-            enginePowerModMin.DataFormula = "0.5 - [Level] * 0.1";
-            enginePowerModMin.Name = "Minimum Engine Power Modifier";
-            enginePowerModMin.Description = "";
-            enginePowerModMin.Category = ResearchCategories.PowerAndPropulsion;
-            enginePowerModMin.Cost = 1;
-            enginePowerModMin.Requirements = new Dictionary<Guid, int>();
+            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, design);
 
-            _game.StaticData.Techs.Add(enginePowerModMin.ID, enginePowerModMin);
-         
+
         }
-
-
     }
 }

@@ -76,10 +76,10 @@ namespace ModdingTools.JsonDataEditor
 
             newTechSD.Category = (ResearchCategories)categoryComboBox.SelectedItem;
 
-            int newCost;
+            string newCost;
             if(Int32.TryParse(costTextBox.Text, out newCost) && newCost > 0)
             {
-                newTechSD.Cost = newCost;
+                newTechSD.CostFormula = newCost;
                 costTextBox.BackColor = Color.White;
             }
             else
@@ -97,7 +97,7 @@ namespace ModdingTools.JsonDataEditor
 
             TechSD techSD;
             if(_selectedItemGuid == Guid.Empty)
-                techSD = new TechSD {Name = "Name", Description = "Description", Category = ResearchCategories.BiologyGenetics, ID = Guid.Empty, Cost = 1000, Requirements = new Dictionary<Guid, int>()};
+                techSD = new TechSD {Name = "Name", Description = "Description", Category = ResearchCategories.BiologyGenetics, ID = Guid.Empty, CostFormula = 1000, Requirements = new Dictionary<Guid, int>()};
             else
                 techSD = Data.TechData[_selectedItemGuid].StaticData;
 
@@ -105,7 +105,7 @@ namespace ModdingTools.JsonDataEditor
             nameTextBox.Text = techSD.Name;
             descTextBox.Text = techSD.Description;
             categoryComboBox.SelectedItem = techSD.Category;
-            costTextBox.Text = techSD.Cost.ToString();
+            costTextBox.Text = techSD.CostFormula;
 
             requirementsListBox.BeginUpdate();
             requirementsListBox.Items.Clear();
@@ -168,7 +168,7 @@ namespace ModdingTools.JsonDataEditor
 
         private void newTechButton_Click(object sender, EventArgs e)
         {
-            TechSD newTechSD = new TechSD() {Name = "New Tech", Description = "Description Here", ID = Guid.NewGuid(), Cost = 1000, Requirements = new Dictionary<Guid, int>()};
+            TechSD newTechSD = new TechSD() {Name = "New Tech", Description = "Description Here", ID = Guid.NewGuid(), CostFormula = 1000, Requirements = new Dictionary<Guid, int>()};
             Data.SaveToDataStore(newTechSD);
         }
 

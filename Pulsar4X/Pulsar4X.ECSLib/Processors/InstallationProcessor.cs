@@ -281,7 +281,8 @@ namespace Pulsar4X.ECSLib
                 int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
                 float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
-                int researchmax = research.Cost;
+                
+                int researchmax = TechProcessor.CostFormula(factionTechs, research);
 
                 int researchPoints = 0;             
                 foreach (var kvp in labs)

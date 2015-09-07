@@ -36,6 +36,6 @@ namespace Pulsar4X.ECSLib
 
         public ResearchCategories Category;        
         public Dictionary<Guid,int> Requirements;        
-        public int Cost; //todo change this to a string CostFormula
+        public string CostFormula; //todo change this to a string CostFormula
     }
 }

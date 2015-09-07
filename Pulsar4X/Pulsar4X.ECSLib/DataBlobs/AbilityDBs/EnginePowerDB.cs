@@ -10,6 +10,10 @@ namespace Pulsar4X.ECSLib
 
         public int EnginePower { get { return _enginePower; } internal set { _enginePower = value; } }
 
+        public EnginePowerDB()
+        {
+        }
+
         public EnginePowerDB(int enginePower)
         {
             _enginePower = enginePower;
