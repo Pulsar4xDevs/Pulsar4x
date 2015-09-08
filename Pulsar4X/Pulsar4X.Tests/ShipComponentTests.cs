@@ -42,11 +42,11 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestEngineComponentFactory()
         {
-            ComponentSD2 engine = EngineFactory.engineasComponentSD();
+            ComponentSD engine = EngineFactory.engineasComponentSD();
 
-            ComponentDesign design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<TechDB>(), _game.StaticData);
+            ComponentDesignDB design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<TechDB>(), _game.StaticData);
 
-            design.SetSize();
+            //design.SetSize();
             design.SetCrew();
             design.SetHTK();
             design.SetCosts();

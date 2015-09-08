@@ -159,32 +159,34 @@ namespace Pulsar4X.ECSLib
 
 
 
-        public static ComponentSD2 engineasComponentSD()
+        public static ComponentSD engineasComponentSD()
         {
-            ComponentSD2 component = new ComponentSD2();
+            ComponentSD component = new ComponentSD();
             component.Name = "Engine";
             component.Description = "Moves a ship";
             component.ID = new Guid();
 
             component.SizeGuiHint = GuiHint.GuiSelectionList;
-            component.SizeFormula = "GUIMinMax(1 ,50, 5)";
+            component.SizeFormula = "5";
+            component.SizeMaxFormula = "50";
+            component.SizeMinFormula = "1";
 
             component.HTKGuiHint = GuiHint.GuiTextDisplay;
-            component.HTKFormula = "Min(1, [Size] / 25)";
+            component.BaseHTKFormula = "Min(1, [Size] / 25)";
 
             component.CrewGuiHint = GuiHint.GuiTextDisplay;
-            component.CrewSizeFormula = "[Size] * 8";
+            component.BaseCrewSizeFormula = "[Size] * 8";
 
             component.CostGuiHint = GuiHint.GuiTextDisplay;
-            component.CostFormula = new JDictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 0.016"}};
+            component.BaseCostFormula = new JDictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 0.016"}};
 
-            component.ComponentAbilitySDs = new List<ComponentAbilitySD2>();
+            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
 
-            ComponentAbilitySD2 engineTypeAbility = new ComponentAbilitySD2();
+            ComponentAbilitySD engineTypeAbility = new ComponentAbilitySD();
             engineTypeAbility.Name = "Engine Type";
             engineTypeAbility.Description = "Type of engine Tech";
             engineTypeAbility.GuiHint = GuiHint.GuiSelectionList;
-            engineTypeAbility.AbilityDataBlob = null;
+            engineTypeAbility.AbilityDataBlobType = null;
             engineTypeAbility.TechList = new List<Guid>
             {
                 new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"),
@@ -205,37 +207,37 @@ namespace Pulsar4X.ECSLib
 
             component.ComponentAbilitySDs.Add(engineTypeAbility);
 
-            ComponentAbilitySD2 enginePowerEfficency = new ComponentAbilitySD2();
+            ComponentAbilitySD enginePowerEfficency = new ComponentAbilitySD();
             enginePowerEfficency.Name = "Engine Consumption vs Power";
             enginePowerEfficency.Description = "More Powerfull engines are less efficent for a given size";
             enginePowerEfficency.GuiHint = GuiHint.GuiSelectionMaxMin;
-            enginePowerEfficency.AbilityDataBlob = null;
+            enginePowerEfficency.AbilityDataBlobType = null;
             enginePowerEfficency.AbilityFormula = "1";
             enginePowerEfficency.MaxFormula = "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')";
-            enginePowerEfficency.MinFormula = "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de'";
+            enginePowerEfficency.MinFormula = "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')";
             component.ComponentAbilitySDs.Add(enginePowerEfficency);
 
-            ComponentAbilitySD2 enginePowerAbility = new ComponentAbilitySD2();
+            ComponentAbilitySD enginePowerAbility = new ComponentAbilitySD();
             enginePowerAbility.Name = "Engine Power";
             enginePowerAbility.Description = "Move Power for ship";
             enginePowerAbility.GuiHint = GuiHint.None;
-            enginePowerAbility.AbilityDataBlob = typeof(EnginePowerDB);
+            enginePowerAbility.AbilityDataBlobType = typeof(EnginePowerDB);
             enginePowerAbility.AbilityFormula = "Ability(0) * [Size]";
             component.ComponentAbilitySDs.Add(enginePowerAbility);
 
-            ComponentAbilitySD2 fuelConsumptionBase = new ComponentAbilitySD2();
+            ComponentAbilitySD fuelConsumptionBase = new ComponentAbilitySD();
             fuelConsumptionBase.Name = "Fuel Consumption";
             fuelConsumptionBase.Description = "From Tech";
             fuelConsumptionBase.GuiHint = GuiHint.None;
-            fuelConsumptionBase.AbilityDataBlob = null;
+            fuelConsumptionBase.AbilityDataBlobType = null;
             fuelConsumptionBase.AbilityFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)";
             component.ComponentAbilitySDs.Add(fuelConsumptionBase);
 
-            ComponentAbilitySD2 fuelConsumptionSizeMod = new ComponentAbilitySD2();
+            ComponentAbilitySD fuelConsumptionSizeMod = new ComponentAbilitySD();
             fuelConsumptionSizeMod.Name = "Fuel Consumption";
             fuelConsumptionSizeMod.Description = "Size Mod";
             fuelConsumptionSizeMod.GuiHint = GuiHint.GuiTextDisplay;
-            fuelConsumptionSizeMod.AbilityDataBlob = typeof(FuelUseDB);
+            fuelConsumptionSizeMod.AbilityDataBlobType = typeof(FuelUseDB);
             fuelConsumptionSizeMod.AbilityFormula = "Ability(2) - Ability(2) * [Size] * 0.002";
             component.ComponentAbilitySDs.Add(fuelConsumptionSizeMod);
 
