@@ -35,7 +35,10 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public int LevelforTech(TechSD techSD)
         {
-            return _researchedTechs[techSD.ID];
+            if(_researchedTechs.ContainsKey(techSD.ID))
+                return _researchedTechs[techSD.ID];
+            else
+                return 0;
         }
 
         /// <summary>

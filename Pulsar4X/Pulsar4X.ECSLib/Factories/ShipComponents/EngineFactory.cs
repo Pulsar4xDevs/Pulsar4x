@@ -167,7 +167,7 @@ namespace Pulsar4X.ECSLib
             component.ID = new Guid();
 
             component.SizeGuiHint = GuiHint.GuiSelectionList;
-            component.SizeFormula = "1 ,50, 5";
+            component.SizeFormula = "GUIMinMax(1 ,50, 5)";
 
             component.HTKGuiHint = GuiHint.GuiTextDisplay;
             component.HTKFormula = "Min(1, [Size] / 25)";
@@ -185,21 +185,24 @@ namespace Pulsar4X.ECSLib
             engineTypeAbility.Description = "Type of engine Tech";
             engineTypeAbility.GuiHint = GuiHint.GuiSelectionList;
             engineTypeAbility.AbilityDataBlob = null;
-            engineTypeAbility.AbilityFormula = "(List) " + 
-                "TechObject(35608fe6-0d65-4a5f-b452-78a3e5e6ce2c), " + 
-                "TechObject(c827d369-3f16-43ef-b112-7d5bcafb74c7), " + 
-                "TechObject(db6818f3-99e9-46c1-b903-f3af978c38b2), " + 
-                "TechObject(f3f10e56-9345-40cc-af42-342e7240355d)";
+            engineTypeAbility.TechList = new List<Guid>
+            {
+                new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"),
+                new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"),
+                new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"),
+                new Guid("f3f10e56-9345-40cc-af42-342e7240355d")
+                //new Guid("58d047e6-c567-4db6-8c76-bfd4a201af94"),
+                //new Guid("bd75bf88-1dad-4022-b401-acdf05ab73f8"),
+                //new Guid("042ce9d4-5a2c-4d8e-9ae4-be059920839c"),
+                //new Guid("93611831-9183-484a-9920-13b39d64e272"),
+                //new Guid("32eda0ab-c117-4224-b148-6c9d0e474296"),
+                //new Guid("cbb1a7ce-3c26-4b5b-abd7-9a99c670d68d"),
+                //new Guid("6e34cc46-0693-4676-b0ca-f076fb36acaf"),
+                //new Guid("9bb4d1c4-680f-4c98-b927-337654073575"),
+                //new Guid("c9587310-f7dd-45d0-ac4c-b6f59a1e1897")
+            };
+            engineTypeAbility.AbilityFormula = null;
 
-                //"TechObject(58d047e6-c567-4db6-8c76-bfd4a201af94)," +
-                //"TechObject(bd75bf88-1dad-4022-b401-acdf05ab73f8)," +
-                //"TechObject(042ce9d4-5a2c-4d8e-9ae4-be059920839c)," +
-                //"TechObject(93611831-9183-484a-9920-13b39d64e272)," +
-                //"TechObject(32eda0ab-c117-4224-b148-6c9d0e474296)," +
-                //"TechObject(cbb1a7ce-3c26-4b5b-abd7-9a99c670d68d)," +
-                //"TechObject(6e34cc46-0693-4676-b0ca-f076fb36acaf)," +
-                //"TechObject(9bb4d1c4-680f-4c98-b927-337654073575)," +
-                //"TechObject(c9587310-f7dd-45d0-ac4c-b6f59a1e1897)";
             component.ComponentAbilitySDs.Add(engineTypeAbility);
 
             ComponentAbilitySD2 enginePowerEfficency = new ComponentAbilitySD2();
@@ -207,7 +210,9 @@ namespace Pulsar4X.ECSLib
             enginePowerEfficency.Description = "More Powerfull engines are less efficent for a given size";
             enginePowerEfficency.GuiHint = GuiHint.GuiSelectionMaxMin;
             enginePowerEfficency.AbilityDataBlob = null;
-            enginePowerEfficency.AbilityFormula = "GUIMinMax(TechData(08fa4c4b-0ddb-4b3a-9190-724d715694de),TechData(b8ef73c7-2ef0-445e-8461-1e0508958a0e), 1";
+            enginePowerEfficency.AbilityFormula = "1";
+            enginePowerEfficency.MaxFormula = "TechData(b8ef73c7-2ef0-445e-8461-1e0508958a0e)";
+            enginePowerEfficency.MinFormula = "TechData(08fa4c4b-0ddb-4b3a-9190-724d715694de";
             component.ComponentAbilitySDs.Add(enginePowerEfficency);
 
             ComponentAbilitySD2 enginePowerAbility = new ComponentAbilitySD2();
@@ -231,7 +236,7 @@ namespace Pulsar4X.ECSLib
             fuelConsumptionSizeMod.Description = "Size Mod";
             fuelConsumptionSizeMod.GuiHint = GuiHint.GuiTextDisplay;
             fuelConsumptionSizeMod.AbilityDataBlob = typeof(FuelUseDB);
-            fuelConsumptionSizeMod.AbilityFormula = "Ability(2) - (Ability)2 * [Size] * 0.002";
+            fuelConsumptionSizeMod.AbilityFormula = "Ability(2) - Ability(2) * [Size] * 0.002";
             component.ComponentAbilitySDs.Add(fuelConsumptionSizeMod);
 
 

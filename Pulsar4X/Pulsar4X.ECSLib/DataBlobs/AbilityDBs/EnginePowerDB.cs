@@ -1,4 +1,5 @@
 ﻿
+using System.Diagnostics.PerformanceData;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -9,6 +10,12 @@ namespace Pulsar4X.ECSLib
         private int _enginePower;
 
         public int EnginePower { get { return _enginePower; } internal set { _enginePower = value; } }
+
+        //hack for dynamic design stuff
+        public void SetData(double data)
+        {
+            _enginePower = (int)data;
+        }
 
         public EnginePowerDB()
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -44,6 +45,26 @@ namespace Pulsar4X.Tests
             ComponentSD2 engine = EngineFactory.engineasComponentSD();
 
             ComponentDesign design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<TechDB>(), _game.StaticData);
+
+            design.SetSize();
+            design.SetCrew();
+            design.SetHTK();
+            design.SetCosts();
+            foreach (var ability in design.ComponentDesignAbilities)
+            {
+                if (ability.GuiHint == GuiHint.GuiSelectionList)
+                {
+                    List<TechSD> selectionlist = ability.SelectionDictionary.Keys.ToList();
+                    ability.SetValueFromTechList(selectionlist[selectionlist.Count - 1]);
+                }
+                else if (ability.GuiHint == GuiHint.GuiSelectionMaxMin)
+                {
+                    ability.SetMax();
+                    ability.SetValueFromInput(ability.MaxValue);
+                }
+                else
+                    ability.SetValue();
+            }
 
             Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, design);
 

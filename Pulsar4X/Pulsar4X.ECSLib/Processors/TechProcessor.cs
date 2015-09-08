@@ -74,9 +74,11 @@ namespace Pulsar4X.ECSLib
             string stringExpression = tech.DataFormula;
 
             Expression expression = new Expression(stringExpression);
-            expression.Parameters.Add("Level", factionTechs.LevelforTech(tech));
-            double result = (double)expression.Evaluate();
-            return result;
+            expression.Parameters.Add("Level", (double)factionTechs.LevelforTech(tech));
+            object result = expression.Evaluate();
+            if (result is int)
+                return (double)(int)result;
+            return (double)result;
         }
 
         public static int CostFormula(TechDB factionTechs, TechSD tech)
