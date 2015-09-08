@@ -201,7 +201,7 @@ namespace Pulsar4X.ECSLib
                 //new Guid("9bb4d1c4-680f-4c98-b927-337654073575"),
                 //new Guid("c9587310-f7dd-45d0-ac4c-b6f59a1e1897")
             };
-            engineTypeAbility.AbilityFormula = null;
+            engineTypeAbility.AbilityFormula = "TechData('f3f10e56-9345-40cc-af42-342e7240355d')";
 
             component.ComponentAbilitySDs.Add(engineTypeAbility);
 
@@ -211,8 +211,8 @@ namespace Pulsar4X.ECSLib
             enginePowerEfficency.GuiHint = GuiHint.GuiSelectionMaxMin;
             enginePowerEfficency.AbilityDataBlob = null;
             enginePowerEfficency.AbilityFormula = "1";
-            enginePowerEfficency.MaxFormula = "TechData(b8ef73c7-2ef0-445e-8461-1e0508958a0e)";
-            enginePowerEfficency.MinFormula = "TechData(08fa4c4b-0ddb-4b3a-9190-724d715694de";
+            enginePowerEfficency.MaxFormula = "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')";
+            enginePowerEfficency.MinFormula = "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de'";
             component.ComponentAbilitySDs.Add(enginePowerEfficency);
 
             ComponentAbilitySD2 enginePowerAbility = new ComponentAbilitySD2();
@@ -228,7 +228,7 @@ namespace Pulsar4X.ECSLib
             fuelConsumptionBase.Description = "From Tech";
             fuelConsumptionBase.GuiHint = GuiHint.None;
             fuelConsumptionBase.AbilityDataBlob = null;
-            fuelConsumptionBase.AbilityFormula = "TechData(8557acb9-c764-44e7-8ee4-db2c2cebf0bc) * Pow((Ability)2, 2.25)";
+            fuelConsumptionBase.AbilityFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)";
             component.ComponentAbilitySDs.Add(fuelConsumptionBase);
 
             ComponentAbilitySD2 fuelConsumptionSizeMod = new ComponentAbilitySD2();
