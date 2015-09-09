@@ -151,7 +151,12 @@ namespace Pulsar4X.Tests
             fuelConsumptionSizeMod.AbilityDataBlobType = typeof(FuelUseDB);
             fuelConsumptionSizeMod.AbilityFormula = "Ability(2) - Ability(2) * [Size] * 0.002";
             component.ComponentAbilitySDs.Add(fuelConsumptionSizeMod);
+            
+            JDictionary<Guid,ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
+            componentsDict.Add(component.ID, component);
 
+            StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
+            
             return component;
         }
     }

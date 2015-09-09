@@ -10,7 +10,8 @@ namespace Pulsar4X.ECSLib
         private TechDB _factionTechDB;
         private ComponentDesignDB _design;
         private Expression _expression;
-        private string _stringExpression; //used for debuging puroposes. though maybe it could be public and shown in the UI?
+        // ReSharper disable once NotAccessedField.Local (Used for debuging puroposes. though maybe it could be public and shown in the UI?)
+        private string _stringExpression;
         internal List<ChainedExpression> DependantExpressions = new List<ChainedExpression>();
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace Pulsar4X.ECSLib
                 if (Result is double)
                     return (double)Result;
                 if (Result is int)
-                    return (double)(int)Result;
+                    return (int)Result;
                 else
                 {
                     throw new Exception("Unexpected Result data Type - not double or int");
