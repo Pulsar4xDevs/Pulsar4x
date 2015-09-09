@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         private TechDB _factionTechDB;
         private ComponentDesignDB _design;
         private Expression _expression;
-        private string _stringExpression; //used for debuging puroposes.
+        private string _stringExpression; //used for debuging puroposes. though maybe it could be public and shown in the UI?
         internal List<ChainedExpression> DependantExpressions = new List<ChainedExpression>();
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Pulsar4X.ECSLib
             _stringExpression = expressionString;
             _expression = new Expression(expressionString);
             _expression.EvaluateFunction += NCalcFunctions;
-            _expression.Parameters["Size"] = _design.SizeValue;
-            //_expression.Parameters["xSizex"] = new Expression("Size"); //this is a bit wacky, I don't fully understand it but "xSizex" has to be something that doesn't exsist or somethign.
+            //_expression.Parameters["Size"] = _design.SizeValue;
+            _expression.Parameters["xSizex"] = new Expression("Size"); //this is a bit wacky, I don't fully understand it but "xSizex" has to be something that doesn't exsist or somethign.
             
             _expression.EvaluateParameter += delegate(string name, ParameterArgs args)
             {
@@ -116,15 +116,18 @@ namespace Pulsar4X.ECSLib
                 {
                     index = (int)args.Parameters[0].Evaluate();
                 }
-                catch (Exception e) { throw new Exception("First arg must be in intiger" + e); }
+                catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
                 try
                 {
+                    
                     ChainedExpression result = _design.ComponentDesignAbilities[index].Formula;
-                    result.Evaluate();
+                    if(result.Result == null)
+                        result.Evaluate();
+                    MakeThisDependant(result); 
                     args.Result = result.Result;
 
                 }//todo catch specific exception
-                catch (Exception e) { throw new Exception("This component does not have an ComponentAbilitySD at that index" + e); }
+                catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
             }
             if (name == "TechObject")
             {

@@ -74,22 +74,22 @@ namespace Pulsar4X.Tests
             component.Description = "Moves a ship";
             component.ID = new Guid();
 
-            component.SizeGuiHint = GuiHint.GuiSelectionList;
+            component.SizeGuiHint = GuiHint.GuiSelectionMaxMin;
             component.SizeFormula = "5";
             component.SizeMaxFormula = "50";
             component.SizeMinFormula = "1";
 
             component.HTKGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseHTKFormula = "Min(1, [Size] / 25)";
+            component.BaseHTKFormula = "Max(1, [Size] / 100)";
 
             component.CrewGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseCrewSizeFormula = "[Size] * 8";
+            component.BaseCrewSizeFormula = "[Size]";
 
             component.ResearchCostGuiHint = GuiHint.None;
             component.BaseResearchCostFormula = "[Size] * 10";
 
             component.CostGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 0.016" } };
+            component.BaseCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
 
             component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
 
