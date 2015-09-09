@@ -71,6 +71,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBlobs\AbilityDBs\ComponentDesignDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\EnginePowerDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\FuelStorageDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\FuelUseDB.cs" />
