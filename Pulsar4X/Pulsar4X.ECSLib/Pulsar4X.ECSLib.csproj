@@ -87,7 +87,6 @@
     <Compile Include="DataBlobs\TeamsDB.cs" />
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
-    <Compile Include="Factories\ShipComponents\EngineFactory.cs" />
     <Compile Include="Factories\ShipComponents\GenericComponent.cs" />
     <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
     <Compile Include="Factories\SystemGen\StarFactory.cs" />

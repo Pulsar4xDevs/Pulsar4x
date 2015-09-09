@@ -19,102 +19,97 @@ namespace Pulsar4X.ECSLib
         public string Name;
         public string Description;
 
-        internal ParsingProcessor Parser { get; private set; }
+        //internal ParsingProcessor Parser { get; private set; }
 
-        public GuiHint SizeGuiHint { get; private set; }
-        public int SizeValue { get; private set; }
-        internal Expression SizeFormula { get; set; }
+        public GuiHint SizeGuiHint { get; internal set; }
+
+        public int SizeValue
+        {
+            get
+            {
+                if (SizeFormula == null)
+                    return 1;
+                else
+                    return SizeFormula.IntResult;
+            } 
+        }
+
+        internal ChainedExpression SizeFormula { get; set; }
         public void SetSize(int size)
         {
             SetMinSize();
-            SetMinSize();
+            SetMaxSize();
             if (size < MinSizeValue)
-                SizeValue = MinSizeValue;
-            if (size > MaxSizeValue)
-                SizeValue = MaxSizeValue;
-            else
-                SizeValue = size;
+                size = MinSizeValue;
+            else if (size > MaxSizeValue)
+                size = MaxSizeValue;
+            SizeFormula.NewExpression(size.ToString()); //prevents it being reset to the default value on Evaluate;
+            SizeFormula.Evaluate();//force dependants to recalc.
         }
 
-        public int MaxSizeValue { get; private set; }
-        internal Expression MaxSizeFormula { get; set; }
+        public int MaxSizeValue { get { return MaxSizeFormula.IntResult; }}
+        internal ChainedExpression MaxSizeFormula { get; set; }
         public void SetMaxSize()
         {
-            object result = MaxSizeFormula.Evaluate();
-            if (result is int)
-                MaxSizeValue = (int)result;
-            else if (result is double)
-                MaxSizeValue = (int)(double)result;
+            MaxSizeFormula.Evaluate();
         }
 
-        public int MinSizeValue { get; private set; }
-        internal Expression MinSizeFormula { get; set; }
+        public int MinSizeValue {get { return MinSizeFormula.IntResult; }}
+
+        internal ChainedExpression MinSizeFormula { get; set; }
         public void SetMinSize()
         {
-            object result = MinSizeFormula.Evaluate();
-            if (result is int)
-                MinSizeValue = (int)result;
-            else if (result is double)
-                MinSizeValue = (int)(double)result;
+            MinSizeFormula.Evaluate();
         }
 
-        public GuiHint HTKGuiHint { get; private set; }
-        public int HTKValue { get; private set; }
-        internal Expression HTKFormula { get; set; }
+        public GuiHint HTKGuiHint { get; internal set; }
+        public int HTKValue { get { return HTKFormula.IntResult; } }
+        internal ChainedExpression HTKFormula { get; set; }
         public void SetHTK()
         {
-            object result = HTKFormula.Evaluate();
-            if (result is int)
-                HTKValue = (int)result;
-            else if (result is double)
-                HTKValue = (int)(double)result;
+            HTKFormula.Evaluate();
         }
 
-        public GuiHint CrewReqGuiHint { get; private set; }
-        public int CrewReqValue { get; private set; }
-        internal Expression CrewFormula { get; set; }
+        public GuiHint CrewReqGuiHint { get; internal set; }
+        public int CrewReqValue { get { return CrewFormula.IntResult; } }
+        internal ChainedExpression CrewFormula { get; set; }
         public void SetCrew()
         {
-            object result = CrewFormula.Evaluate();
-            if (result is int)
-                CrewReqValue = (int)result;
-            else if (result is double)
-                CrewReqValue = (int)(double)result;
+            CrewFormula.Evaluate();
         }
 
-        public GuiHint RessearchGuiHint { get; private set; }
-        public int ResearchCostValue { get; private set; }
-        internal Expression ResearchCostFormula { get; set; }
+        public GuiHint RessearchGuiHint { get; internal set; }
+        public int ResearchCostValue { get { return ResearchCostFormula.IntResult; } }
+        internal ChainedExpression ResearchCostFormula { get; set; }
         public void SetResearchCost()
         {
-            object result = ResearchCostFormula.Evaluate();
-            if (result is int)
-                ResearchCostValue = (int)result;
-            else if (result is double)
-                ResearchCostValue = (int)(double)result;
+            ResearchCostFormula.Evaluate();
         }
 
-        public GuiHint MineralCostGuiHint { get; private set; }
-        public JDictionary<Guid, int> MineralCostValues { get; private set; }
-        internal Dictionary<Guid, Expression> CostFormulas { get; set; }
+        public GuiHint MineralCostGuiHint { get; internal set; }
+        public JDictionary<Guid, int> MineralCostValues {
+            get
+            {
+                JDictionary<Guid,int> dict = new JDictionary<Guid, int>();
+                foreach (var kvp in CostFormulas)
+                {
+                    dict.Add(kvp.Key, kvp.Value.IntResult);  
+                }
+                return dict;
+            }
+        }
+        internal Dictionary<Guid, ChainedExpression> CostFormulas { get; set; }
         public void SetCosts()
         {
-            MineralCostValues = new JDictionary<Guid, int>();
-            foreach (var kvp in CostFormulas)
+            foreach (var expression in CostFormulas.Values)
             {
-                object value = kvp.Value.Evaluate();
-                int intvalue = (int)(double)value;
-                MineralCostValues.Add(kvp.Key, intvalue);
+                expression.Evaluate();
             }
         }
 
 
         public List<ComponentDesignAbilityDB> ComponentDesignAbilities;
 
-        public ComponentDesignDB(StaticDataStore staticData, TechDB factionTech)
-        {
-            Parser = new ParsingProcessor(staticData, factionTech, this);
-        }
     }
 
     public class ComponentDesignAbilityDB
@@ -125,23 +120,23 @@ namespace Pulsar4X.ECSLib
         public GuiHint GuiHint;
         public Type DataBlobType;
         //public BaseDataBlob DataBlob;
-
+        private ComponentDesignDB _parentComponent; //not sure we need this anymore. can be usefull for debug though
+        public ComponentDesignAbilityDB(ComponentDesignDB parentComponent)
+        {
+            _parentComponent = parentComponent;
+        }
 
         public Dictionary<TechSD, double> SelectionDictionary;
 
         public void SetValueFromTechList(TechSD tech)
         {
-            Value = SelectionDictionary[tech];
+            Formula.NewExpression("TechData('" + tech.ID + "')");
         }
 
-        public Expression Formula { get; set; }
+        internal ChainedExpression Formula { get; set; }
         public void SetValue()
         {
-            object result = Formula.Evaluate();
-            if (result is int)
-                Value = (double)(int)result;
-            else
-                Value = (double)result;
+            Formula.Evaluate();
         }
 
         public void SetValueFromInput(double input)
@@ -149,39 +144,37 @@ namespace Pulsar4X.ECSLib
             SetMin();
             SetMax();
             if (input < MinValue)
-                Value = MinValue;
-            if (input > MaxValue)
-                Value = MaxValue;
-            else
-                Value = input;
-            Formula = new Expression(Value.ToString()); //this will stop it re-evaluating to default if/when SetValue() is called.
+                input = MinValue;
+            else if (input > MaxValue)
+                input = MaxValue;
+            Formula.NewExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
+            Formula.Evaluate();//force dependants to recalc.
         }
 
-        public double Value;
+        public double Value { get { return Formula.DResult; } }
 
         public double MinValue;
-        public Expression MinValueFormula { get; set; }
+        internal ChainedExpression MinValueFormula { get; set; }
         public void SetMin()
         {
-            object result = MinValueFormula.Evaluate();
+            MinValueFormula.Evaluate();
+            object result = MinValueFormula.Result;
             if (result is int)
                 MinValue = (double)(int)result;
             else
                 MinValue = (double)result;
-
-
         }
         public double MaxValue;
-        public Expression MaxValueFormula { get; set; }
+        internal ChainedExpression MaxValueFormula { get; set; }
         public void SetMax()
         {
-            object result = MaxValueFormula.Evaluate();
+            MaxValueFormula.Evaluate();
+            object result = MaxValueFormula.Result;
             if (result is int)
                 MaxValue = (double)(int)result;
             else
                 MaxValue = (double)result;
         }
-
     }
 
 }

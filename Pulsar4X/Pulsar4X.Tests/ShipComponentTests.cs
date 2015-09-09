@@ -62,6 +62,8 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
+            design.SetSize(5);
+
             Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, design, _faction.GetDataBlob<TechDB>());
         }
         

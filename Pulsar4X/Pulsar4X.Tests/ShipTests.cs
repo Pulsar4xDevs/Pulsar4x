@@ -58,7 +58,7 @@ namespace Pulsar4X.Tests
             int crew = 5;
             
             Guid tech = new Guid();
-            _engineComponent = EngineFactory.CreateEngineComponent(_starSystem.SystemManager, 5, hitTokill, costs, tech, crew, totalPower, consumptionPerHour, thermalSig);
+            //_engineComponent = EngineFactory.CreateEngineComponent(_starSystem.SystemManager, 5, hitTokill, costs, tech, crew, totalPower, consumptionPerHour, thermalSig);
         }
 
         [Test]
