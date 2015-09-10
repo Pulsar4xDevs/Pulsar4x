@@ -72,7 +72,7 @@ namespace Pulsar4X.Tests
             ComponentSD component = new ComponentSD();
             component.Name = "Engine";
             component.Description = "Moves a ship";
-            component.ID = new Guid();
+            component.ID = new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6");
 
             component.SizeGuiHint = GuiHint.GuiSelectionMaxMin;
             component.SizeFormula = "5";
@@ -132,7 +132,7 @@ namespace Pulsar4X.Tests
             enginePowerAbility.Name = "Engine Power";
             enginePowerAbility.Description = "Move Power for ship";
             enginePowerAbility.GuiHint = GuiHint.None;
-            enginePowerAbility.AbilityDataBlobType = typeof(EnginePowerDB);
+            enginePowerAbility.AbilityDataBlobType = typeof(EnginePowerDB).ToString();
             enginePowerAbility.AbilityFormula = "Ability(0) * [Size]";
             component.ComponentAbilitySDs.Add(enginePowerAbility);
 
@@ -148,14 +148,13 @@ namespace Pulsar4X.Tests
             fuelConsumptionSizeMod.Name = "Fuel Consumption";
             fuelConsumptionSizeMod.Description = "Size Mod";
             fuelConsumptionSizeMod.GuiHint = GuiHint.GuiTextDisplay;
-            fuelConsumptionSizeMod.AbilityDataBlobType = typeof(FuelUseDB);
+            fuelConsumptionSizeMod.AbilityDataBlobType = typeof(FuelUseDB).ToString();
             fuelConsumptionSizeMod.AbilityFormula = "Ability(2) - Ability(2) * [Size] * 0.002";
             component.ComponentAbilitySDs.Add(fuelConsumptionSizeMod);
             
             JDictionary<Guid,ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
             componentsDict.Add(component.ID, component);
-
-            StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
+;           StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
             
             return component;
         }

@@ -12,9 +12,7 @@
           "DataFormula": "[Level] * 1.5",
           "Category": "PowerAndPropulsion",
           "Requirements": {
-            "Version": 0,
-            "Comparer": {},
-            "HashSize": 0
+            "List": []
           },
           "CostFormula": "[Level] * 1"
         }
@@ -29,9 +27,7 @@
           "DataFormula": "0.5 - [Level] * 0.1",
           "Category": "PowerAndPropulsion",
           "Requirements": {
-            "Version": 0,
-            "Comparer": {},
-            "HashSize": 0
+            "List": []
           },
           "CostFormula": "[Level] * 1"
         }
@@ -46,9 +42,7 @@
           "DataFormula": "1 - [Level] * 0.1",
           "Category": "PowerAndPropulsion",
           "Requirements": {
-            "Version": 0,
-            "Comparer": {},
-            "HashSize": 0
+            "List": []
           },
           "CostFormula": "[Level] * 1"
         }
@@ -63,9 +57,7 @@
           "DataFormula": "0.2",
           "Category": "PowerAndPropulsion",
           "Requirements": {
-            "Version": 0,
-            "Comparer": {},
-            "HashSize": 0
+            "List": []
           },
           "CostFormula": "[Level] * 500"
         }
@@ -80,10 +72,7 @@
           "DataFormula": "5",
           "Category": "PowerAndPropulsion",
           "Requirements": {
-            "Version": 1,
-            "Comparer": {},
-            "HashSize": 3,
-            "KeyValuePairs": [
+            "List": [
               {
                 "Key": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
                 "Value": 1
@@ -103,10 +92,7 @@
           "DataFormula": "5",
           "Category": "PowerAndPropulsion",
           "Requirements": {
-            "Version": 1,
-            "Comparer": {},
-            "HashSize": 3,
-            "KeyValuePairs": [
+            "List": [
               {
                 "Key": "c827d369-3f16-43ef-b112-7d5bcafb74c7",
                 "Value": 1
@@ -126,10 +112,7 @@
           "DataFormula": "5",
           "Category": "PowerAndPropulsion",
           "Requirements": {
-            "Version": 1,
-            "Comparer": {},
-            "HashSize": 3,
-            "KeyValuePairs": [
+            "List": [
               {
                 "Key": "db6818f3-99e9-46c1-b903-f3af978c38b2",
                 "Value": 1

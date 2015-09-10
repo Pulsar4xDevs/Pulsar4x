@@ -195,7 +195,6 @@ namespace Pulsar4X.Tests
             fuelUsage.Category = ResearchCategories.PowerAndPropulsion;
             fuelUsage.CostFormula = "[Level] * 1";
             fuelUsage.Requirements = new JDictionary<Guid, int>();
-
             techs.Add(fuelUsage.ID, fuelUsage);
 
 
@@ -208,7 +207,6 @@ namespace Pulsar4X.Tests
             EngineTech1.Category = ResearchCategories.PowerAndPropulsion;
             EngineTech1.CostFormula = "[Level] * 500";
             EngineTech1.Requirements = new JDictionary<Guid, int>();
-
             techs.Add(EngineTech1.ID, EngineTech1);
 
             TechSD EngineTech2 = new TechSD();
