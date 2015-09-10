@@ -22,44 +22,49 @@ namespace Pulsar4X.ECSLib
         //internal ParsingProcessor Parser { get; private set; }
 
         public GuiHint SizeGuiHint { get; internal set; }
-
-        public int SizeValue
+        public int SizeBaseValue
         {
             get
             {
-                if (SizeFormula == null)
+                if (SizeBaseFormula == null)
                     return 1;
                 else
-                    return SizeFormula.IntResult;
+                    return SizeBaseFormula.IntResult;
             } 
         }
-
-        internal ChainedExpression SizeFormula { get; set; }
+        internal ChainedExpression SizeBaseFormula { get; set; }
         public void SetSize(int size)
         {
             SetMinSize();
             SetMaxSize();
-            if (size < MinSizeValue)
-                size = MinSizeValue;
-            else if (size > MaxSizeValue)
-                size = MaxSizeValue;
-            SizeFormula.NewExpression(size.ToString()); //prevents it being reset to the default value on Evaluate;
-            SizeFormula.Evaluate();//force dependants to recalc.
+            if (size < MinSizeBaseValue)
+                size = MinSizeBaseValue;
+            else if (size > MaxSizeBaseValue)
+                size = MaxSizeBaseValue;
+            SizeBaseFormula.ReplaceExpression(size.ToString()); //prevents it being reset to the default value on Evaluate;
+            SizeBaseFormula.Evaluate();//force dependants to recalc.
         }
 
-        public int MaxSizeValue { get { return MaxSizeFormula.IntResult; }}
+        public int MaxSizeBaseValue { get { return MaxSizeFormula.IntResult; }}
         internal ChainedExpression MaxSizeFormula { get; set; }
         public void SetMaxSize()
         {
             MaxSizeFormula.Evaluate();
         }
 
-        public int MinSizeValue {get { return MinSizeFormula.IntResult; }}
+        public int MinSizeBaseValue {get { return MinSizeFormula.IntResult; }}
 
         internal ChainedExpression MinSizeFormula { get; set; }
         public void SetMinSize()
         {
             MinSizeFormula.Evaluate();
+        }
+
+        public int FinalSize { get { return FinalSizeFormula.IntResult; } }
+        internal ChainedExpression FinalSizeFormula { get; set; }
+        public void SetFinalSize()
+        {
+            FinalSizeFormula.Evaluate();
         }
 
         public GuiHint HTKGuiHint { get; internal set; }
@@ -120,17 +125,17 @@ namespace Pulsar4X.ECSLib
         public GuiHint GuiHint;
         public Type DataBlobType;
         //public BaseDataBlob DataBlob;
-        private ComponentDesignDB _parentComponent; //not sure we need this anymore. can be usefull for debug though
+        internal ComponentDesignDB ParentComponent; 
         public ComponentDesignAbilityDB(ComponentDesignDB parentComponent)
         {
-            _parentComponent = parentComponent;
+            ParentComponent = parentComponent;
         }
 
         public Dictionary<TechSD, double> SelectionDictionary;
 
         public void SetValueFromTechList(TechSD tech)
         {
-            Formula.NewExpression("TechData('" + tech.ID + "')");
+            Formula.ReplaceExpression("TechData('" + tech.ID + "')");
         }
 
         internal ChainedExpression Formula { get; set; }
@@ -147,7 +152,7 @@ namespace Pulsar4X.ECSLib
                 input = MinValue;
             else if (input > MaxValue)
                 input = MaxValue;
-            Formula.NewExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
+            Formula.ReplaceExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
             Formula.Evaluate();//force dependants to recalc.
         }
 
@@ -175,6 +180,8 @@ namespace Pulsar4X.ECSLib
             else
                 MaxValue = (double)result;
         }
+
+        internal List<double> DataBlobArgs { get; set; }
     }
 
 }

@@ -103,6 +103,9 @@
     <Compile Include="UserControls\Combat.xaml.cs">
       <DependentUpon>Combat.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ComponentDesign.xaml.cs">
+      <DependentUpon>ComponentDesign.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\DebugLog.xaml.cs">
       <DependentUpon>DebugLog.xaml</DependentUpon>
     </Compile>
@@ -154,6 +157,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Combat.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ComponentDesign.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

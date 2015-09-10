@@ -9,7 +9,9 @@ namespace Pulsar4X.ECSLib
         private StaticDataStore _staticDataStore;
         private TechDB _factionTechDB;
         private ComponentDesignDB _design;
+        private ComponentDesignAbilityDB _designAbility;
         private Expression _expression;
+        
         // ReSharper disable once NotAccessedField.Local (Used for debuging puroposes. though maybe it could be public and shown in the UI?)
         private string _stringExpression;
         internal List<ChainedExpression> DependantExpressions = new List<ChainedExpression>();
@@ -21,6 +23,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Returns Result as an Int. note that if the result was a double you will loose the fraction (ie 1.8 will be 1)
+        /// Getting this will fire the Evaluate if Result is null (but won't know if it's old)
         /// </summary>
         internal int IntResult
         {
@@ -40,6 +43,7 @@ namespace Pulsar4X.ECSLib
         }
         /// <summary>
         /// Returns Result as a double
+        /// Getting this will fire the Evaluate if Result is null (but won't know if its old)
         /// </summary>
         internal double DResult
         {
@@ -58,34 +62,11 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal ChainedExpression(string expressionString, ComponentDesignDB design, TechDB factionTech, StaticDataStore staticDataStore)
-        {
-            _staticDataStore = staticDataStore;
-            _factionTechDB = factionTech;
-            _design = design;
-            NewExpression(expressionString);
-        }
 
-        internal void NewExpression(string expressionString)
-        {
-            _stringExpression = expressionString;
-            _expression = new Expression(expressionString);
-            _expression.EvaluateFunction += NCalcFunctions;
-            //_expression.Parameters["Size"] = _design.SizeValue;
-            _expression.Parameters["xSizex"] = new Expression("Size"); //this is a bit wacky, I don't fully understand it but "xSizex" has to be something that doesn't exsist or somethign.
-            
-            _expression.EvaluateParameter += delegate(string name, ParameterArgs args)
-            {
-                if (name == "Size")
-                {
-                    MakeThisDependant(_design.SizeFormula);
-                    args.Result = _design.SizeValue;
-                }
-            };
-
-            
-        }
-
+        /// <summary>
+        /// Evaluates the expression and updates the Result.
+        /// will also cause any other dependant ChainedExpressions to evaluate. 
+        /// </summary>
         internal void Evaluate()
         {
             Result = _expression.Evaluate();
@@ -93,22 +74,146 @@ namespace Pulsar4X.ECSLib
             {
                 dependant.Evaluate();
             }
-            
+
         }
 
+
+        /// <summary>
+        /// Primary Constructor for ComponentDesignDB
+        /// </summary>
+        /// <param name="expressionString"></param>
+        /// <param name="design"></param>
+        /// <param name="factionTech"></param>
+        /// <param name="staticDataStore"></param>
+        internal ChainedExpression(string expressionString, ComponentDesignDB design, TechDB factionTech, StaticDataStore staticDataStore)
+        {
+            _staticDataStore = staticDataStore;
+            _factionTechDB = factionTech;
+            _design = design;
+            ReplaceExpression(expressionString);
+        }
+
+
+        /// <summary>
+        /// Primary Constructor for ComponentDesignAbilityDB
+        /// </summary>
+        /// <param name="expressionString"></param>
+        /// <param name="designAbility"></param>
+        /// <param name="factionTech"></param>
+        /// <param name="staticDataStore"></param>
+        internal ChainedExpression(string expressionString, ComponentDesignAbilityDB designAbility, TechDB factionTech, StaticDataStore staticDataStore)
+        {
+            _staticDataStore = staticDataStore;
+            _factionTechDB = factionTech;
+            _design = designAbility.ParentComponent;
+            _designAbility = designAbility;
+            ReplaceExpression(expressionString);
+        }
+
+        /// <summary>
+        /// a private constructor that is used internaly for a one use Expression 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="design"></param>
+        /// <param name="factionTech"></param>
+        /// <param name="staticDataStore"></param>
+        private ChainedExpression(Expression expression, ComponentDesignDB design, TechDB factionTech, StaticDataStore staticDataStore)
+        {
+            _staticDataStore = staticDataStore;
+            _factionTechDB = factionTech;
+            _design = design;
+            _expression = expression;
+            SetupExpression();
+
+        }
+
+        /// <summary>
+        /// replaces the expression with a new expression, without having to recreate the whole chainedExpression with deisgn, tech, staticdata.
+        /// </summary>
+        /// <param name="expressionString"></param>
+        internal void ReplaceExpression(string expressionString)
+        {
+            _stringExpression = expressionString;
+            _expression = new Expression(expressionString);
+            SetupExpression();
+        }
+
+        /// <summary>
+        /// it's better to use the string version of this, as that will store the origional string.
+        /// </summary>
+        /// <param name="expression"></param>
+        internal void ReplaceExpression(Expression expression)
+        {
+            
+            _expression = expression;
+            SetupExpression();
+            _stringExpression = _expression.ParsedExpression.ToString();
+        }
+
+        /// <summary>
+        /// adds this to the given ChainedExpressions dependants list.
+        /// </summary>
+        /// <param name="dependee"></param>
         private void MakeThisDependant(ChainedExpression dependee)
         {
-            if(!dependee.DependantExpressions.Contains(this))
+            if (!dependee.DependantExpressions.Contains(this))
                 dependee.DependantExpressions.Add(this);
         }
 
+        /// <summary>
+        /// adds teh given exression to this expressions dependant list
+        /// </summary>
+        /// <param name="dependant"></param>
         public void AddDependee(ChainedExpression dependant)
         {
-            if(!DependantExpressions.Contains(dependant))
+            if (!DependantExpressions.Contains(dependant))
                 DependantExpressions.Add(dependant);
         }
 
-        private void NCalcFunctions(string name, FunctionArgs args)
+
+        /// <summary>
+        /// sets the function and parameter stuff.
+        /// </summary>
+        private void SetupExpression()
+        {
+            _expression.EvaluateFunction += NCalcPulsarFunctions;
+            _expression.EvaluateParameter += NCalcPulsarParameters;
+
+            _expression.Parameters["xBaseSizex"] = new Expression("BaseSize"); //unknown string will force it to look in the NCalcPulsarParameters or something
+            _expression.Parameters["xFinalSizex"] = new Expression("FinalSize"); //unknown string will force it to look in the NCalcPulsarParameters or something
+            //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
+
+            //put extra parameters that don't require extra processing here.ie:
+            //_expression.Parameters["X"] = 5;
+        }
+
+
+        /// <summary>
+        /// extra parameters that requre additional stuff done go here
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="args"></param>
+        private void NCalcPulsarParameters(string name, ParameterArgs args)
+        {
+            if (name == "BaseSize")
+            {
+                MakeThisDependant(_design.SizeBaseFormula);
+                args.Result = _design.SizeBaseValue;
+            }
+            if (name == "FinalSize")
+            {
+                MakeThisDependant(_design.SizeBaseFormula);
+                args.Result = _design.FinalSize;
+            }
+        }
+
+
+        /// <summary>
+        /// extra custom functinos go in here.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="args"></param>
+        private void NCalcPulsarFunctions(string name, FunctionArgs args)
         {
             if (name == "Ability")
             {
@@ -151,6 +256,21 @@ namespace Pulsar4X.ECSLib
                     list.Add((TechSD)item.Evaluate());
                 }
                 args.Result = list;
+            }
+            if (name == "Size")
+            {
+                ChainedExpression finalSize = new ChainedExpression(args.Parameters[0], _design, _factionTechDB, _staticDataStore);
+                _design.FinalSizeFormula = finalSize;
+                args.Result = _design.FinalSize;
+            }
+            if (name == "DataBlobArgs")
+            {
+                _designAbility.DataBlobArgs = new List<double>();
+                foreach (var argParam in args.Parameters)
+                {
+                    ChainedExpression argExpression = new ChainedExpression(argParam, _design, _factionTechDB, _staticDataStore);
+                    _designAbility.DataBlobArgs.Add(argExpression.DResult);
+                }
             }
         }
     }
