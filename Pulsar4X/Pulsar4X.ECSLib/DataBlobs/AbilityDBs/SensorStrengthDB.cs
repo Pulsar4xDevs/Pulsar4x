@@ -18,10 +18,18 @@ namespace Pulsar4X.ECSLib
         private int _resolution;
         public int Resolution { get { return _resolution; } internal set { _resolution = value; } } 
 
-
-        public ActiveSensorDB()
+        /// <summary>
+        /// This is the constructor for the component DesignToEntity factory.
+        /// note that while the params are doubles, it casts them to ints.
+        /// </summary>
+        /// <param name="gravStrenght"></param>
+        /// <param name="emSensitivity"></param>
+        /// <param name="resolution"></param>
+        public ActiveSensorDB(double gravStrenght, double emSensitivity, double resolution)
         {
-
+            _gravSensorStrength = (int)gravStrenght;
+            _emSensitivity = (int)emSensitivity;
+            _resolution = (int)resolution;
         }
 
         public ActiveSensorDB(ActiveSensorDB db)

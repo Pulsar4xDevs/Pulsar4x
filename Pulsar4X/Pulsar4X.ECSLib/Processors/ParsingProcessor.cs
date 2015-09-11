@@ -15,6 +15,9 @@ namespace Pulsar4X.ECSLib
         
         // ReSharper disable once NotAccessedField.Local (Used for debuging puroposes. though maybe it could be public and shown in the UI?)
         private string _stringExpression;
+
+        //this bool is used for tempory created ChainedExpressions that will not have dependants or be dependant. if these are alowed to be dependants they tend to change a dependee's dependant list while itterating.
+        private bool _isDependant = true;
         internal List<ChainedExpression> DependantExpressions = new List<ChainedExpression>();
 
         /// <summary>
@@ -164,7 +167,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="dependee"></param>
         private void MakeThisDependant(ChainedExpression dependee)
         {
-            if (!dependee.DependantExpressions.Contains(this))
+            if (!dependee.DependantExpressions.Contains(this) && !_isDependant)
                 dependee.DependantExpressions.Add(this);
         }
 
@@ -174,7 +177,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="dependant"></param>
         public void AddDependee(ChainedExpression dependant)
         {
-            if (!DependantExpressions.Contains(dependant))
+            if (!DependantExpressions.Contains(dependant) && !dependant._isDependant)
                 DependantExpressions.Add(dependant);
         }
 
@@ -258,18 +261,22 @@ namespace Pulsar4X.ECSLib
             }
             //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
             //The datablob will be the one defined in designAbility.DataBlobType
+            //Note: this will return the first param as a result, so another ability calling this via Ability(x) will get the evaluated args.parameters[0].
             //TODO document blobs and what args they take!!
             if (name == "DataBlobArgs")
             {
                 if(_designAbility.DataBlobType == null)
                     throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
-                _designAbility.DataBlobArgs = new List<double>();
+                //_designAbility.DataBlobArgs = new List<double>();
+                List<object> argList = new List<object>();
                 foreach (var argParam in args.Parameters)
                 {
                     ChainedExpression argExpression = new ChainedExpression(argParam, _design, _factionTechDB, _staticDataStore);
-                    _designAbility.DataBlobArgs.Add(argExpression.DResult);
+                    _isDependant = false;
+                    argList.Add(argExpression.DResult);
                 }
-                args.Result = "";
+                _designAbility.DataBlobArgs = argList.ToArray();
+                args.Result = args.Parameters[0].Evaluate();
             }
 
         }

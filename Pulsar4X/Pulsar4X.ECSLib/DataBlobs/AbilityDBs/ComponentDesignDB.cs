@@ -140,7 +140,7 @@ namespace Pulsar4X.ECSLib
                 MaxValue = (double)result;
         }
 
-        internal List<double> DataBlobArgs { get; set; }
+        internal object[] DataBlobArgs { get; set; }
     }
 
 }

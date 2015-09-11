@@ -98,7 +98,6 @@ namespace Pulsar4X.Tests
             SizeFormula.Name = "Engine Size";
             SizeFormula.Description = "";
             SizeFormula.GuiHint = GuiHint.GuiSelectionMaxMin;
-            SizeFormula.AbilityDataBlobType = null;
             SizeFormula.AbilityFormula = "250";
             SizeFormula.MaxFormula = "2500";
             SizeFormula.MinFormula = "1";
@@ -108,7 +107,6 @@ namespace Pulsar4X.Tests
             engineTypeAbility.Name = "Engine Type";
             engineTypeAbility.Description = "Type of engine Tech";
             engineTypeAbility.GuiHint = GuiHint.GuiSelectionList;
-            engineTypeAbility.AbilityDataBlobType = null;
             engineTypeAbility.TechList = new List<Guid>
             {
                 new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"),
@@ -133,7 +131,6 @@ namespace Pulsar4X.Tests
             enginePowerEfficency.Name = "Engine Consumption vs Power";
             enginePowerEfficency.Description = "More Powerfull engines are less efficent for a given size";
             enginePowerEfficency.GuiHint = GuiHint.GuiSelectionMaxMin;
-            enginePowerEfficency.AbilityDataBlobType = null;
             enginePowerEfficency.AbilityFormula = "1";
             enginePowerEfficency.MaxFormula = "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')";
             enginePowerEfficency.MinFormula = "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')";
@@ -144,14 +141,13 @@ namespace Pulsar4X.Tests
             enginePowerAbility.Description = "Move Power for ship";
             enginePowerAbility.GuiHint = GuiHint.None;
             enginePowerAbility.AbilityDataBlobType = typeof(EnginePowerDB).ToString();
-            enginePowerAbility.AbilityFormula = "Ability(1) * [Size]";
+            enginePowerAbility.AbilityFormula = "DataBlobArgs(Ability(1) * [Size])";
             component.ComponentAbilitySDs.Add(enginePowerAbility);
 
             ComponentAbilitySD fuelConsumptionBase = new ComponentAbilitySD();
             fuelConsumptionBase.Name = "Fuel Consumption";
             fuelConsumptionBase.Description = "From Tech";
             fuelConsumptionBase.GuiHint = GuiHint.None;
-            fuelConsumptionBase.AbilityDataBlobType = null;
             fuelConsumptionBase.AbilityFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(3), 2.25)";
             component.ComponentAbilitySDs.Add(fuelConsumptionBase);
 
@@ -160,8 +156,25 @@ namespace Pulsar4X.Tests
             fuelConsumptionSizeMod.Description = "Size Mod";
             fuelConsumptionSizeMod.GuiHint = GuiHint.GuiTextDisplay;
             fuelConsumptionSizeMod.AbilityDataBlobType = typeof(FuelUseDB).ToString();
-            fuelConsumptionSizeMod.AbilityFormula = "Ability(3) - Ability(3) * [Size] * 0.002";
+            fuelConsumptionSizeMod.AbilityFormula = "DataBlobArgs(Ability(3) - Ability(3) * [Size] * 0.002)";
             component.ComponentAbilitySDs.Add(fuelConsumptionSizeMod);
+
+            ComponentAbilitySD ThermalReduction = new ComponentAbilitySD();
+            ThermalReduction.Name = "Thermal Signature Reduction";
+            ThermalReduction.Description = "";
+            ThermalReduction.GuiHint = GuiHint.GuiSelectionMaxMin;
+            ThermalReduction.AbilityFormula = "0";
+            ThermalReduction.MaxFormula = "0";
+            ThermalReduction.MinFormula = "0.5";
+            component.ComponentAbilitySDs.Add(ThermalReduction);
+
+            ComponentAbilitySD sensorSig = new ComponentAbilitySD();
+            sensorSig.Name = "Thermal Signature";
+            sensorSig.Description = "";
+            sensorSig.GuiHint = GuiHint.GuiTextDisplay;
+            sensorSig.AbilityDataBlobType = typeof(SensorSignatureDB).ToString();
+            sensorSig.AbilityFormula = "DataBlobArgs(Ability(3) * Ability(6),0)";
+            component.ComponentAbilitySDs.Add(sensorSig);
             
             JDictionary<Guid,ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
             componentsDict.Add(component.ID, component);

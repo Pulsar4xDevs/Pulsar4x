@@ -11,14 +11,10 @@ namespace Pulsar4X.ECSLib
 
         public int EnginePower { get { return _enginePower; } internal set { _enginePower = value; } }
 
-        //hack for dynamic design stuff
-        public void SetData(double data)
-        {
-            _enginePower = (int)data;
-        }
 
-        public EnginePowerDB()
+        public EnginePowerDB(double power)
         {
+            _enginePower = (int)power;
         }
 
         public EnginePowerDB(int enginePower)

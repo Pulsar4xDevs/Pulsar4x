@@ -12,10 +12,15 @@ namespace Pulsar4X.ECSLib
         private int _electroMagneticSig;
         public int ElectroMagneticSig { get { return _electroMagneticSig; } internal set { _electroMagneticSig = value; } }
 
-        public SensorSignatureDB(int thermalSig, int electroMagneticSig)
+        /// <summary>
+        /// Constructor for Factory. note int cast.
+        /// </summary>
+        /// <param name="thermalSig"></param>
+        /// <param name="electroMagneticSig"></param>
+        public SensorSignatureDB(double thermalSig, double electroMagneticSig)
         {
-            _thermalSig = thermalSig;
-            _electroMagneticSig = electroMagneticSig;
+            _thermalSig = (int)thermalSig;
+            _electroMagneticSig = (int)electroMagneticSig;
         }
 
         public SensorSignatureDB(SensorSignatureDB db)
