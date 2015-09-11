@@ -81,16 +81,19 @@ namespace Pulsar4X.Tests
             component.SizeFormula = "Ability(0)";
 
             component.HTKGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseHTKFormula = "Max(1, [Size] / 100)";
+            component.HTKFormula = "Max(1, [Size] / 100)";
 
-            component.CrewGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseCrewSizeFormula = "[Size]";
+            component.CrewReqGuiHint = GuiHint.GuiTextDisplay;
+            component.CrewReqFormula = "[Size]";
 
             component.ResearchCostGuiHint = GuiHint.None;
-            component.BaseResearchCostFormula = "[Size] * 10";
+            component.ResearchCostFormula = "[Size] * 10";
 
-            component.CostGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
+            component.MineralCostGuiHint = GuiHint.GuiTextDisplay;
+            component.MineralCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
+
+            component.CreditCostGuiHint = GuiHint.GuiTextDisplay;
+            component.CreditCostFormula = "[Size]";
 
             component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
 

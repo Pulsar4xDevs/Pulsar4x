@@ -192,7 +192,11 @@ namespace Pulsar4X.ECSLib
 
             _expression.Parameters["xSizex"] = new Expression("Size"); //unknown string will force it to look in the NCalcPulsarParameters or something
             //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
-
+            _expression.Parameters["xCrewx"] = new Expression("Crew");
+            _expression.Parameters["xHTKx"] = new Expression("HTK");
+            _expression.Parameters["xResearchCostx"] = new Expression("ResearchCost");
+            _expression.Parameters["xMineralCosts"] = new Expression("MineralCosts");
+            _expression.Parameters["xCreditCosts"] = new Expression("CreditCosts");
             //put extra parameters that don't require extra processing here.ie:
             //_expression.Parameters["X"] = 5;
         }
@@ -209,6 +213,31 @@ namespace Pulsar4X.ECSLib
             {
                 MakeThisDependant(_design.SizeFormula);
                 args.Result = _design.SizeValue;
+            }
+            if (name == "Crew")
+            {
+                MakeThisDependant(_design.SizeFormula);
+                args.Result = _design.CrewReqValue;
+            }
+            if (name == "HTK")
+            {
+                MakeThisDependant(_design.SizeFormula);
+                args.Result = _design.HTKValue;
+            }
+            if (name == "ResearchCost")
+            {
+                MakeThisDependant(_design.SizeFormula);
+                args.Result = _design.ResearchCostValue;
+            }
+            if (name == "MineralCosts")
+            {
+                MakeThisDependant(_design.SizeFormula);
+                args.Result = _design.MineralCostValues;
+            }
+            if (name == "CreditCost")
+            {
+                MakeThisDependant(_design.SizeFormula);
+                args.Result = _design.ResearchCostValue;
             }
         }
 

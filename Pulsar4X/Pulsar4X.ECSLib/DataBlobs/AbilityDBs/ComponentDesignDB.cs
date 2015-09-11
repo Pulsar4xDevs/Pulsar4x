@@ -71,6 +71,13 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public GuiHint CreditCostGuiHint { get; internal set; }
+        public int CreditCostValue { get { return ResearchCostFormula.IntResult; } }
+        internal ChainedExpression CreditCostFormula { get; set; }
+        public void SetCreditCost()
+        {
+            ResearchCostFormula.Evaluate();
+        }
 
         public List<ComponentDesignAbilityDB> ComponentDesignAbilities;
 
@@ -122,22 +129,14 @@ namespace Pulsar4X.ECSLib
         public void SetMin()
         {
             MinValueFormula.Evaluate();
-            object result = MinValueFormula.Result;
-            if (result is int)
-                MinValue = (double)(int)result;
-            else
-                MinValue = (double)result;
+            MinValue = MinValueFormula.DResult;
         }
         public double MaxValue;
         internal ChainedExpression MaxValueFormula { get; set; }
         public void SetMax()
         {
             MaxValueFormula.Evaluate();
-            object result = MaxValueFormula.Result;
-            if (result is int)
-                MaxValue = (double)(int)result;
-            else
-                MaxValue = (double)result;
+            MaxValue = MaxValueFormula.DResult;
         }
 
         internal object[] DataBlobArgs { get; set; }
