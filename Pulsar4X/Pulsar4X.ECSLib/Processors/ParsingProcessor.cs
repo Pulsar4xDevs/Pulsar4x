@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NCalc;
+using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {
@@ -20,6 +21,13 @@ namespace Pulsar4X.ECSLib
         /// returns Result as an object. consider using IntResult or DResult
         /// </summary>
         internal object Result { get; private set; }
+
+        /// <summary>
+        /// This should probilby be avoided, but can be usefull for another formula reading this one, doing another calc, then setting this result again.
+        /// Note that doing so will not recalc other dependants. 
+        /// if I can avoid using this I will remove it. 
+        /// </summary>
+        internal object SetResult { set { Result = value; } }
 
         /// <summary>
         /// Returns Result as an Int. note that if the result was a double you will loose the fraction (ie 1.8 will be 1)
@@ -179,8 +187,7 @@ namespace Pulsar4X.ECSLib
             _expression.EvaluateFunction += NCalcPulsarFunctions;
             _expression.EvaluateParameter += NCalcPulsarParameters;
 
-            _expression.Parameters["xBaseSizex"] = new Expression("BaseSize"); //unknown string will force it to look in the NCalcPulsarParameters or something
-            _expression.Parameters["xFinalSizex"] = new Expression("FinalSize"); //unknown string will force it to look in the NCalcPulsarParameters or something
+            _expression.Parameters["xSizex"] = new Expression("Size"); //unknown string will force it to look in the NCalcPulsarParameters or something
             //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
 
             //put extra parameters that don't require extra processing here.ie:
@@ -195,15 +202,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="args"></param>
         private void NCalcPulsarParameters(string name, ParameterArgs args)
         {
-            if (name == "BaseSize")
+            if (name == "Size")
             {
-                MakeThisDependant(_design.SizeBaseFormula);
-                args.Result = _design.SizeBaseValue;
-            }
-            if (name == "FinalSize")
-            {
-                MakeThisDependant(_design.SizeBaseFormula);
-                args.Result = _design.FinalSize;
+                MakeThisDependant(_design.SizeFormula);
+                args.Result = _design.SizeValue;
             }
         }
 
@@ -217,14 +219,10 @@ namespace Pulsar4X.ECSLib
         {
             if (name == "Ability")
             {
-                int index;
+                int index = 0;
                 try
                 {
                     index = (int)args.Parameters[0].Evaluate();
-                }
-                catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
-                try
-                {
                     
                     ChainedExpression result = _design.ComponentDesignAbilities[index].Formula;
                     if(result.Result == null)
@@ -232,15 +230,25 @@ namespace Pulsar4X.ECSLib
                     MakeThisDependant(result); 
                     args.Result = result.Result;
 
-                }//todo catch specific exception
+                }
+                catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
                 catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
             }
-            if (name == "TechObject")
+            if (name == "SetAbilityValue") //I might remove this..
             {
-                Guid techGuid = new Guid(args.Parameters[0].ToString());
-                TechSD techSD = _staticDataStore.Techs[techGuid];
-                args.Result = techSD;
+                int index = 0;
+                try
+                {
+                    index = (int)args.Parameters[0].Evaluate();
+
+                    ChainedExpression expression = _design.ComponentDesignAbilities[index].Formula;
+                    expression.SetResult = args.Parameters[1].Evaluate();
+
+                }
+                catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
+                catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
             }
+
             if (name == "TechData")
             {
 
@@ -248,30 +256,22 @@ namespace Pulsar4X.ECSLib
                 TechSD techSD = _staticDataStore.Techs[techGuid];
                 args.Result = TechProcessor.DataFormula(_factionTechDB, techSD);
             }
-            if (name == "TechList")
-            {
-                List<TechSD> list = new List<TechSD>();
-                foreach (Expression item in args.Parameters)
-                {
-                    list.Add((TechSD)item.Evaluate());
-                }
-                args.Result = list;
-            }
-            if (name == "Size")
-            {
-                ChainedExpression finalSize = new ChainedExpression(args.Parameters[0], _design, _factionTechDB, _staticDataStore);
-                _design.FinalSizeFormula = finalSize;
-                args.Result = _design.FinalSize;
-            }
+            //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
+            //The datablob will be the one defined in designAbility.DataBlobType
+            //TODO document blobs and what args they take!!
             if (name == "DataBlobArgs")
             {
+                if(_designAbility.DataBlobType == null)
+                    throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
                 _designAbility.DataBlobArgs = new List<double>();
                 foreach (var argParam in args.Parameters)
                 {
                     ChainedExpression argExpression = new ChainedExpression(argParam, _design, _factionTechDB, _staticDataStore);
                     _designAbility.DataBlobArgs.Add(argExpression.DResult);
                 }
+                args.Result = "";
             }
+
         }
     }
 }

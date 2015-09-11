@@ -8,9 +8,7 @@
           "Name": "Engine",
           "Description": "Moves a ship",
           "ID": "e76bd999-ecd7-4511-ad41-6d0c59ca97e6",
-          "SizeMaxFormula": "50",
-          "SizeMinFormula": "1",
-          "SizeFormula": "5",
+          "SizeFormula": "Ability(0)",
           "SizeGuiHint": "GuiSelectionMaxMin",
           "BaseHTKFormula": "Max(1, [Size] / 100)",
           "HTKGuiHint": "GuiTextDisplay",
@@ -28,6 +26,14 @@
           "BaseResearchCostFormula": "[Size] * 10",
           "ResearchCostGuiHint": "None",
           "ComponentAbilitySDs": [
+            {
+              "Name": "Engine Size",
+              "Description": "",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "2500",
+              "MinFormula": "1",
+              "AbilityFormula": "250"
+            },
             {
               "Name": "Engine Type",
               "Description": "Type of engine Tech",
@@ -52,20 +58,20 @@
               "Name": "Engine Power",
               "Description": "Move Power for ship",
               "GuiHint": "None",
-              "AbilityFormula": "Ability(0) * [Size]",
+              "AbilityFormula": "Ability(1) * [Size]",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerDB"
             },
             {
               "Name": "Fuel Consumption",
               "Description": "From Tech",
               "GuiHint": "None",
-              "AbilityFormula": "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)"
+              "AbilityFormula": "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(3), 2.25)"
             },
             {
               "Name": "Fuel Consumption",
               "Description": "Size Mod",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(2) - Ability(2) * [Size] * 0.002",
+              "AbilityFormula": "Ability(3) - Ability(3) * [Size] * 0.002",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelUseDB"
             }
           ]

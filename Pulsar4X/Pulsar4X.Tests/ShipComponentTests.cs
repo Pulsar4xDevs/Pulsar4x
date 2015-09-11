@@ -62,9 +62,12 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
-            design.SetSize(5);
+            design.ComponentDesignAbilities[0].SetValueFromInput(250);
 
             Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, design, _faction.GetDataBlob<TechDB>());
+
+            Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
+
         }
         
         public static ComponentSD EngineComponentSD()
@@ -75,23 +78,31 @@ namespace Pulsar4X.Tests
             component.ID = new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6");
 
             component.SizeGuiHint = GuiHint.GuiSelectionMaxMin;
-            component.SizeFormula = "5";
-            component.SizeMaxFormula = "50";
-            component.SizeMinFormula = "1";
+            component.SizeFormula = "Ability(0)";
 
             component.HTKGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseHTKFormula = "Max(1, [FinalSize] / 100)";
+            component.BaseHTKFormula = "Max(1, [Size] / 100)";
 
             component.CrewGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseCrewSizeFormula = "[FinalSize]";
+            component.BaseCrewSizeFormula = "[Size]";
 
             component.ResearchCostGuiHint = GuiHint.None;
-            component.BaseResearchCostFormula = "[FinalSize] * 10";
+            component.BaseResearchCostFormula = "[Size] * 10";
 
             component.CostGuiHint = GuiHint.GuiTextDisplay;
-            component.BaseCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[FinalSize] * 8" } };
+            component.BaseCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
 
             component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+
+            ComponentAbilitySD SizeFormula = new ComponentAbilitySD();
+            SizeFormula.Name = "Engine Size";
+            SizeFormula.Description = "";
+            SizeFormula.GuiHint = GuiHint.GuiSelectionMaxMin;
+            SizeFormula.AbilityDataBlobType = null;
+            SizeFormula.AbilityFormula = "250";
+            SizeFormula.MaxFormula = "2500";
+            SizeFormula.MinFormula = "1";
+            component.ComponentAbilitySDs.Add(SizeFormula);
 
             ComponentAbilitySD engineTypeAbility = new ComponentAbilitySD();
             engineTypeAbility.Name = "Engine Type";
@@ -133,7 +144,7 @@ namespace Pulsar4X.Tests
             enginePowerAbility.Description = "Move Power for ship";
             enginePowerAbility.GuiHint = GuiHint.None;
             enginePowerAbility.AbilityDataBlobType = typeof(EnginePowerDB).ToString();
-            enginePowerAbility.AbilityFormula = "Ability(0) * [FinalSize]";
+            enginePowerAbility.AbilityFormula = "Ability(1) * [Size]";
             component.ComponentAbilitySDs.Add(enginePowerAbility);
 
             ComponentAbilitySD fuelConsumptionBase = new ComponentAbilitySD();
@@ -141,7 +152,7 @@ namespace Pulsar4X.Tests
             fuelConsumptionBase.Description = "From Tech";
             fuelConsumptionBase.GuiHint = GuiHint.None;
             fuelConsumptionBase.AbilityDataBlobType = null;
-            fuelConsumptionBase.AbilityFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)";
+            fuelConsumptionBase.AbilityFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(3), 2.25)";
             component.ComponentAbilitySDs.Add(fuelConsumptionBase);
 
             ComponentAbilitySD fuelConsumptionSizeMod = new ComponentAbilitySD();
@@ -149,7 +160,7 @@ namespace Pulsar4X.Tests
             fuelConsumptionSizeMod.Description = "Size Mod";
             fuelConsumptionSizeMod.GuiHint = GuiHint.GuiTextDisplay;
             fuelConsumptionSizeMod.AbilityDataBlobType = typeof(FuelUseDB).ToString();
-            fuelConsumptionSizeMod.AbilityFormula = "Ability(2) - Ability(2) * [FinalSize] * 0.002";
+            fuelConsumptionSizeMod.AbilityFormula = "Ability(3) - Ability(3) * [Size] * 0.002";
             component.ComponentAbilitySDs.Add(fuelConsumptionSizeMod);
             
             JDictionary<Guid,ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();

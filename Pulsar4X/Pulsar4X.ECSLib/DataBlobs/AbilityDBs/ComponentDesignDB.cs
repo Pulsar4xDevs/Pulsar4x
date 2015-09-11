@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NCalc;
+
 
 namespace Pulsar4X.ECSLib
 {
@@ -22,49 +19,11 @@ namespace Pulsar4X.ECSLib
         //internal ParsingProcessor Parser { get; private set; }
 
         public GuiHint SizeGuiHint { get; internal set; }
-        public int SizeBaseValue
+        public int SizeValue { get { return SizeFormula.IntResult; } }
+        internal ChainedExpression SizeFormula { get; set; }
+        public void SetSize()
         {
-            get
-            {
-                if (SizeBaseFormula == null)
-                    return 1;
-                else
-                    return SizeBaseFormula.IntResult;
-            } 
-        }
-        internal ChainedExpression SizeBaseFormula { get; set; }
-        public void SetSize(int size)
-        {
-            SetMinSize();
-            SetMaxSize();
-            if (size < MinSizeBaseValue)
-                size = MinSizeBaseValue;
-            else if (size > MaxSizeBaseValue)
-                size = MaxSizeBaseValue;
-            SizeBaseFormula.ReplaceExpression(size.ToString()); //prevents it being reset to the default value on Evaluate;
-            SizeBaseFormula.Evaluate();//force dependants to recalc.
-        }
-
-        public int MaxSizeBaseValue { get { return MaxSizeFormula.IntResult; }}
-        internal ChainedExpression MaxSizeFormula { get; set; }
-        public void SetMaxSize()
-        {
-            MaxSizeFormula.Evaluate();
-        }
-
-        public int MinSizeBaseValue {get { return MinSizeFormula.IntResult; }}
-
-        internal ChainedExpression MinSizeFormula { get; set; }
-        public void SetMinSize()
-        {
-            MinSizeFormula.Evaluate();
-        }
-
-        public int FinalSize { get { return FinalSizeFormula.IntResult; } }
-        internal ChainedExpression FinalSizeFormula { get; set; }
-        public void SetFinalSize()
-        {
-            FinalSizeFormula.Evaluate();
+            SizeFormula.Evaluate();
         }
 
         public GuiHint HTKGuiHint { get; internal set; }
@@ -96,17 +55,17 @@ namespace Pulsar4X.ECSLib
             get
             {
                 JDictionary<Guid,int> dict = new JDictionary<Guid, int>();
-                foreach (var kvp in CostFormulas)
+                foreach (var kvp in MineralCostFormulas)
                 {
                     dict.Add(kvp.Key, kvp.Value.IntResult);  
                 }
                 return dict;
             }
         }
-        internal Dictionary<Guid, ChainedExpression> CostFormulas { get; set; }
-        public void SetCosts()
+        internal Dictionary<Guid, ChainedExpression> MineralCostFormulas { get; set; }
+        public void SetMineralCosts()
         {
-            foreach (var expression in CostFormulas.Values)
+            foreach (var expression in MineralCostFormulas.Values)
             {
                 expression.Evaluate();
             }
