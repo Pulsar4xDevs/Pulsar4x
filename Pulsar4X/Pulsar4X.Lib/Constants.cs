@@ -1073,7 +1073,7 @@ namespace Pulsar4X
             /// <summary>
             /// Jumppoints will not appear on secondary stars if true.
             /// </summary>
-            public static bool PrimaryOnlyJumpPoints = false;
+            public static bool PrimaryOnlyJumpPoints = true;
 
             /// <summary>
             /// Follow TN terraforming rules regarding what can be terraformed, and what gases generate what hostile effects.

@@ -1682,46 +1682,142 @@ namespace Pulsar4X
         /// </summary>
         private static JumpPoint GenerateJumpPoint(Star star)
         {
-            double minRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min;
-            double maxRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max;
-
-            // Clamp generation to within the planetary system.
-            foreach (SystemBody currentPlanet in star.Planets)
+            JumpPoint newJumpPoint;
+            /// <summary>
+            /// Generate jump points connected to survey locations.
+            /// </summary>
+            if (Constants.GameSettings.PrimaryOnlyJumpPoints == true)
             {
-                if (currentPlanet.Type == SystemBody.PlanetType.Comet || currentPlanet.Type == SystemBody.PlanetType.Asteroid)
+                /// <summary>
+                /// Get the SP this JP should belong to.
+                /// </summary>
+                int SP = m_RNG.Next(30);
+                double RingDist = Constants.SensorTN.EarthRingDistance * Math.Sqrt(star.Orbit.MassRelativeToSol);
+                int RingFactor = 0;
+                int angle = -1;
+                int angleMax = 30;
+
+                /// <summary>
+                /// And get the angle for this SP
+                /// </summary>
+                if (SP <= 6)
                 {
-                    // Don't gen JP's around comets or asteroids.
-                    continue;
+                    RingFactor = 1;
+                    angleMax = 60;
+                    int SPCount = 0;
+                    for (int surveyPointIterator = 30; surveyPointIterator < 360; surveyPointIterator += 60)
+                    {
+                        if (SPCount == SP)
+                        {
+                            angle = surveyPointIterator;
+                            break;
+                        }
+                        SPCount++;
+                    }
+                }
+                else if (SP <= 18)
+                {
+                    RingFactor = 2;
+                    int SPCount = 7;
+                    for (int surveyPointIterator = 15; surveyPointIterator < 360; surveyPointIterator += 30)
+                    {
+                        if (SPCount == SP)
+                        {
+                            angle = surveyPointIterator;
+                            break;
+                        }
+                        SPCount++;
+                    }
+                }
+                else
+                {
+                    RingFactor = 3;
+                    int SPCount = 19;
+                    for (int surveyPointIterator = 0; surveyPointIterator < 360; surveyPointIterator += 30)
+                    {
+                        if (SPCount == SP)
+                        {
+                            angle = surveyPointIterator;
+                            break;
+                        }
+                        SPCount++;
+                    }
                 }
 
-                if (minRadius > currentPlanet.Orbit.Periapsis)
+                /// <summary>
+                /// Generate a random angle from the above
+                /// </summary>
+                int TheAngle = 0;
+                if (angle == 0)
                 {
-                    minRadius = currentPlanet.Orbit.Periapsis;
+                    if (m_RNG.Next(100) > 50)
+                    {
+                        TheAngle = 0 + m_RNG.Next((angleMax / 2));
+                    }
+                    else
+                    {
+                        TheAngle = 360 - (angleMax / 2) + m_RNG.Next((angleMax / 2));
+                    }
                 }
-                if (maxRadius < currentPlanet.Orbit.Apoapsis)
+                else
                 {
-                    maxRadius = currentPlanet.Orbit.Apoapsis;
+                    TheAngle = angle - (angleMax / 2) + m_RNG.Next(angleMax);
                 }
+
+                /// <summary>
+                /// Now get a distance for this jump point. RingFactor of 1 means from 0 to RingDist. RingFactor of 2 means from RingDist to RingDist * 2. and RingFactor of 3 means from
+                /// RingDist * 2 to RingDist * 3
+                /// </summary>
+                double Distance = (RingDist * ((double)m_RNG.Next(100000) / 100000.0)) + (RingDist * ((RingFactor - 1))) ;
+
+                double fX = Math.Cos(Helpers.GameMath.Angle.ToRadians((double)TheAngle)) * Distance;
+                double fY = Math.Sin(Helpers.GameMath.Angle.ToRadians((double)TheAngle)) * Distance;
+
+                newJumpPoint = new JumpPoint(star, fX, fY);
             }
-
-            // Determine a location for the new JP.
-            // Location will be between minDistance and 75% of maxDistance.
-            double offsetX = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
-            double offsetY = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
-
-            // Randomly flip the sign of the offsets.
-            if (m_RNG.NextDouble() >= 0.5)
+            else
             {
-                offsetX = -offsetX;
-            }
-            if (m_RNG.NextDouble() >= 0.5)
-            {
-                offsetY = -offsetY;
-            }
 
-            // Create the new jumpPoint and link it to it's parent system.
-            JumpPoint newJumpPoint = new JumpPoint(star, offsetX, offsetY);
+                double minRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min;
+                double maxRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max;
 
+                // Clamp generation to within the planetary system.
+                foreach (SystemBody currentPlanet in star.Planets)
+                {
+                    if (currentPlanet.Type == SystemBody.PlanetType.Comet || currentPlanet.Type == SystemBody.PlanetType.Asteroid)
+                    {
+                        // Don't gen JP's around comets or asteroids.
+                        continue;
+                    }
+
+                    if (minRadius > currentPlanet.Orbit.Periapsis)
+                    {
+                        minRadius = currentPlanet.Orbit.Periapsis;
+                    }
+                    if (maxRadius < currentPlanet.Orbit.Apoapsis)
+                    {
+                        maxRadius = currentPlanet.Orbit.Apoapsis;
+                    }
+                }
+
+                // Determine a location for the new JP.
+                // Location will be between minDistance and 75% of maxDistance.
+                double offsetX = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
+                double offsetY = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
+
+                // Randomly flip the sign of the offsets.
+                if (m_RNG.NextDouble() >= 0.5)
+                {
+                    offsetX = -offsetX;
+                }
+                if (m_RNG.NextDouble() >= 0.5)
+                {
+                    offsetY = -offsetY;
+                }
+
+                // Create the new jumpPoint and link it to it's parent system.
+                newJumpPoint = new JumpPoint(star, offsetX, offsetY);
+            }
             return newJumpPoint;
         }
 
