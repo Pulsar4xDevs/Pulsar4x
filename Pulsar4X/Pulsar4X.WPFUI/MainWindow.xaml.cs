@@ -67,7 +67,7 @@ namespace Pulsar4X.WPFUI
             switch (propertyChangedEventArgs.PropertyName)
             {
                 case "Game":
-                    bool isEnabled = App.Current.Game == null;
+                    bool isEnabled = App.Current.Game != null;
                     TBT_Toolbar.IsEnabled = isEnabled;
                     MI_SaveGame.IsEnabled = isEnabled;
                     break;
@@ -81,7 +81,7 @@ namespace Pulsar4X.WPFUI
             {
                 Status_TextBlock.Text = "Creating new game...";
                 App.Current.Game = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 100, new Progress<double>(OnProgressUpdate)));
-                MessageBox.Show(this, "Game Created.", "Result");
+                //MessageBox.Show(this, "Game Created.", "Result");
                 Status_TextBlock.Text = "Game Created.";
                 Status_ProgressBar.Value = 0;
             }

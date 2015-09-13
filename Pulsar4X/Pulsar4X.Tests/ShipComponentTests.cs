@@ -37,7 +37,17 @@ namespace Pulsar4X.Tests
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "TestClass");
         }
 
- 
+        [Test]
+        public void ExportComponents()
+        {
+            ComponentSD engine = EngineComponentSD();
+            ComponentSD mine = MineInstallation();
+
+            JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
+            componentsDict.Add(engine.ID, engine);
+            componentsDict.Add(mine.ID, mine);
+            StaticDataManager.ExportStaticData(componentsDict, "./ComponentData.json");
+        }
 
         [Test]
         public void TestEngineComponentFactory()
@@ -48,10 +58,10 @@ namespace Pulsar4X.Tests
 
             foreach (var ability in design.ComponentDesignAbilities)
             {
-                if (ability.GuiHint == GuiHint.GuiSelectionList)
+                if (ability.GuiHint == GuiHint.GuiTechSelectionList)
                 {
-                    List<TechSD> selectionlist = ability.SelectionDictionary.Keys.ToList();
-                    ability.SetValueFromTechList(selectionlist[selectionlist.Count - 1]);
+                    List<Guid> selectionlist = ability.GuidDictionary.Keys.ToList();
+                    ability.SetValueFromGuidList(selectionlist[selectionlist.Count - 1]);
                 }
                 else if (ability.GuiHint == GuiHint.GuiSelectionMaxMin)
                 {
@@ -68,8 +78,30 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
 
+            JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
+            componentsDict.Add(engine.ID, engine);
+            StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
+
         }
-        
+
+        [Test]
+        public void TestMineInstalationFactory()
+        {
+            ComponentSD mine = MineInstallation();
+
+            ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<TechDB>(), _game.StaticData);
+            mineDesign.ComponentDesignAbilities[0].SetValue();
+            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, mineDesign, _faction.GetDataBlob<TechDB>());
+
+            Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerMonth.Values.ElementAt(0));
+
+            JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
+            componentsDict.Add(mine.ID, mine);
+            StaticDataManager.ExportStaticData(componentsDict, "./MineComponentTest.json");
+
+        }
+
+
         public static ComponentSD EngineComponentSD()
         {
             ComponentSD component = new ComponentSD();
@@ -95,6 +127,12 @@ namespace Pulsar4X.Tests
             component.CreditCostGuiHint = GuiHint.GuiTextDisplay;
             component.CreditCostFormula = "[Size]";
 
+            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType.Add(ComponentMountType.ShipComponent, true);
+            component.MountType.Add(ComponentMountType.ShipCargo, true);
+            component.MountType.Add(ComponentMountType.PlanetFacility, false);
+            component.MountType.Add(ComponentMountType.PDS, false);
+
             component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
 
             ComponentAbilitySD SizeFormula = new ComponentAbilitySD();
@@ -109,13 +147,13 @@ namespace Pulsar4X.Tests
             ComponentAbilitySD engineTypeAbility = new ComponentAbilitySD();
             engineTypeAbility.Name = "Engine Type";
             engineTypeAbility.Description = "Type of engine Tech";
-            engineTypeAbility.GuiHint = GuiHint.GuiSelectionList;
-            engineTypeAbility.TechList = new List<Guid>
+            engineTypeAbility.GuiHint = GuiHint.GuiTechSelectionList;
+            engineTypeAbility.GuidDictionary = new JDictionary<Guid, string>
             {
-                new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"),
-                new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"),
-                new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"),
-                new Guid("f3f10e56-9345-40cc-af42-342e7240355d")
+                {new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"),""},
+                {new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"),""},
+                {new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"),""},
+                {new Guid("f3f10e56-9345-40cc-af42-342e7240355d"),""}
                 //new Guid("58d047e6-c567-4db6-8c76-bfd4a201af94"),
                 //new Guid("bd75bf88-1dad-4022-b401-acdf05ab73f8"),
                 //new Guid("042ce9d4-5a2c-4d8e-9ae4-be059920839c"),
@@ -143,9 +181,16 @@ namespace Pulsar4X.Tests
             enginePowerAbility.Name = "Engine Power";
             enginePowerAbility.Description = "Move Power for ship";
             enginePowerAbility.GuiHint = GuiHint.None;
-            enginePowerAbility.AbilityDataBlobType = typeof(EnginePowerDB).ToString();
-            enginePowerAbility.AbilityFormula = "DataBlobArgs(Ability(1) * [Size])";
+            enginePowerAbility.AbilityFormula = "Ability(1) * [Size]";
             component.ComponentAbilitySDs.Add(enginePowerAbility);
+
+            ComponentAbilitySD enginePowerDBArgs = new ComponentAbilitySD();
+            enginePowerDBArgs.Name = "Engine Power";
+            enginePowerDBArgs.Description = "Move Power for ship";
+            enginePowerDBArgs.GuiHint = GuiHint.None;
+            enginePowerDBArgs.AbilityDataBlobType = typeof(EnginePowerDB).ToString();
+            enginePowerDBArgs.AbilityFormula = "DataBlobArgs(Ability(3))";
+            component.ComponentAbilitySDs.Add(enginePowerDBArgs);
 
             ComponentAbilitySD fuelConsumptionBase = new ComponentAbilitySD();
             fuelConsumptionBase.Name = "Fuel Consumption";
@@ -176,14 +221,64 @@ namespace Pulsar4X.Tests
             sensorSig.Description = "";
             sensorSig.GuiHint = GuiHint.GuiTextDisplay;
             sensorSig.AbilityDataBlobType = typeof(SensorSignatureDB).ToString();
-            sensorSig.AbilityFormula = "DataBlobArgs(Ability(3) * Ability(6),0)";
+            sensorSig.AbilityFormula = "DataBlobArgs(Ability(3) * Ability(7),0)";
             component.ComponentAbilitySDs.Add(sensorSig);
             
-            JDictionary<Guid,ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
-            componentsDict.Add(component.ID, component);
-;           StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
+            return component;
+        }
+
+        public static ComponentSD MineInstallation()
+        {
+            ComponentSD component = new ComponentSD();
+            component.Name = "Mine";
+            component.Description = "Mines Resources";
+            component.ID = new Guid("F7084155-04C3-49E8-BF43-C7EF4BEFA550");
+
+            component.SizeGuiHint = GuiHint.GuiTextDisplay;
+            component.SizeFormula = "25000";
+
+            component.HTKGuiHint = GuiHint.GuiTextDisplay;
+            component.HTKFormula = "[Size]";
+
+            component.CrewReqGuiHint = GuiHint.GuiTextDisplay;
+            component.CrewReqFormula = "50000";
+
+            component.ResearchCostGuiHint = GuiHint.None;
+            component.ResearchCostFormula = "0";
+
+            component.MineralCostGuiHint = GuiHint.GuiTextDisplay;
+            component.MineralCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60" } };
+            component.MineralCostFormula = new JDictionary<Guid, string> { { new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"), "60" } };
+
+            component.CreditCostGuiHint = GuiHint.GuiTextDisplay;
+            component.CreditCostFormula = "120";
+
+            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType.Add(ComponentMountType.ShipComponent, false);
+            component.MountType.Add(ComponentMountType.ShipCargo, true);
+            component.MountType.Add(ComponentMountType.PlanetFacility, true);
+            component.MountType.Add(ComponentMountType.PDS, false);
+
+            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+
+
+            ComponentAbilitySD mineAbility = new ComponentAbilitySD();
+            mineAbility.Name = "MiningAmount";
+            mineAbility.Description = "";
+            mineAbility.GuiHint = GuiHint.None;
+            mineAbility.GuidDictionary = new JDictionary<Guid, string>
+            {
+                { new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"),"10"},
+                { new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"),"10"},
+                {new Guid("b12acce2-7c7d-4acf-ad41-1c08093fcad8"),"10"},
+                {new Guid("a03863a3-a364-45ff-8c7b-a4f7486bd710"),"10"}
+            };
+            mineAbility.AbilityDataBlobType = typeof(MineResourcesDB).ToString();
+            mineAbility.AbilityFormula = "DataBlobArgs([GuidDict])";
+            component.ComponentAbilitySDs.Add(mineAbility);
             
             return component;
+
         }
     }
 }

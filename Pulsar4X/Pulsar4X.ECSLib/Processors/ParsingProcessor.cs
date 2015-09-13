@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {
-    internal class ChainedExpression
+    public class ChainedExpression
     {
         private StaticDataStore _staticDataStore;
         private TechDB _factionTechDB;
@@ -139,6 +139,24 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// a private constructor that is used internaly for a one use Expression 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="design"></param>
+        /// <param name="factionTech"></param>
+        /// <param name="staticDataStore"></param>
+        private ChainedExpression(Expression expression, ComponentDesignAbilityDB designAbility, TechDB factionTech, StaticDataStore staticDataStore)
+        {
+            _staticDataStore = staticDataStore;
+            _factionTechDB = factionTech;
+            _design = designAbility.ParentComponent;
+            _designAbility = designAbility;
+            _expression = expression;
+            SetupExpression();
+
+        }
+
+        /// <summary>
         /// replaces the expression with a new expression, without having to recreate the whole chainedExpression with deisgn, tech, staticdata.
         /// </summary>
         /// <param name="expressionString"></param>
@@ -197,6 +215,7 @@ namespace Pulsar4X.ECSLib
             _expression.Parameters["xResearchCostx"] = new Expression("ResearchCost");
             _expression.Parameters["xMineralCosts"] = new Expression("MineralCosts");
             _expression.Parameters["xCreditCosts"] = new Expression("CreditCosts");
+            _expression.Parameters["xGuidDictx"] = new Expression("GuidDict");
             //put extra parameters that don't require extra processing here.ie:
             //_expression.Parameters["X"] = 5;
         }
@@ -221,23 +240,36 @@ namespace Pulsar4X.ECSLib
             }
             if (name == "HTK")
             {
-                MakeThisDependant(_design.SizeFormula);
+                MakeThisDependant(_design.HTKFormula);
                 args.Result = _design.HTKValue;
             }
             if (name == "ResearchCost")
             {
-                MakeThisDependant(_design.SizeFormula);
+                MakeThisDependant(_design.ResearchCostFormula);
                 args.Result = _design.ResearchCostValue;
             }
             if (name == "MineralCosts")
             {
-                MakeThisDependant(_design.SizeFormula);
+                foreach (var formula in _design.MineralCostFormulas.Values)
+                {
+                    MakeThisDependant(formula);
+                }
                 args.Result = _design.MineralCostValues;
             }
             if (name == "CreditCost")
             {
-                MakeThisDependant(_design.SizeFormula);
+                MakeThisDependant(_design.CreditCostFormula);
                 args.Result = _design.ResearchCostValue;
+            }
+            if (name == "GuidDict")
+            {
+                Dictionary<Guid, double> dict = new Dictionary<Guid, double>();
+                foreach (var kvp in _designAbility.GuidDictionary)
+                {
+                    //MakeThisDependant(kvp.Value);
+                    dict.Add(kvp.Key,kvp.Value.DResult);     
+                }
+                args.Result = dict;
             }
         }
 
@@ -290,7 +322,6 @@ namespace Pulsar4X.ECSLib
             }
             //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
             //The datablob will be the one defined in designAbility.DataBlobType
-            //Note: this will return the first param as a result, so another ability calling this via Ability(x) will get the evaluated args.parameters[0].
             //TODO document blobs and what args they take!!
             if (name == "DataBlobArgs")
             {
@@ -300,13 +331,15 @@ namespace Pulsar4X.ECSLib
                 List<object> argList = new List<object>();
                 foreach (var argParam in args.Parameters)
                 {
-                    ChainedExpression argExpression = new ChainedExpression(argParam, _design, _factionTechDB, _staticDataStore);
+                    ChainedExpression argExpression = new ChainedExpression(argParam, _designAbility, _factionTechDB, _staticDataStore);
                     _isDependant = false;
-                    argList.Add(argExpression.DResult);
+                    argExpression.Evaluate();
+                    argList.Add(argExpression.Result);
                 }
                 _designAbility.DataBlobArgs = argList.ToArray();
-                args.Result = args.Parameters[0].Evaluate();
+                args.Result = argList;
             }
+
 
         }
     }

@@ -72,6 +72,15 @@ namespace Pulsar4X.ECSLib
         private List<Entity> _fighterStockpile;
 
 
+        public List<Entity> Installations
+        {
+            get { return _installations; }
+            internal set { _installations = value; }
+        }
+        [JsonProperty]
+        private List<Entity> _installations;
+
+
         public Entity PlanetEntity
         {
             get { return _planetEntity; }
@@ -107,6 +116,7 @@ namespace Pulsar4X.ECSLib
             ComponentStockpile = new JDictionary<Guid, float>();
             OrdinanceStockpile = new JDictionary<Guid, float>();
             FighterStockpile = new List<Entity>();
+            Installations = new List<Entity>();
             Scientists = new List<Entity>();
         }
 
@@ -126,6 +136,7 @@ namespace Pulsar4X.ECSLib
             ComponentStockpile = new JDictionary<Guid, float>(colonyInfoDB.ComponentStockpile);
             OrdinanceStockpile = new JDictionary<Guid, float>(colonyInfoDB.OrdinanceStockpile);
             FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);
+            Installations = new List<Entity>(colonyInfoDB.Installations);
             Scientists = new List<Entity>(colonyInfoDB.Scientists);
         }
 

@@ -7,9 +7,6 @@ namespace Pulsar4X.ECSLib
 
     internal static class EnginePowerProcessor
     {
-        
-
-
         public static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
             

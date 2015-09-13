@@ -75,6 +75,7 @@
     <Compile Include="DataBlobs\AbilityDBs\EnginePowerDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\FuelStorageDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\FuelUseDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\MineResources.cs" />
     <Compile Include="DataBlobs\AbilityDBs\MissileLauncherSize.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorSignatureDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorStrengthDB.cs" />
@@ -178,9 +179,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Pulsar4x\Commander Name Theme - The Creators.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\ComponentData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Pulsar4x\InstallationData.json">

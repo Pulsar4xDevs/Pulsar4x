@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
 {
     public enum GuiHint
     {
-        GuiSelectionList,
+        GuiTechSelectionList,
         GuiSelectionMaxMin,
         GuiTextDisplay,
         None
@@ -79,6 +79,8 @@ namespace Pulsar4X.ECSLib
             ResearchCostFormula.Evaluate();
         }
 
+        public Dictionary<ComponentMountType, bool> ComponentMountType { get; internal set; }
+
         public List<ComponentDesignAbilityDB> ComponentDesignAbilities;
 
     }
@@ -97,11 +99,11 @@ namespace Pulsar4X.ECSLib
             ParentComponent = parentComponent;
         }
 
-        public Dictionary<TechSD, double> SelectionDictionary;
+        public Dictionary<Guid, ChainedExpression> GuidDictionary;
 
-        public void SetValueFromTechList(TechSD tech)
+        public void SetValueFromGuidList(Guid techguid)
         {
-            Formula.ReplaceExpression("TechData('" + tech.ID + "')");
+            Formula.ReplaceExpression("TechData('" + techguid + "')");
         }
 
         internal ChainedExpression Formula { get; set; }
