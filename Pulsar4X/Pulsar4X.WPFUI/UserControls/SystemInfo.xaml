@@ -6,7 +6,9 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <DataGrid Name="SystemView_DataGrid" ItemsSource="{Binding}"></DataGrid>
+        <ComboBox Name ="SystemSelection"  HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="157" RenderTransformOrigin="0.092,0.476" SelectionChanged="SystemSelection_SelectionChanged"/>
+        <DataGrid Name="SystemView_DataGrid" ItemsSource="{Binding}" Height="264" VerticalAlignment="Bottom"></DataGrid>
+        
 
     </Grid>
 </UserControl>

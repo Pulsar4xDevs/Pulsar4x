@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Pulsar4X.ECSLib;
+using Pulsar4X.WPFUI.ViewModels;
 
 namespace Pulsar4X.WPFUI
 {
@@ -46,6 +47,8 @@ namespace Pulsar4X.WPFUI
             }
         }
         private Game _game;
+
+        internal GameVM GameVM { get; set; }
 
         internal Entity Faction
         {

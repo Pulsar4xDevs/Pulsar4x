@@ -176,7 +176,7 @@ namespace Pulsar4X.Tests
             TechSD enginePowerModMin = new TechSD();
             enginePowerModMin.ID = new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de");
             enginePowerModMin.MaxLevel = 7;
-            enginePowerModMin.DataFormula = "0.5 - [Level] * 0.1";
+            enginePowerModMin.DataFormula = "1.0 - [Level] * 0.05";
             enginePowerModMin.Name = "Minimum Engine Power Modifier";
             enginePowerModMin.Description = "";
             enginePowerModMin.Category = ResearchCategories.PowerAndPropulsion;

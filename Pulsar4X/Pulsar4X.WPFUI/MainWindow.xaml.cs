@@ -13,6 +13,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI.Properties;
+using Pulsar4X.WPFUI.ViewModels;
 using Xceed.Wpf.AvalonDock.Layout;
 
 namespace Pulsar4X.WPFUI
@@ -82,6 +83,7 @@ namespace Pulsar4X.WPFUI
                 Status_TextBlock.Text = "Creating new game...";
                 App.Current.Game = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 100, new Progress<double>(OnProgressUpdate)));
                 //MessageBox.Show(this, "Game Created.", "Result");
+                App.Current.GameVM = new GameVM(App.Current.Game);
                 Status_TextBlock.Text = "Game Created.";
                 Status_ProgressBar.Value = 0;
             }

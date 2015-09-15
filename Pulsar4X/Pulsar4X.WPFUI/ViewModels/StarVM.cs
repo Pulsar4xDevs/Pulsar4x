@@ -125,7 +125,7 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         public void Refresh(bool partialRefresh = false)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         #endregion

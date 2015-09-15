@@ -507,32 +507,32 @@ namespace Pulsar4X.WPFUI.ViewModels
                 throw new ArgumentNullException("orbitDB");
             }
 
-            Children.Clear();
+            //Children.Clear();
 
-            foreach (Entity child in orbitDB.Children)
-            {
-                // Create a ViewModel for this child.
-                Children.Add(Create(child));
-            }
+            //foreach (Entity child in orbitDB.Children)
+            //{
+            //    // Create a ViewModel for this child.
+            //    Children.Add(Create(child));
+            //}
 
-            if (orbitDB.Parent == null || orbitDB.ParentDB == null)
-            {
-                throw new InvalidOperationException("PlanetVM provided invalid OrbitDB. Planets must have a valid parent.");
-            }
+            //if (orbitDB.Parent == null || orbitDB.ParentDB == null)
+            //{
+            //    throw new InvalidOperationException("PlanetVM provided invalid OrbitDB. Planets must have a valid parent.");
+            //}
 
-            if (orbitDB.Parent.GetDataBlob<StarInfoDB>() != null)
-            {
-                // Parent is a star.
-                ParentPlanet = null;
-                ParentStar = StarVM.Create(orbitDB.Parent);
-            }
-            else
-            {
-                // Parent is a planet.
-                ParentPlanet = Create(orbitDB.Parent);
-                // Parent's parent is the star.
-                ParentStar = StarVM.Create(orbitDB.ParentDB.Parent);
-            }
+            //if (orbitDB.Parent.GetDataBlob<StarInfoDB>() != null)
+            //{
+            //    // Parent is a star.
+            //    ParentPlanet = null;
+            //    ParentStar = StarVM.Create(orbitDB.Parent);
+            //}
+            //else
+            //{
+            //    // Parent is a planet.
+            //    ParentPlanet = Create(orbitDB.Parent);
+            //    // Parent's parent is the star.
+            //    ParentStar = StarVM.Create(orbitDB.ParentDB.Parent);
+            //}
 
             SemiMajorAxis = orbitDB.SemiMajorAxis;
             Apoapsis = orbitDB.Apoapsis;
@@ -548,8 +548,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             {
                 throw new ArgumentNullException("nameDB");
             }
-
-            Name = nameDB.GetName(App.Current.Faction);
+            Name = nameDB.DefaultName;
+            //todo: Name = nameDB.GetName(App.Current.Faction);
         }
 
         private void UpdateProperties([NotNull] MassVolumeDB massVolumeDB)
