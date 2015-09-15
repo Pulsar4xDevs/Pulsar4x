@@ -80,6 +80,7 @@
     <Compile Include="DataBlobs\AbilityDBs\SensorSignatureDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorStrengthDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ComponentInfoDB.cs" />
+    <Compile Include="DataBlobs\ColonyMineingDB.cs" />
     <Compile Include="DataBlobs\ComponentDB.cs" />
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="GameVersionInfo.cs" />
     <Compile Include="Helpers\Pulse.cs" />
     <Compile Include="Processors\AbilityProcessors\EngineSpeed.cs" />
+    <Compile Include="Processors\AbilityProcessors\MineProcessor.cs" />
     <Compile Include="Processors\AtmosphereProcessor.cs" />
     <Compile Include="Processors\InstallationProcessor.cs" />
     <Compile Include="Processors\ParsingProcessor.cs" />

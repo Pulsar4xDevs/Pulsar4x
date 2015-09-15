@@ -5,6 +5,9 @@ using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// This is not really a procesor, consider moving this into Helpers.
+    /// </summary>
     public class ChainedExpression
     {
         private StaticDataStore _staticDataStore;
