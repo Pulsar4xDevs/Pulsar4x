@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.WPFUI.ViewModels
@@ -108,7 +109,8 @@ namespace Pulsar4X.WPFUI.ViewModels
                 OnPropertyChanged();
             }
         }
-
+        private double _periapsis;
+        
         public double ArgumentOfPeriapsis
         {
             get { return _argOfPeriapsis;}
@@ -120,9 +122,18 @@ namespace Pulsar4X.WPFUI.ViewModels
         }
         public double _argOfPeriapsis;
 
-        private double _periapsis;
 
-        
+        public double LongitudeOfAscendingNode
+        {
+            get { return _longitudeOfAscendingNode;}
+            set
+            {
+                _longitudeOfAscendingNode = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private double _longitudeOfAscendingNode;
 
         public double Eccentricity
         {
@@ -552,6 +563,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             Apoapsis = orbitDB.Apoapsis;
             Periapsis = orbitDB.Periapsis;
             ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis;
+            LongitudeOfAscendingNode = orbitDB.LongitudeOfAscendingNode;
             Eccentricity = orbitDB.Eccentricity;
             Inclination = orbitDB.Inclination;
             OrbitalPeriod = orbitDB.OrbitalPeriod;

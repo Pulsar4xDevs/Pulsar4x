@@ -61,17 +61,18 @@ namespace Pulsar4X.WPFUI
 
         private void DrawOrbit(PlanetVM planet, double leftPos, double topPos)
         {
-            //Point arcStart = new Point(leftPos, topPos);  
-            //Point arcEnd = new Point(leftPos, topPos); 
-            Point arcStart = new Point(100, 0);
-            Point arcEnd = new Point(200, 0);
-            //double arcRotAngle = planet.ArgumentOfPeriapsis;
-            double arcRotAngle = 0;
-            Size arcSize = new Size(50, 50);
-            //Size arcSize = new Size(zoom * planet.Apoapsis, zoom * planet.Periapsis);
+            Point arcStart = new Point(leftPos, topPos);  
+            Point arcEnd = new Point(leftPos - 1, topPos - 1); 
+           
+            double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode;
 
+            Size arcSize = new Size(zoom * planet.Periapsis, zoom * planet.Apoapsis);
 
-            ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, arcRotAngle, true, SweepDirection.Clockwise, true);
+            SweepDirection sweepDirection = SweepDirection.Clockwise;
+            if(topPos < canvasCenterH)
+                sweepDirection = SweepDirection.Counterclockwise;
+
+            ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, arcRotAngle, true, sweepDirection, true);
 
             PathFigure pathFigure = new PathFigure();
             pathFigure.StartPoint = arcStart;
