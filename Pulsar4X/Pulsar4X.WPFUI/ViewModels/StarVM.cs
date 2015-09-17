@@ -62,6 +62,17 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         private TimeSpan _year;
 
+
+        public Vector4 Position
+        {
+            get { return _position; }
+            private set
+            {
+                _position = value;
+                OnPropertyChanged();
+            }
+        }
+        private Vector4 _position;
         #endregion
 
         #region Functions
@@ -125,7 +136,7 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         public void Refresh(bool partialRefresh = false)
         {
-            //throw new NotImplementedException();
+            _position = Entity.GetDataBlob<PositionDB>().Position;
         }
 
         #endregion

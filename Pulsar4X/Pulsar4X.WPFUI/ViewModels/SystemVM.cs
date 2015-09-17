@@ -8,11 +8,12 @@ namespace Pulsar4X.WPFUI.ViewModels
     public class SystemVM
     {
         private BindingList<StarVM> _stars;
+        public BindingList<StarVM> Stars { get { return _stars;} } 
 
         private StarVM _parentStar;
+        public StarVM ParentStar { get { return _parentStar;} }
 
         private BindingList<PlanetVM> _Planets;
-
         public BindingList<PlanetVM> Planets { get { return _Planets;} } 
 
         private string _name;
