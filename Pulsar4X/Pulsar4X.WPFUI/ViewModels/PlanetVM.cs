@@ -108,7 +108,21 @@ namespace Pulsar4X.WPFUI.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public double ArgumentOfPeriapsis
+        {
+            get { return _argOfPeriapsis;}
+            set
+            {
+                _argOfPeriapsis = value;
+                OnPropertyChanged();
+            }
+        }
+        public double _argOfPeriapsis;
+
         private double _periapsis;
+
+        
 
         public double Eccentricity
         {
@@ -537,6 +551,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             SemiMajorAxis = orbitDB.SemiMajorAxis;
             Apoapsis = orbitDB.Apoapsis;
             Periapsis = orbitDB.Periapsis;
+            ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis;
             Eccentricity = orbitDB.Eccentricity;
             Inclination = orbitDB.Inclination;
             OrbitalPeriod = orbitDB.OrbitalPeriod;

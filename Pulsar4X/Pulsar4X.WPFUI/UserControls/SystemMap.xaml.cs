@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -50,11 +51,42 @@ namespace Pulsar4X.WPFUI
             {
                 double leftPos = zoom * planet.Position.X + canvasCenterW - 10;
                 double topPos = zoom * planet.Position.Y + canvasCenterH - 10;
-                DrawBody(10, Brushes.DarkGreen, leftPos, topPos);       
+                DrawBody(10, Brushes.DarkGreen, leftPos, topPos);
 
-                ArcSegment orbitPath = new ArcSegment();
+                DrawOrbit(planet, leftPos, topPos);
+
             }
             
+        }
+
+        private void DrawOrbit(PlanetVM planet, double leftPos, double topPos)
+        {
+            //Point arcStart = new Point(leftPos, topPos);  
+            //Point arcEnd = new Point(leftPos, topPos); 
+            Point arcStart = new Point(100, 0);
+            Point arcEnd = new Point(200, 0);
+            //double arcRotAngle = planet.ArgumentOfPeriapsis;
+            double arcRotAngle = 0;
+            Size arcSize = new Size(50, 50);
+            //Size arcSize = new Size(zoom * planet.Apoapsis, zoom * planet.Periapsis);
+
+
+            ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, arcRotAngle, true, SweepDirection.Clockwise, true);
+
+            PathFigure pathFigure = new PathFigure();
+            pathFigure.StartPoint = arcStart;
+            pathFigure.Segments.Add(orbitArc);
+
+
+            PathGeometry pathGeometry = new PathGeometry();
+            pathGeometry.Figures.Add(pathFigure);
+
+            Path orbitPath = new Path();
+            orbitPath.Stroke = Brushes.Cornsilk;
+            orbitPath.StrokeThickness = 1;
+            orbitPath.Data = pathGeometry;
+
+            MapCanvas.Children.Add(orbitPath);
         }
 
         private void DrawBody(int size, Brush color, double leftPos, double topPos)
