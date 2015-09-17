@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public class ColonyInfoDB : BaseDataBlob
     {
+        /// <summary>
+        /// Species Entity and amount
+        /// </summary>
         public JDictionary<Entity, long> Population
         {
             get { return _population; }

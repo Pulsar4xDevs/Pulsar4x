@@ -112,6 +112,9 @@
     <Compile Include="UserControls\EventLog.xaml.cs">
       <DependentUpon>EventLog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\FactionCreation.xaml.cs">
+      <DependentUpon>FactionCreation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\GalaticMap.xaml.cs">
       <DependentUpon>GalaticMap.xaml</DependentUpon>
     </Compile>
@@ -169,6 +172,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\EventLog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\FactionCreation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

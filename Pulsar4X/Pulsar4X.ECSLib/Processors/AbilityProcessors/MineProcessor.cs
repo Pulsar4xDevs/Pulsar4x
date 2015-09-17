@@ -39,10 +39,11 @@ namespace Pulsar4X.ECSLib
             JDictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
             JDictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<SystemBodyDB>().Minerals;
             JDictionary<Guid, float> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            float mineBonuses = colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
-            {
+            {                
                 double accessability = planetMinerals[kvp.Key].Accessibility;
-                double actualRate = kvp.Value * accessability;
+                double actualRate = kvp.Value * mineBonuses * accessability;
                 int mineralsMined = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
 
                 colonyMineralStockpile.SafeValueAdd<Guid>(kvp.Key, mineralsMined);
@@ -62,9 +63,10 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        //this needs to be run when an entity with MineResources is put on planet.
         internal static void CalcMaxRate(Entity colonyEntity)
         {
-            List<Entity> installations = colonyEntity.GetDataBlob<InstallationsDB>().InstallationEntities;
+            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
             List<Entity> mines = new List<Entity>();
             foreach (var inst in installations)
             {

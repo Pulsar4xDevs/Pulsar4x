@@ -80,6 +80,7 @@
     <Compile Include="DataBlobs\AbilityDBs\SensorSignatureDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorStrengthDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ComponentInfoDB.cs" />
+    <Compile Include="DataBlobs\ColonyBonusesDB.cs" />
     <Compile Include="DataBlobs\ColonyMineingDB.cs" />
     <Compile Include="DataBlobs\ComponentDB.cs" />
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />

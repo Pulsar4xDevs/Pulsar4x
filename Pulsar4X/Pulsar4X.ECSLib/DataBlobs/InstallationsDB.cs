@@ -25,7 +25,6 @@ namespace Pulsar4X.ECSLib
 
     public class InstallationsDB : BaseDataBlob
     {
-        public List<Entity> InstallationEntities; //or guid? 
         /// <summary>
         /// a dictionary of installationtype, and the number of that specific type including partial installations.
         /// </summary>

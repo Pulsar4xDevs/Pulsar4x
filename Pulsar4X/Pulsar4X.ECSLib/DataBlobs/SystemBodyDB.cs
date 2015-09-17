@@ -120,6 +120,11 @@ namespace Pulsar4X.ECSLib
             internal set { _supportsPopulations = value; }
         }
 
+
+            
+        [PublicAPI]
+        public List<Entity> Colonies {get{return _colonies;} internal set { _colonies = value; } }
+
         [PublicAPI]
         public TimeSpan LengthOfDay
         {
@@ -152,6 +157,8 @@ namespace Pulsar4X.ECSLib
         private float _atmosphericDust;
         [JsonProperty]
         private bool _supportsPopulations;
+        [JsonProperty]
+        private List<Entity> _colonies;
         [JsonProperty]
         private TimeSpan _lengthOfDay;
 

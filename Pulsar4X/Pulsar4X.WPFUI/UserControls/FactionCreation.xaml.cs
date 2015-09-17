@@ -16,15 +16,15 @@ using System.Windows.Shapes;
 namespace Pulsar4X.WPFUI.UserControls
 {
     /// <summary>
-    /// Interaction logic for ComponentDesign.xaml
+    /// Interaction logic for FactionCreation.xaml
     /// </summary>
-    public partial class ComponentDesign : ITabControl
+    public partial class FactionCreation : ITabControl
     {
         public string Title { get; set; }
-        public ComponentDesign()
+        public FactionCreation()
         {
             InitializeComponent();
-            Title = "Design a Component";
+            Title = "Create Faction";
         }
     }
 }
