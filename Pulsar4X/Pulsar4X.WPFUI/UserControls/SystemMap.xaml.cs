@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI.ViewModels;
 
 namespace Pulsar4X.WPFUI
@@ -72,7 +74,9 @@ namespace Pulsar4X.WPFUI
            
             double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode;
 
-            Size arcSize = new Size(zoom * planet.Periapsis, zoom * planet.Apoapsis);
+            double twoDimentionalPeriapsis = Math.Cos(Angle.ToRadians(planet.Inclination))  * planet.Periapsis;//adjust for inclination.
+
+            Size arcSize = new Size(zoom * twoDimentionalPeriapsis, zoom * planet.Apoapsis); 
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
 
