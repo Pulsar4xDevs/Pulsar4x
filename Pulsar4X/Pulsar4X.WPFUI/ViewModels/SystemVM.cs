@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using Pulsar4X.ECSLib;
@@ -26,6 +27,58 @@ namespace Pulsar4X.WPFUI.ViewModels
         // add list of waypoints
 
         // Add list of colonies? maybe?
+        private Dictionary<Guid, StarVM> _starDictionary;
+
+        private Dictionary<Guid, PlanetVM> _planetDictionary;
+
+        internal StarVM GetStar(Guid bodyGuid)
+        {
+            Entity bodyEntity;
+            Guid starGuid = new Guid();
+            if (_starDictionary.ContainsKey(bodyGuid))
+                starGuid = bodyGuid;
+
+            else if (App.Current.Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
+            {
+                if (bodyEntity.HasDataBlob<StarInfoDB>())
+                {
+                    starGuid = bodyEntity.Guid;
+                }
+            }
+            else throw new GuidNotFoundException(bodyGuid);
+
+            if (!_starDictionary.ContainsKey(starGuid))
+            {
+                StarVM starVM = StarVM.Create(starGuid, this);
+                _stars.Add(starVM);
+                _starDictionary.Add(starGuid, starVM);
+            }
+            return _starDictionary[starGuid];
+        }
+
+        internal PlanetVM GetPlanet(Guid bodyGuid)
+        {
+            Entity bodyEntity;
+            Guid planetGuid = new Guid();
+            if (_planetDictionary.ContainsKey(bodyGuid))
+                planetGuid = bodyGuid;
+            else if (App.Current.Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
+            {
+                if (bodyEntity.HasDataBlob<SystemBodyDB>())
+                {
+                    planetGuid = bodyEntity.Guid;
+                }
+            }
+            else throw new GuidNotFoundException(bodyGuid);
+
+            if (!_planetDictionary.ContainsKey(planetGuid))
+            {
+                PlanetVM planetVM = PlanetVM.Create(planetGuid);
+                _Planets.Add(planetVM);
+                _planetDictionary.Add(planetGuid, planetVM);
+            }
+            return _planetDictionary[planetGuid];
+        }
 
         #region IViewModel
 
@@ -41,12 +94,14 @@ namespace Pulsar4X.WPFUI.ViewModels
             StarSystem = starSystem;
             _stars = new BindingList<StarVM>();
             _Planets = new BindingList<PlanetVM>();
+            _starDictionary = new Dictionary<Guid, StarVM>();
+            _planetDictionary = new Dictionary<Guid, PlanetVM>();
             //find most massive star, this is the parent.
             Entity parentStar = starSystem.SystemManager.GetFirstEntityWithDataBlob<StarInfoDB>();
-            StarVM parentstarVM = StarVM.Create(parentStar);
+            StarVM parentstarVM = StarVM.Create(parentStar, this);
             foreach (var star in starSystem.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>())
             {
-                StarVM starVM = StarVM.Create(star);
+                StarVM starVM = StarVM.Create(star, this);
                 _stars.Add(starVM);
                 if (star.GetDataBlob<MassVolumeDB>().Mass > parentStar.GetDataBlob<MassVolumeDB>().Mass)
                 {

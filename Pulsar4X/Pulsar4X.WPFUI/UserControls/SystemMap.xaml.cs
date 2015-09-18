@@ -44,33 +44,37 @@ namespace Pulsar4X.WPFUI
                 double leftPos = zoom * star.Position.X + canvasCenterW - 10;
                 double topPos = zoom * star.Position.Y + canvasCenterH - 10;
                 DrawBody(20, Brushes.DarkOrange, leftPos, topPos);
-                
+                foreach (var planet in star.ChildPlanets)
+                {
+                    double planetLeftPos = zoom * (star.Position.X + planet.Position.X) + canvasCenterW;
+                    double planetTopPos = zoom * (star.Position.Y + planet.Position.Y) + canvasCenterH;
+                    DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
+
+                    DrawOrbit(planet, planetLeftPos, planetTopPos);
+                    planet.PropertyChanged += planet_PropertyChanged;
+                }
+
             }
 
-            foreach (var planet in systemVM.Planets)
-            {
-                double leftPos = zoom * planet.Position.X + canvasCenterW - 10;
-                double topPos = zoom * planet.Position.Y + canvasCenterH - 10;
-                DrawBody(10, Brushes.DarkGreen, leftPos, topPos);
 
-                DrawOrbit(planet, leftPos, topPos);
-
-            }
             
+        }
+
+        void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            MapCanvas.UpdateLayout();
         }
 
         private void DrawOrbit(PlanetVM planet, double leftPos, double topPos)
         {
             Point arcStart = new Point(leftPos, topPos);  
-            Point arcEnd = new Point(leftPos - 1, topPos - 1); 
+            Point arcEnd = new Point(leftPos + 1, topPos); 
            
             double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode;
 
             Size arcSize = new Size(zoom * planet.Periapsis, zoom * planet.Apoapsis);
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
-            if(topPos < canvasCenterH)
-                sweepDirection = SweepDirection.Counterclockwise;
 
             ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, arcRotAngle, true, sweepDirection, true);
 

@@ -13,8 +13,11 @@ namespace Pulsar4X.WPFUI.ViewModels
         // these are the stars children, if any. Mostly used for rendering and/or navigating to children.
 
         private BindingList<StarVM> _childStars;
+        public BindingList<StarVM> ChildStars { get { return _childStars; }}
+
 
         private BindingList<PlanetVM> _childPlanets;
+        public BindingList<PlanetVM> ChildPlanets { get { return _childPlanets;}} 
 
         // the stars parent system and star (if it is not the root/primary star of the system) 
         private SystemVM _system;
@@ -87,11 +90,13 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// <summary>
         /// Creates and fills out the properties of this ViewModel from the provided entity.
         /// </summary>
-        public static StarVM Create(Entity entity)
+        public static StarVM Create(Entity entity, SystemVM systemVM)
         {
             StarVM newVM = new StarVM(entity);
 
             // Initialize the data.
+            newVM.Init(systemVM);
+
             newVM.Refresh();
 
             return newVM;
@@ -102,7 +107,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// </summary>
         /// <exception cref="InvalidOperationException">Cannot create a Planet ViewModel without an initialized game.</exception>
         /// <exception cref="GuidNotFoundException">Thrown when the supplied Guid is not found in the game.</exception>
-        internal static StarVM Create(Guid guid)
+        internal static StarVM Create(Guid guid, SystemVM systemVM)
         {
             if (App.Current.Game == null)
             {
@@ -115,7 +120,7 @@ namespace Pulsar4X.WPFUI.ViewModels
                 throw new GuidNotFoundException(guid);
             }
 
-            return Create(entity);
+            return Create(entity, systemVM);
         }
 
         #endregion
@@ -136,7 +141,21 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         public void Refresh(bool partialRefresh = false)
         {
-            _position = Entity.GetDataBlob<PositionDB>().Position;
+            _position = Entity.GetDataBlob<PositionDB>().Position;           
+        }
+
+        public void Init(SystemVM systemVM)
+        {
+            _system = systemVM;
+            _childStars = new BindingList<StarVM>();
+            _childPlanets = new BindingList<PlanetVM>();
+            foreach (var childOrbit in Entity.GetDataBlob<OrbitDB>().Children)
+            {
+                if(childOrbit.HasDataBlob<StarInfoDB>())
+                    _childStars.Add(_system.GetStar(childOrbit.Guid));
+                else if(childOrbit.HasDataBlob<SystemBodyDB>())
+                    _childPlanets.Add(_system.GetPlanet(childOrbit.Guid));
+            }
         }
 
         #endregion
