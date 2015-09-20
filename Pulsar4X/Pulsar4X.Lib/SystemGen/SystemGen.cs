@@ -1616,6 +1616,31 @@ namespace Pulsar4X
                 numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointHubConnectivity);
             }
 
+            /// <summary>
+            /// 6.5 jumppoint generation rules. This will generate JPs on a flat chance based only on star mass, not on system bodies or other criteria.
+            /// </summary>
+            if (Constants.GameSettings.Aurora65JPGeneration == true)
+            {
+                int numJPs = 1;
+                int BaseJPChance = 90;
+                int JPChance = (BaseJPChance + (int)Math.Round(system.Stars[0].Orbit.MassRelativeToSol));
+                while (m_RNG.Next(100) < JPChance)
+                {
+                    numJPs++;
+
+                    if (BaseJPChance == 40)
+                        BaseJPChance = 30;
+                    else if (BaseJPChance == 60)
+                        BaseJPChance = 40;
+                    else if (BaseJPChance == 90)
+                        BaseJPChance = 60;
+
+                    JPChance = (BaseJPChance + (int)Math.Round(system.Stars[0].Orbit.MassRelativeToSol));
+                }
+
+                numJumpPoints = numJPs;
+            }
+
             int jumpPointsGenerated = 0;
             while (jumpPointsGenerated < numJumpPoints)
             {

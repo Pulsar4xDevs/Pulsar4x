@@ -1079,6 +1079,11 @@ namespace Pulsar4X
             /// Follow TN terraforming rules regarding what can be terraformed, and what gases generate what hostile effects.
             /// </summary>
             public static bool TNTerraformingRules = false;
+
+            /// <summary>
+            /// Jumppoint generation uses the current 6.50 method of reducing the total number of JPs created.
+            /// </summary>
+            public static bool Aurora65JPGeneration = true;
         }
     }
 }
