@@ -60,8 +60,8 @@ namespace Pulsar4X.WPFUI
 
         private void DrawPlanetMap(Vector4 parentPosition, Vector4 thisPosition, double argumentOfPeriapsis, double longitudeOfAscendingNode, double apoapsis, double periapsis)
         {
-            double planetLeftPos = zoom * (parentPosition.X + thisPosition.X) + canvasCenterW;
-            double planetTopPos = zoom * (parentPosition.Y + thisPosition.Y) + canvasCenterH;
+            double planetLeftPos = zoom * (parentPosition.X + thisPosition.X) + canvasCenterW - 5;
+            double planetTopPos = zoom * (parentPosition.Y + thisPosition.Y) + canvasCenterH - 5;
             DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
 
             DrawOrbit(planetLeftPos, planetTopPos, argumentOfPeriapsis, longitudeOfAscendingNode, apoapsis, periapsis);       

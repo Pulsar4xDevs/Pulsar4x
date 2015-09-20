@@ -26,6 +26,8 @@ namespace Pulsar4X.WPFUI.ViewModels
                 {
                     _visibleFactions.Add(knownFaction.Guid);
                 }
+                _systems = new BindingList<SystemVM>();
+                _systemDictionary = new Dictionary<Guid, SystemVM>();
                 foreach (var knownsystem in _playerFaction.GetDataBlob<FactionDB>().KnownSystems)
                 {
                     SystemVM systemVM = SystemVM.Create(knownsystem);

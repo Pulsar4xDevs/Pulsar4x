@@ -655,7 +655,7 @@ namespace Pulsar4X.ECSLib
             // The value is a percentage as a number between 0 and 1, tho typically it should be less than 10% (or 0.1).
             settings.MaxAsteroidOrbitDeviation = 0.03;
 
-            settings.MaxBodyInclination = 0; //= 45 degrees. used for orbits and axial tilt. ** 0, because I can't figure the math to draw a plan view of the system - se5a
+            settings.MaxBodyInclination = 45; //degrees. used for orbits and axial tilt. ** 0, because I can't figure the math to draw a plan view of the system - se5a
 
             settings.MaxMoonMassRelativeToParentBody = 0.4;
 
