@@ -43,6 +43,7 @@ namespace Pulsar4X.ECSLib
             // < @todo generate JumpPoints
             //JumpPointFactory.GenerateJumpPoints(newSystem, numJumpPoints);
 
+            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(newSystem);
             return newSystem;
         }
 
@@ -187,7 +188,7 @@ namespace Pulsar4X.ECSLib
             GameState.Instance.StarSystems.Add(Sol);
             GameState.Instance.StarSystemCurrentIndex++;
             */
-
+            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(sol);
             return sol;
         }
 

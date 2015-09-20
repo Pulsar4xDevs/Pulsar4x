@@ -35,6 +35,11 @@ namespace Pulsar4X.WPFUI
             systemVM = (SystemVM)SystemSelection.SelectedItem;
             DrawSystem();
         }
+        void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            MapCanvas.UpdateLayout();
+        }
+
 
         private void DrawSystem()
         {
@@ -48,35 +53,35 @@ namespace Pulsar4X.WPFUI
                 DrawBody(20, Brushes.DarkOrange, leftPos, topPos);
                 foreach (var planet in star.ChildPlanets)
                 {
-                    double planetLeftPos = zoom * (star.Position.X + planet.Position.X) + canvasCenterW;
-                    double planetTopPos = zoom * (star.Position.Y + planet.Position.Y) + canvasCenterH;
-                    DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
-
-                    DrawOrbit(planet, planetLeftPos, planetTopPos);
-                    planet.PropertyChanged += planet_PropertyChanged;
+                    DrawPlanetMap(star.Position, planet.Position, planet.ArgumentOfPeriapsis, planet.LongitudeOfAscendingNode, planet.Apoapsis, planet.Periapsis);                   
                 }
-
-            }
-
-
-            
+            } 
         }
 
-        void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void DrawPlanetMap(Vector4 parentPosition, Vector4 thisPosition, double argumentOfPeriapsis, double longitudeOfAscendingNode, double apoapsis, double periapsis)
         {
-            MapCanvas.UpdateLayout();
+            double planetLeftPos = zoom * (parentPosition.X + thisPosition.X) + canvasCenterW;
+            double planetTopPos = zoom * (parentPosition.Y + thisPosition.Y) + canvasCenterH;
+            DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
+
+            DrawOrbit(planetLeftPos, planetTopPos, argumentOfPeriapsis, longitudeOfAscendingNode, apoapsis, periapsis);       
         }
 
-        private void DrawOrbit(PlanetVM planet, double leftPos, double topPos)
+        
+
+        private void DrawOrbit( double leftPos, double topPos, double argumentOfPeriapsis, double longitudeOfAscendingNode, double apoapsis, double periapsis )
         {
             Point arcStart = new Point(leftPos, topPos);  
             Point arcEnd = new Point(leftPos + 1, topPos); 
            
-            double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode;
+            double arcRotAngle = argumentOfPeriapsis + longitudeOfAscendingNode;
 
-            double twoDimentionalPeriapsis = Math.Cos(Angle.ToRadians(planet.Inclination))  * planet.Periapsis;//adjust for inclination.
+            //wrong math:
+            //double twoDimentionalPeriapsis = Math.Cos(Angle.ToRadians(planet.Inclination))  * planet.Periapsis;//adjust for inclination.
 
-            Size arcSize = new Size(zoom * twoDimentionalPeriapsis, zoom * planet.Apoapsis); 
+
+
+            Size arcSize = new Size(zoom * periapsis, zoom * apoapsis); 
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
 

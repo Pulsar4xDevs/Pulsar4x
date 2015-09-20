@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO.Pipes;
 using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib;
 
@@ -13,9 +14,32 @@ namespace Pulsar4X.WPFUI.ViewModels
     {
         private BindingList<SystemVM> _systems;
 
-         
+        private Entity _playerFaction;
+        public Entity PlayerFaction { get{return _playerFaction;}
+            set
+            {
+                _playerFaction = value;
+                //TODO: factionDB.knownfactions need to be filled with... a blank copy of the actual faction that gets filled as the facion finds out more about it?
+                //excepting in the case of GM where the actual faction should be good. 
+                _visibleFactions = new List<Guid>();
+                foreach (var knownFaction in _playerFaction.GetDataBlob<FactionDB>().KnownFactions)
+                {
+                    _visibleFactions.Add(knownFaction.Guid);
+                }
+                foreach (var knownsystem in _playerFaction.GetDataBlob<FactionDB>().KnownSystems)
+                {
+                    SystemVM systemVM = SystemVM.Create(knownsystem);
+                    _systems.Add(systemVM);
+                    _systemDictionary.Add(systemVM.ID, systemVM);
+                }
+            } 
+        }
 
-        private BindingList<SystemVM> _factions;
+        //factions that this client has full visability of. for GM this will be all factions.
+        private List<Guid> _visibleFactions; 
+
+        //faction data. for GM this will be compleate, for normal play this will be factions known to the faction, and the factionVM will only contain data that is known to the faction
+        private BindingList<FactionVM> _factions; 
 
 
         internal BindingList<SystemVM> StarSystems { get { return _systems; } }
@@ -56,12 +80,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             _game = game;
             _systems = new BindingList<SystemVM>();
             _systemDictionary = new Dictionary<Guid, SystemVM>();
-            foreach (var system in game.Systems)
-            {
-                SystemVM systemVM = SystemVM.Create(system);
-                _systems.Add(systemVM);
-                _systemDictionary.Add(systemVM.ID, systemVM);
-            }
+            PlayerFaction = game.GameMasterFaction; //on creation the player faction can be set to GM I guess... for now anyway.
         }
 
         #region IViewModel

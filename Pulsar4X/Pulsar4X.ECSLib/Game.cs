@@ -41,6 +41,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public ReadOnlyCollection<StarSystem> Systems { get { return new ReadOnlyCollection<StarSystem>(StarSystems); } }
 
+        [PublicAPI] 
+        public Entity GameMasterFaction;
+
         /// <summary>
         /// Global Entity Manager.
         /// </summary>
@@ -156,6 +159,7 @@ namespace Pulsar4X.ECSLib
 
             Game newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
             // TODO: Provide options for loading other Static Data DataSets.
+            FactionFactory.CreateGameMaster(newGame);
             newGame.StaticData = StaticDataManager.LoadFromDefaultDataDirectory();
 
             for (int i = 0; i < numSystems; i++)
@@ -169,6 +173,7 @@ namespace Pulsar4X.ECSLib
             }
 
             newGame.PostGameLoad();
+            
             return newGame;
         }
 

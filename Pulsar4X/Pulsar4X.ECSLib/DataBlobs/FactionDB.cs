@@ -24,6 +24,16 @@ namespace Pulsar4X.ECSLib
         private List<StarSystem> _knownSystems;
 
         [PublicAPI]
+        public List<Entity> KnownFactions 
+        {
+            get {return _knownFactions;} 
+            internal set { _knownFactions = value; }
+        }
+        [JsonProperty]
+        private List<Entity> _knownFactions;
+
+
+        [PublicAPI]
         public List<Entity> Colonies
         {
             get { return _colonies; }
@@ -57,6 +67,7 @@ namespace Pulsar4X.ECSLib
             KnownSystems = knownSystems;
             Colonies = colonies;
             ShipClasses = shipClasses;
+            KnownFactions = new List<Entity>();
         }
         
 
@@ -64,8 +75,10 @@ namespace Pulsar4X.ECSLib
         {
             Species = new List<Entity>(factionDB.Species);
             KnownSystems = new List<StarSystem>(factionDB.KnownSystems);
+            KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Colonies = new List<Entity>(factionDB.Colonies);
             ShipClasses = new List<Entity>(factionDB.ShipClasses);
+
         }
 
         public override object Clone()
