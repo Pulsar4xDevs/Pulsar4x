@@ -143,6 +143,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="trueAnomaly">Angle in Radians.</param>
         public static Vector4 GetPosition(OrbitDB orbit, double trueAnomaly)
         {
+            
             if (orbit.IsStationary)
             {
                 return new Vector4(0, 0, 0, 0);
@@ -158,10 +159,23 @@ namespace Pulsar4X.ECSLib
             // Convert KM to AU
             radius = Distance.ToAU(radius);
 
-            // Spherical to Cartesian conversion.
-            double x = radius * Math.Sin(inclination) * Math.Cos(trueAnomaly);
-            double y = radius * Math.Sin(inclination) * Math.Sin(trueAnomaly);
-            double z = radius * Math.Cos(inclination);
+            // Spherical to Cartesian conversion. !Incorrect! we are not using Spherical Coordinates!
+            // Spherical Coordinates assume that theta is on the reference plane, not the orbital plane.  
+            //double x = radius * Math.Sin(inclination) * Math.Cos(trueAnomaly);
+            //double y = radius * Math.Sin(inclination) * Math.Sin(trueAnomaly);
+            //double z = radius * Math.Cos(inclination);
+
+
+            //http://ccar.colorado.edu/ASEN5070/primers/kep2cart/kep2cart.htm
+            // do I have my OoO correct?
+            double lofAN = orbit.LongitudeOfAscendingNode;
+            double aofP = orbit.ArgumentOfPeriapsis;
+            double tA = trueAnomaly;
+            double incl = inclination;
+
+            double x = radius * (Math.Cos(lofAN * Math.Cos(aofP + tA) - Math.Sin(lofAN * Math.Sin(aofP + tA) * Math.Cos(incl))));
+            double y = radius * (Math.Sin(lofAN * Math.Cos(aofP + tA) + Math.Cos(lofAN * Math.Sin(aofP + tA) * Math.Cos(incl))));
+            double z = radius * (Math.Sin(incl * Math.Sin(aofP + tA)));
 
             return new Vector4(x, y, z, 0);
         }

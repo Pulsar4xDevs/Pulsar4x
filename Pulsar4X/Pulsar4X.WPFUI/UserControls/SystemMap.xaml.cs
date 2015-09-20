@@ -48,8 +48,8 @@ namespace Pulsar4X.WPFUI
             MapCanvas.Children.Clear();
             foreach (var star in systemVM.Stars)
             {
-                double leftPos = zoom * star.Position.X + canvasCenterW - 10;
-                double topPos = zoom * star.Position.Y + canvasCenterH - 10;
+                double leftPos = zoom * star.Position.X + canvasCenterW;
+                double topPos = zoom * star.Position.Y + canvasCenterH;
                 DrawBody(20, Brushes.DarkOrange, leftPos, topPos);
                 foreach (var planet in star.ChildPlanets)
                 {
@@ -60,8 +60,8 @@ namespace Pulsar4X.WPFUI
 
         private void DrawPlanetMap(Vector4 parentPosition, Vector4 thisPosition, double argumentOfPeriapsis, double longitudeOfAscendingNode, double apoapsis, double periapsis)
         {
-            double planetLeftPos = zoom * (parentPosition.X + thisPosition.X) + canvasCenterW - 5;
-            double planetTopPos = zoom * (parentPosition.Y + thisPosition.Y) + canvasCenterH - 5;
+            double planetLeftPos = zoom * (parentPosition.X + thisPosition.X) + canvasCenterW;
+            double planetTopPos = zoom * (parentPosition.Y + thisPosition.Y) + canvasCenterH;
             DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
 
             DrawOrbit(planetLeftPos, planetTopPos, argumentOfPeriapsis, longitudeOfAscendingNode, apoapsis, periapsis);       
@@ -111,8 +111,8 @@ namespace Pulsar4X.WPFUI
             bodyEllipse.Fill = color;
 
             MapCanvas.Children.Add(bodyEllipse);
-            Canvas.SetLeft(bodyEllipse, leftPos);
-            Canvas.SetTop(bodyEllipse, topPos);
+            Canvas.SetLeft(bodyEllipse, leftPos - size / 2);
+            Canvas.SetTop(bodyEllipse, topPos - size / 2);
         }
     }
 }
