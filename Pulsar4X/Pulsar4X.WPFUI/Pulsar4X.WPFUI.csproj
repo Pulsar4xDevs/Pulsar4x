@@ -62,6 +62,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -112,9 +113,6 @@
     <Compile Include="UserControls\EventLog.xaml.cs">
       <DependentUpon>EventLog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\FactionCreation.xaml.cs">
-      <DependentUpon>FactionCreation.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UserControls\GalaticMap.xaml.cs">
       <DependentUpon>GalaticMap.xaml</DependentUpon>
     </Compile>
@@ -124,6 +122,9 @@
     <Compile Include="UserControls\ITabControl.cs" />
     <Compile Include="UserControls\Leaders.xaml.cs">
       <DependentUpon>Leaders.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\MinMaxSlider.xaml.cs">
+      <DependentUpon>MinMaxSlider.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\Populations.xaml.cs">
       <DependentUpon>Populations.xaml</DependentUpon>
@@ -149,6 +150,7 @@
     <Compile Include="UserControls\TaskGroups.xaml.cs">
       <DependentUpon>TaskGroups.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\ComponentDesignVM.cs" />
     <Compile Include="ViewModels\FactionVM.cs" />
     <Compile Include="ViewModels\GameVM.cs" />
     <Compile Include="ViewModels\IViewModel.cs" />
@@ -175,10 +177,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\FactionCreation.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="UserControls\GalaticMap.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -188,6 +186,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Leaders.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\MinMaxSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

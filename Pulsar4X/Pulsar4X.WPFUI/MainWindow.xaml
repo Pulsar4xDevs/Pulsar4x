@@ -60,6 +60,8 @@
                 <Separator/>
                 <Button Name="TBB_ShipDesign" Content="Ship Design" Click="TBB_Click"></Button>
                 <Separator/>
+                <Button Name="TBB_ComponentDesign" Content="Component Design" Click="TBB_Click"></Button>
+                <Separator/>
                 <Button Name="TBB_Intelligence" Content="Intelligence" Click="TBB_Click"></Button>
                 <Separator/>
                 <Button Name="TBB_Races" Content="Races" Click="TBB_Click"></Button>

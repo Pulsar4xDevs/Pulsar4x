@@ -112,7 +112,11 @@ namespace Pulsar4X.ECSLib
             {
                 return new Vector4(0, 0, 0, 0);
             }
+            return GetPosition(orbit, GetTrueAnomaly(orbit, time));
+        }
 
+        public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
+        {
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
 
             while (timeSinceEpoch > orbit.OrbitalPeriod)
@@ -128,12 +132,9 @@ namespace Pulsar4X.ECSLib
             // Add nT
             currentMeanAnomaly += Angle.ToRadians(orbit.MeanMotion) * timeSinceEpoch.TotalSeconds;
 
+
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
-
-            // http://en.wikipedia.org/wiki/True_anomaly#From_the_eccentric_anomaly
-            double trueAnomaly = Math.Atan2(Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly), Math.Cos(eccentricAnomaly) - orbit.Eccentricity);
-
-            return GetPosition(orbit, trueAnomaly);
+            return Math.Atan2(Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly), Math.Cos(eccentricAnomaly) - orbit.Eccentricity);
         }
 
         /// <summary>

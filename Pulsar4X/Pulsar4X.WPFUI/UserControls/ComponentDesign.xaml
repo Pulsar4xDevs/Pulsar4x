@@ -1,13 +1,25 @@
-﻿<Page x:Class="Pulsar4X.WPFUI.UserControls.ComponentDesign"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      mc:Ignorable="d" 
-      d:DesignHeight="300" d:DesignWidth="300"
-	Title="ComponentDesign">
+﻿<UserControl x:Class="Pulsar4X.WPFUI.ComponentDesign"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid Name="ComponentDesignLayoytGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="42"/>
+            <RowDefinition Height="85*"/>
+            <RowDefinition Height="44*"/>
+        </Grid.RowDefinitions>
+        <ComboBox Name="ComponentSelection" Margin="10,10,10,11" SelectionChanged="ComponentSelection_SelectionChanged"/>
+        <StackPanel Name="AbilityStackPanel"  Margin="10" Grid.Row="1"/>
+        <RichTextBox Name="ComponentStats" Margin="10" Grid.Row="2">
+            <FlowDocument>
+                <Paragraph>
+                    <Run Text="RichTextBox"/>
+                </Paragraph>
+            </FlowDocument>
+        </RichTextBox>
 
-    <Grid>
-        
     </Grid>
-</Page>
+</UserControl>

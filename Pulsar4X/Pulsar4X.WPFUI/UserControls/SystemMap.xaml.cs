@@ -17,9 +17,19 @@ namespace Pulsar4X.WPFUI
         public string Title { get; set; }
         private SystemVM systemVM;
         private Canvas _canvas;
-        private double canvasCenterH { get { return _canvas.ActualHeight / 2; } }
-        private double canvasCenterW { get { return _canvas.ActualWidth / 2; } }
+
+        private double canvasCenterH
+        {
+            get { return _canvas.ActualHeight / 2; }
+        }
+
+        private double canvasCenterW
+        {
+            get { return _canvas.ActualWidth / 2; }
+        }
+
         private double zoom = 10;
+
         public SystemMap()
         {
             InitializeComponent();
@@ -33,13 +43,19 @@ namespace Pulsar4X.WPFUI
         private void SystemSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             systemVM = (SystemVM)SystemSelection.SelectedItem;
+            //systemVM.PropertyChanged += system_PropertyChanged;
             DrawSystem();
         }
-        void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+
+        private void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             MapCanvas.UpdateLayout();
         }
 
+        private void system_PropertyChanged(object sender, System.ComponentModel.PropertyChangingEventArgs e)
+        {
+            DrawSystem();
+        }
 
         private void DrawSystem()
         {
@@ -53,35 +69,28 @@ namespace Pulsar4X.WPFUI
                 DrawBody(20, Brushes.DarkOrange, leftPos, topPos);
                 foreach (var planet in star.ChildPlanets)
                 {
-                    DrawPlanetMap(star.Position, planet.Position, planet.ArgumentOfPeriapsis, planet.LongitudeOfAscendingNode, planet.Apoapsis, planet.Periapsis);                   
+
+                    double planetLeftPos = zoom * (star.Position.X + planet.Position.X) + canvasCenterW;
+                    double planetTopPos = zoom * (star.Position.Y + planet.Position.Y) + canvasCenterH;
+                    DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
+
+                    DrawOrbit(planetLeftPos, planetTopPos, planet);
+
+                    //DrawDebugLines(leftPos, topPos, planetLeftPos, planetTopPos, planet);
                 }
-            } 
+            }
         }
 
-        private void DrawPlanetMap(Vector4 parentPosition, Vector4 thisPosition, double argumentOfPeriapsis, double longitudeOfAscendingNode, double apoapsis, double periapsis)
+
+        private void DrawOrbit(double leftPos, double topPos, PlanetVM planet)
         {
-            double planetLeftPos = zoom * (parentPosition.X + thisPosition.X) + canvasCenterW;
-            double planetTopPos = zoom * (parentPosition.Y + thisPosition.Y) + canvasCenterH;
-            DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
 
-            DrawOrbit(planetLeftPos, planetTopPos, argumentOfPeriapsis, longitudeOfAscendingNode, apoapsis, periapsis);       
-        }
+            Point arcStart = new Point(leftPos, topPos);
+            Point arcEnd = new Point(leftPos + 1, topPos);
 
-        
+            double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode; // if inclination is 0
 
-        private void DrawOrbit( double leftPos, double topPos, double argumentOfPeriapsis, double longitudeOfAscendingNode, double apoapsis, double periapsis )
-        {
-            Point arcStart = new Point(leftPos, topPos);  
-            Point arcEnd = new Point(leftPos + 1, topPos); 
-           
-            double arcRotAngle = argumentOfPeriapsis + longitudeOfAscendingNode;
-
-            //wrong math:
-            //double twoDimentionalPeriapsis = Math.Cos(Angle.ToRadians(planet.Inclination))  * planet.Periapsis;//adjust for inclination.
-
-
-
-            Size arcSize = new Size(zoom * periapsis, zoom * apoapsis); 
+            Size arcSize = new Size(zoom * planet.Periapsis, zoom * planet.Apoapsis);
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
 
@@ -90,7 +99,6 @@ namespace Pulsar4X.WPFUI
             PathFigure pathFigure = new PathFigure();
             pathFigure.StartPoint = arcStart;
             pathFigure.Segments.Add(orbitArc);
-
 
             PathGeometry pathGeometry = new PathGeometry();
             pathGeometry.Figures.Add(pathFigure);
@@ -113,6 +121,31 @@ namespace Pulsar4X.WPFUI
             MapCanvas.Children.Add(bodyEllipse);
             Canvas.SetLeft(bodyEllipse, leftPos - size / 2);
             Canvas.SetTop(bodyEllipse, topPos - size / 2);
+        }
+
+        private void DrawDebugLines(double starLeftPos, double starTopPos, double leftPos, double topPos, PlanetVM planet)
+        {
+            Line trueAnomoly = new Line();
+            trueAnomoly.Stroke = Brushes.Magenta;
+            trueAnomoly.X1 = starLeftPos;
+            trueAnomoly.Y1 = starTopPos;
+            trueAnomoly.X2 = leftPos;
+            trueAnomoly.Y2 = topPos;
+            trueAnomoly.StrokeThickness = 1;
+            MapCanvas.Children.Add(trueAnomoly);
+
+
+            Line periapsis = new Line();
+            periapsis.Stroke = Brushes.Cyan;
+            periapsis.X1 = starLeftPos;
+            periapsis.Y1 = starTopPos;
+            double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode;
+
+            periapsis.X2 = starLeftPos + Math.Sin(arcRotAngle) * zoom * planet.Periapsis;
+            periapsis.Y2 = starTopPos + Math.Cos(arcRotAngle) * zoom * planet.Periapsis;
+            periapsis.StrokeThickness = 1;
+            MapCanvas.Children.Add(periapsis);
+
         }
     }
 }

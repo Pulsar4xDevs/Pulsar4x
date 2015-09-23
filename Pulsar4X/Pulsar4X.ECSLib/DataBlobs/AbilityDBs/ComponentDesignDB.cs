@@ -13,8 +13,8 @@ namespace Pulsar4X.ECSLib
     }
     public class ComponentDesignDB
     {
-        public string Name;
-        public string Description;
+        public string Name { get; set; }
+        public string Description { get; set; }
 
         //internal ParsingProcessor Parser { get; private set; }
 

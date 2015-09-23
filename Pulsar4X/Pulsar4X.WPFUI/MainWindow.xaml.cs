@@ -273,6 +273,9 @@ namespace Pulsar4X.WPFUI
                 case "TBB_ShipDesign":
                     control = new ShipDesign();
                     break;
+                case "TBB_ComponentDesign":
+                    control = new ComponentDesign();
+                    break;
                 case "TBB_Intelligence":
                     control = new Intelligence();
                     break;
@@ -315,6 +318,7 @@ namespace Pulsar4X.WPFUI
             try
             {
                 secondsPulsed = await Task.Run(() => App.Current.Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
+                
             }
             catch (Exception exception)
             {
