@@ -43,6 +43,7 @@ namespace Pulsar4X.ECSLib
             // < @todo generate JumpPoints
             //JumpPointFactory.GenerateJumpPoints(newSystem, numJumpPoints);
 
+            //add this system to the GameMaster's Known Systems list.
             game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(newSystem);
             return newSystem;
         }
@@ -51,6 +52,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Creates our own solar system.
+        /// This probibly needs to be Json!
         /// </summary>
         public StarSystem CreateSol(Game game)
         {
@@ -69,17 +71,34 @@ namespace Pulsar4X.ECSLib
 
             Entity mercury = new Entity(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
 
-            /*
-            SystemBody Venus = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);
-            Venus.Name = "Venus";
-            Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, GalaxyGen.J2000);
-            Venus.Radius = Distance.ToAU(6051.8);
-            Venus.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
-            Venus.Position.System = Sol;
-            Venus.Position.X = x;
-            Venus.Position.Y = y;
-            sun.Planets.Add(Venus);
+            PositionDB venusPositionDB = new PositionDB();
+            SystemBodyDB venusBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.ToAU(6051.8));
+            NameDB venusNameDB = new NameDB("Venus");
+            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, _galaxyGen.Settings.J2000);
 
+            Entity venus = new Entity(sol.SystemManager, new List<BaseDataBlob> { venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
+
+
+            PositionDB earthPositionDB = new PositionDB();
+            SystemBodyDB earthBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.ToAU(6378.1));
+            NameDB earthNameDB = new NameDB("Venus");
+            OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, _galaxyGen.Settings.J2000);
+            earthBodyDB.Tectonics = TectonicActivity.EarthLike;
+
+            //JDictionary<AtmosphericGasSD, float> atmoGasses = new JDictionary<AtmosphericGasSD, float>();
+            //atmoGasses.Add(); bunch of guid....
+            //AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3, 57.2, atmoGasses); //what's our greenhouse factor an pressure?
+
+            Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB });
+
+
+
+            //        public static Orbit FromMajorPlanetFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+            //                                        double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
+
+             /*
             SystemBody Earth = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);
             Earth.Name = "Earth";
             Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, GalaxyGen.J2000);
