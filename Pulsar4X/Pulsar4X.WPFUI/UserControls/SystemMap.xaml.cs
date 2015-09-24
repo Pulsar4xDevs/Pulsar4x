@@ -28,7 +28,7 @@ namespace Pulsar4X.WPFUI
             get { return _canvas.ActualWidth / 2; }
         }
 
-        private double zoom = 10;
+        private double zoom = 100;
 
         public SystemMap()
         {
@@ -91,7 +91,7 @@ namespace Pulsar4X.WPFUI
 
             double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode; // if inclination is 0
 
-            Size arcSize = new Size(zoom * planet.Periapsis, zoom * planet.Apoapsis);
+            Size arcSize = new Size(zoom * planet.Periapsis * 2, zoom * planet.Apoapsis * 2);
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
 

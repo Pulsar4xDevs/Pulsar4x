@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib
             NameDB mercuryNameDB = new NameDB("Mercury");
             OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, mercuryMVDB.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, _galaxyGen.Settings.J2000);
             PositionDB mercuryPositionDB = new PositionDB();
-
+            mercuryPositionDB.Position = OrbitProcessor.GetPosition(mercuryOrbitDB, game.CurrentDateTime);
             Entity mercury = new Entity(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
 
             PositionDB venusPositionDB = new PositionDB();
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.ToAU(6051.8));
             NameDB venusNameDB = new NameDB("Venus");
             OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, _galaxyGen.Settings.J2000);
-
+            venusPositionDB.Position = OrbitProcessor.GetPosition(venusOrbitDB, game.CurrentDateTime);
             Entity venus = new Entity(sol.SystemManager, new List<BaseDataBlob> { venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
 
 
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
             NameDB earthNameDB = new NameDB("Venus");
             OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, _galaxyGen.Settings.J2000);
             earthBodyDB.Tectonics = TectonicActivity.EarthLike;
-
+            earthPositionDB.Position = OrbitProcessor.GetPosition(earthOrbitDB, game.CurrentDateTime);
             //JDictionary<AtmosphericGasSD, float> atmoGasses = new JDictionary<AtmosphericGasSD, float>();
             //atmoGasses.Add(); bunch of guid....
             //AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3, 57.2, atmoGasses); //what's our greenhouse factor an pressure?
