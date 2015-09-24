@@ -160,26 +160,11 @@ namespace Pulsar4X.ECSLib
             // Convert KM to AU
             radius = Distance.ToAU(radius);
 
-            // Spherical to Cartesian conversion. !Incorrect! we are not using Spherical Coordinates!
-            // Spherical Coordinates assume that theta is on the reference plane, not the orbital plane.  
-            //double x = radius * Math.Sin(inclination) * Math.Cos(trueAnomaly);
-            //double y = radius * Math.Sin(inclination) * Math.Sin(trueAnomaly);
-            //double z = radius * Math.Cos(inclination);
-
-
-            //http://ccar.colorado.edu/ASEN5070/primers/kep2cart/kep2cart.htm
-            //X = r (cos LoA cos(AoP + TA) - sin LoA sin(AoP + TA)cos i)
-            //Y = r (sin LoA cos(AoP + TA) - cos LoA sin(AoP + TA)cos i)
-            //Z = r (sin i sin (AoP + TA))
-            // do I have my OoO correct?
+            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
             double lofAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
             double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
             double tA = trueAnomaly;
             double incl = inclination;
-
-            //double x = radius * (Math.Cos(lofAN * Math.Cos(aofP + tA) - Math.Sin(lofAN * Math.Sin(aofP + tA) * Math.Cos(incl))));
-            //double y = radius * (Math.Sin(lofAN * Math.Cos(aofP + tA) + Math.Cos(lofAN * Math.Sin(aofP + tA) * Math.Cos(incl))));
-            //double z = radius * (Math.Sin(incl * Math.Sin(aofP + tA)));
 
             double x = Math.Cos(lofAN) * Math.Cos(aofP + tA) - Math.Sin(lofAN) * Math.Sin(aofP + tA) * Math.Cos(incl);
             double y = Math.Sin(lofAN) * Math.Cos(aofP + tA) + Math.Cos(lofAN) * Math.Sin(aofP + tA) * Math.Cos(incl);
