@@ -74,7 +74,9 @@ namespace Pulsar4X.WPFUI.ViewModels
             MinMaxSlider guiSliderControl = new MinMaxSlider();
             guiSliderControl.Name.Content = _designAbility.Name;
             guiSliderControl.ToolTip = _designAbility.Description;
+            _designAbility.SetMax();
             guiSliderControl.Maximum = _designAbility.MaxValue;
+            _designAbility.SetMin();
             guiSliderControl.Minimum = _designAbility.MinValue;
             GuiControl = guiSliderControl;
         }

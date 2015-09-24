@@ -497,8 +497,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             NameDB nameDB = _entity.GetDataBlob<NameDB>();
             UpdateProperties(nameDB);
 
-            AtmosphereDB atmosphereDB = _entity.GetDataBlob<AtmosphereDB>();
-            UpdateProperties(atmosphereDB);
+            //AtmosphereDB atmosphereDB = _entity.GetDataBlob<AtmosphereDB>();
+            //UpdateProperties(atmosphereDB);
 
             // Check if we're doing a full refresh.
             if (!partialRefresh)

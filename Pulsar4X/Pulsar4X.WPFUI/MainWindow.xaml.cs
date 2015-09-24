@@ -81,11 +81,16 @@ namespace Pulsar4X.WPFUI
             //try
             //{
                 Status_TextBlock.Text = "Creating new game...";
-                App.Current.Game = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 100, new Progress<double>(OnProgressUpdate)));
+                App.Current.Game = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 10, new Progress<double>(OnProgressUpdate)));
+                //add sol for shits and giggles and testing
+                StarSystemFactory starfac = new StarSystemFactory(App.Current.Game);
+                starfac.CreateSol(App.Current.Game);
+                //
                 MessageBox.Show(this, "Game Created.", "Result");
                 App.Current.GameVM = new GameVM(App.Current.Game);
                 Status_TextBlock.Text = "Game Created.";
                 Status_ProgressBar.Value = 0;
+
             //}
             //catch (Exception exception)
             //{
