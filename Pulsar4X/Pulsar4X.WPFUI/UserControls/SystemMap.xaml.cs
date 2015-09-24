@@ -75,27 +75,30 @@ namespace Pulsar4X.WPFUI
                     double planetTopPos = zoom * (star.Position.Y + planet.Position.Y) + canvasCenterH;
                     DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
 
-                    DrawOrbit(planetLeftPos, planetTopPos, planet);
+                    DrawOrbit(leftPos, topPos, planet);
 
-                    //DrawDebugLines(leftPos, topPos, planetLeftPos, planetTopPos, planet);
+                    DrawDebugLines(leftPos, topPos, planetLeftPos, planetTopPos, planet);
                 }
             }
         }
 
 
-        private void DrawOrbit(double leftPos, double topPos, PlanetVM planet)
+        private void DrawOrbit(double starLeftPos, double starTopPos, PlanetVM planet)
         {
 
-            Point arcStart = new Point(leftPos, topPos);
-            Point arcEnd = new Point(leftPos + 1, topPos);
+            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode); // if inclination is 0
+            Point periapsis = new Point(starLeftPos + Math.Sin(arcRotAngle) * zoom * planet.Periapsis, starTopPos + Math.Cos(arcRotAngle) * zoom * planet.Periapsis);
+            Vector tangent = new Vector(Math.Cos(arcRotAngle), -Math.Sin(arcRotAngle));
+            Point arcStart = periapsis-tangent;
+            Point arcEnd = periapsis+tangent;
 
-            double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode; // if inclination is 0
-
-            Size arcSize = new Size(zoom * planet.Periapsis, zoom * planet.Apoapsis);
+            double majorAxis = planet.Periapsis + planet.Apoapsis;
+            double minorAxis = Math.Sqrt(1-planet.Eccentricity*planet.Eccentricity) * majorAxis;
+            Size arcSize = new Size(zoom * majorAxis / 2, zoom * minorAxis / 2);
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
 
-            ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, arcRotAngle, true, sweepDirection, true);
+            ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode, true, sweepDirection, true);
 
             PathFigure pathFigure = new PathFigure();
             pathFigure.StartPoint = arcStart;
@@ -140,7 +143,7 @@ namespace Pulsar4X.WPFUI
             periapsis.Stroke = Brushes.Cyan;
             periapsis.X1 = starLeftPos;
             periapsis.Y1 = starTopPos;
-            double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode;
+            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode);
 
             periapsis.X2 = starLeftPos + Math.Sin(arcRotAngle) * zoom * planet.Periapsis;
             periapsis.Y2 = starTopPos + Math.Cos(arcRotAngle) * zoom * planet.Periapsis;
