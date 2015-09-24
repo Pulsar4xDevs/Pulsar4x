@@ -36,6 +36,7 @@ namespace Pulsar4X.WPFUI
             Title = "System Map";
             _canvas = MapCanvas;
             SystemSelection.ItemsSource = App.Current.GameVM.StarSystems;
+            SystemSelection.DisplayMemberPath = "Name";
             MapCanvas.Background = new SolidColorBrush(Brushes.DarkBlue.Color);
 
         }

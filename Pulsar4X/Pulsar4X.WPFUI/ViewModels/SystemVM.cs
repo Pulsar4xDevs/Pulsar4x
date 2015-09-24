@@ -19,6 +19,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         public BindingList<PlanetVM> Planets { get { return _Planets;} } 
 
         private string _name;
+        public string Name { get { return _name;} }
 
         public Guid ID { get; set; }
 
