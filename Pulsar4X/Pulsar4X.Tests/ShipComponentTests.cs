@@ -137,7 +137,7 @@ namespace Pulsar4X.Tests
 
             ComponentAbilitySD SizeFormula = new ComponentAbilitySD();
             SizeFormula.Name = "Engine Size";
-            SizeFormula.Description = "";
+            SizeFormula.Description = "Size of this engine in Tons";
             SizeFormula.GuiHint = GuiHint.GuiSelectionMaxMin;
             SizeFormula.AbilityFormula = "250";
             SizeFormula.MaxFormula = "2500";
