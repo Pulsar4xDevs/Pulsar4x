@@ -12,6 +12,9 @@ namespace Pulsar4X.ECSLib
 
         public int FuelStorage { get { return _fuelStorage; } internal set { _fuelStorage = value; } }
 
+        public FuelStorageDB()
+        {
+        }
 
         public FuelStorageDB(double fuelStorage)
         {

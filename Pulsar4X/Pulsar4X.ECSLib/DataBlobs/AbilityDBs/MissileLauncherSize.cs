@@ -12,6 +12,10 @@ namespace Pulsar4X.ECSLib
 
         public double MissileLauncherSize { get { return _missileLauncherSize; } internal set { _missileLauncherSize = value; } }
 
+        public MissileLauncherSizeDB()
+        {
+        }
+
         public MissileLauncherSizeDB(double missileSize)
         {
             _missileLauncherSize = missileSize;

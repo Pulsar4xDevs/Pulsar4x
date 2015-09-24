@@ -16,7 +16,11 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         private int _resolution;
-        public int Resolution { get { return _resolution; } internal set { _resolution = value; } } 
+        public int Resolution { get { return _resolution; } internal set { _resolution = value; } }
+
+        public ActiveSensorDB()
+        {
+        }
 
         /// <summary>
         /// This is the constructor for the component DesignToEntity factory.

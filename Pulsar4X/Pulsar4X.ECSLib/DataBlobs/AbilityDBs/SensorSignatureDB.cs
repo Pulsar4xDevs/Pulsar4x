@@ -12,6 +12,10 @@ namespace Pulsar4X.ECSLib
         private int _electroMagneticSig;
         public int ElectroMagneticSig { get { return _electroMagneticSig; } internal set { _electroMagneticSig = value; } }
 
+        public SensorSignatureDB()
+        {
+        }
+
         /// <summary>
         /// Constructor for Factory. note int cast.
         /// </summary>

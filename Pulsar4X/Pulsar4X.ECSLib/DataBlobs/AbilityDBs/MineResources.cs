@@ -10,6 +10,10 @@ namespace Pulsar4X.ECSLib
         private JDictionary<Guid, int> _resourcesPerMonth;
         public JDictionary<Guid, int> ResourcesPerMonth { get { return _resourcesPerMonth; } internal set { _resourcesPerMonth = value; } }
 
+        public MineResourcesDB()
+        {
+        }
+
         /// <summary>
         /// Component factory constructor.
         /// </summary>
