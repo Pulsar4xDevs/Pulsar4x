@@ -91,7 +91,7 @@ namespace Pulsar4X.WPFUI
 
             double arcRotAngle = planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode; // if inclination is 0
 
-            Size arcSize = new Size(zoom * planet.Periapsis * 2, zoom * planet.Apoapsis * 2);
+            Size arcSize = new Size(zoom * planet.Periapsis, zoom * planet.Apoapsis);
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
 
@@ -133,7 +133,7 @@ namespace Pulsar4X.WPFUI
             trueAnomoly.X2 = leftPos;
             trueAnomoly.Y2 = topPos;
             trueAnomoly.StrokeThickness = 1;
-            MapCanvas.Children.Add(trueAnomoly);
+            //MapCanvas.Children.Add(trueAnomoly);
 
 
             Line periapsis = new Line();
@@ -146,6 +146,7 @@ namespace Pulsar4X.WPFUI
             periapsis.Y2 = starTopPos + Math.Cos(arcRotAngle) * zoom * planet.Periapsis;
             periapsis.StrokeThickness = 1;
             MapCanvas.Children.Add(periapsis);
+
 
         }
     }

@@ -66,7 +66,13 @@ namespace Pulsar4X.ECSLib
             SystemBodyDB mercuryBodyDB = new SystemBodyDB {Type = BodyType.Terrestrial, SupportsPopulations = true};
             MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
             NameDB mercuryNameDB = new NameDB("Mercury");
-            OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, mercuryMVDB.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, _galaxyGen.Settings.J2000);
+            double mercurySemiMajAxis = 0.387098;
+            double mercuryEccentricity = 0.205630;
+            double mercuryInclination = 0;
+            double mercuryLoAN = 48.33167;
+            double mercuryLoP = 77.45645;
+            double mercuryMeanLongd = 252.25084;
+            OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, mercuryMVDB.Mass, mercurySemiMajAxis, mercuryEccentricity, mercuryInclination, mercuryLoAN, mercuryLoP, mercuryMeanLongd, _galaxyGen.Settings.J2000);
             PositionDB mercuryPositionDB = new PositionDB();
             mercuryPositionDB.Position = OrbitProcessor.GetPosition(mercuryOrbitDB, game.CurrentDateTime);
             Entity mercury = new Entity(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
@@ -75,7 +81,13 @@ namespace Pulsar4X.ECSLib
             SystemBodyDB venusBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
             MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.ToAU(6051.8));
             NameDB venusNameDB = new NameDB("Venus");
-            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, _galaxyGen.Settings.J2000);
+            double venusSemiMajAxis = 0.72333199;
+            double venusEccentricity = 0.00677323;
+            double venusInclination = 0;
+            double venusLoAN = 76.68069;
+            double venusLoP = 131.53298;
+            double venusMeanLongd = 181.97973;
+            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, mercuryMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, _galaxyGen.Settings.J2000);
             venusPositionDB.Position = OrbitProcessor.GetPosition(venusOrbitDB, game.CurrentDateTime);
             Entity venus = new Entity(sol.SystemManager, new List<BaseDataBlob> { venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
 
@@ -83,8 +95,14 @@ namespace Pulsar4X.ECSLib
             PositionDB earthPositionDB = new PositionDB();
             SystemBodyDB earthBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
             MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.ToAU(6378.1));
-            NameDB earthNameDB = new NameDB("Venus");
-            OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, _galaxyGen.Settings.J2000);
+            NameDB earthNameDB = new NameDB("Earth");
+            double earthSemiMajAxis = 1.00000011;
+            double earthEccentricity = 0.01671022;
+            double earthInclination = 0;
+            double earthLoAN = -11.26064;
+            double earthLoP = 102.94719;
+            double earthMeanLongd = 100.46435;
+            OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, earthSemiMajAxis, earthEccentricity, earthInclination, earthLoAN, earthLoP, earthMeanLongd, _galaxyGen.Settings.J2000);
             earthBodyDB.Tectonics = TectonicActivity.EarthLike;
             earthPositionDB.Position = OrbitProcessor.GetPosition(earthOrbitDB, game.CurrentDateTime);
             //JDictionary<AtmosphericGasSD, float> atmoGasses = new JDictionary<AtmosphericGasSD, float>();
