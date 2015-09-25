@@ -58,7 +58,12 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         public StarVM ParentStar
         {
-            get { return _parentStar; }
+            get
+            {
+                if (_parentStar == null)
+                    _parentStar = App.Current.GameVM.GetSystem(Entity.Guid).GetStar(_parentStarGuid);
+                return _parentStar;
+            }
             set
             {
                 _parentStar = value;
@@ -66,10 +71,18 @@ namespace Pulsar4X.WPFUI.ViewModels
             }
         }
         private StarVM _parentStar;
-
+        private Guid _parentStarGuid;
         public PlanetVM ParentPlanet
         {
-            get { return _parentPlanet; }
+            get
+            {
+                if (_parentPlanet == null && _parentPlanetGuid != null)
+                {
+                    _parentPlanet = App.Current.GameVM.GetSystem(Entity.Guid).GetPlanet(Entity.GetDataBlob<OrbitDB>().Parent.Guid);
+                }
+
+                return _parentPlanet;
+            }
             set
             {
                 _parentPlanet = value;
@@ -77,6 +90,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             }
         }
         private PlanetVM _parentPlanet; // null if not a moon.
+        private Guid? _parentPlanetGuid;
 
         public double SemiMajorAxis
         {
@@ -545,19 +559,19 @@ namespace Pulsar4X.WPFUI.ViewModels
             //    throw new InvalidOperationException("PlanetVM provided invalid OrbitDB. Planets must have a valid parent.");
             //}
 
-            //if (orbitDB.Parent.GetDataBlob<StarInfoDB>() != null)
-            //{
-            //    // Parent is a star.
-            //    ParentPlanet = null;
-            //    ParentStar = StarVM.Create(orbitDB.Parent);
-            //}
-            //else
-            //{
-            //    // Parent is a planet.
-            //    ParentPlanet = Create(orbitDB.Parent);
-            //    // Parent's parent is the star.
-            //    ParentStar = StarVM.Create(orbitDB.ParentDB.Parent);
-            //}
+            if (orbitDB.Parent.GetDataBlob<StarInfoDB>() != null)
+            {
+                // Parent is a star.
+                _parentPlanetGuid = null;
+                _parentStarGuid = orbitDB.Parent.Guid;
+            }
+            else
+            {
+                // Parent is a planet.
+                _parentPlanetGuid = orbitDB.Parent.Guid;
+                // Parent's parent is the star.
+                _parentStarGuid = orbitDB.Parent.GetDataBlob<OrbitDB>().Parent.Guid;
+            }
 
             SemiMajorAxis = orbitDB.SemiMajorAxis;
             Apoapsis = orbitDB.Apoapsis;

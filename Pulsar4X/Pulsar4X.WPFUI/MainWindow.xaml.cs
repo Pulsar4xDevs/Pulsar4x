@@ -323,7 +323,7 @@ namespace Pulsar4X.WPFUI
             try
             {
                 secondsPulsed = await Task.Run(() => App.Current.Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
-                
+                App.Current.GameVM.Refresh();
             }
             catch (Exception exception)
             {

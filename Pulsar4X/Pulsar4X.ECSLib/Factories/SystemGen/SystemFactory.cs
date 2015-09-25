@@ -105,38 +105,21 @@ namespace Pulsar4X.ECSLib
             OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, earthSemiMajAxis, earthEccentricity, earthInclination, earthLoAN, earthLoP, earthMeanLongd, _galaxyGen.Settings.J2000);
             earthBodyDB.Tectonics = TectonicActivity.EarthLike;
             earthPositionDB.Position = OrbitProcessor.GetPosition(earthOrbitDB, game.CurrentDateTime);
-            //JDictionary<AtmosphericGasSD, float> atmoGasses = new JDictionary<AtmosphericGasSD, float>();
-            //atmoGasses.Add(); bunch of guid....
-            //AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3, 57.2, atmoGasses); //what's our greenhouse factor an pressure?
+            JDictionary<AtmosphericGasSD, float> atmoGasses = new JDictionary<AtmosphericGasSD, float>();
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.78f);
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.12f);
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.01f);
+            AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
 
-            Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB });
+            Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
 
 
 
             //        public static Orbit FromMajorPlanetFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
             //                                        double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
 
-             /*
-            SystemBody Earth = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);
-            Earth.Name = "Earth";
-            Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, GalaxyGen.J2000);
-            Earth.Radius = Distance.ToAU(6378.1);
-            Earth.BaseTemperature = Temperature.ToCelsius(279.3f);  //(float)CalculateBaseTemperatureOfBody(Sun, Earth.Orbit.SemiMajorAxis);
-            Earth.Tectonics = SystemBody.TectonicActivity.EarthLike;
-            Earth.SurfaceGravity = 9.8f;
-            Earth.Atmosphere = new Atmosphere(Earth);
-            Earth.Atmosphere.Albedo = 0.306f;
-            Earth.Atmosphere.SurfaceTemperature = Earth.BaseTemperature;
-            AddGasToAtmoSafely(Earth.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(6), 0.78f);  // N
-            AddGasToAtmoSafely(Earth.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(9), 0.21f);  // O
-            AddGasToAtmoSafely(Earth.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(11), 0.01f);  // Ar
-            Earth.Atmosphere.UpdateState();
-            Earth.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
-            Earth.Position.System = Sol;
-            Earth.Position.X = x;
-            Earth.Position.Y = y;
-            sun.Planets.Add(Earth);
-
+    
+            /*
             SystemBody Moon = new SystemBody(Earth, SystemBody.PlanetType.Moon);
             Moon.Name = "Moon";
             Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, Distance.ToAU(384748), 0.0549006, 0, 0, 0, 0, GalaxyGen.J2000);

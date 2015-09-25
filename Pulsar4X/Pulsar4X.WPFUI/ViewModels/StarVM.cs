@@ -29,6 +29,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         #region Stars Properties
 
         private string _name;
+        public string Name { get { return _name; } }
 
         private Guid _id;
 
@@ -85,6 +86,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         private StarVM(Entity entity)
         {
             Entity = entity;
+            _name = entity.GetDataBlob<NameDB>().DefaultName;
         }
 
         /// <summary>
@@ -141,7 +143,8 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         public void Refresh(bool partialRefresh = false)
         {
-            _position = Entity.GetDataBlob<PositionDB>().Position;           
+            _position = Entity.GetDataBlob<PositionDB>().Position;   
+            
         }
 
         public void Init(SystemVM systemVM)

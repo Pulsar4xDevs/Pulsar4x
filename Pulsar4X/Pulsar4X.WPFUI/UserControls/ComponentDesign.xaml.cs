@@ -55,6 +55,8 @@ namespace Pulsar4X.WPFUI
                 if(vm.GuiControl != null)
                     AbilityStackPanel.Children.Add(vm.GuiControl);
             }
+
+
         }
     }
 }

@@ -18,6 +18,8 @@ namespace Pulsar4X.WPFUI
         private SystemVM systemVM;
         private Canvas _canvas;
 
+        private Dictionary<string, int> _canvasItemIndexes = new Dictionary<string, int>(); 
+
         private double canvasCenterH
         {
             get { return _canvas.ActualHeight / 2; }
@@ -50,7 +52,35 @@ namespace Pulsar4X.WPFUI
 
         private void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            PlanetVM planet = (PlanetVM)sender;
+            var planetItem = MapCanvas.Children[_canvasItemIndexes[planet.Name]];
+            int size = 10;
+            Point newPos = GetPosition(planet);
+            Canvas.SetLeft(planetItem, newPos.X - size / 2);
+            Canvas.SetTop(planetItem, newPos.Y - size / 2);
             MapCanvas.UpdateLayout();
+        }
+
+        private Point GetPosition(PlanetVM planet)
+        {
+
+            Point parentPos;
+            if (planet.ParentPlanet != null)
+                parentPos = GetPosition(planet.ParentPlanet);
+            else
+                parentPos = GetPosition(planet.ParentStar);
+
+            double planetLeftPos = zoom * (parentPos.X + planet.Position.X) + canvasCenterW;
+            double planetTopPos = zoom * (parentPos.Y + planet.Position.Y) + canvasCenterH;
+
+            return new Point(planetLeftPos, planetTopPos);
+        }
+
+        private Point GetPosition(StarVM star)
+        {
+            double leftPos = zoom * star.Position.X + canvasCenterW;
+            double topPos = zoom * star.Position.Y + canvasCenterH;
+            return new Point(leftPos, topPos);
         }
 
         private void system_PropertyChanged(object sender, System.ComponentModel.PropertyChangingEventArgs e)
@@ -65,29 +95,29 @@ namespace Pulsar4X.WPFUI
             MapCanvas.Children.Clear();
             foreach (var star in systemVM.Stars)
             {
-                double leftPos = zoom * star.Position.X + canvasCenterW;
-                double topPos = zoom * star.Position.Y + canvasCenterH;
-                DrawBody(20, Brushes.DarkOrange, leftPos, topPos);
+
+                Point starPos = GetPosition(star);
+                MapCanvas.Children.Add(DrawBody(20, Brushes.DarkOrange, starPos));
+                _canvasItemIndexes.Add(star.Name,MapCanvas.Children.Count);
                 foreach (var planet in star.ChildPlanets)
                 {
 
-                    double planetLeftPos = zoom * (star.Position.X + planet.Position.X) + canvasCenterW;
-                    double planetTopPos = zoom * (star.Position.Y + planet.Position.Y) + canvasCenterH;
-                    DrawBody(10, Brushes.DarkGreen, planetLeftPos, planetTopPos);
-
-                    DrawOrbit(leftPos, topPos, planet);
-
-                    DrawDebugLines(leftPos, topPos, planetLeftPos, planetTopPos, planet);
+                    Point planetPos = GetPosition(planet);
+                    MapCanvas.Children.Add(DrawBody(10, Brushes.DarkGreen, planetPos));
+                    _canvasItemIndexes.Add(planet.Name, MapCanvas.Children.Count);
+                    DrawOrbit(starPos, planet);
+                    planet.PropertyChanged += planet_PropertyChanged;
+                    DrawDebugLines(starPos, planetPos, planet);
                 }
             }
         }
 
 
-        private void DrawOrbit(double starLeftPos, double starTopPos, PlanetVM planet)
+        private void DrawOrbit(Point parentPosition, PlanetVM planet)
         {
 
             double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode); // if inclination is 0
-            Point periapsis = new Point(starLeftPos + Math.Sin(arcRotAngle) * zoom * planet.Periapsis, starTopPos + Math.Cos(arcRotAngle) * zoom * planet.Periapsis);
+            Point periapsis = new Point(parentPosition.X + Math.Sin(arcRotAngle) * zoom * planet.Periapsis, parentPosition.Y + Math.Cos(arcRotAngle) * zoom * planet.Periapsis);
             Vector tangent = new Vector(Math.Cos(arcRotAngle), -Math.Sin(arcRotAngle));
             Point arcStart = periapsis-tangent;
             Point arcEnd = periapsis+tangent;
@@ -115,38 +145,41 @@ namespace Pulsar4X.WPFUI
             MapCanvas.Children.Add(orbitPath);
         }
 
-        private void DrawBody(int size, Brush color, double leftPos, double topPos)
+        private Ellipse DrawBody(int size, Brush color, Point position)
         {
             Ellipse bodyEllipse = new Ellipse();
+            //bodyEllipse.Name 
             bodyEllipse.Height = size;
             bodyEllipse.Width = size;
             bodyEllipse.Fill = color;
 
-            MapCanvas.Children.Add(bodyEllipse);
-            Canvas.SetLeft(bodyEllipse, leftPos - size / 2);
-            Canvas.SetTop(bodyEllipse, topPos - size / 2);
+            
+            Canvas.SetLeft(bodyEllipse, position.X - size / 2);
+            Canvas.SetTop(bodyEllipse, position.Y - size / 2);
+
+            return bodyEllipse;
         }
 
-        private void DrawDebugLines(double starLeftPos, double starTopPos, double leftPos, double topPos, PlanetVM planet)
+        private void DrawDebugLines(Point parentPos, Point position, PlanetVM planet)
         {
             Line trueAnomoly = new Line();
             trueAnomoly.Stroke = Brushes.Magenta;
-            trueAnomoly.X1 = starLeftPos;
-            trueAnomoly.Y1 = starTopPos;
-            trueAnomoly.X2 = leftPos;
-            trueAnomoly.Y2 = topPos;
+            trueAnomoly.X1 = parentPos.X;
+            trueAnomoly.Y1 = parentPos.Y;
+            trueAnomoly.X2 = position.X;
+            trueAnomoly.Y2 = position.Y;
             trueAnomoly.StrokeThickness = 1;
             //MapCanvas.Children.Add(trueAnomoly);
 
 
             Line periapsis = new Line();
             periapsis.Stroke = Brushes.Cyan;
-            periapsis.X1 = starLeftPos;
-            periapsis.Y1 = starTopPos;
+            periapsis.X1 = parentPos.X;
+            periapsis.Y1 = parentPos.Y;
             double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode);
 
-            periapsis.X2 = starLeftPos + Math.Sin(arcRotAngle) * zoom * planet.Periapsis;
-            periapsis.Y2 = starTopPos + Math.Cos(arcRotAngle) * zoom * planet.Periapsis;
+            periapsis.X2 = parentPos.X + Math.Sin(arcRotAngle) * zoom * planet.Periapsis;
+            periapsis.Y2 = parentPos.Y + Math.Cos(arcRotAngle) * zoom * planet.Periapsis;
             periapsis.StrokeThickness = 1;
             MapCanvas.Children.Add(periapsis);
 

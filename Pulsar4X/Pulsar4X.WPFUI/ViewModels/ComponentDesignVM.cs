@@ -84,7 +84,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         private void GuiTextSetup()
         {
             TextBox guiTextBlock = new TextBox();
-
+            guiTextBlock.IsReadOnly = true;
             GuiControl = guiTextBlock;
         }
 
