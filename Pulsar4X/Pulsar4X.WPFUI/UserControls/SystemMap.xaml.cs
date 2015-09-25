@@ -9,6 +9,32 @@ using Pulsar4X.WPFUI.ViewModels;
 
 namespace Pulsar4X.WPFUI
 {
+
+    public static class Conversions
+    {
+        public static Point PointFromVector(Vector vector)
+        {
+            return new Point(vector.X, vector.Y);
+        }
+        /// <summary>
+        /// looses Z and W
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static Point PointFromVector(Vector4 vector)
+        {
+            return new Point(vector.X, vector.Y);
+        }
+        /// <summary>
+        /// looses Z and W
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static Vector VectorFromVector4(Vector4 vector)
+        {
+            return new Vector(vector.X, vector.Y);
+        }
+    }
     /// <summary>
     /// Interaction logic for SystemWindow.xaml
     /// </summary>
@@ -20,14 +46,9 @@ namespace Pulsar4X.WPFUI
 
         private Dictionary<string, int> _canvasItemIndexes = new Dictionary<string, int>(); 
 
-        private double canvasCenterH
+        private Vector CanvasOffset
         {
-            get { return _canvas.ActualHeight / 2; }
-        }
-
-        private double canvasCenterW
-        {
-            get { return _canvas.ActualWidth / 2; }
+            get { return new Vector(_canvas.ActualWidth/2, _canvas.ActualHeight / 2);}
         }
 
         private double zoom = 100;
@@ -61,26 +82,41 @@ namespace Pulsar4X.WPFUI
             MapCanvas.UpdateLayout();
         }
 
+        private Vector GetRawPosition(StarVM star)
+        {
+            Vector parentPos = new Vector();
+            if (star.ParentStar != null)
+            {
+                parentPos = GetRawPosition(star.ParentStar);
+            }
+            return Conversions.VectorFromVector4(star.Position) + parentPos;           
+        }
+
+        private Vector GetRawPosition(PlanetVM planet)
+        {
+            Vector parentPos = new Vector();
+            if (planet.ParentPlanet != null)
+            {
+                parentPos = GetRawPosition(planet.ParentPlanet);
+            }
+            else
+            {
+                parentPos = GetRawPosition(planet.ParentStar);
+            }
+
+            return Conversions.VectorFromVector4(planet.Position) + parentPos;
+        }
+
         private Point GetPosition(PlanetVM planet)
         {
-
-            Point parentPos;
-            if (planet.ParentPlanet != null)
-                parentPos = GetPosition(planet.ParentPlanet);
-            else
-                parentPos = GetPosition(planet.ParentStar);
-
-            double planetLeftPos = zoom * (parentPos.X + planet.Position.X) + canvasCenterW;
-            double planetTopPos = zoom * (parentPos.Y + planet.Position.Y) + canvasCenterH;
-
-            return new Point(planetLeftPos, planetTopPos);
+            Vector pos = zoom * GetRawPosition(planet) + CanvasOffset;
+            return Conversions.PointFromVector(pos);
         }
 
         private Point GetPosition(StarVM star)
         {
-            double leftPos = zoom * star.Position.X + canvasCenterW;
-            double topPos = zoom * star.Position.Y + canvasCenterH;
-            return new Point(leftPos, topPos);
+            Vector pos = zoom * GetRawPosition(star) + CanvasOffset;
+            return Conversions.PointFromVector(pos);
         }
 
         private void system_PropertyChanged(object sender, System.ComponentModel.PropertyChangingEventArgs e)
@@ -101,7 +137,6 @@ namespace Pulsar4X.WPFUI
                 _canvasItemIndexes.Add(star.Name,MapCanvas.Children.Count);
                 foreach (var planet in star.ChildPlanets)
                 {
-
                     Point planetPos = GetPosition(planet);
                     MapCanvas.Children.Add(DrawBody(10, Brushes.DarkGreen, planetPos));
                     _canvasItemIndexes.Add(planet.Name, MapCanvas.Children.Count);

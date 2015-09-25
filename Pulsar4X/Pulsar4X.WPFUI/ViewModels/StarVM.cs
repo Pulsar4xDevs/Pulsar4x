@@ -22,7 +22,22 @@ namespace Pulsar4X.WPFUI.ViewModels
         // the stars parent system and star (if it is not the root/primary star of the system) 
         private SystemVM _system;
 
+        public StarVM ParentStar
+        {
+            get
+            {
+                if (_parentStar == null && _parentStarGuid != null)
+                    _parentStar = App.Current.GameVM.GetSystem(Entity.Guid).GetStar((Guid)_parentStarGuid);
+                return _parentStar;
+            }
+            set
+            {
+                _parentStar = value;
+                OnPropertyChanged();
+            }
+        }
         private StarVM _parentStar;
+        private Guid? _parentStarGuid;
 
         #endregion
 
@@ -152,6 +167,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             _system = systemVM;
             _childStars = new BindingList<StarVM>();
             _childPlanets = new BindingList<PlanetVM>();
+            if (Entity.GetDataBlob<OrbitDB>().Parent != null)
+                _parentStarGuid = Entity.GetDataBlob<OrbitDB>().Parent.Guid;
             foreach (var childOrbit in Entity.GetDataBlob<OrbitDB>().Children)
             {
                 if(childOrbit.HasDataBlob<StarInfoDB>())

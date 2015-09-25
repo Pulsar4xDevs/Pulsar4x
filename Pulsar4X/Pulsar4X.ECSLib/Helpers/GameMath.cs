@@ -23,6 +23,9 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+
+
+
     /// <summary>
     /// Small helper class for Temperature unit conversions
     /// </summary>
@@ -355,4 +358,6 @@ namespace Pulsar4X.ECSLib
             Max = max;
         }
     }
+
+    
 }
