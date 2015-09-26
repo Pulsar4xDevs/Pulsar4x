@@ -10,10 +10,14 @@ namespace Pulsar4X.WPFUI.ViewModels
 {
     public class SystemVM
     {
+        private BindingList<StarVM> _stars;
+        public BindingList<StarVM> Stars { get { return _stars;} }
         public List<StarVM> StarList { get { return _starDictionary.Values.ToList(); } } 
         private StarVM _parentStar;
         public StarVM ParentStar { get { return _parentStar;} }
 
+        private BindingList<PlanetVM> _planets;
+        public BindingList<PlanetVM> Planets { get { return _planets;} }
         public List<PlanetVM> PlanetList { get { return _planetDictionary.Values.ToList(); } } 
         private string _name;
         public string Name { get { return _name;} }
@@ -55,6 +59,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             {
                 StarVM starVM = StarVM.Create(starGuid, this);
                 _starDictionary.Add(starGuid, starVM);
+                if(!_stars.Contains(starVM))
+                    _stars.Add(starVM);
             }
             return _starDictionary[starGuid];
         }
@@ -77,6 +83,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             if (!_planetDictionary.ContainsKey(planetGuid))
             {
                 PlanetVM planetVM = PlanetVM.Create(planetGuid);
+                if (!_planets.Contains(planetVM))
+                    _planets.Add(planetVM);
                 _planetDictionary.Add(planetGuid, planetVM);
             }
             return _planetDictionary[planetGuid];
@@ -103,6 +111,8 @@ namespace Pulsar4X.WPFUI.ViewModels
         {
             _name = starSystem.NameDB.DefaultName;
             StarSystem = starSystem;
+            _stars = new BindingList<StarVM>();
+            _planets = new BindingList<PlanetVM>();
             _starDictionary = new Dictionary<Guid, StarVM>();
             _planetDictionary = new Dictionary<Guid, PlanetVM>();
             //find most massive star, this is the parent.
@@ -111,6 +121,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             foreach (var star in starSystem.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>())
             {
                 StarVM starVM = StarVM.Create(star, this);
+                if(!_stars.Contains(starVM))
+                    _stars.Add(starVM);
                 if(!_starDictionary.ContainsKey(star.Guid))
                     _starDictionary.Add(star.Guid, starVM);
                 if (star.GetDataBlob<MassVolumeDB>().Mass > parentStar.GetDataBlob<MassVolumeDB>().Mass)
@@ -124,6 +136,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>())
             {
                 PlanetVM planetVM = PlanetVM.Create(planet);
+                if (!_planets.Contains(planetVM))
+                    _planets.Add(planetVM);
                 if(!_planetDictionary.ContainsKey(planet.Guid))
                     _planetDictionary.Add(planet.Guid,planetVM);
                

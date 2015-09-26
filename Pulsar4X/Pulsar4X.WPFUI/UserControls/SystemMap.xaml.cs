@@ -74,15 +74,15 @@ namespace Pulsar4X.WPFUI
         private void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             PlanetVM planet = (PlanetVM)sender;
-            if (planet.Name == "Earth")
+            if (_canvasItemIndexes.ContainsKey(planet.ID) && e.PropertyName == "Position")        
             {
+                var planetItem = MapCanvas.Children[_canvasItemIndexes[planet.ID]];
+                int size = 10;
+                Point newPos = GetPosition(planet);
+                Canvas.SetLeft(planetItem, newPos.X - size / 2);
+                Canvas.SetTop(planetItem, newPos.Y - size / 2);
+                MapCanvas.UpdateLayout();
             }
-            var planetItem = MapCanvas.Children[_canvasItemIndexes[planet.ID]];
-            int size = 10;
-            Point newPos = GetPosition(planet);
-            Canvas.SetLeft(planetItem, newPos.X - size / 2);
-            Canvas.SetTop(planetItem, newPos.Y - size / 2);
-            MapCanvas.UpdateLayout();
         }
 
         private Vector GetRawPosition(StarVM star)

@@ -559,10 +559,10 @@ namespace Pulsar4X.WPFUI.ViewModels
             //    Children.Add(Create(child));
             //}
 
-            //if (orbitDB.Parent == null || orbitDB.ParentDB == null)
-            //{
-            //    throw new InvalidOperationException("PlanetVM provided invalid OrbitDB. Planets must have a valid parent.");
-            //}
+            if (orbitDB.Parent == null || orbitDB.ParentDB == null)
+            {
+                throw new InvalidOperationException("PlanetVM provided invalid OrbitDB. Planets must have a valid parent.");
+            }
 
             if (orbitDB.Parent.GetDataBlob<StarInfoDB>() != null)
             {
