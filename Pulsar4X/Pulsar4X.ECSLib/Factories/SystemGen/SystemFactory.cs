@@ -52,7 +52,8 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Creates our own solar system.
-        /// This probibly needs to be Json!
+        /// This probibly needs to be Json! (since we're getting atmo stuff)
+        /// Adds sol to game.StarSystems.
         /// </summary>
         public StarSystem CreateSol(Game game)
         {
@@ -208,6 +209,7 @@ namespace Pulsar4X.ECSLib
             GameState.Instance.StarSystems.Add(Sol);
             GameState.Instance.StarSystemCurrentIndex++;
             */
+            game.StarSystems.Add(sol);
             game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(sol);
             return sol;
         }
@@ -218,6 +220,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Creates an test system with planets of varying eccentricity.
+        /// Adds to game.StarSystems
         /// </summary>
         public StarSystem CreateEccTest(Game game)
         {
@@ -245,12 +248,14 @@ namespace Pulsar4X.ECSLib
                 planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
+            game.StarSystems.Add(system);
             game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(system);
             return system;
         }
 
         /// <summary>
         /// Creates an test system with planets of varying longitude of periapsis.
+        /// Adds to game.StarSystem.
         /// </summary>
         public StarSystem CreateLongitudeTest(Game game) {
             StarSystem system = new StarSystem(game, "Longitude test", -1);
@@ -277,6 +282,7 @@ namespace Pulsar4X.ECSLib
                 planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
+            game.StarSystems.Add(system);
             game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(system);
             return system;
         }
