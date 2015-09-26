@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Pulsar4X.ECSLib;
@@ -10,14 +11,14 @@ namespace Pulsar4X.WPFUI.ViewModels
     public class SystemVM
     {
         private BindingList<StarVM> _stars;
-        public BindingList<StarVM> Stars { get { return _stars;} } 
-
+        public BindingList<StarVM> Stars { get { return _stars;} }
+        public List<StarVM> StarList { get { return _starDictionary.Values.ToList(); } } 
         private StarVM _parentStar;
         public StarVM ParentStar { get { return _parentStar;} }
 
         private BindingList<PlanetVM> _planets;
-        public BindingList<PlanetVM> Planets { get { return _planets;} } 
-
+        public BindingList<PlanetVM> Planets { get { return _planets;} }
+        public List<PlanetVM> PlanetList { get { return _planetDictionary.Values.ToList(); } } 
         private string _name;
         public string Name { get { return _name;} }
 

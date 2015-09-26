@@ -132,7 +132,8 @@ namespace Pulsar4X.WPFUI
             if (systemVM == null)
                 return;
             MapCanvas.Children.Clear();
-            foreach (var star in systemVM.Stars)
+            _canvasItemIndexes = new Dictionary<Guid, int>();
+            foreach (var star in systemVM.StarList)
             {
 
                 Point starPos = GetPosition(star);

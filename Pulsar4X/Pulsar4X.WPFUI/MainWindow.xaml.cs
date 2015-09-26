@@ -320,16 +320,16 @@ namespace Pulsar4X.WPFUI
 
             int secondsPulsed;
 
-            try
-            {
+            //try
+            //{
                 secondsPulsed = await Task.Run(() => App.Current.Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
                 App.Current.GameVM.Refresh();
-            }
-            catch (Exception exception)
-            {
-                DisplayException("executing a pulse", exception);
-            }
-            e.Handled = true;
+            //}
+            //catch (Exception exception)
+            //{
+            //    DisplayException("executing a pulse", exception);
+            //}
+            //e.Handled = true;
         }
 
         private void DisplayException(string activity, Exception exception)
