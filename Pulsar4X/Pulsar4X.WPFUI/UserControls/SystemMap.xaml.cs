@@ -138,12 +138,12 @@ namespace Pulsar4X.WPFUI
 
                 Point starPos = GetPosition(star);
                 MapCanvas.Children.Add(DrawBody(20, Brushes.DarkOrange, starPos));
-                _canvasItemIndexes.Add(star.ID,MapCanvas.Children.Count);
+                _canvasItemIndexes.Add(star.ID,MapCanvas.Children.Count -1);
                 foreach (var planet in star.ChildPlanets)
                 {
                     Point planetPos = GetPosition(planet);
                     MapCanvas.Children.Add(DrawBody(10, Brushes.DarkGreen, planetPos));
-                    _canvasItemIndexes.Add(planet.ID, MapCanvas.Children.Count);
+                    _canvasItemIndexes.Add(planet.ID, MapCanvas.Children.Count -1);
                     DrawOrbit(starPos, planet);
                     planet.PropertyChanged += planet_PropertyChanged;
                     DrawDebugLines(starPos, planetPos, planet);
