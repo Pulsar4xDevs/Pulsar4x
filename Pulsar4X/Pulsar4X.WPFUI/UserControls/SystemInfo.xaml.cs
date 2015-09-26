@@ -20,7 +20,7 @@ namespace Pulsar4X.WPFUI
         private void SystemSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SystemVM systemVM = (SystemVM)SystemSelection.SelectedItem;
-            SystemView_DataGrid.ItemsSource = App.Current.GameVM.GetSystem(systemVM.ID).Planets;
+            SystemView_DataGrid.ItemsSource = App.Current.GameVM.GetSystem(systemVM.ID).PlanetList;
         }
     }
 }
