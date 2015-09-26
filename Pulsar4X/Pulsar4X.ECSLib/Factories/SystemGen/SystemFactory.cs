@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace Pulsar4X.ECSLib
 {
@@ -44,7 +45,7 @@ namespace Pulsar4X.ECSLib
             //JumpPointFactory.GenerateJumpPoints(newSystem, numJumpPoints);
 
             //add this system to the GameMaster's Known Systems list.
-            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(newSystem);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem);
             return newSystem;
         }
 
@@ -88,7 +89,7 @@ namespace Pulsar4X.ECSLib
             double venusLoAN = 76.68069;
             double venusLoP = 131.53298;
             double venusMeanLongd = 181.97973;
-            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, mercuryMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, _galaxyGen.Settings.J2000);
+            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, _galaxyGen.Settings.J2000);
             venusPositionDB.Position = OrbitProcessor.GetPosition(venusOrbitDB, game.CurrentDateTime);
             Entity venus = new Entity(sol.SystemManager, new List<BaseDataBlob> { venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
 
@@ -114,22 +115,28 @@ namespace Pulsar4X.ECSLib
 
             Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
 
+            PositionDB moonPositionDB = new PositionDB();
+            SystemBodyDB moonBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.ToAU(1738.14));
+            NameDB moonNameDB = new NameDB("Venus");
+            double moonSemiMajAxis = 0.3844;
+            double moonEccentricity = 0.0549;
+            double moonInclination = 0;
+            double moonLoAN = 125.08;
+            double moonLoP = 318.0634; //check
+            double moonMeanAnomaly = 115.3654; //check
+            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(earth, earthMVDB.Mass, moonMVDB.Mass, moonSemiMajAxis, moonEccentricity, moonInclination, moonLoAN, moonLoP, moonMeanAnomaly, _galaxyGen.Settings.J2000);
+            moonPositionDB.Position = OrbitProcessor.GetPosition(moonOrbitDB, game.CurrentDateTime);
+            Entity moon = new Entity(sol.SystemManager, new List<BaseDataBlob> { moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
 
+            //public static OrbitDB FromAsteroidFormat([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis, double eccentricity, double inclination,
+                                               // double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
 
             //        public static Orbit FromMajorPlanetFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
             //                                        double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
 
     
             /*
-            SystemBody Moon = new SystemBody(Earth, SystemBody.PlanetType.Moon);
-            Moon.Name = "Moon";
-            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, Distance.ToAU(384748), 0.0549006, 0, 0, 0, 0, GalaxyGen.J2000);
-            Moon.Radius = Distance.ToAU(1738.14);
-            Moon.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
-            Moon.Position.System = Sol;
-            Moon.Position.X = Earth.Position.X + x;
-            Moon.Position.Y = Earth.Position.Y + y;
-            Earth.Moons.Add(Moon);
 
             SystemBody Mars = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);
             Mars.Name = "Mars";
@@ -210,7 +217,7 @@ namespace Pulsar4X.ECSLib
             GameState.Instance.StarSystemCurrentIndex++;
             */
             game.StarSystems.Add(sol);
-            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(sol);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol);
             return sol;
         }
 
@@ -249,7 +256,7 @@ namespace Pulsar4X.ECSLib
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.StarSystems.Add(system);
-            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(system);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system);
             return system;
         }
 
@@ -283,7 +290,7 @@ namespace Pulsar4X.ECSLib
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.StarSystems.Add(system);
-            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(system);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system);
             return system;
         }
 

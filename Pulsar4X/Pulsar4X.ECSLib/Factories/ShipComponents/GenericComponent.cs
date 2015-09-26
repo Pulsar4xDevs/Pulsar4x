@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionTech">this factions TechDB</param>
         /// <param name="staticData">the game staticData</param>
         /// <returns></returns>
-        public static ComponentDesignDB StaticToDesign(ComponentSD component, TechDB factionTech, StaticDataStore staticData)
+        public static ComponentDesignDB StaticToDesign(ComponentSD component, FactionTechDB factionTech, StaticDataStore staticData)
         {
             ComponentDesignDB design = new ComponentDesignDB();
 
@@ -121,7 +121,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="componentDesign"></param>
         /// <param name="factionTech"></param>
         /// <returns></returns>
-        public static Entity DesignToEntity(EntityManager systemeEntityManager, ComponentDesignDB componentDesign, TechDB factionTech)
+        public static Entity DesignToEntity(EntityManager systemeEntityManager, ComponentDesignDB componentDesign, FactionTechDB factionTech)
         {
             //TODO probilby do checking to see if valid here?
             Entity component = new Entity(systemeEntityManager);

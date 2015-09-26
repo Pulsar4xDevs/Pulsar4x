@@ -91,7 +91,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(1, game.Systems.Count);
             Assert.AreEqual(testTime, game.CurrentDateTime);
-            List<Entity> entities = game.GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>();
+            List<Entity> entities = game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
             Assert.AreEqual(3, entities.Count);
             entities = game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>();
             Assert.AreEqual(2, entities.Count);

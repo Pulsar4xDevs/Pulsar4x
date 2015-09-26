@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
             SpeciesDB speciesDB = CreateSpeciesDB_Human();
             var blobs = new List<BaseDataBlob> {name, speciesDB};
             Entity species = new Entity(systemEntityManager, blobs);
-            faction.GetDataBlob<FactionDB>().Species.Add(species);
+            faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
             return species;
         }
 
@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
             SpeciesDB speciesDB = CreateSpeciesDB_FromPlanet(planetEntity);
             var blobs = new List<BaseDataBlob> {name, speciesDB};
             Entity species = new Entity(systemEntityManager, blobs);
-            faction.GetDataBlob<FactionDB>().Species.Add(species);
+            faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
             return species;
         }
 

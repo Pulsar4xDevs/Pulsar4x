@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
             JDictionary<Guid,int> rates = new JDictionary<Guid, int>();
             foreach (var mine in mines)
             {
-                foreach (var kvp in mine.GetDataBlob<MineResourcesDB>().ResourcesPerMonth)
+                foreach (var kvp in mine.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick)
                 {
                     rates.SafeValueAdd(kvp.Key,kvp.Value);
                 }                

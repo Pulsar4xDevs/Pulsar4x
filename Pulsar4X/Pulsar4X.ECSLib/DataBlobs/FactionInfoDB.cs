@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class FactionDB : BaseDataBlob
+    public class FactionInfoDB : BaseDataBlob
     {
         [PublicAPI]
         public List<Entity> Species
@@ -51,13 +51,13 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private List<Entity> _shipClasses;
 
-        public FactionDB()
+        public FactionInfoDB()
             : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>(), new List<Entity>() )
         {
 
         }
 
-        public FactionDB(
+        public FactionInfoDB(
             List<Entity> species,
             List<StarSystem> knownSystems,
             List<Entity> colonies,
@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
         }
         
 
-        public FactionDB(FactionDB factionDB)
+        public FactionInfoDB(FactionInfoDB factionDB)
         {
             Species = new List<Entity>(factionDB.Species);
             KnownSystems = new List<StarSystem>(factionDB.KnownSystems);
@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new FactionDB(this);
+            return new FactionInfoDB(this);
         }
     }
 }

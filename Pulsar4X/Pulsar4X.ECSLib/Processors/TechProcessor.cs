@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
         /// maybe techsd should link up as well as down. it would make this more efficent, but harder on the modder. 
         /// </summary>
         /// <param name="techdb"></param>
-        internal static void MakeResearchable(TechDB techdb)
+        internal static void MakeResearchable(FactionTechDB techdb)
         {
             foreach (var kvpTech in techdb.UnavailableTechs)
             {
@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
         /// <param name="research"></param>
-        public static void ApplyTech(TechDB factionTechs, TechSD research)
+        public static void ApplyTech(FactionTechDB factionTechs, TechSD research)
         {
 
 
@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
             MakeResearchable(factionTechs);
         }
 
-        public static double DataFormula(TechDB factionTechs, TechSD tech)
+        public static double DataFormula(FactionTechDB factionTechs, TechSD tech)
         {
             string stringExpression = tech.DataFormula;
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
             return (double)result;
         }
 
-        public static Expression DataExpression(TechDB factionTechs, TechSD tech)
+        public static Expression DataExpression(FactionTechDB factionTechs, TechSD tech)
         {
             string stringExpression = tech.DataFormula;
 
@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
             return expression;
         }
 
-        public static int CostFormula(TechDB factionTechs, TechSD tech)
+        public static int CostFormula(FactionTechDB factionTechs, TechSD tech)
         {
             string stringExpression = tech.CostFormula;
 

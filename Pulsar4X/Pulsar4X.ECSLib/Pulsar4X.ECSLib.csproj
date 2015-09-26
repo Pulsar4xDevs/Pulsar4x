@@ -77,6 +77,7 @@
     <Compile Include="DataBlobs\AbilityDBs\FuelUseDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\MineResources.cs" />
     <Compile Include="DataBlobs\AbilityDBs\MissileLauncherSize.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\ResearchPointsDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorSignatureDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorStrengthDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ComponentInfoDB.cs" />
@@ -88,7 +89,7 @@
     <Compile Include="DataBlobs\CommanderBonusDB.cs" />
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
-    <Compile Include="DataBlobs\TechDB.cs" />
+    <Compile Include="DataBlobs\FactionTechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
     <Compile Include="Factories\ShipComponents\GenericComponent.cs" />
     <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
@@ -115,7 +116,7 @@
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
-    <Compile Include="DataBlobs\FactionDB.cs" />
+    <Compile Include="DataBlobs\FactionInfoDB.cs" />
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
     <Compile Include="DataBlobs\StarInfoDB.cs" />

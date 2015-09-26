@@ -25,10 +25,10 @@ namespace Pulsar4X.Tests
 
             var requiredDataBlobs = new List<Type>()
             {
-                typeof(FactionDB),
+                typeof(FactionInfoDB),
                 typeof(FactionAbilitiesDB),
                 typeof(NameDB),
-                typeof(TechDB)
+                typeof(FactionTechDB)
             };
 
             Entity faction = FactionFactory.CreateFaction(_game, factionName);
@@ -62,7 +62,7 @@ namespace Pulsar4X.Tests
 
             //Entity colony = ColonyFactory.CreateColony(faction, planet);
             ColonyFactory.CreateColony(faction, species, planet);
-            Entity colony = faction.GetDataBlob<FactionDB>().Colonies[0];
+            Entity colony = faction.GetDataBlob<FactionInfoDB>().Colonies[0];
             ColonyInfoDB colonyInfoDB = colony.GetDataBlob<ColonyInfoDB>();
             //NameDB nameDB = colony.GetDataBlob<NameDB>();
 

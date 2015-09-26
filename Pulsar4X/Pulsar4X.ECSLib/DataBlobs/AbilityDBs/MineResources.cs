@@ -7,8 +7,8 @@ namespace Pulsar4X.ECSLib
     public class MineResourcesDB : BaseDataBlob
     {
 
-        private JDictionary<Guid, int> _resourcesPerMonth;
-        public JDictionary<Guid, int> ResourcesPerMonth { get { return _resourcesPerMonth; } internal set { _resourcesPerMonth = value; } }
+        private JDictionary<Guid, int> _resourcesPerEconTick;
+        public JDictionary<Guid, int> ResourcesPerEconTick { get { return _resourcesPerEconTick; } internal set { _resourcesPerEconTick = value; } }
 
         public MineResourcesDB()
         {
@@ -20,16 +20,16 @@ namespace Pulsar4X.ECSLib
         /// <param name="resources">values will be cast to ints!</param>
         public MineResourcesDB(Dictionary<Guid,double> resources)
         {
-            _resourcesPerMonth = new JDictionary<Guid, int>();
+            _resourcesPerEconTick = new JDictionary<Guid, int>();
             foreach (var kvp in resources)
             {
-                _resourcesPerMonth.Add(kvp.Key,(int)kvp.Value);
+                _resourcesPerEconTick.Add(kvp.Key,(int)kvp.Value);
             }
         }
 
         public MineResourcesDB(MineResourcesDB db)
         {
-            _resourcesPerMonth = db.ResourcesPerMonth;
+            _resourcesPerEconTick = db.ResourcesPerEconTick;
         }
 
         public override object Clone()

@@ -13,12 +13,12 @@ namespace Pulsar4X.WPFUI.ViewModels
     class ComponentDesignVM
     {
         private ComponentDesignDB _design;
-        private TechDB _factionTech;
+        private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
 
         public Control SizeControl;
 
-        public ComponentDesignVM(ComponentDesignDB design, TechDB factionTech, StaticDataStore staticData)
+        public ComponentDesignVM(ComponentDesignDB design, FactionTechDB factionTech, StaticDataStore staticData)
         {
             _design = design;
             _factionTech = factionTech;
@@ -34,9 +34,9 @@ namespace Pulsar4X.WPFUI.ViewModels
     {
         public Control GuiControl;
         private ComponentDesignAbilityDB _designAbility;
-        private TechDB _factionTech;
+        private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
-        public ComponentAbilityDesignVM(ComponentDesignAbilityDB designAbility, TechDB factionTech, StaticDataStore staticData)
+        public ComponentAbilityDesignVM(ComponentDesignAbilityDB designAbility, FactionTechDB factionTech, StaticDataStore staticData)
         {
             _designAbility = designAbility;
             _factionTech = factionTech;

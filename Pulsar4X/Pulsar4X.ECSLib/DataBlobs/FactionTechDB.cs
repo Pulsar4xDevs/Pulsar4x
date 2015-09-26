@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class TechDB : BaseDataBlob
+    public class FactionTechDB : BaseDataBlob
     {
         [JsonProperty]
         private Dictionary<Guid,int> _researchedTechs;
@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
         /// Constructor for datablob, this should only be used when a new faction is created.
         /// </summary>
         /// <param name="alltechs">a list of all possible techs in game</param>
-        public TechDB(List<TechSD> alltechs)
+        public FactionTechDB(List<TechSD> alltechs)
         {
             UnavailableTechs = new Dictionary<TechSD, int>();
             foreach (var techSD in alltechs)
@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
             ResearchPoints = 0;
         }
 
-        public TechDB(TechDB techDB)
+        public FactionTechDB(FactionTechDB techDB)
         {
             UnavailableTechs = new Dictionary<TechSD, int>(techDB.UnavailableTechs);
             ResearchedTechs = new Dictionary<Guid, int>(techDB.ResearchedTechs);
@@ -95,7 +95,7 @@ namespace Pulsar4X.ECSLib
             ResearchPoints = techDB.ResearchPoints;
         }
 
-        public TechDB()
+        public FactionTechDB()
         {
             UnavailableTechs = new Dictionary<TechSD, int>();
             ResearchedTechs = new Dictionary<Guid, int>();
@@ -105,7 +105,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new TechDB(this);
+            return new FactionTechDB(this);
         }
     }
 }

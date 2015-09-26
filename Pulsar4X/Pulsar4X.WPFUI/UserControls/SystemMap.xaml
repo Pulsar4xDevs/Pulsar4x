@@ -15,7 +15,7 @@
         </Grid.ColumnDefinitions>
         <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Stretch"></GridSplitter>
 
-        <Canvas Name="MapCanvas" Grid.Column="2" Margin="0"/>
+        <Canvas Name="MapCanvas" Grid.Column="2" Margin="0" MouseWheel="MapCanvas_MouseWheel" KeyDown="MapCanvas_KeyDown"/>
         <ComboBox Name="SystemSelection" HorizontalAlignment="Left" Margin="47,133,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="SystemSelection_SelectionChanged"/>
     </Grid>
 </UserControl>

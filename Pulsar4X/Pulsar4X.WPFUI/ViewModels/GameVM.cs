@@ -22,13 +22,13 @@ namespace Pulsar4X.WPFUI.ViewModels
                 //TODO: factionDB.knownfactions need to be filled with... a blank copy of the actual faction that gets filled as the facion finds out more about it?
                 //excepting in the case of GM where the actual faction should be good. 
                 _visibleFactions = new List<Guid>();
-                foreach (var knownFaction in _playerFaction.GetDataBlob<FactionDB>().KnownFactions)
+                foreach (var knownFaction in _playerFaction.GetDataBlob<FactionInfoDB>().KnownFactions)
                 {
                     _visibleFactions.Add(knownFaction.Guid);
                 }
                 _systems = new BindingList<SystemVM>();
                 _systemDictionary = new Dictionary<Guid, SystemVM>();
-                foreach (var knownsystem in _playerFaction.GetDataBlob<FactionDB>().KnownSystems)
+                foreach (var knownsystem in _playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems)
                 {
                     SystemVM systemVM = SystemVM.Create(knownsystem);
                     _systems.Add(systemVM);

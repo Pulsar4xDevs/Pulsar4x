@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
             Entity shipClassEntity = new Entity(game.GlobalManager, shipDBList); 
 
             // also gets factionDB:
-            FactionDB factionDB = faction.GetDataBlob<FactionDB>();
+            FactionInfoDB factionDB = faction.GetDataBlob<FactionInfoDB>();
 
             // and add it to the faction:
             factionDB.ShipClasses.Add(shipClassEntity);

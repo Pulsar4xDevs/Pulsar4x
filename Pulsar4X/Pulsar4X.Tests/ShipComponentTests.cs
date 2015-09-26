@@ -26,12 +26,12 @@ namespace Pulsar4X.Tests
             _game = Game.NewGame("Test Game", DateTime.Now, 1);
             //Tech();
             _faction = FactionFactory.CreateFaction(_game, "Terran");
-            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e"),3);
-            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de"), 3);
-            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("8557acb9-c764-44e7-8ee4-db2c2cebf0bc"), 5);
-            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"), 1);
-            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"), 1);
-            _faction.GetDataBlob<TechDB>().ResearchedTechs.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e"),3);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de"), 3);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("8557acb9-c764-44e7-8ee4-db2c2cebf0bc"), 5);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"), 1);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"), 1);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
             _starSystem = new StarSystem(_game, "Sol", -1);
             /////Ship Class/////
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "TestClass");
@@ -54,7 +54,7 @@ namespace Pulsar4X.Tests
         {
             ComponentSD engine = EngineComponentSD();
 
-            ComponentDesignDB design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<TechDB>(), _game.StaticData);
+            ComponentDesignDB design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
 
             foreach (var ability in design.ComponentDesignAbilities)
             {
@@ -74,7 +74,7 @@ namespace Pulsar4X.Tests
 
             design.ComponentDesignAbilities[0].SetValueFromInput(250);
 
-            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, design, _faction.GetDataBlob<TechDB>());
+            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, design, _faction.GetDataBlob<FactionTechDB>());
 
             Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
 
@@ -89,11 +89,11 @@ namespace Pulsar4X.Tests
         {
             ComponentSD mine = MineInstallation();
 
-            ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<TechDB>(), _game.StaticData);
+            ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             mineDesign.ComponentDesignAbilities[0].SetValue();
-            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, mineDesign, _faction.GetDataBlob<TechDB>());
+            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, mineDesign, _faction.GetDataBlob<FactionTechDB>());
 
-            Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerMonth.Values.ElementAt(0));
+            Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick.Values.ElementAt(0));
 
             JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
             componentsDict.Add(mine.ID, mine);

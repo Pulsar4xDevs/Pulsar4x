@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
         {
             Entity factionEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().OwningEntity; 
             FactionAbilitiesDB factionAbilities = factionEntity.GetDataBlob<FactionAbilitiesDB>();
-            TechDB factionTech = factionEntity.GetDataBlob<TechDB>();
+            FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
             Employment(staticData, colonyEntity); //check if installations still work
             Mine(staticData, factionEntity, colonyEntity); //mine new materials.
             Construction(staticData, factionEntity, colonyEntity); //construct, refine, etc.
@@ -269,7 +269,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
-        public static void DoResearch(StaticDataStore staticData, Entity colonyEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
+        public static void DoResearch(StaticDataStore staticData, Entity colonyEntity, FactionAbilitiesDB factionAbilities,  FactionTechDB factionTechs)
         {
             InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
             Dictionary<InstallationSD,int> labs = InstallationsWithAbility(staticData, installations, AbilityType.Research);

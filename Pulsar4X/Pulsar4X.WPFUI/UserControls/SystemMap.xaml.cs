@@ -141,16 +141,25 @@ namespace Pulsar4X.WPFUI
                 _canvasItemIndexes.Add(star.ID,MapCanvas.Children.Count -1);
                 foreach (var planet in star.ChildPlanets)
                 {
-                    Point planetPos = GetPosition(planet);
-                    MapCanvas.Children.Add(DrawBody(10, Brushes.DarkGreen, planetPos));
-                    _canvasItemIndexes.Add(planet.ID, MapCanvas.Children.Count -1);
-                    DrawOrbit(starPos, planet);
-                    planet.PropertyChanged += planet_PropertyChanged;
-                    DrawDebugLines(starPos, planetPos, planet);
+                    AddPlanet(planet, starPos);
                 }
             }
         }
 
+        private void AddPlanet(PlanetVM planet, Point parentPos)
+        {
+            Point planetPos = GetPosition(planet);
+            MapCanvas.Children.Add(DrawBody(10, Brushes.DarkGreen, planetPos));
+            _canvasItemIndexes.Add(planet.ID, MapCanvas.Children.Count - 1);
+            DrawOrbit(parentPos, planet);
+            planet.PropertyChanged += planet_PropertyChanged;
+            DrawDebugLines(parentPos, planetPos, planet);
+            //foreach (var childPlanet in planet.Children)
+            //{
+            //    AddPlanet(childPlanet, planetPos);
+            //}
+
+        }
 
         private void DrawOrbit(Point parentPosition, PlanetVM planet)
         {
@@ -222,6 +231,16 @@ namespace Pulsar4X.WPFUI
             periapsis.StrokeThickness = 1;
             MapCanvas.Children.Add(periapsis);
 
+
+        }
+
+        private void MapCanvas_MouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+
+        }
+
+        private void MapCanvas_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
 
         }
     }

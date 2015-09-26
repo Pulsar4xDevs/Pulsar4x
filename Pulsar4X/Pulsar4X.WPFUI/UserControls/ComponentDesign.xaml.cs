@@ -25,7 +25,7 @@ namespace Pulsar4X.WPFUI
         public string Title { get; set; }
 
         private List<ComponentDesignDB> componentDesignTemplates;
-        private TechDB _factionTech;
+        private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
 
         public ComponentDesign()
@@ -35,7 +35,7 @@ namespace Pulsar4X.WPFUI
             foreach (var componentSD in App.Current.Game.StaticData.Components.Values)
             {
 
-                _factionTech = App.Current.GameVM.PlayerFaction.GetDataBlob<TechDB>();
+                _factionTech = App.Current.GameVM.PlayerFaction.GetDataBlob<FactionTechDB>();
                 _staticData = App.Current.Game.StaticData;
                 ComponentDesignDB design = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
                 componentDesignTemplates.Add(design);                
