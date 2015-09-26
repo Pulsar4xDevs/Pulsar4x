@@ -212,7 +212,76 @@ namespace Pulsar4X.ECSLib
             return sol;
         }
 
+        #endregion
+
+        #region TestSystems
+
+        /// <summary>
+        /// Creates an test system with planets of varying eccentricity.
+        /// </summary>
+        public StarSystem CreateEccTest(Game game)
+        {
+            StarSystem system = new StarSystem(game, "Eccentricity test", -1);
+
+            Entity sun = _starFactory.CreateStar(system, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "_ecc");
+
+            MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
+
+            SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+            double planetSemiMajAxis = 0.387098;
+            double planetEccentricity = 0.205630;
+            double planetInclination = 0;
+            double planetLoAN = 48.33167;
+            double planetLoP = 77.45645;
+            double planetMeanLongd = 252.25084;
+            PositionDB planetPositionDB = new PositionDB();
+
+            for (int i = 0; i < 16; i++)
+            {
+                NameDB planetNameDB = new NameDB("planet"+i);
+                planetEccentricity = i / 16.0;
+                OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, _galaxyGen.Settings.J2000);
+                planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
+                Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+            }
+            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(system);
+            return system;
+        }
+
+        /// <summary>
+        /// Creates an test system with planets of varying longitude of periapsis.
+        /// </summary>
+        public StarSystem CreateLongitudeTest(Game game) {
+            StarSystem system = new StarSystem(game, "Longitude test", -1);
+
+            Entity sun = _starFactory.CreateStar(system, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "_lop");
+
+            MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
+
+            SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+            double planetSemiMajAxis = 0.387098;
+            double planetEccentricity = 0.9;// 0.205630;
+            double planetInclination = 0;
+            double planetLoAN = 48.33167;
+            double planetLoP = 77.45645;
+            double planetMeanLongd = 252.25084;
+            PositionDB planetPositionDB = new PositionDB();
+
+            for (int i = 0; i < 13; i++)
+            {
+                NameDB planetNameDB = new NameDB("planet"+i);
+                planetLoP = i * 15;
+                OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, _galaxyGen.Settings.J2000);
+                planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
+                Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+            }
+            game.GameMasterFaction.GetDataBlob<FactionDB>().KnownSystems.Add(system);
+            return system;
+        }
 
         #endregion
+
     }
 }

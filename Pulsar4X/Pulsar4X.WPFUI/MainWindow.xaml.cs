@@ -85,6 +85,8 @@ namespace Pulsar4X.WPFUI
                 //add sol for shits and giggles and testing
                 StarSystemFactory starfac = new StarSystemFactory(App.Current.Game);
                 starfac.CreateSol(App.Current.Game);
+                starfac.CreateEccTest(App.Current.Game);
+                starfac.CreateLongitudeTest(App.Current.Game);
                 //
                 MessageBox.Show(this, "Game Created.", "Result");
                 App.Current.GameVM = new GameVM(App.Current.Game);
