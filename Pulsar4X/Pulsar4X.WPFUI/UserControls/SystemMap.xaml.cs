@@ -44,7 +44,7 @@ namespace Pulsar4X.WPFUI
         private SystemVM systemVM;
         private Canvas _canvas;
 
-        private Dictionary<string, int> _canvasItemIndexes = new Dictionary<string, int>(); 
+        private Dictionary<Guid, int> _canvasItemIndexes = new Dictionary<Guid, int>(); 
 
         private Vector CanvasOffset
         {
@@ -74,7 +74,10 @@ namespace Pulsar4X.WPFUI
         private void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             PlanetVM planet = (PlanetVM)sender;
-            var planetItem = MapCanvas.Children[_canvasItemIndexes[planet.Name]];
+            if (planet.Name == "Earth")
+            {
+            }
+            var planetItem = MapCanvas.Children[_canvasItemIndexes[planet.ID]];
             int size = 10;
             Point newPos = GetPosition(planet);
             Canvas.SetLeft(planetItem, newPos.X - size / 2);
@@ -134,12 +137,12 @@ namespace Pulsar4X.WPFUI
 
                 Point starPos = GetPosition(star);
                 MapCanvas.Children.Add(DrawBody(20, Brushes.DarkOrange, starPos));
-                _canvasItemIndexes.Add(star.Name,MapCanvas.Children.Count);
+                _canvasItemIndexes.Add(star.ID,MapCanvas.Children.Count);
                 foreach (var planet in star.ChildPlanets)
                 {
                     Point planetPos = GetPosition(planet);
                     MapCanvas.Children.Add(DrawBody(10, Brushes.DarkGreen, planetPos));
-                    _canvasItemIndexes.Add(planet.Name, MapCanvas.Children.Count);
+                    _canvasItemIndexes.Add(planet.ID, MapCanvas.Children.Count);
                     DrawOrbit(starPos, planet);
                     planet.PropertyChanged += planet_PropertyChanged;
                     DrawDebugLines(starPos, planetPos, planet);

@@ -46,7 +46,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         private string _name;
         public string Name { get { return _name; } }
 
-        private Guid _id;
+        public Guid ID { get { return Entity.Guid; } }
 
         private string _starClass;
 

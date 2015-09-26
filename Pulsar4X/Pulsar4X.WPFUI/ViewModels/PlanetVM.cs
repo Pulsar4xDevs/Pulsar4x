@@ -26,6 +26,8 @@ namespace Pulsar4X.WPFUI.ViewModels
         }
         private Entity _entity;
 
+        public Guid ID { get { return Entity.Guid; } }
+
         #endregion
 
         #region PositionDB Properties
@@ -537,6 +539,9 @@ namespace Pulsar4X.WPFUI.ViewModels
             }
 
             Position = positionDB.Position;
+            if (Name == "Earth")
+            {
+            }
         }
 
         private void UpdateProperties([NotNull] OrbitDB orbitDB)

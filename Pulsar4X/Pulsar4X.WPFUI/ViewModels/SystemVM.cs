@@ -58,7 +58,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             {
                 StarVM starVM = StarVM.Create(starGuid, this);
                 _starDictionary.Add(starGuid, starVM);
-                _stars.Add(starVM);
+                if(!_stars.Contains(starVM))
+                    _stars.Add(starVM);
             }
             return _starDictionary[starGuid];
         }
@@ -81,7 +82,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             if (!_planetDictionary.ContainsKey(planetGuid))
             {
                 PlanetVM planetVM = PlanetVM.Create(planetGuid);
-                _planets.Add(planetVM);
+                if (!_planets.Contains(planetVM))
+                    _planets.Add(planetVM);
                 _planetDictionary.Add(planetGuid, planetVM);
             }
             return _planetDictionary[planetGuid];
@@ -118,7 +120,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             foreach (var star in starSystem.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>())
             {
                 StarVM starVM = StarVM.Create(star, this);
-                _stars.Add(starVM);
+                if(!_stars.Contains(starVM))
+                    _stars.Add(starVM);
                 if(!_starDictionary.ContainsKey(star.Guid))
                     _starDictionary.Add(star.Guid, starVM);
                 if (star.GetDataBlob<MassVolumeDB>().Mass > parentStar.GetDataBlob<MassVolumeDB>().Mass)
@@ -132,7 +135,8 @@ namespace Pulsar4X.WPFUI.ViewModels
             foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>())
             {
                 PlanetVM planetVM = PlanetVM.Create(planet);
-                _planets.Add(planetVM);
+                if (!_planets.Contains(planetVM))
+                    _planets.Add(planetVM);
                 if(!_planetDictionary.ContainsKey(planet.Guid))
                     _planetDictionary.Add(planet.Guid,planetVM);
                
@@ -156,7 +160,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             {
                 throw new GuidNotFoundException(guid);
             }
-            ECSLib.StarSystem starSystem = null;
+            StarSystem starSystem = null;
             
             for (int i = 0; i < App.Current.Game.Systems.Count; i++)
             {
