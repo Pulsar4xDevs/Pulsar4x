@@ -165,6 +165,64 @@ namespace Pulsar4X.UI.GLUtilities
             }
         }
 
+        /// <summary>
+        /// Returns the rectangular extent of this font.
+        /// </summary>
+        /// <param name="UpperLeft"></param>
+        /// <param name="BottomRight"></param>
+        public void GetExtent(out Vector2 UpperLeft, out Vector2 BottomRight)
+        {
+            UpperLeft = new Vector2((m_v3Position.X - m_v2Size.X), (m_v3Position.Y - m_v2Size.Y));
+            BottomRight = new Vector2((m_v3Position.X + m_v2Size.X), (m_v3Position.Y + m_v2Size.Y));
+        }
+
+        /// <summary>
+        /// Compares our extent to the provided one, if it is within ours, return true, if it is not return false.
+        /// </summary>
+        /// <param name="UpperLeft"></param>
+        /// <param name="BottomRight"></param>
+        public bool CompareExtent(Vector2 UpperLeft, Vector2 BottomRight)
+        {
+            //m_v3Position
+            //m_v2Size
+            Vector2 MyUpperLeft;
+            Vector2 MyBottomRight;
+            GetExtent(out MyUpperLeft, out MyBottomRight);
+
+            /// <summary>
+            /// Conditions:
+            /// Entirely to the left or right
+            /// Entirely above or below
+            /// possibly overlapping in X terms
+            /// possibly overlapping in Y terms
+            /// </summary>
+            bool inX = false;
+            bool inY = false;
+            if ((BottomRight.X < MyUpperLeft.X) || (UpperLeft.X > MyBottomRight.X))
+            {
+                return false;
+            }
+            else
+            {
+                inX = true;
+            }
+            if ((BottomRight.Y < MyUpperLeft.Y) || (UpperLeft.Y > MyBottomRight.Y))
+            {
+                return false;
+            }
+            else
+            {
+                inY = true;
+            }
+
+            if (inX == true && inY == true)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private void UpdatePositionAndSize()
         {
             Vector3 v3CharPos = new Vector3();
