@@ -116,6 +116,9 @@
     <Compile Include="UserControls\GalaticMap.xaml.cs">
       <DependentUpon>GalaticMap.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\GMControls.xaml.cs">
+      <DependentUpon>GMControls.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Intelligence.xaml.cs">
       <DependentUpon>Intelligence.xaml</DependentUpon>
     </Compile>
@@ -178,6 +181,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\GalaticMap.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\GMControls.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
