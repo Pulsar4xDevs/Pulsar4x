@@ -13,13 +13,8 @@
         </Grid.RowDefinitions>
         <ComboBox Name="ComponentSelection" Margin="10,10,10,11" SelectionChanged="ComponentSelection_SelectionChanged"/>
         <StackPanel Name="AbilityStackPanel"  Margin="10" Grid.Row="1"/>
-        <RichTextBox Name="ComponentStats" Margin="10" Grid.Row="2">
-            <FlowDocument>
-                <Paragraph>
-                    <Run Text="RichTextBox"/>
-                </Paragraph>
-            </FlowDocument>
-        </RichTextBox>
+        <TextBox Name="ComponentStats" Margin="10" Grid.Row="2">
+        </TextBox>
 
     </Grid>
 </UserControl>

@@ -188,7 +188,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="dependee"></param>
         private void MakeThisDependant(ChainedExpression dependee)
         {
-            if (!dependee.DependantExpressions.Contains(this) && !_isDependant)
+            if (!dependee.DependantExpressions.Contains(this) && _isDependant)
                 dependee.DependantExpressions.Add(this);
         }
 
@@ -198,7 +198,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="dependant"></param>
         public void AddDependee(ChainedExpression dependant)
         {
-            if (!DependantExpressions.Contains(dependant) && !dependant._isDependant)
+            if (!DependantExpressions.Contains(dependant) && dependant._isDependant)
                 DependantExpressions.Add(dependant);
         }
 
@@ -238,7 +238,7 @@ namespace Pulsar4X.ECSLib
             }
             if (name == "Crew")
             {
-                MakeThisDependant(_design.SizeFormula);
+                MakeThisDependant(_design.CrewFormula);
                 args.Result = _design.CrewReqValue;
             }
             if (name == "HTK")

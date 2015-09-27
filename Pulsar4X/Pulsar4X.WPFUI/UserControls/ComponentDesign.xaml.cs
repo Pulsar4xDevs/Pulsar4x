@@ -28,6 +28,8 @@ namespace Pulsar4X.WPFUI
         private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
 
+        private ComponentDesignDB selectedTemplate;
+
         public ComponentDesign()
         {                    
             InitializeComponent();
@@ -47,6 +49,7 @@ namespace Pulsar4X.WPFUI
 
         private void ComponentSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            selectedTemplate = componentDesignTemplates[ComponentSelection.SelectedIndex];
             //ComponentDesignAbilitiesGrid.ItemsSource = componentDesignTemplates[ComponentSelection.SelectedIndex].ComponentDesignAbilities;
 
             foreach (var componentAbility in componentDesignTemplates[ComponentSelection.SelectedIndex].ComponentDesignAbilities)
@@ -54,9 +57,32 @@ namespace Pulsar4X.WPFUI
                 ComponentAbilityDesignVM vm = new ComponentAbilityDesignVM(componentAbility, _factionTech, _staticData);
                 if(vm.GuiControl != null)
                     AbilityStackPanel.Children.Add(vm.GuiControl);
+                vm.ValueChanged += OnValueChanged;
             }
+        }
+
+        private void OnValueChanged(double value)
+        {
+            Calculate();
+        }
+
+        private void Calculate()
+        {
+            string text = selectedTemplate.Name + Environment.NewLine;
+            text += "Size: " + selectedTemplate.SizeValue + Environment.NewLine;
+            text += "HTK: " + selectedTemplate.HTKValue + Environment.NewLine;
+            text += "Crew: " + selectedTemplate.CrewReqValue + Environment.NewLine;
+            text += "ResearchCost: " + selectedTemplate.ResearchCostValue + Environment.NewLine;
+            foreach (var kvp in selectedTemplate.MineralCostValues)
+            {
+                string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
+                text += mineralName + ": " + kvp.Value + Environment.NewLine;
+            }
+            text += "Credit Cost: " + selectedTemplate.CreditCostValue + Environment.NewLine;
 
 
+
+            ComponentStats.Text = text;
         }
     }
 }

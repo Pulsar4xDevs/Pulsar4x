@@ -36,6 +36,9 @@ namespace Pulsar4X.WPFUI.ViewModels
         private ComponentDesignAbilityDB _designAbility;
         private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
+
+        public event ValueChangedEventHandler ValueChanged;
+
         public ComponentAbilityDesignVM(ComponentDesignAbilityDB designAbility, FactionTechDB factionTech, StaticDataStore staticData)
         {
             _designAbility = designAbility;
@@ -79,6 +82,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             _designAbility.SetMin();
             guiSliderControl.Minimum = _designAbility.MinValue;
             GuiControl = guiSliderControl;
+            guiSliderControl.ValueChanged += OnValueChanged;
         }
 
         private void GuiTextSetup()
@@ -88,5 +92,14 @@ namespace Pulsar4X.WPFUI.ViewModels
             GuiControl = guiTextBlock;
         }
 
+        private void OnValueChanged(double value)
+        {
+            _designAbility.SetValueFromInput(value);
+
+            if (ValueChanged != null)
+            {
+                ValueChanged.Invoke(value);
+            }
+        }
     }
 }
