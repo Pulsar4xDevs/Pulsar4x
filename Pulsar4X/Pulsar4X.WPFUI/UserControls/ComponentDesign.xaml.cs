@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI.ViewModels;
 
@@ -28,7 +17,7 @@ namespace Pulsar4X.WPFUI
         private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
 
-        private ComponentDesignDB selectedTemplate;
+        private ComponentDesignVM _selectedTemplate;
 
         public ComponentDesign()
         {                    
@@ -49,40 +38,28 @@ namespace Pulsar4X.WPFUI
 
         private void ComponentSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            selectedTemplate = componentDesignTemplates[ComponentSelection.SelectedIndex];
-            //ComponentDesignAbilitiesGrid.ItemsSource = componentDesignTemplates[ComponentSelection.SelectedIndex].ComponentDesignAbilities;
+            _selectedTemplate = new ComponentDesignVM(componentDesignTemplates[ComponentSelection.SelectedIndex], _factionTech, _staticData);
 
-            foreach (var componentAbility in componentDesignTemplates[ComponentSelection.SelectedIndex].ComponentDesignAbilities)
+            foreach (var componentAbilityVM in _selectedTemplate.AbilityList)
             {
-                ComponentAbilityDesignVM vm = new ComponentAbilityDesignVM(componentAbility, _factionTech, _staticData);
-                if(vm.GuiControl != null)
-                    AbilityStackPanel.Children.Add(vm.GuiControl);
-                vm.ValueChanged += OnValueChanged;
+
+                if (componentAbilityVM.GuiControl != null)
+                    AbilityStackPanel.Children.Add(componentAbilityVM.GuiControl);
+                componentAbilityVM.ValueChanged += OnValueChanged;
             }
         }
 
         private void OnValueChanged(double value)
         {
-            Calculate();
+            ComponentStats.Text = _selectedTemplate.StatsText;
+            AbilityStats.Text = _selectedTemplate.AbilityStatsText;
         }
 
-        private void Calculate()
+        private void ButtonCreate_Click(object sender, RoutedEventArgs e)
         {
-            string text = selectedTemplate.Name + Environment.NewLine;
-            text += "Size: " + selectedTemplate.SizeValue + Environment.NewLine;
-            text += "HTK: " + selectedTemplate.HTKValue + Environment.NewLine;
-            text += "Crew: " + selectedTemplate.CrewReqValue + Environment.NewLine;
-            text += "ResearchCost: " + selectedTemplate.ResearchCostValue + Environment.NewLine;
-            foreach (var kvp in selectedTemplate.MineralCostValues)
-            {
-                string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
-                text += mineralName + ": " + kvp.Value + Environment.NewLine;
-            }
-            text += "Credit Cost: " + selectedTemplate.CreditCostValue + Environment.NewLine;
-
-
-
-            ComponentStats.Text = text;
+            GenericComponentFactory.DesignToEntity(App.Current.Game.GlobalManager, _selectedTemplate.DesignDB, _factionTech);
         }
+
+
     }
 }

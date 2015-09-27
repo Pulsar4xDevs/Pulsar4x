@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using NCalc;
-using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {
@@ -51,7 +50,7 @@ namespace Pulsar4X.ECSLib
                     return (int)(double)Result;
                 else
                 {
-                    throw new Exception("Unexpected Result data Type - not double or int");  
+                    throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or int");  
                 }
             }
         }
@@ -71,7 +70,7 @@ namespace Pulsar4X.ECSLib
                     return (int)Result;
                 else
                 {
-                    throw new Exception("Unexpected Result data Type - not double or int");
+                    throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or int");  
                 }
             }
         }
@@ -145,7 +144,7 @@ namespace Pulsar4X.ECSLib
         /// a private constructor that is used internaly for a one use Expression 
         /// </summary>
         /// <param name="expression"></param>
-        /// <param name="design"></param>
+        /// <param name="designAbility"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
         private ChainedExpression(Expression expression, ComponentDesignAbilityDB designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)

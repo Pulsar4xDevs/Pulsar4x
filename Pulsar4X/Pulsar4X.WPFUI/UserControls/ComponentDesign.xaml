@@ -6,15 +6,21 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid Name="ComponentDesignLayoytGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150*"/>
+            <ColumnDefinition Width="150*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="42"/>
-            <RowDefinition Height="85*"/>
-            <RowDefinition Height="44*"/>
+            <RowDefinition Height="146*"/>
+            <RowDefinition Height="69*"/>
+            <RowDefinition Height="42"/>
         </Grid.RowDefinitions>
-        <ComboBox Name="ComponentSelection" Margin="10,10,10,11" SelectionChanged="ComponentSelection_SelectionChanged"/>
-        <StackPanel Name="AbilityStackPanel"  Margin="10" Grid.Row="1"/>
-        <TextBox Name="ComponentStats" Margin="10" Grid.Row="2">
-        </TextBox>
+        <ComboBox Name="ComponentSelection" Margin="10,10,10,11" SelectionChanged="ComponentSelection_SelectionChanged" Grid.ColumnSpan="2"/>
+        <StackPanel Name="AbilityStackPanel"  Margin="10" Grid.Row="1" Grid.ColumnSpan="2"/>
+        <TextBox Name="ComponentStats" Margin="10,10,10,7" Grid.Row="2"/>
+        <TextBox Name="AbilityStats" Grid.Column="1" Margin="10,10,10,7" Grid.Row="2" />
+        <Button Name="ButtonCreate" Content="Create" HorizontalAlignment="Left" Margin="10,13,0,10" Grid.Row="3" Width="75" Click="ButtonCreate_Click"/>
 
     </Grid>
 </UserControl>

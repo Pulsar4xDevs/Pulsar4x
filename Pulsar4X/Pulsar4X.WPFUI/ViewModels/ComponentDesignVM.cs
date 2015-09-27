@@ -12,19 +12,59 @@ namespace Pulsar4X.WPFUI.ViewModels
 {
     class ComponentDesignVM
     {
-        private ComponentDesignDB _design;
+        public ComponentDesignDB DesignDB { get; private set; }
         private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
 
         public Control SizeControl;
 
+        public List<ComponentAbilityDesignVM> AbilityList { get; private set; } 
+
         public ComponentDesignVM(ComponentDesignDB design, FactionTechDB factionTech, StaticDataStore staticData)
         {
-            _design = design;
+            DesignDB = design;
             _factionTech = factionTech;
             _staticData = staticData;
-
+            AbilityList = new List<ComponentAbilityDesignVM>();
+            foreach (var componentAbility in design.ComponentDesignAbilities)
+            {
+                AbilityList.Add(new ComponentAbilityDesignVM(componentAbility, _factionTech, _staticData));
+            }
          }
+
+        public string StatsText
+        {
+            get
+            {
+                string text = DesignDB.Name + Environment.NewLine;
+                text += "Size: " + DesignDB.SizeValue + Environment.NewLine;
+                text += "HTK: " + DesignDB.HTKValue + Environment.NewLine;
+                text += "Crew: " + DesignDB.CrewReqValue + Environment.NewLine;
+                text += "ResearchCost: " + DesignDB.ResearchCostValue + Environment.NewLine;
+                foreach (var kvp in DesignDB.MineralCostValues)
+                {
+                    string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
+                    text += mineralName + ": " + kvp.Value + Environment.NewLine;
+                }
+                text += "Credit Cost: " + DesignDB.CreditCostValue + Environment.NewLine;
+                return text;
+            }
+        }
+
+        public string AbilityStatsText
+        {
+            get
+            {
+                string text = "Ability Stats:" + Environment.NewLine;
+
+                foreach (var abilty in AbilityList)
+                {
+                    text += abilty.AbilityStat;
+                }
+                return text;
+            }
+        }
+
 
     }
 
@@ -52,9 +92,9 @@ namespace Pulsar4X.WPFUI.ViewModels
                 case GuiHint.GuiSelectionMaxMin:
                     GuiSliderSetup();
                     break;
-                case GuiHint.GuiTextDisplay:
-                    GuiTextSetup();
-                    break;
+                //case GuiHint.GuiTextDisplay:
+                //    GuiTextSetup();
+                //    break;
             }
         }
 
@@ -99,6 +139,19 @@ namespace Pulsar4X.WPFUI.ViewModels
             if (ValueChanged != null)
             {
                 ValueChanged.Invoke(value);
+            }
+        }
+
+        public string AbilityStat {
+            get
+            {
+                string text = null;
+                if (_designAbility.GuiHint == GuiHint.GuiTextDisplay)
+                {
+                    text += _designAbility.Name + ": ";
+                    text += _designAbility.Value + Environment.NewLine;
+                }
+                return text;
             }
         }
     }

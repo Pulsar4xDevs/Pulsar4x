@@ -29,13 +29,6 @@ namespace Pulsar4X.ECSLib
             design.MineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
             design.CreditCostFormula = new ChainedExpression(component.CreditCostFormula, design, factionTech, staticData);
 
-            design.SizeGuiHint = component.SizeGuiHint;
-            design.CrewReqGuiHint = component.CrewReqGuiHint;
-            design.HTKGuiHint = component.HTKGuiHint;
-            design.RessearchGuiHint = component.ResearchCostGuiHint;
-            design.MineralCostGuiHint = component.MineralCostGuiHint;
-            design.CreditCostGuiHint = component.CreditCostGuiHint;
-
 
 
             foreach (var kvp in component.MineralCostFormula)
@@ -117,14 +110,14 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Creates Entity and blobs.
         /// </summary>
-        /// <param name="systemeEntityManager"></param>
+        /// <param name="globalEntityManager"></param>
         /// <param name="componentDesign"></param>
         /// <param name="factionTech"></param>
         /// <returns></returns>
-        public static Entity DesignToEntity(EntityManager systemeEntityManager, ComponentDesignDB componentDesign, FactionTechDB factionTech)
+        public static Entity DesignToEntity(EntityManager globalEntityManager, ComponentDesignDB componentDesign, FactionTechDB factionTech)
         {
             //TODO probilby do checking to see if valid here?
-            Entity component = new Entity(systemeEntityManager);
+            Entity component = new Entity(globalEntityManager);
             
             TechSD tech = new TechSD();
             tech.ID = Guid.NewGuid();

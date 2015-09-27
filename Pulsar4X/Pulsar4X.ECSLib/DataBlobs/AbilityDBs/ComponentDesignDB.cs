@@ -16,9 +16,6 @@ namespace Pulsar4X.ECSLib
         public string Name { get; set; }
         public string Description { get; set; }
 
-        //internal ParsingProcessor Parser { get; private set; }
-
-        public GuiHint SizeGuiHint { get; internal set; }
         public int SizeValue { get { return SizeFormula.IntResult; } }
         internal ChainedExpression SizeFormula { get; set; }
         public void SetSize()
@@ -26,7 +23,6 @@ namespace Pulsar4X.ECSLib
             SizeFormula.Evaluate();
         }
 
-        public GuiHint HTKGuiHint { get; internal set; }
         public int HTKValue { get { return HTKFormula.IntResult; } }
         internal ChainedExpression HTKFormula { get; set; }
         public void SetHTK()
@@ -34,7 +30,6 @@ namespace Pulsar4X.ECSLib
             HTKFormula.Evaluate();
         }
 
-        public GuiHint CrewReqGuiHint { get; internal set; }
         public int CrewReqValue { get { return CrewFormula.IntResult; } }
         internal ChainedExpression CrewFormula { get; set; }
         public void SetCrew()
@@ -42,7 +37,6 @@ namespace Pulsar4X.ECSLib
             CrewFormula.Evaluate();
         }
 
-        public GuiHint RessearchGuiHint { get; internal set; }
         public int ResearchCostValue { get { return ResearchCostFormula.IntResult; } }
         internal ChainedExpression ResearchCostFormula { get; set; }
         public void SetResearchCost()
@@ -50,7 +44,6 @@ namespace Pulsar4X.ECSLib
             ResearchCostFormula.Evaluate();
         }
 
-        public GuiHint MineralCostGuiHint { get; internal set; }
         public JDictionary<Guid, int> MineralCostValues {
             get
             {
@@ -71,7 +64,6 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public GuiHint CreditCostGuiHint { get; internal set; }
         public int CreditCostValue { get { return ResearchCostFormula.IntResult; } }
         internal ChainedExpression CreditCostFormula { get; set; }
         public void SetCreditCost()
