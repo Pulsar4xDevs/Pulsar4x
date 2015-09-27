@@ -237,19 +237,22 @@ namespace Pulsar4X.ECSLib
 
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
-            SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-            MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+
             double planetSemiMajAxis = 0.387098;
             double planetEccentricity = 0.205630;
             double planetInclination = 0;
             double planetLoAN = 48.33167;
             double planetLoP = 77.45645;
             double planetMeanLongd = 252.25084;
-            PositionDB planetPositionDB = new PositionDB();
+            
 
             for (int i = 0; i < 16; i++)
             {
                 NameDB planetNameDB = new NameDB("planet"+i);
+
+                SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+                PositionDB planetPositionDB = new PositionDB();
                 planetEccentricity = i / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, _galaxyGen.Settings.J2000);
                 planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
@@ -271,19 +274,20 @@ namespace Pulsar4X.ECSLib
 
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
-            SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-            MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
             double planetSemiMajAxis = 0.387098;
             double planetEccentricity = 0.9;// 0.205630;
             double planetInclination = 0;
             double planetLoAN = 48.33167;
             double planetLoP = 77.45645;
             double planetMeanLongd = 252.25084;
-            PositionDB planetPositionDB = new PositionDB();
+            
 
             for (int i = 0; i < 13; i++)
             {
                 NameDB planetNameDB = new NameDB("planet"+i);
+                SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+                PositionDB planetPositionDB = new PositionDB();
                 planetLoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, _galaxyGen.Settings.J2000);
                 planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
