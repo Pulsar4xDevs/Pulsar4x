@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.WPFUI", "Pulsar4X.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingTools.JsonDataEditor", "ModdingTools.JsonDataEditor\ModdingTools.JsonDataEditor.csproj", "{12B34A79-0285-41C9-9BAD-7902E562234D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingTools.JsonDataEditor2", "ModdingTools.JsonDataEditor2\ModdingTools.JsonDataEditor2.csproj", "{A0640FA3-FAAB-4BCD-A845-548D0967009C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug (No Tests|Any CPU = Debug (No Tests|Any CPU
@@ -120,6 +122,21 @@ Global
 		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|x86.ActiveCfg = Release|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug (No Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug (No Tests|Any CPU.Build.0 = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug (No Tests|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug (No Tests|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug (No Tests|x86.ActiveCfg = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A0640FA3-FAAB-4BCD-A845-548D0967009C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
