@@ -247,8 +247,8 @@ namespace Pulsar4X.Tests
             component.ResearchCostFormula = "0";
 
             component.MineralCostGuiHint = GuiHint.GuiTextDisplay;
-            component.MineralCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60" } };
-            component.MineralCostFormula = new JDictionary<Guid, string> { { new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"), "60" } };
+            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60"}, 
+            {new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"), "60"}};
 
             component.CreditCostGuiHint = GuiHint.GuiTextDisplay;
             component.CreditCostFormula = "120";
@@ -277,6 +277,53 @@ namespace Pulsar4X.Tests
             mineAbility.AbilityFormula = "DataBlobArgs([GuidDict])";
             component.ComponentAbilitySDs.Add(mineAbility);
             
+            return component;
+
+        }
+
+        public static ComponentSD ResearchLab()
+        {
+            ComponentSD component = new ComponentSD();
+            component.Name = "ResearchLab";
+            component.Description = "Creates Research Points";
+            component.ID = new Guid("C203B7CF-8B41-4664-8291-D20DFE1119EC");
+
+            component.SizeGuiHint = GuiHint.GuiTextDisplay;
+            component.SizeFormula = "500000";
+
+            component.HTKGuiHint = GuiHint.GuiTextDisplay;
+            component.HTKFormula = "[Size]";
+
+            component.CrewReqGuiHint = GuiHint.GuiTextDisplay;
+            component.CrewReqFormula = "1000000";
+
+            component.ResearchCostGuiHint = GuiHint.None;
+            component.ResearchCostFormula = "0";
+
+            component.MineralCostGuiHint = GuiHint.GuiTextDisplay;
+            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
+
+            component.CreditCostGuiHint = GuiHint.GuiTextDisplay;
+            component.CreditCostFormula = "120";
+
+            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType.Add(ComponentMountType.ShipComponent, false);
+            component.MountType.Add(ComponentMountType.ShipCargo, true);
+            component.MountType.Add(ComponentMountType.PlanetFacility, true);
+            component.MountType.Add(ComponentMountType.PDS, false);
+
+            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+
+
+            ComponentAbilitySD researchPointsAbility = new ComponentAbilitySD();
+            researchPointsAbility.Name = "RP Amount Per EconTick";
+            researchPointsAbility.Description = "";
+            researchPointsAbility.GuiHint = GuiHint.None;
+            researchPointsAbility.AbilityDataBlobType = typeof(ResearchPointsDB).ToString();
+            researchPointsAbility.AbilityFormula = "DataBlobArgs(20)";
+            component.ComponentAbilitySDs.Add(researchPointsAbility);
+
             return component;
 
         }
