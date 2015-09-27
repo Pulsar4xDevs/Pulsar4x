@@ -31,21 +31,33 @@ namespace Pulsar4X.UI.SceenGraph
         }
 
         /// <summary>
+        /// What is this PlanetElement's parent?
+        /// </summary>
+        private SceenElement _ParentElement;
+        public SceenElement _parentElement
+        {
+            get { return _ParentElement; }
+        }
+
+        /// <summary>
         /// This is the display element for the orbit this planet will make.
         /// </summary>
         private CircleElement m_oOrbitCircle { get; set; }
 
 
-        public PlanetElement()
+        public PlanetElement(SceenElement PElement)
             : base()
         {
+            _ParentElement = PElement;
         }
 
-        public PlanetElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, SystemBody a_oPlanet, System.Drawing.Color a_oColor)
+        public PlanetElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, SystemBody a_oPlanet, System.Drawing.Color a_oColor, SceenElement PElement)
             : base(a_oPlanet)
         {
             m_oOrbitCircle = new CircleElement(a_oDefaultEffect, a_oPosition, a_oPlanet, a_oColor);
 #warning Cannot add m_oOrbitCircle to children for Planet Element
+
+            _ParentElement = PElement;
         }
 
 
@@ -71,7 +83,14 @@ namespace Pulsar4X.UI.SceenGraph
             ///< @todo Make drawing of Asteriod/comet text and orbit circles a setting the player can toggle). or base it on zoom.
             if (m_oLable != null && m_oPlanet.Type != SystemBody.PlanetType.Asteroid && m_oPlanet.Type != SystemBody.PlanetType.Comet)
             {
-                m_oLable.Render();
+                Vector2 PUpperLeft, PBottomRight;
+                m_oLable.GetExtent(out PUpperLeft, out PBottomRight);
+                bool WithinParent = _ParentElement.Lable.CompareExtent(PUpperLeft, PBottomRight);
+                /// <summary>
+                /// Don't draw this label if its parent label will obscure it anyway
+                /// </summary>
+                if(WithinParent == false)
+                    m_oLable.Render();
             }
         }
 

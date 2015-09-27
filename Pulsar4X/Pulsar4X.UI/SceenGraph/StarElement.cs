@@ -31,17 +31,26 @@ namespace Pulsar4X.UI.SceenGraph
         }
 
         /// <summary>
+        /// Does this star element have a parent? if it is a secondary star yes.
+        /// </summary>
+        private SceenElement _ParentElement;
+        public SceenElement _parentElement
+        {
+            get { return _ParentElement; }
+        }
+
+        /// <summary>
         /// This is the display element for the orbit this planet will make.
         /// </summary>
         private CircleElement m_oOrbitCircle { get; set; }
 
-        public StarElement()
+        public StarElement(SceenElement PElement)
             : base()
         {
-
+            _ParentElement = PElement;
         }
 
-        public StarElement(Star a_oStar, GLEffect a_oDefaultEffect, Vector3 a_oPosition, System.Drawing.Color a_oColor, bool a_bPrimary = true)
+        public StarElement(Star a_oStar, GLEffect a_oDefaultEffect, Vector3 a_oPosition, System.Drawing.Color a_oColor, SceenElement PElement, bool a_bPrimary = true)
             : base(a_oStar)
         {
             if (!a_bPrimary)
@@ -55,6 +64,7 @@ namespace Pulsar4X.UI.SceenGraph
             else
                 m_oOrbitCircle = null;
 
+            _ParentElement = PElement;
 
         }
 
@@ -84,7 +94,19 @@ namespace Pulsar4X.UI.SceenGraph
             // render lable:
             if (m_oLable != null)
             {
-                m_oLable.Render();
+                if (_ParentElement != null)
+                {
+                    Vector2 PUpperLeft, PBottomRight;
+                    m_oLable.GetExtent(out PUpperLeft, out PBottomRight);
+                    bool WithinParent = _ParentElement.Lable.CompareExtent(PUpperLeft, PBottomRight);
+                    /// <summary>
+                    /// Don't draw this label if its parent label will obscure it anyway
+                    /// </summary>
+                    if (WithinParent == false)
+                        m_oLable.Render();
+                }
+                else
+                    m_oLable.Render();
             }
         }
 

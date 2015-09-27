@@ -172,8 +172,14 @@ namespace Pulsar4X.UI.GLUtilities
         /// <param name="BottomRight"></param>
         public void GetExtent(out Vector2 UpperLeft, out Vector2 BottomRight)
         {
-            UpperLeft = new Vector2((m_v3Position.X - m_v2Size.X), (m_v3Position.Y - m_v2Size.Y));
-            BottomRight = new Vector2((m_v3Position.X + m_v2Size.X), (m_v3Position.Y + m_v2Size.Y));
+            int iCharsToDraw = m_szText.Length;
+            if (iCharsToDraw > c_uiMaxNumberOfChars)
+            {
+                iCharsToDraw = (int)c_uiMaxNumberOfChars;
+            }
+
+            UpperLeft   = new Vector2((m_v3Position.X - ((m_v2Size.X * iCharsToDraw) / 2.0f)), (m_v3Position.Y - ((m_v2Size.Y) / 2.0f)));
+            BottomRight = new Vector2((m_v3Position.X + ((m_v2Size.X * iCharsToDraw) / 2.0f)), (m_v3Position.Y + ((m_v2Size.Y) / 2.0f)));
         }
 
         /// <summary>
@@ -189,6 +195,7 @@ namespace Pulsar4X.UI.GLUtilities
             Vector2 MyBottomRight;
             GetExtent(out MyUpperLeft, out MyBottomRight);
 
+
             /// <summary>
             /// Conditions:
             /// Entirely to the left or right
@@ -196,31 +203,27 @@ namespace Pulsar4X.UI.GLUtilities
             /// possibly overlapping in X terms
             /// possibly overlapping in Y terms
             /// </summary>
-            bool inX = false;
-            bool inY = false;
+
+            /// <summary>
+            /// If my extent is outside of the argument supplied extent on the X axis, then it does not matter where on the Y axis it is.
+            /// </summary>
             if ((BottomRight.X < MyUpperLeft.X) || (UpperLeft.X > MyBottomRight.X))
             {
                 return false;
             }
-            else
-            {
-                inX = true;
-            }
+
+            /// <summary>
+            /// As per above, if my extent is outside of the argument supplied extent on the Y axis then it doesn't matter where we are on the X axis.
+            /// </summary>
             if ((BottomRight.Y < MyUpperLeft.Y) || (UpperLeft.Y > MyBottomRight.Y))
             {
                 return false;
             }
-            else
-            {
-                inY = true;
-            }
 
-            if (inX == true && inY == true)
-            {
-                return true;
-            }
-
-            return false;
+            /// <summary>
+            /// Having made it this far we know that both extents overlap on both the X and Y axis.
+            /// </summary>
+            return true;
         }
 
         private void UpdatePositionAndSize()

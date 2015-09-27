@@ -241,7 +241,7 @@ namespace Pulsar4X.UI.SceenGraph
             Vector3 v3MoonPos = Vector3.Zero;                                   // Used to store the Moons Position.
 
             // start creating star branches in the sceen graph:
-            SceenElement oRootStar;
+            SceenElement oRootStar = null;
             SceenElement oCurrStar;
             foreach (Pulsar4X.Entities.Star oStar in a_oStarSystem.Stars)
             {
@@ -249,7 +249,7 @@ namespace Pulsar4X.UI.SceenGraph
                 if (iStarCounter <= 0)
                 {
                     // then we have a secondary, etc star give random position around its orbit!
-                    oRootStar = new StarElement(oStar, a_oDefaultEffect, Vector3.Zero, Pulsar4X.Constants.StarColor.LookupColor(oStar), true);
+                    oRootStar = new StarElement(oStar, a_oDefaultEffect, Vector3.Zero, Pulsar4X.Constants.StarColor.LookupColor(oStar), null, true);
                     oCurrStar = oRootStar;
                 }
                 else
@@ -258,7 +258,7 @@ namespace Pulsar4X.UI.SceenGraph
                     v3StarPos.X = (float)(oStar.Position.X);
                     v3StarPos.Y = (float)(oStar.Position.Y);    
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.Orbit.SemiMajorAxis);
-                    oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar), false);
+                    oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar), oRootStar, false);
                 }
 
 
@@ -283,7 +283,7 @@ namespace Pulsar4X.UI.SceenGraph
                 // now go though and add each planet to render list.
                 foreach (Pulsar4X.Entities.SystemBody oPlanet in oStar.Planets)
                 {
-                    SceenElement oPlanetElement = new PlanetElement(a_oDefaultEffect, v3StarPos, oPlanet, Color.FromArgb(255, 0, 205, 0));
+                    SceenElement oPlanetElement = new PlanetElement(a_oDefaultEffect, v3StarPos, oPlanet, Color.FromArgb(255, 0, 205, 0), oCurrStar);
                     oPlanetElement.EntityID = oPlanet.Id;
 
                     if (iPlanetCounter == 0)
@@ -318,7 +318,7 @@ namespace Pulsar4X.UI.SceenGraph
                     // now again for the moons:
                     foreach (Pulsar4X.Entities.SystemBody oMoon in oPlanet.Moons)
                     {
-                        SceenElement oMoonElement = new PlanetElement(a_oDefaultEffect, v3PlanetPos, oMoon, Color.FromArgb(255, 0, 205, 0));
+                        SceenElement oMoonElement = new PlanetElement(a_oDefaultEffect, v3PlanetPos, oMoon, Color.FromArgb(255, 0, 205, 0), oPlanetElement);
                         oMoonElement.EntityID = oMoon.Id;
 
                         if (iMoonCounter == 0)
