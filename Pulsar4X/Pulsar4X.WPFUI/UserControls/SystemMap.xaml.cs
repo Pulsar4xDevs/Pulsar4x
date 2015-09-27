@@ -164,9 +164,9 @@ namespace Pulsar4X.WPFUI
         private void DrawOrbit(Point parentPosition, PlanetVM planet)
         {
 
-            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode); // if inclination is 0
-            Point periapsis = new Point(parentPosition.X + Math.Sin(arcRotAngle) * zoom * planet.Periapsis, parentPosition.Y + Math.Cos(arcRotAngle) * zoom * planet.Periapsis);
-            Vector tangent = new Vector(Math.Cos(arcRotAngle), -Math.Sin(arcRotAngle));
+            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode+90); // if inclination is 0
+            Point periapsis = new Point(parentPosition.X - Math.Sin(arcRotAngle) * zoom * planet.Periapsis, parentPosition.Y - Math.Cos(arcRotAngle) * zoom * planet.Periapsis);
+            Vector tangent = new Vector(-Math.Cos(arcRotAngle), Math.Sin(arcRotAngle));
             Point arcStart = periapsis-tangent;
             Point arcEnd = periapsis+tangent;
 
@@ -176,7 +176,7 @@ namespace Pulsar4X.WPFUI
 
             SweepDirection sweepDirection = SweepDirection.Clockwise;
 
-            ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode, true, sweepDirection, true);
+            ArcSegment orbitArc = new ArcSegment(arcEnd, arcSize, -(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode), true, sweepDirection, true);
 
             PathFigure pathFigure = new PathFigure();
             pathFigure.StartPoint = arcStart;
@@ -224,10 +224,10 @@ namespace Pulsar4X.WPFUI
             periapsis.Stroke = Brushes.Cyan;
             periapsis.X1 = parentPos.X;
             periapsis.Y1 = parentPos.Y;
-            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode);
+            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode+90);
 
-            periapsis.X2 = parentPos.X + Math.Sin(arcRotAngle) * zoom * planet.Periapsis;
-            periapsis.Y2 = parentPos.Y + Math.Cos(arcRotAngle) * zoom * planet.Periapsis;
+            periapsis.X2 = parentPos.X - Math.Sin(arcRotAngle) * zoom * planet.Periapsis;
+            periapsis.Y2 = parentPos.Y - Math.Cos(arcRotAngle) * zoom * planet.Periapsis;
             periapsis.StrokeThickness = 1;
             MapCanvas.Children.Add(periapsis);
 

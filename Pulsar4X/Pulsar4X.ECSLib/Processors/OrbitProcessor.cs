@@ -97,6 +97,13 @@ namespace Pulsar4X.ECSLib
                 // RECURSION!
                 UpdateOrbit(child, entityPosition, currentTime, ref orbitsProcessed);
             }
+            // use this to dump positions to plot orbits
+            /*
+            string name = entity.GetDataBlob<NameDB>().DefaultName;
+            if (name.Equals("Mercury")) {
+              Console.WriteLine(newPosition.X + " " + newPosition.Y);
+            }
+            */
         }
 
         #region Orbit Position Calculations
