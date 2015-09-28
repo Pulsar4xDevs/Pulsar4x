@@ -38,7 +38,7 @@ namespace Pulsar4X.WPFUI
 
         private void ComponentSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _selectedTemplate = new ComponentDesignVM(componentDesignTemplates[ComponentSelection.SelectedIndex], _factionTech, _staticData);
+            _selectedTemplate = new ComponentDesignVM(componentDesignTemplates[ComponentSelection.SelectedIndex], _staticData);
 
             foreach (var componentAbilityVM in _selectedTemplate.AbilityList)
             {
@@ -49,7 +49,7 @@ namespace Pulsar4X.WPFUI
             }
         }
 
-        private void OnValueChanged(double value)
+        private void OnValueChanged(object sender, double value)
         {
             ComponentStats.Text = _selectedTemplate.StatsText;
             AbilityStats.Text = _selectedTemplate.AbilityStatsText;
@@ -57,6 +57,7 @@ namespace Pulsar4X.WPFUI
 
         private void ButtonCreate_Click(object sender, RoutedEventArgs e)
         {
+            _selectedTemplate.DesignDB.Name = NameTextbox.Text;
             GenericComponentFactory.DesignToEntity(App.Current.Game.GlobalManager, _selectedTemplate.DesignDB, _factionTech);
         }
 

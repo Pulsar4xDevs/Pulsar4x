@@ -101,6 +101,9 @@
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\AbilitySelectionList.xaml.cs">
+      <DependentUpon>AbilitySelectionList.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Combat.xaml.cs">
       <DependentUpon>Combat.xaml</DependentUpon>
     </Compile>
@@ -161,6 +164,10 @@
     <Compile Include="ViewModels\StarVM.cs" />
     <Compile Include="ViewModels\SystemVM.cs" />
     <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\AbilitySelectionList.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

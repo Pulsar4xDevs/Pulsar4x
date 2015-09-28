@@ -15,12 +15,15 @@ using System.Windows.Shapes;
 
 namespace Pulsar4X.WPFUI.UserControls
 {
-    public delegate void ValueChangedEventHandler(double value);
+    public delegate void ValueChangedEventHandler(object sender, double value);
     /// <summary>
     /// Interaction logic for MaxMinSlider.xaml
     /// </summary>
     public partial class MinMaxSlider : UserControl
     {
+        
+        public event ValueChangedEventHandler ValueChanged; 
+        
         public double Maximum
         {
             get
@@ -30,7 +33,7 @@ namespace Pulsar4X.WPFUI.UserControls
             set
             {
                 Slider.Maximum = value;
-                Max.Content = value;
+                MaxLabel.Content = value;
             }
         }
 
@@ -43,7 +46,7 @@ namespace Pulsar4X.WPFUI.UserControls
             set
             {
                 Slider.Minimum = value;
-                Min.Content = value;
+                MinLabel.Content = value;
             }
         }
 
@@ -58,12 +61,12 @@ namespace Pulsar4X.WPFUI.UserControls
                 Slider.Value = value;
                 if (ValueChanged != null)
                 {
-                    ValueChanged.Invoke(value);
+                    ValueChanged.Invoke(this, value);
                 }
             }
         }
 
-        public event ValueChangedEventHandler ValueChanged;
+        
        
 
         public MinMaxSlider()

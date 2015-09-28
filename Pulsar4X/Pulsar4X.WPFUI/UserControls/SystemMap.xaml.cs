@@ -224,7 +224,7 @@ namespace Pulsar4X.WPFUI
             periapsis.Stroke = Brushes.Cyan;
             periapsis.X1 = parentPos.X;
             periapsis.Y1 = parentPos.Y;
-            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode+90);
+            double arcRotAngle = Angle.ToRadians(planet.ArgumentOfPeriapsis + planet.LongitudeOfAscendingNode);
 
             periapsis.X2 = parentPos.X - Math.Sin(arcRotAngle) * zoom * planet.Periapsis;
             periapsis.Y2 = parentPos.Y - Math.Cos(arcRotAngle) * zoom * planet.Periapsis;

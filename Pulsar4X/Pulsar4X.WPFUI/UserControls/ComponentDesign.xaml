@@ -21,6 +21,8 @@
         <TextBox Name="ComponentStats" Margin="10,10,10,7" Grid.Row="2"/>
         <TextBox Name="AbilityStats" Grid.Column="1" Margin="10,10,10,7" Grid.Row="2" />
         <Button Name="ButtonCreate" Content="Create" HorizontalAlignment="Left" Margin="10,13,0,10" Grid.Row="3" Width="75" Click="ButtonCreate_Click"/>
+        <TextBox Name="NameTextbox" Grid.Column="1" Margin="10" Grid.Row="3" />
+        <Label Content="Name: " Margin="114,8,0,11" Grid.Row="3"/>
 
     </Grid>
 </UserControl>
