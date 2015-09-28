@@ -13,7 +13,7 @@
             <ColumnDefinition Width="42"/>
         </Grid.ColumnDefinitions>
         <ComboBox Name="SelectionComboBox" Margin="10,10,0,11" Grid.Column="1" SelectionChanged="SelectionComboBox_SelectionChanged" Grid.ColumnSpan="3"/>
-        <Label Name="NameLabel" Content="Label" Margin="0,9,20,10"/>
+        <Label Grid.Column="0" Name="NameLabel" Content="Label" Margin="0,9,20,10"/>
 
     </Grid>
 </UserControl>

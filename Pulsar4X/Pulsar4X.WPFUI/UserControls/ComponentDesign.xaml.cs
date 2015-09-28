@@ -22,6 +22,7 @@ namespace Pulsar4X.WPFUI
         public ComponentDesign()
         {                    
             InitializeComponent();
+            Title = "Component Design";
             componentDesignTemplates = new List<ComponentDesignDB>();
             foreach (var componentSD in App.Current.Game.StaticData.Components.Values)
             {
