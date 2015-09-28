@@ -51,6 +51,11 @@
             this.costTextBox = new System.Windows.Forms.TextBox();
             this.selectedFileComboBox = new System.Windows.Forms.ComboBox();
             this.mainMenuButton = new System.Windows.Forms.Button();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // availibleTechs
@@ -98,7 +103,7 @@
             this.descTextBox.Location = new System.Drawing.Point(87, 53);
             this.descTextBox.Multiline = true;
             this.descTextBox.Name = "descTextBox";
-            this.descTextBox.Size = new System.Drawing.Size(247, 121);
+            this.descTextBox.Size = new System.Drawing.Size(247, 70);
             this.descTextBox.TabIndex = 6;
             this.descTextBox.TextChanged += new System.EventHandler(this.descTextBox_TextChanged);
             // 
@@ -144,11 +149,12 @@
             // costLabel
             // 
             this.costLabel.AutoSize = true;
-            this.costLabel.Location = new System.Drawing.Point(50, 211);
+            this.costLabel.Location = new System.Drawing.Point(10, 211);
             this.costLabel.Name = "costLabel";
-            this.costLabel.Size = new System.Drawing.Size(28, 13);
+            this.costLabel.Size = new System.Drawing.Size(68, 13);
             this.costLabel.TabIndex = 12;
-            this.costLabel.Text = "Cost";
+            this.costLabel.Text = "Cost Formula";
+            this.costLabel.Click += new System.EventHandler(this.costLabel_Click);
             // 
             // requirementsListBox
             // 
@@ -162,7 +168,7 @@
             // requirementsLabel
             // 
             this.requirementsLabel.AutoSize = true;
-            this.requirementsLabel.Location = new System.Drawing.Point(12, 235);
+            this.requirementsLabel.Location = new System.Drawing.Point(6, 235);
             this.requirementsLabel.Name = "requirementsLabel";
             this.requirementsLabel.Size = new System.Drawing.Size(72, 13);
             this.requirementsLabel.TabIndex = 14;
@@ -269,10 +275,46 @@
             this.mainMenuButton.UseVisualStyleBackColor = true;
             this.mainMenuButton.Click += new System.EventHandler(this.mainMenuButton_Click);
             // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.Location = new System.Drawing.Point(87, 129);
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown1.TabIndex = 25;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(87, 155);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(247, 20);
+            this.textBox1.TabIndex = 26;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(22, 131);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(56, 13);
+            this.label2.TabIndex = 27;
+            this.label2.Text = "Max Level";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(8, 158);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(70, 13);
+            this.label3.TabIndex = 28;
+            this.label3.Text = "Data Formula";
+            // 
             // TechnologiesWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.mainMenuButton);
             this.Controls.Add(this.selectedFileComboBox);
             this.Controls.Add(this.costTextBox);
@@ -297,6 +339,7 @@
             this.Controls.Add(this.availibleTechs);
             this.Name = "TechnologiesWindow";
             this.Size = new System.Drawing.Size(600, 460);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -327,6 +370,10 @@
         private System.Windows.Forms.TextBox costTextBox;
         private System.Windows.Forms.ComboBox selectedFileComboBox;
         private System.Windows.Forms.Button mainMenuButton;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
 
     }
 }
