@@ -1,9 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Pulsar4X.ECSLib; //not realy sure we should be referencing ecs lib in wpf...
+using Pulsar4X.WPFUI.ViewModels;
 
 namespace Pulsar4X.WPFUI.UserControls
 {
-    public delegate void ValueChangedEventHandler(object sender, double value);
+    //public delegate void ValueChangedEventHandler(object sender, double value);
     /// <summary>
     /// Interaction logic for MaxMinSlider.xaml
     /// </summary>
@@ -50,13 +52,27 @@ namespace Pulsar4X.WPFUI.UserControls
                 Slider.Value = value;
                 if (ValueChanged != null)
                 {
-                    ValueChanged.Invoke(this, value);
+                    ValueChanged.Invoke(GuiHint.GuiSelectionMaxMin, value);
                 }
             }
         }
 
-        
-       
+        public void GuiSliderSetup(ComponentAbilityDesignVM designAbility)
+        {
+            MinMaxSlider guiSliderControl = new MinMaxSlider
+            {
+                NameLabel = { Content = designAbility.Name },
+                ToolTip = designAbility.Description
+            };
+
+            guiSliderControl.Maximum = designAbility.MaxValue;            
+            guiSliderControl.Minimum = designAbility.MinValue;
+            guiSliderControl.Value = designAbility.Value;
+
+        }
+
+
+
 
         public MinMaxSlider()
         {

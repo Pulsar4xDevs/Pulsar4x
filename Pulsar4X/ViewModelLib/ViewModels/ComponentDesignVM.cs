@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Controls;
 using Pulsar4X.ECSLib;
-using Pulsar4X.WPFUI.UserControls;
 
 namespace Pulsar4X.WPFUI.ViewModels
 {
-    class ComponentDesignVM
+
+
+    public class ComponentDesignVM
     {
         public ComponentDesignDB DesignDB { get; private set; }
         private readonly StaticDataStore _staticData;
 
-        public Control SizeControl;
 
         public List<ComponentAbilityDesignVM> AbilityList { get; private set; } 
 
@@ -63,69 +62,56 @@ namespace Pulsar4X.WPFUI.ViewModels
 
     public class ComponentAbilityDesignVM
     {
-        public Control GuiControl;
         private ComponentDesignAbilityDB _designAbility;
         private StaticDataStore _staticData;
-        private List<TechSD> _techList;
+        
+        
         public event ValueChangedEventHandler ValueChanged;
+        public List<TechSD> TechList { get; private set; }
+        public string Name { get { return _designAbility.Name; } }
+        public string Description { get { return _designAbility.Description; } }
+
+        public double MaxValue { get { return _designAbility.MaxValue; } }
+        public double MinValue { get { return _designAbility.MinValue; } }
+        public double Value { get { return _designAbility.Value; } }
+
+        public GuiHint GuiHint { get { return _designAbility.GuiHint; }}
+        
 
         public ComponentAbilityDesignVM(ComponentDesignAbilityDB designAbility, StaticDataStore staticData)
         {
             _designAbility = designAbility;
             _staticData = staticData;
+
             switch (designAbility.GuiHint)
             {
                 case GuiHint.GuiTechSelectionList:
-                    GuiListSetup();
+                    TechList = new List<TechSD>();
+                    foreach (var kvp in designAbility.GuidDictionary)
+                    {
+                        TechList.Add(_staticData.Techs[kvp.Key]);
+                    }
                     break;
                 case GuiHint.GuiSelectionMaxMin:
-                    GuiSliderSetup();
+                    {
+                        designAbility.SetMax();
+                        designAbility.SetMin();
+                        designAbility.SetValue();
+                    }
                     break;
             }
         }
 
-        private void GuiListSetup()
+        private void OnValueChanged(GuiHint controlType, double value)
         {
-            AbilitySelectionList abilitySelection = new AbilitySelectionList();
-            _techList =  new List<TechSD>();
-            foreach (var kvp in _designAbility.GuidDictionary)
-            {
-                _techList.Add(_staticData.Techs[kvp.Key]);
-            }
-            abilitySelection.NameLabel.Content = _designAbility.Name;
-            abilitySelection.SelectionComboBox.ItemsSource = _techList;
-            abilitySelection.SelectionComboBox.DisplayMemberPath = "Name";
-            abilitySelection.ValueChanged += OnValueChanged;
-            abilitySelection.SelectionComboBox.SelectedIndex = 0;
-            GuiControl = abilitySelection;
-        }
-
-        private void GuiSliderSetup()
-        {
-            MinMaxSlider guiSliderControl = new MinMaxSlider
-            {
-                NameLabel = {Content = _designAbility.Name}, ToolTip = _designAbility.Description
-            };
-            _designAbility.SetMax();
-            guiSliderControl.Maximum = _designAbility.MaxValue;
-            _designAbility.SetMin();
-            guiSliderControl.Minimum = _designAbility.MinValue;
-            guiSliderControl.ValueChanged += OnValueChanged;
-            guiSliderControl.Value = _designAbility.Value;
-            GuiControl = guiSliderControl;
-            
-        }
-
-        private void OnValueChanged(object sender, double value)
-        {
-            if(sender is MinMaxSlider)
+            if(controlType == GuiHint.GuiSelectionMaxMin)
                 _designAbility.SetValueFromInput(value);
-            else if (sender is AbilitySelectionList)
-                _designAbility.SetValueFromGuidList(_techList[(int)value].ID);
+            else if (controlType == GuiHint.GuiTechSelectionList)
+                _designAbility.SetValueFromGuidList(TechList[(int)value].ID);
 
             if (ValueChanged != null)
             {
-                ValueChanged.Invoke(sender, value);
+                ValueChanged.Invoke(controlType, value);
             }
         }
 
@@ -142,4 +128,6 @@ namespace Pulsar4X.WPFUI.ViewModels
             }
         }
     }
+
+    public delegate void ValueChangedEventHandler(GuiHint controlType, double value);
 }

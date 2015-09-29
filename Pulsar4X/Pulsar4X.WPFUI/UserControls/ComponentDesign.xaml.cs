@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Pulsar4X.ECSLib;
+using Pulsar4X.WPFUI.UserControls;
 using Pulsar4X.WPFUI.ViewModels;
 
 namespace Pulsar4X.WPFUI
@@ -43,14 +44,25 @@ namespace Pulsar4X.WPFUI
 
             foreach (var componentAbilityVM in _selectedTemplate.AbilityList)
             {
+                switch (componentAbilityVM.GuiHint)
+                {
+                    case GuiHint.GuiTechSelectionList:
+                        AbilitySelectionList asl = new AbilitySelectionList();
+                        asl.GuiListSetup(componentAbilityVM);
+                        AbilityStackPanel.Children.Add(asl);
+                        break;
+                    case GuiHint.GuiSelectionMaxMin:
+                        MinMaxSlider mms = new MinMaxSlider();
+                        mms.GuiSliderSetup(componentAbilityVM);
+                        AbilityStackPanel.Children.Add(mms);
+                        break;
+                }
 
-                if (componentAbilityVM.GuiControl != null)
-                    AbilityStackPanel.Children.Add(componentAbilityVM.GuiControl);
                 componentAbilityVM.ValueChanged += OnValueChanged;
             }
         }
 
-        private void OnValueChanged(object sender, double value)
+        private void OnValueChanged(GuiHint controlType, double value)
         {
             ComponentStats.Text = _selectedTemplate.StatsText;
             AbilityStats.Text = _selectedTemplate.AbilityStatsText;
