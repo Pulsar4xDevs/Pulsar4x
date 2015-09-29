@@ -43,6 +43,24 @@ namespace Pulsar4X.WPFUI.ViewModels
         }
         private Vector4 _position;
 
+        public Vector SystemPosition
+        {
+            get
+            {
+                Vector parentPos;
+                if (ParentPlanet != null)
+                {
+                    parentPos = ParentPlanet.SystemPosition;
+                }
+                else
+                {
+                    parentPos = ParentStar.SystemPosition;
+                }
+
+                return Conversions.VectorFromVector4(Position) + parentPos;
+            }
+        }
+
         #endregion
 
         #region OrbitDB Properties

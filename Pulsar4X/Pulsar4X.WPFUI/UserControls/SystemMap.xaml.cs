@@ -10,31 +10,6 @@ using Pulsar4X.WPFUI.ViewModels;
 namespace Pulsar4X.WPFUI
 {
 
-    public static class Conversions
-    {
-        public static Point PointFromVector(Vector vector)
-        {
-            return new Point(vector.X, vector.Y);
-        }
-        /// <summary>
-        /// looses Z and W
-        /// </summary>
-        /// <param name="vector"></param>
-        /// <returns></returns>
-        public static Point PointFromVector(Vector4 vector)
-        {
-            return new Point(vector.X, vector.Y);
-        }
-        /// <summary>
-        /// looses Z and W
-        /// </summary>
-        /// <param name="vector"></param>
-        /// <returns></returns>
-        public static Vector VectorFromVector4(Vector4 vector)
-        {
-            return new Vector(vector.X, vector.Y);
-        }
-    }
     /// <summary>
     /// Interaction logic for SystemWindow.xaml
     /// </summary>
@@ -85,40 +60,15 @@ namespace Pulsar4X.WPFUI
             }
         }
 
-        private Vector GetRawPosition(StarVM star)
-        {
-            Vector parentPos = new Vector();
-            if (star.ParentStar != null)
-            {
-                parentPos = GetRawPosition(star.ParentStar);
-            }
-            return Conversions.VectorFromVector4(star.Position) + parentPos;           
-        }
-
-        private Vector GetRawPosition(PlanetVM planet)
-        {
-            Vector parentPos = new Vector();
-            if (planet.ParentPlanet != null)
-            {
-                parentPos = GetRawPosition(planet.ParentPlanet);
-            }
-            else
-            {
-                parentPos = GetRawPosition(planet.ParentStar);
-            }
-
-            return Conversions.VectorFromVector4(planet.Position) + parentPos;
-        }
-
         private Point GetPosition(PlanetVM planet)
         {
-            Vector pos = zoom * GetRawPosition(planet) + CanvasOffset;
+            Vector pos = zoom * planet.SystemPosition + CanvasOffset;
             return Conversions.PointFromVector(pos);
         }
 
         private Point GetPosition(StarVM star)
         {
-            Vector pos = zoom * GetRawPosition(star) + CanvasOffset;
+            Vector pos = zoom * star.SystemPosition + CanvasOffset;
             return Conversions.PointFromVector(pos);
         }
 

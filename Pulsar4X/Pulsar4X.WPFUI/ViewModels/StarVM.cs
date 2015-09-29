@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.WPFUI.ViewModels
@@ -81,7 +82,9 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         private TimeSpan _year;
 
-
+        /// <summary>
+        /// Ralitive to parent orbit.
+        /// </summary>
         public Vector4 Position
         {
             get { return _position; }
@@ -92,6 +95,23 @@ namespace Pulsar4X.WPFUI.ViewModels
             }
         }
         private Vector4 _position;
+
+        /// <summary>
+        /// 2d cartisian position ralitive to ancestor star (ancestor should be 0,0). 
+        /// </summary>
+        public Vector SystemPosition
+        {
+            get
+            {
+                Vector parentPos = new Vector();
+                if (ParentStar != null)
+                {
+                    parentPos = ParentStar.SystemPosition;
+                }
+                return Conversions.VectorFromVector4(Position) + parentPos;
+            }
+        }
+
         #endregion
 
         #region Functions
