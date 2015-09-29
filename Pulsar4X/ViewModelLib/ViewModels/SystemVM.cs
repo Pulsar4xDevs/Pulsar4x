@@ -10,6 +10,8 @@ namespace Pulsar4X.WPFUI.ViewModels
 {
     public class SystemVM
     {
+        private GameVM _gameVM;
+
         private BindingList<StarVM> _stars;
         public BindingList<StarVM> Stars { get { return _stars;} }
         public List<StarVM> StarList { get { return _starDictionary.Values.ToList(); } } 
@@ -46,7 +48,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             if (_starDictionary.ContainsKey(bodyGuid))
                 starGuid = bodyGuid;
 
-            else if (App.Current.Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
+            else if (_gameVM.Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
             {
                 if (bodyEntity.HasDataBlob<StarInfoDB>())
                 {
@@ -57,7 +59,7 @@ namespace Pulsar4X.WPFUI.ViewModels
 
             if (!_starDictionary.ContainsKey(starGuid))
             {
-                StarVM starVM = StarVM.Create(starGuid, this);
+                StarVM starVM = StarVM.Create(_gameVM, starGuid, this);
                 _starDictionary.Add(starGuid, starVM);
                 if(!_stars.Contains(starVM))
                     _stars.Add(starVM);
@@ -71,7 +73,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             Guid planetGuid = new Guid();
             if (_planetDictionary.ContainsKey(bodyGuid))
                 planetGuid = bodyGuid;
-            else if (App.Current.Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
+            else if (_gameVM.Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
             {
                 if (bodyEntity.HasDataBlob<SystemBodyDB>())
                 {
@@ -117,10 +119,10 @@ namespace Pulsar4X.WPFUI.ViewModels
             _planetDictionary = new Dictionary<Guid, PlanetVM>();
             //find most massive star, this is the parent.
             Entity parentStar = starSystem.SystemManager.GetFirstEntityWithDataBlob<StarInfoDB>();
-            StarVM parentstarVM = StarVM.Create(parentStar, this);
+            StarVM parentstarVM = StarVM.Create(_gameVM, parentStar, this);
             foreach (var star in starSystem.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>())
             {
-                StarVM starVM = StarVM.Create(star, this);
+                StarVM starVM = StarVM.Create(_gameVM, star, this);
                 if(!_stars.Contains(starVM))
                     _stars.Add(starVM);
                 if(!_starDictionary.ContainsKey(star.Guid))
@@ -149,38 +151,38 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// </summary>
         /// <exception cref="InvalidOperationException">Cannot create a Planet ViewModel without an initialized game.</exception>
         /// <exception cref="GuidNotFoundException">Thrown when the supplied Guid is not found in the game.</exception>
-        internal static SystemVM Create(Guid guid)
+        internal static SystemVM Create(GameVM gameVM, Guid guid)
         {
-            if (App.Current.Game == null)
+            if (gameVM.Game == null)
             {
                 throw new InvalidOperationException("Cannot create a StarVM without an initialized game.");
             }
 
             Entity entity;
-            if (!App.Current.Game.GlobalManager.FindEntityByGuid(guid, out entity))
+            if (!gameVM.Game.GlobalManager.FindEntityByGuid(guid, out entity))
             {
                 throw new GuidNotFoundException(guid);
             }
             StarSystem starSystem = null;
             
-            for (int i = 0; i < App.Current.Game.Systems.Count; i++)
+            for (int i = 0; i < gameVM.Game.Systems.Count; i++)
             {
-                if (App.Current.Game.Systems[i].SystemManager.FindEntityByGuid(guid, out entity))
+                if (gameVM.Game.Systems[i].SystemManager.FindEntityByGuid(guid, out entity))
                 {
-                    starSystem = App.Current.Game.Systems[i];
-                    i = App.Current.Game.Systems.Count;
+                    starSystem = gameVM.Game.Systems[i];
+                    i = gameVM.Game.Systems.Count;
                 }
             }            
-            return Create(starSystem);
+            return Create(gameVM, starSystem);
         }
 
         /// <summary>
         /// Creates and fills out the properties of this ViewModel from the provided entity.
         /// </summary>
-        public static SystemVM Create(StarSystem starSystem)
+        public static SystemVM Create(GameVM gameVM, StarSystem starSystem)
         {
             SystemVM newVM = new SystemVM(starSystem);
-
+            newVM._gameVM = gameVM;
             // Initialize the data.
             newVM.Refresh();
 

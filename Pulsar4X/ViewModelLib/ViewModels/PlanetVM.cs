@@ -13,8 +13,10 @@ namespace Pulsar4X.WPFUI.ViewModels
     {
         #region Properties
 
+
         #region Metadata
 
+        private GameVM _gameVM;
         public Entity Entity
         {
             get { return _entity; }
@@ -43,11 +45,11 @@ namespace Pulsar4X.WPFUI.ViewModels
         }
         private Vector4 _position;
 
-        public Vector SystemPosition
+        public Vector4 SystemPosition
         {
             get
             {
-                Vector parentPos;
+                Vector4 parentPos;
                 if (ParentPlanet != null)
                 {
                     parentPos = ParentPlanet.SystemPosition;
@@ -57,7 +59,7 @@ namespace Pulsar4X.WPFUI.ViewModels
                     parentPos = ParentStar.SystemPosition;
                 }
 
-                return Conversions.VectorFromVector4(Position) + parentPos;
+                return Position + parentPos;
             }
         }
 
@@ -81,7 +83,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             get
             {
                 if (_parentStar == null)
-                    _parentStar = App.Current.GameVM.GetSystem(Entity.Guid).GetStar(_parentStarGuid);
+                    _parentStar = _gameVM.GetSystem(Entity.Guid).GetStar(_parentStarGuid);
                 return _parentStar;
             }
             set
@@ -98,7 +100,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             {
                 if (_parentPlanet == null && _parentPlanetGuid != null)
                 {
-                    _parentPlanet = App.Current.GameVM.GetSystem(Entity.Guid).GetPlanet(Entity.GetDataBlob<OrbitDB>().Parent.Guid);
+                    _parentPlanet = _gameVM.GetSystem(Entity.Guid).GetPlanet(Entity.GetDataBlob<OrbitDB>().Parent.Guid);
                 }
 
                 return _parentPlanet;
@@ -483,15 +485,15 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// </summary>
         /// <exception cref="InvalidOperationException">Cannot create a Planet ViewModel without an initialized game.</exception>
         /// <exception cref="GuidNotFoundException">Thrown when the supplied Guid is not found in the game.</exception>
-        internal static PlanetVM Create(Guid guid)
+        internal static PlanetVM Create(GameVM gameVM, Guid guid)
         {
-            if (App.Current.Game == null)
+            if (gameVM.Game == null)
             {
                 throw new InvalidOperationException("Cannot create a PlanetVM without an initialized game.");
             }
 
             Entity entity;
-            if (!App.Current.Game.GlobalManager.FindEntityByGuid(guid, out entity))
+            if (!gameVM.Game.GlobalManager.FindEntityByGuid(guid, out entity))
             {
                 throw new GuidNotFoundException(guid);
             }

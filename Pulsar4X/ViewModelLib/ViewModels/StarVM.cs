@@ -8,6 +8,8 @@ namespace Pulsar4X.WPFUI.ViewModels
 {
     public class StarVM : IViewModel
     {
+        private GameVM _gameVM;
+
         public Entity Entity { get; set; }
 
         #region Children And Parents
@@ -28,7 +30,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             get
             {
                 if (_parentStar == null && _parentStarGuid != null)
-                    _parentStar = App.Current.GameVM.GetSystem(Entity.Guid).GetStar((Guid)_parentStarGuid);
+                    _parentStar = _gameVM.GetSystem(Entity.Guid).GetStar((Guid)_parentStarGuid);
                 return _parentStar;
             }
             set
@@ -99,16 +101,16 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// <summary>
         /// 2d cartisian position ralitive to ancestor star (ancestor should be 0,0). 
         /// </summary>
-        public Vector SystemPosition
+        public Vector4 SystemPosition
         {
             get
             {
-                Vector parentPos = new Vector();
+                Vector4 parentPos = new Vector4();
                 if (ParentStar != null)
                 {
                     parentPos = ParentStar.SystemPosition;
                 }
-                return Conversions.VectorFromVector4(Position) + parentPos;
+                return Position + parentPos;
             }
         }
 
@@ -127,10 +129,10 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// <summary>
         /// Creates and fills out the properties of this ViewModel from the provided entity.
         /// </summary>
-        public static StarVM Create(Entity entity, SystemVM systemVM)
+        public static StarVM Create(GameVM gameVM, Entity entity, SystemVM systemVM)
         {
             StarVM newVM = new StarVM(entity);
-
+            newVM._gameVM = gameVM;
             // Initialize the data.
             newVM.Init(systemVM);
 
@@ -144,20 +146,20 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// </summary>
         /// <exception cref="InvalidOperationException">Cannot create a Planet ViewModel without an initialized game.</exception>
         /// <exception cref="GuidNotFoundException">Thrown when the supplied Guid is not found in the game.</exception>
-        internal static StarVM Create(Guid guid, SystemVM systemVM)
+        internal static StarVM Create(GameVM gameVM, Guid guid, SystemVM systemVM)
         {
-            if (App.Current.Game == null)
+            if (gameVM.Game == null)
             {
                 throw new InvalidOperationException("Cannot create a StarVM without an initialized game.");
             }
 
             Entity entity;
-            if (!App.Current.Game.GlobalManager.FindEntityByGuid(guid, out entity))
+            if (!gameVM.Game.GlobalManager.FindEntityByGuid(guid, out entity))
             {
                 throw new GuidNotFoundException(guid);
             }
 
-            return Create(entity, systemVM);
+            return Create(gameVM, entity, systemVM);
         }
 
         #endregion

@@ -30,7 +30,7 @@ namespace Pulsar4X.WPFUI.ViewModels
                 _systemDictionary = new Dictionary<Guid, SystemVM>();
                 foreach (var knownsystem in _playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems)
                 {
-                    SystemVM systemVM = SystemVM.Create(knownsystem);
+                    SystemVM systemVM = SystemVM.Create(this, knownsystem);
                     _systems.Add(systemVM);
                     _systemDictionary.Add(systemVM.ID, systemVM);
                 }
@@ -56,7 +56,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             if (_systemDictionary.ContainsKey(bodyGuid))
                 rootGuid = bodyGuid;
             
-            else if (_game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
+            else if (Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
             {                
                 if (bodyEntity.HasDataBlob<OrbitDB>())
                 {
@@ -67,7 +67,7 @@ namespace Pulsar4X.WPFUI.ViewModels
 
             if (!_systemDictionary.ContainsKey(rootGuid))
             {
-                SystemVM systemVM = SystemVM.Create(rootGuid);
+                SystemVM systemVM = SystemVM.Create(this, rootGuid);
                 _systems.Add(systemVM);
                 _systemDictionary.Add(rootGuid,systemVM);
             }
@@ -75,11 +75,11 @@ namespace Pulsar4X.WPFUI.ViewModels
         }
 
 
-        private Game _game;
+        internal Game Game { get; private set; }
 
         public GameVM(Game game)
         {
-            _game = game;
+            Game = game;
             _systems = new BindingList<SystemVM>();
             _systemDictionary = new Dictionary<Guid, SystemVM>();
             PlayerFaction = game.GameMasterFaction; //on creation the player faction can be set to GM I guess... for now anyway.
