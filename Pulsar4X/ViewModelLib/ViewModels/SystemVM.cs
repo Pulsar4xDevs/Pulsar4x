@@ -84,7 +84,7 @@ namespace Pulsar4X.WPFUI.ViewModels
 
             if (!_planetDictionary.ContainsKey(planetGuid))
             {
-                PlanetVM planetVM = PlanetVM.Create(planetGuid);
+                PlanetVM planetVM = PlanetVM.Create(_gameVM, planetGuid);
                 if (!_planets.Contains(planetVM))
                     _planets.Add(planetVM);
                 _planetDictionary.Add(planetGuid, planetVM);

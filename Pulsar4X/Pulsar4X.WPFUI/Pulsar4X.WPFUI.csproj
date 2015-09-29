@@ -157,13 +157,6 @@
       <DependentUpon>TaskGroups.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ComponentDesignVM.cs" />
-    <Compile Include="ViewModels\FactionVM.cs" />
-    <Compile Include="ViewModels\GameVM.cs" />
-    <Compile Include="ViewModels\Helpers.cs" />
-    <Compile Include="ViewModels\IViewModel.cs" />
-    <Compile Include="ViewModels\PlanetVM.cs" />
-    <Compile Include="ViewModels\StarVM.cs" />
-    <Compile Include="ViewModels\SystemVM.cs" />
     <Page Include="About.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -285,6 +278,10 @@
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
       <Project>{e716fa06-ecdf-b446-96b4-b790aab5713b}</Project>
       <Name>Pulsar4X.ECSLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelLib\ViewModelLib.csproj">
+      <Project>{37f5b88b-f1aa-410e-9fcb-4ca26a4dd887}</Project>
+      <Name>ViewModelLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
