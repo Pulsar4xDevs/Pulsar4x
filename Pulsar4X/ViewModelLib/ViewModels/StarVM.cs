@@ -120,9 +120,10 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         #region Construction
 
-        private StarVM(Entity entity)
+        private StarVM(GameVM gameVM, Entity entity)
         {
             Entity = entity;
+            _gameVM = gameVM;
             _name = entity.GetDataBlob<NameDB>().DefaultName;
         }
 
@@ -131,8 +132,8 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// </summary>
         public static StarVM Create(GameVM gameVM, Entity entity, SystemVM systemVM)
         {
-            StarVM newVM = new StarVM(entity);
-            newVM._gameVM = gameVM;
+            StarVM newVM = new StarVM(gameVM, entity);
+  
             // Initialize the data.
             newVM.Init(systemVM);
 

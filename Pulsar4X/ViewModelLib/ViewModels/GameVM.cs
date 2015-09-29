@@ -44,12 +44,12 @@ namespace Pulsar4X.WPFUI.ViewModels
         private BindingList<FactionVM> _factions; 
 
 
-        internal BindingList<SystemVM> StarSystems { get { return _systems; } }
+        public BindingList<SystemVM> StarSystems { get { return _systems; } }
 
         
         private Dictionary<Guid, SystemVM> _systemDictionary;
 
-        internal SystemVM GetSystem(Guid bodyGuid)
+        public SystemVM GetSystem(Guid bodyGuid)
         {
             Entity bodyEntity;
             Guid rootGuid = new Guid();

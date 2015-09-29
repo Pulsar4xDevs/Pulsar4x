@@ -109,8 +109,9 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         #region Construction
 
-        private SystemVM(StarSystem starSystem)
+        private SystemVM(GameVM gameVM, StarSystem starSystem)
         {
+            _gameVM = gameVM;
             _name = starSystem.NameDB.DefaultName;
             StarSystem = starSystem;
             _stars = new BindingList<StarVM>();
@@ -137,7 +138,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             ID = _parentStar.Entity.Guid;
             foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>())
             {
-                PlanetVM planetVM = PlanetVM.Create(planet);
+                PlanetVM planetVM = PlanetVM.Create(_gameVM, planet);
                 if (!_planets.Contains(planetVM))
                     _planets.Add(planetVM);
                 if(!_planetDictionary.ContainsKey(planet.Guid))
@@ -181,8 +182,8 @@ namespace Pulsar4X.WPFUI.ViewModels
         /// </summary>
         public static SystemVM Create(GameVM gameVM, StarSystem starSystem)
         {
-            SystemVM newVM = new SystemVM(starSystem);
-            newVM._gameVM = gameVM;
+            SystemVM newVM = new SystemVM(gameVM, starSystem);
+            
             // Initialize the data.
             newVM.Refresh();
 

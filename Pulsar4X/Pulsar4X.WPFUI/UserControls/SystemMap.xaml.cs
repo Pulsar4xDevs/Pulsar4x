@@ -62,13 +62,13 @@ namespace Pulsar4X.WPFUI
 
         private Point GetPosition(PlanetVM planet)
         {
-            Vector pos = zoom * planet.SystemPosition + CanvasOffset;
+            Vector pos = zoom * Conversions.VectorFromVector4(planet.SystemPosition) + CanvasOffset;
             return Conversions.PointFromVector(pos);
         }
 
         private Point GetPosition(StarVM star)
         {
-            Vector pos = zoom * star.SystemPosition + CanvasOffset;
+            Vector pos = zoom * Conversions.VectorFromVector4(star.SystemPosition) + CanvasOffset;
             return Conversions.PointFromVector(pos);
         }
 

@@ -462,17 +462,18 @@ namespace Pulsar4X.WPFUI.ViewModels
 
         #region Construction
 
-        private PlanetVM(Entity entity)
+        private PlanetVM(GameVM gameVM, Entity entity)
         {
+            _gameVM = gameVM;
             Entity = entity;
         }
 
         /// <summary>
         /// Creates and fills out the properties of this ViewModel from the provided entity.
         /// </summary>
-        internal static PlanetVM Create(Entity entity)
+        internal static PlanetVM Create(GameVM gameVM, Entity entity)
         {
-            PlanetVM newVM = new PlanetVM(entity);
+            PlanetVM newVM = new PlanetVM(gameVM, entity);
 
             // Initialize the data.
             newVM.Refresh();
@@ -498,7 +499,7 @@ namespace Pulsar4X.WPFUI.ViewModels
                 throw new GuidNotFoundException(guid);
             }
 
-            return Create(entity);
+            return Create(gameVM, entity);
         }
 
         #endregion
