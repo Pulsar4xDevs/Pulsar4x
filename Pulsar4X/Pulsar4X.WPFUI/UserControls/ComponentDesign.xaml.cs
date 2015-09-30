@@ -17,7 +17,6 @@ namespace Pulsar4X.WPFUI
         private List<ComponentDesignDB> componentDesignTemplates;
         private FactionTechDB _factionTech;
         private StaticDataStore _staticData;
-        public event ValueChangedEventHandler ValueChanged; 
 
         private ComponentDesignVM _selectedTemplate;
 

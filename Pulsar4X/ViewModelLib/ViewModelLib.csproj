@@ -38,6 +38,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -45,6 +46,7 @@
     <Compile Include="ViewModels\FactionVM.cs" />
     <Compile Include="ViewModels\GameVM.cs" />
     <Compile Include="ViewModels\IViewModel.cs" />
+    <Compile Include="ViewModels\NewGameOptionsVM.cs" />
     <Compile Include="ViewModels\PlanetVM.cs" />
     <Compile Include="ViewModels\SpeciesVM.cs" />
     <Compile Include="ViewModels\StarVM.cs" />

@@ -132,6 +132,9 @@
     <Compile Include="UserControls\MinMaxSlider.xaml.cs">
       <DependentUpon>MinMaxSlider.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\NewGameOptions.xaml.cs">
+      <DependentUpon>NewGameOptions.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Populations.xaml.cs">
       <DependentUpon>Populations.xaml</DependentUpon>
     </Compile>
@@ -198,6 +201,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\MinMaxSlider.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\NewGameOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
