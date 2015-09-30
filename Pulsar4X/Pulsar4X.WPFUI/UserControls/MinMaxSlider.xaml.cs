@@ -13,8 +13,8 @@ namespace Pulsar4X.WPFUI.UserControls
     public partial class MinMaxSlider : UserControl
     {
         
-        public event ValueChangedEventHandler ValueChanged; 
-        
+        public event ValueChangedEventHandler ValueChanged;
+        private ComponentAbilityDesignVM _designAbility;
         public double Maximum
         {
             get
@@ -52,6 +52,7 @@ namespace Pulsar4X.WPFUI.UserControls
                 Slider.Value = value;
                 if (ValueChanged != null)
                 {
+                    _designAbility.OnValueChanged(GuiHint.GuiSelectionMaxMin, value);
                     ValueChanged.Invoke(GuiHint.GuiSelectionMaxMin, value);
                 }
             }
@@ -59,16 +60,13 @@ namespace Pulsar4X.WPFUI.UserControls
 
         public void GuiSliderSetup(ComponentAbilityDesignVM designAbility)
         {
-            MinMaxSlider guiSliderControl = new MinMaxSlider
-            {
-                NameLabel = { Content = designAbility.Name },
-                ToolTip = designAbility.Description
-            };
-
-            guiSliderControl.Maximum = designAbility.MaxValue;            
-            guiSliderControl.Minimum = designAbility.MinValue;
-            guiSliderControl.Value = designAbility.Value;
-
+            _designAbility = designAbility;
+            NameLabel.Content = designAbility.Name;
+            NameLabel.ToolTip = designAbility.Description;
+            Maximum = designAbility.MaxValue;            
+            Minimum = designAbility.MinValue;
+            Value = designAbility.Value;
+            designAbility.ValueChanged += ValueChanged;
         }
 
 

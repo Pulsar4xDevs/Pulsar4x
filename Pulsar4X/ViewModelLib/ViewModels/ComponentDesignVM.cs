@@ -11,6 +11,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         public ComponentDesignDB DesignDB { get; private set; }
         private readonly StaticDataStore _staticData;
 
+        //public event ValueChangedEventHandler ValueChanged;
 
         public List<ComponentAbilityDesignVM> AbilityList { get; private set; } 
 
@@ -23,6 +24,7 @@ namespace Pulsar4X.WPFUI.ViewModels
             {
                 AbilityList.Add(new ComponentAbilityDesignVM(componentAbility, _staticData));
             }
+            
          }
 
         public string StatsText
@@ -67,6 +69,7 @@ namespace Pulsar4X.WPFUI.ViewModels
         
         
         public event ValueChangedEventHandler ValueChanged;
+
         public List<TechSD> TechList { get; private set; }
         public string Name { get { return _designAbility.Name; } }
         public string Description { get { return _designAbility.Description; } }
@@ -100,19 +103,20 @@ namespace Pulsar4X.WPFUI.ViewModels
                     }
                     break;
             }
+
         }
 
-        private void OnValueChanged(GuiHint controlType, double value)
+        public void OnValueChanged(GuiHint controlType, double value)
         {
             if(controlType == GuiHint.GuiSelectionMaxMin)
                 _designAbility.SetValueFromInput(value);
             else if (controlType == GuiHint.GuiTechSelectionList)
                 _designAbility.SetValueFromGuidList(TechList[(int)value].ID);
 
-            if (ValueChanged != null)
-            {
-                ValueChanged.Invoke(controlType, value);
-            }
+            //if (ValueChanged != null) //bubble it up to ComponentDesignVM?
+            //{
+            //    ValueChanged.Invoke(controlType, value);
+            //}
         }
 
         public string AbilityStat {

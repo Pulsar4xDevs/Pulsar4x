@@ -11,7 +11,8 @@ namespace Pulsar4X.WPFUI.UserControls
     // ReSharper disable once RedundantExtendsListEntry
     public partial class AbilitySelectionList : UserControl
     {
-        private List<TechSD> _techList; 
+        private List<TechSD> _techList;
+        private ComponentAbilityDesignVM _designAbility;
         public event ValueChangedEventHandler ValueChanged; 
 
         public AbilitySelectionList()
@@ -21,7 +22,7 @@ namespace Pulsar4X.WPFUI.UserControls
 
         public void GuiListSetup(ComponentAbilityDesignVM designAbility)
         {
-            //AbilitySelectionList abilitySelection = new AbilitySelectionList();
+            _designAbility = designAbility;
             _techList = designAbility.TechList;
 
             NameLabel.Content = designAbility.Name;
@@ -36,7 +37,8 @@ namespace Pulsar4X.WPFUI.UserControls
         {
             if (ValueChanged != null)
             {
-                ValueChanged.Invoke(ECSLib.GuiHint.GuiTechSelectionList, SelectionComboBox.SelectedIndex);
+                _designAbility.OnValueChanged(GuiHint.GuiTechSelectionList, SelectionComboBox.SelectedIndex);
+                ValueChanged.Invoke(GuiHint.GuiTechSelectionList, SelectionComboBox.SelectedIndex);
             }
         }
     }
