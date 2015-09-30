@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using Pulsar4X.ECSLib; //not realy sure we should be referencing ecs lib in wpf...
-using Pulsar4X.WPFUI.ViewModels;
+using Pulsar4X.ViewModels;
 
 namespace Pulsar4X.WPFUI.UserControls
 {

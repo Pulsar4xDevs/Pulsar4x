@@ -13,7 +13,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI.Properties;
-using Pulsar4X.WPFUI.ViewModels;
+using Pulsar4X.ViewModels;
 using Xceed.Wpf.AvalonDock.Layout;
 
 namespace Pulsar4X.WPFUI

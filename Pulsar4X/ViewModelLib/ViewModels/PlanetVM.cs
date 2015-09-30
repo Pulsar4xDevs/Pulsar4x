@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.WPFUI.ViewModels
+namespace Pulsar4X.ViewModels
 {
     /// <summary>
     /// This class is a view model for all planets, asteroids, comets, moons, etc.

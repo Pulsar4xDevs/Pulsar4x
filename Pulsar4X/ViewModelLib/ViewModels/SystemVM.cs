@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.WPFUI.ViewModels
+namespace Pulsar4X.ViewModels
 {
     public class SystemVM
     {

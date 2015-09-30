@@ -7,7 +7,7 @@
     <ProjectGuid>{76508ABF-600E-4B86-9764-DB82D4E429B0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pulsar4X.WPFUI</RootNamespace>
+    <RootNamespace>Pulsar4X.ViewModels</RootNamespace>
     <AssemblyName>Pulsar4X.WPFUI</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

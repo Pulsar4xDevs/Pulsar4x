@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Pulsar4X.ECSLib;
-using Pulsar4X.WPFUI.ViewModels;
+using Pulsar4X.ViewModels;
 
 namespace Pulsar4X.WPFUI
 {

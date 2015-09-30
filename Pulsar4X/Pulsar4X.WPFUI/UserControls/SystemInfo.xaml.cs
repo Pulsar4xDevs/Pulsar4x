@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 using Pulsar4X.ECSLib;
-using Pulsar4X.WPFUI.ViewModels;
+using Pulsar4X.ViewModels;
 
 namespace Pulsar4X.WPFUI
 {

@@ -46,6 +46,7 @@
     <Compile Include="ViewModels\GameVM.cs" />
     <Compile Include="ViewModels\IViewModel.cs" />
     <Compile Include="ViewModels\PlanetVM.cs" />
+    <Compile Include="ViewModels\SpeciesVM.cs" />
     <Compile Include="ViewModels\StarVM.cs" />
     <Compile Include="ViewModels\SystemVM.cs" />
   </ItemGroup>

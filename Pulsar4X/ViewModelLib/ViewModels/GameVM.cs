@@ -5,7 +5,7 @@ using System.IO.Pipes;
 using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.WPFUI.ViewModels
+namespace Pulsar4X.ViewModels
 {
     /// <summary>
     /// This view model maps to the main game class. It porivdes lists of factions, systems and other high level info.

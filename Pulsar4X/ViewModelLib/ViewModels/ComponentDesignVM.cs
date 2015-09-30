@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.WPFUI.ViewModels
+namespace Pulsar4X.ViewModels
 {
 
 

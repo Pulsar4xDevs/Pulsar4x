@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI.UserControls;
-using Pulsar4X.WPFUI.ViewModels;
+using Pulsar4X.ViewModels;
 
 namespace Pulsar4X.WPFUI
 {
@@ -62,7 +62,7 @@ namespace Pulsar4X.WPFUI
                 }
                 
                 componentAbilityVM.ValueChanged += OnValueChanged;
-
+                OnValueChanged(GuiHint.None, 0);
             }
 
         }
