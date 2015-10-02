@@ -1,31 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModels
 {
 
 
+
+
     public class ComponentDesignVM
     {
-        public ComponentDesignDB DesignDB { get; private set; }
-        private readonly StaticDataStore _staticData;
+        public Dictionary<string, Guid> ComponentTypes { get; set; } 
 
+        public ComponentDesignDB DesignDB { get; private set; }
+        
+        private readonly StaticDataStore _staticData;
+        private readonly FactionTechDB _factionTech;
+        private readonly GameVM _gameVM;
         //public event ValueChangedEventHandler ValueChanged;
 
-        public List<ComponentAbilityDesignVM> AbilityList { get; private set; } 
+        public List<ComponentAbilityDesignVM> AbilityList { get; private set; }
 
-        public ComponentDesignVM(ComponentDesignDB design, StaticDataStore staticData)
+
+        public ComponentDesignVM()
         {
-            DesignDB = design;
-            _staticData = staticData;
+        }
+
+        public ComponentDesignVM(GameVM gameVM)
+        {
+            _gameVM = gameVM;
+            _staticData = gameVM.Game.StaticData;
+            _factionTech = gameVM.PlayerFaction.GetDataBlob<FactionTechDB>();
+
+            ComponentTypes = new Dictionary<string, Guid>();
+            foreach (var componentSD in gameVM.Game.StaticData.Components.Values)
+            {
+                ComponentTypes.Add(componentSD.Name, componentSD.ID);
+            }
+        }
+
+
+        public static ComponentDesignVM Create(GameVM gameVM)
+        {
+            return new ComponentDesignVM(gameVM);            
+        }
+
+        public void SetComponent(Guid componentGuid)
+        {
+            ComponentSD componentSD = _staticData.Components[componentGuid];
+
+            DesignDB = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
+
             AbilityList = new List<ComponentAbilityDesignVM>();
-            foreach (var componentAbility in design.ComponentDesignAbilities)
+            foreach (var componentAbility in DesignDB.ComponentDesignAbilities)
             {
                 AbilityList.Add(new ComponentAbilityDesignVM(componentAbility, _staticData));
-            }
-            
-         }
+            }            
+        }
+
+        public void CreateComponent()
+        {
+            GenericComponentFactory.DesignToEntity(_gameVM.Game.GlobalManager, DesignDB, _factionTech);             
+        }
 
         public string StatsText
         {

@@ -50,14 +50,14 @@ namespace Pulsar4X.WPFUI
 
         internal GameVM GameVM { get; set; }
 
-        internal Entity Faction
+        internal FactionVM Faction
         {
             get { return _faction; }
             set {
                 _faction = value; 
                 OnPropertyChanged(); }
         }
-        private Entity _faction;
+        private FactionVM _faction;
 
         App()
         {
