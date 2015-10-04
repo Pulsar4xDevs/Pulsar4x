@@ -14,6 +14,43 @@ using Pulsar4X.Helpers;
 
 namespace Pulsar4X.Entities
 {
+    /// <summary>
+    /// Class for storing Jump point detections for each faction.
+    /// </summary>
+    public class JPDetection
+    {
+        public enum Status
+        {
+            None,
+            Incomplete,
+            Complete,
+            Count
+        }
+
+        /// <summary>
+        /// Status of this faction's survey of this starsystem.
+        /// </summary>
+        public Status _SurveyStatus { get; set; }
+
+        /// <summary>
+        /// Which Points have been surveyed?
+        /// </summary>
+        public BindingList<SurveyPoint> _SurveyedPoints { get; set; }
+
+        /// <summary>
+        /// List of detected JPs if status is Incomplete.
+        /// </summary>
+        public BindingList<JumpPoint> _DetectedJPs { get; set; }
+
+        public JPDetection()
+        {
+            _SurveyStatus = Status.None;
+            _SurveyedPoints = new BindingList<SurveyPoint>();
+            _DetectedJPs = new BindingList<JumpPoint>();
+        }
+
+    }
+
     public class StarSystem : GameEntity
     {
         public BindingList<Star> Stars { get; set; }
@@ -71,6 +108,12 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<SurveyPoint> _SurveyPoints { get; set; }
 
+        /// <summary>
+        /// store the results of each faction's surveying here. if no faction is present then it obviously has not done any surveying. otherwise complete means every point is mapped,
+        /// and incomplete means only those points in JPDetection._DetectedJP are detected.  
+        /// </summary>
+        public Dictionary<Faction, JPDetection> _SurveyResults { get; set; }
+
         public StarSystem(string name, int seed)
             : base()
         {
@@ -87,6 +130,8 @@ namespace Pulsar4X.Entities
             OrdnanceGroups = new BindingList<OrdnanceGroupTN>();
 
             _SurveyPoints = new BindingList<SurveyPoint>();
+
+            _SurveyResults = new Dictionary<Faction, JPDetection>();
 
             m_seed = seed;
 

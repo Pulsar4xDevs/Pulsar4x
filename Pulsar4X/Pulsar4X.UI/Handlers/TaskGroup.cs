@@ -498,6 +498,10 @@ namespace Pulsar4X.UI.Handlers
                             Waypoint waypoint = (Waypoint)entity;
                             NewOrder = new Order(selected_ordertype, -1, -1, 0, waypoint);
                             break;
+                        case SystemListObject.ListEntityType.SurveyPoints:
+                            SurveyPoint SPoint = (SurveyPoint)entity;
+                            NewOrder = new Order(selected_ordertype, -1, -1, 0, SPoint);
+                            break;
                     }
                     if (NewOrder != null)
                         CurrentTaskGroup.IssueOrder(NewOrder, SelectedOrderIndex);
@@ -1053,16 +1057,41 @@ namespace Pulsar4X.UI.Handlers
         /// Add jump points to the available locations list.
         /// </summary>
         /// <param name="starsystem"></param>
-#warning check to see if jump point is detected eventually when grav survey is implemented
         private void AddJumpPointsToList(StarSystem starsystem)
         {
-            foreach (JumpPoint jp in starsystem.JumpPoints)
+            /// <summary>
+            /// If this starsystem has no survey results for this faction, or the results aren't complete or incomplete then do nothing.
+            /// </summary>
+            if (starsystem._SurveyResults.ContainsKey(CurrentFaction) == true)
             {
-                StarSystemEntity entObj = jp;
-                SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
-                SystemListObject valueObj = new SystemListObject(entType, entObj);
-                SystemLocationGuidDict.Add(entObj.Id, jp.Name);
-                SystemLocationDict.Add(entObj.Id, valueObj);
+                /// <summary>
+                /// Every JP is detected. add them all.
+                /// </summary>
+                if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Complete)
+                {
+                    foreach (JumpPoint jp in starsystem.JumpPoints)
+                    {
+                        StarSystemEntity entObj = jp;
+                        SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
+                        SystemListObject valueObj = new SystemListObject(entType, entObj);
+                        SystemLocationGuidDict.Add(entObj.Id, jp.Name);
+                        SystemLocationDict.Add(entObj.Id, valueObj);
+                    }
+                }
+                /// <summary>
+                /// Only some of the JPs are detected, so list only those.
+                /// </summary>
+                else if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Incomplete)
+                {
+                    foreach (JumpPoint jp in starsystem._SurveyResults[CurrentFaction]._DetectedJPs)
+                    {
+                        StarSystemEntity entObj = jp;
+                        SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
+                        SystemListObject valueObj = new SystemListObject(entType, entObj);
+                        SystemLocationGuidDict.Add(entObj.Id, jp.Name);
+                        SystemLocationDict.Add(entObj.Id, valueObj);
+                    }
+                }
             }
         }
 

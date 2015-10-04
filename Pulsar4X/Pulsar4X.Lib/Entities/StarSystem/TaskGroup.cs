@@ -2904,7 +2904,7 @@ namespace Pulsar4X.Entities
                                if (OB.GeoSurveyList.ContainsKey(TaskGroupFaction) == false)
                                {
                                    OB.GeoSurveyList.Add(TaskGroupFaction, true);
-                                   if(OB._mineralsGenerated == false)
+                                   if (OB._mineralsGenerated == false)
                                        OB.GenerateMinerals();
                                }
                                //handle adding the faction to the survey list when complete 
@@ -2922,6 +2922,77 @@ namespace Pulsar4X.Entities
                         /// get the cost to survey this system, see above geo survey costs.
                         /// reveal detected jumppoints. how will this work? also jumppoint generation needs to be looked at.
                         /// </summary>
+                        int SystemSurveyCost = Contact.Position.System.GetSurveyCost();
+                        StarSystem CurrentSystem = Contact.Position.System;
+
+                        float hourFraction = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
+                        int totalHours = (int)Math.Floor(hourFraction);
+                        int RemainderSP = SystemSurveyCost - _GravSurveyPoints;
+                        int TotalSP = (int)(CalcGravSurveyPoints() * (float)totalHours);
+
+                        if (TotalSP < RemainderSP)
+                        {
+                            _GravSurveyPoints = _GravSurveyPoints + TotalSP;
+                            TimeSlice = 0;
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// Some time will be left over, return that fraction of time.
+                            /// </summary>
+                            int hoursToComplete = (int)Math.Ceiling((float)RemainderSP / CalcGravSurveyPoints());
+                            TimeSlice = TimeSlice - ((uint)hoursToComplete * Constants.TimeInSeconds.Hour);
+                        }
+
+                        if (_GravSurveyPoints >= SystemSurveyCost)
+                        {
+                            /// <summary>
+                            /// 1st mark the survey point as surveyed.
+                            /// </summary>
+                            if (CurrentSystem._SurveyResults.ContainsKey(TaskGroupFaction) == false)
+                            {
+                                JPDetection newJPDet = new JPDetection();
+                                newJPDet._SurveyedPoints.Add(TaskGroupOrders[0].surveyPointOrder);
+                                CurrentSystem._SurveyResults.Add(TaskGroupFaction,newJPDet);
+                                CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus = JPDetection.Status.Incomplete;
+                            }
+                            else
+                            {
+                                CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Add(TaskGroupOrders[0].surveyPointOrder);
+
+                                /// <summary>
+                                /// if 30 points have been surveyed mark the system as totally surveyed.
+                                /// </summary>
+                                if(CurrentSystem._SurveyResults.Count == Constants.SensorTN.SurveyPointCount)
+                                {
+                                    /// <summary>
+                                    /// All survey work is complete, so free up these pointers.
+                                    /// </summary>
+                                    CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus = JPDetection.Status.Complete;
+                                    CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints = null;
+                                    CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs = null;
+                                }
+                            }
+                            int SPIndex = CurrentSystem._SurveyPoints.IndexOf(TaskGroupOrders[0].surveyPointOrder);
+
+                            /// <summary>
+                            /// These pointers will be null if status is complete. check for that. otherwise mark any jps at this index as found.
+                            /// </summary>
+                            if(CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus != JPDetection.Status.Complete)
+                            {
+                               foreach (JumpPoint JP in CurrentSystem.JumpPoints)
+                               {
+                                  int JPIndex = CurrentSystem.GetSurveyPointArea(JP.Position.X,JP.Position.Y);
+                                  if (JPIndex == SPIndex)
+                                  {
+                                      CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Add(JP);
+                                  }
+                               }
+                            }
+
+                            _GravSurveyPoints = 0;
+                        }
+
                         break;
                     #endregion
 

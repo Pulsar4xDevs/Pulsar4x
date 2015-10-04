@@ -748,6 +748,11 @@ namespace Pulsar4X
             /// Each survey ring is 2B km out for every 1.0 unit of solar mass present. solar mass is sqrted for this calculation as per survey cost and then multiplied by this value. units in AU.
             /// </summary>
             public const double EarthRingDistance = 13.36917422;
+
+            /// <summary>
+            /// How many survey points are there? this is only referenced in taskgroup grav survey code for now.
+            /// </summary>
+            public const int SurveyPointCount = 30;
         }
 
         /// <summary>
