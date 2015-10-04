@@ -37,16 +37,6 @@ namespace Pulsar4X.WPFUI
             ((TextBox)sender).SelectAll();
         }
 
-        //internal Game Game
-        //{
-        //    get { return _game; }
-        //    set
-        //    {
-        //        _game = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-        //private Game _game;
 
         internal GameVM GameVM { get; set; }
 

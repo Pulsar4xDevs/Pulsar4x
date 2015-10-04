@@ -42,7 +42,8 @@ namespace Pulsar4X.ECSLib
         public ReadOnlyCollection<StarSystem> Systems { get { return new ReadOnlyCollection<StarSystem>(StarSystems); } }
 
         [PublicAPI] 
-        public Entity GameMasterFaction;
+        [JsonProperty]
+        public Guid GameMasterFaction;
 
         /// <summary>
         /// Global Entity Manager.

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Pipes;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +30,9 @@ namespace Pulsar4X.ViewModels
             }
         }
         private double _progressValue;
+
+        public string StatusText { get{return _statusText;} set { _statusText = value; OnPropertyChanged(); } }
+        private string _statusText;
 
         internal Entity PlayerFaction { get{return _playerFaction;}
             set
@@ -92,9 +96,13 @@ namespace Pulsar4X.ViewModels
 
         public async void CreateGame(NewGameOptionsVM options)
         {
+            StatusText = "Creating Game...";
             Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, new Progress<double>(OnProgressUpdate)));
             Game = newGame;
-            PlayerFaction = newGame.GameMasterFaction;
+
+            Entity gameMaster;
+            Game.GlobalManager.FindEntityByGuid(Game.GameMasterFaction, out gameMaster);
+            PlayerFaction = gameMaster;
             if (options.CreatePlayerFaction && options.DefaultStart)
             {
                 StarSystemFactory starfac = new StarSystemFactory(newGame);
@@ -108,6 +116,28 @@ namespace Pulsar4X.ViewModels
                 PlayerFaction = factionEntity;
             }
             ProgressValue = 0;//reset the progressbar
+            StatusText = "Game Created.";
+        }
+
+        public async void LoadGame(string pathToFile)
+        {
+            StatusText = "Loading Game...";
+            Game = await Task.Run(() => ECSLib.SaveGame.Load(pathToFile, new Progress<double>(OnProgressUpdate)));
+
+            Entity gameMaster;
+            Game.GlobalManager.FindEntityByGuid(Game.GameMasterFaction, out gameMaster);
+            PlayerFaction = gameMaster; //TODO a screen with a faction selection and password. 
+            ProgressValue = 0;
+            StatusText = "Game Loaded.";
+        }
+
+        public async void SaveGame(string pathToFile)
+        {
+            StatusText = "Saving Game...";
+            await Task.Run(() => ECSLib.SaveGame.Save(Game, pathToFile, new Progress<double>(OnProgressUpdate)));
+            //await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, true)); // Compressed
+            ProgressValue = 0;
+            StatusText = "Game Saved";
         }
 
         public async void AdvanceTime(TimeSpan pulseLength, CancellationToken _pulseCancellationToken)

@@ -126,15 +126,13 @@ namespace Pulsar4X.ECSLib
         {
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
 
-
-
-            while (timeSinceEpoch > orbit.OrbitalPeriod)
+            // Don't attempt to calculate large timeframes.
+            if (timeSinceEpoch > orbit.OrbitalPeriod)
             {
-                // Don't attempt to calculate large timeframes.
-                timeSinceEpoch -= orbit.OrbitalPeriod;
-                orbit.Epoch += orbit.OrbitalPeriod;
+                long years = (timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks);
+                timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
+                orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
             }
-
 
             // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)
             // Convert MeanAnomaly to radians.

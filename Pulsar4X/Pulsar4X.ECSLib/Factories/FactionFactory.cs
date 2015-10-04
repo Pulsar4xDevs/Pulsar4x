@@ -19,8 +19,11 @@ namespace Pulsar4X.ECSLib
             blobs.Add(techDB);
             Entity factionEntity = new Entity(game.GlobalManager, blobs);
 
-            //add this faction to the GM's known faction list.            
-            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownFactions.Add(factionEntity);
+            //add this faction to the GM's known faction list.  
+            Entity gameMaster;
+            game.GlobalManager.FindEntityByGuid(game.GameMasterFaction, out gameMaster);
+            gameMaster.GetDataBlob<FactionInfoDB>().KnownFactions.Add(factionEntity);
+
 
             return factionEntity;
         }
@@ -46,9 +49,8 @@ namespace Pulsar4X.ECSLib
             blobs.Add(factionDB);
             blobs.Add(factionAbilitiesDB);
             blobs.Add(techDB);
-            Entity gm = new Entity(game.GlobalManager, blobs);
-
-            game.GameMasterFaction = gm;
+            Entity gameMaster = new Entity(game.GlobalManager, blobs);
+            game.GameMasterFaction = gameMaster.Guid;
         }
 
     }

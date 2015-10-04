@@ -16,7 +16,7 @@
             <MenuItem Header="_File">
                 <MenuItem Header="New Game"  Click="NewGame_Click"/>
                 <Separator/>
-                <MenuItem Name="MI_SaveGame" Header="Save Game" Click="SaveGame_Click" IsEnabled="False"/>
+                <MenuItem Name="MI_SaveGame" Header="Save Game" Click="SaveGame_Click" IsEnabled="{Binding HasGame}"/>
                 <MenuItem Header="Load Game" Click="LoadGame_Click"/>
                 <Separator/>
                 <MenuItem Header="Exit" Click="Exit_Click"/>
@@ -124,7 +124,7 @@
 
         <StatusBar Grid.Row="3" VerticalAlignment="Bottom" Background="Beige" >
             <StatusBarItem>
-                <TextBlock Name="Status_TextBlock">No Game Loaded.</TextBlock>
+                <TextBlock Name="Status_TextBlock" Text="{Binding StatusText}" > </TextBlock>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <ProgressBar Width="100" Height="20" Name="Status_ProgressBar" 

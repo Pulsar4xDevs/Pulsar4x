@@ -89,82 +89,54 @@ namespace Pulsar4X.WPFUI
             doc.Title = title;
             doc.ToolTip = title;
             doc.Content = control;
-            LayoutPane.Children.Add(doc);
-           
-            
-            //try
-            //{
-                //Status_TextBlock.Text = "Creating new game...";
-                //App.Current.Game = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), 10, new Progress<double>(OnProgressUpdate)));
-                ////add sol for shits and giggles and testing
-                //StarSystemFactory starfac = new StarSystemFactory(App.Current.Game);
-                //starfac.CreateSol(App.Current.Game);
-         
-                //starfac.CreateEccTest(App.Current.Game);
-                //starfac.CreateLongitudeTest(App.Current.Game);
-                ////
-                //MessageBox.Show(this, "Game Created.", "Result");
-                //App.Current.GameVM = new GameVM(App.Current.Game);
-                //Status_TextBlock.Text = "Game Created.";
-                //Status_ProgressBar.Value = 0;
-
-            //}
-            //catch (Exception exception)
-            //{
-            //    DisplayException("creating a new game", exception);
-            //}
-
-            //e.Handled = true;
+            LayoutPane.Children.Add(doc);           
         }
 
 
 
-        private async void LoadGame_Click(object sender, RoutedEventArgs e)
+        private void LoadGame_Click(object sender, RoutedEventArgs e)
         {
-            //OpenFileDialog fileDialog = new OpenFileDialog();
-            //fileDialog.Filter = "json Save File|*.json";
-            //if (fileDialog.ShowDialog() == true)
-            //{
-            //    string pathToFile = fileDialog.FileName;
-            //    try
-            //    {
-            //        Status_TextBlock.Text = "Game Loading...";
-            //        App.Current.Game = await Task.Run(() => SaveGame.Load(pathToFile, new Progress<double>(OnProgressUpdate)));
-            //        MessageBox.Show(this, "Game Loaded.", "Result");
-            //        Status_TextBlock.Text = "Game Loaded.";
-            //        Status_ProgressBar.Value = 0;
-            //    }
-            //    catch (Exception exception)
-            //    {
-            //        DisplayException("loading the game", exception);
-            //    }
-            //}
-            //e.Handled = true;
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Filter = "json Save File|*.json";
+            if (fileDialog.ShowDialog() == true)
+            {
+                string pathToFile = fileDialog.FileName;
+                try
+                {
+
+                    App.Current.GameVM.LoadGame(pathToFile);
+
+                    
+                }
+                catch (Exception exception)
+                {
+                    DisplayException("loading the game", exception);
+                }
+            }
+            e.Handled = true;
         }
 
-        private async void SaveGame_Click(object sender, RoutedEventArgs e)
+        private void SaveGame_Click(object sender, RoutedEventArgs e)
         {
-            //SaveFileDialog fileDialog = new SaveFileDialog();
-            //fileDialog.Filter = "json Save File|*.json";
-            //if (fileDialog.ShowDialog() == true)
-            //{
-            //    string pathToFile = fileDialog.FileName;
-            //    try
-            //    {
-            //        Status_TextBlock.Text = "Game Saving...";
-            //        await Task.Run(() => SaveGame.Save(App.Current.Game, pathToFile, new Progress<double>(OnProgressUpdate)));
-            //        //await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, true)); // Compressed
-            //        MessageBox.Show(this, "Game Saved.", "Result");
-            //        Status_TextBlock.Text = "Game Saved.";
-            //        Status_ProgressBar.Value = 0;
-            //    }
-            //    catch (Exception exception)
-            //    {
-            //        DisplayException("saving the game", exception);
-            //    }
+            SaveFileDialog fileDialog = new SaveFileDialog();
+            fileDialog.Filter = "json Save File|*.json";
+            if (fileDialog.ShowDialog() == true)
+            {
+                string pathToFile = fileDialog.FileName;
+                try
+                {
 
-            //}
-            //e.Handled = true;
+                    App.Current.GameVM.SaveGame(pathToFile);
+                    MessageBox.Show(this, "Game Saved.", "Result");
+
+                }
+                catch (Exception exception)
+                {
+                    DisplayException("saving the game", exception);
+                }
+
+            }
+            e.Handled = true;
         }
 
 
