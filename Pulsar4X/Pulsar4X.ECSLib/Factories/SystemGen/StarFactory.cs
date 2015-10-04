@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="system">The Star System the new stars belongs to.</param>
         /// <param name="numStars">The number of stars to create.</param>
         /// <returns>A mass-sorted list of entity ID's for the generated stars.</returns>
-        public List<Entity> CreateStarsForSystem(StarSystem system, int numStars)
+        public List<Entity> CreateStarsForSystem(StarSystem system, int numStars, DateTime currentDateTime)
         {
             // Argument Validation.
             if (system == null)
@@ -147,7 +147,7 @@ namespace Pulsar4X.ECSLib
                 double sma = minDistance * Math.Pow(system.RNG.NextDouble(), 3);
                 double eccentricity = Math.Pow(system.RNG.NextDouble() * 0.8, 3);
 
-                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.Mass, currentStar.GetDataBlob<MassVolumeDB>().Mass, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, _galaxyGen.Settings.J2000);
+                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.Mass, currentStar.GetDataBlob<MassVolumeDB>().Mass, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
                 currentStar.SetDataBlob(currentOrbit);
 
                 previousStar = currentStar;

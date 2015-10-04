@@ -128,16 +128,12 @@ namespace Pulsar4X.ECSLib
 
 
 
-            //while (timeSinceEpoch > orbit.OrbitalPeriod)
-            //{
-            //    // Don't attempt to calculate large timeframes.
-            //    timeSinceEpoch -= orbit.OrbitalPeriod;
-            //    orbit.Epoch += orbit.OrbitalPeriod;
-            //}
-            //more efficent version of the above: TODO Write a test to ensure accuracy! 
-            long years = (timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks);
-            timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
-            orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
+            while (timeSinceEpoch > orbit.OrbitalPeriod)
+            {
+                // Don't attempt to calculate large timeframes.
+                timeSinceEpoch -= orbit.OrbitalPeriod;
+                orbit.Epoch += orbit.OrbitalPeriod;
+            }
 
 
             // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)

@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
             StarSystem newSystem = new StarSystem(game, name, seed);
 
             int numStars = newSystem.RNG.Next(1, 5);
-            List<Entity> stars = _starFactory.CreateStarsForSystem(newSystem, numStars);
+            List<Entity> stars = _starFactory.CreateStarsForSystem(newSystem, numStars, game.CurrentDateTime);
 
             foreach (Entity star in stars)
             {
