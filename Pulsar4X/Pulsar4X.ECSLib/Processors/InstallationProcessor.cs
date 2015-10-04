@@ -38,14 +38,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionEntity"></param>
         public static void PerEconTic(StaticDataStore staticData, Entity colonyEntity)
         {
-            Entity factionEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().OwningEntity; 
-            FactionAbilitiesDB factionAbilities = factionEntity.GetDataBlob<FactionAbilitiesDB>();
-            FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            Employment(staticData, colonyEntity); //check if installations still work
-            Mine(staticData, factionEntity, colonyEntity); //mine new materials.
-            Construction(staticData, factionEntity, colonyEntity); //construct, refine, etc.
+            //TODO this is broken, and old anyway (OwningEntity here returns the colonyEntity, ie the blobs owner not the faction entity)
+            //Entity factionEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().OwningEntity; 
+            //FactionAbilitiesDB factionAbilities = factionEntity.GetDataBlob<FactionAbilitiesDB>();
+            //FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
+            //Employment(staticData, colonyEntity); //check if installations still work
+            //Mine(staticData, factionEntity, colonyEntity); //mine new materials.
+            //Construction(staticData, factionEntity, colonyEntity); //construct, refine, etc.
 
-            DoResearch(staticData, colonyEntity, factionAbilities, factionTech);
+            //DoResearch(staticData, colonyEntity, factionAbilities, factionTech);
         }
 
         /// <summary>

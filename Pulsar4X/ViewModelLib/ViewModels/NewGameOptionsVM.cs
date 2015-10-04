@@ -1,16 +1,16 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModels
 {
-    public class NewGameOptionsVM
+    public class NewGameOptionsVM : IViewModel
     {
-        public delegate void ProgressUpdate(double progress);
-
-        public double StatusValue;
-
+        private GameVM _gameVM;
+        
         public string GmPassword { get; set; }
         
         public bool CreatePlayerFaction { get; set; }
@@ -20,36 +20,37 @@ namespace Pulsar4X.ViewModels
 
         public int NumberOfSystems { get; set; }
 
-        public async void CreateGame()
+
+        public NewGameOptionsVM()
         {
-            Game newGame =  await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), NumberOfSystems, new Progress<double>(OnProgressUpdate)));
-            if (CreatePlayerFaction && DefaultStart)
-            {
-                StarSystemFactory starfac = new StarSystemFactory(newGame);
-                StarSystem sol = starfac.CreateSol(newGame);
-                Entity earth = sol.SystemManager.Entities[3]; //should be fourth entity created 
-                Entity factionEntity = FactionFactory.CreateFaction(newGame, FactionName);
-                Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, newGame.GlobalManager);
-                Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
-                colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
-            }
+            CreatePlayerFaction = true;
+            DefaultStart = true;
+            FactionName = "United Earth Federation";
+            FactionPassword = "FPnotImplemented";
+            GmPassword = "GMPWnotImplemented";
+            NumberOfSystems = 50;
         }
 
-        /// <summary>
-        /// OnProgressUpdate eventhandler for the Progress class.
-        /// Called from the task thread, this call must be marshalled to the UI thread.
-        /// </summary>
-        private void OnProgressUpdate(double progress)
-        {
-            // The Dispatcher contains the UI thread. Make sure we are on the UI thread.
-            //if (Thread.CurrentThread != Dispatcher.Thread)
-            //{
-            //    Dispatcher.BeginInvoke(new ProgressUpdate(OnProgressUpdate), progress);
-            //    return;
-            //}
 
-            StatusValue = progress * 100;
+        public static NewGameOptionsVM Create(GameVM gameVM)
+        {
+            NewGameOptionsVM optionsVM = new NewGameOptionsVM();
+            optionsVM._gameVM = gameVM;
+
+            return optionsVM;
         }
 
+        public void CreateGame()
+        {
+            _gameVM.CreateGame(this);
+        }
+
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void Refresh(bool partialRefresh = false)
+        {
+            //throw new NotImplementedException();
+        }
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using Pulsar4X.ECSLib;
+//using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModels;
 
 namespace Pulsar4X.WPFUI
@@ -37,16 +37,16 @@ namespace Pulsar4X.WPFUI
             ((TextBox)sender).SelectAll();
         }
 
-        internal Game Game
-        {
-            get { return _game; }
-            set
-            {
-                _game = value;
-                OnPropertyChanged();
-            }
-        }
-        private Game _game;
+        //internal Game Game
+        //{
+        //    get { return _game; }
+        //    set
+        //    {
+        //        _game = value;
+        //        OnPropertyChanged();
+        //    }
+        //}
+        //private Game _game;
 
         internal GameVM GameVM { get; set; }
 
@@ -62,7 +62,7 @@ namespace Pulsar4X.WPFUI
         App()
         {
             Current = this;
-            
+            GameVM = new GameVM();
             if (string.IsNullOrEmpty(WPFUI.Properties.Settings.Default.ClientGuid))
             {
                 WPFUI.Properties.Settings.Default.ClientGuid = Guid.NewGuid().ToString();
@@ -77,7 +77,7 @@ namespace Pulsar4X.WPFUI
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotifyPropertyChangedInvocator]
+        //[NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             if (PropertyChanged != null)

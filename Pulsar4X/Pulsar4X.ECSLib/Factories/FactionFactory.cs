@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
             NameDB name = new NameDB(factionName);
             FactionInfoDB factionDB = new FactionInfoDB();
             FactionAbilitiesDB factionAbilitiesDB = new FactionAbilitiesDB();
-            FactionTechDB techDB = new FactionTechDB(game.StaticData.Techs.Values.ToList());
+            FactionTechDB techDB = new FactionTechDB(game.StaticData.Techs.Values.ToList());        
             blobs.Add(name);
             blobs.Add(factionDB);
             blobs.Add(factionAbilitiesDB);

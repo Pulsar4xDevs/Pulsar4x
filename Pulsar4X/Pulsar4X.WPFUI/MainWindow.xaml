@@ -34,7 +34,7 @@
             </MenuItem>
         </Menu>
 
-        <ToolBarTray Name="TBT_Toolbar" Grid.Row="1" Orientation="Horizontal" IsEnabled="False">
+        <ToolBarTray Name="TBT_Toolbar" Grid.Row="1" Orientation="Horizontal" IsEnabled="{Binding HasGame}">
             <ToolBar Band="1">
                 <Button Name="TBB_SystemMap" Content="System Map" Click="TBB_Click"></Button>
                 <Separator/>
@@ -127,7 +127,9 @@
                 <TextBlock Name="Status_TextBlock">No Game Loaded.</TextBlock>
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <ProgressBar Width="100" Height="20" Name="Status_ProgressBar"/>
+                <ProgressBar Width="100" Height="20" Name="Status_ProgressBar" 
+                             Value="{Binding ProgressValue, Mode=OneWay}"
+                    Visibility="{Binding ProgressVisibility}" />
             </StatusBarItem>
         </StatusBar>
     </Grid>

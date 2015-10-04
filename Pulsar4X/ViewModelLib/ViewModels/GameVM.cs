@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO.Pipes;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModels
@@ -15,7 +17,20 @@ namespace Pulsar4X.ViewModels
         private BindingList<SystemVM> _systems;
 
         private Entity _playerFaction;
-        public Entity PlayerFaction { get{return _playerFaction;}
+ 
+        //progress bar in MainWindow should be bound to this
+        public double ProgressValue
+        {
+            get { return _progressValue; }
+            set
+            {
+                _progressValue = value;
+                OnPropertyChanged();
+            }
+        }
+        private double _progressValue;
+
+        internal Entity PlayerFaction { get{return _playerFaction;}
             set
             {
                 _playerFaction = value;
@@ -75,14 +90,104 @@ namespace Pulsar4X.ViewModels
         }
 
 
-        internal Game Game { get; private set; }
-
-        public GameVM(Game game)
+        public async void CreateGame(NewGameOptionsVM options)
         {
-            Game = game;
+            Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, new Progress<double>(OnProgressUpdate)));
+            Game = newGame;
+            PlayerFaction = newGame.GameMasterFaction;
+            if (options.CreatePlayerFaction && options.DefaultStart)
+            {
+                StarSystemFactory starfac = new StarSystemFactory(newGame);
+                StarSystem sol = starfac.CreateSol(newGame);
+                Entity earth = sol.SystemManager.Entities[3]; //should be fourth entity created 
+                Entity factionEntity = FactionFactory.CreateFaction(newGame, options.FactionName);
+                Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, newGame.GlobalManager);
+                Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
+                colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
+                factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol); //hack test because currently stuff doesnt get added to knownSystems automaticaly
+                PlayerFaction = factionEntity;
+            }
+            ProgressValue = 0;//reset the progressbar
+        }
+
+        public async void AdvanceTime(TimeSpan pulseLength, CancellationToken _pulseCancellationToken)
+        {
+            var pulseProgress = new Progress<double>(UpdatePulseProgress);
+
+            int secondsPulsed;
+
+            try
+            {
+                secondsPulsed = await Task.Run(() => Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
+                Refresh();
+            }
+            catch (Exception exception)
+            {
+                //DisplayException("executing a pulse", exception);
+            }
+            //e.Handled = true;
+            ProgressValue = 0;
+        }
+
+
+        private void UpdatePulseProgress(double progress)
+        {
+            // Do some UI stuff with Progress percent
+            ProgressValue = progress * 100;
+        }
+
+        /// <summary>
+        /// OnProgressUpdate eventhandler for the Progress class.
+        /// Called from the task thread, this call must be marshalled to the UI thread.
+        /// </summary>
+        private void OnProgressUpdate(double progress)
+        {
+            // The Dispatcher contains the UI thread. Make sure we are on the UI thread.
+            //if (Thread.CurrentThread != Dispatcher.Thread)
+            //{
+            //    Dispatcher.BeginInvoke(new ProgressUpdate(OnProgressUpdate), progress);
+            //    return;
+            //}
+
+            ProgressValue = progress * 100;
+        }
+
+        private Game _game;
+
+        internal Game Game
+        {
+            get
+            {
+                return _game;
+            }
+            set
+            {
+                _game = value;
+                OnPropertyChanged();
+                
+                if (PropertyChanged != null)
+                {
+                    //forces anything listing for a change in the HasGame property to update. 
+                    PropertyChanged(this, new PropertyChangedEventArgs("HasGame")); 
+                }
+            }
+        }
+
+        /// <summary>
+        /// returns true if a game has been created, loaded etc. 
+        /// </summary>
+        public bool HasGame
+        {
+            get { return Game != null; }
+        }
+
+
+        public GameVM()
+        {
+            //Game = game;
             _systems = new BindingList<SystemVM>();
             _systemDictionary = new Dictionary<Guid, SystemVM>();
-            PlayerFaction = game.GameMasterFaction; //on creation the player faction can be set to GM I guess... for now anyway.
+            //PlayerFaction = game.GameMasterFaction; //on creation the player faction can be set to GM I guess... for now anyway.
         }
 
         #region IViewModel

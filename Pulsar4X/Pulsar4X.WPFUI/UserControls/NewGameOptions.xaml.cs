@@ -12,17 +12,36 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Pulsar4X.WPFUI;
 
 namespace Pulsar4X.ViewModels.UserControls
 {
     /// <summary>
     /// Interaction logic for NewGameOptions.xaml
     /// </summary>
-    public partial class NewGameOptions : UserControl
+    public partial class NewGameOptions : ITabControl
     {
+        public string Title { get; set; }
+        private NewGameOptionsVM _newGameOptions;
+
         public NewGameOptions()
         {
+            Title = "New Game";
             InitializeComponent();
+        }
+
+        public NewGameOptions(NewGameOptionsVM vm)
+        {
+            Title = "New Game";
+            InitializeComponent();
+            _newGameOptions = vm;
+            DataContext = _newGameOptions;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            _newGameOptions.CreateGame();
+            
         }
     }
 }
