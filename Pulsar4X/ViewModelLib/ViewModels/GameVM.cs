@@ -53,6 +53,11 @@ namespace Pulsar4X.ViewModels
                     _systems.Add(systemVM);
                     _systemDictionary.Add(systemVM.ID, systemVM);
                 }
+                ColonyScreens = new List<ColonyScreenVM>();
+                foreach (var colonyEntity in _playerFaction.GetDataBlob<FactionInfoDB>().Colonies)
+                {
+                    ColonyScreens.Add(new ColonyScreenVM(colonyEntity));
+                }
             } 
         }
 
@@ -65,6 +70,7 @@ namespace Pulsar4X.ViewModels
 
         public BindingList<SystemVM> StarSystems { get { return _systems; } }
 
+        public List<ColonyScreenVM> ColonyScreens { get; set; } 
         
         private Dictionary<Guid, SystemVM> _systemDictionary;
 

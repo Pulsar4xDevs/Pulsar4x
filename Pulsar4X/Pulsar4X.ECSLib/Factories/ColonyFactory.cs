@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
             string planetName = planetEntity.GetDataBlob<NameDB>().GetName(factionEntity);
             NameDB name = new NameDB(planetName + " Colony"); // TODO: Review default name.
             blobs.Add(name);
-            ColonyInfoDB colonyInfoDB = new ColonyInfoDB(Entity.InvalidEntity, 0, planetEntity);
+            ColonyInfoDB colonyInfoDB = new ColonyInfoDB(speciesEntity, 0, planetEntity, factionEntity);
             blobs.Add(colonyInfoDB);
             ColonyBonusesDB colonyBonuses = new ColonyBonusesDB();
             blobs.Add(colonyBonuses);       

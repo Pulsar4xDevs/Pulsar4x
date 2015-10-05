@@ -104,6 +104,9 @@
     <Compile Include="UserControls\AbilitySelectionList.xaml.cs">
       <DependentUpon>AbilitySelectionList.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ColonyScreenView.xaml.cs">
+      <DependentUpon>ColonyScreenView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Combat.xaml.cs">
       <DependentUpon>Combat.xaml</DependentUpon>
     </Compile>
@@ -165,6 +168,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\AbilitySelectionList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ColonyScreenView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

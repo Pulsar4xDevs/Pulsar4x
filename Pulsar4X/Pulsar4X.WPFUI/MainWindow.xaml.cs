@@ -236,6 +236,9 @@ namespace Pulsar4X.WPFUI
                 case "TBB_Ships":
                     control = new Ships();
                     break;
+                case "TBB_Colonies":
+                    control = new ColonyScreenView();
+                    break;
                 case "TBB_TaskGroups":
                     control = new TaskGroups();
                     break;

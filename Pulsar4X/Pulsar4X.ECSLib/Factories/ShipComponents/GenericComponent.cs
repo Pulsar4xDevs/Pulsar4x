@@ -127,10 +127,11 @@ namespace Pulsar4X.ECSLib
             tech.CostFormula = componentDesign.ResearchCostValue.ToString();
 
             factionTech.ResearchableTechs.Add(tech, 0);
-
+            NameDB nameDB = new NameDB(componentDesign.Name);
             ComponentInfoDB componentInfo = new ComponentInfoDB(componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.MineralCostValues, tech.ID, componentDesign.CrewReqValue);
+            
             component.SetDataBlob(componentInfo);
-
+            component.SetDataBlob(nameDB);
             foreach (var designAbility in componentDesign.ComponentDesignAbilities)
             {
                 if (designAbility.DataBlobType != null)

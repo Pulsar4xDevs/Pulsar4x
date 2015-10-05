@@ -47,6 +47,8 @@
             <ToolBar Band="1" BandIndex="2">
                 <Button Name="TBB_Ships" Content="Ships" Click="TBB_Click"></Button>
                 <Separator/>
+                <Button Name="TBB_Colonies" Content="Colonies" Click="TBB_Click"></Button>
+                <Separator/>
                 <Button Name="TBB_TaskGroups" Content="TaskGroups" Click="TBB_Click"></Button>
                 <Separator/>
                 <Button Name="TBB_TaskForces" Content="TaskForces" Click="TBB_Click"></Button>

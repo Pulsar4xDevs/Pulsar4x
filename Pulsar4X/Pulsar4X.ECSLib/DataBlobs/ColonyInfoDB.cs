@@ -6,6 +6,23 @@ namespace Pulsar4X.ECSLib
 {
     public class ColonyInfoDB : BaseDataBlob
     {
+        private Entity _factionEntity;
+
+        public Entity FactionEntity
+        {
+            get
+            {
+                return _factionEntity;
+            }
+            internal set
+            {
+                if(value.HasDataBlob<FactionInfoDB>())
+                    _factionEntity = value;
+                else
+                    throw new Exception("Entity Not a faction or does not contain a FactionInfoDB");                
+            }
+        }
+
         /// <summary>
         /// Species Entity and amount
         /// </summary>
@@ -108,8 +125,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="popCount">Species and population number</param>
         /// <param name="planet"> the planet entity this colony is on</param>
-        public ColonyInfoDB(JDictionary<Entity, long> popCount, Entity planet)
+        public ColonyInfoDB(JDictionary<Entity, long> popCount, Entity planet, Entity faction)
         {
+            FactionEntity = faction;
             Population = popCount;
             PlanetEntity = planet;
             
@@ -122,15 +140,16 @@ namespace Pulsar4X.ECSLib
             Scientists = new List<Entity>();
         }
 
-        public ColonyInfoDB(Entity species, long populationCount, Entity planet):this(
+        public ColonyInfoDB(Entity species, long populationCount, Entity planet, Entity faction):this(
             new JDictionary<Entity, long> {{species, populationCount}},
-            planet
+            planet, faction
             )
         {
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
+            FactionEntity = colonyInfoDB.FactionEntity;
             Population = new JDictionary<Entity, long>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
             MineralStockpile = new JDictionary<Guid, float>(colonyInfoDB.MineralStockpile);
