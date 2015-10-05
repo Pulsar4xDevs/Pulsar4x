@@ -43,6 +43,7 @@ namespace Pulsar4X.ViewModels
         {
             _colonyEntity = colonyEntity;
             _factionEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity;
+            _facilities = new ObservableCollection<FacilityVM>();
             foreach (var installation in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations)
             {
                 Facilities.Add(new FacilityVM(installation, _factionEntity));
@@ -69,7 +70,7 @@ namespace Pulsar4X.ViewModels
         private Entity _facilityEntity;
         private Entity _factionEntity;
 
-        public string Name { get { return _facilityEntity.GetDataBlob<NameDB>().GetName(_factionEntity); } }
+        public string Name { get { return _facilityEntity.GetDataBlob<NameDB>().DefaultName; } }
 
         public int WorkersRequired { get { return _facilityEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements; } }
 
@@ -80,7 +81,7 @@ namespace Pulsar4X.ViewModels
         public FacilityVM(Entity facilityEntity, Entity factionEntity)
         {
             _facilityEntity = facilityEntity;
-            _facilityEntity = factionEntity;
+            _factionEntity = factionEntity;
         }
     }
 }

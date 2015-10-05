@@ -37,7 +37,9 @@ namespace Pulsar4X.ViewModels.UserControls
         {
             Title = colonyScreenVM.ColonyName;
             _colonyScreenVM = colonyScreenVM;
-            
+            FacDataGrid.ItemsSource = _colonyScreenVM.Facilities;
+            PopDataGrid.ItemsSource = _colonyScreenVM.Species;
+
         }
 
         public string Title { get; set; }

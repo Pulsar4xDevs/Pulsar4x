@@ -12,11 +12,12 @@
             <RowDefinition Height="145*"/>
         </Grid.RowDefinitions>
         <DataGrid Margin="10" Grid.Row="1"
-                  
-                  DataContext="Facilities"
+                  Name="FacDataGrid"
                   />
         <ComboBox Name="ColonySelection" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ColonySelection_SelectionChanged"/>
-        <DataGrid Margin="10" Grid.Row="2"/>
+        <DataGrid Margin="10" Grid.Row="2"
+                  Name="PopDataGrid"
+                  />
 
     </Grid>
 </UserControl>

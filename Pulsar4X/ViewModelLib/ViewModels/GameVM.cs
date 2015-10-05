@@ -117,6 +117,11 @@ namespace Pulsar4X.ViewModels
                 Entity factionEntity = FactionFactory.CreateFaction(newGame, options.FactionName);
                 Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, newGame.GlobalManager);
                 Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
+
+                ComponentSD mineSD = Game.StaticData.Components[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
+                ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), Game.StaticData);
+                Entity mineEntity = GenericComponentFactory.DesignToEntity(Game.GlobalManager, mineDesign, factionEntity.GetDataBlob<FactionTechDB>());
+                colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(mineEntity);
                 colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
                 factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol); //hack test because currently stuff doesnt get added to knownSystems automaticaly
                 PlayerFaction = factionEntity;
