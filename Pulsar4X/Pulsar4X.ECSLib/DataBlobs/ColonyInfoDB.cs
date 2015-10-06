@@ -37,25 +37,25 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Raw Mined minerals. Mines push here, Refinary pulls from here, Construction pulls from here.
         /// </summary>
-        public JDictionary<Guid, float> MineralStockpile
+        public JDictionary<Guid, int> MineralStockpile
         {
             get { return _mineralStockpile; }
             internal set { _mineralStockpile = value; }
         }
         [JsonProperty]
-        private JDictionary<Guid, float> _mineralStockpile;
+        private JDictionary<Guid, int> _mineralStockpile;
 
         /// <summary>
         ///refined Fuel, or refined minerals if the modder so desires.
         /// Refinary pushes here, Construction pulls from here.
         /// </summary>
-        public JDictionary<Guid, float> RefinedStockpile
+        public JDictionary<Guid, int> RefinedStockpile
         {
             get { return _refinedStockpile; }
             internal set { _refinedStockpile = value; }
         }
         [JsonProperty]
-        private JDictionary<Guid, float> _refinedStockpile;
+        private JDictionary<Guid, int> _refinedStockpile;
 
         /// <summary>
         /// constructed parts stockpile.
@@ -131,8 +131,8 @@ namespace Pulsar4X.ECSLib
             Population = popCount;
             PlanetEntity = planet;
             
-            MineralStockpile =  new JDictionary<Guid, float>();
-            RefinedStockpile = new JDictionary<Guid, float>();
+            MineralStockpile =  new JDictionary<Guid, int>();
+            RefinedStockpile = new JDictionary<Guid, int>();
             ComponentStockpile = new JDictionary<Guid, float>();
             OrdinanceStockpile = new JDictionary<Guid, float>();
             FighterStockpile = new List<Entity>();
@@ -152,8 +152,8 @@ namespace Pulsar4X.ECSLib
             FactionEntity = colonyInfoDB.FactionEntity;
             Population = new JDictionary<Entity, long>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
-            MineralStockpile = new JDictionary<Guid, float>(colonyInfoDB.MineralStockpile);
-            RefinedStockpile = new JDictionary<Guid, float>(colonyInfoDB.RefinedStockpile);
+            MineralStockpile = new JDictionary<Guid, int>(colonyInfoDB.MineralStockpile);
+            RefinedStockpile = new JDictionary<Guid, int>(colonyInfoDB.RefinedStockpile);
             ComponentStockpile = new JDictionary<Guid, float>(colonyInfoDB.ComponentStockpile);
             OrdinanceStockpile = new JDictionary<Guid, float>(colonyInfoDB.OrdinanceStockpile);
             FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);

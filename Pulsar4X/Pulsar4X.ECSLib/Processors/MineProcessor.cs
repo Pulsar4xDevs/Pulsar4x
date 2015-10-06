@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
         {
             JDictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
             JDictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<SystemBodyDB>().Minerals;
-            JDictionary<Guid, float> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            JDictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             float mineBonuses = colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
             {                

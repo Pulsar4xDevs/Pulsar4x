@@ -8,6 +8,7 @@ namespace Pulsar4X.ECSLib
 {
     public static class InstallationProcessor
     {
+        /*
         #region automaticEachTickStuff
         private const int _timeBetweenRuns = 68400; //one terran day.
 
@@ -78,35 +79,35 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// run every econ tic 
+        /// run every econ tic DEFUNCT
         /// extracts minerals from planet surface by mineing ability;
         /// </summary>
         /// <param name="staticData"></param>
         /// <param name="factionEntity"></param>
         public static void Mine(StaticDataStore staticData, Entity factionEntity, Entity colonyEntity)
         {
-            int installationMineingAbility = InstallationAbilityofType(staticData, colonyEntity.GetDataBlob<InstallationsDB>(), AbilityType.Mine);
-            float factionMineingBonus = BonusesForType(factionEntity, colonyEntity, AbilityType.Mine);
-            float totalMineingAbility = installationMineingAbility * factionMineingBonus;
-            Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
-            SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
-            JDictionary<Guid, float> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            //int installationMineingAbility = InstallationAbilityofType(staticData, colonyEntity.GetDataBlob<InstallationsDB>(), AbilityType.Mine);
+            //float factionMineingBonus = BonusesForType(factionEntity, colonyEntity, AbilityType.Mine);
+            //float totalMineingAbility = installationMineingAbility * factionMineingBonus;
+            //Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+            //SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
+            //JDictionary<Guid, float> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             
-            JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
+            //JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
 
-            foreach (KeyValuePair<Guid, MineralDepositInfo> depositKeyValuePair in planetRawMinerals)
-            {
-                Guid mineralGuid = depositKeyValuePair.Key;
-                int amountOnPlanet = depositKeyValuePair.Value.Amount;
-                double accessibility = depositKeyValuePair.Value.Accessibility;
-                double abilitiestoMine = totalMineingAbility * accessibility;
-                int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
-                colonyMineralStockpile.SafeValueAdd<Guid>(mineralGuid, amounttomine);             
-                MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
-                mineralDeposit.Amount -= amounttomine;
-                double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
-                mineralDeposit.Accessibility = GMath.Clamp(accecability, 0.1, mineralDeposit.Accessibility);
-            }
+            //foreach (KeyValuePair<Guid, MineralDepositInfo> depositKeyValuePair in planetRawMinerals)
+            //{
+            //    Guid mineralGuid = depositKeyValuePair.Key;
+            //    int amountOnPlanet = depositKeyValuePair.Value.Amount;
+            //    double accessibility = depositKeyValuePair.Value.Accessibility;
+            //    double abilitiestoMine = totalMineingAbility * accessibility;
+            //    int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
+            //    colonyMineralStockpile.SafeValueAdd<Guid>(mineralGuid, amounttomine);             
+            //    MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
+            //    mineralDeposit.Amount -= amounttomine;
+            //    double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
+            //    mineralDeposit.Accessibility = GMath.Clamp(accecability, 0.1, mineralDeposit.Accessibility);
+            //}
             
         }
 
@@ -176,9 +177,9 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        private static JDictionary<Guid,float> FindResource(ColonyInfoDB colony, Guid key)
+        private static JDictionary<Guid,int> FindResource(ColonyInfoDB colony, Guid key)
         {
-            JDictionary<Guid, float> resourceDictionary = null;
+            JDictionary<Guid, int> resourceDictionary = null;
             if (colony.MineralStockpile.ContainsKey(key))
                 resourceDictionary = colony.MineralStockpile;
             else if (colony.RefinedStockpile.ContainsKey(key))
@@ -197,7 +198,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="rawMaterials"></param>
         /// <param name="colonyInfo"></param>
         /// <param name="stockpileOut"></param>
-        public static void GenericConstructionJobs(double ablityPointsThisColony, List<ConstructionJob> jobList, ColonyInfoDB colonyInfo, JDictionary<Guid,float> stockpileOut)
+        public static void GenericConstructionJobs(double ablityPointsThisColony, List<ConstructionJob> jobList, ColonyInfoDB colonyInfo, JDictionary<Guid,int> stockpileOut)
         {
             List<ConstructionJob> newJobList = new List<ConstructionJob>();
 
@@ -360,7 +361,7 @@ namespace Pulsar4X.ECSLib
              * Should it be in the processor and the processor look up each time, 
              * or should the faction hold the dictionary and the processor update the dictionary, 
              * either on something changeing, or at a designated tic.          
-             */
+             *
             return totalBonus;
         }
 
@@ -402,5 +403,7 @@ namespace Pulsar4X.ECSLib
             return facilities;
         }
         #endregion
+         */
     }
+
 }

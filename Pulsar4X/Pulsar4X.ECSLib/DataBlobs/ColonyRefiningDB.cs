@@ -16,26 +16,49 @@ namespace Pulsar4X.ECSLib
     public class ColonyRefiningDB : BaseDataBlob
     {
        
+        [JsonIgnore]//recalc this on game load.
         public int RefinaryPoints { get; internal set; }
 
+        [JsonProperty]
         public JDictionary<Guid, int> RefiningRates { get; internal set; }
 
-        public JDictionary<Guid, float> MineralStockpile { get { return OwningEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile; } }
-        public JDictionary<Guid, float> MaterialsStockpile { get { return OwningEntity.GetDataBlob<ColonyInfoDB>().RefinedStockpile; } }
-
         [JsonProperty]
-        public JDictionary<RefineingJob, int> JobList { get; set; }
+        public List<RefineingJob> JobBatchList { get; internal set; }
+
+        /// <summary>
+        /// on current job
+        /// </summary>        
+        public int RemainingPoints
+        {
+            get { return _remainingPoints; }
+            internal set{ _remainingPoints = value; }
+        }
+        [JsonProperty]
+        private int _remainingPoints;
+
+
+        /// <summary>
+        /// in current batch
+        /// </summary>        
+        public int RemainingJobs
+        {
+            get { return _remainingJobs; }
+            internal set { _remainingJobs = value; }
+        }
+        [JsonProperty]
+        private int _remainingJobs;
+
 
         public ColonyRefiningDB()
         {
             RefiningRates = new JDictionary<Guid, int>();
-            JobList = new JDictionary<RefineingJob, int>();
+            JobBatchList = new List<RefineingJob>();
         }
 
         public ColonyRefiningDB(ColonyRefiningDB db)
         {
             RefiningRates = new JDictionary<Guid, int>(db.RefiningRates);
-            JobList = new JDictionary<RefineingJob, int>(db.JobList);
+            JobBatchList = new List<RefineingJob>(db.JobBatchList);
         }
 
         public override object Clone()

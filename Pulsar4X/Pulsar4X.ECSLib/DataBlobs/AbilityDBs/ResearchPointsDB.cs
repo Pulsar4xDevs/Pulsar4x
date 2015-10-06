@@ -7,8 +7,7 @@ namespace Pulsar4X.ECSLib
     public class ResearchPointsDB : BaseDataBlob
     {
         [JsonProperty]
-        private int _pointsPerEconTick;
-        
+        private int _pointsPerEconTick;        
         public int PointsPerEconTick { get { return _pointsPerEconTick; } internal set { _pointsPerEconTick = value; } }
 
         public ResearchPointsDB()
