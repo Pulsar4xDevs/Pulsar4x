@@ -16,11 +16,8 @@ namespace Pulsar4X.ECSLib
 
         public static void OnTakingDamage(Entity ship)
         {
-            foreach (var componentEntity in ship.GetDataBlob<ShipInfoDB>().ComponentList)
-            {
-                ComponentInfoDB componentInfo = componentEntity.GetDataBlob<ComponentInfoDB>();
-                componentInfo.StatRecalcDelegate.DynamicInvoke(ship);
-            }            
+            //TODO do some damage to a component.
+            ReCalcProcessor.ReCalcAbilities(ship);
         }
     }
 }

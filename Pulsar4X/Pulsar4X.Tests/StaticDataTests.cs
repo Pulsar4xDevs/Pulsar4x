@@ -158,6 +158,23 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void TestRefinedMatsSave()
+        {
+            JDictionary<Guid, TechSD> mats = new JDictionary<Guid, TechSD>();
+
+            RefinedMaterialSD soriumFuel = new RefinedMaterialSD();
+            soriumFuel.Name = "Sorium Fuel";
+            soriumFuel.Description = "Fuel for SpaceShips";
+            soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
+            soriumFuel.RawMineralCosts = new JDictionary<Guid, int>();
+            soriumFuel.RawMineralCosts.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
+            soriumFuel.OutputAmount = 1;
+
+            StaticDataManager.ExportStaticData(mats, "./ReinfedMaterialsDataExportTest.json");
+            
+        }
+
+        [Test]
         public void TestTechSave()
         {
             JDictionary<Guid, TechSD> techs = new JDictionary<Guid, TechSD>();
@@ -258,7 +275,7 @@ namespace Pulsar4X.Tests
             int mineralsNum = staticDataStore.Minerals.Count;
             int techNum = staticDataStore.Techs.Count;
             int installationsNum = staticDataStore.Installations.Count;
-            int constructableObjectsNum = staticDataStore.ConstructableObjects.Count;
+            int constructableObjectsNum = staticDataStore.RefinedMaterials.Count;
 
             // check that data was loaded:
             Assert.IsNotEmpty(staticDataStore.Minerals);
@@ -275,7 +292,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
             Assert.AreEqual(techNum, staticDataStore.Techs.Count);
             Assert.AreEqual(installationsNum, staticDataStore.Installations.Count);
-            Assert.AreEqual(constructableObjectsNum, staticDataStore.ConstructableObjects.Count);
+            Assert.AreEqual(constructableObjectsNum, staticDataStore.RefinedMaterials.Count);
 
             // now lets test some malformed data folders.
             Assert.Catch(typeof(StaticDataLoadException), () =>

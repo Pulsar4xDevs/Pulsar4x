@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public delegate void StatRecalc(Entity ship);
     
     public enum ComponentMountType
     {
@@ -39,9 +38,6 @@ namespace Pulsar4X.ECSLib
         [JsonProperty] 
         private JDictionary<ComponentMountType, bool> _componentMountType;
         public JDictionary<ComponentMountType, bool> ComponentMountTypes { get { return _componentMountType; } internal set { _componentMountType = value; } } 
-
-        //this should maybe be a list of delegates, for if there's multiple component abilitys...
-        public Delegate StatRecalcDelegate;
 
 
         public ComponentInfoDB()

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public class ColonyMinesDB : BaseDataBlob
     {
-        public JDictionary<Guid,int> MineingRate;
+        [JsonIgnore] //recalc on game load instead of saving.
+        public JDictionary<Guid, int> MineingRate { get; set; }
 
         //Is this legal?
         public JDictionary<Guid, MineralDepositInfo> MineralDeposit
@@ -21,7 +23,7 @@ namespace Pulsar4X.ECSLib
 
         public ColonyMinesDB(ColonyMinesDB db)
         {
-
+            
         }
 
         public override object Clone()

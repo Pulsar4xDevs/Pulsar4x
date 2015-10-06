@@ -63,7 +63,10 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        //this needs to be run when an entity with MineResources is put on planet.
+        /// <summary>
+        /// Called by the ReCalcProcessor.
+        /// </summary>
+        /// <param name="colonyEntity"></param>
         internal static void CalcMaxRate(Entity colonyEntity)
         {
             List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;

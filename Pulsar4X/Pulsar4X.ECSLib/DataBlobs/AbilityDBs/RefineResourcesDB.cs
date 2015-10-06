@@ -9,29 +9,26 @@ namespace Pulsar4X.ECSLib
     {
 
         [JsonProperty]
-        private JDictionary<Guid, int> _refinaryJobsPerEconTick;
-        /// <summary>
-        /// RefinaryJobSD guid, amount
-        /// </summary>
-        public JDictionary<Guid, int> RefinaryJobsPerEconTick { get { return _refinaryJobsPerEconTick; } internal set { _refinaryJobsPerEconTick = value; } }
+        private List<Guid> _refinableMatsList;
+        public List<Guid> RefinableMatsList { get { return _refinableMatsList; } internal set { _refinableMatsList = value; } }
 
+        [JsonProperty] private int _refinaryPoints;
+        public int RefinaryPoints { get { return _refinaryPoints; } internal set { _refinaryPoints = value; } }
 
         public RefineResourcesDB()
         {
         }
 
-        public RefineResourcesDB(Dictionary<Guid, double> jobsPerEconTick)
+        public RefineResourcesDB(List<Guid> refinableMatsList, double refinaryPoints)
         {
-            _refinaryJobsPerEconTick = new JDictionary<Guid, int>();
-            foreach (var kvp in jobsPerEconTick)
-            {
-                _refinaryJobsPerEconTick.Add(kvp.Key, (int)kvp.Value);
-            }
+            _refinableMatsList = refinableMatsList;
+            _refinaryPoints = (int)refinaryPoints;
         }
 
         public RefineResourcesDB(RefineResourcesDB db)
         {
-            _refinaryJobsPerEconTick = new JDictionary<Guid, int>(db.RefinaryJobsPerEconTick);
+            _refinableMatsList = new List<Guid>(db.RefinableMatsList);
+            _refinaryPoints = db.RefinaryPoints;
         }
 
         public override object Clone()

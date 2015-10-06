@@ -55,7 +55,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Dictionary which stores all the Recipes.
         /// </summary>
-        public JDictionary<Guid, ConstructableObjSD> ConstructableObjects = new JDictionary<Guid, ConstructableObjSD>();
+        public JDictionary<Guid, RefinedMaterialSD> RefinedMaterials = new JDictionary<Guid, RefinedMaterialSD>();
 
         /// <summary>
         /// Dictionary which stores all Components.
@@ -107,7 +107,7 @@ namespace Pulsar4X.ECSLib
                     "Installations", typeof(JDictionary<Guid, InstallationSD>)
                 },
                 {
-                    "ConstructableObj", typeof(JDictionary<Guid, ConstructableObjSD>)
+                    "ConstructableObj", typeof(JDictionary<Guid, RefinedMaterialSD>)
                 },
                 {
                     "Components", typeof(JDictionary<Guid, ComponentSD>)
@@ -146,7 +146,7 @@ namespace Pulsar4X.ECSLib
                     typeof(JDictionary<Guid, InstallationSD>), "Installations"
                 },
                 {
-                    typeof(JDictionary<Guid, ConstructableObjSD>), "ConstructableObj"
+                    typeof(JDictionary<Guid, RefinedMaterialSD>), "ConstructableObj"
                 },
                 {
                     typeof(JDictionary<Guid, ComponentSD>), "Components"
@@ -185,8 +185,8 @@ namespace Pulsar4X.ECSLib
             if (Installations.ContainsKey(id))
                 return Installations[id];
 
-            if (ConstructableObjects.ContainsKey(id))
-                return ConstructableObjects[id];
+            if (RefinedMaterials.ContainsKey(id))
+                return RefinedMaterials[id];
 
             if (Components.ContainsKey(id))
                 return Components[id];
@@ -264,12 +264,12 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores ConstructableObj Static Data. Will overwrite any existing ConstructableObjs with the same ID.
         /// </summary>
-        internal void Store(JDictionary<Guid, ConstructableObjSD> recipes)
+        internal void Store(JDictionary<Guid, RefinedMaterialSD> recipes)
         {
             if (recipes != null)
             {
                 foreach (var recipe in recipes)
-                    ConstructableObjects[recipe.Key] = recipe.Value;
+                    RefinedMaterials[recipe.Key] = recipe.Value;
             }
         }
 

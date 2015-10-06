@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
                 className = "New Class"; // <- Hack for now.
             }
 
-            // lets start by creating all the Datablobs that make up a ship class:
+            // lets start by creating all the Datablobs that make up a ship class: TODO only need to add datablobs for compoents it has abilites for.
             var shipInfo = new ShipInfoDB();
             var armor = new ArmorDB();
             var beamWeapons = new BeamWeaponsDB();
@@ -117,7 +117,7 @@ namespace Pulsar4X.ECSLib
             shipinfo.ComponentList.Add(component);
             shipinfo.InternalHTK += componentInfo.HTK;
             shipinfo.Tonnage += componentInfo.SizeInTons; 
-            componentInfo.StatRecalcDelegate.DynamicInvoke(ship);
+            ReCalcProcessor.ReCalcAbilities(ship);
 
             return ship;
         }
