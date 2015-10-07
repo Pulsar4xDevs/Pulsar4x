@@ -39,7 +39,9 @@ namespace Pulsar4X.ViewModels.UserControls
             _colonyScreenVM = colonyScreenVM;
             FacDataGrid.ItemsSource = _colonyScreenVM.Facilities;
             PopDataGrid.ItemsSource = _colonyScreenVM.Species;
-
+            RawMineralsDataGrid.ItemsSource = _colonyScreenVM.MineralDeposits;
+            MinedMineralsStockpile.ItemsSource = _colonyScreenVM.MineralStockpile;
+            RefinedMaterialsStockpile.ItemsSource = _colonyScreenVM.MaterialStockpile;
         }
 
         public string Title { get; set; }

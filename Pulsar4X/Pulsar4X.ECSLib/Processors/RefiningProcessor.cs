@@ -7,67 +7,66 @@ namespace Pulsar4X.ECSLib
     internal static class RefiningProcessor
     {
         private const int _timeBetweenRuns = 68400; //one terran day.
+
         public static void Initialize()
         {
+        }
+
+        public static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        {
+            foreach (var system in systems)
+            {
+                system.EconLastTickRun += deltaSeconds;
+                if (system.EconLastTickRun >= _timeBetweenRuns)
+                {
+                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+                    {
+                        RefineMaterials(colonyEntity, game);
+                    }
+                    system.EconLastTickRun -= _timeBetweenRuns;
+                }
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="game"></param>
-        /// <param name="systems"></param>
-        /// <param name="deltaSeconds"></param>
-        public static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        public static void RefineMaterials(Entity colony, Game game)
         {
-            //TODO: TO MUCH NESTING!
-            foreach (var starsys in systems) //TODO should be threadable
+
+            JDictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            JDictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
+
+            ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
+
+
+            for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
             {
-                starsys.EconLastTickRun += deltaSeconds;
-                if (starsys.EconLastTickRun >= _timeBetweenRuns)
+                var job = refiningDB.JobBatchList[jobIndex];
+
+
+                RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.jobGuid];
+                Dictionary<Guid, int> mineralCosts = material.RawMineralCosts;
+                Dictionary<Guid, int> materialCosts = material.RefinedMateraialsCosts;
+
+                while (refiningDB.RemainingJobs > 0 && refiningDB.RemainingPoints > material.RefinaryPointCost)
                 {
-
-                    starsys.EconLastTickRun -= _timeBetweenRuns;
-                    List<Entity> colonys = starsys.SystemManager.GetAllEntitiesWithDataBlob<ColonyRefiningDB>();
-
-                    foreach (var colony in colonys)
+                    if (HasReqiredItems(mineralStockpile, mineralCosts) && HasReqiredItems(materialsStockpile, materialCosts))
                     {
-
-                        JDictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-                        JDictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
-
-                        ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
-
-
-                        for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
-                        {
-                            var job = refiningDB.JobBatchList[jobIndex];
-
-
-                            RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.jobGuid];
-                            Dictionary<Guid, int> mineralCosts = material.RawMineralCosts;
-                            Dictionary<Guid, int> materialCosts = material.RefinedMateraialsCosts;
-
-                            while (refiningDB.RemainingJobs > 0 && refiningDB.RemainingPoints > material.RefinaryPointCost)
-                            {
-                                if (HasReqiredItems(mineralStockpile, mineralCosts) && HasReqiredItems(materialsStockpile, materialCosts))
-                                {
-                                    UseFromStockpile(mineralStockpile, mineralCosts);
-                                    UseFromStockpile(materialsStockpile, materialCosts);
-                                    refiningDB.RefinaryPoints -= material.RefinaryPointCost;
-                                    refiningDB.RemainingJobs -= 1;
-                                    materialsStockpile.SafeValueAdd(material.ID, material.OutputAmount);
-                                }
-                            }
-                            if (refiningDB.RemainingJobs == 0)
-                            {
-                                refiningDB.JobBatchList.RemoveAt(jobIndex);
-                                if (job.auto)
-                                    refiningDB.JobBatchList.Add(job);
-                            }
-                        }
+                        UseFromStockpile(mineralStockpile, mineralCosts);
+                        UseFromStockpile(materialsStockpile, materialCosts);
+                        refiningDB.RefinaryPoints -= material.RefinaryPointCost;
+                        refiningDB.RemainingJobs -= 1;
+                        materialsStockpile.SafeValueAdd(material.ID, material.OutputAmount);
                     }
                 }
-            }            
+                if (refiningDB.RemainingJobs == 0)
+                {
+                    refiningDB.JobBatchList.RemoveAt(jobIndex);
+                    if (job.auto)
+                        refiningDB.JobBatchList.Add(job);
+                }
+            }
         }
 
         public static bool HasReqiredItems(JDictionary<Guid, int> stockpile, Dictionary<Guid, int> costs )

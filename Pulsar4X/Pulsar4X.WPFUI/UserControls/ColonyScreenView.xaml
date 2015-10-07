@@ -6,18 +6,27 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="137*"/>
+            <ColumnDefinition Width="163*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="42"/>
             <RowDefinition Height="114*"/>
             <RowDefinition Height="145*"/>
         </Grid.RowDefinitions>
-        <DataGrid Margin="10" Grid.Row="1"
+        <DataGrid Margin="10,10,0,10" Grid.Row="1"
                   Name="FacDataGrid"
                   />
         <ComboBox Name="ColonySelection" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ColonySelection_SelectionChanged"/>
-        <DataGrid Margin="10" Grid.Row="2"
-                  Name="PopDataGrid"
+        <DataGrid Margin="10,10,10,0" Grid.Row="1"
+                  Name="PopDataGrid" Grid.Column="1" Height="39" VerticalAlignment="Top"
                   />
-
+        <DataGrid Name="RawMineralsDataGrid" Margin="10,54,10,10" Grid.Row="1" Grid.Column="1"/>        
+        <DataGrid Name="MinedMineralsStockpile" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Height="124" Width="120"/>
+        <DataGrid Name="RefinedMaterialsStockpile" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Height="124" Width="143"/>
+        
     </Grid>
 </UserControl>
+
+    

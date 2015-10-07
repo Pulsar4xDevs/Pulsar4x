@@ -15,6 +15,7 @@ namespace Pulsar4X.ViewModels
     {
         private Entity _colonyEntity;
         private Entity _factionEntity;
+        private Dictionary<Guid, MineralSD> _mineralDictionary; 
         private ObservableCollection<FacilityVM> _facilities;
         public ObservableCollection<FacilityVM> Facilities
         {
@@ -24,6 +25,14 @@ namespace Pulsar4X.ViewModels
         private Dictionary<string, long> _species;
         public Dictionary<string, long> Species { get { return _species; } }
 
+        private Dictionary<string, MineralDepositInfo> _mineralDeposits;
+        public Dictionary<string, MineralDepositInfo> MineralDeposits { get { return _mineralDeposits; } }
+
+        private Dictionary<string, int> _mineralStockpile;
+        public Dictionary<string, int> MineralStockpile { get { return _mineralStockpile; } }
+
+        private Dictionary<string, int> _materialStockpile;
+        public Dictionary<string, int> MaterialStockpile { get { return _materialStockpile; } }
 
         public string ColonyName
         {
@@ -39,7 +48,7 @@ namespace Pulsar4X.ViewModels
         {
         }
 
-        public ColonyScreenVM(Entity colonyEntity)
+        public ColonyScreenVM(Entity colonyEntity, StaticDataStore staticData)
         {
             _colonyEntity = colonyEntity;
             _factionEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity;
@@ -49,18 +58,32 @@ namespace Pulsar4X.ViewModels
                 Facilities.Add(new FacilityVM(installation, _factionEntity));
             }
             _species = new Dictionary<string, long>();
+            
             foreach (var kvp in colonyEntity.GetDataBlob<ColonyInfoDB>().Population)
             {
                 string name = kvp.Key.GetDataBlob<NameDB>().DefaultName;
 
                 _species.Add(name, kvp.Value);
             }
+
+            _mineralDictionary = new Dictionary<Guid, MineralSD>();
+            foreach (var mineral in staticData.Minerals)
+            {
+                _mineralDictionary.Add(mineral.ID, mineral);
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void Refresh(bool partialRefresh = false)
         {
-            throw new NotImplementedException();
+            Entity planet = _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+            var minerals = planet.GetDataBlob<SystemBodyDB>().Minerals;
+            _mineralStockpile = new Dictionary<string, int>();
+            foreach (var kvp in minerals)
+            {
+                MineralSD mineral = _mineralDictionary[kvp.Key];
+                MineralDeposits.Add(mineral.Name, kvp.Value);
+            }
         }
     }
 

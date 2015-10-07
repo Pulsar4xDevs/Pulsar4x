@@ -21,16 +21,11 @@ namespace Pulsar4X.ECSLib
                 {
                     foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
                     {
-                        PerEconTic(game, colonyEntity);
+                        MineResources(colonyEntity);
                     }
                     system.EconLastTickRun -= _timeBetweenRuns;
                 }
             }
-        }
-
-        public static void PerEconTic(Game game, Entity colonyEntity)
-        {
-
         }
 
 

@@ -103,5 +103,13 @@ namespace Pulsar4X.Tests
 
             // <?TODO: Expand this out to cover many more DBs, entities, and cases.
         }
+
+        [Test]
+        public void TestSingleSystemSave()
+        {
+            StarSystemFactory starsysfac = new StarSystemFactory(game);
+            StarSystem sol  = starsysfac.CreateSol(game);
+            StaticDataManager.ExportStaticData(sol, "./solsave.json");
+        }
     }
 }

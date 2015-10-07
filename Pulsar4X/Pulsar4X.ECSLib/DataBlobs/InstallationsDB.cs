@@ -36,21 +36,21 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// list of ConstructionJob Structs.
         /// </summary>
-        public List<ConstructionJob> InstallationJobs { get; set; }
-        public List<ConstructionJob> OrdnanceJobs { get; set; }
-        public List<ConstructionJob> ComponentJobs { get; set; }
-        public List<ConstructionJob> FigherJobs { get; set; }
-        public List<ConstructionJob> RefineryJobs { get; set; }
+        //public List<ConstructionJob> InstallationJobs { get; set; }
+        //public List<ConstructionJob> OrdnanceJobs { get; set; }
+        //public List<ConstructionJob> ComponentJobs { get; set; }
+        //public List<ConstructionJob> FigherJobs { get; set; }
+        //public List<ConstructionJob> RefineryJobs { get; set; }
         public InstallationsDB()
         {
             Installations = new JDictionary<Guid, float>();
             WorkingInstallations = new JDictionary<Guid, int>();
             EmploymentList = new List<InstallationEmployment>();
-            InstallationJobs = new List<ConstructionJob>();
-            ComponentJobs = new List<ConstructionJob>(); 
-            OrdnanceJobs = new List<ConstructionJob>();
-            FigherJobs = new List<ConstructionJob>();
-            RefineryJobs = new List<ConstructionJob>();
+            //InstallationJobs = new List<ConstructionJob>();
+            //ComponentJobs = new List<ConstructionJob>(); 
+            //OrdnanceJobs = new List<ConstructionJob>();
+            //FigherJobs = new List<ConstructionJob>();
+            //RefineryJobs = new List<ConstructionJob>();
         }
 
         public InstallationsDB(InstallationsDB db)
@@ -58,11 +58,11 @@ namespace Pulsar4X.ECSLib
             Installations = new JDictionary<Guid, float>(db.Installations);
             WorkingInstallations = new JDictionary<Guid, int>(db.WorkingInstallations);
             EmploymentList = new List<InstallationEmployment>(db.EmploymentList);
-            InstallationJobs = new List<ConstructionJob>(db.InstallationJobs);
-            ComponentJobs = new List<ConstructionJob>(db.ComponentJobs);
-            OrdnanceJobs = new List<ConstructionJob>(db.OrdnanceJobs);
-            FigherJobs = new List<ConstructionJob>(db.FigherJobs);
-            RefineryJobs = new List<ConstructionJob>(db.RefineryJobs);
+            //InstallationJobs = new List<ConstructionJob>(db.InstallationJobs);
+            //ComponentJobs = new List<ConstructionJob>(db.ComponentJobs);
+            //OrdnanceJobs = new List<ConstructionJob>(db.OrdnanceJobs);
+            //FigherJobs = new List<ConstructionJob>(db.FigherJobs);
+            //RefineryJobs = new List<ConstructionJob>(db.RefineryJobs);
         }
 
         public override object Clone()

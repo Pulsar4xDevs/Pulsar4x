@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using NCalc;
 
 namespace Pulsar4X.ECSLib
@@ -8,6 +10,82 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     internal static class TechProcessor
     {
+        private static Game _game;
+        private const int _timeBetweenRuns = 68400; //one terran day.
+
+
+        public static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        {
+            foreach (var system in systems)
+            {
+                system.EconLastTickRun += deltaSeconds;
+                if (system.EconLastTickRun >= _timeBetweenRuns)
+                {
+                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+                    {
+                        DoResearch(colonyEntity);
+                    }
+                    system.EconLastTickRun -= _timeBetweenRuns;
+                }
+            }
+        }
+
+        /// <summary>
+        /// adds research points to a scientists project.
+        /// </summary>
+        /// <param name="colonyEntity"></param>
+        /// <param name="factionAbilities"></param>
+        /// <param name="factionTechs"></param>
+        public static void DoResearch(Entity colonyEntity)
+        {
+            FactionAbilitiesDB factionAbilities = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionAbilitiesDB>();
+            FactionTechDB factionTechs = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionTechDB>();
+            Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
+            foreach (var lab in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Where(inst => inst.HasDataBlob<ResearchPointsDB>()))
+            {               
+                int points = lab.GetDataBlob<ResearchPointsDB>().PointsPerEconTick;
+                labs.Add(lab, points);
+            }
+            
+            int labsused = 0;
+
+            foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
+            {
+                TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
+                int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
+                float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];
+                //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
+
+                int researchmax = CostFormula(factionTechs, research);
+
+                int researchPoints = 0;
+                foreach (var kvp in labs)
+                {
+                    while (numProjectLabs > 0)
+                    {
+                        researchPoints += kvp.Value;
+                        numProjectLabs --;
+                    }
+                }
+                researchPoints = (int)(researchPoints * bonus);
+                if (factionTechs.ResearchableTechs.ContainsKey(research))
+                {
+                    factionTechs.ResearchableTechs[research] += researchPoints;
+                    if (factionTechs.ResearchableTechs[research] >= researchmax)
+                    {
+                        ApplyTech(factionTechs, research); //apply effects from tech, and add it to researched techs
+                        scientist.GetDataBlob<TeamsDB>().TeamTask = null; //team task is now nothing. 
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
         /// <summary>
         /// maybe techsd should link up as well as down. it would make this more efficent, but harder on the modder. 
         /// </summary>
@@ -68,6 +146,8 @@ namespace Pulsar4X.ECSLib
             //check if it's opened up other reasearch.
             MakeResearchable(factionTechs);
         }
+
+
 
         public static double DataFormula(FactionTechDB factionTechs, TechSD tech)
         {

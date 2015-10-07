@@ -112,6 +112,7 @@ namespace Pulsar4X.ECSLib
             OrbitProcessor.Process(this, systems, deltaSeconds);
             ShipMovementProcessor.Process(this, systems,deltaSeconds);
             //InstallationProcessor.Process(this, systems, deltaSeconds);
+            MineProcessor.Process(this, systems, deltaSeconds);
             RefiningProcessor.Process(this, systems, deltaSeconds);
         }
 
