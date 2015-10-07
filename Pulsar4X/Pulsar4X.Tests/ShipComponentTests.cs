@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
@@ -43,11 +44,13 @@ namespace Pulsar4X.Tests
             ComponentSD engine = EngineComponentSD();
             ComponentSD mine = MineInstallation();
             ComponentSD lab = ResearchLab();
+            ComponentSD refinary = Refinary();
 
             JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
             componentsDict.Add(engine.ID, engine);
             componentsDict.Add(mine.ID, mine);
             componentsDict.Add(lab.ID,lab);
+            componentsDict.Add(refinary.ID, refinary);
             StaticDataManager.ExportStaticData(componentsDict, "./ComponentData.json");
         }
 
@@ -322,6 +325,62 @@ namespace Pulsar4X.Tests
             researchPointsAbility.AbilityFormula = "DataBlobArgs(20)";
             component.ComponentAbilitySDs.Add(researchPointsAbility);
 
+            return component;
+
+        }
+
+
+
+        public static ComponentSD Refinary()
+        {
+            ComponentSD component = new ComponentSD();
+            component.Name = "Refinary";
+            component.Description = "Creates Research Points";
+            component.ID = new Guid("{90592586-0BD6-4885-8526-7181E08556B5}");
+
+            component.SizeFormula = "500000";
+
+            component.HTKFormula = "[Size]";
+
+            component.CrewReqFormula = "1000000";
+
+            component.ResearchCostFormula = "0";
+
+            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
+
+            component.CreditCostFormula = "120";
+
+            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType.Add(ComponentMountType.ShipComponent, false);
+            component.MountType.Add(ComponentMountType.ShipCargo, true);
+            component.MountType.Add(ComponentMountType.PlanetFacility, true);
+            component.MountType.Add(ComponentMountType.PDS, false);
+
+            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+
+
+
+            ComponentAbilitySD refinePointsAbility = new ComponentAbilitySD();
+            refinePointsAbility.Name = "RP Amount Per EconTick";
+            refinePointsAbility.Description = "";
+            refinePointsAbility.GuiHint = GuiHint.None;
+            refinePointsAbility.AbilityDataBlobType = typeof(ResearchPointsDB).ToString();
+            refinePointsAbility.AbilityFormula = "100";
+            component.ComponentAbilitySDs.Add(refinePointsAbility);
+
+            ComponentAbilitySD refineJobsAbility = new ComponentAbilitySD();
+            refineJobsAbility.Name = "RefineAbilitys";
+            refineJobsAbility.Description = "";
+            refineJobsAbility.GuiHint = GuiHint.None;
+            refineJobsAbility.GuidDictionary = new JDictionary<Guid, string>
+            {
+                { new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),"0"},
+                { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}
+            };
+            refineJobsAbility.AbilityDataBlobType = typeof(RefineResourcesDB).ToString();
+            refineJobsAbility.AbilityFormula = "DataBlobArgs([GuidDict], Ability(0)";
+            component.ComponentAbilitySDs.Add(refineJobsAbility);
             return component;
 
         }

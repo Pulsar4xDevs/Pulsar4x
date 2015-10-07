@@ -71,6 +71,7 @@ namespace Pulsar4X.ViewModels
             {
                 _mineralDictionary.Add(mineral.ID, mineral);
             }
+            Refresh();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -79,6 +80,7 @@ namespace Pulsar4X.ViewModels
             Entity planet = _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
             var minerals = planet.GetDataBlob<SystemBodyDB>().Minerals;
             _mineralStockpile = new Dictionary<string, int>();
+            _mineralDeposits = new Dictionary<string, MineralDepositInfo>();
             foreach (var kvp in minerals)
             {
                 MineralSD mineral = _mineralDictionary[kvp.Key];

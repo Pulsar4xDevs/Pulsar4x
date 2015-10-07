@@ -80,6 +80,7 @@ namespace Pulsar4X.ECSLib
             PositionDB mercuryPositionDB = new PositionDB();
             mercuryPositionDB.Position = OrbitProcessor.GetPosition(mercuryOrbitDB, game.CurrentDateTime);
             Entity mercury = new Entity(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, mercury);
 
             PositionDB venusPositionDB = new PositionDB();
             SystemBodyDB venusBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
@@ -92,9 +93,9 @@ namespace Pulsar4X.ECSLib
             double venusLoP = 131.53298;
             double venusMeanLongd = 181.97973;
             OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, _galaxyGen.Settings.J2000);
-            venusPositionDB.Position = OrbitProcessor.GetPosition(venusOrbitDB, game.CurrentDateTime);
+            venusPositionDB.Position = OrbitProcessor.GetPosition(venusOrbitDB, game.CurrentDateTime);        
             Entity venus = new Entity(sol.SystemManager, new List<BaseDataBlob> { venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
-
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, venus);
 
             PositionDB earthPositionDB = new PositionDB();
             SystemBodyDB earthBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
@@ -116,6 +117,8 @@ namespace Pulsar4X.ECSLib
             AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
 
             Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
+            _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
+
 
             PositionDB moonPositionDB = new PositionDB();
             SystemBodyDB moonBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
@@ -130,7 +133,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(earth, earthMVDB.Mass, moonMVDB.Mass, moonSemiMajAxis, moonEccentricity, moonInclination, moonLoAN, moonLoP, moonMeanAnomaly, _galaxyGen.Settings.J2000);
             moonPositionDB.Position = OrbitProcessor.GetPosition(moonOrbitDB, game.CurrentDateTime);
             Entity moon = new Entity(sol.SystemManager, new List<BaseDataBlob> { moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
-
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, moon);
             //public static OrbitDB FromAsteroidFormat([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis, double eccentricity, double inclination,
                                                // double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
 

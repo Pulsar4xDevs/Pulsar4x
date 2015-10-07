@@ -160,7 +160,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestRefinedMatsSave()
         {
-            JDictionary<Guid, TechSD> mats = new JDictionary<Guid, TechSD>();
+            JDictionary<Guid, RefinedMaterialSD> mats = new JDictionary<Guid, RefinedMaterialSD>();
 
             RefinedMaterialSD soriumFuel = new RefinedMaterialSD();
             soriumFuel.Name = "Sorium Fuel";
@@ -168,7 +168,21 @@ namespace Pulsar4X.Tests
             soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
             soriumFuel.RawMineralCosts = new JDictionary<Guid, int>();
             soriumFuel.RawMineralCosts.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
+            soriumFuel.RefinaryPointCost = 10;
             soriumFuel.OutputAmount = 1;
+            mats.Add(soriumFuel.ID, soriumFuel);
+
+            RefinedMaterialSD DepleatedDuranuim = new RefinedMaterialSD();
+            DepleatedDuranuim.Name = "Depleated Duranuim";
+            DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset refinarys";
+            DepleatedDuranuim.ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB");
+            DepleatedDuranuim.RawMineralCosts = new JDictionary<Guid, int>();
+            DepleatedDuranuim.RawMineralCosts.Add(new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), 5);
+            DepleatedDuranuim.RefinedMateraialsCosts = new JDictionary<Guid, int>();
+            DepleatedDuranuim.RefinedMateraialsCosts.Add(new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"), 1);
+            DepleatedDuranuim.RefinaryPointCost = 20;
+            DepleatedDuranuim.OutputAmount = 6;
+            mats.Add(DepleatedDuranuim.ID, DepleatedDuranuim);
 
             StaticDataManager.ExportStaticData(mats, "./ReinfedMaterialsDataExportTest.json");
             

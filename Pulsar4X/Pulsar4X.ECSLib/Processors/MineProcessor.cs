@@ -32,9 +32,9 @@ namespace Pulsar4X.ECSLib
         internal static void MineResources(Entity colonyEntity)
         {
             JDictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
-            JDictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<SystemBodyDB>().Minerals;
+            JDictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyDB>().Minerals;
             JDictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            float mineBonuses = colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
+            float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
             {                
                 double accessability = planetMinerals[kvp.Key].Accessibility;

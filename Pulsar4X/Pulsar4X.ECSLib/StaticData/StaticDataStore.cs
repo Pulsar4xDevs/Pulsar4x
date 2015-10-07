@@ -107,7 +107,7 @@ namespace Pulsar4X.ECSLib
                     "Installations", typeof(JDictionary<Guid, InstallationSD>)
                 },
                 {
-                    "ConstructableObj", typeof(JDictionary<Guid, RefinedMaterialSD>)
+                    "RefinedMaterials", typeof(JDictionary<Guid, RefinedMaterialSD>)
                 },
                 {
                     "Components", typeof(JDictionary<Guid, ComponentSD>)
@@ -146,7 +146,7 @@ namespace Pulsar4X.ECSLib
                     typeof(JDictionary<Guid, InstallationSD>), "Installations"
                 },
                 {
-                    typeof(JDictionary<Guid, RefinedMaterialSD>), "ConstructableObj"
+                    typeof(JDictionary<Guid, RefinedMaterialSD>), "RefinedMaterials"
                 },
                 {
                     typeof(JDictionary<Guid, ComponentSD>), "Components"

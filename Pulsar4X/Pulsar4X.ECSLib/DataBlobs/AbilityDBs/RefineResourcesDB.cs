@@ -19,7 +19,18 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        public RefineResourcesDB(List<Guid> refinableMatsList, double refinaryPoints)
+        /// <summary>
+        /// this is for the parser, it takes a dictionary but turns it into a list of keys, ignoring the values.
+        /// </summary>
+        /// <param name="refinableMatsList"></param>
+        /// <param name="refinaryPoints"></param>
+        public RefineResourcesDB(Dictionary<Guid, double> refinableMatsList, double refinaryPoints)
+        {
+            _refinableMatsList = refinableMatsList.Keys.ToList();
+            _refinaryPoints = (int)refinaryPoints;
+        }
+
+        public RefineResourcesDB(List<Guid> refinableMatsList, int refinaryPoints)
         {
             _refinableMatsList = refinableMatsList;
             _refinaryPoints = (int)refinaryPoints;

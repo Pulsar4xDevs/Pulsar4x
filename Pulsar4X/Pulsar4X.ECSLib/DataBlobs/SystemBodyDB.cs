@@ -137,10 +137,14 @@ namespace Pulsar4X.ECSLib
         /// minerial definition (MineralSD) from the StaticDataStore.
         /// </summary>
         [PublicAPI]
-        public JDictionary<Guid, MineralDepositInfo> Minerals { get { return new JDictionary<Guid, MineralDepositInfo>(_minerals);}}
+        public JDictionary<Guid, MineralDepositInfo> Minerals
+        {
+            get { return _minerals;}
+            internal set { _minerals = value; }
+        }
 
         [JsonProperty]
-        private readonly JDictionary<Guid, MineralDepositInfo> _minerals;
+        private JDictionary<Guid, MineralDepositInfo> _minerals;
         [JsonProperty]
         private BodyType _type;
         [JsonProperty]

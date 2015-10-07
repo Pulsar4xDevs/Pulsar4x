@@ -1,0 +1,53 @@
+{
+  "Type": "RefinedMaterials",
+  "Data": {
+    "List": [
+      {
+        "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+        "Value": {
+          "Name": "Sorium Fuel",
+          "Description": "Fuel for SpaceShips",
+          "ID": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+          "RawMineralCosts": {
+            "List": [
+              {
+                "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
+                "Value": 1
+              }
+            ]
+          },
+          "RefinaryPointCost": 10,
+          "WealthCost": 0,
+          "OutputAmount": 1
+        }
+      },
+      {
+        "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
+        "Value": {
+          "Name": "Depleated Duranuim",
+          "Description": "A mix of Duranium and refined fuel to teset refinarys",
+          "ID": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
+          "RawMineralCosts": {
+            "List": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": 5
+              }
+            ]
+          },
+          "RefinedMateraialsCosts": {
+            "List": [
+              {
+                "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+                "Value": 1
+              }
+            ]
+          },
+          "RefinaryPointCost": 20,
+          "WealthCost": 0,
+          "OutputAmount": 6
+        }
+      }
+    ]
+  }
+}

@@ -22,8 +22,10 @@ namespace Pulsar4X.ECSLib
             blobs.Add(colonyBonuses);       
             ColonyMinesDB colonyMinesDB = new ColonyMinesDB();
             blobs.Add(colonyMinesDB);
-            InstallationsDB colonyInstallationsDB = new InstallationsDB();
-            blobs.Add(colonyInstallationsDB);
+            ColonyRefiningDB colonyRefining = new ColonyRefiningDB();
+            blobs.Add(colonyRefining);
+            //InstallationsDB colonyInstallationsDB = new InstallationsDB();
+            //blobs.Add(colonyInstallationsDB);
             
             Entity colonyEntity = new Entity(planetEntity.Manager, blobs);
             factionEntity.GetDataBlob<FactionInfoDB>().Colonies.Add(colonyEntity);

@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
             Entity mineEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, mineDesign, factionEntity.GetDataBlob<FactionTechDB>());
 
 
-            ComponentSD refinarySD = game.StaticData.Components[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
+            ComponentSD refinarySD = game.StaticData.Components[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
             ComponentDesignDB refinaryDesign = GenericComponentFactory.StaticToDesign(refinarySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity refinaryEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, refinaryDesign, factionEntity.GetDataBlob<FactionTechDB>());
 
