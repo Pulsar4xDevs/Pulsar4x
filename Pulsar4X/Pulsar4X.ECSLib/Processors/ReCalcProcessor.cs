@@ -20,7 +20,8 @@ namespace Pulsar4X.ECSLib
             foreach (var datablob in entity.DataBlobs)
             {
                 var t = datablob.GetType();
-                typeProcessorMap[t].DynamicInvoke(datablob); // invoke appropriate delegate  
+                if(typeProcessorMap.ContainsKey(t))
+                    typeProcessorMap[t].DynamicInvoke(datablob); // invoke appropriate delegate  
             }
         }
     }

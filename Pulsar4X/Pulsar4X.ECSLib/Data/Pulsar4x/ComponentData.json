@@ -335,7 +335,7 @@
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0)",
+              "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesDB"
             }
           ]

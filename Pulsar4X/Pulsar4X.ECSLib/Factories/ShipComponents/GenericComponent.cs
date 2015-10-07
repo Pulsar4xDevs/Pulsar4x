@@ -70,21 +70,6 @@ namespace Pulsar4X.ECSLib
                         }
                     }
                 }
-                //if (designAbility.GuiHint == GuiHint.GuiTechSelectionList)
-                //{
-                //    designAbility.GuidDictionary = new Dictionary<Guid, ChainedExpression>();
-
-                //    List<TechSD> techs = new List<TechSD>();
-                //    foreach (var kvp in abilitySD.GuidDictionary)
-                //    {
-                //        techs.Add(staticData.Techs[kvp.Key]);
-                //    }                
-                //    foreach (var tech in techs)
-                //    {
-                //        if(factionTech.ResearchedTechs.ContainsKey(tech.ID))
-                //            designAbility.GuidDictionary.Add(tech.ID, new ChainedExpression(TechProcessor.DataFormula(factionTech, tech).ToString(), designAbility,factionTech,staticData));
-                //    }
-                //}
                 if (designAbility.GuiHint == GuiHint.GuiSelectionMaxMin)
                 {
                     designAbility.MaxValueFormula = new ChainedExpression(abilitySD.MaxFormula, designAbility, factionTech, staticData);
@@ -135,9 +120,12 @@ namespace Pulsar4X.ECSLib
             foreach (var designAbility in componentDesign.ComponentDesignAbilities)
             {
                 if (designAbility.DataBlobType != null)
-                {   
-                    
-                    dynamic datablob = (BaseDataBlob)Activator.CreateInstance(designAbility.DataBlobType, designAbility.DataBlobArgs);
+                {
+                    if (designAbility.DataBlobArgs == null)
+                        designAbility.SetValue();  //force recalc.
+                                 
+                    object[] constructorArgs = designAbility.DataBlobArgs;
+                    dynamic datablob = (BaseDataBlob)Activator.CreateInstance(designAbility.DataBlobType, constructorArgs);
                     component.SetDataBlob(datablob);
                 }
             }

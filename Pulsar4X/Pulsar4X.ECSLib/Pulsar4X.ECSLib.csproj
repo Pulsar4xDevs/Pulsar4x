@@ -197,6 +197,7 @@
     <None Include="Data\Pulsar4x\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Data\Pulsar4x\ReinfedMaterialsData.json" />
     <None Include="Data\Pulsar4x\SystemGenSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

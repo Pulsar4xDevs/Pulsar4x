@@ -30,11 +30,11 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Small struct to store specifics of a minerial deposit.
     /// </summary>
-    public struct MineralDepositInfo
+    public class MineralDepositInfo
     {
-        public int Amount;
-        public int HalfOriginalAmount;
-        public double Accessibility;
+        public int Amount { get; internal set; }
+        public int HalfOriginalAmount { get; internal set; }
+        public double Accessibility { get; internal set; }
     }
 
     public class SystemBodyDB : BaseDataBlob

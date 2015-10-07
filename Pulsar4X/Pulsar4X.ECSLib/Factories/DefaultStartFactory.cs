@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
             colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(mineEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(refinaryEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(labEntity);
-
+            ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol); //hack test because currently stuff doesnt get added to knownSystems automaticaly
 

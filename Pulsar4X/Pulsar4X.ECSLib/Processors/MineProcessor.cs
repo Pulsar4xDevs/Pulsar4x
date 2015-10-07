@@ -48,13 +48,10 @@ namespace Pulsar4X.ECSLib
                 accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
                 double newAccess = GMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
 
-                MineralDepositInfo newDepositInfo = new MineralDepositInfo
-                {
-                    Amount = newAmount, 
-                    HalfOriginalAmount = mineralDeposit.HalfOriginalAmount, 
-                    Accessibility = newAccess
-                };
-                planetMinerals[kvp.Key] = newDepositInfo;
+                mineralDeposit.Amount = newAmount;
+                mineralDeposit.Accessibility = newAccess;
+
+                //planetMinerals[kvp.Key] = mineralDeposit;
             }
         }
 

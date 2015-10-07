@@ -379,7 +379,7 @@ namespace Pulsar4X.Tests
                 { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}
             };
             refineJobsAbility.AbilityDataBlobType = typeof(RefineResourcesDB).ToString();
-            refineJobsAbility.AbilityFormula = "DataBlobArgs([GuidDict], Ability(0)";
+            refineJobsAbility.AbilityFormula = "DataBlobArgs([GuidDict], Ability(0))";
             component.ComponentAbilitySDs.Add(refineJobsAbility);
             return component;
 
