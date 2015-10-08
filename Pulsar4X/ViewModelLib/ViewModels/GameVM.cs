@@ -239,6 +239,10 @@ namespace Pulsar4X.ViewModels
             {
                 system.Refresh();
             }
+            foreach (var colonyVM in ColonyScreens)
+            {
+                colonyVM.Refresh();
+            }
         }
 
         #endregion
