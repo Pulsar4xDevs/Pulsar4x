@@ -22,10 +22,13 @@
         <DataGrid Margin="10,10,10,0" Grid.Row="1"
                   Name="PopDataGrid" Grid.Column="1" Height="39" VerticalAlignment="Top"
                   />
-        <DataGrid Name="RawMineralsDataGrid" Margin="10,54,10,10" Grid.Row="1" Grid.Column="1"/>        
-        <DataGrid Name="MinedMineralsStockpile" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Height="124" Width="120"/>
-        <DataGrid Name="RefinedMaterialsStockpile" Grid.Column="1" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Height="124" Width="143"/>
-        
+        <DataGrid Name="MineralsDepositDataGrid" Margin="10,54,10,10" Grid.Row="1" Grid.Column="1"
+                  ItemsSource="{Binding Path=MineralDeposits}"/>
+        <DataGrid Name="MinedMineralsStockpile" Margin="10,10,7,0" Grid.Row="2" VerticalAlignment="Top" Height="124"
+                  ItemsSource="{Binding Path=MineralStockpile}"/>
+        <DataGrid Name="RefinedMaterialsStockpile" Grid.Column="1" Margin="10,10,10,0" Grid.Row="2" VerticalAlignment="Top" Height="124"
+                  ItemsSource="{Binding Path=MaterialStockpile}"/>
+
     </Grid>
 </UserControl>
 

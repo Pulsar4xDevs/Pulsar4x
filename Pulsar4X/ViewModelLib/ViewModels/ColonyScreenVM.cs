@@ -126,7 +126,7 @@ namespace Pulsar4X.ViewModels
                 MineralSD mineral = _mineralDictionary[kvp.Key];
                 _mineralStockpile.Add(new RawStockpileInfoVM(kvp.Key, mineral.Name, ColonyInfo));
             }
-            MineralStockpile = MineralStockpile;
+            MineralStockpile = _mineralStockpile;
         }
 
         private void SetupMatsStockpile()
@@ -163,11 +163,11 @@ namespace Pulsar4X.ViewModels
 
             if (ColonyInfo.MineralStockpile.Count != MineralStockpile.Count)
                 SetupMineralStockpile();
-            else
-                foreach (var mineral in MineralStockpile)
-                {
-                    mineral.Refresh();
-                }
+           
+            foreach (var mineral in MineralStockpile)
+            {
+                mineral.Refresh();
+            }
 
             if (ColonyInfo.RefinedStockpile.Count != MaterialStockpile.Count)
                 SetupMatsStockpile();
