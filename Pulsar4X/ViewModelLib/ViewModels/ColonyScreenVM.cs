@@ -254,12 +254,13 @@ namespace Pulsar4X.ViewModels
 
     public class FacilityVM
     {
-        private Entity _facilityEntity;
+        private Entity _facilityDesignEntity;
         private Entity _factionEntity;
+        private int Number;
 
-        public string Name { get { return _facilityEntity.GetDataBlob<NameDB>().DefaultName; } }
+        public string Name { get { return _facilityDesignEntity.GetDataBlob<NameDB>().DefaultName; } }
 
-        public int WorkersRequired { get { return _facilityEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements; } }
+        public int WorkersRequired { get { return _facilityDesignEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements * Number; } }
 
         public FacilityVM()
         {
@@ -267,8 +268,32 @@ namespace Pulsar4X.ViewModels
 
         public FacilityVM(Entity facilityEntity, Entity factionEntity)
         {
-            _facilityEntity = facilityEntity;
+            _facilityDesignEntity = facilityEntity;
             _factionEntity = factionEntity;
         }
     }
+
+
+    public class RefinaryJobVM
+    {
+        private StaticDataStore _staticData;
+        private RefineingJob _job;
+        private ColonyRefiningDB _refiningDB;
+
+        public string Material { get { return _staticData.RefinedMaterials[_job.jobGuid].Name} }
+        public int Remaining { get { return _refiningDB.RemainingJobs} }
+        public int BatchQuantity { get { return _job.numberOrdered; } }       
+        public bool Repeat {get{return _job.auto;}}
+
+        public RefinaryJobVM(StaticDataStore staticData, ColonyRefiningDB colonyRefiningDB, RefineingJob refiningJob)        
+        {
+            _staticData = staticData;
+            _refiningDB = colonyRefiningDB;
+            _job = refiningJob;
+        }
+        
+    }
+
+
+
 }
