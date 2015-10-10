@@ -127,7 +127,7 @@ namespace Pulsar4X.ECSLib
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
 
             // Don't attempt to calculate large timeframes.
-            if (timeSinceEpoch > orbit.OrbitalPeriod)
+            if (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
             {
                 long years = (timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks);
                 timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);

@@ -1,14 +1,18 @@
-﻿<UserControl x:Class="Pulsar4X.WPFUI.UserControls.ColonyScreenView"
+﻿<UserControl
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:Pulsar4X.ViewModel;assembly=ViewModelLib"
+             xmlns:uc="clr-namespace:Pulsar4X.WPFUI.UserControls" xmlns:WPFUI="clr-namespace:Pulsar4X.WPFUI" x:Class="Pulsar4X.WPFUI.UserControls.ColonyScreenView" 
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="137*"/>
-            <ColumnDefinition Width="163*"/>
+            <ColumnDefinition Width="76*"/>
+            <ColumnDefinition Width="61*"/>
+            <ColumnDefinition Width="84*"/>
+            <ColumnDefinition Width="79*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="42"/>
@@ -16,18 +20,18 @@
             <RowDefinition Height="145*"/>
         </Grid.RowDefinitions>
         <DataGrid Margin="10,10,0,10" Grid.Row="1"
-                  Name="FacDataGrid"
+			x:Name="FacDataGrid"
                   />
-        <ComboBox Name="ColonySelection" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ColonySelection_SelectionChanged"/>
-        <DataGrid Margin="10,10,10,0" Grid.Row="1"
-                  Name="PopDataGrid" Grid.Column="1" Height="39" VerticalAlignment="Top"
+        <ComboBox x:Name="ColonySelection" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="ColonySelection_SelectionChanged" Grid.ColumnSpan="2"/>
+        <DataGrid Margin="5,10,0,10" Grid.Row="1"
+			x:Name="PopDataGrid" RenderTransformOrigin="-0.105,0.513" Grid.Column="1"
                   />
-        <DataGrid Name="MineralsDepositDataGrid" Margin="10,54,10,10" Grid.Row="1" Grid.Column="1"
-                  ItemsSource="{Binding Path=MineralDeposits}"/>
-        <DataGrid Name="MinedMineralsStockpile" Margin="10,10,7,0" Grid.Row="2" VerticalAlignment="Top" Height="124"
-                  ItemsSource="{Binding Path=MineralStockpile}"/>
-        <DataGrid Name="RefinedMaterialsStockpile" Grid.Column="1" Margin="10,10,10,0" Grid.Row="2" VerticalAlignment="Top" Height="124"
-                  ItemsSource="{Binding Path=MaterialStockpile}"/>
+        <uc:RawMineralStockpile x:Name="RawMinStockpile" Margin="5,10,10,10" Grid.Row="1" Grid.Column="3" />
+        <uc:RefinedMatsStockpileView x:Name="RefinedMatsStockpile" Grid.Column="2" Margin="10" Grid.Row="2" Grid.ColumnSpan="2"/>
+        <uc:PlanetMineralDepositView x:Name="PlanetMineralDeposit" Grid.Column="2" Margin="10,10,0,10" Grid.Row="1"/>
+
+        <WPFUI:RefinaryAbilityView x:Name="RefinaryAbility" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="0"
+                                   Margin="0,0,7,10" DataContext="RefinaryAbilityVM"/>
 
     </Grid>
 </UserControl>

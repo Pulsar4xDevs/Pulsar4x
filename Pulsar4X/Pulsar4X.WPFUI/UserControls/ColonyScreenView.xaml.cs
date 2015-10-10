@@ -38,8 +38,12 @@ namespace Pulsar4X.WPFUI.UserControls
             Title = colonyScreenVM.ColonyName;
             _colonyScreenVM = colonyScreenVM;
             DataContext = _colonyScreenVM;
+            PlanetMineralDeposit.Setup(_colonyScreenVM.PlanetMineralDepositVM);
+            RawMinStockpile.Setup(_colonyScreenVM.RawMineralStockpileVM);
+            RefinedMatsStockpile.Setup(_colonyScreenVM.RefinedMatsStockpileVM);
             FacDataGrid.ItemsSource = _colonyScreenVM.Facilities;
             PopDataGrid.ItemsSource = _colonyScreenVM.Species;
+            RefinaryAbility.DataContext = _colonyScreenVM.RefinaryAbilityVM;
         }
 
         public string Title { get; set; }

@@ -6,10 +6,12 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public struct RefineingJob
+    public class RefineingJob
     {
         public Guid jobGuid;
         public int numberOrdered;
+        public int numberCompleted;
+        public int pointsLeft;
         public bool auto;
     }
 
@@ -25,30 +27,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public List<RefineingJob> JobBatchList { get; internal set; }
 
-        /// <summary>
-        /// on current job
-        /// </summary>        
-        public int RemainingPoints
-        {
-            get { return _remainingPoints; }
-            internal set{ _remainingPoints = value; }
-        }
-        [JsonProperty]
-        private int _remainingPoints;
-
-
-        /// <summary>
-        /// in current batch
-        /// </summary>        
-        public int RemainingJobs
-        {
-            get { return _remainingJobs; }
-            internal set { _remainingJobs = value; }
-        }
-        [JsonProperty]
-        private int _remainingJobs;
-
-
+        
         public ColonyRefiningDB()
         {
             RefiningRates = new JDictionary<Guid, int>();

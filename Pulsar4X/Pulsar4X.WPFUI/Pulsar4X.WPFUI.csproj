@@ -101,6 +101,9 @@
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\RefinaryAbilityView.xaml.cs">
+      <DependentUpon>RefinaryAbilityView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\AbilitySelectionList.xaml.cs">
       <DependentUpon>AbilitySelectionList.xaml</DependentUpon>
     </Compile>
@@ -141,6 +144,9 @@
     <Compile Include="UserControls\NewGameOptions.xaml.cs">
       <DependentUpon>NewGameOptions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\PlanetMineralDepositView.xaml.cs">
+      <DependentUpon>PlanetMineralDepositView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Populations.xaml.cs">
       <DependentUpon>Populations.xaml</DependentUpon>
     </Compile>
@@ -149,6 +155,12 @@
     </Compile>
     <Compile Include="UserControls\RawMineralStockpile.xaml.cs">
       <DependentUpon>RawMineralStockpile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\RefinaryJobUC.xaml.cs">
+      <DependentUpon>RefinaryJobUC.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\RefinedMatsStockpileView.xaml.cs">
+      <DependentUpon>RefinedMatsStockpileView.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ShipDesign.xaml.cs">
       <DependentUpon>ShipDesign.xaml</DependentUpon>
@@ -170,6 +182,10 @@
     </Compile>
     <Compile Include="ViewModels\Helpers.cs" />
     <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\RefinaryAbilityView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -225,6 +241,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UserControls\PlanetMineralDepositView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserControls\Populations.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -234,6 +254,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\RawMineralStockpile.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\RefinaryJobUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\RefinedMatsStockpileView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
