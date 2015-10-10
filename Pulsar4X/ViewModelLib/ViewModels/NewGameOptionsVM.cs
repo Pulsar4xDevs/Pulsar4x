@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public class NewGameOptionsVM : IViewModel
     {

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
     /// <summary>
     /// This view model maps to the main game class. It porivdes lists of factions, systems and other high level info.

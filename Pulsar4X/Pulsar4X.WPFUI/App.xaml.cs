@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 //using Pulsar4X.ECSLib;
-using Pulsar4X.ViewModels;
+using Pulsar4X.WPFUI;
 
 namespace Pulsar4X.WPFUI
 {

@@ -4,7 +4,7 @@ using Pulsar4X.ECSLib;
 
 
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public class SpeciesVM : IViewModel
     {

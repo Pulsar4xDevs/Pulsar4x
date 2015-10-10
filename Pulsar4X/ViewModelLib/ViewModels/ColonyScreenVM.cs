@@ -5,12 +5,10 @@ using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public class ColonyScreenVM : IViewModel
     {
@@ -28,6 +26,8 @@ namespace Pulsar4X.ViewModels
         private Dictionary<string, long> _species;
         public Dictionary<string, long> Species { get { return _species; } }
 
+        public RawMineralStockpileVM RawMineralStockpile { get; set; }
+
         private ObservableCollection<MineralInfoVM> _mineralDeposits;
         public ObservableCollection<MineralInfoVM> MineralDeposits
         {
@@ -39,12 +39,7 @@ namespace Pulsar4X.ViewModels
             }
         }
 
-        private ObservableCollection<RawStockpileInfoVM> _mineralStockpile;
-        public ObservableCollection<RawStockpileInfoVM> MineralStockpile
-        {
-            get { return _mineralStockpile; }
-            set { _mineralStockpile = value; OnPropertyChanged(); }
-        }
+
 
         private ObservableCollection<MatsStockpileInfoVM> _materialStockpile;
         public ObservableCollection<MatsStockpileInfoVM> MaterialStockpile
@@ -75,7 +70,7 @@ namespace Pulsar4X.ViewModels
             _facilities = new ObservableCollection<FacilityVM>();
             foreach (var installation in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations)
             {
-                Facilities.Add(new FacilityVM(installation, FactionEntity));
+                Facilities.Add(new FacilityVM(installation, ColonyInfo));
             }
             _species = new Dictionary<string, long>();
 
@@ -96,7 +91,7 @@ namespace Pulsar4X.ViewModels
 
             SetupMineralDeposoits();
 
-            SetupMineralStockpile();
+            RawMineralStockpile = new RawMineralStockpileVM(staticData, colonyEntity);
 
             SetupMatsStockpile();
 
@@ -117,17 +112,7 @@ namespace Pulsar4X.ViewModels
             MineralDeposits = MineralDeposits;
         }
 
-        private void SetupMineralStockpile()
-        {
-            var rawMinerals = ColonyInfo.MineralStockpile;
-            _mineralStockpile = new ObservableCollection<RawStockpileInfoVM>();
-            foreach (var kvp in rawMinerals)
-            {
-                MineralSD mineral = _mineralDictionary[kvp.Key];
-                _mineralStockpile.Add(new RawStockpileInfoVM(kvp.Key, mineral.Name, ColonyInfo));
-            }
-            MineralStockpile = _mineralStockpile;
-        }
+
 
         private void SetupMatsStockpile()
         {
@@ -136,7 +121,7 @@ namespace Pulsar4X.ViewModels
             foreach (var kvp in mats)
             {
                 RefinedMaterialSD mat = _materialsDictionary[kvp.Key];
-                _mineralStockpile.Add(new RawStockpileInfoVM(kvp.Key, mat.Name, ColonyInfo));
+                _mineralStockpile.Add(new RawMineralInfoVM(kvp.Key, mat.Name, ColonyInfo));
             }
             MaterialStockpile = MaterialStockpile;
         }
@@ -161,13 +146,7 @@ namespace Pulsar4X.ViewModels
                 mineralvm.Refresh();
             }
 
-            if (ColonyInfo.MineralStockpile.Count != MineralStockpile.Count)
-                SetupMineralStockpile();
-           
-            foreach (var mineral in MineralStockpile)
-            {
-                mineral.Refresh();
-            }
+
 
             if (ColonyInfo.RefinedStockpile.Count != MaterialStockpile.Count)
                 SetupMatsStockpile();
@@ -204,18 +183,75 @@ namespace Pulsar4X.ViewModels
         }
     }
 
-    public class RawStockpileInfoVM : IViewModel
+    public class RawMineralStockpileVM : IViewModel
+    {
+        private Entity _colonyEntity;
+        private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
+        private Dictionary<Guid, MineralSD> _mineralDictionary;
+
+        private ObservableCollection<RawMineralInfoVM> _mineralStockpile;
+        public ObservableCollection<RawMineralInfoVM> MineralStockpile
+        {
+            get { return _mineralStockpile; }
+            set { _mineralStockpile = value; OnPropertyChanged(); }
+        }
+
+        public RawMineralStockpileVM(StaticDataStore staticData, Entity colonyEntity)
+        {
+            _mineralDictionary = new Dictionary<Guid, MineralSD>();
+            foreach (var mineral in staticData.Minerals)
+            {
+                _mineralDictionary.Add(mineral.ID, mineral);
+            }
+            _colonyEntity = colonyEntity;
+            SetupMineralStockpile();
+        }
+
+        private void SetupMineralStockpile()
+        {
+            var rawMinerals = ColonyInfo.MineralStockpile;
+            _mineralStockpile = new ObservableCollection<RawMineralInfoVM>();
+            foreach (var kvp in rawMinerals)
+            {
+                MineralSD mineral = _mineralDictionary[kvp.Key];
+                _mineralStockpile.Add(new RawMineralInfoVM(kvp.Key, mineral.Name, ColonyInfo));
+            }
+            MineralStockpile = _mineralStockpile;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        public void Refresh(bool partialRefresh = false)
+        {
+            if (ColonyInfo.MineralStockpile.Count != MineralStockpile.Count)
+                SetupMineralStockpile();
+            else
+                foreach (var mineral in MineralStockpile)
+                {
+                    mineral.Refresh();
+                }
+        }
+    }
+
+    public class RawMineralInfoVM : IViewModel
     {
         private ColonyInfoDB _colonyInfo;
         private Guid _guid;
         public string Mineral { get; private set; }
         public int Amount { get { return _colonyInfo.MineralStockpile[_guid]; } }
 
-        public RawStockpileInfoVM(Guid guid, string name, ColonyInfoDB colonyInfo)
+        public RawMineralInfoVM(Guid guid, string name, ColonyInfoDB colonyInfo)
         {
             _guid = guid;
             Mineral = name;
-            _colonyInfo = colonyInfo;
+            _colonyInfo = colonyInfo;           
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -243,6 +279,7 @@ namespace Pulsar4X.ViewModels
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         public void Refresh(bool partialRefresh = false)
         {
             if (PropertyChanged != null)
@@ -252,36 +289,120 @@ namespace Pulsar4X.ViewModels
         }
     }
 
-    public class FacilityVM
+    public class FacilityVM : IViewModel
     {
-        private Entity _facilityDesignEntity;
-        private Entity _factionEntity;
-        private int Number;
+        private Entity _facilityEntity;
+        private ColonyInfoDB _colonyInfo;
+        private int _count;
 
-        public string Name { get { return _facilityDesignEntity.GetDataBlob<NameDB>().DefaultName; } }
-
-        public int WorkersRequired { get { return _facilityDesignEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements * Number; } }
+        public string Name { get { return _facilityEntity.GetDataBlob<NameDB>().DefaultName; } }
+        public int Count
+        {
+            get{ return _count; }
+            private set {_count = value; OnPropertyChanged();}
+        }
+        public int WorkersRequired { get { return _facilityEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements * Count; } }
 
         public FacilityVM()
         {
         }
 
-        public FacilityVM(Entity facilityEntity, Entity factionEntity)
+        public FacilityVM(Entity facilityEntity, ColonyInfoDB colonyInfo)
         {
-            _facilityDesignEntity = facilityEntity;
-            _factionEntity = factionEntity;
+            _facilityEntity = facilityEntity;
+            _colonyInfo = colonyInfo;
+            Refresh();
+
+        }
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void Refresh(bool partialRefresh = false)
+        {
+            
+            int count = 0;
+            foreach (var installation in _colonyInfo.Installations)
+            {
+                if (installation.GetDataBlob<ComponentInfoDB>().DesignGuid 
+                    == _facilityEntity.GetDataBlob<ComponentInfoDB>().DesignGuid)
+                    count ++;
+            }
+            Count = count;
         }
     }
 
 
-    public class RefinaryJobVM
+    public class RefinaryAbilityVM : IViewModel
+    {
+        private ColonyRefiningDB _refiningDB;
+        private StaticDataStore _staticData;
+        private ObservableCollection<RefinaryJobVM> _refinaryJobs;
+        public ObservableCollection<RefinaryJobVM> RefinaryJobs
+        {
+            get { return _refinaryJobs;}
+            set
+            {
+                _refinaryJobs = value;
+                OnPropertyChanged();
+            }
+        }
+        public RefinaryAbilityVM(StaticDataStore staticData, ColonyRefiningDB colonyRefining)
+        {
+            _staticData = staticData;
+            _refiningDB = colonyRefining;
+            SetupRefiningJobs();
+        }
+
+
+
+        private void SetupRefiningJobs()
+        {
+            var jobs = _refiningDB.JobBatchList;
+            _refinaryJobs = new ObservableCollection<RefinaryJobVM>();
+            foreach (var item in jobs)
+            {
+               _refinaryJobs.Add(new RefinaryJobVM(_staticData,_refiningDB,item));
+            }
+            RefinaryJobs = RefinaryJobs;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public void Refresh(bool partialRefresh = false)
+        {
+            if (_refiningDB.JobBatchList.Count != RefinaryJobs.Count)
+                SetupRefiningJobs();
+            else
+            foreach (var job in RefinaryJobs)
+            {
+                job.Refresh();
+            }
+        }
+    }
+
+    public class RefinaryJobVM : IViewModel
     {
         private StaticDataStore _staticData;
         private RefineingJob _job;
         private ColonyRefiningDB _refiningDB;
 
-        public string Material { get { return _staticData.RefinedMaterials[_job.jobGuid].Name} }
-        public int Remaining { get { return _refiningDB.RemainingJobs} }
+        public string Material { get { return _staticData.RefinedMaterials[_job.jobGuid].Name; } }
+        public int Remaining { get { return _refiningDB.RemainingJobs; } }
         public int BatchQuantity { get { return _job.numberOrdered; } }       
         public bool Repeat {get{return _job.auto;}}
 
@@ -291,7 +412,19 @@ namespace Pulsar4X.ViewModels
             _refiningDB = colonyRefiningDB;
             _job = refiningJob;
         }
-        
+
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void Refresh(bool partialRefresh = false)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs("Remaining"));
+                PropertyChanged(this, new PropertyChangedEventArgs("BatchQuantity"));
+                PropertyChanged(this, new PropertyChangedEventArgs("Repeat"));
+            }
+        }
     }
 
 

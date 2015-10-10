@@ -99,8 +99,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="componentDesign"></param>
         /// <param name="factionTech"></param>
         /// <returns></returns>
-        public static Entity DesignToEntity(EntityManager globalEntityManager, ComponentDesignDB componentDesign, FactionTechDB factionTech)
+        public static Entity DesignToEntity(EntityManager globalEntityManager, Entity factionEntity, ComponentDesignDB componentDesign)
         {
+            FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
+            FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             //TODO probilby do checking to see if valid here?
             Entity component = new Entity(globalEntityManager);
             
@@ -113,7 +115,7 @@ namespace Pulsar4X.ECSLib
 
             factionTech.ResearchableTechs.Add(tech, 0);
             NameDB nameDB = new NameDB(componentDesign.Name);
-            ComponentInfoDB componentInfo = new ComponentInfoDB(componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.MineralCostValues, tech.ID, componentDesign.CrewReqValue);
+            ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.MineralCostValues, tech.ID, componentDesign.CrewReqValue);
             
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);
@@ -129,10 +131,9 @@ namespace Pulsar4X.ECSLib
                     component.SetDataBlob(datablob);
                 }
             }
+
+            factionInfo.ComponentDesigns.Add(component);
             return component;
-        }
-
-
-        
+        }        
     }
 }

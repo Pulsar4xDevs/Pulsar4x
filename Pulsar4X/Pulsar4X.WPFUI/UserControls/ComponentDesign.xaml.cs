@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI.UserControls;
-using Pulsar4X.ViewModels;
+using Pulsar4X.WPFUI;
 
 namespace Pulsar4X.WPFUI
 {

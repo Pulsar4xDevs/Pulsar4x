@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public class FactionVM
     {

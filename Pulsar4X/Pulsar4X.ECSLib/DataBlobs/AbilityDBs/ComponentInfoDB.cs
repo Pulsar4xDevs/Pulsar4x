@@ -15,6 +15,13 @@ namespace Pulsar4X.ECSLib
     }
     public class ComponentInfoDB : BaseDataBlob
     {
+        [JsonProperty] private Guid _designGuid;
+        [PublicAPI]
+        public Guid DesignGuid {
+            get{return _designGuid;}
+            internal set { _designGuid = value; }
+        }
+
         [JsonProperty]
         private int _sizeInTons;
         public int SizeInTons { get { return _sizeInTons; } internal set { _sizeInTons = value; } }
@@ -44,8 +51,18 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        public ComponentInfoDB(int size, int htk, JDictionary<Guid,int> materialCosts, Guid techRequrement, int crewReqirement)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="designGuid">this is the design GUID, NOT the SD GUID</param>
+        /// <param name="size"></param>
+        /// <param name="htk"></param>
+        /// <param name="materialCosts"></param>
+        /// <param name="techRequrement"></param>
+        /// <param name="crewReqirement"></param>
+        public ComponentInfoDB(Guid designGuid, int size, int htk, JDictionary<Guid,int> materialCosts, Guid techRequrement, int crewReqirement)
         {
+            _designGuid = designGuid;
             _sizeInTons = size;
             _htk = htk;
             _materialCosts = materialCosts;

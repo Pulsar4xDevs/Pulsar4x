@@ -1,5 +1,5 @@
 ﻿using System.Windows.Controls;
-using Pulsar4X.ViewModels;
+using Pulsar4X.WPFUI;
 
 namespace Pulsar4X.WPFUI
 {

@@ -79,7 +79,7 @@ namespace Pulsar4X.Tests
 
             design.ComponentDesignAbilities[0].SetValueFromInput(250);
 
-            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, design, _faction.GetDataBlob<FactionTechDB>());
+            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, _faction, design);
 
             Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.Tests
 
             ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             mineDesign.ComponentDesignAbilities[0].SetValue();
-            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, mineDesign, _faction.GetDataBlob<FactionTechDB>());
+            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, _faction, mineDesign);
 
             Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick.Values.ElementAt(0));
 

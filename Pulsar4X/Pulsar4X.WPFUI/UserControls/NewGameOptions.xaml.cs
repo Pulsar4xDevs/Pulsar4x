@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Pulsar4X.WPFUI;
 
-namespace Pulsar4X.ViewModels.UserControls
+namespace Pulsar4X.WPFUI.UserControls
 {
     /// <summary>
     /// Interaction logic for NewGameOptions.xaml

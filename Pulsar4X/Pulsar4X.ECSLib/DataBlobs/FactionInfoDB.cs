@@ -51,6 +51,15 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private List<Entity> _shipClasses;
 
+        [PublicAPI]
+        public List<Entity> ComponentDesigns
+        {
+            get { return _compnentDesigns; }
+            internal set { _compnentDesigns = value; }
+        }
+        [JsonProperty]
+        private List<Entity> _compnentDesigns;
+
         public FactionInfoDB()
             : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>(), new List<Entity>() )
         {
@@ -68,6 +77,7 @@ namespace Pulsar4X.ECSLib
             Colonies = colonies;
             ShipClasses = shipClasses;
             KnownFactions = new List<Entity>();
+            ComponentDesigns = new List<Entity>();
         }
         
 

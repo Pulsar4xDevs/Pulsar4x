@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public interface IViewModel : INotifyPropertyChanged
     {

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public class StarVM : IViewModel
     {

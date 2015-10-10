@@ -12,11 +12,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Pulsar4X.ViewModels;
+using Pulsar4X.WPFUI;
 using Pulsar4X.WPFUI;
 
 
-namespace Pulsar4X.ViewModels.UserControls
+namespace Pulsar4X.WPFUI.UserControls
 {
     /// <summary>
     /// Interaction logic for ColonyScreenView.xaml

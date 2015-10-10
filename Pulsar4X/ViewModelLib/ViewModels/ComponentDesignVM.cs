@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.ViewModel
 {
 
 
@@ -16,6 +16,7 @@ namespace Pulsar4X.ViewModels
         public ComponentDesignDB DesignDB { get; private set; }
         
         private readonly StaticDataStore _staticData;
+        private readonly Entity _factionEntity;
         private readonly FactionTechDB _factionTech;
         private readonly GameVM _gameVM;
         //public event ValueChangedEventHandler ValueChanged;
@@ -31,6 +32,7 @@ namespace Pulsar4X.ViewModels
         {
             _gameVM = gameVM;
             _staticData = gameVM.Game.StaticData;
+            _factionEntity = gameVM.PlayerFaction;
             _factionTech = gameVM.PlayerFaction.GetDataBlob<FactionTechDB>();
 
             ComponentTypes = new Dictionary<string, Guid>();
@@ -61,7 +63,7 @@ namespace Pulsar4X.ViewModels
 
         public void CreateComponent()
         {
-            GenericComponentFactory.DesignToEntity(_gameVM.Game.GlobalManager, DesignDB, _factionTech);             
+            GenericComponentFactory.DesignToEntity(_gameVM.Game.GlobalManager, _factionEntity, DesignDB);             
         }
 
         public string StatsText

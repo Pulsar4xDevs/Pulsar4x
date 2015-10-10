@@ -17,17 +17,17 @@ namespace Pulsar4X.ECSLib
 
             ComponentSD mineSD = game.StaticData.Components[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
             ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity mineEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, mineDesign, factionEntity.GetDataBlob<FactionTechDB>());
+            Entity mineEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, factionEntity, mineDesign);
 
 
             ComponentSD refinarySD = game.StaticData.Components[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
             ComponentDesignDB refinaryDesign = GenericComponentFactory.StaticToDesign(refinarySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity refinaryEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, refinaryDesign, factionEntity.GetDataBlob<FactionTechDB>());
+            Entity refinaryEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, factionEntity, refinaryDesign);
 
 
             ComponentSD labSD = game.StaticData.Components[new Guid("c203b7cf-8b41-4664-8291-d20dfe1119ec")];
             ComponentDesignDB labDesign = GenericComponentFactory.StaticToDesign(labSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity labEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, labDesign, factionEntity.GetDataBlob<FactionTechDB>());
+            Entity labEntity = GenericComponentFactory.DesignToEntity(game.GlobalManager, factionEntity, labDesign);
 
             colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(mineEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(refinaryEntity);

@@ -7,7 +7,7 @@
     <ProjectGuid>{76508ABF-600E-4B86-9764-DB82D4E429B0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pulsar4X.ViewModels</RootNamespace>
+    <RootNamespace>Pulsar4X.WPFUI</RootNamespace>
     <AssemblyName>Pulsar4X.WPFUI</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -125,6 +125,9 @@
     <Compile Include="UserControls\GMControls.xaml.cs">
       <DependentUpon>GMControls.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\IndustryView.xaml.cs">
+      <DependentUpon>IndustryView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\Intelligence.xaml.cs">
       <DependentUpon>Intelligence.xaml</DependentUpon>
     </Compile>
@@ -143,6 +146,9 @@
     </Compile>
     <Compile Include="UserControls\Races.xaml.cs">
       <DependentUpon>Races.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\RawMineralStockpile.xaml.cs">
+      <DependentUpon>RawMineralStockpile.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\ShipDesign.xaml.cs">
       <DependentUpon>ShipDesign.xaml</DependentUpon>
@@ -199,6 +205,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UserControls\IndustryView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserControls\Intelligence.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -220,6 +230,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Races.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\RawMineralStockpile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
