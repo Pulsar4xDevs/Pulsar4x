@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using Pulsar4X.ViewModel;
 namespace Pulsar4X.WPFUI.UserControls
 {
     /// <summary>
@@ -20,11 +20,18 @@ namespace Pulsar4X.WPFUI.UserControls
     /// </summary>
     public partial class RawMineralStockpile : UserControl
     {
-        private _
+        private RawMineralStockpileVM _rawMineralStockpileVM;
 
         public RawMineralStockpile()
         {
             InitializeComponent();
+        }
+
+        public RawMineralStockpile(RawMineralStockpileVM rawMineralStockpileVM)
+        {
+            InitializeComponent();
+            _rawMineralStockpileVM = rawMineralStockpileVM;
+            DataContext = _rawMineralStockpileVM;
         }
     }
 }

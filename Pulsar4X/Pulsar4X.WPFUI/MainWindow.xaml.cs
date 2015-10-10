@@ -12,8 +12,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ViewModel;
 using Pulsar4X.WPFUI.Properties;
-using Pulsar4X.WPFUI;
 using Pulsar4X.WPFUI.UserControls;
 using Xceed.Wpf.AvalonDock.Layout;
 

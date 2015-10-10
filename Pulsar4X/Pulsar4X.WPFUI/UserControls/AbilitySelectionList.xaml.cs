@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Controls;
 using Pulsar4X.ECSLib;
-using Pulsar4X.WPFUI;
+using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.WPFUI.UserControls
 {

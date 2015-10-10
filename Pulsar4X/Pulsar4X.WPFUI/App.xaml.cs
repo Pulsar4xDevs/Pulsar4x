@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Pulsar4X.ViewModel;
 //using Pulsar4X.ECSLib;
 using Pulsar4X.WPFUI;
 

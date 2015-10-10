@@ -12,8 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Pulsar4X.WPFUI;
-using Pulsar4X.WPFUI;
+using Pulsar4X.ViewModel;
+
 
 
 namespace Pulsar4X.WPFUI.UserControls

@@ -121,7 +121,7 @@ namespace Pulsar4X.ViewModel
             foreach (var kvp in mats)
             {
                 RefinedMaterialSD mat = _materialsDictionary[kvp.Key];
-                _mineralStockpile.Add(new RawMineralInfoVM(kvp.Key, mat.Name, ColonyInfo));
+                _materialStockpile.Add(new MatsStockpileInfoVM(kvp.Key, mat.Name, ColonyInfo));
             }
             MaterialStockpile = MaterialStockpile;
         }
