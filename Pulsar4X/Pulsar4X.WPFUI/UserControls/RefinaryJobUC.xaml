@@ -17,7 +17,7 @@
         </Grid.ColumnDefinitions>
         <Label Content="{Binding Path=Material}"/>
         <xctk:ButtonSpinner Grid.Column="4" Margin="0,0,0,-1" Spin="ButtonSpinner_Spin"/>
-        <xctk:ByteUpDown Grid.Column="2"
+        <xctk:ShortUpDown Grid.Column="2"
                          Value="{Binding Path=BatchQuantity}"/>
         <CheckBox  Grid.Column="3" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="12" Width="14"
                    IsChecked="{Binding Path=Repeat}"/>

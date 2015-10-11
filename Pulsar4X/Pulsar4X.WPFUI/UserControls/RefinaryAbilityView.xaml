@@ -34,8 +34,8 @@
                   ItemsSource="{Binding Path=MaterialDictionary}"
                   SelectedValuePath="Value" DisplayMemberPath="Key"
                   SelectedValue="{Binding Path=NewJobSelectedMaterial}"/>
-        <xctk:ByteUpDown Grid.Column="1" Grid.Row="2" Margin="0,0,1,0"
-                         Value="{Binding Path=NewJobBatchCount}"/>
+        <xctk:ShortUpDown Grid.Column="1" Grid.Row="2" Margin="0,0,1,0"
+                         Value="{Binding Path=NewJobBatchCount}" ParsingNumberStyle="Integer"/>
         <CheckBox Content="Repeat" Grid.Column="2" Margin="4,5,4,6" Grid.Row="2" FlowDirection="RightToLeft"
                   IsChecked="{Binding Path=NewJobRepeat}"/>
         <Button Content="Add" Grid.Column="3" Margin="0,0,10,0" Grid.Row="2" Height="24" VerticalAlignment="Top"                 

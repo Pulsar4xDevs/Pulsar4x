@@ -100,12 +100,10 @@ namespace Pulsar4X.ViewModel
         }
         public void Refresh(bool partialRefresh = false)
         {
-
-            
-
             PlanetMineralDepositVM.Refresh();
             RawMineralStockpileVM.Refresh();
             RefinedMatsStockpileVM.Refresh();
+            RefinaryAbilityVM.Refresh();
         }
     }
 

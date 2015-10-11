@@ -12,8 +12,8 @@ namespace Pulsar4X.ECSLib
 
         public JDictionary<Guid, int> RawMineralCosts;
         public JDictionary<Guid, int> RefinedMateraialsCosts;
-        public int RefinaryPointCost;
-        public int WealthCost;
-        public int OutputAmount;
+        public ushort RefinaryPointCost;
+        public ushort WealthCost;
+        public ushort OutputAmount;
     }
 }

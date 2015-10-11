@@ -25,7 +25,7 @@ namespace Pulsar4X.ViewModel
 
         public Dictionary<string, Guid> MaterialDictionary { get; set; }
         public Guid NewJobSelectedMaterial { get; set; }
-        public byte NewJobBatchCount { get; set; }
+        public ushort NewJobBatchCount { get; set; }
         public bool NewJobRepeat { get; set; }
 
 
@@ -98,13 +98,14 @@ namespace Pulsar4X.ViewModel
 
         public void Refresh(bool partialRefresh = false)
         {
-            if (_refiningDB.JobBatchList.Count != RefinaryJobs.Count)
-                SetupRefiningJobs();
-            else
-                foreach (var job in RefinaryJobs)
-                {
-                    job.Refresh();
-                }
+            SetupRefiningJobs();
+            //if (_refiningDB.JobBatchList.Count != RefinaryJobs.Count)
+            //    SetupRefiningJobs();
+            //else
+            //    foreach (var job in RefinaryJobs)
+            //    {
+            //        job.Refresh();
+            //    }
         }
 
         #endregion
@@ -120,8 +121,8 @@ namespace Pulsar4X.ViewModel
         private RefinaryAbilityVM _parentRefiningVM;
 
         public string Material { get { return _staticData.RefinedMaterials[_job.jobGuid].Name; } }
-        public int Completed { get { return _job.numberCompleted; } }
-        public int BatchQuantity { get { return _job.numberOrdered; } set { _job.numberOrdered = value; } }
+        public ushort Completed { get { return _job.numberCompleted; } }
+        public ushort BatchQuantity { get { return _job.numberOrdered; } set { _job.numberOrdered = value; } }
         public bool Repeat { get { return _job.auto; } set { _job.auto = value; } }
         private int PriorityIndex { get { return _parentRefiningVM.RefinaryJobs.IndexOf(this); } }
 

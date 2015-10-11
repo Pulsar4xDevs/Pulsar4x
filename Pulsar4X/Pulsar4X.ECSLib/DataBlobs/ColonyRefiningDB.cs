@@ -9,9 +9,9 @@ namespace Pulsar4X.ECSLib
     public class RefineingJob
     {
         public Guid jobGuid;
-        public int numberOrdered;
-        public int numberCompleted;
-        public int pointsLeft;
+        public ushort numberOrdered;
+        public ushort numberCompleted;
+        public ushort pointsLeft;
         public bool auto;
     }
 

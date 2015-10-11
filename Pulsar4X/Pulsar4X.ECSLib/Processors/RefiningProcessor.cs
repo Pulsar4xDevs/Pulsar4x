@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
                         }
                    
                         //use refinary points
-                        int pointsUsed = Math.Min(job.pointsLeft, material.RefinaryPointCost);
+                        ushort pointsUsed = (ushort)Math.Min(job.pointsLeft, material.RefinaryPointCost);
                         job.pointsLeft -= pointsUsed;
                         refinaryPoints -= pointsUsed;
 
