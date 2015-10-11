@@ -71,7 +71,9 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConstructionDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ComponentDesignDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\EnginePowerDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\FuelStorageDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\FuelUseDB.cs" />
@@ -190,14 +192,18 @@
     <None Include="Data\Pulsar4x\Commander Name Theme - The Creators.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Pulsar4x\ComponentData.json" />
+    <None Include="Data\Pulsar4x\ComponentData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Pulsar4x\InstallationData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Data\Pulsar4x\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\Pulsar4x\ReinfedMaterialsData.json" />
+    <None Include="Data\Pulsar4x\ReinfedMaterialsData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Pulsar4x\SystemGenSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

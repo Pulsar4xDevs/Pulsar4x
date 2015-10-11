@@ -8,11 +8,11 @@ namespace Pulsar4X.ECSLib
 {
     public class RefineingJob
     {
-        public Guid jobGuid;
-        public ushort numberOrdered;
-        public ushort numberCompleted;
-        public ushort pointsLeft;
-        public bool auto;
+        public Guid MaterialGuid;
+        public ushort NumberOrdered;
+        public ushort NumberCompleted;
+        public ushort PointsLeft;
+        public bool Auto;
     }
 
     public class ColonyRefiningDB : BaseDataBlob

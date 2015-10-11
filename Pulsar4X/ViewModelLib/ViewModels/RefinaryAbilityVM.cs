@@ -63,11 +63,11 @@ namespace Pulsar4X.ViewModel
         public void OnNewBatchJob()
         {
             RefineingJob newjob = new RefineingJob();
-            newjob.jobGuid = NewJobSelectedMaterial;
-            newjob.numberCompleted = 0;
-            newjob.numberOrdered = NewJobBatchCount;
-            newjob.pointsLeft = _staticData.RefinedMaterials[NewJobSelectedMaterial].RefinaryPointCost;
-            newjob.auto = NewJobRepeat;
+            newjob.MaterialGuid = NewJobSelectedMaterial;
+            newjob.NumberCompleted = 0;
+            newjob.NumberOrdered = NewJobBatchCount;
+            newjob.PointsLeft = _staticData.RefinedMaterials[NewJobSelectedMaterial].RefinaryPointCost;
+            newjob.Auto = NewJobRepeat;
             RefiningProcessor.AddJob(_staticData, _colonyEntity, newjob);
             Refresh();
         }
@@ -120,10 +120,10 @@ namespace Pulsar4X.ViewModel
         private Entity _colonyEntity;
         private RefinaryAbilityVM _parentRefiningVM;
 
-        public string Material { get { return _staticData.RefinedMaterials[_job.jobGuid].Name; } }
-        public ushort Completed { get { return _job.numberCompleted; } }
-        public ushort BatchQuantity { get { return _job.numberOrdered; } set { _job.numberOrdered = value; } }
-        public bool Repeat { get { return _job.auto; } set { _job.auto = value; } }
+        public string Material { get { return _staticData.RefinedMaterials[_job.MaterialGuid].Name; } }
+        public ushort Completed { get { return _job.NumberCompleted; } }
+        public ushort BatchQuantity { get { return _job.NumberOrdered; } set { _job.NumberOrdered = value; } }
+        public bool Repeat { get { return _job.Auto; } set { _job.Auto = value; } }
         private int PriorityIndex { get { return _parentRefiningVM.RefinaryJobs.IndexOf(this); } }
 
         public RefinaryJobVM(StaticDataStore staticData, Entity colonyEntity, RefineingJob refiningJob)

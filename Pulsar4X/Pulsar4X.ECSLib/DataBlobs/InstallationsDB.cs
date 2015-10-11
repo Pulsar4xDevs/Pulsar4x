@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public struct ConstructionJob
-    {        
-        public Guid Type;
-        public float ItemsRemaining;
-        public PercentValue PriorityPercent;
-        public JDictionary<Guid, int> RawMaterialsRemaining;
-        public int BuildPointsRemaining;
-        public int BuildPointsPerItem;
-    }
+    //public struct ConstructionJob
+    //{        
+    //    public Guid Type;
+    //    public float ItemsRemaining;
+    //    public PercentValue PriorityPercent;
+    //    public JDictionary<Guid, int> RawMaterialsRemaining;
+    //    public int BuildPointsRemaining;
+    //    public int BuildPointsPerItem;
+    //}
 
     /// <summary>
     /// this is used to turn installations on and off, 

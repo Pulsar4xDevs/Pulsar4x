@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// 
+        /// TODO: refineing rates should also limit the amount that can be refined for a specific mat each tick. 
         /// </summary>
         internal static void RefineMaterials(Entity colony, Game game)
         {
@@ -46,13 +46,13 @@ namespace Pulsar4X.ECSLib
                 if (refinaryPoints > 0)
                 {
                     var job = refiningDB.JobBatchList[jobIndex];
-                    RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.jobGuid];
+                    RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.MaterialGuid];
                     Dictionary<Guid, int> mineralCosts = material.RawMineralCosts;
                     Dictionary<Guid, int> materialCosts = material.RefinedMateraialsCosts;
 
-                    while (job.numberCompleted < job.numberOrdered && job.pointsLeft > 0)
+                    while (job.NumberCompleted < job.NumberOrdered && job.PointsLeft > 0)
                     {
-                        if (job.pointsLeft == material.RefinaryPointCost)
+                        if (job.PointsLeft == material.RefinaryPointCost)
                         {
                             //consume all ingredients for this job on the first point use. 
                             if (HasReqiredItems(mineralStockpile, mineralCosts) && HasReqiredItems(materialsStockpile, materialCosts))
@@ -67,28 +67,28 @@ namespace Pulsar4X.ECSLib
                         }
                    
                         //use refinary points
-                        ushort pointsUsed = (ushort)Math.Min(job.pointsLeft, material.RefinaryPointCost);
-                        job.pointsLeft -= pointsUsed;
+                        ushort pointsUsed = (ushort)Math.Min(job.PointsLeft, material.RefinaryPointCost);
+                        job.PointsLeft -= pointsUsed;
                         refinaryPoints -= pointsUsed;
 
                         //if job is complete
-                        if (job.pointsLeft == 0)
+                        if (job.PointsLeft == 0)
                         {
-                            job.numberCompleted++; //complete job,                          
+                            job.NumberCompleted++; //complete job,                          
                             materialsStockpile.SafeValueAdd(material.ID, material.OutputAmount); //and add the product to the stockpile
-                            job.pointsLeft = material.RefinaryPointCost; //and reset the points left for the next job in the batch.
+                            job.PointsLeft = material.RefinaryPointCost; //and reset the points left for the next job in the batch.
                         }
                         
                     }
                     //if the whole batch is completed
-                    if (job.numberCompleted == job.numberOrdered)
+                    if (job.NumberCompleted == job.NumberOrdered)
                     {
                         //remove it from the list
                         refiningDB.JobBatchList.RemoveAt(jobIndex);
-                        if (job.auto) //but if it's set to auto, re-add it. 
+                        if (job.Auto) //but if it's set to auto, re-add it. 
                         {
-                            job.pointsLeft = material.RefinaryPointCost;
-                            job.numberCompleted = 0;
+                            job.PointsLeft = material.RefinaryPointCost;
+                            job.NumberCompleted = 0;
                             refiningDB.JobBatchList.Add(job);
                         }
                     }
@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
             ColonyRefiningDB refiningDB = colonyEntity.GetDataBlob<ColonyRefiningDB>();
             lock (refiningDB.JobBatchList) //prevent threaded race conditions
             {
-                if (staticData.RefinedMaterials.ContainsKey(job.jobGuid))
+                if (staticData.RefinedMaterials.ContainsKey(job.MaterialGuid))
                     refiningDB.JobBatchList.Add(job);
             }
         }
