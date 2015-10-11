@@ -207,6 +207,7 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
             m_oTaskGroupPanel.OrderFilteringCheckBox.CheckStateChanged += new EventHandler(OrderFilteringCheckBox_CheckChanged);
             m_oTaskGroupPanel.DisplaySurveyLocationsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.ExcludeSurveyedCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
 
             m_oTaskGroupPanel.NewTaskGroupButton.Click += new EventHandler(NewTaskGroupButton_Click);
             m_oTaskGroupPanel.RenameTaskGroupButton.Click += new EventHandler(RenameTaskGroupButton_Click);
@@ -1211,13 +1212,63 @@ namespace Pulsar4X.UI.Handlers
         private void AddSurveyPointsToList(StarSystem starsystem)
         {
             int SPIndex = 1;
+            bool DisplaySP = false;
             foreach (SurveyPoint SP in starsystem._SurveyPoints)
             {
-                string keyName = String.Format("Survey Location #{0}",SPIndex);
-                StarSystemEntity entObj = SP;
-                SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.SurveyPoints, entObj);
-                SystemLocationGuidDict.Add(entObj.Id, keyName);
-                SystemLocationDict.Add(entObj.Id, valueObj);
+                if (m_oTaskGroupPanel.ExcludeSurveyedCheckBox.Checked == true)
+                {
+                    /// <summary>
+                    /// it is important to always check to see if the desired key is in the dictionary before using said dictionary to prevent null references, crashes, and so on.
+                    /// </summary>
+                    if (starsystem._SurveyResults.ContainsKey(CurrentFaction) == true)
+                    {
+                        if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Complete)
+                        {
+                            /// <summary>
+                            /// Don't display any survey points, they are all surveyed, and surveyed points should be excluded.
+                            /// </summary>
+                            return;
+                        }
+                        else if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Incomplete)
+                        {
+                            if (starsystem._SurveyResults[CurrentFaction]._SurveyedPoints.Contains(SP) == false)
+                            {
+                                /// <summary>
+                                /// Display only those sps not yet surveyed.
+                                /// </summary>
+                                DisplaySP = true;
+                            }
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// Display everything, as the survey status should be none in this case.
+                            /// </summary>
+                            DisplaySP = true;
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// This faction has performed no survey, so add all points.
+                        /// </summary>
+                        DisplaySP = true;
+                    }
+                }
+                else
+                {
+                    DisplaySP = true;
+                }
+
+                if (DisplaySP == true)
+                {
+                    string keyName = String.Format("Survey Location #{0}", SPIndex);
+                    StarSystemEntity entObj = SP;
+                    SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.SurveyPoints, entObj);
+                    SystemLocationGuidDict.Add(entObj.Id, keyName);
+                    SystemLocationDict.Add(entObj.Id, valueObj);
+                    DisplaySP = false;
+                }   
                 SPIndex++;
             }
         }

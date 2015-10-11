@@ -58,6 +58,8 @@ namespace Pulsar4X.Entities
 
             _GravSurveyList = new BindingList<Faction>();
             _JPList = new BindingList<JumpPoint>();
+
+            Name = "Survey Location #" + (SystemOfPoint._SurveyPoints.Count() + 1).ToString();
         }
 
         /// <summary>

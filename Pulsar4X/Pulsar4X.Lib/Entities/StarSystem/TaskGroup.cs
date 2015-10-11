@@ -2881,7 +2881,13 @@ namespace Pulsar4X.Entities
                            int BodySurveyCost = OB.GetSurveyCost();
 
                            float hourFract = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
-                           int hours = (int)Math.Floor(hourFract);
+                           _SurveyHourFraction = _SurveyHourFraction + hourFract;
+                           int hours = (int)Math.Floor(_SurveyHourFraction);
+                           if (hours != 0)
+                           {
+                               _SurveyHourFraction = _SurveyHourFraction - hours;
+                           }
+
                            int RemainderGP = BodySurveyCost - _GeoSurveyPoints;
                            int TotalGP = (int)(CalcGeoSurveyPoints() * (float)hours);
                            if (TotalGP < RemainderGP)
@@ -2910,6 +2916,7 @@ namespace Pulsar4X.Entities
                                //handle adding the faction to the survey list when complete 
                                //generate minerals?
                                _GeoSurveyPoints = 0;
+                               _SurveyHourFraction = 0.0f;
                            }
                            
                         break;
@@ -2926,9 +2933,17 @@ namespace Pulsar4X.Entities
                         StarSystem CurrentSystem = Contact.Position.System;
 
                         float hourFraction = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
-                        int totalHours = (int)Math.Floor(hourFraction);
+                        _SurveyHourFraction = _SurveyHourFraction + hourFraction;
+
+                        int totalHours = (int)Math.Floor(_SurveyHourFraction);
+                        if (totalHours != 0)
+                        {
+                            _SurveyHourFraction = _SurveyHourFraction - totalHours;
+                        }
+
                         int RemainderSP = SystemSurveyCost - _GravSurveyPoints;
                         int TotalSP = (int)(CalcGravSurveyPoints() * (float)totalHours);
+
 
                         if (TotalSP < RemainderSP)
                         {
@@ -2940,12 +2955,14 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Some time will be left over, return that fraction of time.
                             /// </summary>
+                            _GravSurveyPoints = SystemSurveyCost;
                             int hoursToComplete = (int)Math.Ceiling((float)RemainderSP / CalcGravSurveyPoints());
                             TimeSlice = TimeSlice - ((uint)hoursToComplete * Constants.TimeInSeconds.Hour);
                         }
 
                         if (_GravSurveyPoints >= SystemSurveyCost)
                         {
+
                             /// <summary>
                             /// 1st mark the survey point as surveyed.
                             /// </summary>
@@ -2991,6 +3008,7 @@ namespace Pulsar4X.Entities
                             }
 
                             _GravSurveyPoints = 0;
+                            _SurveyHourFraction = 0.0f;
                         }
 
                         break;

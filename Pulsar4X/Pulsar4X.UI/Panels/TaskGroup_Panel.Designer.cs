@@ -130,6 +130,14 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Do not display any surveyed bodies or survey points.
+        /// </summary>
+        public CheckBox ExcludeSurveyedCheckBox
+        {
+            get { return m_oExcludeSurveyedCheckBox; }
+        }
+
+        /// <summary>
         /// creates a new task group.
         /// </summary>
         public Button NewTaskGroupButton

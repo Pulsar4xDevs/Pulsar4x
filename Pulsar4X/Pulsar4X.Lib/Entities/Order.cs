@@ -310,7 +310,7 @@ namespace Pulsar4X.Entities
         /// <param name="SecondaryOrder">Secondary</param>
         /// <param name="TertiaryOrder">Tertiary</param>
         /// <param name="Delay">Order delay</param>
-        /// <param name="ShipsOrder">Ship target of order</param>
+        /// <param name="SPOrder">survey point target of order</param>
         public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, SurveyPoint SPOrder)
         {
             TypeOf = TypeOrder;
