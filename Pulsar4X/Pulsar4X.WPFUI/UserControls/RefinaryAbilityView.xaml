@@ -23,17 +23,12 @@
         </Grid.ColumnDefinitions>
         <Label Content="Refinary Points:" Margin="10,10,0,0" VerticalAlignment="Top" Height="23" Grid.RowSpan="2"/>
         <Label Content="{Binding Path=PointsPerDay}" HorizontalAlignment="Left" Margin="5,10,0,0" VerticalAlignment="Top" Grid.Column="1" Height="23" Width="41" Grid.RowSpan="2"/>
-        <ListBox Grid.ColumnSpan="4" Margin="10,10,10,0" Grid.Row="1" DataContext="RefinaryJobs">
-            <ListBox.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel/>
-            </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
+        <ListBox Grid.ColumnSpan="4" Margin="10,10,10,0" Grid.Row="1" ItemsSource="{Binding Path=RefinaryJobs}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <userControls:RefinaryJobUC />
+                    <userControls:RefinaryJobUC DataContext="{Binding}"  />
                 </DataTemplate>
-            </ListBox.ItemTemplate> />
+            </ListBox.ItemTemplate> 
         </ListBox>
         <ComboBox Name="MatComboBox" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Top" Width="89" Height="21"
                   ItemsSource="{Binding Path=MaterialDictionary}"

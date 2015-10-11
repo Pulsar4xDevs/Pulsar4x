@@ -35,6 +35,7 @@ namespace Pulsar4X.ViewModel
             _staticData = staticData;
             _colonyEntity = colonyEntity;
             SetupRefiningJobs();
+            
             MaterialDictionary = new Dictionary<string, Guid>();
             foreach (var kvp in _staticData.RefinedMaterials)
             {
