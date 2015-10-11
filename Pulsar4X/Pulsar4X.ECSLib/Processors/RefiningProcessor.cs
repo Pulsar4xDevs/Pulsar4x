@@ -39,58 +39,70 @@ namespace Pulsar4X.ECSLib
             JDictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
 
             ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
-
+            int refinaryPoints = refiningDB.RefinaryPoints;
 
             for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
             {
-                var job = refiningDB.JobBatchList[jobIndex];
-
-
-                RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.jobGuid];
-                Dictionary<Guid, int> mineralCosts = material.RawMineralCosts;
-                Dictionary<Guid, int> materialCosts = material.RefinedMateraialsCosts;
-
-                while (job.numberCompleted < job.numberOrdered && job.pointsLeft > 0)
+                if (refinaryPoints > 0)
                 {
-                    if (job.pointsLeft == material.RefinaryPointCost)
+                    var job = refiningDB.JobBatchList[jobIndex];
+                    RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.jobGuid];
+                    Dictionary<Guid, int> mineralCosts = material.RawMineralCosts;
+                    Dictionary<Guid, int> materialCosts = material.RefinedMateraialsCosts;
+
+                    while (job.numberCompleted < job.numberOrdered && job.pointsLeft > 0)
                     {
-                        //consume all ingredients for this job on the first point use. 
-                        if (HasReqiredItems(mineralStockpile, mineralCosts) && HasReqiredItems(materialsStockpile, materialCosts))
+                        if (job.pointsLeft == material.RefinaryPointCost)
                         {
-                            UseFromStockpile(mineralStockpile, mineralCosts);
-                            UseFromStockpile(materialsStockpile, materialCosts);
+                            //consume all ingredients for this job on the first point use. 
+                            if (HasReqiredItems(mineralStockpile, mineralCosts) && HasReqiredItems(materialsStockpile, materialCosts))
+                            {
+                                UseFromStockpile(mineralStockpile, mineralCosts);
+                                UseFromStockpile(materialsStockpile, materialCosts);
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
+                   
                         //use refinary points
-                        job.pointsLeft -= Math.Min(job.pointsLeft, material.RefinaryPointCost); 
+                        int pointsUsed = Math.Min(job.pointsLeft, material.RefinaryPointCost);
+                        job.pointsLeft -= pointsUsed;
+                        refinaryPoints -= pointsUsed;
+
                         //if job is complete
                         if (job.pointsLeft == 0)
                         {
                             job.numberCompleted++; //complete job,                          
                             materialsStockpile.SafeValueAdd(material.ID, material.OutputAmount); //and add the product to the stockpile
-                            job.pointsLeft = material.RefinaryPointCost;//and reset the points left for the next job in the batch.
+                            job.pointsLeft = material.RefinaryPointCost; //and reset the points left for the next job in the batch.
                         }
+                        
                     }
-                }
-                //if the whole batch is completed
-                if (job.numberCompleted == job.numberOrdered)
-                {
-                    //remove it from the list
-                    refiningDB.JobBatchList.RemoveAt(jobIndex);
-                    if (job.auto) //but if it's set to auto, re-add it. 
+                    //if the whole batch is completed
+                    if (job.numberCompleted == job.numberOrdered)
                     {
-                        job.pointsLeft = material.RefinaryPointCost;
-                        job.numberCompleted = 0;
-                        refiningDB.JobBatchList.Add(job);
+                        //remove it from the list
+                        refiningDB.JobBatchList.RemoveAt(jobIndex);
+                        if (job.auto) //but if it's set to auto, re-add it. 
+                        {
+                            job.pointsLeft = material.RefinaryPointCost;
+                            job.numberCompleted = 0;
+                            refiningDB.JobBatchList.Add(job);
+                        }
                     }
                 }
             }
         }
 
+        
+
         public static bool HasReqiredItems(JDictionary<Guid, int> stockpile, Dictionary<Guid, int> costs )
         {
             if (costs == null)
                 return true;
-            return costs.All(kvp => stockpile.ContainsKey(kvp.Key) || !(stockpile[kvp.Key] > kvp.Value));
+            return costs.All(kvp => stockpile.ContainsKey(kvp.Key) && (stockpile[kvp.Key] >= kvp.Value));
         }
 
         public static void UseFromStockpile(JDictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
