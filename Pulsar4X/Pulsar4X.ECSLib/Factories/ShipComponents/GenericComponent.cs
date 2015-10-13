@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 
 namespace Pulsar4X.ECSLib
@@ -99,8 +100,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="componentDesign"></param>
         /// <param name="factionTech"></param>
         /// <returns></returns>
-        public static Entity DesignToEntity(EntityManager globalEntityManager, Entity factionEntity, ComponentDesignDB componentDesign)
+        public static Entity DesignToEntity(Game game, Entity factionEntity, ComponentDesignDB componentDesign)
         {
+            EntityManager globalEntityManager = game.GlobalManager;
+            StaticDataStore staticData = game.StaticData;
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
             FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             //TODO probilby do checking to see if valid here?
@@ -115,7 +118,31 @@ namespace Pulsar4X.ECSLib
 
             factionTech.ResearchableTechs.Add(tech, 0);
             NameDB nameDB = new NameDB(componentDesign.Name);
-            ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.MineralCostValues, tech.ID, componentDesign.CrewReqValue);
+
+            JDictionary<Guid, int> mineralCosts = new JDictionary<Guid, int>();
+            JDictionary<Guid, int> materalCosts = new JDictionary<Guid, int>();
+            JDictionary<Guid, int> componentCosts = new JDictionary<Guid, int>();
+
+            foreach (var kvp in componentDesign.MineralCostValues)
+            {
+
+                if (staticData.RefinedMaterials.ContainsKey(kvp.Key))
+                {
+                    materalCosts.Add(kvp.Key, kvp.Value);
+                }
+                else if (staticData.Components.ContainsKey(kvp.Key))
+                {
+                    componentCosts.Add(kvp.Key, kvp.Value);
+                }
+                else if (staticData.Minerals.Any(item => item.ID == kvp.Key))
+                {
+                    mineralCosts.Add(kvp.Key, kvp.Value);
+                }
+                else
+                    throw new Exception("GUID object {" + kvp.Key + "} not found in materialCosting for " + componentDesign.Name + " This object needs to be either a mineral, material or component defined in the Data folder");
+            }
+
+            ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, mineralCosts,materalCosts,componentCosts , tech.ID, componentDesign.CrewReqValue);
             
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);
@@ -132,7 +159,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            factionInfo.ComponentDesigns.Add(component);
+            factionInfo.ComponentDesigns.Add(component.Guid,component);
             return component;
         }        
     }

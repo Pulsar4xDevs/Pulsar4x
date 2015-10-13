@@ -31,8 +31,19 @@ namespace Pulsar4X.ECSLib
         public int HTK { get { return _htk; } internal set { _htk = value; } }
 
         [JsonProperty]
+        private JDictionary<Guid, int> _minerialCosts;
+        public JDictionary<Guid, int> MinerialCosts { get { return _minerialCosts; } internal set { _minerialCosts = value; } }
+
+        [JsonProperty]
         private JDictionary<Guid, int> _materialCosts;
         public JDictionary<Guid, int> MaterialCosts { get { return _materialCosts; } internal set { _materialCosts = value; } }
+
+        [JsonProperty]
+        private JDictionary<Guid, int> _componentCosts;
+        public JDictionary<Guid, int> ComponentCosts { get { return _componentCosts; } internal set { _componentCosts = value; } }
+
+        [JsonProperty]
+        public int BuildPointCost { get; internal set; }
 
         [JsonProperty]
         private Guid _techReqToBuild; //maybe have a requirement to use as well? might be usefull later down the track...
@@ -60,12 +71,14 @@ namespace Pulsar4X.ECSLib
         /// <param name="materialCosts"></param>
         /// <param name="techRequrement"></param>
         /// <param name="crewReqirement"></param>
-        public ComponentInfoDB(Guid designGuid, int size, int htk, JDictionary<Guid,int> materialCosts, Guid techRequrement, int crewReqirement)
+        public ComponentInfoDB(Guid designGuid, int size, int htk, JDictionary<Guid, int> minerialCosts, JDictionary<Guid, int> materialCosts, JDictionary<Guid, int> componentCosts, Guid techRequrement, int crewReqirement)
         {
             _designGuid = designGuid;
             _sizeInTons = size;
             _htk = htk;
+            _minerialCosts = minerialCosts;
             _materialCosts = materialCosts;
+            _componentCosts = componentCosts;
             _techReqToBuild = techRequrement;
             _crewRequirement = crewReqirement;
         }

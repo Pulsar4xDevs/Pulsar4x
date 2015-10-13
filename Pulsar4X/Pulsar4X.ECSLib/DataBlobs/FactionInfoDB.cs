@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -52,13 +53,10 @@ namespace Pulsar4X.ECSLib
         private List<Entity> _shipClasses;
 
         [PublicAPI]
-        public List<Entity> ComponentDesigns
-        {
-            get { return _compnentDesigns; }
-            internal set { _compnentDesigns = value; }
-        }
         [JsonProperty]
-        private List<Entity> _compnentDesigns;
+        public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
+        
+
 
         public FactionInfoDB()
             : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>(), new List<Entity>() )
@@ -77,7 +75,7 @@ namespace Pulsar4X.ECSLib
             Colonies = colonies;
             ShipClasses = shipClasses;
             KnownFactions = new List<Entity>();
-            ComponentDesigns = new List<Entity>();
+            ComponentDesigns = new JDictionary<Guid, Entity>();
         }
         
 

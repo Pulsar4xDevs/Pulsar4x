@@ -1,26 +1,31 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ViewModel;
 
-namespace Pulsar4X.ViewModel
+namespace ViewModelLib.ViewModels
 {
-    public class RefinaryAbilityVM : IViewModel 
+
+    public class ConstructionAbilityVM : IViewModel
     {
         private Entity _colonyEntity;
-        private ColonyRefiningDB RefiningDB { get { return _colonyEntity.GetDataBlob<ColonyRefiningDB>(); } }
+        private ColonyConstructionDB ConstructionDB { get { return _colonyEntity.GetDataBlob<ColonyConstructionDB>(); } }
         private StaticDataStore _staticData;
 
-        public int PointsPerDay { get { return RefiningDB.RefinaryPoints; } }
+        public int PointsPerDay { get { return ConstructionDB.ConstructionPoints; } }
 
-        private ObservableCollection<RefinaryJobVM> _itemJobs;
-        public ObservableCollection<RefinaryJobVM> ItemJobs
+        private ObservableCollection<ConstructionJobVM> _itemJobs;
+        public ObservableCollection<ConstructionJobVM> ItemJobs
         {
-            get { return _itemJobs;}
-            set{_itemJobs = value; OnPropertyChanged();}
+            get { return _itemJobs; }
+            set { _itemJobs = value; OnPropertyChanged(); }
         }
 
         public Dictionary<string, Guid> ItemDictionary { get; set; }
@@ -30,12 +35,12 @@ namespace Pulsar4X.ViewModel
 
 
         #region Constructor
-        public RefinaryAbilityVM(StaticDataStore staticData, Entity colonyEntity)
+        public ConstructionAbilityVM(StaticDataStore staticData, Entity colonyEntity)
         {
             _staticData = staticData;
             _colonyEntity = colonyEntity;
-            SetupRefiningJobs();
-            
+            SetupConstructionJobs();
+
             ItemDictionary = new Dictionary<string, Guid>();
             foreach (var kvp in _staticData.RefinedMaterials)
             {
@@ -71,13 +76,13 @@ namespace Pulsar4X.ViewModel
 
         #region Refresh
 
-        private void SetupRefiningJobs()
+        private void SetupConstructionJobs()
         {
-            var jobs = RefiningDB.JobBatchList;
-            _itemJobs = new ObservableCollection<RefinaryJobVM>();
+            var jobs = ConstructionDB.JobBatchList;
+            _itemJobs = new ObservableCollection<ConstructionJobVM>();
             foreach (var item in jobs)
             {
-                _itemJobs.Add(new RefinaryJobVM(_staticData, _colonyEntity, item, this));
+                _itemJobs.Add(new ConstructionJobVM(_staticData, _colonyEntity, item, this));
             }
             ItemJobs = ItemJobs;
         }
@@ -95,14 +100,7 @@ namespace Pulsar4X.ViewModel
 
         public void Refresh(bool partialRefresh = false)
         {
-            SetupRefiningJobs();
-            //if (_refiningDB.JobBatchList.Count != RefinaryJobs.Count)
-            //    SetupRefiningJobs();
-            //else
-            //    foreach (var job in RefinaryJobs)
-            //    {
-            //        job.Refresh();
-            //    }
+            SetupConstructionJobs();
         }
 
         #endregion
@@ -110,39 +108,39 @@ namespace Pulsar4X.ViewModel
     }
 
 
-    public class RefinaryJobVM : IViewModel
+    public class ConstructionJobVM : IViewModel
     {
         private StaticDataStore _staticData;
-        private RefineingJob _job;
+        private ConstructionJob _job;
         private Entity _colonyEntity;
-        private RefinaryAbilityVM _parentRefiningVM;
+        private ConstructionAbilityVM _parentConstructionVM;
 
-        public string Material { get { return _staticData.RefinedMaterials[_job.MaterialGuid].Name; } }
+        public string Component { get { return _staticData.Components[_job.ComponentDesignGuid].Name; } }
         public ushort Completed { get { return _job.NumberCompleted; } }
         public ushort BatchQuantity { get { return _job.NumberOrdered; } set { _job.NumberOrdered = value; } }
         public bool Repeat { get { return _job.Auto; } set { _job.Auto = value; } }
-        private int PriorityIndex { get { return _parentRefiningVM.ItemJobs.IndexOf(this); } }
+        private int PriorityIndex { get { return _parentConstructionVM.ItemJobs.IndexOf(this); } }
 
-        public RefinaryJobVM(StaticDataStore staticData, Entity colonyEntity, RefineingJob refiningJob, RefinaryAbilityVM parentRefiningVM)
+        public ConstructionJobVM(StaticDataStore staticData, Entity colonyEntity, ConstructionJob constructionJob, ConstructionAbilityVM parentConstructionVM)
         {
             _staticData = staticData;
             _colonyEntity = colonyEntity;
-            _job = refiningJob;
-            _parentRefiningVM = parentRefiningVM;
+            _job = constructionJob;
+            _parentConstructionVM = parentConstructionVM;
         }
 
         public void IncreasePriority()
         {
             if (PriorityIndex > 0)
             {
-                RefiningProcessor.MoveJob(_colonyEntity, _job, -1);
+                ConstructionProcessor.MoveJob(_colonyEntity, _job, -1);
             }
         }
         public void DecresePriorty()
         {
-            if (PriorityIndex < _parentRefiningVM.ItemJobs.Count - 2)
+            if (PriorityIndex < _parentConstructionVM.ItemJobs.Count - 2)
             {
-                RefiningProcessor.MoveJob(_colonyEntity, _job, 1);
+                ConstructionProcessor.MoveJob(_colonyEntity, _job, 1);
             }
         }
 
@@ -189,5 +187,4 @@ namespace Pulsar4X.ViewModel
             _action();
         }
     }
-
 }

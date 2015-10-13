@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
         public JDictionary<Guid,string> MineralCostFormula;
         public string ResearchCostFormula;
         public string CreditCostFormula;
-
+        public string BuildPointCostFormula;
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
         public JDictionary<ComponentMountType, bool> MountType; 
 

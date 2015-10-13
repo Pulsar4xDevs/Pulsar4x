@@ -1,19 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing.Text;
 using System.Linq;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public enum ConstructionType
-    {
-        Component,
-        Amunition,
-        Fighter,
-        Facility
-    }
 
-    public class  ConstructionAbilityDB : BaseDataBlob
+    public class  ConstructInstationsAbilityDB : BaseDataBlob
     {
         [JsonProperty] private int _constructionPoints;
         public int ConstructionPoints
@@ -22,28 +16,97 @@ namespace Pulsar4X.ECSLib
             internal set { _constructionPoints = value; }
         }
 
-        [JsonProperty] private List<ConstructionType> _constructionTypes;
-
-        public List<ConstructionType> ConstructionTypes
-        {
-            get { return _constructionTypes; } 
-            internal set { _constructionTypes = value; }
-        } 
-
-
-        public ConstructionAbilityDB(double constructionPoints)
-        {
+        public ConstructInstationsAbilityDB(double constructionPoints)
+        {           
             _constructionPoints = (int)constructionPoints;
         }
 
-        public ConstructionAbilityDB(ConstructionAbilityDB db)
+        public ConstructInstationsAbilityDB(ConstructInstationsAbilityDB db)
         {
             _constructionPoints = db.ConstructionPoints;
         }
 
         public override object Clone()
         {
-            return new ConstructionAbilityDB(this);
+            return new ConstructInstationsAbilityDB(this);
+        }
+    }
+
+    public class ConstructShipComponentsAbilityDB : BaseDataBlob
+    {
+        [JsonProperty]
+        private int _constructionPoints;
+        public int ConstructionPoints
+        {
+            get { return _constructionPoints; }
+            internal set { _constructionPoints = value; }
+        }
+
+        public ConstructShipComponentsAbilityDB(double constructionPoints)
+        {
+            _constructionPoints = (int)constructionPoints;
+        }
+
+        public ConstructShipComponentsAbilityDB(ConstructShipComponentsAbilityDB db)
+        {
+            _constructionPoints = db.ConstructionPoints;
+        }
+
+        public override object Clone()
+        {
+            return new ConstructShipComponentsAbilityDB(this);
+        }
+    }
+
+    public class ConstructAmmoAbilityDB : BaseDataBlob
+    {
+        [JsonProperty]
+        private int _constructionPoints;
+        public int ConstructionPoints
+        {
+            get { return _constructionPoints; }
+            internal set { _constructionPoints = value; }
+        }
+
+        public ConstructAmmoAbilityDB(double constructionPoints)
+        {
+            _constructionPoints = (int)constructionPoints;
+        }
+
+        public ConstructAmmoAbilityDB(ConstructAmmoAbilityDB db)
+        {
+            _constructionPoints = db.ConstructionPoints;
+        }
+
+        public override object Clone()
+        {
+            return new ConstructAmmoAbilityDB(this);
+        }
+    }
+
+    public class ConstructFightersAbilityDB : BaseDataBlob
+    {
+        [JsonProperty]
+        private int _constructionPoints;
+        public int ConstructionPoints
+        {
+            get { return _constructionPoints; }
+            internal set { _constructionPoints = value; }
+        }
+
+        public ConstructFightersAbilityDB(double constructionPoints)
+        {
+            _constructionPoints = (int)constructionPoints;
+        }
+
+        public ConstructFightersAbilityDB(ConstructFightersAbilityDB db)
+        {
+            _constructionPoints = db.ConstructionPoints;
+        }
+
+        public override object Clone()
+        {
+            return new ConstructFightersAbilityDB(this);
         }
     }
 }

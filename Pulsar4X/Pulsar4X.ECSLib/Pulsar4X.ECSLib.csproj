@@ -71,7 +71,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConstructionDB.cs" />
+    <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ComponentDesignDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\EnginePowerDB.cs" />
@@ -104,7 +104,9 @@
     <Compile Include="Factories\SystemGen\SystemFactory.cs" />
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
+    <Compile Include="Helpers\MiscHelpers.cs" />
     <Compile Include="Helpers\Pulse.cs" />
+    <Compile Include="Processors\ConstructionProcessor.cs" />
     <Compile Include="Processors\MineProcessor.cs" />
     <Compile Include="Processors\AtmosphereProcessor.cs" />
     <Compile Include="Processors\InstallationProcessor.cs" />

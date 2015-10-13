@@ -60,7 +60,7 @@ namespace Pulsar4X.ViewModel
             _facilities = new ObservableCollection<FacilityVM>();
             foreach (var installation in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations)
             {
-                Facilities.Add(new FacilityVM(installation, ColonyInfo));
+                Facilities.Add(new FacilityVM(installation.Key, ColonyInfo));
             }
             _species = new Dictionary<string, long>();
 
@@ -76,7 +76,6 @@ namespace Pulsar4X.ViewModel
             {
                 _mineralDictionary.Add(mineral.ID, mineral);
             }
-
 
 
             PlanetMineralDepositVM = new PlanetMineralDepositVM(staticData, _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);
@@ -361,13 +360,11 @@ namespace Pulsar4X.ViewModel
     {
         private Entity _facilityEntity;
         private ColonyInfoDB _colonyInfo;
-        private int _count;
 
         public string Name { get { return _facilityEntity.GetDataBlob<NameDB>().DefaultName; } }
         public int Count
         {
-            get{ return _count; }
-            private set {_count = value; OnPropertyChanged();}
+            get{ return _colonyInfo.Installations[_facilityEntity];}
         }
         public int WorkersRequired { get { return _facilityEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements * Count; } }
 
@@ -393,15 +390,8 @@ namespace Pulsar4X.ViewModel
         public event PropertyChangedEventHandler PropertyChanged;
         public void Refresh(bool partialRefresh = false)
         {
-            
-            int count = 0;
-            foreach (var installation in _colonyInfo.Installations)
-            {
-                if (installation.GetDataBlob<ComponentInfoDB>().DesignGuid 
-                    == _facilityEntity.GetDataBlob<ComponentInfoDB>().DesignGuid)
-                    count ++;
-            }
-            Count = count;
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs("Count"));
         }
     }
 

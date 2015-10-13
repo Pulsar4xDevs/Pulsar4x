@@ -55,10 +55,10 @@ namespace Pulsar4X.ECSLib
                         if (job.PointsLeft == material.RefinaryPointCost)
                         {
                             //consume all ingredients for this job on the first point use. 
-                            if (HasReqiredItems(mineralStockpile, mineralCosts) && HasReqiredItems(materialsStockpile, materialCosts))
+                            if (Misc.HasReqiredItems(mineralStockpile, mineralCosts) && Misc.HasReqiredItems(materialsStockpile, materialCosts))
                             {
-                                UseFromStockpile(mineralStockpile, mineralCosts);
-                                UseFromStockpile(materialsStockpile, materialCosts);
+                                Misc.UseFromStockpile(mineralStockpile, mineralCosts);
+                                Misc.UseFromStockpile(materialsStockpile, materialCosts);
                             }
                             else
                             {
@@ -98,23 +98,6 @@ namespace Pulsar4X.ECSLib
 
         
 
-        public static bool HasReqiredItems(JDictionary<Guid, int> stockpile, Dictionary<Guid, int> costs )
-        {
-            if (costs == null)
-                return true;
-            return costs.All(kvp => stockpile.ContainsKey(kvp.Key) && (stockpile[kvp.Key] >= kvp.Value));
-        }
-
-        public static void UseFromStockpile(JDictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
-        {
-            if (costs != null)
-            {
-                foreach (var kvp in costs)
-                {
-                    stockpile[kvp.Key] -= kvp.Value;
-                }
-            }
-        }
 
 
         /// <summary>
@@ -123,36 +106,65 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         public static void ReCalcRefiningRate(Entity colonyEntity)
         {
-            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
+            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
             List<Entity> refinarys = new List<Entity>();
             foreach (var inst in installations)
             {
                 if (inst.HasDataBlob<RefineResourcesDB>())
                     refinarys.Add(inst);
             }
-            int rate = 0;
+            int pointsRate = 0;
+            JDictionary<Guid, int> matRate = new JDictionary<Guid, int>();
             foreach (var refinary in refinarys)
             {
-                rate += refinary.GetDataBlob<RefineResourcesDB>().RefinaryPoints;
+                int points = refinary.GetDataBlob<RefineResourcesDB>().RefinaryPoints;
+                
+                foreach (var mat in refinary.GetDataBlob<RefineResourcesDB>().RefinableMatsList)
+                {
+                   matRate.SafeValueAdd(mat, points); 
+                }
+                pointsRate += points;
             }
-            colonyEntity.GetDataBlob<ColonyRefiningDB>().RefinaryPoints = rate;
+            colonyEntity.GetDataBlob<ColonyRefiningDB>().RefinaryPoints = pointsRate;
         }
 
+
+        /// <summary>
+        /// Adds a job to a colonys ColonyRefiningDB.JobBatchList
+        /// </summary>
+        /// <param name="staticData"></param>
+        /// <param name="colonyEntity"></param>
+        /// <param name="job"></param>
+        [PublicAPI]
         public static void AddJob(StaticDataStore staticData, Entity colonyEntity, RefineingJob job)
         {
             ColonyRefiningDB refiningDB = colonyEntity.GetDataBlob<ColonyRefiningDB>();
             lock (refiningDB.JobBatchList) //prevent threaded race conditions
             {
+                //check if the job materialguid is valid, then add it if so.
                 if (staticData.RefinedMaterials.ContainsKey(job.MaterialGuid))
                     refiningDB.JobBatchList.Add(job);
             }
         }
 
+        /// <summary>
+        /// Moves a job up or down the ColonyRefiningDB.JobBatchList. 
+        /// </summary>
+        /// <param name="colonyEntity">the colony that's being interacted with</param>
+        /// <param name="job">the job that needs re-prioritising</param>
+        /// <param name="delta">How much to move it ie: 
+        /// -1 moves it down the list and it will be done later
+        /// +1 moves it up the list andit will be done sooner
+        /// this will safely handle numbers larger than the list size, 
+        /// placing the item either at the top or bottom of the list.
+        /// </param>
+        [PublicAPI]
         public static void MoveJob(Entity colonyEntity, RefineingJob job, int delta)
         {
             ColonyRefiningDB refiningDB = colonyEntity.GetDataBlob<ColonyRefiningDB>();
             lock (refiningDB.JobBatchList) //prevent threaded race conditions
             {
+                //first check that the job does still exsist in the list.
                 if (refiningDB.JobBatchList.Contains(job))
                 {
                     int currentIndex = refiningDB.JobBatchList.IndexOf(job);
@@ -175,6 +187,5 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
-
     }
 }

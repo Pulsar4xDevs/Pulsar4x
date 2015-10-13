@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
             FactionAbilitiesDB factionAbilities = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionTechDB>();
             Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
-            foreach (var lab in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Where(inst => inst.HasDataBlob<ResearchPointsDB>()))
+            foreach (var lab in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.Where(inst => inst.HasDataBlob<ResearchPointsDB>()))
             {               
                 int points = lab.GetDataBlob<ResearchPointsDB>().PointsPerEconTick;
                 labs.Add(lab, points);

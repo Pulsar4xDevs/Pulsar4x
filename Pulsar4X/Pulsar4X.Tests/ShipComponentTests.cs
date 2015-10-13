@@ -79,7 +79,7 @@ namespace Pulsar4X.Tests
 
             design.ComponentDesignAbilities[0].SetValueFromInput(250);
 
-            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, _faction, design);
+            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game, _faction, design);
 
             Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.Tests
 
             ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             mineDesign.ComponentDesignAbilities[0].SetValue();
-            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game.GlobalManager, _faction, mineDesign);
+            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game, _faction, mineDesign);
 
             Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick.Values.ElementAt(0));
 
@@ -382,7 +382,62 @@ namespace Pulsar4X.Tests
             refineJobsAbility.AbilityFormula = "DataBlobArgs([GuidDict], Ability(0))";
             component.ComponentAbilitySDs.Add(refineJobsAbility);
             return component;
+        }
 
+        public static ComponentSD Factory()
+        {
+            ComponentSD component = new ComponentSD();
+            component.Name = "Refinary";
+            component.Description = "Creates Construction Points";
+            component.ID = new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}");
+
+            component.SizeFormula = "500000";
+
+            component.HTKFormula = "[Size]";
+
+            component.CrewReqFormula = "1000000";
+
+            component.ResearchCostFormula = "0";
+
+            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
+
+            component.CreditCostFormula = "120";
+
+            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType.Add(ComponentMountType.ShipComponent, false);
+            component.MountType.Add(ComponentMountType.ShipCargo, true);
+            component.MountType.Add(ComponentMountType.PlanetFacility, true);
+            component.MountType.Add(ComponentMountType.PDS, false);
+
+            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+
+            ComponentAbilitySD instalationPointsAbility = new ComponentAbilitySD();
+            instalationPointsAbility.Name = "Construction Points";
+            instalationPointsAbility.Description = "";
+            instalationPointsAbility.GuiHint = GuiHint.None;
+            instalationPointsAbility.AbilityDataBlobType = typeof(ResearchPointsDB).ToString();
+            instalationPointsAbility.AbilityFormula = "100";
+            component.ComponentAbilitySDs.Add(instalationPointsAbility);
+
+            ComponentAbilitySD instalationConstructionAbility = new ComponentAbilitySD();
+            instalationConstructionAbility.Name = "Construction Points";
+            instalationConstructionAbility.Description = "";
+            instalationConstructionAbility.GuiHint = GuiHint.None;
+            instalationConstructionAbility.AbilityDataBlobType = typeof(ConstructInstationsAbilityDB).ToString();
+            instalationConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
+            component.ComponentAbilitySDs.Add(instalationConstructionAbility);
+
+            ComponentAbilitySD shipComponentsConstructionAbility = new ComponentAbilitySD();
+            shipComponentsConstructionAbility.Name = "Construction Points";
+            shipComponentsConstructionAbility.Description = "";
+            shipComponentsConstructionAbility.GuiHint = GuiHint.None;
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructShipComponentsAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
+            component.ComponentAbilitySDs.Add(shipComponentsConstructionAbility);
+
+
+            return component;
         }
     }
 }

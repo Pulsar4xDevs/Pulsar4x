@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -61,7 +62,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         internal static void CalcMaxRate(Entity colonyEntity)
         {
-            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
+            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
             List<Entity> mines = new List<Entity>();
             foreach (var inst in installations)
             {

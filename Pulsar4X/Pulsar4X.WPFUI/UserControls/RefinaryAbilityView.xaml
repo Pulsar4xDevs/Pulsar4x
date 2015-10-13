@@ -23,7 +23,7 @@
         </Grid.ColumnDefinitions>
         <Label Content="Refinary Points:" Margin="10,10,0,0" VerticalAlignment="Top" Height="23" Grid.RowSpan="2"/>
         <Label Content="{Binding Path=PointsPerDay}" HorizontalAlignment="Left" Margin="5,10,0,0" VerticalAlignment="Top" Grid.Column="1" Height="23" Width="41" Grid.RowSpan="2"/>
-        <ListBox Grid.ColumnSpan="4" Margin="10,10,10,0" Grid.Row="1" ItemsSource="{Binding Path=RefinaryJobs}">
+        <ListBox Grid.ColumnSpan="4" Margin="10,10,10,0" Grid.Row="1" ItemsSource="{Binding Path=ItemJobs}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <userControls:RefinaryJobUC DataContext="{Binding}"  />
@@ -31,7 +31,7 @@
             </ListBox.ItemTemplate> 
         </ListBox>
         <ComboBox Name="MatComboBox" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Top" Width="89" Height="21"
-                  ItemsSource="{Binding Path=MaterialDictionary}"
+                  ItemsSource="{Binding Path=ItemDictionary}"
                   SelectedValuePath="Value" DisplayMemberPath="Key"
                   SelectedValue="{Binding Path=NewJobSelectedMaterial}"/>
         <xctk:ShortUpDown Grid.Column="1" Grid.Row="2" Margin="0,0,1,0"

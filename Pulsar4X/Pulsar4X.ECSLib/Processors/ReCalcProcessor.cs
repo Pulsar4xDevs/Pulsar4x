@@ -14,6 +14,7 @@ namespace Pulsar4X.ECSLib
                 { typeof(ColonyMinesDB), new Action<ColonyMinesDB>(processor => { MineProcessor.CalcMaxRate(entity);}) },
                 { typeof(PropulsionDB), new Action<PropulsionDB>(processor => { ShipMovementProcessor.CalcMaxSpeed(entity); }) },
                 { typeof(ColonyRefiningDB), new Action<ColonyRefiningDB>(processor => { RefiningProcessor.ReCalcRefiningRate(entity); }) },
+                { typeof(ColonyConstructionDB), new Action<ColonyConstructionDB>(processor => { ConstructionProcessor.ReCalcConstructionRate(entity); }) },
             };            
             
             

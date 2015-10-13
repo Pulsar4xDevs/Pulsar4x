@@ -63,7 +63,7 @@ namespace Pulsar4X.ViewModel
 
         public void CreateComponent()
         {
-            GenericComponentFactory.DesignToEntity(_gameVM.Game.GlobalManager, _factionEntity, DesignDB);             
+            GenericComponentFactory.DesignToEntity(_gameVM.Game, _factionEntity, DesignDB);             
         }
 
         public string StatsText

@@ -61,13 +61,13 @@ namespace Pulsar4X.ECSLib
         /// constructed parts stockpile.
         /// Construction pulls and pushes from here.
         /// </summary>
-        public JDictionary<Guid, float> ComponentStockpile
+        public JDictionary<Guid, int> ComponentStockpile
         {
             get { return _componentStockpile; }
             internal set { _componentStockpile = value; }
         }
         [JsonProperty]
-        private JDictionary<Guid, float> _componentStockpile;
+        private JDictionary<Guid, int> _componentStockpile;
 
         /// <summary>
         /// Construction pushes here.
@@ -91,13 +91,7 @@ namespace Pulsar4X.ECSLib
         private List<Entity> _fighterStockpile;
 
 
-        public List<Entity> Installations
-        {
-            get { return _installations; }
-            internal set { _installations = value; }
-        }
-        [JsonProperty]
-        private List<Entity> _installations;
+        public JDictionary<Entity, int> Installations { get;internal set; }
 
 
         public Entity PlanetEntity
@@ -133,10 +127,10 @@ namespace Pulsar4X.ECSLib
             
             MineralStockpile =  new JDictionary<Guid, int>();
             RefinedStockpile = new JDictionary<Guid, int>();
-            ComponentStockpile = new JDictionary<Guid, float>();
+            ComponentStockpile = new JDictionary<Guid, int>();
             OrdinanceStockpile = new JDictionary<Guid, float>();
             FighterStockpile = new List<Entity>();
-            Installations = new List<Entity>();
+            Installations = new JDictionary<Entity, int>();
             Scientists = new List<Entity>();
         }
 
@@ -154,10 +148,10 @@ namespace Pulsar4X.ECSLib
             PlanetEntity = colonyInfoDB.PlanetEntity;
             MineralStockpile = new JDictionary<Guid, int>(colonyInfoDB.MineralStockpile);
             RefinedStockpile = new JDictionary<Guid, int>(colonyInfoDB.RefinedStockpile);
-            ComponentStockpile = new JDictionary<Guid, float>(colonyInfoDB.ComponentStockpile);
+            ComponentStockpile = new JDictionary<Guid, int>(colonyInfoDB.ComponentStockpile);
             OrdinanceStockpile = new JDictionary<Guid, float>(colonyInfoDB.OrdinanceStockpile);
             FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);
-            Installations = new List<Entity>(colonyInfoDB.Installations);
+            Installations = new JDictionary<Entity, int>(colonyInfoDB.Installations);
             Scientists = new List<Entity>(colonyInfoDB.Scientists);
         }
 
