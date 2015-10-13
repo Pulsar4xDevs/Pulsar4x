@@ -16,6 +16,10 @@ namespace Pulsar4X.ECSLib
             internal set { _constructionPoints = value; }
         }
 
+        public ConstructInstationsAbilityDB()
+        {
+        }
+
         public ConstructInstationsAbilityDB(double constructionPoints)
         {           
             _constructionPoints = (int)constructionPoints;
@@ -40,6 +44,10 @@ namespace Pulsar4X.ECSLib
         {
             get { return _constructionPoints; }
             internal set { _constructionPoints = value; }
+        }
+
+        public ConstructShipComponentsAbilityDB()
+        {
         }
 
         public ConstructShipComponentsAbilityDB(double constructionPoints)
@@ -68,6 +76,10 @@ namespace Pulsar4X.ECSLib
             internal set { _constructionPoints = value; }
         }
 
+        public ConstructAmmoAbilityDB()
+        {
+        }
+
         public ConstructAmmoAbilityDB(double constructionPoints)
         {
             _constructionPoints = (int)constructionPoints;
@@ -92,6 +104,10 @@ namespace Pulsar4X.ECSLib
         {
             get { return _constructionPoints; }
             internal set { _constructionPoints = value; }
+        }
+
+        public ConstructFightersAbilityDB()
+        {
         }
 
         public ConstructFightersAbilityDB(double constructionPoints)
