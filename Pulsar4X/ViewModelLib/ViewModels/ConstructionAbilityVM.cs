@@ -64,12 +64,14 @@ namespace Pulsar4X.ViewModel
 
         public void OnNewBatchJob()
         {
-            ConstructionJob newjob = new ConstructionJob();
-            newjob.ItemGuid = NewJobSelectedItem;
-            newjob.NumberCompleted = 0;
-            newjob.NumberOrdered = NewJobBatchCount;
-            newjob.PointsLeft = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().BuildPointCost;
-            newjob.Auto = NewJobRepeat;
+            int buildpointCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().BuildPointCost;
+            JDictionary<Guid, int> mineralCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().MinerialCosts;
+            JDictionary<Guid, int> materialCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().MaterialCosts;
+            JDictionary<Guid, int> componentCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().ComponentCosts;
+
+            ConstructionJob newjob = new ConstructionJob(NewJobSelectedItem,NewJobBatchCount, buildpointCost, NewJobRepeat,
+                mineralCost, materialCost, componentCost);
+
             ConstructionProcessor.AddJob(_colonyEntity, newjob);
             Refresh();
         }

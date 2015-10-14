@@ -8,16 +8,18 @@ namespace Pulsar4X.ECSLib
 {
     public class RefineingJob : JobBase
     {
-
+        public RefineingJob(Guid matGuid, ushort numberOrderd, int jobPoints, bool auto): base(matGuid, numberOrderd, jobPoints, auto)
+        {
+        }
     }
 
     public class ColonyRefiningDB : BaseDataBlob
     {
        
-        [JsonIgnore]//recalc this on game load. TODO scrap this and use RefiningRates
+        [JsonIgnore]//recalc this on game load. 
         public int RefinaryPoints { get; internal set; }
 
-        [JsonIgnore]//recalc this on game load todo implement this in the processor. instead of RefinaryPoints.
+        [JsonIgnore]//recalc this on game load todo implement this in the processor. 
         public JDictionary<Guid, int> RefiningRates{ get; internal set; }
 
         [JsonProperty] 

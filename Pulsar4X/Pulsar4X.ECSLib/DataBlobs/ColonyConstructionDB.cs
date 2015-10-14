@@ -21,6 +21,15 @@ namespace Pulsar4X.ECSLib
         public ushort NumberCompleted { get; set; }
         public int PointsLeft { get; set; }
         public bool Auto { get; set; }
+
+        public JobBase(Guid guid, ushort numberOrderd, int jobPoints, bool auto)
+        {
+            ItemGuid = guid;
+            NumberOrdered = numberOrderd;
+            NumberCompleted = 0;
+            PointsLeft = jobPoints;
+            Auto = auto;
+        }
     }
 
 
@@ -32,7 +41,16 @@ namespace Pulsar4X.ECSLib
         public JDictionary<Guid, int> MineralsLeft { get; set; }
         public JDictionary<Guid, int> MaterialsLeft { get; set; }
         public JDictionary<Guid, int> ComponentsLeft { get; set; }
-        
+
+        public ConstructionJob(Guid designGuid, ushort numberOrderd, int jobPoints, bool auto, 
+            JDictionary<Guid,int> mineralCost, JDictionary<Guid, int> matCost, JDictionary<Guid,int> componentCost  ): 
+            base(designGuid, numberOrderd, jobPoints, auto)
+        {
+            MineralsLeft = mineralCost;
+            MaterialsLeft = matCost;
+            ComponentsLeft = componentCost;
+        }
+
     }
 
     public class  ColonyConstructionDB : BaseDataBlob
@@ -50,7 +68,13 @@ namespace Pulsar4X.ECSLib
 
         public ColonyConstructionDB()
         {
-            ConstructionRates = new JDictionary<ConstructionType, int>();
+            ConstructionRates = new JDictionary<ConstructionType, int>
+            {
+                {ConstructionType.Ammo, 0}, 
+                {ConstructionType.Facility, 0}, 
+                {ConstructionType.Fighter, 0}, 
+                {ConstructionType.ShipComponent, 0}
+            };
             JobBatchList = new List<ConstructionJob>();
         }
 

@@ -15,7 +15,7 @@
             <ColumnDefinition Width="24"/>
             <ColumnDefinition Width="18"/>
         </Grid.ColumnDefinitions>
-        <Label Content="{Binding Path=Material}"/>
+        <Label Content="{Binding Path=Item}"/>
         <xctk:ButtonSpinner Grid.Column="4" Margin="0,0,0,-1" Spin="ButtonSpinner_Spin"/>
         <xctk:ShortUpDown Grid.Column="2"
                          Value="{Binding Path=BatchQuantity}"/>

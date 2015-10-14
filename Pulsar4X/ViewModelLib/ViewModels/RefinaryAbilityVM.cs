@@ -59,12 +59,7 @@ namespace Pulsar4X.ViewModel
 
         public void OnNewBatchJob()
         {
-            RefineingJob newjob = new RefineingJob();
-            newjob.ItemGuid = NewJobSelectedItem;
-            newjob.NumberCompleted = 0;
-            newjob.NumberOrdered = NewJobBatchCount;
-            newjob.PointsLeft = _staticData.RefinedMaterials[NewJobSelectedItem].RefinaryPointCost;
-            newjob.Auto = NewJobRepeat;
+            RefineingJob newjob = new RefineingJob(NewJobSelectedItem,NewJobBatchCount, _staticData.RefinedMaterials[NewJobSelectedItem].RefinaryPointCost, NewJobRepeat);
             RefiningProcessor.AddJob(_staticData, _colonyEntity, newjob);
             Refresh();
         }

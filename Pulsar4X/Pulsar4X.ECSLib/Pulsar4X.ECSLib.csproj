@@ -107,6 +107,7 @@
     <Compile Include="Helpers\MiscHelpers.cs" />
     <Compile Include="Helpers\Pulse.cs" />
     <Compile Include="Processors\ConstructionProcessor.cs" />
+    <Compile Include="Processors\EconProcessor.cs" />
     <Compile Include="Processors\MineProcessor.cs" />
     <Compile Include="Processors\AtmosphereProcessor.cs" />
     <Compile Include="Processors\InstallationProcessor.cs" />
