@@ -10,7 +10,7 @@ using System.Windows.Input;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel;
 
-namespace ViewModelLib.ViewModels
+namespace Pulsar4X.ViewModel
 {
 
     public class ConstructionAbilityVM : IViewModel
@@ -18,11 +18,11 @@ namespace ViewModelLib.ViewModels
         private Entity _colonyEntity;
         private ColonyConstructionDB ConstructionDB { get { return _colonyEntity.GetDataBlob<ColonyConstructionDB>(); } }
         private StaticDataStore _staticData;
-
+        private FactionInfoDB FactionInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>(); } }
         public int PointsPerDay { get { return ConstructionDB.ConstructionPoints; } }
 
-        private ObservableCollection<ConstructionJobVM> _itemJobs;
-        public ObservableCollection<ConstructionJobVM> ItemJobs
+        private ObservableCollection<JobVM> _itemJobs;
+        public ObservableCollection<JobVM> ItemJobs
         {
             get { return _itemJobs; }
             set { _itemJobs = value; OnPropertyChanged(); }
@@ -42,9 +42,9 @@ namespace ViewModelLib.ViewModels
             SetupConstructionJobs();
 
             ItemDictionary = new Dictionary<string, Guid>();
-            foreach (var kvp in _staticData.RefinedMaterials)
+            foreach (var kvp in FactionInfo.ComponentDesigns)
             {
-                ItemDictionary.Add(kvp.Value.Name, kvp.Key);
+                ItemDictionary.Add(kvp.Value.GetDataBlob<NameDB>().DefaultName, kvp.Key);
             }
             NewJobBatchCount = 1;
             NewJobRepeat = false;
@@ -64,13 +64,13 @@ namespace ViewModelLib.ViewModels
 
         public void OnNewBatchJob()
         {
-            RefineingJob newjob = new RefineingJob();
-            newjob.MaterialGuid = NewJobSelectedItem;
+            ConstructionJob newjob = new ConstructionJob();
+            newjob.ItemGuid = NewJobSelectedItem;
             newjob.NumberCompleted = 0;
             newjob.NumberOrdered = NewJobBatchCount;
-            newjob.PointsLeft = _staticData.RefinedMaterials[NewJobSelectedItem].RefinaryPointCost;
+            newjob.PointsLeft = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().BuildPointCost;
             newjob.Auto = NewJobRepeat;
-            RefiningProcessor.AddJob(_staticData, _colonyEntity, newjob);
+            ConstructionProcessor.AddJob(_colonyEntity, newjob);
             Refresh();
         }
 
@@ -79,10 +79,10 @@ namespace ViewModelLib.ViewModels
         private void SetupConstructionJobs()
         {
             var jobs = ConstructionDB.JobBatchList;
-            _itemJobs = new ObservableCollection<ConstructionJobVM>();
+            _itemJobs = new ObservableCollection<JobVM>();
             foreach (var item in jobs)
             {
-                _itemJobs.Add(new ConstructionJobVM(_staticData, _colonyEntity, item, this));
+                _itemJobs.Add(new JobVM(_staticData, _colonyEntity, item));
             }
             ItemJobs = ItemJobs;
         }
@@ -105,86 +105,5 @@ namespace ViewModelLib.ViewModels
 
         #endregion
 
-    }
-
-
-    public class ConstructionJobVM : IViewModel
-    {
-        private StaticDataStore _staticData;
-        private ConstructionJob _job;
-        private Entity _colonyEntity;
-        private ConstructionAbilityVM _parentConstructionVM;
-
-        public string Component { get { return _staticData.Components[_job.ComponentDesignGuid].Name; } }
-        public ushort Completed { get { return _job.NumberCompleted; } }
-        public ushort BatchQuantity { get { return _job.NumberOrdered; } set { _job.NumberOrdered = value; } }
-        public bool Repeat { get { return _job.Auto; } set { _job.Auto = value; } }
-        private int PriorityIndex { get { return _parentConstructionVM.ItemJobs.IndexOf(this); } }
-
-        public ConstructionJobVM(StaticDataStore staticData, Entity colonyEntity, ConstructionJob constructionJob, ConstructionAbilityVM parentConstructionVM)
-        {
-            _staticData = staticData;
-            _colonyEntity = colonyEntity;
-            _job = constructionJob;
-            _parentConstructionVM = parentConstructionVM;
-        }
-
-        public void IncreasePriority()
-        {
-            if (PriorityIndex > 0)
-            {
-                ConstructionProcessor.MoveJob(_colonyEntity, _job, -1);
-            }
-        }
-        public void DecresePriorty()
-        {
-            if (PriorityIndex < _parentConstructionVM.ItemJobs.Count - 2)
-            {
-                ConstructionProcessor.MoveJob(_colonyEntity, _job, 1);
-            }
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        public void Refresh(bool partialRefresh = false)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs("Completed"));
-                PropertyChanged(this, new PropertyChangedEventArgs("BatchQuantity"));
-                PropertyChanged(this, new PropertyChangedEventArgs("Repeat"));
-            }
-        }
-    }
-
-    public class CommandHandler : ICommand
-    {
-        private Action _action;
-        private bool _canExecute;
-        public CommandHandler(Action action, bool canExecute)
-        {
-            _action = action;
-            _canExecute = canExecute;
-        }
-
-        public bool CanExecute(object parameter)
-        {
-            return _canExecute;
-        }
-
-        public event EventHandler CanExecuteChanged;
-
-        public void Execute(object parameter)
-        {
-            _action();
-        }
     }
 }

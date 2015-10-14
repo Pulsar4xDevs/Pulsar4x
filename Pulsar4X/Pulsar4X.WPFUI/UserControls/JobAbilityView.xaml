@@ -6,7 +6,7 @@
              xmlns:vm="clr-namespace:Pulsar4X.ViewModel;assembly=ViewModelLib"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:userControls="clr-namespace:Pulsar4X.WPFUI.UserControls"
-             x:Class="Pulsar4X.WPFUI.RefinaryAbilityView"
+             x:Class="Pulsar4X.WPFUI.JobAbilityView"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
@@ -26,21 +26,21 @@
         <ListBox Grid.ColumnSpan="4" Margin="10,10,10,0" Grid.Row="1" ItemsSource="{Binding Path=ItemJobs}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <userControls:RefinaryJobUC DataContext="{Binding}"  />
+                    <userControls:JobUC DataContext="{Binding}"  />
                 </DataTemplate>
             </ListBox.ItemTemplate> 
         </ListBox>
-        <ComboBox Name="MatComboBox" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Top" Width="89" Height="21"
+        <ComboBox Name="ItemComboBox" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Top" Width="89" Height="21"
                   ItemsSource="{Binding Path=ItemDictionary}"
                   SelectedValuePath="Value" DisplayMemberPath="Key"
-                  SelectedValue="{Binding Path=NewJobSelectedMaterial}"/>
+                  SelectedValue="{Binding Path=NewJobSelectedItem}"/>
         <xctk:ShortUpDown Grid.Column="1" Grid.Row="2" Margin="0,0,1,0"
                          Value="{Binding Path=NewJobBatchCount}" ParsingNumberStyle="Integer"/>
         <CheckBox Content="Repeat" Grid.Column="2" Margin="4,5,4,6" Grid.Row="2" FlowDirection="RightToLeft"
                   IsChecked="{Binding Path=NewJobRepeat}"/>
         <Button Content="Add" Grid.Column="3" Margin="0,0,10,0" Grid.Row="2" Height="24" VerticalAlignment="Top"                 
                 Command="{Binding AddNewJob}" 
-                CommandParameter="{Binding ElementName=MatComboBox,Path=SelectedValue}" />
+                CommandParameter="{Binding ElementName=ItemComboBox,Path=SelectedValue}" />
 
     </Grid>
 </UserControl>

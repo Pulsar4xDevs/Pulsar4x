@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Pulsar4X.WPFUI.UserControls.RefinaryJobUC" 
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Pulsar4X.WPFUI.UserControls.JobUC" 
              xmlns:vm="clr-namespace:Pulsar4X.ViewModel;assembly=ViewModelLib"
              mc:Ignorable="d" 
              d:DesignHeight="24" d:DesignWidth="300">

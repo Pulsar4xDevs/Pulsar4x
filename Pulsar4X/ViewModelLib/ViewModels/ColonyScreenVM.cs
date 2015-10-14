@@ -31,6 +31,7 @@ namespace Pulsar4X.ViewModel
         public RefinedMatsStockpileVM RefinedMatsStockpileVM { get; set; }
 
         public RefinaryAbilityVM RefinaryAbilityVM { get; set; }
+        public ConstructionAbilityVM ConstructionAbilityVM { get; set; }
 
         
 
@@ -85,6 +86,8 @@ namespace Pulsar4X.ViewModel
             RefinedMatsStockpileVM = new RefinedMatsStockpileVM(staticData, _colonyEntity);
             
             RefinaryAbilityVM = new RefinaryAbilityVM(staticData, _colonyEntity);
+
+            ConstructionAbilityVM = new ConstructionAbilityVM(staticData, _colonyEntity);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -103,6 +106,7 @@ namespace Pulsar4X.ViewModel
             RawMineralStockpileVM.Refresh();
             RefinedMatsStockpileVM.Refresh();
             RefinaryAbilityVM.Refresh();
+            ConstructionAbilityVM.Refresh();
         }
     }
 

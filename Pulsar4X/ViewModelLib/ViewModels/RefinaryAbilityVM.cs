@@ -16,8 +16,8 @@ namespace Pulsar4X.ViewModel
 
         public int PointsPerDay { get { return RefiningDB.RefinaryPoints; } }
 
-        private ObservableCollection<RefinaryJobVM> _itemJobs;
-        public ObservableCollection<RefinaryJobVM> ItemJobs
+        private ObservableCollection<JobVM> _itemJobs;
+        public ObservableCollection<JobVM> ItemJobs
         {
             get { return _itemJobs;}
             set{_itemJobs = value; OnPropertyChanged();}
@@ -60,7 +60,7 @@ namespace Pulsar4X.ViewModel
         public void OnNewBatchJob()
         {
             RefineingJob newjob = new RefineingJob();
-            newjob.MaterialGuid = NewJobSelectedItem;
+            newjob.ItemGuid = NewJobSelectedItem;
             newjob.NumberCompleted = 0;
             newjob.NumberOrdered = NewJobBatchCount;
             newjob.PointsLeft = _staticData.RefinedMaterials[NewJobSelectedItem].RefinaryPointCost;
@@ -74,10 +74,10 @@ namespace Pulsar4X.ViewModel
         private void SetupRefiningJobs()
         {
             var jobs = RefiningDB.JobBatchList;
-            _itemJobs = new ObservableCollection<RefinaryJobVM>();
+            _itemJobs = new ObservableCollection<JobVM>();
             foreach (var item in jobs)
             {
-                _itemJobs.Add(new RefinaryJobVM(_staticData, _colonyEntity, item, this));
+                _itemJobs.Add(new JobVM(_staticData, _colonyEntity, item));
             }
             ItemJobs = ItemJobs;
         }
@@ -110,41 +110,54 @@ namespace Pulsar4X.ViewModel
     }
 
 
-    public class RefinaryJobVM : IViewModel
+    public class JobVM : IViewModel
     {
         private StaticDataStore _staticData;
-        private RefineingJob _job;
+        private JobBase _job;
         private Entity _colonyEntity;
         private RefinaryAbilityVM _parentRefiningVM;
 
-        public string Material { get { return _staticData.RefinedMaterials[_job.MaterialGuid].Name; } }
+        public string Item
+        {
+            get
+            {
+                if (_job is RefineingJob)
+                    return _staticData.RefinedMaterials[_job.ItemGuid].Name;
+                else if (_job is ConstructionJob)
+                    return _colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<NameDB>().DefaultName;
+                else
+                    return "Unknown Jobtype";
+            
+            }
+        }
+
         public ushort Completed { get { return _job.NumberCompleted; } }
         public ushort BatchQuantity { get { return _job.NumberOrdered; } set { _job.NumberOrdered = value; } }
         public bool Repeat { get { return _job.Auto; } set { _job.Auto = value; } }
         private int PriorityIndex { get { return _parentRefiningVM.ItemJobs.IndexOf(this); } }
 
-        public RefinaryJobVM(StaticDataStore staticData, Entity colonyEntity, RefineingJob refiningJob, RefinaryAbilityVM parentRefiningVM)
+        public JobVM(StaticDataStore staticData, Entity colonyEntity, JobBase Job)//, RefinaryAbilityVM parentRefiningVM)
         {
             _staticData = staticData;
             _colonyEntity = colonyEntity;
-            _job = refiningJob;
-            _parentRefiningVM = parentRefiningVM;
+            _job = Job;
+            //_parentRefiningVM = parentRefiningVM;
         }
 
-        public void IncreasePriority()
-        {
-            if (PriorityIndex > 0)
-            {
-                RefiningProcessor.MoveJob(_colonyEntity, _job, -1);
-            }
-        }
-        public void DecresePriorty()
-        {
-            if (PriorityIndex < _parentRefiningVM.ItemJobs.Count - 2)
-            {
-                RefiningProcessor.MoveJob(_colonyEntity, _job, 1);
-            }
-        }
+        //public void IncreasePriority()
+        //{
+        //    if (PriorityIndex > 0)
+        //    {
+        //        RefiningProcessor.MoveJob(_colonyEntity, _job, -1);
+        //    }
+        //}
+        //public void DecresePriorty()
+        //{
+        //    if (PriorityIndex < _parentRefiningVM.ItemJobs.Count - 2)
+        //    {
+        //        RefiningProcessor.MoveJob(_colonyEntity, _job, 1);
+        //    }
+        //}
 
 
         public event PropertyChangedEventHandler PropertyChanged;

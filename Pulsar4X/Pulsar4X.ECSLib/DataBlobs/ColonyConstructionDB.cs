@@ -14,17 +14,25 @@ namespace Pulsar4X.ECSLib
         Ammo
     }
 
-    public class ConstructionJob
+    public class JobBase
     {
-        public Guid ComponentDesignGuid { get; set; }
-        public ConstructionType ConstructionType { get; set; }
+        public Guid ItemGuid { get; set; }
         public ushort NumberOrdered { get; set; }
         public ushort NumberCompleted { get; set; }
         public int PointsLeft { get; set; }
+        public bool Auto { get; set; }
+    }
+
+
+    public class ConstructionJob : JobBase
+    {
+        
+        public ConstructionType ConstructionType { get; set; }
+
         public JDictionary<Guid, int> MineralsLeft { get; set; }
         public JDictionary<Guid, int> MaterialsLeft { get; set; }
         public JDictionary<Guid, int> ComponentsLeft { get; set; }
-        public bool Auto { get; set; }
+        
     }
 
     public class  ColonyConstructionDB : BaseDataBlob

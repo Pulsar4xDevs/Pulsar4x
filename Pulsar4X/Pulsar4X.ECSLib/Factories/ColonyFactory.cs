@@ -24,6 +24,8 @@ namespace Pulsar4X.ECSLib
             blobs.Add(colonyMinesDB);
             ColonyRefiningDB colonyRefining = new ColonyRefiningDB();
             blobs.Add(colonyRefining);
+            ColonyConstructionDB colonyConstruction = new ColonyConstructionDB();
+            blobs.Add(colonyConstruction);
             //InstallationsDB colonyInstallationsDB = new InstallationsDB();
             //blobs.Add(colonyInstallationsDB);
             

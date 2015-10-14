@@ -101,8 +101,8 @@
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\RefinaryAbilityView.xaml.cs">
-      <DependentUpon>RefinaryAbilityView.xaml</DependentUpon>
+    <Compile Include="UserControls\JobAbilityView.xaml.cs">
+      <DependentUpon>JobAbilityView.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\AbilitySelectionList.xaml.cs">
       <DependentUpon>AbilitySelectionList.xaml</DependentUpon>
@@ -156,8 +156,8 @@
     <Compile Include="UserControls\RawMineralStockpile.xaml.cs">
       <DependentUpon>RawMineralStockpile.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\RefinaryJobUC.xaml.cs">
-      <DependentUpon>RefinaryJobUC.xaml</DependentUpon>
+    <Compile Include="UserControls\JobUC.xaml.cs">
+      <DependentUpon>JobUC.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\RefinedMatsStockpileView.xaml.cs">
       <DependentUpon>RefinedMatsStockpileView.xaml</DependentUpon>
@@ -185,7 +185,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\RefinaryAbilityView.xaml">
+    <Page Include="UserControls\JobAbilityView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -257,7 +257,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\RefinaryJobUC.xaml">
+    <Page Include="UserControls\JobUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
             foreach (var batchJob in constructionJobs)
             {
-                ComponentInfoDB designInfo = factionInfo.ComponentDesigns[batchJob.ComponentDesignGuid].GetDataBlob<ComponentInfoDB>();
+                ComponentInfoDB designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid].GetDataBlob<ComponentInfoDB>();
                 ConstructionType conType = batchJob.ConstructionType;
                 //total number of resources requred for a single job in this batch
                 int resourcepoints = designInfo.MinerialCosts.Sum(item => item.Value);
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
             if (batchJob.ConstructionType == ConstructionType.Facility)
             {
                 FactionInfoDB factionInfo = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
-                Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ComponentDesignGuid];
+                Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
                 ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
                 colonyInfo.Installations.SafeValueAdd(facilityDesignEntity,1);
             }
@@ -171,7 +171,7 @@ namespace Pulsar4X.ECSLib
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //check that this faction does have the design on file. I *think* all this type of construction design will get stored in factionInfo.ComponentDesigns
-                if (factionInfo.ComponentDesigns.ContainsKey(job.ComponentDesignGuid))
+                if (factionInfo.ComponentDesigns.ContainsKey(job.ItemGuid))
                     constructingDB.JobBatchList.Add(job);
             }
         }

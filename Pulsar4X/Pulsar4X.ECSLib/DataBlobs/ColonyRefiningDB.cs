@@ -6,13 +6,9 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class RefineingJob
+    public class RefineingJob : JobBase
     {
-        public Guid MaterialGuid;
-        public ushort NumberOrdered;
-        public ushort NumberCompleted;
-        public ushort PointsLeft;
-        public bool Auto;
+
     }
 
     public class ColonyRefiningDB : BaseDataBlob

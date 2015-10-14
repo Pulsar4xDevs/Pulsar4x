@@ -44,6 +44,7 @@ namespace Pulsar4X.WPFUI.UserControls
             FacDataGrid.ItemsSource = _colonyScreenVM.Facilities;
             PopDataGrid.ItemsSource = _colonyScreenVM.Species;
             RefinaryAbility.DataContext = _colonyScreenVM.RefinaryAbilityVM;
+            ConstructionAbility.DataContext = _colonyScreenVM.ConstructionAbilityVM;
         }
 
         public string Title { get; set; }

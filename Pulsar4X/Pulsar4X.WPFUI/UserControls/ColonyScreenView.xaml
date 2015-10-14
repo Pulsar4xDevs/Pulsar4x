@@ -27,11 +27,13 @@
 			x:Name="PopDataGrid" RenderTransformOrigin="-0.105,0.513" Grid.Column="1"
                   />
         <uc:RawMineralStockpile x:Name="RawMinStockpile" Margin="5,10,10,10" Grid.Row="1" Grid.Column="3" />
-        <uc:RefinedMatsStockpileView x:Name="RefinedMatsStockpile" Grid.Column="2" Margin="10" Grid.Row="2" Grid.ColumnSpan="2"/>
+        <uc:RefinedMatsStockpileView x:Name="RefinedMatsStockpile" Grid.Column="1" Margin="5,10,0,10" Grid.Row="2"/>
         <uc:PlanetMineralDepositView x:Name="PlanetMineralDeposit" Grid.Column="2" Margin="10,10,0,10" Grid.Row="1"/>
 
-        <WPFUI:RefinaryAbilityView x:Name="RefinaryAbility" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="0"
-                                   Margin="0,0,7,10" DataContext="RefinaryAbilityVM"/>
+        <WPFUI:JobAbilityView x:Name="RefinaryAbility" Grid.Row="2" Grid.Column="0"
+                                   Margin="0,0,0,10" DataContext="RefinaryAbilityVM"/>
+        <WPFUI:JobAbilityView x:Name="ConstructionAbility" Grid.Column="2" Grid.Row="2" Margin="0,0,0,10"
+                              DataContext="ConstructionAbilityVM"/>
 
     </Grid>
 </UserControl>
