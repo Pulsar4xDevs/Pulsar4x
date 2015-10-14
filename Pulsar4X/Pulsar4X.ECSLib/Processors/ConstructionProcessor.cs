@@ -131,8 +131,13 @@ namespace Pulsar4X.ECSLib
       
                     factories.Add(inst);
             }
- 
-            JDictionary<ConstructionType, int> typeRate = new JDictionary<ConstructionType, int>();
+
+            JDictionary<ConstructionType, int> typeRate = new JDictionary<ConstructionType, int>{
+                {ConstructionType.Ammo, 0}, 
+                {ConstructionType.Facility, 0}, 
+                {ConstructionType.Fighter, 0}, 
+                {ConstructionType.ShipComponent, 0}
+            };
             foreach (var factory in factories)
             {
                 int installationPoints = factory.GetDataBlob<ConstructInstationsAbilityDB>().ConstructionPoints;
