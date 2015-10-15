@@ -276,10 +276,18 @@ namespace Pulsar4X.Tests
             mineAbility.GuiHint = GuiHint.None;
             mineAbility.GuidDictionary = new JDictionary<Guid, string>
             {
-                { new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"),"10"},
-                { new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"),"10"},
+                {new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"),"10"},
+                {new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"),"10"},
                 {new Guid("b12acce2-7c7d-4acf-ad41-1c08093fcad8"),"10"},
-                {new Guid("a03863a3-a364-45ff-8c7b-a4f7486bd710"),"10"}
+                {new Guid("a03863a3-a364-45ff-8c7b-a4f7486bd710"),"10"},
+                {new Guid("14a83fc3-04fd-4ea3-82f4-290995c4418e"),"10"},
+                {new Guid("29b3797d-f9d7-4e73-a593-2b05bf4ef012"),"10"},
+                {new Guid("5fdfb85c-fad2-4a48-8a75-04eb65dc9741"),"10"},
+                {new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"),"10"},
+                {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"),"10"},
+                {new Guid("6a38b268-041f-4103-9d23-c13c1041cecd"),"10"},
+                {new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"),"10"}
+
             };
             mineAbility.AbilityDataBlobType = typeof(MineResourcesDB).ToString();
             mineAbility.AbilityFormula = "DataBlobArgs([GuidDict])";
