@@ -45,12 +45,13 @@ namespace Pulsar4X.Tests
             ComponentSD mine = MineInstallation();
             ComponentSD lab = ResearchLab();
             ComponentSD refinary = Refinary();
-
+            ComponentSD factory = Factory();
             JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
             componentsDict.Add(engine.ID, engine);
             componentsDict.Add(mine.ID, mine);
             componentsDict.Add(lab.ID,lab);
             componentsDict.Add(refinary.ID, refinary);
+            componentsDict.Add(factory.ID, factory);
             StaticDataManager.ExportStaticData(componentsDict, "./ComponentData.json");
         }
 
@@ -387,8 +388,8 @@ namespace Pulsar4X.Tests
         public static ComponentSD Factory()
         {
             ComponentSD component = new ComponentSD();
-            component.Name = "Refinary";
-            component.Description = "Creates Construction Points";
+            component.Name = "Factory";
+            component.Description = "Constructs Facilities, Fighters Ammo and Components";
             component.ID = new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}");
 
             component.SizeFormula = "500000";
@@ -416,7 +417,6 @@ namespace Pulsar4X.Tests
             instalationPointsAbility.Name = "Construction Points";
             instalationPointsAbility.Description = "";
             instalationPointsAbility.GuiHint = GuiHint.None;
-            instalationPointsAbility.AbilityDataBlobType = typeof(ResearchPointsDB).ToString();
             instalationPointsAbility.AbilityFormula = "100";
             component.ComponentAbilitySDs.Add(instalationPointsAbility);
 
@@ -435,6 +435,22 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructShipComponentsAbilityDB).ToString();
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(shipComponentsConstructionAbility);
+
+            ComponentAbilitySD fighterConstructionAbility = new ComponentAbilitySD();
+            shipComponentsConstructionAbility.Name = "Construction Points";
+            shipComponentsConstructionAbility.Description = "";
+            shipComponentsConstructionAbility.GuiHint = GuiHint.None;
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructFightersAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
+            component.ComponentAbilitySDs.Add(fighterConstructionAbility);
+
+            ComponentAbilitySD ammoConstructionAbility = new ComponentAbilitySD();
+            shipComponentsConstructionAbility.Name = "Construction Points";
+            shipComponentsConstructionAbility.Description = "";
+            shipComponentsConstructionAbility.GuiHint = GuiHint.None;
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructAmmoAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
+            component.ComponentAbilitySDs.Add(ammoConstructionAbility);
 
 
             return component;

@@ -340,6 +340,79 @@
             }
           ]
         }
+      },
+      {
+        "Key": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
+        "Value": {
+          "Name": "Factory",
+          "Description": "Constructs Facilities, Fighters Ammo and Components",
+          "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
+          "SizeFormula": "500000",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "1000000",
+          "MineralCostFormula": {
+            "List": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "MountType": {
+            "List": [
+              {
+                "Key": "ShipComponent",
+                "Value": false
+              },
+              {
+                "Key": "ShipCargo",
+                "Value": true
+              },
+              {
+                "Key": "PlanetFacility",
+                "Value": true
+              },
+              {
+                "Key": "PDS",
+                "Value": false
+              }
+            ]
+          },
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Construction Points",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Construction Points",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAbilityDB"
+            },
+            {
+              "Name": "Construction Points",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructShipComponentsAbilityDB"
+            },
+            {
+              "GuiHint": "GuiTechSelectionList"
+            },
+            {
+              "GuiHint": "GuiTechSelectionList"
+            }
+          ]
+        }
       }
     ]
   }

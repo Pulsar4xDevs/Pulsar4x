@@ -140,15 +140,27 @@ namespace Pulsar4X.ECSLib
             };
             foreach (var factory in factories)
             {
-                int installationPoints = factory.GetDataBlob<ConstructInstationsAbilityDB>().ConstructionPoints;
-                typeRate.SafeValueAdd(ConstructionType.Facility, installationPoints);
-                int shipComponentPoints = factory.GetDataBlob<ConstructShipComponentsAbilityDB>().ConstructionPoints;
-                typeRate.SafeValueAdd(ConstructionType.Facility, shipComponentPoints);
-                int fighterPoints = factory.GetDataBlob<ConstructFightersAbilityDB>().ConstructionPoints;
-                typeRate.SafeValueAdd(ConstructionType.Facility, fighterPoints);
-                int ammoPoints = factory.GetDataBlob<ConstructAmmoAbilityDB>().ConstructionPoints;
-                typeRate.SafeValueAdd(ConstructionType.Facility, ammoPoints);  
- 
+                if (factory.HasDataBlob<ConstructInstationsAbilityDB>())
+                {
+                    int installationPoints = factory.GetDataBlob<ConstructInstationsAbilityDB>().ConstructionPoints;
+                    typeRate.SafeValueAdd(ConstructionType.Facility, installationPoints);
+                }
+                if (factory.HasDataBlob<ConstructShipComponentsAbilityDB>())
+                {
+                    int shipComponentPoints = factory.GetDataBlob<ConstructShipComponentsAbilityDB>().ConstructionPoints;
+                    typeRate.SafeValueAdd(ConstructionType.Facility, shipComponentPoints);
+                }
+                if (factory.HasDataBlob<ConstructFightersAbilityDB>())
+                {
+                    int fighterPoints = factory.GetDataBlob<ConstructFightersAbilityDB>().ConstructionPoints;
+                    typeRate.SafeValueAdd(ConstructionType.Facility, fighterPoints);
+                }
+                if (factory.HasDataBlob<ConstructAmmoAbilityDB>())
+                {
+                    int ammoPoints = factory.GetDataBlob<ConstructAmmoAbilityDB>().ConstructionPoints;
+                    typeRate.SafeValueAdd(ConstructionType.Facility, ammoPoints);
+                }
+
             }
             colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionRates = typeRate;
             int maxPoints = 0;
