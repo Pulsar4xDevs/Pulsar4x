@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
             {
                 TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
                 int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
-                float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];
+                float bonus = scientist.GetDataBlob<ScientistDB>().Bonuses[research.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
 
                 int researchmax = CostFormula(factionTechs, research);

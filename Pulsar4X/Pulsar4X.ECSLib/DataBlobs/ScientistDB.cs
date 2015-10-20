@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class ScientistBonusDB : BaseDataBlob
+    public class ScientistDB : BaseDataBlob
     {
         [PublicAPI]
         public Dictionary<ResearchCategories, float> Bonuses
@@ -22,24 +23,30 @@ namespace Pulsar4X.ECSLib
         }
         [JsonProperty]
         private int _maxLabs;
+        
+        [JsonProperty]
+        public int AssignedLabs { get; internal set; }
+
+        public List<Guid> ProjectQueue { get; internal set; } 
+
 
         [UsedImplicitly]
-        public ScientistBonusDB() { } // needed by json
+        public ScientistDB() { } // needed by json
 
-        public ScientistBonusDB(Dictionary<ResearchCategories,float> bonuses, int maxLabs )
+        public ScientistDB(Dictionary<ResearchCategories,float> bonuses, int maxLabs )
         {
             Bonuses = bonuses;
             MaxLabs = maxLabs;
         }
 
-        public ScientistBonusDB(ScientistBonusDB scientistBonusDB)
+        public ScientistDB(ScientistDB dB)
         {
-            Bonuses = new Dictionary<ResearchCategories, float>();
+            Bonuses = new Dictionary<ResearchCategories, float>(dB.Bonuses);
         }
 
         public override object Clone()
         {
-            return new ScientistBonusDB(this);
+            return new ScientistDB(this);
         }
     }
 }

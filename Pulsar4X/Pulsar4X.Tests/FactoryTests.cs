@@ -79,7 +79,7 @@ namespace Pulsar4X.Tests
             var requiredDataBlobs = new List<Type>()
             {
                 typeof(CommanderDB),
-                typeof(ScientistBonusDB)
+                typeof(ScientistDB)
             };
 
             Entity scientist = CommanderFactory.CreateScientist(_game.GlobalManager, faction);

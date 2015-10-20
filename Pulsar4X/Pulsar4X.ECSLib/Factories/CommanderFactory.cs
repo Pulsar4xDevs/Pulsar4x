@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
 
             //create the blob.
             CommanderDB scientist = new CommanderDB(name, 1, type);
-            ScientistBonusDB bonus = new ScientistBonusDB(bonuses, maxTeamSize);
+            ScientistDB bonus = new ScientistDB(bonuses, maxTeamSize);
    
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             blobs.Add(scientist);
