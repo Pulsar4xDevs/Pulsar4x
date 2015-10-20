@@ -123,6 +123,8 @@ namespace Pulsar4X.Tests
 
             component.ResearchCostFormula = "[Size] * 10";
 
+            component.BuildPointCostFormula = "[Size]";
+
             component.MineralCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
 
             component.CreditCostFormula = "[Size]";
@@ -255,6 +257,8 @@ namespace Pulsar4X.Tests
             component.CrewReqFormula = "50000";
 
             component.ResearchCostFormula = "0";
+            
+            component.BuildPointCostFormula = "[Size]";
 
             component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60"}, 
             {new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"), "60"}};
@@ -312,6 +316,8 @@ namespace Pulsar4X.Tests
 
             component.ResearchCostFormula = "0";
 
+            component.BuildPointCostFormula = "[Size]";
+
             component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
@@ -354,6 +360,8 @@ namespace Pulsar4X.Tests
             component.CrewReqFormula = "1000000";
 
             component.ResearchCostFormula = "0";
+
+            component.BuildPointCostFormula = "[Size]";
 
             component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
@@ -407,6 +415,8 @@ namespace Pulsar4X.Tests
             component.CrewReqFormula = "1000000";
 
             component.ResearchCostFormula = "0";
+
+            component.BuildPointCostFormula = "[Size]";
 
             component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};

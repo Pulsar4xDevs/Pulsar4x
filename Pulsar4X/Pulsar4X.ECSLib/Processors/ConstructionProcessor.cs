@@ -34,36 +34,37 @@ namespace Pulsar4X.ECSLib
             int maxPoints = colonyConstruction.ConstructionPoints;
 
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
-            foreach (var batchJob in constructionJobs)
+            foreach (var batchJob in constructionJobs.ToArray())
             {
                 ComponentInfoDB designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid].GetDataBlob<ComponentInfoDB>();
                 ConstructionType conType = batchJob.ConstructionType;
                 //total number of resources requred for a single job in this batch
-                int resourcepoints = designInfo.MinerialCosts.Sum(item => item.Value);
-                resourcepoints += designInfo.MaterialCosts.Sum(item => item.Value);
-                resourcepoints += designInfo.ComponentCosts.Sum(item => item.Value);
+                int resourcePoints = designInfo.MinerialCosts.Sum(item => item.Value);
+                resourcePoints += designInfo.MaterialCosts.Sum(item => item.Value);
+                resourcePoints += designInfo.ComponentCosts.Sum(item => item.Value);
 
-                while (pointRates[conType] > 0 && maxPoints > 0 && batchJob.NumberCompleted > batchJob.NumberOrdered)
+                while (pointRates[conType] > 0 && maxPoints > 0 && batchJob.NumberCompleted < batchJob.NumberOrdered)
                 {
                     //gather availible resorces for this job.
                     
-                    ConsumeResources(mineralStockpile, batchJob.MineralsLeft);
-                    ConsumeResources(materialStockpile, batchJob.MaterialsLeft);
-                    ConsumeResources(componentStockpile, batchJob.ComponentsLeft);
+                    ConsumeResources(mineralStockpile, batchJob.MineralsRequired);
+                    ConsumeResources(materialStockpile, batchJob.MaterialsRequired);
+                    ConsumeResources(componentStockpile, batchJob.ComponentsRequired);
 
-                    int useablePoints = batchJob.MineralsLeft.Sum(item => item.Value);
-                    useablePoints += batchJob.MaterialsLeft.Sum(item => item.Value);
-                    useablePoints += batchJob.ComponentsLeft.Sum(item => item.Value);
+                    int useableResourcePoints = designInfo.MinerialCosts.Sum(item => item.Value) - batchJob.MineralsRequired.Sum(item => item.Value);
+                    useableResourcePoints += designInfo.MaterialCosts.Sum(item => item.Value) - batchJob.MaterialsRequired.Sum(item => item.Value);
+                    useableResourcePoints += designInfo.ComponentCosts.Sum(item => item.Value) - batchJob.ComponentsRequired.Sum(item => item.Value);
                     //how many construction points each resourcepoint is worth.
-                    int pointPerResource = designInfo.BuildPointCost / resourcepoints;
+                    int pointPerResource = designInfo.BuildPointCost / resourcePoints;
                     
                     //calculate how many construction points each resource we've got stored for this job is worth
                     int pointsToUse = Math.Min(pointRates[conType], maxPoints);
                     pointsToUse = Math.Min(pointsToUse, batchJob.PointsLeft);
-                    pointsToUse = Math.Min(pointsToUse, useablePoints / pointPerResource);
-                    batchJob.PointsLeft -= pointsToUse;
-                    pointRates[conType] -= pointsToUse;
+                    pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
+                    
                     //construct only enough for the amount of resources we have. 
+                    batchJob.PointsLeft -= pointsToUse;
+                    pointRates[conType] -= pointsToUse;                    
                     maxPoints -= pointsToUse;
 
                     if (batchJob.PointsLeft == 0)
@@ -79,9 +80,9 @@ namespace Pulsar4X.ECSLib
             ColonyConstructionDB colonyConstruction = colonyEntity.GetDataBlob<ColonyConstructionDB>();
             batchJob.NumberCompleted++;
             batchJob.PointsLeft = designInfo.BuildPointCost;
-            batchJob.MineralsLeft = designInfo.MinerialCosts;
-            batchJob.MineralsLeft = designInfo.MaterialCosts;
-            batchJob.MineralsLeft = designInfo.ComponentCosts;
+            batchJob.MineralsRequired = designInfo.MinerialCosts;
+            batchJob.MineralsRequired = designInfo.MaterialCosts;
+            batchJob.MineralsRequired = designInfo.ComponentCosts;
             if (batchJob.ConstructionType == ConstructionType.Facility)
             {
                 FactionInfoDB factionInfo = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
@@ -102,8 +103,9 @@ namespace Pulsar4X.ECSLib
         }
 
         private static void ConsumeResources(Dictionary<Guid,int> stockpile, Dictionary<Guid,int> toUse)
-        {           
-            foreach (var kvp in toUse)
+        {   
+        
+            foreach (var kvp in toUse.ToArray())
             {
                 if (stockpile.ContainsKey(kvp.Key))
                 {
@@ -166,7 +168,7 @@ namespace Pulsar4X.ECSLib
             int maxPoints = 0;
             foreach (var p in typeRate.Values)
             {
-                if (maxPoints > p)
+                if (p > maxPoints)
                     maxPoints = p;
             }
             colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionPoints = maxPoints;

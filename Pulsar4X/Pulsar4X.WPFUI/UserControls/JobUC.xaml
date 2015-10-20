@@ -6,23 +6,26 @@
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Pulsar4X.WPFUI.UserControls.JobUC" 
              xmlns:vm="clr-namespace:Pulsar4X.ViewModel;assembly=ViewModelLib"
              mc:Ignorable="d" 
-             d:DesignHeight="24" d:DesignWidth="300">
+             d:DesignHeight="24" d:DesignWidth="400">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="84*"/>
-            <ColumnDefinition Width="111*"/>
-            <ColumnDefinition Width="59*"/>
+            <ColumnDefinition Width="85*"/>
+            <ColumnDefinition Width="65"/>
+            <ColumnDefinition Width="32"/>
+            <ColumnDefinition Width="60*"/>
             <ColumnDefinition Width="24"/>
             <ColumnDefinition Width="18"/>
         </Grid.ColumnDefinitions>
         <Label Content="{Binding Path=Item}"/>
-        <xctk:ButtonSpinner Grid.Column="4" Margin="0,0,0,-1" Spin="ButtonSpinner_Spin"/>
-        <xctk:ShortUpDown Grid.Column="2"
+        <xctk:ButtonSpinner Grid.Column="5" Margin="0,0,0,-1" Spin="ButtonSpinner_Spin"/>
+        <xctk:ShortUpDown Grid.Column="3"
                          Value="{Binding Path=BatchQuantity}"/>
-        <CheckBox  Grid.Column="3" Margin="1" HorizontalAlignment="Center" VerticalAlignment="Center" Height="12" Width="14"
+        <CheckBox  Grid.Column="4" Margin="5,6" HorizontalAlignment="Center" VerticalAlignment="Center" Height="12" Width="14"
                    IsChecked="{Binding Path=Repeat}"/>
-        <Label  Grid.Column="1" Margin="68,0,0,0"
+        <Label  Grid.Column="2"
                 Content="{Binding Path=Completed}"/>
+        <ProgressBar Grid.Column="1" Margin="0,0,0,-1"
+                     Value="{Binding Path=ItemBuildPointsRemaining, Mode=OneWay}"/>
 
     </Grid>
 </UserControl>

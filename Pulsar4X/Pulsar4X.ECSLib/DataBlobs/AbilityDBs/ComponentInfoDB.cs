@@ -71,11 +71,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="materialCosts"></param>
         /// <param name="techRequrement"></param>
         /// <param name="crewReqirement"></param>
-        public ComponentInfoDB(Guid designGuid, int size, int htk, JDictionary<Guid, int> minerialCosts, JDictionary<Guid, int> materialCosts, JDictionary<Guid, int> componentCosts, Guid techRequrement, int crewReqirement)
+        public ComponentInfoDB(Guid designGuid, int size, int htk, int buildPointCost, JDictionary<Guid, int> minerialCosts, JDictionary<Guid, int> materialCosts, JDictionary<Guid, int> componentCosts, Guid techRequrement, int crewReqirement)
         {
             _designGuid = designGuid;
             _sizeInTons = size;
             _htk = htk;
+            BuildPointCost = buildPointCost;
             _minerialCosts = minerialCosts;
             _materialCosts = materialCosts;
             _componentCosts = componentCosts;
