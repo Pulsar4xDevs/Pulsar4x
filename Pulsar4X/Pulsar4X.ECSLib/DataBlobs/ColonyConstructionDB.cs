@@ -38,17 +38,17 @@ namespace Pulsar4X.ECSLib
         
         public ConstructionType ConstructionType { get; set; }
 
-        public JDictionary<Guid, int> MineralsLeft { get; set; }
-        public JDictionary<Guid, int> MaterialsLeft { get; set; }
-        public JDictionary<Guid, int> ComponentsLeft { get; set; }
+        public JDictionary<Guid, int> MineralsRequired { get; set; }
+        public JDictionary<Guid, int> MaterialsRequired { get; set; }
+        public JDictionary<Guid, int> ComponentsRequired { get; set; }
 
         public ConstructionJob(Guid designGuid, ushort numberOrderd, int jobPoints, bool auto, 
             JDictionary<Guid,int> mineralCost, JDictionary<Guid, int> matCost, JDictionary<Guid,int> componentCost  ): 
             base(designGuid, numberOrderd, jobPoints, auto)
         {
-            MineralsLeft = mineralCost;
-            MaterialsLeft = matCost;
-            ComponentsLeft = componentCost;
+            MineralsRequired = new JDictionary<Guid, int>(mineralCost);
+            MaterialsRequired = new JDictionary<Guid, int>(matCost);
+            ComponentsRequired = new JDictionary<Guid, int>(componentCost);
         }
 
     }

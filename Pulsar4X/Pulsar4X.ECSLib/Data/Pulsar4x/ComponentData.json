@@ -21,6 +21,7 @@
           },
           "ResearchCostFormula": "[Size] * 10",
           "CreditCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Size]",
           "MountType": {
             "List": [
               {
@@ -163,6 +164,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
           "MountType": {
             "List": [
               {
@@ -265,6 +267,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
           "MountType": {
             "List": [
               {
@@ -319,6 +322,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
           "MountType": {
             "List": [
               {
@@ -392,6 +396,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
           "MountType": {
             "List": [
               {

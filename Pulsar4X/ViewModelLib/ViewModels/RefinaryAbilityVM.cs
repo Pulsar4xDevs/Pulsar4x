@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Pulsar4X.ECSLib;
@@ -41,6 +42,7 @@ namespace Pulsar4X.ViewModel
             {
                 ItemDictionary.Add(kvp.Value.Name, kvp.Key);
             }
+            NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
             NewJobBatchCount = 1;
             NewJobRepeat = false;
         }
@@ -112,6 +114,7 @@ namespace Pulsar4X.ViewModel
         private Entity _colonyEntity;
         private RefinaryAbilityVM _parentRefiningVM;
 
+        private int _jobTotalPoints;
         public string Item
         {
             get
@@ -130,13 +133,20 @@ namespace Pulsar4X.ViewModel
         public ushort BatchQuantity { get { return _job.NumberOrdered; } set { _job.NumberOrdered = value; } }
         public bool Repeat { get { return _job.Auto; } set { _job.Auto = value; } }
         private int PriorityIndex { get { return _parentRefiningVM.ItemJobs.IndexOf(this); } }
-
+        public int ItemBuildPointsRemaining { get { return _job.PointsLeft; } }
+        public double ItemPercentRemaining { get { return (double)_job.PointsLeft / _jobTotalPoints * 100; } }
         public JobVM(StaticDataStore staticData, Entity colonyEntity, JobBase Job)//, RefinaryAbilityVM parentRefiningVM)
         {
             _staticData = staticData;
             _colonyEntity = colonyEntity;
             _job = Job;
             //_parentRefiningVM = parentRefiningVM;
+
+            if (_job is RefineingJob)
+                _jobTotalPoints = _staticData.RefinedMaterials[_job.ItemGuid].RefinaryPointCost;
+            else if (_job is ConstructionJob)
+                _jobTotalPoints = _colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<ComponentInfoDB>().BuildPointCost;
+
         }
 
         //public void IncreasePriority()
@@ -171,6 +181,7 @@ namespace Pulsar4X.ViewModel
                 PropertyChanged(this, new PropertyChangedEventArgs("Completed"));
                 PropertyChanged(this, new PropertyChangedEventArgs("BatchQuantity"));
                 PropertyChanged(this, new PropertyChangedEventArgs("Repeat"));
+                PropertyChanged(this, new PropertyChangedEventArgs("ItemPercentRemaining"));
             }
         }
     }

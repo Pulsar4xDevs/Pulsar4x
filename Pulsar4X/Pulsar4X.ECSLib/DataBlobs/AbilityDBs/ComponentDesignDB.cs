@@ -44,6 +44,13 @@ namespace Pulsar4X.ECSLib
             ResearchCostFormula.Evaluate();
         }
 
+        public int BuildCostValue { get { return BuildCostFormula.IntResult; } }
+        internal ChainedExpression BuildCostFormula { get; set; }
+        public void SetBuildCost()
+        {
+            BuildCostFormula.Evaluate();
+        }
+
         public JDictionary<Guid, int> MineralCostValues {
             get
             {
@@ -68,7 +75,7 @@ namespace Pulsar4X.ECSLib
         internal ChainedExpression CreditCostFormula { get; set; }
         public void SetCreditCost()
         {
-            ResearchCostFormula.Evaluate();
+            CreditCostFormula.Evaluate();
         }
 
         public Dictionary<ComponentMountType, bool> ComponentMountType { get; internal set; }

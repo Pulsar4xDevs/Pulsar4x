@@ -107,6 +107,10 @@ namespace Pulsar4X.ViewModel
             RefinedMatsStockpileVM.Refresh();
             RefinaryAbilityVM.Refresh();
             ConstructionAbilityVM.Refresh();
+            foreach (var facilityvm in Facilities)
+            {
+                facilityvm.Refresh();
+            }
         }
     }
 

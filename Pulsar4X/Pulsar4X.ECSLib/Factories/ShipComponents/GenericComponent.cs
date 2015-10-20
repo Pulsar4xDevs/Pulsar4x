@@ -27,6 +27,7 @@ namespace Pulsar4X.ECSLib
             design.CrewFormula = new ChainedExpression(component.CrewReqFormula, design, factionTech, staticData);
             design.HTKFormula = new ChainedExpression(component.HTKFormula, design, factionTech, staticData);
             design.ResearchCostFormula = new ChainedExpression(component.ResearchCostFormula, design, factionTech, staticData);
+            design.BuildCostFormula = new ChainedExpression(component.BuildPointCostFormula, design, factionTech, staticData);
             design.MineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
             design.CreditCostFormula = new ChainedExpression(component.CreditCostFormula, design, factionTech, staticData);
 
@@ -88,6 +89,7 @@ namespace Pulsar4X.ECSLib
             design.SetCrew();
             design.SetHTK();
             design.SetResearchCost();
+            design.SetBuildCost();
             design.SetMineralCosts();
 
             return design;
@@ -142,7 +144,7 @@ namespace Pulsar4X.ECSLib
                     throw new Exception("GUID object {" + kvp.Key + "} not found in materialCosting for " + componentDesign.Name + " This object needs to be either a mineral, material or component defined in the Data folder");
             }
 
-            ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, mineralCosts,materalCosts,componentCosts , tech.ID, componentDesign.CrewReqValue);
+            ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.BuildCostValue , mineralCosts,materalCosts,componentCosts , tech.ID, componentDesign.CrewReqValue);
             
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);
