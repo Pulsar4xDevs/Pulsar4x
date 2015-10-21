@@ -101,6 +101,9 @@
     <Compile Include="About.xaml.cs">
       <DependentUpon>About.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ColonyResearchView.xaml.cs">
+      <DependentUpon>ColonyResearchView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\JobAbilityView.xaml.cs">
       <DependentUpon>JobAbilityView.xaml</DependentUpon>
     </Compile>
@@ -162,6 +165,9 @@
     <Compile Include="UserControls\RefinedMatsStockpileView.xaml.cs">
       <DependentUpon>RefinedMatsStockpileView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\ScientistUC.xaml.cs">
+      <DependentUpon>ScientistUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\ShipDesign.xaml.cs">
       <DependentUpon>ShipDesign.xaml</DependentUpon>
     </Compile>
@@ -182,6 +188,10 @@
     </Compile>
     <Compile Include="ViewModels\Helpers.cs" />
     <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ColonyResearchView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -262,6 +272,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\RefinedMatsStockpileView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ScientistUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

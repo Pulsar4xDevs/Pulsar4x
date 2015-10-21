@@ -16,16 +16,16 @@ namespace Pulsar4X.ECSLib
         private Dictionary<ResearchCategories, float> _bonuses;
 
         [PublicAPI]
-        public int MaxLabs
+        public byte MaxLabs
         {
             get { return _maxLabs; }
             internal set { _maxLabs = value; }
         }
         [JsonProperty]
-        private int _maxLabs;
+        private byte _maxLabs;
         
         [JsonProperty]
-        public int AssignedLabs { get; internal set; }
+        public byte AssignedLabs { get; internal set; }
 
         public List<Guid> ProjectQueue { get; internal set; } 
 
@@ -33,15 +33,18 @@ namespace Pulsar4X.ECSLib
         [UsedImplicitly]
         public ScientistDB() { } // needed by json
 
-        public ScientistDB(Dictionary<ResearchCategories,float> bonuses, int maxLabs )
+        public ScientistDB(Dictionary<ResearchCategories,float> bonuses, byte maxLabs )
         {
             Bonuses = bonuses;
             MaxLabs = maxLabs;
+            AssignedLabs = 0;
         }
 
         public ScientistDB(ScientistDB dB)
         {
             Bonuses = new Dictionary<ResearchCategories, float>(dB.Bonuses);
+            _maxLabs = dB.MaxLabs;
+            AssignedLabs = dB.AssignedLabs;
         }
 
         public override object Clone()

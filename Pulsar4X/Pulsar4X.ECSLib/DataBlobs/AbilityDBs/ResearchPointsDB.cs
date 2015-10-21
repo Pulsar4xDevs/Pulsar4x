@@ -4,13 +4,13 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class ResearchPointsDB : BaseDataBlob
+    public class ResearchPointsAbilityDB : BaseDataBlob
     {
         [JsonProperty]
         private int _pointsPerEconTick;        
         public int PointsPerEconTick { get { return _pointsPerEconTick; } internal set { _pointsPerEconTick = value; } }
 
-        public ResearchPointsDB()
+        public ResearchPointsAbilityDB()
         {
         }
 
@@ -18,19 +18,19 @@ namespace Pulsar4X.ECSLib
         /// Casts to int.
         /// </summary>
         /// <param name="pointsPerEconTick"></param>
-        public ResearchPointsDB(double pointsPerEconTick)
+        public ResearchPointsAbilityDB(double pointsPerEconTick)
         {
             _pointsPerEconTick = (int)pointsPerEconTick;
         }
 
-        public ResearchPointsDB(ResearchPointsDB db)
+        public ResearchPointsAbilityDB(ResearchPointsAbilityDB db)
         {
 
         }
 
         public override object Clone()
         {
-            return new ResearchPointsDB(this);
+            return new ResearchPointsAbilityDB(this);
         }
     }
 }

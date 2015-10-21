@@ -336,7 +336,7 @@ namespace Pulsar4X.Tests
             researchPointsAbility.Name = "RP Amount Per EconTick";
             researchPointsAbility.Description = "";
             researchPointsAbility.GuiHint = GuiHint.None;
-            researchPointsAbility.AbilityDataBlobType = typeof(ResearchPointsDB).ToString();
+            researchPointsAbility.AbilityDataBlobType = typeof(ResearchPointsAbilityDB).ToString();
             researchPointsAbility.AbilityFormula = "DataBlobArgs(20)";
             component.ComponentAbilitySDs.Add(researchPointsAbility);
 
@@ -382,7 +382,7 @@ namespace Pulsar4X.Tests
             refinePointsAbility.Name = "RP Amount Per EconTick";
             refinePointsAbility.Description = "";
             refinePointsAbility.GuiHint = GuiHint.None;
-            refinePointsAbility.AbilityDataBlobType = typeof(ResearchPointsDB).ToString();
+            refinePointsAbility.AbilityDataBlobType = typeof(ResearchPointsAbilityDB).ToString();
             refinePointsAbility.AbilityFormula = "100";
             component.ComponentAbilitySDs.Add(refinePointsAbility);
 

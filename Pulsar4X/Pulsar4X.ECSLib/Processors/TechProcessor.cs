@@ -8,13 +8,13 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// See also the Installation Processors for DoResearch
     /// </summary>
-    internal static class TechProcessor
+    public static class TechProcessor
     {
         private static Game _game;
         private const int _timeBetweenRuns = 68400; //one terran day.
 
 
-        public static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        internal static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
             foreach (var system in systems)
             {
@@ -36,14 +36,14 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
-        public static void DoResearch(Entity colonyEntity)
+        internal static void DoResearch(Entity colonyEntity)
         {
             FactionAbilitiesDB factionAbilities = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionTechDB>();
             Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
-            foreach (var lab in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.Where(inst => inst.HasDataBlob<ResearchPointsDB>()))
+            foreach (var lab in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.Where(inst => inst.HasDataBlob<ResearchPointsAbilityDB>()))
             {               
-                int points = lab.GetDataBlob<ResearchPointsDB>().PointsPerEconTick;
+                int points = lab.GetDataBlob<ResearchPointsAbilityDB>().PointsPerEconTick;
                 labs.Add(lab, points);
             }
             
@@ -78,6 +78,11 @@ namespace Pulsar4X.ECSLib
                     }
                 }
             }
+        }
+
+        public static void AssignLabs(Entity scientist, byte labs)
+        {
+
         }
 
 

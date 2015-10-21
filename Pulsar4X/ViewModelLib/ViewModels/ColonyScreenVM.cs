@@ -33,7 +33,7 @@ namespace Pulsar4X.ViewModel
         public RefinaryAbilityVM RefinaryAbilityVM { get; set; }
         public ConstructionAbilityVM ConstructionAbilityVM { get; set; }
 
-        
+        public ColonyResearchVM ColonyResearchVM { get; set; }
 
 
 
@@ -88,6 +88,8 @@ namespace Pulsar4X.ViewModel
             RefinaryAbilityVM = new RefinaryAbilityVM(staticData, _colonyEntity);
 
             ConstructionAbilityVM = new ConstructionAbilityVM(staticData, _colonyEntity);
+
+            ColonyResearchVM = new ColonyResearchVM(staticData, _colonyEntity);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
