@@ -89,6 +89,7 @@ namespace Pulsar4X.ECSLib
                 Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
                 ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
                 colonyInfo.Installations.SafeValueAdd(facilityDesignEntity,1);
+                ReCalcProcessor.ReCalcAbilities(colonyEntity);
             }
 
 

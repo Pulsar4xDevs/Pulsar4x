@@ -85,22 +85,18 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         public static void ReCalcRefiningRate(Entity colonyEntity)
         {
-            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
-            List<Entity> refinarys = new List<Entity>();
-            foreach (var inst in installations)
-            {
-                if (inst.HasDataBlob<RefineResourcesDB>())
-                    refinarys.Add(inst);
-            }
+            Dictionary<Entity, int> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
+            Dictionary<Entity, int> refinarys = installations.Where(kvp => kvp.Key.HasDataBlob<RefineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
             int pointsRate = 0;
             JDictionary<Guid, int> matRate = new JDictionary<Guid, int>();
-            foreach (var refinary in refinarys)
+            foreach (var refinaryKvp in refinarys)
             {
-                int points = refinary.GetDataBlob<RefineResourcesDB>().RefinaryPoints;
+                int points = refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinaryPoints;
                 
-                foreach (var mat in refinary.GetDataBlob<RefineResourcesDB>().RefinableMatsList)
+                foreach (var mat in refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinableMatsList)
                 {
-                   matRate.SafeValueAdd(mat, points); 
+                   matRate.SafeValueAdd(mat, points * refinaryKvp.Value); 
                 }
                 pointsRate += points;
             }

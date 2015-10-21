@@ -43,19 +43,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         internal static void CalcMaxRate(Entity colonyEntity)
         {
-            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
-            List<Entity> mines = new List<Entity>();
-            foreach (var inst in installations)
-            {
-                if(inst.HasDataBlob<MineResourcesDB>())
-                    mines.Add(inst);
-            }
+            Dictionary<Entity, int> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
+            Dictionary<Entity, int> mines = installations.Where(kvp => kvp.Key.HasDataBlob<MineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             JDictionary<Guid,int> rates = new JDictionary<Guid, int>();
-            foreach (var mine in mines)
+            
+            foreach (var mineTypeKvp in mines)
             {
-                foreach (var kvp in mine.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick)
+                foreach (var kvp in mineTypeKvp.Key.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick)
                 {
-                    rates.SafeValueAdd(kvp.Key,kvp.Value);
+                    rates.SafeValueAdd(kvp.Key,kvp.Value * mineTypeKvp.Value);
                 }                
             }
             colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate = rates;
