@@ -16,14 +16,8 @@
             <RowDefinition Height="11*"/>
         </Grid.RowDefinitions>
         <Label Content="{Binding Path=ColonyName}" HorizontalAlignment="Left" Width="76"/>
-        <ListBox Name="ScientistListBox" Grid.Row="1" Grid.Column="0">         
-            <ListBox.ItemTemplate>
-            <DataTemplate>
-                    
-            </DataTemplate>
-            </ListBox.ItemTemplate>
+        <ListBox Name="ScientistListBox" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">         
         </ListBox>
-        <ListBox Grid.Column="1" Grid.Row="1"/>
 
     </Grid>
 </UserControl>

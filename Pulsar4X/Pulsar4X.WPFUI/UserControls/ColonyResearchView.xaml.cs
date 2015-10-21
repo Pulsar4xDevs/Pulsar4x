@@ -35,15 +35,17 @@ namespace Pulsar4X.WPFUI.UserControls
             _colonyResearchVM = colonyResearchVM;
             DataContext = _colonyResearchVM;
             ScientistControls = new ObservableCollection<ScientistUC>();
+            InitializeComponent();
+            ScientistListBox.ItemsSource = ScientistControls;
+
             foreach (var sci in _colonyResearchVM.Scientists)
             {
                 ScientistControls.Add(new ScientistUC(sci));
             }
             
-            InitializeComponent();
-            ScientistListBox.DataContext = this;
-            ScientistListBox.ItemsSource = ScientistControls;
+
             
+
         }
     }
 }

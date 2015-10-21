@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        internal static void ConstructStuff(Entity colony, Game game)
+        internal static void ConstructStuff(Entity colony, Game game, int econTicks)
         {
             JDictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             JDictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
 
 
             Dictionary<ConstructionType,int> pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
-            int maxPoints = colonyConstruction.ConstructionPoints;
+            int maxPoints = colonyConstruction.ConstructionPoints * econTicks;
 
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
             foreach (var batchJob in constructionJobs.ToArray())

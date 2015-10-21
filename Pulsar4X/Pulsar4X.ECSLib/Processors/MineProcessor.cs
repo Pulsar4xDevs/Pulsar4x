@@ -7,30 +7,11 @@ namespace Pulsar4X.ECSLib
     internal static class MineProcessor
     {
 
-        private const int _timeBetweenRuns = 68400; //one terran day.
-
-        public static void Initialize()
-        {
-        }
-
-        public static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
-        {
-            foreach (var system in systems)
-            {
-                system.EconLastTickRun += deltaSeconds;
-                if (system.EconLastTickRun >= _timeBetweenRuns)
-                {
-                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
-                    {
-                        MineResources(colonyEntity);
-                    }
-                    system.EconLastTickRun -= _timeBetweenRuns;
-                }
-            }
-        }
 
 
-        internal static void MineResources(Entity colonyEntity)
+
+
+        internal static void MineResources(Entity colonyEntity, int econTicks)
         {
             JDictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
             JDictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyDB>().Minerals;
@@ -39,7 +20,7 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in mineRates)
             {                
                 double accessability = planetMinerals[kvp.Key].Accessibility;
-                double actualRate = kvp.Value * mineBonuses * accessability;
+                double actualRate = kvp.Value * mineBonuses * accessability * econTicks;
                 int mineralsMined = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
 
                 colonyMineralStockpile.SafeValueAdd<Guid>(kvp.Key, mineralsMined);

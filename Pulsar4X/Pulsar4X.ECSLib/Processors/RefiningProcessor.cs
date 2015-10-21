@@ -6,40 +6,19 @@ namespace Pulsar4X.ECSLib
 {
     public static class RefiningProcessor
     {
-        private const int _timeBetweenRuns = 68400; //one terran day.
 
-        internal static void Initialize(StaticDataStore staticData)
-        {
-            
-        }
-
-        internal static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
-        {
-            foreach (var system in systems)
-            {
-                system.EconLastTickRun += deltaSeconds;
-                if (system.EconLastTickRun >= _timeBetweenRuns)
-                {
-                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
-                    {
-                        RefineMaterials(colonyEntity, game);
-                    }
-                    system.EconLastTickRun -= _timeBetweenRuns;
-                }
-            }
-        }
 
         /// <summary>
         /// TODO: refineing rates should also limit the amount that can be refined for a specific mat each tick. 
         /// </summary>
-        internal static void RefineMaterials(Entity colony, Game game)
+        internal static void RefineMaterials(Entity colony, Game game, int econTicks)
         {
 
             JDictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             JDictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
 
             ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
-            int refinaryPoints = refiningDB.RefinaryPoints;
+            int refinaryPoints = refiningDB.RefinaryPoints * econTicks;
 
             for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
             {

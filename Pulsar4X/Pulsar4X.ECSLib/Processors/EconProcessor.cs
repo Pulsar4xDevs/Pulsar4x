@@ -22,21 +22,22 @@ namespace Pulsar4X.ECSLib
                 system.EconLastTickRun += deltaSeconds;
                 if (system.EconLastTickRun >= _timeBetweenRuns)
                 {
+                    int econTicks = system.EconLastTickRun / _timeBetweenRuns;
                     //should each colony be run in sequence, or each process... does it matter?
                     foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyMinesDB>())
                     {
-                        MineProcessor.MineResources(colonyEntity);                        
+                        MineProcessor.MineResources(colonyEntity, econTicks);                        
                     }
                     foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyRefiningDB>())
                     {
-                        RefiningProcessor.RefineMaterials(colonyEntity, game);
+                        RefiningProcessor.RefineMaterials(colonyEntity, game, econTicks);
                     }
                     foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyConstructionDB>())
                     {
-                        ConstructionProcessor.ConstructStuff(colonyEntity, game);
+                        ConstructionProcessor.ConstructStuff(colonyEntity, game, econTicks);
                     }
   
-                    system.EconLastTickRun -= _timeBetweenRuns;
+                    system.EconLastTickRun -= _timeBetweenRuns * econTicks;
                 }
             }
         }
