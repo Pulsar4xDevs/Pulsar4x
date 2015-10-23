@@ -16,7 +16,7 @@ namespace Pulsar4X.ViewModel
         private Entity _colonyEntity;
         //private RefinaryAbilityVM _parentRefiningVM;
 
-        public JobPriorityCommand JobPriorityCommand { get; set; }
+        //public JobPriorityCommand JobPriorityCommand { get; set; }
 
         private int _jobTotalPoints;
         public string Item
@@ -44,7 +44,6 @@ namespace Pulsar4X.ViewModel
 
         public JobVM()
         {
-            JobPriorityCommand = new JobPriorityCommand(this);
         }
 
 
@@ -61,31 +60,18 @@ namespace Pulsar4X.ViewModel
                 _jobTotalPoints = _colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<ComponentInfoDB>().BuildPointCost;
 
 
-            JobPriorityCommand = new JobPriorityCommand(this);
+            //JobPriorityCommand = new JobPriorityCommand(this);
         }
 
-        public void ChangePriority(string direction)
+        public void ChangePriority(int delta)
         {
-            int delta =0;
-            if (direction == "up")
-                delta = -1;
-            else if (direction == "down")
-                delta = 1;
 
             if (_job is RefineingJob)
                 RefiningProcessor.ChangeJobPriority(_colonyEntity, (RefineingJob)_job, delta);
-            //if (_job is ConstructionJob)
-            //ConstructionJob.MoveJob(_colonyEntity, (ConstructionJob)_job, -1);
+            if (_job is ConstructionJob)
+                ConstructionProcessor.ChangeJobPriority(_colonyEntity, (ConstructionJob)_job, delta);
 
         }
-        //public void DecresePriorty()
-        //{
-        //    if (PriorityIndex < _parentRefiningVM.ItemJobs.Count - 2)
-        //    {
-        //        if (_job is RefineingJob)
-        //            RefiningProcessor.ChangeJobPriority(_colonyEntity, (RefineingJob)_job, 1);
-        //    }
-        //}
 
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -9,6 +9,8 @@
              x:Class="Pulsar4X.WPFUI.JobAbilityView"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="24"/>
@@ -26,7 +28,7 @@
         <ListBox Grid.ColumnSpan="4" Margin="10,10,10,0" Grid.Row="1" ItemsSource="{Binding Path=ItemJobs}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <userControls:JobUC DataContext="{Binding}"  />
+                    <userControls:JobUC DataContext="{Binding}" />
                 </DataTemplate>
             </ListBox.ItemTemplate> 
         </ListBox>

@@ -5,6 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Pulsar4X.WPFUI.UserControls.JobUC" 
              xmlns:vm="clr-namespace:Pulsar4X.ViewModel;assembly=ViewModelLib"
+             xmlns:wpfui="clr-namespace:Pulsar4X.WPFUI"
+
              mc:Ignorable="d" 
              d:DesignHeight="24" d:DesignWidth="400">
 
@@ -29,9 +31,11 @@
         <ProgressBar Grid.Column="1" Margin="0,0,0,-1"
                      Value="{Binding Path=ItemBuildPointsRemaining, Mode=OneWay}"/>
         <Button  Grid.Column="5" VerticalAlignment="Top" Height="12"
-                 Command="{Binding Path=JobPriorityCommand}" CommandParameter="up"/>
+                 Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type wpfui:JobAbilityView}}, Path=DataContext.JobIncPriorityCommand}" 
+                 CommandParameter="{Binding}" />
         <Button  Grid.Column="5" Height="12" VerticalAlignment="Bottom"
-                 Command="{Binding Path=JobPriorityCommand}" CommandParameter="down"/>
+                 Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type wpfui:JobAbilityView}}, Path=DataContext.JobDecPriorityCommand}" 
+                 CommandParameter="{Binding}" />
 
     </Grid>
 </UserControl>

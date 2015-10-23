@@ -14,7 +14,8 @@ namespace Pulsar4X.ViewModel
         private Entity _colonyEntity;
         private ColonyRefiningDB RefiningDB { get { return _colonyEntity.GetDataBlob<ColonyRefiningDB>(); } }
         private StaticDataStore _staticData;
-
+        public JobIncreasePriorityCommand JobIncPriorityCommand { get; set; }
+        public JobDecreasePriorityCommand JobDecPriorityCommand { get; set; }
         public int PointsPerDay { get { return RefiningDB.RefinaryPoints; } }
 
         private ObservableCollection<JobVM> _itemJobs;
@@ -33,6 +34,8 @@ namespace Pulsar4X.ViewModel
         #region Constructor
         public RefinaryAbilityVM(StaticDataStore staticData, Entity colonyEntity)
         {
+            JobIncPriorityCommand = new JobIncreasePriorityCommand();
+            JobDecPriorityCommand = new JobDecreasePriorityCommand();
             _staticData = staticData;
             _colonyEntity = colonyEntity;
             SetupRefiningJobs();

@@ -209,7 +209,7 @@ namespace Pulsar4X.ECSLib
         /// placing the item either at the top or bottom of the list.
         /// </param>
         [PublicAPI]
-        public static void MoveJob(Entity colonyEntity, ConstructionJob job, int delta)
+        public static void ChangeJobPriority(Entity colonyEntity, ConstructionJob job, int delta)
         {
             ColonyConstructionDB constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions

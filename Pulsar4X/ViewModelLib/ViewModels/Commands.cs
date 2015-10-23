@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel
 {
-    public class JobPriorityCommand : ICommand
+    public class JobIncreasePriorityCommand : ICommand
     {
-        public JobVM JobVM { get; set; }
 
-        public JobPriorityCommand(JobVM viewModel)
+
+        public JobIncreasePriorityCommand()
         {
-            JobVM = viewModel;
         }
 
         public bool CanExecute(object parameter)
@@ -23,9 +24,34 @@ namespace Pulsar4X.ViewModel
 
         public void Execute(object parameter)
         {
-            JobVM.ChangePriority((string)parameter);
+            JobVM job = (JobVM)parameter;
+            job.ChangePriority(-1);
         }
 
         public event EventHandler CanExecuteChanged;
     }
+
+    public class JobDecreasePriorityCommand : ICommand
+    {
+
+
+        public JobDecreasePriorityCommand()
+        {
+
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            return true;
+        }
+
+        public void Execute(object parameter)
+        {
+            JobVM job = (JobVM)parameter;
+            job.ChangePriority(1);
+        }
+
+        public event EventHandler CanExecuteChanged;
+    }
+
 }
