@@ -70,6 +70,10 @@ namespace Pulsar4X.ECSLib
                             job.NumberCompleted = 0;
                             refiningDB.JobBatchList.Add(job);
                         }
+                        for (int i = 0; i < refiningDB.JobBatchList.Count -1; i++)
+                        {
+                            refiningDB.JobBatchList[i].Index.OnNext(i);
+                        }
                     }
                 }
             }
@@ -118,7 +122,10 @@ namespace Pulsar4X.ECSLib
             {
                 //check if the job materialguid is valid, then add it if so.
                 if (staticData.RefinedMaterials.ContainsKey(job.ItemGuid))
+                {
                     refiningDB.JobBatchList.Add(job);
+                    job.Index.OnNext(refiningDB.JobBatchList.Count -1);
+                }
             }
         }
 

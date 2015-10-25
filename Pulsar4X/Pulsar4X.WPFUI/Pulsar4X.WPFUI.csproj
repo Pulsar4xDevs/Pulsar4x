@@ -349,9 +349,9 @@
       <Project>{e716fa06-ecdf-b446-96b4-b790aab5713b}</Project>
       <Name>Pulsar4X.ECSLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ViewModelLib\ViewModelLib.csproj">
+    <ProjectReference Include="..\ViewModelLib\Pulsar4x.ViewModels.csproj">
       <Project>{37f5b88b-f1aa-410e-9fcb-4ca26a4dd887}</Project>
-      <Name>ViewModelLib</Name>
+      <Name>Pulsar4x.ViewModels</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.UI", "Pulsar4X.UI\Pulsar4X.UI.csproj", "{F5FC84D7-A87C-FB4E-89AA-FE2E6D75EB65}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingTools.JsonDataEditor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingTools.JsonDataEditor2", "ModdingTools.JsonDataEditor2\ModdingTools.JsonDataEditor2.csproj", "{A0640FA3-FAAB-4BCD-A845-548D0967009C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModelLib", "ViewModelLib\ViewModelLib.csproj", "{37F5B88B-F1AA-410E-9FCB-4CA26A4DD887}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4x.ViewModels", "ViewModelLib\Pulsar4x.ViewModels.csproj", "{37F5B88B-F1AA-410E-9FCB-4CA26A4DD887}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

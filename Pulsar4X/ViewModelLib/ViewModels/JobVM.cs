@@ -15,7 +15,7 @@ namespace Pulsar4X.ViewModel
         private JobBase _job;
         private Entity _colonyEntity;
         //private RefinaryAbilityVM _parentRefiningVM;
-
+        
         //public JobPriorityCommand JobPriorityCommand { get; set; }
 
         private int _jobTotalPoints;
