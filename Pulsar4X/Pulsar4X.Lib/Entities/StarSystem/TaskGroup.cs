@@ -220,6 +220,11 @@ namespace Pulsar4X.Entities
         public float _SurveyHourFraction { get; set; }
 
         /// <summary>
+        /// What default and conditional orders does this taskgroup have, if any.
+        /// </summary>
+        public ConditionalOrders _SpecialOrders { get; set; }
+
+        /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
         /// <param name="Title">Name</param>
@@ -262,6 +267,7 @@ namespace Pulsar4X.Entities
             TimeRequirement = 0;
 
             TaskGroupOrders = new BindingList<Order>();
+            _SpecialOrders = new ConditionalOrders();
 
             TotalOrderDistance = 0.0;
 
@@ -2014,8 +2020,20 @@ namespace Pulsar4X.Entities
                     }
                     else
                     {
-                        DrawTravelLine = 1;
-                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        /// <summary>
+                        /// Check conditional and default orders if any.
+                        /// </summary>
+                        ProcessDefaultOrders();
+                        ProcessConditionalOrders();
+
+                        /// <summary>
+                        /// Check again to see if no conditional orders got added to taskgroup orders.
+                        /// </summary>
+                        if (TaskGroupOrders.Count == 0)
+                        {
+                            DrawTravelLine = 1;
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
                     }
                 }
             }
@@ -2921,8 +2939,8 @@ namespace Pulsar4X.Entities
                            
                         break;
                     #endregion
-#warning implement GravSurvey
-                    #region GravSurvey to be implemented
+
+                    #region GravSurvey
                         case (int)Constants.ShipTN.OrderType.GravSurvey:
                         /// <summary>
                         /// Figure out how to store survey results with a star. I think that Partial for each point, and then a full system wide 0% or 100% bool will work.
@@ -3022,12 +3040,51 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Any conditional or default orders must also be accomplished here. these will insert real orders based on the conditions involved into the TaskGroupOrders list.
+        /// </summary>
+        public void ProcessDefaultOrders()
+        {
+            foreach(Constants.ShipTN.DefaultOrders DO in _SpecialOrders._DefaultOrdersList)
+            {
+                if (DO == Constants.ShipTN.DefaultOrders.NoSpecialOrder)
+                    continue;
+
+                /// <summary>
+                /// Default orders need to be checked to see if they are possible, and if so then placed into the list of Taskgroup orders. there is no reason to interrupt
+                /// regular orders for a default order.
+                /// </summary>
+            }
+        }
+
+        /// <summary>
+        /// Same for this function.
+        /// </summary>
+        public void ProcessConditionalOrders()
+        {
+            foreach (Constants.ShipTN.Condition Cond in _SpecialOrders._ConditionList)
+            {
+                if (Cond == Constants.ShipTN.Condition.NoCondition)
+                    continue;
+
+                /// <summary>
+                /// First Cond needs to be checked to see if it has occurred or not. if that is the case, then the conditional order must also be processed, and a regular order
+                /// added to the list of TaskGroupOrders. Conditional order checking may be worthwhile to interrupt regular orders for, such as fuel constraints.
+                /// </summary>
+                int cIndex = _SpecialOrders._ConditionList.IndexOf(Cond);
+                Constants.ShipTN.ConditionalOrders CO = _SpecialOrders._ConditionalOrdersList[cIndex];
+            }
+        }
+
+        /// <summary>
         /// Clears the current orders for this TG. Make sure to check to see if we are at a planet, if so we are orbiting.
         /// </summary>
         public void clearAllOrders()
         {
             if (TaskGroupOrders.Count > 0)
             {
+                /// <summary>
+                /// Check whether we are in orbit.
+                /// </summary>
                 if ((TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     && (Contact.Position.X == TaskGroupOrders[0].target.Position.X && Contact.Position.Y == TaskGroupOrders[0].target.Position.Y))
                 {
@@ -3047,6 +3104,20 @@ namespace Pulsar4X.Entities
                     if (!OrbitingPlanet.TaskGroupsInOrbit.Contains(this))
                     {
                         OrbitingPlanet.TaskGroupsInOrbit.Add(this);
+                    }
+                }
+
+                /// <summary>
+                /// inform taskgroups that this taskgroup is no longer ordered to target them in some manner.
+                /// </summary>
+                foreach (Order TGO in TaskGroupOrders)
+                {
+                    if (TGO.target.SSEntity == StarSystemEntityType.TaskGroup)
+                    {
+                        if (TGO.taskGroup.TaskGroupsOrdered.Contains(this) == true)
+                        {
+                            TGO.taskGroup.TaskGroupsOrdered.Remove(this);
+                        }
                     }
                 }
             }

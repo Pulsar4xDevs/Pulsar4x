@@ -326,5 +326,30 @@ namespace Pulsar4X.Entities
         }
     }
 
+    public class ConditionalOrders
+    {
+        /// <summary>
+        /// Order priority is based on their own order within the list. the 1st default order is primary, second is secondary, and so on.
+        /// </summary>
+        public BindingList<Constants.ShipTN.DefaultOrders> _DefaultOrdersList { get; set; }
+
+        /// <summary>
+        /// Conditions work the same as order priority above, and the same as orders for that matter. earlier ones in the list are done/checked first.
+        /// </summary>
+        public BindingList<Constants.ShipTN.Condition> _ConditionList { get; set; }
+
+        /// <summary>
+        /// Orders to execute if the above conditions match up.
+        /// </summary>
+        public BindingList<Constants.ShipTN.ConditionalOrders> _ConditionalOrdersList { get; set; }
+
+        public ConditionalOrders()
+        {
+            _DefaultOrdersList = new BindingList<Constants.ShipTN.DefaultOrders>();
+            _ConditionList = new BindingList<Constants.ShipTN.Condition>();
+            _ConditionalOrdersList = new BindingList<Constants.ShipTN.ConditionalOrders>();
+        }
+    }
+
 
 }

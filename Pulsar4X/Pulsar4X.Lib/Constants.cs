@@ -474,6 +474,120 @@ namespace Pulsar4X
                 Troop,
                 TypeCount
             }
+
+            public enum DefaultOrders
+            {
+                NoSpecialOrder,
+                SurveyNearestAsteroid,
+                SurveyNearestMoon,
+                SurveyNearestPlanet,
+                SurveyNearestPlanetOrMoon,
+                SurveyNearestBody,
+                SurveyNextFiveBodies,
+                SurveyNearestSurveyLocation,
+                SurveyNextThreeSurveyLocations,
+
+                /// <summary>
+                /// Superior formation.
+                /// </summary>
+                FollowHigherFleetInSystem,
+                MoveToEntryJumpPoint,
+                RefuelInCurrentSystem,
+
+                /// <summary>
+                /// Any Colony with > 25M people that is set as a colonist source.
+                /// </summary>
+                LoadColonistsAtNearestSource,
+                LoadColonistsAtCapital,
+
+                /// <summary>
+                /// Any colony with less than 25M people, or otherwise set as a colonist destination.
+                /// </summary>
+                UnloadColonistsAtNearestDestination,
+                BuildJumpGateAtNearestJumpPoint,
+
+                /// <summary>
+                /// Colony with citizens who likely don't need automines.
+                /// </summary>
+                LoadAutomineFromPopulation,
+
+                /// <summary>
+                /// No people, only mines present,
+                /// </summary>
+                UnloadAutomineToMiningColony,
+
+                /// <summary>
+                /// Special tradeship only conditional.
+                /// </summary>
+                MoveToTradeLocation,
+
+                /// <summary>
+                /// Luxury ships? rescue vessels?
+                /// </summary>
+                UnloadPassengersAtNearestColony,
+
+                /// <summary>
+                /// World with minerals available above world reserve levels?
+                /// </summary>
+                MoveToMineralSource,
+                MoveToSoriumGasGiant,
+                SalvageNearestWreck,
+                TerraformColony,
+                TypeCount
+            }
+
+            public enum Condition
+            {
+                NoCondition,
+                FuelLessThan50,
+                FuelLessThan40,
+                FuelLessThan30,
+                FuelLessThan20,
+                FuelLessThan10,
+                FuelTanksFull,
+                ParentFleetInSystem,
+                SubFleetInSameLocation,
+                SpeedLessThanMax,
+                SupplyPointsLessThan20,
+                SupplyPointsLessThan10,
+                HostileActiveContactInSystem,
+                TypeCount
+            }
+
+            public enum ConditionalOrders
+            {
+                NoConditionalOrder,
+                Unload90PercentOfFuelAtNearestColony,
+                UnloadFuelAtColonyAndMoveToSoriumGasGiant,
+                JoinParentFleetIfInSystem,
+                RefuelAtNearestColony,
+
+                /// <summary>
+                /// Tanker must have more than 10% of its fuel available to refuel with.
+                /// </summary>
+                RefuelAtNearestAvailableTanker,
+
+                /// <summary>
+                /// Can be world or tanker.
+                /// </summary>
+                RefuelAtNearestAvailableSource,
+
+                /// <summary>
+                /// All restrictions that apply to fuel harvesting apply here.
+                /// </summary>
+                ResupplyAtNearestColony,
+                ResupplyAtNearestSupplyShip,
+                RessuplyAtNearestSource,
+
+                ActivateShields,
+                DeactivateShields,
+                ClearOrders,
+                IncorporateSubFleetsAtLocation,
+                ChangeToMaximumSpeed,
+                ActiveSensorsOn,
+                OverhaulAtNearestColony,
+                TypeCount
+            }
         }
 
         /// <summary>
