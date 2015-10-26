@@ -122,8 +122,8 @@ namespace Pulsar4X.ViewModel
 
         public void Refresh(bool partialRefresh = false)
         {
-            SetupJobs();
-            //ReOrderRefiningJobs();
+            SetupJobs();//TODO make this smarter. this rebuilds the VMs whichis not ideal
+
         }
     }
 
@@ -148,133 +148,6 @@ namespace Pulsar4X.ViewModel
             Refresh();
         }
     }
-
-    /*
-    public class RefinaryAbilityVM : IViewModel 
-    {
-        private Entity _colonyEntity;
-        private ColonyRefiningDB RefiningDB { get { return _colonyEntity.GetDataBlob<ColonyRefiningDB>(); } }
-        private StaticDataStore _staticData;
-        public JobIncreasePriorityCommand JobIncPriorityCommand { get; set; }
-        public JobDecreasePriorityCommand JobDecPriorityCommand { get; set; }
-        public int PointsPerDay { get { return RefiningDB.PointsPerTick; } }
-
-        public MVMCollectionSyncher<RefineingJob> JobCollectionSyncher { get { return _jobCollectionSyncher; } } 
-        private MVMCollectionSyncher<RefineingJob> _jobCollectionSyncher { get; set; }
-        private ObservableCollection<JobVM> _itemJobs;
-        public ObservableCollection<JobVM> ItemJobs
-        {
-            get { return _itemJobs;}
-            set{_itemJobs = value; OnPropertyChanged();}
-        }
-        public int JobSelectedIndex { get; set; }
-
-
-        public Dictionary<string, Guid> ItemDictionary { get; set; }
-        public Guid NewJobSelectedItem { get; set; }
-        public ushort NewJobBatchCount { get; set; }
-        public bool NewJobRepeat { get; set; }
-
-
-        #region Constructor
-        public RefinaryAbilityVM(StaticDataStore staticData, Entity colonyEntity)
-        {
-            JobIncPriorityCommand = new JobIncreasePriorityCommand();
-            JobDecPriorityCommand = new JobDecreasePriorityCommand();
-            _staticData = staticData;
-            _colonyEntity = colonyEntity;
-
-            _jobCollectionSyncher = new MVMCollectionSyncher<RefineingJob>(RefiningDB.JobBatchList);
-
-
-            SetupRefiningJobs();
-
-            ItemDictionary = new Dictionary<string, Guid>();
-            foreach (var kvp in _staticData.RefinedMaterials)
-            {
-                ItemDictionary.Add(kvp.Value.Name, kvp.Key);
-            }
-            NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
-            NewJobBatchCount = 1;
-            NewJobRepeat = false;
-        }
-        #endregion
-
-
-        private ICommand _addNewJob;
-        public ICommand AddNewJob
-        {
-            get
-            {
-                return _addNewJob ?? (_addNewJob = new CommandHandler(OnNewBatchJob, true));
-            }
-        }
-
-
-        public void OnNewBatchJob()
-        {
-            RefineingJob newjob = new RefineingJob(NewJobSelectedItem,NewJobBatchCount, _staticData.RefinedMaterials[NewJobSelectedItem].RefinaryPointCost, NewJobRepeat);
-            RefiningProcessor.AddJob(_staticData, _colonyEntity, newjob);
-            Refresh();
-        }
-
-        #region Refresh
-
-        private void SetupRefiningJobs()
-        {
-            var jobs = RefiningDB.JobBatchList;
-            _itemJobs = new ObservableCollection<JobVM>();
-            foreach (var item in jobs)
-            {
-                _itemJobs.Add(new JobVM(_staticData, _colonyEntity, item));
-            }
-            ItemJobs = ItemJobs;
-        }
-
-        //private void ReOrderRefiningJobs()
-        //{
-        //    List<JobVM> jobs = new List<JobVM>(_itemJobs);
-        //    _itemJobs = new ObservableCollection<JobVM>();
-        //    foreach (var job in jobs)
-        //    {
-        //        if (job.PriorityIndex != null)
-        //        {
-        //            if (job.PriorityIndex > _itemJobs.Count)
-        //                _itemJobs.Add(job);
-        //            else
-        //                _itemJobs.Insert(job.PriorityIndex, job);
-        //        }
-        //    }
-        //    ItemJobs = ItemJobs;
-        //}
-        public void OnJobIndexIncrease()
-        {
-            ListPriority<RefineingJob>.ChangeJobPriority(JobCollectionSyncher, _jobCollectionSyncher[JobSelectedIndex], -1);
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public void Refresh(bool partialRefresh = false)
-        {
-            SetupRefiningJobs();
-            //ReOrderRefiningJobs();
-        }
-
-        #endregion
-
-    }
-
-    */
 
 
     public class CommandHandler : ICommand

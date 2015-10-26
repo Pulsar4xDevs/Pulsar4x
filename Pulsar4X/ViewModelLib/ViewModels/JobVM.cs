@@ -85,14 +85,8 @@ namespace Pulsar4X.ViewModel
                 Completed = Completed;
                 BatchQuantity = BatchQuantity;
                 Repeat = Repeat;
-                //PriorityIndex = PriorityIndex;
                 ItemBuildPointsRemaining = ItemBuildPointsRemaining;
                 ItemPercentRemaining = ItemPercentRemaining;
-
-                //PropertyChanged(this, new PropertyChangedEventArgs("Completed"));
-                //PropertyChanged(this, new PropertyChangedEventArgs("BatchQuantity"));
-                //PropertyChanged(this, new PropertyChangedEventArgs("Repeat"));
-                //PropertyChanged(this, new PropertyChangedEventArgs("ItemPercentRemaining"));
             }
         }
     }
