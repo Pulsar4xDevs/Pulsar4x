@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
     {
        
         [JsonIgnore]//recalc this on game load. 
-        public int RefinaryPoints { get; internal set; }
+        public int PointsPerTick { get; internal set; }
 
         [JsonIgnore]//recalc this on game load todo implement this in the processor. 
         public JDictionary<Guid, int> RefiningRates{ get; internal set; }

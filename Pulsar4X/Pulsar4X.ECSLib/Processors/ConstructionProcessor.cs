@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
 
 
             Dictionary<ConstructionType,int> pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
-            int maxPoints = colonyConstruction.ConstructionPoints * econTicks;
+            int maxPoints = colonyConstruction.PointsPerTick * econTicks;
 
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
             foreach (var batchJob in constructionJobs.ToArray())
@@ -172,7 +172,7 @@ namespace Pulsar4X.ECSLib
                 if (p > maxPoints)
                     maxPoints = p;
             }
-            colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionPoints = maxPoints;
+            colonyEntity.GetDataBlob<ColonyConstructionDB>().PointsPerTick = maxPoints;
         }
 
 

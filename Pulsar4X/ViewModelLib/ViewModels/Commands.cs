@@ -9,12 +9,19 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel
 {
-    public class JobIncreasePriorityCommand : ICommand
+    public class JobPriorityCommand<TDataBlob, TJob> : ICommand
+        where TDataBlob : BaseDataBlob
     {
+        JobVM<TDataBlob, TJob> _jobVM { get; set; }
 
+        public int DeltaUp { get; set; }
+        public int DeltaDown { get; set; }
 
-        public JobIncreasePriorityCommand()
+        public JobPriorityCommand(JobVM<TDataBlob, TJob> jobVM)
         {
+            _jobVM = jobVM;
+            DeltaUp = -1;
+            DeltaDown = 1;
         }
 
         public bool CanExecute(object parameter)
@@ -24,34 +31,12 @@ namespace Pulsar4X.ViewModel
 
         public void Execute(object parameter)
         {
-            JobVM job = (JobVM)parameter;
-            job.ChangePriority(-1);
+            _jobVM.ChangePriority((int)parameter);
         }
 
         public event EventHandler CanExecuteChanged;
     }
 
-    public class JobDecreasePriorityCommand : ICommand
-    {
 
-
-        public JobDecreasePriorityCommand()
-        {
-
-        }
-
-        public bool CanExecute(object parameter)
-        {
-            return true;
-        }
-
-        public void Execute(object parameter)
-        {
-            JobVM job = (JobVM)parameter;
-            job.ChangePriority(1);
-        }
-
-        public event EventHandler CanExecuteChanged;
-    }
 
 }

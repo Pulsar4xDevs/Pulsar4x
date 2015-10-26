@@ -18,7 +18,6 @@ namespace Pulsar4X.ECSLib
 
     public class JobBase
     {
-        public Subject<int> Index { get; set; }
         public Guid ItemGuid { get; private set; }
         //yes this can be public set just fine. no reason not to here...
         public ushort NumberOrdered { get; set; }
@@ -34,7 +33,6 @@ namespace Pulsar4X.ECSLib
             NumberCompleted = 0;
             PointsLeft = jobPoints;
             Auto = auto;
-            Index = new Subject<int>();
         }
     }
 
@@ -63,7 +61,7 @@ namespace Pulsar4X.ECSLib
     {
 
         [JsonIgnore]//recalc this on game load.
-        public int ConstructionPoints { get; internal set; }
+        public int PointsPerTick { get; internal set; }
 
         [JsonProperty]
         public JDictionary<ConstructionType, int> ConstructionRates { get; internal set; }
