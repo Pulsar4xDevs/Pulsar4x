@@ -45,7 +45,7 @@ namespace Pulsar4X.WPFUI.UserControls
             PopDataGrid.ItemsSource = _colonyScreenVM.Species;
             RefinaryAbility.DataContext = _colonyScreenVM.RefinaryAbilityVM;
             ConstructionAbility.DataContext = _colonyScreenVM.ConstructionAbilityVM;
-            ColonyResearchView1 = new ColonyResearchView(_colonyScreenVM.ColonyResearchVM);
+            ColonyResearchView1.DataContext = _colonyScreenVM.ColonyResearchVM;
 
         }
 

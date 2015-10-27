@@ -23,29 +23,11 @@ namespace Pulsar4X.WPFUI.UserControls
     public partial class ColonyResearchView : UserControl
     {
         private ColonyResearchVM _colonyResearchVM;
-        public ObservableCollection<ScientistUC> ScientistControls { get; set; }
         public ColonyResearchView()
         {
-            ScientistControls = new ObservableCollection<ScientistUC>();
+
             InitializeComponent();
         }
-
-        public ColonyResearchView(ColonyResearchVM colonyResearchVM)
-        {
-            _colonyResearchVM = colonyResearchVM;
-            DataContext = _colonyResearchVM;
-            ScientistControls = new ObservableCollection<ScientistUC>();
-            InitializeComponent();
-            ScientistListBox.ItemsSource = ScientistControls;
-
-            foreach (var sci in _colonyResearchVM.Scientists)
-            {
-                ScientistControls.Add(new ScientistUC(sci));
-            }
-            
-
-            
-
-        }
+        
     }
 }

@@ -22,17 +22,17 @@ namespace Pulsar4X.WPFUI.UserControls
     /// </summary>
     public partial class ScientistUC : UserControl
     {
-        private ScientistControlVM _scientistControlVM;
+        //private ScientistControlVM _scientistControlVM;
         public ScientistUC()
         {
             InitializeComponent();
         }
-        public ScientistUC(ScientistControlVM scientistVM)
-        {
-            _scientistControlVM = scientistVM;
-            DataContext = _scientistControlVM;
-            InitializeComponent();
+        //public ScientistUC(ScientistControlVM scientistVM)
+        //{
+        //    _scientistControlVM = scientistVM;
+        //    DataContext = _scientistControlVM;
+        //    InitializeComponent();
             
-        }
+        //}
     }
 }
