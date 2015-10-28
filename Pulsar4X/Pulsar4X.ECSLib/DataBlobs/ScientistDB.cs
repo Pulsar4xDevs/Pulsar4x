@@ -38,6 +38,7 @@ namespace Pulsar4X.ECSLib
             Bonuses = bonuses;
             MaxLabs = maxLabs;
             AssignedLabs = 0;
+            ProjectQueue = new List<Guid>();
         }
 
         public ScientistDB(ScientistDB dB)
@@ -45,6 +46,7 @@ namespace Pulsar4X.ECSLib
             Bonuses = new Dictionary<ResearchCategories, float>(dB.Bonuses);
             _maxLabs = dB.MaxLabs;
             AssignedLabs = dB.AssignedLabs;
+            ProjectQueue = dB.ProjectQueue;
         }
 
         public override object Clone()

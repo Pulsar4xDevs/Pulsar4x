@@ -23,6 +23,9 @@ namespace Pulsar4X.ViewModel
         }
         private List<ColonyResearchVM> _colonyResearchVms;
 
+        public FactionResearchVM()
+        {            
+        }
 
         public FactionResearchVM(StaticDataStore staticData, Entity factionEntity)
         {
@@ -92,6 +95,10 @@ namespace Pulsar4X.ViewModel
 
         public List<ScientistControlVM> Scientists { get; set; }
 
+
+        public ColonyResearchVM()
+        {         
+        }
 
         public ColonyResearchVM(StaticDataStore staticData, Entity colonyEntity)
         {
@@ -163,8 +170,8 @@ namespace Pulsar4X.ViewModel
         //public int ColonyFreeLabs { get}
 
         public Dictionary<ResearchCategories,float> ScientistBonus { get { return _scientistEntity.GetDataBlob<ScientistDB>().Bonuses; } }
-        private List<ResearchTechControlVM> _projectQueue;
-        public List<ResearchTechControlVM> ProjectQueue { get { return _projectQueue; } }
+        private ObservableCollection<ResearchTechControlVM> _projectQueue;
+        public ObservableCollection<ResearchTechControlVM> ProjectQueue { get { return _projectQueue; } }
 
 
 
@@ -196,6 +203,10 @@ namespace Pulsar4X.ViewModel
         #endregion
 
 
+        public ScientistControlVM()
+        {            
+        }
+
         public ScientistControlVM(StaticDataStore staticData, FactionTechDB factionTech, Entity scientist)
         {
             _staticData = staticData;
@@ -207,6 +218,12 @@ namespace Pulsar4X.ViewModel
                 ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
                 SelectedTech = ResearchableTechs[0];
             }
+            _projectQueue = new ObservableCollection<ResearchTechControlVM>();
+            foreach (var techGuid in scientist.GetDataBlob<ScientistDB>().ProjectQueue)
+            {
+                _projectQueue.Add(new ResearchTechControlVM(_factionTech, _staticData.Techs[techGuid]));
+            }
+            
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -234,6 +251,16 @@ namespace Pulsar4X.ViewModel
 
         public int PointCost { get { return TechProcessor.CostFormula(_factionTech, _techSD); } }
         public int PointsCompleted { get { return _factionTech.ResearchableTechs[_techSD]; } set{OnPropertyChanged();} }
+
+        public ResearchTechControlVM()
+        {           
+        }
+
+        public ResearchTechControlVM(FactionTechDB factionTech, TechSD tech)
+        {
+            _factionTech = factionTech;
+            _techSD = tech;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         [NotifyPropertyChangedInvocator]
