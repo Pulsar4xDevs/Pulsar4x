@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -162,15 +163,50 @@ namespace Pulsar4X.ViewModel
         //public int ColonyFreeLabs { get}
 
         public Dictionary<ResearchCategories,float> ScientistBonus { get { return _scientistEntity.GetDataBlob<ScientistDB>().Bonuses; } }
-        private List<TechSD> _projectQueue;
-        public List<TechSD> ProjectQueue { get { return _projectQueue; } }
-        public Dictionary<TechSD,int> ResearchableTechs { get { return _factionTech.ResearchableTechs; } }
+        private List<ResearchTechControlVM> _projectQueue;
+        public List<ResearchTechControlVM> ProjectQueue { get { return _projectQueue; } }
+
+
+
+        #region AddTech 
+
+        public ObservableCollection<TechSD> ResearchableTechs { get; set; }
+        public TechSD SelectedTech { get; set; }
+
+        public int SelectedTechPointsComplete
+        {
+            get
+            {
+                if (SelectedTech.Name == null)
+                    return 0;
+                return _factionTech.ResearchableTechs[SelectedTech];
+            }
+        }
+
+        public int SelectedTechNextLevel
+        {
+            get
+            {
+                if (SelectedTech.Name == null)
+                    return 0;
+                return _factionTech.LevelforTech(SelectedTech) + 1;
+            }
+        }
+
+        #endregion
+
 
         public ScientistControlVM(StaticDataStore staticData, FactionTechDB factionTech, Entity scientist)
         {
             _staticData = staticData;
             _factionTech = factionTech;
             _scientistEntity = scientist;
+            
+            if (_factionTech.ResearchableTechs.Count > 0)
+            {
+                ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
+                SelectedTech = ResearchableTechs[0];
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -184,7 +220,33 @@ namespace Pulsar4X.ViewModel
         }
         public void Refresh(bool partialRefresh = false)
         {
-            throw new NotImplementedException();
+            ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
+        }
+    }
+
+    public class ResearchTechControlVM : IViewModel
+    {
+        private FactionTechDB _factionTech;
+        private TechSD _techSD;
+
+        public string TechName { get { return _techSD.Name; } }
+        public int Level { get { return _factionTech.LevelforTech(_techSD) + 1; } }
+
+        public int PointCost { get { return TechProcessor.CostFormula(_factionTech, _techSD); } }
+        public int PointsCompleted { get { return _factionTech.ResearchableTechs[_techSD]; } set{OnPropertyChanged();} }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        public void Refresh(bool partialRefresh = false)
+        {
+            PointsCompleted = PointsCompleted;
         }
     }
 }

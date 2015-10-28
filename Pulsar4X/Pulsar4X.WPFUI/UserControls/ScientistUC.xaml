@@ -4,9 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="Pulsar4X.WPFUI.UserControls.ScientistUC" 
-             mc:Ignorable="d" d:DesignWidth="300" Height="48">
+             mc:Ignorable="d" d:DesignWidth="300" Height="72">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
             <RowDefinition Height="24"/>
             <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
@@ -24,6 +25,27 @@
                             Value="{Binding Path=ScientistAssignedLabs}"/>
         <Label  Grid.Column="3"
                 Content="{Binding Path=ScientistMaxLabs}"/>
+        <Expander  Grid.Row="1" Grid.ColumnSpan="4">
+            <Expander.Header>
+                <Grid Height="24" Width="300">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="6*"/>
+                        <ColumnDefinition Width="19*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Label" Grid.Row="0" Grid.Column="0"/>
+                </Grid>
+            </Expander.Header>
+            <Grid Background="#FFE5E5E5"/>
+        </Expander>
+        <ComboBox Grid.ColumnSpan="2" Grid.Row="2"
+                  ItemsSource="{Binding Path=ResearchableTechs}"
+                  DisplayMemberPath="Name"
+                  SelectedValue="{Binding Path=SelectedTech}"/>
+        <Button Content="Add" Grid.Column="3" Grid.Row="2"/>
+        <Label Grid.Column="2" Grid.Row="2" Margin="0,0,51,0"
+               Content="{Binding Path=SelectedTechNextLevel}"/>
+        <Label Grid.Column="2" Margin="56,0,0,0" Grid.Row="2"
+               Content="{Binding Path=SelectedTechPointsComplete}"  />
 
     </Grid>
 </UserControl>
