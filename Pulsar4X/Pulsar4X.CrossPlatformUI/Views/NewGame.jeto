@@ -1,0 +1,126 @@
+﻿{
+  "$type": "Dialog",
+  "Title": "New Game",
+  "WindowStyle": "Default",
+  "Content": {
+    "$type": "StackLayout",
+    "Padding": "10",
+    "Spacing": "5",
+    "Items": [
+      {
+        "$type": "StackLayout",
+        "Padding": "10",
+        "Spacing": "10",
+        "Orientation": "Horizontal",
+        "Items": [
+          {
+            "$type": "Label",
+            "Text": "Create Player Faction",
+            "VerticalAlignment": "Center"
+          },
+          {
+            "Control": {
+              "$type": "CheckBox",
+              "$name": "CreatePlayerFaction"
+            }
+          },
+          { },
+          {
+            "$type": "Label",
+            "Text": "Default Start",
+            "VerticalAlignment": "Center"
+          },
+          {
+            "Control": {
+              "$type": "CheckBox",
+              "$name": "DefaultStart"
+            }
+          }
+        ]
+      },
+      {
+        "$type": "TableLayout",
+        "Padding": "10",
+        "Spacing": "5, 5",
+        "Width": "400",
+        "Rows": [
+          [
+            {
+              "$type": "Label",
+              "Text": "Faction Name",
+              "VerticalAlignment": "Center"
+            },
+            {
+              "Control": {
+                "$type": "TextBox",
+                "$name": "FactionName"
+              },
+            }
+          ],
+          [
+            {
+              "$type": "Label",
+              "Text": "NumberOfSystems",
+              "VerticalAlignment": "Center"
+            },
+            {
+              "Control": {
+                "$type": "NumericUpDown",
+                "$name": "NumberOfSystems"
+              },
+            }
+          ],
+          [
+            {
+              "$type": "Label",
+              "Text": "Faction Password",
+              "VerticalAlignment": "Center"
+            },
+            {
+              "Control": {
+                "$type": "PasswordBox",
+                "$name": "FactionPassword"
+              },
+            }
+          ],
+          [
+            {
+              "$type": "Label",
+              "Text": "GM Password",
+              "VerticalAlignment": "Center"
+            },
+            {
+              "Control": {
+                "$type": "PasswordBox",
+                "$name": "GmPassword"
+              },
+            }
+          ],
+          null
+        ]
+      },
+      {
+        "HorizontalAlignment": "Right",
+        "Control": {
+          "$type": "StackLayout",
+          "Orientation": "Horizontal",
+          "Spacing": "5",
+          "Items": [
+            {
+              "$type": "Button",
+              "$name": "DefaultButton",
+              "Text": "OK",
+              "Click": "DefaultButton_Click"
+            },
+            {
+              "$type": "Button",
+              "$name": "AbortButton",
+              "Text": "C&ancel",
+              "Click": "AbortButton_Click"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
