@@ -1888,6 +1888,105 @@ namespace Pulsar4X.Entities
             }
             dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
             TotalOrderDistance = TotalOrderDistance + dZ;
+
+            /// <summary>
+            /// Check to see if a GeoSurvey Order or GravSurvey order was added. The survey body should be added to the survey in progress list for the current system.
+            /// </summary>
+            if (OrderToTaskGroup.typeOf == Constants.ShipTN.OrderType.GeoSurvey)
+            {
+                /// <summary>
+                /// A geoSurvey order without a OrderToTaskGroup.body is a problem further up the chain.
+                /// </summary>
+                if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                {
+                    if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(OrderToTaskGroup.body) == false)
+                    {
+                        /// <summary>
+                        /// if this is true then someone else is also geosurveying the world, but I don't care about that.
+                        /// </summary>
+                        Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Add(OrderToTaskGroup.body);
+                    }
+                }
+                else
+                {
+                    JPDetection NewDetection = new JPDetection();
+                    Contact.Position.System._SurveyResults.Add(TaskGroupFaction, NewDetection);
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Add(OrderToTaskGroup.body);
+                }
+            }
+            else if (OrderToTaskGroup.typeOf == Constants.ShipTN.OrderType.GravSurvey)
+            {
+                /// <summary>
+                /// A gravSurvey order without a surveyPointOrder is a problem further up the chain.
+                /// </summary>
+                if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                {
+                    if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(OrderToTaskGroup.surveyPointOrder) == false)
+                    {
+                        /// <summary>
+                        /// if this is true then someone else is also geosurveying the world, but I don't care about that.
+                        /// </summary>
+                        Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Add(OrderToTaskGroup.surveyPointOrder);
+                    }
+                }
+                else
+                {
+                    JPDetection NewDetection = new JPDetection();
+                    Contact.Position.System._SurveyResults.Add(TaskGroupFaction, NewDetection);
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Add(OrderToTaskGroup.surveyPointOrder);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Order removal needs to check the survey results member for the current system to check to see if a survey is in progress because of this order. if so remove it.
+        /// </summary>
+        /// <param name="orderIndex"></param>
+        /// <param name="SkipCheck">Orders that successfully complete do not need to check Geo/grav survey and will be removed with this function.</param>
+        public void RemoveOrder(int orderIndex, bool SkipCheck = false)
+        {
+            if (SkipCheck == true)
+            {
+                if (TaskGroupOrders.Count > orderIndex)
+                {
+                    if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.GeoSurvey)
+                    {
+                        if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(TaskGroupOrders[orderIndex].body) == true)
+                        {
+                            Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Remove(TaskGroupOrders[orderIndex].body);
+                        }
+                    }
+                    if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.GravSurvey)
+                    {
+                        if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(TaskGroupOrders[orderIndex].surveyPointOrder) == true)
+                        {
+                            Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Remove(TaskGroupOrders[orderIndex].surveyPointOrder);
+                        }
+                    }
+                }
+            }
+
+            TaskGroupOrders.RemoveAt(orderIndex);
+        }
+
+        public void RemoveOrder(Order orderToRemove)
+        {
+            if (orderToRemove.typeOf == Constants.ShipTN.OrderType.GeoSurvey)
+            {
+                if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(orderToRemove.body) == true)
+                {
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Remove(orderToRemove.body);
+                }
+            }
+            if (orderToRemove.typeOf == Constants.ShipTN.OrderType.GravSurvey)
+            {
+                if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(orderToRemove.surveyPointOrder) == true)
+                {
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Remove(orderToRemove.surveyPointOrder);
+                }
+            }
+
+            TaskGroupOrders.Remove(orderToRemove);
         }
 
 
@@ -2011,7 +2110,12 @@ namespace Pulsar4X.Entities
                             }
                         }
                     }
-                    TaskGroupOrders.RemoveAt(0);
+
+                    /// <summary>
+                    /// This order was completed successfully, so do not bother checking it for any conditions.
+                    /// </summary>
+                    RemoveOrder(0, true);
+                    //TaskGroupOrders.RemoveAt(0);
 
                     if (TaskGroupOrders.Count > 0)
                     {
@@ -2034,9 +2138,14 @@ namespace Pulsar4X.Entities
                             DrawTravelLine = 1;
                             CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                         }
-                    }
-                }
-            }
+                        else
+                        {
+                            NewOrders = true;
+                            FollowOrders(TimeSlice);
+                        }
+                    }//end else taskgrouporders.Count > 0. as a result check for conditional and default orders.
+                }//end if timeslice > 0, which means follow orders for the timeslice.
+            }//end if timeRequirement for orders < timeSlice, which means orders can be completed within the timeslice.
             else
             {
 
@@ -2931,6 +3040,16 @@ namespace Pulsar4X.Entities
                                    if (OB._mineralsGenerated == false)
                                        OB.GenerateMinerals();
                                }
+
+                               /// <summary>
+                               /// Clear the survey in progress list.
+                               /// </summary>
+                               if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                               {
+                                   if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(OB) == true)
+                                       Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Remove(OB);
+                               }
+
                                //handle adding the faction to the survey list when complete 
                                //generate minerals?
                                _GeoSurveyPoints = 0;
@@ -3025,6 +3144,15 @@ namespace Pulsar4X.Entities
                                }
                             }
 
+                            /// <summary>
+                            /// Clear the survey in progress list.
+                            /// </summary>
+                            if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                            {
+                                if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(TaskGroupOrders[0].surveyPointOrder) == true)
+                                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Remove(TaskGroupOrders[0].surveyPointOrder);
+                            }
+
                             _GravSurveyPoints = 0;
                             _SurveyHourFraction = 0.0f;
                         }
@@ -3053,6 +3181,13 @@ namespace Pulsar4X.Entities
                 /// Default orders need to be checked to see if they are possible, and if so then placed into the list of Taskgroup orders. there is no reason to interrupt
                 /// regular orders for a default order.
                 /// </summary>
+                switch (DO)
+                {
+                    case Constants.ShipTN.DefaultOrders.SurveyNearestBody:
+                        break;
+                    case Constants.ShipTN.DefaultOrders.SurveyNearestSurveyLocation:
+                        break;
+                }
             }
         }
 

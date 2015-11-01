@@ -540,10 +540,12 @@ namespace Pulsar4X.UI.Handlers
                 }
 
                 if (removeindex == -1)
-                    CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
+                    CurrentTaskGroup.RemoveOrder(CurrentTaskGroup.TaskGroupOrders.Last());
+                //CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
                 else
                 {
-                    CurrentTaskGroup.TaskGroupOrders.RemoveAt(removeindex);
+                    CurrentTaskGroup.RemoveOrder(removeindex);
+                    //CurrentTaskGroup.TaskGroupOrders.RemoveAt(removeindex);
                     //int prevIndex = SelectedOrderIndex;
                     //SelectedOrderIndex = -1;
                     //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
@@ -562,7 +564,11 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RemoveAllButton_Clicked(object sender, EventArgs e)
         {
-            CurrentTaskGroup.TaskGroupOrders.Clear();
+            foreach(Order TGO in CurrentTaskGroup.TaskGroupOrders)
+            {
+                CurrentTaskGroup.RemoveOrder(TGO);
+            }
+            //CurrentTaskGroup.TaskGroupOrders.Clear();
             ClearActionList();
             m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
             CalculateTimeDistance();

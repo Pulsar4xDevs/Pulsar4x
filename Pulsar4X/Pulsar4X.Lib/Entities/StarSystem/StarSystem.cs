@@ -42,11 +42,23 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<JumpPoint> _DetectedJPs { get; set; }
 
+        /// <summary>
+        /// These points are marked as claimed for survey purpose so that more than one survey ship doesn't attempt to survey the same point.
+        /// </summary>
+        public BindingList<SurveyPoint> _GravSurveyInProgress { get; set; }
+
+        /// <summary>
+        /// These system bodies are "claimed" by the geo survey craft surveying them, this should prevent multiple craft from surveying the same body.
+        /// </summary>
+        public BindingList<SystemBody> _GeoSurveyInProgress { get; set; }
+
         public JPDetection()
         {
             _SurveyStatus = Status.None;
             _SurveyedPoints = new BindingList<SurveyPoint>();
             _DetectedJPs = new BindingList<JumpPoint>();
+            _GravSurveyInProgress = new BindingList<SurveyPoint>();
+            _GeoSurveyInProgress = new BindingList<SystemBody>();
         }
 
     }
