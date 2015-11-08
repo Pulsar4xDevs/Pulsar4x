@@ -261,6 +261,41 @@ namespace Pulsar4X.UI.Panels
         
         #endregion 
 
+        #region Special Orders Tab
+        /// <summary>
+        /// The list of primary default orders. these will be done before secondary default orders.
+        /// </summary>
+        public ComboBox PrimaryDefaultOrderComboBox
+        {
+            get { return m_oPrimaryDefaultOrdersComboBox; }
+        }
+        public ComboBox SecondaryDefaultOrderComboBox
+        {
+            get { return m_oSecondaryDefaultOrdersComboBox; }
+        }
+
+        /// <summary>
+        /// How should conditionals be handled? should they interrupt orders?
+        /// </summary>
+        public ComboBox ConditionalAConditionComboBox
+        {
+            get { return m_oCondAConditionComboBox; }
+        }
+        public ComboBox ConditionalAOrderComboBox
+        {
+            get { return m_oCondAOrderComboBox; }
+        }
+
+        public ComboBox ConditionalBConditionComboBox
+        {
+            get { return m_oCondBConditionComboBox; }
+        }
+        public ComboBox ConditionalBOrderComboBox
+        {
+            get { return m_oCondBOrderComboBox; }
+        }
+        #endregion
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>

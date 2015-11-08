@@ -43,6 +43,9 @@ namespace Pulsar4X.Entities
             MissileMissed,
             MissileOutOfFuel,
 
+            NoGeoSurveyTarget,
+            NoGravSurveyTarget,
+
             OrdersCompleted,
             OrdersNotCompleted,
 

@@ -3183,10 +3183,129 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 switch (DO)
                 {
+                    #region Survey Nearest Body
                     case Constants.ShipTN.DefaultOrders.SurveyNearestBody:
-                        break;
+                        float lowestDistance = -1.0f;
+                        SystemBody ClosestSB = null;
+                        StarSystem CurrentSystem = Contact.Position.System;
+
+                        /// <summary>
+                        /// Look through every point. If the point is not surveyed, not marked as going to be surveyed then it is available to be considered a survey target.
+                        /// Check to see if it is closer than any other point. This is the greedy method, and a more optimal search pattern can be done, especially for multiple ships.
+                        /// </summary>
+                        foreach (Star Stellar in CurrentSystem.Stars)
+                        {
+                            foreach (SystemBody SB in Stellar.Planets)
+                            {
+                                if (SB.GeoSurveyList.ContainsKey(TaskGroupFaction) == true)
+                                {
+                                    if (SB.GeoSurveyList[TaskGroupFaction] == true)
+                                    {
+                                        /// <summary>
+                                        /// This body is surveyed, move on to the next one.
+                                        /// </summary>
+                                        continue;
+                                    }
+                                }
+
+                                if (CurrentSystem._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                                {
+                                    if (CurrentSystem._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(SB) == false)
+                                    {
+                                        float distSq = (float)(SB.Position.X * Contact.Position.X) + (float)(SB.Position.Y * Contact.Position.Y);
+                                        if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                        {
+                                            lowestDistance = distSq;
+                                            ClosestSB = SB;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    float distSq = (float)(SB.Position.X * Contact.Position.X) + (float)(SB.Position.Y * Contact.Position.Y);
+                                    if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                    {
+                                        lowestDistance = distSq;
+                                        ClosestSB = SB;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (lowestDistance == -1.0f)
+                        {
+                            /// <summary>
+                            /// No suitable target was found.
+                            /// </summary>
+                            String Entry = String.Format("No suitable geo survey target for {0} in {1}", Name, Contact.Position.System);
+                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                            TaskGroupFaction.MessageLog.Add(NME);
+                        }
+                        else
+                        {
+                            Order SPOrder = new Order(Constants.ShipTN.OrderType.GeoSurvey, -1, -1, 0, ClosestSB);
+                            IssueOrder(SPOrder);
+                        }    
+                    break;
+                    #endregion
+
+                    #region Survey Nearest Survey Location
                     case Constants.ShipTN.DefaultOrders.SurveyNearestSurveyLocation:
-                        break;
+                        lowestDistance = -1.0f;
+                        SurveyPoint ClosestSP = null;
+                        CurrentSystem = Contact.Position.System;
+
+                        /// <summary>
+                        /// Look through every point. If the point is not surveyed, not marked as going to be surveyed then it is available to be considered a survey target.
+                        /// Check to see if it is closer than any other point. This is the greedy method, and a more optimal search pattern can be done, especially for multiple ships.
+                        /// </summary>
+                        foreach (SurveyPoint SP in CurrentSystem._SurveyPoints)
+                        {
+                            if (CurrentSystem._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                            {
+                                if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus == JPDetection.Status.Complete)
+                                    break;
+
+                                if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Contains(SP) == false)
+                                {
+                                    if (CurrentSystem._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(SP) == false)
+                                    {
+                                        float distSq = (float)(SP.Position.X * Contact.Position.X) + (float)(SP.Position.Y * Contact.Position.Y);
+                                        if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                        {
+                                            lowestDistance = distSq;
+                                            ClosestSP = SP;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                float distSq = (float)(SP.Position.X * Contact.Position.X) + (float)(SP.Position.Y * Contact.Position.Y);
+                                if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                {
+                                    lowestDistance = distSq;
+                                    ClosestSP = SP;
+                                }
+                            }
+                        }
+
+                        if (lowestDistance == -1.0f)
+                        {
+                            /// <summary>
+                            /// No suitable target was found.
+                            /// </summary>
+                            String Entry = String.Format("No suitable grav survey target for {0} in {1}", Name, Contact.Position.System);
+                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                            TaskGroupFaction.MessageLog.Add(NME);
+                        }
+                        else
+                        {
+                            Order SPOrder = new Order(Constants.ShipTN.OrderType.GravSurvey, -1, -1, 0, ClosestSP);
+                            IssueOrder(SPOrder);
+                        }
+                    break;
+                    #endregion
                 }
             }
         }

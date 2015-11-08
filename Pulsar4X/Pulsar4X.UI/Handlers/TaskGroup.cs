@@ -234,6 +234,9 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.OrgMoveRightButton.Click += new EventHandler(OrgMoveRightButton_Click);
             #endregion
 
+            #region Special Orders Tab
+            SetupDefaultAndConditionalOrders();
+            #endregion
 
             /// <summary>
             /// Rename Class Button Handlers:
@@ -700,6 +703,37 @@ namespace Pulsar4X.UI.Handlers
                 logger.Error("Something went wrong Creating Columns for Taskgroup summary screen...");
 #endif
             }
+        }
+
+        /// <summary>
+        /// Fill the combo boxes for default orders, conditional conditions, and conditional orders.
+        /// Typecasting all these to ints produces shorter lines than going by the enum type.
+        /// </summary>
+        private void SetupDefaultAndConditionalOrders()
+        {
+            for (int defaultOrderIterator = 0; defaultOrderIterator < (int)Constants.ShipTN.DefaultOrders.TypeCount; defaultOrderIterator++)
+            {
+                m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.Items.Add((Constants.ShipTN.DefaultOrders)defaultOrderIterator);
+                m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.Items.Add((Constants.ShipTN.DefaultOrders)defaultOrderIterator);
+            }
+            m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = 0;
+            m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex = 0;
+
+            for (int condIterator = 0; condIterator < (int)Constants.ShipTN.Condition.TypeCount; condIterator++)
+            {
+                m_oTaskGroupPanel.ConditionalAConditionComboBox.Items.Add((Constants.ShipTN.Condition)condIterator);
+                m_oTaskGroupPanel.ConditionalBConditionComboBox.Items.Add((Constants.ShipTN.Condition)condIterator);
+            }
+            m_oTaskGroupPanel.ConditionalAConditionComboBox.SelectedIndex = 0;
+            m_oTaskGroupPanel.ConditionalBConditionComboBox.SelectedIndex = 0;
+
+            for (int condOrderIterator = 0; condOrderIterator < (int)Constants.ShipTN.ConditionalOrders.TypeCount; condOrderIterator++)
+            {
+                m_oTaskGroupPanel.ConditionalAOrderComboBox.Items.Add((Constants.ShipTN.ConditionalOrders)condOrderIterator);
+                m_oTaskGroupPanel.ConditionalBOrderComboBox.Items.Add((Constants.ShipTN.ConditionalOrders)condOrderIterator);
+            }
+            m_oTaskGroupPanel.ConditionalAOrderComboBox.SelectedIndex = 0;
+            m_oTaskGroupPanel.ConditionalBOrderComboBox.SelectedIndex = 0;
         }
 
         private void RefreshShipCells()
