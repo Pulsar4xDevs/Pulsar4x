@@ -1145,6 +1145,14 @@ namespace Pulsar4X
 
         }
 
+        public static class GameConstants
+        {
+            /// <summary>
+            /// 10k km is the basic unit of AuroraTN distance that pretty much all calculations will go to. I don't expect this to ever change, but would prefer to keep it as a constant regardless.
+            /// </summary>
+            public const double BasicUnitOfDistance = 10000.0; 
+        }
+
         /// <summary>
         /// List of game-specific settings.
         /// Since we don't have save/load yet, I'm just sticking this here.

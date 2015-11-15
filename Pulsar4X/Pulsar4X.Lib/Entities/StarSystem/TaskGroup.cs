@@ -3007,6 +3007,14 @@ namespace Pulsar4X.Entities
                            SystemBody OB = OrbitingBody as SystemBody;
                            int BodySurveyCost = OB.GetSurveyCost();
 
+                           /// <summary>
+                           /// This survey was finished on the dot last tick.
+                           /// </summary>
+                           if (OB._mineralsGenerated == true)
+                           {
+                               break;
+                           }
+
                            float hourFract = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
                            _SurveyHourFraction = _SurveyHourFraction + hourFract;
                            int hours = (int)Math.Floor(_SurveyHourFraction);
@@ -3069,6 +3077,14 @@ namespace Pulsar4X.Entities
                         int SystemSurveyCost = Contact.Position.System.GetSurveyCost();
                         StarSystem CurrentSystem = Contact.Position.System;
 
+                        /// <summary>
+                        /// This point was surveyed, but the survey ended right on the dot of the last tick.
+                        /// </summary>
+                        if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Contains(TaskGroupOrders[0].surveyPointOrder) == true)
+                        {
+                            break;
+                        }
+
                         float hourFraction = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
                         _SurveyHourFraction = _SurveyHourFraction + hourFraction;
 
@@ -3080,6 +3096,11 @@ namespace Pulsar4X.Entities
 
                         int RemainderSP = SystemSurveyCost - _GravSurveyPoints;
                         int TotalSP = (int)(CalcGravSurveyPoints() * (float)totalHours);
+
+
+                            String Entry = String.Format("{0} {1} {2}",TotalSP,RemainderSP,_GravSurveyPoints);
+                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                            TaskGroupFaction.MessageLog.Add(NME);
 
 
                         if (TotalSP < RemainderSP)
@@ -3243,8 +3264,13 @@ namespace Pulsar4X.Entities
                         }
                         else
                         {
-                            Order SPOrder = new Order(Constants.ShipTN.OrderType.GeoSurvey, -1, -1, 0, ClosestSB);
-                            IssueOrder(SPOrder);
+                            Order SBOrder = new Order(Constants.ShipTN.OrderType.GeoSurvey, -1, -1, 0, ClosestSB);
+                            IssueOrder(SBOrder);
+
+                            /// <summary>
+                            /// The order has been issued so cancel out of this function.
+                            /// </summary>
+                            return;
                         }    
                     break;
                     #endregion
@@ -3301,13 +3327,40 @@ namespace Pulsar4X.Entities
                         }
                         else
                         {
+
+                            String Entry = String.Format("Order for {0} to survey {1}", Name, ClosestSP);
+                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                            TaskGroupFaction.MessageLog.Add(NME);
+
                             Order SPOrder = new Order(Constants.ShipTN.OrderType.GravSurvey, -1, -1, 0, ClosestSP);
                             IssueOrder(SPOrder);
+
+                            /// <summary>
+                            /// The order has been issued so cancel out of this function.
+                            /// </summary>
+                            return;
                         }
                     break;
                     #endregion
                 }
             }
+        }
+
+        /// <summary>
+        /// Add a default order to be processed by this TG when it has no other business.
+        /// </summary>
+        /// <param name="OrderToAdd">Default Order to add</param>
+        /// <param name="index">index order should be placed at</param>
+        public void AddDefaultOrder(Constants.ShipTN.DefaultOrders OrderToAdd, int index)
+        {
+            if (_SpecialOrders._DefaultOrdersList.Count <= index)
+            {
+                while (_SpecialOrders._DefaultOrdersList.Count != index)
+                    _SpecialOrders._DefaultOrdersList.Add(Constants.ShipTN.DefaultOrders.NoSpecialOrder);
+                _SpecialOrders._DefaultOrdersList.Add(OrderToAdd);
+            }
+            else
+                _SpecialOrders._DefaultOrdersList[index] = OrderToAdd;
         }
 
         /// <summary>

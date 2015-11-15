@@ -236,6 +236,8 @@ namespace Pulsar4X.UI.Handlers
 
             #region Special Orders Tab
             SetupDefaultAndConditionalOrders();
+            m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndexChanged += new EventHandler(PrimaryDefaultOrderComboBox_SelectedIndexChanged);
+            m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndexChanged += new EventHandler(SecondaryDefaultOrderComboBox_SelectedIndexChanged);
             #endregion
 
             /// <summary>
@@ -313,6 +315,25 @@ namespace Pulsar4X.UI.Handlers
         private void SystemLocationListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             BuildActionList();
+        }
+
+
+        /// <summary>
+        /// Selecting a primary order will place that order into the taskgroup default orders list.
+        /// </summary>
+        private void PrimaryDefaultOrderComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.AddDefaultOrder((Constants.ShipTN.DefaultOrders)m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex, 0);
+        }
+
+        /// <summary>
+        /// Selecting a secondary order will place that order into the taskgroup default orders list.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SecondaryDefaultOrderComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.AddDefaultOrder((Constants.ShipTN.DefaultOrders)m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex, 1);
         }
 
         /// <summary>

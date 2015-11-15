@@ -192,29 +192,65 @@ namespace Pulsar4X.UI.SceenGraph
                                 _SensorContactElements.Remove(SCE);
                         }
 
-                        if (_SensorContactElements.ContainsKey(TaskGroup.BestEM.pSensorDef.Id) == false && ParentSceen.ShowPassives == true)
+                        if (ParentSceen.ShowPassives == true)
                         {
-                            PassiveSensorDefTN pSensorDef = TaskGroup.BestEM.pSensorDef;
-#warning all of these 10000.0's are related to the fact that distance is done by 10k km in Aurora.
-                            double factor = Constants.Units.KmPerAu / 10000.0;
-                            double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+                            /// <summary>
+                            /// A taskgroup with no sensors still has the default package, so handle that.
+                            /// </summary>
+                            if (TaskGroup.BestEM == null)
+                            {
 
-                            Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+                                PassiveSensorDefTN pSensorDef = TaskGroup.TaskGroupFaction.ComponentList.DefaultPassives;
+                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
-                            SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, TaskGroup.BestEM.Name, TaskGroup.BestEM, TaskGroup.BestEM.pSensorDef.componentType, ParentSceen);
-                            _SensorContactElements.Add(TaskGroup.BestEM.pSensorDef.Id, NSE);
-                        }
+                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
-                        if (_SensorContactElements.ContainsKey(TaskGroup.BestThermal.pSensorDef.Id) == false && ParentSceen.ShowPassives == true)
-                        {
-                            PassiveSensorDefTN pSensorDef = TaskGroup.BestThermal.pSensorDef;
-                            double factor = Constants.Units.KmPerAu / 10000.0;
-                            double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, "", null, ComponentTypeTN.PassiveSensor, ParentSceen);
 
-                            Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+                                //definitely a kludge here to make SCE work with default passives.
+                                _SensorContactElements.Add(TaskGroup.Id, NSE);
+                                
+                            }
+                            else if (_SensorContactElements.ContainsKey(TaskGroup.BestEM.pSensorDef.Id) == false)
+                            {
+                                PassiveSensorDefTN pSensorDef = TaskGroup.BestEM.pSensorDef;
+                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
-                            SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, TaskGroup.BestThermal.Name, TaskGroup.BestThermal, TaskGroup.BestThermal.pSensorDef.componentType, ParentSceen);
-                            _SensorContactElements.Add(TaskGroup.BestThermal.pSensorDef.Id, NSE);
+                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+
+                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, TaskGroup.BestEM.Name, TaskGroup.BestEM, TaskGroup.BestEM.pSensorDef.componentType, ParentSceen);
+                                _SensorContactElements.Add(TaskGroup.BestEM.pSensorDef.Id, NSE);
+                            }
+
+                            /// <summary>
+                            /// A taskgroup with no sensors still has the default package, so handle that.
+                            /// </summary>
+                            if (TaskGroup.BestThermal == null)
+                            {
+                                PassiveSensorDefTN pSensorDef = TaskGroup.TaskGroupFaction.ComponentList.DefaultPassives;
+                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+
+                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+
+                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, "", null, ComponentTypeTN.PassiveSensor, ParentSceen);
+
+                                //yep, its a kludge.
+                                _SensorContactElements.Add(TaskGroup.Ships[0].Id, NSE);
+                            }
+                            else if (_SensorContactElements.ContainsKey(TaskGroup.BestThermal.pSensorDef.Id) == false)
+                            {
+                                PassiveSensorDefTN pSensorDef = TaskGroup.BestThermal.pSensorDef;
+                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+
+                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+
+                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, TaskGroup.BestThermal.Name, TaskGroup.BestThermal, TaskGroup.BestThermal.pSensorDef.componentType, ParentSceen);
+                                _SensorContactElements.Add(pSensorDef.Id, NSE);
+                            }
                         }
 
 
@@ -233,7 +269,7 @@ namespace Pulsar4X.UI.SceenGraph
 
                                 ActiveSensorDefTN SensorDef = Sensor.aSensorDef;
 
-                                double factor = Constants.Units.KmPerAu / 10000.0;
+                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
                                 double AURadius = (double)SensorDef.maxRange / factor;
 
                                 Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
@@ -264,7 +300,7 @@ namespace Pulsar4X.UI.SceenGraph
 #warning if EM strength differs from Thermal handle that here.
                         int ScanStrength = DSTS * Constants.Colony.ThermalDeepSpaceStrength[SensorTech] * 100;
 
-                        double factor = Constants.Units.KmPerAu / 10000.0;
+                        double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
                         double AURadius = (double)ScanStrength * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                         Vector3 PopPosition = new Vector3((float)CurrentPop.Contact.Position.X, (float)CurrentPop.Contact.Position.Y, 0.0f);
@@ -290,7 +326,7 @@ namespace Pulsar4X.UI.SceenGraph
 
                         if (OrdDef.aSD != null && ParentSceen.ShowActives == true)
                         {
-                            double factor = Constants.Units.KmPerAu / 10000.0;
+                            double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
                             double AURadius = (double)OrdDef.aSD.maxRange / factor;
 
                             Vector3 MGPos = new Vector3((float)MissileGroup.contact.Position.X, (float)MissileGroup.contact.Position.Y, 0.0f);
@@ -302,7 +338,7 @@ namespace Pulsar4X.UI.SceenGraph
 
                         if (OrdDef.tHD != null && ParentSceen.ShowPassives == true)
                         {
-                            double factor = Constants.Units.KmPerAu / 10000.0;
+                            double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
                             double AURadius = (double)OrdDef.tHD.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                             Vector3 MGPos = new Vector3((float)MissileGroup.contact.Position.X, (float)MissileGroup.contact.Position.Y, 0.0f);
@@ -314,7 +350,7 @@ namespace Pulsar4X.UI.SceenGraph
 
                         if (OrdDef.eMD != null && ParentSceen.ShowPassives == true)
                         {
-                            double factor = Constants.Units.KmPerAu / 10000.0;
+                            double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
                             double AURadius = (double)OrdDef.eMD.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
                             Vector3 MGPos = new Vector3((float)MissileGroup.contact.Position.X, (float)MissileGroup.contact.Position.Y, 0.0f);

@@ -642,6 +642,12 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Adding new taskgroups means adding a loop here to run through them all.
                     /// </summary>
+                    if (TaskGroup.TaskGroupOrders.Count == 0 && ( TaskGroup._SpecialOrders._DefaultOrdersList.Count != 0 || TaskGroup._SpecialOrders._ConditionList.Count != 0 ))
+                    {
+                        TaskGroup.ProcessDefaultOrders();
+                        TaskGroup.ProcessConditionalOrders();
+                    }
+
                     if (TaskGroup.TaskGroupOrders.Count != 0)
                     {
                         TaskGroup.FollowOrders((uint)deltaSeconds);
