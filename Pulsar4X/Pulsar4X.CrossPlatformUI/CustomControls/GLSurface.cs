@@ -32,11 +32,13 @@ namespace Pulsar4X.CrossPlatformUI
         static GLSurface ()
         {
             RegisterEvent<GLSurface>(c => c.OnGLInitalized(null), GLInitializedEvent);
+            //RegisterEvent<GLSurface>(c => c.OnDrawNow(null, null), GLDrawNowEvent);
         }
         
         public const string GLShuttingDownEvent = "GL.ShuttingDown";
         public const string GLDrawNowEvent = "GL.DrawNow";
         public const string GLInitializedEvent = "GL.Initialized";
+        public const string GLResizeEvent = "GL.Resize";
 
         //public event EventHandler<EventArgs> Click
         public event EventHandler<EventArgs> GLInitalized
@@ -49,10 +51,15 @@ namespace Pulsar4X.CrossPlatformUI
             add { this.Properties.AddHandlerEvent(GLDrawNowEvent, value); }
             remove { this.Properties.RemoveEvent(GLDrawNowEvent, value); }
         }
+        public event EventHandler<EventArgs> GLResize
+        {
+            add { this.Properties.AddHandlerEvent(GLResizeEvent, value); }
+            remove { this.Properties.RemoveEvent(GLResizeEvent, value); }
+        }
         public event EventHandler<EventArgs> GLShuttingDown
         {
-            add { this.Properties.AddHandlerEvent(GLDrawNowEvent, value); }
-            remove { this.Properties.RemoveEvent(GLDrawNowEvent, value); }
+            add { this.Properties.AddHandlerEvent(GLShuttingDownEvent, value); }
+            remove { this.Properties.RemoveEvent(GLShuttingDownEvent, value); }
         }
 
         public virtual void OnGLInitalized(EventArgs e)
@@ -61,14 +68,16 @@ namespace Pulsar4X.CrossPlatformUI
         }
         private void OnDrawNow(object sender, EventArgs e)
         {
-            this.Properties.TriggerEvent(GLInitializedEvent, this, e);
+            this.Properties.TriggerEvent(GLDrawNowEvent, this, e);
+        }
+        private void OnResize(object sender, EventArgs e)
+        {
+            this.Properties.TriggerEvent(GLResizeEvent, this, e);
         }
         public virtual void OnShuttingDown(object obj, EventArgs e)
         {
             this.Properties.TriggerEvent(GLShuttingDownEvent, this, e);
         }
-
-
 
         private new IHandler Handler{get{return (IHandler)base.Handler;}}
 
@@ -93,6 +102,7 @@ namespace Pulsar4X.CrossPlatformUI
             void OnInitialized(GLSurface w, EventArgs e);
             void OnShuttingDown(GLSurface w, EventArgs e);
             void OnDrawNow(GLSurface w, EventArgs e);
+            void OnResize(GLSurface w, EventArgs e);
         }
 
         //PLATFORM CONTROL -> ETO WIDGET
@@ -112,6 +122,11 @@ namespace Pulsar4X.CrossPlatformUI
             public void OnDrawNow(GLSurface w, EventArgs e)
             {
                 w.Platform.Invoke(() => w.OnDrawNow(w, e));
+            }
+
+            public void OnResize(GLSurface w, EventArgs e)
+            {
+                w.Platform.Invoke(() => w.OnResize(w, e));
             }
         }
 

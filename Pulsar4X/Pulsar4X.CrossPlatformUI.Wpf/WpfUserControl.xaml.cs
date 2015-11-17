@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenTK;
 using OpenTK.Graphics;
+using OpenTK.Platform;
 using Eto;
 namespace Pulsar4X.CrossPlatformUI.Wpf
 {
@@ -10,21 +11,43 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
     public partial class WpfUserControl : System.Windows.Controls.UserControl
     {
         public event EventHandler ShuttingDown = delegate { };
-        private GraphicsMode mode;
-        private int major;
-        private int minor;
-        private GraphicsContextFlags flags;
         public GLControl glc;
-        private GLSurface Widget;
+        IGraphicsContext context;
+        readonly GraphicsMode graphicsMode;
+        readonly int major;
+        readonly int minor;
+        readonly GraphicsContextFlags flags;
 
+        /// <summary>
+        /// Constructs a new instance with the specified GraphicsMode.
+        /// </summary>
+        /// <param name="mode">The OpenTK.Graphics.GraphicsMode of the control.</param>
+        /// <param name="major">The major version for the OpenGL GraphicsContext.</param>
+        /// <param name="minor">The minor version for the OpenGL GraphicsContext.</param>
+        /// <param name="flags">The GraphicsContextFlags for the OpenGL GraphicsContext.</param>
         public WpfUserControl(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags, GLSurface Widget)
         {
-            // TODO: Complete member initialization
-            this.mode = mode;
+            if (mode == null)
+                throw new ArgumentNullException("mode");
+
+            // SDL does not currently support embedding
+            // on external windows. If Open.Toolkit is not yet
+            // initialized, we'll try to request a native backend
+            // that supports embedding.
+            // Most people are using GLControl through the
+            // WinForms designer in Visual Studio. This approach
+            // works perfectly in that case.
+            Toolkit.Init(new ToolkitOptions
+            {
+                Backend = PlatformBackend.PreferNative
+            });
+
+
+            this.graphicsMode = mode;
             this.major = major;
             this.minor = minor;
             this.flags = flags;
-            this.Widget = Widget;
+
             InitializeComponent();
             glc = new GLControl(mode, major, minor, flags);
             glc.Load += (sender, args) => {

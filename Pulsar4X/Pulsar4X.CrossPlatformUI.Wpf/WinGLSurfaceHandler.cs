@@ -20,6 +20,7 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
         {
             var c = new WpfUserControl(mode, major, minor, flags, Widget);
             c.glc.Paint += (sender, args) => base.Callback.OnDrawNow(Widget, args);
+            c.glc.Resize += (sender, args) => base.Callback.OnResize(Widget, args);
             c.glc.Load += (sender, args) => base.Callback.OnInitialized(Widget, args);
             c.glc.Disposed += (sender, args) => base.Callback.OnShuttingDown(Widget, args);
             c.glc.MouseDown += glc_MouseDown;
