@@ -80,7 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <Compile Include="ConfirmActivity.cs" />
+    <Compile Include="ConfirmActivity.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ConfirmActivity.designer.cs">
       <DependentUpon>ConfirmActivity.cs</DependentUpon>
     </Compile>

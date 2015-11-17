@@ -19,6 +19,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected ListBox Systems;
         protected SystemVM CurrentSystem;
+        protected RenderVM SceneMgr;
 
         protected Splitter Body;
 
@@ -129,6 +130,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             DataContext = GameVM;
             gl_context = new GLSurface(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
+            SceneMgr = new RenderVM();
             shaderList = new List<int>();
             JsonReader.Load(this);
 
@@ -138,10 +140,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             Systems.SelectedIndexChanged += loadSystem;
 
             Body.Panel2 = gl_context;
-            gl_context.GLInitalized += InitializeCanvas;
-            gl_context.GLDrawNow += DrawNow;
-            gl_context.GLShuttingDown += TeardownCanvas;
-            gl_context.GLResize += Resize;
+            gl_context.GLInitalized += SceneMgr.Initialize;
+            gl_context.GLDrawNow += SceneMgr.Draw;
+            gl_context.GLShuttingDown += SceneMgr.Teardown;
+            gl_context.GLResize += SceneMgr.Resize;
         }
 
         void InitializeProgram()
@@ -168,11 +170,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         }
 
-        private void init()
-        {
-
-        }
-
         private void Draw()
         {
             drawPending = true;
@@ -189,16 +186,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0F);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.UseProgram(theProgram);
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, positionBufferObject);
-            GL.EnableVertexAttribArray(0);
-            GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 0, 0);
-
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-
-            GL.DisableVertexAttribArray(0);
-            GL.UseProgram(0);
+            SceneMgr.Draw();
             GL.Flush();
             gl_context.SwapBuffers();
 

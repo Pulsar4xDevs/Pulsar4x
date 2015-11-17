@@ -1,17 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{37F5B88B-F1AA-410E-9FCB-4CA26A4DD887}</ProjectGuid>
+    <ProjectGuid>{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pulsar4x.ViewModels</RootNamespace>
-    <AssemblyName>Pulsar4x.ViewModels</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <RootNamespace>Pulsar4X.Sceen</RootNamespace>
+    <AssemblyName>Pulsar4X.Sceen</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,35 +36,12 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SceenManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModels\ColonyScreenVM.cs" />
-    <Compile Include="ViewModels\Commands.cs" />
-    <Compile Include="ViewModels\ComponentDesignVM.cs" />
-    <Compile Include="ViewModels\ComponentTemplateVM.cs" />
-    <Compile Include="ViewModels\ConstructionAbilityVM.cs" />
-    <Compile Include="ViewModels\FactionVM.cs" />
-    <Compile Include="ViewModels\GameVM.cs" />
-    <Compile Include="ViewModels\IViewModel.cs" />
-    <Compile Include="ViewModels\JobVM.cs" />
-    <Compile Include="ViewModels\NewGameOptionsVM.cs" />
-    <Compile Include="ViewModels\PlanetVM.cs" />
-    <Compile Include="ViewModels\RefinaryAbilityVM.cs" />
-    <Compile Include="ViewModels\RenderVM.cs" />
-    <Compile Include="ViewModels\ResearchVM.cs" />
-    <Compile Include="ViewModels\SpeciesVM.cs" />
-    <Compile Include="ViewModels\StarVM.cs" />
-    <Compile Include="ViewModels\SystemVM.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
-      <Project>{e716fa06-ecdf-b446-96b4-b790aab5713b}</Project>
-      <Name>Pulsar4X.ECSLib</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

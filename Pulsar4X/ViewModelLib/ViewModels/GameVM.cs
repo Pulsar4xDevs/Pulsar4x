@@ -59,7 +59,7 @@ namespace Pulsar4X.ViewModel
                 {
                     ColonyScreens.Add(new ColonyScreenVM(colonyEntity, Game.StaticData));
                 }
-            } 
+            }
         }
 
         //factions that this client has full visability of. for GM this will be all factions.
