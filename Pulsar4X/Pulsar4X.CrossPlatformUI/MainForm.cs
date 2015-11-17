@@ -7,17 +7,16 @@ using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.CrossPlatformUI
 {
-
     public class MainForm : Form
     {
         internal GameVM GameVM { get; set; }
         public MainForm()
         {
-            JsonReader.Load(this);
-            ClientSize = new Size(400, 600);
-            Content = new Views.Startup();
+            ClientSize = new Size(600, 400);
             GameVM = new GameVM();
+            Content = new Views.SystemView(GameVM);
             CreateMenuToolBar();
+            Title = "Pulsar4X";
         }
 
         void CreateMenuToolBar()
@@ -46,13 +45,12 @@ namespace Pulsar4X.CrossPlatformUI
                           },
                 };
             }
-
             if (Platform.Supports<ToolBar>())
             {
                 // create and set the toolbar
-                ToolBar = new ToolBar();
+                //ToolBar = new ToolBar();
 
-                ToolBar.Items.Add(newgame);
+                //ToolBar.Items.Add(newgame);
 
             }
 

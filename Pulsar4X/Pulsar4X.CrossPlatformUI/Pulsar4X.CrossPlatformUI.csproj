@@ -4,11 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7F35F681-E5D7-49AC-BB06-A6116016B98C}</ProjectGuid>
+    <ProjectGuid>{26B67EDA-BC6C-44D7-9E08-8C1C31415788}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Pulsar4X.CrossPlatformUI</RootNamespace>
     <AssemblyName>Pulsar4X.CrossPlatformUI</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,34 +37,31 @@
       <HintPath>..\packages\Eto.Serialization.Json.2.1.0\lib\net45\Eto.Serialization.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Eto.Serialization.Xaml, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Eto.Serialization.Xaml.2.1.0\lib\net45\Eto.Serialization.Xaml.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.6\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <EmbeddedResource Include="MainForm.jeto" />
-    <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Views\Startup.jeto" />
     <EmbeddedResource Include="Views\NewGame.jeto" />
+    <EmbeddedResource Include="Views\Startup.jeto" />
+    <EmbeddedResource Include="Views\SystemView.jeto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\LoadGame.cs" />
+    <Compile Include="Commands\NewGame.cs" />
     <Compile Include="Commands\Quit.cs" />
     <Compile Include="Commands\SaveGame.cs" />
-    <Compile Include="Commands\NewGame.cs" />
-    <Compile Include="MainForm.jeto.cs">
-      <DependentUpon>MainForm.jeto</DependentUpon>
-    </Compile>
+    <Compile Include="CustomControls\GLSurface.cs" />
+    <Compile Include="MainForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\NewGame.jeto.cs">
       <DependentUpon>NewGame.jeto</DependentUpon>
@@ -71,9 +69,15 @@
     <Compile Include="Views\Startup.jeto.cs">
       <DependentUpon>Startup.jeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\SystemView.jeto.cs">
+      <DependentUpon>SystemView.jeto</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <ProjectReference Include="..\ViewModelLib\Pulsar4X.ViewModels.csproj">
+      <Project>{37f5b88b-f1aa-410e-9fcb-4ca26a4dd887}</Project>
+      <Name>Pulsar4X.ViewModels</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Views\Partials\" />
@@ -81,16 +85,5 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\NewGame.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
-      <Project>{e716fa06-ecdf-b446-96b4-b790aab5713b}</Project>
-      <Name>Pulsar4X.ECSLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ViewModelLib\Pulsar4X.ViewModels.csproj">
-      <Project>{37f5b88b-f1aa-410e-9fcb-4ca26a4dd887}</Project>
-      <Name>Pulsar4X.ViewModels</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions />
 </Project>

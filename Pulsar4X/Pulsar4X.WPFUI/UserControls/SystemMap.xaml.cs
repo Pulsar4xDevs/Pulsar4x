@@ -50,7 +50,7 @@ namespace Pulsar4X.WPFUI
         private void planet_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             PlanetVM planet = (PlanetVM)sender;
-            if (_canvasItemIndexes.ContainsKey(planet.ID) && e.PropertyName == "Position")        
+            if (_canvasItemIndexes.ContainsKey(planet.ID) && e.PropertyName == "Position")
             {
                 var planetItem = MapCanvas.Children[_canvasItemIndexes[planet.ID]];
                 int size = 10;

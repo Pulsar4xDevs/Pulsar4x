@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Pipes;
 using System.Reflection.Emit;
@@ -11,11 +12,11 @@ using Pulsar4X.ECSLib;
 namespace Pulsar4X.ViewModel
 {
     /// <summary>
-    /// This view model maps to the main game class. It porivdes lists of factions, systems and other high level info.
+    /// This view model maps to the main game class. It provides lists of factions, systems and other high level info.
     /// </summary>
     public class GameVM : IViewModel
     {
-        private BindingList<SystemVM> _systems;
+        private ObservableCollection<SystemVM> _systems;
 
         private Entity _playerFaction;
  
@@ -45,8 +46,8 @@ namespace Pulsar4X.ViewModel
                 {
                     _visibleFactions.Add(knownFaction.Guid);
                 }
-                _systems = new BindingList<SystemVM>();
-                _systemDictionary = new Dictionary<Guid, SystemVM>();
+                _systems.Clear();
+                _systemDictionary.Clear();
                 foreach (var knownsystem in _playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems)
                 {
                     SystemVM systemVM = SystemVM.Create(this, knownsystem);
@@ -67,8 +68,7 @@ namespace Pulsar4X.ViewModel
         //faction data. for GM this will be compleate, for normal play this will be factions known to the faction, and the factionVM will only contain data that is known to the faction
         private BindingList<FactionVM> _factions; 
 
-
-        public BindingList<SystemVM> StarSystems { get { return _systems; } }
+        public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
 
         public List<ColonyScreenVM> ColonyScreens { get; set; } 
         
@@ -111,8 +111,6 @@ namespace Pulsar4X.ViewModel
             PlayerFaction = gameMaster;
             if (options.CreatePlayerFaction && options.DefaultStart)
             {
-
-
                 PlayerFaction = DefaultStartFactory.DefaultHumans(newGame, options.FactionName);
             }
             ProgressValue = 0;//reset the progressbar
@@ -215,7 +213,7 @@ namespace Pulsar4X.ViewModel
         public GameVM()
         {
             //Game = game;
-            _systems = new BindingList<SystemVM>();
+            _systems = new ObservableCollection<SystemVM>();
             _systemDictionary = new Dictionary<Guid, SystemVM>();
             //PlayerFaction = game.GameMasterFaction; //on creation the player faction can be set to GM I guess... for now anyway.
         }

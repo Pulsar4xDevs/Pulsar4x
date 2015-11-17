@@ -28,7 +28,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             FactionName.TextBinding.BindDataContext((NewGameOptionsVM n) => n.FactionName);
             FactionPassword.TextBinding.BindDataContext((NewGameOptionsVM n) => n.FactionPassword);
             GmPassword.TextBinding.BindDataContext((NewGameOptionsVM n) => n.GmPassword);
-            (new BindableBinding<NumericUpDown, double>(NumberOfSystems, c => c.Value, (c, v) => c.Value = v)).BindDataContext((NewGameOptionsVM n) => n.NumberOfSystems);
+            var NumberOfSystemsBinding = (new BindableBinding<NumericUpDown, double>(NumberOfSystems, c => c.Value, (c, v) => c.Value = v));
+            NumberOfSystemsBinding.BindDataContext((NewGameOptionsVM n) => n.NumberOfSystems);
             //NumberOfSystems.BindDataContext<int>("NumberOfSystems", "NumberOfSystems");
         }
 
