@@ -8,7 +8,9 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
         [STAThread]
         public static void Main(string[] args)
         {
-            new Application(Eto.Platforms.Gtk2).Run(new MainForm());
+			var platform = new Eto.GtkSharp.Platform ();
+			platform.Add<GLSurface.IHandler>(() => new GtkGLSurfaceHandler());
+			new Application(platform).Run(new MainForm());
         }
     }
 }

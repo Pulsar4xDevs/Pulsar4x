@@ -1,10 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F5FC84D7-A87C-FB4E-89AA-FE2E6D75EB65}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -43,10 +41,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
-      <Project>{e716fa06-ecdf-b446-96b4-b790aab5713b}</Project>
+      <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
       <Name>Pulsar4X.ECSLib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Pulsar4X.Lib\Pulsar4X.Lib.csproj">
@@ -62,19 +62,19 @@
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="log4net">
-      <HintPath>../deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll</HintPath>
+      <HintPath>..\deps\log4net-1.2.11\bin\net\4.0\release\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\deps\Newtonsoft.Json\Net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK">
-      <HintPath>../deps/OpenTK-1.1/bin/OpenTK.dll</HintPath>
+      <HintPath>..\deps\OpenTK-1.1\Bin\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK.GLControl">
-      <HintPath>../deps/OpenTK-1.1/Bin/OpenTK.GLControl.dll</HintPath>
+      <HintPath>..\deps\OpenTK-1.1\Bin\OpenTK.GLControl.dll</HintPath>
     </Reference>
     <Reference Include="WeifenLuo.WinFormsUI.Docking">
-      <HintPath>../deps/DockPanelSuite/WeifenLuo.WinFormsUI.Docking.dll</HintPath>
+      <HintPath>..\deps\DockPanelSuite\WeifenLuo.WinFormsUI.Docking.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
