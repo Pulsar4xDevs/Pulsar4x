@@ -8,7 +8,7 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
     /// <summary>
     /// Interaction logic for WpfUserControl.xaml
     /// </summary>
-    public partial class WpfUserControl : System.Windows.Controls.UserControl
+    public partial class WpfGLSurface : System.Windows.Controls.UserControl
     {
         public event EventHandler ShuttingDown = delegate { };
         public GLControl glc;
@@ -25,7 +25,7 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
         /// <param name="major">The major version for the OpenGL GraphicsContext.</param>
         /// <param name="minor">The minor version for the OpenGL GraphicsContext.</param>
         /// <param name="flags">The GraphicsContextFlags for the OpenGL GraphicsContext.</param>
-        public WpfUserControl(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags, GLSurface Widget)
+        public WpfGLSurface(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags, GLSurface Widget)
         {
             if (mode == null)
                 throw new ArgumentNullException("mode");

@@ -71,8 +71,8 @@
     </Compile>
     <Compile Include="Win32Helper.cs" />
     <Compile Include="WinGLSurfaceHandler.cs" />
-    <Compile Include="WpfUserControl.xaml.cs">
-      <DependentUpon>WpfUserControl.xaml</DependentUpon>
+    <Compile Include="WpfGLSurface.xaml.cs">
+      <DependentUpon>WpfGLSurface.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -86,7 +86,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WpfUserControl.xaml">
+    <Page Include="WpfGLSurface.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

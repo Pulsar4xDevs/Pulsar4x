@@ -9,7 +9,7 @@ using System;
 
 namespace Pulsar4X.CrossPlatformUI.Wpf
 {
-    public class WinGLSurfaceHandler : WpfFrameworkElement<WpfUserControl, GLSurface, GLSurface.ICallback>, GLSurface.IHandler
+    public class WinGLSurfaceHandler : WpfFrameworkElement<WpfGLSurface, GLSurface, GLSurface.ICallback>, GLSurface.IHandler
     {
         private GraphicsMode mode;
         private int major;
@@ -18,7 +18,7 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
 
         protected override void Initialize()
         {
-            var c = new WpfUserControl(mode, major, minor, flags, Widget);
+            var c = new WpfGLSurface(mode, major, minor, flags, Widget);
             c.glc.Paint += (sender, args) => base.Callback.OnDrawNow(Widget, args);
             c.glc.Resize += (sender, args) => base.Callback.OnResize(Widget, args);
             c.glc.Load += (sender, args) => base.Callback.OnInitialized(Widget, args);

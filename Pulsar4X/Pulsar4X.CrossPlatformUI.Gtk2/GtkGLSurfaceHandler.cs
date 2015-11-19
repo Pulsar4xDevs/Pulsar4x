@@ -17,11 +17,11 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 
 		protected override void Initialize()
 		{
-			var c = new GtkGLSurface(mode, major, minor, flags, Widget);
-			c.glc.Paint += (sender, args) => base.Callback.OnDrawNow(Widget, args);
-			c.glc.Resize += (sender, args) => base.Callback.OnResize(Widget, args);
-			c.glc.Load += (sender, args) => base.Callback.OnInitialized(Widget, args);
-			c.glc.Disposed += (sender, args) => base.Callback.OnShuttingDown(Widget, args);
+			Toolkit.Init();
+			var c = new GtkGLSurface(mode, major, minor, flags);
+			c.RenderFrame += (sender, args) => base.Callback.OnDrawNow(Widget, args);
+			c.Initialized += (sender, args) => base.Callback.OnInitialized(Widget, args);
+			c.ShuttingDown += (sender, args) => base.Callback.OnShuttingDown(Widget, args);
 			this.Control = c;
 
 			base.Initialize();
@@ -37,7 +37,7 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 
 		public Size GLSize
 		{
-			get { return this.Control.GLSize; }
+			get { return Control.GLSize; }
 			set { this.Control.GLSize = value; }
 		}
 
@@ -54,24 +54,6 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 		public void SwapBuffers()
 		{
 			this.Control.SwapBuffers();
-		}
-
-		public override void AttachEvent(string id)
-		{
-			switch (id)
-			{
-			case GLSurface.GLInitializedEvent:
-				this.Control.Initialized += (sender, args) => Callback.OnInitialized(this.Widget, args);
-				break;
-
-			case GLSurface.GLShuttingDownEvent:
-				this.Control.ShuttingDown += (sender, args) => Callback.OnShuttingDown(this.Widget, args);
-				break;
-
-			default:
-				base.AttachEvent(id);
-				break;
-			}
 		}
 
 		public override Color BackgroundColor

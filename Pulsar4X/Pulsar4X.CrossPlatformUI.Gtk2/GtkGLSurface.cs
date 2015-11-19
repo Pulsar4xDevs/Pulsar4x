@@ -1,31 +1,43 @@
-﻿using System;
+﻿////////////////////////////////////////////////////////////////////////////////
+// Gtk GLWidget Sharp - Gtk OpenGL Widget for CSharp using OpenTK
+////////////////////////////////////////////////////////////////////////////////
+/*
+Usage:
+To render either override OnRenderFrame() or hook to the RenderFrame event.
+
+When GraphicsContext.ShareContexts == True (Default)
+To setup OpenGL state hook to the following events:
+GLWidget.GraphicsContextInitialized
+GLWidget.GraphicsContextShuttingDown
+
+When GraphicsContext.ShareContexts == False
+To setup OpenGL state hook to the following events:
+GLWidget.Initialized
+GLWidget.ShuttingDown 
+*/
+////////////////////////////////////////////////////////////////////////////////
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Platform;
+using Eto.Drawing;
+using Eto;
+using Eto.Forms;
+using Eto.GtkSharp;
+using Gtk;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
-using Eto.Drawing;
-using Eto.GtkSharp;
-using Gtk;
-using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Platform;
+using System.ComponentModel;
 
 namespace Pulsar4X.CrossPlatformUI.Gtk2
 {
+	[ToolboxItem(true)]
 	public class GtkGLSurface : DrawingArea, IDisposable
 	{
 		IGraphicsContext graphicsContext;
 		static int graphicsContextCount;
-
-		const string linux_libx11_name = "libX11.so.6";
-		const string linux_libgdk_x11_name = "libgdk-x11-2.0.so.0";
-		const string linux_libgl_name = "libGL.so.1";
-		const string libgdk_name = "libgdk-win32-2.0-0.dll";
-		const string libX11_name = "libX11";
-
-		public GLControl glc;
 
 		/// <summary>Use a single buffer versus a double buffer.</summary>
 		[Browsable(true)]
@@ -57,34 +69,7 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 		/// <summary>The minor version of OpenGL to use.</summary>
 		public int GlVersionMinor { get; set; }
 
-		private Size size;
-		/// <summary>
-		/// Gets or sets the context size.
-		/// </summary>
-		/// <value>The width.</value>
-		public virtual Size GLSize
-		{
-			get
-			{
-				return Visible ? new Size(Allocation.Size.Width, Allocation.Size.Height) : size; 
-			}
-			set
-			{
-				if (size != value)
-				{
-					size = value;
-					var alloc = Allocation;
-					alloc.Size = value.ToGdk();
-					SetSizeRequest(size.Width, size.Height);
-				}
-			}
-		}
-
-		bool initialized = false;
-		public virtual bool IsInitialized 
-		{
-			get { return initialized; }
-		}
+		public bool IsInitialized { get{ return initialized; } }
 
 		public GraphicsContextFlags GraphicsContextFlags
 		{
@@ -93,12 +78,29 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 		}
 		GraphicsContextFlags graphicsContextFlags;
 
+		public Eto.Drawing.Size GLSize
+		{
+			get
+			{
+				return new Size(Allocation.Size.Width, Allocation.Size.Height);
+			}
+			set
+			{
+				var alloc = Allocation;
+				alloc.Size = new Gdk.Size (value.Width, value.Height);
+			}
+		}
+
+		/// <summary>Constructs a new GLWidget.</summary>
+		public GtkGLSurface() : this(GraphicsMode.Default) { }
+
+		/// <summary>Constructs a new GLWidget using a given GraphicsMode</summary>
+		public GtkGLSurface(GraphicsMode graphicsMode) : this(graphicsMode, 1, 0, GraphicsContextFlags.Default) { }
+
 		/// <summary>Constructs a new GLWidget</summary>
-		public GtkGLSurface(GraphicsMode graphicsMode, int glVersionMajor, int glVersionMinor, GraphicsContextFlags graphicsContextFlags, GLSurface widget)
+		public GtkGLSurface(GraphicsMode graphicsMode, int glVersionMajor, int glVersionMinor, GraphicsContextFlags graphicsContextFlags)
 		{
 			this.DoubleBuffered = false;
-
-			CanFocus = true;
 
 			SingleBuffer = graphicsMode.Buffers == 1;
 			ColorBPP = graphicsMode.ColorFormat.BitsPerPixel;
@@ -111,11 +113,6 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 			GlVersionMajor = glVersionMajor;
 			GlVersionMinor = glVersionMinor;
 			GraphicsContextFlags = graphicsContextFlags;
-
-			glc = new GLControl(graphicsMode, GlVersionMajor, GlVersionMinor, GraphicsContextFlags);
-			glc.Load += (sender, args) => {
-				widget.OnGLInitalized(args);
-			};
 		}
 
 		~GtkGLSurface() { Dispose(false); }
@@ -142,27 +139,6 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 			}
 		}
 
-		public virtual void MakeCurrent() {
-			if (!initialized)
-			{
-				return;
-			}
-
-			graphicsContext.MakeCurrent(windowInfo);
-		}
-
-		public virtual void SwapBuffers() {
-			if (!initialized)
-			{
-				return;
-			}
-
-			Display.Flush ();
-			graphicsContext.SwapBuffers ();
-			Display.Sync ();           
-		}
-
-
 		// Called when the first GraphicsContext is created in the case of GraphicsContext.ShareContexts == True;
 		public static event EventHandler GraphicsContextInitialized;
 		static void OnGraphicsContextInitialized() { if (GraphicsContextInitialized != null) GraphicsContextInitialized(null, EventArgs.Empty); }
@@ -172,21 +148,25 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 		static void OnGraphicsContextShuttingDown() { if (GraphicsContextShuttingDown != null) GraphicsContextShuttingDown(null, EventArgs.Empty); }
 
 		// Called when this GLWidget has a valid GraphicsContext
-		public event EventHandler Initialized = delegate {};
-		protected virtual void OnInitialized() { Initialized(this, EventArgs.Empty); }
+		public event EventHandler Initialized;
+		protected virtual void OnInitialized() { if (Initialized != null) Initialized(this, EventArgs.Empty); }
 
 		// Called when this GLWidget needs to render a frame
-		public event EventHandler Resize = delegate {};
-		protected virtual void OnResize() { Resize (this, EventArgs.Empty); }
+		public event EventHandler RenderFrame;
+		protected virtual void OnRenderFrame() { if (RenderFrame != null) RenderFrame(this, EventArgs.Empty); }
 
 		// Called when this GLWidget is being Disposed
 		public event EventHandler ShuttingDown;
 		protected virtual void OnShuttingDown() { if (ShuttingDown != null) ShuttingDown(this, EventArgs.Empty); }
 
+		// Called when a widget is realized. (window handles and such are valid)
+		// protected override void OnRealized() { base.OnRealized(); }
+
 		static bool sharedContextInitialized = false;
+		bool initialized = false;
 
 		// Called when the widget needs to be (fully or partially) redrawn.
-		protected bool OnExposeEvent(Gdk.EventExpose eventExpose)
+		protected override bool OnExposeEvent(Gdk.EventExpose eventExpose)
 		{
 			if (!initialized)
 			{
@@ -195,7 +175,7 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 				// If this looks uninitialized...  initialize.
 				if( ColorBPP == 0 )
 				{
-					ColorBPP = 24;
+					ColorBPP = 32;
 
 					if( DepthBPP == 0 ) DepthBPP = 16;
 				}
@@ -249,7 +229,7 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 
 				// GraphicsContext
 				graphicsContext = new GraphicsContext(graphicsMode, windowInfo, GlVersionMajor, GlVersionMinor, graphicsContextFlags);
-				MakeCurrent();
+				graphicsContext.MakeCurrent(windowInfo);
 
 				if (GraphicsContext.ShareContexts)
 				{
@@ -276,23 +256,36 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 			}
 
 			bool result = base.OnExposeEvent(eventExpose);
-
-			GL.Viewport( 0, 0, GLSize.Width, GLSize.Height );
-			GL.MatrixMode( MatrixMode.Projection );
-			GL.LoadIdentity();
-			GL.Ortho( -1.0, 1.0, -1.0, 1.0, 0.0, 4.0 );
-
-			OnResize();
-			eventExpose.Window.Display.Sync(); // Add Sync call to fix resize rendering problem (Jay L. T. Cornwall) - How does this affect VSync?           
+			OnRenderFrame();
+			eventExpose.Window.Display.Sync(); // Add Sync call to fix resize rendering problem (Jay L. T. Cornwall) - How does this affect VSync?
+			this.graphicsContext.SwapBuffers();
 			return result;
 		}
 
+		internal void MakeCurrent()
+		{
+			if (IsInitialized) {
+				graphicsContext.MakeCurrent (windowInfo);
+			}
+		}
+
+		internal void SwapBuffers()
+		{
+			if (IsInitialized) {
+				graphicsContext.SwapBuffers ();
+			}
+		}
+
+		// Called on Resize
 		protected override bool OnConfigureEvent(Gdk.EventConfigure evnt)
 		{
 			bool result = base.OnConfigureEvent(evnt);
 			if (graphicsContext != null) graphicsContext.Update(windowInfo);
 			return result;
 		}
+
+		[SuppressUnmanagedCodeSecurity, DllImport("libgdk-win32-2.0-0.dll")]
+		public static extern IntPtr gdk_win32_drawable_get_handle(IntPtr d);
 
 		public enum XVisualClass : int
 		{
@@ -341,18 +334,19 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 			All = 0x1FF,
 		}
 
-		[DllImport(libX11_name, EntryPoint = "XGetVisualInfo")]
+		[DllImport("libX11", EntryPoint = "XGetVisualInfo")]
 		static extern IntPtr XGetVisualInfoInternal(IntPtr display, IntPtr vinfo_mask, ref XVisualInfo template, out int nitems);
 		static IntPtr XGetVisualInfo(IntPtr display, XVisualInfoMask vinfo_mask, ref XVisualInfo template, out int nitems)
 		{
 			return XGetVisualInfoInternal(display, (IntPtr)(int)vinfo_mask, ref template, out nitems);
 		}
 
-		[SuppressUnmanagedCodeSecurity, DllImport(libgdk_name)]
-		public static extern IntPtr gdk_win32_drawable_get_handle(IntPtr d);
+		const string linux_libx11_name = "libX11.so.6";
 
 		[SuppressUnmanagedCodeSecurity, DllImport(linux_libx11_name)]
 		static extern void XFree(IntPtr handle);
+
+		const string linux_libgdk_x11_name = "libgdk-x11-2.0.so.0";
 
 		/// <summary> Returns the X resource (window or pixmap) belonging to a GdkDrawable. </summary>
 		/// <remarks> XID gdk_x11_drawable_get_xid(GdkDrawable *drawable); </remarks>
@@ -367,9 +361,6 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 		/// <returns> The X Display of the GdkDisplay. </returns>
 		[SuppressUnmanagedCodeSecurity, DllImport(linux_libgdk_x11_name)]
 		static extern IntPtr gdk_x11_display_get_xdisplay(IntPtr gdkDisplay);
-
-		[SuppressUnmanagedCodeSecurity, DllImport(linux_libgl_name)]
-		static extern IntPtr glXChooseVisual(IntPtr display, int screen, int[] attr);
 
 		IntPtr GetVisualInfo(IntPtr display)
 		{
@@ -456,7 +447,11 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 
 				return attributeList;
 			}
-		}      
+		}
+
+		const string linux_libgl_name = "libGL.so.1";
+
+		[SuppressUnmanagedCodeSecurity, DllImport(linux_libgl_name)]
+		static extern IntPtr glXChooseVisual(IntPtr display, int screen, int[] attr);
 	}
 }
-
