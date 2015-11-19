@@ -3,6 +3,7 @@
     <String>ModdingTools.JsonDataEditor/ModdingTools.JsonDataEditor.csproj</String>
     <String>ModdingTools.JsonDataEditor2/ModdingTools.JsonDataEditor2.csproj</String>
     <String>Pulsar4X.WPFUI/Pulsar4X.WPFUI.csproj</String>
+    <String>Pulsar4X.CrossPlatformUI.Mac/Pulsar4X.CrossPlatformUI.Mac.csproj</String>
   </DisabledProjects>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI/MainForm.cs">
