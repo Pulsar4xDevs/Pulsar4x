@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Pulsar4X.CrossPlatformUI</RootNamespace>
     <AssemblyName>Pulsar4X.CrossPlatformUI</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
