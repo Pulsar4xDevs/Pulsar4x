@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{37F5B88B-F1AA-410E-9FCB-4CA26A4DD887}</ProjectGuid>
+    <ProjectGuid>{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pulsar4x.ViewModels</RootNamespace>
-    <AssemblyName>Pulsar4x.ViewModels</AssemblyName>
+    <RootNamespace>Pulsar4X.Sceen</RootNamespace>
+    <AssemblyName>Pulsar4X.Sceen</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -37,41 +36,12 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="OpenTK">
-      <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK.GLControl">
-      <HintPath>..\packages\OpenTK.GLControl.1.1.1589.5942\lib\NET40\OpenTK.GLControl.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SceenManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModels\ColonyScreenVM.cs" />
-    <Compile Include="ViewModels\Commands.cs" />
-    <Compile Include="ViewModels\ComponentDesignVM.cs" />
-    <Compile Include="ViewModels\ComponentTemplateVM.cs" />
-    <Compile Include="ViewModels\ConstructionAbilityVM.cs" />
-    <Compile Include="ViewModels\FactionVM.cs" />
-    <Compile Include="ViewModels\GameVM.cs" />
-    <Compile Include="ViewModels\IViewModel.cs" />
-    <Compile Include="ViewModels\JobVM.cs" />
-    <Compile Include="ViewModels\NewGameOptionsVM.cs" />
-    <Compile Include="ViewModels\PlanetVM.cs" />
-    <Compile Include="ViewModels\RefinaryAbilityVM.cs" />
-    <Compile Include="ViewModels\RenderVM.cs" />
-    <Compile Include="ViewModels\ResearchVM.cs" />
-    <Compile Include="ViewModels\SpeciesVM.cs" />
-    <Compile Include="ViewModels\StarVM.cs" />
-    <Compile Include="ViewModels\SystemVM.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
-      <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
-      <Name>Pulsar4X.ECSLib</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -81,7 +51,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>

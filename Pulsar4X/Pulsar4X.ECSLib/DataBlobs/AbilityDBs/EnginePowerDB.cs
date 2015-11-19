@@ -1,6 +1,4 @@
-﻿
-using System.Diagnostics.PerformanceData;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
