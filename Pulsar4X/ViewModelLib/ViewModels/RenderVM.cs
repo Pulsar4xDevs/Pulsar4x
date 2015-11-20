@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Sceen;
 
 namespace Pulsar4X.ViewModel
 {
@@ -11,9 +12,10 @@ namespace Pulsar4X.ViewModel
     /// </summary>
     public class RenderVM : IViewModel
     {
+		private SceenManager SceneManager;
         public RenderVM()
         {
-
+			SceneManager = new SceenManager ();
         }
 
         public void Draw()

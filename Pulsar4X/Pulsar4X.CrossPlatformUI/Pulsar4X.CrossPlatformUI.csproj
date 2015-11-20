@@ -68,6 +68,7 @@
     <Compile Include="Views\SystemView.jeto.cs">
       <DependentUpon>SystemView.jeto</DependentUpon>
     </Compile>
+    <Compile Include="Lib\OpenGLRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ViewModelLib\Pulsar4x.ViewModels.csproj">
@@ -76,10 +77,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Views\Partials\" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\NewGame.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Lib\" />
+  </ItemGroup>
 </Project>

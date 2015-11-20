@@ -51,4 +51,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Interface\" />
+  </ItemGroup>
 </Project>

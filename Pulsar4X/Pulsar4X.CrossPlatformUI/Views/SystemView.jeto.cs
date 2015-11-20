@@ -19,7 +19,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected ListBox Systems;
         protected SystemVM CurrentSystem;
-        protected RenderVM SceneMgr;
+        protected RenderVM RenderVM;
 
         protected Splitter Body;
 
@@ -29,109 +29,16 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private bool drawPending = false;
 
-        private List<int> shaderList;
+		private OpenGLRenderer Renderer;
 
-        int theProgram;
 
-        int positionBufferObject;
-        private int vao;
-
-        readonly Vector4[] vertexPositions =
-{
-            new Vector4(0.75f, 0.75f, 0.0f, 1.0f),
-            new Vector4(0.75f, -0.75f, 0.0f, 1.0f),
-            new Vector4(-0.75f, -0.75f, 0.0f, 1.0f),
-        };
-
-        private const string strVertexShader = @"#version 330
-			layout(location = 0) in vec4 position;
-			void main()
-			{
-			   gl_Position = position;
-			}";
-
-        private const string strFragmentShader = @"#version 330
-			out vec4 outputColor;
-			void main()
-			{
-			   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-			}";
-        int CreateShader(ShaderType eShaderType, string strShaderFile)
-        {
-            int shader = GL.CreateShader(eShaderType);
-            GL.ShaderSource(shader, strShaderFile);
-            GL.CompileShader(shader);
-
-            int status;
-            GL.GetShader(shader, ShaderParameter.CompileStatus, out status);
-            if (status == 0)
-            {
-                int infoLogLength;
-                GL.GetShader(shader, ShaderParameter.InfoLogLength, out infoLogLength);
-
-                string strInfoLog;
-                GL.GetShaderInfoLog(shader, out strInfoLog);
-
-                string strShaderType;
-                switch (eShaderType)
-                {
-                    case ShaderType.FragmentShader:
-                        strShaderType = "fragment";
-                        break;
-                    case ShaderType.VertexShader:
-                        strShaderType = "vertex";
-                        break;
-                    case ShaderType.GeometryShader:
-                        strShaderType = "geometry";
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException("eShaderType");
-                }
-
-                //Debug.WriteLine("Compile failure in " + strShaderType + " shader:\n" + strInfoLog, "Error");
-            }
-
-            return shader;
-        }
-
-        int CreateProgram(List<int> shaderList)
-        {
-            int program = GL.CreateProgram();
-
-            foreach (int shader in shaderList)
-            {
-                GL.AttachShader(program, shader);
-            }
-
-            GL.LinkProgram(program);
-
-            int status;
-            GL.GetProgram(program, GetProgramParameterName.LinkStatus, out status);
-            if (status == 0)
-            {
-                int infoLogLength;
-                GL.GetProgram(program, GetProgramParameterName.InfoLogLength, out infoLogLength);
-
-                string strInfoLog;
-                GL.GetProgramInfoLog(program, out strInfoLog);
-                //Debug.WriteLine("Linker failure: " + strInfoLog, "Error");
-                throw new Exception("Linker failure: " + strInfoLog);
-            }
-
-            foreach (int shader in shaderList)
-            {
-                GL.DetachShader(program, shader);
-            }
-
-            return program;
-        }
 
         public SystemView(GameVM GameVM)
         {
             DataContext = GameVM;
             gl_context = new GLSurface(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
-            SceneMgr = new RenderVM();
-            shaderList = new List<int>();
+            RenderVM = new RenderVM();
+			Renderer = new OpenGLRenderer ();
             JsonReader.Load(this);
 
             Systems.BindDataContext(c => c.DataStore, (GameVM c) => c.StarSystems);
@@ -140,34 +47,16 @@ namespace Pulsar4X.CrossPlatformUI.Views
             Systems.SelectedIndexChanged += loadSystem;
 
             Body.Panel2 = gl_context;
-            gl_context.GLInitalized += SceneMgr.Initialize;
-            gl_context.GLDrawNow += SceneMgr.Draw;
-            gl_context.GLShuttingDown += SceneMgr.Teardown;
-            gl_context.GLResize += SceneMgr.Resize;
+            gl_context.GLInitalized += Initialize;
+            gl_context.GLDrawNow += DrawNow;
+            gl_context.GLShuttingDown += Teardown;
+            gl_context.GLResize += Resize;
+			gl_context.MouseMove += Gl_context_MouseMove;
         }
 
-        void InitializeProgram()
+        void Gl_context_MouseMove (object sender, MouseEventArgs e)
         {
-            shaderList.Add(CreateShader(ShaderType.VertexShader, strVertexShader));
-            shaderList.Add(CreateShader(ShaderType.FragmentShader, strFragmentShader));
-
-            theProgram = CreateProgram(shaderList);
-
-            foreach (int shader in shaderList)
-            {
-                GL.DeleteShader(shader);
-            }
-        }
-
-        void InitializeVertexBuffer()
-        {
-            GL.GenBuffers(1, out positionBufferObject);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, positionBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer,
-                (IntPtr)(vertexPositions.Length * Vector4.SizeInBytes),
-                vertexPositions,
-                BufferUsageHint.StaticDraw);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+			Console.WriteLine (e.Location);
         }
 
         private void Draw()
@@ -175,52 +64,36 @@ namespace Pulsar4X.CrossPlatformUI.Views
             drawPending = true;
         }
 
-        private void timDraw_Elapsed(object sender, EventArgs e)
-        {
-            if (!drawPending || !gl_context.IsInitialized)
-            {
-                return;
-            }
+		public void loadSystem(object sender, EventArgs e)
+		{
+			CurrentSystem = (SystemVM)((ListBox)sender).SelectedValue;
+			Draw();
+		}
 
-            gl_context.MakeCurrent();
+		public void Initialize(object sender, EventArgs e) {
+			timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
+			timDraw.Elapsed += timDraw_Elapsed;
+			timDraw.Start();
 
-            GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0F);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            SceneMgr.Draw();
-            GL.Flush();
-            gl_context.SwapBuffers();
+			gl_context.MakeCurrent();
+			Renderer.Initialize();
+		}
 
-            drawPending = false;
-        }
+		private void timDraw_Elapsed(object sender, EventArgs e)
+		{
+			if (!drawPending || !gl_context.IsInitialized)
+			{
+				return;
+			}
 
-        public void loadSystem(object sender, EventArgs e)
-        {
-            CurrentSystem = (SystemVM)((ListBox)sender).SelectedValue;
-            Draw();
-        }
+			gl_context.MakeCurrent();
 
-        public void InitializeCanvas(object sender, EventArgs e)
-        {
-            gl_context.MakeCurrent();
+			Renderer.Draw();
 
-            GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
-            GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
-            GL.ClearColor(0.0F, 0.0F, 0.0F, 1.0F);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-            GL.ShadeModel(ShadingModel.Smooth);
-            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-            GL.Enable(EnableCap.DepthTest);
+			gl_context.SwapBuffers();
 
-            InitializeProgram();
-            InitializeVertexBuffer();
-
-            GL.GenVertexArrays(1, out vao);
-            GL.BindVertexArray(vao);
-
-            timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
-            timDraw.Elapsed += timDraw_Elapsed;
-            timDraw.Start();
-        }
+			drawPending = false;
+		}
 
         public void DrawNow(object sender, EventArgs e)
         {
@@ -229,11 +102,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public void Resize(object sender, EventArgs e)
         {
-            Draw();
+			gl_context.MakeCurrent();
+			Renderer.Resize();
         }
 
-        public void TeardownCanvas(object sender, EventArgs e)
+        public void Teardown(object sender, EventArgs e)
         {
+			Renderer.Destroy();
         }
     }
 }

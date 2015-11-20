@@ -8,5 +8,8 @@ namespace Pulsar4X.Sceen
 {
     public class SceenManager
     {
+		public SceenManager() {
+
+		}
     }
 }

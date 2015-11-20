@@ -72,6 +72,10 @@
       <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
       <Name>Pulsar4X.ECSLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Pulsar4X.Sceen\Pulsar4X.Sceen.csproj">
+      <Project>{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}</Project>
+      <Name>Pulsar4X.Sceen</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
