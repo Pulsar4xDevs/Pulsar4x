@@ -315,10 +315,12 @@ namespace Pulsar4X.Entities
             double RingValue = Math.Sqrt(Stars[0].Orbit.MassRelativeToSol) * Constants.SensorTN.EarthRingDistance;
             double distanceFromPrimary = Math.Sqrt(((X * X) + (Y * Y)));
             double Angle = (Math.Atan((X / Y)) / Constants.Units.Radian);
+            if (Angle < 0)
+                Angle += 360.0;
 
             int SurveyIndex = -1;
 
-            if (distanceFromPrimary < (3 * RingValue))
+            if (distanceFromPrimary >= (2 * RingValue) && distanceFromPrimary < (3 * RingValue))
             {
                 /// <summary>
                 /// Ring 3 contains survey indices 19 through 30, but these are addressed starting from zero.
@@ -358,7 +360,7 @@ namespace Pulsar4X.Entities
                     }
                 }
             }
-            else if (distanceFromPrimary < (2 * RingValue))
+            else if (distanceFromPrimary >= (RingValue) && distanceFromPrimary < (2 * RingValue))
             {
                 /// <summary>
                 /// Ring 2 contains survey indices 7 through 18.

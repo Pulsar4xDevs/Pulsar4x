@@ -3097,12 +3097,6 @@ namespace Pulsar4X.Entities
                         int RemainderSP = SystemSurveyCost - _GravSurveyPoints;
                         int TotalSP = (int)(CalcGravSurveyPoints() * (float)totalHours);
 
-
-                            String Entry = String.Format("{0} {1} {2}",TotalSP,RemainderSP,_GravSurveyPoints);
-                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
-                            TaskGroupFaction.MessageLog.Add(NME);
-
-
                         if (TotalSP < RemainderSP)
                         {
                             _GravSurveyPoints = _GravSurveyPoints + TotalSP;
@@ -3138,7 +3132,7 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// if 30 points have been surveyed mark the system as totally surveyed.
                                 /// </summary>
-                                if(CurrentSystem._SurveyResults.Count == Constants.SensorTN.SurveyPointCount)
+                                if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Count == Constants.SensorTN.SurveyPointCount)
                                 {
                                     /// <summary>
                                     /// All survey work is complete, so free up these pointers.
@@ -3158,9 +3152,12 @@ namespace Pulsar4X.Entities
                                foreach (JumpPoint JP in CurrentSystem.JumpPoints)
                                {
                                   int JPIndex = CurrentSystem.GetSurveyPointArea(JP.Position.X,JP.Position.Y);
-                                  if (JPIndex == SPIndex)
+                                  if (JPIndex == (SPIndex+1))
                                   {
                                       CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Add(JP);
+                                      String Entry = String.Format("Indexs J:{0}",CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Count);
+                                      MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                                      TaskGroupFaction.MessageLog.Add(NME);
                                   }
                                }
                             }
@@ -3296,7 +3293,9 @@ namespace Pulsar4X.Entities
                                 {
                                     if (CurrentSystem._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(SP) == false)
                                     {
-                                        float distSq = (float)(SP.Position.X * Contact.Position.X) + (float)(SP.Position.Y * Contact.Position.Y);
+                                        float dX = (float)Math.Abs(SP.Position.X - Contact.Position.X);
+                                        float dY = (float)Math.Abs(SP.Position.Y - Contact.Position.Y);
+                                        float distSq = (dX * dX) + (dY * dY);
                                         if (distSq < lowestDistance || lowestDistance == -1.0f)
                                         {
                                             lowestDistance = distSq;
@@ -3307,7 +3306,9 @@ namespace Pulsar4X.Entities
                             }
                             else
                             {
-                                float distSq = (float)(SP.Position.X * Contact.Position.X) + (float)(SP.Position.Y * Contact.Position.Y);
+                                float dX = (float)Math.Abs(SP.Position.X - Contact.Position.X);
+                                float dY = (float)Math.Abs(SP.Position.Y - Contact.Position.Y);
+                                float distSq = (dX * dX) + (dY * dY);
                                 if (distSq < lowestDistance || lowestDistance == -1.0f)
                                 {
                                     lowestDistance = distSq;
@@ -3327,11 +3328,6 @@ namespace Pulsar4X.Entities
                         }
                         else
                         {
-
-                            String Entry = String.Format("Order for {0} to survey {1}", Name, ClosestSP);
-                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
-                            TaskGroupFaction.MessageLog.Add(NME);
-
                             Order SPOrder = new Order(Constants.ShipTN.OrderType.GravSurvey, -1, -1, 0, ClosestSP);
                             IssueOrder(SPOrder);
 

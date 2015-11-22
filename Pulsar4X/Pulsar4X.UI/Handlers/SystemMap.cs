@@ -734,6 +734,13 @@ namespace Pulsar4X.UI.Handlers
             {
                 return;
             }
+            else if (m_oCurrnetSystem == null)
+            {
+                /// <summary>
+                /// Not even sure how I made it do this.
+                /// </summary>
+                return;
+            }
 
             // Now we test to see if we have already loaded this system or if it the current one:
             if (m_oCurrentSceen == null)

@@ -89,7 +89,7 @@ namespace Pulsar4X.UI
 
             oNewFaction2.Capitol = oNewFaction2.Populations[0];
             oNewFaction2.Capitol.Planet.GeoSurveyList.Add(oNewFaction2, true);
-            oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, sol);
+            //oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, sol);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 
             oNewFaction.AddNewShipDesign("Sword");
@@ -150,7 +150,7 @@ namespace Pulsar4X.UI
             }
             oNewFaction.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction.ShipDesigns[1].PreferredOrdnanceSize;
 
-            oNewFaction2.AddNewShipDesign("Mace");
+            /*oNewFaction2.AddNewShipDesign("Mace");
             CL = oNewFaction2.ComponentList;
 
 
@@ -205,7 +205,7 @@ namespace Pulsar4X.UI
             {
                 oNewFaction2.TaskGroups.Last().Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);
             }
-            oNewFaction2.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction2.ShipDesigns[1].PreferredOrdnanceSize;
+            oNewFaction2.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction2.ShipDesigns[1].PreferredOrdnanceSize;*/
 
             oNewFaction.GiveAllTechs();
             oNewFaction2.GiveAllTechs();
