@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.CrossPlatformUI
 {
 	public class OpenGLRenderer
 	{
+        private RenderVM RenderVM;
 		private List<int> shaderList;
 
 		int theProgram;
@@ -36,9 +38,10 @@ namespace Pulsar4X.CrossPlatformUI
 			   outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 			}";
 
-		public OpenGLRenderer ()
+		public OpenGLRenderer (RenderVM render_data)
 		{
             shaderList = new List<int>();
+            RenderVM = render_data;
 		}
 
 		int CreateShader(ShaderType eShaderType, string strShaderFile)
@@ -131,16 +134,7 @@ namespace Pulsar4X.CrossPlatformUI
 		public void Draw() {
 			GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0F);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			GL.UseProgram(theProgram);
 
-			GL.BindBuffer(BufferTarget.ArrayBuffer, positionBufferObject);
-			GL.EnableVertexAttribArray(0);
-			GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, 0, 0);
-
-			GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
-
-			GL.DisableVertexAttribArray(0);
-			GL.UseProgram(0);
 			GL.Flush();
 		}
 

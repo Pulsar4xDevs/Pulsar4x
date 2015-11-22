@@ -23,7 +23,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         protected Splitter Body;
 
-        protected GLSurface gl_context;
+        protected RenderCanvas RenderCanvas;
 
         private UITimer timDraw;
 
@@ -36,9 +36,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public SystemView(GameVM GameVM)
         {
             DataContext = GameVM;
-            gl_context = new GLSurface(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
+            RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
             RenderVM = new RenderVM();
-			Renderer = new OpenGLRenderer ();
+			Renderer = new OpenGLRenderer (RenderVM);
             JsonReader.Load(this);
 
             Systems.BindDataContext(c => c.DataStore, (GameVM c) => c.StarSystems);
@@ -46,12 +46,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             Systems.ItemKeyBinding = Binding.Property((SystemVM vm) => vm.ID).Convert((Guid ID) => ID.ToString());
             Systems.SelectedIndexChanged += loadSystem;
 
-            Body.Panel2 = gl_context;
-            gl_context.GLInitalized += Initialize;
-            gl_context.GLDrawNow += DrawNow;
-            gl_context.GLShuttingDown += Teardown;
-            gl_context.GLResize += Resize;
-			gl_context.MouseMove += Gl_context_MouseMove;
+            Body.Panel2 = RenderCanvas;
+            RenderCanvas.GLInitalized += Initialize;
+            RenderCanvas.GLDrawNow += DrawNow;
+            RenderCanvas.GLShuttingDown += Teardown;
+            RenderCanvas.GLResize += Resize;
+			RenderCanvas.MouseMove += Gl_context_MouseMove;
         }
 
         void Gl_context_MouseMove (object sender, MouseEventArgs e)
@@ -75,22 +75,22 @@ namespace Pulsar4X.CrossPlatformUI.Views
 			timDraw.Elapsed += timDraw_Elapsed;
 			timDraw.Start();
 
-			gl_context.MakeCurrent();
+			RenderCanvas.MakeCurrent();
 			Renderer.Initialize();
 		}
 
 		private void timDraw_Elapsed(object sender, EventArgs e)
 		{
-			if (!drawPending || !gl_context.IsInitialized)
+			if (!drawPending || !RenderCanvas.IsInitialized)
 			{
 				return;
 			}
 
-			gl_context.MakeCurrent();
+			RenderCanvas.MakeCurrent();
 
 			Renderer.Draw();
 
-			gl_context.SwapBuffers();
+			RenderCanvas.SwapBuffers();
 
 			drawPending = false;
 		}
@@ -102,7 +102,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public void Resize(object sender, EventArgs e)
         {
-			gl_context.MakeCurrent();
+			RenderCanvas.MakeCurrent();
 			Renderer.Resize();
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Platform;
 using Eto;
 namespace Pulsar4X.CrossPlatformUI.Wpf
 {
@@ -12,7 +11,6 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
     {
         public event EventHandler ShuttingDown = delegate { };
         public GLControl glc;
-        IGraphicsContext context;
         readonly GraphicsMode graphicsMode;
         readonly int major;
         readonly int minor;
@@ -25,7 +23,7 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
         /// <param name="major">The major version for the OpenGL GraphicsContext.</param>
         /// <param name="minor">The minor version for the OpenGL GraphicsContext.</param>
         /// <param name="flags">The GraphicsContextFlags for the OpenGL GraphicsContext.</param>
-        public WpfGLSurface(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags, GLSurface Widget)
+        public WpfGLSurface(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags, RenderCanvas Widget)
         {
             if (mode == null)
                 throw new ArgumentNullException("mode");
@@ -48,6 +46,7 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
             this.minor = minor;
             this.flags = flags;
 
+            this.
             InitializeComponent();
             glc = new GLControl(mode, major, minor, flags);
             glc.Load += (sender, args) => {

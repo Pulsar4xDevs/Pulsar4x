@@ -9,30 +9,30 @@ using OpenTK;
 
 namespace Pulsar4X.CrossPlatformUI
 {
-    [Handler(typeof(GLSurface.IHandler))]
-    public class GLSurface : Control
+    [Handler(typeof(RenderCanvas.IHandler))]
+    public class RenderCanvas : Control
     {
-	    public GLSurface() :
+	    public RenderCanvas() :
 			this(GraphicsMode.Default)
 	    {
 	    }
 
-	    public GLSurface(GraphicsMode graphicsMode):
+	    public RenderCanvas(GraphicsMode graphicsMode):
 			this(graphicsMode, 3, 0, GraphicsContextFlags.Default)
 	    {
 		    
 	    }
 
-	    public GLSurface(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags)
+	    public RenderCanvas(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags)
 	    {
 		    this.Handler.CreateWithParams(mode, major, minor, flags);
 		    this.Initialize();
 	    }
 
-        static GLSurface ()
+        static RenderCanvas ()
         {
-            RegisterEvent<GLSurface>(c => c.OnGLInitalized(null), GLInitializedEvent);
-            //RegisterEvent<GLSurface>(c => c.OnDrawNow(null, null), GLDrawNowEvent);
+            RegisterEvent<RenderCanvas>(c => c.OnGLInitalized(null), GLInitializedEvent);
+            //RegisterEvent<RenderCanvas>(c => c.OnDrawNow(null, null), GLDrawNowEvent);
         }
         
         public const string GLShuttingDownEvent = "GL.ShuttingDown";
@@ -99,32 +99,32 @@ namespace Pulsar4X.CrossPlatformUI
 
         public new interface ICallback : Control.ICallback
         {
-            void OnInitialized(GLSurface w, EventArgs e);
-            void OnShuttingDown(GLSurface w, EventArgs e);
-            void OnDrawNow(GLSurface w, EventArgs e);
-            void OnResize(GLSurface w, EventArgs e);
+            void OnInitialized(RenderCanvas w, EventArgs e);
+            void OnShuttingDown(RenderCanvas w, EventArgs e);
+            void OnDrawNow(RenderCanvas w, EventArgs e);
+            void OnResize(RenderCanvas w, EventArgs e);
         }
 
         //PLATFORM CONTROL -> ETO WIDGET
 
         protected new class Callback : Control.Callback, ICallback
         {
-            public void OnInitialized(GLSurface w, EventArgs e)
+            public void OnInitialized(RenderCanvas w, EventArgs e)
             {
                 w.Platform.Invoke(() => w.OnGLInitalized(e));
             }
 
-            public void OnShuttingDown(GLSurface w, EventArgs e)
+            public void OnShuttingDown(RenderCanvas w, EventArgs e)
             {
                 w.Platform.Invoke(() => w.OnShuttingDown(w, e));
             }
 
-            public void OnDrawNow(GLSurface w, EventArgs e)
+            public void OnDrawNow(RenderCanvas w, EventArgs e)
             {
                 w.Platform.Invoke(() => w.OnDrawNow(w, e));
             }
 
-            public void OnResize(GLSurface w, EventArgs e)
+            public void OnResize(RenderCanvas w, EventArgs e)
             {
                 w.Platform.Invoke(() => w.OnResize(w, e));
             }

@@ -17,12 +17,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected NumericUpDown NumberOfSystems;
 
         private NewGameOptionsVM new_game_options;
+        private GameVM Game;
 
-        public NewGame(NewGameOptionsVM context)
+        public NewGame(GameVM Game)
         {
             JsonReader.Load(this);
-            DataContext = context;
-            new_game_options = context;
+            this.Game = Game;
+            new_game_options = new NewGameOptionsVM();
+            DataContext = new_game_options;
             CreatePlayerFaction.CheckedBinding.BindDataContext((NewGameOptionsVM n) => n.CreatePlayerFaction);
             DefaultStart.CheckedBinding.BindDataContext((NewGameOptionsVM n) => n.DefaultStart);
             FactionName.TextBinding.BindDataContext((NewGameOptionsVM n) => n.FactionName);
@@ -35,7 +37,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         protected void DefaultButton_Click(object sender, EventArgs e)
         {
-            new_game_options.CreateGame();
+            Game.CreateGame(new_game_options);
             Close();
         }
 

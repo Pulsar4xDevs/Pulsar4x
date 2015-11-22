@@ -9,21 +9,19 @@ namespace Pulsar4X.CrossPlatformUI
 {
     public class MainForm : Form
     {
-        internal GameVM GameVM { get; set; }
-        public MainForm()
+        public MainForm(GameVM Game)
         {
             ClientSize = new Size(600, 400);
-            GameVM = new GameVM();
-            Content = new Views.SystemView(GameVM);
-            CreateMenuToolBar();
+            Content = new Views.SystemView(Game);
+            CreateMenuToolBar(Game);
             Title = "Pulsar4X";
         }
 
-        void CreateMenuToolBar()
+        void CreateMenuToolBar(GameVM Game)
         {
-            var newgame = new Commands.NewGame(NewGameOptionsVM.Create(GameVM));
-            var savegame = new Commands.SaveGame(GameVM);
-            var loadgame = new Commands.LoadGame(GameVM);
+            var newgame = new Commands.NewGame(Game);
+            var savegame = new Commands.SaveGame(Game);
+            var loadgame = new Commands.LoadGame(Game);
             var quit = new Commands.Quit();
 
             if (Platform.Supports<MenuBar>())
