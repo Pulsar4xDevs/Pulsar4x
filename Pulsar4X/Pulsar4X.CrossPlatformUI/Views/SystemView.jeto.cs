@@ -27,24 +27,24 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private UITimer timDraw;
 
-        private bool drawPending = false;
-
 		private OpenGLRenderer Renderer;
 
-
+        private SystemViewModel svm;
 
         public SystemView(GameVM GameVM)
         {
+            RenderVM = new RenderVM();
+            Renderer = new OpenGLRenderer(RenderVM);
             DataContext = GameVM;
             RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
-            RenderVM = new RenderVM();
-			Renderer = new OpenGLRenderer (RenderVM);
             JsonReader.Load(this);
 
-            Systems.BindDataContext(c => c.DataStore, (GameVM c) => c.StarSystems);
+            Systems.BindDataContext(s => s.DataStore, (GameVM g) => g.StarSystems);
             Systems.ItemTextBinding = Binding.Property((SystemVM vm) => vm.Name);
             Systems.ItemKeyBinding = Binding.Property((SystemVM vm) => vm.ID).Convert((Guid ID) => ID.ToString());
-            Systems.SelectedIndexChanged += loadSystem;
+            
+            //direct binding - might need to be replaced later
+            Systems.Bind(s => s.SelectedValue, RenderVM, (RenderVM rvm) => rvm.ActiveSystem);
 
             Body.Panel2 = RenderCanvas;
             RenderCanvas.GLInitalized += Initialize;
@@ -61,38 +61,34 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void Draw()
         {
-            drawPending = true;
+            RenderVM.drawPending = true;
         }
 
-		public void loadSystem(object sender, EventArgs e)
-		{
-			CurrentSystem = (SystemVM)((ListBox)sender).SelectedValue;
-			Draw();
-		}
-
 		public void Initialize(object sender, EventArgs e) {
-			timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
+            RenderCanvas.MakeCurrent();
+            Renderer.Initialize();
+
+            //we need this to run on its own because we cant have rendering blocked by the
+            //the rest of the system or waiting for an advance time command
+            timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
 			timDraw.Elapsed += timDraw_Elapsed;
 			timDraw.Start();
-
-			RenderCanvas.MakeCurrent();
-			Renderer.Initialize();
 		}
 
 		private void timDraw_Elapsed(object sender, EventArgs e)
 		{
-			if (!drawPending || !RenderCanvas.IsInitialized)
+			if (!RenderVM.drawPending || !RenderCanvas.IsInitialized)
 			{
 				return;
 			}
 
 			RenderCanvas.MakeCurrent();
 
-			Renderer.Draw();
+			Renderer.Draw(RenderVM);
 
 			RenderCanvas.SwapBuffers();
 
-			drawPending = false;
+			RenderVM.drawPending = false;
 		}
 
         public void DrawNow(object sender, EventArgs e)
@@ -109,6 +105,18 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public void Teardown(object sender, EventArgs e)
         {
 			Renderer.Destroy();
+        }
+    }
+
+    struct SystemViewModel
+    {
+        public ObservableCollection<SystemVM> systems;
+        public RenderVM render_data;
+
+        public SystemViewModel(GameVM g, RenderVM r)
+        {
+            systems = g.StarSystems;
+            render_data = r;
         }
     }
 }

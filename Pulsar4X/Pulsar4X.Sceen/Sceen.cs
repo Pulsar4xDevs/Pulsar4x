@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.Sceen
 {
-    class Sceen
+    public class Sceen
     {
     }
 }

@@ -14,21 +14,15 @@ namespace Pulsar4X.CrossPlatformUI
 
 		int theProgram;
 
-		int positionBufferObject;
 		private int vao;
 
-		readonly Vector4[] vertexPositions =
-		{
-			new Vector4(0.75f, 0.75f, 0.0f, 1.0f),
-			new Vector4(0.75f, -0.75f, 0.0f, 1.0f),
-			new Vector4(-0.75f, -0.75f, 0.0f, 1.0f),
-		};
-
 		private const string strVertexShader = @"#version 330
-			layout(location = 0) in vec4 position;
+			layout(location = 0) in vec3 vertex_pos;
+            layout(location = 1) in vec3 instance_pos;
+
 			void main()
 			{
-			   gl_Position = position;
+			   gl_Position = vec4(vertex_pos + instance_pos, 1.0f);
 			}";
 
 		private const string strFragmentShader = @"#version 330
@@ -42,7 +36,35 @@ namespace Pulsar4X.CrossPlatformUI
 		{
             shaderList = new List<int>();
             RenderVM = render_data;
+            RenderVM.SceneLoaded += LoadScenes;
 		}
+
+        public void LoadScenes(object sender, EventArgs e)
+        {
+            foreach(var scene in RenderVM.scenes)
+            {
+                if (!scene.IsInitialized)
+                {
+                    GL.GenBuffers(1, out scene.mesh.vertex_buffer_id);
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, scene.mesh.vertex_buffer_id);
+                    GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.mesh.vertices.Count * Vector3.SizeInBytes), scene.mesh.vertices.ToArray(), BufferUsageHint.StaticDraw);
+                    // 1st attribute buffer : vertices
+                    GL.EnableVertexAttribArray(0);
+                    GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
+
+                    GL.GenBuffers(1, out scene.mesh.index_buffer_id);
+                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, scene.mesh.index_buffer_id);
+                    GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(scene.mesh.indices.Count * sizeof(uint)), scene.mesh.indices.ToArray(), BufferUsageHint.StaticDraw);
+
+                    // The VBO containing the positions and sizes of the particles
+                    GL.GenBuffers(1, out scene.position_buffer_id);
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
+                    // Initialize with empty (NULL) buffer : it will be updated later, each frame.
+                    GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), IntPtr.Zero, BufferUsageHint.StreamDraw);
+                    scene.IsInitialized = true;
+                }
+            }
+        }
 
 		int CreateShader(ShaderType eShaderType, string strShaderFile)
 		{
@@ -125,15 +147,38 @@ namespace Pulsar4X.CrossPlatformUI
 			GL.Enable(EnableCap.DepthTest);
 
 			InitializeProgram();
-			InitializeVertexBuffer();
+			//InitializeVertexBuffer();
 
 			GL.GenVertexArrays(1, out vao);
 			GL.BindVertexArray(vao);
-		}
 
-		public void Draw() {
+        }
+
+		public void Draw(RenderVM data) {
 			GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0F);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            foreach (var scene in data.scenes)
+            {
+                GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
+                // Write null to avoid implicit sync
+                GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), IntPtr.Zero, BufferUsageHint.StreamDraw);
+                GL.BufferSubData(BufferTarget.ArrayBuffer, IntPtr.Zero, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), scene.position_data.ToArray());
+
+                // 2nd attribute buffer : instance position vectors
+                GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
+                GL.EnableVertexAttribArray(1);
+                GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 0, 0);
+
+                GL.VertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
+
+                // Draw the particules !
+                // This draws many times a small triangle_strip (which looks like a quad).
+                // This is equivalent to :
+                // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4),
+                // but faster.
+                GL.DrawElementsInstanced(PrimitiveType.Triangles, scene.mesh.indices.Count, DrawElementsType.UnsignedInt, IntPtr.Zero, scene.position_data.Count);
+            }
 
 			GL.Flush();
 		}
@@ -157,17 +202,6 @@ namespace Pulsar4X.CrossPlatformUI
 			{
 				GL.DeleteShader(shader);
 			}
-		}
-
-		void InitializeVertexBuffer()
-		{
-			GL.GenBuffers(1, out positionBufferObject);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, positionBufferObject);
-			GL.BufferData(BufferTarget.ArrayBuffer,
-				(IntPtr)(vertexPositions.Length * Vector4.SizeInBytes),
-				vertexPositions,
-				BufferUsageHint.StaticDraw);
-			GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 		}
 	}
 }
