@@ -72,10 +72,10 @@ namespace Pulsar4X.ViewModel
             List<Vector3> vertices = new List<Vector3>();
             List<uint> indices = new List<uint>();
             Vector3[] tmp_vectors = {
-                    new Vector3(-0.5f, 0.5f, 0.5f),
-                    new Vector3(-0.5f, -0.5f, 0.5f),
-                    new Vector3(0.5f, -0.5f, 0.5f),
-                    new Vector3(0.5f, 0.5f, 0.5f)
+                    new Vector3(-0.5f, 0.5f, 0f),
+                    new Vector3(-0.5f, -0.5f, 0f),
+                    new Vector3(0.5f, -0.5f, 0f),
+                    new Vector3(0.5f, 0.5f, 0f)
                 };
         
             vertices.AddRange(tmp_vectors);
@@ -85,6 +85,7 @@ namespace Pulsar4X.ViewModel
                 2, 3, 0
             };
             indices.AddRange(tmp_indices);
+            //this is our base instance
             var mesh = new Mesh(vertices, indices);
             //create instance specific data
             List<Vector3> position_data = new List<Vector3>();
@@ -124,6 +125,25 @@ namespace Pulsar4X.ViewModel
         public void Refresh(bool partialRefresh = false)
         {
 
+        }
+    }
+
+    public class Camera
+    {
+        public Vector3 Position = Vector3.Zero;
+        public Vector3 Orientation = new Vector3(0f, 0f, (float)Math.PI);
+        public float MoveSpeed = 0.2f;
+        public float MouseSensitivity = 0.01f;
+
+        public Matrix4 GetViewMatrix()
+        {
+            Vector3 lookat = new Vector3();
+
+            lookat.X = (float)(Math.Sin((float)Orientation.X) * Math.Cos((float)Orientation.Y));
+            lookat.Y = (float)Math.Sin((float)Orientation.Y);
+            lookat.Z = (float)(Math.Cos((float)Orientation.X) * Math.Cos((float)Orientation.Y));
+
+            return Matrix4.LookAt(Position, Position + lookat, Vector3.UnitY);
         }
     }
 

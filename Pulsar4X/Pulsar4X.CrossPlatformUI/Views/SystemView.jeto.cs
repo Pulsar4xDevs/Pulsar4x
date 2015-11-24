@@ -66,7 +66,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 		public void Initialize(object sender, EventArgs e) {
             RenderCanvas.MakeCurrent();
-            Renderer.Initialize();
+            Renderer.Initialize(RenderCanvas.GLSize.Width, RenderCanvas.GLSize.Height);
 
             //we need this to run on its own because we cant have rendering blocked by the
             //the rest of the system or waiting for an advance time command
@@ -99,7 +99,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public void Resize(object sender, EventArgs e)
         {
 			RenderCanvas.MakeCurrent();
-			Renderer.Resize();
+			Renderer.Resize(RenderCanvas.GLSize.Width, RenderCanvas.GLSize.Height);
         }
 
         public void Teardown(object sender, EventArgs e)

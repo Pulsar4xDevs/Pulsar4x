@@ -13,6 +13,9 @@ namespace Pulsar4X.CrossPlatformUI
 		private List<int> shaderList;
 
 		int theProgram;
+        int VP_Matrix_Unif;
+
+        Matrix4 view_projection;
 
 		private int vao;
 
@@ -20,12 +23,11 @@ namespace Pulsar4X.CrossPlatformUI
 			layout(location = 0) in vec3 vertex_pos;
             layout(location = 1) in vec3 instance_pos;
 
-            uniform mat4 projection;
-            uniform mat4 view;
+            uniform mat4 VP_Matrix;
 
 			void main()
 			{
-			   gl_Position = vec4(vertex_pos + instance_pos, 1.0f);
+			   gl_Position = vec4(vertex_pos + instance_pos, 1.0f) * VP_Matrix;
 			}";
 
 		private const string strFragmentShader = @"#version 330
@@ -139,7 +141,7 @@ namespace Pulsar4X.CrossPlatformUI
 			return program;
 		}
 
-		public void Initialize()
+		public void Initialize(int viewport_width, int viewport_height)
 		{
 			GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
@@ -150,9 +152,14 @@ namespace Pulsar4X.CrossPlatformUI
 			GL.Enable(EnableCap.DepthTest);
 
 			InitializeProgram();
-			//InitializeVertexBuffer();
+            VP_Matrix_Unif = GL.GetUniformLocation(theProgram, "VP_Matrix");
 
-			GL.GenVertexArrays(1, out vao);
+            var cam = new Camera();
+            cam.Position.Z = -10f;
+            //InitializeVertexBuffer();
+            var projection = Matrix4.CreatePerspectiveFieldOfView(1.3f, viewport_width/(float)viewport_height, 0.1f, 10000f);
+            view_projection = cam.GetViewMatrix() * projection;
+            GL.GenVertexArrays(1, out vao);
 			GL.BindVertexArray(vao);
 
         }
@@ -162,6 +169,7 @@ namespace Pulsar4X.CrossPlatformUI
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.UseProgram(theProgram);
+            GL.UniformMatrix4(VP_Matrix_Unif, 1, false, ref view_projection.Row0.X);
             foreach (var scene in data.scenes)
             {
                 GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
@@ -176,11 +184,6 @@ namespace Pulsar4X.CrossPlatformUI
 
                 GL.VertexAttribDivisor(1, 1); // positions : one per quad (its center) -> 1
 
-                // Draw the particules !
-                // This draws many times a small triangle_strip (which looks like a quad).
-                // This is equivalent to :
-                // for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4),
-                // but faster.
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, scene.mesh.indices.Count, DrawElementsType.UnsignedInt, IntPtr.Zero, scene.position_data.Count);
             }
             GL.UseProgram(0);
@@ -188,7 +191,7 @@ namespace Pulsar4X.CrossPlatformUI
 			GL.Flush();
 		}
 
-		public void Resize() {
+		public void Resize(int viewport_width, int viewport_height) {
 
 		}
 
