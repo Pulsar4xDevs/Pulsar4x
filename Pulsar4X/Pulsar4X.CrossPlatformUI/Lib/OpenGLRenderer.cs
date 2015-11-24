@@ -20,6 +20,9 @@ namespace Pulsar4X.CrossPlatformUI
 			layout(location = 0) in vec3 vertex_pos;
             layout(location = 1) in vec3 instance_pos;
 
+            uniform mat4 projection;
+            uniform mat4 view;
+
 			void main()
 			{
 			   gl_Position = vec4(vertex_pos + instance_pos, 1.0f);
@@ -158,6 +161,7 @@ namespace Pulsar4X.CrossPlatformUI
 			GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0F);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            GL.UseProgram(theProgram);
             foreach (var scene in data.scenes)
             {
                 GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
@@ -179,6 +183,7 @@ namespace Pulsar4X.CrossPlatformUI
                 // but faster.
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, scene.mesh.indices.Count, DrawElementsType.UnsignedInt, IntPtr.Zero, scene.position_data.Count);
             }
+            GL.UseProgram(0);
 
 			GL.Flush();
 		}
