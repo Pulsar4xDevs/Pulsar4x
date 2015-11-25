@@ -6,11 +6,6 @@ namespace Pulsar4X.ECSLib
 {
     internal static class MineProcessor
     {
-
-
-
-
-
         internal static void MineResources(Entity colonyEntity, int econTicks)
         {
             JDictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;

@@ -13,7 +13,7 @@ namespace Pulsar4X.CrossPlatformUI.Gtk2
 			OpenTK.Toolkit.Init ();
 			var platform = new Eto.GtkSharp.Platform ();
 			platform.Add<GLSurface.IHandler>(() => new GtkGLSurfaceHandler());
-			new Application(platform).Run(new MainForm());
+			new Pulsar4XApplication(platform).Run();
         }
     }
 }

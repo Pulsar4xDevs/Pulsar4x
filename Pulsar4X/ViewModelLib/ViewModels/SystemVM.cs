@@ -138,7 +138,7 @@ namespace Pulsar4X.ViewModel
             ID = _parentStar.Entity.Guid;
             foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>())
             {
-                PlanetVM planetVM = PlanetVM.Create(_gameVM, planet);
+                PlanetVM planetVM = PlanetVM.Create(_gameVM, planet, parentstarVM);
                 if (!_planets.Contains(planetVM))
                     _planets.Add(planetVM);
                 if(!_planetDictionary.ContainsKey(planet.Guid))

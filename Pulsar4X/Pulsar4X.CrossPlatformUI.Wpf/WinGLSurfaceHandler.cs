@@ -9,7 +9,7 @@ using System;
 
 namespace Pulsar4X.CrossPlatformUI.Wpf
 {
-    public class WinGLSurfaceHandler : WpfFrameworkElement<WpfGLSurface, GLSurface, GLSurface.ICallback>, GLSurface.IHandler
+    public class WinGLSurfaceHandler : WpfFrameworkElement<WpfGLSurface, RenderCanvas, RenderCanvas.ICallback>, RenderCanvas.IHandler
     {
         private GraphicsMode mode;
         private int major;
@@ -74,11 +74,11 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
         {
             switch (id)
             {
-                case GLSurface.GLInitializedEvent:
+                case RenderCanvas.GLInitializedEvent:
                     this.Control.Initialized += (sender, args) => Callback.OnInitialized(this.Widget, args);
                     break;
 
-                case GLSurface.GLShuttingDownEvent:
+                case RenderCanvas.GLShuttingDownEvent:
                     this.Control.ShuttingDown += (sender, args) => Callback.OnShuttingDown(this.Widget, args);
                     break;
 

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Processors
 {
-    class RenderProcessor
+    public class RenderProcessor
     {
     }
 }
