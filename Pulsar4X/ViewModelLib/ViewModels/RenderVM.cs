@@ -92,14 +92,14 @@ namespace Pulsar4X.ViewModel
             List<float> scale_data = new List<float>();
             foreach (var star in ActiveSystem.StarList)
             {
-                var pos = star.SystemPosition;
-                position_data.Add(new Vector3(3*(float)pos.X, 3*(float)pos.Y, 0.0f));
+                var pos = star.Position;
+                position_data.Add(new Vector3((float)pos.X, (float)pos.Y, 0.0f));
             }
 
             foreach(var planet in ActiveSystem.PlanetList)
             {
                 var pos = planet.Position;
-                position_data.Add(new Vector3(3*(float)pos.X, 3*(float)pos.Y, 0.0f));
+                position_data.Add(new Vector3((float)pos.X, (float)pos.Y, 0.0f));
             }
             temp_scenes.Add(new Scene(position_data, scale_data, mesh));
             scenes = temp_scenes;

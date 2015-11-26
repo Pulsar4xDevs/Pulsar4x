@@ -481,6 +481,13 @@ namespace Pulsar4X.ViewModel
             return newVM;
         }
 
+        internal static PlanetVM Create(GameVM gameVM, Entity entity, StarVM parent_star)
+        {
+            var newvm = PlanetVM.Create(gameVM, entity);
+            newvm.ParentStar = parent_star;
+            return newvm;
+        }
+
         /// <summary>
         /// Creates and fills out the properties of this ViewModel from the entity with the provided Guid.
         /// </summary>
