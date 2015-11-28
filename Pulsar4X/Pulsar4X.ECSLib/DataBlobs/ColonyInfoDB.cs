@@ -8,20 +8,8 @@ namespace Pulsar4X.ECSLib
     {
         private Entity _factionEntity;
 
-        public Entity FactionEntity
-        {
-            get
-            {
-                return _factionEntity;
-            }
-            internal set
-            {
-                if(value.HasDataBlob<FactionInfoDB>())
-                    _factionEntity = value;
-                else
-                    throw new Exception("Entity Not a faction or does not contain a FactionInfoDB");                
-            }
-        }
+        [JsonProperty]
+        public Entity FactionEntity { get; internal set; }
 
         /// <summary>
         /// Species Entity and amount

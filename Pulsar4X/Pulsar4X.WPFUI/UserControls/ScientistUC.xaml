@@ -7,9 +7,9 @@
              xmlns:ViewModel="clr-namespace:Pulsar4X.ViewModel;assembly=Pulsar4x.ViewModels" 
              x:Class="Pulsar4X.WPFUI.UserControls.ScientistUC" 
              mc:Ignorable="d" d:DesignWidth="300" Height="72">
-    <UserControl.DataContext>
+    <!--<UserControl.DataContext>
         <ViewModel:ScientistControlVM/>
-    </UserControl.DataContext>
+    </UserControl.DataContext>-->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="24"/>
