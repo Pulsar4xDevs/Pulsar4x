@@ -314,7 +314,17 @@ namespace Pulsar4X.Entities
         {
             double RingValue = Math.Sqrt(Stars[0].Orbit.MassRelativeToSol) * Constants.SensorTN.EarthRingDistance;
             double distanceFromPrimary = Math.Sqrt(((X * X) + (Y * Y)));
-            double Angle = (Math.Atan((X / Y)) / Constants.Units.Radian);
+            double Angle = (Math.Atan((Y / X)) / Constants.Units.Radian);
+
+            /// <summary>
+            /// Atan will give the same values for -1,-1 as 1,1, so handle this condition.
+            /// </summary>
+            if (Y < 0 && X < 0)
+                Angle += 180.0;
+
+            /// <summary>
+            /// Also if the angle is less than 0 add 360 to the angle. I don't know if this is necessary.
+            /// </summary>
             if (Angle < 0)
                 Angle += 360.0;
 
@@ -387,7 +397,7 @@ namespace Pulsar4X.Entities
                 /// because there are fewer points, each point covers more total area, 60 degrees here instead of 30.
                 /// </summary>
                 SurveyIndex = 5;
-                for (int surveyPointIterator = 300; surveyPointIterator >= 0; surveyPointIterator -= 60)
+                for (int surveyPointIterator = 330; surveyPointIterator >= 30; surveyPointIterator -= 60)
                 {
                     int highAngle = surveyPointIterator + 30;
                     int lowAngle = surveyPointIterator - 30;
@@ -402,7 +412,11 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            return SurveyIndex;
+            String Entry = String.Format("GetSurveyPointArea({0},{1}):{2},{3},{4},{5}", X,Y,distanceFromPrimary,Angle,(SurveyIndex+1),RingValue);
+            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, null, null, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+            GameState.Instance.Factions[0].MessageLog.Add(NME);
+
+            return (SurveyIndex+1);
         }
     }
 }

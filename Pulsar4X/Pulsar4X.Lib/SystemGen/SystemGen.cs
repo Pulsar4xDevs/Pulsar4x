@@ -1621,7 +1621,7 @@ namespace Pulsar4X
             /// </summary>
             if (Constants.GameSettings.Aurora65JPGeneration == true)
             {
-                int numJPs = 1;
+                int numJPs = 10;
                 int BaseJPChance = 90;
                 int JPChance = (BaseJPChance + (int)Math.Round(system.Stars[0].Orbit.MassRelativeToSol));
                 while (m_RNG.Next(100) < JPChance)
@@ -1723,9 +1723,9 @@ namespace Pulsar4X
                 int angleMax = 30;
 
                 /// <summary>
-                /// And get the angle for this SP
+                /// And get the angle for this SP. 0 - 5 for the 1st 6.
                 /// </summary>
-                if (SP <= 6)
+                if (SP <= 5)
                 {
                     RingFactor = 1;
                     angleMax = 60;
@@ -1740,10 +1740,13 @@ namespace Pulsar4X
                         SPCount++;
                     }
                 }
-                else if (SP <= 18)
+                /// <summary>
+                /// 6 through 17 for the next 12
+                /// </summary>
+                else if (SP <= 17)
                 {
                     RingFactor = 2;
-                    int SPCount = 7;
+                    int SPCount = 6;
                     for (int surveyPointIterator = 15; surveyPointIterator < 360; surveyPointIterator += 30)
                     {
                         if (SPCount == SP)
@@ -1757,7 +1760,7 @@ namespace Pulsar4X
                 else
                 {
                     RingFactor = 3;
-                    int SPCount = 19;
+                    int SPCount = 18;
                     for (int surveyPointIterator = 0; surveyPointIterator < 360; surveyPointIterator += 30)
                     {
                         if (SPCount == SP)

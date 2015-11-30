@@ -3155,7 +3155,11 @@ namespace Pulsar4X.Entities
                                   if (JPIndex == (SPIndex+1))
                                   {
                                       CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Add(JP);
-                                      String Entry = String.Format("Indexs J:{0}",CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Count);
+
+                                      if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus == JPDetection.Status.None)
+                                          CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus = JPDetection.Status.Incomplete;
+
+                                      String Entry = String.Format("Indexs J:{0} Just found {1} at {2} {3},{4}", CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Count,JP,SPIndex+1,JP.Position.X,JP.Position.Y);
                                       MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
                                       TaskGroupFaction.MessageLog.Add(NME);
                                   }
