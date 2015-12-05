@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
+  xmlns:c="clr-namespace:Pulsar4x.CrossPlatformUI.Views"
+  >
+  <TableLayout>
+    <TableRow>
+      <ComboBox ID="ColonySelection"  />
+    </TableRow>
+    <TableRow>
+      <GridView ID="FacDataGrid" />
+      <GridView ID="PopDataGrid" />
+      
+    </TableRow>
+    <TableRow>
+      <c:JobAbilityView />
+    </TableRow>
+    
+  </TableLayout>
+</Panel>

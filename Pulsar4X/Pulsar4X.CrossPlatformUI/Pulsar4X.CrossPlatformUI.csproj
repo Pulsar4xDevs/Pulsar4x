@@ -29,6 +29,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Eto.Serialization.Xaml, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Eto.Serialization.Xaml.2.1.0\lib\net45\Eto.Serialization.Xaml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Eto, Version=2.1.0.0, Culture=neutral, PublicKeyToken=null">
@@ -43,6 +47,7 @@
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4">
       <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
@@ -50,6 +55,18 @@
     <EmbeddedResource Include="Views\NewGame.jeto" />
     <EmbeddedResource Include="Views\Startup.jeto" />
     <EmbeddedResource Include="Views\SystemView.jeto" />
+    <EmbeddedResource Include="Views\ScientistUC.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\JobUC.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\JobAbilityView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ColonyScreenView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\LoadGame.cs" />
@@ -60,8 +77,20 @@
     <Compile Include="MainForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pulsar4XApplication.cs" />
+    <Compile Include="Views\ColonyScreenView.xeto.cs">
+      <DependentUpon>ColonyScreenView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\JobAbilityView.xeto.cs">
+      <DependentUpon>JobAbilityView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\JobUC.xeto.cs">
+      <DependentUpon>JobUC.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\NewGame.jeto.cs">
       <DependentUpon>NewGame.jeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ScientistUC.xeto.cs">
+      <DependentUpon>ScientistUC.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\Startup.jeto.cs">
       <DependentUpon>Startup.jeto</DependentUpon>
@@ -72,6 +101,10 @@
     <Compile Include="Lib\OpenGLRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
+      <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
+      <Name>Pulsar4X.ECSLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Pulsar4X.Sceen\Pulsar4X.Sceen.csproj">
       <Project>{0c8f4417-1e55-4f99-b3dd-d5b0432f09fc}</Project>
       <Name>Pulsar4X.Sceen</Name>
@@ -86,4 +119,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties Views_2NewGame_1jeto__JSONSchema="" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

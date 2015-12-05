@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableRow>
+			<Label ID="FirstName" />
+			<Label ID="LastName" />
+      <NumericUpDown ID="AssignedLabs" />
+      <Label ID="MaxLabs" />
+		</TableRow>
+     <TableRow>
+			<Label Text="" /> <!--Expander with list of queued projects, current project details in expander header?-->
+		</TableRow>
+    <TableRow>
+      <ComboBox 
+        ID="AvailibleProjects"  
+        />
+      <Label ID="SelectedProject"/>
+      <Button ID="AddSelectedProject" Text="Add" />
+		</TableRow>
+
+  </TableLayout>
+</Panel>

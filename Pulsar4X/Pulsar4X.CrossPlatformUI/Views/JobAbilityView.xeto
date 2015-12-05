@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableRow>
+      <Label Text="JobPoints" />
+      <Label ID="PointsPerDay" />
+    </TableRow>
+    <TableRow ScaleHeight="True">
+      <ListBox ID="ItemJobs">      
+      </ListBox>
+    </TableRow>
+    <TableRow ScaleHeight="False">
+      <ComboBox ID="ItemComboBox" />
+      <NumericUpDown ID="NewJobBatchAmount" />
+      <CheckBox ID="NewJobIsRepeated"/>
+      <Button ID="NewJobAdd" Text="Add" />
+    </TableRow>
+  </TableLayout>
+</Panel>
