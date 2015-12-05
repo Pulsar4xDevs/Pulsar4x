@@ -165,7 +165,7 @@ namespace Pulsar4X.CrossPlatformUI
 		public void Draw(RenderVM data) {
 			GL.ClearColor(System.Drawing.Color.MidnightBlue);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
+            
             GL.UseProgram(theProgram);
             foreach (var scene_kv in data.scenes)
             {
