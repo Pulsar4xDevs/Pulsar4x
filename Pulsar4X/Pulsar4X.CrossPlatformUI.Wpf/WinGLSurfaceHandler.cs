@@ -2,10 +2,13 @@ using Eto.Drawing;
 using Eto.Forms;
 using Eto.Wpf;
 using Eto.Wpf.Forms;
-using Eto;
+using MouseButtons = Eto.Forms.MouseButtons;
+using MouseEventArgs = Eto.Forms.MouseEventArgs;
+using Keys = Eto.Forms.Keys;
 using OpenTK.Graphics;
 using OpenTK;
 using System;
+using System.Windows.Forms;
 
 namespace Pulsar4X.CrossPlatformUI.Wpf
 {
@@ -23,17 +26,43 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
             c.glc.Resize += (sender, args) => base.Callback.OnResize(Widget, args);
             c.glc.Load += (sender, args) => base.Callback.OnInitialized(Widget, args);
             c.glc.Disposed += (sender, args) => base.Callback.OnShuttingDown(Widget, args);
-            c.glc.MouseDown += glc_MouseDown;
+            c.glc.MouseMove += WhenMouseMove;
+            c.glc.MouseDown += WhenMouseDown;
+            c.glc.MouseUp += WhenMouseUp;
+            c.glc.MouseWheel += WhenMouseWheel;
+            c.glc.MouseLeave += WhenMouseLeave;
             this.Control = c;
 
             base.Initialize();
         }
 
-        private void glc_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void WhenMouseLeave(object sender, EventArgs e)
+        {
+            Callback.OnMouseLeave(Widget, new MouseEventArgs(MouseButtons.None, Keys.None, new PointF(0, 0)));
+        }
+
+        private void WhenMouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            Callback.OnMouseWheel(Widget, new MouseEventArgs(MouseButtons.None, Keys.None, new PointF(e.Location.X, e.Location.Y), new SizeF(e.Delta/120, e.Delta/120)));
+        }
+
+        private void WhenMouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             MouseButtons button;
             Enum.TryParse<MouseButtons>(e.Button.ToString(), out button);
-            Callback.OnMouseDown(Widget, new MouseEventArgs(button, Keys.A, new PointF(e.Location.X, e.Location.Y)));
+            Callback.OnMouseDown(Widget, new MouseEventArgs(button, Keys.None, new PointF(e.Location.X, e.Location.Y)));
+        }
+
+        private void WhenMouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            MouseButtons button;
+            Enum.TryParse<MouseButtons>(e.Button.ToString(), out button);
+            Callback.OnMouseDown(Widget, new MouseEventArgs(button, Keys.None, new PointF(e.Location.X, e.Location.Y)));
+        }
+
+        private void WhenMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            Callback.OnMouseMove(Widget, new MouseEventArgs(MouseButtons.None, Keys.None, new PointF(e.Location.X, e.Location.Y)));
         }
 
         public void CreateWithParams(GraphicsMode mode, int major, int minor, GraphicsContextFlags flags)

@@ -20,6 +20,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected ListBox Systems;
         protected SystemVM CurrentSystem;
         protected RenderVM RenderVM;
+        private bool mouse_held = false;
+        private Vector2 mouse_held_position;
+        private Vector2 mouse_released_position;
+        private const float mouse_move_threshold = 20f;
 
         protected Splitter Body;
 
@@ -28,8 +32,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private UITimer timDraw;
 
 		private OpenGLRenderer Renderer;
-
-        private SystemViewModel svm;
 
         public SystemView(GameVM GameVM)
         {
@@ -51,12 +53,51 @@ namespace Pulsar4X.CrossPlatformUI.Views
             RenderCanvas.GLDrawNow += DrawNow;
             RenderCanvas.GLShuttingDown += Teardown;
             RenderCanvas.GLResize += Resize;
-			RenderCanvas.MouseMove += Gl_context_MouseMove;
+			RenderCanvas.MouseMove += WhenMouseMove;
+            RenderCanvas.MouseDown += WhenMouseDown;
+            RenderCanvas.MouseUp += WhenMouseUp;
+            RenderCanvas.MouseWheel += WhenMouseWheel;
+            RenderCanvas.MouseLeave += WhenMouseLeave;
         }
 
-        void Gl_context_MouseMove (object sender, MouseEventArgs e)
+        private void WhenMouseLeave(object sender, MouseEventArgs e)
         {
-			Console.WriteLine (e.Location);
+            e.Handled = true;
+            mouse_held = false;
+        }
+
+        private void WhenMouseWheel(object sender, MouseEventArgs e)
+        {
+            e.Handled = true;
+            RenderVM.UpdateCameraZoom((int)e.Delta.Height);
+        }
+
+        private void WhenMouseUp(object sender, MouseEventArgs e)
+        {
+            e.Handled = true;
+            mouse_held = false;
+        }
+
+        private void WhenMouseDown(object sender, MouseEventArgs e)
+        {
+            e.Handled = true;
+            mouse_held = true;
+            mouse_held_position.X = e.Location.X;
+            mouse_held_position.Y = e.Location.Y;
+        }
+
+        private void WhenMouseMove(object sender, MouseEventArgs e)
+        {
+            e.Handled = true;
+            if(mouse_held)
+            {
+                Vector2 mouse_pos = new Vector2(e.Location.X, e.Location.Y);
+                var delta = mouse_pos - mouse_held_position;
+                if (delta.Length > mouse_move_threshold)
+                {
+                    RenderVM.UpdateCameraPosition(delta);
+                }
+            }
         }
 
         private void Draw()
@@ -98,25 +139,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public void Resize(object sender, EventArgs e)
         {
-			RenderCanvas.MakeCurrent();
-			Renderer.Resize(RenderCanvas.GLSize.Width, RenderCanvas.GLSize.Height);
+			RenderVM.Resize(RenderCanvas.GLSize.Width, RenderCanvas.GLSize.Height);
         }
 
         public void Teardown(object sender, EventArgs e)
         {
 			Renderer.Destroy();
-        }
-    }
-
-    struct SystemViewModel
-    {
-        public ObservableCollection<SystemVM> systems;
-        public RenderVM render_data;
-
-        public SystemViewModel(GameVM g, RenderVM r)
-        {
-            systems = g.StarSystems;
-            render_data = r;
         }
     }
 }

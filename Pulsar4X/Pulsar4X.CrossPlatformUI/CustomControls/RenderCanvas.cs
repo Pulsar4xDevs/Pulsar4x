@@ -128,6 +128,7 @@ namespace Pulsar4X.CrossPlatformUI
             {
                 w.Platform.Invoke(() => w.OnResize(w, e));
             }
+
         }
 
         //Gets an instance of an object used to perform callbacks to the widget from handler implementations

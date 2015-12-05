@@ -15,7 +15,7 @@ namespace Pulsar4X.CrossPlatformUI
 		int theProgram;
         int VP_Matrix_Unif;
 
-        Matrix4 view_projection;
+        Matrix4 projection;
 
 		private int vao;
 
@@ -46,8 +46,9 @@ namespace Pulsar4X.CrossPlatformUI
 
         public void LoadScenes(object sender, EventArgs e)
         {
-            foreach(var scene in RenderVM.scenes)
+            foreach(var scene_kv in RenderVM.scenes)
             {
+                var scene = scene_kv.Value;
                 if (!scene.IsInitialized)
                 {
                     GL.GenBuffers(1, out scene.mesh.vertex_buffer_id);
@@ -153,12 +154,8 @@ namespace Pulsar4X.CrossPlatformUI
 
 			InitializeProgram();
             VP_Matrix_Unif = GL.GetUniformLocation(theProgram, "VP_Matrix");
-
-            var cam = new Camera();
-            cam.Position.Z = -10f;
-            //InitializeVertexBuffer();
-            var projection = Matrix4.CreatePerspectiveFieldOfView(1.3f, viewport_width/(float)viewport_height, 0.1f, 10000f);
-            view_projection = cam.GetViewMatrix() * projection;
+            RenderVM.Resize(viewport_width, viewport_height);
+            
             GL.GenVertexArrays(1, out vao);
 			GL.BindVertexArray(vao);
 
@@ -169,9 +166,11 @@ namespace Pulsar4X.CrossPlatformUI
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.UseProgram(theProgram);
-            GL.UniformMatrix4(VP_Matrix_Unif, 1, false, ref view_projection.Row0.X);
-            foreach (var scene in data.scenes)
+            foreach (var scene_kv in data.scenes)
             {
+                var scene = scene_kv.Value;
+                var view_projection = scene.camera.GetViewProjectionMatrix();
+                GL.UniformMatrix4(VP_Matrix_Unif, 1, false, ref view_projection.Row0.X);
                 GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
                 // Write null to avoid implicit sync
                 GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), IntPtr.Zero, BufferUsageHint.StreamDraw);
