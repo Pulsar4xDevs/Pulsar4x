@@ -46,7 +46,6 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
             this.minor = minor;
             this.flags = flags;
 
-            this.
             InitializeComponent();
             glc = new GLControl(mode, major, minor, flags);
             glc.Load += (sender, args) => {
