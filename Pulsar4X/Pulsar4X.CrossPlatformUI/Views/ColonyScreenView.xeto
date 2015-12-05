@@ -2,7 +2,7 @@
 <Panel
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
-  xmlns:c="clr-namespace:Pulsar4x.CrossPlatformUI.Views"
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
   >
   <TableLayout>
     <TableRow>
@@ -14,7 +14,7 @@
       
     </TableRow>
     <TableRow>
-      <!--<c:JobAbilityView />--> 
+      <c:JobAbilityView />
     </TableRow>
     
   </TableLayout>
