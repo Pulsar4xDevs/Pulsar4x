@@ -27,7 +27,7 @@ namespace Pulsar4X.CrossPlatformUI
 
 			void main()
 			{
-			   gl_Position = vec4(vertex_pos + instance_pos, 1.0f) * VP_Matrix;
+			   gl_Position = VP_Matrix * vec4(vertex_pos + instance_pos, 1.0f);
 			}";
 
 		private const string strFragmentShader = @"#version 330
@@ -142,9 +142,10 @@ namespace Pulsar4X.CrossPlatformUI
 			return program;
 		}
 
-		public void Initialize(int viewport_width, int viewport_height)
+		public void Initialize(int x, int y, int viewport_width, int viewport_height)
 		{
-			GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+            GL.Viewport(x, y, viewport_width, viewport_height);
+            GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
 			GL.PixelStore(PixelStoreParameter.UnpackAlignment, 1);
 			GL.ClearColor(0.0F, 0.0F, 0.0F, 1.0F);
 			GL.Clear(ClearBufferMask.ColorBufferBit);
@@ -162,7 +163,7 @@ namespace Pulsar4X.CrossPlatformUI
         }
 
 		public void Draw(RenderVM data) {
-			GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0F);
+			GL.ClearColor(System.Drawing.Color.MidnightBlue);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.UseProgram(theProgram);
@@ -190,9 +191,9 @@ namespace Pulsar4X.CrossPlatformUI
 			GL.Flush();
 		}
 
-		public void Resize(int viewport_width, int viewport_height) {
-
-		}
+		public void Resize(int x, int y, int viewport_width, int viewport_height) {
+            GL.Viewport(x, y, viewport_width, viewport_height);
+        }
 
 		public void Destroy() {
 

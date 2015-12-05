@@ -50,7 +50,7 @@ namespace Pulsar4X.CrossPlatformUI.Wpf
         {
             MouseButtons button;
             Enum.TryParse<MouseButtons>(e.Button.ToString(), out button);
-            Callback.OnMouseDown(Widget, new MouseEventArgs(button, Keys.None, new PointF(e.Location.X, e.Location.Y)));
+            Callback.OnMouseUp(Widget, new MouseEventArgs(button, Keys.None, new PointF(e.Location.X, e.Location.Y)));
         }
 
         private void WhenMouseDown(object sender, System.Windows.Forms.MouseEventArgs e)

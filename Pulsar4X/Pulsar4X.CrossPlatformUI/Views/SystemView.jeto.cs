@@ -21,6 +21,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected SystemVM CurrentSystem;
         protected RenderVM RenderVM;
         private bool mouse_held = false;
+        private bool continue_drag = false;
         private Vector2 mouse_held_position;
         private Vector2 mouse_released_position;
         private const float mouse_move_threshold = 20f;
@@ -64,6 +65,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             e.Handled = true;
             mouse_held = false;
+            continue_drag = false;
         }
 
         private void WhenMouseWheel(object sender, MouseEventArgs e)
@@ -76,6 +78,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             e.Handled = true;
             mouse_held = false;
+            continue_drag = false;
         }
 
         private void WhenMouseDown(object sender, MouseEventArgs e)
@@ -93,9 +96,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 Vector2 mouse_pos = new Vector2(e.Location.X, e.Location.Y);
                 var delta = mouse_pos - mouse_held_position;
-                if (delta.Length > mouse_move_threshold)
+                if (delta.Length > mouse_move_threshold || continue_drag)
                 {
+                    continue_drag = true;
                     RenderVM.UpdateCameraPosition(delta);
+                    mouse_held_position = mouse_pos;
                 }
             }
         }
@@ -107,7 +112,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 		public void Initialize(object sender, EventArgs e) {
             RenderCanvas.MakeCurrent();
-            Renderer.Initialize(RenderCanvas.GLSize.Width, RenderCanvas.GLSize.Height);
+            var bounds = RenderCanvas.Bounds;
+            Renderer.Initialize(bounds.X, bounds.Y, bounds.Width, bounds.Height);
 
             //we need this to run on its own because we cant have rendering blocked by the
             //the rest of the system or waiting for an advance time command
@@ -139,7 +145,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public void Resize(object sender, EventArgs e)
         {
-			RenderVM.Resize(RenderCanvas.GLSize.Width, RenderCanvas.GLSize.Height);
+            RenderCanvas.MakeCurrent();
+            var bounds = RenderCanvas.Bounds;
+			RenderVM.Resize(bounds.Width, bounds.Height);
+            Renderer.Resize(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+            RenderVM.drawPending = true;
         }
 
         public void Teardown(object sender, EventArgs e)

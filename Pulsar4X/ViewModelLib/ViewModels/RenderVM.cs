@@ -79,10 +79,10 @@ namespace Pulsar4X.ViewModel
             var vertices = new List<Vector3>();
             var indices = new List<uint>();
             Vector3[] tmp_vectors = {
-                    new Vector3(-0.5f, 0.5f, 0f),
-                    new Vector3(-0.5f, -0.5f, 0f),
-                    new Vector3(0.5f, -0.5f, 0f),
-                    new Vector3(0.5f, 0.5f, 0f)
+                    new Vector3(-0.1f, 0.1f, 0f),
+                    new Vector3(-0.1f, -0.1f, 0f),
+                    new Vector3(0.1f, -0.1f, 0f),
+                    new Vector3(0.1f, 0.1f, 0f)
                 };
         
             vertices.AddRange(tmp_vectors);
@@ -101,7 +101,7 @@ namespace Pulsar4X.ViewModel
             cam.Position = new Vector3(
                             (float)ActiveSystem.ParentStar.Position.X,
                             (float)ActiveSystem.ParentStar.Position.Y,
-                            -10f
+                            -1f
                            );
             foreach (var star in ActiveSystem.StarList)
             {
@@ -150,22 +150,21 @@ namespace Pulsar4X.ViewModel
                 position = value;
             }
         }
-        private Vector3 orientation = new Vector3(0f, 0f, (float)Math.PI);
-        public Vector3 Orientation {
-            get { return orientation; }
+        private Vector3 lookat = new Vector3(0f, 0f, 0f);
+        public Vector3 LookAt {
+            get { return lookat; }
             set {
                 view_matrix_dirty = true;
-                position = value;
+                lookat = value;
             }
         }
+        private Vector3 up = new Vector3(0, 1f, 0f);
         public float MoveSpeed = 0.2f;
         public float MouseSensitivity = 0.01f;
         private Matrix4 projection_matrix;
         private bool view_matrix_dirty = true;
         private Matrix4 view_matrix;
         private Matrix4 view_projection_matrix;
-        private int viewport_width;
-        private int viewport_height;
 
         public Camera(int viewport_width, int viewport_height)
         {
@@ -176,13 +175,9 @@ namespace Pulsar4X.ViewModel
         {
             if (view_matrix_dirty)
             {
-                Vector3 lookat = new Vector3();
-
-                lookat.X = (float)(Math.Sin((float)Orientation.X) * Math.Cos((float)Orientation.Y));
-                lookat.Y = (float)Math.Sin((float)Orientation.Y);
-                lookat.Z = (float)(Math.Cos((float)Orientation.X) * Math.Cos((float)Orientation.Y));
-
-                view_matrix = Matrix4.LookAt(Position, Position + lookat, Vector3.UnitY);
+                //because we move the world and not the camera we invert the vector
+                //so we can think as if we are moving the camera
+                view_matrix = Matrix4.LookAt(position, new Vector3(position.X, position.Y, 0f), Vector3.UnitY);
                 view_projection_matrix = view_matrix * projection_matrix;
                 view_matrix_dirty = false;
             }
@@ -192,24 +187,24 @@ namespace Pulsar4X.ViewModel
         public void Move(Vector2 delta)
         {
             //first convert the delta to world space units
-            var delta4 = new Vector4(delta.X, delta.Y, position.Z, 1.0f);
-            //delta4 = Vector4.Transform(delta4, view_projection_matrix);
+            var delta3 = new Vector3(delta.X, delta.Y, 0);
+            //delta3 = Vector3.Transform(delta3, view_matrix);
 
             //we go in reverse because we're actually transforming the world
-            position.X -= delta4.X;
-            position.Y -= delta4.Y;
+            position += delta3 * MoveSpeed * MouseSensitivity * position.Z;
             view_matrix_dirty = true;
         }
 
         public void Zoom(int delta)
         {
-            position.Z += delta;
+            position.Z += delta*0.1f;
             view_matrix_dirty = true;
         }
 
         internal void UpdateProjectionMatrix(float viewport_width, float viewport_height)
         {
             projection_matrix = Matrix4.CreatePerspectiveFieldOfView((float)(2 * Math.PI / 3), viewport_width / viewport_height, 0.1f, 1000f);
+            //projection_matrix = Matrix4.CreateOrthographic(viewport_width, viewport_height, -10f, 10000f);
             view_matrix_dirty = true;
         }
     }
