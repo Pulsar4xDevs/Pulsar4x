@@ -14,7 +14,7 @@
       
     </TableRow>
     <TableRow>
-      <c:JobAbilityView />
+      <!--<c:JobAbilityView />--> 
     </TableRow>
     
   </TableLayout>
