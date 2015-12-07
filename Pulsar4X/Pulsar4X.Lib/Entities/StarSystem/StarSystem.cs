@@ -316,16 +316,27 @@ namespace Pulsar4X.Entities
             double distanceFromPrimary = Math.Sqrt(((X * X) + (Y * Y)));
             double Angle = (Math.Atan((Y / X)) / Constants.Units.Radian);
 
+
             /// <summary>
-            /// Atan will give the same values for -1,-1 as 1,1, so handle this condition.
+            /// Atan will give the same values for -1,-1 as 1,1, so handle this condition. likewise -1,1 will give 1,1's answer
+            /// Atan(1) = 45
+            /// Atan(-1) = -45
+            /// -1,1(135)   1,1(45)
+            /// -1,-1(225), 1,-1(315)
             /// </summary>
-            if (Y < 0 && X < 0)
+            if (X < 0 && Y < 0)
                 Angle += 180.0;
 
             /// <summary>
-            /// Also if the angle is less than 0 add 360 to the angle. I don't know if this is necessary.
+            /// -1,1
             /// </summary>
-            if (Angle < 0)
+            else if (X < 0)
+                Angle += 180.0;
+
+            /// <summary>
+            /// 1,-1
+            /// </summary>
+            else if (Y < 0)
                 Angle += 360.0;
 
             int SurveyIndex = -1;
