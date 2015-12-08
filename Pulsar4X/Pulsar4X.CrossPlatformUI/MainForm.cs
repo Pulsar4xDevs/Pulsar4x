@@ -22,6 +22,8 @@ namespace Pulsar4X.CrossPlatformUI
             var newgame = new Commands.NewGame(Game);
             var savegame = new Commands.SaveGame(Game);
             var loadgame = new Commands.LoadGame(Game);
+            var sysMap = new Commands.SystemMap(Game);
+            var colView = new Commands.ColonyView(Game);
             var quit = new Commands.Quit();
 
             if (Platform.Supports<MenuBar>())
@@ -46,12 +48,15 @@ namespace Pulsar4X.CrossPlatformUI
             if (Platform.Supports<ToolBar>())
             {
                 // create and set the toolbar
-                //ToolBar = new ToolBar();
+                ToolBar = new ToolBar();
 
                 //ToolBar.Items.Add(newgame);
+                ToolBar.Items.Add(sysMap);
+                ToolBar.Items.Add(colView);
 
             }
 
         }
+
     }
 }

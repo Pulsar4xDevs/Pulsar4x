@@ -523,7 +523,36 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the associated entityID of the specified Guid.
+        /// Gets the entity with the associated Guid. this version doesn't use out. 
+        /// </summary>
+        /// <returns>The Entity if found</returns>
+        /// <exception cref="GuidNotFoundException">Guid was not found in Global list, orlocally</exception>
+        [PublicAPI]
+        public Entity GetEntityByGuid(Guid entityGuid)
+        {
+            Entity entity;
+            if (_game != null)
+            {
+                if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
+                {
+                    return entity;
+                }
+                if (_game.GlobalGuidDictionary.ContainsKey(entityGuid))
+                {
+                    return _game.GlobalGuidDictionary[entityGuid].GetEntityByGuid(entityGuid);
+                }
+                throw new GuidNotFoundException(entityGuid);
+            }
+            // This is a "fake" manager that does not link to other managers.
+            if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
+            {
+                return entity;
+            }
+            throw new GuidNotFoundException(entityGuid);
+        }
+
+        /// <summary>
+        /// Gets the associated entityID of the specified Guid. (this manager only, not global)
         /// <para></para>
         /// Does not throw exceptions.
         /// </summary>
@@ -556,6 +585,8 @@ namespace Pulsar4X.ECSLib
             entity = Entity.InvalidEntity;
             return false;
         }
+
+
 
         /// <summary>
         /// Returns the true if the specified type is a valid DataBlobType.

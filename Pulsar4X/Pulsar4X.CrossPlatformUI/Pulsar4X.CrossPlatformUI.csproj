@@ -69,10 +69,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\ColonyView.cs" />
     <Compile Include="Commands\LoadGame.cs" />
     <Compile Include="Commands\NewGame.cs" />
     <Compile Include="Commands\Quit.cs" />
     <Compile Include="Commands\SaveGame.cs" />
+    <Compile Include="Commands\SystemMap.cs" />
     <Compile Include="CustomControls\RenderCanvas.cs" />
     <Compile Include="MainForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -118,7 +120,12 @@
     <EmbeddedResource Include="Resources\Icons\NewGame.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\SystemMap.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Icons\ColonyView.ico" />
+  </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties Views_2NewGame_1jeto__JSONSchema="" />

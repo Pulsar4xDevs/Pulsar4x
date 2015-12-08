@@ -55,10 +55,14 @@ namespace Pulsar4X.ViewModel
                     _systemDictionary.Add(systemVM.ID, systemVM);
                 }
                 ColonyScreens = new List<ColonyScreenVM>();
+                Colonys = new Dictionary<Guid, string>();
                 foreach (var colonyEntity in _playerFaction.GetDataBlob<FactionInfoDB>().Colonies)
                 {
                     ColonyScreens.Add(new ColonyScreenVM(colonyEntity, Game.StaticData));
+                    Colonys.Add(colonyEntity.Guid, colonyEntity.GetDataBlob<NameDB>().GetName(_playerFaction));
                 }
+                
+
             }
         }
 
@@ -70,8 +74,16 @@ namespace Pulsar4X.ViewModel
 
         public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
 
-        public List<ColonyScreenVM> ColonyScreens { get; set; } 
-        
+        public List<ColonyScreenVM> ColonyScreens { get; set; } //TODO create the VM as a view is requested?
+
+        public Dictionary<Guid, string> Colonys { get; set; }
+
+        public ColonyScreenVM ColonyScreen { get; set; }
+
+        public Guid SetColonyScreen {            
+            set {ColonyScreen = new ColonyScreenVM(Game.GlobalManager.GetEntityByGuid(value), Game.StaticData); }
+        }
+
         private Dictionary<Guid, SystemVM> _systemDictionary;
 
         public SystemVM GetSystem(Guid bodyGuid)
