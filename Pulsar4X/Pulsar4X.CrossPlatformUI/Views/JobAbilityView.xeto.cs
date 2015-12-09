@@ -21,21 +21,36 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected CheckBox NewJobIsRepeated { get; set; }
         protected Button NewJobAdd { get; set; }
 
+
+  
+
         public JobAbilityView()
         {
             XamlReader.Load(this);
         }
 
-        public JobAbilityView(JobAbilityBaseVM<BaseDataBlob, object> viewModel)
+        public JobAbilityView(RefinaryAbilityVM viewModel)
         {
+
             PointsPerDay.Text = viewModel.PointsPerDay.ToString();
 
-            ItemJobs.DataStore = new ObservableCollection<JobVM<BaseDataBlob,object>>(viewModel.ItemJobs);
+            ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyRefiningDB, RefineingJob>>(viewModel.ItemJobs);
 
             ItemComboBox.DataStore = new List<string>(viewModel.ItemDictionary.Keys);
             NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
             NewJobAdd.Click += AddSelectedProjectOnClick;
             
+        }
+
+        public JobAbilityView(ConstructionAbilityVM viewModel)
+        {
+            PointsPerDay.Text = viewModel.PointsPerDay.ToString();
+
+            ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyConstructionDB, ConstructionJob>>(viewModel.ItemJobs);
+
+            ItemComboBox.DataStore = new List<string>(viewModel.ItemDictionary.Keys);
+            NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
+            NewJobAdd.Click += AddSelectedProjectOnClick;
         }
 
         private void AddSelectedProjectOnClick(object sender, EventArgs eventArgs)

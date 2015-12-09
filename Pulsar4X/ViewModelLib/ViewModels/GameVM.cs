@@ -80,8 +80,12 @@ namespace Pulsar4X.ViewModel
 
         public ColonyScreenVM ColonyScreen { get; set; }
 
-        public Guid SetColonyScreen {            
-            set {ColonyScreen = new ColonyScreenVM(Game.GlobalManager.GetEntityByGuid(value), Game.StaticData); }
+        private Guid _selectedColonyGuid;
+        public Guid SetColonyScreen {
+            get { return _selectedColonyGuid; }
+            set
+            {
+                _selectedColonyGuid = value; ColonyScreen = new ColonyScreenVM(Game.GlobalManager.GetEntityByGuid(value), Game.StaticData); }
         }
 
         private Dictionary<Guid, SystemVM> _systemDictionary;
