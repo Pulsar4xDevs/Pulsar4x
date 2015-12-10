@@ -67,6 +67,7 @@
     <EmbeddedResource Include="Views\ColonyScreenView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ResearchAbilityView.xeto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -90,6 +91,9 @@
     </Compile>
     <Compile Include="Views\NewGame.jeto.cs">
       <DependentUpon>NewGame.jeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ResearchAbilityView.xeto.cs">
+      <DependentUpon>ResearchAbilityView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ScientistUC.xeto.cs">
       <DependentUpon>ScientistUC.xeto</DependentUpon>

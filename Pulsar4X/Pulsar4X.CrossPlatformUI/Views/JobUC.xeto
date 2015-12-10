@@ -10,7 +10,15 @@
       <ProgressBar ID="PercentComplete" />
       <Label ID="Completed" />
       <NumericUpDown ID="BatchQuantity" />
-      <CheckBox ID="RepeatJob" />            
+      <CheckBox ID="RepeatJob" />
+      <TableLayout>
+        <TableRow>
+        <Button ID="IncPriority" />
+        </TableRow>
+        <TableRow>
+        <Button ID="DecPriority" />
+        </TableRow>
+      </TableLayout>
     </TableRow>
   </TableLayout>
 </Panel>

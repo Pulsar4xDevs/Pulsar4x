@@ -11,10 +11,35 @@
     <TableRow>
       <GridView ID="FacDataGrid" />
       <GridView ID="PopDataGrid" />
-      
+      <TableLayout>
+        <TableRow> 
+          <Label Text="Mineral Deposits" /> 
+        </TableRow>
+        <TableRow>
+          <GridView ID="MineralDeposits" />
+        </TableRow>
+      </TableLayout>
+      <TableLayout>
+        <TableRow>
+          <Label Text="Mineral Stockpile" />
+        </TableRow>
+        <TableRow>
+          <GridView ID="MineralStockpile" />
+        </TableRow>
+      </TableLayout>
     </TableRow>
     <TableRow>
-      <c:JobAbilityView ID="JobAbilityView" />
+      <c:JobAbilityView ID="RefinaryAbilityView" />
+      <TableLayout>
+        <TableRow>
+          <Label Text="Refined Materials Stockpile" />
+        </TableRow>
+        <TableRow>
+          <GridView ID="RefinedMats" />
+        </TableRow>
+      </TableLayout>
+      <c:JobAbilityView ID="ConstructionAbilityView" />
+      <c:ResearchAbilityView ID="ConstructionAbilityView" />
     </TableRow>
     
   </TableLayout>

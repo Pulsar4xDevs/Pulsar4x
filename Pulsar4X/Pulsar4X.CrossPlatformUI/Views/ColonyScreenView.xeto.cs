@@ -15,7 +15,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected ComboBox ColonySelection { get; set; }
         protected GridView FacDataGrid { get; set; }
         protected GridView PopDataGrid { get; set; }
-        protected JobAbilityView JobAbilityView { get; set; }
+        protected GridView MineralDeposits { get; set; }
+        protected GridView MineralStockpile { get; set; }
+        protected JobAbilityView RefinaryAbilityView { get; set; }
+        protected GridView RefinedMats { get; set; }
+        protected JobAbilityView ConstructionAbilityView { get; set; }
+        protected ResearchAbilityView ResearchAbilityView { get; set; }
+
+
         private ColonyScreenVM colonyScreenVM { get; set; }
         private GameVM gameVM { get; set; }
 
@@ -45,7 +52,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             FacDataGrid.DataContext = colonyScreenVM.Facilities;
             PopDataGrid.DataContext = colonyScreenVM.Species;
-            JobAbilityView = new JobAbilityView(colonyScreenVM.RefinaryAbilityVM);
+            MineralDeposits.DataContext = colonyScreenVM.PlanetMineralDepositVM;
+            MineralStockpile.DataContext = colonyScreenVM.RawMineralStockpileVM;
+            RefinaryAbilityView = new JobAbilityView(colonyScreenVM.RefinaryAbilityVM);
+            RefinedMats.DataContext = colonyScreenVM.RefinedMatsStockpileVM;
+            ConstructionAbilityView = new JobAbilityView(colonyScreenVM.ConstructionAbilityVM);
+            ResearchAbilityView = new ResearchAbilityView(colonyScreenVM.ColonyResearchVM);
+
+
 
         }
     }
