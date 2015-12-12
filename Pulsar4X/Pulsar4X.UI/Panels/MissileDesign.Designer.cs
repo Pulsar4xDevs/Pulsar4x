@@ -524,6 +524,22 @@ namespace Pulsar4X.UI.Panels
             this.m_oEngineLabel = new System.Windows.Forms.Label();
             this.m_oMissileEngineComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSecondStageGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMaterialsRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.m_oSubTotalCostTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSepRangeTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSubCostTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSubTotalSizeTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTotalMCostLabel = new System.Windows.Forms.Label();
+            this.m_oSubNumberTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSubSizeTextBox = new System.Windows.Forms.TextBox();
+            this.m_oMissileCostLabel = new System.Windows.Forms.Label();
+            this.m_oSepRangeLabel = new System.Windows.Forms.Label();
+            this.m_oMaterialsLabel = new System.Windows.Forms.Label();
+            this.m_oTotalMSizeLabel = new System.Windows.Forms.Label();
+            this.m_oSubSizeLabel = new System.Windows.Forms.Label();
+            this.m_oSubNumberLabel = new System.Windows.Forms.Label();
+            this.m_oMissileTypeLabel = new System.Windows.Forms.Label();
+            this.m_oSubMunitionComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSystemParametersGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oCreateButton = new System.Windows.Forms.Button();
             this.m_oMissileNameTextBox = new System.Windows.Forms.TextBox();
@@ -538,22 +554,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oSetSeriesButton = new System.Windows.Forms.Button();
             this.m_oReplaceAllButton = new System.Windows.Forms.Button();
             this.m_oInstantButton = new System.Windows.Forms.Button();
-            this.m_oSubMunitionComboBox = new System.Windows.Forms.ComboBox();
-            this.m_oMissileTypeLabel = new System.Windows.Forms.Label();
-            this.m_oSubNumberLabel = new System.Windows.Forms.Label();
-            this.m_oSubSizeLabel = new System.Windows.Forms.Label();
-            this.m_oTotalMSizeLabel = new System.Windows.Forms.Label();
-            this.m_oMaterialsLabel = new System.Windows.Forms.Label();
-            this.m_oSepRangeLabel = new System.Windows.Forms.Label();
-            this.m_oMissileCostLabel = new System.Windows.Forms.Label();
-            this.m_oTotalMCostLabel = new System.Windows.Forms.Label();
-            this.m_oSubTotalSizeTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSubNumberTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSubSizeTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSubTotalCostTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSepRangeTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSubCostTextBox = new System.Windows.Forms.TextBox();
-            this.m_oMaterialsRichTextBox = new System.Windows.Forms.RichTextBox();
             this.m_oEmpireGroupBox.SuspendLayout();
             this.m_oCompSizeBox.SuspendLayout();
             this.m_oParametersGroupBox.SuspendLayout();
@@ -1235,6 +1235,162 @@ namespace Pulsar4X.UI.Panels
             this.m_oSecondStageGroupBox.TabStop = false;
             this.m_oSecondStageGroupBox.Text = "Second Stage(if desired)";
             // 
+            // m_oMaterialsRichTextBox
+            // 
+            this.m_oMaterialsRichTextBox.Location = new System.Drawing.Point(87, 118);
+            this.m_oMaterialsRichTextBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oMaterialsRichTextBox.Name = "m_oMaterialsRichTextBox";
+            this.m_oMaterialsRichTextBox.ReadOnly = true;
+            this.m_oMaterialsRichTextBox.Size = new System.Drawing.Size(219, 64);
+            this.m_oMaterialsRichTextBox.TabIndex = 3;
+            this.m_oMaterialsRichTextBox.Text = "0x Boronide  0x Corbomite  0x Tritanium  0x Uridium  0x Gallicite  0x Corundium  " +
+                "0x Duranium  0x Neutronium\nNot Yet Implemented";
+            // 
+            // m_oSubTotalCostTextBox
+            // 
+            this.m_oSubTotalCostTextBox.Location = new System.Drawing.Point(262, 92);
+            this.m_oSubTotalCostTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oSubTotalCostTextBox.Name = "m_oSubTotalCostTextBox";
+            this.m_oSubTotalCostTextBox.ReadOnly = true;
+            this.m_oSubTotalCostTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oSubTotalCostTextBox.TabIndex = 42;
+            this.m_oSubTotalCostTextBox.Text = "0";
+            this.m_oSubTotalCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oSepRangeTextBox
+            // 
+            this.m_oSepRangeTextBox.Location = new System.Drawing.Point(262, 40);
+            this.m_oSepRangeTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oSepRangeTextBox.Name = "m_oSepRangeTextBox";
+            this.m_oSepRangeTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oSepRangeTextBox.TabIndex = 40;
+            this.m_oSepRangeTextBox.Text = "150";
+            this.m_oSepRangeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oSubCostTextBox
+            // 
+            this.m_oSubCostTextBox.Location = new System.Drawing.Point(262, 66);
+            this.m_oSubCostTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oSubCostTextBox.Name = "m_oSubCostTextBox";
+            this.m_oSubCostTextBox.ReadOnly = true;
+            this.m_oSubCostTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oSubCostTextBox.TabIndex = 41;
+            this.m_oSubCostTextBox.Text = "0";
+            this.m_oSubCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oSubTotalSizeTextBox
+            // 
+            this.m_oSubTotalSizeTextBox.Location = new System.Drawing.Point(87, 92);
+            this.m_oSubTotalSizeTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oSubTotalSizeTextBox.Name = "m_oSubTotalSizeTextBox";
+            this.m_oSubTotalSizeTextBox.ReadOnly = true;
+            this.m_oSubTotalSizeTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oSubTotalSizeTextBox.TabIndex = 39;
+            this.m_oSubTotalSizeTextBox.Text = "0";
+            this.m_oSubTotalSizeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTotalMCostLabel
+            // 
+            this.m_oTotalMCostLabel.AutoSize = true;
+            this.m_oTotalMCostLabel.Location = new System.Drawing.Point(194, 95);
+            this.m_oTotalMCostLabel.Name = "m_oTotalMCostLabel";
+            this.m_oTotalMCostLabel.Size = new System.Drawing.Size(55, 13);
+            this.m_oTotalMCostLabel.TabIndex = 18;
+            this.m_oTotalMCostLabel.Text = "Total Cost";
+            // 
+            // m_oSubNumberTextBox
+            // 
+            this.m_oSubNumberTextBox.Location = new System.Drawing.Point(87, 40);
+            this.m_oSubNumberTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oSubNumberTextBox.Name = "m_oSubNumberTextBox";
+            this.m_oSubNumberTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oSubNumberTextBox.TabIndex = 37;
+            this.m_oSubNumberTextBox.Text = "0";
+            this.m_oSubNumberTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oSubSizeTextBox
+            // 
+            this.m_oSubSizeTextBox.Location = new System.Drawing.Point(87, 66);
+            this.m_oSubSizeTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oSubSizeTextBox.Name = "m_oSubSizeTextBox";
+            this.m_oSubSizeTextBox.ReadOnly = true;
+            this.m_oSubSizeTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oSubSizeTextBox.TabIndex = 38;
+            this.m_oSubSizeTextBox.Text = "0";
+            this.m_oSubSizeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oMissileCostLabel
+            // 
+            this.m_oMissileCostLabel.AutoSize = true;
+            this.m_oMissileCostLabel.Location = new System.Drawing.Point(187, 69);
+            this.m_oMissileCostLabel.Name = "m_oMissileCostLabel";
+            this.m_oMissileCostLabel.Size = new System.Drawing.Size(62, 13);
+            this.m_oMissileCostLabel.TabIndex = 17;
+            this.m_oMissileCostLabel.Text = "Missile Cost";
+            // 
+            // m_oSepRangeLabel
+            // 
+            this.m_oSepRangeLabel.AutoSize = true;
+            this.m_oSepRangeLabel.Location = new System.Drawing.Point(144, 43);
+            this.m_oSepRangeLabel.Name = "m_oSepRangeLabel";
+            this.m_oSepRangeLabel.Size = new System.Drawing.Size(105, 13);
+            this.m_oSepRangeLabel.TabIndex = 16;
+            this.m_oSepRangeLabel.Text = "Separation Range(k)";
+            // 
+            // m_oMaterialsLabel
+            // 
+            this.m_oMaterialsLabel.AutoSize = true;
+            this.m_oMaterialsLabel.Location = new System.Drawing.Point(6, 121);
+            this.m_oMaterialsLabel.Name = "m_oMaterialsLabel";
+            this.m_oMaterialsLabel.Size = new System.Drawing.Size(49, 13);
+            this.m_oMaterialsLabel.TabIndex = 15;
+            this.m_oMaterialsLabel.Text = "Materials";
+            // 
+            // m_oTotalMSizeLabel
+            // 
+            this.m_oTotalMSizeLabel.AutoSize = true;
+            this.m_oTotalMSizeLabel.Location = new System.Drawing.Point(6, 95);
+            this.m_oTotalMSizeLabel.Name = "m_oTotalMSizeLabel";
+            this.m_oTotalMSizeLabel.Size = new System.Drawing.Size(54, 13);
+            this.m_oTotalMSizeLabel.TabIndex = 14;
+            this.m_oTotalMSizeLabel.Text = "Total Size";
+            // 
+            // m_oSubSizeLabel
+            // 
+            this.m_oSubSizeLabel.AutoSize = true;
+            this.m_oSubSizeLabel.Location = new System.Drawing.Point(6, 69);
+            this.m_oSubSizeLabel.Name = "m_oSubSizeLabel";
+            this.m_oSubSizeLabel.Size = new System.Drawing.Size(61, 13);
+            this.m_oSubSizeLabel.TabIndex = 13;
+            this.m_oSubSizeLabel.Text = "Missile Size";
+            // 
+            // m_oSubNumberLabel
+            // 
+            this.m_oSubNumberLabel.AutoSize = true;
+            this.m_oSubNumberLabel.Location = new System.Drawing.Point(7, 43);
+            this.m_oSubNumberLabel.Name = "m_oSubNumberLabel";
+            this.m_oSubNumberLabel.Size = new System.Drawing.Size(44, 13);
+            this.m_oSubNumberLabel.TabIndex = 12;
+            this.m_oSubNumberLabel.Text = "Number";
+            // 
+            // m_oMissileTypeLabel
+            // 
+            this.m_oMissileTypeLabel.AutoSize = true;
+            this.m_oMissileTypeLabel.Location = new System.Drawing.Point(6, 16);
+            this.m_oMissileTypeLabel.Name = "m_oMissileTypeLabel";
+            this.m_oMissileTypeLabel.Size = new System.Drawing.Size(65, 13);
+            this.m_oMissileTypeLabel.TabIndex = 11;
+            this.m_oMissileTypeLabel.Text = "Missile Type";
+            // 
+            // m_oSubMunitionComboBox
+            // 
+            this.m_oSubMunitionComboBox.FormattingEnabled = true;
+            this.m_oSubMunitionComboBox.Location = new System.Drawing.Point(87, 13);
+            this.m_oSubMunitionComboBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oSubMunitionComboBox.Name = "m_oSubMunitionComboBox";
+            this.m_oSubMunitionComboBox.Size = new System.Drawing.Size(219, 21);
+            this.m_oSubMunitionComboBox.TabIndex = 11;
+            // 
             // m_oSystemParametersGroupBox
             // 
             this.m_oSystemParametersGroupBox.Controls.Add(this.m_oCreateButton);
@@ -1369,162 +1525,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oInstantButton.TabIndex = 3;
             this.m_oInstantButton.Text = "Instant";
             this.m_oInstantButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSubMunitionComboBox
-            // 
-            this.m_oSubMunitionComboBox.FormattingEnabled = true;
-            this.m_oSubMunitionComboBox.Location = new System.Drawing.Point(87, 13);
-            this.m_oSubMunitionComboBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oSubMunitionComboBox.Name = "m_oSubMunitionComboBox";
-            this.m_oSubMunitionComboBox.Size = new System.Drawing.Size(219, 21);
-            this.m_oSubMunitionComboBox.TabIndex = 11;
-            // 
-            // m_oMissileTypeLabel
-            // 
-            this.m_oMissileTypeLabel.AutoSize = true;
-            this.m_oMissileTypeLabel.Location = new System.Drawing.Point(6, 16);
-            this.m_oMissileTypeLabel.Name = "m_oMissileTypeLabel";
-            this.m_oMissileTypeLabel.Size = new System.Drawing.Size(65, 13);
-            this.m_oMissileTypeLabel.TabIndex = 11;
-            this.m_oMissileTypeLabel.Text = "Missile Type";
-            // 
-            // m_oSubNumberLabel
-            // 
-            this.m_oSubNumberLabel.AutoSize = true;
-            this.m_oSubNumberLabel.Location = new System.Drawing.Point(7, 43);
-            this.m_oSubNumberLabel.Name = "m_oSubNumberLabel";
-            this.m_oSubNumberLabel.Size = new System.Drawing.Size(44, 13);
-            this.m_oSubNumberLabel.TabIndex = 12;
-            this.m_oSubNumberLabel.Text = "Number";
-            // 
-            // m_oSubSizeLabel
-            // 
-            this.m_oSubSizeLabel.AutoSize = true;
-            this.m_oSubSizeLabel.Location = new System.Drawing.Point(6, 69);
-            this.m_oSubSizeLabel.Name = "m_oSubSizeLabel";
-            this.m_oSubSizeLabel.Size = new System.Drawing.Size(61, 13);
-            this.m_oSubSizeLabel.TabIndex = 13;
-            this.m_oSubSizeLabel.Text = "Missile Size";
-            // 
-            // m_oTotalMSizeLabel
-            // 
-            this.m_oTotalMSizeLabel.AutoSize = true;
-            this.m_oTotalMSizeLabel.Location = new System.Drawing.Point(6, 95);
-            this.m_oTotalMSizeLabel.Name = "m_oTotalMSizeLabel";
-            this.m_oTotalMSizeLabel.Size = new System.Drawing.Size(54, 13);
-            this.m_oTotalMSizeLabel.TabIndex = 14;
-            this.m_oTotalMSizeLabel.Text = "Total Size";
-            // 
-            // m_oMaterialsLabel
-            // 
-            this.m_oMaterialsLabel.AutoSize = true;
-            this.m_oMaterialsLabel.Location = new System.Drawing.Point(6, 121);
-            this.m_oMaterialsLabel.Name = "m_oMaterialsLabel";
-            this.m_oMaterialsLabel.Size = new System.Drawing.Size(49, 13);
-            this.m_oMaterialsLabel.TabIndex = 15;
-            this.m_oMaterialsLabel.Text = "Materials";
-            // 
-            // m_oSepRangeLabel
-            // 
-            this.m_oSepRangeLabel.AutoSize = true;
-            this.m_oSepRangeLabel.Location = new System.Drawing.Point(144, 43);
-            this.m_oSepRangeLabel.Name = "m_oSepRangeLabel";
-            this.m_oSepRangeLabel.Size = new System.Drawing.Size(105, 13);
-            this.m_oSepRangeLabel.TabIndex = 16;
-            this.m_oSepRangeLabel.Text = "Separation Range(k)";
-            // 
-            // m_oMissileCostLabel
-            // 
-            this.m_oMissileCostLabel.AutoSize = true;
-            this.m_oMissileCostLabel.Location = new System.Drawing.Point(187, 69);
-            this.m_oMissileCostLabel.Name = "m_oMissileCostLabel";
-            this.m_oMissileCostLabel.Size = new System.Drawing.Size(62, 13);
-            this.m_oMissileCostLabel.TabIndex = 17;
-            this.m_oMissileCostLabel.Text = "Missile Cost";
-            // 
-            // m_oTotalMCostLabel
-            // 
-            this.m_oTotalMCostLabel.AutoSize = true;
-            this.m_oTotalMCostLabel.Location = new System.Drawing.Point(194, 95);
-            this.m_oTotalMCostLabel.Name = "m_oTotalMCostLabel";
-            this.m_oTotalMCostLabel.Size = new System.Drawing.Size(55, 13);
-            this.m_oTotalMCostLabel.TabIndex = 18;
-            this.m_oTotalMCostLabel.Text = "Total Cost";
-            // 
-            // m_oSubTotalSizeTextBox
-            // 
-            this.m_oSubTotalSizeTextBox.Location = new System.Drawing.Point(87, 92);
-            this.m_oSubTotalSizeTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oSubTotalSizeTextBox.Name = "m_oSubTotalSizeTextBox";
-            this.m_oSubTotalSizeTextBox.ReadOnly = true;
-            this.m_oSubTotalSizeTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oSubTotalSizeTextBox.TabIndex = 39;
-            this.m_oSubTotalSizeTextBox.Text = "0";
-            this.m_oSubTotalSizeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSubNumberTextBox
-            // 
-            this.m_oSubNumberTextBox.Location = new System.Drawing.Point(87, 40);
-            this.m_oSubNumberTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oSubNumberTextBox.Name = "m_oSubNumberTextBox";
-            this.m_oSubNumberTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oSubNumberTextBox.TabIndex = 37;
-            this.m_oSubNumberTextBox.Text = "0";
-            this.m_oSubNumberTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSubSizeTextBox
-            // 
-            this.m_oSubSizeTextBox.Location = new System.Drawing.Point(87, 66);
-            this.m_oSubSizeTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oSubSizeTextBox.Name = "m_oSubSizeTextBox";
-            this.m_oSubSizeTextBox.ReadOnly = true;
-            this.m_oSubSizeTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oSubSizeTextBox.TabIndex = 38;
-            this.m_oSubSizeTextBox.Text = "0";
-            this.m_oSubSizeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSubTotalCostTextBox
-            // 
-            this.m_oSubTotalCostTextBox.Location = new System.Drawing.Point(262, 92);
-            this.m_oSubTotalCostTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oSubTotalCostTextBox.Name = "m_oSubTotalCostTextBox";
-            this.m_oSubTotalCostTextBox.ReadOnly = true;
-            this.m_oSubTotalCostTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oSubTotalCostTextBox.TabIndex = 42;
-            this.m_oSubTotalCostTextBox.Text = "0";
-            this.m_oSubTotalCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSepRangeTextBox
-            // 
-            this.m_oSepRangeTextBox.Location = new System.Drawing.Point(262, 40);
-            this.m_oSepRangeTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oSepRangeTextBox.Name = "m_oSepRangeTextBox";
-            this.m_oSepRangeTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oSepRangeTextBox.TabIndex = 40;
-            this.m_oSepRangeTextBox.Text = "150";
-            this.m_oSepRangeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSubCostTextBox
-            // 
-            this.m_oSubCostTextBox.Location = new System.Drawing.Point(262, 66);
-            this.m_oSubCostTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oSubCostTextBox.Name = "m_oSubCostTextBox";
-            this.m_oSubCostTextBox.ReadOnly = true;
-            this.m_oSubCostTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oSubCostTextBox.TabIndex = 41;
-            this.m_oSubCostTextBox.Text = "0";
-            this.m_oSubCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oMaterialsRichTextBox
-            // 
-            this.m_oMaterialsRichTextBox.Location = new System.Drawing.Point(87, 118);
-            this.m_oMaterialsRichTextBox.Margin = new System.Windows.Forms.Padding(10);
-            this.m_oMaterialsRichTextBox.Name = "m_oMaterialsRichTextBox";
-            this.m_oMaterialsRichTextBox.ReadOnly = true;
-            this.m_oMaterialsRichTextBox.Size = new System.Drawing.Size(219, 64);
-            this.m_oMaterialsRichTextBox.TabIndex = 3;
-            this.m_oMaterialsRichTextBox.Text = "0x Boronide  0x Corbomite  0x Tritanium  0x Uridium  0x Gallicite  0x Corundium  " +
-                "0x Duranium  0x Neutronium\nNot Yet Implemented";
             // 
             // MissileDesign
             // 

@@ -1621,7 +1621,7 @@ namespace Pulsar4X
             /// </summary>
             if (Constants.GameSettings.Aurora65JPGeneration == true)
             {
-                int numJPs = 10;
+                int numJPs = 1;
                 int BaseJPChance = 90;
                 int JPChance = (BaseJPChance + (int)Math.Round(system.Stars[0].Orbit.MassRelativeToSol));
                 while (m_RNG.Next(100) < JPChance)

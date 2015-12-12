@@ -1012,7 +1012,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Update the taskgroup lookup missile table if this sensor is better than the previous ones for any particular resolution.
                         /// </summary>
-                        for (int loop = 0; loop < 15; loop++)
+                        for (int loop = 0; loop < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); loop++)
                         {
                             if (ActiveSensorQue[(ActiveSensorQue.Count - 1)].aSensorDef.lookUpMT[loop] > ActiveSensorQue[TaskGroupLookUpMT[loop]].aSensorDef.lookUpMT[loop])
                             {
@@ -1106,7 +1106,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Missile Table reassignment.
                             /// </summary>
-                            for (int loop = 0; loop < 15; loop++)
+                            for (int loop = 0; loop < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); loop++)
                             {
                                 if (TaskGroupLookUpMT[loop] == inQue)
                                 {
@@ -3158,10 +3158,6 @@ namespace Pulsar4X.Entities
 
                                       if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus == JPDetection.Status.None)
                                           CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus = JPDetection.Status.Incomplete;
-
-                                      String Entry = String.Format("Indexs J:{0} Just found {1} at {2} {3},{4}", CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Count,JP,SPIndex+1,JP.Position.X,JP.Position.Y);
-                                      MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
-                                      TaskGroupFaction.MessageLog.Add(NME);
                                   }
                                }
                             }

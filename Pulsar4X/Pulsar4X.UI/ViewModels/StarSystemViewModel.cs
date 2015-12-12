@@ -14,6 +14,25 @@ namespace Pulsar4X.UI.ViewModels
 {
     public class StarSystemViewModel : INotifyPropertyChanged
     {
+        private Faction _currentFaction;
+        public Faction CurrentFaction
+        {
+            get { return _currentFaction; }
+            set
+            {
+                _currentFaction = value;
+                if (_currentFaction == null)
+                {
+                    return;
+                }
+                OnPropertyChanged(() => CurrentFaction);
+
+                CurrentStarSystem = CurrentFaction.KnownSystems[0];
+            }
+        }
+
+        public BindingList<Faction> Factions { get; set; }
+
         private StarSystem _currentstarsystem;
         public StarSystem CurrentStarSystem
         {
@@ -146,6 +165,8 @@ namespace Pulsar4X.UI.ViewModels
 
         public StarSystemViewModel()
         {
+            Factions = GameState.Instance.Factions;
+
             // Bind to list of star systems:
             StarSystems = GameState.Instance.StarSystems;
 
@@ -154,6 +175,8 @@ namespace Pulsar4X.UI.ViewModels
             {
                 return;
             }
+
+            CurrentFaction = GameState.Instance.Factions.FirstOrDefault();
 
             CurrentStarSystem = GameState.Instance.StarSystems.FirstOrDefault();
             CurrentStar = CurrentStarSystem.Stars.FirstOrDefault();

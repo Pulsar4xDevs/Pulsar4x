@@ -16,6 +16,14 @@ namespace Pulsar4X.UI.Panels
         #region Properties
 
         /// <summary>
+        /// What is the currently selected faction
+        /// </summary>
+        public ComboBox CurrentFactionComboBox
+        {
+            get { return m_oCurrentFactionComboBox; }
+        }
+
+        /// <summary>
         /// Combo Box used to select the current star system.
         /// </summary>
         public ComboBox SystemSelectionComboBox

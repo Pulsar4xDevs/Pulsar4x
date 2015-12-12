@@ -46,6 +46,7 @@
             this.m_oDeleteSystemButton = new System.Windows.Forms.Button();
             this.m_oGenGalaxyButton = new System.Windows.Forms.Button();
             this.m_oGenSystemButton = new System.Windows.Forms.Button();
+            this.m_oCurrentFactionComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSystemInfoGroupBox.SuspendLayout();
             this.m_oControlsGroupBox.SuspendLayout();
             this.m_oSMControlsGroupBox.SuspendLayout();
@@ -54,7 +55,7 @@
             // m_oSystemSelectionComboBox
             // 
             this.m_oSystemSelectionComboBox.FormattingEnabled = true;
-            this.m_oSystemSelectionComboBox.Location = new System.Drawing.Point(13, 13);
+            this.m_oSystemSelectionComboBox.Location = new System.Drawing.Point(12, 39);
             this.m_oSystemSelectionComboBox.Name = "m_oSystemSelectionComboBox";
             this.m_oSystemSelectionComboBox.Size = new System.Drawing.Size(183, 21);
             this.m_oSystemSelectionComboBox.TabIndex = 0;
@@ -69,7 +70,7 @@
             this.m_oSystemInfoGroupBox.Controls.Add(this.m_oAgeTextBox);
             this.m_oSystemInfoGroupBox.Controls.Add(this.m_oSystemTypeTextBox);
             this.m_oSystemInfoGroupBox.Controls.Add(this.label1);
-            this.m_oSystemInfoGroupBox.Location = new System.Drawing.Point(13, 41);
+            this.m_oSystemInfoGroupBox.Location = new System.Drawing.Point(12, 67);
             this.m_oSystemInfoGroupBox.Name = "m_oSystemInfoGroupBox";
             this.m_oSystemInfoGroupBox.Size = new System.Drawing.Size(183, 139);
             this.m_oSystemInfoGroupBox.TabIndex = 1;
@@ -145,7 +146,7 @@
             this.m_oControlsGroupBox.Controls.Add(this.m_oExportButton);
             this.m_oControlsGroupBox.Controls.Add(this.m_oAddColonyButton);
             this.m_oControlsGroupBox.Controls.Add(this.m_oAutoRenameButton);
-            this.m_oControlsGroupBox.Location = new System.Drawing.Point(13, 186);
+            this.m_oControlsGroupBox.Location = new System.Drawing.Point(12, 212);
             this.m_oControlsGroupBox.Name = "m_oControlsGroupBox";
             this.m_oControlsGroupBox.Size = new System.Drawing.Size(183, 84);
             this.m_oControlsGroupBox.TabIndex = 2;
@@ -176,7 +177,7 @@
             this.m_oAutoRenameButton.Name = "m_oAutoRenameButton";
             this.m_oAutoRenameButton.Size = new System.Drawing.Size(75, 23);
             this.m_oAutoRenameButton.TabIndex = 0;
-            this.m_oAutoRenameButton.Text = "Auto Rename";
+            this.m_oAutoRenameButton.Text = "Auto Rename\r\n";
             this.m_oAutoRenameButton.UseVisualStyleBackColor = true;
             // 
             // m_oSMControlsGroupBox
@@ -184,7 +185,7 @@
             this.m_oSMControlsGroupBox.Controls.Add(this.m_oDeleteSystemButton);
             this.m_oSMControlsGroupBox.Controls.Add(this.m_oGenGalaxyButton);
             this.m_oSMControlsGroupBox.Controls.Add(this.m_oGenSystemButton);
-            this.m_oSMControlsGroupBox.Location = new System.Drawing.Point(13, 276);
+            this.m_oSMControlsGroupBox.Location = new System.Drawing.Point(12, 302);
             this.m_oSMControlsGroupBox.Name = "m_oSMControlsGroupBox";
             this.m_oSMControlsGroupBox.Size = new System.Drawing.Size(183, 82);
             this.m_oSMControlsGroupBox.TabIndex = 3;
@@ -218,12 +219,21 @@
             this.m_oGenSystemButton.Text = "Gen System";
             this.m_oGenSystemButton.UseVisualStyleBackColor = true;
             // 
+            // m_oCurrentFactionComboBox
+            // 
+            this.m_oCurrentFactionComboBox.FormattingEnabled = true;
+            this.m_oCurrentFactionComboBox.Location = new System.Drawing.Point(12, 12);
+            this.m_oCurrentFactionComboBox.Name = "m_oCurrentFactionComboBox";
+            this.m_oCurrentFactionComboBox.Size = new System.Drawing.Size(183, 21);
+            this.m_oCurrentFactionComboBox.TabIndex = 4;
+            // 
             // SGaD_Controls
             // 
             this.AutoHidePortion = 0.2D;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(208, 370);
+            this.ClientSize = new System.Drawing.Size(208, 397);
+            this.Controls.Add(this.m_oCurrentFactionComboBox);
             this.Controls.Add(this.m_oSMControlsGroupBox);
             this.Controls.Add(this.m_oControlsGroupBox);
             this.Controls.Add(this.m_oSystemInfoGroupBox);
@@ -262,5 +272,6 @@
         private System.Windows.Forms.Button m_oGenSystemButton;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox m_oSeedTextBox;
+        private System.Windows.Forms.ComboBox m_oCurrentFactionComboBox;
     }
 }

@@ -52,6 +52,7 @@ namespace Pulsar4X.Entities
             ManyGood,          //Rich world with many high quality mineral deposits, but not truly massive deposits 500k-4M range 4-8 minerals
             MassiveReserves,   //Gargantuan amount of resources, low accessibility. 10-150M 8-11 minerals.
             Homeworld,         //50k-150k of every resource in good amounts. Everything a starting faction will need.
+            GasGiant,          //500k to 50M Sorium only, varying accessibility but not extremely low.
             Count,
         }
 
@@ -234,6 +235,9 @@ namespace Pulsar4X.Entities
 
 
             Atmosphere = new Atmosphere(this);
+
+            if(Type != PlanetType.GasDwarf && Type != PlanetType.GasGiant && Type != PlanetType.IceGiant)
+                SupportsPopulations = true;
         }
 
 
@@ -421,6 +425,12 @@ namespace Pulsar4X.Entities
             }
         }
 
+        public void GasGiantMineralGeneration()
+        {
+            m_aiMinerialReserves[(int)Constants.Minerals.MinerialNames.Sorium] = 500000.0f + (49500000.0f * ((float)GameState.RNG.Next(0,100000) / 100000.0f));
+            m_aiMinerialAccessibility[(int)Constants.Minerals.MinerialNames.Sorium] = 0.4f + ((float)GameState.RNG.Next(0, 6) / 10.0f);
+        }
+
         /// <summary>
         /// determine what type of world this is with regards to mineral generation and generate those minerals.
         /// </summary>
@@ -430,8 +440,36 @@ namespace Pulsar4X.Entities
 
             MineralType MType = MineralType.Homeworld;
 
-            if(isHomeWorld == false)
-                MType = (MineralType)GameState.RNG.Next((int)SystemBody.MineralType.NoMinerals, (int)SystemBody.MineralType.Homeworld);
+
+
+            if (isHomeWorld == false)
+            {
+                int MineralTest = GameState.RNG.Next(0,100);
+                MType = MineralType.NoMinerals;
+
+                /// <summary>
+                /// Minerals should be generated.
+                /// </summary>
+                if(MineralTest > 60)
+                {
+                    if (Type == PlanetType.GasGiant || Type == PlanetType.IceGiant || Type == PlanetType.GasDwarf)
+                    {
+                        MType = SystemBody.MineralType.GasGiant;
+                    }
+                    else if (Type == PlanetType.Comet)
+                    {
+                        MType = SystemBody.MineralType.Comet;
+                    }
+                    else if (Type == PlanetType.Asteroid)
+                    {
+                        MType = MineralType.Asteroid;
+                    }
+                    else
+                    {
+                        MType = (MineralType)GameState.RNG.Next((int)SystemBody.MineralType.FewGood, (int)SystemBody.MineralType.Homeworld);
+                    }
+                }
+            }
 
             switch (MType)
             {
@@ -455,6 +493,9 @@ namespace Pulsar4X.Entities
                 case SystemBody.MineralType.Homeworld:
                     HomeworldMineralGeneration();
                     break;
+                case SystemBody.MineralType.GasGiant:
+                    GasGiantMineralGeneration();
+                    break;
             }
             _MineralsGenerated = true;
         }
@@ -466,6 +507,41 @@ namespace Pulsar4X.Entities
         public int GetSurveyCost()
         {
             return (int)Math.Floor((float)Constants.SensorTN.EarthSurvey * ((float)Radius / Constants.SensorTN.EarthRadius));
+        }
+
+
+        /// <summary>
+        /// Add a population if possible for the selected faction of species CurrentSpecies.
+        /// </summary>
+        /// <param name="PopFaction">Faction of population.</param>
+        /// <param name="TimeSlice">Sensor info needs timeslice I think</param>
+        /// <param name="CurrentSpecies">Species of this population.</param>
+        public void AddPopulation(Faction PopFaction, int TimeSlice, Species CurrentSpecies)
+        {
+            String Entry = String.Format("AddPopulation Run {0} {1}",SupportsPopulations, Populations.Count);
+            MessageEntry NMG = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.CurrentDate, GameState.Instance.CurrentSecond, Entry);
+            GameState.Instance.Factions[0].MessageLog.Add(NMG);
+            /// <summary>
+            /// Some planet types can't host populations. Gas Giants for example.
+            /// </summary>
+            if (SupportsPopulations == false)
+                return;
+
+            /// <summary>
+            /// If such a population already exists do not allow duplicates. this will crash if a duplicate is allowed, and it also potentially perverts gameplay mechanics.
+            /// </summary>
+            foreach (Population CurrentPop in Populations)
+            {
+                if (CurrentPop.Faction == PopFaction && CurrentPop.Species == CurrentSpecies)
+                    return;
+            }
+
+            /// <summary>
+            /// Assuming that we got this far, add the population.
+            /// </summary>
+            Population NewPopulation = new Population(this, PopFaction, TimeSlice, Name, CurrentSpecies);
+            Populations.Add(NewPopulation);
+            PopFaction.Populations.Add(NewPopulation);
         }
     }
 

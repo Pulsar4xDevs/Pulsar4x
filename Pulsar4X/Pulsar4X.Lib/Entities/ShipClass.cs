@@ -1643,13 +1643,26 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Right now all this function does is overwrite the previous engine entry if switching types.
+        /// Right now all this function does is overwrite the previous engine entry if switching types. Update: this causes problems.
         /// I think I'll add a static variable to ComponentDefTN to deal with that. Can subtract.
         /// </summary>
         /// <param name="Engine">Engine Definition</param>
         /// <param name="inc">Number of engines to be added.</param>
         public void AddEngine(EngineDefTN Engine, short inc)
         {
+            if (ShipEngineDef != Engine && ShipEngineDef != null)
+            {
+                /// <summary>
+                /// The old engine has to be subtracted from the ship, so handle that here.
+                /// </summary>
+                short OldShipEngineCount = (short)ShipEngineCount;
+                AddEngine(ShipEngineDef, (short)(OldShipEngineCount * -1));
+
+                /// <summary>
+                /// Preserve the overall engine count. gah, casting is annoying, I should have just made everything ints.
+                /// </summary>
+                inc = (short)(inc + OldShipEngineCount);
+            }
             ShipEngineDef = Engine;
             ShipEngineCount = (ushort)((short)ShipEngineCount + inc);
 
