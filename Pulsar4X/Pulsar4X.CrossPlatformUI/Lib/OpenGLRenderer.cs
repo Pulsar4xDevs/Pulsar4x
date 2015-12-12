@@ -204,7 +204,7 @@ namespace Pulsar4X.CrossPlatformUI
 			shaderList.Add(CreateShader(ShaderType.VertexShader, strVertexShader));
 			shaderList.Add(CreateShader(ShaderType.FragmentShader, strFragmentShader));
 
-			theProgram = CreateProgram(shaderList);
+			//theProgram = CreateProgram(shaderList);
 
 			foreach (int shader in shaderList)
 			{

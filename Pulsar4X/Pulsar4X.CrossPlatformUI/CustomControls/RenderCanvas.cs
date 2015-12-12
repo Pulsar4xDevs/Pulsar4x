@@ -64,7 +64,7 @@ namespace Pulsar4X.CrossPlatformUI
 
         public virtual void OnGLInitalized(EventArgs e)
         {
-            this.Properties.TriggerEvent(GLInitializedEvent, this, e);
+            //this.Properties.TriggerEvent(GLInitializedEvent, this, e);
         }
         private void OnDrawNow(object sender, EventArgs e)
         {
