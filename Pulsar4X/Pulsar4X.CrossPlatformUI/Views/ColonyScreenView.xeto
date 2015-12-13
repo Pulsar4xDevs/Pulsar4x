@@ -9,8 +9,15 @@
       <ComboBox ID="ColonySelection"  />
     </TableRow>
     <TableRow>
-      <GridView ID="FacDataGrid" />
-      <GridView ID="PopDataGrid" />
+      <TableLayout>
+        <TableRow><Label Text="Facilites"/></TableRow>
+        <TableRow><GridView ID="FacDataGrid" /></TableRow>      
+      </TableLayout>
+      <TableLayout>
+        <TableRow><Label Text ="Population"/></TableRow>
+        <TableRow> <GridView ID="PopDataGrid" /></TableRow>
+      </TableLayout>
+     
       <TableLayout>
         <TableRow> 
           <Label Text="Mineral Deposits" /> 
@@ -39,7 +46,7 @@
         </TableRow>
       </TableLayout>
       <c:JobAbilityView ID="ConstructionAbilityView" />
-      <c:ResearchAbilityView ID="ConstructionAbilityView" />
+      <c:ResearchAbilityView ID="ResearchAbilityView" />
     </TableRow>
     
   </TableLayout>

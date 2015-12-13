@@ -29,7 +29,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             XamlReader.Load(this);
         }
 
-        public JobAbilityView(RefinaryAbilityVM viewModel)
+        public JobAbilityView(RefinaryAbilityVM viewModel) :this()
         {
 
             PointsPerDay.Text = viewModel.PointsPerDay.ToString();
@@ -42,7 +42,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             
         }
 
-        public JobAbilityView(ConstructionAbilityVM viewModel)
+        public JobAbilityView(ConstructionAbilityVM viewModel) : this()
         {
             PointsPerDay.Text = viewModel.PointsPerDay.ToString();
 
