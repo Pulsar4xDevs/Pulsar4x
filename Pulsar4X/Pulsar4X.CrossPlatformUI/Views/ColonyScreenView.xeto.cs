@@ -50,12 +50,58 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             colonyScreenVM = gameVM.ColonyScreens[0];
 
-            FacDataGrid.DataContext = colonyScreenVM.Facilities;
-            PopDataGrid.DataContext = colonyScreenVM.Species;
-            MineralDeposits.DataContext = colonyScreenVM.PlanetMineralDepositVM;
-            MineralStockpile.DataContext = colonyScreenVM.RawMineralStockpileVM;
+            FacDataGrid.DataStore = colonyScreenVM.Facilities;
+            FacDataGrid.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<FacilityVM, string>(r => r.Name) }
+            });
+
+            PopDataGrid.DataStore = colonyScreenVM.Species.Cast<object>();
+            PopDataGrid.Columns.Add(new GridColumn
+                {
+                DataCell = new TextBoxCell{Binding = Binding.Property((KeyValuePair<string,long> r) => r.Key)}});
+            PopDataGrid.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property((KeyValuePair<string, long> r) => r.Value).Convert(r=> r.ToString()) }
+            });
+            
+            MineralDeposits.DataStore = colonyScreenVM.PlanetMineralDepositVM.MineralDeposits;
+            MineralDeposits.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, string>(r => r.Mineral) }
+            });
+            MineralDeposits.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, double>(r => r.Accessability).Convert(r=> r.ToString()) }
+            });
+            MineralDeposits.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
+            });
+
+            MineralStockpile.DataStore = colonyScreenVM.RawMineralStockpileVM.MineralStockpile;
+            MineralStockpile.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<RawMineralInfoVM, string>(r => r.Mineral) }
+            });
+            MineralStockpile.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<RawMineralInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
+            });
+
+
             RefinaryAbilityView = new JobAbilityView(colonyScreenVM.RefinaryAbilityVM);
-            RefinedMats.DataContext = colonyScreenVM.RefinedMatsStockpileVM;
+
+            RefinedMats.DataStore = colonyScreenVM.RefinedMatsStockpileVM.MaterialStockpile;
+            RefinedMats.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<RefinedMatInfoVM, string>(r => r.Material) }
+            });
+            RefinedMats.Columns.Add(new GridColumn
+            {
+                DataCell = new TextBoxCell { Binding = Binding.Property<RefinedMatInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
+            });
+
             ConstructionAbilityView = new JobAbilityView(colonyScreenVM.ConstructionAbilityVM);
             ResearchAbilityView = new ResearchAbilityView(colonyScreenVM.ColonyResearchVM);
 
