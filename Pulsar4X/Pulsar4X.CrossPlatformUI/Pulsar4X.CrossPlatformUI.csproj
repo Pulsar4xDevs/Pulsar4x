@@ -68,6 +68,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ResearchAbilityView.xeto" />
+    <EmbeddedResource Include="Views\ComponentDesignView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -82,6 +85,9 @@
     <Compile Include="Pulsar4XApplication.cs" />
     <Compile Include="Views\ColonyScreenView.xeto.cs">
       <DependentUpon>ColonyScreenView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentDesignView.xeto.cs">
+      <DependentUpon>ComponentDesignView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\JobAbilityView.xeto.cs">
       <DependentUpon>JobAbilityView.xeto</DependentUpon>
