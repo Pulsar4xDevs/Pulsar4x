@@ -142,6 +142,12 @@ namespace Pulsar4X.UI.SceenGraph
                     if (TaskGroup.SensorUpdateAck != _LastSensorUpdateAck)
                     {
                         /// <summary>
+                        /// Get rid of all sensors if this taskgroup is empty. a SensorUpdateAck should be sent upon emptying a tg into another tg.
+                        /// </summary>
+                        if (TaskGroup.Ships.Count == 0)
+                            _SensorContactElements.Clear();
+
+                        /// <summary>
                         /// Remove those sensors that are no longer active.
                         /// </summary>
                         BindingList<Guid> SensorRemoveList = new BindingList<Guid>();
@@ -207,60 +213,63 @@ namespace Pulsar4X.UI.SceenGraph
 
                         if (ParentSceen.ShowPassives == true)
                         {
-                            /// <summary>
-                            /// A taskgroup with no sensors still has the default package, so handle that.
-                            /// </summary>
-                            if (TaskGroup.BestEM == null && _SensorContactElements.ContainsKey(TaskGroup.Id) == false)
+                            if(TaskGroup.Ships.Count != 0)
                             {
-                                PassiveSensorDefTN pSensorDef = TaskGroup.TaskGroupFaction.ComponentList.DefaultPassives;
-                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
-                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+                                /// <summary>
+                                /// A taskgroup with no sensors still has the default package, so handle that. A taskgroup with no ships should not have a sensor presence however.
+                                /// </summary>
+                                if (TaskGroup.BestEM == null && _SensorContactElements.ContainsKey(TaskGroup.Id) == false)
+                                {
+                                    PassiveSensorDefTN pSensorDef = TaskGroup.TaskGroupFaction.ComponentList.DefaultPassives;
+                                    double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                    double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
-                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+                                    Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
-                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, "", null, ComponentTypeTN.PassiveSensor, ParentSceen);
+                                    SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, "", null, ComponentTypeTN.PassiveSensor, ParentSceen);
 
-                                //definitely a kludge here to make SCE work with default passives.
-                                _SensorContactElements.Add(TaskGroup.Id, NSE);
-                            }
-                            else if (TaskGroup.BestEM != null && _SensorContactElements.ContainsKey(TaskGroup.BestEM.pSensorDef.Id) == false)
-                            {
-                                PassiveSensorDefTN pSensorDef = TaskGroup.BestEM.pSensorDef;
-                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
-                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+                                    //definitely a kludge here to make SCE work with default passives.
+                                    _SensorContactElements.Add(TaskGroup.Id, NSE);
+                                }
+                                else if (TaskGroup.BestEM != null && _SensorContactElements.ContainsKey(TaskGroup.BestEM.pSensorDef.Id) == false)
+                                {
+                                    PassiveSensorDefTN pSensorDef = TaskGroup.BestEM.pSensorDef;
+                                    double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                    double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
-                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+                                    Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
-                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, TaskGroup.BestEM.Name, TaskGroup.BestEM, TaskGroup.BestEM.pSensorDef.componentType, ParentSceen);
-                                _SensorContactElements.Add(TaskGroup.BestEM.pSensorDef.Id, NSE);
-                            }
+                                    SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, TaskGroup.BestEM.Name, TaskGroup.BestEM, TaskGroup.BestEM.pSensorDef.componentType, ParentSceen);
+                                    _SensorContactElements.Add(TaskGroup.BestEM.pSensorDef.Id, NSE);
+                                }
 
-                            /// <summary>
-                            /// A taskgroup with no sensors still has the default package, so handle that.
-                            /// </summary>
-                            if (TaskGroup.BestThermal == null && _SensorContactElements.ContainsKey(TaskGroup.Ships[0].Id) == false)
-                            {
-                                PassiveSensorDefTN pSensorDef = TaskGroup.TaskGroupFaction.ComponentList.DefaultPassives;
-                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
-                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+                                /// <summary>
+                                /// A taskgroup with no sensors still has the default package, so handle that.
+                                /// </summary>
+                                if (TaskGroup.BestThermal == null && _SensorContactElements.ContainsKey(TaskGroup.Ships[0].Id) == false)
+                                {
+                                    PassiveSensorDefTN pSensorDef = TaskGroup.TaskGroupFaction.ComponentList.DefaultPassives;
+                                    double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                    double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
-                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+                                    Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
-                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, "", null, ComponentTypeTN.PassiveSensor, ParentSceen);
+                                    SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, "", null, ComponentTypeTN.PassiveSensor, ParentSceen);
 
-                                //yep, its a kludge.
-                                _SensorContactElements.Add(TaskGroup.Ships[0].Id, NSE);
-                            }
-                            else if (TaskGroup.BestThermal != null && _SensorContactElements.ContainsKey(TaskGroup.BestThermal.pSensorDef.Id) == false)
-                            {
-                                PassiveSensorDefTN pSensorDef = TaskGroup.BestThermal.pSensorDef;
-                                double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
-                                double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
+                                    //yep, its a kludge.
+                                    _SensorContactElements.Add(TaskGroup.Ships[0].Id, NSE);
+                                }
+                                else if (TaskGroup.BestThermal != null && _SensorContactElements.ContainsKey(TaskGroup.BestThermal.pSensorDef.Id) == false)
+                                {
+                                    PassiveSensorDefTN pSensorDef = TaskGroup.BestThermal.pSensorDef;
+                                    double factor = Constants.Units.KmPerAu / Constants.GameConstants.BasicUnitOfDistance;
+                                    double AURadius = (double)pSensorDef.range * ((float)Constants.SensorTN.DefaultPassiveSignature / (float)ParentSceen.ShowPassiveSignatureRange) / factor;
 
-                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+                                    Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
-                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, TaskGroup.BestThermal.Name, TaskGroup.BestThermal, TaskGroup.BestThermal.pSensorDef.componentType, ParentSceen);
-                                _SensorContactElements.Add(pSensorDef.Id, NSE);
+                                    SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, TaskGroup.BestThermal.Name, TaskGroup.BestThermal, TaskGroup.BestThermal.pSensorDef.componentType, ParentSceen);
+                                    _SensorContactElements.Add(pSensorDef.Id, NSE);
+                                }
                             }
                         }
 

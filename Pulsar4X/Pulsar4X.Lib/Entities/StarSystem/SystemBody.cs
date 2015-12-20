@@ -330,12 +330,15 @@ namespace Pulsar4X.Entities
             {
                 for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
-                    if (GameState.RNG.Next(10) == 1)
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
                     {
                         m_aiMinerialReserves[mineralIterator] = 500.0f + (9500.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
                         m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(8, 10) / 10.0f);
 
                         mCount--;
+
+                        if (mCount == 0)
+                            break;
                     }
                 }
             }
@@ -351,12 +354,15 @@ namespace Pulsar4X.Entities
             {
                 for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
-                    if (GameState.RNG.Next(10) == 1)
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
                     {
                         m_aiMinerialReserves[mineralIterator] = 10000.0f + (90000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
                         m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(4, 10) / 10.0f);
 
                         mCount--;
+
+                        if (mCount == 0)
+                            break;
                     }
                 }
             }
@@ -372,12 +378,15 @@ namespace Pulsar4X.Entities
             {
                 for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
-                    if (GameState.RNG.Next(10) == 1)
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
                     {
                         m_aiMinerialReserves[mineralIterator] = 500000.0f + (3500000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
                         m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
 
                         mCount--;
+
+                        if (mCount == 0)
+                            break;
                     }
                 }
             }
@@ -393,12 +402,15 @@ namespace Pulsar4X.Entities
             {
                 for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
-                    if (GameState.RNG.Next(10) == 1)
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
                     {
                         m_aiMinerialReserves[mineralIterator] = 500000.0f + (3500000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
                         m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
 
                         mCount--;
+
+                        if (mCount == 0)
+                            break;
                     }
                 }
             }
@@ -414,12 +426,20 @@ namespace Pulsar4X.Entities
             {
                 for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
-                    if (GameState.RNG.Next(10) == 1)
+                    /// <summary>
+                    /// randomly pick a mineral to generate, and don't double up on mineral generation.
+                    /// </summary>
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
                     {
                         m_aiMinerialReserves[mineralIterator] = 10000000.0f + (140000000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
                         m_aiMinerialAccessibility[mineralIterator] = 0.1f;
 
                         mCount--;
+
+                        /// <summary>
+                        /// So important thing: if mCount keeps getting incremented past -1, this can go into an infinite loop.
+                        if (mCount == 0)
+                            break;
                     }
                 }
             }

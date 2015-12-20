@@ -462,7 +462,7 @@ namespace Pulsar4X.Entities
                 {
                     case Constants.ShipyardInfo.SYType.Commercial:
                         Name = "Commercial Yard #" + Number.ToString();
-                        Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage * Constants.ShipyardInfo.NavalToCommercialRatio;
+                        Tonnage = (Constants.ShipyardInfo.BaseShipyardTonnage * Constants.ShipyardInfo.NavalToCommercialRatio);
                         break;
                     case Constants.ShipyardInfo.SYType.Naval:
                         Name = "Naval Yard #" + Number.ToString();

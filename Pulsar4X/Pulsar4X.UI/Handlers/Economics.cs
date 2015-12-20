@@ -1045,6 +1045,14 @@ namespace Pulsar4X.UI.Handlers
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
+        /// <summary>
+        /// The system map needs a way to refresh the economics panel based on the passage of time there, so a way to call SoftRefresh publically is needed.
+        /// </summary>
+        public void RefreshDisplay()
+        {
+            SoftRefresh();
+        }
+
         #endregion
 
 
