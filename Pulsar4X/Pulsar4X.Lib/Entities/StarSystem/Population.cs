@@ -819,7 +819,6 @@ namespace Pulsar4X.Entities
                         Number++;
                         
                         Installations[Index].SYInfo.Add(SYI);
-
                         Adjustment = Adjustment - 1.0f;
                     }
                     break;
@@ -837,7 +836,6 @@ namespace Pulsar4X.Entities
                         Number++;
 
                         Installations[Index].SYInfo.Add(SYI);
-
                         Adjustment = Adjustment - 1.0f;
                     }
                     break;

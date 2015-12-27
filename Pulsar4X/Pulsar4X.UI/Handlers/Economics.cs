@@ -227,8 +227,8 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Tree view
             /// </summary>
-            m_oSummaryPanel.PopulationTreeView.KeyPress += new KeyPressEventHandler(PopulationTreeView_Input);
-            m_oSummaryPanel.PopulationTreeView.MouseClick += new MouseEventHandler(PopulationTreeView_Input);
+            m_oSummaryPanel.PopulationTreeView.AfterSelect += new TreeViewEventHandler(PopulationTreeView_Input);
+
 
             /// <summary>
             /// Time Advancement Buttons:
@@ -426,9 +426,10 @@ namespace Pulsar4X.UI.Handlers
                         CurrentSYInfo = null;
                     }
 
-                    RefreshPanels();
+                    RefreshPanels(true);
                 }
             }
+
         }
 
         /// <summary>
@@ -1445,7 +1446,7 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Refresh all the various panels that make up this display.
         /// </summary>
-        private void RefreshPanels()
+        private void RefreshPanels(bool skipTree=false)
         {
             if (m_oCurrnetFaction != null)
             {
@@ -1461,7 +1462,8 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Build the population lists.
                 /// </summary>
-                BuildTreeView();
+                if(skipTree == false)
+                    BuildTreeView();
 
                 /// <summary>
                 /// Summary Tab:
@@ -1666,16 +1668,20 @@ namespace Pulsar4X.UI.Handlers
                 {
                     StarSystem CurrentSystem = Pop.Planet.Position.System;
 
-                    if (m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes.ContainsKey(CurrentSystem.Name) == false)
-                    {
-                        m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes.Add(CurrentSystem.Name, CurrentSystem.Name);
-                    }
-
-
                     /// <summary>
                     /// What type of colony is this, and should it be placed into the tree view(no if CMC and CMC are hidden)
                     /// <summary>
                     String Class = "";
+
+                    /// <summary>
+                    /// What key will be put into the display tree?
+                    /// </summary>
+                    String Entry = "";
+
+                    /// <summary>
+                    /// Which node display should be used?
+                    /// </summary>
+                    int DisplayIndex = -1;
 
                     /// <summary>
                     /// Populated colony, can do basically anything
@@ -1696,14 +1702,10 @@ namespace Pulsar4X.UI.Handlers
 
                         Class = String.Format("{0}: {1:n2}m",Class, Pop.CivilianPopulation);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
 #warning DisplayIndex here is kludgy, do a find on the appropriate section? if so alter the adds to include a key string in addition to a text string
-                        int DisplayIndex = 0;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
+                        DisplayIndex = 0;
                     }
                     /// <summary>
                     /// Automining colony will only mine, but may have CMCs listening posts, terraforming gear and ruins
@@ -1713,13 +1715,9 @@ namespace Pulsar4X.UI.Handlers
                         int mines = (int)Math.Floor(Pop.Installations[(int)Installation.InstallationType.AutomatedMine].Number);
                         Class = String.Format(": {0}x Auto Mines", mines);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 1;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
+                        DisplayIndex = 1;
                     }
                     /// <summary>
                     /// CMCs. don't print this one if they should be hidden(by user input request). will also have a DSTS(or should I roll that into the CMC?), and may have terraforming and ruins)
@@ -1729,13 +1727,9 @@ namespace Pulsar4X.UI.Handlers
                         int mines = (int)Math.Floor(Pop.Installations[(int)Installation.InstallationType.CivilianMiningComplex].Number);
                         Class = String.Format(": {0}x Civ Mines", mines);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 2;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
+                        DisplayIndex = 2;
 
                     }
                     /// <summary>
@@ -1746,15 +1740,11 @@ namespace Pulsar4X.UI.Handlers
                         int DSTS = (int)Math.Floor(Pop.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number);
                         Class = String.Format(": {0}x DSTS", DSTS);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 2;
+                        DisplayIndex = 2;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 3;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
 
                     /// <summary>
@@ -1764,15 +1754,11 @@ namespace Pulsar4X.UI.Handlers
                     {
                         Class = String.Format(" Archeological Dig");
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 3;
+                        DisplayIndex = 3;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 4;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
                     /// <summary>
                     /// Orbital Terraforming modules. a planet with ships in orbit that will terraform it.
@@ -1781,15 +1767,11 @@ namespace Pulsar4X.UI.Handlers
                     {
                         Class = String.Format(": {0:n1}x Orbital Terraform", Pop._OrbitalTerraformModules);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 4;
+                        DisplayIndex = 4;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 5;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
                     else
                     {
@@ -1798,16 +1780,25 @@ namespace Pulsar4X.UI.Handlers
                         /// If none of the above are true, then the colony is simply dropped into the other colonies category.
                         /// </summary>
 
-                        String Entry = String.Format("{0} - {1}", Pop.Name, Pop.Species.Name);
+                        Entry = String.Format("{0} - {1}", Pop.Name, Pop.Species.Name);
 
-                        int DisplayIndex = 5;
+                        DisplayIndex = 5;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 6;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
+
+                    /// <summary>
+                    /// Every displayIndex node needs to have the current system in it added somewhere, so I'll do it here.
+                    /// </summary>
+                    if (m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.ContainsKey(CurrentSystem.Name) == false)
+                    {
+                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.Add(CurrentSystem.Name, CurrentSystem.Name);
+                    }
+
+                    int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
+                    m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
+
+                    TreeViewDictionary.Add(Entry, Pop);
                 }
             }
             else

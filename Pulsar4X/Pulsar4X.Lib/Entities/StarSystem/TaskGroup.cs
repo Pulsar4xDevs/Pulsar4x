@@ -3037,6 +3037,7 @@ namespace Pulsar4X.Entities
                                /// </summary>
                                int hoursToComplete = (int)Math.Ceiling((float)RemainderGP / CalcGeoSurveyPoints());
                                TimeSlice = TimeSlice - ((uint)hoursToComplete * Constants.TimeInSeconds.Hour);
+                               _GeoSurveyPoints = BodySurveyCost;
                            }
                            
                            
@@ -3230,7 +3231,9 @@ namespace Pulsar4X.Entities
                                 {
                                     if (CurrentSystem._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(SB) == false)
                                     {
-                                        float distSq = (float)(SB.Position.X * Contact.Position.X) + (float)(SB.Position.Y * Contact.Position.Y);
+                                        float dX = (float)Math.Abs(SB.Position.X - Contact.Position.X);
+                                        float dY = (float)Math.Abs(SB.Position.Y - Contact.Position.Y);
+                                        float distSq = (dX * dX) + (dY * dY);
                                         if (distSq < lowestDistance || lowestDistance == -1.0f)
                                         {
                                             lowestDistance = distSq;
@@ -3240,7 +3243,9 @@ namespace Pulsar4X.Entities
                                 }
                                 else
                                 {
-                                    float distSq = (float)(SB.Position.X * Contact.Position.X) + (float)(SB.Position.Y * Contact.Position.Y);
+                                    float dX = (float)Math.Abs(SB.Position.X - Contact.Position.X);
+                                    float dY = (float)Math.Abs(SB.Position.Y - Contact.Position.Y);
+                                    float distSq = (dX * dX) + (dY * dY);
                                     if (distSq < lowestDistance || lowestDistance == -1.0f)
                                     {
                                         lowestDistance = distSq;

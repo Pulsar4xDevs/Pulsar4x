@@ -438,6 +438,7 @@ namespace Pulsar4X.Entities
 
                         /// <summary>
                         /// So important thing: if mCount keeps getting incremented past -1, this can go into an infinite loop.
+                        /// </summary>
                         if (mCount == 0)
                             break;
                     }
@@ -538,9 +539,6 @@ namespace Pulsar4X.Entities
         /// <param name="CurrentSpecies">Species of this population.</param>
         public void AddPopulation(Faction PopFaction, int TimeSlice, Species CurrentSpecies)
         {
-            String Entry = String.Format("AddPopulation Run {0} {1}",SupportsPopulations, Populations.Count);
-            MessageEntry NMG = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.CurrentDate, GameState.Instance.CurrentSecond, Entry);
-            GameState.Instance.Factions[0].MessageLog.Add(NMG);
             /// <summary>
             /// Some planet types can't host populations. Gas Giants for example.
             /// </summary>

@@ -479,7 +479,6 @@ namespace Pulsar4X.Entities
                 BuildingShips = new BindingList<ShipyardTask>();
                 CurrentActivity = new ShipyardActivity();
 
-                Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage;
                 Slipways = 1;
                 AssignedClass = null;
 
@@ -538,6 +537,9 @@ namespace Pulsar4X.Entities
 
                 switch (NewActivity)
                 {
+                    case Constants.ShipyardInfo.ShipyardActivity.NoActivity:
+                        CurrentActivity = new ShipyardActivity();
+                        break;
                     case Constants.ShipyardInfo.ShipyardActivity.AddSlipway:
                         decimal TotalSlipwayCost = 0.0m;
                         for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
