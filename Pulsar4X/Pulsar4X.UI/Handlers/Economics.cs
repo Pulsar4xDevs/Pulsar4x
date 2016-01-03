@@ -2113,7 +2113,8 @@ namespace Pulsar4X.UI.Handlers
                     // need planetary hab rating vs species tolerance
                     double ColCost = CurrentPopulation.Species.GetTNHabRating(CurrentPopulation.Planet);
 
-                    m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[1].Value = ColCost.ToString();
+                    String CCCost = String.Format("{0:N2}",ColCost);
+                    m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[1].Value = CCCost;
                     m_oSummaryPanel.SummaryDataGrid.Rows[3].Cells[1].Value = CurrentPopulation.AdminRating;
 
                     /// <summary>
@@ -2134,11 +2135,11 @@ namespace Pulsar4X.UI.Handlers
 
                     if (CurrentPopulation.CivilianPopulation != 0.0f)
                     {
-                        Entry = String.Format("   Agriculture and Enviromental ({0:N2}%)", CurrentPopulation.PopulationWorkingInAgriAndEnviro / CurrentPopulation.CivilianPopulation);
+                        Entry = String.Format("   Agriculture and Enviromental ({0:N2}%)", ((CurrentPopulation.PopulationWorkingInAgriAndEnviro / CurrentPopulation.CivilianPopulation) * 100.0f));
                         m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[0].Value = Entry;
-                        Entry = String.Format("   Service Industries ({0:N2}%)", CurrentPopulation.PopulationWorkingInServiceIndustries / CurrentPopulation.CivilianPopulation);
+                        Entry = String.Format("   Service Industries ({0:N2}%)", ((CurrentPopulation.PopulationWorkingInServiceIndustries / CurrentPopulation.CivilianPopulation) * 100.0f));
                         m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[0].Value = Entry;
-                        Entry = String.Format("   Manufacturing ({0:N2}%)", CurrentPopulation.PopulationWorkingInManufacturing / CurrentPopulation.CivilianPopulation);
+                        Entry = String.Format("   Manufacturing ({0:N2}%)", ((CurrentPopulation.PopulationWorkingInManufacturing / CurrentPopulation.CivilianPopulation) * 100.0f));
                         m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[0].Value = Entry;
                         m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[0].Value = "Annual Growth Rate";
 
@@ -2153,14 +2154,26 @@ namespace Pulsar4X.UI.Handlers
 
                         Adjust1 = 5;
                     }
+                    else
+                    {
+                        Entry = String.Format("0.0%");
+                        m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = Entry;
+                    }
                     /// <summary>
                     /// Infrastructure information.
                     /// </summary>
-                    m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = (ColCost * 200.0).ToString();
+                    m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[0].Value = "Infrastructure Required per Million Population";
+                    m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[0].Value = "Current Infrastructure";
+                    m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[0].Value = "Population supported by Infrastructure";
+                    Entry = String.Format("{0:N2}", (ColCost * 200.0));
+                    m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = Entry;
                     m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number.ToString();
 
                     if (ColCost != 0.0f)
-                        m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = (CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number / (ColCost * 200.0)).ToString();
+                    {
+                        Entry = String.Format("{0:N2}", (CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number / (Math.Round(ColCost) * 200.0)));
+                        m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = Entry;
+                    }
                     else
                         m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = "No Maximum";
 

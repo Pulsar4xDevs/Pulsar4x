@@ -550,7 +550,7 @@ namespace Pulsar4X.Entities
                 m_aoInstallations[i] = new Installation((Installation.InstallationType)i);
             }
 
-            CivilianPopulation = 0;
+            CivilianPopulation = 0.0f;
             PopulationGrowthRate = 0.1f;
             FuelStockpile = 0;
             MaintenanceSupplies = 0;
