@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
+    <Compile Include="Commands\ComponentDesignViewCMD.cs" />
     <Compile Include="Commands\LoadGame.cs" />
     <Compile Include="Commands\NewGame.cs" />
     <Compile Include="Commands\Quit.cs" />
