@@ -5,7 +5,7 @@
   >
   <TableLayout>
     <TableRow>
-      <ComboBox ID="ComponentSelection"  />
+      <ComboBox ID="ComponentSelection" ItemsSource="{Binding ComponentTypes}"  />
     </TableRow>
     <TableRow ScaleHeight="True">
       <DynamicLayout ID="AbilitysLayout" />

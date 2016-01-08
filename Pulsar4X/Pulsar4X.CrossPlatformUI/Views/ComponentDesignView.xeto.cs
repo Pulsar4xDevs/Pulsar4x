@@ -24,8 +24,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         }
         public ComponentDesignView(ComponentDesignVM viewmodel) :this()
         {
-           
-        
+            DataContext = viewmodel;
+
         }
     }
 }
