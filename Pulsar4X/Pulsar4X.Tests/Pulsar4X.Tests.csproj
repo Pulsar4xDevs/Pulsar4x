@@ -56,13 +56,14 @@
     <Reference Include="dotMemory.Unit">
       <HintPath>..\packages\JetBrains.DotMemoryUnit.1.0.20150408.170258\Lib\dotMemory.Unit.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\deps\Newtonsoft.Json\Net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.framework">
       <HintPath>..\deps\NUnit-2.6.4\bin\nunit.framework.dll</HintPath>
     </Reference>
