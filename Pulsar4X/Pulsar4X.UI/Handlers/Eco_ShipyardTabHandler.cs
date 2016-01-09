@@ -156,6 +156,17 @@ namespace Pulsar4X.UI.Handlers
 
                 RefreshShipyardTasksTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
             }
+            else if (SYInfo == null)
+            {
+                m_oSummaryPanel.ShipyardDataGrid.ClearSelection();
+                /// <summary>
+                /// Do not display any rows at all as there is no shipyard for this world.
+                /// </summary>
+                for (int rowIterator = 0; rowIterator < m_oSummaryPanel.ShipyardDataGrid.Rows.Count; rowIterator++)
+                {
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[rowIterator].Visible = false;
+                }
+            }
         }
 
         /// <summary>

@@ -423,10 +423,6 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            String Entry = String.Format("GetSurveyPointArea({0},{1}):{2},{3},{4},{5}", X,Y,distanceFromPrimary,Angle,(SurveyIndex+1),RingValue);
-            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, null, null, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
-            GameState.Instance.Factions[0].MessageLog.Add(NME);
-
             return (SurveyIndex+1);
         }
     }

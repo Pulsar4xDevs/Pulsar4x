@@ -980,6 +980,31 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// How much infrastructure does this species require for every million inhabitants on this world?
+        /// </summary>
+        /// <returns></returns>
+        public float GetInfrastructureRequirement()
+        {
+            return (float)Math.Round(Species.GetTNHabRating(Planet) * 100.0f);
+        }
+
+        /// <summary>
+        /// If infrastructure is required for habitation, calculated the required value here.
+        /// </summary>
+        /// <returns>a positive number or zero if infrastructure is present, or -1.0f if no maximum, and -2.0f if the planet is not habitable.</returns>
+        public float GetPopulationMaximum()
+        {
+            if (Species.GetTNHabRating(Planet) > 0.0f)
+            {
+                return (Installations[(int)Installation.InstallationType.Infrastructure].Number / GetInfrastructureRequirement());
+            }
+            else if (Species.GetTNHabRating(Planet) == -1.0f)
+                return -2.0f;
+            else
+                return -1.0f;
+        }
+
         #region Sensor Characteristcs
         /// <summary>
         /// Calculate the thermal signature of this colony
@@ -1475,5 +1500,6 @@ namespace Pulsar4X.Entities
             return false;
         }
         #endregion
+
     }
 }

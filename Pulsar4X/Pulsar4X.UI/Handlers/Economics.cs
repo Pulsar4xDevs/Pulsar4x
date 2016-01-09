@@ -1495,6 +1495,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.SYShipNameTextBox.Clear();
 
                 
+                
                 /// <summary>
                 /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
                 /// So. they have to be refs.
@@ -2165,14 +2166,19 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[0].Value = "Infrastructure Required per Million Population";
                     m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[0].Value = "Current Infrastructure";
                     m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[0].Value = "Population supported by Infrastructure";
-                    Entry = String.Format("{0:N2}", (ColCost * 200.0));
+                    Entry = String.Format("{0:N2}", CurrentPopulation.GetInfrastructureRequirement());
                     m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = Entry;
                     m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number.ToString();
 
-                    if (ColCost != 0.0f)
+                    if (ColCost > 0.0f)
                     {
-                        Entry = String.Format("{0:N2}", (CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number / (Math.Round(ColCost) * 200.0)));
+                        Entry = String.Format("{0:N2}", (CurrentPopulation.GetPopulationMaximum()));
                         m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = Entry;
+                    }
+                    else if (ColCost == -1.0f)
+                    {
+#warning Underground infrastructure should be handled here if implemented.
+                        m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = "Not Habitable";
                     }
                     else
                         m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = "No Maximum";
@@ -4373,11 +4379,16 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// 4 is YTD. reserves / mining
                     /// </summary>
-                    int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator])));
-                    if (YTD > YearsToDepletion)
-                        YearsToDepletion = YTD;
-                    if (YTD != 0)
-                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = String.Format("{0}", YTD);
+                    if (m_oCurrnetPopulation.CalcTotalMining() != 0.0f)
+                    {
+                        int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator])));
+                        if (YTD > YearsToDepletion)
+                            YearsToDepletion = YTD;
+                        if (YTD != 0)
+                            m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = String.Format("{0}", YTD);
+                        else
+                            m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = "-";
+                    }
                     else
                         m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = "-";
 
