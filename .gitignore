@@ -13,6 +13,9 @@ Pulsar4X/Pulsar4X.Installer/bin
 Pulsar4X/Pulsar4X.Installer/obj
 Pulsar4X\Pulsar4X.Tests\test-results
 
+#Doxygen output
+doc/doxygen/html/
+
 #C# Temp Files:
 *.db
 *.suo
