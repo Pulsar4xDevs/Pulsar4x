@@ -3,6 +3,9 @@ Pulsar4X/*/bin
 Pulsar4X/*/obj
 Pulsar4X/packages/*
 
+#Doxygen output
+doc/doxygen/html/
+
 #C# Temp Files:
 *.db
 *.suo
