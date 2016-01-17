@@ -210,6 +210,9 @@ namespace Pulsar4X
             Mercury.Position.System = Sol;
             Mercury.Position.X = x;
             Mercury.Position.Y = y;
+            Mercury.Atmosphere.Albedo = 0.068f; //bond and not geometric albedo.
+            Mercury.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Mercury.Orbit.SemiMajorAxis);
+            Mercury.Atmosphere.UpdateState();
             Sun.Planets.Add(Mercury);
 
             SystemBody Venus = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
@@ -220,6 +223,8 @@ namespace Pulsar4X
             Venus.SurfaceGravity = 8.918f; //from aurora, not necessarily accurate.
             AddGasToAtmoSafely(Venus.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(6), 50.0f); //N, value is from aurora
             AddGasToAtmoSafely(Venus.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(12), 50.0f); //CO2, value is from aurora
+            Venus.Atmosphere.Albedo = 0.090f; //bond and not geometric albedo.
+            Venus.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Venus.Orbit.SemiMajorAxis);
             Venus.Atmosphere.UpdateState();
             Venus.Position.System = Sol;
             Venus.Position.X = x;
@@ -255,6 +260,9 @@ namespace Pulsar4X
             Moon.Position.System = Sol;
             Moon.Position.X = Earth.Position.X + x;
             Moon.Position.Y = Earth.Position.Y + y;
+            Moon.Atmosphere.Albedo = 0.136f; //not sure if bond or geo.
+            Moon.BaseTemperature = Temperature.ToCelsius(279.3f);
+            Moon.Atmosphere.UpdateState();
             Earth.Moons.Add(Moon);
 
             SystemBody Mars = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
@@ -286,6 +294,10 @@ namespace Pulsar4X
             Jupiter.Position.System = Sol;
             Jupiter.Position.X = x;
             Jupiter.Position.Y = y;
+            Jupiter.SurfaceGravity = 24.79f;
+            Jupiter.Atmosphere.Albedo = 0.343f;
+            Jupiter.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Jupiter.Orbit.SemiMajorAxis);
+            Jupiter.Atmosphere.UpdateState();
             Sun.Planets.Add(Jupiter);
 
             SystemBody Saturn = new SystemBody(Sun, SystemBody.PlanetType.GasGiant);
@@ -296,6 +308,10 @@ namespace Pulsar4X
             Saturn.Position.System = Sol;
             Saturn.Position.X = x;
             Saturn.Position.Y = y;
+            Saturn.SurfaceGravity = 10.44f;
+            Saturn.Atmosphere.Albedo = 0.342f;
+            Saturn.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Saturn.Orbit.SemiMajorAxis);
+            Saturn.Atmosphere.UpdateState();
             Sun.Planets.Add(Saturn);
 
             SystemBody Uranus = new SystemBody(Sun, SystemBody.PlanetType.IceGiant);
@@ -306,6 +322,10 @@ namespace Pulsar4X
             Uranus.Position.System = Sol;
             Uranus.Position.X = x;
             Uranus.Position.Y = y;
+            Uranus.SurfaceGravity = 8.69f;
+            Uranus.Atmosphere.Albedo = 0.300f;
+            Uranus.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Uranus.Orbit.SemiMajorAxis);
+            Uranus.Atmosphere.UpdateState();
             Sun.Planets.Add(Uranus);
 
             SystemBody Neptune = new SystemBody(Sun, SystemBody.PlanetType.IceGiant);
@@ -316,6 +336,10 @@ namespace Pulsar4X
             Neptune.Position.System = Sol;
             Neptune.Position.X = x;
             Neptune.Position.Y = y;
+            Neptune.SurfaceGravity = 11.15f;
+            Neptune.Atmosphere.Albedo = 0.290f;
+            Neptune.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Neptune.Orbit.SemiMajorAxis);
+            Neptune.Atmosphere.UpdateState();
             Sun.Planets.Add(Neptune);
 
             SystemBody Pluto = new SystemBody(Sun, SystemBody.PlanetType.DwarfPlanet);
@@ -326,6 +350,10 @@ namespace Pulsar4X
             Pluto.Position.System = Sol;
             Pluto.Position.X = x;
             Pluto.Position.Y = y;
+            Pluto.SurfaceGravity = 0.658f;
+            Pluto.Atmosphere.Albedo = 0.069f;
+            Pluto.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Pluto.Orbit.SemiMajorAxis);
+            Pluto.Atmosphere.UpdateState();
             Sun.Planets.Add(Pluto);
 
             GenerateJumpPoints(Sol);

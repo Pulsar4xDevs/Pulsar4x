@@ -2114,7 +2114,9 @@ namespace Pulsar4X.UI.Handlers
                     // need planetary hab rating vs species tolerance
                     double ColCost = CurrentPopulation.Species.GetTNHabRating(CurrentPopulation.Planet);
 
-                    String CCCost = String.Format("{0:N2}",ColCost);
+                    String CCCost = "Not Habitable";
+                    if(ColCost != -1.0)
+                       CCCost = String.Format("{0:N2}",ColCost);
                     m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[1].Value = CCCost;
                     m_oSummaryPanel.SummaryDataGrid.Rows[3].Cells[1].Value = CurrentPopulation.AdminRating;
 
@@ -2166,8 +2168,15 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[0].Value = "Infrastructure Required per Million Population";
                     m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[0].Value = "Current Infrastructure";
                     m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[0].Value = "Population supported by Infrastructure";
-                    Entry = String.Format("{0:N2}", CurrentPopulation.GetInfrastructureRequirement());
-                    m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = Entry;
+                    if (ColCost != -1.0)
+                    {
+                        Entry = String.Format("{0:N2}", CurrentPopulation.GetInfrastructureRequirement());
+                        m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = Entry;
+                    }
+                    else
+                    {
+                        m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = "Underground Infra not implemented";
+                    }
                     m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number.ToString();
 
                     if (ColCost > 0.0f)
@@ -2177,7 +2186,7 @@ namespace Pulsar4X.UI.Handlers
                     }
                     else if (ColCost == -1.0f)
                     {
-#warning Underground infrastructure should be handled here if implemented.
+#warning Underground infrastructure should be handled here if implemented. as well as further up.
                         m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = "Not Habitable";
                     }
                     else
