@@ -100,5 +100,12 @@ namespace Pulsar4X.UI
                                                          "Build PDC / Orbital Habitat", "Prefab PDC", "Assemble PDC", "Refit PDC", "Maintenance Supplies" };   
         }
 
+        public static class Armor
+        {
+            public static String[] ArmorTypes = { "Conventional", "Duranium", "High Density Duranium", "Composite", "Ceramic Composite",
+                                                  "Laminate Composite", "Compressed Carbon", "Biphased Carbide", "Crystaline Composite", "Superdense", "Bonded Superdense",
+                                                  "Coherent Superdense", "Collapsium" };
+        }
+
     }
 }
