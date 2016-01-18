@@ -896,7 +896,6 @@ namespace Pulsar4X.Entities.Components
                                 for (int BeamShotIterator = 0; BeamShotIterator < LinkedWeapon.beamDef.shotCount; BeamShotIterator++)
                                 {
                                     bool PopDamaged = m_oTarget.pop.OnDamaged(LinkedWeapon.beamDef.damageType, LinkedWeapon.beamDef.damage[RangeIncrement], FiringShip);
-                                    return weaponFired;
                                 }
                             }
                         }
