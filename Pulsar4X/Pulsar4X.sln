@@ -20,8 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.CrossPlatformUI.Wp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.CrossPlatformUI.Mac", "Pulsar4X.CrossPlatformUI.Mac\Pulsar4X.CrossPlatformUI.Mac.csproj", "{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Sceen", "Pulsar4X.Sceen\Pulsar4X.Sceen.csproj", "{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug (No Tests|Any CPU = Debug (No Tests|Any CPU
@@ -151,21 +149,6 @@ Global
 		{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}.Release|x86.ActiveCfg = Release|Any CPU
 		{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}.Release|x86.Build.0 = Release|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug (No Tests|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug (No Tests|Any CPU.Build.0 = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug (No Tests|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug (No Tests|Mixed Platforms.Build.0 = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug (No Tests|x86.ActiveCfg = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{0C8F4417-1E55-4F99-B3DD-D5B0432F09FC}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
