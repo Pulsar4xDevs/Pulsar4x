@@ -49,10 +49,6 @@
       <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
       <Name>Pulsar4X.ECSLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pulsar4X.Lib\Pulsar4X.Lib.csproj">
-      <Project>{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}</Project>
-      <Name>Pulsar4X.Lib</Name>
-    </ProjectReference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />

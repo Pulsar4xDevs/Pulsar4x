@@ -5,7 +5,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
-using Pulsar4X.Sceen;
+//using Pulsar4X.Sceen;
 using System.Diagnostics;
 using OpenTK;
 using Vector4 = OpenTK.Vector4;

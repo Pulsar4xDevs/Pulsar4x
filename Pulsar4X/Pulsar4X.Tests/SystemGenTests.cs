@@ -358,36 +358,36 @@ namespace Pulsar4X.Tests
             Assert.Pass(output);
         }
 
-        [Test]
-        [Description("generates 1000 test systems using pre-ECS system Gen to test performance of the run.")]
-        [Ignore]
-        public void OldSystemGenPerformanceTest()
-        {
-            // use a stop watch to get more accurate time.
-            System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+        //[Test]
+        //[Description("generates 1000 test systems using pre-ECS system Gen to test performance of the run.")]
+        //[Ignore]
+        //public void OldSystemGenPerformanceTest()
+        //{
+        //    // use a stop watch to get more accurate time.
+        //    System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
 
-            // lets get our memory before starting:
-            long startMemory = GC.GetTotalMemory(true);
+        //    // lets get our memory before starting:
+        //    long startMemory = GC.GetTotalMemory(true);
 
-            timer.Start();
-            for (int i = 0; i < 1000; i++)
-            {
-                SystemGen.CreateSystem("Performance Test No " + i.ToString());
-            }
+        //    timer.Start();
+        //    for (int i = 0; i < 1000; i++)
+        //    {
+        //        SystemGen.CreateSystem("Performance Test No " + i.ToString());
+        //    }
 
-            timer.Stop();
-            double totalTime = timer.Elapsed.TotalSeconds;
+        //    timer.Stop();
+        //    double totalTime = timer.Elapsed.TotalSeconds;
 
-            long endMemory = GC.GetTotalMemory(true);
-            double totalMemory = (endMemory - startMemory) / 1024.0;  // in KB
+        //    long endMemory = GC.GetTotalMemory(true);
+        //    double totalMemory = (endMemory - startMemory) / 1024.0;  // in KB
 
-            // note that because we do 1000 systems total time taken as milliseconds is the time for a single system, on average.
-            string output = string.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB.",
-                totalTime.ToString("N4"), (totalTime).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / 1000).ToString("N2"));
+        //    // note that because we do 1000 systems total time taken as milliseconds is the time for a single system, on average.
+        //    string output = string.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB.",
+        //        totalTime.ToString("N4"), (totalTime).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / 1000).ToString("N2"));
 
-            // print results:
-            Console.WriteLine(output);
-            Assert.Pass(output);
-        }
+        //    // print results:
+        //    Console.WriteLine(output);
+        //    Assert.Pass(output);
+        //}
     }
 }
