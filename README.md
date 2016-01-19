@@ -11,14 +11,24 @@ IRC channel #Pulsar4x on Freenode.
 
 Bugs can be reported on the [issue tracker.](https://github.com/Pulsar4xDevs/Pulsar4x/issues)
 
-## Compiling Pulsar4x
+## Compiling Pulsar4x ECS-CrossPlatform branch:
 
 To compile Pulsar4x we recommend either [VisualStudio 2013 Community Edition](http://www.visualstudio.com/en-us/news/vs2013-community-vs.aspx) or Visual Studio Express 2013 for Windows Desktop, available [here.](http://www.visualstudio.com/downloads/download-visual-studio-vs)
- 
+2015 should also work. Mono may have problems but should work if you have enough mono-fu
+
+
 Instructions:
 
 1. Clone the Git Repo.
 
 2. Open the solution file "Pulsar4X\Pulsar4X.sln".
 
-3. Build the "Pulsar4X.UI" project. This will automatically build the Pulsar Library (containing the game logic) as well as the UI. You can find the compile program in "Pulsar4X\Pulsar4X.UI\bin\Debug" or "Pulsar4X\Pulsar4X.UI\bin\Release", depending on the build configuration.  
+3. a. If you're running Windows: unload the GTK and Mac projects (this should eventualy  be fixed but at the time of this writing they're WIP.)
+  
+ b. If you're running Linux:   
+ c. If you're running Mac: welcome to the team! we don't currently have a mac specialist, feel free to take on the challenge!  
+
+4. a. if you're running Windows Set Pulsar4x.CrossPlatform.WPF project as the startup project. you should be able to build and/or run from there.   
+ b. Linux:   
+ c. Mac:  See 3c
+
