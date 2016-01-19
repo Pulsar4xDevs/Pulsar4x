@@ -8,7 +8,7 @@ using OpenTK;
 
 namespace Pulsar4X.CrossPlatformUI.Gtk2
 {
-	public class GtkGLSurfaceHandler : GtkControl<GtkGLSurface, GLSurface, GLSurface.ICallback>, GLSurface.IHandler
+	public class GtkGLSurfaceHandler : GtkControl<GtkGLSurface, RenderCanvas, RenderCanvas.ICallback>, RenderCanvas.IHandler
 	{
 		private GraphicsMode mode;
 		private int major;
