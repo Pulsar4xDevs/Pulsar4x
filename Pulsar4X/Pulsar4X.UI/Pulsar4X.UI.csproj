@@ -53,6 +53,10 @@
       <Project>{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}</Project>
       <Name>Pulsar4X.Lib</Name>
     </ProjectReference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -63,9 +67,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="log4net">
       <HintPath>..\deps\log4net-1.2.11\bin\net\4.0\release\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\deps\Newtonsoft.Json\Net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\deps\OpenTK-1.1\Bin\OpenTK.dll</HintPath>
@@ -404,6 +405,7 @@
     <Compile Include="ViewModels\StarSystemViewModel.cs" />
     <Compile Include="ViewModels\TaskGroupViewModel.cs" />
     <Compile Include="ViewModels\TurretDesignViewModel.cs" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
