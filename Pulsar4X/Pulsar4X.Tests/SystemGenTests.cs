@@ -13,14 +13,14 @@ namespace Pulsar4X.Tests
     {
         private Game _game;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUpAttribute]
         public void GlobalInit()
         {
             _game = Game.NewGame("Unit Test Game", DateTime.Now, 10); // init the game class as we will need it for these tests.
         }
 
         [Test]
-        [Ignore]
+        [Ignore("TODO: why is this test ignored?")]
         [Description("Outputs all the systems generated in the init of this test to XML")]
         public void OutputToXML()
         {
@@ -360,7 +360,7 @@ namespace Pulsar4X.Tests
 
         [Test]
         [Description("generates 1000 test systems using pre-ECS system Gen to test performance of the run.")]
-        [Ignore]
+        [Ignore("TODO: why is this test ignored?")]
         public void OldSystemGenPerformanceTest()
         {
             // use a stop watch to get more accurate time.
