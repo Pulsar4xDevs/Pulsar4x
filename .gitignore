@@ -40,3 +40,7 @@ _ReSharper.AuroraExtract
 *.vsp
 *.vspx
 /Pulsar4X/Pulsar4X.UI/StyleCop.Cache
+
+# Monodevelop user specific files
+*.userprefs
+*.usertasks
