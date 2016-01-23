@@ -67,7 +67,13 @@ namespace Pulsar4X.Entities.Components
 
             isSalvaged = false;
             isObsolete = false;
-            isMilitary = false;
+
+            if (SensorType == SurveySensorType.Geological)
+                isMilitary = false;
+            else if(SensorType == SurveySensorType.Gravitational)
+                isMilitary = true;
+
+
             isDivisible = false;
             isElectronic = false;
         }

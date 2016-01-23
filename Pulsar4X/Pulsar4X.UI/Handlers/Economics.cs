@@ -1560,6 +1560,7 @@ namespace Pulsar4X.UI.Handlers
                 BuildConstructionLabel();
                 BuildRefiningLabel();
                 UpdateBuildTexts();
+                BuildCostListBox();
 
                 /// <summary>
                 /// Mining Tab:

@@ -555,11 +555,13 @@ namespace Pulsar4X.Entities
             }
 
             /// <summary>
-            /// Assuming that we got this far, add the population.
+            /// Assuming that we got this far, add the population. The constructor will add the population to the planet's population list and the faction population list, but this function
+            /// should prevent duplicate populations from being made if it is always called.
             /// </summary>
             Population NewPopulation = new Population(this, PopFaction, TimeSlice, Name, CurrentSpecies);
-            Populations.Add(NewPopulation);
-            PopFaction.Populations.Add(NewPopulation);
+
+            //Populations.Add(NewPopulation);
+            //PopFaction.Populations.Add(NewPopulation);
         }
     }
 

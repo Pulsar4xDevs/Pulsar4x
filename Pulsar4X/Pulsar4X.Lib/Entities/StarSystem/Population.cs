@@ -577,7 +577,13 @@ namespace Pulsar4X.Entities
 
             SSEntity = StarSystemEntityType.Population;
 
+            /// <summary>
+            /// Not particularly happy with adding these right here, any events will run off and process in the middle of population creation. In particular, SSEntity must be defined before doing this for
+            /// the display.
+            /// </summary>
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
+            a_oFaction.Populations.Add(this);
+
             Planet.Position.System.Populations.Add(this);
             Contact = new SystemContact(Faction, this);
             Contact.Position.System = Planet.Position.System;
