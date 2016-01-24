@@ -25,8 +25,9 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
-            
-            Application.Instance.MainForm.Content = new Views.ComponentDesignView(ComponentDesignVM.Create(GameData));
+
+            ComponentDesignVM designVM = ComponentDesignVM.Create(GameData);
+            Application.Instance.MainForm.Content = new Views.ComponentDesignView(designVM);
         }
     }
 }

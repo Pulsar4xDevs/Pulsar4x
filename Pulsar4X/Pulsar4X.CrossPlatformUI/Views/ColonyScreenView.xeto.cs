@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Eto.Forms;
-using Eto.Drawing;
 using Eto.Serialization.Xaml;
-using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.CrossPlatformUI.Views

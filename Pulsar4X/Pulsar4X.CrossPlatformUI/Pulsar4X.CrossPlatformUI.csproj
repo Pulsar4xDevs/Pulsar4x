@@ -41,6 +41,7 @@
       <HintPath>..\packages\Eto.Serialization.Xaml.2.2.0\lib\net45\Eto.Serialization.Xaml.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -79,6 +80,12 @@
     <EmbeddedResource Include="Views\ComponentDesignView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\AbilitySelectionList.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MinMaxSlider.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -92,6 +99,9 @@
     <Compile Include="MainForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pulsar4XApplication.cs" />
+    <Compile Include="Views\AbilitySelectionList.xeto.cs">
+      <DependentUpon>AbilitySelectionList.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ColonyScreenView.xeto.cs">
       <DependentUpon>ColonyScreenView.xeto</DependentUpon>
     </Compile>
@@ -103,6 +113,9 @@
     </Compile>
     <Compile Include="Views\JobUC.xeto.cs">
       <DependentUpon>JobUC.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MinMaxSlider.xeto.cs">
+      <DependentUpon>MinMaxSlider.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\NewGame.jeto.cs">
       <DependentUpon>NewGame.jeto</DependentUpon>
