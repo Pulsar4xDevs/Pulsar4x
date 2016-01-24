@@ -29,17 +29,19 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _designVM = viewmodel;
             DataContext = viewmodel;
 
-            ComponentSelection.ItemTextBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Value);
-            ComponentSelection.ItemKeyBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Key).Convert(r => r.ToString());
+            ComponentSelection.DataStore = _designVM.ComponentTypes.DisplayList;
+            //ComponentSelection.ItemKeyBinding = _designVM.ComponentTypes.GetKey(ComponentSelection.SelectedIndex);
+            //ComponentSelection.ItemTextBinding = Binding.Property((KeyValuePair<string, Guid> r) => r.Key);
+            //ComponentSelection.ItemKeyBinding = Binding.Property((KeyValuePair<string, Guid> r) => r.Value).Convert(r => r.ToString());
 
-            ComponentSelection.DataStore = _designVM.ComponentTypes.Cast<object>();
+            //ComponentSelection.DataStore = _designVM.ComponentTypes.Cast<object>();
             ComponentSelection.SelectedKeyChanged += SetViewModel;
 
         }
 
         private void SetViewModel(object sender, EventArgs e)
         {
-            _designVM.SetComponent((Guid)ComponentSelection.SelectedValue);
+            _designVM.SetComponent(_designVM.ComponentTypes.GetValue(ComponentSelection.SelectedIndex));  //(Guid)ComponentSelection.SelectedValue);
             foreach (var componentAbilityVM in _designVM.AbilityList)
             {
                 switch (componentAbilityVM.GuiHint)
