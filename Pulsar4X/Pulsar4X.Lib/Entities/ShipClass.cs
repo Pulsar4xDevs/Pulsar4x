@@ -3070,7 +3070,7 @@ namespace Pulsar4X.Entities
             SizeDiff = Math.Abs(SizeDiff);
 
             decimal SizeDiffCost = (decimal)SizeDiff * 5.0m;
-            TotalRefitCost = TotalRefitCost += SizeDiffCost;
+            TotalRefitCost += SizeDiffCost;
 
             /// <summary>
             /// size differential alone invalidates the eligibility of this class. most classes should be different enough in size for this to catch most cases.

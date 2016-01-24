@@ -814,55 +814,11 @@ namespace Pulsar4X.UI.Handlers
                     {
                         int ArmorTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
 
+#warning throw error here if this happens instead of just capping at 12?
                         if (ArmorTech > 12)
                             ArmorTech = 12;
 
-#warning move these to constants.UI at some point.
-                        #region Armor Tech names
-                        String Title = "N/A";
-                        switch (ArmorTech)
-                        {
-                            case 0:
-                                Title = "Conventional";
-                                break;
-                            case 1:
-                                Title = "Duranium";
-                                break;
-                            case 2:
-                                Title = "High Density Duranium";
-                                break;
-                            case 3:
-                                Title = "Composite";
-                                break;
-                            case 4:
-                                Title = "Ceramic Composite";
-                                break;
-                            case 5:
-                                Title = "Laminate Composite";
-                                break;
-                            case 6:
-                                Title = "Compressed Carbon";
-                                break;
-                            case 7:
-                                Title = "Biphased Carbide";
-                                break;
-                            case 8:
-                                Title = "Crystaline Composite";
-                                break;
-                            case 9:
-                                Title = "Superdense";
-                                break;
-                            case 10:
-                                Title = "Bonded Superdense";
-                                break;
-                            case 11:
-                                Title = "Coherent Superdense";
-                                break;
-                            case 12:
-                                Title = "Collapsium";
-                                break;
-                        }
-                        #endregion
+                        String Title = UIConstants.Armor.ArmorTypes[ArmorTech];
 
                         _CurrnetShipClass.NewArmor(Title, (ushort)Constants.MagazineTN.MagArmor[ArmorTech], _CurrnetShipClass.ShipArmorDef.depth);
 
@@ -984,54 +940,11 @@ namespace Pulsar4X.UI.Handlers
 
             int ArmorTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
 
+#warning throw error here if this happens instead of just capping at 12?
             if (ArmorTech > 12)
                 ArmorTech = 12;
-#warning more armor names to move to constants.UI
-            #region Armor Tech names
-            String Title = "N/A";
-            switch (ArmorTech)
-            {
-                case 0:
-                    Title = "Conventional";
-                    break;
-                case 1:
-                    Title = "Duranium";
-                    break;
-                case 2:
-                    Title = "High Density Duranium";
-                    break;
-                case 3:
-                    Title = "Composite";
-                    break;
-                case 4:
-                    Title = "Ceramic Composite";
-                    break;
-                case 5:
-                    Title = "Laminate Composite";
-                    break;
-                case 6:
-                    Title = "Compressed Carbon";
-                    break;
-                case 7:
-                    Title = "Biphased Carbide";
-                    break;
-                case 8:
-                    Title = "Crystaline Composite";
-                    break;
-                case 9:
-                    Title = "Superdense";
-                    break;
-                case 10:
-                    Title = "Bonded Superdense";
-                    break;
-                case 11:
-                    Title = "Coherent Superdense";
-                    break;
-                case 12:
-                    Title = "Collapsium";
-                    break;
-            }
-            #endregion
+
+            String Title = UIConstants.Armor.ArmorTypes[ArmorTech];
 
             oNewShipClass.NewArmor(Title, (ushort)Constants.MagazineTN.MagArmor[ArmorTech], oNewShipClass.ShipArmorDef.depth);
 
