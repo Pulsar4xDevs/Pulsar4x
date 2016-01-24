@@ -6,13 +6,13 @@
 
   <TableLayout>
     <TableRow>
-      <Label ItemsSource="{Binding Name}"  />
+      <Label Text="{Binding Name}"  />
       <Slider ID="Slider" />
     </TableRow>
     <TableRow>
-      <Label ItemsSource="{Binding MinValue}"  />
-      <Spinner ItemSource="{Binding CurrentValue}" />
-      <Label ItemSource="{Binding MaxValue}" />
+      <Label Text="{Binding MinValue}"  />
+      <NumericUpDown ID="NumericUpDown"  />
+      <Label Text="{Binding MaxValue}" />
     </TableRow>
   </TableLayout>
 	

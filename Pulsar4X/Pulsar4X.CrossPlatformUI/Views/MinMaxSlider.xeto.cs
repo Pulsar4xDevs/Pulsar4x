@@ -10,14 +10,21 @@ namespace Pulsar4X.CrossPlatformUI.Views
     public class MinMaxSlider : Panel
     {
         protected Slider Slider { get; set; }
-        
+        protected NumericUpDown NumericUpDown { get; set; }
 
-        protected float MaxValue { get; set; }
-        protected float MinValue { get; set; }
-        
-        protected float CurrentValue { get; set; }
+        private double MaxValue { get; set; }
+        private double MinValue { get; set; }
 
-        protected string Name { get; set; }
+        //private double _value;
+        //public double Value
+        //{
+        //    get { return _value; }
+        //    set { _value = value; Slider.Value = (int)value * 10000; }
+        //}
+
+        public double Value { get; set; }
+
+        private string Name { get; set; }
 
 
         private float _tickFrequency;
@@ -27,7 +34,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             XamlReader.Load(this);
             DataContext = this;
-            Slider.ValueChanged += Slider_ValueChanged;           
+            //Slider.ValueChanged += Slider_ValueChanged;
+            NumericUpDown.DecimalPlaces = 4;
+            
+            NumericUpDown.ValueBinding.BindDataContext((MinMaxSlider m) => m.Value);
+            Slider.BindDataContext(c => c.Value * 0.0001f, (MinMaxSlider m) => m.Value * 10000);
+
         }
 
 
@@ -38,16 +50,23 @@ namespace Pulsar4X.CrossPlatformUI.Views
         /// <param name="viewModelObject"></param>
         public MinMaxSlider(dynamic viewModelObject):this()
         {
-            //Name = viewModelObject.Name;
-            //MaxValue = viewModelObject.MaxValue;
-            //MinValue = viewModelObject.MinValue;
+            //DataContext = viewModelObject;
+            Name = viewModelObject.Name;
+            SetMax = viewModelObject.MaxValue;
+            SetMin = viewModelObject.MinValue;
+            Value = viewModelObject.Value;
 
 
         }
 
-        public float SetMax { set { MaxValue = value; Slider.MaxValue = (int)value * 10000; } }
-        public float SetMin { set { MinValue = value; Slider.MinValue = (int)value * 10000;} }
-        public float Value { get { return CurrentValue; } set { CurrentValue = value; Slider.Value = (int)value * 10000; } }
+        public double SetMax { set { MaxValue = value; Slider.MaxValue = (int)value * 10000;
+            NumericUpDown.MaxValue = value;
+        } }
+        public double SetMin { set { MinValue = value; Slider.MinValue = (int)value * 10000;
+            NumericUpDown.MinValue = value;
+        }  }
+
+
 
         public float TickFrequency 
         { 
@@ -60,10 +79,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
         }
         public bool SnapToTick { get { return Slider.SnapToTick; } set {Slider.SnapToTick = value; } }
 
-        private void Slider_ValueChanged(object sender, EventArgs e)
-        {
-            CurrentValue = Slider.Value * 0.0001f; 
-        }
+        //private void Slider_ValueChanged(object sender, EventArgs e)
+        //{
+        //    CurrentValue = Slider.Value * 0.0001f;
+        //    NumericUpDown.Value = CurrentValue;
+        //}
     }
 }
 

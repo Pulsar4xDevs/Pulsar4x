@@ -12,7 +12,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     public class ComponentDesignView : Panel
     {
         protected ComboBox ComponentSelection {get;set;}
-        protected DynamicLayout AbilitysLayout {get;set;}
+        protected StackLayout AbilitysLayout {get;set;}
         protected TextBox AbilityStats { get; set; }
         protected TextBox ComponentStats { get; set; }
         protected Button Create { get; set; }
@@ -47,16 +47,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 switch (componentAbilityVM.GuiHint)
                 {
                     case GuiHint.GuiTechSelectionList:
-                        AbilitySelectionList asl = new AbilitySelectionList();
-                        asl.GuiListSetup(componentAbilityVM);
+                        AbilitySelectionList asl = new AbilitySelectionList(componentAbilityVM);
+                        //asl.GuiListSetup(componentAbilityVM);
                         //asl.ValueChanged += OnValueChanged;
-                        AbilitysLayout.Add(asl);
+                        AbilitysLayout.Items.Add(asl);
                         break;
                     case GuiHint.GuiSelectionMaxMin:
-                        MinMaxSlider mms = new MinMaxSlider();
-                        //mms.GuiSliderSetup(componentAbilityVM);
+                        MinMaxSlider mms = new MinMaxSlider(componentAbilityVM);
                         //mms.ValueChanged += OnValueChanged;
-                        AbilitysLayout.Add(mms);
+                        AbilitysLayout.Items.Add(mms);
                         break;
                 }
 

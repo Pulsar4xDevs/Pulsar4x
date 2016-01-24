@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
@@ -26,18 +27,20 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             _designAbility = designAbility;
             DataContext = _designAbility;
+            AbilitySelection.DataStore = _designAbility.TechList.Cast<string>();
+            AbilitySelection.SelectedIndex = 0;
             AbilitySelection.SelectedKeyChanged += SelectionComboBox_SelectionChanged;
         }
 
-        public void GuiListSetup(ComponentAbilityDesignVM designAbility)
-        {
-            _designAbility = designAbility;
+        //public void GuiListSetup(ComponentAbilityDesignVM designAbility)
+        //{
+        //    _designAbility = designAbility;
 
-            //AbilitySelection.ItemTextBinding = "Name";
+        //    //AbilitySelection.ItemTextBinding = "Name";
 
-            AbilitySelection.SelectedIndex = 0;
+            
 
-        }
+        //}
 
         private void SelectionComboBox_SelectionChanged(object sender, EventArgs e)
         {
