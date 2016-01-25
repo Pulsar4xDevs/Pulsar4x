@@ -27,7 +27,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             _designAbility = designAbility;
             DataContext = _designAbility;
-            AbilitySelection.DataStore = _designAbility.TechList.Cast<string>();
+            AbilitySelection.DataStore = _designAbility.TechList.Cast<object>();
             AbilitySelection.SelectedIndex = 0;
             AbilitySelection.SelectedKeyChanged += SelectionComboBox_SelectionChanged;
         }

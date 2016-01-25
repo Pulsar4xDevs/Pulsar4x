@@ -30,11 +30,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             DataContext = viewmodel;
 
             ComponentSelection.DataStore = _designVM.ComponentTypes.DisplayList;
-            //ComponentSelection.ItemKeyBinding = _designVM.ComponentTypes.GetKey(ComponentSelection.SelectedIndex);
-            //ComponentSelection.ItemTextBinding = Binding.Property((KeyValuePair<string, Guid> r) => r.Key);
-            //ComponentSelection.ItemKeyBinding = Binding.Property((KeyValuePair<string, Guid> r) => r.Value).Convert(r => r.ToString());
 
-            //ComponentSelection.DataStore = _designVM.ComponentTypes.Cast<object>();
             ComponentSelection.SelectedKeyChanged += SetViewModel;
 
         }
@@ -53,7 +49,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         AbilitysLayout.Items.Add(asl);
                         break;
                     case GuiHint.GuiSelectionMaxMin:
-                        MinMaxSlider mms = new MinMaxSlider(componentAbilityVM);
+                        MinMaxSlider mms = new MinMaxSlider(componentAbilityVM.MinMaxSlider);
                         //mms.ValueChanged += OnValueChanged;
                         AbilitysLayout.Items.Add(mms);
                         break;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using Pulsar4x.ViewModels;
 using Pulsar4x.ViewModels.ViewModels;
 using Pulsar4X.ECSLib;
 
@@ -27,9 +28,10 @@ namespace Pulsar4X.ViewModel
 
         public ComponentDesignVM()
         {
+            AbilityList = new List<ComponentAbilityDesignVM>();
         }
 
-        public ComponentDesignVM(GameVM gameVM)
+        public ComponentDesignVM(GameVM gameVM):this()
         {
             _gameVM = gameVM;
             _staticData = gameVM.Game.StaticData;
@@ -72,17 +74,21 @@ namespace Pulsar4X.ViewModel
         {
             get
             {
-                string text = DesignDB.Name + Environment.NewLine;
-                text += "Size: " + DesignDB.SizeValue + Environment.NewLine;
-                text += "HTK: " + DesignDB.HTKValue + Environment.NewLine;
-                text += "Crew: " + DesignDB.CrewReqValue + Environment.NewLine;
-                text += "ResearchCost: " + DesignDB.ResearchCostValue + Environment.NewLine;
-                foreach (var kvp in DesignDB.MineralCostValues)
+                string text = "";
+                if (DesignDB != null)
                 {
-                    string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
-                    text += mineralName + ": " + kvp.Value + Environment.NewLine;
+                    text = DesignDB.Name + Environment.NewLine;
+                    text += "Size: " + DesignDB.SizeValue + Environment.NewLine;
+                    text += "HTK: " + DesignDB.HTKValue + Environment.NewLine;
+                    text += "Crew: " + DesignDB.CrewReqValue + Environment.NewLine;
+                    text += "ResearchCost: " + DesignDB.ResearchCostValue + Environment.NewLine;
+                    foreach (var kvp in DesignDB.MineralCostValues)
+                    {
+                        string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
+                        text += mineralName + ": " + kvp.Value + Environment.NewLine;
+                    }
+                    text += "Credit Cost: " + DesignDB.CreditCostValue + Environment.NewLine;
                 }
-                text += "Credit Cost: " + DesignDB.CreditCostValue + Environment.NewLine;
                 return text;
             }
         }
@@ -121,11 +127,16 @@ namespace Pulsar4X.ViewModel
 
         public GuiHint GuiHint { get { return _designAbility.GuiHint; }}
         
+        public MinMaxSliderVM MinMaxSlider { get; set; }
+        
+
 
         public ComponentAbilityDesignVM(ComponentDesignAbilityDB designAbility, StaticDataStore staticData)
         {
             _designAbility = designAbility;
             _staticData = staticData;
+
+
 
             switch (designAbility.GuiHint)
             {
@@ -138,9 +149,15 @@ namespace Pulsar4X.ViewModel
                     break;
                 case GuiHint.GuiSelectionMaxMin:
                     {
+                        MinMaxSlider = new MinMaxSliderVM();
+
                         designAbility.SetMax();
                         designAbility.SetMin();
                         designAbility.SetValue();
+                        MinMaxSlider.Name = Name;
+                        MinMaxSlider.MaxValue = MaxValue;
+                        MinMaxSlider.MinValue = MinValue;
+                        MinMaxSlider.Value = Value;
                     }
                     break;
             }
