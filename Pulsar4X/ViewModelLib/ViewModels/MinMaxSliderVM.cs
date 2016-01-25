@@ -16,7 +16,7 @@ namespace Pulsar4x.ViewModels
         public string Name { get; set; }
         public double MaxValue { get; set; }
         public double MinValue { get; set; }
-        public double Value { get {return _value;} set { _value = value; OnPropertyChanged(); } }
+        public double Value { get {return _value;} set { _value = value; OnPropertyChanged(); OnPropertyChanged("SliderValue"); } }
         private double _value;
 
         public int SliderMaxValue { get { return (int)MaxValue * 10000; } set { OnPropertyChanged(); }}
