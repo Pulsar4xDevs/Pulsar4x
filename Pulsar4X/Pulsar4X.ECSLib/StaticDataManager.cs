@@ -25,13 +25,13 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// The subdirectory of defaultDataDirectory that contains the offical game data.
-        /// We will want to laod this first so that mods overwrite our game files.
+        /// We will want to load this first so that mods overwrite our game files.
         /// @todo make this load from some sort of settings file.
-        /// @todo make this more cross platform (currently windows only).
+        /// @todo make this more cross platform (currently Windows only).
         /// </summary>
         private const string OfficialDataDirectory = "\\Pulsar4x";
 
-        // Serilizer, specifically configured for static data.
+        // Serializer, specifically configured for static data.
         private static JsonSerializer _serializer = new JsonSerializer
         {
             NullValueHandling = NullValueHandling.Ignore,
@@ -41,8 +41,8 @@ namespace Pulsar4X.ECSLib
         };
 
         /// <summary>
-        /// Loads all dtat from the default static data directory.
-        /// Used when initilising a new game.
+        /// Loads all data from the default static data directory.
+        /// Used when initializing a new game.
         /// </summary>
         [PublicAPI]
         public static StaticDataStore LoadFromDefaultDataDirectory()
@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
                 return staticDataStore;  // return empty static data.
             }
 
-            // lets make sure we load the official data first:
+            // let's make sure we load the official data first:
             int i = Array.FindIndex(dataDirs, x => x == (DefaultDataDirectory + OfficialDataDirectory));
             if (i < 0 || String.IsNullOrEmpty(dataDirs[i]))
                 return staticDataStore; // bad?
@@ -80,14 +80,14 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Loads all data from the specified directory.
-        /// @todo chagne this function so that bad data does not cause a partial, unreversable import.
+        /// @todo change this function so that bad data does not cause a partial, irreversible import.
         /// </summary>
         [PublicAPI]
         public static void LoadFromDirectory(string directory, StaticDataStore staticDataStore)
         {
             try
             {
-                // we start by looking for a version file, no verion file, no load.
+                // we start by looking for a version file, no version file, no load.
                 VersionInfo dataVInfo;
                 if (CheckDataDirectoryVersion(directory, VersionInfo.PulsarVersionInfo, out dataVInfo) == false)
                     return; ///< @todo log failure to import due to incompatible version.
@@ -119,14 +119,14 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Checks for a valid vinfo file in the specified directory, if the file is found it loads it and 
-        /// chacks that is is a compatible with version info provided.
+        /// checks that it is compatible with the version info provided.
         /// </summary>
         /// <param name="directory">Directory to check.</param>
         /// <param name="vinfo">Version to check against.</param>
         /// <returns>true if a compatible vinfo file was found, false otherwise.</returns>
         private static bool CheckDataDirectoryVersion(string directory, VersionInfo pulsarVInfo, out VersionInfo dataVInfo)
         {
-            dataVInfo = new VersionInfo(); // need to assing some value to this to compile okay. value doesn't matter unless we return true tho.
+            dataVInfo = new VersionInfo(); // need to assign some value to this to compile okay. value doesn't matter unless we return true tho.
 
             var vInfoFile = Directory.GetFiles(directory, "*.vinfo");
 

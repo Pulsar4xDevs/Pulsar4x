@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.dotMemoryUnit;
 using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
