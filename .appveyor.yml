@@ -11,5 +11,13 @@ branches:
 os: Windows Server 2012
 cache:
 - packages -> **\packages.config
+before_build:
+- nuget restore Pulsar4X/Pulsar4X.sln
+platform:
+- Any CPU
+configuration:
+- Windows
 build:
   project: Pulsar4X/Pulsar4X.sln
+before_test:
+  cp -R "./Pulsar4X/Pulsar4X.ECSLib/Data/" .
