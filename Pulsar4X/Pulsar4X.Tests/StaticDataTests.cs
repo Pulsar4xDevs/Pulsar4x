@@ -322,6 +322,27 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void TestOverwriteDefaultData()
+        {
+            var staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
+
+            // store counts for later:
+            int mineralsNum = staticDataStore.Minerals.Count;
+            string soriumName = staticDataStore.Minerals[0].Name;
+            Guid soriumGuid = staticDataStore.Minerals[0].ID;
+            StaticDataManager.LoadFromDirectory("./TestData/Other", staticDataStore);
+
+            // check the test is still valid, should be the first mineral item (sorium) 
+            Assert.AreEqual(soriumGuid, staticDataStore.Minerals[0].ID);
+            // now check that overwriting occured and that there were no duplicates:
+            Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
+            //check the name has been overwritten
+            Assert.AreNotEqual(soriumName, staticDataStore.Minerals[0].Name);
+
+
+        }
+
+        [Test]
         public void TestIDLookup()
         {
             // Create an empty data store:
