@@ -1235,6 +1235,13 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void BuildDataGrid_SelectionChanged(object sender, EventArgs e)
         {
+            if (m_oSummaryPanel.BuildDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    m_oSummaryPanel.IndustrialProjectGroupBox.Text = String.Format("Create Industrial Project For {0}", m_oSummaryPanel.BuildDataGrid.CurrentCell.Value.ToString());
+                }
+            }
             BuildCostListBox();
         }
 
@@ -1264,6 +1271,12 @@ namespace Pulsar4X.UI.Handlers
                     float PercentCapacity = -1.0f;
                     bool r1 = float.TryParse(m_oSummaryPanel.ItemNumberTextBox.Text, out NumToBuild);
                     bool r2 = float.TryParse(m_oSummaryPanel.ItemPercentTextBox.Text, out PercentCapacity);
+
+                    if (PercentCapacity < 0.0f)
+                        PercentCapacity = 0.0f;
+
+                    if (PercentCapacity > 100.0f)
+                        PercentCapacity = 100.0f;
 
                     if (m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex != -1 && r1 == true && r2 == true)
                     {
@@ -1317,6 +1330,12 @@ namespace Pulsar4X.UI.Handlers
                     float PercentCapacity = -1.0f;
                     bool r1 = float.TryParse(m_oSummaryPanel.ItemNumberTextBox.Text, out NumToBuild);
                     bool r2 = float.TryParse(m_oSummaryPanel.ItemPercentTextBox.Text, out PercentCapacity);
+
+                    if (PercentCapacity < 0.0f)
+                        PercentCapacity = 0.0f;
+
+                    if (PercentCapacity > 100.0f)
+                        PercentCapacity = 100.0f;
 
                     int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
                     if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
@@ -2494,7 +2513,7 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0:N2}m", workers);
                         m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[1].Value = Entry;
 
-                        m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Ordnance Factories";
+                        m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Fuel Refineries";
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[3].Value = Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.FuelRefinery].Number).ToString();
 
                         Adjust1++;

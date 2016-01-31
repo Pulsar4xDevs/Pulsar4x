@@ -81,7 +81,7 @@ namespace Pulsar4X.Entities
         /// <param name="BuildNum">Number to build</param>
         /// <param name="BuildPercent">Percent of industry to devote to production.</param>
         /// <param name="Production">Is this item paused?</param>
-        public void UpdateBuildQueueInfo(float BuildNum, float BuildPercent, bool Production, decimal Cost)
+        public void UpdateBuildQueueInfo(float BuildNum, float BuildPercent, bool Production, decimal Cost, float TotalIndustry)
         {
             m_NumToBuild = BuildNum;
             m_BuildCapcity = BuildPercent;
@@ -89,7 +89,11 @@ namespace Pulsar4X.Entities
 
             float BPRequirement = (float)Math.Floor(m_NumToBuild) * (float)Cost;
             float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-            float YearsOfProduction = (BPRequirement / m_BuildCapcity);
+
+
+            float YearlyDevotedIndustry = (m_BuildCapcity / 100.0f) * TotalIndustry;
+            float YearsOfProduction = (BPRequirement / YearlyDevotedIndustry);
+
             int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
 
             /// <summary>
@@ -764,7 +768,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ComponentDef">Component to be added. This is the class all components inherit from, not any particular type of component.</param>
         /// <param name="increment">Number to add to the stockpile.</param>
-        public void AddComponentsToStockpile(ComponentDefTN ComponentDef, float increment)
+        /// <param name="numToBuild">Total production run(if applicable)</param>
+        public void AddComponentsToStockpile(ComponentDefTN ComponentDef, float increment, float numToBuild = -10.0f)
         {
             if (ComponentStockpileLookup.ContainsKey(ComponentDef.Id) == true)
             {
@@ -776,6 +781,17 @@ namespace Pulsar4X.Entities
                 ComponentStockpileCount.Add(increment);
                 ComponentStockpileLookup.Add(ComponentDef.Id, ComponentStockpile.IndexOf(ComponentDef));
             }
+
+            if (numToBuild != -10.0f && numToBuild <= 0.0f)
+            {
+                /// <summary>
+                /// round the installation number if this is the last build, and we are within a thousandth of a point of another component.
+                /// </summary>
+                if (Math.Ceiling(ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]]) - ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]] < 0.001f)
+                {
+                    ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]] = (float)Math.Ceiling(ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]]);
+                }
+            }
         }
 
         /// <summary>
@@ -783,7 +799,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Inst">Installation to be built</param>
         /// <param name="increment">Amount of said installation to be built</param>
-        public void AddInstallation(Installation Inst, float increment)
+        /// <param name="numToBuild">Total production order from the player, used to check for rounding issues.</param>
+        public void AddInstallation(Installation Inst, float increment, float numToBuild)
         {
             int Index = (int)Inst.Type;
             switch (Inst.Type)
@@ -853,6 +870,17 @@ namespace Pulsar4X.Entities
                     break;
             }
             Installations[Index].Number = Installations[Index].Number + increment;
+
+            if (numToBuild <= 0.0f)
+            {
+                /// <summary>
+                /// round the installation number if this is the last build, and we are within a thousandth of a point of another installation.
+                /// </summary>
+                if (Math.Ceiling(Installations[Index].Number) - Installations[Index].Number < 0.001f)
+                {
+                    Installations[Index].Number = (float)Math.Ceiling(Installations[Index].Number);
+                }
+            }
         }
 
         /// <summary>
@@ -897,9 +925,21 @@ namespace Pulsar4X.Entities
         /// Constructs maintenance supply parts at this population.
         /// </summary>
         /// <param name="increment">number to build.</param>
-        public void AddMSP(float increment)
+        /// <param name="numToBuild">Number of total MSP the player ordered, used to check for rounding issues when completing a production run.</param>
+        public void AddMSP(float increment,float numToBuild)
         {
             MaintenanceSupplies = MaintenanceSupplies + increment;
+
+            if (numToBuild <= 0.0f)
+            {
+                /// <summary>
+                /// round the installation number if this is the last build, and we are within a thousandth of a point of another installation.
+                /// </summary>
+                if (Math.Ceiling(MaintenanceSupplies) - MaintenanceSupplies < 0.001f)
+                {
+                    MaintenanceSupplies = (float)Math.Ceiling(MaintenanceSupplies);
+                }
+            }
         }
 
         /// <summary>
@@ -1099,7 +1139,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddInstallation(Installation Install, float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(Install);
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,Install.Cost);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,Install.Cost,CalcTotalIndustry());
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -1113,7 +1153,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddComponent(ComponentDefTN ComponentDef, float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(ComponentDef);
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,ComponentDef.cost);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,ComponentDef.cost,CalcTotalIndustry());
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -1126,7 +1166,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddMSP(float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem();
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, Constants.Colony.MaintenanceSupplyCost);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, Constants.Colony.MaintenanceSupplyCost,CalcTotalIndustry());
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -1140,7 +1180,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddMissile(OrdnanceDefTN MissileDef, float BuildAmt, float RequestedBuildPercentage)
         {
             MissileBuildQueueItem NewMBQItem = new MissileBuildQueueItem(MissileDef);
-            NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, MissileDef.cost);
+            NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, MissileDef.cost,CalcTotalOrdnanceIndustry());
 
             MissileBuildQueue.Add(NewMBQItem);
         }
@@ -1258,7 +1298,10 @@ namespace Pulsar4X.Entities
         public bool CIRequirement(float CIReq)
         {
             bool ret = false;
-            if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number >= CIReq)
+            /// <summary>
+            /// Occasionally rounding will steal the last CI, so this is an attempt to fix that by adding 0.005f to this calculation.
+            /// </summary>
+            if ((Installations[(int)Installation.InstallationType.ConventionalIndustry].Number + 0.005f) >= CIReq)
             {
                 ret = true;
             }
@@ -1273,7 +1316,7 @@ namespace Pulsar4X.Entities
         public bool MineRequirement(float MineReq)
         {
             bool ret = false;
-            if (Installations[(int)Installation.InstallationType.Mine].Number >= MineReq)
+            if (Installations[(int)Installation.InstallationType.Mine].Number + 0.005f >= MineReq)
             {
                 ret = true;
             }
@@ -1339,6 +1382,12 @@ namespace Pulsar4X.Entities
             if (CIConvReq == true)
             {
                 Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = Installations[(int)Installation.InstallationType.ConventionalIndustry].Number - Completion;
+
+                /// <summary>
+                /// Account for the 0.005 fudge factor introduced above.
+                /// </summary>
+                if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number < 0.0f)
+                    Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = 0.0f;
             }
 
             /// <summary>
@@ -1347,6 +1396,12 @@ namespace Pulsar4X.Entities
             if (MineConvReq == true)
             {
                 Installations[(int)Installation.InstallationType.Mine].Number = Installations[(int)Installation.InstallationType.Mine].Number - Completion;
+
+                /// <summary>
+                /// Account for the 0.005 fudge factor introduced above.
+                /// </summary>
+                if (Installations[(int)Installation.InstallationType.Mine].Number < 0.0f)
+                    Installations[(int)Installation.InstallationType.Mine].Number = 0.0f;
             }
         }
 

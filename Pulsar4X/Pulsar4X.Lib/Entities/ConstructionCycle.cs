@@ -83,7 +83,9 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
                 float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-                float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+
+                float YearlyDevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
+                float YearsOfProduction = (BPRequirement / YearlyDevotedIndustry);
 
                 if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
                 {
@@ -107,6 +109,11 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
                 float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
+
+                if ((CurrentConstruction.numToBuild - Completion) < 0.0f)
+                {
+                    Completion = CurrentConstruction.numToBuild;
+                }
 
                 bool CIRequired = false;
                 bool MineRequired = false;
@@ -205,18 +212,9 @@ namespace Pulsar4X.Entities
                             CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
                         else if (CIRequired == false && MineRequired == true)
                             CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
-                        CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion);
+                        CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion,CurrentConstruction.numToBuild);
                         break;
                     case ConstructionBuildQueueItem.CBType.ShipComponent:
-
-                        /// <summary>
-                        /// Component issues seem more blatant than construction issues.
-                        /// </summary>
-                        if (CurrentConstruction.numToBuild < 0.0f)
-                        {
-                            Completion = Completion + CurrentConstruction.numToBuild;
-                        }
-
                         CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.componentBuild.minerialsCost, Completion);
                         CurrentPopulation.AddComponentsToStockpile(CurrentConstruction.componentBuild, Completion);
                         break;
@@ -229,17 +227,8 @@ namespace Pulsar4X.Entities
                     case ConstructionBuildQueueItem.CBType.PDCRefit:
                         break;
                     case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
-
-                        /// <summary>
-                        /// Component issues seem more blatant than construction issues.
-                        /// </summary>
-                        if (CurrentConstruction.numToBuild < 0.0f)
-                        {
-                            Completion = Completion + CurrentConstruction.numToBuild;
-                        }
-
                         CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, Constants.Colony.MaintenanceMineralCost, Completion);
-                        CurrentPopulation.AddMSP(Completion);
+                        CurrentPopulation.AddMSP(Completion,CurrentConstruction.numToBuild);
                         break;
                 }
 
@@ -293,7 +282,9 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
                 float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-                float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+
+                float YearlyDevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
+                float YearsOfProduction = (BPRequirement / YearlyDevotedIndustry);
 
                 if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
                 {
