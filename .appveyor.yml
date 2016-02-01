@@ -20,4 +20,5 @@ configuration:
 build:
   project: Pulsar4X/Pulsar4X.sln
 before_test:
-  cp -R "./Pulsar4X/Pulsar4X.ECSLib/Data/" .
+  cp -R "./Pulsar4X/Pulsar4X.ECSLib/Data/" 
+  cp -R "./Pulsar4X/Pulsar4X.Tests/TestData/" 
