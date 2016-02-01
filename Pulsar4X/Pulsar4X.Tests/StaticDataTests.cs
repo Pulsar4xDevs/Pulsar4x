@@ -309,16 +309,15 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(constructableObjectsNum, staticDataStore.RefinedMaterials.Count);
 
             // now lets test some malformed data folders.
-            Assert.Catch(typeof(StaticDataLoadException), () =>
-            {
-                StaticDataManager.LoadFromDirectory("./TestData/MalformedData", staticDataStore);
-            });
+            StaticDataLoadException ex = Assert.Throws<StaticDataLoadException>(
+            delegate { StaticDataManager.LoadFromDirectory("./TestData/MalformedData", staticDataStore); });
+            Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Bad Json provided in directory: ./TestData/MalformedData"));
+
 
             // now ,lets try for a directory that does not exist.
-            Assert.Catch(typeof(StaticDataLoadException), () =>
-            {
-                StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist", staticDataStore);
-            });
+            ex = Assert.Throws<StaticDataLoadException>(
+            delegate { StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist", staticDataStore); });
+            Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Directory not found: ./TestData/DoesNotExist"));
         }
 
         [Test]
