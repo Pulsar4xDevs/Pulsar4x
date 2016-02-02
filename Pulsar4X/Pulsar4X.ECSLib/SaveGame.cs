@@ -13,8 +13,6 @@ namespace Pulsar4X.ECSLib
     // use: http://www.newtonsoft.com/json/help/html/SerializationAttributes.htm
     public static class SaveGame
     {
-        private static readonly JsonSerializer DefaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable() };
-
         internal static Game CurrentGame { get; private set; }
         internal static IProgress<double> Progress { get; private set; }
         internal static int ManagersProcessed { get; set; }
@@ -40,6 +38,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void Save([NotNull] Game game, [NotNull] Stream outputStream,  IProgress<double> progress = null, bool compress = false)
         {
+            JsonSerializer DefaultSerializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None};
             if (game == null)
             {
                 throw new ArgumentNullException("game");
@@ -216,6 +215,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="inputStream">Uncompressed stream containing the game data.</param>
         private static void PopulateGame(Stream inputStream)
         {
+            JsonSerializer DefaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.Objects };
+
             using (StreamReader sr = new StreamReader(inputStream))
             {
                 using (JsonReader reader = new JsonTextReader(sr))
