@@ -124,7 +124,7 @@ namespace Pulsar4X.Tests
                 fs2.Close();
 
                 // Return false to indicate files are different
-                Assert.Fail("Savegames are not the same size.");
+                Assert.Fail("Savegames are not the same size. Original: " + fs1.Length + " Second: " + fs2.Length );
             }
 
             // Read and compare a byte from each file until either a
@@ -147,7 +147,7 @@ namespace Pulsar4X.Tests
             // the same.
             if (file1byte - file2byte != 0)
             {
-                Assert.Fail("Save files are different");
+                Assert.Fail("Save files are binary different");
             }
         }
 
