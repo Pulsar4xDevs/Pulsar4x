@@ -79,6 +79,7 @@ namespace Pulsar4X.ECSLib
         /// This list holds the version info of all the loaded data sets.
         /// </summary>
         [PublicAPI]
+        [JsonIgnore]
         public List<VersionInfo> LoadedDataSets { get { return _loadedDataSets; } }
         [JsonProperty]
         private readonly List<VersionInfo> _loadedDataSets;
