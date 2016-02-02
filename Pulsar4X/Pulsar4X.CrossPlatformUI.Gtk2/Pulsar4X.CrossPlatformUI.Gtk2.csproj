@@ -75,6 +75,16 @@
       <Project>{26B67EDA-BC6C-44D7-9E08-8C1C31415788}</Project>
       <Name>Pulsar4X.CrossPlatformUI</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ViewModelLib\Pulsar4x.ViewModels.csproj">
+      <Project>{37F5B88B-F1AA-410E-9FCB-4CA26A4DD887}</Project>
+      <Name>Pulsar4x.ViewModels</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
+      <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
+      <Name>Pulsar4X.ECSLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
