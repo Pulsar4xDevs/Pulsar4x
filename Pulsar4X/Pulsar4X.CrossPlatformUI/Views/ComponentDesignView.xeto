@@ -8,7 +8,7 @@
       <ComboBox ID="ComponentSelection" ItemsSource="{Binding ComponentTypes}"  />
     </TableRow>
     <TableRow ScaleHeight="True">
-      <DynamicLayout ID="AbilitysLayout" />
+      <StackLayout ID="AbilitysLayout" />
     </TableRow>
     <TableRow>
       <TextBox ID ="AbilityStats" />
