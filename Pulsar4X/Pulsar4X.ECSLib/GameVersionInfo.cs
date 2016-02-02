@@ -119,8 +119,8 @@ namespace Pulsar4X.ECSLib
         {
             unchecked
             {
-                int hashCode = Name?.GetHashCode() ?? 0;
-                hashCode = (hashCode * 397) ^ (VersionString?.GetHashCode() ?? 0);
+                int hashCode = (Name != null ? Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (VersionString != null ? VersionString.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ MajorVersion;
                 hashCode = (hashCode * 397) ^ MinorVersion;
                 return hashCode;
