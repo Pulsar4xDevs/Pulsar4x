@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography;
 using NUnit.Framework;
@@ -305,7 +306,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void EntityTransfer()
         {
-            EntityManager manager2 = _game.Systems[0].SystemManager;
+            EntityManager manager2 = _game.Systems.First().Value.SystemManager;
 
             PopulateEntityManager();
 

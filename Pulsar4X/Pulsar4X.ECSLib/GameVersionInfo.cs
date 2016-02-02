@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -11,17 +12,17 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The name of the product, for the main game it is Pulsar4x, mods should use the name of the mod.
         /// </summary>
-        public string Name;
+        public readonly string Name;
 
         /// <summary>
         /// The version string. For example 1.1 or Major.Minor
         /// The version number should only contain numeric digits with periods separating the different sections.
         /// </summary>
-        public string VersionString;
+        public readonly string VersionString;
 
         // Integer versions of each section of the build number:
-        public int MajorVersion;
-        public int MinorVersion;
+        public readonly int MajorVersion;
+        public readonly int MinorVersion;
         
         /// <summary>
         /// A comma seperate list of compatible version numbers, numbers in this list will be deem compatible with the current version in VersionString.
@@ -42,18 +43,26 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                VersionInfo gameVersionInfo = new VersionInfo {Name = "Pulsar4X Alpha"};
                 AssemblyName assName = Assembly.GetAssembly(typeof(VersionInfo)).GetName();
-                gameVersionInfo.VersionString = assName.Version.Major + "." + assName.Version.Minor;
-                gameVersionInfo.MajorVersion = assName.Version.Major;
-                gameVersionInfo.MinorVersion = assName.Version.Minor;
-                gameVersionInfo.CompatibleVersions = gameVersionInfo.VersionString;
-                gameVersionInfo.CompatibleLibVersions = gameVersionInfo.VersionString;
+                string versionString = assName.Version.Major + "." + assName.Version.Minor;
+                int majorVersion = assName.Version.Major;
+                int minorVersion = assName.Version.Minor;
+     
+                VersionInfo gameVersionInfo = new VersionInfo("Pulsar4X Alpha", versionString, majorVersion, minorVersion, versionString, versionString);
                 return gameVersionInfo;
             }
         }
 
-
+        [JsonConstructor]
+        public VersionInfo(string Name, string VersionString, int MajorVersion, int MinorVersion, string CompatibleVersions, string CompatibleLibVersions)
+        {
+            this.Name = Name;
+            this.VersionString = VersionString;
+            this.MajorVersion = MajorVersion;
+            this.MinorVersion = MinorVersion;
+            this.CompatibleVersions = CompatibleVersions;
+            this.CompatibleLibVersions = CompatibleLibVersions;
+        }
         /// <summary>
         /// Checks that this Version Info is compatible with the version info supplied.
         /// </summary>
@@ -89,6 +98,33 @@ namespace Pulsar4X.ECSLib
             }
 
             return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is VersionInfo))
+            {
+                return false;
+            }
+
+            return Equals((VersionInfo)obj);
+        }
+
+        public bool Equals(VersionInfo other)
+        {
+            return string.Equals(Name, other.Name) && string.Equals(VersionString, other.VersionString) && MajorVersion == other.MajorVersion && MinorVersion == other.MinorVersion;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = Name?.GetHashCode() ?? 0;
+                hashCode = (hashCode * 397) ^ (VersionString?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ MajorVersion;
+                hashCode = (hashCode * 397) ^ MinorVersion;
+                return hashCode;
+            }
         }
     }
 }

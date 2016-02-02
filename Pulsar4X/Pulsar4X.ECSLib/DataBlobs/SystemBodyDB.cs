@@ -32,9 +32,33 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class MineralDepositInfo
     {
-        public int Amount { get; internal set; }
-        public int HalfOriginalAmount { get; internal set; }
-        public double Accessibility { get; internal set; }
+        [JsonProperty]
+        private int _amount;
+        [JsonProperty]
+        private int _halfOriginalAmount;
+        [JsonProperty]
+        private double _accessibility;
+
+        [JsonIgnore]
+        public int Amount
+        {
+            get { return _amount; }
+            internal set { _amount = value; }
+        }
+
+        [JsonIgnore]
+        public int HalfOriginalAmount
+        {
+            get { return _halfOriginalAmount; }
+            internal set { _halfOriginalAmount = value; }
+        }
+
+        [JsonIgnore]
+        public double Accessibility
+        {
+            get { return _accessibility; }
+            internal set { _accessibility = value; }
+        }
     }
 
     public class SystemBodyDB : BaseDataBlob

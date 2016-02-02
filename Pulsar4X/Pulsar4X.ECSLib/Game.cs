@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -39,7 +40,7 @@ namespace Pulsar4X.ECSLib
         internal int NumSystems;
 
         [PublicAPI]
-        public ReadOnlyCollection<StarSystem> Systems { get { return new ReadOnlyCollection<StarSystem>(StarSystems); } }
+        public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
 
         [PublicAPI] 
         [JsonProperty]
@@ -71,7 +72,7 @@ namespace Pulsar4X.ECSLib
         /// List of StarSystems currently in the game.
         /// </summary>
         [JsonProperty]
-        internal List<StarSystem> StarSystems { get; private set; }
+        internal JDictionary<Guid, StarSystem> StarSystems { get; private set; }
 
         internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new JDictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
@@ -93,7 +94,7 @@ namespace Pulsar4X.ECSLib
 
             IsLoaded = false;
             _globalManager = new EntityManager(this);
-            StarSystems = new List<StarSystem>();
+            StarSystems = new JDictionary<Guid, StarSystem>();
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);
             StaticData = new StaticDataStore();
@@ -166,7 +167,6 @@ namespace Pulsar4X.ECSLib
             for (int i = 0; i < numSystems; i++)
             {
                 StarSystem newSystem = newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
-                newGame.StarSystems.Add(newSystem);
                 if (progress != null)
                 {
                     progress.Report((double)newGame.StarSystems.Count / numSystems);
@@ -231,7 +231,7 @@ namespace Pulsar4X.ECSLib
                 CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
 
                 // Execute all processors. Magic happens here.
-                RunProcessors(StarSystems, deltaSeconds);
+                RunProcessors(StarSystems.Values.ToList(), deltaSeconds);
 
                 // Update our remaining values.
                 deltaSeconds -= subpulseTime;

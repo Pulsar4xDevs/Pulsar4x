@@ -30,8 +30,9 @@ namespace Pulsar4X.Tests
             XmlDocument xmlDoc = new XmlDocument();
             XmlNode toplevelNode = xmlDoc.CreateNode(XmlNodeType.Element, "Systems", "NS");
 
-            foreach (var system in _game.Systems)
+            foreach (KeyValuePair<Guid, StarSystem> kvp in _game.Systems)
             {
+                StarSystem system = kvp.Value;
                 var systemBody = system.SystemManager.GetFirstEntityWithDataBlob<OrbitDB>();
 
                 // get root star:
@@ -336,9 +337,9 @@ namespace Pulsar4X.Tests
             double totalTime = timer.Elapsed.TotalSeconds;
 
             int totalEntities = 0;
-            foreach (StarSystem system in _game.Systems)
+            foreach (KeyValuePair<Guid, StarSystem> system in _game.Systems)
             {
-                List<Entity> entities = system.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>();
+                List<Entity> entities = system.Value.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>();
                 totalEntities += entities.Count;
             }
 

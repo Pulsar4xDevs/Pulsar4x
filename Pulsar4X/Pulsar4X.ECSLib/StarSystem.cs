@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -6,6 +7,9 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem
     {
+        [PublicAPI]
+        public Guid Guid { get; protected set; }
+
         [PublicAPI]
         public int Seed
         {
@@ -36,14 +40,22 @@ namespace Pulsar4X.ECSLib
         {
             get { return _systemManager; }
         }
+
         [JsonProperty("SystemManager")]
         private readonly EntityManager _systemManager;
 
+        [JsonConstructor]
+        internal StarSystem()
+        {
+        }
+
         public StarSystem(Game game, string name, int seed)
         {
+            Guid = Guid.NewGuid();
             _systemManager = new EntityManager(game);
             _nameDB = new NameDB(name);
             _seed = seed;
+            game.StarSystems.Add(Guid, this);
             RNG = new Random(seed);
             EconLastTickRun = 0;
         }

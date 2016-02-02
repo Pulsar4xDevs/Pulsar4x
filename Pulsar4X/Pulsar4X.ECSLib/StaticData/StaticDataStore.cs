@@ -29,37 +29,44 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// List which stores all the atmospheric gases.
         /// </summary>
+        [JsonIgnore]
         public WeightedList<AtmosphericGasSD> AtmosphericGases = new WeightedList<AtmosphericGasSD>();
 
         /// <summary>
         /// List which stores all the Commander Name themes.
         /// </summary>
+        [JsonIgnore]
         public List<CommanderNameThemeSD> CommanderNameThemes = new List<CommanderNameThemeSD>();
 
         /// <summary>
         /// List which stores all the Minerals.
         /// </summary>
+        [JsonIgnore]
         public List<MineralSD> Minerals = new List<MineralSD>();
 
         /// <summary>
         /// Dictionary which stores all the Technologies.
         /// stored in a dictionary to allow fast lookup of a specific Technology based on its guid.
         /// </summary>
+        [JsonIgnore]
         public JDictionary<Guid, TechSD> Techs = new JDictionary<Guid, TechSD>();
 
         /// <summary>
         /// List which stores all of the installations
         /// </summary>
+        [JsonIgnore]
         public JDictionary<Guid, InstallationSD> Installations = new JDictionary<Guid, InstallationSD>();
 
         /// <summary>
         /// Dictionary which stores all the Recipes.
         /// </summary>
+        [JsonIgnore]
         public JDictionary<Guid, RefinedMaterialSD> RefinedMaterials = new JDictionary<Guid, RefinedMaterialSD>();
 
         /// <summary>
         /// Dictionary which stores all Components.
         /// </summary>
+        [JsonIgnore]
         public JDictionary<Guid, ComponentSD> Components = new JDictionary<Guid, ComponentSD>();
 
         /// <summary>

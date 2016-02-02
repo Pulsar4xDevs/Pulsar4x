@@ -259,11 +259,11 @@ namespace Pulsar4X.ECSLib
         /// Verifies that the supplied entity is valid in this manager.
         /// </summary>
         /// <returns>True is the entity is considered valid.</returns>
-        internal bool IsValidEntity([NotNull] Entity entity)
+        internal bool IsValidEntity([CanBeNull] Entity entity)
         {
             if (entity == null)
             {
-                throw new ArgumentNullException("entity");
+                return false;
             }
 
             return IsValidID(entity.ID) && _entities[entity.ID] == entity;
@@ -450,7 +450,7 @@ namespace Pulsar4X.ECSLib
         {
             foreach (Entity entity in _entities)
             {
-                if (entity.DataBlobMask.SetBits.Contains(typeIndex))
+                if (IsValidEntity(entity) && entity.DataBlobMask.SetBits.Contains(typeIndex))
                 {
                     return entity;
                 }

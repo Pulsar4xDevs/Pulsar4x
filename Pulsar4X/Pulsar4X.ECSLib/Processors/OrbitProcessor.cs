@@ -258,7 +258,7 @@ namespace Pulsar4X.ECSLib
 
             timer.Start();
 
-            orbitsProcessed = OrbitProcessor.Process(_game, _game.StarSystems, 60);
+            orbitsProcessed = OrbitProcessor.Process(_game, _game.StarSystems.Values.ToList(), 60);
 
             timer.Stop();
 

@@ -111,7 +111,10 @@ namespace Pulsar4X.ECSLib
                     StoreObject(obj, staticDataStore);
                 }
 
-                staticDataStore.LoadedDataSets.Add(dataVInfo);
+                if (!staticDataStore.LoadedDataSets.Contains(dataVInfo))
+                {
+                    staticDataStore.LoadedDataSets.Add(dataVInfo);
+                }
             }
             catch (Exception e)
             {

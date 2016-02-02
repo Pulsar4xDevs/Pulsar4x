@@ -152,28 +152,17 @@ namespace Pulsar4X.ViewModel
         /// </summary>
         /// <exception cref="InvalidOperationException">Cannot create a Planet ViewModel without an initialized game.</exception>
         /// <exception cref="GuidNotFoundException">Thrown when the supplied Guid is not found in the game.</exception>
-        internal static SystemVM Create(GameVM gameVM, Guid guid)
+        internal static SystemVM Create(GameVM gameVM, Guid starSystemGuid)
         {
             if (gameVM.Game == null)
             {
                 throw new InvalidOperationException("Cannot create a StarVM without an initialized game.");
             }
 
-            Entity entity;
-            if (!gameVM.Game.GlobalManager.FindEntityByGuid(guid, out entity))
-            {
-                throw new GuidNotFoundException(guid);
-            }
-            StarSystem starSystem = null;
-            
-            for (int i = 0; i < gameVM.Game.Systems.Count; i++)
-            {
-                if (gameVM.Game.Systems[i].SystemManager.FindEntityByGuid(guid, out entity))
-                {
-                    starSystem = gameVM.Game.Systems[i];
-                    i = gameVM.Game.Systems.Count;
-                }
-            }            
+            StarSystem starSystem;
+            if (!gameVM.Game.Systems.TryGetValue(starSystemGuid, out starSystem))
+                throw new GuidNotFoundException(starSystemGuid);
+ 
             return Create(gameVM, starSystem);
         }
 

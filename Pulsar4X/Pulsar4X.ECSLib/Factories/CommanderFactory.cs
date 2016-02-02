@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
             CommanderTypes type = CommanderTypes.Civilian;
 
             //this is going to have to be thought out properly.
-            Dictionary<ResearchCategories, float> bonuses = new Dictionary<ResearchCategories, float>();
+            JDictionary<ResearchCategories, float> bonuses = new JDictionary<ResearchCategories, float>();
             bonuses.Add(ResearchCategories.PowerAndPropulsion, 1.1f);
             byte maxLabs = 25;
 

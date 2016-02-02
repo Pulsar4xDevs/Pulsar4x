@@ -16,13 +16,13 @@ namespace Pulsar4X.ECSLib
         private List<Entity> _species;
 
         [PublicAPI]
-        public List<StarSystem> KnownSystems
+        public List<Guid> KnownSystems
         {
             get { return _knownSystems; }
             internal set { _knownSystems = value; }
         }
         [JsonProperty]
-        private List<StarSystem> _knownSystems;
+        private List<Guid> _knownSystems;
 
         [PublicAPI]
         public List<Entity> KnownFactions 
@@ -54,19 +54,19 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
+        public JDictionary<Guid, Entity> ComponentDesigns { get; internal set; }
         
 
 
         public FactionInfoDB()
-            : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>(), new List<Entity>() )
+            : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() )
         {
 
         }
 
         public FactionInfoDB(
             List<Entity> species,
-            List<StarSystem> knownSystems,
+            List<Guid> knownSystems,
             List<Entity> colonies,
             List<Entity> shipClasses)
         {
@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
         public FactionInfoDB(FactionInfoDB factionDB)
         {
             Species = new List<Entity>(factionDB.Species);
-            KnownSystems = new List<StarSystem>(factionDB.KnownSystems);
+            KnownSystems = new List<Guid>(factionDB.KnownSystems);
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Colonies = new List<Entity>(factionDB.Colonies);
             ShipClasses = new List<Entity>(factionDB.ShipClasses);

@@ -7,13 +7,13 @@ namespace Pulsar4X.ECSLib
     public class ScientistDB : BaseDataBlob
     {
         [PublicAPI]
-        public Dictionary<ResearchCategories, float> Bonuses
+        public JDictionary<ResearchCategories, float> Bonuses
         {
             get { return _bonuses; }
             internal set { _bonuses = value; }
         }
         [JsonProperty]
-        private Dictionary<ResearchCategories, float> _bonuses;
+        private JDictionary<ResearchCategories, float> _bonuses;
 
         [PublicAPI]
         public byte MaxLabs
@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
         [UsedImplicitly]
         public ScientistDB() { } // needed by json
 
-        public ScientistDB(Dictionary<ResearchCategories,float> bonuses, byte maxLabs )
+        public ScientistDB(JDictionary<ResearchCategories,float> bonuses, byte maxLabs )
         {
             Bonuses = bonuses;
             MaxLabs = maxLabs;
@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
 
         public ScientistDB(ScientistDB dB)
         {
-            Bonuses = new Dictionary<ResearchCategories, float>(dB.Bonuses);
+            Bonuses = new JDictionary<ResearchCategories, float>(dB.Bonuses);
             _maxLabs = dB.MaxLabs;
             AssignedLabs = dB.AssignedLabs;
             ProjectQueue = dB.ProjectQueue;
