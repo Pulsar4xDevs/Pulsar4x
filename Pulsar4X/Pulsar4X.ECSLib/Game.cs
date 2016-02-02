@@ -40,7 +40,10 @@ namespace Pulsar4X.ECSLib
         internal int NumSystems;
 
         [PublicAPI]
-        public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
+        public ReadOnlyDictionary<Guid, StarSystem> Systems
+        {
+            get { return new ReadOnlyDictionary<Guid, StarSystem>(StarSystems); }
+        }
 
         [PublicAPI] 
         [JsonProperty]

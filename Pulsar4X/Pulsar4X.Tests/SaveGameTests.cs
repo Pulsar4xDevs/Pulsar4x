@@ -12,12 +12,13 @@ namespace Pulsar4X.Tests
     {
         private Game game;
         private const string file = "./testSave.json";
+        private const string file2 = "./testSave2.json";
         private readonly DateTime testTime = DateTime.Now;
 
         [SetUp]
         public void Init()
         {
-            game = Game.NewGame("Unit Test Game", testTime, 1);
+            game = Game.NewGame("Unit Test Game", testTime, 50);
 
             // add a faction:
             Entity humanFaction = FactionFactory.CreateFaction(game, "New Terran Utopian Empire");
@@ -89,7 +90,7 @@ namespace Pulsar4X.Tests
             //and load the saved data:
             game = SaveGame.Load(file);
 
-            Assert.AreEqual(1, game.Systems.Count);
+            Assert.AreEqual(50, game.Systems.Count);
             Assert.AreEqual(testTime, game.CurrentDateTime);
             List<Entity> entities = game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
             Assert.AreEqual(3, entities.Count);
@@ -102,6 +103,52 @@ namespace Pulsar4X.Tests
             Assert.AreSame(speciesName.OwningEntity, species);
 
             // <?TODO: Expand this out to cover many more DBs, entities, and cases.
+        }
+
+        [Test]
+        public void SaveGameConsistency()
+        {
+            SaveGame.Save(game, file);
+            game = SaveGame.Load(file);
+            SaveGame.Save(game, file2);
+
+            int file1byte;
+            int file2byte;
+            FileStream fs1 = new FileStream(file, FileMode.Open);
+            FileStream fs2 = new FileStream(file2, FileMode.Open);
+
+            if (fs1.Length != fs2.Length)
+            {
+                // Close the file
+                fs1.Close();
+                fs2.Close();
+
+                // Return false to indicate files are different
+                Assert.Fail("Savegames are not the same size.");
+            }
+
+            // Read and compare a byte from each file until either a
+            // non-matching set of bytes is found or until the end of
+            // file1 is reached.
+            do
+            {
+                // Read one byte from each file.
+                file1byte = fs1.ReadByte();
+                file2byte = fs2.ReadByte();
+            }
+            while ((file1byte == file2byte) && (file1byte != -1));
+
+            // Close the files.
+            fs1.Close();
+            fs2.Close();
+
+            // Return the success of the comparison. "file1byte" is 
+            // equal to "file2byte" at this point only if the files are 
+            // the same.
+            if (file1byte - file2byte != 0)
+            {
+                Assert.Fail("Save files are different");
+            }
         }
 
         [Test]
