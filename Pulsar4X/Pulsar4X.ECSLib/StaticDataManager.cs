@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -51,6 +52,12 @@ namespace Pulsar4X.ECSLib
             StaticDataStore staticDataStore = new StaticDataStore();
 
             // get list of default sub-directories:
+            string assemblyDir = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+            if (assemblyDir == null)
+            {
+                throw new DirectoryNotFoundException("StaticDataStore could not find/access the executable's directory.");
+            }
+            Directory.SetCurrentDirectory(assemblyDir);
             var dataDirs = Directory.GetDirectories(DefaultDataDirectory);
 
             // safety check:

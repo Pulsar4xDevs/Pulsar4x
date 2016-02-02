@@ -205,34 +205,34 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\Pulsar4x\Commander Name Theme - The Creators.json">
+    <Content Include="Data\Pulsar4x\Commander Name Theme - The Creators.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\ComponentData.json">
+    </Content>
+    <Content Include="Data\Pulsar4x\ComponentData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\InstallationData.json">
+    </Content>
+    <Content Include="Data\Pulsar4x\InstallationData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\Minerals.json">
+    </Content>
+    <Content Include="Data\Pulsar4x\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\ReinfedMaterialsData.json">
+    </Content>
+    <Content Include="Data\Pulsar4x\ReinfedMaterialsData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\SystemGenSettings.json">
+    </Content>
+    <Content Include="Data\Pulsar4x\SystemGenSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\TechnologyData.json">
+    </Content>
+    <Content Include="Data\Pulsar4x\TechnologyData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\Pulsar4x\VersionInfo.vinfo">
+    </Content>
+    <Content Include="Data\Pulsar4x\VersionInfo.vinfo">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="packages.config" />
-    <None Include="Data\Pulsar4x\AtmosphericData.json">
+    <Content Include="Data\Pulsar4x\AtmosphericData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
