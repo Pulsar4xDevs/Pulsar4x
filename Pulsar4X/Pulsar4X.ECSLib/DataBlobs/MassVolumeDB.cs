@@ -42,7 +42,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The Average Radius in AU.
         /// </summary>
-        [JsonIgnore]
         public double Radius
         {
             get { return _radius; }

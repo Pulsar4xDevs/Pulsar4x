@@ -48,7 +48,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Position as a vec4. This is a utility property that converts Position to Km on get and to AU on set.
         /// </summary>
-        [JsonIgnore]
         public Vector4 PositionInKm
         {
             get { return new Vector4(Distance.ToKm(Position.X), Distance.ToKm(Position.Y), Distance.ToKm(Position.Z), 0); }
@@ -58,7 +57,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// System X coordinante. This is a utility property that converts the X Coord. to Km on get and to AU on set.
         /// </summary>
-        [JsonIgnore]
         public double XInKm
         {
             get { return Distance.ToKm(Position.X); }
@@ -68,7 +66,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// System Y coordinante. This is a utility property that converts the Y Coord. to Km on get and to AU on set.
         /// </summary>
-        [JsonIgnore]
         public double YInKm
         {
             get { return Distance.ToKm(Position.Y); }
@@ -78,7 +75,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// System Z coordinate. This is a utility property that converts the Z Coord. to Km on get and to AU on set.
         /// </summary>
-        [JsonIgnore]
         public double ZInKm
         {
             get { return Distance.ToKm(Position.Z); }

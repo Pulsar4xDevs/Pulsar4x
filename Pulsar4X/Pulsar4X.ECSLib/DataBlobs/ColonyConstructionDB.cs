@@ -56,8 +56,6 @@ namespace Pulsar4X.ECSLib
 
     public class  ColonyConstructionDB : BaseDataBlob
     {
-
-        [JsonIgnore]//recalc this on game load.
         public int PointsPerTick { get; internal set; }
 
         [JsonProperty]

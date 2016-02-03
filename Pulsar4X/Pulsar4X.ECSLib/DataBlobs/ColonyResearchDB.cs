@@ -5,10 +5,6 @@ namespace Pulsar4X.ECSLib
 {
     public class  ColonyResearchDB : BaseDataBlob
     {
-
-
-
-
         public ColonyResearchDB()
         {
         }

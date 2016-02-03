@@ -15,11 +15,9 @@ namespace Pulsar4X.ECSLib
 
     public class ColonyRefiningDB : BaseDataBlob
     {
-       
-        [JsonIgnore]//recalc this on game load. 
         public int PointsPerTick { get; internal set; }
 
-        [JsonIgnore]//recalc this on game load todo implement this in the processor. 
+        //recalc this on game load todo implement this in the processor. 
         public JDictionary<Guid, int> RefiningRates{ get; internal set; }
 
         [JsonProperty] 

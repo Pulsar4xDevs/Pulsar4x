@@ -20,7 +20,6 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        [Ignore("TODO: why is this test ignored?")]
         [Description("Outputs all the systems generated in the init of this test to XML")]
         public void OutputToXML()
         {
