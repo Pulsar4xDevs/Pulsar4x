@@ -4,7 +4,8 @@ using System.IO;
 using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
-using Pulsar4x.ViewModels;
+using Pulsar4X.ViewModel;
+
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -12,6 +13,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected Slider Slider { get; set; }
         protected NumericUpDown NumericUpDown { get; set; }
+        public event ValueChangedEventHandler ValueChanged;
 
 
         private float _tickFrequency;

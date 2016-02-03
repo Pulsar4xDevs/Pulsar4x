@@ -29,15 +29,22 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _designVM = viewmodel;
             DataContext = viewmodel;
 
-            ComponentSelection.DataStore = _designVM.ComponentTypes.DisplayList;
-
+            ComponentSelection.DataStore = _designVM.ComponentTypes.DisplayList;          
             ComponentSelection.SelectedKeyChanged += SetViewModel;
+            Create.Click += Create_Click;
 
+        }
+
+        void Create_Click(object sender, EventArgs e)
+        {
+            _designVM.DesignDB.Name = Name.Text;
+            _designVM.CreateComponent();
         }
 
         private void SetViewModel(object sender, EventArgs e)
         {
             _designVM.SetComponent(_designVM.ComponentTypes.GetValue(ComponentSelection.SelectedIndex));  //(Guid)ComponentSelection.SelectedValue);
+            
             foreach (var componentAbilityVM in _designVM.AbilityList)
             {
                 switch (componentAbilityVM.GuiHint)
@@ -45,19 +52,27 @@ namespace Pulsar4X.CrossPlatformUI.Views
                     case GuiHint.GuiTechSelectionList:
                         AbilitySelectionList asl = new AbilitySelectionList(componentAbilityVM);
                         //asl.GuiListSetup(componentAbilityVM);
-                        //asl.ValueChanged += OnValueChanged;
+                        asl.ValueChanged += OnValueChanged;
                         AbilitysLayout.Items.Add(asl);
                         break;
                     case GuiHint.GuiSelectionMaxMin:
                         MinMaxSlider mms = new MinMaxSlider(componentAbilityVM.MinMaxSlider);
-                        //mms.ValueChanged += OnValueChanged;
+                        mms.ValueChanged += OnValueChanged;
                         AbilitysLayout.Items.Add(mms);
                         break;
                 }
-
-                //componentAbilityVM.ValueChanged += OnValueChanged;
-                //OnValueChanged(GuiHint.None, 0);
+                Name.Text = _designVM.DesignDB.Name;
+                componentAbilityVM.ValueChanged += OnValueChanged;
+                OnValueChanged(GuiHint.None, 0);
             }
+        }
+
+        private void OnValueChanged(GuiHint controlType, double value)
+        {
+
+            ComponentStats.Text = _designVM.StatsText;
+            AbilityStats.Text = _designVM.AbilityStatsText;
+
         }
     }
 }

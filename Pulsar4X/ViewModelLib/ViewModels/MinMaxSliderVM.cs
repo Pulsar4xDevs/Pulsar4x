@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ViewModel;
 
-namespace Pulsar4x.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public class MinMaxSliderVM : IViewModel
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar4x.ViewModels.ViewModels
+namespace Pulsar4X.ViewModel
 {
     public enum DisplayMode
     {

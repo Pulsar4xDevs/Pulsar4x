@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using Pulsar4x.ViewModels;
-using Pulsar4x.ViewModels.ViewModels;
+using Pulsar4X.ViewModel;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel
