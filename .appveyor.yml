@@ -1,14 +1,14 @@
 #.appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 #.appveyor.yml validation: https://ci.appveyor.com/tools/validate-yaml
 #verify WHOLE file after EVERY change or it could crash cause of whitespaces or tabulation
-os: Visual Studio 2015
+
 version: 0.4.{build}
 
 branches:
   except:
     - master
  
-os: Windows Server 2012
+os: Visual Studio 2015
 cache:
 - packages -> **\packages.config
 before_build:
