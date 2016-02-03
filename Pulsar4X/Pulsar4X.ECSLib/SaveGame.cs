@@ -13,6 +13,10 @@ namespace Pulsar4X.ECSLib
     // use: http://www.newtonsoft.com/json/help/html/SerializationAttributes.htm
     public static class SaveGame
     {
+        /// <summary>
+        /// Game class of the game that is currently saving/loading. It is garunteed to be the loading/saving game from
+        /// the time the operation starts, until AFTER any events are fired.
+        /// </summary>
         internal static Game CurrentGame { get; private set; }
         internal static IProgress<double> Progress { get; private set; }
         internal static int ManagersProcessed { get; set; }

@@ -23,7 +23,9 @@ namespace Pulsar4X.ECSLib
         private Dictionary<AbilityType, float> _abilities;
 
         public ComponentDB()
-        { }
+        {
+            // Default parameterless constructor for JSON.
+        }
 
         public ComponentDB(ComponentDB db)
         {
