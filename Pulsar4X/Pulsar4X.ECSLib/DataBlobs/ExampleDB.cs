@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using NCalc.Domain;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib.DataBlobs
@@ -23,8 +18,9 @@ namespace Pulsar4X.ECSLib.DataBlobs
         private BasicExampleDB()
         {
             // This is called the "default parameterless constructor" most datablobs will need one of these
-            // so that the code that restores a game from the disk can instinate an object of this type.
+            // so that JSON, the code that restores a game from the disk, can instinate an object of this type.
             // It doesn't need to actually do anything, it just has to exist. See: ComponentDB
+            // This is AKA the "JSON Constructor"
         }
 
         // Datablobs need to implement a deep-copy constructor.
