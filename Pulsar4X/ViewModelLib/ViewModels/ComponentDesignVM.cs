@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Dynamic;
+using System.Runtime.CompilerServices;
 using Pulsar4X.ViewModel;
 using Pulsar4X.ECSLib;
 
@@ -10,7 +12,7 @@ namespace Pulsar4X.ViewModel
 
 
 
-    public class ComponentDesignVM
+    public class ComponentDesignVM : IViewModel
     {
         //public Dictionary<string, Guid> ComponentTypes { get; set; }
         public DictionaryVM<string, Guid> ComponentTypes { get; set; } 
@@ -60,7 +62,7 @@ namespace Pulsar4X.ViewModel
             AbilityList = new List<ComponentAbilityDesignVM>();
             foreach (var componentAbility in DesignDB.ComponentDesignAbilities)
             {
-                AbilityList.Add(new ComponentAbilityDesignVM(componentAbility, _staticData));
+                AbilityList.Add(new ComponentAbilityDesignVM(this, componentAbility, _staticData));
             }            
         }
 
@@ -90,6 +92,7 @@ namespace Pulsar4X.ViewModel
                 }
                 return text;
             }
+            set { OnPropertyChanged();}
         }
 
         public string AbilityStatsText
@@ -104,15 +107,34 @@ namespace Pulsar4X.ViewModel
                 }
                 return text;
             }
+            set { OnPropertyChanged();}
+        }
+
+        
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public void Refresh(bool partialRefresh = false)
+        {
+            StatsText = ""; //setter just triggers refresh of this property.
+            AbilityStatsText = ""; //setter just triggers refresh of this property.
         }
     }
 
 
-    public class ComponentAbilityDesignVM
+    public class ComponentAbilityDesignVM : IViewModel
     {
         private ComponentDesignAbilityDB _designAbility;
         private StaticDataStore _staticData;
-        
+        private ComponentDesignVM _parentDesignVM;
         
         public event ValueChangedEventHandler ValueChanged;
 
@@ -122,7 +144,10 @@ namespace Pulsar4X.ViewModel
 
         public double MaxValue { get { return _designAbility.MaxValue; } }
         public double MinValue { get { return _designAbility.MinValue; } }
-        public double Value { get { return _designAbility.Value; } }
+        private double _value;
+        public double Value { get { return _designAbility.Value; }set
+        {
+            _value = value; OnPropertyChanged();} }
 
         public GuiHint GuiHint { get { return _designAbility.GuiHint; }}
         
@@ -130,11 +155,11 @@ namespace Pulsar4X.ViewModel
         
 
 
-        public ComponentAbilityDesignVM(ComponentDesignAbilityDB designAbility, StaticDataStore staticData)
+        public ComponentAbilityDesignVM(ComponentDesignVM designVM, ComponentDesignAbilityDB designAbility, StaticDataStore staticData)
         {
             _designAbility = designAbility;
             _staticData = staticData;
-
+            _parentDesignVM = designVM;
 
 
             switch (designAbility.GuiHint)
@@ -157,19 +182,37 @@ namespace Pulsar4X.ViewModel
                         MinMaxSlider.MaxValue = MaxValue;
                         MinMaxSlider.MinValue = MinValue;
                         MinMaxSlider.Value = Value;
+                        MinMaxSlider.PropertyChanged += MinMaxSlider_PropertyChanged;
+
                     }
                     break;
             }
+        }
 
+        void MinMaxSlider_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnValueChanged( MinMaxSlider.Value);
+        }
+
+
+        private void OnValueChanged(double value)
+        {
+            if (GuiHint == GuiHint.GuiSelectionMaxMin)
+                _designAbility.SetValueFromInput(value);
+            else if (GuiHint == GuiHint.GuiTechSelectionList)
+                _designAbility.SetValueFromGuidList(TechList[(int)value].ID);
+
+            _parentDesignVM.Refresh();
         }
 
         public void OnValueChanged(GuiHint controlType, double value)
         {
-            if(controlType == GuiHint.GuiSelectionMaxMin)
+            if (controlType == GuiHint.GuiSelectionMaxMin)
                 _designAbility.SetValueFromInput(value);
             else if (controlType == GuiHint.GuiTechSelectionList)
                 _designAbility.SetValueFromGuidList(TechList[(int)value].ID);
 
+            //_parentDesignVM.Refresh();
             //if (ValueChanged != null) //bubble it up to ComponentDesignVM?
             //{
             //    ValueChanged.Invoke(controlType, value);
@@ -186,6 +229,22 @@ namespace Pulsar4X.ViewModel
                     text += _designAbility.Value + Environment.NewLine;
                 }
                 return text;
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void Refresh(bool partialRefresh = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                OnValueChanged( _value );
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
