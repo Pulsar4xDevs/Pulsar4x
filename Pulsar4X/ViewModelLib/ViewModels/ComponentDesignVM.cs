@@ -92,7 +92,6 @@ namespace Pulsar4X.ViewModel
                 }
                 return text;
             }
-            set { OnPropertyChanged();}
         }
 
         public string AbilityStatsText
@@ -107,7 +106,6 @@ namespace Pulsar4X.ViewModel
                 }
                 return text;
             }
-            set { OnPropertyChanged();}
         }
 
         
@@ -124,8 +122,8 @@ namespace Pulsar4X.ViewModel
 
         public void Refresh(bool partialRefresh = false)
         {
-            StatsText = ""; //setter just triggers refresh of this property.
-            AbilityStatsText = ""; //setter just triggers refresh of this property.
+            OnPropertyChanged("AbilityStatsText");
+            OnPropertyChanged("StatsText");
         }
     }
 

@@ -11,8 +11,8 @@
       <StackLayout ID="AbilitysLayout" />
     </TableRow>
     <TableRow>
-      <TextBox ID ="AbilityStats" />
-      <TextBox ID="ComponentStats" />
+      <TextBox ID ="AbilityStats" Text="{Binding AbilityStatsText}"/>
+      <TextBox ID="ComponentStats" Text="{Binding StatsText}"/>
     </TableRow>
     <TableRow ScaleHeight="False">
       <Button ID="Create" Text="Create" />
