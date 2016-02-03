@@ -14,15 +14,11 @@ namespace Pulsar4X.Tests
     {
         private static readonly List<Type> DataBlobTypes = new List<Type>(Assembly.GetAssembly(typeof(BaseDataBlob)).GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract));
 
-        [SetUp]
-        public void Init()
-        {
-            Game game = Game.NewGame("Test Game", DateTime.Now, 1);
-        }
-
         [Test]
         public void TypeCount()
         {
+            // This is mostly a test for the EntityManager, but is included here because we do DataBlobType reflection here.
+            // EntityManager does the same reflection for some of its functions.
             Assert.AreEqual(DataBlobTypes.Count, EntityManager.BlankDataBlobMask().Length);
         }
 
