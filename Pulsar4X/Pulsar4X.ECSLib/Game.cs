@@ -119,8 +119,7 @@ namespace Pulsar4X.ECSLib
         internal void PostGameLoad()
         {
             // Invoke the Post Load event down the chain.
-            if (PostLoad != null)
-                PostLoad(this, EventArgs.Empty);
+            PostLoad?.Invoke(this, EventArgs.Empty);
 
             // set isLoaded to true:
             IsLoaded = true;
@@ -208,7 +207,7 @@ namespace Pulsar4X.ECSLib
             int timeAdvanced = 0;
 
             // Clamp deltaSeconds to a multiple of our MinimumTimestep.
-            deltaSeconds = deltaSeconds - (deltaSeconds % GameConstants.MinimumTimestep);
+            deltaSeconds = deltaSeconds - deltaSeconds % GameConstants.MinimumTimestep;
             if (deltaSeconds == 0)
             {
                 deltaSeconds = GameConstants.MinimumTimestep;
@@ -216,8 +215,7 @@ namespace Pulsar4X.ECSLib
 
             // Clear any interrupt flag before starting the pulse.
             CurrentInterrupt = null;
-
-            while (CurrentInterrupt == null && deltaSeconds > 0)
+            while ((CurrentInterrupt == null) && (deltaSeconds > 0))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 int subpulseTime = Math.Min(NextSubpulse.MaxSeconds, deltaSeconds);
