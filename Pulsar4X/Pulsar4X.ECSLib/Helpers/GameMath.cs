@@ -23,9 +23,6 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-
-
-
     /// <summary>
     /// Small helper class for Temperature unit conversions
     /// </summary>
@@ -148,6 +145,15 @@ namespace Pulsar4X.ECSLib
         public WeightedList()
         {
             _valueList = new List<WeightedValue<T>>();
+        }
+
+        /// <summary>
+        /// Deep copy consturctor
+        /// </summary>
+        public WeightedList(WeightedList<T> weightedList)
+        {
+            _valueList = new List<WeightedValue<T>>(weightedList._valueList);
+            TotalWeight = weightedList.TotalWeight;
         }
 
         /// <summary>

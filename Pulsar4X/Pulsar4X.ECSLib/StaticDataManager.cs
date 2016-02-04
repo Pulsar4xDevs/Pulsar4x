@@ -52,18 +52,19 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Loads the data from a specified data subdirectory into the provided staticDataStore
+        /// Loads the data from a specified data subdirectory into the provided game
         /// </summary>
         [PublicAPI]
-        public static void LoadData(string dataDir, StaticDataStore staticDataStore)
+        public static void LoadData(string dataDir, Game game)
         {
+            StaticDataStore newStore = game.StaticData.Clone();
             try
             {
                 string dataDirectory = Path.Combine(GetWorkingDataDirectory(), dataDir);
 
                 // we start by looking for a version file, no version file, no load.
                 DataVersionInfo dataVInfo;
-                if (CheckDataDirectoryVersion(dataDirectory, staticDataStore, out dataVInfo) == false)
+                if (CheckDataDirectoryVersion(dataDirectory, game.StaticData, out dataVInfo) == false)
                 {
                     throw new StaticDataLoadException("Static Data is explicitly incompatible with currently loaded data.");
                 }
@@ -77,18 +78,21 @@ namespace Pulsar4X.ECSLib
                 foreach (string file in files)
                 {
                     JObject obj = Load(file);
-                    StoreObject(obj, staticDataStore);
+                    StoreObject(obj, newStore);
                 }
 
-                if (!staticDataStore.LoadedDataSets.Contains(dataVInfo))
+                if (!newStore.LoadedDataSets.Contains(dataVInfo))
                 {
-                    staticDataStore.LoadedDataSets.Add(dataVInfo);
+                    newStore.LoadedDataSets.Add(dataVInfo);
                 }
+
+                game.StaticData = newStore;
             }
             catch (Exception e)
             {
-                if (e.GetType() == typeof(JsonSerializationException))
+                if (e.GetType() == typeof(JsonSerializationException) || e.GetType() == typeof(JsonReaderException))
                     throw new StaticDataLoadException("Bad Json provided in directory: " + dataDir, e);
+                
 
                 throw;  // rethrow exception if not known ;)
             }
