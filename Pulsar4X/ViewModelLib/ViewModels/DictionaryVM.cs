@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace Pulsar4X.ViewModel
         private Dictionary<TKey, TValue> _dictionary;
         private Dictionary<int, KeyValuePair<TKey, TValue>> _index = new Dictionary<int, KeyValuePair<TKey, TValue>>(); 
         private Dictionary<KeyValuePair<TKey,TValue>,int> _reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>(); 
-        public List<string> DisplayList { get; set; }
+        public ObservableCollection<string> DisplayList { get; set; }
  
         public DisplayMode DisplayMode { get; set; }
         //public Mode SelectedValueMode { get; set; }
@@ -34,35 +35,9 @@ namespace Pulsar4X.ViewModel
         /// <param name="displayMode"></param>
         public DictionaryVM(DisplayMode displayMode )
         {
-            //Dictionary<TKey,TValue> dictionary
-            //Dictionary = dictionary;
             DisplayMode = displayMode;
-            DisplayList = new List<string>();
+            DisplayList = new ObservableCollection<string>();
             _dictionary = new Dictionary<TKey, TValue>();
-            //int i = 0;
-            //foreach (KeyValuePair<TKey,TValue> kvp in this) 
-            //{
-            //    _index.Add(i, kvp);
-            //    _reverseIndex.Add(kvp,i);
-            //    i++;
-            //}
-            
-            //switch (displayMode)
-            //{
-            //    case DisplayMode.Key:
-
-            //        for (int j = 0; j < _index.Count - 1; j++)
-            //        {
-            //            DisplayList.Add(_index[i].Key.ToString());
-            //        }
-            //        break;
-            //    case DisplayMode.Value:
-            //        for (int j = 0; j < _index.Count - 1; j++)
-            //        {
-            //            DisplayList.Add(_index[i].Value.ToString());
-            //        }
-            //        break;
-            //}
         }
 
 
