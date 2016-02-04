@@ -109,13 +109,6 @@ namespace Pulsar4X.ECSLib
 
         #region Internal Functions
 
-        internal void RunProcessors(List<StarSystem> systems, int deltaSeconds)
-        {
-            OrbitProcessor.Process(this, systems, deltaSeconds);
-            ShipMovementProcessor.Process(this, systems,deltaSeconds);
-            EconProcessor.Process(this, systems, deltaSeconds);
-        }
-
         internal void PostGameLoad()
         {
             // Invoke the Post Load event down the chain.
@@ -242,6 +235,18 @@ namespace Pulsar4X.ECSLib
             return timeAdvanced;
         }
 
+        /// <summary>
+        /// Runs all processors on the list of systems provided.
+        /// </summary>
+        /// <param name="systems">Systems to have processors run on them.</param>
+        /// <param name="deltaSeconds">Game-time to progress in the processors.</param>
+        [PublicAPI]
+        public void RunProcessors(List<StarSystem> systems, int deltaSeconds)
+        {
+            OrbitProcessor.Process(this, systems, deltaSeconds);
+            ShipMovementProcessor.Process(this, systems, deltaSeconds);
+            EconProcessor.Process(this, systems, deltaSeconds);
+        }
         #endregion
 
 
