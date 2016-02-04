@@ -15,7 +15,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected PasswordBox FactionPassword;
         protected PasswordBox GmPassword;
         protected NumericUpDown NumberOfSystems;
-        protected StackLayout ModList { get; set; }
+        protected ListBox AvailableModList { get; set; }
+        protected ListBox SelectedModList { get; set; }
 
         private NewGameOptionsVM new_game_options;
         private GameVM Game;
@@ -35,12 +36,30 @@ namespace Pulsar4X.CrossPlatformUI.Views
             NumberOfSystemsBinding.BindDataContext((NewGameOptionsVM n) => n.NumberOfSystems);
             //NumberOfSystems.BindDataContext<int>("NumberOfSystems", "NumberOfSystems");
 
-            foreach (var item in new_game_options.ModList)
+            foreach (var item in new_game_options.AvailableModList)
             {
-                CheckBox c = new CheckBox();
-                c.Text = item.Name;
-                ModList.Items.Add(c);
+                AvailableModList.Items.Add(item.Name);
             }
+        }
+
+        protected void AddModButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void RemoveModButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void MoveUpModButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void MoveDownModButton_Click(object sender, EventArgs e)
+        {
+
         }
 
         protected void DefaultButton_Click(object sender, EventArgs e)
