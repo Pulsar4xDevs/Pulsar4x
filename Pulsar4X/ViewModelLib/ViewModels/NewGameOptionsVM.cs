@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿using Pulsar4X.ECSLib;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 
 namespace Pulsar4X.ViewModel
@@ -6,15 +9,16 @@ namespace Pulsar4X.ViewModel
     public class NewGameOptionsVM : IViewModel
     {
         private GameVM _gameVM;
-        
+
         public string GmPassword { get; set; }
-        
+
         public bool CreatePlayerFaction { get; set; }
         public string FactionName { get; set; }
         public string FactionPassword { get; set; }
         public bool DefaultStart { get; set; }
 
         public int NumberOfSystems { get; set; }
+        public List<VersionInfo> ModList { get; set; }
 
 
         public NewGameOptionsVM()
@@ -25,6 +29,10 @@ namespace Pulsar4X.ViewModel
             FactionPassword = "FPnotImplemented";
             GmPassword = "GMPWnotImplemented";
             NumberOfSystems = 50;
+
+            var staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
+            foreach (var i in staticDataStore.LoadedDataSets)
+                ModList.Add(i);
         }
 
 
