@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -26,6 +27,24 @@ namespace Pulsar4X.ECSLib
             ContractResolver = new ForceUseISerializable(),
             Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
         };
+
+        public static List<DataVersionInfo> AvailableData()
+        {
+            string dataDirectory = GetWorkingDataDirectory();
+            var availableDirs = new List<string>(Directory.GetDirectories(dataDirectory));
+            var availableData = new List<DataVersionInfo>();
+
+            foreach (string possibleMod in availableDirs)
+            {
+                DataVersionInfo dvi;
+                if (CheckDataDirectoryVersion(possibleMod, new StaticDataStore(), out dvi))
+                {
+                    availableData.Add(dvi);
+                }
+            }
+
+            return availableData;
+        }
 
         [PublicAPI]
         public static void LoadData(string dataName, StaticDataStore staticDataStore)

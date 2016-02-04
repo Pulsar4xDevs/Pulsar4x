@@ -18,8 +18,8 @@ namespace Pulsar4X.ViewModel
         public bool DefaultStart { get; set; }
 
         public int NumberOfSystems { get; set; }
-        public List<VersionInfo> AvailableModList { get; set; }
-        public List<VersionInfo> SelectedModList { get; set; }
+        public List<DataVersionInfo> AvailableModList { get; set; }
+        public List<DataVersionInfo> SelectedModList { get; set; }
 
         public NewGameOptionsVM()
         {
@@ -29,12 +29,8 @@ namespace Pulsar4X.ViewModel
             FactionPassword = "FPnotImplemented";
             GmPassword = "GMPWnotImplemented";
             NumberOfSystems = 50;
-            AvailableModList = new List<VersionInfo>();
-            SelectedModList = new List<VersionInfo>();
-
-            var staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
-            foreach (var i in staticDataStore.LoadedDataSets)
-                AvailableModList.Add(i);
+            AvailableModList = StaticDataManager.AvailableData();
+            SelectedModList = new List<DataVersionInfo>();
         }
 
 
