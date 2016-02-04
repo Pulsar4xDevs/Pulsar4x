@@ -100,6 +100,78 @@
         ]
       },
       {
+        "$type": "TableLayout",
+        "Padding": "10",
+        "Spacing": "5, 5",
+        "Width": "600",
+        "Rows": [
+            [
+                {
+                    "$type": "Label",
+                    "Text": "Available Mods:",
+                    "VerticalAlignment": "Center"
+                },
+                {},
+                {
+                    "$type": "Label",
+                    "Text": "Selected Mods:",
+                    "VerticalAlignment": "Center"
+                },
+                {}
+            ],
+            [
+                {
+                    "$type": "ListBox",
+                    "$name": "AvailableModList"
+                },
+                {
+                    "$type": "StackLayout",
+                    "Padding": "10",
+                    "Spacing": "10",
+                    "Orientation": "Vertical",
+                    "Items": [
+                        {
+                            "$type": "Button",
+                            "$name": "AddMod",
+                            "Text": "Add Mod ->",
+                            "Click": "AddModButton_Click"
+                        },
+                        {
+                            "$type": "Button",
+                            "$name": "RemoveMod",
+                            "Text": "<- Remove Mod",
+                            "Click": "RemoveModButton_Click"
+                        }
+                   ]
+                },
+                {
+                    "$type": "ListBox",
+                    "$name": "SelectedModList"
+                },
+                {
+                    "$type": "StackLayout",
+                    "Padding": "10",
+                    "Spacing": "10",
+                    "Orientation": "Vertical",
+                    "Items": [
+                        {
+                            "$type": "Button",
+                            "$name": "MoveUpMod",
+                            "Text": "Up",
+                            "Click": "MoveUpModButton_Click"
+                        },
+                        {
+                            "$type": "Button",
+                            "$name": "MoveDownMod",
+                            "Text": "Down",
+                            "Click": "MoveDownModButton_Click"
+                        }
+                   ]
+                }
+            ]
+        ]
+      },
+      {
         "HorizontalAlignment": "Right",
         "Control": {
           "$type": "StackLayout",

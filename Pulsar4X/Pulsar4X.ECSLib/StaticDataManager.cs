@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -27,16 +28,43 @@ namespace Pulsar4X.ECSLib
             Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
         };
 
+        /// <summary>
+        /// Returns a list of DataVersionInfo objects representing the datasets that the StaticDataManager
+        /// could find and are available for loading.
+        /// </summary>
         [PublicAPI]
-        public static void LoadData(string dataName, StaticDataStore staticDataStore)
+        public static List<DataVersionInfo> AvailableData()
         {
+            string dataDirectory = GetWorkingDataDirectory();
+            var availableDirs = new List<string>(Directory.GetDirectories(dataDirectory));
+            var availableData = new List<DataVersionInfo>();
+
+            foreach (string possibleMod in availableDirs)
+            {
+                DataVersionInfo dvi;
+                if (CheckDataDirectoryVersion(possibleMod, new StaticDataStore(), out dvi))
+                {
+                    availableData.Add(dvi);
+                }
+            }
+
+            return availableData;
+        }
+
+        /// <summary>
+        /// Loads the data from a specified data subdirectory into the provided game
+        /// </summary>
+        [PublicAPI]
+        public static void LoadData(string dataDir, Game game)
+        {
+            StaticDataStore newStore = game.StaticData.Clone();
             try
             {
-                string dataDirectory = Path.Combine(GetWorkingDataDirectory(), dataName);
+                string dataDirectory = Path.Combine(GetWorkingDataDirectory(), dataDir);
 
                 // we start by looking for a version file, no version file, no load.
                 DataVersionInfo dataVInfo;
-                if (CheckDataDirectoryVersion(dataDirectory, staticDataStore, out dataVInfo) == false)
+                if (CheckDataDirectoryVersion(dataDirectory, game.StaticData, out dataVInfo) == false)
                 {
                     throw new StaticDataLoadException("Static Data is explicitly incompatible with currently loaded data.");
                 }
@@ -50,18 +78,21 @@ namespace Pulsar4X.ECSLib
                 foreach (string file in files)
                 {
                     JObject obj = Load(file);
-                    StoreObject(obj, staticDataStore);
+                    StoreObject(obj, newStore);
                 }
 
-                if (!staticDataStore.LoadedDataSets.Contains(dataVInfo))
+                if (!newStore.LoadedDataSets.Contains(dataVInfo))
                 {
-                    staticDataStore.LoadedDataSets.Add(dataVInfo);
+                    newStore.LoadedDataSets.Add(dataVInfo);
                 }
+
+                game.StaticData = newStore;
             }
             catch (Exception e)
             {
-                if (e.GetType() == typeof(JsonSerializationException))
-                    throw new StaticDataLoadException("Bad Json provided in directory: " + dataName, e);
+                if (e.GetType() == typeof(JsonSerializationException) || e.GetType() == typeof(JsonReaderException))
+                    throw new StaticDataLoadException("Bad Json provided in directory: " + dataDir, e);
+                
 
                 throw;  // rethrow exception if not known ;)
             }
@@ -69,10 +100,10 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Checks for a valid vinfo file in the specified directory, if the file is found it loads it and 
-        /// checks that it is compatible with the version info provided.
+        /// checks that it is compatible with previously loaded data and the library.
         /// </summary>
         /// <param name="directory">Directory to check.</param>
-        /// <param name="pulsarVInfo">Pulsar version to check against.</param>
+        /// <param name="staticDataStore">staticDataStore to check this dataVersionInfo against loaded dataVersionInfo for incompatibilities</param>
         /// <param name="dataVInfo">Static data version to check against.</param>
         /// <returns>true if a compatible vinfo file was found, false otherwise.</returns>
         private static bool CheckDataDirectoryVersion(string directory, StaticDataStore staticDataStore, out DataVersionInfo dataVInfo)
@@ -121,7 +152,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Loads the specified file into a JObject for further processing.
         /// </summary>
-        static JObject Load(string file)
+        private static JObject Load(string file)
         {
             JObject obj;
             using (var sr = new StreamReader(file))

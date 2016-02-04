@@ -2,7 +2,7 @@
   "Type": "Minerals",
   "Data": [
     {
-      "Name": "Sorium",
+      "Name": "Sorium2",
       "Description": "des",
       "ID": "bbfb5681-9bc2-46b6-b93d-ea4d410ca0da",
       "Abundance": [
@@ -36,9 +36,3 @@
         },
         {
           "Key": "Terrestrial",
-          "Value": 1.0
-        }
-      ]
-    }
-  ]
-}

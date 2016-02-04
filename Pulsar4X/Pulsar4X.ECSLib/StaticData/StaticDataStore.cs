@@ -83,12 +83,11 @@ namespace Pulsar4X.ECSLib
         public List<DataVersionInfo> LoadedDataSets => _loadedDataSets;
 
         [JsonProperty]
-        private readonly List<DataVersionInfo> _loadedDataSets;
+        private List<DataVersionInfo> _loadedDataSets;
 
         public StaticDataStore()
         {
             _loadedDataSets = new List<DataVersionInfo>();
-
         }
 
         #region Static field initializers
@@ -324,12 +323,29 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         internal void OnDeserialized(StreamingContext context)
         {
-            //foreach (string dataSet in _loadedDataSets)
-            //{
-            //    LoadDataSet(dataSet);
-            //}
+            foreach (string dataSet in _loadedDataSets.Select(dataVersionInfo => dataVersionInfo.Directory).ToList())
+            {
+                StaticDataManager.LoadData(dataSet, SaveGame.CurrentGame);
+            }
         }
 
+        internal StaticDataStore Clone()
+        {
+            StaticDataStore clone = new StaticDataStore
+            {
+                AtmosphericGases = new WeightedList<AtmosphericGasSD>(AtmosphericGases),
+                CommanderNameThemes = new List<CommanderNameThemeSD>(CommanderNameThemes),
+                Components = new JDictionary<Guid, ComponentSD>(Components),
+                Installations = new JDictionary<Guid, InstallationSD>(Installations),
+                _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
+                Minerals = new List<MineralSD>(Minerals),
+                RefinedMaterials = new JDictionary<Guid, RefinedMaterialSD>(RefinedMaterials),
+                SystemGenSettings = SystemGenSettings, // Todo: Make this cloneable
+                Techs = new JDictionary<Guid, TechSD>(Techs)
+            };
+
+            return clone;
+        }
         #endregion
 
     }
