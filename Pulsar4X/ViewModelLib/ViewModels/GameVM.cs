@@ -119,7 +119,7 @@ namespace Pulsar4X.ViewModel
         public async void CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
-            Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, new Progress<double>(OnProgressUpdate)));
+            Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, null, new Progress<double>(OnProgressUpdate)));
             Game = newGame;
 
             Entity gameMaster;
