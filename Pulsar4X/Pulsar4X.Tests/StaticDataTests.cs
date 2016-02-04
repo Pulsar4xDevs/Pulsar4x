@@ -1,6 +1,7 @@
 ﻿﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
+﻿using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -283,7 +284,9 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestLoadDefaultData()
         {
-            var staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
+
+            var staticDataStore = new StaticDataStore();
+            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
 
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
@@ -300,7 +303,7 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(staticDataStore.Installations);
 
             // now lets re-load the same data, to test that duplicates don't occure as required:
-            StaticDataManager.LoadFromDefaultDataDirectory();
+            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
 
             // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
@@ -310,26 +313,26 @@ namespace Pulsar4X.Tests
 
             // now lets test some malformed data folders.
             StaticDataLoadException ex = Assert.Throws<StaticDataLoadException>(
-            delegate { StaticDataManager.LoadFromDirectory("./TestData/MalformedData", staticDataStore); });
-            Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Bad Json provided in directory: ./TestData/MalformedData"));
+            delegate { StaticDataManager.LoadData("MalformedData", staticDataStore); });
+            Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Bad Json provided in directory: MalformedData"));
 
 
             // now ,lets try for a directory that does not exist.
-            ex = Assert.Throws<StaticDataLoadException>(
-            delegate { StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist", staticDataStore); });
-            Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Directory not found: ./TestData/DoesNotExist"));
+            Assert.Throws<DirectoryNotFoundException>(
+            delegate { StaticDataManager.LoadData("DoesNotExist", staticDataStore); });
         }
 
         [Test]
         public void TestOverwriteDefaultData()
         {
-            var staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
+            var staticDataStore = new StaticDataStore();
+            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
 
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
             string soriumName = staticDataStore.Minerals[0].Name;
             Guid soriumGuid = staticDataStore.Minerals[0].ID;
-            StaticDataManager.LoadFromDirectory("./TestData/Other", staticDataStore);
+            StaticDataManager.LoadData("Other", staticDataStore);
 
             // check the test is still valid, should be the first mineral item (sorium) 
             Assert.AreEqual(soriumGuid, staticDataStore.Minerals[0].ID);
@@ -352,7 +355,7 @@ namespace Pulsar4X.Tests
             Assert.IsNull(testNullObj);
 
             // Load the default static data to test against:
-            staticDataStore = StaticDataManager.LoadFromDefaultDataDirectory();
+            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
 
             // test with a guid that is not in the store:
             object testObj = staticDataStore.FindDataObjectUsingID(Guid.Empty);  // empty guid should never be in the store.

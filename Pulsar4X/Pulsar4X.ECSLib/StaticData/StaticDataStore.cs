@@ -80,13 +80,14 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         [JsonIgnore]
-        public List<VersionInfo> LoadedDataSets { get { return _loadedDataSets; } }
+        public List<DataVersionInfo> LoadedDataSets => _loadedDataSets;
+
         [JsonProperty]
-        private readonly List<VersionInfo> _loadedDataSets;
+        private readonly List<DataVersionInfo> _loadedDataSets;
 
         public StaticDataStore()
         {
-            _loadedDataSets = new List<VersionInfo>();
+            _loadedDataSets = new List<DataVersionInfo>();
 
         }
 
@@ -234,7 +235,7 @@ namespace Pulsar4X.ECSLib
         {
             if (minerals != null)
             {
-                foreach (var min in minerals)
+                foreach (MineralSD min in minerals)
                 {
                     int i = Minerals.FindIndex(x => x.ID == min.ID);
                     if (i >= 0) // found existing element!
@@ -252,7 +253,7 @@ namespace Pulsar4X.ECSLib
         {
             if (techs != null)
             {
-                foreach (var tech in techs)
+                foreach (KeyValuePair<Guid, TechSD> tech in techs)
                     Techs[tech.Key] = tech.Value; // replace existing value or insert a new one as required.
             }
         }
@@ -264,7 +265,7 @@ namespace Pulsar4X.ECSLib
         {
             if (installations != null)
             {
-                foreach (var facility in installations)
+                foreach (KeyValuePair<Guid, InstallationSD> facility in installations)
                     Installations[facility.Key] = facility.Value;
             }
         }
@@ -276,7 +277,7 @@ namespace Pulsar4X.ECSLib
         {
             if (recipes != null)
             {
-                foreach (var recipe in recipes)
+                foreach (KeyValuePair<Guid, RefinedMaterialSD> recipe in recipes)
                     RefinedMaterials[recipe.Key] = recipe.Value;
             }
         }
@@ -288,7 +289,7 @@ namespace Pulsar4X.ECSLib
         {
             if (components != null)
             {
-                foreach (var component in components)
+                foreach (KeyValuePair<Guid, ComponentSD> component in components)
                     Components[component.Key] = component.Value;
             }
         }

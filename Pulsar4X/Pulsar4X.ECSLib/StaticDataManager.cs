@@ -14,26 +14,12 @@ namespace Pulsar4X.ECSLib
     public class StaticDataManager
     {
         /// <summary>
-        /// The static data store.
-        /// </summary>
-        //public static StaticDataStore StaticDataStore = new StaticDataStore();
-
-        /// <summary>
         /// Default data directory, static data is stored in subfolders.
-        /// @todo make this load from some sort of settings file.
         /// </summary>
-        private const string DefaultDataDirectory = "./Data";
-
-        /// <summary>
-        /// The subdirectory of defaultDataDirectory that contains the offical game data.
-        /// We will want to load this first so that mods overwrite our game files.
-        /// @todo make this load from some sort of settings file.
-        /// @todo make this more cross platform (currently Windows only).
-        /// </summary>
-        private const string OfficialDataDirectory = "\\Pulsar4x";
+        private const string DataDirectory = "Data";
 
         // Serializer, specifically configured for static data.
-        private static JsonSerializer _serializer = new JsonSerializer
+        private static readonly JsonSerializer Serializer = new JsonSerializer
         {
             NullValueHandling = NullValueHandling.Ignore,
             Formatting = Formatting.Indented,
@@ -41,71 +27,27 @@ namespace Pulsar4X.ECSLib
             Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
         };
 
-        /// <summary>
-        /// Loads all data from the default static data directory.
-        /// Used when initializing a new game.
-        /// </summary>
         [PublicAPI]
-        public static StaticDataStore LoadFromDefaultDataDirectory()
-        {
-            // create an amprt static data store:
-            StaticDataStore staticDataStore = new StaticDataStore();
-
-            // get list of default sub-directories:
-            string assemblyDir = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
-            if (assemblyDir == null)
-            {
-                throw new DirectoryNotFoundException("StaticDataStore could not find/access the executable's directory.");
-            }
-            Directory.SetCurrentDirectory(assemblyDir);
-            var dataDirs = Directory.GetDirectories(DefaultDataDirectory);
-
-            // safety check:
-            if (dataDirs.GetLength(0) < 1)
-            {
-                ///< @todo Should we throw an exception here?
-                return staticDataStore;  // return empty static data.
-            }
-
-            // let's make sure we load the official data first:
-            int i = Array.FindIndex(dataDirs, x => x == (DefaultDataDirectory + OfficialDataDirectory));
-            if (i < 0 || String.IsNullOrEmpty(dataDirs[i]))
-                return staticDataStore; // bad?
-
-            LoadFromDirectory(dataDirs[i], staticDataStore);
-            dataDirs[i] = null; // prevent us from loading it again.
-
-            // Loop through dirs, looking for files to load:
-            foreach (var dir in dataDirs)
-            {
-                if (dir != null)
-                    LoadFromDirectory(dir, staticDataStore);
-            }
-
-            return staticDataStore;
-        }
-
-        /// <summary>
-        /// Loads all data from the specified directory.
-        /// @todo change this function so that bad data does not cause a partial, irreversible import.
-        /// </summary>
-        [PublicAPI]
-        public static void LoadFromDirectory(string directory, StaticDataStore staticDataStore)
+        public static void LoadData(string dataName, StaticDataStore staticDataStore)
         {
             try
             {
+                string dataDirectory = Path.Combine(GetWorkingDataDirectory(), dataName);
+
                 // we start by looking for a version file, no version file, no load.
-                VersionInfo dataVInfo;
-                if (CheckDataDirectoryVersion(directory, VersionInfo.PulsarVersionInfo, out dataVInfo) == false)
-                    return; ///< @todo log failure to import due to incompatible version.
+                DataVersionInfo dataVInfo;
+                if (CheckDataDirectoryVersion(dataDirectory, staticDataStore, out dataVInfo) == false)
+                {
+                    throw new StaticDataLoadException("Static Data is explicitly incompatible with currently loaded data.");
+                }
 
                 // now we can move on to looking for json files:
-                var files = Directory.GetFiles(directory, "*.json");
+                string[] files = Directory.GetFiles(dataDirectory, "*.json");
 
                 if (files.GetLength(0) < 1)
                     return;
 
-                foreach (var file in files)
+                foreach (string file in files)
                 {
                     JObject obj = Load(file);
                     StoreObject(obj, staticDataStore);
@@ -119,11 +61,9 @@ namespace Pulsar4X.ECSLib
             catch (Exception e)
             {
                 if (e.GetType() == typeof(JsonSerializationException))
-                    throw new StaticDataLoadException("Bad Json provided in directory: " + directory, e);
-                if (e.GetType() == typeof(DirectoryNotFoundException))
-                    throw new StaticDataLoadException("Directory not found: " + directory, e);
-                
-                throw e;  // rethrow exception if not known ;)
+                    throw new StaticDataLoadException("Bad Json provided in directory: " + dataName, e);
+
+                throw;  // rethrow exception if not known ;)
             }
         }
 
@@ -132,21 +72,32 @@ namespace Pulsar4X.ECSLib
         /// checks that it is compatible with the version info provided.
         /// </summary>
         /// <param name="directory">Directory to check.</param>
-        /// <param name="vinfo">Version to check against.</param>
+        /// <param name="pulsarVInfo">Pulsar version to check against.</param>
+        /// <param name="dataVInfo">Static data version to check against.</param>
         /// <returns>true if a compatible vinfo file was found, false otherwise.</returns>
-        private static bool CheckDataDirectoryVersion(string directory, VersionInfo pulsarVInfo, out VersionInfo dataVInfo)
+        private static bool CheckDataDirectoryVersion(string directory, StaticDataStore staticDataStore, out DataVersionInfo dataVInfo)
         {
-            dataVInfo = new VersionInfo(); // need to assign some value to this to compile okay. value doesn't matter unless we return true tho.
+            dataVInfo = null;
 
-            var vInfoFile = Directory.GetFiles(directory, "*.vinfo");
+            string[] vInfoFile = Directory.GetFiles(directory, "*.vinfo");
 
-            if (vInfoFile.GetLength(0) < 1 || String.IsNullOrEmpty(vInfoFile[0]))
+            if (vInfoFile.GetLength(0) < 1 || string.IsNullOrEmpty(vInfoFile[0]))
                 return false;
 
             dataVInfo = LoadVinfo(vInfoFile[0]);
 
-            ///< @todo make this check against saved data for that mod or against the game library.
-            return dataVInfo.IsCompatibleWith(pulsarVInfo);
+            if (!dataVInfo.IsCompatibleWithLibrary())
+            {
+                return false;
+            }
+            foreach (DataVersionInfo dataVersionInfo in staticDataStore.LoadedDataSets)
+            {
+                if (!dataVersionInfo.IsCompatibleWithDataset(dataVInfo))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -162,7 +113,7 @@ namespace Pulsar4X.ECSLib
             // we are alreading checking the types via StaticDataStore.*Type, so we 
             // can rely on there being an overload of StaticDataStore.Store
             // that supports that type.
-            dynamic data = obj["Data"].ToObject(type, _serializer);
+            dynamic data = obj["Data"].ToObject(type, Serializer);
 
             staticDataStore.Store(data);
         }
@@ -172,11 +123,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         static JObject Load(string file)
         {
-            JObject obj = null;
-            using (StreamReader sr = new StreamReader(file))
+            JObject obj;
+            using (var sr = new StreamReader(file))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                obj = (JObject)_serializer.Deserialize(reader);
+                obj = (JObject)Serializer.Deserialize(reader);
             }
 
             return obj;
@@ -185,18 +136,12 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Loads the specified object into a VersionInfo struct.
         /// </summary>
-        static VersionInfo LoadVinfo(string file)
+        private static DataVersionInfo LoadVinfo(string file)
         {
-            var obj = Load(file); // load into json data.
-            VersionInfo info = (VersionInfo)obj["Data"].ToObject(typeof(VersionInfo), _serializer);
+            JObject obj = Load(file); // load into json data.
+            var info = (DataVersionInfo)obj["Data"].ToObject(typeof(DataVersionInfo), Serializer);
 
             return info;
-        }
-
-
-        public static void ImportStaticData(string file)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -204,18 +149,27 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static void ExportStaticData(object staticData, string file)
         {
-            var data = new DataExportContainer();
-            data.Data = staticData;
-            data.Type = StaticDataStore.GetTypeString(staticData.GetType());
+            var data = new DataExportContainer {Data = staticData, Type = StaticDataStore.GetTypeString(staticData.GetType())};
 
-            if (String.IsNullOrEmpty(data.Type) == false)
+            if (string.IsNullOrEmpty(data.Type) == false)
             {
-                using (StreamWriter sw = new StreamWriter(file))
+                using (var sw = new StreamWriter(file))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
-                    _serializer.Serialize(writer, data);
+                    Serializer.Serialize(writer, data);
                 }
             }
+        }
+
+        private static string GetWorkingDataDirectory()
+        {
+            // get list of default sub-directories:
+            string dataDirectory = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+            if (dataDirectory == null)
+            {
+                throw new DirectoryNotFoundException("StaticDataStore could not find/access the executable's directory.");
+            }
+            return Path.Combine(dataDirectory, DataDirectory);
         }
     }
 

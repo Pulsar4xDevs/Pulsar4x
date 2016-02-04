@@ -149,14 +149,6 @@ namespace Pulsar4X.ECSLib
                     }
                 }
 
-                // check the version info:
-                if (game.Version.IsCompatibleWith(VersionInfo.PulsarVersionInfo) == false)
-                {
-                    string e = string.Format("The save file is not supported. the save is from version {0}, the game only supports versions: {1}", game.Version.VersionString, VersionInfo.PulsarVersionInfo.CompatibleVersions);
-
-                    throw new NotSupportedException(e);
-                }
-
                 // get the game to do its post load stuff
                 game.PostGameLoad();
                 CurrentGame = null;
