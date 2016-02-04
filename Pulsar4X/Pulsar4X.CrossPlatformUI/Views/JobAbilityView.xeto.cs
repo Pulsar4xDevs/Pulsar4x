@@ -31,12 +31,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public JobAbilityView(RefinaryAbilityVM viewModel) :this()
         {
-
+            DataContext = viewModel;
+            
             PointsPerDay.Text = viewModel.PointsPerDay.ToString();
 
             ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyRefiningDB, RefineingJob>>(viewModel.ItemJobs);
 
-            ItemComboBox.DataStore = new List<string>(viewModel.ItemDictionary.Keys);
+            ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
             NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
             NewJobAdd.Click += AddSelectedProjectOnClick;
             
@@ -44,11 +45,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public JobAbilityView(ConstructionAbilityVM viewModel) : this()
         {
+            DataContext = viewModel;
             PointsPerDay.Text = viewModel.PointsPerDay.ToString();
 
             ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyConstructionDB, ConstructionJob>>(viewModel.ItemJobs);
 
-            ItemComboBox.DataStore = new List<string>(viewModel.ItemDictionary.Keys);
+            ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
             NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
             NewJobAdd.Click += AddSelectedProjectOnClick;
         }
