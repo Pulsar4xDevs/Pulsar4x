@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
 
     public class DataVersionInfo : VersionInfo
     {
-        public string Directory { get; }
+        public string Directory;
 
         public VersionInfo MinLibraryVersion;
         public VersionInfo MaxLibraryVersion;

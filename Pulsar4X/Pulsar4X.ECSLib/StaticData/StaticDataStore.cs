@@ -88,7 +88,6 @@ namespace Pulsar4X.ECSLib
         public StaticDataStore()
         {
             _loadedDataSets = new List<DataVersionInfo>();
-
         }
 
         #region Static field initializers
@@ -324,10 +323,10 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         internal void OnDeserialized(StreamingContext context)
         {
-            //foreach (string dataSet in _loadedDataSets)
-            //{
-            //    LoadDataSet(dataSet);
-            //}
+            foreach (string dataSet in _loadedDataSets.Select(dataVersionInfo => dataVersionInfo.Directory).ToList())
+            {
+                StaticDataManager.LoadData(dataSet, this);
+            }
         }
 
         #endregion

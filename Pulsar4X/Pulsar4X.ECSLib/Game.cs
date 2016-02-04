@@ -153,7 +153,7 @@ namespace Pulsar4X.ECSLib
             }
 
             var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
-            if (dataSets == null)
+            if (dataSets == null || dataSets.Count == 0)
             {
                 StaticDataManager.LoadData("Pulsar4x", newGame.StaticData);
             }
