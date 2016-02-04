@@ -119,7 +119,7 @@ namespace Pulsar4X.Tests
                 fs1.Close();
                 fs2.Close();
             }
-            Assert.Inconclusive("SaveGameConsistency could not be verified. Please ensure saves are properly loading and saving.");
+            Assert.Fail("SaveGameConsistency could not be verified. Please ensure saves are properly loading and saving.");
         }
 
         [Test]
