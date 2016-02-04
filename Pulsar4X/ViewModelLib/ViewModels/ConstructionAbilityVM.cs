@@ -18,7 +18,7 @@ namespace Pulsar4X.ViewModel
 
         public ConstructionAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {
-            ItemDictionary = new Dictionary<string, Guid>();
+            ItemDictionary = new DictionaryVM<string, Guid>(DisplayMode.Key);
             foreach (var kvp in FactionInfo.ComponentDesigns)
             {
                 ItemDictionary.Add(kvp.Value.GetDataBlob<NameDB>().DefaultName, kvp.Key);

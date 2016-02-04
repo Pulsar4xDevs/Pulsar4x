@@ -8,56 +8,41 @@ namespace Pulsar4X.ECSLib
     public class StarSystem
     {
         [PublicAPI]
-        public Guid Guid { get; protected set; }
+        [JsonProperty]
+        public Guid Guid { get; private set; }
 
         [PublicAPI]
-        public int Seed
-        {
-            get { return _seed; }
-        }
         [JsonProperty]
-        private readonly int _seed;
+        public NameDB NameDB { get; private set; }
 
         [PublicAPI]
-        public NameDB NameDB
-        {
-            get { return _nameDB; }
-        }
         [JsonProperty]
-        private readonly NameDB _nameDB;
+        public int EconLastTickRun { get; internal set; }
 
+        [PublicAPI]
+        [JsonProperty]
+        public EntityManager SystemManager { get; private set; }
+
+        [PublicAPI]
+        [JsonProperty]
+        public int Seed { get; private set; }
         internal Random RNG { get; private set; }
 
-        internal int EconLastTickRun
-        {
-            get { return _econLastTickRun; }
-            set { _econLastTickRun = value; }
-        }
-        [JsonProperty]
-        private int _econLastTickRun;
-
-        public EntityManager SystemManager
-        {
-            get { return _systemManager; }
-        }
-
-        [JsonProperty("SystemManager")]
-        private readonly EntityManager _systemManager;
-
         [JsonConstructor]
-        internal StarSystem()
+        private StarSystem()
         {
         }
 
         public StarSystem(Game game, string name, int seed)
         {
             Guid = Guid.NewGuid();
-            _systemManager = new EntityManager(game);
-            _nameDB = new NameDB(name);
-            _seed = seed;
-            game.StarSystems.Add(Guid, this);
-            RNG = new Random(seed);
+            NameDB = new NameDB(name);
             EconLastTickRun = 0;
+            SystemManager = new EntityManager(game);
+            Seed = seed;
+            RNG = new Random(seed);
+
+            game.StarSystems.Add(Guid, this);
         }
     }
 }

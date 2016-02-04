@@ -94,19 +94,19 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="TestData\MalformedData\CommanderNameTheme.json">
+    <None Include="Data\MalformedData\CommanderNameTheme.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\MalformedData\Minerals.json">
+    <None Include="Data\MalformedData\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\MalformedData\VersionInfo.vinfo">
+    <None Include="Data\MalformedData\VersionInfo.vinfo">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\Other\Minerals.json">
+    <None Include="Data\Other\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\Other\VersionInfo.vinfo">
+    <None Include="Data\Other\VersionInfo.vinfo">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -25,7 +25,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             XamlReader.Load(this);
         }
 
-        public ScientistUC(ScientistControlVM viewModel)
+        public ScientistUC(ScientistControlVM viewModel) : this()
         {
             _viewModel = viewModel;
             FirstName.Text = viewModel.ScientistFirstName;

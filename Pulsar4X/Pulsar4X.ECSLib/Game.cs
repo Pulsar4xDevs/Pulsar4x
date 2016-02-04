@@ -109,13 +109,6 @@ namespace Pulsar4X.ECSLib
 
         #region Internal Functions
 
-        internal void RunProcessors(List<StarSystem> systems, int deltaSeconds)
-        {
-            OrbitProcessor.Process(this, systems, deltaSeconds);
-            ShipMovementProcessor.Process(this, systems,deltaSeconds);
-            EconProcessor.Process(this, systems, deltaSeconds);
-        }
-
         internal void PostGameLoad()
         {
             // Invoke the Post Load event down the chain.
@@ -152,7 +145,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException"><paramref name="gameName"/> is <see langword="null" />.</exception>
         /// <exception cref="StaticDataLoadException">Thrown in a variety of situations when StaticData could not be loaded.</exception>
         [PublicAPI]
-        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, IProgress<double> progress = null)
+        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, List<string> dataSets = null, IProgress<double> progress = null)
         {
             if (gameName == null)
             {
@@ -160,9 +153,18 @@ namespace Pulsar4X.ECSLib
             }
 
             var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
-            // TODO: Provide options for loading other Static Data DataSets.
+            if (dataSets == null)
+            {
+                StaticDataManager.LoadData("Pulsar4x", newGame.StaticData);
+            }
+            else
+            {
+                foreach (string dataSet in dataSets)
+                {
+                    StaticDataManager.LoadData(dataSet, newGame.StaticData);
+                }
+            }
             FactionFactory.CreateGameMaster(newGame);
-            newGame.StaticData = StaticDataManager.LoadFromDefaultDataDirectory();
 
             for (int i = 0; i < numSystems; i++)
             {
@@ -242,6 +244,18 @@ namespace Pulsar4X.ECSLib
             return timeAdvanced;
         }
 
+        /// <summary>
+        /// Runs all processors on the list of systems provided.
+        /// </summary>
+        /// <param name="systems">Systems to have processors run on them.</param>
+        /// <param name="deltaSeconds">Game-time to progress in the processors.</param>
+        [PublicAPI]
+        public void RunProcessors(List<StarSystem> systems, int deltaSeconds)
+        {
+            OrbitProcessor.Process(this, systems, deltaSeconds);
+            ShipMovementProcessor.Process(this, systems, deltaSeconds);
+            EconProcessor.Process(this, systems, deltaSeconds);
+        }
         #endregion
 
 

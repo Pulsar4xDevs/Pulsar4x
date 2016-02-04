@@ -43,6 +43,8 @@ namespace Pulsar4X.ECSLib
 
             int orbitsProcessed = 0;
 
+#pragma warning disable 162
+            // Disable "Unreachable Code" warning for hardcoded function.
             if (UseMultiThread)
             {
                 Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime, ref orbitsProcessed));
@@ -54,6 +56,7 @@ namespace Pulsar4X.ECSLib
                     UpdateSystemOrbits(system, currentTime, ref orbitsProcessed);
                 }
             }
+#pragma warning restore 162
             return orbitsProcessed;
         }
 
