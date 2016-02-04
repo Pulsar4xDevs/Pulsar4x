@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         private string _gameName;
 
         [PublicAPI]
-        public VersionInfo Version { get { return VersionInfo.PulsarVersionInfo;} }
+        public VersionInfo Version => VersionInfo.PulsarVersionInfo;
 
         [PublicAPI]
         public bool IsLoaded { get; internal set; }
@@ -40,10 +40,7 @@ namespace Pulsar4X.ECSLib
         internal int NumSystems;
 
         [PublicAPI]
-        public ReadOnlyDictionary<Guid, StarSystem> Systems
-        {
-            get { return new ReadOnlyDictionary<Guid, StarSystem>(StarSystems); }
-        }
+        public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
 
         [PublicAPI] 
         [JsonProperty]
@@ -53,7 +50,8 @@ namespace Pulsar4X.ECSLib
         /// Global Entity Manager.
         /// </summary>
         [PublicAPI]
-        public EntityManager GlobalManager { get { return _globalManager; } }
+        public EntityManager GlobalManager => _globalManager;
+
         [JsonProperty]
         private readonly EntityManager _globalManager;
 
@@ -111,18 +109,10 @@ namespace Pulsar4X.ECSLib
 
         #region Internal Functions
 
-        internal void RunProcessors(List<StarSystem> systems, int deltaSeconds)
-        {
-            OrbitProcessor.Process(this, systems, deltaSeconds);
-            ShipMovementProcessor.Process(this, systems,deltaSeconds);
-            EconProcessor.Process(this, systems, deltaSeconds);
-        }
-
         internal void PostGameLoad()
         {
             // Invoke the Post Load event down the chain.
-            if (PostLoad != null)
-                PostLoad(this, EventArgs.Empty);
+            PostLoad?.Invoke(this, EventArgs.Empty);
 
             // set isLoaded to true:
             IsLoaded = true;
@@ -159,21 +149,18 @@ namespace Pulsar4X.ECSLib
         {
             if (gameName == null)
             {
-                throw new ArgumentNullException("gameName");
+                throw new ArgumentNullException(nameof(gameName));
             }
 
-            Game newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
+            var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
             // TODO: Provide options for loading other Static Data DataSets.
             FactionFactory.CreateGameMaster(newGame);
             newGame.StaticData = StaticDataManager.LoadFromDefaultDataDirectory();
 
             for (int i = 0; i < numSystems; i++)
             {
-                StarSystem newSystem = newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
-                if (progress != null)
-                {
-                    progress.Report((double)newGame.StarSystems.Count / numSystems);
-                }
+                newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
+                progress?.Report((double)newGame.StarSystems.Count / numSystems);
             }
 
             newGame.PostGameLoad();
@@ -213,7 +200,7 @@ namespace Pulsar4X.ECSLib
             int timeAdvanced = 0;
 
             // Clamp deltaSeconds to a multiple of our MinimumTimestep.
-            deltaSeconds = deltaSeconds - (deltaSeconds % GameConstants.MinimumTimestep);
+            deltaSeconds = deltaSeconds - deltaSeconds % GameConstants.MinimumTimestep;
             if (deltaSeconds == 0)
             {
                 deltaSeconds = GameConstants.MinimumTimestep;
@@ -221,8 +208,7 @@ namespace Pulsar4X.ECSLib
 
             // Clear any interrupt flag before starting the pulse.
             CurrentInterrupt = null;
-
-            while (CurrentInterrupt == null && deltaSeconds > 0)
+            while ((CurrentInterrupt == null) && (deltaSeconds > 0))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 int subpulseTime = Math.Min(NextSubpulse.MaxSeconds, deltaSeconds);
@@ -239,10 +225,7 @@ namespace Pulsar4X.ECSLib
                 // Update our remaining values.
                 deltaSeconds -= subpulseTime;
                 timeAdvanced += subpulseTime;
-                if (progress != null)
-                {
-                    progress.Report((double)timeAdvanced / deltaSeconds);
-                }
+                progress?.Report((double)timeAdvanced / deltaSeconds);
             }
 
             if (CurrentInterrupt != null)
@@ -252,6 +235,18 @@ namespace Pulsar4X.ECSLib
             return timeAdvanced;
         }
 
+        /// <summary>
+        /// Runs all processors on the list of systems provided.
+        /// </summary>
+        /// <param name="systems">Systems to have processors run on them.</param>
+        /// <param name="deltaSeconds">Game-time to progress in the processors.</param>
+        [PublicAPI]
+        public void RunProcessors(List<StarSystem> systems, int deltaSeconds)
+        {
+            OrbitProcessor.Process(this, systems, deltaSeconds);
+            ShipMovementProcessor.Process(this, systems, deltaSeconds);
+            EconProcessor.Process(this, systems, deltaSeconds);
+        }
         #endregion
 
 

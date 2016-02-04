@@ -27,7 +27,7 @@ namespace Pulsar4X.Tests
         /// Any type that fails this test cannot be instantiated by Json, and thus will throw an exception if you try to deserialize it.
         /// </summary>
         [Test]
-        [TestCaseSource("DataBlobTypes")]
+        [TestCaseSource(nameof(DataBlobTypes))]
         public void JSONConstructor(Type dataBlobType)
         {
             ConstructorInfo[] constructors = dataBlobType.GetConstructors();
@@ -35,7 +35,7 @@ namespace Pulsar4X.Tests
 
             foreach (ConstructorInfo constructorInfo in constructors.Where(constructorInfo => constructorInfo.GetCustomAttributes().Contains(jsonConstructorAttribute)))
             {
-                // Test for any constructor marked with a [JsonConsturctor] attribute.
+                // Test for any constructor marked with a [JsonConstructor] attribute.
                 Assert.Pass(dataBlobType.ToString() + " will deserialize with the constructor marked with [JsonConstructor]");
             }
 

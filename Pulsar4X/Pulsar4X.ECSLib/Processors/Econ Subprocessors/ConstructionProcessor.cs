@@ -26,24 +26,24 @@ namespace Pulsar4X.ECSLib
             JDictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
             JDictionary<Guid, int> componentStockpile = colony.GetDataBlob<ColonyInfoDB>().ComponentStockpile;
 
-            ColonyConstructionDB colonyConstruction = colony.GetDataBlob<ColonyConstructionDB>();
-            FactionInfoDB factionInfo = colony.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
+            var colonyConstruction = colony.GetDataBlob<ColonyConstructionDB>();
+            var factionInfo = colony.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
 
 
-            Dictionary<ConstructionType,int> pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
+            var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
             int maxPoints = colonyConstruction.PointsPerTick * econTicks;
 
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
-            foreach (var batchJob in constructionJobs.ToArray())
+            foreach (ConstructionJob batchJob in constructionJobs.ToArray())
             {
-                ComponentInfoDB designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid].GetDataBlob<ComponentInfoDB>();
+                var designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid].GetDataBlob<ComponentInfoDB>();
                 ConstructionType conType = batchJob.ConstructionType;
                 //total number of resources requred for a single job in this batch
                 int resourcePoints = designInfo.MinerialCosts.Sum(item => item.Value);
                 resourcePoints += designInfo.MaterialCosts.Sum(item => item.Value);
                 resourcePoints += designInfo.ComponentCosts.Sum(item => item.Value);
 
-                while (pointRates[conType] > 0 && maxPoints > 0 && batchJob.NumberCompleted < batchJob.NumberOrdered)
+                while ((pointRates[conType] > 0) && (maxPoints > 0) && (batchJob.NumberCompleted < batchJob.NumberOrdered))
                 {
                     //gather availible resorces for this job.
                     
@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
 
         private static void BatchJobItemComplete(Entity colonyEntity, ConstructionJob batchJob, ComponentInfoDB designInfo)
         {
-            ColonyConstructionDB colonyConstruction = colonyEntity.GetDataBlob<ColonyConstructionDB>();
+            var colonyConstruction = colonyEntity.GetDataBlob<ColonyConstructionDB>();
             batchJob.NumberCompleted++;
             batchJob.PointsLeft = designInfo.BuildPointCost;
             batchJob.MineralsRequired = designInfo.MinerialCosts;
@@ -85,9 +85,9 @@ namespace Pulsar4X.ECSLib
             batchJob.MineralsRequired = designInfo.ComponentCosts;
             if (batchJob.ConstructionType == ConstructionType.Facility)
             {
-                FactionInfoDB factionInfo = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
+                var factionInfo = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
                 Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
-                ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
+                var colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
                 colonyInfo.Installations.SafeValueAdd(facilityDesignEntity,1);
                 ReCalcProcessor.ReCalcAbilities(colonyEntity);
             }
@@ -103,10 +103,10 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void ConsumeResources(Dictionary<Guid,int> stockpile, Dictionary<Guid,int> toUse)
+        private static void ConsumeResources(IDictionary<Guid, int> stockpile, IDictionary<Guid, int> toUse)
         {   
         
-            foreach (var kvp in toUse.ToArray())
+            foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
             {
                 if (stockpile.ContainsKey(kvp.Key))
                 {
@@ -124,8 +124,8 @@ namespace Pulsar4X.ECSLib
         public static void ReCalcConstructionRate(Entity colonyEntity)
         {
             List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
-            List<Entity> factories = new List<Entity>();
-            foreach (var inst in installations)
+            var factories = new List<Entity>();
+            foreach (Entity inst in installations)
             {
                 if (inst.HasDataBlob<ConstructInstationsAbilityDB>() ||                    
                     inst.HasDataBlob<ConstructShipComponentsAbilityDB>() ||
@@ -135,13 +135,13 @@ namespace Pulsar4X.ECSLib
                     factories.Add(inst);
             }
 
-            JDictionary<ConstructionType, int> typeRate = new JDictionary<ConstructionType, int>{
+            var typeRate = new JDictionary<ConstructionType, int>{
                 {ConstructionType.Ammo, 0}, 
                 {ConstructionType.Facility, 0}, 
                 {ConstructionType.Fighter, 0}, 
                 {ConstructionType.ShipComponent, 0}
             };
-            foreach (var factory in factories)
+            foreach (Entity factory in factories)
             {
                 if (factory.HasDataBlob<ConstructInstationsAbilityDB>())
                 {
@@ -167,7 +167,7 @@ namespace Pulsar4X.ECSLib
             }
             colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionRates = typeRate;
             int maxPoints = 0;
-            foreach (var p in typeRate.Values)
+            foreach (int p in typeRate.Values)
             {
                 if (p > maxPoints)
                     maxPoints = p;
@@ -186,8 +186,8 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void AddJob(Entity colonyEntity, ConstructionJob job)
         {
-            ColonyConstructionDB constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
-            FactionInfoDB factionInfo = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
+            var constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
+            var factionInfo = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //check that this faction does have the design on file. I *think* all this type of construction design will get stored in factionInfo.ComponentDesigns
@@ -211,14 +211,14 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void ChangeJobPriority(Entity colonyEntity, ConstructionJob job, int delta)
         {
-            ColonyConstructionDB constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
+            var constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //first check that the job does still exsist in the list.
                 if (constructingDB.JobBatchList.Contains(job))
                 {
-                    int currentIndex = constructingDB.JobBatchList.IndexOf(job);
-                    int newIndex = currentIndex + delta;
+                    var currentIndex = constructingDB.JobBatchList.IndexOf(job);
+                    var newIndex = currentIndex + delta;
                     if (newIndex <= 0)
                     {
                         constructingDB.JobBatchList.RemoveAt(currentIndex);
