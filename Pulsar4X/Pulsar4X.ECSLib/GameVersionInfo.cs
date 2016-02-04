@@ -83,14 +83,16 @@ namespace Pulsar4X.ECSLib
 
     public class DataVersionInfo : VersionInfo
     {
+        public string Directory;
+
         public VersionInfo MinLibraryVersion;
         public VersionInfo MaxLibraryVersion;
+        public List<VersionInfo> IncompatibleData;
 
-        public List<VersionInfo> IncompatibleData; 
-
-        public DataVersionInfo(string Name, string LifeCycle, int MajorVersion, int MinorVersion, VersionInfo MinLibraryVersion, VersionInfo MaxLibraryVersion, List<VersionInfo> IncompatibleData = null) 
+        public DataVersionInfo(string Name, string LifeCycle, int MajorVersion, int MinorVersion, string Directory, VersionInfo MinLibraryVersion, VersionInfo MaxLibraryVersion, List<VersionInfo> IncompatibleData = null) 
             : base(Name, LifeCycle, MajorVersion, MinorVersion)
         {
+            this.Directory = Directory;
             this.MinLibraryVersion = MinLibraryVersion;
             this.MaxLibraryVersion = MaxLibraryVersion;
             this.IncompatibleData = IncompatibleData ?? new List<VersionInfo>();

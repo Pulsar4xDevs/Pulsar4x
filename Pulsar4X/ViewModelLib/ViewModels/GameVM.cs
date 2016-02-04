@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Pipes;
+using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -119,7 +120,7 @@ namespace Pulsar4X.ViewModel
         public async void CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
-            Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, new Progress<double>(OnProgressUpdate)));
+            Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate)));
             Game = newGame;
 
             Entity gameMaster;

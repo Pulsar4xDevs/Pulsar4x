@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public StaticDataStore StaticData { get; private set; }
+        public StaticDataStore StaticData { get; internal set; }
 
         [CanBeNull]
         [PublicAPI]
@@ -153,15 +153,16 @@ namespace Pulsar4X.ECSLib
             }
 
             var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
-            if (dataSets == null)
+            if (dataSets == null || dataSets.Count == 0)
             {
-                StaticDataManager.LoadData("Pulsar4x", newGame.StaticData);
+                StaticDataManager.LoadData("Pulsar4x", newGame);
             }
             else
             {
                 foreach (string dataSet in dataSets)
                 {
-                    StaticDataManager.LoadData(dataSet, newGame.StaticData);
+                    StaticDataManager.LoadData(dataSet, newGame);
+                    StaticDataManager.LoadData(dataSet, newGame);
                 }
             }
             FactionFactory.CreateGameMaster(newGame);

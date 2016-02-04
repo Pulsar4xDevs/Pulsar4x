@@ -93,16 +93,16 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="Data\MalformedData\Commander Name Theme - The Creators.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
-    <None Include="Data\MalformedData\CommanderNameTheme.json">
+    <Content Include="Data\MalformedData\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\MalformedData\Minerals.json">
+    </Content>
+    <Content Include="Data\MalformedData\VersionInfo.vinfo">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Data\MalformedData\VersionInfo.vinfo">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="Data\Other\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

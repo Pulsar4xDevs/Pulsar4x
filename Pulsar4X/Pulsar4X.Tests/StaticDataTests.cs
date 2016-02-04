@@ -284,9 +284,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestLoadDefaultData()
         {
-
-            var staticDataStore = new StaticDataStore();
-            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
+            Game game = Game.NewGame("", DateTime.Now, 0);
+            var staticDataStore = game.StaticData;
 
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
@@ -303,7 +302,7 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(staticDataStore.Installations);
 
             // now lets re-load the same data, to test that duplicates don't occure as required:
-            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
+            StaticDataManager.LoadData("Pulsar4x", game);
 
             // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
@@ -313,26 +312,28 @@ namespace Pulsar4X.Tests
 
             // now lets test some malformed data folders.
             StaticDataLoadException ex = Assert.Throws<StaticDataLoadException>(
-            delegate { StaticDataManager.LoadData("MalformedData", staticDataStore); });
+            delegate { StaticDataManager.LoadData("MalformedData", game); });
             Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Bad Json provided in directory: MalformedData"));
 
 
             // now ,lets try for a directory that does not exist.
             Assert.Throws<DirectoryNotFoundException>(
-            delegate { StaticDataManager.LoadData("DoesNotExist", staticDataStore); });
+            delegate { StaticDataManager.LoadData("DoesNotExist", game); });
         }
 
         [Test]
         public void TestOverwriteDefaultData()
         {
-            var staticDataStore = new StaticDataStore();
-            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
+            Game game = Game.NewGame("", DateTime.Now, 0);
+            StaticDataManager.LoadData("Pulsar4x", game);
+            var staticDataStore = game.StaticData;
 
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
             string soriumName = staticDataStore.Minerals[0].Name;
             Guid soriumGuid = staticDataStore.Minerals[0].ID;
-            StaticDataManager.LoadData("Other", staticDataStore);
+            StaticDataManager.LoadData("Other", game);
+            staticDataStore = game.StaticData;
 
             // check the test is still valid, should be the first mineral item (sorium) 
             Assert.AreEqual(soriumGuid, staticDataStore.Minerals[0].ID);
@@ -340,22 +341,21 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
             //check the name has been overwritten
             Assert.AreNotEqual(soriumName, staticDataStore.Minerals[0].Name);
-
-
         }
 
         [Test]
         public void TestIDLookup()
         {
             // Create an empty data store:
-            var staticDataStore = new StaticDataStore();
+            Game game = Game.NewGame("", DateTime.Now, 0);
+            var staticDataStore = game.StaticData;
 
             // test when the store is empty:
             object testNullObj = staticDataStore.FindDataObjectUsingID(Guid.NewGuid());
             Assert.IsNull(testNullObj);
 
             // Load the default static data to test against:
-            StaticDataManager.LoadData("Pulsar4x", staticDataStore);
+            StaticDataManager.LoadData("Pulsar4x", game);
 
             // test with a guid that is not in the store:
             object testObj = staticDataStore.FindDataObjectUsingID(Guid.Empty);  // empty guid should never be in the store.
