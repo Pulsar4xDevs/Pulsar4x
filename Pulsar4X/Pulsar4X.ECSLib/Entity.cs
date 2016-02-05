@@ -6,6 +6,10 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// A ProtoEntity is an entity that is not stored in an EntityManager.
+    /// It holds its own datablobs and provides all other functionality (but not performance) of the EntityManager.
+    /// </summary>
     [PublicAPI]
     public class ProtoEntity
     {
@@ -17,13 +21,14 @@ namespace Pulsar4X.ECSLib
 
         [NotNull]
         [PublicAPI]
-        public ComparableBitArray DataBlobMask { get { return _protectedDataBlobMask_; } }
+        public ComparableBitArray DataBlobMask => _protectedDataBlobMask_;
+
         protected ComparableBitArray _protectedDataBlobMask_ = EntityManager.BlankDataBlobMask();
 
         [PublicAPI]
         public static ProtoEntity Create(Guid guid, IEnumerable<BaseDataBlob> dataBlobs = null)
         {
-            ProtoEntity protoEntity = new ProtoEntity
+            var protoEntity = new ProtoEntity
             {
                 DataBlobs = EntityManager.BlankDataBlobList(),
                 Guid = guid
@@ -92,8 +97,10 @@ namespace Pulsar4X.ECSLib
     }
 
     [JsonConverter(typeof(EntityConverter))]
+    [PublicAPI]
     public sealed class Entity : ProtoEntity
     {
+        // Index slot of this entity's datablobs in its EntityManager.
         internal int ID;
 
         [NotNull]
@@ -102,7 +109,7 @@ namespace Pulsar4X.ECSLib
 
         [NotNull]
         [PublicAPI]
-        public new ReadOnlyCollection<BaseDataBlob> DataBlobs { get { return IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>()); } }
+        public new ReadOnlyCollection<BaseDataBlob> DataBlobs => IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>());
 
         private static readonly EntityManager InvalidManager = new EntityManager(null);
 
@@ -161,10 +168,7 @@ namespace Pulsar4X.ECSLib
         /// Entities are considered valid if they are not the static InvalidEntity and are properly registered to a manager.
         /// </summary>
         [PublicAPI]
-        public bool IsValid
-        {
-            get { return this != InvalidEntity && Manager != InvalidManager && Manager.IsValidEntity(this); }
-        }
+        public bool IsValid => this != InvalidEntity && Manager != InvalidManager && Manager.IsValidEntity(this);
 
         /// <summary>
         /// Creates a new entity with a randomly generated Guid, registered with the provided manager with the optionally provided dataBlobs.
@@ -174,7 +178,7 @@ namespace Pulsar4X.ECSLib
         {
             if (manager == null)
             {
-                throw new ArgumentNullException("manager");
+                throw new ArgumentNullException(nameof(manager));
             }
 
             return new Entity(manager, dataBlobs);
@@ -239,7 +243,7 @@ namespace Pulsar4X.ECSLib
         {
             if (dataBlob == null)
             {
-                throw new ArgumentNullException("dataBlob", "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
+                throw new ArgumentNullException(nameof(dataBlob), "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
             }
             if (!IsValid)
             {
@@ -259,7 +263,7 @@ namespace Pulsar4X.ECSLib
         {
             if (dataBlob == null)
             {
-                throw new ArgumentNullException("dataBlob", "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
+                throw new ArgumentNullException(nameof(dataBlob), "Cannot use SetDataBlob to set a dataBlob to null. Use RemoveDataBlob instead.");
             }
             if (!IsValid)
             {
@@ -387,7 +391,7 @@ namespace Pulsar4X.ECSLib
             }
             if (newManager == null)
             {
-                throw new ArgumentNullException("newManager");
+                throw new ArgumentNullException(nameof(newManager));
             }
             // Store dataBlobs.
             List<BaseDataBlob> dataBlobs = Manager.GetAllDataBlobs(ID);
@@ -407,8 +411,8 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// EntityConverter responsible for deserializng Entity objects that are not part of an EntityManager.
-        /// EntityManagers serialize Entities directly.
+        /// EntityConverter is responsible for deserializing entities when they are encountered as references. 
+        /// The EntityConverter must provide a proper reference to the object being deserialized.
         /// </summary>
         private class EntityConverter : JsonConverter
         {
@@ -421,7 +425,7 @@ namespace Pulsar4X.ECSLib
             /// Returns a Entity object that represents the entity.
             /// If the Entity's manager has already deserialized the entity, then the EntityManager's reference is returned.
             /// If not, then we create the entity in the global manager, and when the EntityManager containing this entity deserializes,
-            /// it will transfer the entity to itself.
+            /// it will transfer the entity (that we create here) to itself. This will preserve all Entity references already deserialized.
             /// </summary>
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
@@ -447,7 +451,7 @@ namespace Pulsar4X.ECSLib
             /// </summary>
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             {
-                Entity entity = (Entity)value;
+                var entity = (Entity)value;
                 serializer.Serialize(writer, entity.Guid);
             }
         }
