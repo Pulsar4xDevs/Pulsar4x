@@ -6,11 +6,11 @@
   >
   <TableLayout>
     <TableRow>
-      <Label ID="Item" />
-      <ProgressBar ID="PercentComplete" />
-      <Label ID="Completed" />
-      <NumericUpDown ID="BatchQuantity" />
-      <CheckBox ID="RepeatJob" />
+      <Label ID="Item" Text="{Binding Item}" />
+      <ProgressBar ID="PercentComplete" Value ="{Binding ItemPercentRemaining}" />
+      <Label ID="Completed" Text ="{Binding Completed}" />
+      <NumericUpDown ID="BatchQuantity" Value="{Binding BatchQuantity}"/>
+      <CheckBox ID="RepeatJob" Checked ="{Binding Repeat}" />
       <TableLayout>
         <TableRow>
         <Button ID="IncPriority" />

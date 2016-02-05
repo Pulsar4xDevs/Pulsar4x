@@ -14,51 +14,98 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected Label PointsPerDay { get; set; }
         
-        protected ListBox ItemJobs { get; set; }
+        protected StackLayout ItemJobs { get; set; }
 
         protected ComboBox ItemComboBox { get; set; }
         protected NumericUpDown NewJobBatchAmount { get; set; }
         protected CheckBox NewJobIsRepeated { get; set; }
         protected Button NewJobAdd { get; set; }
 
-
-  
+        //private JobAbilityBaseVM<BaseDataBlob, object> _viewModel;
 
         public JobAbilityView()
         {
             XamlReader.Load(this);
+            //NewJobAdd.Click += AddSelectedProjectOnClick;
         }
 
         public JobAbilityView(RefinaryAbilityVM viewModel) :this()
         {
-            DataContext = viewModel;
-            
-            PointsPerDay.Text = viewModel.PointsPerDay.ToString();
-
-            ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyRefiningDB, RefineingJob>>(viewModel.ItemJobs);
-
-            ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
-            NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
-            NewJobAdd.Click += AddSelectedProjectOnClick;
-            
+            SetViewModel(viewModel);
         }
 
         public JobAbilityView(ConstructionAbilityVM viewModel) : this()
         {
-            DataContext = viewModel;
-            PointsPerDay.Text = viewModel.PointsPerDay.ToString();
-
-            ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyConstructionDB, ConstructionJob>>(viewModel.ItemJobs);
-
-            ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
-            NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
-            NewJobAdd.Click += AddSelectedProjectOnClick;
+            SetViewModel(viewModel);
         }
 
-        private void AddSelectedProjectOnClick(object sender, EventArgs eventArgs)
+
+        public void SetViewModel(ConstructionAbilityVM viewModel)
         {
-            throw new NotImplementedException();
+
+            DataContext = viewModel;
+
+            //ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyConstructionDB, ConstructionJob>>(viewModel.ItemJobs);
+            //viewModel.ItemJobs.CollectionChanged += ItemJobs_CollectionChanged;
+            ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
+            //NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
+            
+            NewJobAdd.Command = viewModel.AddNewJob;
+            NewJobAdd.Click += NewJobAdd_Click;
         }
-        
+
+        //private void ItemJobs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        //{
+        //    switch (e.Action)
+        //    {
+        //        case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
+        //            foreach (var vm in e.NewItems)
+        //            {
+        //                ItemJobs.Items.Add(new JobUC((JobVM<BaseDataBlob, object>)vm));
+        //            }
+        //            break;
+        //        case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
+        //            ItemJobs.Items.Clear();
+
+        //            break;
+                    
+        //    }
+        //}
+
+        public void SetViewModel(RefinaryAbilityVM viewModel)
+        {
+            DataContext = viewModel;
+
+            //ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyRefiningDB, RefineingJob>>(viewModel.ItemJobs);
+            //viewModel.ItemJobs.CollectionChanged += ItemJobs_CollectionChanged;
+            //ItemJobs.DataStore = viewModel.ItemJobs;
+            ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
+            NewJobAdd.Command = viewModel.AddNewJob;
+            NewJobAdd.Click += NewJobAdd_Click;
+
+        }
+
+        private void NewJobAdd_Click(object sender, EventArgs e)
+        {
+            if (DataContext is RefinaryAbilityVM)
+            {
+                RefinaryAbilityVM viewModel = (RefinaryAbilityVM)DataContext;
+                ItemJobs.Items.Clear();
+                foreach (var vm in viewModel.ItemJobs)
+                    ItemJobs.Items.Add(new JobUC(vm));
+
+            }
+
+            if (DataContext is ConstructionAbilityVM)
+            {
+                ConstructionAbilityVM viewModel = (ConstructionAbilityVM)DataContext;
+                ItemJobs.Items.Clear();
+                foreach (var vm in viewModel.ItemJobs)
+                    ItemJobs.Items.Add(new JobUC(vm));
+
+            }
+        }
+
+
     }
 }

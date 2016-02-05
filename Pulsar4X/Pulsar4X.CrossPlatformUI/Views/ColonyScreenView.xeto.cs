@@ -89,8 +89,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             });
 
 
-            RefinaryAbilityView = new JobAbilityView(colonyScreenVM.RefinaryAbilityVM);
-
+            //RefinaryAbilityView = new JobAbilityView(colonyScreenVM.RefinaryAbilityVM);
+            RefinaryAbilityView.SetViewModel(colonyScreenVM.RefinaryAbilityVM);
+            
             RefinedMats.DataStore = colonyScreenVM.RefinedMatsStockpileVM.MaterialStockpile;
             RefinedMats.Columns.Add(new GridColumn
             {
@@ -101,7 +102,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 DataCell = new TextBoxCell { Binding = Binding.Property<RefinedMatInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
             });
 
-            ConstructionAbilityView = new JobAbilityView(colonyScreenVM.ConstructionAbilityVM);
+            ConstructionAbilityView.SetViewModel(colonyScreenVM.ConstructionAbilityVM); 
             ResearchAbilityView = new ResearchAbilityView(colonyScreenVM.ColonyResearchVM);
 
 

@@ -21,12 +21,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public ResearchAbilityView(ColonyResearchVM viewModel) :this()
         {
+            SetViewModel(viewModel);
+        }
+
+        public void SetViewModel(ColonyResearchVM viewModel)
+        {
             foreach (var scientistControlVM in viewModel.Scientists)
             {
                 ScientistUC scientist = new ScientistUC(scientistControlVM);
                 ScientistUCList.Add(scientist);
                 ScientistsLayout.Items.Add(scientist);
-                
+
             }
         }
 

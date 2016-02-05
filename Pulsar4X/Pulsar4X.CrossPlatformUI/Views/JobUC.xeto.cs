@@ -21,13 +21,34 @@ namespace Pulsar4X.CrossPlatformUI.Views
             XamlReader.Load(this);
         }
 
-        public JobUC(JobVM<BaseDataBlob, object> viewModel) : this()
+        //public JobUC(JobVM<BaseDataBlob, object> viewModel) : this()
+        //{
+        //    Item.Text = viewModel.Item;
+        //    PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
+        //    Completed.Text = viewModel.Completed.ToString();
+        //    BatchQuantity.Value = viewModel.BatchQuantity;
+        //    RepeatJob.Checked = viewModel.Repeat;
+        //}
+
+
+        public JobUC(JobVM<ColonyRefiningDB, RefineingJob> viewModel) : this()
         {
-            Item.Text = viewModel.Item;
-            PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
-            Completed.Text = viewModel.Completed.ToString();
-            BatchQuantity.Value = viewModel.BatchQuantity;
-            RepeatJob.Checked = viewModel.Repeat;
+            DataContext = viewModel;
+  
+            //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
+            //Completed.Text = viewModel.Completed.ToString();
+
+
+        }
+
+        public JobUC(JobVM<ColonyConstructionDB, ConstructionJob> viewModel) : this()
+        {
+            DataContext = viewModel;
+
+            //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
+            //Completed.Text = viewModel.Completed.ToString();
+
+
         }
 
     }
