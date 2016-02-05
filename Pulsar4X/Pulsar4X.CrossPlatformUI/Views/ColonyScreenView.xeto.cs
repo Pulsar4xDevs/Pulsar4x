@@ -32,12 +32,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public ColonyScreenView(GameVM gameVM) :this()
         {
             this.gameVM = gameVM;
-            
 
-            ColonySelection.ItemTextBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Value);
-            ColonySelection.ItemKeyBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Key).Convert(r => r.ToString());
-            
-            ColonySelection.DataStore = gameVM.Colonys.Cast<object>();
+
+            //ColonySelection.ItemTextBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Value);
+            //ColonySelection.ItemKeyBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Key).Convert(r => r.ToString());
+
+            //ColonySelection.DataStore = gameVM.Colonys.Cast<object>();
+            ColonySelection.DataStore = gameVM.Colonys.DisplayList;
             //ColonySelection.SelectedKeyBinding.Convert(r => new Guid(r), g => g.ToString()).BindDataContext((GameVM m) => m.SetColonyScreen);
             //Guid guid1 = ColonySelection.SelectedKeyBinding.Convert(new Guid(r),)
             ColonySelection.SelectedKeyChanged += SetViewModel;
