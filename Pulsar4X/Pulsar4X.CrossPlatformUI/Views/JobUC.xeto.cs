@@ -15,6 +15,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected Label Completed { get; set; }
         protected NumericUpDown BatchQuantity { get; set; }
         protected CheckBox RepeatJob { get; set; }
+        protected Button IncPriority { get; set; }
+        protected Button DecPriority { get; set; }
 
         public JobUC()
         {
@@ -34,7 +36,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public JobUC(JobVM<ColonyRefiningDB, RefineingJob> viewModel) : this()
         {
             DataContext = viewModel;
-  
+            IncPriority.Command = viewModel.JobPriorityCommand;
+            IncPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaDown;
+            DecPriority.Command = viewModel.JobPriorityCommand;
+            DecPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaUp;
             //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
             //Completed.Text = viewModel.Completed.ToString();
 
@@ -44,7 +49,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public JobUC(JobVM<ColonyConstructionDB, ConstructionJob> viewModel) : this()
         {
             DataContext = viewModel;
-
+            IncPriority.Command = viewModel.JobPriorityCommand;
+            IncPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaUp;
+            DecPriority.Command = viewModel.JobPriorityCommand;
+            DecPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaDown;
             //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
             //Completed.Text = viewModel.Completed.ToString();
 

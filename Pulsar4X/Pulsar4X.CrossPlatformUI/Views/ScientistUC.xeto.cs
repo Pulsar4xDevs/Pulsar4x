@@ -28,13 +28,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public ScientistUC(ScientistControlVM viewModel) : this()
         {
             _viewModel = viewModel;
-            FirstName.Text = viewModel.ScientistFirstName;
-            LastName.Text = viewModel.ScientistLastName;
-            AssignedLabs.Value = viewModel.ScientistAssignedLabs;
-            MaxLabs.Text = viewModel.ScientistMaxLabs.ToString();
+            DataContext = _viewModel;
 
-            AvailibleProjects.DataStore = new[] {viewModel.ResearchableTechs};
-            AvailibleProjects.ItemTextBinding = Binding.Property<string>("Name");
+            //FirstName.Text = viewModel.ScientistFirstName;
+            //LastName.Text = viewModel.ScientistLastName;
+            //AssignedLabs.Value = viewModel.ScientistAssignedLabs;
+            //MaxLabs.Text = viewModel.ScientistMaxLabs.ToString();
+
+            AvailibleProjects.DataStore = viewModel.ResearchableTechs.DisplayList;
+            //AvailibleProjects.ItemTextBinding = Binding.Property<string>("Name");
 
 
             AddSelectedProject.Click += AddSelectedProjectOnClick;

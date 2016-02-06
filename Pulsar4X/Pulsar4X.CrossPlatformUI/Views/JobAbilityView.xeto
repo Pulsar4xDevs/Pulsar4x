@@ -15,8 +15,8 @@
       </StackLayout>
     </TableRow>
     <TableRow ScaleHeight="False">
-      <ComboBox ID="ItemComboBox" /> 
-      <NumericUpDown ID="NewJobBatchAmount" />
+      <ComboBox ID="ItemComboBox" SelectedIndex="{Binding NewJobSelectedIndex}"/> 
+      <NumericUpDown ID="NewJobBatchAmount" Value="{Binding NewJobBatchCount}" />
       <CheckBox ID="NewJobIsRepeated" Checked="{Binding NewJobRepeat}"/>
       <Button ID="NewJobAdd" Text="Add" />
     </TableRow>

@@ -177,7 +177,8 @@ namespace Pulsar4X.ViewModel
 
         #region AddTech 
 
-        public ObservableCollection<TechSD> ResearchableTechs { get; set; }
+        //public ObservableCollection<TechSD> ResearchableTechs { get; set; }
+        public DictionaryVM<TechSD,string> ResearchableTechs { get; set; }
         public TechSD SelectedTech { get; set; }
 
         public int SelectedTechPointsComplete
@@ -215,8 +216,11 @@ namespace Pulsar4X.ViewModel
             
             if (_factionTech.ResearchableTechs.Count > 0)
             {
-                ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
-                SelectedTech = ResearchableTechs[0];
+                //ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
+                ResearchableTechs = new DictionaryVM<TechSD, string>(DisplayMode.Value);
+                foreach (var tech in _factionTech.ResearchableTechs.Keys)
+                    ResearchableTechs.Add(tech,tech.Name);
+                SelectedTech = ResearchableTechs.GetKey(0);
             }
             _projectQueue = new ObservableCollection<ResearchTechControlVM>();
             foreach (var techGuid in scientist.GetDataBlob<ScientistDB>().ProjectQueue)
@@ -237,7 +241,10 @@ namespace Pulsar4X.ViewModel
         }
         public void Refresh(bool partialRefresh = false)
         {
-            ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
+            //ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
+            ResearchableTechs = new DictionaryVM<TechSD, string>(DisplayMode.Value);
+            foreach (var tech in _factionTech.ResearchableTechs.Keys)
+                ResearchableTechs.Add(tech, tech.Name);
         }
     }
 

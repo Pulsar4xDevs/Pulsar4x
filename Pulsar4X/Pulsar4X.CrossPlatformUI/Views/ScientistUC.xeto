@@ -5,10 +5,10 @@
   >
   <TableLayout>
     <TableRow>
-			<Label ID="FirstName" />
-			<Label ID="LastName" />
-      <NumericUpDown ID="AssignedLabs" />
-      <Label ID="MaxLabs" />
+			<Label ID="FirstName" Text="{Binding ScientistFirstName}" />
+			<Label ID="LastName" Text="{Binding ScientistLastName}" />
+      <NumericUpDown ID="AssignedLabs" Value="{Binding ScientistAssignedLabs}" />
+      <Label ID="MaxLabs" Value ="{Binding ScientistMaxLabs}"/>
 		</TableRow>
      <TableRow>
 			<Label Text="" /> <!--Expander with list of queued projects, current project details in expander header?-->

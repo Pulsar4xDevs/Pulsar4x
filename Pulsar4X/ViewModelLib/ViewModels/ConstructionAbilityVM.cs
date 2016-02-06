@@ -23,7 +23,8 @@ namespace Pulsar4X.ViewModel
             {
                 ItemDictionary.Add(kvp.Value.GetDataBlob<NameDB>().DefaultName, kvp.Key);
             }
-            NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
+            //NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
+            NewJobSelectedIndex = 0;
             NewJobBatchCount = 1;
             NewJobRepeat = false;
         }

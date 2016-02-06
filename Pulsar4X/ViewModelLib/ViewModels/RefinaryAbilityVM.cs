@@ -34,7 +34,8 @@ namespace Pulsar4X.ViewModel
 
 
         public DictionaryVM<string, Guid> ItemDictionary { get; set; }
-        public Guid NewJobSelectedItem { get; set; }
+        public int NewJobSelectedIndex { get; set; }
+        public Guid NewJobSelectedItem { get { return ItemDictionary.GetValue(NewJobSelectedIndex); } }// set; }
         public ushort NewJobBatchCount { get; set; }
         public bool NewJobRepeat { get; set; }
 
@@ -136,7 +137,8 @@ namespace Pulsar4X.ViewModel
             {
                 ItemDictionary.Add(kvp.Value.Name, kvp.Key);
             }
-            NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
+            //NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
+            NewJobSelectedIndex = 0;
             NewJobBatchCount = 1;
             NewJobRepeat = false;
         }

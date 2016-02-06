@@ -102,8 +102,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 DataCell = new TextBoxCell { Binding = Binding.Property<RefinedMatInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
             });
 
-            ConstructionAbilityView.SetViewModel(colonyScreenVM.ConstructionAbilityVM); 
-            ResearchAbilityView = new ResearchAbilityView(colonyScreenVM.ColonyResearchVM);
+            ConstructionAbilityView.SetViewModel(colonyScreenVM.ConstructionAbilityVM);
+            //ResearchAbilityView = new ResearchAbilityView(colonyScreenVM.ColonyResearchVM);
+            ResearchAbilityView.SetViewModel(colonyScreenVM.ColonyResearchVM);
 
 
 
