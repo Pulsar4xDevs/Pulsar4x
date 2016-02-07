@@ -282,7 +282,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public List<LogEvent> GetEventsForFaction(Entity faction, bool factionIsSM = false)
         {
-            return new List<LogEvent>(allEvents.Where(@event => @event.Faction == faction || (factionIsSM && @event.IsSMOnly)));
+            return new List<LogEvent>(_logEvents.Where(@event => @event.Faction == faction || (factionIsSM && @event.IsSMOnly)));
         }
         #endregion
 
