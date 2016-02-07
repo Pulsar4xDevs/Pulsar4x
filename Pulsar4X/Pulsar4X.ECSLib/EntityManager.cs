@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -345,6 +348,49 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Public API Functions
+
+        [PublicAPI]
+        public void SerializeEntity([NotNull] Entity entity, [NotNull] Stream outputStream, bool compress = false)
+        {
+            if (outputStream == null)
+            {
+                throw new ArgumentNullException(nameof(outputStream));
+            }
+
+            if (!IsValidEntity(entity))
+            {
+                throw new InvalidOperationException("This EntityManager cannot serialize this entity. Entity not found in this manager.");
+            }
+
+            var DefaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
+            DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+
+            using (var intermediateStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                {
+                    using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                    {
+                        DefaultSerializer.Serialize(writer, new StoredEntity(entity));
+                    }
+                }
+
+                // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
+                intermediateStream.Position = 0;
+
+                if (compress)
+                {
+                    using (var compressionStream = new GZipStream(outputStream, CompressionLevel.Optimal))
+                    {
+                        intermediateStream.CopyTo(compressionStream);
+                    }
+                }
+                else
+                {
+                    intermediateStream.CopyTo(outputStream);
+                }
+            }
+        }
 
         /// <summary>
         /// Returns a list of entities that have datablob type T.
