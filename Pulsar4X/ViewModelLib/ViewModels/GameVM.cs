@@ -137,7 +137,7 @@ namespace Pulsar4X.ViewModel
         public async void LoadGame(string pathToFile)
         {
             StatusText = "Loading Game...";
-            Game = await Task.Run(() => ECSLib.SaveGame.Load(pathToFile, new Progress<double>(OnProgressUpdate)));
+            Game = await Task.Run(() => ECSLib.SerializationManager.Load(pathToFile, new Progress<double>(OnProgressUpdate)));
 
             Entity gameMaster;
             Game.GlobalManager.FindEntityByGuid(Game.GameMasterFaction, out gameMaster);
@@ -149,7 +149,7 @@ namespace Pulsar4X.ViewModel
         public async void SaveGame(string pathToFile)
         {
             StatusText = "Saving Game...";
-            await Task.Run(() => ECSLib.SaveGame.Save(Game, pathToFile, new Progress<double>(OnProgressUpdate)));
+            await Task.Run(() => ECSLib.SerializationManager.SaveGame(Game, pathToFile, new Progress<double>(OnProgressUpdate)));
             //await Task.Run(() => SaveGame.Save(CurrentGame, pathToFile, true)); // Compressed
             ProgressValue = 0;
             StatusText = "Game Saved";

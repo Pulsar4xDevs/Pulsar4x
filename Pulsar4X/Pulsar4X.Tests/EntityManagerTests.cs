@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -61,6 +60,16 @@ namespace Pulsar4X.Tests
             int colonyTypeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
             expectedMask[orbitTypeIndex] = true;
             expectedMask[colonyTypeIndex] = true;
+
+            using (var stream = new MemoryStream())
+            {
+                SerializationManager.ExportEntity(_game, testEntity, stream);
+                testEntity.Destroy();
+
+                stream.Position = 0;
+
+                testEntity = SerializationManager.ImportEntity(_game, _game.GlobalManager, stream);
+            }
 
             Assert.AreEqual(expectedMask, testEntity.DataBlobMask);
 

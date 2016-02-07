@@ -69,6 +69,12 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
 
+        [PublicAPI]
+        public ReadOnlyCollection<LogEvent> LogEvents => new ReadOnlyCollection<LogEvent>(_logEvents);
+
+        [JsonProperty]
+        internal List<LogEvent> _logEvents;
+
         /// <summary>
         /// List of StarSystems currently in the game.
         /// </summary>
@@ -99,6 +105,7 @@ namespace Pulsar4X.ECSLib
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);
             StaticData = new StaticDataStore();
+            _logEvents = new List<LogEvent>();
 
             PostLoad += (sender, args) => { InitializeProcessors(); };
         }
@@ -256,6 +263,27 @@ namespace Pulsar4X.ECSLib
             OrbitProcessor.Process(this, systems, deltaSeconds);
             ShipMovementProcessor.Process(this, systems, deltaSeconds);
             EconProcessor.Process(this, systems, deltaSeconds);
+        }
+
+        [PublicAPI]
+        public void AddLogEvent(LogEvent logEvent)
+        {
+            if (_logEvents.Count > 0)
+            {
+                LogEvent lastEvent = _logEvents.Last();
+                if (lastEvent.Time > logEvent.Time)
+                {
+                    throw new InvalidOperationException("Cannot add a LogEvent that occured before the last LogEvent");
+                }
+            }
+
+            _logEvents.Add(logEvent);
+        }
+
+        [PublicAPI]
+        public List<LogEvent> GetEventsForFaction(Entity faction, bool factionIsSM = false)
+        {
+            return new List<LogEvent>(_logEvents.Where(@event => @event.Faction == faction || (factionIsSM && @event.IsSMOnly)));
         }
         #endregion
 

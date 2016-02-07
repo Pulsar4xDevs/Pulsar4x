@@ -2,7 +2,7 @@
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     //All datablobs must be public.
     public class BasicExampleDB
@@ -12,8 +12,8 @@ namespace Pulsar4X.ECSLib.DataBlobs
     // EntityManager does quite a bit of work to shift things around
     // and it's not easy to understand everything the EntityManager does. So just derive from BaseDataBlob.
     {
-        private int importantNumber;
-        private ICloneable cloneableObj;
+        private int _importantNumber;
+        private ICloneable _cloneableObj;
 
         private BasicExampleDB()
         {
@@ -26,8 +26,8 @@ namespace Pulsar4X.ECSLib.DataBlobs
         // Datablobs need to implement a deep-copy constructor.
         public BasicExampleDB(BasicExampleDB clone)
         {
-            importantNumber = clone.importantNumber;
-            cloneableObj = (ICloneable)cloneableObj.Clone();
+            _importantNumber = clone._importantNumber;
+            _cloneableObj = (ICloneable)_cloneableObj.Clone();
         }
 
         // Datablobs must implement the IClonable interface.
@@ -104,17 +104,17 @@ namespace Pulsar4X.ECSLib.DataBlobs
 
         // Instead, either store the guid and look up the system when needed (from the Game.Systems dictionary)
         [JsonProperty]
-        public Guid mySystemGuid;
+        public Guid MySystemGuid;
 
         // Or if you want to get really fancy, use a deserialization callback to resolve the star system after load-time.
-        public StarSystem myStarSystem;
+        public StarSystem MyStarSystem;
 
         // JSON deserialization callback.
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
             // Star system resolver loads myStarSystem from mySystemGuid after the game is done loading.
-            SaveGame.CurrentGame.PostLoad += (sender, args) => { if (!SaveGame.CurrentGame.StarSystems.TryGetValue(mySystemGuid, out myStarSystem)) throw new GuidNotFoundException(mySystemGuid); };
+            SerializationManager.CurrentGame.PostLoad += (sender, args) => { if (!SerializationManager.CurrentGame.StarSystems.TryGetValue(MySystemGuid, out MyStarSystem)) throw new GuidNotFoundException(MySystemGuid); };
         }
 
         #region Stuff we already talked about.
@@ -125,7 +125,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
 
         public AdvancedExampleDB(AdvancedExampleDB clone)
         {
-            mySystemGuid = clone.mySystemGuid;
+            MySystemGuid = clone.MySystemGuid;
             _friendEntity = clone.FriendEntity;
         }
 
