@@ -10,7 +10,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
     public class ResearchAbilityView : Panel
     {
         protected StackLayout ScientistsLayout { get; set; }
-        protected List<ScientistUC> ScientistUCList { get; set; } 
+        protected List<ScientistUC> ScientistUCList { get; set; }
+        protected ComboBox AvailibleProjects { get; set; }
+        //protected Label SelectedScientist { get; set; }
+        protected Button AddSelectedProject { get; set; }
+
+        private ColonyResearchVM _viewModel;
 
         public ResearchAbilityView()
         {
@@ -26,14 +31,29 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public void SetViewModel(ColonyResearchVM viewModel)
         {
+            _viewModel = viewModel;
+            DataContext = _viewModel;
+            AvailibleProjects.DataStore = viewModel.ResearchableTechs.DisplayList;
+            AddSelectedProject.Click += AddSelectedProject_Click;
+            AddSelectedProject.Command = _viewModel.AddNewProject;
             foreach (var scientistControlVM in viewModel.Scientists)
             {
                 ScientistUC scientist = new ScientistUC(scientistControlVM);
                 ScientistUCList.Add(scientist);
                 ScientistsLayout.Items.Add(scientist);
 
+                
+
             }
         }
 
+        private void AddSelectedProject_Click(object sender, EventArgs e)
+        {
+            foreach (var control in ScientistUCList)
+            {
+                control.SetResearchViews();
+            }
+
+        }
     }
 }

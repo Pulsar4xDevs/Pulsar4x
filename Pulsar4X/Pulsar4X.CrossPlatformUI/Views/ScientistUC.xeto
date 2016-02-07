@@ -2,6 +2,7 @@
 <Panel
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
   >
   <TableLayout>
     <TableRow>
@@ -11,15 +12,15 @@
       <Label ID="MaxLabs" Value ="{Binding ScientistMaxLabs}"/>
 		</TableRow>
      <TableRow>
-			<Label Text="" /> <!--Expander with list of queued projects, current project details in expander header?-->
+       <c:ScientistResearchView x:Name="CurrentResearch"/>
 		</TableRow>
     <TableRow>
-      <ComboBox 
-        ID="AvailibleProjects"  
-        />
-      <Label ID="SelectedProject"/>
-      <Button ID="AddSelectedProject" Text="Add" />
-		</TableRow>
+      <Expander>
+        <StackLayout ID="ResearchQueue">          
+        </StackLayout>
+      </Expander>
+    </TableRow>
+
 
   </TableLayout>
 </Panel>

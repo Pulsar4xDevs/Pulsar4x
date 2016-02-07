@@ -16,9 +16,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected NumericUpDown AssignedLabs { get; set; }
         protected Label MaxLabs { get; set; }
 
-        protected ComboBox AvailibleProjects { get; set; }
-        protected Label SelectedProject { get; set; }
-        protected Button AddSelectedProject { get; set; }
+
+
+        protected ScientistResearchView CurrentResearch { get; set; }
+        protected StackLayout ResearchQueue { get; set; }
 
         public ScientistUC()
         {
@@ -35,17 +36,32 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //AssignedLabs.Value = viewModel.ScientistAssignedLabs;
             //MaxLabs.Text = viewModel.ScientistMaxLabs.ToString();
 
-            AvailibleProjects.DataStore = viewModel.ResearchableTechs.DisplayList;
+            //AvailibleProjects.DataStore = viewModel.ResearchableTechs.DisplayList;
             //AvailibleProjects.ItemTextBinding = Binding.Property<string>("Name");
 
-
-            AddSelectedProject.Click += AddSelectedProjectOnClick;
             
+
+            SetResearchViews();
+
+        }
+
+        public void SetResearchViews()
+        {
+            ResearchQueue.Items.Clear();
+            if (_viewModel.ProjectQueue.Count > 0)
+            {
+                CurrentResearch.SetViewModel(_viewModel.ProjectQueue[0]);
+
+                foreach (var item in _viewModel.ProjectQueue)
+                {
+                    ResearchQueue.Items.Add(new ScientistResearchView(item));
+                }
+            }
         }
 
         private void AddSelectedProjectOnClick(object sender, EventArgs eventArgs)
         {
-            throw new NotImplementedException();
+            SetResearchViews();
         }
     }
 }

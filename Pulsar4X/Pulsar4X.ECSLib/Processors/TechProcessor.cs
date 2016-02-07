@@ -51,12 +51,14 @@ namespace Pulsar4X.ECSLib
 
             foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
             {
-                TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
+                //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
+                Guid projectGuid = scientist.GetDataBlob<ScientistDB>().ProjectQueue[0];
+                TechSD project = _game.StaticData.Techs[projectGuid];
                 int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
-                float bonus = scientist.GetDataBlob<ScientistDB>().Bonuses[research.Category];
+                float bonus = scientist.GetDataBlob<ScientistDB>().Bonuses[project.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
 
-                int researchmax = CostFormula(factionTechs, research);
+                int researchmax = CostFormula(factionTechs, project);
 
                 int researchPoints = 0;
                 foreach (var kvp in labs)
@@ -68,24 +70,43 @@ namespace Pulsar4X.ECSLib
                     }
                 }
                 researchPoints = (int)(researchPoints * bonus);
-                if (factionTechs.ResearchableTechs.ContainsKey(research))
+                if (factionTechs.ResearchableTechs.ContainsKey(project))
                 {
-                    factionTechs.ResearchableTechs[research] += researchPoints;
-                    if (factionTechs.ResearchableTechs[research] >= researchmax)
+                    factionTechs.ResearchableTechs[project] += researchPoints;
+                    if (factionTechs.ResearchableTechs[project] >= researchmax)
                     {
-                        ApplyTech(factionTechs, research); //apply effects from tech, and add it to researched techs
+                        ApplyTech(factionTechs, project); //apply effects from tech, and add it to researched techs
                         scientist.GetDataBlob<TeamsDB>().TeamTask = null; //team task is now nothing. 
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// assigns more labs to a given scientist
+        /// will not assign more than scientists MaxLabs
+        /// </summary>
+        /// <param name="scientist"></param>
+        /// <param name="labs"></param>
         public static void AssignLabs(Entity scientist, byte labs)
         {
-
+            //TODO: ensure that the labs are availible to assign.
+            ScientistDB scientistDB = scientist.GetDataBlob<ScientistDB>();
+            scientistDB.AssignedLabs = Math.Max(scientistDB.MaxLabs, labs);
         }
 
-
+        /// <summary>
+        /// adds a tech to a scientists research queue.
+        /// </summary>
+        /// <param name="scientist"></param>
+        /// <param name="techID"></param>
+        public static void AssignProject(Entity scientist, Guid techID)
+        {
+            //TODO: check valid research, scientist etc for the empire.
+            ScientistDB scientistDB = scientist.GetDataBlob<ScientistDB>();
+            //TechSD project = _game.StaticData.Techs[techID];
+            scientistDB.ProjectQueue.Add(techID);
+        }
 
 
 
