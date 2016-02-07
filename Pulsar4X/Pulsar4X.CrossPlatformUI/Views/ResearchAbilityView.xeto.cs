@@ -4,6 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
+using System.Linq;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -12,7 +13,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected StackLayout ScientistsLayout { get; set; }
         protected List<ScientistUC> ScientistUCList { get; set; }
         protected ComboBox AvailibleProjects { get; set; }
-        //protected Label SelectedScientist { get; set; }
         protected Button AddSelectedProject { get; set; }
 
         private ColonyResearchVM _viewModel;
@@ -20,7 +20,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public ResearchAbilityView()
         {
             ScientistUCList = new List<ScientistUC>();
-            //todo figure out how to properly bind to the stacklayout to the list 
             XamlReader.Load(this);
         }
 
@@ -34,26 +33,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             DataContext = _viewModel;
             AvailibleProjects.DataStore = viewModel.ResearchableTechs.DisplayList;
-            AddSelectedProject.Click += AddSelectedProject_Click;
+            AvailibleProjects.SelectedIndexBinding.BindDataContext((ColonyResearchVM vm) => vm.SelectedTechIndex);
             AddSelectedProject.Command = _viewModel.AddNewProject;
             foreach (var scientistControlVM in viewModel.Scientists)
             {
                 ScientistUC scientist = new ScientistUC(scientistControlVM);
                 ScientistUCList.Add(scientist);
-                ScientistsLayout.Items.Add(scientist);
-
-                
-
+                ScientistsLayout.Items.Add(scientist);               
             }
-        }
-
-        private void AddSelectedProject_Click(object sender, EventArgs e)
-        {
-            foreach (var control in ScientistUCList)
-            {
-                control.SetResearchViews();
-            }
-
         }
     }
 }

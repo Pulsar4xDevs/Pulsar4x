@@ -4,6 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
+using System.Linq;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -31,37 +32,29 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             DataContext = _viewModel;
 
-            //FirstName.Text = viewModel.ScientistFirstName;
-            //LastName.Text = viewModel.ScientistLastName;
-            //AssignedLabs.Value = viewModel.ScientistAssignedLabs;
-            //MaxLabs.Text = viewModel.ScientistMaxLabs.ToString();
-
-            //AvailibleProjects.DataStore = viewModel.ResearchableTechs.DisplayList;
-            //AvailibleProjects.ItemTextBinding = Binding.Property<string>("Name");
-
-            
+            _viewModel.ProjectQueue.CollectionChanged += ProjectQueue_CollectionChanged; 
 
             SetResearchViews();
 
         }
 
-        public void SetResearchViews()
+        private void ProjectQueue_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            SetResearchViews();
+        }
+
+        private void SetResearchViews()
         {
             ResearchQueue.Items.Clear();
             if (_viewModel.ProjectQueue.Count > 0)
             {
                 CurrentResearch.SetViewModel(_viewModel.ProjectQueue[0]);
 
-                foreach (var item in _viewModel.ProjectQueue)
+                foreach (var item in _viewModel.ProjectQueue.Skip(1))
                 {
                     ResearchQueue.Items.Add(new ScientistResearchView(item));
                 }
             }
-        }
-
-        private void AddSelectedProjectOnClick(object sender, EventArgs eventArgs)
-        {
-            SetResearchViews();
         }
     }
 }

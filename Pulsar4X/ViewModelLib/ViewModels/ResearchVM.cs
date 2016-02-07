@@ -135,7 +135,7 @@ namespace Pulsar4X.ViewModel
                 ResearchableTechs = new DictionaryVM<TechSD, string>(DisplayMode.Value);
                 foreach (var tech in _factionTech.ResearchableTechs.Keys)
                     ResearchableTechs.Add(tech, tech.Name);
-                SelectedTech = ResearchableTechs.GetKey(0);
+                SelectedTechIndex = 0;
             }
 
             foreach (var scientist in _colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
@@ -147,7 +147,8 @@ namespace Pulsar4X.ViewModel
 
         }
 
-        public TechSD SelectedTech { get; set; }
+        public int SelectedTechIndex { get; set; }
+        public TechSD SelectedTech { get { return ResearchableTechs.GetKey(SelectedTechIndex); } }
 
         public int SelectedTechPointsComplete
         {
@@ -258,17 +259,8 @@ namespace Pulsar4X.ViewModel
             ScientistEntity = scientist;
 
             _projectQueue = new ObservableCollection<ResearchTechControlVM>();
-            //foreach (var techGuid in scientist.GetDataBlob<ScientistDB>().ProjectQueue)
-            //{
-            //    _projectQueue.Add(new ResearchTechControlVM(_factionTech, _staticData.Techs[techGuid]));
-            //}
             Refresh();
             
-        }
-
-        public void AddTechToQueue(Guid techID)
-        {
-            //Pulsar4X.ECSLib.s
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
