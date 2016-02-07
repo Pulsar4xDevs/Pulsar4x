@@ -44,6 +44,10 @@ namespace Pulsar4X.ECSLib
                 DataVersionInfo dvi;
                 if (CheckDataDirectoryVersion(possibleMod, new StaticDataStore(), out dvi))
                 {
+                    if (availableData.Contains(dvi))
+                    {
+                        throw new AmbiguousMatchException($"Found two mods in different directories with the same version info: {dvi.FullVersion}");
+                    }
                     availableData.Add(dvi);
                 }
             }
