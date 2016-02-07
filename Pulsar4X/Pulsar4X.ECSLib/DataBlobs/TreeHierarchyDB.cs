@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
             int typeIndex;
             EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
 
-            return entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
+            return !entity.IsValid ? null : entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
         }
 
         #region Unit Test

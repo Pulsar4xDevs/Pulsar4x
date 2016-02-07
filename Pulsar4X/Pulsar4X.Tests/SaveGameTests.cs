@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Pulsar4X.ECSLib;
 using System.IO;
+using System.Linq;
 
 namespace Pulsar4X.Tests
 {
@@ -16,37 +18,22 @@ namespace Pulsar4X.Tests
         private readonly DateTime _testTime = DateTime.Now;
 
         [Test]
-        public void TestSaveLoad()
+        public void GameImportExport()
         {
             // lets create a bad save game:
 
             // Check default nulls throw:
-            Assert.Catch(typeof(ArgumentNullException), () =>
-            {
-                SerializationManager.ExportGame(null, File);
-            });
-            Assert.Catch(typeof(ArgumentNullException), () =>
-            {
-                SerializationManager.ExportGame(_game, (string)null);
-            }); 
-            Assert.Catch(typeof(ArgumentNullException), () =>
-            {
-                SerializationManager.ImportGame(null);
-            });
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.ExportGame(null, File));
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.ExportGame(_game, (string)null));
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.ExportGame(_game, string.Empty));
 
-            // check provided empty string throws:
-            const string emptyString = "";
-            Assert.Catch(typeof(ArgumentNullException), () =>
-            {
-                SerializationManager.ExportGame(_game, emptyString);
-            });
-            Assert.Catch(typeof(ArgumentNullException), () =>
-            {
-                SerializationManager.ImportGame(emptyString);
-            });
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((string)null));
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame(string.Empty));
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((Stream)null));
 
-
-            CreateTestUniverse(10);
+            if (_game == null)
+                CreateTestUniverse(10);
+            Assert.NotNull(_game);
 
             // lets create a good saveGame
             SerializationManager.ExportGame(_game, File);
@@ -72,6 +59,77 @@ namespace Pulsar4X.Tests
             Assert.AreSame(speciesName.OwningEntity, species);
 
             // <?TODO: Expand this out to cover many more DBs, entities, and cases.
+        }
+
+        [Test]
+        public void EntityImportExport()
+        {
+            // Ensure we have a test universe.
+            if (_game == null)
+                CreateTestUniverse(10);
+            Assert.NotNull(_game);
+
+            // Choose a random system.
+            var rand = new Random();
+            int systemIndex = rand.Next(_game.Systems.Count - 1);
+            StarSystem system = _game.Systems.Values.ToArray()[systemIndex];
+
+            // Export/Reinport all entities in that system.
+            EntityManager systemManager = system.SystemManager;
+            for (int index = 0; index < systemManager.Entities.Count; index++)
+            {
+                Entity entity = systemManager.Entities[index];
+
+                if (entity == null || !entity.IsValid)
+                {
+                    continue;
+                }
+
+                string jsonString = SerializationManager.ExportEntity(entity);
+
+                // Clone the entity for later comparison.
+                ProtoEntity clone = entity.Clone();
+
+                // Destroy the entity.
+                entity.Destroy();
+
+                // Ensure the entity was destroyed.
+                Entity foundEntity;
+                Assert.IsFalse(systemManager.FindEntityByGuid(clone.Guid, out foundEntity));
+
+                // Import the entity back into the manager.
+                Entity importedEntity = SerializationManager.ImportEntity(_game, systemManager, jsonString);
+
+                // Ensure the imported entity is valid
+                Assert.IsTrue(importedEntity.IsValid);
+                // Check to find the guid.
+                Assert.IsTrue(systemManager.FindEntityByGuid(clone.Guid, out foundEntity));
+                // Check the Guid imported correctly.
+                Assert.AreEqual(clone.Guid, importedEntity.Guid);
+                // Check the datablobs imported correctly.
+                Assert.AreEqual(clone.DataBlobs.Where(dataBlob => dataBlob != null).ToList().Count, importedEntity.DataBlobs.Count);
+                // Check the manager is the same.
+                Assert.AreEqual(systemManager, importedEntity.Manager);
+            }
+        }
+
+        [Test]
+        public void StarSystemImportExport()
+        {
+            // Ensure we have a test universe.
+            if (_game == null)
+                CreateTestUniverse(10);
+            Assert.NotNull(_game);
+
+            // Choose a random system.
+            var rand = new Random();
+            int systemIndex = rand.Next(_game.Systems.Count - 1);
+            StarSystem system = _game.Systems.Values.ToArray()[systemIndex];
+
+            string jsonString = SerializationManager.ExportStarSystem(system);
+            _game = Game.NewGame("StarSystem Import Test", DateTime.Now, 0);
+
+            SerializationManager.ImportStarSystem(_game, jsonString);
         }
 
         [Test]

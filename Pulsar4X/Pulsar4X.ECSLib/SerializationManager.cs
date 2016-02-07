@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using System.IO;
 using System.IO.Compression;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Pulsar4X.ECSLib
@@ -58,37 +57,19 @@ namespace Pulsar4X.ECSLib
                 ManagersProcessed = 0;
                 game.NumSystems = game.StarSystems.Count;
 
-                // Wrap the outputStream in a BufferedStream.
-                // This will improves performance if the outputStream does not have an internal buffer. (E.G. NetworkStream)
-                using (var outputBuffer = new BufferedStream(outputStream))
+                using (var intermediateStream = new MemoryStream())
                 {
-                    using (var intermediateStream = new MemoryStream())
+                    using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
                     {
-                        using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                        using (var writer = new JsonTextWriter(streamWriter))
                         {
-                            using (var writer = new JsonTextWriter(streamWriter))
-                            {
-                                CurrentGame = game;
-                                DefaultSerializer.Serialize(writer, game);
-                                CurrentGame = null;
-                            }
-                        }
-
-                        // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
-                        intermediateStream.Position = 0;
-
-                        if (compress)
-                        {
-                            using (var compressionStream = new GZipStream(outputBuffer, CompressionLevel.Optimal))
-                            {
-                                intermediateStream.CopyTo(compressionStream);
-                            }
-                        }
-                        else
-                        {
-                            intermediateStream.CopyTo(outputBuffer);
+                            CurrentGame = game;
+                            DefaultSerializer.Serialize(writer, game);
+                            CurrentGame = null;
                         }
                     }
+
+                    FinalizeOutput(outputStream, intermediateStream, compress);
                 }
             }
         }
@@ -111,7 +92,7 @@ namespace Pulsar4X.ECSLib
         /// Loads the game from the provided stream using the default serializer.
         /// </summary>
         [PublicAPI]
-        private static Game ImportGame([NotNull] Stream inputStream, IProgress<double> progress = null)
+        public static Game ImportGame([NotNull] Stream inputStream, IProgress<double> progress = null)
         {
             if (inputStream == null)
             {
@@ -162,16 +143,37 @@ namespace Pulsar4X.ECSLib
             return game;
         }
 
+        /// <summary>
+        /// Populates the currently loading game from the passed uncompressed inputStream.
+        /// </summary>
+        /// <param name="inputStream">Uncompressed stream containing the game data.</param>
+        private static void PopulateGame(Stream inputStream)
+        {
+            using (var sr = new StreamReader(inputStream))
+            {
+                using (var reader = new JsonTextReader(sr))
+                {
+                    DefaultSerializer.Populate(reader, CurrentGame);
+                }
+            }
+        }
+
         #endregion
 
         #region Entity Serialization/Deserialization
 
+        /// <summary>
+        /// Exports an entity to a JsonString
+        /// </summary>
+        /// <param name="entity">Entity to export</param>
+        /// <param name="compress">Determines if the JsonString should be compressed using GZip</param>
+        /// <returns>JsonString representation of the entity.</returns>
         [PublicAPI]
-        public static string ExportEntity([NotNull] Game game, [NotNull] Entity entity, bool compress = false)
+        public static string ExportEntity([NotNull] Entity entity, bool compress = false)
         {
             using (var stream = new MemoryStream())
             {
-                ExportEntity(game, entity, stream, compress);
+                ExportEntity(entity, stream, compress);
 
                 stream.Position = 0;
                 using (var reader = new StreamReader(stream))
@@ -179,16 +181,17 @@ namespace Pulsar4X.ECSLib
                     return reader.ReadToEnd();
                 }
             }
-
         }
 
+        /// <summary>
+        /// Exports an entity to a provided outputStream.
+        /// </summary>
+        /// <param name="entity">Entity to export</param>
+        /// <param name="outputStream">Output stream to use.</param>
+        /// <param name="compress">Determines if the output should be compressed using GZip</param>
         [PublicAPI]
-        public static void ExportEntity([NotNull] Game game, [NotNull] Entity entity, [NotNull] Stream outputStream, bool compress = false)
+        public static void ExportEntity([NotNull] Entity entity, [NotNull] Stream outputStream, bool compress = false)
         {
-            if (game == null)
-            {
-                throw new ArgumentNullException(nameof(game));
-            }
             if (outputStream == null)
             {
                 throw new ArgumentNullException(nameof(outputStream));
@@ -214,33 +217,20 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
-                intermediateStream.Position = 0;
-
-                if (compress)
-                {
-                    using (var compressionStream = new GZipStream(outputStream, CompressionLevel.Optimal))
-                    {
-                        intermediateStream.CopyTo(compressionStream);
-                    }
-                }
-                else
-                {
-                    intermediateStream.CopyTo(outputStream);
-                }
+                FinalizeOutput(outputStream, intermediateStream, compress);
             }
         }
 
+        /// <summary>
+        /// Imports an entity into a specified manager.
+        /// </summary>
+        /// <param name="game">Game object we're importing into.</param>
+        /// <param name="entityManager">EntityManager to import the entity into.</param>
+        /// <param name="jsonString">JsonString representation of the Entity.</param>
+        /// <returns>Valid and fully formed Entity</returns>
         [PublicAPI]
-        public static Entity ImportEntity([NotNull] Game game, [NotNull] EntityManager manager, [NotNull] string jsonString)
+        public static Entity ImportEntity([NotNull] Game game, [NotNull] EntityManager entityManager, [NotNull] string jsonString)
         {
-            if (game == null)
-            {
-                throw new ArgumentNullException(nameof(game));
-            }
-            if (manager == null)
-            {
-                throw new ArgumentNullException(nameof(manager));
-            }
             if (string.IsNullOrEmpty(jsonString))
             {
                 throw new ArgumentException("Argument is null or empty", nameof(jsonString));
@@ -252,33 +242,40 @@ namespace Pulsar4X.ECSLib
                 {
                     writer.Write(jsonString);
                     writer.Flush();
-                }
-                stream.Position = 0;
 
-                return ImportEntity(game, manager, stream);
+                    stream.Position = 0;
+                    return ImportEntity(game, entityManager, stream);
+                }
             }
         }
 
+        /// <summary>
+        /// Imports an entity into the specified manager from a Stream.
+        /// </summary>
+        /// <param name="game">Game object we're importing into.</param>
+        /// <param name="entityManager">EntityManager to import the entity into.</param>
+        /// <param name="inputStream">Stream that will contain the entity.</param>
+        /// <returns></returns>
         [PublicAPI]
-        public static Entity ImportEntity([NotNull] Game game, [NotNull] EntityManager manager, [NotNull] MemoryStream inputMemoryStream)
+        public static Entity ImportEntity([NotNull] Game game, [NotNull] EntityManager entityManager, [NotNull]Stream inputStream)
         {
             if (game == null)
             {
                 throw new ArgumentNullException(nameof(game));
             }
-            if (manager == null)
+            if (entityManager == null)
             {
-                throw new ArgumentNullException(nameof(manager));
+                throw new ArgumentNullException(nameof(entityManager));
             }
-            if (inputMemoryStream == null)
+            if (inputStream == null)
             {
-                throw new ArgumentNullException(nameof(inputMemoryStream));
+                throw new ArgumentNullException(nameof(inputStream));
             }
 
             ProtoEntity entity;
 
             // Check if our stream is compressed.
-            using (var bufferedStream = new BufferedStream(inputMemoryStream))
+            using (var bufferedStream = new BufferedStream(inputStream))
             {
                 if (HasGZipHeader(bufferedStream))
                 {
@@ -303,10 +300,176 @@ namespace Pulsar4X.ECSLib
                     entity = PopulateEntity(game, bufferedStream);
                 }
             }
-            return Entity.Create(manager, entity);
+            return Entity.Create(entityManager, entity);
+        }
+
+        private static ProtoEntity PopulateEntity(Game game, Stream stream)
+        {
+            ProtoEntity entity;
+
+            using (var sr = new StreamReader(stream))
+            {
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    lock (SyncRoot)
+                    {
+                        CurrentGame = game;
+                        entity = DefaultSerializer.Deserialize<ProtoEntity>(reader);
+                        CurrentGame.PostGameLoad();
+                        CurrentGame = null;
+                    }
+                }
+            }
+            return entity;
         }
 
         #endregion
+
+        #region StarSystem Serialization/Deserialization
+
+        public static string ExportStarSystem(StarSystem system, bool compress = false)
+        {
+            using (var stream = new MemoryStream())
+            {
+                ExportStarSystem(system, stream, compress);
+
+                stream.Position = 0;
+                using (var reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+        }
+
+        public static void ExportStarSystem(StarSystem system, Stream outputStream, bool compress = false)
+        {
+            if (outputStream == null)
+            {
+                throw new ArgumentNullException(nameof(outputStream));
+            }
+
+            using (var intermediateStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                {
+                    using (var writer = new JsonTextWriter(streamWriter))
+                    {
+                        lock (SyncRoot)
+                        {
+                            DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                            DefaultSerializer.Serialize(writer, system);
+                        }
+                    }
+                }
+
+                // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
+                FinalizeOutput(outputStream, intermediateStream, compress);
+            }
+        }
+
+        public static StarSystem ImportStarSystem(Game game, string jsonString)
+        {
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                throw new ArgumentException("Argument is null or empty", nameof(jsonString));
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(stream))
+                {
+                    writer.Write(jsonString);
+                    writer.Flush();
+                }
+                stream.Position = 0;
+
+                return ImportStarSystem(game, stream);
+            }
+        }
+
+        public static StarSystem ImportStarSystem(Game game, Stream inputStream)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game));
+            }
+            if (inputStream == null)
+            {
+                throw new ArgumentNullException(nameof(inputStream));
+            }
+
+            StarSystem system;
+
+            // Check if our stream is compressed.
+            using (var bufferedStream = new BufferedStream(inputStream))
+            {
+                if (HasGZipHeader(bufferedStream))
+                {
+                    // File is compressed. Decompress using GZip.
+                    using (var compressionStream = new GZipStream(bufferedStream, CompressionMode.Decompress))
+                    {
+                        // Decompress into a MemoryStream.
+                        using (var intermediateStream = new MemoryStream())
+                        {
+                            // Decompress the file into an intermediate MemoryStream.
+                            compressionStream.CopyTo(intermediateStream);
+
+                            // Reset the position of the MemoryStream so it can be read from the beginning.
+                            intermediateStream.Position = 0;
+
+                            system = PopulateStarSystem(game, intermediateStream);
+                        }
+                    }
+                }
+                else
+                {
+                    system = PopulateStarSystem(game, bufferedStream);
+                }
+            }
+            return system;
+        }
+
+        private static StarSystem PopulateStarSystem(Game game, Stream bufferedStream)
+        {
+            StarSystem system;
+            using (var streamReader = new StreamReader(bufferedStream))
+            {
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    lock (SyncRoot)
+                    {
+                        CurrentGame = game;
+                        system = DefaultSerializer.Deserialize<StarSystem>(reader);
+                        CurrentGame.PostGameLoad();
+                        CurrentGame = null;
+                    }
+                }
+            }
+
+            return system;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Finalizes the outputStream by applying compression.
+        /// </summary>
+        private static void FinalizeOutput(Stream outputStream, Stream intermediateStream, bool compress)
+        {
+            intermediateStream.Position = 0;
+
+            if (compress)
+            {
+                using (var compressionStream = new GZipStream(outputStream, CompressionLevel.Optimal))
+                {
+                    intermediateStream.CopyTo(compressionStream);
+                }
+            }
+            else
+            {
+                intermediateStream.CopyTo(outputStream);
+            }
+        }
 
         /// <summary>
         /// Check if we have a valid file. Will throw exceptions if there's issues with the file.
@@ -355,41 +518,6 @@ namespace Pulsar4X.ECSLib
             // First two bytes should be 31 and 139 according to the GZip file format.
             // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
             return headerBytes[0] == 31 && headerBytes[1] == 139;
-        }
-
-        /// <summary>
-        /// Populates the currently loading game from the passed uncompressed inputStream.
-        /// </summary>
-        /// <param name="inputStream">Uncompressed stream containing the game data.</param>
-        private static void PopulateGame(Stream inputStream)
-        {
-            using (var sr = new StreamReader(inputStream))
-            {
-                using (var reader = new JsonTextReader(sr))
-                {
-                    DefaultSerializer.Populate(reader, CurrentGame);
-                }
-            }
-        }
-
-        private static ProtoEntity PopulateEntity(Game game, Stream stream)
-        {
-            ProtoEntity entity;
-
-            using (var sr = new StreamReader(stream))
-            {
-                using (JsonReader reader = new JsonTextReader(sr))
-                {
-                    lock (SyncRoot)
-                    {
-                        CurrentGame = game;
-                        entity = DefaultSerializer.Deserialize<ProtoEntity>(reader);
-                        CurrentGame.PostGameLoad();
-                        CurrentGame = null;
-                    }
-                }
-            }
-            return entity;
         }
     }
 }

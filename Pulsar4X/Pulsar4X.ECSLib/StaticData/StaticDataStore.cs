@@ -325,7 +325,7 @@ namespace Pulsar4X.ECSLib
         {
             foreach (string dataSet in _loadedDataSets.Select(dataVersionInfo => dataVersionInfo.Directory).ToList())
             {
-                StaticDataManager.LoadData(dataSet, SaveGame.CurrentGame);
+                StaticDataManager.LoadData(dataSet, SerializationManager.CurrentGame);
             }
         }
 

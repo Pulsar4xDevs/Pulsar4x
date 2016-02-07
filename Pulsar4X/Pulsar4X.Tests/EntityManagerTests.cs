@@ -61,16 +61,6 @@ namespace Pulsar4X.Tests
             expectedMask[orbitTypeIndex] = true;
             expectedMask[colonyTypeIndex] = true;
 
-            using (var stream = new MemoryStream())
-            {
-                SerializationManager.ExportEntity(_game, testEntity, stream);
-                testEntity.Destroy();
-
-                stream.Position = 0;
-
-                testEntity = SerializationManager.ImportEntity(_game, _game.GlobalManager, stream);
-            }
-
             Assert.AreEqual(expectedMask, testEntity.DataBlobMask);
 
             // Create entity with existing datablobs, but provide an empty list:

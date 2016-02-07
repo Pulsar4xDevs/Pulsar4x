@@ -228,7 +228,7 @@
     <Compile Include="Processors\RuinsProcessor.cs" />
     <Compile Include="Processors\SpeciesProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SaveGame.cs" />
+    <Compile Include="SerializationManager.cs" />
     <Compile Include="StarSystem.cs" />
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
     <Compile Include="StaticData\ComponentSD.cs" />

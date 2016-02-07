@@ -357,7 +357,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Attempts to find the entity with the associated Guid.
+        /// Attempts to find the entity with the associated Guid. Checks globally.
         /// </summary>
         /// <returns>True if entityID is found.</returns>
         /// <exception cref="GuidNotFoundException">Guid was found in Global list, but not locally. Should not be possible.</exception>
@@ -488,7 +488,7 @@ namespace Pulsar4X.ECSLib
         #region ISerializable interface
 
         // ReSharper disable once UnusedParameter.Local
-        public EntityManager(SerializationInfo info, StreamingContext context) : this(SaveGame.CurrentGame)
+        public EntityManager(SerializationInfo info, StreamingContext context) : this(SerializationManager.CurrentGame)
         {
             var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
 
@@ -533,8 +533,8 @@ namespace Pulsar4X.ECSLib
                 throw new InvalidOperationException("Fake managers cannot be serialized.");
             }
 
-            SaveGame.ManagersProcessed++;
-            SaveGame.Progress?.Report((double)SaveGame.ManagersProcessed / (_game.NumSystems + 1));
+            SerializationManager.ManagersProcessed++;
+            SerializationManager.Progress?.Report((double)SerializationManager.ManagersProcessed / (_game.NumSystems + 1));
         }
 
         /// <summary>
@@ -548,8 +548,8 @@ namespace Pulsar4X.ECSLib
                 throw new InvalidOperationException("Fake managers cannot be deserialized.");
             }
 
-            SaveGame.ManagersProcessed++;
-            SaveGame.Progress?.Report((double)SaveGame.ManagersProcessed / (_game.NumSystems + 1));
+            SerializationManager.ManagersProcessed++;
+            SerializationManager.Progress?.Report((double)SerializationManager.ManagersProcessed / (_game.NumSystems + 1));
         }
 
         #endregion

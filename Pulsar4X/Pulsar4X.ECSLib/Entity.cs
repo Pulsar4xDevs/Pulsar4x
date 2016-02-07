@@ -491,11 +491,11 @@ namespace Pulsar4X.ECSLib
                 // Lookup the entity using a global Guid lookup.
                 if (entityGuid == Guid.Empty)
                     return InvalidEntity;
-                if (SaveGame.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                if (SerializationManager.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                     return entity;
 
                 // If no entity was found, create a new entity in the global manager.
-                entity = new Entity(SaveGame.CurrentGame.GlobalManager, entityGuid);
+                entity = new Entity(SerializationManager.CurrentGame.GlobalManager, entityGuid);
                 return entity;
             }
 
