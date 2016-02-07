@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -65,17 +63,12 @@ namespace Pulsar4X.Tests
 
             using (var stream = new MemoryStream())
             {
-                SaveGame.ExportEntity(_game, testEntity, stream);
+                SerializationManager.ExportEntity(_game, testEntity, stream);
                 testEntity.Destroy();
 
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    stream.Position = 0;
-                    string jsonString = reader.ReadToEnd();
-                    stream.Position = 0;
+                stream.Position = 0;
 
-                    testEntity = SaveGame.ImportEntity(_game, _game.GlobalManager, stream);
-                }
+                testEntity = SerializationManager.ImportEntity(_game, _game.GlobalManager, stream);
             }
 
             Assert.AreEqual(expectedMask, testEntity.DataBlobMask);

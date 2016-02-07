@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         private void Deserialized(StreamingContext context)
         {
             // Star system resolver loads myStarSystem from mySystemGuid after the game is done loading.
-            SaveGame.CurrentGame.PostLoad += (sender, args) => { if (!SaveGame.CurrentGame.StarSystems.TryGetValue(mySystemGuid, out myStarSystem)) throw new GuidNotFoundException(mySystemGuid); };
+            SerializationManager.CurrentGame.PostLoad += (sender, args) => { if (!SerializationManager.CurrentGame.StarSystems.TryGetValue(mySystemGuid, out myStarSystem)) throw new GuidNotFoundException(mySystemGuid); };
         }
 
         #region Stuff we already talked about.
