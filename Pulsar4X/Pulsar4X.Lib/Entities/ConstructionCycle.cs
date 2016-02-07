@@ -81,7 +81,7 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// Calculate Completion Estimate:
                 /// </summary>
-                float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
+                float BPRequirement = (float)CurrentConstruction.numToBuild * (float)CurrentConstruction.costPerItem;
                 float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
 
                 float YearlyDevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
@@ -110,9 +110,13 @@ namespace Pulsar4X.Entities
                 float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
                 float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
 
-                if ((CurrentConstruction.numToBuild - Completion) < 0.0f)
+                if ((CurrentConstruction.numToBuild - Completion) <= 0.0f)
                 {
-                    Completion = CurrentConstruction.numToBuild;
+                    /// <summary>
+                    /// floating point errors will sometimes produce a situation where completion, numToBuild and installation.Number may be slightly off by a small delta, this 0.00001f is to correct that.
+                    /// it slightly increases the overall cost of the installation, and slightly gives more of an installation than the player ordered.
+                    /// </summary>
+                    Completion = CurrentConstruction.numToBuild + 0.00001f;
                 }
 
                 bool CIRequired = false;

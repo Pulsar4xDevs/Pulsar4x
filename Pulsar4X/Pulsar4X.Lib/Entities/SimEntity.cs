@@ -536,6 +536,7 @@ namespace Pulsar4X.Entities
         {
             GameState.Instance.CurrentSecond += deltaSeconds;
             ConstructionTick += deltaSeconds;
+            GameState.Instance.LastTimestep = deltaSeconds;
 
             foreach (StarSystem CurrentSystem in GameState.Instance.StarSystems)
             {

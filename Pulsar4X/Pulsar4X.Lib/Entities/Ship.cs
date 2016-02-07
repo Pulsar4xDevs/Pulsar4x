@@ -296,6 +296,13 @@ namespace Pulsar4X.Entities
         public BindingList<int> ActiveDetection { get; set; }
 
         /// <summary>
+        /// change to how tick works means that year must also be recorded.
+        /// </summary>
+        private BindingList<int> ThermalYearDetection { get; set; }
+        private BindingList<int> EMYearDetection { get; set; }
+        private BindingList<int> ActiveYearDetection { get; set; }
+
+        /// <summary>
         /// Each ship will store its placement in the overall taskgroup.
         /// </summary>
         public LinkedListNode<int> ThermalList;
@@ -739,11 +746,18 @@ namespace Pulsar4X.Entities
             EMDetection = new BindingList<int>();
             ActiveDetection = new BindingList<int>();
 
+            ThermalYearDetection = new BindingList<int>();
+            EMYearDetection = new BindingList<int>();
+            ActiveYearDetection = new BindingList<int>();
+
             for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
             {
                 ThermalDetection.Add(CurrentTimeSlice);
                 EMDetection.Add(CurrentTimeSlice);
                 ActiveDetection.Add(CurrentTimeSlice);
+                ThermalYearDetection.Add(GameState.Instance.CurrentYear);
+                EMYearDetection.Add(GameState.Instance.CurrentYear);
+                ActiveYearDetection.Add(GameState.Instance.CurrentYear);
             }
 
             ShipCommanded = false;
@@ -3449,6 +3463,7 @@ namespace Pulsar4X.Entities
         }
         #endregion
 
+        #region Ship jump functionality
         /// <summary>
         /// Reduce the jump sickness of this ship. if it is zero the ship is no longer sick
         /// </summary>
@@ -3493,6 +3508,93 @@ namespace Pulsar4X.Entities
         {
             JumpSickness = Constants.JumpEngineTN.SquadronTransitPenalty;
         }
+        #endregion
+
+        #region Ship detection setting and getting
+        /// <summary>
+        /// Is this ship detected this tick via thermal?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedThermal(int FactionID, int tick, int year)
+        {
+            if (ThermalDetection[FactionID] == tick && ThermalYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this ship detected this tick via em?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedEM(int FactionID, int tick, int year)
+        {
+            if (EMDetection[FactionID] == tick && EMYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this ship detected this tick via active?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedActive(int FactionID, int tick, int year)
+        {
+            if (ActiveDetection[FactionID] == tick && ActiveYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Set this ship as detected via thermal
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetThermalDetection(int FactionID, int tick, int year)
+        {
+            ThermalDetection[FactionID] = tick;
+            ThermalYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this ship as detected via em
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetEMDetection(int FactionID, int tick, int year)
+        {
+            EMDetection[FactionID] = tick;
+            EMYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this ship as detected via active. really should have made detectableEntity a class that ships, populations, and ordnance groups inherit from.
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetActiveDetection(int FactionID, int tick, int year)
+        {
+            ActiveDetection[FactionID] = tick;
+            ActiveYearDetection[FactionID] = year;
+        }
+        #endregion
     }
     /// <summary>
     /// End of ShipTN class
@@ -3525,9 +3627,6 @@ namespace Pulsar4X.Entities
             PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
             PointDefenseType = new Dictionary<ComponentTN, bool>();
         }
-
-
-#warning When jump transits are fully implemented, PointDefenseFC listings will have to be moved as appropriate, be sure to handle that.
 
         /// <summary>
         /// Handles adding a new FC to the list.

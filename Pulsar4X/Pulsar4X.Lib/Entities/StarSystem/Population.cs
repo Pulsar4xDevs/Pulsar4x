@@ -335,17 +335,24 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Which factions have detected a thermal sig from this population?
         /// </summary>
-        public BindingList<int> ThermalDetection { get; set; }
+        private BindingList<int> ThermalDetection { get; set; }
 
         /// <summary>
         /// Which factions have detected an EM signature?
         /// </summary>
-        public BindingList<int> EMDetection { get; set; }
+        private BindingList<int> EMDetection { get; set; }
 
         /// <summary>
         /// Any active sensor in range detects a planet.
         /// </summary>
-        public BindingList<int> ActiveDetection { get; set; }
+        private BindingList<int> ActiveDetection { get; set; }
+
+        /// <summary>
+        /// change to how tick works means that year must also be recorded.
+        /// </summary>
+        private BindingList<int> ThermalYearDetection { get; set; }
+        private BindingList<int> EMYearDetection { get; set; }
+        private BindingList<int> ActiveYearDetection { get; set; }
 
         /// <summary>
         /// Populations with structures tend to emit a thermal signature. 5 per installation I believe.
@@ -633,12 +640,18 @@ namespace Pulsar4X.Entities
             ThermalDetection = new BindingList<int>();
             EMDetection = new BindingList<int>();
             ActiveDetection = new BindingList<int>();
+            ThermalYearDetection = new BindingList<int>();
+            EMYearDetection = new BindingList<int>();
+            ActiveYearDetection = new BindingList<int>();
 
             for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
             {
                 ThermalDetection.Add(CurrentTimeSlice);
                 EMDetection.Add(CurrentTimeSlice);
                 ActiveDetection.Add(CurrentTimeSlice);
+                ThermalYearDetection.Add(GameState.Instance.CurrentYear);
+                EMYearDetection.Add(GameState.Instance.CurrentYear);
+                ActiveYearDetection.Add(GameState.Instance.CurrentYear);
             }
 
             ShipsTargetting = new BindingList<ShipTN>();
@@ -1127,6 +1140,91 @@ namespace Pulsar4X.Entities
             EMSignature = signature;
             return signature;
         }
+
+        /// <summary>
+        /// Is this planet detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedThermal(int FactionID, int tick, int year)
+        {
+            if (ThermalDetection[FactionID] == tick && ThermalYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this planet detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedEM(int FactionID, int tick, int year)
+        {
+            if (EMDetection[FactionID] == tick && EMYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this planet detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedActive(int FactionID, int tick, int year)
+        {
+            if (ActiveDetection[FactionID] == tick && ActiveYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Set this planet as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetThermalDetection(int FactionID, int tick, int year)
+        {
+            ThermalDetection[FactionID] = tick;
+            ThermalYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this planet as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetEMDetection(int FactionID, int tick, int year)
+        {
+            EMDetection[FactionID] = tick;
+            EMYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this planet as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetActiveDetection(int FactionID, int tick, int year)
+        {
+            ActiveDetection[FactionID] = tick;
+            ActiveYearDetection[FactionID] = year;
+        }
+
         #endregion
 
         #region Build Queue
