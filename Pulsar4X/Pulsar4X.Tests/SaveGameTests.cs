@@ -129,7 +129,21 @@ namespace Pulsar4X.Tests
             string jsonString = SerializationManager.ExportStarSystem(system);
             _game = Game.NewGame("StarSystem Import Test", DateTime.Now, 0);
 
-            SerializationManager.ImportStarSystem(_game, jsonString);
+            StarSystem importedSystem = SerializationManager.ImportStarSystem(_game, jsonString);
+            Assert.AreEqual(system.Guid, importedSystem.Guid);
+
+            // See that the entities were imported.
+            Assert.AreEqual(system.SystemManager.Entities.Count, importedSystem.SystemManager.Entities.Count);
+
+            // Ensure the system was added to the game's system list.
+            Assert.AreEqual(1, _game.Systems.Count);
+            Assert.IsTrue(_game.Systems.TryGetValue(system.Guid, out system));
+
+            // Ensure the returned value references the same system as the game's system list
+            Assert.AreEqual(importedSystem, system);
+
+
+
         }
 
         [Test]

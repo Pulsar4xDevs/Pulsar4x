@@ -380,10 +380,10 @@ namespace Pulsar4X.ECSLib
                 {
                     writer.Write(jsonString);
                     writer.Flush();
-                }
-                stream.Position = 0;
 
-                return ImportStarSystem(game, stream);
+                    stream.Position = 0;
+                    return ImportStarSystem(game, stream);
+                }
             }
         }
 
