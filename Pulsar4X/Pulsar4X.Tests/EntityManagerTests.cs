@@ -65,7 +65,7 @@ namespace Pulsar4X.Tests
 
             using (var stream = new MemoryStream())
             {
-                _game.GlobalManager.ExportEntity(testEntity, stream);
+                SaveGame.ExportEntity(_game, testEntity, stream);
                 testEntity.Destroy();
 
                 using (StreamReader reader = new StreamReader(stream))
@@ -74,7 +74,7 @@ namespace Pulsar4X.Tests
                     string jsonString = reader.ReadToEnd();
                     stream.Position = 0;
 
-                    _game.GlobalManager.ImportEntity(stream);
+                    testEntity = SaveGame.ImportEntity(_game, _game.GlobalManager, stream);
                 }
             }
 

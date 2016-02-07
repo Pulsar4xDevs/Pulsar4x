@@ -263,9 +263,9 @@ namespace Pulsar4X.ECSLib
             Periapsis = (1 - Eccentricity) * SemiMajorAxis;
         }
 
-        protected override void OnDeserialized()
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
         {
-            base.OnDeserialized();
             CalculateExtendedParameters();
         }
 

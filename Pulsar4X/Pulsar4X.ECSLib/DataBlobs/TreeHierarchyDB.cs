@@ -16,30 +16,21 @@ namespace Pulsar4X.ECSLib
             get { return _owningEntity_; }
             internal set
             {
-                if (ParentDB != null)
-                {
-                    ParentDB.RemoveChild(_owningEntity_);
-                }
+                ParentDB?.RemoveChild(_owningEntity_);
                 _owningEntity_ = value;
 
-                if (OwningEntity != Entity.InvalidEntity && ParentDB != null)
+                if (OwningEntity != Entity.InvalidEntity)
                 {
-                    ParentDB.AddChild(value);
+                    ParentDB?.AddChild(value);
                 }
-                
             }
         }
         protected Entity _owningEntity_;
 
         [CanBeNull]
         [PublicAPI]
-        public Entity Parent
-        {
-            get { return _parent; }
-            private set { _parent = value; }
-        }
         [JsonProperty]
-        private Entity _parent;
+        public Entity Parent { get; private set; }
 
         [CanBeNull]
         [PublicAPI]
@@ -48,51 +39,30 @@ namespace Pulsar4X.ECSLib
             get
             {
                 if (Parent == null)
+                {
                     return null;
-
-                return GetSameTypeDB(Parent);
+                }
+                return Parent == Entity.InvalidEntity ? null : GetSameTypeDB(Parent);
             }
         }
 
         [NotNull]
         [PublicAPI]
-        public Entity Root
-        {
-            get
-            {
-                if (ParentDB != null)
-                {
-                    return ParentDB.Root;
-                }
-                if (OwningEntity != null)
-                {
-                    return OwningEntity;
-                }
-                throw new InvalidOperationException("TreeHierarchyDB cannot access Root entity before being assigned to an entity.");
-            }
-        }
-        [NotNull]
-        [PublicAPI]
-        public TreeHierarchyDB RootDB
-        {
-            get { return GetSameTypeDB(Root); }
-        }
+        public Entity Root => ParentDB?.Root ?? OwningEntity;
 
         [NotNull]
         [PublicAPI]
-        public List<Entity> Children
-        {
-            get { return _children; }
-        }
+        public TreeHierarchyDB RootDB => GetSameTypeDB(Root);
+
+        [NotNull]
+        [PublicAPI]
+        public List<Entity> Children => _children;
         [JsonProperty]
         private readonly List<Entity> _children;
 
         [NotNull]
         [PublicAPI]
-        public List<TreeHierarchyDB> ChildrenDBs
-        {
-            get { return Children.Select(GetSameTypeDB).ToList(); }
-        }
+        public List<TreeHierarchyDB> ChildrenDBs => Children.Select(GetSameTypeDB).ToList();
 
         protected TreeHierarchyDB(Entity parent)
         {
@@ -102,15 +72,9 @@ namespace Pulsar4X.ECSLib
 
         internal void SetParent(Entity parent)
         {
-            if (ParentDB != null)
-            {
-                ParentDB.RemoveChild(OwningEntity);
-            }
+            ParentDB?.RemoveChild(OwningEntity);
             Parent = parent;
-            if (ParentDB != null)
-            {
-                ParentDB.AddChild(OwningEntity);
-            }
+            ParentDB?.AddChild(OwningEntity);
         }
 
         private void AddChild(Entity child)
@@ -138,24 +102,6 @@ namespace Pulsar4X.ECSLib
             EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
 
             return entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
-        }
-
-        [OnDeserialized]
-        private void Deserialized(StreamingContext context)
-        {
-            OnDeserialized();
-        }
-        protected virtual void OnDeserialized()
-        {
-            SaveGame.CurrentGame.PostLoad += PostLoadHandler;
-        }
-
-        private void PostLoadHandler(object sender, EventArgs e)
-        {
-            if (Parent != null && ParentDB != null && OwningEntity != null)
-            {
-                ParentDB.AddChild(OwningEntity);
-            }
         }
 
         #region Unit Test
