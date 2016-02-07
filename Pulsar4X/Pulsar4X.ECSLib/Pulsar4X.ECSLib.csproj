@@ -112,6 +112,7 @@
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
     <Compile Include="DataBlobs\FactionTechDB.cs" />
+    <Compile Include="EventLog\Event.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
     <Compile Include="Factories\DefaultStartFactory.cs" />
     <Compile Include="Factories\ShipComponents\GenericComponent.cs" />
