@@ -164,10 +164,8 @@ namespace Pulsar4X.ECSLib
             : this(atmosphereDB.Pressure, atmosphereDB.Hydrosphere, atmosphereDB.HydrosphereExtent, 
             atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure, atmosphereDB.Albedo, 
             atmosphereDB.SurfaceTemperature, 
-            (JDictionary<AtmosphericGasSD,float>)atmosphereDB.Composition.ToDictionary(
-            entry => new AtmosphericGasSD(), 
-            entry => entry.Value
-            ))
+            new JDictionary<AtmosphericGasSD, float>(atmosphereDB.Composition)
+            )
         {
 
         }

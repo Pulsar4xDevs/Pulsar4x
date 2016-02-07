@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -55,8 +57,10 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public JDictionary<Guid, Entity> ComponentDesigns { get; internal set; }
-        
 
+        [PublicAPI]
+        public ReadOnlyCollection<LogEvent> LogEvents => new ReadOnlyCollection<LogEvent>(_logEvents);
+        internal List<LogEvent> _logEvents = new List<LogEvent>(); 
 
         public FactionInfoDB()
             : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() )
@@ -92,6 +96,12 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new FactionInfoDB(this);
+        }
+
+        [OnDeserialized]
+        public void OnDeserialized(StreamingContext context)
+        {
+            SaveGame.CurrentGame.PostLoad += (sender, args) => { _logEvents = SaveGame.CurrentGame.GetEventsForFaction(OwningEntity); };
         }
     }
 }

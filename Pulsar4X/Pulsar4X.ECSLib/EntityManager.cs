@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -23,105 +26,6 @@ namespace Pulsar4X.ECSLib
 
     public class EntityManager : ISerializable
     {
-        /// <summary>
-        /// This class is responsible for reading/writing entities to JSON.
-        /// It doesn't work on actual entities, it works on the datablobs and Guid that are stored in the entity manager.
-        /// </summary>
-        private class EntityManagerConverter : JsonConverter
-        {
-            /// <summary>
-            /// Serializes an Entity from the EntityManager's custom storage format, into a more classic JsonObject. 
-            /// </summary>
-            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            {
-                Entity entity = ((StoredEntity)value).EntityStored;
-
-                writer.WriteStartObject(); // Start the Entity.
-                writer.WritePropertyName("Guid"); // Write the Guid PropertyName
-                serializer.Serialize(writer, entity.Guid); // Write the Entity's guid.
-                    foreach (BaseDataBlob dataBlob in entity.DataBlobs)
-                    {
-                        writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
-                        serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
-                    }
-                    writer.WriteEndObject(); // End then Entity.
-            }
-
-            /// <summary>
-            /// Deserializes an Entity based on the JSON found in the EntityManager.
-            /// We need to leave the JsonReader in a state where it is reading AFTER this entity.
-            /// First we read the entity and its datablobs in its entirety.
-            /// </summary>
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-            {
-                //StarObject (Entity)
-                reader.Read(); // PropertyName Guid
-                reader.Read(); // Actual Guid
-                Guid entityGuid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
-
-                // Deserialize the dataBlobs
-                var dataBlobs = new List<BaseDataBlob>();
-                reader.Read(); // PropertyName DATABLOB
-                while (reader.TokenType == JsonToken.PropertyName)
-                {
-                    Type dataBlobType = Type.GetType("Pulsar4X.ECSLib." + (string)reader.Value);
-                    reader.Read(); // StartObject (dataBlob)
-                    BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
-                    dataBlobs.Add(dataBlob);
-                    reader.Read(); // PropertyName DATABLOB OR EndObject (Entity)
-                }
-
-                // Now that the entity has been read, we do a lookup to see if the entity has been created previously by some reference.
-                // Attempt a global Guid lookup of the Guid.
-                Entity entity;
-                if (SaveGame.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                {
-                    // Entity was previously created by a reference deserialization.
-                    // Reference deserializations use the EntityConverter found in Entity.cs instead of this one.
-                    // The Entity.cs EntityConverter does not deserialize the datablobs, it just creates the Entity object
-                    // so it can be used as a reference in memory. Now that the datablobs have been deserialized, we assign
-                    // them to the previously created Entity object.
-                    foreach (BaseDataBlob dataBlob in dataBlobs)
-                    {
-                        entity.SetDataBlob(dataBlob);
-                    }
-                }
-                else
-                {
-                    // No Entity object has been created by a previous deserialization. Create it with the datablobs.
-                    entity = new Entity(SaveGame.CurrentGame.GlobalManager, entityGuid, dataBlobs);
-                }
-
-                // If the entity was created by a reference deserialization, then it exists in the GlobalManager.
-                // We store the entity here, and when we return to the EntityManager JsonConstructer, we transfer
-                // the entities to the proper EntityManager
-                var deserializedEntity = new StoredEntity(entity);
-                return deserializedEntity;
-            }
-
-            public override bool CanConvert(Type objectType)
-            {
-                return objectType == typeof(StoredEntity);
-            }
-        }
-
-        /// <summary>
-        /// Helper class for Entity serialization/deserialization.
-        /// Entity deserialization requires filling out an object.
-        /// The Entity class wont work because it already uses a custom JsonConverter
-        /// to resolve Entity Guid references into object references.
-        /// </summary>
-        [JsonConverter(typeof(EntityManagerConverter))]
-        private class StoredEntity
-        {
-            public readonly Entity EntityStored;
-
-            public StoredEntity(Entity entity)
-            {
-                EntityStored = entity;
-            }
-        }
-
         [CanBeNull]
         private readonly Game _game;
         private readonly List<Entity> _entities = new List<Entity>();
@@ -345,7 +249,6 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Public API Functions
-
         /// <summary>
         /// Returns a list of entities that have datablob type T.
         /// <para></para>
@@ -587,25 +490,34 @@ namespace Pulsar4X.ECSLib
         // ReSharper disable once UnusedParameter.Local
         public EntityManager(SerializationInfo info, StreamingContext context) : this(SaveGame.CurrentGame)
         {
-            // Read a "List of Stored Entities" from Json
-            var entities = (List<StoredEntity>)info.GetValue("Entities", typeof(List<StoredEntity>));
+            var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
 
-            // Transfer all entities to this manager. Entities deserialized by reference deserialization 
-            // are deserialized into the GlobalManager, so we need to make sure it comes here once properly deserialized.
-            foreach (StoredEntity entity in entities)
+            foreach (ProtoEntity protoEntity in entities)
             {
-                entity.EntityStored.Transfer(this);
+                Entity entity;
+                if (FindEntityByGuid(protoEntity.Guid, out entity))
+                {
+                    // Entity has already been deserialized as a reference. It currently exists on the global manager.
+                    entity.Transfer(this);
+                    foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
+                    {
+                        entity.SetDataBlob(dataBlob);
+                    }
+                }
+                else
+                {
+                    // Entity has not been previously deserialized.
+                    Entity.Create(this, protoEntity);
+                }
             }
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            // Create a list of "StoredEntities" from our custom storage format.
-            List<StoredEntity> storedEntities = (from entity in _entities
-                                  where entity != null
-                                  select new StoredEntity(entity)).ToList();
+            List<ProtoEntity> storedEntities = (from entity in _entities
+                                                where entity != null
+                                                select entity.Clone()).ToList();
 
-            // Add it to the resulting output.
             info.AddValue("Entities", storedEntities);
         }
 
@@ -641,6 +553,5 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
-
     }
 }

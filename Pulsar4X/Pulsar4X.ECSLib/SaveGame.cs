@@ -111,7 +111,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         private static Game Load(Stream inputStream, IProgress<double> progress = null)
         {
-            Game game = new Game();
+            var game = new Game();
 
             lock (SyncRoot)
             {
@@ -156,6 +156,103 @@ namespace Pulsar4X.ECSLib
             return game;
         }
 
+        [PublicAPI]
+        public static void ExportEntity(Game game, [NotNull] Entity entity, [NotNull] Stream outputStream, bool compress = false)
+        {
+            if (outputStream == null)
+            {
+                throw new ArgumentNullException(nameof(outputStream));
+            }
+
+            if (!entity.IsValid)
+            {
+                throw new InvalidOperationException("Cannot serialize invalid entities.");
+            }
+
+            var defaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
+            defaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+
+            using (var intermediateStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                {
+                    using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                    {
+                        defaultSerializer.Serialize(writer, entity.Clone());
+                    }
+                }
+
+                // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
+                intermediateStream.Position = 0;
+
+                if (compress)
+                {
+                    using (var compressionStream = new GZipStream(outputStream, CompressionLevel.Optimal))
+                    {
+                        intermediateStream.CopyTo(compressionStream);
+                    }
+                }
+                else
+                {
+                    intermediateStream.CopyTo(outputStream);
+                }
+            }
+        }
+
+        public static Entity ImportEntity(Game game, EntityManager manager, MemoryStream inputMemoryStream)
+        {
+            ProtoEntity entity;
+
+            // Check if our stream is compressed.
+            using (var bufferedStream = new BufferedStream(inputMemoryStream))
+            {
+                if (HasGZipHeader(bufferedStream))
+                {
+                    // File is compressed. Decompress using GZip.
+                    using (var compressionStream = new GZipStream(bufferedStream, CompressionMode.Decompress))
+                    {
+                        // Decompress into a MemoryStream.
+                        using (var intermediateStream = new MemoryStream())
+                        {
+                            // Decompress the file into an intermediate MemoryStream.
+                            compressionStream.CopyTo(intermediateStream);
+
+                            // Reset the position of the MemoryStream so it can be read from the beginning.
+                            intermediateStream.Position = 0;
+
+                            entity = PopulateEntity(game, intermediateStream);
+                        }
+                    }
+                }
+                else
+                {
+                    entity = PopulateEntity(game, bufferedStream);
+                }
+            }
+            return Entity.Create(manager, entity);
+        }
+
+        private static ProtoEntity PopulateEntity(Game game, Stream stream)
+        {
+            var defaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.Objects };
+            ProtoEntity entity;
+
+            using (var sr = new StreamReader(stream))
+            {
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    lock (SyncRoot)
+                    {
+                        CurrentGame = game;
+                        entity = defaultSerializer.Deserialize<ProtoEntity>(reader);
+                        CurrentGame.PostGameLoad();
+                        CurrentGame = null;
+                    }
+                }
+            }
+            return entity;
+        }
+
         /// <summary>
         /// Check if we have a valid file.
         /// </summary>
@@ -190,7 +287,7 @@ namespace Pulsar4X.ECSLib
         /// Checks the stream for compression by looking for GZip header numbers.
         /// </summary>
         /// <returns></returns>
-        private static bool HasGZipHeader(BufferedStream inputStream)
+        public static bool HasGZipHeader(BufferedStream inputStream)
         {
             var headerBytes = new byte[2];
 
