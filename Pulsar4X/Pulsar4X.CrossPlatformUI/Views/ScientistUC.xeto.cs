@@ -20,6 +20,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
         protected ScientistResearchView CurrentResearch { get; set; }
+        protected Expander RQExpander { get; set; }
         protected StackLayout ResearchQueue { get; set; }
 
         public ScientistUC()
@@ -32,8 +33,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             DataContext = _viewModel;
 
-            _viewModel.ProjectQueue.CollectionChanged += ProjectQueue_CollectionChanged; 
-
+            _viewModel.ProjectQueue.CollectionChanged += ProjectQueue_CollectionChanged;
+            CurrentResearch = new ScientistResearchView();
+            RQExpander.Header = CurrentResearch;
             SetResearchViews();
 
         }
@@ -49,7 +51,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             if (_viewModel.ProjectQueue.Count > 0)
             {
                 CurrentResearch.SetViewModel(_viewModel.ProjectQueue[0]);
-
+                
                 foreach (var item in _viewModel.ProjectQueue.Skip(1))
                 {
                     ResearchQueue.Items.Add(new ScientistResearchView(item));

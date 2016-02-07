@@ -11,11 +11,8 @@
       <NumericUpDown ID="AssignedLabs" Value="{Binding ScientistAssignedLabs}" />
       <Label ID="MaxLabs" Value ="{Binding ScientistMaxLabs}"/>
 		</TableRow>
-     <TableRow>
-       <c:ScientistResearchView x:Name="CurrentResearch"/>
-		</TableRow>
     <TableRow>
-      <Expander>
+      <Expander ID="RQExpander">
         <StackLayout ID="ResearchQueue">          
         </StackLayout>
       </Expander>
