@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib
         }
 
         [OnDeserialized]
-        public void OnDeserialized()
+        public void OnDeserialized(StreamingContext context)
         {
             SaveGame.CurrentGame.PostLoad += (sender, args) => { _logEvents = SaveGame.CurrentGame.GetEventsForFaction(OwningEntity); };
         }

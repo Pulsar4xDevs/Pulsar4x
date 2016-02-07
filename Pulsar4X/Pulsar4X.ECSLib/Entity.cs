@@ -11,13 +11,20 @@ namespace Pulsar4X.ECSLib
     /// It holds its own datablobs and provides all other functionality (but not performance) of the EntityManager.
     /// </summary>
     [PublicAPI]
+    [JsonConverter(typeof(ProtoEntityConverter))]
     public class ProtoEntity
     {
         [PublicAPI]
-        public List<BaseDataBlob> DataBlobs { get; set; }
+        public List<BaseDataBlob> DataBlobs
+        {
+            get { return _dataBlobs; }
+            set { _dataBlobs = value; }
+        }
+
+        private List<BaseDataBlob> _dataBlobs = EntityManager.BlankDataBlobList();
 
         [PublicAPI]
-        public Guid Guid { get; protected set; }
+        public Guid Guid { get; protected internal set; }
 
         [NotNull]
         [PublicAPI]
@@ -94,6 +101,51 @@ namespace Pulsar4X.ECSLib
             DataBlobs[typeIndex] = null;
             _protectedDataBlobMask_[typeIndex] = false;
         }
+
+        internal class ProtoEntityConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType)
+            {
+                return objectType == typeof(ProtoEntity);
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                var protoEntity = new ProtoEntity();
+
+                //StarObject (Entity)
+                reader.Read(); // PropertyName Guid
+                reader.Read(); // Actual Guid
+                protoEntity.Guid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
+
+                // Deserialize the dataBlobs
+                reader.Read(); // PropertyName DATABLOB
+                while (reader.TokenType == JsonToken.PropertyName)
+                {
+                    Type dataBlobType = Type.GetType("Pulsar4X.ECSLib." + (string)reader.Value);
+                    reader.Read(); // StartObject (dataBlob)
+                    BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
+                    protoEntity.SetDataBlob(dataBlob);
+                    reader.Read(); // PropertyName DATABLOB OR EndObject (Entity)
+                }
+
+                return protoEntity;
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                ProtoEntity protoEntity = (ProtoEntity)value;
+                writer.WriteStartObject(); // Start the Entity.
+                writer.WritePropertyName("Guid"); // Write the Guid PropertyName
+                serializer.Serialize(writer, protoEntity.Guid); // Write the Entity's guid.
+                foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
+                {
+                    writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
+                    serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
+                }
+                writer.WriteEndObject(); // End then Entity.
+            }
+        }
     }
 
     [JsonConverter(typeof(EntityConverter))]
@@ -158,7 +210,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(manager, Guid.NewGuid(), protoEntity.DataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(manager, protoEntity.Guid, protoEntity.DataBlobs) { }
         #endregion
 
         #region Public API Functions
@@ -186,7 +238,7 @@ namespace Pulsar4X.ECSLib
 
         public static Entity Create(EntityManager manager, ProtoEntity protoEntity)
         {
-            return Create(manager, protoEntity.DataBlobs);
+            return new Entity(manager, protoEntity.Guid, protoEntity.DataBlobs);
         }
 
         [PublicAPI]
@@ -352,7 +404,7 @@ namespace Pulsar4X.ECSLib
                 throw new InvalidOperationException("Cannot clone an invalid entity.");
             }
             List<BaseDataBlob> clonedDataBlobs = DataBlobs.Select(dataBlob => dataBlob.Clone()).Cast<BaseDataBlob>().ToList();
-            return ProtoEntity.Create(clonedDataBlobs);
+            return Create(Guid, clonedDataBlobs);
         }
 
         /// <summary>
@@ -363,7 +415,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public Entity Clone(EntityManager manager)
         {
-            return new Entity(manager, Clone());
+            ProtoEntity clone = Clone();
+            clone.Guid = Guid.NewGuid();
+            return new Entity(manager, clone);
         }
 
         #endregion

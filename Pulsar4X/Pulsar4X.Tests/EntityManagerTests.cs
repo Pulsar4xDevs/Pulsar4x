@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography;
@@ -61,6 +62,21 @@ namespace Pulsar4X.Tests
             int colonyTypeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
             expectedMask[orbitTypeIndex] = true;
             expectedMask[colonyTypeIndex] = true;
+
+            using (var stream = new MemoryStream())
+            {
+                _game.GlobalManager.ExportEntity(testEntity, stream);
+                testEntity.Destroy();
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    stream.Position = 0;
+                    string jsonString = reader.ReadToEnd();
+                    stream.Position = 0;
+
+                    _game.GlobalManager.ImportEntity(stream);
+                }
+            }
 
             Assert.AreEqual(expectedMask, testEntity.DataBlobMask);
 

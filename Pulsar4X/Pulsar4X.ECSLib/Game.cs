@@ -105,6 +105,7 @@ namespace Pulsar4X.ECSLib
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);
             StaticData = new StaticDataStore();
+            _logEvents = new List<LogEvent>();
 
             PostLoad += (sender, args) => { InitializeProcessors(); };
         }
