@@ -44,22 +44,38 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         protected void AddModButton_Click(object sender, EventArgs e)
         {
-
+            if (AvailableModList.SelectedKey != null)
+            {
+                var item = AvailableModList.SelectedKey;
+                AvailableModList.Items.RemoveAt(AvailableModList.SelectedIndex);
+                SelectedModList.Items.Add(item);
+            }
         }
 
         protected void RemoveModButton_Click(object sender, EventArgs e)
         {
-
+            if (SelectedModList.SelectedKey != null)
+            {
+                var item = SelectedModList.SelectedKey;
+                SelectedModList.Items.RemoveAt(SelectedModList.SelectedIndex);
+                AvailableModList.Items.Add(item);
+            }
         }
 
         protected void MoveUpModButton_Click(object sender, EventArgs e)
         {
-
+            if (SelectedModList.SelectedKey != null && SelectedModList.SelectedIndex != 0)
+            {
+                SelectedModList.Items.Move(SelectedModList.SelectedIndex, SelectedModList.SelectedIndex - 1);
+            }
         }
 
         protected void MoveDownModButton_Click(object sender, EventArgs e)
         {
-
+            if (SelectedModList.SelectedKey != null && SelectedModList.SelectedIndex != SelectedModList.Items.Count-1)
+            {
+                SelectedModList.Items.Move(SelectedModList.SelectedIndex, SelectedModList.SelectedIndex + 1);
+            }
         }
 
         protected void DefaultButton_Click(object sender, EventArgs e)
