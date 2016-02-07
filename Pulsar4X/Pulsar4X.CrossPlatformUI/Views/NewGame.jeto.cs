@@ -80,6 +80,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         protected void DefaultButton_Click(object sender, EventArgs e)
         {
+            foreach (var item in new_game_options.SelectedModList)
+            {
+                SelectedModList.Items.Add(item.Name);
+            }
+
             Game.CreateGame(new_game_options);
             Close();
         }
