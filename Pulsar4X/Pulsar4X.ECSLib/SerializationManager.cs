@@ -440,6 +440,7 @@ namespace Pulsar4X.ECSLib
                     {
                         CurrentGame = game;
                         system = DefaultSerializer.Deserialize<StarSystem>(reader);
+                        CurrentGame.StarSystems.Add(system.Guid, system);
                         CurrentGame.PostGameLoad();
                         CurrentGame = null;
                     }

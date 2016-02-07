@@ -121,11 +121,23 @@ namespace Pulsar4X.Tests
                 CreateTestUniverse(10);
             Assert.NotNull(_game);
 
-            // Choose a random system.
+            // Choose a procedural system.
             var rand = new Random();
             int systemIndex = rand.Next(_game.Systems.Count - 1);
             StarSystem system = _game.Systems.Values.ToArray()[systemIndex];
 
+            ImportExportSystem(system);
+
+            //Now do the same thing, but with Sol.
+            DefaultStartFactory.DefaultHumans(_game, "Humans");
+
+            system = _game.Systems.Values.ToArray()[_game.Systems.Count - 1];
+            ImportExportSystem(system);
+
+        }
+
+        private void ImportExportSystem(StarSystem system)
+        {
             string jsonString = SerializationManager.ExportStarSystem(system);
             _game = Game.NewGame("StarSystem Import Test", DateTime.Now, 0);
 
@@ -141,9 +153,6 @@ namespace Pulsar4X.Tests
 
             // Ensure the returned value references the same system as the game's system list
             Assert.AreEqual(importedSystem, system);
-
-
-
         }
 
         [Test]

@@ -31,7 +31,6 @@ namespace Pulsar4X.ECSLib
         [JsonConstructor]
         private StarSystem()
         {
-            SerializationManager.CurrentGame.PostLoad += (sender, args) => { SerializationManager.CurrentGame.StarSystems.Add(Guid, this); };
         }
 
         public StarSystem(Game game, string name, int seed)
