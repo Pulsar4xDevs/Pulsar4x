@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Pulsar4X.ECSLib;
 using System.IO;
 using System.Linq;
@@ -9,8 +8,9 @@ namespace Pulsar4X.Tests
 {
     using NUnit.Framework;
 
-    [TestFixture, Description("Tests the game Save/Load system.")]
-    class SaveGameTests
+    [TestFixture]
+    [Description("Tests the SerialzationManagers Import/Export capabilities.")]
+    internal class SerializationManagerTests
     {
         private Game _game;
         private const string File = "./testSave.json";
@@ -135,7 +135,6 @@ namespace Pulsar4X.Tests
             ImportExportSystem(system);
 
         }
-
         private void ImportExportSystem(StarSystem system)
         {
             string jsonString = SerializationManager.ExportStarSystem(system);
