@@ -13,6 +13,8 @@
 		</TableRow>
     <TableRow>
       <Expander ID="RQExpander">
+        <Expander.Header>
+          <c:ScientistResearchView x:Name="CurrentResearch" /></Expander.Header>
         <StackLayout ID="ResearchQueue">          
         </StackLayout>
       </Expander>

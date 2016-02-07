@@ -20,7 +20,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
         protected ScientistResearchView CurrentResearch { get; set; }
-        protected Expander RQExpander { get; set; }
+        //protected Expander RQExpander { get; set; }
         protected StackLayout ResearchQueue { get; set; }
 
         public ScientistUC()
@@ -34,8 +34,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             DataContext = _viewModel;
 
             _viewModel.ProjectQueue.CollectionChanged += ProjectQueue_CollectionChanged;
-            CurrentResearch = new ScientistResearchView();
-            RQExpander.Header = CurrentResearch;
+            //CurrentResearch = new ScientistResearchView();
+            //RQExpander.Header = CurrentResearch;
             SetResearchViews();
 
         }
