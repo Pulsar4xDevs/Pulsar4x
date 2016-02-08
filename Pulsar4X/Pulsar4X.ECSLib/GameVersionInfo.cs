@@ -35,6 +35,7 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
+                
                 AssemblyName assName = Assembly.GetAssembly(typeof(VersionInfo)).GetName();
                 int majorVersion = assName.Version.Major;
                 int minorVersion = assName.Version.Minor;
