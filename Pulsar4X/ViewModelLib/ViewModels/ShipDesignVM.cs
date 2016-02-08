@@ -60,4 +60,42 @@ namespace Pulsar4X.ViewModel.ViewModels
             throw new NotImplementedException();
         }
     }
+
+    class ComponentListVM : IViewModel
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void Refresh(bool partialRefresh = false)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    class ComponentListComponentVM : IViewModel
+    {
+        private Entity _componentEntity;
+        private ComponentInfoDB _designDB;
+
+        public string Name { get; private set ; }
+        public int Size { get { return _designDB.SizeInTons; } }
+        public int AbilityAmount { get; set; }
+
+
+        public ComponentListComponentVM(Entity component)
+        {
+            _componentEntity = component;
+            _designDB = component.GetDataBlob<ComponentInfoDB>();
+
+            Name = component.GetDataBlob<NameDB>().DefaultName;
+            
+           
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void Refresh(bool partialRefresh = false)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

@@ -134,6 +134,8 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ShipDesignView.xeto" />
+    <EmbeddedResource Include="Views\ComponentsListView.xeto" />
+    <EmbeddedResource Include="Views\ComponentListComponentView.xeto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -155,6 +157,12 @@
     </Compile>
     <Compile Include="Views\ComponentDesignView.xeto.cs">
       <DependentUpon>ComponentDesignView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentListComponentView.xeto.cs">
+      <DependentUpon>ComponentListComponentView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentsListView.xeto.cs">
+      <DependentUpon>ComponentsListView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\JobAbilityView.xeto.cs">
       <DependentUpon>JobAbilityView.xeto</DependentUpon>
