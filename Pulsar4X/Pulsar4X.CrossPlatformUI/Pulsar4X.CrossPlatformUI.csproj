@@ -133,6 +133,7 @@
     <EmbeddedResource Include="Views\ScientistResearchView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ShipDesignView.xeto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -175,6 +176,9 @@
     </Compile>
     <Compile Include="Views\ScientistUC.xeto.cs">
       <DependentUpon>ScientistUC.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ShipDesignView.xeto.cs">
+      <DependentUpon>ShipDesignView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\Startup.jeto.cs">
       <DependentUpon>Startup.jeto</DependentUpon>
