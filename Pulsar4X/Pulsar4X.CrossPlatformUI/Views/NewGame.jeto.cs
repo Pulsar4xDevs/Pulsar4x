@@ -4,6 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Json;
 using Pulsar4X.ViewModel;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -36,55 +37,49 @@ namespace Pulsar4X.CrossPlatformUI.Views
             NumberOfSystemsBinding.BindDataContext((NewGameOptionsVM n) => n.NumberOfSystems);
             //NumberOfSystems.BindDataContext<int>("NumberOfSystems", "NumberOfSystems");
 
-            foreach (var item in new_game_options.AvailableModList)
-            {
-                AvailableModList.Items.Add(item.Name);
-            }
+            AvailableModList.ItemTextBinding = Binding.Property((DataVersionInfo n) => n.FullVersion);
+            SelectedModList.ItemTextBinding = Binding.Property((DataVersionInfo n) => n.FullVersion);
+
+            AvailableModList.DataStore = new_game_options.AvailableModList;
+            SelectedModList.DataStore = new_game_options.SelectedModList;
         }
 
         protected void AddModButton_Click(object sender, EventArgs e)
         {
-            if (AvailableModList.SelectedKey != null)
+            if (AvailableModList.SelectedValue != null)
             {
-                var item = AvailableModList.SelectedKey;
-                AvailableModList.Items.RemoveAt(AvailableModList.SelectedIndex);
-                SelectedModList.Items.Add(item);
+                new_game_options.SelectedModList.Add((DataVersionInfo)AvailableModList.SelectedValue);
+                new_game_options.AvailableModList.RemoveAt(AvailableModList.SelectedIndex);
             }
         }
 
         protected void RemoveModButton_Click(object sender, EventArgs e)
         {
-            if (SelectedModList.SelectedKey != null)
+            if (SelectedModList.SelectedValue != null)
             {
-                var item = SelectedModList.SelectedKey;
-                SelectedModList.Items.RemoveAt(SelectedModList.SelectedIndex);
-                AvailableModList.Items.Add(item);
+                new_game_options.AvailableModList.Add((DataVersionInfo)SelectedModList.SelectedValue);
+                new_game_options.SelectedModList.RemoveAt(SelectedModList.SelectedIndex);
             }
         }
 
         protected void MoveUpModButton_Click(object sender, EventArgs e)
         {
-            if (SelectedModList.SelectedKey != null && SelectedModList.SelectedIndex != 0)
+            if (SelectedModList.SelectedValue != null && SelectedModList.SelectedIndex != 0)
             {
-                SelectedModList.Items.Move(SelectedModList.SelectedIndex, SelectedModList.SelectedIndex - 1);
+                new_game_options.SelectedModList.Move(SelectedModList.SelectedIndex, SelectedModList.SelectedIndex - 1);
             }
         }
 
         protected void MoveDownModButton_Click(object sender, EventArgs e)
         {
-            if (SelectedModList.SelectedKey != null && SelectedModList.SelectedIndex != SelectedModList.Items.Count-1)
+            if (SelectedModList.SelectedValue != null && SelectedModList.SelectedIndex != new_game_options.SelectedModList.Count-1)
             {
-                SelectedModList.Items.Move(SelectedModList.SelectedIndex, SelectedModList.SelectedIndex + 1);
+                new_game_options.SelectedModList.Move(SelectedModList.SelectedIndex, SelectedModList.SelectedIndex + 1);
             }
         }
 
         protected void DefaultButton_Click(object sender, EventArgs e)
         {
-            foreach (var item in new_game_options.SelectedModList)
-            {
-                SelectedModList.Items.Add(item.Name);
-            }
-
             Game.CreateGame(new_game_options);
             MessageBox.Show("New Game Created", "New Game", MessageBoxType.Information);
             Close();
