@@ -150,6 +150,7 @@
     <Compile Include="DataBlobs\ExampleDB.cs" />
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
+    <Compile Include="DataBlobs\JPSurveyable.cs" />
     <Compile Include="DataBlobs\ScientistDB.cs" />
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Factories\DefaultStartFactory.cs" />
     <Compile Include="Factories\ShipComponents\GenericComponent.cs" />
     <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
+    <Compile Include="Factories\SystemGen\JPSurveyFactory.cs" />
     <Compile Include="Factories\SystemGen\StarFactory.cs" />
     <Compile Include="Factories\SystemGen\SystemBodyFactory.cs" />
     <Compile Include="Factories\SystemGen\SystemFactory.cs" />
