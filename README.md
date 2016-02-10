@@ -13,7 +13,7 @@ Bugs can be reported on the [issue tracker.](https://github.com/Pulsar4xDevs/Pul
 
 ## Compiling Pulsar4x ECS-CrossPlatform branch:
 
-To compile Pulsar4x we recommend [VisualStudio 2015 Community Edition](http://www.visualstudio.com/en-us/news/vs2013-community-vs.aspx). we're starting to use a bit of C#6, so 2013 is not recomended unless you know what you're doing.  Mono should work if you have enough mono-fu.
+To compile Pulsar4x we recommend [VisualStudio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). we're starting to use a bit of C#6, so 2013 is not recomended unless you know what you're doing.  Mono should work if you have enough mono-fu.
 
 
 Instructions:
