@@ -146,7 +146,6 @@
     <Compile Include="DataBlobs\ColonyMineingDB.cs" />
     <Compile Include="DataBlobs\ColonyRefiningDB.cs" />
     <Compile Include="DataBlobs\ColonyResearchDB.cs" />
-    <Compile Include="DataBlobs\CommandableDB.cs" />
     <Compile Include="DataBlobs\ComponentDB.cs" />
     <Compile Include="DataBlobs\ExampleDB.cs" />
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
@@ -161,10 +160,6 @@
     <Compile Include="Helpers\Pathfinding\PathfindingManager.cs" />
     <Compile Include="Helpers\Pulse.cs" />
     <Compile Include="Helpers\Vector4.cs" />
-    <Compile Include="Orders\Conditionals\ConditionalOrder.cs" />
-    <Compile Include="Orders\Conditionals\Results\Refuel.cs" />
-    <Compile Include="Orders\Conditionals\Results\Result.cs" />
-    <Compile Include="Orders\Order.cs" />
     <Compile Include="DataBlobs\ScientistDB.cs" />
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
@@ -180,8 +175,6 @@
     <Compile Include="Factories\SystemGen\SystemFactory.cs" />
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
-    <Compile Include="Orders\Conditionals\Conditions\Condition.cs" />
-    <Compile Include="Orders\Conditionals\Conditions\OwnFuelPercent.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\MineProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\RefiningProcessor.cs" />
@@ -191,7 +184,6 @@
     <Compile Include="Processors\ReCalcProcessor.cs" />
     <Compile Include="Processors\ShipDamageProcessor.cs" />
     <Compile Include="Processors\ShipMovement.cs" />
-    <Compile Include="Processors\SurveyProcessor.cs" />
     <Compile Include="Processors\TechProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />

@@ -263,8 +263,7 @@ namespace Pulsar4X.ECSLib
         {
             OrbitProcessor.Process(this, systems, deltaSeconds);
             ShipMovementProcessor.Process(this, systems, deltaSeconds);
-
-            SurveyProcessor.Process(this, systems, deltaSeconds);
+            
             EconProcessor.Process(this, systems, deltaSeconds);
         }
 
