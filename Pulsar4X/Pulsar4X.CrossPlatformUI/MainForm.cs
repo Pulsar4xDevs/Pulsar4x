@@ -25,6 +25,7 @@ namespace Pulsar4X.CrossPlatformUI
             var sysMap = new Commands.SystemMap(Game);
             var colView = new Commands.ColonyView(Game);
             var componentDesign = new Commands.ComponentDesignViewCMD(Game);
+            var shipDesign = new Commands.ShipDesignViewCMD(Game);
             var quit = new Commands.Quit();
 
             if (Platform.Supports<MenuBar>())
@@ -55,6 +56,7 @@ namespace Pulsar4X.CrossPlatformUI
                 ToolBar.Items.Add(sysMap);
                 ToolBar.Items.Add(colView);
                 ToolBar.Items.Add(componentDesign);
+                ToolBar.Items.Add(shipDesign);
             }
 
         }

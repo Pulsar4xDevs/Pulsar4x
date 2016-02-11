@@ -134,8 +134,16 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ShipDesignView.xeto" />
-    <EmbeddedResource Include="Views\ComponentsListView.xeto" />
+    <EmbeddedResource Include="Views\ComponentsListView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\ComponentListComponentView.xeto" />
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentAbilityTemplateDesignerView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -144,6 +152,7 @@
     <Compile Include="Commands\NewGame.cs" />
     <Compile Include="Commands\Quit.cs" />
     <Compile Include="Commands\SaveGame.cs" />
+    <Compile Include="Commands\ShipDesignViewCMD.cs" />
     <Compile Include="Commands\SystemMap.cs" />
     <Compile Include="CustomControls\RenderCanvas.cs" />
     <Compile Include="MainForm.cs" />
@@ -155,6 +164,9 @@
     <Compile Include="Views\ColonyScreenView.xeto.cs">
       <DependentUpon>ColonyScreenView.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\ComponentTemplateDesigner\ComponentAbilityTemplateDesignerView.xeto.cs">
+      <DependentUpon>ComponentAbilityTemplateDesignerView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ComponentDesignView.xeto.cs">
       <DependentUpon>ComponentDesignView.xeto</DependentUpon>
     </Compile>
@@ -163,6 +175,9 @@
     </Compile>
     <Compile Include="Views\ComponentsListView.xeto.cs">
       <DependentUpon>ComponentsListView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerView.xeto.cs">
+      <DependentUpon>ComponentTemplateDesignerView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\JobAbilityView.xeto.cs">
       <DependentUpon>JobAbilityView.xeto</DependentUpon>

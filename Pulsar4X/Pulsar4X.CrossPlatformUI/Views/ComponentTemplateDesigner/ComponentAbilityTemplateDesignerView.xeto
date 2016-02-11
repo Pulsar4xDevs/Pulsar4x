@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableRow>
+      <Label Text="Name" />
+      <TextBox Text="{Binding Name}" />
+    </TableRow>
+    <TableRow>
+      <Label Text="Description" />
+      <TextBox Text="{Binding Description}" />
+    </TableRow>
+    <TableRow>
+      <Label Text="GuiHint" />      
+      <ComboBox ID="GuiHint" />
+    </TableRow>
+    <TableRow>
+      <StackLayout ID="GuiHintControls"></StackLayout>
+    </TableRow>
+    <!--TableRow ID="GuiHintControls">
+      <Label Text="MinFormula" />
+      <TextBox Text="{Binding MinFormula}" />
+      <Label Text="MaxFormula" />
+      <TextBox Text="{Binding MaxFormula}" />
+
+      <Label Text="AbilityDataBlobType"/>
+      <ComboBox ID="AbilityDataBlobType" />
+    </TableRow-->
+    <TableRow>
+      <Label Text="AbilityFormula" />
+      <TextBox Text="{Binding AbilityFormula}" />
+      
+    </TableRow>
+    
+  </TableLayout>
+	
+</Panel>

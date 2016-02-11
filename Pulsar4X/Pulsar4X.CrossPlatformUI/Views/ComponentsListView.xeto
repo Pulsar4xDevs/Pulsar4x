@@ -5,9 +5,9 @@
   >
     <Expander>
       <Expander.Header>
-        <Label Text="{Binding Type}" />
+        <Label Text="Engines" />
       </Expander.Header> 
-      <StackLayout>
+      <StackLayout ID="StackLayout">
         
         
       </StackLayout>

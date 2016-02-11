@@ -1,15 +1,16 @@
 ﻿using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar4X.ViewModel.ViewModels
+namespace Pulsar4X.ViewModel
 {
-    class ShipDesignVM : IViewModel
+    public class ShipDesignVM : IViewModel
     {
         private Entity _factionEntity;
 
@@ -32,6 +33,8 @@ namespace Pulsar4X.ViewModel.ViewModels
         /// these are what get generated from the DesignToEntity factory.
         /// </summary>
         public List<Entity> ComponentsDesigned { get { return _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToList(); } }
+        //public List<ComponentListVM> ComponentsDesignedLists { get; set; }
+        public ComponentListVM ComponentsDesignedLists { get; set; }
 
         /// <summary>
         /// a list of componentDesign Entities installed on teh ship, and how many of that type. 
@@ -42,7 +45,18 @@ namespace Pulsar4X.ViewModel.ViewModels
         public ShipDesignVM(Entity factionEntity)
         {
             _factionEntity = factionEntity;
+            ComponentsDesignedLists = new ComponentListVM(_factionEntity);
+            //ComponentsDesignedLists = new List<ComponentListVM>();
+            //foreach (var item in ComponentsDesigned)
+            //{
+            //    ComponentsDesignedLists.Add(new Compon)
+            //}
 
+        }
+
+        public static ShipDesignVM Create(GameVM game)
+        {
+            return new ShipDesignVM(game.PlayerFaction);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -61,8 +75,24 @@ namespace Pulsar4X.ViewModel.ViewModels
         }
     }
 
-    class ComponentListVM : IViewModel
+    public class ComponentListVM : IViewModel
     {
+        public ObservableCollection<ComponentListEngineVM> Engines {get;set;}
+
+
+        public ComponentListVM(Entity factionEntity)
+        {
+            FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
+            Engines = new ObservableCollection<ComponentListEngineVM>();
+            foreach (var componentDesign in factionInfo.ComponentDesigns.Values)
+            {
+                if (componentDesign.HasDataBlob<EnginePowerDB>())
+                {
+                    Engines.Add(new ComponentListEngineVM(componentDesign));
+                }
+            }            
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public void Refresh(bool partialRefresh = false)
@@ -71,24 +101,24 @@ namespace Pulsar4X.ViewModel.ViewModels
         }
     }
 
-    class ComponentListComponentVM : IViewModel
+    public class ComponentListComponentVM : IViewModel
     {
-        private Entity _componentEntity;
+        protected Entity _componentEntity_;
         private ComponentInfoDB _designDB;
 
         public string Name { get; private set ; }
         public int Size { get { return _designDB.SizeInTons; } }
-        public int AbilityAmount { get; set; }
+        public int CrewReq { get { return _designDB.CrewRequrements; } }
+
+        public int AbilityAmount { get; protected set; }
 
 
         public ComponentListComponentVM(Entity component)
         {
-            _componentEntity = component;
+            _componentEntity_ = component;
             _designDB = component.GetDataBlob<ComponentInfoDB>();
 
             Name = component.GetDataBlob<NameDB>().DefaultName;
-            
-           
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -98,4 +128,16 @@ namespace Pulsar4X.ViewModel.ViewModels
             throw new NotImplementedException();
         }
     }
+
+    public class ComponentListEngineVM : ComponentListComponentVM
+    {
+        public ComponentListEngineVM(Entity component) : base(component)
+        {
+            AbilityAmount = _componentEntity_.GetDataBlob<EnginePowerDB>().EnginePower;
+        }
+    }
+
+
+
+
 }
