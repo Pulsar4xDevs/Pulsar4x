@@ -136,7 +136,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private static void InitializeProcessors()
         {
-            OrbitProcessor.Initialize();
             ShipMovementProcessor.Initialize();
             //InstallationProcessor.Initialize();
         }

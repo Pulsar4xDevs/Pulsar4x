@@ -26,7 +26,8 @@ namespace Pulsar4X.ECSLib
 
             foreach (ProtoEntity surveyPoint in surveyPoints)
             {
-                Entity.Create(system.SystemManager, surveyPoint);
+                var realPoint = Entity.Create(system.SystemManager, surveyPoint);
+                realPoint.GetDataBlob<PositionDB>().System = system;
             }
         }
 
@@ -56,7 +57,7 @@ namespace Pulsar4X.ECSLib
             const int pointsRequired = 500;
 
             var surveyDB = new JPSurveyableDB(pointsRequired, new JDictionary<Entity, int>());
-            var posDB = new PositionDB(x, y, 0);
+            var posDB = new PositionDB(x, y, 0, null);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
 
             return ProtoEntity.Create(Guid.Empty, new BaseDataBlob[] { surveyDB, posDB, nameDB });
