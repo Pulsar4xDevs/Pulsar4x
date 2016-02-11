@@ -42,6 +42,12 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
 
+        /// <summary>
+        /// List of StarSystems currently in the game.
+        /// </summary>
+        [JsonProperty]
+        internal Dictionary<Guid, StarSystem> StarSystems { get; private set; }
+
         [PublicAPI] 
         [JsonProperty]
         public Guid GameMasterFaction;
@@ -75,14 +81,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal List<LogEvent> _logEvents;
 
-        /// <summary>
-        /// List of StarSystems currently in the game.
-        /// </summary>
-        [JsonProperty]
-        internal JDictionary<Guid, StarSystem> StarSystems { get; private set; }
-
-        internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new JDictionary<Guid, EntityManager>();
+        internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
+
+        [JsonProperty] public bool EnableMultiThreading = true;
 
         #endregion
 
@@ -101,7 +103,7 @@ namespace Pulsar4X.ECSLib
 
             IsLoaded = false;
             _globalManager = new EntityManager(this);
-            StarSystems = new JDictionary<Guid, StarSystem>();
+            StarSystems = new Dictionary<Guid, StarSystem>();
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);
             StaticData = new StaticDataStore();
@@ -134,7 +136,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private static void InitializeProcessors()
         {
-            OrbitProcessor.Initialize();
             ShipMovementProcessor.Initialize();
             //InstallationProcessor.Initialize();
         }
@@ -262,6 +263,7 @@ namespace Pulsar4X.ECSLib
         {
             OrbitProcessor.Process(this, systems, deltaSeconds);
             ShipMovementProcessor.Process(this, systems, deltaSeconds);
+            
             EconProcessor.Process(this, systems, deltaSeconds);
         }
 

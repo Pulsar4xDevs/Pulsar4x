@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public int PopulationRequired;
         public int CargoSize;
-        public JDictionary<AbilityType, int> BaseAbilityAmounts;
+        public Dictionary<AbilityType, int> BaseAbilityAmounts;
         
         /// <summary>
         /// research ID Requirements to build.
@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The resources required to build this facility
         /// </summary>
-        public JDictionary<Guid,int> ResourceCosts;
+        public Dictionary<Guid,int> ResourceCosts;
         /// <summary>
         /// pricetag
         /// </summary>

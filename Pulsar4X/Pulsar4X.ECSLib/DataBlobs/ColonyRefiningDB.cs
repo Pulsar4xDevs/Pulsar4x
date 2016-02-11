@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         public int PointsPerTick { get; internal set; }
 
         //recalc this on game load todo implement this in the processor. 
-        public JDictionary<Guid, int> RefiningRates{ get; internal set; }
+        public Dictionary<Guid, int> RefiningRates{ get; internal set; }
 
         [JsonProperty] 
         private List<RefineingJob> _jobBatchList; 
@@ -27,13 +27,13 @@ namespace Pulsar4X.ECSLib
         
         public ColonyRefiningDB()
         {
-            RefiningRates = new JDictionary<Guid, int>();
+            RefiningRates = new Dictionary<Guid, int>();
             JobBatchList = new List<RefineingJob>();
         }
 
         public ColonyRefiningDB(ColonyRefiningDB db)
         {
-            RefiningRates = new JDictionary<Guid, int>(db.RefiningRates);
+            RefiningRates = new Dictionary<Guid, int>(db.RefiningRates);
             JobBatchList = new List<RefineingJob>(db.JobBatchList);
         }
 

@@ -13,12 +13,12 @@ namespace Pulsar4X.ECSLib
         public string SizeFormula;
         public string HTKFormula;
         public string CrewReqFormula;
-        public JDictionary<Guid,string> MineralCostFormula;
+        public Dictionary<Guid,string> MineralCostFormula;
         public string ResearchCostFormula;
         public string CreditCostFormula;
         public string BuildPointCostFormula;
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
-        public JDictionary<ComponentMountType, bool> MountType; 
+        public Dictionary<ComponentMountType, bool> MountType; 
 
         public List<ComponentAbilitySD> ComponentAbilitySDs;
     }
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public GuiHint GuiHint; //if AbilityFormula uses AbilityArgs(), this should be none!
 
         //used if guihint is GuiSelectionList
-        public JDictionary<Guid, string> GuidDictionary;
+        public Dictionary<Guid, string> GuidDictionary;
 
         //used if GuiHint is GuiMinMax
         public string MaxFormula;

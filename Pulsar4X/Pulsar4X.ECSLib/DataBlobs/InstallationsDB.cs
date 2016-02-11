@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
     //    public Guid Type;
     //    public float ItemsRemaining;
     //    public PercentValue PriorityPercent;
-    //    public JDictionary<Guid, int> RawMaterialsRemaining;
+    //    public Dictionary<Guid, int> RawMaterialsRemaining;
     //    public int BuildPointsRemaining;
     //    public int BuildPointsPerItem;
     //}
@@ -28,9 +28,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// a dictionary of installationtype, and the number of that specific type including partial installations.
         /// </summary>
-        public JDictionary<Guid, float> Installations { get; set; }
+        public Dictionary<Guid, float> Installations { get; set; }
 
-        public JDictionary<Guid,int> WorkingInstallations { get; set; }
+        public Dictionary<Guid,int> WorkingInstallations { get; set; }
 
         public List<InstallationEmployment> EmploymentList { get; set; } 
         /// <summary>
@@ -43,8 +43,8 @@ namespace Pulsar4X.ECSLib
         //public List<ConstructionJob> RefineryJobs { get; set; }
         public InstallationsDB()
         {
-            Installations = new JDictionary<Guid, float>();
-            WorkingInstallations = new JDictionary<Guid, int>();
+            Installations = new Dictionary<Guid, float>();
+            WorkingInstallations = new Dictionary<Guid, int>();
             EmploymentList = new List<InstallationEmployment>();
             //InstallationJobs = new List<ConstructionJob>();
             //ComponentJobs = new List<ConstructionJob>(); 
@@ -55,8 +55,8 @@ namespace Pulsar4X.ECSLib
 
         public InstallationsDB(InstallationsDB db)
         {
-            Installations = new JDictionary<Guid, float>(db.Installations);
-            WorkingInstallations = new JDictionary<Guid, int>(db.WorkingInstallations);
+            Installations = new Dictionary<Guid, float>(db.Installations);
+            WorkingInstallations = new Dictionary<Guid, int>(db.WorkingInstallations);
             EmploymentList = new List<InstallationEmployment>(db.EmploymentList);
             //InstallationJobs = new List<ConstructionJob>(db.InstallationJobs);
             //ComponentJobs = new List<ConstructionJob>(db.ComponentJobs);

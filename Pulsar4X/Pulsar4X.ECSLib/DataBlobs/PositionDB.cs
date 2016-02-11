@@ -81,6 +81,8 @@ namespace Pulsar4X.ECSLib
             set { _position.Z = Distance.ToAU(value); }
         }
 
+        public StarSystem System { get; internal set; }
+
         #endregion
 
         /// <summary>
@@ -89,14 +91,16 @@ namespace Pulsar4X.ECSLib
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
         /// <param name="z">Z value.</param>
-        public PositionDB(double x, double y, double z)
+        public PositionDB(double x, double y, double z, StarSystem system)
         {
             Position = new Vector4(x, y, z, 0);
+            System = system;
         }
 
-        public PositionDB(Vector4 pos)
+        public PositionDB(Vector4 pos, StarSystem system)
         {
             Position = pos;
+            System = system;
         }
 
         public PositionDB()
@@ -105,7 +109,7 @@ namespace Pulsar4X.ECSLib
         }
 
         public PositionDB(PositionDB positionDB)
-            : this(positionDB.X, positionDB.Y, positionDB.Z)
+            : this(positionDB.X, positionDB.Y, positionDB.Z, positionDB.System)
         {
         }
 

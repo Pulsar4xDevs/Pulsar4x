@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -51,7 +52,7 @@ namespace Pulsar4X.Tests
 
             int hitTokill = 5;
 
-            JDictionary<Guid, int> costs = new JDictionary<Guid, int>();
+            Dictionary<Guid, int> costs = new Dictionary<Guid, int>();
             Guid gallicite = new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"); //Gallicite.
             costs.Add(gallicite, 8 * 5);
             

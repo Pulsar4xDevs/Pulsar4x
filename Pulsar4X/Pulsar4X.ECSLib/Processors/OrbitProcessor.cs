@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {
@@ -13,39 +10,20 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// TypeIndexes for several dataBlobs used frequently by this processor.
         /// </summary>
-        private static int _orbitTypeIndex = -1;
-        private static int _positionTypeIndex = -1;
-        private static int _starInfoTypeIndex = -1;
-
-        /// <summary>
-        /// Determines if this processor should use multithreading.
-        /// </summary>
-        public const bool UseMultiThread = false;
-
-        /// <summary>
-        /// Initializes this Processor.
-        /// </summary>
-        internal static void Initialize()
-        {
-            // Resolve TypeIndexes.
-            _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
-            _positionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
-            _starInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
-        }
+        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+        private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
+        private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
 
         /// <summary>
         /// Function called by Game.RunProcessors to run this processor.
         /// </summary>
         internal static int Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
-
             DateTime currentTime = game.CurrentDateTime;
 
             int orbitsProcessed = 0;
 
-#pragma warning disable 162
-            // Disable "Unreachable Code" warning for hardcoded function.
-            if (UseMultiThread)
+            if (game.EnableMultiThreading)
             {
                 Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime, ref orbitsProcessed));
             }
@@ -56,7 +34,6 @@ namespace Pulsar4X.ECSLib
                     UpdateSystemOrbits(system, currentTime, ref orbitsProcessed);
                 }
             }
-#pragma warning restore 162
             return orbitsProcessed;
         }
 
@@ -65,7 +42,7 @@ namespace Pulsar4X.ECSLib
             EntityManager currentManager = system.SystemManager;
 
             // Find the first orbital entity.
-            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_starInfoTypeIndex);
+            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(StarInfoTypeIndex);
 
             if (!firstOrbital.IsValid)
             {
@@ -73,25 +50,33 @@ namespace Pulsar4X.ECSLib
                 return;
             }
 
-            Entity root = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).Root;
-            PositionDB rootPositionDB = root.GetDataBlob<PositionDB>(_positionTypeIndex);
+            Entity root = firstOrbital.GetDataBlob<OrbitDB>(OrbitTypeIndex).Root;
+            var rootPositionDB = root.GetDataBlob<PositionDB>(PositionTypeIndex);
 
             // Call recursive function to update every orbit in this system.
             UpdateOrbit(root, rootPositionDB, currentTime, ref orbitsProcessed);
         }
 
-        private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime, ref int orbitsProcessed)
+        private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime currentTime, ref int orbitsProcessed)
         {
-            OrbitDB entityOrbitDB = entity.GetDataBlob<OrbitDB>(_orbitTypeIndex);
-            PositionDB entityPosition = entity.GetDataBlob<PositionDB>(_positionTypeIndex);
+            var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
+            var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
 
             // Get our Parent-Relative coordinates.
-            Vector4 newPosition = GetPosition(entityOrbitDB, currentTime);
+            try
+            {
+                Vector4 newPosition = GetPosition(entityOrbitDB, currentTime);
 
-            // Get our Absolute coordinates.
-            entityPosition.Position = parentPositionDB.Position + newPosition;
+                // Get our Absolute coordinates.
+                entityPosition.Position = parentPositionDB.Position + newPosition;
 
-            Interlocked.Increment(ref orbitsProcessed);
+                Interlocked.Increment(ref orbitsProcessed);
+            }
+            catch (OrbitProcessorException e)
+            {
+                // TODO: Debug log this exception. Do NOT fail to the UI. There is NO data-corruption on this exception.
+                // In this event, we did NOT update our position.
+            }
 
             // Update our children.
             foreach (Entity child in entityOrbitDB.Children)
@@ -99,13 +84,6 @@ namespace Pulsar4X.ECSLib
                 // RECURSION!
                 UpdateOrbit(child, entityPosition, currentTime, ref orbitsProcessed);
             }
-            // use this to dump positions to plot orbits
-            /*
-            string name = entity.GetDataBlob<NameDB>().DefaultName;
-            if (name.Equals("Mercury")) {
-              Console.WriteLine(newPosition.X + " " + newPosition.Y);
-            }
-            */
         }
 
         #region Orbit Position Calculations
@@ -131,7 +109,7 @@ namespace Pulsar4X.ECSLib
             // Don't attempt to calculate large timeframes.
             if (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
             {
-                long years = (timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks);
+                long years = timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks;
                 timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
                 orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
             }
@@ -154,7 +132,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="trueAnomaly">Angle in Radians.</param>
         public static Vector4 GetPosition(OrbitDB orbit, double trueAnomaly)
         {
-            
+
             if (orbit.IsStationary)
             {
                 return new Vector4(0, 0, 0, 0);
@@ -213,61 +191,30 @@ namespace Pulsar4X.ECSLib
                  * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
                  * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
                 */
-                e[i + 1] = e[i] - ((e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i])));
+                e[i + 1] = e[i] - (e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]));
                 i++;
             } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
 
             if (i + 1 >= numIterations)
             {
-                // <? todo: Flag an error about non-convergence of Newton's method.
+                throw new OrbitProcessorException("Non-convergence of Newton's method while calculating Eccentric Anomaly.", orbit.OwningEntity);
             }
 
             return e[i - 1];
         }
 
+        private class OrbitProcessorException : Exception
+        {
+            public override string Message { get; }
+            public Entity Entity { get; }
+
+            public OrbitProcessorException(string message, Entity entity)
+            {
+                Message = message;
+                Entity = entity;
+            }
+        }
+
         #endregion
-    }
-
-    public class OrbitProcessorTests
-    {
-        private Game _game;
-        private List<StarSystem> _systems;
-        private const int NumSystems = 10;
-
-        Stopwatch timer = new Stopwatch();
-
-        // Declare variables before usage to keep memory usage constant.
-        long startMemory;
-        long endMemory;
-        int orbitsProcessed;
-        private string output;
-
-        public void Init()
-        {
-            _game = Game.NewGame("Unit Test Game", DateTime.Now, NumSystems); // init the game class as we will need it for these tests.
-        }
-
-        // Note: This is a memory test, and is designed to be used with an external profiler called from the UI.
-        public void OrbitStressTest()
-        {
-            // use a stop watch to get more accurate time.
-            timer = new Stopwatch();
-
-            // Declare variables before usage to keep memory usage constant.
-
-            // lets get our memory before starting:
-            GC.Collect();
-            startMemory = GC.GetTotalMemory(true);
-
-            timer.Start();
-
-            orbitsProcessed = OrbitProcessor.Process(_game, _game.StarSystems.Values.ToList(), 60);
-
-            timer.Stop();
-
-            // Check memory afterwords.
-            // Note: dotMemory.Check doesn't work unless run with dotMemory unit.
-            GC.Collect();
-        }
     }
 }

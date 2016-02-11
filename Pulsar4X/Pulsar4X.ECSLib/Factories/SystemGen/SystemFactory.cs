@@ -1,5 +1,4 @@
 ﻿ using System.Collections.Generic;
-using System.Security.Cryptography;
 
 namespace Pulsar4X.ECSLib
 {
@@ -40,6 +39,8 @@ namespace Pulsar4X.ECSLib
             {
                 _systemBodyFactory.GenerateSystemBodiesForStar(game.StaticData, newSystem, star, game.CurrentDateTime);
             }
+
+            JPSurveyFactory.GenerateJPSurveyPoints(newSystem);
 
             // < @todo generate JumpPoints
             //JumpPointFactory.GenerateJumpPoints(newSystem, numJumpPoints);
@@ -110,7 +111,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, earthSemiMajAxis, earthEccentricity, earthInclination, earthLoAN, earthLoP, earthMeanLongd, _galaxyGen.Settings.J2000);
             earthBodyDB.Tectonics = TectonicActivity.EarthLike;
             earthPositionDB.Position = OrbitProcessor.GetPosition(earthOrbitDB, game.CurrentDateTime);
-            JDictionary<AtmosphericGasSD, float> atmoGasses = new JDictionary<AtmosphericGasSD, float>();
+            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.78f);
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.12f);
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.01f);
@@ -140,7 +141,7 @@ namespace Pulsar4X.ECSLib
             //        public static Orbit FromMajorPlanetFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
             //                                        double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
 
-    
+
             /*
 
             SystemBody Mars = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);
@@ -221,6 +222,9 @@ namespace Pulsar4X.ECSLib
             GameState.Instance.StarSystems.Add(Sol);
             GameState.Instance.StarSystemCurrentIndex++;
             */
+            
+            JPSurveyFactory.GenerateJPSurveyPoints(sol);
+
             Entity gameMaster;
             game.GlobalManager.FindEntityByGuid(game.GameMasterFaction, out gameMaster);
             gameMaster.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);

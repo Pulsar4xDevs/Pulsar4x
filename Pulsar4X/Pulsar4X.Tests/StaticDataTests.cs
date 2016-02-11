@@ -60,7 +60,7 @@ namespace Pulsar4X.Tests
 
             List<MineralSD> minList = new List<MineralSD>();
             MineralSD min = new MineralSD();
-            min.Abundance = new JDictionary<BodyType, double>();
+            min.Abundance = new Dictionary<BodyType, double>();
             min.Abundance.Add(BodyType.Asteroid, 0.01);
             min.Abundance.Add(BodyType.Comet, 0.05);
             min.Abundance.Add(BodyType.DwarfPlanet, 0.075);
@@ -76,7 +76,7 @@ namespace Pulsar4X.Tests
 
             StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
 
-            //JDictionary<Guid, TechSD> techs = Tech();
+            //Dictionary<Guid, TechSD> techs = Tech();
             //TechSD tech1 = new TechSD();
             //tech1.Name = "Trans-Newtonian Technology";
             //tech1.Requirements = new Dictionary<Guid, int>();
@@ -110,11 +110,11 @@ namespace Pulsar4X.Tests
             //install.Description = "Employs population to mine transnewtonian resources.";
             //install.PopulationRequired = 1;
             //install.CargoSize = 1;
-            //install.BaseAbilityAmounts = new JDictionary<AbilityType, int>();
+            //install.BaseAbilityAmounts = new Dictionary<AbilityType, int>();
             //install.BaseAbilityAmounts.Add(AbilityType.Mine, 1);
             //install.TechRequirements = new List<Guid>();
             //install.TechRequirements.Add(tech1.ID); //use trans-newtonian techology you just added to the tech list
-            //install.ResourceCosts = new JDictionary<Guid, int>();
+            //install.ResourceCosts = new Dictionary<Guid, int>();
             //install.ResourceCosts.Add(min.ID,60); //use Sorium that you just added to the mineral list
             //install.WealthCost = 120;
             //install.BuildPoints = 120;
@@ -149,7 +149,7 @@ namespace Pulsar4X.Tests
 
             ////StaticDataManager.ExportStaticData(launchAbility, "./launcherabilitytest.json");
             ////StaticDataManager.ExportStaticData(reloadAbility, "./launcherabilitytest.json");
-            //JDictionary<Guid, ComponentSD> components = new JDictionary<Guid, ComponentSD>();
+            //Dictionary<Guid, ComponentSD> components = new Dictionary<Guid, ComponentSD>();
             //components.Add(missileLauncher.ID, missileLauncher);
             //StaticDataManager.ExportStaticData(components, "./Componentstest.json");
 
@@ -161,13 +161,13 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestRefinedMatsSave()
         {
-            JDictionary<Guid, RefinedMaterialSD> mats = new JDictionary<Guid, RefinedMaterialSD>();
+            Dictionary<Guid, RefinedMaterialSD> mats = new Dictionary<Guid, RefinedMaterialSD>();
 
             RefinedMaterialSD soriumFuel = new RefinedMaterialSD();
             soriumFuel.Name = "Sorium Fuel";
             soriumFuel.Description = "Fuel for SpaceShips";
             soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
-            soriumFuel.RawMineralCosts = new JDictionary<Guid, int>();
+            soriumFuel.RawMineralCosts = new Dictionary<Guid, int>();
             soriumFuel.RawMineralCosts.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
             soriumFuel.RefinaryPointCost = 10;
             soriumFuel.OutputAmount = 1;
@@ -177,9 +177,9 @@ namespace Pulsar4X.Tests
             DepleatedDuranuim.Name = "Depleated Duranuim";
             DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset refinarys";
             DepleatedDuranuim.ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB");
-            DepleatedDuranuim.RawMineralCosts = new JDictionary<Guid, int>();
+            DepleatedDuranuim.RawMineralCosts = new Dictionary<Guid, int>();
             DepleatedDuranuim.RawMineralCosts.Add(new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), 5);
-            DepleatedDuranuim.RefinedMateraialsCosts = new JDictionary<Guid, int>();
+            DepleatedDuranuim.RefinedMateraialsCosts = new Dictionary<Guid, int>();
             DepleatedDuranuim.RefinedMateraialsCosts.Add(new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"), 1);
             DepleatedDuranuim.RefinaryPointCost = 20;
             DepleatedDuranuim.OutputAmount = 6;
@@ -192,7 +192,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestTechSave()
         {
-            JDictionary<Guid, TechSD> techs = new JDictionary<Guid, TechSD>();
+            Dictionary<Guid, TechSD> techs = new Dictionary<Guid, TechSD>();
             TechSD enginePowerModMax = new TechSD();
             enginePowerModMax.ID = new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e");
             enginePowerModMax.MaxLevel = 7;
@@ -201,7 +201,7 @@ namespace Pulsar4X.Tests
             enginePowerModMax.Description = "";
             enginePowerModMax.Category = ResearchCategories.PowerAndPropulsion;
             enginePowerModMax.CostFormula = "[Level] * 1";
-            enginePowerModMax.Requirements = new JDictionary<Guid, int>();
+            enginePowerModMax.Requirements = new Dictionary<Guid, int>();
 
             techs.Add(enginePowerModMax.ID, enginePowerModMax);
 
@@ -213,7 +213,7 @@ namespace Pulsar4X.Tests
             enginePowerModMin.Description = "";
             enginePowerModMin.Category = ResearchCategories.PowerAndPropulsion;
             enginePowerModMin.CostFormula = "[Level] * 1";
-            enginePowerModMin.Requirements = new JDictionary<Guid, int>();
+            enginePowerModMin.Requirements = new Dictionary<Guid, int>();
 
             techs.Add(enginePowerModMin.ID, enginePowerModMin);
 
@@ -226,7 +226,7 @@ namespace Pulsar4X.Tests
             fuelUsage.Description = "";
             fuelUsage.Category = ResearchCategories.PowerAndPropulsion;
             fuelUsage.CostFormula = "[Level] * 1";
-            fuelUsage.Requirements = new JDictionary<Guid, int>();
+            fuelUsage.Requirements = new Dictionary<Guid, int>();
             techs.Add(fuelUsage.ID, fuelUsage);
 
 
@@ -238,7 +238,7 @@ namespace Pulsar4X.Tests
             EngineTech1.Description = "";
             EngineTech1.Category = ResearchCategories.PowerAndPropulsion;
             EngineTech1.CostFormula = "[Level] * 500";
-            EngineTech1.Requirements = new JDictionary<Guid, int>();
+            EngineTech1.Requirements = new Dictionary<Guid, int>();
             techs.Add(EngineTech1.ID, EngineTech1);
 
             TechSD EngineTech2 = new TechSD();
@@ -249,7 +249,7 @@ namespace Pulsar4X.Tests
             EngineTech2.Description = "";
             EngineTech2.Category = ResearchCategories.PowerAndPropulsion;
             EngineTech2.CostFormula = "[Level] * 2500";
-            EngineTech2.Requirements = new JDictionary<Guid, int>();
+            EngineTech2.Requirements = new Dictionary<Guid, int>();
             EngineTech2.Requirements.Add(new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"), 1);
             techs.Add(EngineTech2.ID, EngineTech2);
 
@@ -261,7 +261,7 @@ namespace Pulsar4X.Tests
             EngineTech3.Description = "";
             EngineTech3.Category = ResearchCategories.PowerAndPropulsion;
             EngineTech3.CostFormula = "[Level] * 5000";
-            EngineTech3.Requirements = new JDictionary<Guid, int>();
+            EngineTech3.Requirements = new Dictionary<Guid, int>();
             EngineTech3.Requirements.Add(new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"), 1);
             techs.Add(EngineTech3.ID, EngineTech3);
 
@@ -273,7 +273,7 @@ namespace Pulsar4X.Tests
             EngineTech4.Description = "";
             EngineTech4.Category = ResearchCategories.PowerAndPropulsion;
             EngineTech4.CostFormula = "[Level] * 10000"; ;
-            EngineTech4.Requirements = new JDictionary<Guid, int>();
+            EngineTech4.Requirements = new Dictionary<Guid, int>();
             EngineTech4.Requirements.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
             techs.Add(EngineTech4.ID, EngineTech4);
 
@@ -382,7 +382,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestJdicExtension() 
         {
-            JDictionary<int, int> dict = new JDictionary<int, int>();
+            Dictionary<int, int> dict = new Dictionary<int, int>();
             dict.Add(1,1);
             dict.SafeValueAdd(1, 2); //add to exsisting
             dict.SafeValueAdd(2, 5); //add to non exsisting.

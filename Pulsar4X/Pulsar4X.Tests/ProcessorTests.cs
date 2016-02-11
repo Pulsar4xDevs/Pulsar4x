@@ -39,7 +39,7 @@
 //            blobs.Add(planetDB);
 //            Entity planetEntity = new Entity(_entityManager, blobs);
 
-//            JDictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
+//            Dictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
 
 //            MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOriginalAmount = 5000 };
             
@@ -80,8 +80,8 @@
 //            //first with no population;
 //            Entity colonyEntity = _faction.GetDataBlob<FactionDB>().Colonies[0];
 //            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
-//            JDictionary<Guid, float> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-//            JDictionary<Guid, float> mineralstockpilePreMined = new JDictionary<Guid, float>(mineralstockpile);
+//            Dictionary<Guid, float> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+//            Dictionary<Guid, float> mineralstockpilePreMined = new Dictionary<Guid, float>(mineralstockpile);
             
             
 //            InstallationProcessor.Employment(colonyEntity); //do employment check;
@@ -92,7 +92,7 @@
 
 
 //            ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
-//            JDictionary<Entity, long> pop = colonyInfo.Population;
+//            Dictionary<Entity, long> pop = colonyInfo.Population;
 //            var species = pop.Keys.ToList();
 //            colonyInfo.Population[species[0]] = 5; //5mil pop
 
@@ -112,10 +112,10 @@
 //            double ablityPointsThisColony = 100;
 //            List<ConstructionJob> jobList = new List<ConstructionJob>();
             
-//            JDictionary<Guid,float> stockpileOut = new JDictionary<Guid, float>();
+//            Dictionary<Guid,float> stockpileOut = new Dictionary<Guid, float>();
 
 //            PercentValue priority = new PercentValue {Percent = 1};
-//            JDictionary<Guid,int> jobRawMaterials = new JDictionary<Guid, int>();
+//            Dictionary<Guid,int> jobRawMaterials = new Dictionary<Guid, int>();
 //            jobRawMaterials.Add(_duraniumSD.ID, 5000); //500 per item
 //            jobRawMaterials.Add(_corundiumSD.ID, 70); //7 per item
 //            ConstructionJob newJob = new ConstructionJob 

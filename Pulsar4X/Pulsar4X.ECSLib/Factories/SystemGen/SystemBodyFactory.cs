@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static ProtoEntity CreateBaseBody()
         {
-            var position = new PositionDB(0, 0, 0);
+            var position = new PositionDB(0, 0, 0, null);
             var massVolume = new MassVolumeDB();
             var planetInfo = new SystemBodyDB();
             var name = new NameDB();
@@ -149,6 +149,7 @@ namespace Pulsar4X.ECSLib
             foreach (ProtoEntity protoBody in systemBodies)
             {
                 Entity body = Entity.Create(system.SystemManager, protoBody);
+                body.GetDataBlob<PositionDB>().System = system;
                 FinalizeBodies(staticData, system, body, bodyCount, currentDateTime);
                 bodyCount++;
             }
@@ -190,8 +191,9 @@ namespace Pulsar4X.ECSLib
                 GenerateCometOrbit(system, star, newCometProto, currentDateTime);
 
                 FinalizeSystemBodyDB(staticData, system, newCometProto);
-
-                Entity.Create(system.SystemManager, newCometProto);
+                
+                var comet = Entity.Create(system.SystemManager, newCometProto);
+                comet.GetDataBlob<PositionDB>().System = system;
             }
         }
 
@@ -543,7 +545,8 @@ namespace Pulsar4X.ECSLib
             // create proper entities:
             foreach (var moon in moons)
             {
-                Entity.Create(system.SystemManager, moon);
+                var realMoon = Entity.Create(system.SystemManager, moon);
+                realMoon.GetDataBlob<PositionDB>().System = system;
             }
         }
 
@@ -557,6 +560,7 @@ namespace Pulsar4X.ECSLib
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
                 Entity newBody = Entity.Create(system.SystemManager, newProtoBody);
+                newBody.GetDataBlob<PositionDB>().System = system;
                 SystemBodyDB newBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
                 if (system.RNG.NextDouble() > (1.0 / _galaxyGen.Settings.NumberOfAsteroidsPerDwarfPlanet))

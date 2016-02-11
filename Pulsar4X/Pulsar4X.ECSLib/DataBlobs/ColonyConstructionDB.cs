@@ -39,17 +39,17 @@ namespace Pulsar4X.ECSLib
         
         public ConstructionType ConstructionType { get; internal set; }
 
-        public JDictionary<Guid, int> MineralsRequired { get; internal set; }
-        public JDictionary<Guid, int> MaterialsRequired { get; internal set; }
-        public JDictionary<Guid, int> ComponentsRequired { get; internal set; }
+        public Dictionary<Guid, int> MineralsRequired { get; internal set; }
+        public Dictionary<Guid, int> MaterialsRequired { get; internal set; }
+        public Dictionary<Guid, int> ComponentsRequired { get; internal set; }
 
         public ConstructionJob(Guid designGuid, ushort numberOrderd, int jobPoints, bool auto, 
-            JDictionary<Guid,int> mineralCost, JDictionary<Guid, int> matCost, JDictionary<Guid,int> componentCost  ): 
+            Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
             base(designGuid, numberOrderd, jobPoints, auto)
         {
-            MineralsRequired = new JDictionary<Guid, int>(mineralCost);
-            MaterialsRequired = new JDictionary<Guid, int>(matCost);
-            ComponentsRequired = new JDictionary<Guid, int>(componentCost);
+            MineralsRequired = new Dictionary<Guid, int>(mineralCost);
+            MaterialsRequired = new Dictionary<Guid, int>(matCost);
+            ComponentsRequired = new Dictionary<Guid, int>(componentCost);
         }
 
     }
@@ -59,7 +59,7 @@ namespace Pulsar4X.ECSLib
         public int PointsPerTick { get; internal set; }
 
         [JsonProperty]
-        public JDictionary<ConstructionType, int> ConstructionRates { get; internal set; }
+        public Dictionary<ConstructionType, int> ConstructionRates { get; internal set; }
 
         [JsonProperty]
         public List<ConstructionJob> JobBatchList { get; internal set; }
@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
 
         public ColonyConstructionDB()
         {
-            ConstructionRates = new JDictionary<ConstructionType, int>
+            ConstructionRates = new Dictionary<ConstructionType, int>
             {
                 {ConstructionType.Ammo, 0}, 
                 {ConstructionType.Facility, 0}, 

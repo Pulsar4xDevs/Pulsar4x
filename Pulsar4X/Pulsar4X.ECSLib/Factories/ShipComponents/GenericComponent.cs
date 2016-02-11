@@ -121,9 +121,9 @@ namespace Pulsar4X.ECSLib
             factionTech.ResearchableTechs.Add(tech, 0);
             NameDB nameDB = new NameDB(componentDesign.Name);
 
-            JDictionary<Guid, int> mineralCosts = new JDictionary<Guid, int>();
-            JDictionary<Guid, int> materalCosts = new JDictionary<Guid, int>();
-            JDictionary<Guid, int> componentCosts = new JDictionary<Guid, int>();
+            Dictionary<Guid, int> mineralCosts = new Dictionary<Guid, int>();
+            Dictionary<Guid, int> materalCosts = new Dictionary<Guid, int>();
+            Dictionary<Guid, int> componentCosts = new Dictionary<Guid, int>();
 
             foreach (var kvp in componentDesign.MineralCostValues)
             {
