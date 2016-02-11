@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         /// List of StarSystems currently in the game.
         /// </summary>
         [JsonProperty]
-        internal JDictionary<Guid, StarSystem> StarSystems { get; private set; }
+        internal Dictionary<Guid, StarSystem> StarSystems { get; private set; }
 
         [PublicAPI] 
         [JsonProperty]
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal List<LogEvent> _logEvents;
 
-        internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new JDictionary<Guid, EntityManager>();
+        internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
 
         [JsonProperty] public bool EnableMultiThreading = true;
@@ -103,7 +103,7 @@ namespace Pulsar4X.ECSLib
 
             IsLoaded = false;
             _globalManager = new EntityManager(this);
-            StarSystems = new JDictionary<Guid, StarSystem>();
+            StarSystems = new Dictionary<Guid, StarSystem>();
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);
             StaticData = new StaticDataStore();

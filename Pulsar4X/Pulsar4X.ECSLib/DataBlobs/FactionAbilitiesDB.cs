@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
 
         private float _baseGroundUnitStrengthBonus;
 
-        public JDictionary<AbilityType, float> AbilityBonuses { get; set; }
+        public Dictionary<AbilityType, float> AbilityBonuses { get; set; }
 
         /// <summary>
         /// To determine final colony costs, from the Colonization Cost Reduction X% techs.
@@ -116,7 +116,7 @@ namespace Pulsar4X.ECSLib
             BaseGroundUnitStrengthBonus = groundUnitStrengthBonus;
             ColonyCostMultiplier = colonyCostMultiplier;
 
-            AbilityBonuses = new JDictionary<AbilityType, float>();
+            AbilityBonuses = new Dictionary<AbilityType, float>();
             AbilityBonuses.Add(AbilityType.GenericConstruction, constructionBonus);
             AbilityBonuses.Add(AbilityType.FighterConstruction, fighterConstructionBonus);
             AbilityBonuses.Add(AbilityType.Mine, miningBonus);
@@ -130,7 +130,7 @@ namespace Pulsar4X.ECSLib
 
         public FactionAbilitiesDB(FactionAbilitiesDB db)
         {
-            AbilityBonuses = new JDictionary<AbilityType, float>(db.AbilityBonuses);
+            AbilityBonuses = new Dictionary<AbilityType, float>(db.AbilityBonuses);
             BasePlanetarySensorStrength = db.BasePlanetarySensorStrength;
             BaseGroundUnitStrengthBonus = db.BaseGroundUnitStrengthBonus;
             ColonyCostMultiplier = db.ColonyCostMultiplier;

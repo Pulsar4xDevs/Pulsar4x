@@ -31,16 +31,16 @@ namespace Pulsar4X.ECSLib
         public int HTK { get { return _htk; } internal set { _htk = value; } }
 
         [JsonProperty]
-        private JDictionary<Guid, int> _minerialCosts;
-        public JDictionary<Guid, int> MinerialCosts { get { return _minerialCosts; } internal set { _minerialCosts = value; } }
+        private Dictionary<Guid, int> _minerialCosts;
+        public Dictionary<Guid, int> MinerialCosts { get { return _minerialCosts; } internal set { _minerialCosts = value; } }
 
         [JsonProperty]
-        private JDictionary<Guid, int> _materialCosts;
-        public JDictionary<Guid, int> MaterialCosts { get { return _materialCosts; } internal set { _materialCosts = value; } }
+        private Dictionary<Guid, int> _materialCosts;
+        public Dictionary<Guid, int> MaterialCosts { get { return _materialCosts; } internal set { _materialCosts = value; } }
 
         [JsonProperty]
-        private JDictionary<Guid, int> _componentCosts;
-        public JDictionary<Guid, int> ComponentCosts { get { return _componentCosts; } internal set { _componentCosts = value; } }
+        private Dictionary<Guid, int> _componentCosts;
+        public Dictionary<Guid, int> ComponentCosts { get { return _componentCosts; } internal set { _componentCosts = value; } }
 
         [JsonProperty]
         public int BuildPointCost { get; internal set; }
@@ -54,8 +54,8 @@ namespace Pulsar4X.ECSLib
         public int CrewRequrements { get { return _crewRequirement; } internal set { _crewRequirement = value; } }
 
         [JsonProperty] 
-        private JDictionary<ComponentMountType, bool> _componentMountType;
-        public JDictionary<ComponentMountType, bool> ComponentMountTypes { get { return _componentMountType; } internal set { _componentMountType = value; } } 
+        private Dictionary<ComponentMountType, bool> _componentMountType;
+        public Dictionary<ComponentMountType, bool> ComponentMountTypes { get { return _componentMountType; } internal set { _componentMountType = value; } } 
 
 
         public ComponentInfoDB()
@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="materialCosts"></param>
         /// <param name="techRequrement"></param>
         /// <param name="crewReqirement"></param>
-        public ComponentInfoDB(Guid designGuid, int size, int htk, int buildPointCost, JDictionary<Guid, int> minerialCosts, JDictionary<Guid, int> materialCosts, JDictionary<Guid, int> componentCosts, Guid techRequrement, int crewReqirement)
+        public ComponentInfoDB(Guid designGuid, int size, int htk, int buildPointCost, Dictionary<Guid, int> minerialCosts, Dictionary<Guid, int> materialCosts, Dictionary<Guid, int> componentCosts, Guid techRequrement, int crewReqirement)
         {
             _designGuid = designGuid;
             _sizeInTons = size;

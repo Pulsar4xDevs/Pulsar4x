@@ -8,9 +8,9 @@ namespace Pulsar4X.ECSLib
     {
         internal static void MineResources(Entity colonyEntity, int econTicks)
         {
-            JDictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
-            JDictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyDB>().Minerals;
-            JDictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
+            Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyDB>().Minerals;
+            Dictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
             {                
@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
         {
             Dictionary<Entity, int> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
             Dictionary<Entity, int> mines = installations.Where(kvp => kvp.Key.HasDataBlob<MineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            JDictionary<Guid,int> rates = new JDictionary<Guid, int>();
+            Dictionary<Guid,int> rates = new Dictionary<Guid, int>();
             
             foreach (var mineTypeKvp in mines)
             {

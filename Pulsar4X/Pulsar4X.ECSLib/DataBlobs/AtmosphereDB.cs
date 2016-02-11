@@ -94,13 +94,13 @@ namespace Pulsar4X.ECSLib
         //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
         //In Earth Atmospheres (atm).
         //</summary>
-        public JDictionary<AtmosphericGasSD, float> Composition
+        public Dictionary<AtmosphericGasSD, float> Composition
         {
             get { return _composition; }
             internal set { _composition = value; }
         }
         [JsonProperty]
-        private JDictionary<AtmosphericGasSD, float> _composition;
+        private Dictionary<AtmosphericGasSD, float> _composition;
 
         /// <summary>
         /// A sting describing the Atmosphere in Percentages, like this:
@@ -134,7 +134,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public AtmosphereDB()
         {
-            Composition = new JDictionary<AtmosphericGasSD, float>();
+            Composition = new Dictionary<AtmosphericGasSD, float>();
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        internal AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, JDictionary<AtmosphericGasSD,float> composition)
+        internal AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, Dictionary<AtmosphericGasSD,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
@@ -164,7 +164,7 @@ namespace Pulsar4X.ECSLib
             : this(atmosphereDB.Pressure, atmosphereDB.Hydrosphere, atmosphereDB.HydrosphereExtent, 
             atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure, atmosphereDB.Albedo, 
             atmosphereDB.SurfaceTemperature, 
-            new JDictionary<AtmosphericGasSD, float>(atmosphereDB.Composition)
+            new Dictionary<AtmosphericGasSD, float>(atmosphereDB.Composition)
             )
         {
 

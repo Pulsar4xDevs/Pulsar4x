@@ -15,8 +15,8 @@ namespace Pulsar4X.ECSLib
         internal static void RefineMaterials(Entity colony, Game game, int econTicks)
         {
 
-            JDictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            JDictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
+            Dictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            Dictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
 
             ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
             int refinaryPoints = refiningDB.PointsPerTick * econTicks;
@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
             Dictionary<Entity, int> refinarys = installations.Where(kvp => kvp.Key.HasDataBlob<RefineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             int pointsRate = 0;
-            JDictionary<Guid, int> matRate = new JDictionary<Guid, int>();
+            Dictionary<Guid, int> matRate = new Dictionary<Guid, int>();
             foreach (var refinaryKvp in refinarys)
             {
                 int points = refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinaryPoints;

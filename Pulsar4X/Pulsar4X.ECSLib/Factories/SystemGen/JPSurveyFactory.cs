@@ -56,7 +56,7 @@ namespace Pulsar4X.ECSLib
             // TODO: Load "pointsRequired" from GalaxyGen settings
             const int pointsRequired = 500;
 
-            var surveyDB = new JPSurveyableDB(pointsRequired, new JDictionary<Entity, int>());
+            var surveyDB = new JPSurveyableDB(pointsRequired, new Dictionary<Entity, int>());
             var posDB = new PositionDB(x, y, 0, null);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
 

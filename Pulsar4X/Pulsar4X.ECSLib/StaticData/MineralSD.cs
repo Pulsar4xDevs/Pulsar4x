@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -9,6 +10,6 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public Guid ID;
 
-        public JDictionary<BodyType, double> Abundance;
+        public Dictionary<BodyType, double> Abundance;
     }
 }

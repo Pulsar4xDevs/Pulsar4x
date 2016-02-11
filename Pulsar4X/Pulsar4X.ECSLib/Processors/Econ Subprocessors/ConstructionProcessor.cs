@@ -22,9 +22,9 @@ namespace Pulsar4X.ECSLib
 
         internal static void ConstructStuff(Entity colony, Game game, int econTicks)
         {
-            JDictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            JDictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
-            JDictionary<Guid, int> componentStockpile = colony.GetDataBlob<ColonyInfoDB>().ComponentStockpile;
+            Dictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            Dictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
+            Dictionary<Guid, int> componentStockpile = colony.GetDataBlob<ColonyInfoDB>().ComponentStockpile;
 
             var colonyConstruction = colony.GetDataBlob<ColonyConstructionDB>();
             var factionInfo = colony.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>();
@@ -135,7 +135,7 @@ namespace Pulsar4X.ECSLib
                     factories.Add(inst);
             }
 
-            var typeRate = new JDictionary<ConstructionType, int>{
+            var typeRate = new Dictionary<ConstructionType, int>{
                 {ConstructionType.Ammo, 0}, 
                 {ConstructionType.Facility, 0}, 
                 {ConstructionType.Fighter, 0}, 

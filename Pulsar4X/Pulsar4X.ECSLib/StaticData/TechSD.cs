@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
         public string DataFormula;
 
         public ResearchCategories Category;        
-        public JDictionary<Guid,int> Requirements;        
+        public Dictionary<Guid,int> Requirements;        
         public string CostFormula; 
     }
 }

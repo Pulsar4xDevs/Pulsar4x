@@ -13,16 +13,16 @@ namespace Pulsar4X.Tests
     {
         private Game _game;
         private Entity _species1;
-        private JDictionary<Entity, long> _pop1;
-        private JDictionary<Entity, long> _pop2;
+        private Dictionary<Entity, long> _pop1;
+        private Dictionary<Entity, long> _pop2;
 
         [SetUp]
         public void Init()
         {
             _game = Game.NewGame("Test Game", DateTime.Now, 1);
             _species1 = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> {new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45)});
-            _pop1 = new JDictionary<Entity, long> { { _species1, 10 } };
-            _pop2 = new JDictionary<Entity, long> { { _species1, 5 } };
+            _pop1 = new Dictionary<Entity, long> { { _species1, 10 } };
+            _pop2 = new Dictionary<Entity, long> { { _species1, 5 } };
         }
 
         [Test]

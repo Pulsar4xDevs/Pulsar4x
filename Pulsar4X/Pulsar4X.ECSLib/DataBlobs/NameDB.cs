@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -9,7 +10,7 @@ namespace Pulsar4X.ECSLib
         /// Each faction can have a different name for whatever entity has this blob.
         /// </summary>
         [JsonProperty]
-        private readonly JDictionary<Entity, string> _names = new JDictionary<Entity, string>();
+        private readonly Dictionary<Entity, string> _names = new Dictionary<Entity, string>();
 
         [PublicAPI]
         public string DefaultName { get { return _names[Entity.InvalidEntity]; } }
@@ -27,7 +28,7 @@ namespace Pulsar4X.ECSLib
 
         public NameDB(NameDB nameDB)
         {
-            _names = new JDictionary<Entity, string>(nameDB._names);
+            _names = new Dictionary<Entity, string>(nameDB._names);
         }
 
         public override object Clone()

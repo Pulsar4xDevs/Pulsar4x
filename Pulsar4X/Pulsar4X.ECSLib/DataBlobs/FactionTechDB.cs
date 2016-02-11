@@ -7,11 +7,11 @@ namespace Pulsar4X.ECSLib
     public class FactionTechDB : BaseDataBlob
     {
         [JsonProperty]
-        private JDictionary<Guid,int> _researchedTechs;
+        private Dictionary<Guid,int> _researchedTechs;
         [JsonProperty]
-        private JDictionary<TechSD, int> _researchableTechs;
+        private Dictionary<TechSD, int> _researchableTechs;
         [JsonProperty]
-        private JDictionary<TechSD, int> _unavailableTechs;
+        private Dictionary<TechSD, int> _unavailableTechs;
         [JsonProperty]
         private int _researchPoints;
 
@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
         /// techs will be added to this dictionary or incremeted by the processor once research is complete.
         /// </summary>
         [PublicAPI]
-        public JDictionary<Guid,int> ResearchedTechs
+        public Dictionary<Guid,int> ResearchedTechs
         {
             get { return _researchedTechs; }
             internal set { _researchedTechs = value; }
@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         /// the int is how much research has been compleated on this tech.
         /// </summary>
         [PublicAPI]
-        public JDictionary<TechSD, int> ResearchableTechs
+        public Dictionary<TechSD, int> ResearchableTechs
         {
             get { return _researchableTechs; }
             internal set { _researchableTechs = value; }
@@ -56,7 +56,7 @@ namespace Pulsar4X.ECSLib
         /// a list of techs not yet meeting the requirements to research
         /// </summary>
         [PublicAPI]
-        public JDictionary<TechSD, int> UnavailableTechs
+        public Dictionary<TechSD, int> UnavailableTechs
         {
             get { return _unavailableTechs; }
             internal set { _unavailableTechs = value; }
@@ -75,30 +75,30 @@ namespace Pulsar4X.ECSLib
         /// <param name="alltechs">a list of all possible techs in game</param>
         public FactionTechDB(List<TechSD> alltechs)
         {
-            UnavailableTechs = new JDictionary<TechSD, int>();
+            UnavailableTechs = new Dictionary<TechSD, int>();
             foreach (var techSD in alltechs)
             {             
                 UnavailableTechs.Add(techSD,0);
             }
             
-            ResearchedTechs = new JDictionary<Guid, int>();
-            ResearchableTechs = new JDictionary<TechSD, int>();
+            ResearchedTechs = new Dictionary<Guid, int>();
+            ResearchableTechs = new Dictionary<TechSD, int>();
             ResearchPoints = 0;
         }
 
         public FactionTechDB(FactionTechDB techDB)
         {
-            UnavailableTechs = new JDictionary<TechSD, int>(techDB.UnavailableTechs);
-            ResearchedTechs = new JDictionary<Guid, int>(techDB.ResearchedTechs);
-            ResearchableTechs = new JDictionary<TechSD, int>(techDB.ResearchableTechs);
+            UnavailableTechs = new Dictionary<TechSD, int>(techDB.UnavailableTechs);
+            ResearchedTechs = new Dictionary<Guid, int>(techDB.ResearchedTechs);
+            ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
             ResearchPoints = techDB.ResearchPoints;
         }
 
         public FactionTechDB()
         {
-            UnavailableTechs = new JDictionary<TechSD, int>();
-            ResearchedTechs = new JDictionary<Guid, int>();
-            ResearchableTechs = new JDictionary<TechSD, int>();
+            UnavailableTechs = new Dictionary<TechSD, int>();
+            ResearchedTechs = new Dictionary<Guid, int>();
+            ResearchableTechs = new Dictionary<TechSD, int>();
             ResearchPoints = 0;
         }
 

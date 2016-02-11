@@ -161,14 +161,14 @@ namespace Pulsar4X.ECSLib
         /// minerial definition (MineralSD) from the StaticDataStore.
         /// </summary>
         [PublicAPI]
-        public JDictionary<Guid, MineralDepositInfo> Minerals
+        public Dictionary<Guid, MineralDepositInfo> Minerals
         {
             get { return _minerals;}
             internal set { _minerals = value; }
         }
 
         [JsonProperty]
-        private JDictionary<Guid, MineralDepositInfo> _minerals;
+        private Dictionary<Guid, MineralDepositInfo> _minerals;
         [JsonProperty]
         private BodyType _type;
         [JsonProperty]
@@ -192,7 +192,7 @@ namespace Pulsar4X.ECSLib
 
         public SystemBodyDB()
         {
-            _minerals = new JDictionary<Guid, MineralDepositInfo>();
+            _minerals = new Dictionary<Guid, MineralDepositInfo>();
         }
 
         public SystemBodyDB(SystemBodyDB systemBodyDB)
@@ -206,7 +206,7 @@ namespace Pulsar4X.ECSLib
             AtmosphericDust = systemBodyDB.AtmosphericDust;
             SupportsPopulations = systemBodyDB.SupportsPopulations;
             LengthOfDay = systemBodyDB.LengthOfDay;
-            _minerals = new JDictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
+            _minerals = new Dictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
         }
 
         public override object Clone()

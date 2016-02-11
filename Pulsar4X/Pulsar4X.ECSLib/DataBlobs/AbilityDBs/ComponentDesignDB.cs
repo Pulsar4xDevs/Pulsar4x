@@ -51,10 +51,10 @@ namespace Pulsar4X.ECSLib
             BuildCostFormula.Evaluate();
         }
 
-        public JDictionary<Guid, int> MineralCostValues {
+        public Dictionary<Guid, int> MineralCostValues {
             get
             {
-                JDictionary<Guid,int> dict = new JDictionary<Guid, int>();
+                Dictionary<Guid,int> dict = new Dictionary<Guid, int>();
                 foreach (var kvp in MineralCostFormulas)
                 {
                     dict.Add(kvp.Key, kvp.Value.IntResult);  

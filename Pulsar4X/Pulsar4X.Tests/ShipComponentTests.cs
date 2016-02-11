@@ -46,7 +46,7 @@ namespace Pulsar4X.Tests
             ComponentSD lab = ResearchLab();
             ComponentSD refinary = Refinary();
             ComponentSD factory = Factory();
-            JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
+            Dictionary<Guid, ComponentSD> componentsDict = new Dictionary<Guid, ComponentSD>();
             componentsDict.Add(engine.ID, engine);
             componentsDict.Add(mine.ID, mine);
             componentsDict.Add(lab.ID,lab);
@@ -84,7 +84,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
 
-            JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
+            Dictionary<Guid, ComponentSD> componentsDict = new Dictionary<Guid, ComponentSD>();
             componentsDict.Add(engine.ID, engine);
             StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
 
@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick.Values.ElementAt(0));
 
-            JDictionary<Guid, ComponentSD> componentsDict = new JDictionary<Guid, ComponentSD>();
+            Dictionary<Guid, ComponentSD> componentsDict = new Dictionary<Guid, ComponentSD>();
             componentsDict.Add(mine.ID, mine);
             StaticDataManager.ExportStaticData(componentsDict, "./MineComponentTest.json");
 
@@ -125,11 +125,11 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Size]";
 
-            component.MineralCostFormula = new JDictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
+            component.MineralCostFormula = new Dictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
 
             component.CreditCostFormula = "[Size]";
 
-            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType = new Dictionary<ComponentMountType, bool>();
             component.MountType.Add(ComponentMountType.ShipComponent, true);
             component.MountType.Add(ComponentMountType.ShipCargo, true);
             component.MountType.Add(ComponentMountType.PlanetFacility, false);
@@ -150,7 +150,7 @@ namespace Pulsar4X.Tests
             engineTypeAbility1.Name = "Engine Type";
             engineTypeAbility1.Description = "Type of engine Tech";
             engineTypeAbility1.GuiHint = GuiHint.GuiTechSelectionList;
-            engineTypeAbility1.GuidDictionary = new JDictionary<Guid, string>
+            engineTypeAbility1.GuidDictionary = new Dictionary<Guid, string>
             {
                 {new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"),""},
                 {new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"),""},
@@ -260,12 +260,12 @@ namespace Pulsar4X.Tests
             
             component.BuildPointCostFormula = "[Size]";
 
-            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60"}, 
+            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60"}, 
             {new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"), "60"}};
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType = new Dictionary<ComponentMountType, bool>();
             component.MountType.Add(ComponentMountType.ShipComponent, false);
             component.MountType.Add(ComponentMountType.ShipCargo, true);
             component.MountType.Add(ComponentMountType.PlanetFacility, true);
@@ -278,7 +278,7 @@ namespace Pulsar4X.Tests
             mineAbility.Name = "MiningAmount";
             mineAbility.Description = "";
             mineAbility.GuiHint = GuiHint.None;
-            mineAbility.GuidDictionary = new JDictionary<Guid, string>
+            mineAbility.GuidDictionary = new Dictionary<Guid, string>
             {
                 {new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"),"10"},
                 {new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"),"10"},
@@ -318,12 +318,12 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Size]";
 
-            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType = new Dictionary<ComponentMountType, bool>();
             component.MountType.Add(ComponentMountType.ShipComponent, false);
             component.MountType.Add(ComponentMountType.ShipCargo, true);
             component.MountType.Add(ComponentMountType.PlanetFacility, true);
@@ -363,12 +363,12 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Size]";
 
-            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType = new Dictionary<ComponentMountType, bool>();
             component.MountType.Add(ComponentMountType.ShipComponent, false);
             component.MountType.Add(ComponentMountType.ShipCargo, true);
             component.MountType.Add(ComponentMountType.PlanetFacility, true);
@@ -390,7 +390,7 @@ namespace Pulsar4X.Tests
             refineJobsAbility.Name = "RefineAbilitys";
             refineJobsAbility.Description = "";
             refineJobsAbility.GuiHint = GuiHint.None;
-            refineJobsAbility.GuidDictionary = new JDictionary<Guid, string>
+            refineJobsAbility.GuidDictionary = new Dictionary<Guid, string>
             {
                 { new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),"0"},
                 { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}
@@ -418,12 +418,12 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Size]";
 
-            component.MineralCostFormula = new JDictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new JDictionary<ComponentMountType, bool>();
+            component.MountType = new Dictionary<ComponentMountType, bool>();
             component.MountType.Add(ComponentMountType.ShipComponent, false);
             component.MountType.Add(ComponentMountType.ShipCargo, true);
             component.MountType.Add(ComponentMountType.PlanetFacility, true);

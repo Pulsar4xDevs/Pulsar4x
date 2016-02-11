@@ -7,16 +7,16 @@ namespace Pulsar4X.ECSLib
 {
     public class ColonyMinesDB : BaseDataBlob
     {
-        public JDictionary<Guid, int> MineingRate { get; set; }
+        public Dictionary<Guid, int> MineingRate { get; set; }
 
-        public JDictionary<Guid, MineralDepositInfo> MineralDeposit
+        public Dictionary<Guid, MineralDepositInfo> MineralDeposit
         {
             get { return OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyDB>().Minerals; }
         }
 
         public ColonyMinesDB()
         {
-            MineingRate = new JDictionary<Guid, int>();
+            MineingRate = new Dictionary<Guid, int>();
         }
 
         public ColonyMinesDB(ColonyMinesDB db)

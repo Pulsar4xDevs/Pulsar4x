@@ -111,7 +111,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, earthSemiMajAxis, earthEccentricity, earthInclination, earthLoAN, earthLoP, earthMeanLongd, _galaxyGen.Settings.J2000);
             earthBodyDB.Tectonics = TectonicActivity.EarthLike;
             earthPositionDB.Position = OrbitProcessor.GetPosition(earthOrbitDB, game.CurrentDateTime);
-            JDictionary<AtmosphericGasSD, float> atmoGasses = new JDictionary<AtmosphericGasSD, float>();
+            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.78f);
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.12f);
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.01f);

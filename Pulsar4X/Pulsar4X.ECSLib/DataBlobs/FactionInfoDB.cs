@@ -56,7 +56,7 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public JDictionary<Guid, Entity> ComponentDesigns { get; internal set; }
+        public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
 
         [PublicAPI]
         public ReadOnlyCollection<LogEvent> LogEvents => new ReadOnlyCollection<LogEvent>(_logEvents);
@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
             Colonies = colonies;
             ShipClasses = shipClasses;
             KnownFactions = new List<Entity>();
-            ComponentDesigns = new JDictionary<Guid, Entity>();
+            ComponentDesigns = new Dictionary<Guid, Entity>();
         }
         
 

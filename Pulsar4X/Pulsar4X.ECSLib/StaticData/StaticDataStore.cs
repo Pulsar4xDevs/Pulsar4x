@@ -49,25 +49,25 @@ namespace Pulsar4X.ECSLib
         /// stored in a dictionary to allow fast lookup of a specific Technology based on its guid.
         /// </summary>
         [JsonIgnore]
-        public JDictionary<Guid, TechSD> Techs = new JDictionary<Guid, TechSD>();
+        public Dictionary<Guid, TechSD> Techs = new Dictionary<Guid, TechSD>();
 
         /// <summary>
         /// List which stores all of the installations
         /// </summary>
         [JsonIgnore]
-        public JDictionary<Guid, InstallationSD> Installations = new JDictionary<Guid, InstallationSD>();
+        public Dictionary<Guid, InstallationSD> Installations = new Dictionary<Guid, InstallationSD>();
 
         /// <summary>
         /// Dictionary which stores all the Recipes.
         /// </summary>
         [JsonIgnore]
-        public JDictionary<Guid, RefinedMaterialSD> RefinedMaterials = new JDictionary<Guid, RefinedMaterialSD>();
+        public Dictionary<Guid, RefinedMaterialSD> RefinedMaterials = new Dictionary<Guid, RefinedMaterialSD>();
 
         /// <summary>
         /// Dictionary which stores all Components.
         /// </summary>
         [JsonIgnore]
-        public JDictionary<Guid, ComponentSD> Components = new JDictionary<Guid, ComponentSD>();
+        public Dictionary<Guid, ComponentSD> Components = new Dictionary<Guid, ComponentSD>();
 
         /// <summary>
         /// Settings used by system generation. 
@@ -109,16 +109,16 @@ namespace Pulsar4X.ECSLib
                     "Minerals", typeof(List<MineralSD>)
                 },
                 {
-                    "Techs", typeof(JDictionary<Guid, TechSD>)
+                    "Techs", typeof(Dictionary<Guid, TechSD>)
                 },
                 {
-                    "Installations", typeof(JDictionary<Guid, InstallationSD>)
+                    "Installations", typeof(Dictionary<Guid, InstallationSD>)
                 },
                 {
-                    "RefinedMaterials", typeof(JDictionary<Guid, RefinedMaterialSD>)
+                    "RefinedMaterials", typeof(Dictionary<Guid, RefinedMaterialSD>)
                 },
                 {
-                    "Components", typeof(JDictionary<Guid, ComponentSD>)
+                    "Components", typeof(Dictionary<Guid, ComponentSD>)
                 },
                 {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
@@ -148,16 +148,16 @@ namespace Pulsar4X.ECSLib
                     typeof(List<MineralSD>), "Minerals"
                 },
                 {
-                    typeof(JDictionary<Guid, TechSD>), "Techs"
+                    typeof(Dictionary<Guid, TechSD>), "Techs"
                 },
                 {
-                    typeof(JDictionary<Guid, InstallationSD>), "Installations"
+                    typeof(Dictionary<Guid, InstallationSD>), "Installations"
                 },
                 {
-                    typeof(JDictionary<Guid, RefinedMaterialSD>), "RefinedMaterials"
+                    typeof(Dictionary<Guid, RefinedMaterialSD>), "RefinedMaterials"
                 },
                 {
-                    typeof(JDictionary<Guid, ComponentSD>), "Components"
+                    typeof(Dictionary<Guid, ComponentSD>), "Components"
                 },
                 {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
@@ -248,7 +248,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores Technology Static Data. Will overwrite any existing Techs with the same ID.
         /// </summary>
-        internal void Store(JDictionary<Guid, TechSD> techs)
+        internal void Store(Dictionary<Guid, TechSD> techs)
         {
             if (techs != null)
             {
@@ -260,7 +260,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores Installation Static Data. Will overwrite any existing Installations with the same ID.
         /// </summary>
-        internal void Store(JDictionary<Guid, InstallationSD> installations)
+        internal void Store(Dictionary<Guid, InstallationSD> installations)
         {
             if (installations != null)
             {
@@ -272,7 +272,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores ConstructableObj Static Data. Will overwrite any existing ConstructableObjs with the same ID.
         /// </summary>
-        internal void Store(JDictionary<Guid, RefinedMaterialSD> recipes)
+        internal void Store(Dictionary<Guid, RefinedMaterialSD> recipes)
         {
             if (recipes != null)
             {
@@ -284,7 +284,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores Component Static Data. Will overwrite any existing Component with the same ID.
         /// </summary>
-        internal void Store(JDictionary<Guid, ComponentSD> components)
+        internal void Store(Dictionary<Guid, ComponentSD> components)
         {
             if (components != null)
             {
@@ -335,13 +335,13 @@ namespace Pulsar4X.ECSLib
             {
                 AtmosphericGases = new WeightedList<AtmosphericGasSD>(AtmosphericGases),
                 CommanderNameThemes = new List<CommanderNameThemeSD>(CommanderNameThemes),
-                Components = new JDictionary<Guid, ComponentSD>(Components),
-                Installations = new JDictionary<Guid, InstallationSD>(Installations),
+                Components = new Dictionary<Guid, ComponentSD>(Components),
+                Installations = new Dictionary<Guid, InstallationSD>(Installations),
                 _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
                 Minerals = new List<MineralSD>(Minerals),
-                RefinedMaterials = new JDictionary<Guid, RefinedMaterialSD>(RefinedMaterials),
+                RefinedMaterials = new Dictionary<Guid, RefinedMaterialSD>(RefinedMaterials),
                 SystemGenSettings = SystemGenSettings, // Todo: Make this cloneable
-                Techs = new JDictionary<Guid, TechSD>(Techs)
+                Techs = new Dictionary<Guid, TechSD>(Techs)
             };
 
             return clone;

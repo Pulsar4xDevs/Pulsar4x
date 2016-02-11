@@ -1,62 +1,65 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    /// <summary>
-    /// The following is a special dictionay. It should be used whenever you have a dictionary 
-    /// that will be serialized/deserialized by json.
-    /// This is because by default JSON.net will save the key as a string only or will fail to deserialized, 
-    /// this Dictionay forces it to save the full type (if it is a custom type) or to serilize as a Json array of key/value pairs.
-    /// </summary>
-    [JsonArrayAttribute]
-    public class JDictionary<TKey, TValue> : Dictionary<TKey, TValue>
+    public class DictionaryConverter : JsonConverter
     {
-        /// <summary>
-        /// Initializes a new instance of Pulsar4X.ECSLib.JDictionary class that is empty, has the default initial capacity, and uses the default equality comparer for the key type.
-        /// </summary>
-        public JDictionary()
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the Pulsar4X.ESCLib.JDictionary class that contains elements copied from the specified System.Collections.Generic.IDictionary and uses the default equality comparer for the key type.
-        /// </summary>
-        public JDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary)
-        {
-        }
-
-        /// <summary>
-        /// Deserializes the dictionary from a json list.
-        /// </summary>
-        [UsedImplicitly]
-        public JDictionary(SerializationInfo info, StreamingContext context)
-        {
-            var list = (List<KeyValuePair<TKey, TValue>>)info.GetValue("List", typeof(List<KeyValuePair<TKey, TValue>>));
-
-            foreach (KeyValuePair<TKey, TValue> item in list)
+            writer.WriteStartObject();
+            writer.WritePropertyName("List");
+            writer.WriteStartArray();
+            foreach (DictionaryEntry entry in (IDictionary)value)
             {
-                Add(item.Key, item.Value);
+                serializer.Serialize(writer, entry);
             }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
         }
 
-        /// <summary>
-        /// Serializes the Dictionary to a json list.
-        /// </summary>
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            info.AddValue("List", this.ToList());
-        }
-    }
+            var dictionary = (IDictionary)Activator.CreateInstance(objectType);
+            var keyType = objectType.GenericTypeArguments[0];
+            var valueType = objectType.GenericTypeArguments[1];
 
-    public static class JDictionaryExtension
+            reader.Read(); // PropertyName "List"
+            reader.Read(); // StartArray
+            reader.Read(); // EndArray OR StartObject
+            while (reader.TokenType != JsonToken.EndArray)
+            {
+                reader.Read(); // PropertyName "Key"
+                reader.Read(); // Actual Key value
+                var Key = serializer.Deserialize(reader, keyType);
+                reader.Read(); // PropertyName "Value"
+                reader.Read(); // Actual Value value
+                var Value = serializer.Deserialize(reader, valueType);
+                dictionary.Add(Key, Value);
+                reader.Read(); // End Object
+                reader.Read(); // EndArray OR StartObject
+            }
+            reader.Read(); // Next
+
+            return dictionary;
+        }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType.GetInterfaces().Any(i => i == typeof(IDictionary) || (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>)));
+        }
+    } 
+
+    public static class DictionaryExtension
     {
         [PublicAPI]
-        public static void SafeValueAdd<TKey>(this JDictionary<TKey, int> jDict, TKey key, int toAdd)
+        public static void SafeValueAdd<TKey>(this Dictionary<TKey, int> jDict, TKey key, int toAdd)
         {
             if(!jDict.ContainsKey(key))
                 jDict.Add(key, toAdd);
@@ -67,7 +70,7 @@ namespace Pulsar4X.ECSLib
         }
 
         [PublicAPI]
-        public static void SafeValueAdd<TKey>(this JDictionary<TKey, float> jDict, TKey key, float toAdd)
+        public static void SafeValueAdd<TKey>(this Dictionary<TKey, float> jDict, TKey key, float toAdd)
         {
             if (!jDict.ContainsKey(key))
                 jDict.Add(key, toAdd);
@@ -78,7 +81,7 @@ namespace Pulsar4X.ECSLib
         }
 
         [PublicAPI]
-        public static void SafeValueAdd<TKey>(this JDictionary<TKey, double> jDict, TKey key, double toAdd)
+        public static void SafeValueAdd<TKey>(this Dictionary<TKey, double> jDict, TKey key, double toAdd)
         {
             if (!jDict.ContainsKey(key))
                 jDict.Add(key, toAdd);
@@ -101,6 +104,14 @@ namespace Pulsar4X.ECSLib
             if (typeof(DateTime).IsAssignableFrom(objectType))  
             {
                 return base.CreateContract(objectType);
+            }
+
+            // Serialize dictionaries as arrays without subclassing.
+            if (objectType.GetInterfaces().Any(i => i == typeof(IDictionary) || (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>))))
+            {
+                var contract = CreateArrayContract(objectType);
+                contract.Converter = new DictionaryConverter();
+                return contract;
             }
 
             // now we can force iserialible to be used.

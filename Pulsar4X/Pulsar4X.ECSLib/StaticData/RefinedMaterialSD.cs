@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -10,8 +11,8 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public Guid ID;
 
-        public JDictionary<Guid, int> RawMineralCosts;
-        public JDictionary<Guid, int> RefinedMateraialsCosts;
+        public Dictionary<Guid, int> RawMineralCosts;
+        public Dictionary<Guid, int> RefinedMateraialsCosts;
         public ushort RefinaryPointCost;
         public ushort WealthCost;
         public ushort OutputAmount;
