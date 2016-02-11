@@ -42,6 +42,12 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
 
+        /// <summary>
+        /// List of StarSystems currently in the game.
+        /// </summary>
+        [JsonProperty]
+        internal JDictionary<Guid, StarSystem> StarSystems { get; private set; }
+
         [PublicAPI] 
         [JsonProperty]
         public Guid GameMasterFaction;
@@ -75,14 +81,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal List<LogEvent> _logEvents;
 
-        /// <summary>
-        /// List of StarSystems currently in the game.
-        /// </summary>
-        [JsonProperty]
-        internal JDictionary<Guid, StarSystem> StarSystems { get; private set; }
-
         internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new JDictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
+
+        [JsonProperty] public bool EnableMultiThreading = true;
 
         #endregion
 
@@ -262,6 +264,8 @@ namespace Pulsar4X.ECSLib
         {
             OrbitProcessor.Process(this, systems, deltaSeconds);
             ShipMovementProcessor.Process(this, systems, deltaSeconds);
+
+            SurveyProcessor.Process(this, systems, deltaSeconds);
             EconProcessor.Process(this, systems, deltaSeconds);
         }
 

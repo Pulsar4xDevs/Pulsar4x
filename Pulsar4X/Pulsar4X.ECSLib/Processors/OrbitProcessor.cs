@@ -10,25 +10,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// TypeIndexes for several dataBlobs used frequently by this processor.
         /// </summary>
-        private static int _orbitTypeIndex = -1;
-        private static int _positionTypeIndex = -1;
-        private static int _starInfoTypeIndex = -1;
-
-        /// <summary>
-        /// Determines if this processor should use multithreading.
-        /// </summary>
-        public const bool UseMultiThread = false;
-
-        /// <summary>
-        /// Initializes this Processor.
-        /// </summary>
-        internal static void Initialize()
-        {
-            // Resolve TypeIndexes.
-            _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
-            _positionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
-            _starInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
-        }
+        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+        private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
+        private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
 
         /// <summary>
         /// Function called by Game.RunProcessors to run this processor.
@@ -39,12 +23,7 @@ namespace Pulsar4X.ECSLib
 
             int orbitsProcessed = 0;
 
-#pragma warning disable 162
-            // Disable "Unreachable Code" warnings for hardcoded function.
-            // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            // ReSharper disable HeuristicUnreachableCode
-            // ReSharper disable RedundantIfElseBlock
-            if (UseMultiThread)
+            if (game.EnableMultiThreading)
             {
                 Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime, ref orbitsProcessed));
             }
@@ -55,10 +34,6 @@ namespace Pulsar4X.ECSLib
                     UpdateSystemOrbits(system, currentTime, ref orbitsProcessed);
                 }
             }
-            // ReSharper restore RedundantIfElseBlock
-            // ReSharper restore HeuristicUnreachableCode
-            // ReSharper restore ConditionIsAlwaysTrueOrFalse
-#pragma warning restore 162
             return orbitsProcessed;
         }
 
@@ -67,7 +42,7 @@ namespace Pulsar4X.ECSLib
             EntityManager currentManager = system.SystemManager;
 
             // Find the first orbital entity.
-            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_starInfoTypeIndex);
+            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(StarInfoTypeIndex);
 
             if (!firstOrbital.IsValid)
             {
@@ -75,8 +50,8 @@ namespace Pulsar4X.ECSLib
                 return;
             }
 
-            Entity root = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).Root;
-            var rootPositionDB = root.GetDataBlob<PositionDB>(_positionTypeIndex);
+            Entity root = firstOrbital.GetDataBlob<OrbitDB>(OrbitTypeIndex).Root;
+            var rootPositionDB = root.GetDataBlob<PositionDB>(PositionTypeIndex);
 
             // Call recursive function to update every orbit in this system.
             UpdateOrbit(root, rootPositionDB, currentTime, ref orbitsProcessed);
@@ -84,8 +59,8 @@ namespace Pulsar4X.ECSLib
 
         private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime currentTime, ref int orbitsProcessed)
         {
-            var entityOrbitDB = entity.GetDataBlob<OrbitDB>(_orbitTypeIndex);
-            var entityPosition = entity.GetDataBlob<PositionDB>(_positionTypeIndex);
+            var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
+            var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
 
             // Get our Parent-Relative coordinates.
             try
