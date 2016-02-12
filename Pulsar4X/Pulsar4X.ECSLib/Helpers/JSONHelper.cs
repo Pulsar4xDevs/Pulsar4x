@@ -20,11 +20,11 @@ namespace Pulsar4X.ECSLib
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             writer.WriteStartObject(); // Start of the Dictionary
-            writer.WritePropertyName("List"); // First Property "List" (Property named List to be backwords compatible with JDictionaries)
+            writer.WritePropertyName("Entries"); // First Property "Entries"
             writer.WriteStartArray(); // Beginning of "List" array
             foreach (DictionaryEntry entry in (IDictionary)value)
             {
-                // Serialize each entry as an object in the "List" array
+                // Serialize each entry as an object in the "Entries" array
                 serializer.Serialize(writer, entry);
             }
             writer.WriteEndArray(); // End of the "List" array
@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
             var keyType = objectType.GenericTypeArguments[0];
             var valueType = objectType.GenericTypeArguments[1];
 
-            reader.Read(); // PropertyName "List"
+            reader.Read(); // PropertyName "Entries"
             reader.Read(); // StartArray
             reader.Read(); // EndArray OR StartObject
             while (reader.TokenType != JsonToken.EndArray)
