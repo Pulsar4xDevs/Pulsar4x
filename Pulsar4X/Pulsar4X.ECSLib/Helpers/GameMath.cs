@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
@@ -87,6 +84,33 @@ namespace Pulsar4X.ECSLib
     {
         public double Weight { get; set; }
         public T Value { get; set; }
+
+        protected bool Equals(WeightedValue<T> other)
+        {
+            return EqualityComparer<T>.Default.Equals(Value, other.Value);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+            return Equals((WeightedValue<T>)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return EqualityComparer<T>.Default.GetHashCode(Value);
+        }
     }
 
     /// <summary>
@@ -167,6 +191,10 @@ namespace Pulsar4X.ECSLib
             TotalWeight += weight;
         }
 
+        public void Add(WeightedValue<T> value)
+        {
+            Add(value.Weight, value.Value);
+        }
         /// <summary>
         /// Adds the contents of another weighted list to this one.
         /// </summary>
@@ -204,6 +232,16 @@ namespace Pulsar4X.ECSLib
             _valueList.RemoveAt(index);
 
             TotalWeight -= weight;
+        }
+
+        public bool ContainsValue(T Value)
+        {
+            return _valueList.Contains(new WeightedValue<T> {Value = Value});
+        }
+
+        public int IndexOf(T Value)
+        {
+            return _valueList.IndexOf(new WeightedValue<T> { Value = Value });
         }
 
         public IEnumerator<WeightedValue<T>> GetEnumerator() 
@@ -260,6 +298,12 @@ namespace Pulsar4X.ECSLib
             {
                 TotalWeight += w.Weight;
             }
+        }
+
+        public WeightedValue<T> this[int index]
+        {
+            get { return _valueList[index]; }
+            set { RemoveAt(index); Add(value); }
         }
     }
 

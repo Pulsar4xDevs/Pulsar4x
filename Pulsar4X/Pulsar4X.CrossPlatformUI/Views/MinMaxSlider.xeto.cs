@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using Eto.Forms;
-using Eto.Drawing;
+﻿using Eto.Forms;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
 

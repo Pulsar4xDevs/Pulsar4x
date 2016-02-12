@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Eto;
 using OpenTK;
 using OpenTK.Graphics;
-using Eto;
+using System;
 namespace Pulsar4X.CrossPlatformUI.Wpf
 {
     /// <summary>

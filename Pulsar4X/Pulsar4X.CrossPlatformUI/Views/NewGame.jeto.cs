@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Eto.Forms;
-using Eto.Drawing;
+﻿using Eto.Forms;
 using Eto.Serialization.Json;
-using Pulsar4X.ViewModel;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ViewModel;
+using System;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {

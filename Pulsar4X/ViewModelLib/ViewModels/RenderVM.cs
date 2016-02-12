@@ -1,14 +1,10 @@
-﻿using System;
+﻿//using Pulsar4X.Sceen;
+using OpenTK;
+using Pulsar4X.ECSLib;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using Pulsar4X.ECSLib;
-//using Pulsar4X.Sceen;
-using System.Diagnostics;
-using OpenTK;
-using Vector4 = OpenTK.Vector4;
 
 namespace Pulsar4X.ViewModel
 {

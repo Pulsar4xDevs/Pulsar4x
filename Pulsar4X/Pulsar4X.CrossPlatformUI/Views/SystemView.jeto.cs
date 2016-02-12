@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Collections.ObjectModel;
-using Eto.Forms;
-using Eto.Drawing;
+﻿using Eto.Forms;
 using Eto.Serialization.Json;
-using Pulsar4X.ViewModel;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
+using Pulsar4X.ViewModel;
+using System;
 
 //#TODO Move the actual rendering stuff out into a partial and separate it from the VMs
 //I might also want to make windows render with DirectX so that it plays nicer with wpf, 

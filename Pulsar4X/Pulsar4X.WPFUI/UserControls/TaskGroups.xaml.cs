@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-
-namespace Pulsar4X.WPFUI
+﻿namespace Pulsar4X.WPFUI
 {
     /// <summary>
     /// Interaction logic for TaskGroups.xaml

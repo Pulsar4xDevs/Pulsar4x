@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Security.AccessControl;
-using Eto.Forms;
-using Eto.Drawing;
+﻿using Eto.Forms;
 using Eto.Serialization.Xaml;
-using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel;
+using System;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {

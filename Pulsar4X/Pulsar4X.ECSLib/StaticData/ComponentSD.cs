@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
-{  
+{
     [StaticDataAttribute(true, IDPropertyName = "ID")]
     public struct ComponentSD
     {

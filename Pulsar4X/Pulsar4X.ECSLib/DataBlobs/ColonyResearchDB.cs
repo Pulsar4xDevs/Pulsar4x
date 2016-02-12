@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Pulsar4X.ECSLib
+﻿namespace Pulsar4X.ECSLib
 {
     public class  ColonyResearchDB : BaseDataBlob
     {

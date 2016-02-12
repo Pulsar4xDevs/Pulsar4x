@@ -1,5 +1,5 @@
-﻿using System.Windows.Controls;
-using Pulsar4X.ViewModel;
+﻿using Pulsar4X.ViewModel;
+using System.Windows.Controls;
 namespace Pulsar4X.WPFUI.UserControls
 {
     /// <summary>
