@@ -64,9 +64,10 @@ namespace Pulsar4X.ViewModel
 
         private void ComponentTemplateVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (MineralCostFormula.Last().Minerals != null)
+            if (MineralCostFormula.Last().Minerals.SelectedIndex >= 0 && MineralCostFormula[0].Minerals.SelectedIndex >= 0)
             {
                 MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+                MineralCostFormula.Last().PropertyChanged += ComponentTemplateVM_PropertyChanged;
             }
         }
 
