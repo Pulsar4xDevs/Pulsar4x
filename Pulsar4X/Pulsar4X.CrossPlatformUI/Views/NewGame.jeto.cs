@@ -80,6 +80,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             Game.CreateGame(new_game_options);
             MessageBox.Show("New Game Created", "New Game", MessageBoxType.Information);
+            MainForm.toggleToolbar(true);
+            MainForm.toggleSaveGame(true);
             Close();
         }
 
