@@ -28,14 +28,12 @@ namespace Pulsar4X.ViewModel
         public ObservableCollection<string> DisplayList { get; set; }
         public int SelectedIndex { get; set; }
         public DisplayMode DisplayMode { get; set; }
-        //public Mode SelectedValueMode { get; set; }
         
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="dictionary"></param>
-        /// <param name="displayMode"></param>
-        public DictionaryVM(DisplayMode displayMode )
+        /// <param name="displayMode">Should the DisplayList be made up of the Key or the Value</param>
+        public DictionaryVM(DisplayMode displayMode = DisplayMode.Value)
         {
             DisplayMode = displayMode;
             DisplayList = new ObservableCollection<string>();
@@ -44,29 +42,55 @@ namespace Pulsar4X.ViewModel
         }
 
         
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>The Selected Value</returns>
         public TValue GetValue()
         {
             return _index[SelectedIndex].Value;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns>The value at the given index</returns>
         public TValue GetValue(int index)
         {
             return _index[index].Value;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>The Selected Key</returns>
         public TKey GetKey()
         {
             return _index[SelectedIndex].Key;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns>The Key at the given Index</returns>
         public TKey GetKey(int index)
         {
             return _index[index].Key;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>The Selected KeyValuePair</returns>
         public KeyValuePair<TKey, TValue> GetKeyValuePair()
         {
             return _index[SelectedIndex];
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns>The KeyValuePair at the given Index</returns>
         public KeyValuePair<TKey, TValue> GetKeyValuePair(int index)
         {
             return _index[index];

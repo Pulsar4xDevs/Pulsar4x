@@ -17,7 +17,11 @@ namespace Pulsar4X.ViewModel
         public string Name { get; set; }
         public string Description { get; set; }
         private Guid _ID;
-        public string ID { get { return _ID.ToString(); } }
+        public string ID
+        {
+            get { return _ID.ToString(); }
+            set { _ID = Guid.Parse(value); }
+        }
 
         public string SizeFormula { get; set; }
         public string HTKFormula { get; set; }
@@ -69,7 +73,7 @@ namespace Pulsar4X.ViewModel
         {
             Name = designSD.Name;
             Description = designSD.Description;
-            //ID = designSD.ID;
+            _ID = designSD.ID;
 
             SizeFormula = designSD.SizeFormula;
             HTKFormula = designSD.HTKFormula;
@@ -92,8 +96,31 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        public void Create(GameVM game)
+        public void CreateSD(GameVM game)
         {
+            ComponentSD sd = new ComponentSD();
+            sd.Name = Name;
+            sd.Description = Description;
+            sd.ID = _ID;
+
+            sd.SizeFormula = SizeFormula;
+            sd.HTKFormula = HTKFormula;
+            sd.CrewReqFormula = CrewReqFormula;
+            sd.MineralCostFormula = new Dictionary<Guid, string>();
+            foreach (var item in MineralCostFormula)
+            {
+                sd.MineralCostFormula.Add(item.Minerals.GetKey(), item.Forumula);
+            }
+            sd.ResearchCostFormula = ResearchCostFormula;
+            sd.CreditCostFormula = CreditCostFormula;
+            sd.BuildPointCostFormula = BuildPointCostFormula;
+            sd.MountType = new Dictionary<ComponentMountType, bool>();
+            sd.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            foreach (var item in ComponentAbilitySDs)
+            {
+                sd.ComponentAbilitySDs.Add(item.CreateSD());
+            }
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

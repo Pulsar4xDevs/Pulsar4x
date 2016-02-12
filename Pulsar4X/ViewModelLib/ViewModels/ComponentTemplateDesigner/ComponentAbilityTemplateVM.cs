@@ -14,7 +14,6 @@ namespace Pulsar4X.ViewModel
 
         public string Name { get; set; }
         public string Description { get; set; }
-        //public DictionaryVM<GuiHint, string> GuiHint { get; set; }
         public DictionaryVM<GuiHint,string> SelectedGuiHint{ get; set; }
         public DictionaryVM<Type,string> AbilityDataBlobTypeSelection { get; set; }
         public string AbilityDataBlobType { get; set; }
@@ -30,9 +29,6 @@ namespace Pulsar4X.ViewModel
                 SelectedGuiHint.Add((GuiHint)item, Enum.GetName(typeof(GuiHint), item));
             }
             
-            //GuiHint = Enum.GetNames(typeof(ECSLib.GuiHint)).ToList<string>();
-            //GuiHint = new DictionaryVM<ECSLib.GuiHint, string>(DisplayMode.Value);
-            //GuiHint = typeof(GuiHint);
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
@@ -46,7 +42,7 @@ namespace Pulsar4X.ViewModel
             MinFormula = abilitySD.MinFormula;
             MaxFormula = abilitySD.MaxFormula;
             GuidDictionary = abilitySD.GuidDictionary;
-    }
+        }
 
         private static List<Type> AbilityTypes()
         {
@@ -80,6 +76,20 @@ namespace Pulsar4X.ViewModel
 
         }
 
+        public ComponentAbilitySD CreateSD()
+        {
+            ComponentAbilitySD sd = new ComponentAbilitySD();
+            sd.Name = Name;
+            sd.Description = Description;
+            sd.AbilityDataBlobType = AbilityDataBlobType;
+            sd.GuiHint = SelectedGuiHint.GetKey();
+            sd.AbilityFormula = AbilityFormula;
+            sd.MinFormula = MinFormula;
+            sd.MaxFormula = MaxFormula;
+            sd.GuidDictionary = GuidDictionary;
+            return sd;
+                
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

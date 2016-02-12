@@ -25,15 +25,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             GuiHint.DataContext = viewModel.SelectedGuiHint;
             GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
             GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
-            //GuiHint.DataStore = Enum.GetValues(typeof(ECSLib.GuiHint)).Cast<object>();
-            //GuiHint.ItemTextBinding = Binding.Property((ECSLib.GuiHint n) => Enum.GetName(typeof(ECSLib.GuiHint), n));
 
             GuiHint.SelectedIndexChanged += GuiHint_SelectedIndexChanged;
         }
 
         private void GuiHint_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //ECSLib.GuiHint selected = (ECSLib.GuiHint)GuiHint.SelectedValue;
 
             switch (_viewModel.SelectedGuiHint.GetKey())
             {
