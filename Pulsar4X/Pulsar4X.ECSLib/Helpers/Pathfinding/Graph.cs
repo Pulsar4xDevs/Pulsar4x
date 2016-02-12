@@ -141,9 +141,9 @@ namespace Pulsar4X.ECSLib
     /// Simple hashtable implementation of a NodeList.
     /// Hashtable will keep lookup time very fast with larger datasets.
     /// </summary>
-    public class NodeList : IEnumerable
+    public class NodeList : IEnumerable, ICloneable
     {
-        private readonly Hashtable _data = new Hashtable();
+        private Hashtable _data = new Hashtable();
         
         public virtual void Add(Node n)
         {
@@ -172,6 +172,11 @@ namespace Pulsar4X.ECSLib
         public IEnumerator GetEnumerator()
         {
             return _data.GetEnumerator();
+        }
+
+        public object Clone()
+        {
+            return new NodeList {_data = (Hashtable)_data.Clone()};
         }
     }
 
