@@ -15,6 +15,10 @@ namespace Pulsar4X.ViewModel
     }
     /// <summary>
     /// An attempt at creating a class to make binding dictionaries to UI more streamlined.
+    /// To Use in the View:
+    ///     myComboBox.DataContext = viewModel.myDictionaryVM;
+    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
@@ -24,7 +28,7 @@ namespace Pulsar4X.ViewModel
         private Dictionary<int, KeyValuePair<TKey, TValue>> _index = new Dictionary<int, KeyValuePair<TKey, TValue>>(); 
         private Dictionary<KeyValuePair<TKey,TValue>,int> _reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>(); 
         public ObservableCollection<string> DisplayList { get; set; }
- 
+        public int SelectedIndex { get; set; }
         public DisplayMode DisplayMode { get; set; }
         //public Mode SelectedValueMode { get; set; }
         
@@ -38,18 +42,36 @@ namespace Pulsar4X.ViewModel
             DisplayMode = displayMode;
             DisplayList = new ObservableCollection<string>();
             _dictionary = new Dictionary<TKey, TValue>();
+            SelectedIndex = -1;
         }
 
+        
 
-
+        public TValue GetValue()
+        {
+            return _index[SelectedIndex].Value;
+        }
         public TValue GetValue(int index)
         {
             return _index[index].Value;
         }
 
+        public TKey GetKey()
+        {
+            return _index[SelectedIndex].Key;
+        }
         public TKey GetKey(int index)
         {
             return _index[index].Key;
+        }
+
+        public KeyValuePair<TKey, TValue> GetKeyValuePair()
+        {
+            return _index[SelectedIndex];
+        }
+        public KeyValuePair<TKey, TValue> GetKeyValuePair(int index)
+        {
+            return _index[index];
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()

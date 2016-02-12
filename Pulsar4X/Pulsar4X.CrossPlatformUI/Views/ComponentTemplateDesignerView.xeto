@@ -26,13 +26,13 @@
       <Label Text="BuildPointCostFormula" />
       <TextBox Text="{Binding BuildPointCostFormula}" />
       <Label Text="MineralCostFormula" />
-      <TextBox Text="{Binding MineralCostFormula}" />
+      <StackLayout ID="MineralCostFormulaStackLayout" />
     </TableRow>
     <TableRow>
       <Label Text="CreditCostFormula" />
       <TextBox Text="{Binding CreditCostFormula}" />
       <Label Text="MountType" />
-      <ListBox Text="{Binding MountType}" />
+      <ListBox /> <!--="{Binding MountType}" /> -->
     </TableRow>
     <TableRow>
       <StackLayout ID="AbilityTemplates"></StackLayout>

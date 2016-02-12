@@ -144,6 +144,9 @@
     <EmbeddedResource Include="Views\ComponentAbilityTemplateDesignerView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\MineralFormulaView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -179,6 +182,9 @@
     </Compile>
     <Compile Include="Views\ComponentTemplateDesignerView.xeto.cs">
       <DependentUpon>ComponentTemplateDesignerView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GuidFormulaView.xeto.cs">
+      <DependentUpon>MineralFormulaView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\JobAbilityView.xeto.cs">
       <DependentUpon>JobAbilityView.xeto</DependentUpon>

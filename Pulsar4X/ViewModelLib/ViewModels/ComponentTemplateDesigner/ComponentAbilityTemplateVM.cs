@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
+using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.ViewModel
 {
@@ -75,6 +76,15 @@ namespace Pulsar4X.ViewModel
 
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
         public void Refresh(bool partialRefresh = false)
         {

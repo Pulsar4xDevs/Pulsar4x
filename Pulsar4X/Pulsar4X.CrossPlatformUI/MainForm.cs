@@ -26,7 +26,7 @@ namespace Pulsar4X.CrossPlatformUI
             var colView = new Commands.ColonyView(Game);
             var componentDesign = new Commands.ComponentDesignViewCMD(Game);
             var shipDesign = new Commands.ShipDesignViewCMD(Game);
-            var componentTemplateDesign = new Commands.ComponentTemplateViewCMD();
+            var componentTemplateDesign = new Commands.ComponentTemplateViewCMD(Game);
             var quit = new Commands.Quit();
 
             if (Platform.Supports<MenuBar>())
