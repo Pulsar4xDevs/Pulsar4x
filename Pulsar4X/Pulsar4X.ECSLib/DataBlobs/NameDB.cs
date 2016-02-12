@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
         private readonly Dictionary<Entity, string> _names = new Dictionary<Entity, string>();
 
         [PublicAPI]
-        public string DefaultName { get { return _names[Entity.InvalidEntity]; } }
+        public string DefaultName => _names[Entity.InvalidEntity];
 
         public NameDB()
         {
