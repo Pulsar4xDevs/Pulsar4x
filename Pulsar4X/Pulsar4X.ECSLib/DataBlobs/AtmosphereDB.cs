@@ -117,16 +117,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// indicates if the body as a valid atmosphere.
         /// </summary>
-        public bool Exists
-        {
-            get
-            {
-                if (Composition.Count == 0)
-                    return false;
-
-                return true;
-            }
-        }
+        public bool Exists => Composition.Count != 0;
 
         /// <summary>
         /// Empty constructor for AtmosphereDataBlob.
