@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib
     public class ColonyBonusesDB : BaseDataBlob
     {
        
-        private Dictionary<AbilityType, float> FactionBonus { get { return OwningEntity.GetDataBlob<FactionAbilitiesDB>().AbilityBonuses; }}
+        private Dictionary<AbilityType, float> FactionBonus => OwningEntity.GetDataBlob<FactionAbilitiesDB>().AbilityBonuses;
 
         public float GetBonus(AbilityType type)
         {
