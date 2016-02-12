@@ -212,7 +212,22 @@ namespace Pulsar4X.ECSLib
         internal void Store(WeightedList<AtmosphericGasSD> atmosphericGases)
         {
             if (atmosphericGases != null)
-                AtmosphericGases.AddRange(atmosphericGases);
+            {
+                foreach (WeightedValue<AtmosphericGasSD> atmosphericGas in atmosphericGases)
+                {
+                    if (AtmosphericGases.ContainsValue(atmosphericGas.Value))
+                    {
+                        // Update existing value
+                        int index = AtmosphericGases.IndexOf(atmosphericGas.Value);
+                        AtmosphericGases[index] = atmosphericGas;
+                    }
+                    else
+                    {
+                        // Add new value
+                        AtmosphericGases.Add(atmosphericGas);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -221,7 +236,22 @@ namespace Pulsar4X.ECSLib
         internal void Store(List<CommanderNameThemeSD> commanderNameThemes)
         {
             if (commanderNameThemes != null)
-                CommanderNameThemes.AddRange(commanderNameThemes);
+            {
+                foreach (CommanderNameThemeSD commanderNameThemeSD in commanderNameThemes)
+                {
+                    if (CommanderNameThemes.Contains(commanderNameThemeSD))
+                    {
+                        // Update existing value.
+                        int index = CommanderNameThemes.IndexOf(commanderNameThemeSD);
+                        CommanderNameThemes[index] = commanderNameThemeSD;
+                    }
+                    else
+                    {
+                        // Add new value.
+                        CommanderNameThemes.Add(commanderNameThemeSD);
+                    }
+                }
+            }
         }
 
         /// <summary>

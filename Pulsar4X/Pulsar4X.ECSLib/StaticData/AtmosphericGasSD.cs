@@ -1,6 +1,6 @@
 ﻿namespace Pulsar4X.ECSLib
 {
-    [StaticDataAttribute(false)]
+    [StaticData(false)]
     public struct AtmosphericGasSD
     {
         /// <summary>
@@ -43,5 +43,23 @@
         /// </summary>
         public double GreenhouseEffect;
 
+        public bool Equals(AtmosphericGasSD other)
+        {
+            return string.Equals(ChemicalSymbol, other.ChemicalSymbol);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            return obj is AtmosphericGasSD && Equals((AtmosphericGasSD)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ChemicalSymbol?.GetHashCode() ?? 0;
+        }
     }
 }
