@@ -11,22 +11,31 @@
       <TextBox Text="{Binding Description}" />
       <Label Text="ID" />
       <TextBox Text="{Binding ID}" />
+    </TableRow>
+    <TableRow>
       <Label Text="SizeFormula" />
       <TextBox Text="{Binding SizeFormula}" />
       <Label Text="HTKFormula" />
       <TextBox Text="{Binding HTKFormula}" />
       <Label Text="CrewReqFormula" />
       <TextBox Text="{Binding CrewReqFormula}" />
+    </TableRow>
+    <TableRow>
       <Label Text="ResearchCostFormula" />
       <TextBox Text="{Binding ResearchCostFormula}" />
       <Label Text="BuildPointCostFormula" />
       <TextBox Text="{Binding BuildPointCostFormula}" />
       <Label Text="MineralCostFormula" />
       <TextBox Text="{Binding MineralCostFormula}" />
+    </TableRow>
+    <TableRow>
       <Label Text="CreditCostFormula" />
       <TextBox Text="{Binding CreditCostFormula}" />
       <Label Text="MountType" />
       <ListBox Text="{Binding MountType}" />
+    </TableRow>
+    <TableRow>
+      <StackLayout ID="AbilityTemplates"></StackLayout>
     </TableRow>
     
   </TableLayout>

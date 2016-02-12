@@ -26,6 +26,7 @@ namespace Pulsar4X.CrossPlatformUI
             var colView = new Commands.ColonyView(Game);
             var componentDesign = new Commands.ComponentDesignViewCMD(Game);
             var shipDesign = new Commands.ShipDesignViewCMD(Game);
+            var componentTemplateDesign = new Commands.ComponentTemplateViewCMD();
             var quit = new Commands.Quit();
 
             if (Platform.Supports<MenuBar>())
@@ -57,6 +58,7 @@ namespace Pulsar4X.CrossPlatformUI
                 ToolBar.Items.Add(colView);
                 ToolBar.Items.Add(componentDesign);
                 ToolBar.Items.Add(shipDesign);
+                ToolBar.Items.Add(componentTemplateDesign);
             }
 
         }

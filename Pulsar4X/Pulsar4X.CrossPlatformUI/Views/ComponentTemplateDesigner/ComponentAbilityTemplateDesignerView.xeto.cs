@@ -12,12 +12,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected ComboBox GuiHint { get; set; }
         protected StackLayout GuiHintControls { get; set; }
+
+        
+
         public ComponentAbilityTemplateDesignerView()
         {
             XamlReader.Load(this);
         }
 
-        public ComponentAbilityTemplateDesignerView(ComponentAbilityTemplateVM viewModel)
+        public ComponentAbilityTemplateDesignerView(ComponentAbilityTemplateVM viewModel) : this()
         {
             DataContext = viewModel;
             GuiHint.DataStore = Enum.GetValues(typeof(ECSLib.GuiHint)).Cast<object>();
@@ -58,12 +61,33 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void GuiTechSelectionList()
         {
+            GuiHintControls.Items.Clear();
+            TextBox tb = new TextBox();
+            
+            ComboBox comboBox = new ComboBox();
+            comboBox.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM n) => n.AbilityDataBlobTypeSelection.DisplayList);
+            comboBox.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.AbilityDataBlobType);
+
+
 
         }
 
         private void GuiTextDisplay()
         {
+            //this just uses the exsisting Abilityformula
             GuiHintControls.Items.Clear();
+            Label label = new Label();
+            label.Text = "Displays AbilityFormula";
+            GuiHintControls.Items.Add(label);
+        }
+
+        private void GuiNone()
+        {
+            GuiHintControls.Items.Clear();
+            Label label = new Label();
+            label.Text = "Does Not display anything, however AbilityFormula still works 'under the hood'";
+            GuiHintControls.Items.Add(label);
+
         }
     }
 }

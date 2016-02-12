@@ -15,19 +15,31 @@ namespace Pulsar4X.ViewModel
         public string Description { get; set; }
         //public DictionaryVM<GuiHint, string> GuiHint { get; set; }
         public GuiHint SelectedGuiHint{ get; set; }
-        public DictionaryVM<Type,string> AbilityDataBlobType { get; set; }
+        public DictionaryVM<Type,string> AbilityDataBlobTypeSelection { get; set; }
+        public string AbilityDataBlobType { get; set; }
         public string AbilityFormula { get; set; }
         public string MinFormula { get; set; }
         public string MaxFormula { get; set; }
-
+        public Dictionary<Guid, string> GuidDictionary;
         public ComponentAbilityTemplateVM()
         {
             //GuiHint = Enum.GetNames(typeof(ECSLib.GuiHint)).ToList<string>();
             //GuiHint = new DictionaryVM<ECSLib.GuiHint, string>(DisplayMode.Value);
             //GuiHint = typeof(GuiHint);
-            AbilityDataBlobType = GetTypeDict(AbilityTypes());
+            AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
+        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD)
+        {
+            Name = abilitySD.Name;
+            Description = abilitySD.Description;
+            SelectedGuiHint = abilitySD.GuiHint;
+            AbilityDataBlobType = abilitySD.AbilityDataBlobType;
+            AbilityFormula = abilitySD.AbilityFormula;
+            MinFormula = abilitySD.MinFormula;
+            MaxFormula = abilitySD.MaxFormula;
+            GuidDictionary = abilitySD.GuidDictionary;
+    }
 
         private static List<Type> AbilityTypes()
         {
