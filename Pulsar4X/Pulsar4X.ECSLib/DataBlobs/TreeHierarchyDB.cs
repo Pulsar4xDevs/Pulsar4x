@@ -1,10 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
-using Newtonsoft.Json;
-using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {

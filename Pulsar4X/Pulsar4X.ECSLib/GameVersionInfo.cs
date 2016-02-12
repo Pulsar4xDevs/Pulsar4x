@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Reflection;
-using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Pulsar4X.ECSLib;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel
 {

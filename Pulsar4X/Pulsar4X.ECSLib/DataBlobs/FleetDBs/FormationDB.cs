@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Pulsar4X.ECSLib
+﻿namespace Pulsar4X.ECSLib
 {
     class FormationDB : TreeHierarchyDB
     {

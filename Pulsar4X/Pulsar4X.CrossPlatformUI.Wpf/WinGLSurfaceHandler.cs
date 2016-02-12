@@ -1,14 +1,11 @@
 using Eto.Drawing;
-using Eto.Forms;
 using Eto.Wpf;
 using Eto.Wpf.Forms;
+using OpenTK.Graphics;
+using System;
+using Keys = Eto.Forms.Keys;
 using MouseButtons = Eto.Forms.MouseButtons;
 using MouseEventArgs = Eto.Forms.MouseEventArgs;
-using Keys = Eto.Forms.Keys;
-using OpenTK.Graphics;
-using OpenTK;
-using System;
-using System.Windows.Forms;
 
 namespace Pulsar4X.CrossPlatformUI.Wpf
 {

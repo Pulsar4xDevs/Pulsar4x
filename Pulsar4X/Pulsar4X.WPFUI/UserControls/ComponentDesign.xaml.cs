@@ -1,9 +1,9 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using Pulsar4X.ECSLib;
+﻿using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel;
 using Pulsar4X.WPFUI.UserControls;
+using System;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace Pulsar4X.WPFUI
 {

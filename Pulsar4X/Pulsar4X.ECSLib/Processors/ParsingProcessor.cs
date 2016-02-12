@@ -1,6 +1,6 @@
-﻿using System;
+﻿using NCalc;
+using System;
 using System.Collections.Generic;
-using NCalc;
 
 namespace Pulsar4X.ECSLib
 {

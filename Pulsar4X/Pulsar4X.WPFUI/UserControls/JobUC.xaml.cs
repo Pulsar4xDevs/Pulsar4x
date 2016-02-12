@@ -1,6 +1,4 @@
 ﻿using System.Windows.Controls;
-using Pulsar4X.ViewModel;
-using Xceed.Wpf.Toolkit;
 
 namespace Pulsar4X.WPFUI.UserControls
 {

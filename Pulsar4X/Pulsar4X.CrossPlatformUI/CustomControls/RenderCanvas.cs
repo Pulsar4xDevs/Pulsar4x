@@ -1,11 +1,10 @@
 
 
-using System;
 using Eto;
 using Eto.Drawing;
 using Eto.Forms;
 using OpenTK.Graphics;
-using OpenTK;
+using System;
 
 namespace Pulsar4X.CrossPlatformUI
 {

@@ -1,13 +1,11 @@
-﻿using System;
+﻿using Pulsar4X.ECSLib;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
-using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel
 {

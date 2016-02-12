@@ -42,11 +42,11 @@
 //            Dictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
 
 //            MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOriginalAmount = 5000 };
-            
+
 //            minerals.Add(_duraniumSD.ID, duraniumDeposit);
 
 //            MineralDepositInfo corundiumDeposit = new MineralDepositInfo { Amount = 1000, Accessibility = 0.5, HalfOriginalAmount = 500 };
-            
+
 //            minerals.Add(_corundiumSD.ID, corundiumDeposit);
 
 //            Entity species = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
@@ -54,7 +54,7 @@
 //            _colonyEntity = ColonyFactory.CreateColony(_faction, species, planetEntity);
 
 //            InstallationsDB installationsDB = _colonyEntity.GetDataBlob<InstallationsDB>();
-            
+
 //            //wow holy shit, this is a pain. definatly need to add an "AddInstallation" to the InstallationProcessor. (and RemoveInstallation);
 //            Guid mineguidGuid = new Guid("406E22B5-65DB-4C7E-B956-B120B0466503");
 //            //InstallationSD mineSD = StaticDataManager.StaticDataStore.Installations[mineguidGuid];
@@ -82,11 +82,11 @@
 //            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
 //            Dictionary<Guid, float> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
 //            Dictionary<Guid, float> mineralstockpilePreMined = new Dictionary<Guid, float>(mineralstockpile);
-            
-            
+
+
 //            InstallationProcessor.Employment(colonyEntity); //do employment check;
 //            InstallationProcessor.Mine(_faction, colonyEntity); //run mines
-            
+
 //            Assert.AreEqual(mineralstockpile[_corundiumSD.ID], 0);
 //            Assert.AreEqual(mineralstockpile[_duraniumSD.ID], 0);
 
@@ -101,7 +101,7 @@
 
 //            Assert.AreNotEqual(mineralstockpile[_corundiumSD.ID], 10);
 //            Assert.AreNotEqual(mineralstockpile[_duraniumSD.ID], 5);
-            
+
 //        }
 
 //        [Test]
@@ -111,7 +111,7 @@
 //            Guid itemConstructing = new Guid();//just a random guid for now.
 //            double ablityPointsThisColony = 100;
 //            List<ConstructionJob> jobList = new List<ConstructionJob>();
-            
+
 //            Dictionary<Guid,float> stockpileOut = new Dictionary<Guid, float>();
 
 //            PercentValue priority = new PercentValue {Percent = 1};
@@ -128,18 +128,18 @@
 //                BuildPointsPerItem = 100
 //            };
 //            jobList.Add(newJob);
-            
+
 //            colonyInfo.MineralStockpile.Add(_duraniumSD.ID, 2250); //not enough of this should get 4.5  total installations. 
 //            colonyInfo.MineralStockpile.Add(_corundiumSD.ID, 100); //enough of this
 //            stockpileOut.Add(itemConstructing,0);
 
-            
+
 //            //firstpass 
 //            InstallationProcessor.GenericConstructionJobs(0, jobList, colonyInfo, stockpileOut);
 //            Assert.AreEqual(0, stockpileOut[itemConstructing], "Should not have constructed anything due to no buildpoints");
 //            Assert.AreEqual(2250, colonyInfo.MineralStockpile[_duraniumSD.ID], "Mineral Usage Incorrect");
 //            Assert.AreEqual(100, colonyInfo.MineralStockpile[_corundiumSD.ID], "Mineral Usage Incorrect");
-            
+
 //            //todo: fix floating point math.
 
 //            //secondPass
@@ -149,7 +149,7 @@
 //            //thirdPass
 //            //InstallationProcessor.GenericConstructionJobs(50, jobList, colonyInfo, stockpileOut);
 //            //Assert.AreEqual(1.5, stockpileOut[itemConstructing]);            
-            
+
 //            //fourthPass
 //            //InstallationProcessor.GenericConstructionJobs(5000, jobList, colonyInfo, stockpileOut);
 //            //Assert.AreEqual(4.5, stockpileOut[itemConstructing]);

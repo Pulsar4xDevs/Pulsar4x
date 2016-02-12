@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Eto;
 using Eto.Forms;
-using Eto;
 using Pulsar4X.ViewModel;
+using System;
 
 namespace Pulsar4X.CrossPlatformUI
 {

@@ -1,10 +1,9 @@
-﻿using System;
+﻿using NUnit.Framework;
+using Pulsar4X.ECSLib;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using NUnit.Framework;
-using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {

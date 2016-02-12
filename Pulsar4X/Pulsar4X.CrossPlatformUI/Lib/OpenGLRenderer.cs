@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using OpenTK;
-using OpenTK.Graphics;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using Pulsar4X.ViewModel;
+using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.CrossPlatformUI
 {
-	public class OpenGLRenderer
+    public class OpenGLRenderer
 	{
         private RenderVM RenderVM;
 		private List<int> shaderList;

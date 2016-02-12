@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    
+
     public enum ComponentMountType
     {
         ShipComponent,

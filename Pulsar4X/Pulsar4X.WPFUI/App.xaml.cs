@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Pulsar4X.ViewModel;
+using System;
 using System.ComponentModel;
-using System.Configuration;
-using System.Data;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
-using Pulsar4X.ViewModel;
 //using Pulsar4X.ECSLib;
-using Pulsar4X.WPFUI;
 
 namespace Pulsar4X.WPFUI
 {

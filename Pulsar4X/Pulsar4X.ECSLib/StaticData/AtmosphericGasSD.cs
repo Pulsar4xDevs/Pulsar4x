@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-
-namespace Pulsar4X.ECSLib
+﻿namespace Pulsar4X.ECSLib
 {
     [StaticDataAttribute(false)]
     public struct AtmosphericGasSD
