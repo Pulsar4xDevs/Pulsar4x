@@ -107,7 +107,7 @@ namespace Pulsar4X.ECSLib
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
 
             // Don't attempt to calculate large timeframes.
-            if (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
+            while (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
             {
                 long years = timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks;
                 timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
@@ -119,6 +119,8 @@ namespace Pulsar4X.ECSLib
             double currentMeanAnomaly = Angle.ToRadians(orbit.MeanAnomaly);
             // Add nT
             currentMeanAnomaly += Angle.ToRadians(orbit.MeanMotion) * timeSinceEpoch.TotalSeconds;
+            // Large nT can cause meanAnomaly to go past 2*Pi. Roll it down. It shouldn't, because timeSinceEpoch should be tapered above, but it has.
+            currentMeanAnomaly = currentMeanAnomaly % (Math.PI * 2);
 
 
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);

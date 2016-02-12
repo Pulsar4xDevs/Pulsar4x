@@ -10,12 +10,10 @@ namespace Pulsar4X.ECSLib
     public class SystemBodyFactory
     {
         private GalaxyFactory _galaxyGen;
-        private DateTime _currDateTime;
 
         public SystemBodyFactory(GalaxyFactory galaxyGen)
         {
             _galaxyGen = galaxyGen;
-            _currDateTime = DateTime.Now;
         }
 
         /// <summary>
@@ -149,7 +147,6 @@ namespace Pulsar4X.ECSLib
             foreach (ProtoEntity protoBody in systemBodies)
             {
                 Entity body = Entity.Create(system.SystemManager, protoBody);
-                body.GetDataBlob<PositionDB>().System = system;
                 FinalizeBodies(staticData, system, body, bodyCount, currentDateTime);
                 bodyCount++;
             }
@@ -464,6 +461,11 @@ namespace Pulsar4X.ECSLib
             FinalizeSystemBodyDB(staticData, system, body);
             FinalizeNameDB(body, bodyOrbit.Parent, bodyCount);
 
+            // Finalize Orbit
+            var positionDB = body.GetDataBlob<PositionDB>();
+            positionDB.System = system;
+            positionDB.Position = OrbitProcessor.GetPosition(body.GetDataBlob<OrbitDB>(), currentDateTime);
+
             GenerateMoons(system, body, currentDateTime);
 
             // if there were any moons generated, finalize them:
@@ -720,10 +722,6 @@ namespace Pulsar4X.ECSLib
 
             // generate ruins:
             GenerateRuins(system, body);
-
-            // run orbit for current date/time to get an initial position ofr the body:
-            var positionDB = body.GetDataBlob<PositionDB>();
-            positionDB.Position = OrbitProcessor.GetPosition(bodyOrbit, _currDateTime);
         }
 
         /// <summary>

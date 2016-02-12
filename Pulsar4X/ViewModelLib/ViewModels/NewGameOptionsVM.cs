@@ -1,6 +1,7 @@
 ﻿using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 
@@ -18,8 +19,8 @@ namespace Pulsar4X.ViewModel
         public bool DefaultStart { get; set; }
 
         public int NumberOfSystems { get; set; }
-        public List<DataVersionInfo> AvailableModList { get; set; }
-        public List<DataVersionInfo> SelectedModList { get; set; }
+        public ObservableCollection<DataVersionInfo> AvailableModList { get; set; }
+        public ObservableCollection<DataVersionInfo> SelectedModList { get; set; }
 
         public NewGameOptionsVM()
         {
@@ -29,8 +30,8 @@ namespace Pulsar4X.ViewModel
             FactionPassword = "FPnotImplemented";
             GmPassword = "GMPWnotImplemented";
             NumberOfSystems = 50;
-            AvailableModList = StaticDataManager.AvailableData();
-            SelectedModList = new List<DataVersionInfo>();
+            AvailableModList = new ObservableCollection<DataVersionInfo>(StaticDataManager.AvailableData());
+            SelectedModList = new ObservableCollection<DataVersionInfo>();
         }
 
 
