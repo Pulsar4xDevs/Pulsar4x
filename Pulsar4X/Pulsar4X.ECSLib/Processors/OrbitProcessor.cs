@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib
             //Kepler's Equation
             const int numIterations = 100;
             var e = new double[numIterations];
-            const double epsilon = 1E-12; // Plenty of accuracy.
+            const double epsilon = 3E-11; // Plenty of accuracy.
             int i = 0;
 
             if (orbit.Eccentricity > 0.8)
