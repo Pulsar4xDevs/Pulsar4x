@@ -170,7 +170,6 @@ namespace Pulsar4X.ECSLib
                 foreach (string dataSet in dataSets)
                 {
                     StaticDataManager.LoadData(dataSet, newGame);
-                    StaticDataManager.LoadData(dataSet, newGame);
                 }
             }
             FactionFactory.CreateGameMaster(newGame);
