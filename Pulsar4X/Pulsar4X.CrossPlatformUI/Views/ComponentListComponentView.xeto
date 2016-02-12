@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableRow>
+	    <Label Text="{Binding Name}" />
+      <Label Text="{Binding Size}" />
+      <Label Text="{Binding AbilityAmount}" />
+    </TableRow>
+  </TableLayout>
+</Panel>
