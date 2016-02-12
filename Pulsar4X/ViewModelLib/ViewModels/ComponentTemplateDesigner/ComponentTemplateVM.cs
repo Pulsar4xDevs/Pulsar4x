@@ -42,7 +42,7 @@ namespace Pulsar4X.ViewModel
             _staticData = gameData.Game.StaticData;
             Name = "";
             Description = "";
-            //ID = "";
+            _ID = Guid.NewGuid();
             SizeFormula = "";
             HTKFormula = "";
             CrewReqFormula = "";
