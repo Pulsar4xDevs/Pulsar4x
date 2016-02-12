@@ -9,21 +9,32 @@ using Newtonsoft.Json.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// JsonConverter for dictionaries. Allows serialization/deserialization of dictionaries as class members with custom class keys.
+    /// Replaces JDictionary
+    /// </summary>
     public class DictionaryConverter : JsonConverter
     {
+        /// <summary>
+        /// Writes the dictionary to the JsonWriter. Writes it in a custom format that's compact, and typeSafe for custom classes.
+        /// </summary>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            writer.WriteStartObject();
-            writer.WritePropertyName("List");
-            writer.WriteStartArray();
+            writer.WriteStartObject(); // Start of the Dictionary
+            writer.WritePropertyName("List"); // First Property "List" (Property named List to be backwords compatible with JDictionaries)
+            writer.WriteStartArray(); // Beginning of "List" array
             foreach (DictionaryEntry entry in (IDictionary)value)
             {
+                // Serialize each entry as an object in the "List" array
                 serializer.Serialize(writer, entry);
             }
-            writer.WriteEndArray();
-            writer.WriteEndObject();
+            writer.WriteEndArray(); // End of the "List" array
+            writer.WriteEndObject(); // End of the Dictionary
         }
 
+        /// <summary>
+        /// Reads the dictionary from the JsonReader. Reads the custom format in a way that is typeSafe for custom classes.
+        /// </summary>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var dictionary = (IDictionary)Activator.CreateInstance(objectType);
@@ -37,15 +48,15 @@ namespace Pulsar4X.ECSLib
             {
                 reader.Read(); // PropertyName "Key"
                 reader.Read(); // Actual Key value
-                var Key = serializer.Deserialize(reader, keyType);
+                var key = serializer.Deserialize(reader, keyType);
                 reader.Read(); // PropertyName "Value"
                 reader.Read(); // Actual Value value
-                var Value = serializer.Deserialize(reader, valueType);
-                dictionary.Add(Key, Value);
+                var value = serializer.Deserialize(reader, valueType);
+                dictionary.Add(key, value);
                 reader.Read(); // End Object
-                reader.Read(); // EndArray OR StartObject
+                reader.Read(); // EndArray OR StartObject OR EndObject (Dictionary)
             }
-            reader.Read(); // Next
+            reader.Read(); // Set the reader to the next object
 
             return dictionary;
         }
@@ -106,7 +117,7 @@ namespace Pulsar4X.ECSLib
                 return base.CreateContract(objectType);
             }
 
-            // Serialize dictionaries as arrays without subclassing.
+            // Custom serialization of dictionaries without subclassing.
             if (objectType.GetInterfaces().Any(i => i == typeof(IDictionary) || (i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>))))
             {
                 var contract = CreateArrayContract(objectType);

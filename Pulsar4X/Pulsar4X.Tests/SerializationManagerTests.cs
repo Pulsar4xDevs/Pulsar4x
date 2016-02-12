@@ -20,6 +20,9 @@ namespace Pulsar4X.Tests
         [Test]
         public void GameImportExport()
         {
+            // Nubmer of systems to generate for this test. Configurable.
+            const int numSystems = 10;
+
             // lets create a bad save game:
 
             // Check default nulls throw:
@@ -32,7 +35,7 @@ namespace Pulsar4X.Tests
             Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((Stream)null));
 
             if (_game == null)
-                CreateTestUniverse(10);
+                CreateTestUniverse(numSystems);
             Assert.NotNull(_game);
 
             // lets create a good saveGame
@@ -46,7 +49,7 @@ namespace Pulsar4X.Tests
             //and load the saved data:
             _game = SerializationManager.ImportGame(File);
 
-            Assert.AreEqual(10, _game.Systems.Count);
+            Assert.AreEqual(numSystems, _game.Systems.Count);
             Assert.AreEqual(_testTime, _game.CurrentDateTime);
             List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
             Assert.AreEqual(3, entities.Count);
