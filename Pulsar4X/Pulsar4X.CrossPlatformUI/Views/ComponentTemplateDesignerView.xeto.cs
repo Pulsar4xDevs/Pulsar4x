@@ -33,13 +33,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             foreach (var item in _viewModel.MountType)
             {
-                KeyValuePair<ECSLib.ComponentMountType, bool?> kvp = item;
-                
+                ECSLib.ComponentMountType key = item.Key;
                 CheckBox chkbx = new CheckBox();
-                chkbx.Text = kvp.Key.ToString();
-                chkbx.CheckedBinding.BindDataContext((DictionaryVM<ECSLib.ComponentMountType, bool?> x) => x.GetValue(_viewModel.MountType.GetIndex(kvp)));
+                chkbx.Text = key.ToString();
+                chkbx.CheckedBinding.BindDataContext((DictionaryVM<ECSLib.ComponentMountType, bool?> x) => x[key] , (m, val) => m[key] = val);
                 chkbx.DataContext = _viewModel.MountType;
-                //chkbx.Checked = item.Value;
                 MountTypes.Items.Add(chkbx);
             }
         }
