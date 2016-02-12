@@ -138,10 +138,10 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ComponentListComponentView.xeto" />
-    <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerView.xeto">
+    <EmbeddedResource Include="Views\ComponentTemplateDesignerView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentAbilityTemplateDesignerView.xeto">
+    <EmbeddedResource Include="Views\ComponentAbilityTemplateDesignerView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -165,7 +165,7 @@
     <Compile Include="Views\ColonyScreenView.xeto.cs">
       <DependentUpon>ColonyScreenView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\ComponentTemplateDesigner\ComponentAbilityTemplateDesignerView.xeto.cs">
+    <Compile Include="Views\ComponentAbilityTemplateDesignerView.xeto.cs">
       <DependentUpon>ComponentAbilityTemplateDesignerView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ComponentDesignView.xeto.cs">
@@ -177,7 +177,7 @@
     <Compile Include="Views\ComponentsListView.xeto.cs">
       <DependentUpon>ComponentsListView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerView.xeto.cs">
+    <Compile Include="Views\ComponentTemplateDesignerView.xeto.cs">
       <DependentUpon>ComponentTemplateDesignerView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\JobAbilityView.xeto.cs">
@@ -232,6 +232,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\ColonyView.ico" />
   </ItemGroup>
+  <ItemGroup />
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties Views_2NewGame_1jeto__JSONSchema="" />
