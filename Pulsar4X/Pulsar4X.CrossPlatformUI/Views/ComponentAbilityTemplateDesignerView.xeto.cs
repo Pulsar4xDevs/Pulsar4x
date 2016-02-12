@@ -11,7 +11,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected ComboBox GuiHint { get; set; }
         protected StackLayout GuiHintControls { get; set; }
 
-        
+        private ComponentAbilityTemplateVM _viewModel;
 
         public ComponentAbilityTemplateDesignerView()
         {
@@ -20,27 +20,34 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public ComponentAbilityTemplateDesignerView(ComponentAbilityTemplateVM viewModel) : this()
         {
+            _viewModel = viewModel;
             DataContext = viewModel;
-            GuiHint.DataStore = Enum.GetValues(typeof(ECSLib.GuiHint)).Cast<object>();
-            GuiHint.ItemTextBinding = Binding.Property((ECSLib.GuiHint n) => Enum.GetName(typeof(ECSLib.GuiHint), n));
-            
+            GuiHint.DataContext = viewModel.SelectedGuiHint;
+            GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+            //GuiHint.DataStore = Enum.GetValues(typeof(ECSLib.GuiHint)).Cast<object>();
+            //GuiHint.ItemTextBinding = Binding.Property((ECSLib.GuiHint n) => Enum.GetName(typeof(ECSLib.GuiHint), n));
+
             GuiHint.SelectedIndexChanged += GuiHint_SelectedIndexChanged;
         }
 
         private void GuiHint_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ECSLib.GuiHint selected = (ECSLib.GuiHint)GuiHint.SelectedValue;
+            //ECSLib.GuiHint selected = (ECSLib.GuiHint)GuiHint.SelectedValue;
 
-            switch (selected)
+            switch (_viewModel.SelectedGuiHint.GetKey())
             {
                 case ECSLib.GuiHint.GuiSelectionMaxMin:
                     GuiHintMinMax();
                     break;
                 case ECSLib.GuiHint.GuiTechSelectionList:
+                    GuiTechSelectionList();
                     break;
                 case ECSLib.GuiHint.GuiTextDisplay:
+                    GuiHintTextDisplay();
                     break;
                 case ECSLib.GuiHint.None:
+                    GuiHintNone();
                     break;
 
             }
@@ -66,11 +73,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             comboBox.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM n) => n.AbilityDataBlobTypeSelection.DisplayList);
             comboBox.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.AbilityDataBlobType);
 
-
+            GuiHintControls.Items.Add(comboBox);
 
         }
 
-        private void GuiTextDisplay()
+        private void GuiHintTextDisplay()
         {
             //this just uses the exsisting Abilityformula
             GuiHintControls.Items.Clear();
@@ -79,7 +86,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             GuiHintControls.Items.Add(label);
         }
 
-        private void GuiNone()
+        private void GuiHintNone()
         {
             GuiHintControls.Items.Clear();
             Label label = new Label();

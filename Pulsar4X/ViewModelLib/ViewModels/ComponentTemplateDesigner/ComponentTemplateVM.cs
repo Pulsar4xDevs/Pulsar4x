@@ -50,6 +50,7 @@ namespace Pulsar4X.ViewModel
             BuildPointCostFormula = "";
             MountType = new Dictionary<ComponentMountType, bool>();
             ComponentAbilitySDs = new ObservableCollection<ComponentAbilityTemplateVM>();
+            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM());
 
         }
 
