@@ -96,6 +96,11 @@ namespace Pulsar4X.ViewModel
             return _index[index];
         }
 
+        public int GetIndex(KeyValuePair<TKey,TValue> kvp)
+        {
+            return _reverseIndex[kvp];
+        }
+
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             return _dictionary.GetEnumerator();

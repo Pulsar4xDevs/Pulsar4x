@@ -22,11 +22,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             SelectionComboBox.DataContext = viewModel.Minerals;
             SelectionComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid,string> m) => m.DisplayList);
             SelectionComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid,string> m) => m.SelectedIndex);
+            SelectionComboBox.SelectedIndexChanged += _viewModel.OnSelectionChange;
         }
 
-        private void SelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            _viewModel.SetSelectedMineral(SelectionComboBox.SelectedIndex);
-        }
+        //private void SelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    _viewModel.SetSelectedMineral(SelectionComboBox.SelectedIndex);
+        //}
     }
 }

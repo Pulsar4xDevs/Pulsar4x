@@ -14,7 +14,6 @@ namespace Pulsar4X.ViewModel
         private StaticDataStore _dataStore;
         public string Forumula { get; set; }
         public DictionaryVM<Guid, string> Minerals { get; set; }
-        //public KeyValuePair<Guid, string> selectedMineralKVP { get; set; }
 
         public MineralFormulaVM(StaticDataStore staticDataStore)
         {
@@ -23,19 +22,24 @@ namespace Pulsar4X.ViewModel
             foreach (var item in staticDataStore.Minerals)
             {
                 Minerals.Add(item.ID, item.Name);
-            }            
+            }
+                        
         }
 
-        public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid,string> mineralKVP) : this(staticDataStore)
+        public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid, string> mineralKVP) : this(staticDataStore)
         {
-            //selectedMineralKVP = mineralKVP;
+            Minerals.SelectedIndex = Minerals.GetIndex(mineralKVP);
         }
 
-        public void SetSelectedMineral(int index)
-        {            
-            //selectedMineralKVP = Minerals.GetKeyValuePair(index);
-            //OnPropertyChanged("selectedMineralKVP");
+        public void OnSelectionChange(object sender, EventArgs e)
+        {
+            OnPropertyChanged();
         }
+        //public void SetSelectedMineral(int index)
+        //{            
+        //    //selectedMineralKVP = Minerals.GetKeyValuePair(index);
+        //    //OnPropertyChanged("selectedMineralKVP");
+        //}
 
         public event PropertyChangedEventHandler PropertyChanged;
         [NotifyPropertyChangedInvocator]

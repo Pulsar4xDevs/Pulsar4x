@@ -32,7 +32,7 @@
       <Label Text="CreditCostFormula" />
       <TextBox Text="{Binding CreditCostFormula}" />
       <Label Text="MountType" />
-      <ListBox /> <!--="{Binding MountType}" /> -->
+      <StackLayout ID="MountTypes"/>
     </TableRow>
     <TableRow>
       <StackLayout ID="AbilityTemplates"></StackLayout>

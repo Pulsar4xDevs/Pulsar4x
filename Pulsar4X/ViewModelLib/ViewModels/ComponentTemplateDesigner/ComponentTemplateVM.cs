@@ -31,7 +31,7 @@ namespace Pulsar4X.ViewModel
         public string CreditCostFormula { get; set; }
         public string BuildPointCostFormula { get; set; }
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
-        public Dictionary<ComponentMountType, bool> MountType { get; set; }
+        public DictionaryVM<ComponentMountType, bool?> MountType { get; set; }
 
         public ObservableCollection<ComponentAbilityTemplateVM> ComponentAbilitySDs { get; set; }
 
@@ -52,7 +52,11 @@ namespace Pulsar4X.ViewModel
             ResearchCostFormula = "";
             CreditCostFormula = "";
             BuildPointCostFormula = "";
-            MountType = new Dictionary<ComponentMountType, bool>();
+            MountType = new DictionaryVM<ComponentMountType, bool?>(DisplayMode.Value);
+            foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
+            {
+                MountType.Add((ComponentMountType)item, false);
+            }
             ComponentAbilitySDs = new ObservableCollection<ComponentAbilityTemplateVM>();
             ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM());
 
@@ -60,10 +64,10 @@ namespace Pulsar4X.ViewModel
 
         private void ComponentTemplateVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            //if (MineralCostFormula.Last().selectedMineralKVP.Key != null)
-            //{
-            //    MineralCostFormula.Add(new MineralFormulaVM(_staticData));
-            //}
+            if (MineralCostFormula.Last().Minerals != null)
+            {
+                MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+            }
         }
 
         public ComponentTemplateVM(GameVM gameData, ComponentSD designSD) : this(gameData)
@@ -88,7 +92,11 @@ namespace Pulsar4X.ViewModel
             ResearchCostFormula = designSD.ResearchCostFormula;
             CreditCostFormula = designSD.CreditCostFormula;
             BuildPointCostFormula = designSD.BuildPointCostFormula;
-            MountType = designSD.MountType;
+            foreach (var item in designSD.MountType)
+            {
+                MountType.Add(item.Key, item.Value);
+            }
+            
             ComponentAbilitySDs = new ObservableCollection<ComponentAbilityTemplateVM>();
             foreach (var item in designSD.ComponentAbilitySDs)
             {
