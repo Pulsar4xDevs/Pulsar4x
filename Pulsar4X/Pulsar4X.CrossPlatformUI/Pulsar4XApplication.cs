@@ -1,12 +1,13 @@
 ﻿using Eto;
 using Eto.Forms;
 using System;
-using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.CrossPlatformUI
 {
     public class Pulsar4XApplication : Application
     {
+        public new MainForm MainForm;
+
         public Pulsar4XApplication(Platform platform)
 			: base(platform)
 		{

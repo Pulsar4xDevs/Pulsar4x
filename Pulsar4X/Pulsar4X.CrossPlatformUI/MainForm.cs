@@ -1,4 +1,5 @@
-﻿using Eto.Drawing;
+﻿using System;
+using Eto.Drawing;
 using Eto.Forms;
 using Pulsar4X.ViewModel;
 
@@ -29,7 +30,7 @@ namespace Pulsar4X.CrossPlatformUI
         {
             var newgame = new Commands.NewGame(Game);
             var loadgame = new Commands.LoadGame(Game);
-            var quit = new Commands.Quit();
+            var quit = new Commands.Quit(Game);
             savegame = new Commands.SaveGame(Game);
             sysMap = new Commands.SystemMap(Game);
             colView = new Commands.ColonyView(Game);
@@ -85,6 +86,18 @@ namespace Pulsar4X.CrossPlatformUI
         public static void toggleSaveGame(bool toggle)
         {
             savegame.Enabled = toggle;
+        }
+
+        public void DisplayException(string activity, Exception exception)
+        {
+            MessageBox.Show("Exception thrown while " + activity + ":\n\n" +
+                    exception.GetType() + "\n" +
+                    exception.Message +
+                    "\n\nThrown in function:\n" +
+                    exception.TargetSite +
+                    "\n\nStack Trace:\n" +
+                    exception.StackTrace,
+                    "Exception", MessageBoxButtons.OK, MessageBoxType.Error);
         }
     }
 }
