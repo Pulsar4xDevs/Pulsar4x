@@ -1909,6 +1909,9 @@ namespace Pulsar4X.Entities
                 }
                 else
                 {
+                    /// <summary>
+                    /// JPDetection also stores geo survey results.
+                    /// </summary>
                     JPDetection NewDetection = new JPDetection();
                     Contact.Position.System._SurveyResults.Add(TaskGroupFaction, NewDetection);
                     Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Add(OrderToTaskGroup.body);
@@ -1966,6 +1969,24 @@ namespace Pulsar4X.Entities
                 }
             }
 
+            /// <summary>
+            /// If we just jumped through an unknown gate, allow orders again, same with following.
+            /// </summary>
+            if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersUnknownJump)
+            {
+                if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.StandardTransit ||
+                    TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
+                    TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
+                {
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                }
+            }
+            else if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersFollowingTarget)
+            {
+                if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.Follow)
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+            }
+
             TaskGroupOrders.RemoveAt(orderIndex);
         }
 
@@ -1984,6 +2005,24 @@ namespace Pulsar4X.Entities
                 {
                     Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Remove(orderToRemove.surveyPointOrder);
                 }
+            }
+
+            /// <summary>
+            /// If we just jumped through an unknown gate, allow orders again, same with following.
+            /// </summary>
+            if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersUnknownJump)
+            {
+                if (orderToRemove.typeOf == Constants.ShipTN.OrderType.StandardTransit ||
+                    orderToRemove.typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
+                    orderToRemove.typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
+                {
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                }
+            }
+            else if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersFollowingTarget)
+            {
+                if (orderToRemove.typeOf == Constants.ShipTN.OrderType.Follow)
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
             }
 
             TaskGroupOrders.Remove(orderToRemove);
@@ -3191,6 +3230,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void ProcessDefaultOrders()
         {
+            bool noGeo = false;
+            bool noGrav = false;
             foreach(Constants.ShipTN.DefaultOrders DO in _SpecialOrders._DefaultOrdersList)
             {
                 if (DO == Constants.ShipTN.DefaultOrders.NoSpecialOrder)
@@ -3257,12 +3298,7 @@ namespace Pulsar4X.Entities
 
                         if (lowestDistance == -1.0f)
                         {
-                            /// <summary>
-                            /// No suitable target was found.
-                            /// </summary>
-                            String Entry = String.Format("No suitable geo survey target for {0} in {1}", Name, Contact.Position.System);
-                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
-                            TaskGroupFaction.MessageLog.Add(NME);
+                            noGeo = true;
                         }
                         else
                         {
@@ -3324,12 +3360,7 @@ namespace Pulsar4X.Entities
 
                         if (lowestDistance == -1.0f)
                         {
-                            /// <summary>
-                            /// No suitable target was found.
-                            /// </summary>
-                            String Entry = String.Format("No suitable grav survey target for {0} in {1}", Name, Contact.Position.System);
-                            MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
-                            TaskGroupFaction.MessageLog.Add(NME);
+                            noGrav = true;
                         }
                         else
                         {
@@ -3344,6 +3375,28 @@ namespace Pulsar4X.Entities
                     break;
                     #endregion
                 }
+            }
+
+            /// <summary>
+            /// If 1 conditional order fails, but another succeeds don't print the warnings yet. this may get bloated.
+            /// </summary>
+            if (noGeo == true)
+            {
+                /// <summary>
+                /// No suitable target was found.
+                /// </summary>
+                String Entry = String.Format("No suitable geo survey target for {0} in {1}", Name, Contact.Position.System);
+                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGeoSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                TaskGroupFaction.MessageLog.Add(NME);
+            }
+            if (noGrav == true)
+            {
+                /// <summary>
+                /// No suitable target was found.
+                /// </summary>
+                String Entry = String.Format("No suitable grav survey target for {0} in {1}", Name, Contact.Position.System);
+                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                TaskGroupFaction.MessageLog.Add(NME);
             }
         }
 

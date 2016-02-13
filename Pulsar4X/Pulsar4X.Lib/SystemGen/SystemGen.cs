@@ -1060,6 +1060,7 @@ namespace Pulsar4X
         /// <item>
         /// <b>Minerials:</b> Currently an ugly hack of using homworld minerials. Note that minerial generation 
         /// functions should be part of the SystemBody class as the player will likly want to re-generate them.
+        /// Update: mineral generation is done by surveying when the planet is surveyed, not here. see systemBody.cs for details.
         /// </item>
         /// <item>
         /// <b>Moons:</b> If we a generating a planet we genmerate moons using GenerateMoons().
@@ -1113,9 +1114,6 @@ namespace Pulsar4X
 
             // Generate Ruins, note that it will only do so for suitable planets:
             GenerateRuins(star, body);
-            
-            ///< @todo Generate Minerials Properly instead of this ugly hack:
-            body.HomeworldMineralGeneration();
 
             // generate moons if required for this body type:
             if (IsPlanet(body.Type))

@@ -900,7 +900,7 @@ namespace Pulsar4X.Entities
                         Cost = 120;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 60;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = 30;
-                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 30;
+                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = 30;
                         ThermalSignature = 5;
                         EMSignature = 5;
                         RequiredTechnology = Faction.FactionTechnology.TransNewtonianTech;
@@ -929,7 +929,7 @@ namespace Pulsar4X.Entities
                         Cost = 20;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 10;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = 5;
-                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 5;
+                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = 5;
                         ThermalSignature = 5;
                         EMSignature = 5;
                         RequiredTechnology = Faction.FactionTechnology.TransNewtonianTech;
