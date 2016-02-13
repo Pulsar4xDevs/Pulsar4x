@@ -11,8 +11,9 @@ Pulsar4x/Pulsar4X.GTKForms/obj
 Pulsar4x/Pulsar4X.GTKForms/bin
 Pulsar4X/Pulsar4X.Installer/bin
 Pulsar4X/Pulsar4X.Installer/obj
-Pulsar4X\Pulsar4X.Tests\test-results
-
+Pulsar4X/Pulsar4X.Tests/test-results
+#NuGet
+Pulsar4X/packages
 #Doxygen output
 doc/doxygen/html/
 
