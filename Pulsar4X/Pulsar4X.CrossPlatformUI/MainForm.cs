@@ -30,6 +30,7 @@ namespace Pulsar4X.CrossPlatformUI
             savegame = new Commands.SaveGame(Game);
             sysMap = new Commands.SystemMap(Game);
             colView = new Commands.ColonyView(Game);
+            componentDesign = new Commands.ComponentDesignViewCMD(Game);
             shipDesign = new Commands.ShipDesignViewCMD(Game);
             componentTemplateDesign = new Commands.ComponentTemplateViewCMD(Game);
 			
