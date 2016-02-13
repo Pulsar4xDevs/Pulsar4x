@@ -21,6 +21,12 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
+            OpenFileDialog fd = new OpenFileDialog();
+            fd.ShowDialog(Application.Instance.MainForm);
+            // TODO: finish implementation of loading game data
+
+            MainForm.toggleToolbar(true);
+            MainForm.toggleSaveGame(true);
         }
     }
 }

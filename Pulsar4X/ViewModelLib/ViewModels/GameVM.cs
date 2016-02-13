@@ -115,7 +115,7 @@ namespace Pulsar4X.ViewModel
         }
 
 
-        public async void CreateGame(NewGameOptionsVM options)
+        public async Task<int> CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
             Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate)));
@@ -130,6 +130,7 @@ namespace Pulsar4X.ViewModel
             }
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
+            return 0;
         }
 
         public async void LoadGame(string pathToFile)
