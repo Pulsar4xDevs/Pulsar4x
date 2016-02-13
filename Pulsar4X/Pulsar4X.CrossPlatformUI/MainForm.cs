@@ -6,6 +6,8 @@ namespace Pulsar4X.CrossPlatformUI
 {
     public class MainForm : Form
     {
+        private GameVM _gameVM;
+
         private static Command savegame;
 
         private static Command sysMap;
@@ -14,11 +16,12 @@ namespace Pulsar4X.CrossPlatformUI
         private static Command shipDesign;
         private static Command componentTemplateDesign;
 
-        public MainForm(GameVM Game)
+        public MainForm()
         {
+            _gameVM = new GameVM();
             ClientSize = new Size(600, 400);
-            Content = new Views.SystemView(Game);
-            CreateMenuToolBar(Game);
+            Content = new Views.SystemView(_gameVM);
+            CreateMenuToolBar(_gameVM);
             Title = "Pulsar4X";
         }
 
@@ -72,7 +75,7 @@ namespace Pulsar4X.CrossPlatformUI
 
         public static void toggleToolbar(bool toggle)
         {
-            sysMap.Enabled = toggle;
+            //sysMap.Enabled = toggle;
             colView.Enabled = toggle;
             componentDesign.Enabled = toggle;
             shipDesign.Enabled = toggle;

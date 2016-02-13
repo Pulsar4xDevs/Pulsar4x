@@ -208,22 +208,16 @@ namespace Pulsar4X.ViewModel
             {
                 _game = value;
                 OnPropertyChanged();
-                
-                if (PropertyChanged != null)
-                {
-                    //forces anything listing for a change in the HasGame property to update. 
-                    PropertyChanged(this, new PropertyChangedEventArgs("HasGame")); 
-                }
+
+                //forces anything listing for a change in the HasGame property to update. 
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HasGame"));
             }
         }
 
         /// <summary>
         /// returns true if a game has been created, loaded etc. 
         /// </summary>
-        public bool HasGame
-        {
-            get { return Game != null; }
-        }
+        public bool HasGame => Game != null;
 
 
         public GameVM()
@@ -241,10 +235,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void Refresh(bool partialRefresh = false)
