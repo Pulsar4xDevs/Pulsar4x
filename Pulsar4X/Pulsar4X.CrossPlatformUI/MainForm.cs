@@ -1,13 +1,17 @@
 ﻿using System;
+using System.ComponentModel;
 using Eto.Drawing;
 using Eto.Forms;
+using Pulsar4X.CrossPlatformUI.Commands;
+using Pulsar4X.CrossPlatformUI.Views;
 using Pulsar4X.ViewModel;
+using NewGame = Pulsar4X.CrossPlatformUI.Commands.NewGame;
 
 namespace Pulsar4X.CrossPlatformUI
 {
     public class MainForm : Form
     {
-        private GameVM _gameVM;
+        private readonly GameVM _gameVM;
 
         private static Command savegame;
 
@@ -21,22 +25,22 @@ namespace Pulsar4X.CrossPlatformUI
         {
             _gameVM = new GameVM();
             ClientSize = new Size(600, 400);
-            Content = new Views.SystemView(_gameVM);
-            CreateMenuToolBar(_gameVM);
+            Content = new SystemView(_gameVM);
+            CreateMenuToolBar();
             Title = "Pulsar4X";
         }
 
-        void CreateMenuToolBar(GameVM Game)
+        void CreateMenuToolBar()
         {
-            var newgame = new Commands.NewGame(Game);
-            var loadgame = new Commands.LoadGame(Game);
-            var quit = new Commands.Quit(Game);
-            savegame = new Commands.SaveGame(Game);
-            sysMap = new Commands.SystemMap(Game);
-            colView = new Commands.ColonyView(Game);
-            componentDesign = new Commands.ComponentDesignViewCMD(Game);
-            shipDesign = new Commands.ShipDesignViewCMD(Game);
-            componentTemplateDesign = new Commands.ComponentTemplateViewCMD(Game);
+            var newgame = new NewGame(_gameVM);
+            var loadgame = new LoadGame(_gameVM);
+            var quit = new Quit(_gameVM);
+            savegame = new SaveGame(_gameVM);
+            sysMap = new SystemMap(_gameVM);
+            colView = new ColonyView(_gameVM);
+            componentDesign = new ComponentDesignViewCMD(_gameVM);
+            shipDesign = new ShipDesignViewCMD(_gameVM);
+            componentTemplateDesign = new ComponentTemplateViewCMD(_gameVM);
 			
 
             if (Platform.Supports<MenuBar>())
@@ -55,7 +59,7 @@ namespace Pulsar4X.CrossPlatformUI
                     HelpItems =
                           {
                               new Command { MenuText = "Help Command" }
-                          },
+                          }
                 };
             }
             if (Platform.Supports<ToolBar>())
@@ -68,24 +72,7 @@ namespace Pulsar4X.CrossPlatformUI
                 ToolBar.Items.Add(componentDesign);
                 ToolBar.Items.Add(shipDesign);
                 ToolBar.Items.Add(componentTemplateDesign);
-                //at start, toolbar and savegame are disabled
-                toggleToolbar(false);
-                toggleSaveGame(false);
             }
-        }
-
-        public static void toggleToolbar(bool toggle)
-        {
-            //sysMap.Enabled = toggle;
-            colView.Enabled = toggle;
-            componentDesign.Enabled = toggle;
-            shipDesign.Enabled = toggle;
-            componentTemplateDesign.Enabled = toggle;
-        }
-
-        public static void toggleSaveGame(bool toggle)
-        {
-            savegame.Enabled = toggle;
         }
 
         public void DisplayException(string activity, Exception exception)
@@ -98,6 +85,28 @@ namespace Pulsar4X.CrossPlatformUI
                     "\n\nStack Trace:\n" +
                     exception.StackTrace,
                     "Exception", MessageBoxButtons.OK, MessageBoxType.Error);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            if (_gameVM.HasGame)
+            {
+                var result = MessageBox.Show("Would you like to save the game before exiting?", MessageBoxButtons.YesNoCancel, MessageBoxType.Question, MessageBoxDefaultButton.Yes);
+
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        var saveGame = new SaveGame(_gameVM);
+                        saveGame.Execute();
+                        break;
+
+                    case DialogResult.Cancel:
+                        e.Cancel = true;
+                        break;
+                }
+            }
         }
     }
 }

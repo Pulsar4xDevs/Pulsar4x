@@ -20,15 +20,10 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             _gameVM = gameVM;
         }
 
-        protected override async void OnExecuted(EventArgs e)
+        protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
 
-            await New();
-        }
-
-        public async Task New()
-        {
             if (_gameVM.HasGame)
             {
                 // Check if we want to save the current game.
@@ -36,7 +31,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
                 if (result == DialogResult.Yes)
                 {
                     var saveGame = new SaveGame(_gameVM);
-                    await saveGame.Save();
+                    saveGame.Execute();
                 }
             }
 

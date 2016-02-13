@@ -19,15 +19,10 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             _gameVM = gameVM;
         }
 
-        protected override async void OnExecuted(EventArgs e)
+        protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
 
-            await Load();
-        }
-
-        public async Task Load()
-        {
             if (_gameVM.HasGame)
             {
                 // Check to see if we want to save current game.
@@ -46,7 +41,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
                 string pathToFile = fileDialog.FileName;
                 try
                 {
-                    await _gameVM.LoadGame(pathToFile);
+                    _gameVM.LoadGame(pathToFile);
                 }
                 catch (Exception exception)
                 {

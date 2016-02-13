@@ -2,27 +2,38 @@
 using Eto.Forms;
 using Pulsar4X.ViewModel;
 using System;
+using System.ComponentModel;
 
 namespace Pulsar4X.CrossPlatformUI.Commands
 {
-    class ShipDesignViewCMD : Command
+    sealed class ShipDesignViewCMD : Command
     {
-        private GameVM GameData;
-        public ShipDesignViewCMD(GameVM GameVM)
+        private readonly GameVM _gameVM;
+        public ShipDesignViewCMD(GameVM gameVM)
         {
             ID = "ShipDesignViewCMD";
             Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.ColonyView.ico");
             MenuText = "Ship Design View";
             ToolBarText = "Ship Design View";
             //Shortcut = Keys.F5;
-            GameData = GameVM;
+            _gameVM = gameVM;
+            Enabled = _gameVM.HasGame;
+            _gameVM.PropertyChanged += _gameVM_PropertyChanged;
+        }
+
+        private void _gameVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "HasGame")
+            {
+                Enabled = _gameVM.HasGame;
+            }
         }
 
         protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
 
-            ShipDesignVM designVM = ShipDesignVM.Create(GameData);
+            ShipDesignVM designVM = ShipDesignVM.Create(_gameVM);
             Application.Instance.MainForm.Content = new Views.ShipDesignView(designVM);
         }
     }
