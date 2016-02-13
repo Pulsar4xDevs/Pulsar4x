@@ -39,7 +39,7 @@ namespace Pulsar4X.CrossPlatformUI
             colView = new Commands.ColonyView(Game);
             componentDesign = new Commands.ComponentDesignViewCMD(Game);
             shipDesign = new Commands.ShipDesignViewCMD(Game);
-            componentTemplateDesign = new Commands.ComponentTemplateViewCMD();
+            componentTemplateDesign = new Commands.ComponentTemplateViewCMD(Game);
 
             if (Platform.Supports<MenuBar>())
             {
