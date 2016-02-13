@@ -8,7 +8,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
 {
     sealed class SystemMap : Command
     {
-        private GameVM _gameVM;
+        private readonly GameVM _gameVM;
 
         public SystemMap(GameVM gameVM)
         {

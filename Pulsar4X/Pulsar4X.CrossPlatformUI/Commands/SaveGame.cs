@@ -31,15 +31,10 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             }
         }
 
-        protected override async void OnExecuted(EventArgs e)
+        protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
-            
-            await Save();
-        }
 
-        public async Task Save()
-        {
             SaveFileDialog fileDialog = new SaveFileDialog();
             fileDialog.Filters.Add(new FileDialogFilter("Pulsar4x Json Save File", ".json"));
 
@@ -48,7 +43,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
                 string pathToFile = fileDialog.FileName;
                 try
                 {
-                    await _gameVM.SaveGame(pathToFile);
+                    _gameVM.SaveGame(pathToFile);
                 }
                 catch (Exception exception)
                 {

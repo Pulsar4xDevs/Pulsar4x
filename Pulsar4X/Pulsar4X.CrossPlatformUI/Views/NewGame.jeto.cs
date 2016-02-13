@@ -76,11 +76,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
         }
 
-        protected async void DefaultButton_Click(object sender, EventArgs e)
+        protected void DefaultButton_Click(object sender, EventArgs e)
         {
-            await Game.CreateGame(new_game_options);
-            MainForm.toggleToolbar(true);
-            MainForm.toggleSaveGame(true);
+            Game.CreateGame(new_game_options);
             Close();
         }
 
