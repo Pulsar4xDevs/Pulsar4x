@@ -8,6 +8,8 @@ namespace Pulsar4X.CrossPlatformUI.Commands
     class NewGame : Command
     {
         private Views.NewGame NewGameDialog;
+        private GameVM _gameVM;
+
         public NewGame(GameVM Game)
         {
             ID = "newgame";
@@ -15,12 +17,13 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             MenuText = "New Game";
             ToolBarText = "New Game";
             Shortcut = Keys.F11;
-            NewGameDialog = new Views.NewGame(Game);
+            _gameVM = Game;
         }
 
         protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
+            NewGameDialog = new Views.NewGame(_gameVM);
             NewGameDialog.ShowModal(Application.Instance.MainForm);
         }
     }
