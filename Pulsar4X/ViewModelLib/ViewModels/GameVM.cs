@@ -115,7 +115,7 @@ namespace Pulsar4X.ViewModel
         }
 
 
-        public async Task<int> CreateGame(NewGameOptionsVM options)
+        public async Task CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
             Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate)));
@@ -130,10 +130,9 @@ namespace Pulsar4X.ViewModel
             }
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
-            return 0;
         }
 
-        public async void LoadGame(string pathToFile)
+        public async Task LoadGame(string pathToFile)
         {
             StatusText = "Loading Game...";
             Game = await Task.Run(() => ECSLib.SerializationManager.ImportGame(pathToFile, new Progress<double>(OnProgressUpdate)));
@@ -145,11 +144,10 @@ namespace Pulsar4X.ViewModel
             StatusText = "Game Loaded.";
         }
 
-        public async void SaveGame(string pathToFile)
+        public async Task SaveGame(string pathToFile)
         {
             StatusText = "Saving Game...";
             await Task.Run(() => ECSLib.SerializationManager.ExportGame(Game, pathToFile, new Progress<double>(OnProgressUpdate)));
-            //await Task.Run(() => SerializationManager.Save(CurrentGame, pathToFile, true)); // Compressed
             ProgressValue = 0;
             StatusText = "Game Saved";
         }
