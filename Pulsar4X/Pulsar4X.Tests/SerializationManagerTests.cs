@@ -35,7 +35,7 @@ namespace Pulsar4X.Tests
             Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((Stream)null));
 
             if (_game == null)
-                CreateTestUniverse(numSystems);
+                CreateTestUniverse(numSystems, true);
             Assert.NotNull(_game);
 
             // lets create a good saveGame
@@ -215,7 +215,7 @@ namespace Pulsar4X.Tests
             StaticDataManager.ExportStaticData(sol, "./solsave.json");
         }
 
-        private void CreateTestUniverse(int numSystems)
+        private void CreateTestUniverse(int numSystems, bool generateDefaultHumans = false)
         {
             _game = Game.NewGame("Unit Test Game", _testTime, numSystems);
 
@@ -236,6 +236,11 @@ namespace Pulsar4X.Tests
             greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction, "Space bugs");
 
             //TODO Expand the "Test Universe" to cover more datablobs and entities. And ships. Etc.
+
+            if (generateDefaultHumans)
+            {
+                DefaultStartFactory.DefaultHumans(_game, "Humans");
+            }
         }
     }
 }
