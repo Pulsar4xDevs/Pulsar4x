@@ -127,9 +127,6 @@ namespace Pulsar4X.ECSLib
 
         internal void PostGameLoad()
         {
-            // Set the SM
-            SpaceMaster = Players[0];
-
             // Invoke the Post Load event down the chain.
             PostLoad?.Invoke(this, EventArgs.Empty);
 

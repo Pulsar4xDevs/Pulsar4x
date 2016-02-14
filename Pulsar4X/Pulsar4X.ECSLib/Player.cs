@@ -60,13 +60,13 @@ namespace Pulsar4X.ECSLib
         #region Properties
 
         [JsonProperty]
-        public Guid ID { get; }
+        public Guid ID { get; private set; }
 
         [JsonProperty]
         public string Name { get; private set; }
 
         [JsonProperty]
-        private Dictionary<ProtoEntity, AccessRole> FactionAccessRoles { get; }
+        private Dictionary<Entity, uint> FactionAccessRoles { get; set; }
 
         [JsonProperty]
         private string PasswordHash { get; set; }
@@ -86,10 +86,10 @@ namespace Pulsar4X.ECSLib
         internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
         { }
 
-        internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<ProtoEntity, AccessRole>())
+        internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<Entity, uint>())
         { }
 
-        internal Player(string name, string password, Guid id, Dictionary<ProtoEntity, AccessRole> factionAccessRoles)
+        internal Player(string name, string password, Guid id, Dictionary<Entity, uint> factionAccessRoles)
         {
             ID = id;
             Name = string.IsNullOrEmpty(name) ? "Unnamed Player" : name;
@@ -102,22 +102,22 @@ namespace Pulsar4X.ECSLib
 
         #region Internal API
 
-        internal AccessRole GetAccess(ProtoEntity faction)
+        internal AccessRole GetAccess(Entity faction)
         {
-            AccessRole role;
+            uint role;
             FactionAccessRoles.TryGetValue(faction, out role);
-            return role;
+            return (AccessRole)role;
         }
 
-        internal void SetAccess(ProtoEntity faction, AccessRole accessRole)
+        internal void SetAccess(Entity faction, AccessRole accessRole)
         {
             if (FactionAccessRoles.ContainsKey(faction))
             {
-                FactionAccessRoles[faction] = accessRole;
+                FactionAccessRoles[faction] = (uint)accessRole;
             }
             else
             {
-                FactionAccessRoles.Add(faction, accessRole);
+                FactionAccessRoles.Add(faction, (uint)accessRole);
             }
         }
 
