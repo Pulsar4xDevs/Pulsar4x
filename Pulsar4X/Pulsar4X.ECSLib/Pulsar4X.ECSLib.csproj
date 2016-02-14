@@ -175,6 +175,7 @@
     <Compile Include="Factories\SystemGen\SystemFactory.cs" />
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\MineProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\RefiningProcessor.cs" />

@@ -12,6 +12,10 @@ namespace Pulsar4X.ECSLib
     {
         #region Properties
 
+        [JsonProperty]
+        public List<Player> Players;
+        public Player SpaceMaster;
+
         [PublicAPI]
         public string GameName
         {
@@ -120,6 +124,9 @@ namespace Pulsar4X.ECSLib
 
         internal void PostGameLoad()
         {
+            // Set the SM
+            SpaceMaster = Players[0];
+
             // Invoke the Post Load event down the chain.
             PostLoad?.Invoke(this, EventArgs.Empty);
 
@@ -128,7 +135,6 @@ namespace Pulsar4X.ECSLib
 
             // Post load event completed. Drop all handlers.
             PostLoad = null;
-
         }
 
         /// <summary>
@@ -149,11 +155,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="gameName"></param>
         /// <param name="startDateTime"></param>
         /// <param name="numSystems"></param>
+        /// <param name="smPassword">Password for the SpaceMaster</param>
         /// <param name="progress"></param>
         /// <exception cref="ArgumentNullException"><paramref name="gameName"/> is <see langword="null" />.</exception>
         /// <exception cref="StaticDataLoadException">Thrown in a variety of situations when StaticData could not be loaded.</exception>
         [PublicAPI]
-        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, List<string> dataSets = null, IProgress<double> progress = null)
+        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, string smPassword = "", List<string> dataSets = null, IProgress<double> progress = null)
         {
             if (gameName == null)
             {
@@ -161,6 +168,8 @@ namespace Pulsar4X.ECSLib
             }
 
             var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
+
+            // Load static data
             if (dataSets == null || dataSets.Count == 0)
             {
                 StaticDataManager.LoadData("Pulsar4x", newGame);
@@ -172,16 +181,20 @@ namespace Pulsar4X.ECSLib
                     StaticDataManager.LoadData(dataSet, newGame);
                 }
             }
-            FactionFactory.CreateGameMaster(newGame);
 
+            // Generate systems
             for (int i = 0; i < numSystems; i++)
             {
                 newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
                 progress?.Report((double)newGame.StarSystems.Count / numSystems);
             }
 
+            // Create SM
+            newGame.SpaceMaster = new Player("Space Master", smPassword);
+            newGame.Players = new List<Player> { newGame.SpaceMaster };
+
             newGame.PostGameLoad();
-            
+
             return newGame;
         }
 
@@ -285,6 +298,14 @@ namespace Pulsar4X.ECSLib
         public List<LogEvent> GetEventsForFaction(Entity faction, bool factionIsSM = false)
         {
             return new List<LogEvent>(_logEvents.Where(@event => @event.Faction == faction || (factionIsSM && @event.IsSMOnly)));
+        }
+
+        [PublicAPI]
+        public Player AddPlayer(string playerName, string playerPassword)
+        {
+            var player = new Player(playerName, playerPassword);
+            Players.Add(player);
+            return player;
         }
         #endregion
 
