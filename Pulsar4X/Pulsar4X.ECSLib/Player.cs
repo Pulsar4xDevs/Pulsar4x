@@ -63,7 +63,7 @@ namespace Pulsar4X.ECSLib
         public Guid ID { get; }
 
         [JsonProperty]
-        public string Name { get; internal set; }
+        public string Name { get; private set; }
 
         [JsonProperty]
         private Dictionary<ProtoEntity, AccessRole> FactionAccessRoles { get; }
@@ -81,16 +81,13 @@ namespace Pulsar4X.ECSLib
         [JsonConstructor]
         [UsedImplicitly]
         private Player()
-        {
-        }
+        { }
 
         internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
-        {
-        }
+        { }
 
         internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<ProtoEntity, AccessRole>())
-        {
-        }
+        { }
 
         internal Player(string name, string password, Guid id, Dictionary<ProtoEntity, AccessRole> factionAccessRoles)
         {
@@ -124,14 +121,9 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal bool IsTokenValid([NotNull] AuthenticationToken authToken)
+        internal bool IsTokenValid(AuthenticationToken authToken)
         {
-            if (authToken == null)
-            {
-                throw new ArgumentNullException(nameof(authToken));
-            }
-
-            return ID == authToken.PlayerID && ConfirmPassword(authToken.Password);
+            return authToken != null && ID == authToken.PlayerID && ConfirmPassword(authToken.Password);
         }
 
         #endregion
@@ -185,7 +177,7 @@ namespace Pulsar4X.ECSLib
         #region Private Functions
 
         #region Crypto Functions
-
+        
         private bool ConfirmPassword(string password)
         {
             byte[] passwordHash = Hash(password, Salt);
@@ -210,6 +202,10 @@ namespace Pulsar4X.ECSLib
 
         private static byte[] Hash(string value, string salt)
         {
+            if (value == null)
+            {
+                value = "";
+            }
             return Hash(Encoding.UTF8.GetBytes(value), Convert.FromBase64String(salt));
         }
 
