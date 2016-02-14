@@ -193,7 +193,7 @@ namespace Pulsar4X.ECSLib
         private static string GenerateSalt()
         {
             var rng = new RNGCryptoServiceProvider();
-            var buff = new byte[16];
+            var buff = new byte[12];
             rng.GetBytes(buff);
 
             // Return a Base64 string representation of the random number.
