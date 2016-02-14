@@ -51,6 +51,7 @@ namespace Pulsar4X.ECSLib
         internal int NumSystems;
 
         [PublicAPI]
+        [Obsolete("Use game.GetSystems(AuthenticationToken) or game.GetSystem(AuthenticationToken, Guid)")]
         public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
 
         /// <summary>
@@ -85,13 +86,27 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public ReadOnlyCollection<LogEvent> LogEvents => new ReadOnlyCollection<LogEvent>(_logEvents);
 
+        public bool EnableMultiThreading
+        {
+            get
+            {
+                return _enableMultiThreading;
+            }
+
+            set
+            {
+                _enableMultiThreading = value;
+            }
+        }
+        [JsonProperty]
+        private bool _enableMultiThreading = true;
+
         [JsonProperty]
         internal List<LogEvent> _logEvents;
 
         internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
 
-        [JsonProperty] public bool EnableMultiThreading = true;
 
         #endregion
 
@@ -156,11 +171,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="startDateTime"></param>
         /// <param name="numSystems"></param>
         /// <param name="smPassword">Password for the SpaceMaster</param>
+        /// <param name="dataSets">IEnumerable containing filePaths to mod directories to load.</param>
         /// <param name="progress"></param>
         /// <exception cref="ArgumentNullException"><paramref name="gameName"/> is <see langword="null" />.</exception>
         /// <exception cref="StaticDataLoadException">Thrown in a variety of situations when StaticData could not be loaded.</exception>
         [PublicAPI]
-        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, string smPassword = "", List<string> dataSets = null, IProgress<double> progress = null)
+        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, string smPassword = "", IEnumerable<string> dataSets = null, IProgress<double> progress = null)
         {
             if (gameName == null)
             {
@@ -170,16 +186,16 @@ namespace Pulsar4X.ECSLib
             var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
 
             // Load static data
-            if (dataSets == null || dataSets.Count == 0)
-            {
-                StaticDataManager.LoadData("Pulsar4x", newGame);
-            }
-            else
+            if (dataSets != null)
             {
                 foreach (string dataSet in dataSets)
                 {
                     StaticDataManager.LoadData(dataSet, newGame);
                 }
+            }
+            if (newGame.StaticData.LoadedDataSets.Count == 0)
+            {
+                StaticDataManager.LoadData("Pulsar4x", newGame);
             }
 
             // Create SM
@@ -308,8 +324,65 @@ namespace Pulsar4X.ECSLib
             Players.Add(player);
             return player;
         }
+
+        [PublicAPI]
+        public List<StarSystem> GetSystems(AuthenticationToken authToken)
+        {
+            Player player = GetPlayerForToken(authToken);
+            var systems = new List<StarSystem>();
+
+            if (player?.AccessRoles == null)
+            {
+                return systems;
+            }
+
+            foreach (KeyValuePair<Entity, AccessRole> accessRole in player.AccessRoles)
+            {
+                // TODO: Implement vision access roles.
+                if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
+                {
+                    systems.AddRange(accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Select(systemGuid => StarSystems[systemGuid]));
+                }
+            }
+            return systems;
+        }
+
+        [PublicAPI]
+        public StarSystem GetSystem(AuthenticationToken authToken, Guid systemGuid)
+        {
+            Player player = GetPlayerForToken(authToken);
+
+            if (player?.AccessRoles == null)
+            {
+                return null;
+            }
+
+            foreach (KeyValuePair<Entity, AccessRole> accessRole in player.AccessRoles)
+            {
+                // TODO: Implement vision access roles.
+                if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
+                {
+                    foreach (Guid system in accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Where(system => system == systemGuid))
+                    {
+                        return StarSystems[system];
+                    }
+                }
+            }
+
+            return null;
+        }
+        
         #endregion
 
+        private Player GetPlayerForToken(AuthenticationToken authToken)
+        {
+            if (SpaceMaster.IsTokenValid(authToken))
+            {
+                return SpaceMaster;
+            }
+
+            return Players.FirstOrDefault(player => player.IsTokenValid(authToken));
+        }
 
         #endregion
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -64,6 +65,8 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public string Name { get; private set; }
+
+        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
         [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; }
