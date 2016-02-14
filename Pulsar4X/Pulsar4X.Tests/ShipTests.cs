@@ -28,10 +28,6 @@ namespace Pulsar4X.Tests
             _starSystem = new StarSystem(_game, "Sol", -1);
             /////Ship Class/////
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "TestClass");
-            
-
-            
-
         }
 
         private void CreateShipFromClass()

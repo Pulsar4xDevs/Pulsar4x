@@ -117,15 +117,18 @@ namespace Pulsar4X.ViewModel
         public void CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
-            Game newGame = Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate));
+            Game newGame = Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.GmPassword, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate));
             Game = newGame;
+
+            // TODO: Add options for Player name to be different than faction name.
+            Player defaultPlayer = Game.AddPlayer(options.FactionName, options.FactionPassword);
 
             Entity gameMaster;
             Game.GlobalManager.FindEntityByGuid(Game.GameMasterFaction, out gameMaster);
             PlayerFaction = gameMaster;
             if (options.CreatePlayerFaction && options.DefaultStart)
             {
-                PlayerFaction = DefaultStartFactory.DefaultHumans(newGame, options.FactionName);
+                PlayerFaction = DefaultStartFactory.DefaultHumans(newGame, defaultPlayer, options.FactionName);
             }
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
