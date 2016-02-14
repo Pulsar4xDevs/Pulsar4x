@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
             var factionEntity = new Entity(game.GlobalManager, blobs);
 
             // Add this faction to the SM's access list.
-            game.SpaceMaster.SetAccess(factionEntity, AccessRole.FullAccess);
+            game.SpaceMaster.SetAccess(factionEntity, AccessRole.SM);
 
             return factionEntity;
         }
@@ -24,7 +24,11 @@ namespace Pulsar4X.ECSLib
         public static Entity CreatePlayerFaction(Game game, Player owningPlayer, string factionName)
         {
             Entity faction = CreateFaction(game, factionName);
-            owningPlayer.SetAccess(faction, AccessRole.FullAccess);
+
+            if (!Equals(owningPlayer, game.SpaceMaster))
+            {
+                owningPlayer.SetAccess(faction, AccessRole.Owner);
+            }
 
             return faction;
         }

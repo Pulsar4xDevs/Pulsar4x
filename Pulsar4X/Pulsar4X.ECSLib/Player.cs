@@ -19,10 +19,33 @@ namespace Pulsar4X.ECSLib
         ManageShipyards = 32,           // UNUSED - EXAMPLE ONLY Player can manage shipyards.
         ManageResearch  = 64,           // UNUSED - EXAMPLE ONLY Player can manage research projects.
         ManageTeams     = 128,          // UNUSED - EXAMPLE ONLY Player can manage teams.
-
-        FullAccess      = 1073741823,   // Player can do anything with this faction, except remove Owners/SM.
-        Owner           = 2147483647,   // Player can do anything with this faction, except remove SM.
-        SM              = 4294967295    // Player can do anything with this faction.
+        Unused1         = 256,
+        Unused2         = 512,
+        Unused3         = 1024,
+        Unused4         = 2048,
+        Unused5         = 4096,
+        Unused6         = 8192,
+        Unused7         = 16384,
+        Unused8         = 32768,
+        Unused9         = 65536,
+        Unused10        = 131072,
+        Unused11        = 262144,
+        Unused12        = 524288,
+        Unused13        = 1048576,
+        Unused14        = 2097152,
+        Unused15        = 4194304,
+        Unused16        = 8388608,
+        Unused17        = 16777216,
+        Unused18        = 33554432,
+        Unused19        = 67108864,
+        Unused20        = 134217728,
+        Unused21        = 268435456,
+        Unused22        = 536870912,
+            FullAccess      = 1073741823,   // Player can do anything with this faction, except edit the FullAccess players.
+        EditFullAccess  = 1073741824,
+            Owner           = 2147483647,   // Player can do anything with this faction, except edit the Owner players.
+        EditOwners      = 2147483648,
+            SM              = 4294967295    // Player can do anything with this faction.
     }
     
     public class AuthenticationToken
@@ -34,64 +57,145 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public class Player
     {
+        #region Properties
+
         [JsonProperty]
         public Guid ID { get; }
 
         [JsonProperty]
-        public string Name { get; set; }
-        
-        [JsonProperty]
-        private readonly Dictionary<ProtoEntity, AccessRole> _factionAccessRoles;
+        public string Name { get; internal set; }
 
         [JsonProperty]
-        private string PasswordHash { get; }
+        private Dictionary<ProtoEntity, AccessRole> FactionAccessRoles { get; }
 
         [JsonProperty]
-        private string Salt { get; }
+        private string PasswordHash { get; set; }
+
+        [JsonProperty]
+        private string Salt { get; set; }
+
+        #endregion
+
+        #region Constructors
 
         [JsonConstructor]
+        [UsedImplicitly]
         private Player()
-        { }
+        {
+        }
 
-        public Player(string name, string password) : this(name, password, Guid.NewGuid())
-        { }
+        internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
+        {
+        }
 
-        public Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<ProtoEntity, AccessRole>())
-        { }
+        internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<ProtoEntity, AccessRole>())
+        {
+        }
 
-        public Player(string name, string password, Guid id, Dictionary<ProtoEntity, AccessRole> factionAccessRoles)
+        internal Player(string name, string password, Guid id, Dictionary<ProtoEntity, AccessRole> factionAccessRoles)
         {
             ID = id;
-            Name = name;
-            _factionAccessRoles = factionAccessRoles;
+            Name = string.IsNullOrEmpty(name) ? "Unnamed Player" : name;
+            FactionAccessRoles = factionAccessRoles;
             Salt = GenerateSalt();
-            PasswordHash = Convert.ToBase64String(Hash(password, Salt));
+            PasswordHash = GeneratePasswordHash(password, Salt);
         }
-        
+
+        #endregion
+
+        #region Internal API
+
         internal AccessRole GetAccess(ProtoEntity faction)
         {
             AccessRole role;
-            _factionAccessRoles.TryGetValue(faction, out role);
+            FactionAccessRoles.TryGetValue(faction, out role);
             return role;
         }
 
         internal void SetAccess(ProtoEntity faction, AccessRole accessRole)
         {
-            if (_factionAccessRoles.ContainsKey(faction))
+            if (FactionAccessRoles.ContainsKey(faction))
             {
-                _factionAccessRoles[faction] = accessRole;
+                FactionAccessRoles[faction] = accessRole;
             }
             else
             {
-                _factionAccessRoles.Add(faction, accessRole);
+                FactionAccessRoles.Add(faction, accessRole);
             }
         }
 
-        internal bool ConfirmPassword(string password)
+        internal bool IsTokenValid([NotNull] AuthenticationToken authToken)
+        {
+            if (authToken == null)
+            {
+                throw new ArgumentNullException(nameof(authToken));
+            }
+
+            return ID == authToken.PlayerID && ConfirmPassword(authToken.Password);
+        }
+
+        #endregion
+
+        #region Public API
+
+        /// <summary>
+        /// Changes the name of this player.
+        /// </summary>
+        /// <param name="authToken">Current AuthenticationToken for this player.</param>
+        /// <param name="newName">New name for the player</param>
+        /// <returns>True if operation is successful.</returns>
+        [PublicAPI]
+        public bool ChangeName([NotNull] AuthenticationToken authToken, [NotNull] string newName)
+        {
+            if (string.IsNullOrEmpty(newName))
+            {
+                throw new ArgumentException("Argument is null or empty", nameof(newName));
+            }
+
+            if (!IsTokenValid(authToken))
+            {
+                return false;
+            }
+
+            Name = newName;
+            return true;
+        }
+
+        /// <summary>
+        /// Changes the password of this player.
+        /// </summary>
+        /// <param name="authToken">Current AuthenticationToken for this player.</param>
+        /// <param name="newPassword">New password for the player.</param>
+        /// <returns>True if operation is successful.</returns>
+        [PublicAPI]
+        public bool ChangePassword([NotNull] AuthenticationToken authToken, [NotNull] string newPassword)
+        {
+            if (!IsTokenValid(authToken))
+            {
+                return false;
+            }
+
+            Salt = GenerateSalt();
+            PasswordHash = GeneratePasswordHash(newPassword, Salt);
+            return true;
+        }
+
+        #endregion
+
+        #region Private Functions
+
+        #region Crypto Functions
+
+        private bool ConfirmPassword(string password)
         {
             byte[] passwordHash = Hash(password, Salt);
 
             return Convert.FromBase64String(PasswordHash).SequenceEqual(passwordHash);
+        }
+
+        private static string GeneratePasswordHash([NotNull] string password, string salt)
+        {
+            return Convert.ToBase64String(Hash(password, salt));
         }
 
         private static string GenerateSalt()
@@ -116,6 +220,8 @@ namespace Pulsar4X.ECSLib
             return new SHA256Managed().ComputeHash(saltedValue);
         }
 
+        #endregion
+
         #region Equality Members
 
         protected bool Equals(Player other)
@@ -133,11 +239,7 @@ namespace Pulsar4X.ECSLib
             {
                 return true;
             }
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-            return Equals((Player)obj);
+            return obj.GetType() == GetType() && Equals((Player)obj);
         }
 
         public override int GetHashCode()
@@ -145,7 +247,24 @@ namespace Pulsar4X.ECSLib
             return ID.GetHashCode();
         }
 
+        public static bool operator ==(Player playerA, Player playerB)
+        {
+            return Equals(playerA, playerB);
+        }
+
+        public static bool operator !=(Player playerA, Player playerB)
+        {
+            return !Equals(playerA, playerB);
+        }
+
         #endregion
 
+        public override string ToString()
+        {
+            return ID.ToString();
+        }
+
+        #endregion
+        
     }
 }

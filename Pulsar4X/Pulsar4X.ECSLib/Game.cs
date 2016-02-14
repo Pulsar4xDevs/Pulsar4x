@@ -14,7 +14,14 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public List<Player> Players;
+
+        [PublicAPI]
+        [JsonProperty]
         public Player SpaceMaster;
+
+        [PublicAPI]
+        [JsonProperty]
+        public Entity GameMasterFaction;
 
         [PublicAPI]
         public string GameName
@@ -51,10 +58,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonProperty]
         internal Dictionary<Guid, StarSystem> StarSystems { get; private set; }
-
-        [PublicAPI] 
-        [JsonProperty]
-        public Guid GameMasterFaction;
 
         /// <summary>
         /// Global Entity Manager.
@@ -182,16 +185,17 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
+            // Create SM
+            newGame.SpaceMaster = new Player("Space Master", smPassword);
+            newGame.Players = new List<Player>();
+            newGame.GameMasterFaction = FactionFactory.CreatePlayerFaction(newGame, newGame.SpaceMaster, "SpaceMaster Faction");
+
             // Generate systems
             for (int i = 0; i < numSystems; i++)
             {
                 newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
                 progress?.Report((double)newGame.StarSystems.Count / numSystems);
             }
-
-            // Create SM
-            newGame.SpaceMaster = new Player("Space Master", smPassword);
-            newGame.Players = new List<Player> { newGame.SpaceMaster };
 
             newGame.PostGameLoad();
 

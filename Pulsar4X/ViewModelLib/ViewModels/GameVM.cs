@@ -123,9 +123,7 @@ namespace Pulsar4X.ViewModel
             // TODO: Add options for Player name to be different than faction name.
             Player defaultPlayer = Game.AddPlayer(options.FactionName, options.FactionPassword);
 
-            Entity gameMaster;
-            Game.GlobalManager.FindEntityByGuid(Game.GameMasterFaction, out gameMaster);
-            PlayerFaction = gameMaster;
+            PlayerFaction = Game.GameMasterFaction;
             if (options.CreatePlayerFaction && options.DefaultStart)
             {
                 PlayerFaction = DefaultStartFactory.DefaultHumans(newGame, defaultPlayer, options.FactionName);
@@ -139,9 +137,7 @@ namespace Pulsar4X.ViewModel
             StatusText = "Loading Game...";
             Game = SerializationManager.ImportGame(pathToFile, new Progress<double>(OnProgressUpdate));
 
-            Entity gameMaster;
-            Game.GlobalManager.FindEntityByGuid(Game.GameMasterFaction, out gameMaster);
-            PlayerFaction = gameMaster; //TODO a screen with a faction selection and password. 
+            PlayerFaction = Game.GameMasterFaction;
             ProgressValue = 0;
             StatusText = "Game Loaded.";
         }
@@ -149,6 +145,7 @@ namespace Pulsar4X.ViewModel
         public void SaveGame(string pathToFile)
         {
             StatusText = "Saving Game...";
+
             SerializationManager.ExportGame(Game, pathToFile, new Progress<double>(OnProgressUpdate));
             ProgressValue = 0;
             StatusText = "Game Saved";

@@ -46,9 +46,8 @@ namespace Pulsar4X.ECSLib
             //JumpPointFactory.GenerateJumpPoints(newSystem, numJumpPoints);
 
             //add this system to the GameMaster's Known Systems list.
-            Entity gameMaster;
-            game.GlobalManager.FindEntityByGuid(game.GameMasterFaction, out gameMaster);
-            gameMaster.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.Guid);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.Guid);
+
             return newSystem;
         }
 
@@ -225,9 +224,7 @@ namespace Pulsar4X.ECSLib
             
             JPSurveyFactory.GenerateJPSurveyPoints(sol);
 
-            Entity gameMaster;
-            game.GlobalManager.FindEntityByGuid(game.GameMasterFaction, out gameMaster);
-            gameMaster.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
             return sol;
         }
 
@@ -268,9 +265,7 @@ namespace Pulsar4X.ECSLib
                 planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
-            Entity gameMaster;
-            game.GlobalManager.FindEntityByGuid(game.GameMasterFaction, out gameMaster);
-            gameMaster.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
             return system;
         }
 
@@ -304,9 +299,7 @@ namespace Pulsar4X.ECSLib
                 planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
-            Entity gameMaster;
-            game.GlobalManager.FindEntityByGuid(game.GameMasterFaction, out gameMaster);
-            gameMaster.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
             return system;
         }
 
