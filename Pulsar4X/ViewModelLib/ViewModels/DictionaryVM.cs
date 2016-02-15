@@ -11,6 +11,9 @@ namespace Pulsar4X.ViewModel
         Key,
         Value
     }
+
+    public delegate void SelectionChangedEventHandler(int oldSelection, int newSelection);
+
     /// <summary>
     /// An attempt at creating a class to make binding dictionaries to UI more streamlined.
     /// To Use in the View:
@@ -26,9 +29,21 @@ namespace Pulsar4X.ViewModel
         private Dictionary<int, KeyValuePair<TKey, TValue>> _index = new Dictionary<int, KeyValuePair<TKey, TValue>>(); 
         private Dictionary<KeyValuePair<TKey,TValue>,int> _reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>(); 
         public ObservableCollection<string> DisplayList { get; set; }
-        public int SelectedIndex { get; set; }
+        private int _selectedIndex;
+        public int SelectedIndex
+        {
+            get { return _selectedIndex; }
+            set
+            {
+                int old = _selectedIndex;
+                _selectedIndex = value;
+                SelectionChangedEvent(old, _selectedIndex);
+            }
+        }
         public DisplayMode DisplayMode { get; set; }
-        
+
+        public event SelectionChangedEventHandler SelectionChangedEvent;
+
         /// <summary>
         /// 
         /// </summary>
