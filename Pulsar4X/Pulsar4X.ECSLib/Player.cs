@@ -55,19 +55,67 @@ namespace Pulsar4X.ECSLib
         public string Password { get; set; }
     }
 
+    public abstract class Player
+    {
+        [PublicAPI]
+        [JsonProperty]
+        public Guid ID { get; protected set; }
+
+        [PublicAPI]
+        [JsonProperty]
+        public string Name { get; protected set; }
+
+        public abstract bool ChangeName(AuthenticationToken authToken, string newName);
+        public abstract bool ChangePassword(AuthenticationToken authToken, string newPassword);
+        public abstract ReadOnlyDictionary<Entity, AccessRole> GetAccessRoles(AuthenticationToken authToken); 
+
+        #region Equality Members
+
+        protected bool Equals(Player other)
+        {
+            return ID.Equals(other.ID);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            return obj.GetType() == GetType() && Equals((Player)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ID.GetHashCode();
+        }
+
+        public static bool operator ==(Player playerA, Player playerB)
+        {
+            return Equals(playerA, playerB);
+        }
+
+        public static bool operator !=(Player playerA, Player playerB)
+        {
+            return !Equals(playerA, playerB);
+        }
+
+        #endregion
+
+        public override string ToString()
+        {
+            return ID.ToString();
+        }
+    }
+
     [JsonObject(MemberSerialization.OptIn)]
-    public class Player
+    internal class InternalPlayer : Player
     {
         #region Properties
-
-        [JsonProperty]
-        public Guid ID { get; private set; }
-
-        [JsonProperty]
-        public string Name { get; private set; }
-
-        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
-
         [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; }
 
@@ -83,16 +131,16 @@ namespace Pulsar4X.ECSLib
 
         [JsonConstructor]
         [UsedImplicitly]
-        private Player()
+        private InternalPlayer()
         { }
 
-        internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
+        internal InternalPlayer(string name, string password = "") : this(name, password, Guid.NewGuid())
         { }
 
-        internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<Entity, uint>())
+        internal InternalPlayer(string name, string password, Guid id) : this(name, password, id, new Dictionary<Entity, uint>())
         { }
 
-        internal Player(string name, string password, Guid id, Dictionary<Entity, uint> factionAccessRoles)
+        internal InternalPlayer(string name, string password, Guid id, Dictionary<Entity, uint> factionAccessRoles)
         {
             ID = id;
             Name = string.IsNullOrEmpty(name) ? "Unnamed Player" : name;
@@ -140,7 +188,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="newName">New name for the player</param>
         /// <returns>True if operation is successful.</returns>
         [PublicAPI]
-        public bool ChangeName([NotNull] AuthenticationToken authToken, [NotNull] string newName)
+        public override bool ChangeName([NotNull] AuthenticationToken authToken, [NotNull] string newName)
         {
             if (string.IsNullOrEmpty(newName))
             {
@@ -163,7 +211,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="newPassword">New password for the player.</param>
         /// <returns>True if operation is successful.</returns>
         [PublicAPI]
-        public bool ChangePassword([NotNull] AuthenticationToken authToken, [NotNull] string newPassword)
+        public override bool ChangePassword([NotNull] AuthenticationToken authToken, [NotNull] string newPassword)
         {
             if (!IsTokenValid(authToken))
             {
@@ -173,6 +221,17 @@ namespace Pulsar4X.ECSLib
             Salt = GenerateSalt();
             PasswordHash = GeneratePasswordHash(newPassword, Salt);
             return true;
+        }
+
+        /// <summary>
+        /// Gets all the access roles of this player.
+        /// </summary>
+        /// <param name="authToken">Current AuthenticationToken for this player.</param>
+        /// <returns>ReadOnlyDictionary containing the access roles.</returns>
+        [PublicAPI]
+        public override ReadOnlyDictionary<Entity, AccessRole> GetAccessRoles(AuthenticationToken authToken)
+        {
+            return !IsTokenValid(authToken) ? new ReadOnlyDictionary<Entity, AccessRole>(new Dictionary<Entity, AccessRole>()) : new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
         }
 
         #endregion
@@ -220,48 +279,6 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
-
-        #region Equality Members
-
-        protected bool Equals(Player other)
-        {
-            return ID.Equals(other.ID);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-            return obj.GetType() == GetType() && Equals((Player)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return ID.GetHashCode();
-        }
-
-        public static bool operator ==(Player playerA, Player playerB)
-        {
-            return Equals(playerA, playerB);
-        }
-
-        public static bool operator !=(Player playerA, Player playerB)
-        {
-            return !Equals(playerA, playerB);
-        }
-
-        #endregion
-
-        public override string ToString()
-        {
-            return ID.ToString();
-        }
 
         #endregion
         
