@@ -37,7 +37,7 @@ namespace Pulsar4X.ViewModel
             {
                 int old = _selectedIndex;
                 _selectedIndex = value;
-                SelectionChangedEvent(old, _selectedIndex);
+                if(SelectionChangedEvent != null) SelectionChangedEvent(old, _selectedIndex);
             }
         }
         public DisplayMode DisplayMode { get; set; }

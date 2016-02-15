@@ -7,6 +7,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 {
     public class ComponentTemplateDesignerView : Panel
     {
+        protected ComboBox ComponentsComBox { get; set; }
         protected StackLayout MineralCostFormulaStackLayout { get; set; }
         protected StackLayout AbilityTemplates { get; set; }
         protected StackLayout MountTypes { get; set; }
@@ -21,10 +22,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             DataContext = _viewModel;
 
+            ComponentsComBox.DataContext = viewModel.Components;
+            ComponentsComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            ComponentsComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
+
             foreach (var item in viewModel.ComponentAbilitySDs)
             {
                 AbilityTemplates.Items.Add(new ComponentAbilityTemplateDesignerView(item));
             }
+            viewModel.ComponentAbilitySDs.CollectionChanged += ComponentAbilitySDs_CollectionChanged;
             foreach (var item in viewModel.MineralCostFormula)
             {
                 MineralCostFormulaStackLayout.Items.Add(new MineralFormulaView(item));
@@ -42,6 +48,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
         }
 
+        private void ComponentAbilitySDs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            AbilityTemplates.Items.Clear();
+            foreach (var item in _viewModel.ComponentAbilitySDs)
+            {
+                AbilityTemplates.Items.Add(new ComponentAbilityTemplateDesignerView(item));
+            }
+        }
+
         private void MineralCostFormula_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             MineralCostFormulaStackLayout.Items.Clear();
@@ -50,5 +65,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 MineralCostFormulaStackLayout.Items.Add(new MineralFormulaView(item));
             }
         }
+
+        
     }
 }

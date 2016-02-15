@@ -26,9 +26,10 @@ namespace Pulsar4X.ViewModel
                         
         }
 
-        public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid, string> mineralKVP) : this(staticDataStore)
+        public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid, string> guidFormulaKVP) : this(staticDataStore)
         {
-            Minerals.SelectedIndex = Minerals.GetIndex(mineralKVP);
+            this.Forumula = guidFormulaKVP.Value;
+            Minerals.SelectedIndex = Minerals.GetIndex(new KeyValuePair<Guid, string>(guidFormulaKVP.Key, Minerals[guidFormulaKVP.Key]));
         }
 
         public void OnSelectionChange(object sender, EventArgs e)
