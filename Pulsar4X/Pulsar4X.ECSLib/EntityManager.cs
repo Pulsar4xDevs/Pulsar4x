@@ -141,7 +141,7 @@ namespace Pulsar4X.ECSLib
 
         private bool IsValidID(int entityID)
         {
-            return entityID >= 0 && entityID < _entities.Count;
+            return entityID >= 0 && entityID < _entities.Count && _entities[entityID] != null;
         }
 
         internal void RemoveEntity(Entity entity)
@@ -290,7 +290,49 @@ namespace Pulsar4X.ECSLib
 
             var entities = new List<Entity>();
 
-            entities.AddRange(_localEntityDictionary.Values.Where(entity => (entity.DataBlobMask & dataBlobMask) == dataBlobMask));
+            for (int entityID = 0; entityID < EntityMasks.Count; entityID++)
+            {
+                ComparableBitArray entityMask = EntityMasks[entityID];
+                if (entityMask == null)
+                {
+                    continue;
+                }
+                if ((entityMask & dataBlobMask) == dataBlobMask)
+                {
+                    entities.Add(_entities[entityID]);
+                }
+            }
+
+            return entities;
+        }
+
+        public List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask)
+        {
+            if (dataBlobMask == null)
+            {
+                throw new ArgumentNullException(nameof(dataBlobMask));
+            }
+
+            if (dataBlobMask.Length != DataBlobTypes.Count)
+            {
+                throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
+            }
+
+            var entities = new List<Entity>();
+
+            for (int entityID = 0; entityID < EntityMasks.Count; entityID++)
+            {
+                ComparableBitArray entityMask = EntityMasks[entityID];
+                if (entityMask == null)
+                {
+                    continue;
+                }
+
+                if ((entityMask & dataBlobMask) == BlankDataBlobMask())
+                {
+                    entities.Add(_entities[entityID]);
+                }
+            }
 
             return entities;
         }
@@ -400,24 +442,11 @@ namespace Pulsar4X.ECSLib
         public Entity GetEntityByGuid(Guid entityGuid)
         {
             Entity entity;
-            if (_game != null)
+            if (!TryGetEntityByGuid(entityGuid, out entity))
             {
-                if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
-                {
-                    return entity;
-                }
-                if (_game.GlobalGuidDictionary.ContainsKey(entityGuid))
-                {
-                    return _game.GlobalGuidDictionary[entityGuid].GetEntityByGuid(entityGuid);
-                }
                 throw new GuidNotFoundException(entityGuid);
             }
-            // This is a "fake" manager that does not link to other managers.
-            if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
-            {
-                return entity;
-            }
-            throw new GuidNotFoundException(entityGuid);
+            return entity;
         }
 
         /// <summary>
