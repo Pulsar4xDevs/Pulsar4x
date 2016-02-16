@@ -6,7 +6,7 @@
   <TableLayout>
     <TableRow>
       <Label Text="Name" />
-      <TextBox Text="{Binding Name}" />
+      <ComboBox ID="ComponentsComBox" />
       <Label Text="Description" />
       <TextBox Text="{Binding Description}" />
       <Label Text="ID" />

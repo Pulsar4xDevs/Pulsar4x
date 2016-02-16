@@ -13,12 +13,12 @@ namespace Pulsar4X.ViewModel
     {
         private StaticDataStore _dataStore;
         public string Forumula { get; set; }
-        public DictionaryVM<Guid, string> Minerals { get; set; }
+        public DictionaryVM<Guid, string, string> Minerals { get; set; }
 
         public MineralFormulaVM(StaticDataStore staticDataStore)
         {
             _dataStore = staticDataStore;
-            Minerals = new DictionaryVM<Guid, string>(DisplayMode.Value);
+            Minerals = new DictionaryVM<Guid, string, string>(DisplayMode.Value);
             foreach (var item in staticDataStore.Minerals)
             {
                 Minerals.Add(item.ID, item.Name);
@@ -26,9 +26,10 @@ namespace Pulsar4X.ViewModel
                         
         }
 
-        public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid, string> mineralKVP) : this(staticDataStore)
+        public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid, string> guidFormulaKVP) : this(staticDataStore)
         {
-            Minerals.SelectedIndex = Minerals.GetIndex(mineralKVP);
+            this.Forumula = guidFormulaKVP.Value;
+            Minerals.SelectedIndex = Minerals.GetIndex(new KeyValuePair<Guid, string>(guidFormulaKVP.Key, Minerals[guidFormulaKVP.Key]));
         }
 
         public void OnSelectionChange(object sender, EventArgs e)

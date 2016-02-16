@@ -11,19 +11,59 @@ namespace Pulsar4X.ViewModel
 {
    public class ComponentAbilityTemplateVM : IViewModel
     {
+        private string _name;
+        public string Name { get { return _name; } set { _name = value; OnPropertyChanged(); } }
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set { _description = value; OnPropertyChanged(); }
+        }
+        private DictionaryVM<GuiHint, string, string> _selectedGuiHint = new DictionaryVM<GuiHint, string, string>();
+        public DictionaryVM<GuiHint, string, string> SelectedGuiHint
+        {
+            get { return _selectedGuiHint; }
+            set { _selectedGuiHint = value; OnPropertyChanged(); }
+        } 
 
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public DictionaryVM<GuiHint,string> SelectedGuiHint{ get; set; }
-        public DictionaryVM<Type,string> AbilityDataBlobTypeSelection { get; set; }
-        public string AbilityDataBlobType { get; set; }
-        public string AbilityFormula { get; set; }
-        public string MinFormula { get; set; }
-        public string MaxFormula { get; set; }
+        private DictionaryVM<Type, string, string> _abilityDataBlobTypeSelection = new DictionaryVM<Type, string, string>();
+        public DictionaryVM<Type,string, string> AbilityDataBlobTypeSelection
+        {
+            get { return _abilityDataBlobTypeSelection; }
+            set { _abilityDataBlobTypeSelection = value; OnPropertyChanged(); }
+        }
+
+        private string _abilityDataBlobType;
+        public string AbilityDataBlobType
+        {
+            get { return _abilityDataBlobType; }
+            set { _abilityDataBlobType = value; OnPropertyChanged(); }
+        }
+        private string _abilityFormula;
+        public string AbilityFormula
+        {
+            get { return _abilityFormula; }
+            set { _abilityFormula = value; OnPropertyChanged(); }
+        }
+        private string _minFormula;
+        public string MinFormula
+        {
+            get { return _minFormula; }
+            set { _minFormula = value; OnPropertyChanged(); }
+        }
+        private string _maxFormula;        
+        public string MaxFormula
+        {
+            get { return _maxFormula; }
+            set { _maxFormula = value; OnPropertyChanged(); }
+        }
+        //private Dictionary
         public Dictionary<Guid, string> GuidDictionary;
+
+
         public ComponentAbilityTemplateVM()
         {
-            SelectedGuiHint = new DictionaryVM<GuiHint, string>(DisplayMode.Value);
+            //SelectedGuiHint = new DictionaryVM<GuiHint, string>(DisplayMode.Value);
             foreach (var item in Enum.GetValues(typeof(GuiHint)))
             {
                 SelectedGuiHint.Add((GuiHint)item, Enum.GetName(typeof(GuiHint), item));
@@ -36,7 +76,7 @@ namespace Pulsar4X.ViewModel
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
-
+            SelectedGuiHint.SelectedIndex = (int)abilitySD.GuiHint;
             AbilityDataBlobType = abilitySD.AbilityDataBlobType;
             AbilityFormula = abilitySD.AbilityFormula;
             MinFormula = abilitySD.MinFormula;
@@ -64,9 +104,9 @@ namespace Pulsar4X.ViewModel
             return typelist;
         }
 
-        private static DictionaryVM<Type, string> GetTypeDict(List<Type> abilityTypes)
+        private static DictionaryVM<Type, string, string> GetTypeDict(List<Type> abilityTypes)
         {
-            DictionaryVM<Type, string> dict = new DictionaryVM<Type, string>(DisplayMode.Key);
+            DictionaryVM<Type, string, string> dict = new DictionaryVM<Type, string, string>(DisplayMode.Value);
             foreach (var type in abilityTypes)
             {
                 dict.Add(type, type.Name);

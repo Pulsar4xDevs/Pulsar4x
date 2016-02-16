@@ -37,7 +37,7 @@ namespace Pulsar4X.ViewModel
         /// <summary>
         /// a list of componentDesign Entities installed on teh ship, and how many of that type. 
         /// </summary>
-        public DictionaryVM<Entity, int> ComponentsInstalled { get; set; }
+        public DictionaryVM<Entity, int, int> ComponentsInstalled { get; set; }
 
 
         public ShipDesignVM(Entity factionEntity)

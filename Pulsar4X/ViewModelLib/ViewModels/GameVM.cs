@@ -53,7 +53,7 @@ namespace Pulsar4X.ViewModel
                     _systemDictionary.Add(systemVM.ID, systemVM);
                 }
                 ColonyScreens = new List<ColonyScreenVM>();
-                Colonys = new DictionaryVM<Guid, string>(DisplayMode.Value);
+                Colonys = new DictionaryVM<Guid, string, string>(DisplayMode.Value);
                 foreach (var colonyEntity in _playerFaction.GetDataBlob<FactionInfoDB>().Colonies)
                 {
                     ColonyScreens.Add(new ColonyScreenVM(colonyEntity, Game.StaticData));
@@ -74,7 +74,7 @@ namespace Pulsar4X.ViewModel
 
         public List<ColonyScreenVM> ColonyScreens { get; set; } //TODO create the VM as a view is requested?
 
-        public DictionaryVM<Guid, string> Colonys { get; set; }
+        public DictionaryVM<Guid, string, string> Colonys { get; set; }
 
         public ColonyScreenVM ColonyScreen { get; set; }
 
