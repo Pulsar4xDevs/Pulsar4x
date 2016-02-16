@@ -361,7 +361,7 @@ namespace Pulsar4X.ECSLib
         {
             foreach (Entity entity in _entities)
             {
-                if (IsValidEntity(entity) && entity.DataBlobMask.SetBits.Contains(typeIndex))
+                if (entity != null && entity.DataBlobMask.SetBits.Contains(typeIndex))
                 {
                     return entity;
                 }
@@ -434,7 +434,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the entity with the associated Guid. this version doesn't use out. 
+        /// Gets the entity with the associated Guid. Checks only this EntityManager.
         /// </summary>
         /// <returns>The Entity if found</returns>
         /// <exception cref="GuidNotFoundException">Guid was not found in Global list, orlocally</exception>
@@ -450,7 +450,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the associated entityID of the specified Guid. (this manager only, not global)
+        /// Gets the associated entity of the specified Guid. Checks only this EntityManager.
         /// <para></para>
         /// Does not throw exceptions.
         /// </summary>
@@ -484,8 +484,6 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-
-
         /// <summary>
         /// Returns the true if the specified type is a valid DataBlobType.
         /// <para></para>
@@ -495,7 +493,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static bool TryGetTypeIndex(Type dataBlobType, out int typeIndex)
         {
-            return DataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
+            return InternalDataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
         }
 
         /// <summary>

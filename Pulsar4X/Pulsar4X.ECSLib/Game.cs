@@ -12,9 +12,10 @@ namespace Pulsar4X.ECSLib
     {
         #region Properties
 
+        [PublicAPI]
         [JsonProperty]
         public List<Player> Players;
-
+        
         [PublicAPI]
         [JsonProperty]
         public Player SpaceMaster;
@@ -122,7 +123,6 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
-
             IsLoaded = false;
             _globalManager = new EntityManager(this);
             StarSystems = new Dictionary<Guid, StarSystem>();
@@ -373,7 +373,7 @@ namespace Pulsar4X.ECSLib
         }
         
         #endregion
-
+        
         private Player GetPlayerForToken(AuthenticationToken authToken)
         {
             if (SpaceMaster.IsTokenValid(authToken))
