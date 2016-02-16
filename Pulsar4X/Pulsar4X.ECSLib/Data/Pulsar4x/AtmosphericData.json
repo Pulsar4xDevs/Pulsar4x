@@ -1,0 +1,259 @@
+{
+  "Type": "AtmosphericGases",
+  "Data": {
+    "Values": [
+	    {
+            "Weight": 500.0,
+            "Value": {
+                "Name": "Hydrogen",
+                "ChemicalSymbol": "H",
+                "IsToxic": false,
+                "BoilingPoint": -252.879,
+                "MeltingPoint": -259.16,
+                "MinGravity": 3.0,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 150.0,
+            "Value": {
+                "Name": "Helium",
+                "ChemicalSymbol": "He",
+                "IsToxic": false,
+                "BoilingPoint": -268.928,
+                "MeltingPoint": -272.20,
+                "MinGravity": 2.5,
+                "GreenhouseEffect": 0.0
+            }
+        },
+        {
+            "Weight": 10.0,
+            "Value": {
+                "Name": "Methane",
+                "ChemicalSymbol": "CH4",
+                "IsToxic": true,
+                "BoilingPoint": -161.49,
+                "MeltingPoint": -182.5,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 10.0,
+            "Value": {
+                "Name": "Water",
+                "ChemicalSymbol": "H2O",
+                "IsToxic": false,
+                "BoilingPoint": 100.0,
+                "MeltingPoint": 0.0,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 10.0,
+            "Value": {
+                "Name": "Ammonia",
+                "ChemicalSymbol": "NH3",
+                "IsToxic": true,
+                "BoilingPoint": -33.34,
+                "MeltingPoint": -77.73,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 5.0,
+            "Value": {
+                "Name": "Neon",
+                "ChemicalSymbol": "Ne",
+                "IsToxic": false,
+                "BoilingPoint": -246.046,
+                "MeltingPoint": -248.59,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 0.0
+            }
+        },
+        {
+            "Weight": 50.0,
+            "Value": {
+                "Name": "Nitrogen",
+                "ChemicalSymbol": "N",
+                "IsToxic": false,
+                "BoilingPoint": -195.795,
+                "MeltingPoint": -210.00,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 0.0
+            }
+        },
+        {
+            "Weight": 10.0,
+            "Value": {
+                "Name": "Carbon monoxide",
+                "ChemicalSymbol": "CO",
+                "IsToxic": true,
+                "BoilingPoint": -191.5,
+                "MeltingPoint": -205.02,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Nitrogen oxide",
+                "ChemicalSymbol": "NO",
+                "IsToxic": false,
+                "BoilingPoint": -152.0,
+                "MeltingPoint": -164.0,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 25.0,
+            "Value": {
+                "Name": "Oxygen",
+                "ChemicalSymbol": "O",
+                "IsToxic": false,
+                "BoilingPoint": -182.962,
+                "MeltingPoint": -218.79,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 0.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Hydrogen sulfide",
+                "ChemicalSymbol": "H2S",
+                "IsToxic": true,
+                "BoilingPoint": -60.0,
+                "MeltingPoint": -82.0,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 10.0,
+            "Value": {
+                "Name": "Argon",
+                "ChemicalSymbol": "Ar",
+                "IsToxic": false,
+                "BoilingPoint": -185.848,
+                "MeltingPoint": -189.34,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 0.0
+            }
+        },
+        {
+            "Weight": 15.0,
+            "Value": {
+                "Name": "Carbon dioxide",
+                "ChemicalSymbol": "CO2",
+                "IsToxic": false,
+                "BoilingPoint": -87.5,
+                "MeltingPoint": -87.5,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Nitrogen dioxide",
+                "ChemicalSymbol": "NO2",
+                "IsToxic": false,
+                "BoilingPoint": 21.2,
+                "MeltingPoint": -11.2,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Sulfur dioxide",
+                "ChemicalSymbol": "SO2",
+                "IsToxic": false,
+                "BoilingPoint": -10.0,
+                "MeltingPoint": -72.0,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Chlorine",
+                "ChemicalSymbol": "Cl",
+                "IsToxic": true,
+                "BoilingPoint": -34.04,
+                "MeltingPoint": -101.5,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Fluorine",
+                "ChemicalSymbol": "F",
+                "IsToxic": true,
+                "BoilingPoint": -188.11,
+                "MeltingPoint": -219.67,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Bromine",
+                "ChemicalSymbol": "Br",
+                "IsToxic": true,
+                "BoilingPoint": 58.8,
+                "MeltingPoint": -7.2,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 1.0,
+            "Value": {
+                "Name": "Iodine",
+                "ChemicalSymbol": "I",
+                "IsToxic": true,
+                "BoilingPoint": 184.3,
+                "MeltingPoint": 113.7,
+                "MinGravity": 0.001,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 0.0000001,
+            "Value": {
+                "Name": "Safe Greenhouse Gas",
+                "ChemicalSymbol": "SGG",
+                "IsToxic": false,
+                "BoilingPoint": 100.0,
+                "MeltingPoint": 0.0,
+                "MinGravity": 1000,
+                "GreenhouseEffect": 1.0
+            }
+        },
+        {
+            "Weight": 0.0000001,
+            "Value": {
+                "Name": "Anti-Greenhouse Gas",
+                "ChemicalSymbol": "AGG",
+                "IsToxic": false,
+                "BoilingPoint": 100.0,
+                "MeltingPoint": 0.0,
+                "MinGravity": 10000,
+                "GreenhouseEffect": -1.0
+            }
+        }
+	  ]
+	}
+}

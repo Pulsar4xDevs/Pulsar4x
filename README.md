@@ -1,6 +1,7 @@
-# Pulsar4x										{#mainpage}
+ECS-CrossPlatform status: [![Build status](https://ci.appveyor.com/api/projects/status/owpp4y7ruyn0skm1/branch/ECS-CrossPlatform?svg=true)](https://ci.appveyor.com/project/intercross21/pulsar4x/branch/ECS-CrossPlatform)
+# Pulsar4x
 
-A Fan work recreation of Aurora, a 4x space sim created by Steve Walmsley. Pulsar4x is being develop in in C# and is intended to be cross platform. The long term goal of the project is to produce a feature complete clone of [Aurora](http://aurora2.pentarch.org/index.php).
+A Fan work recreation of Aurora, a 4x space sim created by Steve Walmsley. Pulsar4x is being develop in in C#. The long term goal of the project is to produce a feature complete clone of [Aurora](http://aurora2.pentarch.org/index.php).
 
 ## Community
 
@@ -10,23 +11,23 @@ IRC channel #Pulsar4x on Freenode.
 
 Bugs can be reported on the [issue tracker.](https://github.com/Pulsar4xDevs/Pulsar4x/issues)
 
-## Compiling Pulsar4x
+## Compiling Pulsar4x ECS-CrossPlatform branch:
 
-To compile Pulsar4x you'll need either Visual Studio 2010/2012/2013 or the latest version of MonoDevlop/SharpDevelop. If you are on windows we recommend either [VisualStudio 2013 Community Edition](http://www.visualstudio.com/en-us/news/vs2013-community-vs.aspx) or Visual Studio Express 2013 for Windows Desktop, available [here.](http://www.visualstudio.com/downloads/download-visual-studio-vs) If you are on Mac or Linux you can use either [Monodevelop](http://www.monodevelop.com/) or [SharpDevelop](http://www.icsharpcode.net/OpenSource/SD/Default.aspx).  
+To compile Pulsar4x we recommend [VisualStudio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). we're starting to use a bit of C#6, so 2013 is not recomended unless you know what you're doing.  Mono should work if you have enough mono-fu.
 
-The project uses a custom premake4 build, source available [here.](https://bitbucket.org/antagonist/premake-stable). Note that there are pre-compiled versions of Premake as part of the Project Repo.
 
 Instructions:
 
 1. Clone the Git Repo.
 
-2. Run the version of premake appropriate for your platform (premake4.exe for windows, premake4.lin for linux and premake4.osx for Mac OS X). This will build the visual studio solution files (which are also used by MonoDevelop/SharpDevelop).
+2. Open the solution file "Pulsar4X\Pulsar4X.sln".
 
-3. Open the solution file "Pulsar4X\Pulsar4X.sln".
+3. a. If you're running Windows: unload the GTK and Mac projects (this should eventualy  be fixed but at the time of this writing they're WIP.)
+  
+ b. If you're running Linux:   
+ c. If you're running Mac: welcome to the team! we don't currently have a mac specialist, feel free to take on the challenge!  
 
-4. Build the "Pulsar4X.UI" project. This will automatically build the Pulsar Library (containing the game logic) as well as the UI. You can find the compile program in "Pulsar4X\Pulsar4X.UI\bin\Debug" or "Pulsar4X\Pulsar4X.UI\bin\Release", depending on the build configuration.  
-
-5. If Visual Studio shows "Attach" instead of "Start" for the debugging button, right click the Pulsar4x.UI project in the Solution Explorer and select "Set as StartUp Project" click saveall.  
-
-
+4. a. if you're running Windows Set Pulsar4x.CrossPlatform.WPF project as the startup project. you should be able to build and/or run from there.   
+ b. Linux:   
+ c. Mac:  See 3c
 

@@ -1,0 +1,452 @@
+{
+  "Type": "Components",
+  "Data": {
+    "List": [
+      {
+        "Key": "e76bd999-ecd7-4511-ad41-6d0c59ca97e6",
+        "Value": {
+          "Name": "Engine",
+          "Description": "Moves a ship",
+          "ID": "e76bd999-ecd7-4511-ad41-6d0c59ca97e6",
+          "SizeFormula": "Ability(0)",
+          "HTKFormula": "Max(1, [Size] / 100)",
+          "CrewReqFormula": "[Size]",
+          "MineralCostFormula": {
+            "List": [
+              {
+                "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
+                "Value": "[Size] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Size] * 10",
+          "CreditCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": {
+            "List": [
+              {
+                "Key": "ShipComponent",
+                "Value": true
+              },
+              {
+                "Key": "ShipCargo",
+                "Value": true
+              },
+              {
+                "Key": "PlanetFacility",
+                "Value": false
+              },
+              {
+                "Key": "PDS",
+                "Value": false
+              }
+            ]
+          },
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Engine Size",
+              "Description": "Size of this engine in Tons",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "2500",
+              "MinFormula": "1",
+              "AbilityFormula": "250"
+            },
+            {
+              "Name": "Engine Type",
+              "Description": "Type of engine Tech",
+              "GuiHint": "GuiTechSelectionList",
+              "GuidDictionary": {
+                "List": [
+                  {
+                    "Key": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
+                    "Value": ""
+                  },
+                  {
+                    "Key": "c827d369-3f16-43ef-b112-7d5bcafb74c7",
+                    "Value": ""
+                  },
+                  {
+                    "Key": "db6818f3-99e9-46c1-b903-f3af978c38b2",
+                    "Value": ""
+                  },
+                  {
+                    "Key": "f3f10e56-9345-40cc-af42-342e7240355d",
+                    "Value": ""
+                  }
+                ]
+              },
+              "AbilityFormula": "TechData('f3f10e56-9345-40cc-af42-342e7240355d')"
+            },
+            {
+              "Name": "Engine Consumption vs Power",
+              "Description": "More Powerfull engines are less efficent for a given size",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')",
+              "MinFormula": "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Engine Power",
+              "Description": "Move Power for ship",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability(1) * [Size] * Ability(2)"
+            },
+            {
+              "Name": "Engine Power",
+              "Description": "Move Power for ship",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(3))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerDB"
+            },
+            {
+              "Name": "Fuel Consumption",
+              "Description": "From Tech",
+              "GuiHint": "None",
+              "AbilityFormula": "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)"
+            },
+            {
+              "Name": "Fuel Consumption",
+              "Description": "Fuel Consumption Calc",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability(3) - Ability(3) * [Size] * 0.002 * Ability(5)"
+            },
+            {
+              "Name": "Fuel Consumption",
+              "Description": "Size Mod",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(6))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelUseDB"
+            },
+            {
+              "Name": "Thermal Signature Reduction",
+              "Description": "",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "0.5",
+              "MinFormula": "0",
+              "AbilityFormula": "0"
+            },
+            {
+              "Name": "Thermal Signature",
+              "Description": "",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability(3) * Ability(8)"
+            },
+            {
+              "Name": "Sensor Signature",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(9),0)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "f7084155-04c3-49e8-bf43-c7ef4befa550",
+        "Value": {
+          "Name": "Mine",
+          "Description": "Mines Resources",
+          "ID": "f7084155-04c3-49e8-bf43-c7ef4befa550",
+          "SizeFormula": "25000",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "50000",
+          "MineralCostFormula": {
+            "List": [
+              {
+                "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
+                "Value": "60"
+              },
+              {
+                "Key": "2ae2a928-3e14-45d5-befc-5bd6ed16ec0a",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": {
+            "List": [
+              {
+                "Key": "ShipComponent",
+                "Value": false
+              },
+              {
+                "Key": "ShipCargo",
+                "Value": true
+              },
+              {
+                "Key": "PlanetFacility",
+                "Value": true
+              },
+              {
+                "Key": "PDS",
+                "Value": false
+              }
+            ]
+          },
+          "ComponentAbilitySDs": [
+            {
+              "Name": "MiningAmount",
+              "Description": "",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "List": [
+                  {
+                    "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "b12acce2-7c7d-4acf-ad41-1c08093fcad8",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "a03863a3-a364-45ff-8c7b-a4f7486bd710",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "14a83fc3-04fd-4ea3-82f4-290995c4418e",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "29b3797d-f9d7-4e73-a593-2b05bf4ef012",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "5fdfb85c-fad2-4a48-8a75-04eb65dc9741",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "2ae2a928-3e14-45d5-befc-5bd6ed16ec0a",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "6a38b268-041f-4103-9d23-c13c1041cecd",
+                    "Value": "10"
+                  },
+                  {
+                    "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
+                    "Value": "10"
+                  }
+                ]
+              },
+              "AbilityFormula": "DataBlobArgs([GuidDict])",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.MineResourcesDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
+        "Value": {
+          "Name": "ResearchLab",
+          "Description": "Creates Research Points",
+          "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
+          "SizeFormula": "500000",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "1000000",
+          "MineralCostFormula": {
+            "List": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": {
+            "List": [
+              {
+                "Key": "ShipComponent",
+                "Value": false
+              },
+              {
+                "Key": "ShipCargo",
+                "Value": true
+              },
+              {
+                "Key": "PlanetFacility",
+                "Value": true
+              },
+              {
+                "Key": "PDS",
+                "Value": false
+              }
+            ]
+          },
+          "ComponentAbilitySDs": [
+            {
+              "Name": "RP Amount Per EconTick",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(20)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "90592586-0bd6-4885-8526-7181e08556b5",
+        "Value": {
+          "Name": "Refinary",
+          "Description": "Creates Research Points",
+          "ID": "90592586-0bd6-4885-8526-7181e08556b5",
+          "SizeFormula": "500000",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "1000000",
+          "MineralCostFormula": {
+            "List": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": {
+            "List": [
+              {
+                "Key": "ShipComponent",
+                "Value": false
+              },
+              {
+                "Key": "ShipCargo",
+                "Value": true
+              },
+              {
+                "Key": "PlanetFacility",
+                "Value": true
+              },
+              {
+                "Key": "PDS",
+                "Value": false
+              }
+            ]
+          },
+          "ComponentAbilitySDs": [
+            {
+              "Name": "RP Amount Per EconTick",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "100",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsDB"
+            },
+            {
+              "Name": "RefineAbilitys",
+              "Description": "",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "List": [
+                  {
+                    "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+                    "Value": "0"
+                  },
+                  {
+                    "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
+                    "Value": "0"
+                  }
+                ]
+              },
+              "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
+        "Value": {
+          "Name": "Factory",
+          "Description": "Constructs Facilities, Fighters Ammo and Components",
+          "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
+          "SizeFormula": "500000",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "1000000",
+          "MineralCostFormula": {
+            "List": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": {
+            "List": [
+              {
+                "Key": "ShipComponent",
+                "Value": false
+              },
+              {
+                "Key": "ShipCargo",
+                "Value": true
+              },
+              {
+                "Key": "PlanetFacility",
+                "Value": true
+              },
+              {
+                "Key": "PDS",
+                "Value": false
+              }
+            ]
+          },
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Construction Points",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Construction Points",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAbilityDB"
+            },
+            {
+              "Name": "Construction Points",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructShipComponentsAbilityDB"
+            },
+            {
+              "GuiHint": "GuiTechSelectionList"
+            },
+            {
+              "GuiHint": "GuiTechSelectionList"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

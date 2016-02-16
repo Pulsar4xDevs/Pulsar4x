@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  
+  >
+  <TableLayout>
+    <TableRow>
+      <Label ID="Item" Text="{Binding Item}" />
+      <ProgressBar ID="PercentComplete" Value ="{Binding ItemPercentRemaining}" />
+      <Label ID="Completed" Text ="{Binding Completed}" />
+      <NumericUpDown ID="BatchQuantity" Value="{Binding BatchQuantity}"/>
+      <CheckBox ID="RepeatJob" Checked ="{Binding Repeat}" />
+      <TableLayout>
+        <TableRow>
+        <Button ID="IncPriority" />
+        </TableRow>
+        <TableRow>
+        <Button ID="DecPriority" />
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+  </TableLayout>
+</Panel>

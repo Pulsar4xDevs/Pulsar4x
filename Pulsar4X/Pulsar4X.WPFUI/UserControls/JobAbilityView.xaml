@@ -1,0 +1,48 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:Pulsar4X.ViewModel;assembly=ViewModelLib"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:userControls="clr-namespace:Pulsar4X.WPFUI.UserControls"
+             x:Class="Pulsar4X.WPFUI.JobAbilityView"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="37*"/>
+            <RowDefinition Height="24"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="99*"/>
+            <ColumnDefinition Width="74*"/>
+            <ColumnDefinition Width="67*"/>
+            <ColumnDefinition Width="60*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Refinary Points:" Margin="10,10,0,0" VerticalAlignment="Top" Height="23" Grid.RowSpan="2"/>
+        <Label Content="{Binding Path=PointsPerDay}" HorizontalAlignment="Left" Margin="5,10,0,0" VerticalAlignment="Top" Grid.Column="1" Height="23" Width="41" Grid.RowSpan="2"/>
+        <ListBox Grid.ColumnSpan="4" Margin="10,10,10,0" Grid.Row="1" ItemsSource="{Binding Path=ItemJobs}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <userControls:JobUC DataContext="{Binding}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate> 
+        </ListBox>
+        <ComboBox Name="ItemComboBox" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="2" VerticalAlignment="Top" Width="89" Height="21"
+                  ItemsSource="{Binding Path=ItemDictionary}"
+                  SelectedValuePath="Value" DisplayMemberPath="Key"
+                  SelectedValue="{Binding Path=NewJobSelectedItem}"/>
+        <xctk:ShortUpDown Grid.Column="1" Grid.Row="2" Margin="0,0,1,0"
+                         Value="{Binding Path=NewJobBatchCount}" ParsingNumberStyle="Integer"/>
+        <CheckBox Content="Repeat" Grid.Column="2" Margin="4,5,4,6" Grid.Row="2" FlowDirection="RightToLeft"
+                  IsChecked="{Binding Path=NewJobRepeat}"/>
+        <Button Content="Add" Grid.Column="3" Margin="0,0,10,0" Grid.Row="2" Height="24" VerticalAlignment="Top"                 
+                Command="{Binding AddNewJob}" 
+                CommandParameter="{Binding ElementName=ItemComboBox,Path=SelectedValue}" />
+
+    </Grid>
+</UserControl>

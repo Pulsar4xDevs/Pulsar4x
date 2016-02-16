@@ -9,6 +9,7 @@ using log4net;
 #endif
 
 using Pulsar4X.Entities.Components;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.UI
 {
@@ -21,7 +22,7 @@ namespace Pulsar4X.UI
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
+        [MTAThread]
         static void Main()
         {
 #if LOG4NET_ENABLED

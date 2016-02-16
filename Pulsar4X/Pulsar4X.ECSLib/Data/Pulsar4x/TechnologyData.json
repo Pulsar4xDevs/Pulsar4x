@@ -1,0 +1,127 @@
+{
+  "Type": "Techs",
+  "Data": {
+    "List": [
+      {
+        "Key": "b8ef73c7-2ef0-445e-8461-1e0508958a0e",
+        "Value": {
+          "Name": "Maximum Engine Power Modifier",
+          "Description": "",
+          "ID": "b8ef73c7-2ef0-445e-8461-1e0508958a0e",
+          "MaxLevel": 7,
+          "DataFormula": "[Level] * 1.5",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "[Level] * 1"
+        }
+      },
+      {
+        "Key": "08fa4c4b-0ddb-4b3a-9190-724d715694de",
+        "Value": {
+          "Name": "Minimum Engine Power Modifier",
+          "Description": "",
+          "ID": "08fa4c4b-0ddb-4b3a-9190-724d715694de",
+          "MaxLevel": 7,
+          "DataFormula": "0.5 - [Level] * 0.1",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "[Level] * 1"
+        }
+      },
+      {
+        "Key": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
+        "Value": {
+          "Name": "Fuel Consumption: 1 Litre per Engine Power Hour",
+          "Description": "",
+          "ID": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
+          "MaxLevel": 12,
+          "DataFormula": "1 - [Level] * 0.1",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "[Level] * 1"
+        }
+      },
+      {
+        "Key": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
+        "Value": {
+          "Name": "Conventional Engine Technology",
+          "Description": "",
+          "ID": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
+          "MaxLevel": 1,
+          "DataFormula": "0.2",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "[Level] * 500"
+        }
+      },
+      {
+        "Key": "c827d369-3f16-43ef-b112-7d5bcafb74c7",
+        "Value": {
+          "Name": "Nuclear Thermal Engine Technology",
+          "Description": "",
+          "ID": "c827d369-3f16-43ef-b112-7d5bcafb74c7",
+          "MaxLevel": 1,
+          "DataFormula": "5",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": [
+              {
+                "Key": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
+                "Value": 1
+              }
+            ]
+          },
+          "CostFormula": "[Level] * 2500"
+        }
+      },
+      {
+        "Key": "db6818f3-99e9-46c1-b903-f3af978c38b2",
+        "Value": {
+          "Name": "Nuclear Pulse Engine Technology",
+          "Description": "",
+          "ID": "db6818f3-99e9-46c1-b903-f3af978c38b2",
+          "MaxLevel": 1,
+          "DataFormula": "5",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": [
+              {
+                "Key": "c827d369-3f16-43ef-b112-7d5bcafb74c7",
+                "Value": 1
+              }
+            ]
+          },
+          "CostFormula": "[Level] * 5000"
+        }
+      },
+      {
+        "Key": "f3f10e56-9345-40cc-af42-342e7240355d",
+        "Value": {
+          "Name": "Ion Drive Technology",
+          "Description": "",
+          "ID": "f3f10e56-9345-40cc-af42-342e7240355d",
+          "MaxLevel": 1,
+          "DataFormula": "5",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": [
+              {
+                "Key": "db6818f3-99e9-46c1-b903-f3af978c38b2",
+                "Value": 1
+              }
+            ]
+          },
+          "CostFormula": "[Level] * 10000"
+        }
+      }
+    ]
+  }
+}

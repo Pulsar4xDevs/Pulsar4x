@@ -1,0 +1,27 @@
+﻿<Window x:Class="ModdingTools.JsonDataEditor2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Menu HorizontalAlignment="Stretch">
+            <MenuItem Header="_File">
+                <MenuItem Header="New DataSet"  Click="NewDataSet_Click"/>
+                <Separator/>
+                <MenuItem Name="MI_SaveDataSet" Header="Save Game" Click="SaveDataSet_Click" IsEnabled="False"/>
+                <MenuItem Header="Load DataSet" Click="LoadDataSet_Click"/>
+                <Separator/>
+                <MenuItem Header="Exit" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_View">
+
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_About" Click="About_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Testing">
+                <MenuItem Header="Test_CurrentSD" Click="CurrentSDTest_Click"/>
+                <MenuItem Header="Test_DataSet" Click="DataSetTest_Click"/>
+            </MenuItem>
+        </Menu>
+    </Grid>
+</Window>

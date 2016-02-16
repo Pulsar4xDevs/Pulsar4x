@@ -1,0 +1,34 @@
+﻿<Properties StartupItem="Pulsar4X.CrossPlatformUI.Gtk2/Pulsar4X.CrossPlatformUI.Gtk2.csproj">
+  <DisabledProjects>
+    <String>ModdingTools.JsonDataEditor/ModdingTools.JsonDataEditor.csproj</String>
+    <String>ModdingTools.JsonDataEditor2/ModdingTools.JsonDataEditor2.csproj</String>
+    <String>Pulsar4X.WPFUI/Pulsar4X.WPFUI.csproj</String>
+  </DisabledProjects>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI/MainForm.cs">
+    <Files>
+      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/GtkGLSurface.cs" Line="51" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/GtkGLSurfaceHandler.cs" Line="33" Column="4" />
+      <File FileName="Pulsar4X.CrossPlatformUI.Wpf/WpfGLSurface.xaml.cs" Line="15" Column="21" />
+      <File FileName="Pulsar4X.CrossPlatformUI.Wpf/WinGLSurfaceHandler.cs" Line="1" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView.jeto.cs" Line="142" Column="37" />
+      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/Program.cs" Line="12" Column="105" />
+      <File FileName="Pulsar4X.ECSLib/StaticDataManager.cs" Line="37" Column="48" />
+      <File FileName="Pulsar4X.CrossPlatformUI/CustomControls/GLSurface.cs" Line="125" Column="1" />
+      <File FileName="ViewModelLib/ViewModels/RenderVM.cs" Line="24" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView.jeto" Line="12" Column="35" />
+      <File FileName="Pulsar4X.CrossPlatformUI/MainForm.cs" Line="24" Column="43" />
+    </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>sender.Handler</Value>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>

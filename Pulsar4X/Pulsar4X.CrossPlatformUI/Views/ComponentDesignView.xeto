@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableRow>
+      <ComboBox ID="ComponentSelection"  />
+    </TableRow>
+    <TableRow ScaleHeight="True">
+      <StackLayout ID="AbilitysLayout" />
+    </TableRow>
+    <TableRow>
+      <TextBox ID ="AbilityStats" Text="{Binding AbilityStatsText}"/>
+      <TextBox ID="ComponentStats" Text="{Binding StatsText}"/>
+    </TableRow>
+    <TableRow ScaleHeight="False">
+      <Button ID="Create" Text="Create" />
+      <TextBox ID="Name" />
+    </TableRow>    
+  </TableLayout>
+</Panel>

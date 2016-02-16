@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
+  >
+  <TableLayout>
+    <TableRow>
+      <ComboBox ID="ColonySelection"  />
+    </TableRow>
+    <TableRow>
+      <TableLayout>
+        <TableRow><Label Text="Facilites"/></TableRow>
+        <TableRow><GridView ID="FacDataGrid" /></TableRow>      
+      </TableLayout>
+      <TableLayout>
+        <TableRow><Label Text ="Population"/></TableRow>
+        <TableRow> <GridView ID="PopDataGrid" /></TableRow>
+      </TableLayout>
+     
+      <TableLayout>
+        <TableRow> 
+          <Label Text="Mineral Deposits" /> 
+        </TableRow>
+        <TableRow>
+          <GridView ID="MineralDeposits" />
+        </TableRow>
+      </TableLayout>
+      <TableLayout>
+        <TableRow>
+          <Label Text="Mineral Stockpile" />
+        </TableRow>
+        <TableRow>
+          <GridView ID="MineralStockpile" />
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+    <TableRow>
+      <c:JobAbilityView x:Name="RefinaryAbilityView" />
+      <TableLayout>
+        <TableRow>
+          <Label Text="Refined Materials Stockpile" />
+        </TableRow>
+        <TableRow>
+          <GridView ID="RefinedMats" />
+        </TableRow>
+      </TableLayout>
+      <c:JobAbilityView x:Name="ConstructionAbilityView" />
+      <c:ResearchAbilityView x:Name="ResearchAbilityView" />
+    </TableRow>
+    
+  </TableLayout>
+</Panel>

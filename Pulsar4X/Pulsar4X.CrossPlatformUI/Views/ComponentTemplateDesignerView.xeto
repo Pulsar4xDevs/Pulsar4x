@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableRow>
+      <Label Text="Name" />
+      <TextBox Text="{Binding Name}" />
+      <Label Text="Description" />
+      <TextBox Text="{Binding Description}" />
+      <Label Text="ID" />
+      <TextBox Text="{Binding ID}" />
+    </TableRow>
+    <TableRow>
+      <Label Text="SizeFormula" />
+      <TextBox Text="{Binding SizeFormula}" />
+      <Label Text="HTKFormula" />
+      <TextBox Text="{Binding HTKFormula}" />
+      <Label Text="CrewReqFormula" />
+      <TextBox Text="{Binding CrewReqFormula}" />
+    </TableRow>
+    <TableRow>
+      <Label Text="ResearchCostFormula" />
+      <TextBox Text="{Binding ResearchCostFormula}" />
+      <Label Text="BuildPointCostFormula" />
+      <TextBox Text="{Binding BuildPointCostFormula}" />
+      <Label Text="MineralCostFormula" />
+      <StackLayout ID="MineralCostFormulaStackLayout" />
+    </TableRow>
+    <TableRow>
+      <Label Text="CreditCostFormula" />
+      <TextBox Text="{Binding CreditCostFormula}" />
+      <Label Text="MountType" />
+      <StackLayout ID="MountTypes"/>
+    </TableRow>
+    <TableRow>
+      <StackLayout ID="AbilityTemplates"></StackLayout>
+    </TableRow>
+    
+  </TableLayout>
+	
+</Panel>
