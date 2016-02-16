@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using Newtonsoft.Json.Serialization;
 using Formatting = Newtonsoft.Json.Formatting;
 
 namespace Pulsar4X.ECSLib
@@ -25,7 +26,8 @@ namespace Pulsar4X.ECSLib
         internal static IProgress<double> Progress { get; private set; }
         internal static int ManagersProcessed { get; set; }
         private static readonly object SyncRoot = new object();
-        private static readonly JsonSerializer DefaultSerializer = new JsonSerializer { Context = new StreamingContext(StreamingContextStates.Persistence), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
+        private static readonly JsonSerializer PersistenceSerializer = new JsonSerializer { Context = new StreamingContext(StreamingContextStates.Persistence), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
+        private static readonly JsonSerializer RemoteSerializer = new JsonSerializer {Context = new StreamingContext(StreamingContextStates.Remoting), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None};
 
         #region Game Serialization/Deserialization
 
@@ -56,8 +58,7 @@ namespace Pulsar4X.ECSLib
 
             lock (SyncRoot)
             {
-
-                DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                PersistenceSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
                 Progress = progress;
                 ManagersProcessed = 0;
                 game.NumSystems = game.StarSystems.Count;
@@ -69,7 +70,7 @@ namespace Pulsar4X.ECSLib
                         using (var writer = new JsonTextWriter(streamWriter))
                         {
                             CurrentGame = game;
-                            DefaultSerializer.Serialize(writer, game);
+                            PersistenceSerializer.Serialize(writer, game);
                             CurrentGame = null;
                         }
                     }
@@ -158,7 +159,7 @@ namespace Pulsar4X.ECSLib
             {
                 using (var reader = new JsonTextReader(sr))
                 {
-                    DefaultSerializer.Populate(reader, CurrentGame);
+                    PersistenceSerializer.Populate(reader, CurrentGame);
                 }
             }
         }
@@ -215,8 +216,8 @@ namespace Pulsar4X.ECSLib
                     {
                         lock (SyncRoot)
                         {
-                            DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
-                            DefaultSerializer.Serialize(writer, entity.Clone());
+                            PersistenceSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                            PersistenceSerializer.Serialize(writer, entity.Clone());
                         }
                     }
                 }
@@ -319,7 +320,7 @@ namespace Pulsar4X.ECSLib
                     lock (SyncRoot)
                     {
                         CurrentGame = game;
-                        entity = DefaultSerializer.Deserialize<ProtoEntity>(reader);
+                        entity = PersistenceSerializer.Deserialize<ProtoEntity>(reader);
                         CurrentGame.PostGameLoad();
                         CurrentGame = null;
                     }
@@ -361,8 +362,8 @@ namespace Pulsar4X.ECSLib
                     {
                         lock (SyncRoot)
                         {
-                            DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
-                            DefaultSerializer.Serialize(writer, system);
+                            PersistenceSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                            PersistenceSerializer.Serialize(writer, system);
                         }
                     }
                 }
@@ -704,7 +705,7 @@ namespace Pulsar4X.ECSLib
                     lock (SyncRoot)
                     {
                         CurrentGame = game;
-                        system = DefaultSerializer.Deserialize<StarSystem>(reader);
+                        system = PersistenceSerializer.Deserialize<StarSystem>(reader);
                         CurrentGame.StarSystems.Add(system.Guid, system);
                         CurrentGame.PostGameLoad();
                         CurrentGame = null;
