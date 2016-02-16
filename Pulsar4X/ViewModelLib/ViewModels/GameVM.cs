@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Pulsar4X.ViewModel
 {
@@ -115,10 +114,10 @@ namespace Pulsar4X.ViewModel
         }
 
 
-        public async Task<int> CreateGame(NewGameOptionsVM options)
+        public void CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
-            Game newGame = await Task.Run(() => Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate)));
+            Game newGame = Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate));
             Game = newGame;
 
             Entity gameMaster;
@@ -130,13 +129,12 @@ namespace Pulsar4X.ViewModel
             }
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
-            return 0;
         }
 
-        public async void LoadGame(string pathToFile)
+        public void LoadGame(string pathToFile)
         {
             StatusText = "Loading Game...";
-            Game = await Task.Run(() => ECSLib.SerializationManager.ImportGame(pathToFile, new Progress<double>(OnProgressUpdate)));
+            Game = SerializationManager.ImportGame(pathToFile, new Progress<double>(OnProgressUpdate));
 
             Entity gameMaster;
             Game.GlobalManager.FindEntityByGuid(Game.GameMasterFaction, out gameMaster);
@@ -145,30 +143,22 @@ namespace Pulsar4X.ViewModel
             StatusText = "Game Loaded.";
         }
 
-        public async void SaveGame(string pathToFile)
+        public void SaveGame(string pathToFile)
         {
             StatusText = "Saving Game...";
-            await Task.Run(() => ECSLib.SerializationManager.ExportGame(Game, pathToFile, new Progress<double>(OnProgressUpdate)));
-            //await Task.Run(() => SerializationManager.Save(CurrentGame, pathToFile, true)); // Compressed
+            SerializationManager.ExportGame(Game, pathToFile, new Progress<double>(OnProgressUpdate));
             ProgressValue = 0;
             StatusText = "Game Saved";
         }
 
-        public async void AdvanceTime(TimeSpan pulseLength, CancellationToken _pulseCancellationToken)
+        public void AdvanceTime(TimeSpan pulseLength, CancellationToken _pulseCancellationToken)
         {
             var pulseProgress = new Progress<double>(UpdatePulseProgress);
 
             int secondsPulsed;
-
-            try
-            {
-                secondsPulsed = await Task.Run(() => Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress));
-                Refresh();
-            }
-            catch (Exception exception)
-            {
-                //DisplayException("executing a pulse", exception);
-            }
+            
+            secondsPulsed = Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress);
+            Refresh();
             //e.Handled = true;
             ProgressValue = 0;
         }
@@ -208,22 +198,16 @@ namespace Pulsar4X.ViewModel
             {
                 _game = value;
                 OnPropertyChanged();
-                
-                if (PropertyChanged != null)
-                {
-                    //forces anything listing for a change in the HasGame property to update. 
-                    PropertyChanged(this, new PropertyChangedEventArgs("HasGame")); 
-                }
+
+                //forces anything listing for a change in the HasGame property to update. 
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HasGame"));
             }
         }
 
         /// <summary>
         /// returns true if a game has been created, loaded etc. 
         /// </summary>
-        public bool HasGame
-        {
-            get { return Game != null; }
-        }
+        public bool HasGame => Game != null;
 
 
         public GameVM()
@@ -241,10 +225,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void Refresh(bool partialRefresh = false)

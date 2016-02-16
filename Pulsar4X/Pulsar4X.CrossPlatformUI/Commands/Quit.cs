@@ -1,13 +1,18 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
 using System;
+using System.Threading.Tasks;
+using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.CrossPlatformUI.Commands
 {
     class Quit : Command
     {
-        public Quit()
+        private readonly GameVM _gameVM;
+
+        public Quit(GameVM gameVM)
         {
+            _gameVM = gameVM;
             ID = "quit";
             Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.NewGame.ico");
             MenuText = "&Quit";
@@ -19,7 +24,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
-            Application.Instance.Quit();
+            Application.Instance.MainForm.Close();
         }
     }
 }
