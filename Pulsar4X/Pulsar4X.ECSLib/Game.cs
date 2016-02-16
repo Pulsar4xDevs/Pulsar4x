@@ -65,6 +65,7 @@ namespace Pulsar4X.ECSLib
         /// Global Entity Manager.
         /// </summary>
         [PublicAPI]
+        [Obsolete("Will be made internal to conform with data hiding.")]
         public EntityManager GlobalManager => _globalManager;
 
         [JsonProperty]
