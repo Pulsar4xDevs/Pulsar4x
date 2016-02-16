@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -24,7 +25,7 @@ namespace Pulsar4X.ECSLib
         internal static IProgress<double> Progress { get; private set; }
         internal static int ManagersProcessed { get; set; }
         private static readonly object SyncRoot = new object();
-        private static readonly JsonSerializer DefaultSerializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
+        private static readonly JsonSerializer DefaultSerializer = new JsonSerializer { Context = new StreamingContext(StreamingContextStates.Persistence), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
 
         #region Game Serialization/Deserialization
 

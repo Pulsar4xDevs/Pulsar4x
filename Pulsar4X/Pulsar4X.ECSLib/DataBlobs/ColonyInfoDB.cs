@@ -6,11 +6,6 @@ namespace Pulsar4X.ECSLib
 {
     public class ColonyInfoDB : BaseDataBlob
     {
-        private Entity _factionEntity;
-
-        [JsonProperty]
-        public Entity FactionEntity { get; internal set; }
-
         /// <summary>
         /// Species Entity and amount
         /// </summary>
@@ -112,9 +107,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="popCount">Species and population number</param>
         /// <param name="planet"> the planet entity this colony is on</param>
-        public ColonyInfoDB(Dictionary<Entity, long> popCount, Entity planet, Entity faction)
+        public ColonyInfoDB(Dictionary<Entity, long> popCount, Entity planet)
         {
-            FactionEntity = faction;
             Population = popCount;
             PlanetEntity = planet;
             
@@ -127,16 +121,14 @@ namespace Pulsar4X.ECSLib
             Scientists = new List<Entity>();
         }
 
-        public ColonyInfoDB(Entity species, long populationCount, Entity planet, Entity faction):this(
+        public ColonyInfoDB(Entity species, long populationCount, Entity planet):this(
             new Dictionary<Entity, long> {{species, populationCount}},
-            planet, faction
-            )
+            planet)
         {
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
-            FactionEntity = colonyInfoDB.FactionEntity;
             Population = new Dictionary<Entity, long>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
             MineralStockpile = new Dictionary<Guid, int>(colonyInfoDB.MineralStockpile);

@@ -69,6 +69,11 @@ namespace Pulsar4X.ECSLib
 
         #region Entity Management Functions
 
+        /// <summary>
+        /// Used to add the provided entity to this entity manager.
+        /// Sets up the entity slot and assigns it to the entity while preserving 
+        /// entity object references.
+        /// </summary>
         internal int SetupEntity(Entity entity)
         {
             // Find an entity slot.
@@ -118,7 +123,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                // THis is a "fake" manager, that does not link to other managers.
+                // This is a "fake" manager, that does not link to other managers.
                 _localEntityDictionary.Add(entity.Guid, entity);
             }
 
@@ -141,7 +146,7 @@ namespace Pulsar4X.ECSLib
 
         private bool IsValidID(int entityID)
         {
-            return entityID >= 0 && entityID < _entities.Count;
+            return entityID >= 0 && entityID < _entities.Count && _entities[entityID] != null;
         }
 
         internal void RemoveEntity(Entity entity)
@@ -254,7 +259,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         [NotNull]
-        [PublicAPI]
         public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
@@ -275,7 +279,6 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException">Thrown when dataBlobMask is null.</exception>
         /// <exception cref="ArgumentException">Thrown when passed a malformed (incorrect length) dataBlobMask.</exception>
         [NotNull]
-        [PublicAPI]
         public List<Entity> GetAllEntitiesWithDataBlobs([NotNull] ComparableBitArray dataBlobMask)
         {
             if (dataBlobMask == null)
@@ -290,7 +293,49 @@ namespace Pulsar4X.ECSLib
 
             var entities = new List<Entity>();
 
-            entities.AddRange(_localEntityDictionary.Values.Where(entity => (entity.DataBlobMask & dataBlobMask) == dataBlobMask));
+            for (int entityID = 0; entityID < EntityMasks.Count; entityID++)
+            {
+                ComparableBitArray entityMask = EntityMasks[entityID];
+                if (entityMask == null)
+                {
+                    continue;
+                }
+                if ((entityMask & dataBlobMask) == dataBlobMask)
+                {
+                    entities.Add(_entities[entityID]);
+                }
+            }
+
+            return entities;
+        }
+
+        public List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask) // TODO: Find a better name for this method?
+        {
+            if (dataBlobMask == null)
+            {
+                throw new ArgumentNullException(nameof(dataBlobMask));
+            }
+
+            if (dataBlobMask.Length != DataBlobTypes.Count)
+            {
+                throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
+            }
+
+            var entities = new List<Entity>();
+
+            for (int entityID = 0; entityID < EntityMasks.Count; entityID++)
+            {
+                ComparableBitArray entityMask = EntityMasks[entityID];
+                if (entityMask == null)
+                {
+                    continue;
+                }
+
+                if ((entityMask & dataBlobMask) == BlankDataBlobMask())
+                {
+                    entities.Add(_entities[entityID]);
+                }
+            }
 
             return entities;
         }
@@ -319,7 +364,7 @@ namespace Pulsar4X.ECSLib
         {
             foreach (Entity entity in _entities)
             {
-                if (IsValidEntity(entity) && entity.DataBlobMask.SetBits.Contains(typeIndex))
+                if (entity != null && entity.DataBlobMask.SetBits.Contains(typeIndex))
                 {
                     return entity;
                 }
@@ -392,7 +437,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the entity with the associated Guid. this version doesn't use out. 
+        /// Gets the entity with the associated Guid. Checks only this EntityManager.
         /// </summary>
         /// <returns>The Entity if found</returns>
         /// <exception cref="GuidNotFoundException">Guid was not found in Global list, orlocally</exception>
@@ -400,28 +445,15 @@ namespace Pulsar4X.ECSLib
         public Entity GetEntityByGuid(Guid entityGuid)
         {
             Entity entity;
-            if (_game != null)
+            if (!TryGetEntityByGuid(entityGuid, out entity))
             {
-                if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
-                {
-                    return entity;
-                }
-                if (_game.GlobalGuidDictionary.ContainsKey(entityGuid))
-                {
-                    return _game.GlobalGuidDictionary[entityGuid].GetEntityByGuid(entityGuid);
-                }
                 throw new GuidNotFoundException(entityGuid);
             }
-            // This is a "fake" manager that does not link to other managers.
-            if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
-            {
-                return entity;
-            }
-            throw new GuidNotFoundException(entityGuid);
+            return entity;
         }
 
         /// <summary>
-        /// Gets the associated entityID of the specified Guid. (this manager only, not global)
+        /// Gets the associated entity of the specified Guid. Checks only this EntityManager.
         /// <para></para>
         /// Does not throw exceptions.
         /// </summary>
@@ -455,8 +487,6 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-
-
         /// <summary>
         /// Returns the true if the specified type is a valid DataBlobType.
         /// <para></para>
@@ -466,7 +496,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static bool TryGetTypeIndex(Type dataBlobType, out int typeIndex)
         {
-            return DataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
+            return InternalDataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
         }
 
         /// <summary>

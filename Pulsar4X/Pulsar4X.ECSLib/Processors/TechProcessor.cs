@@ -38,8 +38,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionTechs"></param>
         internal static void DoResearch(Entity colonyEntity)
         {
-            FactionAbilitiesDB factionAbilities = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionAbilitiesDB>();
-            FactionTechDB factionTechs = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionTechDB>();
+            var Faction = colonyEntity.GetDataBlob<OwnedDB>().Faction;
+            FactionAbilitiesDB factionAbilities = Faction.GetDataBlob<FactionAbilitiesDB>();
+            FactionTechDB factionTechs = Faction.GetDataBlob<FactionTechDB>();
             Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
             foreach (var lab in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.Where(inst => inst.HasDataBlob<ResearchPointsAbilityDB>()))
             {               
@@ -107,10 +108,6 @@ namespace Pulsar4X.ECSLib
             //TechSD project = _game.StaticData.Techs[techID];
             scientistDB.ProjectQueue.Add(techID);
         }
-
-
-
-
 
         /// <summary>
         /// maybe techsd should link up as well as down. it would make this more efficent, but harder on the modder. 

@@ -123,7 +123,7 @@ namespace Pulsar4X.ViewModel
 
         public ColonyResearchVM(StaticDataStore staticData, Entity colonyEntity)
         {
-            _factionEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity;
+            _factionEntity = colonyEntity.GetDataBlob<OwnedDB>().Faction;
             _colonyEntity = colonyEntity;
             _factionTech = _factionEntity.GetDataBlob<FactionTechDB>();
             Scientists = new List<ScientistControlVM>();

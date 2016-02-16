@@ -12,7 +12,7 @@ namespace Pulsar4X.ViewModel
     {
         private Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
-        private Entity FactionEntity { get { return ColonyInfo.FactionEntity; } }
+        private Entity FactionEntity { get { return _colonyEntity.GetDataBlob<OwnedDB>().Faction; } }
         private Dictionary<Guid, MineralSD> _mineralDictionary;
 
         private ObservableCollection<FacilityVM> _facilities;
