@@ -69,6 +69,11 @@ namespace Pulsar4X.ECSLib
 
         #region Entity Management Functions
 
+        /// <summary>
+        /// Used to add the provided entity to this entity manager.
+        /// Sets up the entity slot and assigns it to the entity while preserving 
+        /// entity object references.
+        /// </summary>
         internal int SetupEntity(Entity entity)
         {
             // Find an entity slot.
@@ -118,7 +123,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                // THis is a "fake" manager, that does not link to other managers.
+                // This is a "fake" manager, that does not link to other managers.
                 _localEntityDictionary.Add(entity.Guid, entity);
             }
 
@@ -254,7 +259,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         [NotNull]
-        [PublicAPI]
         public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
@@ -275,7 +279,6 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException">Thrown when dataBlobMask is null.</exception>
         /// <exception cref="ArgumentException">Thrown when passed a malformed (incorrect length) dataBlobMask.</exception>
         [NotNull]
-        [PublicAPI]
         public List<Entity> GetAllEntitiesWithDataBlobs([NotNull] ComparableBitArray dataBlobMask)
         {
             if (dataBlobMask == null)
@@ -306,7 +309,7 @@ namespace Pulsar4X.ECSLib
             return entities;
         }
 
-        public List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask)
+        public List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask) // TODO: Find a better name for this method?
         {
             if (dataBlobMask == null)
             {

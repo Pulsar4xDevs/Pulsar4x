@@ -102,6 +102,24 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    public static class ListExtension
+    {
+        [PublicAPI]
+        public static List<Entity> GetEntititiesWithDataBlob<TDataBlob>(this List<Entity> list) where TDataBlob : BaseDataBlob
+        {
+            var retVal = new List<Entity>();
+            foreach (Entity entity in list)
+            {
+                if (entity.HasDataBlob<TDataBlob>())
+                {
+                    retVal.Add(entity);
+                }
+            }
+
+            return retVal;
+        }
+    }
+
     /// <summary>
     /// This class can be used by a Json.net serializer to get around the problem of it ignoreing ISerializable in favor of IEnumarble.
     /// </summary>

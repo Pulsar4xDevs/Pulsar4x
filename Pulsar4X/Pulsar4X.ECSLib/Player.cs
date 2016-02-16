@@ -13,15 +13,15 @@ namespace Pulsar4X.ECSLib
     public enum AccessRole : uint
     {
         None            = 0,            // Player can't do anything with this faction.
-        ColonyVision    = 1,            // UNUSED - EXAMPLE ONLY Player can see locations of colonies.
-        UnitVision      = 2,            // UNUSED - EXAMPLE ONLY Player can see locations of units.
-        SensorVision    = 4,            // UNUSED - EXAMPLE ONLY Player can see sensor data.
-        IssueOrders     = 8,            // UNUSED - EXAMPLE ONLY Player can issue orders to units.
-        ManageIndustry  = 16,           // UNUSED - EXAMPLE ONLY Player can manage colony industry.
-        ManageShipyards = 32,           // UNUSED - EXAMPLE ONLY Player can manage shipyards.
-        ManageResearch  = 64,           // UNUSED - EXAMPLE ONLY Player can manage research projects.
-        ManageTeams     = 128,          // UNUSED - EXAMPLE ONLY Player can manage teams.
-        Unused1         = 256,
+        SystemKnowledge = 1,            // Player can see systems this faction knows about.
+        ColonyVision    = 2,            // UNUSED - EXAMPLE ONLY Player can see locations of colonies.
+        UnitVision      = 4,            // Player can see units.
+        SensorVision    = 8,            // UNUSED - EXAMPLE ONLY Player can see sensor data.
+        IssueOrders     = 16,           // UNUSED - EXAMPLE ONLY Player can issue orders to units.
+        ManageIndustry  = 32,           // UNUSED - EXAMPLE ONLY Player can manage colony industry.
+        ManageShipyards = 64,           // UNUSED - EXAMPLE ONLY Player can manage shipyards.
+        ManageResearch  = 128,          // UNUSED - EXAMPLE ONLY Player can manage research projects.
+        ManageTeams     = 256,          // UNUSED - EXAMPLE ONLY Player can manage teams.
         Unused2         = 512,
         Unused3         = 1024,
         Unused4         = 2048,

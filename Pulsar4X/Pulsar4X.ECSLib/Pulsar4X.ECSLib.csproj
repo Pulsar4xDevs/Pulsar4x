@@ -151,6 +151,7 @@
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
     <Compile Include="DataBlobs\JPSurveyableDB.cs" />
+    <Compile Include="DataBlobs\OwnedDB.cs" />
     <Compile Include="DataBlobs\TransitableDB.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
     <Compile Include="Helpers\GameMath.cs" />

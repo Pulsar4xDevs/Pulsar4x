@@ -373,8 +373,8 @@ namespace Pulsar4X.ECSLib
         }
         
         #endregion
-        
-        private Player GetPlayerForToken(AuthenticationToken authToken)
+
+        public Player GetPlayerForToken(AuthenticationToken authToken)
         {
             if (SpaceMaster.IsTokenValid(authToken))
             {
