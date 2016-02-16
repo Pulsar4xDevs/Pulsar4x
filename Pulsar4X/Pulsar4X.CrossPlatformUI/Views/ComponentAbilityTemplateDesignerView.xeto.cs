@@ -23,8 +23,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             DataContext = viewModel;
             GuiHint.DataContext = viewModel.SelectedGuiHint;
-            GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
-            GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+            GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
+            GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
 
             GuiHint.SelectedIndexChanged += GuiHint_SelectedIndexChanged;
         }

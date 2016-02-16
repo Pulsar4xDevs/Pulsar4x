@@ -19,15 +19,15 @@ namespace Pulsar4X.ViewModel
             get { return _description; }
             set { _description = value; OnPropertyChanged(); }
         }
-        private DictionaryVM<GuiHint, string> _selectedGuiHint = new DictionaryVM<GuiHint, string>();
-        public DictionaryVM<GuiHint, string> SelectedGuiHint
+        private DictionaryVM<GuiHint, string, string> _selectedGuiHint = new DictionaryVM<GuiHint, string, string>();
+        public DictionaryVM<GuiHint, string, string> SelectedGuiHint
         {
             get { return _selectedGuiHint; }
             set { _selectedGuiHint = value; OnPropertyChanged(); }
         } 
 
-        private DictionaryVM<Type, string> _abilityDataBlobTypeSelection = new DictionaryVM<Type, string>();
-        public DictionaryVM<Type,string> AbilityDataBlobTypeSelection
+        private DictionaryVM<Type, string, string> _abilityDataBlobTypeSelection = new DictionaryVM<Type, string, string>();
+        public DictionaryVM<Type,string, string> AbilityDataBlobTypeSelection
         {
             get { return _abilityDataBlobTypeSelection; }
             set { _abilityDataBlobTypeSelection = value; OnPropertyChanged(); }
@@ -104,9 +104,9 @@ namespace Pulsar4X.ViewModel
             return typelist;
         }
 
-        private static DictionaryVM<Type, string> GetTypeDict(List<Type> abilityTypes)
+        private static DictionaryVM<Type, string, string> GetTypeDict(List<Type> abilityTypes)
         {
-            DictionaryVM<Type, string> dict = new DictionaryVM<Type, string>(DisplayMode.Key);
+            DictionaryVM<Type, string, string> dict = new DictionaryVM<Type, string, string>(DisplayMode.Value);
             foreach (var type in abilityTypes)
             {
                 dict.Add(type, type.Name);

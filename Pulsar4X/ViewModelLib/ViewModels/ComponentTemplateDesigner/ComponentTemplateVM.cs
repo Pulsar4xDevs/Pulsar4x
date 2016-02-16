@@ -14,7 +14,7 @@ namespace Pulsar4X.ViewModel
     {
         private StaticDataStore _staticData;
 
-        public DictionaryVM<ComponentSD, string> Components { get; set; }
+        public DictionaryVM<ComponentSD, string, string> Components { get; set; }
         
 
         public string Name { get; set; }
@@ -78,12 +78,18 @@ namespace Pulsar4X.ViewModel
         }
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
 
-        private DictionaryVM<ComponentMountType, bool?> _mountType = new DictionaryVM<ComponentMountType, bool?>(DisplayMode.Value);
-        public DictionaryVM<ComponentMountType, bool?> MountType
-        {
-            get { return _mountType; }
-            set { _mountType = value; OnPropertyChanged(); }
-        }
+        public ObservableDictionary<ComponentMountType, bool?> MountType { get; set; }
+
+        //private DictionaryVM<ComponentMountType, bool?, bool?> _mountType = new DictionaryVM<ComponentMountType, bool?, bool?>();
+        //public DictionaryVM<ComponentMountType, bool?, bool?> MountType { get; set; }
+
+        //private ObservableCollection<ItemPair<ComponentMountType, bool?>> _mountType;
+        //public ObservableCollection<ItemPair<ComponentMountType, bool?>> MountType
+        //{
+        //    get { return _mountType; }
+        //    set { _mountType = value; OnPropertyChanged(); }
+        //}
+        //public ObservableCollection<ItemPair<ComponentMountType, bool?>> MountType { get; set; }
 
         private ObservableCollection<ComponentAbilityTemplateVM> _componentAbilitySDs = new ObservableCollection<ComponentAbilityTemplateVM>();
         public ObservableCollection<ComponentAbilityTemplateVM> ComponentAbilitySDs
@@ -97,7 +103,7 @@ namespace Pulsar4X.ViewModel
         public ComponentTemplateVM(GameVM gameData)
         {
             _staticData = gameData.Game.StaticData;
-            Components = new DictionaryVM<ComponentSD, string>();
+            Components = new DictionaryVM<ComponentSD, string, string>();
             foreach (var item in _staticData.Components.Values)
             {
                 Components.Add(item, item.Name);
@@ -139,11 +145,17 @@ namespace Pulsar4X.ViewModel
             ResearchCostFormula = "";
             CreditCostFormula = "";
             BuildPointCostFormula = "";
-            MountType.Clear(); 
+            MountType = new ObservableDictionary<ComponentMountType, bool?>();
+            //MountType = new DictionaryVM<ComponentMountType, bool?, bool?>();
             foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
             {
                 MountType.Add((ComponentMountType)item, false);
             }
+            //MountType = new ObservableCollection<ItemPair<ComponentMountType, bool?>>();
+            //foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
+            //{
+            //    MountType.Add(new ItemPair<ComponentMountType, bool?>((ComponentMountType)item, false));
+            //}
             ComponentAbilitySDs.Clear();
             ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM());
         }
@@ -170,9 +182,19 @@ namespace Pulsar4X.ViewModel
 
             foreach (var item in designSD.MountType)
             {
+
                 MountType[item.Key] = item.Value;
-                OnPropertyChanged("MountType");
             }
+            //for (int i = 0; i < MountType.Count; i++)
+            //{
+            //    MountType[i].Item2 = designSD.MountType.ElementAt(i).Value;//not sure this will work, didn't think dictionarys were ordered?
+            //}
+            //MountType.Clear();
+            //foreach (var item in designSD.MountType)
+            //{
+            //    ItemPair<ComponentMountType, bool?> ipr = new ItemPair<ComponentMountType, bool?>(item.Key, item.Value);
+            //    MountType.Add(ipr);
+            //}
 
             ComponentAbilitySDs.Clear();
             foreach (var item in designSD.ComponentAbilitySDs)

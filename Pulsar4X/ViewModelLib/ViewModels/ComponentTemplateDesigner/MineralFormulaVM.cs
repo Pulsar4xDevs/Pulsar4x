@@ -13,12 +13,12 @@ namespace Pulsar4X.ViewModel
     {
         private StaticDataStore _dataStore;
         public string Forumula { get; set; }
-        public DictionaryVM<Guid, string> Minerals { get; set; }
+        public DictionaryVM<Guid, string, string> Minerals { get; set; }
 
         public MineralFormulaVM(StaticDataStore staticDataStore)
         {
             _dataStore = staticDataStore;
-            Minerals = new DictionaryVM<Guid, string>(DisplayMode.Value);
+            Minerals = new DictionaryVM<Guid, string, string>(DisplayMode.Value);
             foreach (var item in staticDataStore.Minerals)
             {
                 Minerals.Add(item.ID, item.Name);
