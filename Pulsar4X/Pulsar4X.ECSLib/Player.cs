@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
@@ -55,8 +56,10 @@ namespace Pulsar4X.ECSLib
         public string Password { get; set; }
     }
 
-    public abstract class Player
+    [JsonObject(MemberSerialization.OptIn)]
+    public class Player : ISerializable
     {
+        #region Properties
         [PublicAPI]
         [JsonProperty]
         public Guid ID { get; protected set; }
@@ -65,82 +68,42 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public string Name { get; protected set; }
 
-        public abstract bool ChangeName(AuthenticationToken authToken, string newName);
-        public abstract bool ChangePassword(AuthenticationToken authToken, string newPassword);
-        public abstract ReadOnlyDictionary<Entity, AccessRole> GetAccessRoles(AuthenticationToken authToken); 
-
-        #region Equality Members
-
-        protected bool Equals(Player other)
-        {
-            return ID.Equals(other.ID);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-            return obj.GetType() == GetType() && Equals((Player)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return ID.GetHashCode();
-        }
-
-        public static bool operator ==(Player playerA, Player playerB)
-        {
-            return Equals(playerA, playerB);
-        }
-
-        public static bool operator !=(Player playerA, Player playerB)
-        {
-            return !Equals(playerA, playerB);
-        }
-
-        #endregion
-
-        public override string ToString()
-        {
-            return ID.ToString();
-        }
-    }
-
-    [JsonObject(MemberSerialization.OptIn)]
-    internal class InternalPlayer : Player
-    {
-        #region Properties
         [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; }
+        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
         [JsonProperty]
         private string PasswordHash { get; set; }
 
         [JsonProperty]
         private string Salt { get; set; }
-
+        
         #endregion
 
         #region Constructors
 
-        [JsonConstructor]
-        [UsedImplicitly]
-        private InternalPlayer()
+        public Player(SerializationInfo info, StreamingContext context)
+        {
+            ID = (Guid)info.GetValue(nameof(ID), typeof(Guid));
+            Name = info.GetString(nameof(Name));
+
+            if (context.State != StreamingContextStates.Persistence)
+            {
+                return;
+            }
+
+            PasswordHash = info.GetString(nameof(PasswordHash));
+            Salt = info.GetString(nameof(Salt));
+            FactionAccessRoles = (Dictionary<Entity, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<Entity, uint>));
+        }
+
+        internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
         { }
 
-        internal InternalPlayer(string name, string password = "") : this(name, password, Guid.NewGuid())
+        internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<Entity, uint>())
         { }
 
-        internal InternalPlayer(string name, string password, Guid id) : this(name, password, id, new Dictionary<Entity, uint>())
-        { }
-
-        internal InternalPlayer(string name, string password, Guid id, Dictionary<Entity, uint> factionAccessRoles)
+        internal Player(string name, string password, Guid id, Dictionary<Entity, uint> factionAccessRoles)
         {
             ID = id;
             Name = string.IsNullOrEmpty(name) ? "Unnamed Player" : name;
@@ -184,11 +147,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Changes the name of this player.
         /// </summary>
-        /// <param name="authToken">Current AuthenticationToken for this player.</param>
-        /// <param name="newName">New name for the player</param>
         /// <returns>True if operation is successful.</returns>
         [PublicAPI]
-        public override bool ChangeName([NotNull] AuthenticationToken authToken, [NotNull] string newName)
+        public bool ChangeName([NotNull] AuthenticationToken authToken, [NotNull] string newName)
         {
             if (string.IsNullOrEmpty(newName))
             {
@@ -207,11 +168,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Changes the password of this player.
         /// </summary>
-        /// <param name="authToken">Current AuthenticationToken for this player.</param>
-        /// <param name="newPassword">New password for the player.</param>
         /// <returns>True if operation is successful.</returns>
         [PublicAPI]
-        public override bool ChangePassword([NotNull] AuthenticationToken authToken, [NotNull] string newPassword)
+        public bool ChangePassword([NotNull] AuthenticationToken authToken, [NotNull] string newPassword)
         {
             if (!IsTokenValid(authToken))
             {
@@ -226,20 +185,90 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Gets all the access roles of this player.
         /// </summary>
-        /// <param name="authToken">Current AuthenticationToken for this player.</param>
         /// <returns>ReadOnlyDictionary containing the access roles.</returns>
         [PublicAPI]
-        public override ReadOnlyDictionary<Entity, AccessRole> GetAccessRoles(AuthenticationToken authToken)
+        public ReadOnlyDictionary<Entity, AccessRole> GetAccessRoles(AuthenticationToken authToken)
         {
-            return !IsTokenValid(authToken) ? new ReadOnlyDictionary<Entity, AccessRole>(new Dictionary<Entity, AccessRole>()) : new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
+            return !IsTokenValid(authToken) ? new ReadOnlyDictionary<Entity, AccessRole>(new Dictionary<Entity, AccessRole>()) : AccessRoles;
+        }
+
+        /// <summary>
+        /// Retrieves the AccessRole this player has over the specified faction.
+        /// </summary>
+        [PublicAPI]
+        public AccessRole GetAccess(AuthenticationToken authToken, Entity faction)
+        {
+            var role = AccessRole.None;
+            if (IsTokenValid(authToken))
+            {
+                role = GetAccess(faction);
+            }
+            return role;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(ID), ID);
+            info.AddValue(nameof(Name), Name);
+
+            if (context.State != StreamingContextStates.Persistence)
+            {
+                return;
+            }
+
+            info.AddValue(nameof(PasswordHash), PasswordHash);
+            info.AddValue(nameof(Salt), Salt);
+            info.AddValue(nameof(FactionAccessRoles), FactionAccessRoles);
         }
 
         #endregion
 
         #region Private Functions
 
+        #region Equality Members
+
+        protected bool Equals(Player other)
+        {
+            return ID.Equals(other.ID);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            return obj.GetType() == GetType() && Equals((Player)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return ID.GetHashCode();
+        }
+
+        public static bool operator ==(Player playerA, Player playerB)
+        {
+            return Equals(playerA, playerB);
+        }
+
+        public static bool operator !=(Player playerA, Player playerB)
+        {
+            return !Equals(playerA, playerB);
+        }
+
+        #endregion
+
+        public override string ToString()
+        {
+            return $"{Name} {ID}";
+        }
+
         #region Crypto Functions
-        
+
         private bool ConfirmPassword(string password)
         {
             byte[] passwordHash = Hash(password, Salt);
