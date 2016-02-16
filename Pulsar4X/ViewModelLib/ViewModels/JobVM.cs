@@ -22,7 +22,7 @@ namespace Pulsar4X.ViewModel
                 if (_job is RefineingJob)
                     return _staticData.RefinedMaterials[_job.ItemGuid].Name;
                 else if (_job is ConstructionJob)
-                    return _colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<NameDB>().DefaultName;
+                    return _colonyEntity.GetDataBlob<OwnedDB>().Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<NameDB>().DefaultName;
                 else
                     return "Unknown Jobtype";
 
@@ -53,7 +53,7 @@ namespace Pulsar4X.ViewModel
             if (_job is RefineingJob)
                 _jobTotalPoints = _staticData.RefinedMaterials[_job.ItemGuid].RefinaryPointCost;
             else if (_job is ConstructionJob)
-                _jobTotalPoints = _colonyEntity.GetDataBlob<ColonyInfoDB>().FactionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<ComponentInfoDB>().BuildPointCost;
+                _jobTotalPoints = _colonyEntity.GetDataBlob<OwnedDB>().Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<ComponentInfoDB>().BuildPointCost;
 
             JobPriorityCommand = new JobPriorityCommand<TDataBlob, TJob>(this);
         }

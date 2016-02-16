@@ -523,7 +523,7 @@ namespace Pulsar4X
             public static int[] ThermalDeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
 
             /// <summary>
-            /// What sensor strength will a single DSTS add? This is about equal to a full sized thermal sensor array at each tech level.
+            /// What sensor strength will a single DSTS add? This is about equal to a full sized em sensor array at each tech level.
             /// </summary>
             public static int[]EMDeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
 
@@ -567,6 +567,9 @@ namespace Pulsar4X
             /// About 3 points per 5 days. experimentation shows it varies between 3 and 4.
             /// </summary>
             public const int AtmosphericDustDecayPerYear = 216;
+
+            public static float[] TerraformRate = { 0.001f, 0.0012f, 0.0015f, 0.002f, 0.0025f, 0.003f, 0.0035f, 0.004f, 0.0045f, 0.005f, 0.006f, 0.007f, 0.008f };
+            public const int TerraformRateMax = 13;
         }
 
         public static class ShipyardInfo
@@ -1050,6 +1053,8 @@ namespace Pulsar4X
             /// Jumppoints will not appear on secondary stars if true.
             /// </summary>
             public static bool PrimaryOnlyJumpPoints = false;
+
+            public static bool TNTerraformingRules = false;
         }
     }
 }

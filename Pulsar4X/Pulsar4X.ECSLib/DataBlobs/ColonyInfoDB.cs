@@ -6,11 +6,6 @@ namespace Pulsar4X.ECSLib
 {
     public class ColonyInfoDB : BaseDataBlob
     {
-        private Entity _factionEntity;
-
-        [JsonProperty]
-        public Entity FactionEntity { get; internal set; }
-
         /// <summary>
         /// Species Entity and amount
         /// </summary>
@@ -20,7 +15,7 @@ namespace Pulsar4X.ECSLib
             internal set { _population = value; }
         }
         [JsonProperty]
-        private Dictionary<Entity, long> _population;
+        private Dictionary<Entity, long> _population = new Dictionary<Entity, long>();
 
         /// <summary>
         /// Raw Mined minerals. Mines push here, Refinary pulls from here, Construction pulls from here.
@@ -31,7 +26,7 @@ namespace Pulsar4X.ECSLib
             internal set { _mineralStockpile = value; }
         }
         [JsonProperty]
-        private Dictionary<Guid, int> _mineralStockpile;
+        private Dictionary<Guid, int> _mineralStockpile = new Dictionary<Guid, int>();
 
         /// <summary>
         ///refined Fuel, or refined minerals if the modder so desires.
@@ -43,7 +38,7 @@ namespace Pulsar4X.ECSLib
             internal set { _refinedStockpile = value; }
         }
         [JsonProperty]
-        private Dictionary<Guid, int> _refinedStockpile;
+        private Dictionary<Guid, int> _refinedStockpile = new Dictionary<Guid, int>();
 
         /// <summary>
         /// constructed parts stockpile.
@@ -55,7 +50,7 @@ namespace Pulsar4X.ECSLib
             internal set { _componentStockpile = value; }
         }
         [JsonProperty]
-        private Dictionary<Guid, int> _componentStockpile;
+        private Dictionary<Guid, int> _componentStockpile = new Dictionary<Guid, int>();
 
         /// <summary>
         /// Construction pushes here.
@@ -66,7 +61,7 @@ namespace Pulsar4X.ECSLib
             internal set { _ordinanceStockpile = value; }
         }
         [JsonProperty]
-        private Dictionary<Guid, float> _ordinanceStockpile;
+        private Dictionary<Guid, float> _ordinanceStockpile = new Dictionary<Guid, float>();
         /// <summary>
         /// Construction *adds* to this list. damaged and partialy constructed fighters will go here too, but shouldnt launch.
         /// </summary>
@@ -76,11 +71,16 @@ namespace Pulsar4X.ECSLib
             internal set { _fighterStockpile = value; }
         }
         [JsonProperty]
-        private List<Entity> _fighterStockpile;
+        private List<Entity> _fighterStockpile = new List<Entity>();
 
 
-        public Dictionary<Entity, int> Installations { get;internal set; }
-
+        public Dictionary<Entity, int> Installations
+        {
+            get { return _installations; }
+            internal set { _installations = value; }
+        }
+        [JsonProperty]
+        private Dictionary<Entity, int> _installations = new Dictionary<Entity, int>();
 
         public Entity PlanetEntity
         {
@@ -88,7 +88,7 @@ namespace Pulsar4X.ECSLib
             internal set { _planetEntity = value; }
         }
         [JsonProperty]
-        private Entity _planetEntity;
+        private Entity _planetEntity = Entity.InvalidEntity;
 
         public List<Entity> Scientists
         {
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
             internal set { _scientists = value; }
         }
         [JsonProperty]
-        private List<Entity> _scientists;
+        private List<Entity> _scientists = new List<Entity>();
 
         public ColonyInfoDB()
         {
@@ -107,9 +107,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="popCount">Species and population number</param>
         /// <param name="planet"> the planet entity this colony is on</param>
-        public ColonyInfoDB(Dictionary<Entity, long> popCount, Entity planet, Entity faction)
+        public ColonyInfoDB(Dictionary<Entity, long> popCount, Entity planet)
         {
-            FactionEntity = faction;
             Population = popCount;
             PlanetEntity = planet;
             
@@ -122,16 +121,14 @@ namespace Pulsar4X.ECSLib
             Scientists = new List<Entity>();
         }
 
-        public ColonyInfoDB(Entity species, long populationCount, Entity planet, Entity faction):this(
+        public ColonyInfoDB(Entity species, long populationCount, Entity planet):this(
             new Dictionary<Entity, long> {{species, populationCount}},
-            planet, faction
-            )
+            planet)
         {
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
-            FactionEntity = colonyInfoDB.FactionEntity;
             Population = new Dictionary<Entity, long>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
             MineralStockpile = new Dictionary<Guid, int>(colonyInfoDB.MineralStockpile);

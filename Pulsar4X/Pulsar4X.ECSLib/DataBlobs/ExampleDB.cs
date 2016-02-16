@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    //All datablobs must be public.
+    // All datablobs must be public.
     public class BasicExampleDB
         : BaseDataBlob
     // All datablobs MUST derive from BaseDataBlob

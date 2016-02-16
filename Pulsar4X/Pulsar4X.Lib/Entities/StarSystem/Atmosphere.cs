@@ -117,6 +117,15 @@ namespace Pulsar4X.Entities
         /// </summary>
         public SystemBody ParentBody { get { return _parentBody; } }
 
+        /// <summary>
+        /// Is a gas responsible for setting hab rating to a minimum 2.0 present?
+        /// </summary>
+        public bool HazardOne { get; set; }
+        /// <summary>
+        /// Is a gas responsible for setting hab rating to a minimum 3.0 present?
+        /// </summary>
+        public bool HazardTwo { get; set; }
+
 
         /// <summary>
         /// Atmosphere Constructor
@@ -125,6 +134,8 @@ namespace Pulsar4X.Entities
             : base()
         {
             _parentBody = parentBody;
+            HazardOne = false;
+            HazardTwo = false;
         }
 
         public override string ToString()
@@ -212,19 +223,135 @@ namespace Pulsar4X.Entities
         /// <param name="ammount">The ammount of gass to add in atm. Provide a negative number to remove gas.</param>
         public void AddGas(AtmosphericGas gas, float ammount)
         {
-            if (CanModify == false)
+            if (CanModify == false && Constants.GameSettings.TNTerraformingRules == false)
                 return; // we dont care!!
 
             if (_composition.ContainsKey(gas))
             {
                 _composition[gas] += ammount;
 
+                if (ammount > 0)
+                {
+                    if(Constants.GameSettings.TNTerraformingRules == true)
+                    {
+                        if (gas.HazardOne == true && HazardTwo == false) //This planet has no hazard two gases that will override a hazard one setting.
+                        {
+                             HazardOne = true;
+                        }
+
+                        if (gas.HazardTwo == true) //Override the hazard one setting if set, or set hazard two directly.
+                        {
+                            HazardOne = false;
+                            HazardTwo = true;
+                        }
+                    }
+                    else
+                    {
+                        if(gas.IsToxic == true)
+                        {
+                            HazardOne = true;
+                        }
+                    }
+                }
+
                 if (_composition[gas] <= 0)
+                {
+                    if (Constants.GameSettings.TNTerraformingRules == true)
+                    {
+                        if (gas.HazardOne == true && HazardTwo == false)
+                        {
+                            bool hazard = false;
+                            foreach (KeyValuePair<AtmosphericGas, float> atmGas in _composition)
+                            {
+                                /// <summary>
+                                /// This planet just got rid of a hazard one gas, so look for another hazard one gas. if one is found the planet is still hazard one.
+                                /// This planet is already not hazard two, so don't worry about that.
+                                /// </summary>
+                                if (atmGas.Key.HazardOne == true)
+                                {
+                                    hazard = true;
+                                    break;
+                                }
+                            }
+                            HazardOne = hazard;
+                        }
+
+                        if (gas.HazardTwo == true)
+                        {
+                            bool hazardOne = false;
+                            bool hazardTwo = false;
+                            foreach (KeyValuePair<AtmosphericGas, float> atmGas in _composition)
+                            {
+                                /// <summary>
+                                /// This planet just got rid of a hazard two gas, so look for another hazard two gas. also keep an eye out for hazard one gases.
+                                /// </summary>
+                                if (atmGas.Key.HazardTwo == true)
+                                {
+                                    hazardTwo = true;
+                                    break;
+                                }
+                                else if (atmGas.Key.HazardOne == true)
+                                {
+                                    hazardOne = true;
+                                }
+                            }
+                            HazardTwo = hazardTwo;
+                            if (HazardTwo == false)
+                                HazardOne = hazardOne;
+                        }
+                    }
+                    else
+                    {
+                        if (gas.IsToxic == true)
+                        {
+                            bool hazard = false;
+                            foreach (KeyValuePair<AtmosphericGas, float> atmGas in _composition)
+                            {
+                                /// <summary>
+                                /// This planet just got rid of a hazard one gas, so look for another hazard one gas. if one is found the planet is still hazard one.
+                                /// This planet is already not hazard two, so don't worry about that.
+                                /// </summary>
+                                if (atmGas.Key.IsToxic == true)
+                                {
+                                    hazard = true;
+                                    break;
+                                }
+                            }
+                            ///<summary>
+                            ///Atmosphere uses HazardOne to indicate IsToxic for non-TN rules.
+                            ///</summary>
+                            HazardOne = hazard;
+                        }
+                    }
                     _composition.Remove(gas);  // if there is none left, remove it.
+                }
+
             }
             else if (ammount > 0)               // only add new gas if it is actuall adding (i.e. ammount is positive).
             {
                 _composition.Add(gas, ammount);
+
+                if (Constants.GameSettings.TNTerraformingRules == true)
+                {
+                    if (gas.HazardOne == true && HazardTwo == false)
+                    {
+                        HazardOne = true;
+                    }
+
+                    if (gas.HazardTwo == true)
+                    {
+                        HazardOne = false;
+                        HazardTwo = true;
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// As before, HazardOne indicates IsToxic for non-TN terraforming rules.
+                    /// </summary>
+                    if (gas.IsToxic == true)
+                        HazardOne = true;
+                }
             }
 
             UpdateState();                  // update other state to reflect the new gas ammount.

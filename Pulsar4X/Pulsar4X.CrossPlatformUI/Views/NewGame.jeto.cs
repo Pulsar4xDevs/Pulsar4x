@@ -79,7 +79,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected void DefaultButton_Click(object sender, EventArgs e)
         {
             Game.CreateGame(new_game_options);
-            MessageBox.Show("New Game Created", "New Game", MessageBoxType.Information);
             Close();
         }
 

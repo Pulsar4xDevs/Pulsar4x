@@ -204,6 +204,7 @@ namespace Pulsar4X
             Mercury.Orbit = Orbit.FromMajorPlanetFormat(3.3022E23, Sun.Orbit.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, GalaxyGen.J2000);
             Mercury.Radius = Distance.ToAU(2439.7);
             double x, y;
+            Mercury.SurfaceGravity = 3.724f; //from aurora, not necessarily accurate.
             Mercury.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Mercury.Position.System = Sol;
             Mercury.Position.X = x;
@@ -215,6 +216,10 @@ namespace Pulsar4X
             Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, Sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, GalaxyGen.J2000);
             Venus.Radius = Distance.ToAU(6051.8);
             Venus.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
+            Venus.SurfaceGravity = 8.918f; //from aurora, not necessarily accurate.
+            AddGasToAtmoSafely(Venus.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(6), 50.0f); //N, value is from aurora
+            AddGasToAtmoSafely(Venus.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(12), 50.0f); //CO2, value is from aurora
+            Venus.Atmosphere.UpdateState();
             Venus.Position.System = Sol;
             Venus.Position.X = x;
             Venus.Position.Y = y;
@@ -244,6 +249,7 @@ namespace Pulsar4X
             Moon.Name = "Moon";
             Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, Distance.ToAU(384748), 0.0549006, 0, 0, 0, 0, GalaxyGen.J2000);
             Moon.Radius = Distance.ToAU(1738.14);
+            Moon.SurfaceGravity = 1.666f; //value from aurora
             Moon.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Moon.Position.System = Sol;
             Moon.Position.X = Earth.Position.X + x;
@@ -1430,7 +1436,7 @@ namespace Pulsar4X
 
         /// <summary>
         /// This function generate ruins for the specified system Body.
-        /// @todo Make Ruins Generation take star age/type into consideration??
+        /// @todo Make Ruins Generation take star age/type into consideration?? why? ruins in game will yield TN artifacts, which means that the host civ had space travel at a bare minimum.
         /// </summary>
         private static void GenerateRuins(Star star, SystemBody body)
         {
@@ -1442,7 +1448,7 @@ namespace Pulsar4X
             }
             else if (body.Atmosphere.Exists == false && (body.Atmosphere.Pressure > 2.5 || body.Atmosphere.Pressure < 0.01))
             {
-                return; // no valid atmosphere!
+                return; // no valid atmosphere! why is that a problem? bodies without atmospheres can be colonized.
             }
             else if (m_RNG.NextDouble() > 0.5)
             {
@@ -1727,7 +1733,7 @@ namespace Pulsar4X
 
         #region Util Functions
 
-        private static bool IsMoon(SystemBody.PlanetType pt)
+        public static bool IsMoon(SystemBody.PlanetType pt)
         {
             if (pt == SystemBody.PlanetType.Moon
                 || pt == SystemBody.PlanetType.IceMoon)
@@ -1831,6 +1837,7 @@ namespace Pulsar4X
         /// <returns>Temperature in Degrees C</returns>
         public static double CalculateBaseTemperatureOfBody(Star parentStar, double distanceFromStar)
         {
+#warning Does this take into account multiple stars? should it? TN does not.
             double temp = Temperature.ToKelvin(parentStar.Temperature);
             temp = temp * Math.Sqrt(parentStar.Radius / (2 * distanceFromStar));
             return Temperature.ToCelsius(temp);

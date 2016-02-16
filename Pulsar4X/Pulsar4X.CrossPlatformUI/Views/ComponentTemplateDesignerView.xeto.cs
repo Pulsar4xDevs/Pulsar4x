@@ -1,6 +1,7 @@
 ﻿using Eto.Forms;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
+using System.Collections.Generic;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -32,10 +33,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             foreach (var item in _viewModel.MountType)
             {
+                ECSLib.ComponentMountType key = item.Key;
                 CheckBox chkbx = new CheckBox();
-                chkbx.Text = item.Key.ToString();
-                chkbx.CheckedBinding.BindDataContext((DictionaryVM<ECSLib.ComponentMountType, bool?> x) => x.GetValue(_viewModel.MountType.GetIndex(item)));
-                //chkbx.Checked = item.Value;
+                chkbx.Text = key.ToString();
+                chkbx.CheckedBinding.BindDataContext((DictionaryVM<ECSLib.ComponentMountType, bool?> x) => x[key] , (m, val) => m[key] = val);
+                chkbx.DataContext = _viewModel.MountType;
                 MountTypes.Items.Add(chkbx);
             }
         }

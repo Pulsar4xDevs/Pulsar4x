@@ -13,6 +13,18 @@ namespace Pulsar4X.ECSLib
         #region Properties
 
         [PublicAPI]
+        [JsonProperty]
+        public List<Player> Players;
+        
+        [PublicAPI]
+        [JsonProperty]
+        public Player SpaceMaster;
+
+        [PublicAPI]
+        [JsonProperty]
+        public Entity GameMasterFaction;
+
+        [PublicAPI]
         public string GameName
         {
             get { return _gameName; }
@@ -40,6 +52,7 @@ namespace Pulsar4X.ECSLib
         internal int NumSystems;
 
         [PublicAPI]
+        [Obsolete("Use game.GetSystems(AuthenticationToken) or game.GetSystem(AuthenticationToken, Guid)")]
         public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
 
         /// <summary>
@@ -48,14 +61,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal Dictionary<Guid, StarSystem> StarSystems { get; private set; }
 
-        [PublicAPI] 
-        [JsonProperty]
-        public Guid GameMasterFaction;
-
         /// <summary>
         /// Global Entity Manager.
         /// </summary>
         [PublicAPI]
+        [Obsolete("Will be made internal to conform with data hiding.")]
         public EntityManager GlobalManager => _globalManager;
 
         [JsonProperty]
@@ -78,13 +88,27 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public ReadOnlyCollection<LogEvent> LogEvents => new ReadOnlyCollection<LogEvent>(_logEvents);
 
+        public bool EnableMultiThreading
+        {
+            get
+            {
+                return _enableMultiThreading;
+            }
+
+            set
+            {
+                _enableMultiThreading = value;
+            }
+        }
+        [JsonProperty]
+        private bool _enableMultiThreading = true;
+
         [JsonProperty]
         internal List<LogEvent> _logEvents;
 
         internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
 
-        [JsonProperty] public bool EnableMultiThreading = true;
 
         #endregion
 
@@ -100,7 +124,6 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
-
             IsLoaded = false;
             _globalManager = new EntityManager(this);
             StarSystems = new Dictionary<Guid, StarSystem>();
@@ -128,7 +151,6 @@ namespace Pulsar4X.ECSLib
 
             // Post load event completed. Drop all handlers.
             PostLoad = null;
-
         }
 
         /// <summary>
@@ -149,11 +171,13 @@ namespace Pulsar4X.ECSLib
         /// <param name="gameName"></param>
         /// <param name="startDateTime"></param>
         /// <param name="numSystems"></param>
+        /// <param name="smPassword">Password for the SpaceMaster</param>
+        /// <param name="dataSets">IEnumerable containing filePaths to mod directories to load.</param>
         /// <param name="progress"></param>
         /// <exception cref="ArgumentNullException"><paramref name="gameName"/> is <see langword="null" />.</exception>
         /// <exception cref="StaticDataLoadException">Thrown in a variety of situations when StaticData could not be loaded.</exception>
         [PublicAPI]
-        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, List<string> dataSets = null, IProgress<double> progress = null)
+        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, string smPassword = "", IEnumerable<string> dataSets = null, IProgress<double> progress = null)
         {
             if (gameName == null)
             {
@@ -161,19 +185,26 @@ namespace Pulsar4X.ECSLib
             }
 
             var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
-            if (dataSets == null || dataSets.Count == 0)
-            {
-                StaticDataManager.LoadData("Pulsar4x", newGame);
-            }
-            else
+
+            // Load static data
+            if (dataSets != null)
             {
                 foreach (string dataSet in dataSets)
                 {
                     StaticDataManager.LoadData(dataSet, newGame);
                 }
             }
-            FactionFactory.CreateGameMaster(newGame);
+            if (newGame.StaticData.LoadedDataSets.Count == 0)
+            {
+                StaticDataManager.LoadData("Pulsar4x", newGame);
+            }
 
+            // Create SM
+            newGame.SpaceMaster = new Player("Space Master", smPassword);
+            newGame.Players = new List<Player>();
+            newGame.GameMasterFaction = FactionFactory.CreatePlayerFaction(newGame, newGame.SpaceMaster, "SpaceMaster Faction");
+
+            // Generate systems
             for (int i = 0; i < numSystems; i++)
             {
                 newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
@@ -181,7 +212,7 @@ namespace Pulsar4X.ECSLib
             }
 
             newGame.PostGameLoad();
-            
+
             return newGame;
         }
 
@@ -286,8 +317,73 @@ namespace Pulsar4X.ECSLib
         {
             return new List<LogEvent>(_logEvents.Where(@event => @event.Faction == faction || (factionIsSM && @event.IsSMOnly)));
         }
+
+        [PublicAPI]
+        public Player AddPlayer(string playerName, string playerPassword)
+        {
+            var player = new Player(playerName, playerPassword);
+            Players.Add(player);
+            return player;
+        }
+
+        [PublicAPI]
+        public List<StarSystem> GetSystems(AuthenticationToken authToken)
+        {
+            Player player = GetPlayerForToken(authToken);
+            var systems = new List<StarSystem>();
+
+            if (player?.AccessRoles == null)
+            {
+                return systems;
+            }
+
+            foreach (KeyValuePair<Entity, AccessRole> accessRole in player.AccessRoles)
+            {
+                // TODO: Implement vision access roles.
+                if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
+                {
+                    systems.AddRange(accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Select(systemGuid => StarSystems[systemGuid]));
+                }
+            }
+            return systems;
+        }
+
+        [PublicAPI]
+        public StarSystem GetSystem(AuthenticationToken authToken, Guid systemGuid)
+        {
+            Player player = GetPlayerForToken(authToken);
+
+            if (player?.AccessRoles == null)
+            {
+                return null;
+            }
+
+            foreach (KeyValuePair<Entity, AccessRole> accessRole in player.AccessRoles)
+            {
+                // TODO: Implement vision access roles.
+                if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
+                {
+                    foreach (Guid system in accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Where(system => system == systemGuid))
+                    {
+                        return StarSystems[system];
+                    }
+                }
+            }
+
+            return null;
+        }
+        
         #endregion
 
+        public Player GetPlayerForToken(AuthenticationToken authToken)
+        {
+            if (SpaceMaster.IsTokenValid(authToken))
+            {
+                return SpaceMaster;
+            }
+
+            return Players.FirstOrDefault(player => player.IsTokenValid(authToken));
+        }
 
         #endregion
     }

@@ -349,9 +349,10 @@ namespace Pulsar4X.Entities
         public int ThermalSignature { get; set; }
 
         /// <summary>
-        /// How many orbital terraforming modules are in orbit around this planet?
+        /// How many orbital terraforming modules are in orbit around this population? (NOTE: orbital terraformers should always have an assigned population, and hence this variable is here and not on
+        /// planet)
         /// </summary>
-        public float OrbitalTerraformModules { get; set; }
+        public float _OrbitalTerraformModules { get; set; }
 
 
         public float CivilianPopulation { get; set; }
@@ -510,6 +511,19 @@ namespace Pulsar4X.Entities
             set { _SensorUpdateAck = value; }
         }
 
+        /// <summary>
+        /// True = Add gas, False = Subtract gas.
+        /// </summary>
+        public bool _GasAddSubtract { get; set; }
+        /// <summary>
+        /// How much Gas should be added or subtracted?
+        /// </summary>
+        public float _GasAmt { get; set; }
+
+        /// <summary>
+        /// What gas should be altered on this world by terraforming?
+        /// </summary>
+        public AtmosphericGas _GasToAdd { get; set; }
         #endregion
 
         /// <summary>
@@ -579,7 +593,7 @@ namespace Pulsar4X.Entities
             ComponentStockpileLookup = new Dictionary<Guid, int>();
             MissileStockpile = new Dictionary<OrdnanceDefTN, float>();
 
-            OrbitalTerraformModules = 0.0f;
+            _OrbitalTerraformModules = 0.0f;
 
             PoliticalPopStatus = PoliticalStatus.Imperial;
 
@@ -621,6 +635,13 @@ namespace Pulsar4X.Entities
             MissilesInFlight = new BindingList<OrdnanceGroupTN>();
 
             _SensorUpdateAck = 0;
+
+            /// <summary>
+            /// Terraforming Section:
+            /// </summary>
+            _GasAddSubtract = false;
+            _GasAmt = 0.0f;
+            _GasToAdd = null;
         }
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
@@ -1103,6 +1124,7 @@ namespace Pulsar4X.Entities
         public float CalcTotalIndustry()
         {
 #warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled. also efficiencies. also for OF and FF, mining and refining.
+#warning implement radiation in addition to governor/sector bonuses. industrial penalty is Rad / 100(45 = -0.45%)
             float BP = (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number) * 10.0f + (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
             return BP;
         }
@@ -1148,6 +1170,53 @@ namespace Pulsar4X.Entities
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FuelRefinery].Number) * Constants.Colony.SoriumToFuel * 10.0f) +
                        (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number * Constants.Colony.SoriumToFuel);
             return BP;
+        }
+        
+        /// <summary>
+        /// Add Terraforming installations to orbital terraforming modules.
+        /// </summary>
+        /// <returns></returns>
+        public float CalcTotalTerraforming()
+        {
+            int modules = (int)Math.Floor(_OrbitalTerraformModules);
+            float TP = (float)((int)Math.Floor(Installations[(int)Installation.InstallationType.TerraformingInstallation].Number) + modules) * Constants.Colony.TerraformRate[0];
+
+            return TP;
+        }
+
+        /// <summary>
+        /// Calculates the population growth of this colony
+        /// </summary>
+        /// <returns></returns>
+        public float CalcPopulationGrowth()
+        {
+            /// <summary>
+            /// Don't want a divide by zero from this.
+            /// </summary>
+            if (CivilianPopulation == 0.0f)
+                return 0.0f;
+
+            /// <summary>
+            /// This is the AuroraTN population growth rate formula: 20 / cubed root(Population)
+            /// </summary>
+            float AnnualColonyGrowthRate = 20.0f / (float)Math.Pow((double)CivilianPopulation, (1.0 / 3.0));
+
+            float RadGrowthAdjust = Planet.RadiationLevel / 400.0f;
+
+            AnnualColonyGrowthRate = AnnualColonyGrowthRate - RadGrowthAdjust;
+
+            if (AnnualColonyGrowthRate > 10.0f)
+                AnnualColonyGrowthRate = 10.0f;
+
+#warning sector bonuses come after cap for pop growth.
+
+
+            /// <summary>
+            /// Set the population growth rate here.
+            /// </summary>
+            PopulationGrowthRate = AnnualColonyGrowthRate;
+
+            return AnnualColonyGrowthRate;
         }
         #endregion
 
@@ -1275,6 +1344,15 @@ namespace Pulsar4X.Entities
                     m_aiMinerials[mineralIterator] = m_aiMinerials[mineralIterator] - ((float)MineralCost[mineralIterator] * Completion);
                 }
             }
+        }
+
+        /// <summary>
+        /// Changes the population and handles anything resulting from that for the colony.
+        /// </summary>
+        /// <param name="Growth">Amount of population to add/Subtract to this colony.</param>
+        public void AddPopulation(float Growth)
+        {
+            CivilianPopulation = CivilianPopulation + Growth;
         }
         #endregion
 

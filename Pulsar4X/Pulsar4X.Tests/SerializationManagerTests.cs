@@ -22,6 +22,8 @@ namespace Pulsar4X.Tests
         {
             // Nubmer of systems to generate for this test. Configurable.
             const int numSystems = 10;
+            const bool generateSol = false;
+            int totalSystems = generateSol ? numSystems + 1 : numSystems;
 
             // lets create a bad save game:
 
@@ -35,7 +37,7 @@ namespace Pulsar4X.Tests
             Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((Stream)null));
 
             if (_game == null)
-                CreateTestUniverse(numSystems);
+                CreateTestUniverse(numSystems, generateSol);
             Assert.NotNull(_game);
 
             // lets create a good saveGame
@@ -49,7 +51,7 @@ namespace Pulsar4X.Tests
             //and load the saved data:
             _game = SerializationManager.ImportGame(File);
 
-            Assert.AreEqual(numSystems, _game.Systems.Count);
+            Assert.AreEqual(totalSystems, _game.Systems.Count);
             Assert.AreEqual(_testTime, _game.CurrentDateTime);
             List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
             Assert.AreEqual(3, entities.Count);
@@ -132,7 +134,7 @@ namespace Pulsar4X.Tests
             ImportExportSystem(system);
 
             //Now do the same thing, but with Sol.
-            DefaultStartFactory.DefaultHumans(_game, "Humans");
+            DefaultStartFactory.DefaultHumans(_game, _game.SpaceMaster, "Humans");
 
             system = _game.Systems.Values.ToArray()[_game.Systems.Count - 1];
             ImportExportSystem(system);
@@ -215,7 +217,7 @@ namespace Pulsar4X.Tests
             StaticDataManager.ExportStaticData(sol, "./solsave.json");
         }
 
-        private void CreateTestUniverse(int numSystems)
+        private void CreateTestUniverse(int numSystems, bool generateDefaultHumans = false)
         {
             _game = Game.NewGame("Unit Test Game", _testTime, numSystems);
 
@@ -236,6 +238,11 @@ namespace Pulsar4X.Tests
             greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction, "Space bugs");
 
             //TODO Expand the "Test Universe" to cover more datablobs and entities. And ships. Etc.
+
+            if (generateDefaultHumans)
+            {
+                DefaultStartFactory.DefaultHumans(_game, _game.SpaceMaster, "Humans");
+            }
         }
     }
 }

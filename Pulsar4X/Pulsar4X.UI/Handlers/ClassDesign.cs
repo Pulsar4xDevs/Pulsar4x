@@ -189,6 +189,12 @@ namespace Pulsar4X.UI.Handlers
 
             CompLocation = new BindingList<int>();
 
+            ToolTip toolTip = new ToolTip();
+            toolTip.AutoPopDelay = 5000;
+            toolTip.InitialDelay = 1000;
+            toolTip.ReshowDelay = 500;
+            toolTip.ShowAlways = true;
+
             // create panels:
             //m_oClassPropertiesPanel = new Panels.ClassDes_Properties();
             //m_oDesignAndInformationPanel = new Panels.ClassDes_DesignAndInfo();
@@ -264,6 +270,17 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.TankerCheckBox.CheckedChanged += new System.EventHandler(this.TankerCheckbox_Changed);
             m_oOptionsPanel.CollierCheckBox.CheckedChanged += new System.EventHandler(this.CollierCheckbox_Changed);
             m_oOptionsPanel.SupplyShipCheckBox.CheckedChanged += new System.EventHandler(this.SupplyCheckbox_Changed);
+
+            /// <summary>
+            /// set checkbox tooltips:
+            /// </summary>
+            toolTip.SetToolTip(m_oOptionsPanel.TankerCheckBox, "Clicking this button will designate the ship as a fuel tanker. This allows the ship to carry out fuel delivery orders.");
+            toolTip.SetToolTip(m_oOptionsPanel.CollierCheckBox, "Clicking this button will designate the ship as an ammunition collier. When a fleet reloads magazines during a turn, they will reload from the magazines of any colliers in the fleet.");
+            toolTip.SetToolTip(m_oOptionsPanel.ConscriptCheckBox, "Checking this box means that all new ships of that class will use conscript-only crews.");
+            toolTip.SetToolTip(m_oOptionsPanel.ObsoleteCheckBox, "Checking this box will stop this class appearing in lists for construction or refit.");
+            toolTip.SetToolTip(m_oOptionsPanel.SupplyShipCheckBox, "Clicking this button will designate the ship as a maintenance supply ship.");
+            toolTip.SetToolTip(m_oOptionsPanel.SizeInTonsCheckBox, "If this box is checked, sizes will be shown in tons rather than hull spaces (1 HS = 50 tons).");
+            toolTip.SetToolTip(m_oOptionsPanel.KeepExcessQuarters, "Do not automatically remove crew quarters beyond those needed for the normal crew. This is useful for carriers to leave Q available for the flight crews.");
 
             /// <summary>
             /// Button click handlers:
@@ -814,55 +831,11 @@ namespace Pulsar4X.UI.Handlers
                     {
                         int ArmorTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
 
+#warning throw error here if this happens instead of just capping at 12?
                         if (ArmorTech > 12)
                             ArmorTech = 12;
 
-#warning move these to constants.UI at some point.
-                        #region Armor Tech names
-                        String Title = "N/A";
-                        switch (ArmorTech)
-                        {
-                            case 0:
-                                Title = "Conventional";
-                                break;
-                            case 1:
-                                Title = "Duranium";
-                                break;
-                            case 2:
-                                Title = "High Density Duranium";
-                                break;
-                            case 3:
-                                Title = "Composite";
-                                break;
-                            case 4:
-                                Title = "Ceramic Composite";
-                                break;
-                            case 5:
-                                Title = "Laminate Composite";
-                                break;
-                            case 6:
-                                Title = "Compressed Carbon";
-                                break;
-                            case 7:
-                                Title = "Biphased Carbide";
-                                break;
-                            case 8:
-                                Title = "Crystaline Composite";
-                                break;
-                            case 9:
-                                Title = "Superdense";
-                                break;
-                            case 10:
-                                Title = "Bonded Superdense";
-                                break;
-                            case 11:
-                                Title = "Coherent Superdense";
-                                break;
-                            case 12:
-                                Title = "Collapsium";
-                                break;
-                        }
-                        #endregion
+                        String Title = UIConstants.Armor.ArmorTypes[ArmorTech];
 
                         _CurrnetShipClass.NewArmor(Title, (ushort)Constants.MagazineTN.MagArmor[ArmorTech], _CurrnetShipClass.ShipArmorDef.depth);
 
@@ -984,54 +957,11 @@ namespace Pulsar4X.UI.Handlers
 
             int ArmorTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
 
+#warning throw error here if this happens instead of just capping at 12?
             if (ArmorTech > 12)
                 ArmorTech = 12;
-#warning more armor names to move to constants.UI
-            #region Armor Tech names
-            String Title = "N/A";
-            switch (ArmorTech)
-            {
-                case 0:
-                    Title = "Conventional";
-                    break;
-                case 1:
-                    Title = "Duranium";
-                    break;
-                case 2:
-                    Title = "High Density Duranium";
-                    break;
-                case 3:
-                    Title = "Composite";
-                    break;
-                case 4:
-                    Title = "Ceramic Composite";
-                    break;
-                case 5:
-                    Title = "Laminate Composite";
-                    break;
-                case 6:
-                    Title = "Compressed Carbon";
-                    break;
-                case 7:
-                    Title = "Biphased Carbide";
-                    break;
-                case 8:
-                    Title = "Crystaline Composite";
-                    break;
-                case 9:
-                    Title = "Superdense";
-                    break;
-                case 10:
-                    Title = "Bonded Superdense";
-                    break;
-                case 11:
-                    Title = "Coherent Superdense";
-                    break;
-                case 12:
-                    Title = "Collapsium";
-                    break;
-            }
-            #endregion
+
+            String Title = UIConstants.Armor.ArmorTypes[ArmorTech];
 
             oNewShipClass.NewArmor(Title, (ushort)Constants.MagazineTN.MagArmor[ArmorTech], oNewShipClass.ShipArmorDef.depth);
 

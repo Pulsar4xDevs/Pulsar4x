@@ -137,6 +137,10 @@ namespace Pulsar4X.UI.Panels
         {
             get { return m_oCollierCheckBox; }
         }
+        public CheckBox ConscriptCheckBox
+        {
+            get { return m_oConscriptCheckBox; }
+        }
         public bool Conscript
         {
             get { return m_oConscriptCheckBox.Checked; }
@@ -156,6 +160,11 @@ namespace Pulsar4X.UI.Panels
         public CheckBox SizeInTonsCheckBox
         {
             get { return m_oSizeinTonsCheckBox; }
+        }
+
+        public CheckBox ObsoleteCheckBox
+        {
+            get { return m_oObsoleteCheckBox; }
         }
 
         public bool Obsolete
