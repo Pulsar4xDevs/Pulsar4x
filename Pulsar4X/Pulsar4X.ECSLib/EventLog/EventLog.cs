@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
 
         private Player SpaceMaster => _game.SpaceMaster;
 
-        private EventLog()
+        internal EventLog()
         {
             // JsonConstructor
             _newEvents = new Dictionary<Player, List<LogEvent>>();

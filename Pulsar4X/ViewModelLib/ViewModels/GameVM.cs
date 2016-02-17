@@ -135,7 +135,7 @@ namespace Pulsar4X.ViewModel
         public void LoadGame(string pathToFile)
         {
             StatusText = "Loading Game...";
-            Game = SerializationManager.ImportGame(pathToFile, new Progress<double>(OnProgressUpdate));
+            Game = SerializationManager.ImportGame(pathToFile);
 
             PlayerFaction = Game.GameMasterFaction;
             ProgressValue = 0;
@@ -146,18 +146,18 @@ namespace Pulsar4X.ViewModel
         {
             StatusText = "Saving Game...";
 
-            SerializationManager.ExportGame(Game, pathToFile, new Progress<double>(OnProgressUpdate));
+            SerializationManager.Export(Game, pathToFile);
             ProgressValue = 0;
             StatusText = "Game Saved";
         }
 
-        public void AdvanceTime(TimeSpan pulseLength, CancellationToken _pulseCancellationToken)
+        public void AdvanceTime(TimeSpan pulseLength, CancellationToken pulseCancellationToken)
         {
             var pulseProgress = new Progress<double>(UpdatePulseProgress);
 
             int secondsPulsed;
             
-            secondsPulsed = Game.AdvanceTime((int)pulseLength.TotalSeconds, _pulseCancellationToken, pulseProgress);
+            secondsPulsed = Game.AdvanceTime((int)pulseLength.TotalSeconds, pulseCancellationToken, pulseProgress);
             Refresh();
             //e.Handled = true;
             ProgressValue = 0;
