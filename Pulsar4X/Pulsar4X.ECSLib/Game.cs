@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
         private bool _enableMultiThreading = true;
 
         [PublicAPI]
-        public EventLog EventLog { get; }
+        public EventLog EventLog { get; internal set; }
 
         internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();

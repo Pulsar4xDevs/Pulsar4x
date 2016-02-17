@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -10,21 +12,28 @@ namespace Pulsar4X.ECSLib
 
         [CanBeNull]
         public Entity Faction { get; }
-        [CanBeNull]
-        public StarSystem System { get; }
+        public Guid SystemGuid { get; }
         [CanBeNull]
         public Entity Entity { get; }
+
+        [JsonProperty]
+        internal List<Guid> ConcernedPlayers { get; set; }
         
         // ReSharper disable InconsistentNaming (Conforming to JSON parameterized consturctor)
-        public LogEvent(DateTime Time, string Message, Entity Faction, StarSystem System, Entity Entity, bool IsSMOnly = false)
+        public LogEvent(DateTime Time, string Message, Entity Faction, Guid SystemGuid, Entity Entity, bool IsSMOnly = false, List<Guid> ConcernedPlayers = null)
         // ReSharper restore InconsistentNaming
         {
             this.Time = Time;
             this.Message = Message;
             this.Faction = Faction;
-            this.System = System;
+            this.SystemGuid = SystemGuid;
             this.Entity = Entity;
             this.IsSMOnly = IsSMOnly;
+            if (ConcernedPlayers == null)
+            {
+                ConcernedPlayers = new List<Guid>();
+            }
+            this.ConcernedPlayers = ConcernedPlayers;
         }
     }
 }
