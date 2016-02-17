@@ -483,6 +483,7 @@ namespace Pulsar4X.ECSLib
             /// </summary>
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
+                Game game = (Game)serializer.Context.Context;
                 Entity entity;
 
                 // Parse the Guid from the reader.
@@ -491,11 +492,11 @@ namespace Pulsar4X.ECSLib
                 // Lookup the entity using a global Guid lookup.
                 if (entityGuid == Guid.Empty)
                     return InvalidEntity;
-                if (SerializationManager.CurrentGame.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                     return entity;
 
                 // If no entity was found, create a new entity in the global manager.
-                entity = new Entity(SerializationManager.CurrentGame.GlobalManager, entityGuid);
+                entity = new Entity(game.GlobalManager, entityGuid);
                 return entity;
             }
 

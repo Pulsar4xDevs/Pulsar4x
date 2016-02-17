@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
         {
-            SerializationManager.CurrentGame.PostLoad += (sender, args) => { _logEvents = SerializationManager.CurrentGame.GetEventsForFaction(OwningEntity); };
+            ((Game)context.Context).PostLoad += (sender, args) => { };
         }
     }
 }

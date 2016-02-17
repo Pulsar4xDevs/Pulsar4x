@@ -514,7 +514,7 @@ namespace Pulsar4X.ECSLib
         #region ISerializable interface
 
         // ReSharper disable once UnusedParameter.Local
-        public EntityManager(SerializationInfo info, StreamingContext context) : this(SerializationManager.CurrentGame)
+        public EntityManager(SerializationInfo info, StreamingContext context) : this((Game)context.Context)
         {
             var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
 

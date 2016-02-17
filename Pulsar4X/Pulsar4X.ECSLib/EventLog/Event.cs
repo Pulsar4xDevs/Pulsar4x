@@ -1,27 +1,39 @@
 ﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public struct LogEvent
+    public class LogEvent
     {
-        [CanBeNull]
-        public Entity Faction { get; }
+        public DateTime Time { get; }
+        public string Message { get; }
         public bool IsSMOnly { get; }
 
-        public DateTime Time { get; }
         [CanBeNull]
-        public StarSystem System { get; }
-        public string Message { get; }
+        public Entity Faction { get; }
+        public Guid SystemGuid { get; }
+        [CanBeNull]
+        public Entity Entity { get; }
+
+        [JsonProperty]
+        internal List<Guid> ConcernedPlayers { get; set; }
         
         // ReSharper disable InconsistentNaming (Conforming to JSON parameterized consturctor)
-        public LogEvent(Entity Faction, DateTime Time, StarSystem System, string Message, bool IsSMOnly = false)
+        public LogEvent(DateTime Time, string Message, Entity Faction, Guid SystemGuid, Entity Entity, bool IsSMOnly = false, List<Guid> ConcernedPlayers = null)
         // ReSharper restore InconsistentNaming
         {
-            this.Faction = Faction;
-            this.IsSMOnly = IsSMOnly;
             this.Time = Time;
-            this.System = System;
             this.Message = Message;
+            this.Faction = Faction;
+            this.SystemGuid = SystemGuid;
+            this.Entity = Entity;
+            this.IsSMOnly = IsSMOnly;
+            if (ConcernedPlayers == null)
+            {
+                ConcernedPlayers = new List<Guid>();
+            }
+            this.ConcernedPlayers = ConcernedPlayers;
         }
     }
 }

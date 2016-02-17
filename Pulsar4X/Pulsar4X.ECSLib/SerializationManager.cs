@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using Newtonsoft.Json.Serialization;
 using Formatting = Newtonsoft.Json.Formatting;
 
 namespace Pulsar4X.ECSLib
@@ -21,11 +22,11 @@ namespace Pulsar4X.ECSLib
         /// Game class of the game that is currently saving/loading. It is garunteed to be the loading/saving game from
         /// the time the operation starts, until AFTER any events are fired.
         /// </summary>
-        internal static Game CurrentGame { get; private set; }
         internal static IProgress<double> Progress { get; private set; }
         internal static int ManagersProcessed { get; set; }
         private static readonly object SyncRoot = new object();
-        private static readonly JsonSerializer DefaultSerializer = new JsonSerializer { Context = new StreamingContext(StreamingContextStates.Persistence), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
+        private static readonly JsonSerializer PersistenceSerializer = new JsonSerializer { Context = new StreamingContext(StreamingContextStates.Persistence), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
+        private static readonly JsonSerializer RemoteSerializer = new JsonSerializer {Context = new StreamingContext(StreamingContextStates.Remoting), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None};
 
         #region Game Serialization/Deserialization
 
@@ -56,8 +57,7 @@ namespace Pulsar4X.ECSLib
 
             lock (SyncRoot)
             {
-
-                DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                PersistenceSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
                 Progress = progress;
                 ManagersProcessed = 0;
                 game.NumSystems = game.StarSystems.Count;
@@ -68,9 +68,8 @@ namespace Pulsar4X.ECSLib
                     {
                         using (var writer = new JsonTextWriter(streamWriter))
                         {
-                            CurrentGame = game;
-                            DefaultSerializer.Serialize(writer, game);
-                            CurrentGame = null;
+                            PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
+                            PersistenceSerializer.Serialize(writer, game);
                         }
                     }
 
@@ -109,7 +108,6 @@ namespace Pulsar4X.ECSLib
             {
                 Progress = progress;
                 ManagersProcessed = 0;
-                CurrentGame = game;
                 // Use a BufferedStream to allow reading and seeking from any stream.
                 // Example: If inputStream is a NetworkStream, then we can only read once.
                 using (var inputBuffer = new BufferedStream(inputStream))
@@ -130,20 +128,19 @@ namespace Pulsar4X.ECSLib
                                 intermediateStream.Position = 0;
 
                                 // Populate the game from the uncompressed MemoryStream.
-                                PopulateGame(intermediateStream);
+                                PopulateGame(intermediateStream, game);
                             }
                         }
                     }
                     else
                     {
                         // Populate the game from the uncompressed inputStream.
-                        PopulateGame(inputBuffer);
+                        PopulateGame(inputBuffer, game);
                     }
                 }
 
                 // get the game to do its post load stuff
                 game.PostGameLoad();
-                CurrentGame = null;
             }
             return game;
         }
@@ -152,13 +149,14 @@ namespace Pulsar4X.ECSLib
         /// Populates the currently loading game from the passed uncompressed inputStream.
         /// </summary>
         /// <param name="inputStream">Uncompressed stream containing the game data.</param>
-        private static void PopulateGame(Stream inputStream)
+        private static void PopulateGame(Stream inputStream, Game game)
         {
             using (var sr = new StreamReader(inputStream))
             {
                 using (var reader = new JsonTextReader(sr))
                 {
-                    DefaultSerializer.Populate(reader, CurrentGame);
+                    PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
+                    PersistenceSerializer.Populate(reader, game);
                 }
             }
         }
@@ -215,8 +213,8 @@ namespace Pulsar4X.ECSLib
                     {
                         lock (SyncRoot)
                         {
-                            DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
-                            DefaultSerializer.Serialize(writer, entity.Clone());
+                            PersistenceSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                            PersistenceSerializer.Serialize(writer, entity.Clone());
                         }
                     }
                 }
@@ -318,10 +316,9 @@ namespace Pulsar4X.ECSLib
                 {
                     lock (SyncRoot)
                     {
-                        CurrentGame = game;
-                        entity = DefaultSerializer.Deserialize<ProtoEntity>(reader);
-                        CurrentGame.PostGameLoad();
-                        CurrentGame = null;
+                        PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
+                        entity = PersistenceSerializer.Deserialize<ProtoEntity>(reader);
+                        game.PostGameLoad();
                     }
                 }
             }
@@ -361,8 +358,8 @@ namespace Pulsar4X.ECSLib
                     {
                         lock (SyncRoot)
                         {
-                            DefaultSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
-                            DefaultSerializer.Serialize(writer, system);
+                            PersistenceSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                            PersistenceSerializer.Serialize(writer, system);
                         }
                     }
                 }
@@ -703,11 +700,10 @@ namespace Pulsar4X.ECSLib
                 {
                     lock (SyncRoot)
                     {
-                        CurrentGame = game;
-                        system = DefaultSerializer.Deserialize<StarSystem>(reader);
-                        CurrentGame.StarSystems.Add(system.Guid, system);
-                        CurrentGame.PostGameLoad();
-                        CurrentGame = null;
+                        PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
+                        system = PersistenceSerializer.Deserialize<StarSystem>(reader);
+                        game.StarSystems.Add(system.Guid, system);
+                        game.PostGameLoad();
                     }
                 }
             }
@@ -715,6 +711,91 @@ namespace Pulsar4X.ECSLib
             return system;
         }
 
+        #endregion
+
+        #region EventLog Serialization/Deserialization
+
+        public static EventLog ImportEventLog(Game game, string jsonString)
+        {
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                throw new ArgumentException("Argument is null or empty", nameof(jsonString));
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(stream))
+                {
+                    writer.Write(jsonString);
+                    writer.Flush();
+
+                    stream.Position = 0;
+                    return ImportEventLog(game, stream);
+                }
+            }
+        }
+
+        [PublicAPI]
+        public static EventLog ImportEventLog([NotNull] Game game, [NotNull]Stream inputStream)
+        {
+            if (game == null)
+            {
+                throw new ArgumentNullException(nameof(game));
+            }
+            if (inputStream == null)
+            {
+                throw new ArgumentNullException(nameof(inputStream));
+            }
+
+            EventLog eventLog;
+
+            // Check if our stream is compressed.
+            using (var bufferedStream = new BufferedStream(inputStream))
+            {
+                if (HasGZipHeader(bufferedStream))
+                {
+                    // File is compressed. Decompress using GZip.
+                    using (var compressionStream = new GZipStream(bufferedStream, CompressionMode.Decompress))
+                    {
+                        // Decompress into a MemoryStream.
+                        using (var intermediateStream = new MemoryStream())
+                        {
+                            // Decompress the file into an intermediate MemoryStream.
+                            compressionStream.CopyTo(intermediateStream);
+
+                            // Reset the position of the MemoryStream so it can be read from the beginning.
+                            intermediateStream.Position = 0;
+
+                            eventLog = PopulateEventLog(intermediateStream, game);
+                        }
+                    }
+                }
+                else
+                {
+                    eventLog = PopulateEventLog(bufferedStream, game);
+                }
+            }
+            game.EventLog = eventLog;
+            return eventLog;
+        }
+
+        private static EventLog PopulateEventLog(Stream bufferedStream, Game game)
+        {
+            EventLog eventLog;
+            using (var streamReader = new StreamReader(bufferedStream))
+            {
+                using (var reader = new JsonTextReader(streamReader))
+                {
+                    lock (SyncRoot)
+                    {
+                        PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
+                        eventLog = PersistenceSerializer.Deserialize<EventLog>(reader);
+                    }
+                }
+            }
+
+            return eventLog;
+        }
         #endregion
 
         /// <summary>
