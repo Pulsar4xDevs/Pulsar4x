@@ -18,7 +18,6 @@ namespace Pulsar4X.ECSLib
 
         internal EventLog()
         {
-            // JsonConstructor
             _newEvents = new Dictionary<Player, List<LogEvent>>();
         }
 

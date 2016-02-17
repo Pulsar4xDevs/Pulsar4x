@@ -1,39 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    public class LogEvent
+    public class LogEvent : ISerializable
     {
-        public DateTime Time { get; }
-        public string Message { get; }
-        public bool IsSMOnly { get; }
-
-        [CanBeNull]
-        public Entity Faction { get; }
-        public Guid SystemGuid { get; }
-        [CanBeNull]
-        public Entity Entity { get; }
-
-        [JsonProperty]
-        internal List<Guid> ConcernedPlayers { get; set; }
+        public DateTime Time { get; internal set; }
         
-        // ReSharper disable InconsistentNaming (Conforming to JSON parameterized consturctor)
-        public LogEvent(DateTime Time, string Message, Entity Faction, Guid SystemGuid, Entity Entity, bool IsSMOnly = false, List<Guid> ConcernedPlayers = null)
-        // ReSharper restore InconsistentNaming
+        public string Message { get; internal set; }
+        
+        [CanBeNull]
+        public Entity Faction { get; internal set; }
+        
+        public Guid SystemGuid { get; internal set; }
+        
+        [CanBeNull]
+        public Entity Entity { get; internal set; }
+        
+        internal List<Guid> ConcernedPlayers { get; set; }
+
+        public LogEvent(SerializationInfo info, StreamingContext context)
         {
-            this.Time = Time;
-            this.Message = Message;
-            this.Faction = Faction;
-            this.SystemGuid = SystemGuid;
-            this.Entity = Entity;
-            this.IsSMOnly = IsSMOnly;
-            if (ConcernedPlayers == null)
+            Time = (DateTime)info.GetValue(nameof(Time), typeof(DateTime));
+            Message = (string)info.GetValue(nameof(Message), typeof(string));
+            Faction = (Entity)info.GetValue(nameof(Faction), typeof(Entity));
+            SystemGuid = (Guid)info.GetValue(nameof(SystemGuid), typeof(Guid));
+            Entity = (Entity)info.GetValue(nameof(Entity), typeof(Entity));
+
+            if ((context.State & StreamingContextStates.Persistence) != 0)
             {
-                ConcernedPlayers = new List<Guid>();
+                ConcernedPlayers = (List<Guid>)info.GetValue(nameof(ConcernedPlayers), typeof(List<Guid>));
             }
-            this.ConcernedPlayers = ConcernedPlayers;
+        }
+
+        public LogEvent(DateTime time, string message, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null) : this(time, message, Guid.Empty, faction, entity, concernedPlayers)
+        { }
+
+        public LogEvent(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null)
+        {
+            Time = time;
+            Message = message;
+            Faction = faction;
+            SystemGuid = systemGuid;
+            Entity = entity;
+            if (concernedPlayers == null)
+            {
+                concernedPlayers = new List<Guid>();
+            }
+            ConcernedPlayers = concernedPlayers;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(Time), Time);
+            info.AddValue(nameof(Message), Message);
+            info.AddValue(nameof(Faction), Faction);
+            info.AddValue(nameof(SystemGuid), SystemGuid);
+            info.AddValue(nameof(Entity), Entity);
+
+            if ((context.State & StreamingContextStates.Persistence) != 0)
+            {
+                info.AddValue(nameof(ConcernedPlayers), ConcernedPlayers);
+            }
         }
     }
 }
