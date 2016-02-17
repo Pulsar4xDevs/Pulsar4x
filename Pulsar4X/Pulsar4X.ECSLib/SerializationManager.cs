@@ -715,6 +715,7 @@ namespace Pulsar4X.ECSLib
 
         #region EventLog Serialization/Deserialization
 
+        [PublicAPI]
         public static EventLog ImportEventLog(Game game, string jsonString)
         {
             if (string.IsNullOrEmpty(jsonString))
@@ -777,6 +778,44 @@ namespace Pulsar4X.ECSLib
             }
             game.EventLog = eventLog;
             return eventLog;
+        }
+
+        [PublicAPI]
+        public static void ExportEventLog([NotNull] EventLog eventLog, [NotNull] string filePath, bool compress = false)
+        {
+            CheckFile(filePath, FileAccess.Write);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+            {
+                ExportEventLog(eventLog, fileStream, compress);
+            }
+        }
+        
+        [PublicAPI]
+        public static void ExportEventLog(EventLog eventLog, [NotNull] Stream outputStream, bool compress = false)
+        {
+            if (outputStream == null)
+            {
+                throw new ArgumentNullException(nameof(outputStream));
+            }
+
+            using (var intermediateStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                {
+                    using (var writer = new JsonTextWriter(streamWriter))
+                    {
+                        lock (SyncRoot)
+                        {
+                            PersistenceSerializer.Formatting = compress ? Formatting.None : Formatting.Indented;
+                            PersistenceSerializer.Serialize(writer, eventLog);
+                        }
+                    }
+                }
+
+                // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
+                FinalizeOutput(outputStream, intermediateStream, compress);
+            }
         }
 
         private static EventLog PopulateEventLog(Stream bufferedStream, Game game)
