@@ -4,6 +4,7 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
   <TableLayout>
+  <TableLayout>
     <TableRow>
       <Label Text="Name" />
       <ComboBox ID="ComponentsComBox" />
@@ -34,10 +35,15 @@
       <Label Text="MountType" />
       <StackLayout ID="MountTypes"/>
     </TableRow>
+  </TableLayout>
+  <TableLayout>
     <TableRow>
+      <Scrollable>
       <StackLayout ID="AbilityTemplates"></StackLayout>
+      </Scrollable>
+      <Panel></Panel>
     </TableRow>
     
   </TableLayout>
-	
+  </TableLayout>
 </Panel>

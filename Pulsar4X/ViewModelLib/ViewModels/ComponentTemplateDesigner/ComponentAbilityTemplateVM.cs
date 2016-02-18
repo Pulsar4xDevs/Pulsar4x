@@ -68,7 +68,7 @@ namespace Pulsar4X.ViewModel
             {
                 SelectedGuiHint.Add((GuiHint)item, Enum.GetName(typeof(GuiHint), item));
             }
-            
+            SelectedGuiHint.SelectedIndex = 0;
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 

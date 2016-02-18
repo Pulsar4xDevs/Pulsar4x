@@ -26,6 +26,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
             GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
             _viewModel.SelectedGuiHint.PropertyChanged += GuiHint_SelectedIndexChanged;
+            GuiHint_SelectedIndexChanged(this, null);
         }
 
         private void GuiHint_SelectedIndexChanged(object sender, EventArgs e)
@@ -52,14 +53,27 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private void GuiHintMinMax()
         {
             GuiHintControls.Items.Clear();
+
+            TableLayout tl1 = new TableLayout(2, 2);
+
+            Label lblMin = new Label();
+            lblMin.Text = "MinFormula";
             TextBox minFormula = new TextBox();
             minFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.MinFormula);
             minFormula.DataContext = _viewModel;
+
+            Label lblMax = new Label();
+            lblMax.Text = "MaxFormula:";
             TextBox maxFormula = new TextBox();
             maxFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.MaxFormula);
             maxFormula.DataContext = _viewModel;
-            GuiHintControls.Items.Add(minFormula);
-            GuiHintControls.Items.Add(maxFormula);
+            tl1.Add(lblMin, 0, 0);
+            tl1.Add(minFormula, 1, 0);
+            tl1.Add(lblMax, 0, 1);
+            tl1.Add(maxFormula, 1, 1);
+            GuiHintControls.Items.Add(tl1);
+            //GuiHintControls.Items.Add(minFormula);
+            //GuiHintControls.Items.Add(maxFormula);
         }
 
         private void GuiTechSelectionList()
@@ -88,7 +102,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             GuiHintControls.Items.Clear();
             Label label = new Label();
-            label.Text = "Does Not display anything, however AbilityFormula still works 'under the hood'";
+            label.Text = "Does Not display anything, however, \r\nAbilityFormula still works 'under the hood'";
             GuiHintControls.Items.Add(label);
 
         }

@@ -6,10 +6,11 @@ namespace Pulsar4X.ECSLib
 {
     public enum GuiHint
     {
+        None,
         GuiTechSelectionList,
         GuiSelectionMaxMin,
-        GuiTextDisplay,
-        None
+        GuiTextDisplay
+        
     }
     public class ComponentDesignDB
     {
