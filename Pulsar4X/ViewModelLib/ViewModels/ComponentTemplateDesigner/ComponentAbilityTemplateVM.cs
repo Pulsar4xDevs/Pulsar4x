@@ -72,7 +72,7 @@ namespace Pulsar4X.ViewModel
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
-        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD)
+        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD) : this()
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;

@@ -12,7 +12,7 @@ namespace Pulsar4X.ViewModel
     public class MineralFormulaVM : IViewModel
     {
         private StaticDataStore _dataStore;
-        public string Forumula { get; set; }
+        public string Formula { get; set; }
         public DictionaryVM<Guid, string, string> Minerals { get; set; }
 
         public MineralFormulaVM(StaticDataStore staticDataStore)
@@ -28,7 +28,7 @@ namespace Pulsar4X.ViewModel
 
         public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid, string> guidFormulaKVP) : this(staticDataStore)
         {
-            this.Forumula = guidFormulaKVP.Value;
+            this.Formula = guidFormulaKVP.Value;
             Minerals.SelectedIndex = Minerals.GetIndex(new KeyValuePair<Guid, string>(guidFormulaKVP.Key, Minerals[guidFormulaKVP.Key]));
         }
 

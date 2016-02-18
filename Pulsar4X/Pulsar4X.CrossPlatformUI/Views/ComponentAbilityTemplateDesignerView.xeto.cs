@@ -25,8 +25,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             GuiHint.DataContext = viewModel.SelectedGuiHint;
             GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
             GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
-
-            GuiHint.SelectedIndexChanged += GuiHint_SelectedIndexChanged;
+            _viewModel.SelectedGuiHint.PropertyChanged += GuiHint_SelectedIndexChanged;
         }
 
         private void GuiHint_SelectedIndexChanged(object sender, EventArgs e)
@@ -55,8 +54,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             GuiHintControls.Items.Clear();
             TextBox minFormula = new TextBox();
             minFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.MinFormula);
+            minFormula.DataContext = _viewModel;
             TextBox maxFormula = new TextBox();
-            minFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.MaxFormula);
+            maxFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.MaxFormula);
+            maxFormula.DataContext = _viewModel;
             GuiHintControls.Items.Add(minFormula);
             GuiHintControls.Items.Add(maxFormula);
         }

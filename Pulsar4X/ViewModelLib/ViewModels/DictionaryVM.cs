@@ -55,7 +55,7 @@ namespace Pulsar4X.ViewModel
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class DictionaryVM<TKey,TValue, TListValue> :IDictionary<TKey,TValue>
+    public class DictionaryVM<TKey,TValue, TListValue> :IDictionary<TKey,TValue>, INotifyPropertyChanged
     {
         private Dictionary<TKey, TValue> _dictionary;
         private Dictionary<int, KeyValuePair<TKey, TValue>> _index = new Dictionary<int, KeyValuePair<TKey, TValue>>(); 
@@ -70,11 +70,18 @@ namespace Pulsar4X.ViewModel
                 int old = _selectedIndex;
                 _selectedIndex = value;
                 if(SelectionChangedEvent != null) SelectionChangedEvent(old, _selectedIndex);
+                OnPropertyChanged();
             }
         }
         public DisplayMode DisplayMode { get; set; }
 
         public event SelectionChangedEventHandler SelectionChangedEvent;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         /// <summary>
         /// 
