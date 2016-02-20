@@ -71,7 +71,7 @@ namespace Pulsar4X.ViewModel
     public class DictionaryVM<TKey,TValue, TListValue> :IDictionary<TKey,TValue>, INotifyPropertyChanged
     {
         private Dictionary<TKey, TValue> _dictionary;
-        private Dictionary<int, KeyValuePair<TKey, TValue>> _index = new Dictionary<int, KeyValuePair<TKey, TValue>>(); 
+        private List<KeyValuePair<TKey, TValue>> _index = new List<KeyValuePair<TKey, TValue>>(); 
         private Dictionary<KeyValuePair<TKey,TValue>,int> _reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>(); 
         public ObservableCollection<TListValue> DisplayList { get; set; }
         private int _selectedIndex;
@@ -182,7 +182,7 @@ namespace Pulsar4X.ViewModel
         {
             int i = _index.Count;
             _dictionary.Add(item.Key, item.Value);
-            _index.Add(i, item);
+            _index.Add(item);
             _reverseIndex.Add(item, i);
             var conv = TypeDescriptor.GetConverter(typeof(TListValue));
             if (DisplayMode == DisplayMode.Key)
@@ -218,14 +218,14 @@ namespace Pulsar4X.ViewModel
             {
                 int i = _reverseIndex[item];
                 _dictionary.Remove(item.Key);
-                _index.Remove(i);
+                _index.RemoveAt(i);
                 _reverseIndex.Remove(item);
                 DisplayList.RemoveAt(i);
                 //_reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>();
                 int i2 = 0;
                 foreach (var thing in _dictionary)
                 {
-                    _index[i2] = thing;
+                    
                     _reverseIndex[thing] = i2;
                     i2++;
                 }
