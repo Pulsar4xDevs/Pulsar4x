@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <GroupBox Width="400" Text="{Binding Index}">
+  <TableLayout>
+    <TableRow >
+      <!--Button Width="26" Text="{Binding Index}"/-->
+      <TableLayout>
+        <TableRow>
+          <Label Text="Name" />
+          <TextBox Text="{Binding Name}" />
+        </TableRow>
+        <TableRow>
+          <Label Text="Description" />
+          <TextBox Text="{Binding Description}" />
+        </TableRow>
+        <TableRow>
+          <Label Text="AbilityFormula" />
+          <TextBox Text="{Binding AbilityFormula}" />
+        </TableRow>
+        <TableRow>
+          <Label Text="GuiHint" />
+          <ComboBox ID="GuiHint" />
+        </TableRow>
+      </TableLayout>
+      <TableLayout>
+        <TableRow>
+          <StackLayout ID="GuiHintControls"></StackLayout>
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+  </TableLayout>
+  </GroupBox>
+</Panel>

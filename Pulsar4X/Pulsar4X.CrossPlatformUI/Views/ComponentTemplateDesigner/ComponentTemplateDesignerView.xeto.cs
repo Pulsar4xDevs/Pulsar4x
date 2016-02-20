@@ -4,7 +4,7 @@ using Pulsar4X.ViewModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Pulsar4X.CrossPlatformUI.Views
+namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {
     public class ComponentTemplateDesignerView : Panel
     {
@@ -12,6 +12,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected StackLayout MineralCostFormulaStackLayout { get; set; }
         protected StackLayout AbilityTemplates { get; set; }
         protected StackLayout MountTypes { get; set; }
+        protected Button Save { get; set; }
+        protected Button Export { get; set; }
         private ComponentTemplateVM _viewModel;
         public ComponentTemplateDesignerView()
         {
@@ -22,7 +24,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             _viewModel = viewModel;
             DataContext = _viewModel;
-
+            Save.Click += Save_Click;
+            Export.Click += Export_Click;
             ComponentsComBox.DataContext = viewModel.Components;
             ComponentsComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
             ComponentsComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);
@@ -69,6 +72,16 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //    chkbx.DataContext = ipr; //_viewModel.MountType;
             //    MountTypes.Items.Add(chkbx);
             //}
+        }
+
+        private void Export_Click(object sender, System.EventArgs e)
+        {
+            _viewModel.SaveToFile();
+        }
+
+        private void Save_Click(object sender, System.EventArgs e)
+        {
+            _viewModel.CreateSD();
         }
 
         private void MountType_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

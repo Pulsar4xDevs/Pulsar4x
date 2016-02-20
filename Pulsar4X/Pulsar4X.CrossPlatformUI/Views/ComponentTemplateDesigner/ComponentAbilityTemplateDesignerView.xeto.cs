@@ -4,7 +4,7 @@ using Pulsar4X.ViewModel;
 using System;
 using System.Linq;
 
-namespace Pulsar4X.CrossPlatformUI.Views
+namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {
     public class ComponentAbilityTemplateDesignerView : Panel
     {

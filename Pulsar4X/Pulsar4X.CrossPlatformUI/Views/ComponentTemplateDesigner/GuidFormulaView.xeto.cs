@@ -5,7 +5,7 @@ using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
 
-namespace Pulsar4X.CrossPlatformUI.Views
+namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {
     public class MineralFormulaView : Panel
     {

@@ -16,6 +16,7 @@ namespace Pulsar4X.ViewModel
 
         public DictionaryVM<ComponentSD, string, string> Components { get; set; }
         
+        
 
         public string Name { get; set; }
         private string _description;
@@ -157,7 +158,7 @@ namespace Pulsar4X.ViewModel
             //    MountType.Add(new ItemPair<ComponentMountType, bool?>((ComponentMountType)item, false));
             //}
             ComponentAbilitySDs.Clear();
-            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM());
+            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(ComponentAbilitySDs));
         }
 
         public void SetDesignSD(ComponentSD designSD)
@@ -199,11 +200,11 @@ namespace Pulsar4X.ViewModel
             ComponentAbilitySDs.Clear();
             foreach (var item in designSD.ComponentAbilitySDs)
             {
-                ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(item));
+                ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs));
             }
         }
 
-        public void CreateSD(GameVM game)
+        public void CreateSD()
         {
             ComponentSD sd = new ComponentSD();
             sd.Name = Name;
@@ -228,6 +229,19 @@ namespace Pulsar4X.ViewModel
                 sd.ComponentAbilitySDs.Add(item.CreateSD());
             }
 
+            if (_staticData.Components.Keys.Contains(sd.ID))
+            {
+                _staticData.Components[sd.ID] = sd;
+            }
+            else
+            {
+                _staticData.Components.Add(sd.ID, sd);
+            }
+        }
+
+        public void SaveToFile()
+        {
+            StaticDataManager.ExportStaticData(_staticData.Components, "./NewComponentData.json");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

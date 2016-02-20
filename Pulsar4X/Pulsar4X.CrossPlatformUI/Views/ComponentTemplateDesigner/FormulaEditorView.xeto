@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableLayout>
+      <TableRow>
+        <Label Text="{Binding FunctionName}" />
+      </TableRow>
+      <TableRow>
+        <TextBox Text="{Binding Function}"/>
+      </TableRow>
+    </TableLayout>
+    <TableLayout>
+      <TableRow>
+        <Label Text="Parameters:" />
+      </TableRow>
+        <TableLayout>
+      <TableRow>
+        <Button Text="[Size]"/>
+        <Button Text="[Crew]"/>
+        <Button Text="[HTK]"/>
+        <Button Text="[ResearchCost]"/>
+      </TableRow>  
+      <TableRow>
+        <Button Text="[MineralCosts]"/>
+        <Button Text="[CreditCost]"/>
+        <Button Text="[GuidDict]"/>
+      </TableRow>    
+      </TableLayout>
+      <TableRow>
+        <Label Text="Functions:" />
+      </TableRow>
+      <TableRow>
+        <Button Text="Ability()"/>
+        <Button Text="Tech('guid')" />
+        <ComboBox ID="TechSelection" />
+      </TableRow>
+      <TableRow>
+        <Label Text="TODO instructions/description on whatever item is selected" />
+      </TableRow>
+    </TableLayout>
+  </TableLayout>
+	
+</Panel>

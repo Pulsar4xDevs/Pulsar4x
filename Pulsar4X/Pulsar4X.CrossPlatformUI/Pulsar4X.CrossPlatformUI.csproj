@@ -138,13 +138,16 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\ComponentListComponentView.xeto" />
-    <EmbeddedResource Include="Views\ComponentTemplateDesignerView.xeto">
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\ComponentAbilityTemplateDesignerView.xeto">
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentAbilityTemplateDesignerView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\MineralFormulaView.xeto">
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\MineralFormulaView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\FormulaEditorView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -168,7 +171,7 @@
     <Compile Include="Views\ColonyScreenView.xeto.cs">
       <DependentUpon>ColonyScreenView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\ComponentAbilityTemplateDesignerView.xeto.cs">
+    <Compile Include="Views\ComponentTemplateDesigner\ComponentAbilityTemplateDesignerView.xeto.cs">
       <DependentUpon>ComponentAbilityTemplateDesignerView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ComponentDesignView.xeto.cs">
@@ -180,10 +183,13 @@
     <Compile Include="Views\ComponentsListView.xeto.cs">
       <DependentUpon>ComponentsListView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\ComponentTemplateDesignerView.xeto.cs">
+    <Compile Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerView.xeto.cs">
       <DependentUpon>ComponentTemplateDesignerView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\GuidFormulaView.xeto.cs">
+    <Compile Include="Views\ComponentTemplateDesigner\FunctionEditorView.xeto.cs">
+      <DependentUpon>FormulaEditorView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentTemplateDesigner\GuidFormulaView.xeto.cs">
       <DependentUpon>MineralFormulaView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\JobAbilityView.xeto.cs">

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 using System.Runtime.CompilerServices;
+using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ViewModel
 {
@@ -19,6 +20,14 @@ namespace Pulsar4X.ViewModel
             get { return _description; }
             set { _description = value; OnPropertyChanged(); }
         }
+
+        private ObservableCollection<ComponentAbilityTemplateVM> ParentList { get; set; }
+        private int _index;
+        public int Index
+        {
+            get { return ParentList.IndexOf(this); }
+        }
+
         private DictionaryVM<GuiHint, string, string> _selectedGuiHint = new DictionaryVM<GuiHint, string, string>();
         public DictionaryVM<GuiHint, string, string> SelectedGuiHint
         {
@@ -61,9 +70,10 @@ namespace Pulsar4X.ViewModel
         public Dictionary<Guid, string> GuidDictionary;
 
 
-        public ComponentAbilityTemplateVM()
+        public ComponentAbilityTemplateVM(ObservableCollection<ComponentAbilityTemplateVM> parentList)
         {
             //SelectedGuiHint = new DictionaryVM<GuiHint, string>(DisplayMode.Value);
+            ParentList = parentList;
             foreach (var item in Enum.GetValues(typeof(GuiHint)))
             {
                 SelectedGuiHint.Add((GuiHint)item, Enum.GetName(typeof(GuiHint), item));
@@ -72,7 +82,7 @@ namespace Pulsar4X.ViewModel
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
-        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD) : this()
+        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList) : this(parentList)
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
