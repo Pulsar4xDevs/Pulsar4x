@@ -81,11 +81,12 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             GuiHintControls.Items.Clear();
             TextBox tb = new TextBox();
             
-            ComboBox comboBox = new ComboBox();
-            comboBox.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM n) => n.AbilityDataBlobTypeSelection.DisplayList);
-            comboBox.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.AbilityDataBlobType);
+            TechList techList = new TechList();
+            techList.DataContext = _viewModel.GuidDict;
+            //techList.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM n) => n.AbilityDataBlobTypeSelection.DisplayList);
+            //techList.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.AbilityDataBlobType);
 
-            GuiHintControls.Items.Add(comboBox);
+            GuiHintControls.Items.Add(techList);
 
         }
 

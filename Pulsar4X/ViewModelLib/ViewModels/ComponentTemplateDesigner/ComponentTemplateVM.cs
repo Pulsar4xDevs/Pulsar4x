@@ -158,7 +158,7 @@ namespace Pulsar4X.ViewModel
             //    MountType.Add(new ItemPair<ComponentMountType, bool?>((ComponentMountType)item, false));
             //}
             ComponentAbilitySDs.Clear();
-            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(ComponentAbilitySDs));
+            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(ComponentAbilitySDs, _staticData));
         }
 
         public void SetDesignSD(ComponentSD designSD)
@@ -183,7 +183,6 @@ namespace Pulsar4X.ViewModel
 
             foreach (var item in designSD.MountType)
             {
-
                 MountType[item.Key] = item.Value;
             }
             //for (int i = 0; i < MountType.Count; i++)
@@ -200,7 +199,7 @@ namespace Pulsar4X.ViewModel
             ComponentAbilitySDs.Clear();
             foreach (var item in designSD.ComponentAbilitySDs)
             {
-                ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs));
+                ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs, _staticData));
             }
         }
 

@@ -12,6 +12,8 @@ namespace Pulsar4X.ViewModel
 {
    public class ComponentAbilityTemplateVM : IViewModel
     {
+        private StaticDataStore _staticData;
+
         private string _name;
         public string Name { get { return _name; } set { _name = value; OnPropertyChanged(); } }
         private string _description;
@@ -67,11 +69,12 @@ namespace Pulsar4X.ViewModel
             set { _maxFormula = value; OnPropertyChanged(); }
         }
         //private Dictionary
-        public Dictionary<Guid, string> GuidDictionary;
 
+        public TechListVM GuidDict { get; set; }
 
-        public ComponentAbilityTemplateVM(ObservableCollection<ComponentAbilityTemplateVM> parentList)
+        public ComponentAbilityTemplateVM(ObservableCollection<ComponentAbilityTemplateVM> parentList, Pulsar4X.ECSLib.StaticDataStore staticData)
         {
+            _staticData = staticData;
             //SelectedGuiHint = new DictionaryVM<GuiHint, string>(DisplayMode.Value);
             ParentList = parentList;
             foreach (var item in Enum.GetValues(typeof(GuiHint)))
@@ -82,7 +85,7 @@ namespace Pulsar4X.ViewModel
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
-        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList) : this(parentList)
+        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parentList, staticData)
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
@@ -91,7 +94,16 @@ namespace Pulsar4X.ViewModel
             AbilityFormula = abilitySD.AbilityFormula;
             MinFormula = abilitySD.MinFormula;
             MaxFormula = abilitySD.MaxFormula;
-            GuidDictionary = abilitySD.GuidDictionary;
+            //GuidDictionary = abilitySD.GuidDictionary;
+            DictionaryVM<Guid, string, string> techSelected = new DictionaryVM<Guid, string, string>();
+            if (abilitySD.GuiHint == GuiHint.GuiTechSelectionList)
+            {
+                foreach (var item in abilitySD.GuidDictionary)
+                {
+                    techSelected.Add(item.Key, _staticData.Techs[item.Key].Name);
+                }
+                GuidDict = new TechListVM(techSelected, _staticData);
+            }
         }
 
         private static List<Type> AbilityTypes()
@@ -136,7 +148,12 @@ namespace Pulsar4X.ViewModel
             sd.AbilityFormula = AbilityFormula;
             sd.MinFormula = MinFormula;
             sd.MaxFormula = MaxFormula;
-            sd.GuidDictionary = GuidDictionary;
+            Dictionary<Guid, string> guidict = new Dictionary<Guid, string>();
+            foreach (var item in GuidDict.SelectedItems)
+            {
+                guidict.Add(item.Key, item.Value);
+            }
+            sd.GuidDictionary = guidict;
             return sd;
                 
         }

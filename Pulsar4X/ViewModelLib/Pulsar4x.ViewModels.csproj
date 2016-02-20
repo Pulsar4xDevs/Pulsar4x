@@ -102,6 +102,7 @@
     <Compile Include="ViewModels\ComponentTemplateDesigner\ComponentTemplateVM.cs" />
     <Compile Include="ViewModels\ComponentTemplateDesigner\FormulaEditorVM.cs" />
     <Compile Include="ViewModels\ComponentTemplateDesigner\MineralFormulaVM.cs" />
+    <Compile Include="ViewModels\ComponentTemplateDesigner\TechListVM.cs" />
     <Compile Include="ViewModels\ConstructionAbilityVM.cs" />
     <Compile Include="ViewModels\DictionaryVM.cs" />
     <Compile Include="ViewModels\FactionVM.cs" />
