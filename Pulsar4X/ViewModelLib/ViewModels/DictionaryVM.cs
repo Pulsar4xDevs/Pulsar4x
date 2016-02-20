@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
@@ -62,8 +63,8 @@ namespace Pulsar4X.ViewModel
     /// An attempt at creating a class to make binding dictionaries to UI more streamlined.
     /// To Use in the View:
     ///     myComboBox.DataContext = viewModel.myDictionaryVM;
-    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
-    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
+    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
@@ -220,6 +221,14 @@ namespace Pulsar4X.ViewModel
                 _index.Remove(i);
                 _reverseIndex.Remove(item);
                 DisplayList.RemoveAt(i);
+                //_reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>();
+                int i2 = 0;
+                foreach (var thing in _dictionary)
+                {
+                    _index[i2] = thing;
+                    _reverseIndex[thing] = i2;
+                    i2++;
+                }
                 return true;
             }
             return false;

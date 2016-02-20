@@ -16,7 +16,7 @@
     <TableRow>
     <TableLayout>
     <TableRow ScaleHeight="False">
-      <Button Text="Add:" />
+      <Button Text="Add:" Command="{Binding AddCommand}" />
       <ComboBox ID="PossibleItems" DataContext="{Binding PossibleItems}"/>
     </TableRow>
     </TableLayout>

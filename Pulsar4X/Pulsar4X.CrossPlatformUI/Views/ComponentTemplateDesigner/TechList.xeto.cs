@@ -21,6 +21,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
             SelectedItems.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
             SelectedItems.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
+
         }
 
     }

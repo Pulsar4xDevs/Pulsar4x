@@ -114,6 +114,7 @@
     <Compile Include="ViewModels\ObservableDictionary.cs" />
     <Compile Include="ViewModels\PlanetVM.cs" />
     <Compile Include="ViewModels\RefinaryAbilityVM.cs" />
+    <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="ViewModels\RenderVM.cs" />
     <Compile Include="ViewModels\ResearchVM.cs" />
     <Compile Include="ViewModels\ShipDesignVM.cs" />

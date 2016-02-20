@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
@@ -13,6 +10,8 @@ namespace Pulsar4X.ViewModel
     {
         public DictionaryVM<Guid, string, string> SelectedItems {get; private set;}
         public DictionaryVM<Guid, string, string> PossibleItems { get; private set; }
+
+        public ICommand AddCommand { get { return new RelayCommand<object>(obj => AddSelectedPossibleToSelected()); } }
 
         public TechListVM(StaticDataStore staticData)
         {
@@ -29,8 +28,7 @@ namespace Pulsar4X.ViewModel
             SelectedItems = selectedItems;
             foreach (var item in SelectedItems)
             {
-                if(!SelectedItems.Keys.Contains(item.Key))
-                    PossibleItems.Remove(item);
+                PossibleItems.Remove(item.Key);
             }           
         }
 
@@ -45,8 +43,13 @@ namespace Pulsar4X.ViewModel
 
         public void AddSelectedPossibleToSelected()
         {
+            int selectedIndex = PossibleItems.SelectedIndex;
             SelectedItems.Add(PossibleItems.GetKeyValuePair());
             PossibleItems.Remove(PossibleItems.GetKey());
+            if (PossibleItems.Count > selectedIndex)
+                PossibleItems.SelectedIndex = selectedIndex;
+            else
+                PossibleItems.SelectedIndex = PossibleItems.Count - 1;
         }
     }
 }
