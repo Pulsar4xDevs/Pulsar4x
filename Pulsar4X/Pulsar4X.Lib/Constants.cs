@@ -361,8 +361,10 @@ namespace Pulsar4X
                 /// </summary>
                 LoadInstallation,
                 LoadShipComponent,
+                LoadPDCPart,
                 UnloadInstallation,
                 UnloadShipComponent,
+                UnloadPDCPart,
                 UnloadAll,
                 LoadAllMinerals,
                 UnloadAllMinerals,
@@ -443,6 +445,20 @@ namespace Pulsar4X
                 TractorSpecifiedShip,
                 TractorSpecifiedShipyard,
                 ReleaseAt,
+
+                /// <summary>
+                /// Transport equipped ships
+                /// </summary>
+                LoadGroundUnit,
+                UnloadGroundUnit,
+
+                /// <summary>
+                /// Any ship can carry teams or commanders.
+                /// </summary>
+                LoadCommander,
+                LoadTeam,
+                UnloadCommander,
+                UnloadTeam,
 
                 /// <summary>
                 /// Number of orders available.

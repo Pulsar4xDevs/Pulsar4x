@@ -1595,8 +1595,30 @@ namespace Pulsar4X.Entities
                         dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
                         break;
                 }
-
-                CurrentHeading = Pulsar4X.Helpers.GameMath.Angle.ToDegrees(Math.Atan(dY / dX));
+                /// <summary>
+                /// Do yourself a favor and don't divide by zero here. if X is exactly the same then we either want to go up or down, depending on the sign of dY. if dX and dY are both zero then currentHeading
+                /// doesn't matter and can be set to 0.0.
+                /// </summary>
+                if (dY == 0.0 && dX == 0.0)
+                {
+                    CurrentHeading = 0.0;
+                }
+                else if (dY == 0.0)
+                {
+                    if (dX > 0.0)
+                        CurrentHeading = 0.0;
+                    else if (dX < 0.0)
+                        CurrentHeading = 180.0;
+                }
+                else
+                {
+                    if (dX != 0.0)
+                        CurrentHeading = Pulsar4X.Helpers.GameMath.Angle.ToDegrees(Math.Atan(dY / dX));
+                    else if (dY > 0.0)
+                        CurrentHeading = 270.0;
+                    else if (dY < 0.0)
+                        CurrentHeading = 90.0;
+                }
             }
             else
                 CurrentHeading = 0.0;

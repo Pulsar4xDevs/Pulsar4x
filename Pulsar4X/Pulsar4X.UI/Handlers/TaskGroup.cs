@@ -220,6 +220,7 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.CurrentTDRadioButton.CheckedChanged += new EventHandler(CurrentTDRadioButton_CheckChanged);
             m_oTaskGroupPanel.AllOrdersTDRadioButton.CheckedChanged += new EventHandler(AllOrdersTDRadioButton_CheckChanged);
 
+            m_oTaskGroupPanel.AvailableActionsListBox.MouseClick += new MouseEventHandler(AvailableActionsListBox_MouseClick);
             m_oTaskGroupPanel.AvailableActionsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
             m_oTaskGroupPanel.SystemLocationsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
             m_oTaskGroupPanel.PlottedMovesListBox.MouseDoubleClick += new MouseEventHandler(RemoveButton_Clicked);
@@ -537,6 +538,105 @@ namespace Pulsar4X.UI.Handlers
             BuildPlottedMoveList();
             BuildSystemLocationList();
             CalculateTimeDistance();
+        }
+
+        /// <summary>
+        /// If an appropriate action is selected, make the Taskgroup secondary listbox visible and populate it.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AvailableActionsListBox_MouseClick(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Planets, Contacts, TG, WP
+            /// </summary>
+            int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
+
+            /// <summary>
+            /// If AddMove is clicked with no system location it will bomb.
+            /// </summary>
+            if (PlaceIndex != -1)
+            {
+                List<Guid> GID = SystemLocationGuidDict.Keys.ToList();
+                SystemListObject selected = SystemLocationDict[GID[PlaceIndex]];
+
+                int ActionIndex = m_oTaskGroupPanel.AvailableActionsListBox.SelectedIndex;
+                if (ActionIndex != -1)
+                {
+                    Constants.ShipTN.OrderType selected_ordertype = (Constants.ShipTN.OrderType)m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
+
+                    /// <summary>
+                    /// Now figure out what the hell order this would be.
+                    /// </summary>
+                    var entity = selected.Entity;
+                    var etype = selected.EntityType;
+
+                    switch (selected_ordertype)
+                    {
+                        case Constants.ShipTN.OrderType.LoadInstallation:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Installation";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            foreach (Installation inst in (selected.Entity as Population).Installations)
+                            {
+                                if (inst.Number >= 1.0f && inst.Type != Installation.InstallationType.ConventionalIndustry &&
+                                    inst.Type != Installation.InstallationType.CivilianMiningComplex && inst.Type != Installation.InstallationType.MilitaryAcademy &&
+                                    inst.Type != Installation.InstallationType.SectorCommand && inst.Type != Installation.InstallationType.Spaceport &&
+                                    inst.Type != Installation.InstallationType.CommercialShipyard && inst.Type != Installation.InstallationType.NavalShipyardComplex)
+                                {
+                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(inst.Type);
+                                }
+                            }
+                            break;
+                        case Constants.ShipTN.OrderType.LoadMineral:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Mineral";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                            {
+                                m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(((Constants.Minerals.MinerialNames)mineralIterator).ToString());
+                            }
+                            break;
+#warning All of the rest of these load types need to be implemented
+                        case Constants.ShipTN.OrderType.LoadMineralWhenX:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Mineral";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadShipComponent:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Component";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadPDCPart:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select PDC Part";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadGroundUnit:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Ground Unit";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadCommander:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Commander";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadTeam:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Team";
+                            break;
+                        default:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+                            break;
+                    }
+                }
+            }
         }
 
         /// <summary>

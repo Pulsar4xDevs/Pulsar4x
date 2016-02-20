@@ -90,6 +90,22 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Secondary orders listbox: minerals, installation, ground units, commanders, teams, pdc parts, and anything else.
+        /// </summary>
+        public ListBox TaskgroupSecondaryListBox
+        {
+            get { return m_oTaskgroupSecondaryListBox; }
+        }
+
+        /// <summary>
+        /// Secondary orders groupbox: will have text for the above.
+        /// </summary>
+        public GroupBox TaskgroupSecondaryGroupBox
+        {
+            get { return m_oTaskGroupSecondaryGroupBox; }
+        }
+
+        /// <summary>
         /// Should detected contacts be displayed?
         /// </summary>
         public CheckBox DisplayContactsCheckBox
@@ -402,6 +418,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oMatchSpeedsCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oCopyOrdersToSubordinateButton = new System.Windows.Forms.Button();
             this.m_oCondOrderAGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oCondAOrderLabel = new System.Windows.Forms.Label();
+            this.m_oCondACondLabel = new System.Windows.Forms.Label();
             this.m_oCondAOrderComboBox = new System.Windows.Forms.ComboBox();
             this.m_oCondAConditionComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSuperiorFormationGroupBox = new System.Windows.Forms.GroupBox();
@@ -411,12 +429,21 @@ namespace Pulsar4X.UI.Panels
             this.m_oSaveCombineButton = new System.Windows.Forms.Button();
             this.m_oCombineTaskgroupsComboBox = new System.Windows.Forms.ComboBox();
             this.m_oCondOrderBGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oCondBOrderLabel = new System.Windows.Forms.Label();
+            this.m_oCondBCondLabel = new System.Windows.Forms.Label();
             this.m_oCondBOrderComboBox = new System.Windows.Forms.ComboBox();
             this.m_oCondBConditionComboBox = new System.Windows.Forms.ComboBox();
             this.m_oDefaultOrderGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oDefaultSecondaryLabel = new System.Windows.Forms.Label();
+            this.m_oDefaultPrimaryLabel = new System.Windows.Forms.Label();
             this.m_oSecondaryDefaultOrdersComboBox = new System.Windows.Forms.ComboBox();
             this.m_oPrimaryDefaultOrdersComboBox = new System.Windows.Forms.ComboBox();
             this.m_oProtectThreatAxisGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oBearingThreatLabel = new System.Windows.Forms.Label();
+            this.m_oOffsetthreatLabel = new System.Windows.Forms.Label();
+            this.m_oThreatDistanceLabel = new System.Windows.Forms.Label();
+            this.m_oTaskGroupThreatLabel = new System.Windows.Forms.Label();
+            this.m_oThreatLabel = new System.Windows.Forms.Label();
             this.comboBox12 = new System.Windows.Forms.ComboBox();
             this.comboBox11 = new System.Windows.Forms.ComboBox();
             this.comboBox10 = new System.Windows.Forms.ComboBox();
@@ -470,17 +497,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oAddColonyButton = new System.Windows.Forms.Button();
             this.m_oSystemMapButton = new System.Windows.Forms.Button();
             this.m_oNewTGButton = new System.Windows.Forms.Button();
-            this.m_oDefaultPrimaryLabel = new System.Windows.Forms.Label();
-            this.m_oDefaultSecondaryLabel = new System.Windows.Forms.Label();
-            this.m_oCondACondLabel = new System.Windows.Forms.Label();
-            this.m_oCondAOrderLabel = new System.Windows.Forms.Label();
-            this.m_oCondBCondLabel = new System.Windows.Forms.Label();
-            this.m_oCondBOrderLabel = new System.Windows.Forms.Label();
-            this.m_oThreatLabel = new System.Windows.Forms.Label();
-            this.m_oTaskGroupThreatLabel = new System.Windows.Forms.Label();
-            this.m_oThreatDistanceLabel = new System.Windows.Forms.Label();
-            this.m_oOffsetthreatLabel = new System.Windows.Forms.Label();
-            this.m_oBearingThreatLabel = new System.Windows.Forms.Label();
+            this.m_oTaskGroupSecondaryGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oTaskgroupSecondaryListBox = new System.Windows.Forms.ListBox();
             this.m_oGeneralTGDetailsBox.SuspendLayout();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oTaskGroupOrdersTabPage.SuspendLayout();
@@ -513,6 +531,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCenterShowGF.SuspendLayout();
             this.m_oSpeedBox.SuspendLayout();
             this.m_oButtonBox.SuspendLayout();
+            this.m_oTaskGroupSecondaryGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupName
@@ -932,6 +951,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oTaskGroupOrdersBox.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oTaskGroupSecondaryGroupBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrdersTextBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrderButton);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oCycleMovesCheckBox);
@@ -1525,6 +1545,24 @@ namespace Pulsar4X.UI.Panels
             this.m_oCondOrderAGroupBox.TabStop = false;
             this.m_oCondOrderAGroupBox.Text = "Conditional Order A(act on order if condition is met)";
             // 
+            // m_oCondAOrderLabel
+            // 
+            this.m_oCondAOrderLabel.AutoSize = true;
+            this.m_oCondAOrderLabel.Location = new System.Drawing.Point(6, 61);
+            this.m_oCondAOrderLabel.Name = "m_oCondAOrderLabel";
+            this.m_oCondAOrderLabel.Size = new System.Drawing.Size(33, 13);
+            this.m_oCondAOrderLabel.TabIndex = 5;
+            this.m_oCondAOrderLabel.Text = "Order";
+            // 
+            // m_oCondACondLabel
+            // 
+            this.m_oCondACondLabel.AutoSize = true;
+            this.m_oCondACondLabel.Location = new System.Drawing.Point(6, 26);
+            this.m_oCondACondLabel.Name = "m_oCondACondLabel";
+            this.m_oCondACondLabel.Size = new System.Drawing.Size(51, 13);
+            this.m_oCondACondLabel.TabIndex = 4;
+            this.m_oCondACondLabel.Text = "Condition";
+            // 
             // m_oCondAOrderComboBox
             // 
             this.m_oCondAOrderComboBox.FormattingEnabled = true;
@@ -1614,6 +1652,24 @@ namespace Pulsar4X.UI.Panels
             this.m_oCondOrderBGroupBox.TabStop = false;
             this.m_oCondOrderBGroupBox.Text = "Conditional Order B(act on order if condition is met)";
             // 
+            // m_oCondBOrderLabel
+            // 
+            this.m_oCondBOrderLabel.AutoSize = true;
+            this.m_oCondBOrderLabel.Location = new System.Drawing.Point(6, 61);
+            this.m_oCondBOrderLabel.Name = "m_oCondBOrderLabel";
+            this.m_oCondBOrderLabel.Size = new System.Drawing.Size(33, 13);
+            this.m_oCondBOrderLabel.TabIndex = 7;
+            this.m_oCondBOrderLabel.Text = "Order";
+            // 
+            // m_oCondBCondLabel
+            // 
+            this.m_oCondBCondLabel.AutoSize = true;
+            this.m_oCondBCondLabel.Location = new System.Drawing.Point(6, 24);
+            this.m_oCondBCondLabel.Name = "m_oCondBCondLabel";
+            this.m_oCondBCondLabel.Size = new System.Drawing.Size(51, 13);
+            this.m_oCondBCondLabel.TabIndex = 6;
+            this.m_oCondBCondLabel.Text = "Condition";
+            // 
             // m_oCondBOrderComboBox
             // 
             this.m_oCondBOrderComboBox.FormattingEnabled = true;
@@ -1644,6 +1700,24 @@ namespace Pulsar4X.UI.Panels
             this.m_oDefaultOrderGroupBox.TabIndex = 1;
             this.m_oDefaultOrderGroupBox.TabStop = false;
             this.m_oDefaultOrderGroupBox.Text = "Default Orders(if no other orders are set)";
+            // 
+            // m_oDefaultSecondaryLabel
+            // 
+            this.m_oDefaultSecondaryLabel.AutoSize = true;
+            this.m_oDefaultSecondaryLabel.Location = new System.Drawing.Point(6, 61);
+            this.m_oDefaultSecondaryLabel.Name = "m_oDefaultSecondaryLabel";
+            this.m_oDefaultSecondaryLabel.Size = new System.Drawing.Size(58, 13);
+            this.m_oDefaultSecondaryLabel.TabIndex = 3;
+            this.m_oDefaultSecondaryLabel.Text = "Secondary";
+            // 
+            // m_oDefaultPrimaryLabel
+            // 
+            this.m_oDefaultPrimaryLabel.AutoSize = true;
+            this.m_oDefaultPrimaryLabel.Location = new System.Drawing.Point(6, 26);
+            this.m_oDefaultPrimaryLabel.Name = "m_oDefaultPrimaryLabel";
+            this.m_oDefaultPrimaryLabel.Size = new System.Drawing.Size(41, 13);
+            this.m_oDefaultPrimaryLabel.TabIndex = 2;
+            this.m_oDefaultPrimaryLabel.Text = "Primary";
             // 
             // m_oSecondaryDefaultOrdersComboBox
             // 
@@ -1680,6 +1754,51 @@ namespace Pulsar4X.UI.Panels
             this.m_oProtectThreatAxisGroupBox.TabIndex = 0;
             this.m_oProtectThreatAxisGroupBox.TabStop = false;
             this.m_oProtectThreatAxisGroupBox.Text = "Protect Threat Axis(Acts as Highest Priority default order)";
+            // 
+            // m_oBearingThreatLabel
+            // 
+            this.m_oBearingThreatLabel.AutoSize = true;
+            this.m_oBearingThreatLabel.Location = new System.Drawing.Point(6, 144);
+            this.m_oBearingThreatLabel.Name = "m_oBearingThreatLabel";
+            this.m_oBearingThreatLabel.Size = new System.Drawing.Size(43, 13);
+            this.m_oBearingThreatLabel.TabIndex = 12;
+            this.m_oBearingThreatLabel.Text = "Bearing";
+            // 
+            // m_oOffsetthreatLabel
+            // 
+            this.m_oOffsetthreatLabel.AutoSize = true;
+            this.m_oOffsetthreatLabel.Location = new System.Drawing.Point(6, 131);
+            this.m_oOffsetthreatLabel.Name = "m_oOffsetthreatLabel";
+            this.m_oOffsetthreatLabel.Size = new System.Drawing.Size(35, 13);
+            this.m_oOffsetthreatLabel.TabIndex = 11;
+            this.m_oOffsetthreatLabel.Text = "Offset";
+            // 
+            // m_oThreatDistanceLabel
+            // 
+            this.m_oThreatDistanceLabel.AutoSize = true;
+            this.m_oThreatDistanceLabel.Location = new System.Drawing.Point(6, 96);
+            this.m_oThreatDistanceLabel.Name = "m_oThreatDistanceLabel";
+            this.m_oThreatDistanceLabel.Size = new System.Drawing.Size(49, 13);
+            this.m_oThreatDistanceLabel.TabIndex = 10;
+            this.m_oThreatDistanceLabel.Text = "Distance";
+            // 
+            // m_oTaskGroupThreatLabel
+            // 
+            this.m_oTaskGroupThreatLabel.AutoSize = true;
+            this.m_oTaskGroupThreatLabel.Location = new System.Drawing.Point(6, 59);
+            this.m_oTaskGroupThreatLabel.Name = "m_oTaskGroupThreatLabel";
+            this.m_oTaskGroupThreatLabel.Size = new System.Drawing.Size(58, 13);
+            this.m_oTaskGroupThreatLabel.TabIndex = 9;
+            this.m_oTaskGroupThreatLabel.Text = "Taskgroup";
+            // 
+            // m_oThreatLabel
+            // 
+            this.m_oThreatLabel.AutoSize = true;
+            this.m_oThreatLabel.Location = new System.Drawing.Point(6, 26);
+            this.m_oThreatLabel.Name = "m_oThreatLabel";
+            this.m_oThreatLabel.Size = new System.Drawing.Size(38, 13);
+            this.m_oThreatLabel.TabIndex = 8;
+            this.m_oThreatLabel.Text = "Threat";
             // 
             // comboBox12
             // 
@@ -2233,104 +2352,24 @@ namespace Pulsar4X.UI.Panels
             this.m_oNewTGButton.Text = "&New TG";
             this.m_oNewTGButton.UseVisualStyleBackColor = true;
             // 
-            // m_oDefaultPrimaryLabel
+            // m_oTaskGroupSecondaryGroupBox
             // 
-            this.m_oDefaultPrimaryLabel.AutoSize = true;
-            this.m_oDefaultPrimaryLabel.Location = new System.Drawing.Point(6, 26);
-            this.m_oDefaultPrimaryLabel.Name = "m_oDefaultPrimaryLabel";
-            this.m_oDefaultPrimaryLabel.Size = new System.Drawing.Size(41, 13);
-            this.m_oDefaultPrimaryLabel.TabIndex = 2;
-            this.m_oDefaultPrimaryLabel.Text = "Primary";
+            this.m_oTaskGroupSecondaryGroupBox.Controls.Add(this.m_oTaskgroupSecondaryListBox);
+            this.m_oTaskGroupSecondaryGroupBox.Location = new System.Drawing.Point(517, 69);
+            this.m_oTaskGroupSecondaryGroupBox.Name = "m_oTaskGroupSecondaryGroupBox";
+            this.m_oTaskGroupSecondaryGroupBox.Size = new System.Drawing.Size(275, 201);
+            this.m_oTaskGroupSecondaryGroupBox.TabIndex = 45;
+            this.m_oTaskGroupSecondaryGroupBox.TabStop = false;
+            this.m_oTaskGroupSecondaryGroupBox.Visible = false;
             // 
-            // m_oDefaultSecondaryLabel
+            // m_oTaskgroupSecondaryListBox
             // 
-            this.m_oDefaultSecondaryLabel.AutoSize = true;
-            this.m_oDefaultSecondaryLabel.Location = new System.Drawing.Point(6, 61);
-            this.m_oDefaultSecondaryLabel.Name = "m_oDefaultSecondaryLabel";
-            this.m_oDefaultSecondaryLabel.Size = new System.Drawing.Size(58, 13);
-            this.m_oDefaultSecondaryLabel.TabIndex = 3;
-            this.m_oDefaultSecondaryLabel.Text = "Secondary";
-            // 
-            // m_oCondACondLabel
-            // 
-            this.m_oCondACondLabel.AutoSize = true;
-            this.m_oCondACondLabel.Location = new System.Drawing.Point(6, 26);
-            this.m_oCondACondLabel.Name = "m_oCondACondLabel";
-            this.m_oCondACondLabel.Size = new System.Drawing.Size(51, 13);
-            this.m_oCondACondLabel.TabIndex = 4;
-            this.m_oCondACondLabel.Text = "Condition";
-            // 
-            // m_oCondAOrderLabel
-            // 
-            this.m_oCondAOrderLabel.AutoSize = true;
-            this.m_oCondAOrderLabel.Location = new System.Drawing.Point(6, 61);
-            this.m_oCondAOrderLabel.Name = "m_oCondAOrderLabel";
-            this.m_oCondAOrderLabel.Size = new System.Drawing.Size(33, 13);
-            this.m_oCondAOrderLabel.TabIndex = 5;
-            this.m_oCondAOrderLabel.Text = "Order";
-            // 
-            // m_oCondBCondLabel
-            // 
-            this.m_oCondBCondLabel.AutoSize = true;
-            this.m_oCondBCondLabel.Location = new System.Drawing.Point(6, 24);
-            this.m_oCondBCondLabel.Name = "m_oCondBCondLabel";
-            this.m_oCondBCondLabel.Size = new System.Drawing.Size(51, 13);
-            this.m_oCondBCondLabel.TabIndex = 6;
-            this.m_oCondBCondLabel.Text = "Condition";
-            // 
-            // m_oCondBOrderLabel
-            // 
-            this.m_oCondBOrderLabel.AutoSize = true;
-            this.m_oCondBOrderLabel.Location = new System.Drawing.Point(6, 61);
-            this.m_oCondBOrderLabel.Name = "m_oCondBOrderLabel";
-            this.m_oCondBOrderLabel.Size = new System.Drawing.Size(33, 13);
-            this.m_oCondBOrderLabel.TabIndex = 7;
-            this.m_oCondBOrderLabel.Text = "Order";
-            // 
-            // m_oThreatLabel
-            // 
-            this.m_oThreatLabel.AutoSize = true;
-            this.m_oThreatLabel.Location = new System.Drawing.Point(6, 26);
-            this.m_oThreatLabel.Name = "m_oThreatLabel";
-            this.m_oThreatLabel.Size = new System.Drawing.Size(38, 13);
-            this.m_oThreatLabel.TabIndex = 8;
-            this.m_oThreatLabel.Text = "Threat";
-            // 
-            // m_oTaskGroupThreatLabel
-            // 
-            this.m_oTaskGroupThreatLabel.AutoSize = true;
-            this.m_oTaskGroupThreatLabel.Location = new System.Drawing.Point(6, 59);
-            this.m_oTaskGroupThreatLabel.Name = "m_oTaskGroupThreatLabel";
-            this.m_oTaskGroupThreatLabel.Size = new System.Drawing.Size(58, 13);
-            this.m_oTaskGroupThreatLabel.TabIndex = 9;
-            this.m_oTaskGroupThreatLabel.Text = "Taskgroup";
-            // 
-            // m_oThreatDistanceLabel
-            // 
-            this.m_oThreatDistanceLabel.AutoSize = true;
-            this.m_oThreatDistanceLabel.Location = new System.Drawing.Point(6, 96);
-            this.m_oThreatDistanceLabel.Name = "m_oThreatDistanceLabel";
-            this.m_oThreatDistanceLabel.Size = new System.Drawing.Size(49, 13);
-            this.m_oThreatDistanceLabel.TabIndex = 10;
-            this.m_oThreatDistanceLabel.Text = "Distance";
-            // 
-            // m_oOffsetthreatLabel
-            // 
-            this.m_oOffsetthreatLabel.AutoSize = true;
-            this.m_oOffsetthreatLabel.Location = new System.Drawing.Point(6, 131);
-            this.m_oOffsetthreatLabel.Name = "m_oOffsetthreatLabel";
-            this.m_oOffsetthreatLabel.Size = new System.Drawing.Size(35, 13);
-            this.m_oOffsetthreatLabel.TabIndex = 11;
-            this.m_oOffsetthreatLabel.Text = "Offset";
-            // 
-            // m_oBearingThreatLabel
-            // 
-            this.m_oBearingThreatLabel.AutoSize = true;
-            this.m_oBearingThreatLabel.Location = new System.Drawing.Point(6, 144);
-            this.m_oBearingThreatLabel.Name = "m_oBearingThreatLabel";
-            this.m_oBearingThreatLabel.Size = new System.Drawing.Size(43, 13);
-            this.m_oBearingThreatLabel.TabIndex = 12;
-            this.m_oBearingThreatLabel.Text = "Bearing";
+            this.m_oTaskgroupSecondaryListBox.FormattingEnabled = true;
+            this.m_oTaskgroupSecondaryListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oTaskgroupSecondaryListBox.Name = "m_oTaskgroupSecondaryListBox";
+            this.m_oTaskgroupSecondaryListBox.Size = new System.Drawing.Size(263, 147);
+            this.m_oTaskgroupSecondaryListBox.TabIndex = 0;
+            this.m_oTaskgroupSecondaryListBox.Visible = false;
             // 
             // TaskGroup_Panel
             // 
@@ -2395,6 +2434,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpeedBox.ResumeLayout(false);
             this.m_oSpeedBox.PerformLayout();
             this.m_oButtonBox.ResumeLayout(false);
+            this.m_oTaskGroupSecondaryGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2565,5 +2605,7 @@ namespace Pulsar4X.UI.Panels
         private Label m_oThreatDistanceLabel;
         private Label m_oTaskGroupThreatLabel;
         private Label m_oThreatLabel;
+        private GroupBox m_oTaskGroupSecondaryGroupBox;
+        private ListBox m_oTaskgroupSecondaryListBox;
     }
 }
