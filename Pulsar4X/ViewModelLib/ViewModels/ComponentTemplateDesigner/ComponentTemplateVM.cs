@@ -92,11 +92,10 @@ namespace Pulsar4X.ViewModel
         //}
         //public ObservableCollection<ItemPair<ComponentMountType, bool?>> MountType { get; set; }
 
-        private ObservableCollection<ComponentAbilityTemplateVM> _componentAbilitySDs = new ObservableCollection<ComponentAbilityTemplateVM>();
-        public ObservableCollection<ComponentAbilityTemplateVM> ComponentAbilitySDs
+        private readonly RangeEnabledObservableCollection<ComponentAbilityTemplateVM> _componentAbilitySDs = new RangeEnabledObservableCollection<ComponentAbilityTemplateVM>();
+        public RangeEnabledObservableCollection<ComponentAbilityTemplateVM> ComponentAbilitySDs
         {
             get { return _componentAbilitySDs; }
-            set { _componentAbilitySDs = value; OnPropertyChanged(); }
         }
 
 
@@ -196,11 +195,19 @@ namespace Pulsar4X.ViewModel
             //    MountType.Add(ipr);
             //}
 
+            //ComponentAbilitySDs.Clear();
+            //foreach (var item in designSD.ComponentAbilitySDs)
+            //{
+            //    ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs, _staticData));
+            //}
             ComponentAbilitySDs.Clear();
+            var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in designSD.ComponentAbilitySDs)
             {
-                ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs, _staticData));
+                tmp.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs, _staticData));
+                
             }
+            ComponentAbilitySDs.AddRange(tmp);
         }
 
         public void CreateSD()
