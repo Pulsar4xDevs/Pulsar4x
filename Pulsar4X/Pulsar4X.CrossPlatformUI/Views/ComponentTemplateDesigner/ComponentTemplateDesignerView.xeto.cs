@@ -53,6 +53,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 MountTypes.Items.Add(chkbx);
             }
             _viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
+            
             //for (int i = 0; i < _viewModel.MountType.Count ; i++)
             //{
             //    //ItemPair<ECSLib.ComponentMountType, bool?> ipr = item;
@@ -94,11 +95,18 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
         private void ComponentAbilitySDs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            AbilityTemplates.SuspendLayout();
             AbilityTemplates.Items.Clear();
             foreach (var item in _viewModel.ComponentAbilitySDs)
             {
                 AbilityTemplates.Items.Add(new ComponentAbilityTemplateDesignerView(item));
             }
+            //padding to fix a bug with eto scrollable not scrolling down far enough. 
+            //can be removed when the next version of eto.forms comes out as of this writing we're using 2.2 (it's fixed in the dev version of eto.forms)
+            AbilityTemplates.Items.Add(new Label());
+            AbilityTemplates.Items.Add(new Label());
+
+            AbilityTemplates.ResumeLayout();
         }
 
         private void MineralCostFormula_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
