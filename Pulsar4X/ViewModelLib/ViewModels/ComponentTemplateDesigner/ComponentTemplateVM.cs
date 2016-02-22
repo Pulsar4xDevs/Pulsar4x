@@ -63,31 +63,31 @@ namespace Pulsar4X.ViewModel
                 switch (ControlInFocus)
                 {
                     case FocusedControl.NameControl:
-                        value = Name;
+                        Name = value;
                         OnPropertyChanged();
                         break;
                     case FocusedControl.DescriptionControl:
-                        value = Description;
+                        Description = value;
                         OnPropertyChanged();
                         break;
                     case FocusedControl.SizeControl:
-                        value = SizeFormula;
+                        SizeFormula = value;
                         OnPropertyChanged();
                         break;
                     case FocusedControl.CrewReqControl:
-                        value = CrewReqFormula;
+                        CrewReqFormula = value;
                         OnPropertyChanged();
                         break;
                     case FocusedControl.HTKControl:
-                        value = HTKFormula;
+                        HTKFormula = value;
                         OnPropertyChanged();
                         break;
                     case FocusedControl.BPCostControl:
-                        value = BuildPointCostFormula;
+                        BuildPointCostFormula = value;
                         OnPropertyChanged();
                         break;
                     case FocusedControl.ResearchCostControl:
-                        value = ResearchCostFormula;
+                        ResearchCostFormula = value;
                         OnPropertyChanged();
                         break;
                 }
