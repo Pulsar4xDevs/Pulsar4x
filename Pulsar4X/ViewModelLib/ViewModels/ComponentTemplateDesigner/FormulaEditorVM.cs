@@ -55,9 +55,14 @@ namespace Pulsar4X.ViewModel
             ParameterButtons.Add(new ButtonInfo("[CreditCost]", "Links to the Credit Cost formula field", this));
             ParameterButtons.Add(new ButtonInfo("[GuidDict]", "A special parameter for a key value pair collection, used in ability formula fields", this));
 
-
+            _parent.PropertyChanged += _parent_PropertyChanged;
         }
 
+        private void _parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "FocusText")
+                OnPropertyChanged("Formula");
+        }
 
         public void AddParam(string param)
         {
