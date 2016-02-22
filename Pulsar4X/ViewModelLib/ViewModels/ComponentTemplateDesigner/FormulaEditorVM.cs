@@ -66,7 +66,9 @@ namespace Pulsar4X.ViewModel
 
         public void AddParam(string param)
         {
-            Formula = Formula.Insert(CaretIndex, param);
+            //Formula = Formula.Insert(CaretIndex, param);
+            //CaretIndex doesn't fire an event so we'll have to just append for now
+            Formula += param;
         }
     }
 
