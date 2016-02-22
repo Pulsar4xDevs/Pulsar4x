@@ -14,10 +14,31 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         protected StackLayout MountTypes { get; set; }
         protected Button Save { get; set; }
         protected Button Export { get; set; }
+        protected FormulaEditorView FormulaEditorView { get; set; }
         private ComponentTemplateVM _viewModel;
+        
+        protected TextBox SizeFormulaTBx { get; set; }
+        protected TextBox HTKTBx { get; set; }
+        protected TextBox CrewReqTBx { get; set; }
+        protected TextBox ResearchCostTBx { get; set; }
+        protected TextBox BuildPointTBx { get; set; }
+        protected TextBox CreditCostTBx { get; set; }
+
+
+
         public ComponentTemplateDesignerView()
         {
             XamlReader.Load(this);
+
+            SizeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.SizeControl;
+            HTKTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.HTKControl;
+            CrewReqTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.CrewReqControl;
+            ResearchCostTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.ResearchCostControl;
+            BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.BPCostControl;
+            CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.CreditCostControl;
+
+            ComponentsComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
+            ComponentsComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);
         }
 
         public ComponentTemplateDesignerView(ComponentTemplateVM viewModel) : this()
@@ -26,9 +47,9 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             DataContext = _viewModel;
             Save.Click += Save_Click;
             Export.Click += Export_Click;
-            ComponentsComBox.DataContext = viewModel.Components;
-            ComponentsComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
-            ComponentsComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);
+            //ComponentsComBox.DataContext = viewModel.Components;
+
+            FormulaEditorView.SetViewModel(_viewModel.FormulaEditor);
 
             foreach (var item in viewModel.ComponentAbilitySDs)
             {
@@ -43,7 +64,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
             foreach (var item in _viewModel.MountType)
             {
-                //KeyValuePair<ECSLib.ComponentMountType, bool?> kvp = item;
+       
                 ECSLib.ComponentMountType key = item.Key;
                 CheckBox chkbx = new CheckBox();
                 chkbx.Text = key.ToString();
@@ -53,26 +74,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 MountTypes.Items.Add(chkbx);
             }
             _viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
-            
-            //for (int i = 0; i < _viewModel.MountType.Count ; i++)
-            //{
-            //    //ItemPair<ECSLib.ComponentMountType, bool?> ipr = item;
-            //    int idx = i;
-            //    CheckBox chkbx = new CheckBox();
-            //    chkbx.Text = _viewModel.MountType[idx].Item1.ToString();//ipr.Item1.ToString();
-            //    chkbx.CheckedBinding.BindDataContext((ItemPair<ECSLib.ComponentMountType, bool?> x) => x.Item2, (m, val) => m.Item2 = val);
-            //    chkbx.DataContext = _viewModel.MountType[idx];
-            //    MountTypes.Items.Add(chkbx);
-            //}
-            //foreach (var item in _viewModel.MountType)
-            //{
-            //    ItemPair<ECSLib.ComponentMountType, bool?> ipr = item;
-            //    CheckBox chkbx = new CheckBox();
-            //    chkbx.Text = ipr.Item1.ToString();
-            //    chkbx.CheckedBinding.BindDataContext((ItemPair<ECSLib.ComponentMountType, bool?> x) => x.Item2, (m, val) => m.Item2 = val);
-            //    chkbx.DataContext = ipr; //_viewModel.MountType;
-            //    MountTypes.Items.Add(chkbx);
-            //}
+           
         }
 
         private void Export_Click(object sender, System.EventArgs e)

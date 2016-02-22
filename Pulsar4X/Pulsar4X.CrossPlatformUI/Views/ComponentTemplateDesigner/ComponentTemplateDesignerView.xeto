@@ -10,7 +10,7 @@
     <TableLayout>
     <TableRow>
       <Label Text="Name" />
-      <ComboBox ID="ComponentsComBox" />
+      <ComboBox ID="ComponentsComBox" DataContext="{Binding Components}" />
       <Label Text="Description" />
       <TextBox Text="{Binding Description}" />
       <Label Text="ID" />
@@ -18,23 +18,23 @@
     </TableRow>
     <TableRow>
       <Label Text="SizeFormula" />
-      <TextBox Text="{Binding SizeFormula}" />
+      <TextBox ID="SizeFormulaTBx" Text="{Binding SizeFormula}" />
       <Label Text="HTKFormula" />
-      <TextBox Text="{Binding HTKFormula}" />
+      <TextBox ID="HTKTBx" Text="{Binding HTKFormula}" />
       <Label Text="CrewReqFormula" />
-      <TextBox Text="{Binding CrewReqFormula}" />
+      <TextBox ID="CrewReqTBx" Text="{Binding CrewReqFormula}" />
     </TableRow>
     <TableRow>
       <Label Text="ResearchCostFormula" />
-      <TextBox Text="{Binding ResearchCostFormula}" />
+      <TextBox ID="ResearchCostTBx" Text="{Binding ResearchCostFormula}" />
       <Label Text="BuildPointCostFormula" />
-      <TextBox Text="{Binding BuildPointCostFormula}" />
+      <TextBox ID="BuildPointTBx" Text="{Binding BuildPointCostFormula}" />
       <Label Text="MineralCostFormula" />
       <StackLayout ID="MineralCostFormulaStackLayout" />
     </TableRow>
     <TableRow>
       <Label Text="CreditCostFormula" />
-      <TextBox Text="{Binding CreditCostFormula}" />
+      <TextBox ID="CreditCostTBx" Text="{Binding CreditCostFormula}" />
       <Label Text="MountType" />
       <StackLayout ID="MountTypes"/>
     </TableRow>
@@ -46,7 +46,7 @@
       <Scrollable >
         <StackLayout  ID="AbilityTemplates"></StackLayout>
       </Scrollable>
-      <c:FormulaEditorView />
+      <c:FormulaEditorView x:Name="FormulaEditorView"/>
     </TableRow>   
   </TableLayout>
     </TableRow>

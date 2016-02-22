@@ -10,15 +10,95 @@ using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ViewModel
 {
+    public enum FocusedControl
+    {
+        NameControl,
+        DescriptionControl,
+        SizeControl,
+        HTKControl,
+        CrewReqControl,
+        MinCostControl,
+        BPCostControl,
+        ResearchCostControl,
+        CreditCostControl,
+        MinControl,
+        MaxControl,
+    }
+
     public class ComponentTemplateVM : IViewModel
     {
         private StaticDataStore _staticData;
 
         public DictionaryVM<ComponentSD, string, string> Components { get; set; }
-        
-        
 
-        public string Name { get; set; }
+        public FormulaEditorVM FormulaEditor { get; set; }
+        public FocusedControl ControlInFocus { get; set; }
+        public string FocusedText
+        {
+            get
+            {
+                switch (ControlInFocus)
+                {
+                    case FocusedControl.NameControl:
+                        return Name;                        
+                    case FocusedControl.DescriptionControl:
+                        return Description;
+                    case FocusedControl.SizeControl:
+                        return SizeFormula;
+                    case FocusedControl.CrewReqControl:
+                        return CrewReqFormula;
+                    case FocusedControl.HTKControl:
+                        return HTKFormula;
+                    case FocusedControl.BPCostControl:
+                        return BuildPointCostFormula;
+                    case FocusedControl.ResearchCostControl:
+                        return ResearchCostFormula;                   
+                    default:
+                        return "";
+                }
+            }
+            set
+            {
+                switch (ControlInFocus)
+                {
+                    case FocusedControl.NameControl:
+                        value = Name;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.DescriptionControl:
+                        value = Description;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.SizeControl:
+                        value = SizeFormula;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.CrewReqControl:
+                        value = CrewReqFormula;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.HTKControl:
+                        value = HTKFormula;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.BPCostControl:
+                        value = BuildPointCostFormula;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.ResearchCostControl:
+                        value = ResearchCostFormula;
+                        OnPropertyChanged();
+                        break;
+                }
+            }
+        }
+
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; OnPropertyChanged(); }
+        }
         private string _description;
         public string Description
         {
@@ -51,11 +131,10 @@ namespace Pulsar4X.ViewModel
             set { _crewReqFormula = value; OnPropertyChanged(); }
         }
 
-        private ObservableCollection<MineralFormulaVM> _mineralCostFormula = new ObservableCollection<MineralFormulaVM>();
+        private readonly ObservableCollection<MineralFormulaVM> _mineralCostFormula = new ObservableCollection<MineralFormulaVM>();
         public ObservableCollection<MineralFormulaVM> MineralCostFormula
         {
             get { return _mineralCostFormula; }
-            set { _mineralCostFormula = value; OnPropertyChanged(); }
         }
         private string _researchCostFormula;
         public string ResearchCostFormula
@@ -77,20 +156,10 @@ namespace Pulsar4X.ViewModel
             get { return _buildPointCostFormula; }
             set { _buildPointCostFormula = value; OnPropertyChanged(); }
         }
+        
+        
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
-
         public ObservableDictionary<ComponentMountType, bool?> MountType { get; set; }
-
-        //private DictionaryVM<ComponentMountType, bool?, bool?> _mountType = new DictionaryVM<ComponentMountType, bool?, bool?>();
-        //public DictionaryVM<ComponentMountType, bool?, bool?> MountType { get; set; }
-
-        //private ObservableCollection<ItemPair<ComponentMountType, bool?>> _mountType;
-        //public ObservableCollection<ItemPair<ComponentMountType, bool?>> MountType
-        //{
-        //    get { return _mountType; }
-        //    set { _mountType = value; OnPropertyChanged(); }
-        //}
-        //public ObservableCollection<ItemPair<ComponentMountType, bool?>> MountType { get; set; }
 
         private readonly RangeEnabledObservableCollection<ComponentAbilityTemplateVM> _componentAbilitySDs = new RangeEnabledObservableCollection<ComponentAbilityTemplateVM>();
         public RangeEnabledObservableCollection<ComponentAbilityTemplateVM> ComponentAbilitySDs
@@ -103,6 +172,8 @@ namespace Pulsar4X.ViewModel
         public ComponentTemplateVM(GameVM gameData)
         {
             _staticData = gameData.Game.StaticData;
+            ControlInFocus = FocusedControl.SizeControl;
+            FormulaEditor = new FormulaEditorVM(this);
             Components = new DictionaryVM<ComponentSD, string, string>();
             foreach (var item in _staticData.Components.Values)
             {
@@ -146,16 +217,12 @@ namespace Pulsar4X.ViewModel
             CreditCostFormula = "";
             BuildPointCostFormula = "";
             MountType = new ObservableDictionary<ComponentMountType, bool?>();
-            //MountType = new DictionaryVM<ComponentMountType, bool?, bool?>();
+
             foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
             {
                 MountType.Add((ComponentMountType)item, false);
             }
-            //MountType = new ObservableCollection<ItemPair<ComponentMountType, bool?>>();
-            //foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
-            //{
-            //    MountType.Add(new ItemPair<ComponentMountType, bool?>((ComponentMountType)item, false));
-            //}
+
             ComponentAbilitySDs.Clear();
             ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(ComponentAbilitySDs, _staticData));
         }
@@ -169,7 +236,7 @@ namespace Pulsar4X.ViewModel
             SizeFormula = designSD.SizeFormula;
             HTKFormula = designSD.HTKFormula;
             CrewReqFormula = designSD.CrewReqFormula;
-            MineralCostFormula.Clear(); // = new ObservableCollection<MineralFormulaVM>();//clear the list
+            MineralCostFormula.Clear(); 
             foreach (var item in designSD.MineralCostFormula)
             {
                 MineralCostFormula.Add(new MineralFormulaVM(_staticData, item));
@@ -184,22 +251,7 @@ namespace Pulsar4X.ViewModel
             {
                 MountType[item.Key] = item.Value;
             }
-            //for (int i = 0; i < MountType.Count; i++)
-            //{
-            //    MountType[i].Item2 = designSD.MountType.ElementAt(i).Value;//not sure this will work, didn't think dictionarys were ordered?
-            //}
-            //MountType.Clear();
-            //foreach (var item in designSD.MountType)
-            //{
-            //    ItemPair<ComponentMountType, bool?> ipr = new ItemPair<ComponentMountType, bool?>(item.Key, item.Value);
-            //    MountType.Add(ipr);
-            //}
 
-            //ComponentAbilitySDs.Clear();
-            //foreach (var item in designSD.ComponentAbilitySDs)
-            //{
-            //    ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs, _staticData));
-            //}
             ComponentAbilitySDs.Clear();
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in designSD.ComponentAbilitySDs)

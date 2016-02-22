@@ -9,26 +9,14 @@
         <Label Text="{Binding FunctionName}" />
       </TableRow>
       <TableRow>
-        <TextBox Text="{Binding Function}"/>
+        <TextBox CaretIndex="{Binding CaretIndex}" Text="{Binding Function}"/>
       </TableRow>
     </TableLayout>
     <TableLayout>
       <TableRow>
         <Label Text="Parameters:" />
       </TableRow>
-        <TableLayout>
-      <TableRow>
-        <Button Text="[Size]"/>
-        <Button Text="[Crew]"/>
-        <Button Text="[HTK]"/>
-        <Button Text="[ResearchCost]"/>
-      </TableRow>  
-      <TableRow>
-        <Button Text="[MineralCosts]"/>
-        <Button Text="[CreditCost]"/>
-        <Button Text="[GuidDict]"/>
-      </TableRow>    
-      </TableLayout>
+        <StackLayout ID="ParameterButtonsStackLayout" />
       <TableRow>
         <Label Text="Functions:" />
       </TableRow>
