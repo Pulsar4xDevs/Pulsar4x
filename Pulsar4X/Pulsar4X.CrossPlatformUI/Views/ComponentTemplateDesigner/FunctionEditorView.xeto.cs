@@ -18,6 +18,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
         public void SetViewModel(FormulaEditorVM viewModel)
         {
+            DataContext = viewModel;
             ParameterButtonsStackLayout.Orientation = Orientation.Horizontal;
             foreach (var item in viewModel.ParameterButtons)
             {
