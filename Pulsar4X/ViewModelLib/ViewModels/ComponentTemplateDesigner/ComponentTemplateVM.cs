@@ -32,7 +32,8 @@ namespace Pulsar4X.ViewModel
         public DictionaryVM<ComponentSD, string, string> Components { get; set; }
 
         public FormulaEditorVM FormulaEditor { get; set; }
-        public FocusedControl ControlInFocus { get; set; }
+        private FocusedControl _controlInFocus;
+        public FocusedControl ControlInFocus { get { return _controlInFocus; } set { _controlInFocus = value; OnPropertyChanged("FocusText"); }  }
         public string FocusedText
         {
             get
@@ -174,6 +175,7 @@ namespace Pulsar4X.ViewModel
             _staticData = gameData.Game.StaticData;
             ControlInFocus = FocusedControl.SizeControl;
             FormulaEditor = new FormulaEditorVM(this);
+            
             Components = new DictionaryVM<ComponentSD, string, string>();
             foreach (var item in _staticData.Components.Values)
             {

@@ -15,15 +15,21 @@ namespace Pulsar4X.ViewModel
 
         private ComponentTemplateVM _parent;
 
-        public string FunctionName { get; set; }
+        public string FormulaName { get; set; }
 
         
-        public string Function
+        public string Formula
         {
             get { return _parent.FocusedText; }
             set { _parent.FocusedText = value; OnPropertyChanged(); }
         }
-        public int CaretIndex { get; set; }
+
+        private int _caretIndex;
+        public int CaretIndex
+        {
+            get { return _caretIndex; }
+            set { _caretIndex = value; OnPropertyChanged(); }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -55,7 +61,7 @@ namespace Pulsar4X.ViewModel
 
         public void AddParam(string param)
         {
-            Function = Function.Insert(CaretIndex, param);
+            Formula = Formula.Insert(CaretIndex, param);
         }
     }
 

@@ -47,7 +47,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             DataContext = _viewModel;
             Save.Click += Save_Click;
             Export.Click += Export_Click;
-            //ComponentsComBox.DataContext = viewModel.Components;
 
             FormulaEditorView.SetViewModel(_viewModel.FormulaEditor);
 

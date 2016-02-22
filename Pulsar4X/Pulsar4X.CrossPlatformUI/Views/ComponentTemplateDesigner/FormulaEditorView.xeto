@@ -6,10 +6,10 @@
   <TableLayout>
     <TableLayout>
       <TableRow>
-        <Label Text="{Binding FunctionName}" />
+        <Label Text="{Binding FormulaName}" />
       </TableRow>
       <TableRow>
-        <TextBox CaretIndex="{Binding CaretIndex}" Text="{Binding Function}"/>
+        <TextBox CaretIndex="{Binding CaretIndex}" Text="{Binding Formula}"/>
       </TableRow>
     </TableLayout>
     <TableLayout>
