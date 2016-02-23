@@ -32,7 +32,7 @@ namespace Pulsar4X.ViewModel
         private FocusedControl _subControlInFocus;
         public FocusedControl SubControlInFocus {
             get { return _subControlInFocus; }
-            set { _subControlInFocus = value; OnPropertyChanged("FocusText"); } }
+            set { _subControlInFocus = value; OnPropertyChanged("FocusedText"); } }
 
         public virtual string FocusedText { get; set; }
         
@@ -280,10 +280,17 @@ namespace Pulsar4X.ViewModel
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in designSD.ComponentAbilitySDs)
             {
-                tmp.Add(new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData));
+                var vm = new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData);
+                vm.PropertyChanged += Vm_PropertyChanged;
+                tmp.Add(vm);
                 
             }
             ComponentAbilitySDs.AddRange(tmp);
+        }
+
+        private void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged("FocusedText");
         }
 
         public void CreateSD()

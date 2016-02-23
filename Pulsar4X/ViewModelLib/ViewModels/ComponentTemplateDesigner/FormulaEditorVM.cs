@@ -60,7 +60,7 @@ namespace Pulsar4X.ViewModel
 
         private void _parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "FocusText")
+            if (e.PropertyName == "FocusedText")
                 OnPropertyChanged("Formula");
         }
 
