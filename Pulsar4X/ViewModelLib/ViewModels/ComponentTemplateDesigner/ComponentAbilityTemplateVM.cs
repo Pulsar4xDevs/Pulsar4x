@@ -10,9 +10,10 @@ using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ViewModel
 {
-   public class ComponentAbilityTemplateVM : IViewModel
+   public class ComponentAbilityTemplateVM : ComponentTemplateDesignerBaseVM
     {
         private StaticDataStore _staticData;
+        private ComponentTemplateVM _parent;
 
         private string _name;
         public string Name { get { return _name; } set { _name = value; OnPropertyChanged(); } }
@@ -68,13 +69,65 @@ namespace Pulsar4X.ViewModel
             get { return _maxFormula; }
             set { _maxFormula = value; OnPropertyChanged(); }
         }
-        //private Dictionary
+
+        public override string FocusedText
+        {
+
+            get
+            {
+                switch (SubControlInFocus)
+                {
+                    case FocusedControl.NameControl:
+                        return Name;
+                    case FocusedControl.DescriptionControl:
+                        return Description;
+                    case FocusedControl.MinControl:
+                        return MinFormula;
+                    case FocusedControl.MaxControl:
+                        return MaxFormula;
+                    case FocusedControl.AbilityFormulaControl:
+                        return AbilityFormula;
+                    default:
+                        return "";
+                }
+            }
+            set
+            {
+                _parent.ControlInFocus = this;
+                switch (SubControlInFocus)
+                {
+                    case FocusedControl.NameControl:
+                        Name = value;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.DescriptionControl:
+                        Description = value;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.MinControl:
+                        MinFormula = value;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.MaxControl:
+                        MaxFormula = value;
+                        OnPropertyChanged();
+                        break;
+                    case FocusedControl.AbilityFormulaControl:
+                        AbilityFormula = value;
+                        OnPropertyChanged();
+                        break;
+                }
+            }
+        }
+
 
         public TechListVM GuidDict { get; set; }
 
-        public ComponentAbilityTemplateVM(ObservableCollection<ComponentAbilityTemplateVM> parentList, Pulsar4X.ECSLib.StaticDataStore staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateVM parent, ObservableCollection<ComponentAbilityTemplateVM> parentList, Pulsar4X.ECSLib.StaticDataStore staticData)
         {
+
             _staticData = staticData;
+            _parent = parent;
             //SelectedGuiHint = new DictionaryVM<GuiHint, string>(DisplayMode.Value);
             ParentList = parentList;
             foreach (var item in Enum.GetValues(typeof(GuiHint)))
@@ -85,7 +138,7 @@ namespace Pulsar4X.ViewModel
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
-        public ComponentAbilityTemplateVM(ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parentList, staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
@@ -156,22 +209,6 @@ namespace Pulsar4X.ViewModel
             sd.GuidDictionary = guidict;
             return sd;
                 
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public void Refresh(bool partialRefresh = false)
-        {
-            throw new NotImplementedException();
         }
     }
 }

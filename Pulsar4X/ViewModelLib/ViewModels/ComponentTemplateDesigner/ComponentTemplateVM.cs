@@ -23,22 +23,42 @@ namespace Pulsar4X.ViewModel
         CreditCostControl,
         MinControl,
         MaxControl,
+        AbilityFormulaControl
     }
 
-    public class ComponentTemplateVM : IViewModel
+    public class ComponentTemplateDesignerBaseVM : INotifyPropertyChanged
+    {
+        
+        private FocusedControl _subControlInFocus;
+        public FocusedControl SubControlInFocus {
+            get { return _subControlInFocus; }
+            set { _subControlInFocus = value; OnPropertyChanged("FocusText"); } }
+
+        public virtual string FocusedText { get; set; }
+        
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class ComponentTemplateVM : ComponentTemplateDesignerBaseVM
     {
         private StaticDataStore _staticData;
 
         public DictionaryVM<ComponentSD, string, string> Components { get; set; }
 
         public FormulaEditorVM FormulaEditor { get; set; }
-        private FocusedControl _controlInFocus;
-        public FocusedControl ControlInFocus { get { return _controlInFocus; } set { _controlInFocus = value; OnPropertyChanged("FocusText"); }  }
-        public string FocusedText
+
+        public ComponentTemplateDesignerBaseVM ControlInFocus { get; set; }
+        //public FocusedControl SubControlInFocus { get { return _controlInFocus; } set { _controlInFocus = value; OnPropertyChanged("FocusText"); }  }
+        public override string FocusedText
         {
+            
             get
             {
-                switch (ControlInFocus)
+                switch (SubControlInFocus)
                 {
                     case FocusedControl.NameControl:
                         return Name;                        
@@ -60,7 +80,8 @@ namespace Pulsar4X.ViewModel
             }
             set
             {
-                switch (ControlInFocus)
+                ControlInFocus = this;
+                switch (SubControlInFocus)
                 {
                     case FocusedControl.NameControl:
                         Name = value;
@@ -173,7 +194,8 @@ namespace Pulsar4X.ViewModel
         public ComponentTemplateVM(GameVM gameData)
         {
             _staticData = gameData.Game.StaticData;
-            ControlInFocus = FocusedControl.SizeControl;
+            SubControlInFocus = FocusedControl.SizeControl;
+            ControlInFocus = this;
             FormulaEditor = new FormulaEditorVM(this);
             
             Components = new DictionaryVM<ComponentSD, string, string>();
@@ -226,7 +248,7 @@ namespace Pulsar4X.ViewModel
             }
 
             ComponentAbilitySDs.Clear();
-            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(ComponentAbilitySDs, _staticData));
+            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(this, ComponentAbilitySDs, _staticData));
         }
 
         public void SetDesignSD(ComponentSD designSD)
@@ -258,7 +280,7 @@ namespace Pulsar4X.ViewModel
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in designSD.ComponentAbilitySDs)
             {
-                tmp.Add(new ComponentAbilityTemplateVM(item, ComponentAbilitySDs, _staticData));
+                tmp.Add(new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData));
                 
             }
             ComponentAbilitySDs.AddRange(tmp);
@@ -304,20 +326,5 @@ namespace Pulsar4X.ViewModel
             StaticDataManager.ExportStaticData(_staticData.Components, "./NewComponentData.json");
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public void Refresh(bool partialRefresh = false)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

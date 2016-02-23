@@ -30,12 +30,12 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             XamlReader.Load(this);
 
-            SizeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.SizeControl;
-            HTKTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.HTKControl;
-            CrewReqTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.CrewReqControl;
-            ResearchCostTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.ResearchCostControl;
-            BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.BPCostControl;
-            CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).ControlInFocus = FocusedControl.CreditCostControl;
+            SizeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.SizeControl;
+            HTKTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.HTKControl;
+            CrewReqTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.CrewReqControl;
+            ResearchCostTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.ResearchCostControl;
+            BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.BPCostControl;
+            CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.CreditCostControl;
 
             ComponentsComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
             ComponentsComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);

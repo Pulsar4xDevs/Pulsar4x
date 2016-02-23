@@ -20,8 +20,8 @@ namespace Pulsar4X.ViewModel
         
         public string Formula
         {
-            get { return _parent.FocusedText; }
-            set { _parent.FocusedText = value; OnPropertyChanged(); }
+            get { return _parent.ControlInFocus.FocusedText; }
+            set { _parent.ControlInFocus.FocusedText = value; OnPropertyChanged(); }
         }
 
         private int _caretIndex;

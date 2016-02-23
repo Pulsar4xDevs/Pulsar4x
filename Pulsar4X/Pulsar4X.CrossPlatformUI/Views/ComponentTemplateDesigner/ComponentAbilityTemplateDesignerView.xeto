@@ -10,19 +10,19 @@
       <TableLayout>
         <TableRow>
           <Label Text="Name" />
-          <TextBox Text="{Binding Name}" />
+          <TextBox ID="NameTBx" Text="{Binding Name}" />
         </TableRow>
         <TableRow>
           <Label Text="Description" />
-          <TextBox Text="{Binding Description}" />
+          <TextBox ID="DescriptionTBx" Text="{Binding Description}" />
         </TableRow>
         <TableRow>
           <Label Text="AbilityFormula" />
-          <TextBox Text="{Binding AbilityFormula}" />
+          <TextBox ID="AbilityFormulaTBx" Text="{Binding AbilityFormula}" />
         </TableRow>
         <TableRow>
           <Label Text="GuiHint" />
-          <ComboBox ID="GuiHint" />
+          <ComboBox ID="GuiHint" DataContext="{Binding SelectedGuiHint}" />
         </TableRow>
       </TableLayout>
       <TableLayout>
