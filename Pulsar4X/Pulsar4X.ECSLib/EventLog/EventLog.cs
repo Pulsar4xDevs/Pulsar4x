@@ -9,43 +9,41 @@ namespace Pulsar4X.ECSLib
     {
         private readonly Game _game;
         private readonly DateTime _loadTime;
-
-        private readonly List<LogEvent> _events;
-
-        private readonly Dictionary<Player, List<LogEvent>> _newEvents;
+        private readonly List<Event> _events;
+        private readonly Dictionary<Player, List<Event>> _newEvents;
 
         private Player SpaceMaster => _game.SpaceMaster;
 
         internal EventLog()
         {
-            _newEvents = new Dictionary<Player, List<LogEvent>>();
+            _newEvents = new Dictionary<Player, List<Event>>();
         }
 
         internal EventLog(Game game) : this()
         {
             _loadTime = game.CurrentDateTime;
             _game = game;
-            _events = new List<LogEvent>();
+            _events = new List<Event>();
             
-            _newEvents.Add(SpaceMaster, new List<LogEvent>());
+            _newEvents.Add(SpaceMaster, new List<Event>());
             foreach (Player player in _game.Players)
             {
-                _newEvents.Add(player, new List<LogEvent>());
+                _newEvents.Add(player, new List<Event>());
             }
         }
 
-        public List<LogEvent> GetAllEvents(AuthenticationToken authToken)
+        public List<Event> GetAllEvents(AuthenticationToken authToken)
         {
             Player player = _game.GetPlayerForToken(authToken);
 
             if (player == null)
             {
-                return new List<LogEvent>();
+                return new List<Event>();
             }
 
-            var retVal = new List<LogEvent>();
+            var retVal = new List<Event>();
 
-            foreach (LogEvent logEvent in _events)
+            foreach (Event logEvent in _events)
             {
                 if (logEvent.ConcernedPlayers.Contains(player.ID))
                 {
@@ -55,40 +53,40 @@ namespace Pulsar4X.ECSLib
             return retVal;
         }
 
-        public List<LogEvent> GetNewEvents(AuthenticationToken authToken)
+        public List<Event> GetNewEvents(AuthenticationToken authToken)
         {
             Player player = _game.GetPlayerForToken(authToken);
 
             if (player == null)
             {
-                return new List<LogEvent>();
+                return new List<Event>();
             }
 
-            List<LogEvent> retVal = _newEvents[player];
+            List<Event> retVal = _newEvents[player];
             if (retVal.Count > 0)
             {
-                _newEvents[player] = new List<LogEvent>();
+                _newEvents[player] = new List<Event>();
             }
             return retVal;
         }
 
-        internal void AddEvent(LogEvent logEvent)
+        internal void AddEvent(Event @event)
         {
-            logEvent.ConcernedPlayers.Add(_game.SpaceMaster.ID);
-            _newEvents[SpaceMaster].Add(logEvent);
+            @event.ConcernedPlayers.Add(_game.SpaceMaster.ID);
+            _newEvents[SpaceMaster].Add(@event);
 
-            foreach (Player player in _game.Players.Where(player => IsPlayerConcerned(logEvent, player)))
+            foreach (Player player in _game.Players.Where(player => IsPlayerConcerned(@event, player)))
             {
-                logEvent.ConcernedPlayers.Add(player.ID);
-                _newEvents[player].Add(logEvent);
+                @event.ConcernedPlayers.Add(player.ID);
+                _newEvents[player].Add(@event);
             }
         }
 
-        private bool IsPlayerConcerned([NotNull] LogEvent logEvent, [NotNull] Player player)
+        private bool IsPlayerConcerned([NotNull] Event @event, [NotNull] Player player)
         {
-            if (logEvent == null)
+            if (@event == null)
             {
-                throw new ArgumentNullException(nameof(logEvent));
+                throw new ArgumentNullException(nameof(@event));
             }
             if (player == null)
             {
@@ -100,7 +98,7 @@ namespace Pulsar4X.ECSLib
                 return true;
             }
 
-            var ownedDB = logEvent.Entity?.GetDataBlob<OwnedDB>();
+            var ownedDB = @event.Entity?.GetDataBlob<OwnedDB>();
             if (ownedDB != null)
             {
                 foreach (KeyValuePair<Entity, AccessRole> keyValuePair in player.AccessRoles)
@@ -109,11 +107,11 @@ namespace Pulsar4X.ECSLib
                     AccessRole arRole = keyValuePair.Value;
                     if (ownedDB.Faction == arFaction)
                     {
-                        if (logEvent.Entity.HasDataBlob<ShipInfoDB>() && (arRole & AccessRole.UnitVision) == AccessRole.UnitVision)
+                        if (@event.Entity.HasDataBlob<ShipInfoDB>() && (arRole & AccessRole.UnitVision) == AccessRole.UnitVision)
                         {
                             return true;
                         }
-                        if (logEvent.Entity.HasDataBlob<ColonyInfoDB>() && (arRole & AccessRole.ColonyVision) == AccessRole.ColonyVision)
+                        if (@event.Entity.HasDataBlob<ColonyInfoDB>() && (arRole & AccessRole.ColonyVision) == AccessRole.ColonyVision)
                         {
                             return true;
                         }
@@ -123,7 +121,7 @@ namespace Pulsar4X.ECSLib
                 return false;
             }
 
-            if (logEvent.SystemGuid != Guid.Empty)
+            if (@event.SystemGuid != Guid.Empty)
             {
                 foreach (KeyValuePair<Entity, AccessRole> keyValuePair in player.AccessRoles)
                 {
@@ -138,7 +136,7 @@ namespace Pulsar4X.ECSLib
 
                     foreach (Guid knownSystem in factionInfo.KnownSystems)
                     {
-                        if (knownSystem != logEvent.SystemGuid)
+                        if (knownSystem != @event.SystemGuid)
                         {
                             continue;
                         }
@@ -154,14 +152,14 @@ namespace Pulsar4X.ECSLib
                 return false;
             }
 
-            if (logEvent.Faction != null)
+            if (@event.Faction != null)
             {
                 foreach (KeyValuePair<Entity, AccessRole> keyValuePair in player.AccessRoles)
                 {
                     Entity arFaction = keyValuePair.Key;
                     AccessRole arRole = keyValuePair.Value;
 
-                    if (arFaction != logEvent.Faction)
+                    if (arFaction != @event.Faction)
                     {
                         continue;
                     }
@@ -176,12 +174,12 @@ namespace Pulsar4X.ECSLib
 
         public EventLog(SerializationInfo info, StreamingContext context) : this((Game)context.Context)
         {
-            _events = (List<LogEvent>)info.GetValue("Events", typeof(List<LogEvent>));
+            _events = (List<Event>)info.GetValue("Events", typeof(List<Event>));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            List<LogEvent> eventList = _events.Where(logEvent => logEvent.Time > _loadTime).ToList();
+            List<Event> eventList = _events.Where(logEvent => logEvent.Time > _loadTime).ToList();
             info.AddValue("Events", eventList);
         }
 
