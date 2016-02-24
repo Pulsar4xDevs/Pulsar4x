@@ -154,6 +154,7 @@
     <Compile Include="DataBlobs\OwnedDB.cs" />
     <Compile Include="DataBlobs\TransitableDB.cs" />
     <Compile Include="EventLog\EventLog.cs" />
+    <Compile Include="EventLog\EventType.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
     <Compile Include="Helpers\GameMath.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />

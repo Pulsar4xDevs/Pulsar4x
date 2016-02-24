@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    public class LogEvent : ISerializable
+    public class Event : ISerializable
     {
         public DateTime Time { get; internal set; }
         
@@ -17,10 +17,12 @@ namespace Pulsar4X.ECSLib
         
         [CanBeNull]
         public Entity Entity { get; internal set; }
+
+        public EventType EventType { get; internal set; }
         
         internal List<Guid> ConcernedPlayers { get; set; }
 
-        public LogEvent(SerializationInfo info, StreamingContext context)
+        public Event(SerializationInfo info, StreamingContext context)
         {
             Time = (DateTime)info.GetValue(nameof(Time), typeof(DateTime));
             Message = (string)info.GetValue(nameof(Message), typeof(string));
@@ -34,10 +36,10 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public LogEvent(DateTime time, string message, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null) : this(time, message, Guid.Empty, faction, entity, concernedPlayers)
+        public Event(DateTime time, string message, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null) : this(time, message, Guid.Empty, faction, entity, concernedPlayers)
         { }
 
-        public LogEvent(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null)
+        public Event(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null)
         {
             Time = time;
             Message = message;
