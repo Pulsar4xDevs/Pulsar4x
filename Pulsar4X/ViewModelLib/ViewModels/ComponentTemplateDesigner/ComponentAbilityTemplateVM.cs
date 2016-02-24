@@ -99,25 +99,21 @@ namespace Pulsar4X.ViewModel
                 {
                     case FocusedControl.NameControl:
                         Name = value;
-                        OnPropertyChanged();
                         break;
                     case FocusedControl.DescriptionControl:
                         Description = value;
-                        OnPropertyChanged();
                         break;
                     case FocusedControl.MinControl:
                         MinFormula = value;
-                        OnPropertyChanged();
                         break;
                     case FocusedControl.MaxControl:
                         MaxFormula = value;
-                        OnPropertyChanged();
                         break;
                     case FocusedControl.AbilityFormulaControl:
                         AbilityFormula = value;
-                        OnPropertyChanged();
                         break;
                 }
+                OnPropertyChanged();
             }
         }
 

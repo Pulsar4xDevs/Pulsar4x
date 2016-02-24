@@ -32,7 +32,7 @@ namespace Pulsar4X.ViewModel
         private FocusedControl _subControlInFocus;
         public FocusedControl SubControlInFocus {
             get { return _subControlInFocus; }
-            set { _subControlInFocus = value; OnPropertyChanged("FocusedText"); } }
+            set { _subControlInFocus = value; FocusedText = FocusedText; } }
 
         //public virtual string FocusedText { get { return ""; } set { OnPropertyChanged(); } }
         public abstract string FocusedText { get; set; }
@@ -58,7 +58,8 @@ namespace Pulsar4X.ViewModel
                 if (_controlInFocus != value)
                 {
                     _controlInFocus = value;
-                    ControlInFocus.OnPropertyChanged("FocusedText");
+                    if(FormulaEditor != null)
+                        FormulaEditor.Formula = FormulaEditor.Formula; //force propertyUpdate
                 }
             }
         }
