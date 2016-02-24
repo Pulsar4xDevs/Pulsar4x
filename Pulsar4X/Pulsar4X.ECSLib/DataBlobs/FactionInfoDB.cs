@@ -58,10 +58,6 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
 
-        [PublicAPI]
-        public ReadOnlyCollection<LogEvent> LogEvents => new ReadOnlyCollection<LogEvent>(_logEvents);
-        internal List<LogEvent> _logEvents = new List<LogEvent>(); 
-
         public FactionInfoDB()
             : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() )
         {
