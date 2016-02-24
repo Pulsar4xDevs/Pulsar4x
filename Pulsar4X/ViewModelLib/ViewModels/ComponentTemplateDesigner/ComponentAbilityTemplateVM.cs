@@ -25,7 +25,6 @@ namespace Pulsar4X.ViewModel
         }
 
         private ObservableCollection<ComponentAbilityTemplateVM> ParentList { get; set; }
-        private int _index;
         public int Index
         {
             get { return ParentList.IndexOf(this); }
@@ -63,7 +62,10 @@ namespace Pulsar4X.ViewModel
             get { return _minFormula; }
             set { _minFormula = value; OnPropertyChanged(); }
         }
-        private string _maxFormula;        
+        private string _maxFormula;
+
+        public override event PropertyChangedEventHandler PropertyChanged;
+
         public string MaxFormula
         {
             get { return _maxFormula; }
@@ -92,8 +94,7 @@ namespace Pulsar4X.ViewModel
                 }
             }
             set
-            {
-                _parent.ControlInFocus = this;
+            {                
                 switch (SubControlInFocus)
                 {
                     case FocusedControl.NameControl:
@@ -209,6 +210,12 @@ namespace Pulsar4X.ViewModel
             sd.GuidDictionary = guidict;
             return sd;
                 
+        }
+
+        internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            _parent.ControlInFocus = this;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

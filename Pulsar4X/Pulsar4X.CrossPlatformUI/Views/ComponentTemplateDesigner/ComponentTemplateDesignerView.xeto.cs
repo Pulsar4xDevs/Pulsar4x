@@ -17,6 +17,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         protected FormulaEditorView FormulaEditorView { get; set; }
         private ComponentTemplateVM _viewModel;
         
+        protected TextBox DescriptionTBx { get; set; }
         protected TextBox SizeFormulaTBx { get; set; }
         protected TextBox HTKTBx { get; set; }
         protected TextBox CrewReqTBx { get; set; }
@@ -30,6 +31,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             XamlReader.Load(this);
 
+            ComponentsComBox.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.NameControl;
+            DescriptionTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.DescriptionControl;
             SizeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.SizeControl;
             HTKTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.HTKControl;
             CrewReqTBx.GotFocus += (sender, e) => ((ComponentTemplateVM)DataContext).SubControlInFocus = FocusedControl.CrewReqControl;

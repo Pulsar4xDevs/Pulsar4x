@@ -12,7 +12,7 @@
       <Label Text="Name" />
       <ComboBox ID="ComponentsComBox" DataContext="{Binding Components}" />
       <Label Text="Description" />
-      <TextBox Text="{Binding Description}" />
+      <TextBox ID="DescriptionTBx" Text="{Binding Description}" />
       <Label Text="ID" />
       <TextBox Text="{Binding ID}" />
     </TableRow>

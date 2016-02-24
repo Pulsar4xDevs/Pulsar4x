@@ -26,7 +26,7 @@ namespace Pulsar4X.ViewModel
         AbilityFormulaControl
     }
 
-    public class ComponentTemplateDesignerBaseVM : INotifyPropertyChanged
+    public abstract class ComponentTemplateDesignerBaseVM : INotifyPropertyChanged
     {
         
         private FocusedControl _subControlInFocus;
@@ -34,13 +34,11 @@ namespace Pulsar4X.ViewModel
             get { return _subControlInFocus; }
             set { _subControlInFocus = value; OnPropertyChanged("FocusedText"); } }
 
-        public virtual string FocusedText { get; set; }
-        
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        //public virtual string FocusedText { get { return ""; } set { OnPropertyChanged(); } }
+        public abstract string FocusedText { get; set; }
+        public abstract event PropertyChangedEventHandler PropertyChanged;
+        internal abstract void OnPropertyChanged([CallerMemberName] string propertyName = null);
+
     }
 
     public class ComponentTemplateVM : ComponentTemplateDesignerBaseVM
@@ -51,7 +49,19 @@ namespace Pulsar4X.ViewModel
 
         public FormulaEditorVM FormulaEditor { get; set; }
 
-        public ComponentTemplateDesignerBaseVM ControlInFocus { get; set; }
+        private ComponentTemplateDesignerBaseVM _controlInFocus;
+        public ComponentTemplateDesignerBaseVM ControlInFocus
+        {
+            get { return _controlInFocus; }
+            set
+            {
+                if (_controlInFocus != value)
+                {
+                    _controlInFocus = value;
+                    ControlInFocus.OnPropertyChanged("FocusedText");
+                }
+            }
+        }
         //public FocusedControl SubControlInFocus { get { return _controlInFocus; } set { _controlInFocus = value; OnPropertyChanged("FocusText"); }  }
         public override string FocusedText
         {
@@ -73,45 +83,43 @@ namespace Pulsar4X.ViewModel
                     case FocusedControl.BPCostControl:
                         return BuildPointCostFormula;
                     case FocusedControl.ResearchCostControl:
-                        return ResearchCostFormula;                   
+                        return ResearchCostFormula;
+                    case FocusedControl.CreditCostControl:
+                        return CreditCostFormula;
                     default:
                         return "";
                 }
             }
             set
-            {
-                ControlInFocus = this;
+            {               
                 switch (SubControlInFocus)
                 {
                     case FocusedControl.NameControl:
-                        Name = value;
-                        OnPropertyChanged();
+                        Name = value;                   
                         break;
                     case FocusedControl.DescriptionControl:
-                        Description = value;
-                        OnPropertyChanged();
+                        Description = value;            
                         break;
                     case FocusedControl.SizeControl:
-                        SizeFormula = value;
-                        OnPropertyChanged();
+                        SizeFormula = value;              
                         break;
                     case FocusedControl.CrewReqControl:
-                        CrewReqFormula = value;
-                        OnPropertyChanged();
+                        CrewReqFormula = value;             
                         break;
                     case FocusedControl.HTKControl:
-                        HTKFormula = value;
-                        OnPropertyChanged();
+                        HTKFormula = value;                 
                         break;
                     case FocusedControl.BPCostControl:
-                        BuildPointCostFormula = value;
-                        OnPropertyChanged();
+                        BuildPointCostFormula = value;            
                         break;
                     case FocusedControl.ResearchCostControl:
-                        ResearchCostFormula = value;
-                        OnPropertyChanged();
+                        ResearchCostFormula = value;                    
+                        break;
+                    case FocusedControl.CreditCostControl:
+                        CreditCostFormula = value;                        
                         break;
                 }
+                OnPropertyChanged();
             }
         }
 
@@ -184,6 +192,9 @@ namespace Pulsar4X.ViewModel
         public ObservableDictionary<ComponentMountType, bool?> MountType { get; set; }
 
         private readonly RangeEnabledObservableCollection<ComponentAbilityTemplateVM> _componentAbilitySDs = new RangeEnabledObservableCollection<ComponentAbilityTemplateVM>();
+
+        public override event PropertyChangedEventHandler PropertyChanged;
+
         public RangeEnabledObservableCollection<ComponentAbilityTemplateVM> ComponentAbilitySDs
         {
             get { return _componentAbilitySDs; }
@@ -204,7 +215,6 @@ namespace Pulsar4X.ViewModel
                 Components.Add(item, item.Name);
             }
             Components.SelectionChangedEvent += Components_SelectionChangedEvent;
-
             ClearSelection();
         }
 
@@ -281,17 +291,13 @@ namespace Pulsar4X.ViewModel
             foreach (var item in designSD.ComponentAbilitySDs)
             {
                 var vm = new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData);
-                vm.PropertyChanged += Vm_PropertyChanged;
                 tmp.Add(vm);
                 
             }
             ComponentAbilitySDs.AddRange(tmp);
         }
 
-        private void Vm_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            OnPropertyChanged("FocusedText");
-        }
+
 
         public void CreateSD()
         {
@@ -333,5 +339,10 @@ namespace Pulsar4X.ViewModel
             StaticDataManager.ExportStaticData(_staticData.Components, "./NewComponentData.json");
         }
 
+        internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            ControlInFocus = this;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }
