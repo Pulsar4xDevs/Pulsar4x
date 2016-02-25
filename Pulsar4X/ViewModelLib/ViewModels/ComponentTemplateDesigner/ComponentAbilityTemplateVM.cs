@@ -13,7 +13,7 @@ namespace Pulsar4X.ViewModel
    public class ComponentAbilityTemplateVM : ComponentTemplateDesignerBaseVM
     {
         private StaticDataStore _staticData;
-        private ComponentTemplateVM _parent;
+        private ComponentTemplateParentVM _parent;
 
         private string _name;
         public string Name { get { return _name; } set { _name = value; OnPropertyChanged(); } }
@@ -113,14 +113,19 @@ namespace Pulsar4X.ViewModel
                         AbilityFormula = value;
                         break;
                 }
-                OnPropertyChanged();
+                //if (_parent.FormulaEditor != null)
+                //{
+                //    _parent.ControlInFocus = this;
+                //    OnPropertyChanged();
+                //    //_parent.FormulaEditor.Formula = _parent.FormulaEditor.Formula; //force propertyUpdate
+                //}
             }
         }
 
 
         public TechListVM GuidDict { get; set; }
 
-        public ComponentAbilityTemplateVM(ComponentTemplateVM parent, ObservableCollection<ComponentAbilityTemplateVM> parentList, Pulsar4X.ECSLib.StaticDataStore staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ObservableCollection<ComponentAbilityTemplateVM> parentList, Pulsar4X.ECSLib.StaticDataStore staticData)
         {
 
             _staticData = staticData;
@@ -135,7 +140,7 @@ namespace Pulsar4X.ViewModel
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
-        public ComponentAbilityTemplateVM(ComponentTemplateVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
@@ -210,7 +215,7 @@ namespace Pulsar4X.ViewModel
 
         internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            _parent.ControlInFocus = this;
+            //_parent.ControlInFocus = this;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {
-    public class ComponentAbilityTemplateDesignerView : Panel
+    public class ComponentTemplateAbilityPropertiesView : Panel
     {
         protected ComboBox GuiHint { get; set; }
         protected StackLayout GuiHintControls { get; set; }
@@ -18,7 +18,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
         private ComponentAbilityTemplateVM _viewModel;
 
-        public ComponentAbilityTemplateDesignerView()
+        public ComponentTemplateAbilityPropertiesView()
         {
             XamlReader.Load(this);
             GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
@@ -29,7 +29,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             AbilityFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.AbilityFormulaControl;
         }
 
-        public ComponentAbilityTemplateDesignerView(ComponentAbilityTemplateVM viewModel) : this()
+        public ComponentTemplateAbilityPropertiesView(ComponentAbilityTemplateVM viewModel) : this()
         {
             _viewModel = viewModel;
             DataContext = viewModel;

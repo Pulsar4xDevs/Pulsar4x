@@ -13,14 +13,20 @@ namespace Pulsar4X.ViewModel
     public class FormulaEditorVM : INotifyPropertyChanged
     {
 
-        private ComponentTemplateVM _parent;
+        private ComponentTemplateParentVM _parent;
 
         public string FormulaName { get; set; }
 
         
         public string Formula
         {
-            get { return _parent.ControlInFocus.FocusedText; }
+            get
+            {
+                if (_parent.ControlInFocus != null)
+                    return _parent.ControlInFocus.FocusedText;
+                else
+                    return "";
+            }
             set { _parent.ControlInFocus.FocusedText = value; OnPropertyChanged(); }
         }
 
@@ -43,7 +49,7 @@ namespace Pulsar4X.ViewModel
         public List <ButtonInfo> ParameterButtons { get; set; }
         public List<ButtonInfo> FunctionButtons { get; set; }
 
-        public FormulaEditorVM(ComponentTemplateVM parent)
+        public FormulaEditorVM(ComponentTemplateParentVM parent)
         {
             _parent = parent;
             ParameterButtons = new List<ButtonInfo>();
@@ -55,14 +61,14 @@ namespace Pulsar4X.ViewModel
             ParameterButtons.Add(new ButtonInfo("[CreditCost]", "Links to the Credit Cost formula field", this));
             ParameterButtons.Add(new ButtonInfo("[GuidDict]", "A special parameter for a key value pair collection, used in ability formula fields", this));
 
-            _parent.PropertyChanged += _parent_PropertyChanged;
+            //_parent.PropertyChanged += _parent_PropertyChanged;
         }
 
-        private void _parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "FocusedText")
-                OnPropertyChanged("Formula");
-        }
+        //private void _parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        //{
+        //    if (e.PropertyName == "FocusedText")
+        //        OnPropertyChanged("Formula");
+        //}
 
         public void AddParam(string param)
         {

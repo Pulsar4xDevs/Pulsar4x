@@ -7,10 +7,8 @@
   
   <TableLayout>
     <TableRow>
-    <TableLayout>
-    <TableRow>
       <Label Text="Name" />
-      <ComboBox ID="ComponentsComBox" DataContext="{Binding Components}" />
+      <TextBox ID="NameTBx" DataContext="{Binding Name}" />
       <Label Text="Description" />
       <TextBox ID="DescriptionTBx" Text="{Binding Description}" />
       <Label Text="ID" />
@@ -37,26 +35,6 @@
       <TextBox ID="CreditCostTBx" Text="{Binding CreditCostFormula}" />
       <Label Text="MountType" />
       <StackLayout ID="MountTypes"/>
-    </TableRow>
-  </TableLayout>
-    </TableRow>
-    <TableRow ScaleHeight="True">
-    <TableLayout >
-    <TableRow >
-      <Scrollable >
-        <StackLayout  ID="AbilityTemplates"></StackLayout>
-      </Scrollable>
-      <c:FormulaEditorView x:Name="FormulaEditorView"/>
-    </TableRow>   
-  </TableLayout>
-    </TableRow>
-    <TableRow ScaleHeight="False">
-    <TableLayout >
-      <TableRow >
-        <Button ID="Save" Text="Save to datastore"/>
-        <Button ID="Export" Text="Export datastore to file" />
-      </TableRow>
-    </TableLayout>
     </TableRow>
   </TableLayout>
 

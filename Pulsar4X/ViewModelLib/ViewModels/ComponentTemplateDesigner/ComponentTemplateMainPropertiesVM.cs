@@ -10,21 +10,7 @@ using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ViewModel
 {
-    public enum FocusedControl
-    {
-        NameControl,
-        DescriptionControl,
-        SizeControl,
-        HTKControl,
-        CrewReqControl,
-        MinCostControl,
-        BPCostControl,
-        ResearchCostControl,
-        CreditCostControl,
-        MinControl,
-        MaxControl,
-        AbilityFormulaControl
-    }
+
 
     public abstract class ComponentTemplateDesignerBaseVM : INotifyPropertyChanged
     {
@@ -41,29 +27,14 @@ namespace Pulsar4X.ViewModel
 
     }
 
-    public class ComponentTemplateVM : ComponentTemplateDesignerBaseVM
+    public class ComponentTemplateMainPropertiesVM : ComponentTemplateDesignerBaseVM
     {
+
+
         private StaticDataStore _staticData;
 
-        public DictionaryVM<ComponentSD, string, string> Components { get; set; }
 
-        public FormulaEditorVM FormulaEditor { get; set; }
 
-        private ComponentTemplateDesignerBaseVM _controlInFocus;
-        public ComponentTemplateDesignerBaseVM ControlInFocus
-        {
-            get { return _controlInFocus; }
-            set
-            {
-                if (_controlInFocus != value)
-                {
-                    _controlInFocus = value;
-                    if(FormulaEditor != null)
-                        FormulaEditor.Formula = FormulaEditor.Formula; //force propertyUpdate
-                }
-            }
-        }
-        //public FocusedControl SubControlInFocus { get { return _controlInFocus; } set { _controlInFocus = value; OnPropertyChanged("FocusText"); }  }
         public override string FocusedText
         {
             
@@ -120,7 +91,12 @@ namespace Pulsar4X.ViewModel
                         CreditCostFormula = value;                        
                         break;
                 }
-                OnPropertyChanged();
+                //if (FormulaEditor != null)
+                //{
+                //    ControlInFocus = this;
+                //    OnPropertyChanged();
+                //    //FormulaEditor.Formula = FormulaEditor.Formula; //force propertyUpdate
+                //}
             }
         }
 
@@ -187,43 +163,31 @@ namespace Pulsar4X.ViewModel
             get { return _buildPointCostFormula; }
             set { _buildPointCostFormula = value; OnPropertyChanged(); }
         }
-        
-        
-        //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
-        public ObservableDictionary<ComponentMountType, bool?> MountType { get; set; }
 
-        private readonly RangeEnabledObservableCollection<ComponentAbilityTemplateVM> _componentAbilitySDs = new RangeEnabledObservableCollection<ComponentAbilityTemplateVM>();
+
+        //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
+        private readonly ObservableDictionary<ComponentMountType, bool?> _mountType = new ObservableDictionary<ComponentMountType, bool?>();
+        public ObservableDictionary<ComponentMountType, bool?> MountType { get { return _mountType; } }
+
 
         public override event PropertyChangedEventHandler PropertyChanged;
 
-        public RangeEnabledObservableCollection<ComponentAbilityTemplateVM> ComponentAbilitySDs
+
+
+
+
+        public ComponentTemplateMainPropertiesVM(GameVM gameVM)
         {
-            get { return _componentAbilitySDs; }
-        }
+            _staticData = gameVM.Game.StaticData;
 
-
-
-        public ComponentTemplateVM(GameVM gameData)
-        {
-            _staticData = gameData.Game.StaticData;
             SubControlInFocus = FocusedControl.SizeControl;
-            ControlInFocus = this;
-            FormulaEditor = new FormulaEditorVM(this);
+            //ControlInFocus = this;
+            //FormulaEditor = new FormulaEditorVM(this);
             
-            Components = new DictionaryVM<ComponentSD, string, string>();
-            foreach (var item in _staticData.Components.Values)
-            {
-                Components.Add(item, item.Name);
-            }
-            Components.SelectionChangedEvent += Components_SelectionChangedEvent;
-            ClearSelection();
+
         }
 
-        private void Components_SelectionChangedEvent(int oldSelection, int newSelection)
-        {
-            //todo if current selection has changed in any way, warn.
-            SetDesignSD(Components.GetKey());
-        }
+
 
         private void ComponentTemplateVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -234,8 +198,10 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        public ComponentTemplateVM(GameVM gameData, ComponentSD designSD) : this(gameData)
+        public ComponentTemplateMainPropertiesVM(GameVM gameData, ComponentSD designSD) : this(gameData)
         { SetDesignSD(designSD); }
+
+
 
         public void ClearSelection()
         {
@@ -251,15 +217,12 @@ namespace Pulsar4X.ViewModel
             ResearchCostFormula = "";
             CreditCostFormula = "";
             BuildPointCostFormula = "";
-            MountType = new ObservableDictionary<ComponentMountType, bool?>();
+            MountType.Clear();// = new ObservableDictionary<ComponentMountType, bool?>();
 
             foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
             {
                 MountType.Add((ComponentMountType)item, false);
             }
-
-            ComponentAbilitySDs.Clear();
-            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(this, ComponentAbilitySDs, _staticData));
         }
 
         public void SetDesignSD(ComponentSD designSD)
@@ -287,62 +250,16 @@ namespace Pulsar4X.ViewModel
                 MountType[item.Key] = item.Value;
             }
 
-            ComponentAbilitySDs.Clear();
-            var tmp = new List<ComponentAbilityTemplateVM>();
-            foreach (var item in designSD.ComponentAbilitySDs)
-            {
-                var vm = new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData);
-                tmp.Add(vm);
-                
-            }
-            ComponentAbilitySDs.AddRange(tmp);
+
         }
 
 
 
-        public void CreateSD()
-        {
-            ComponentSD sd = new ComponentSD();
-            sd.Name = Name;
-            sd.Description = Description;
-            sd.ID = _ID;
 
-            sd.SizeFormula = SizeFormula;
-            sd.HTKFormula = HTKFormula;
-            sd.CrewReqFormula = CrewReqFormula;
-            sd.MineralCostFormula = new Dictionary<Guid, string>();
-            foreach (var item in MineralCostFormula)
-            {
-                sd.MineralCostFormula.Add(item.Minerals.GetKey(), item.Formula);
-            }
-            sd.ResearchCostFormula = ResearchCostFormula;
-            sd.CreditCostFormula = CreditCostFormula;
-            sd.BuildPointCostFormula = BuildPointCostFormula;
-            sd.MountType = new Dictionary<ComponentMountType, bool>();
-            sd.ComponentAbilitySDs = new List<ComponentAbilitySD>();
-            foreach (var item in ComponentAbilitySDs)
-            {
-                sd.ComponentAbilitySDs.Add(item.CreateSD());
-            }
-
-            if (_staticData.Components.Keys.Contains(sd.ID))
-            {
-                _staticData.Components[sd.ID] = sd;
-            }
-            else
-            {
-                _staticData.Components.Add(sd.ID, sd);
-            }
-        }
-
-        public void SaveToFile()
-        {
-            StaticDataManager.ExportStaticData(_staticData.Components, "./NewComponentData.json");
-        }
 
         internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            ControlInFocus = this;
+            //ControlInFocus = this;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
