@@ -62,10 +62,6 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
 
-        [PublicAPI]
-        public ReadOnlyCollection<LogEvent> LogEvents => new ReadOnlyCollection<LogEvent>(_logEvents);
-        internal List<LogEvent> _logEvents = new List<LogEvent>();
-
         public FactionInfoDB()
             : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() )
         {
@@ -105,7 +101,7 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
         {
-            SerializationManager.CurrentGame.PostLoad += (sender, args) => { _logEvents = SerializationManager.CurrentGame.GetEventsForFaction(OwningEntity); };
+            ((Game)context.Context).PostLoad += (sender, args) => { };
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
         internal Random RNG { get; private set; }
 
         [JsonConstructor]
-        private StarSystem()
+        internal StarSystem()
         {
         }
 

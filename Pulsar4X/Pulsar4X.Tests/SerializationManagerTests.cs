@@ -28,9 +28,9 @@ namespace Pulsar4X.Tests
             // lets create a bad save game:
 
             // Check default nulls throw:
-            Assert.Catch<ArgumentNullException>(() => SerializationManager.ExportGame(null, File));
-            Assert.Catch<ArgumentNullException>(() => SerializationManager.ExportGame(_game, (string)null));
-            Assert.Catch<ArgumentNullException>(() => SerializationManager.ExportGame(_game, string.Empty));
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.Export(null, File));
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.Export(_game, (string)null));
+            Assert.Catch<ArgumentNullException>(() => SerializationManager.Export(_game, string.Empty));
 
             Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((string)null));
             Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame(string.Empty));
@@ -41,7 +41,7 @@ namespace Pulsar4X.Tests
             Assert.NotNull(_game);
 
             // lets create a good saveGame
-            SerializationManager.ExportGame(_game, File);
+            SerializationManager.Export(_game, File);
 
             Assert.IsTrue(System.IO.File.Exists(File));
             Console.WriteLine(Path.GetFullPath(File));
@@ -90,7 +90,7 @@ namespace Pulsar4X.Tests
                     continue;
                 }
 
-                string jsonString = SerializationManager.ExportEntity(entity);
+                string jsonString = SerializationManager.Export(_game, entity);
 
                 // Clone the entity for later comparison.
                 ProtoEntity clone = entity.Clone();
@@ -103,7 +103,7 @@ namespace Pulsar4X.Tests
                 Assert.IsFalse(systemManager.FindEntityByGuid(clone.Guid, out foundEntity));
 
                 // Import the entity back into the manager.
-                Entity importedEntity = SerializationManager.ImportEntity(_game, systemManager, jsonString);
+                Entity importedEntity = SerializationManager.ImportEntityJson(_game, jsonString, systemManager);
 
                 // Ensure the imported entity is valid
                 Assert.IsTrue(importedEntity.IsValid);
@@ -142,10 +142,10 @@ namespace Pulsar4X.Tests
         }
         private void ImportExportSystem(StarSystem system)
         {
-            string jsonString = SerializationManager.ExportStarSystem(system);
+            string jsonString = SerializationManager.Export(_game, system);
             _game = Game.NewGame("StarSystem Import Test", DateTime.Now, 0);
 
-            StarSystem importedSystem = SerializationManager.ImportStarSystem(_game, jsonString);
+            StarSystem importedSystem = SerializationManager.ImportSystemJson(_game, jsonString);
             Assert.AreEqual(system.Guid, importedSystem.Guid);
 
             // See that the entities were imported.
@@ -167,9 +167,9 @@ namespace Pulsar4X.Tests
             for (int numTries = 0; numTries < maxTries; numTries++)
             {
                 CreateTestUniverse(10);
-                SerializationManager.ExportGame(_game, File);
+                SerializationManager.Export(_game, File);
                 _game = SerializationManager.ImportGame(File);
-                SerializationManager.ExportGame(_game, File2);
+                SerializationManager.Export(_game, File2);
 
                 var fs1 = new FileStream(File, FileMode.Open);
                 var fs2 = new FileStream(File2, FileMode.Open);

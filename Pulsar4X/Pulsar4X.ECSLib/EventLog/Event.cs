@@ -1,27 +1,70 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    public struct LogEvent
+    public class Event : ISerializable
     {
-        [CanBeNull]
-        public Entity Faction { get; }
-        public bool IsSMOnly { get; }
-
-        public DateTime Time { get; }
-        [CanBeNull]
-        public StarSystem System { get; }
-        public string Message { get; }
+        public DateTime Time { get; internal set; }
         
-        // ReSharper disable InconsistentNaming (Conforming to JSON parameterized consturctor)
-        public LogEvent(Entity Faction, DateTime Time, StarSystem System, string Message, bool IsSMOnly = false)
-        // ReSharper restore InconsistentNaming
+        public string Message { get; internal set; }
+        
+        [CanBeNull]
+        public Entity Faction { get; internal set; }
+        
+        public Guid SystemGuid { get; internal set; }
+        
+        [CanBeNull]
+        public Entity Entity { get; internal set; }
+
+        public EventType EventType { get; internal set; }
+        
+        internal List<Guid> ConcernedPlayers { get; set; }
+
+        public Event(SerializationInfo info, StreamingContext context)
         {
-            this.Faction = Faction;
-            this.IsSMOnly = IsSMOnly;
-            this.Time = Time;
-            this.System = System;
-            this.Message = Message;
+            Time = (DateTime)info.GetValue(nameof(Time), typeof(DateTime));
+            Message = (string)info.GetValue(nameof(Message), typeof(string));
+            Faction = (Entity)info.GetValue(nameof(Faction), typeof(Entity));
+            SystemGuid = (Guid)info.GetValue(nameof(SystemGuid), typeof(Guid));
+            Entity = (Entity)info.GetValue(nameof(Entity), typeof(Entity));
+
+            if ((context.State & StreamingContextStates.Persistence) != 0)
+            {
+                ConcernedPlayers = (List<Guid>)info.GetValue(nameof(ConcernedPlayers), typeof(List<Guid>));
+            }
+        }
+
+        public Event(DateTime time, string message, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null) : this(time, message, Guid.Empty, faction, entity, concernedPlayers)
+        { }
+
+        public Event(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null)
+        {
+            Time = time;
+            Message = message;
+            Faction = faction;
+            SystemGuid = systemGuid;
+            Entity = entity;
+            if (concernedPlayers == null)
+            {
+                concernedPlayers = new List<Guid>();
+            }
+            ConcernedPlayers = concernedPlayers;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(Time), Time);
+            info.AddValue(nameof(Message), Message);
+            info.AddValue(nameof(Faction), Faction);
+            info.AddValue(nameof(SystemGuid), SystemGuid);
+            info.AddValue(nameof(Entity), Entity);
+
+            if ((context.State & StreamingContextStates.Persistence) != 0)
+            {
+                info.AddValue(nameof(ConcernedPlayers), ConcernedPlayers);
+            }
         }
     }
 }

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+    <TableRow ScaleHeight="True">
+    <TableLayout>     
+    <TableRow>
+
+      <ListBox ID="SelectedItems" DataContext="{Binding SelectedItems}"/>
+
+    </TableRow>
+    </TableLayout>
+    </TableRow>
+    <TableRow>
+    <TableLayout>
+    <TableRow ScaleHeight="False">
+      <Button Text="Add:" Command="{Binding AddCommand}" />
+      <ComboBox ID="PossibleItems" DataContext="{Binding PossibleItems}"/>
+    </TableRow>
+    </TableLayout>
+    </TableRow>
+  </TableLayout>
+	
+</Panel>

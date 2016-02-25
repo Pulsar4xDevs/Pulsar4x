@@ -2,33 +2,100 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
+
+    public class RangeEnabledObservableCollection<T> : ObservableCollection<T>
+    {
+        public void AddRange(IEnumerable<T> items)
+        {
+            this.CheckReentrancy();
+            foreach (var item in items)
+                this.Items.Add(item);
+            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+    }
+
+    public class ItemPair<T1, T2> : INotifyPropertyChanged
+    {
+        private T1 _item1;
+        public T1 Item1
+        {
+            get { return _item1; }
+            set { _item1 = value; OnPropertyChanged(); }
+        }
+
+        private T2 _item2;
+        public T2 Item2
+        {
+            get { return _item2; }
+            set { _item2 = value; OnPropertyChanged(); }
+        }
+
+        public ItemPair(T1 item1, T2 item2)
+        {
+            Item1 = item1;
+            Item2 = item2;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));           
+        }
+    }
+
     public enum DisplayMode
     {
         Key,
         Value
     }
+
+    public delegate void SelectionChangedEventHandler(int oldSelection, int newSelection);
+
     /// <summary>
     /// An attempt at creating a class to make binding dictionaries to UI more streamlined.
     /// To Use in the View:
     ///     myComboBox.DataContext = viewModel.myDictionaryVM;
-    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
-    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
+    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class DictionaryVM<TKey,TValue> :IDictionary<TKey,TValue>
+    public class DictionaryVM<TKey,TValue, TListValue> :IDictionary<TKey,TValue>, INotifyPropertyChanged
     {
         private Dictionary<TKey, TValue> _dictionary;
-        private Dictionary<int, KeyValuePair<TKey, TValue>> _index = new Dictionary<int, KeyValuePair<TKey, TValue>>(); 
+        private List<KeyValuePair<TKey, TValue>> _index = new List<KeyValuePair<TKey, TValue>>(); 
         private Dictionary<KeyValuePair<TKey,TValue>,int> _reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>(); 
-        public ObservableCollection<string> DisplayList { get; set; }
-        public int SelectedIndex { get; set; }
+        public ObservableCollection<TListValue> DisplayList { get; set; }
+        private int _selectedIndex;
+        public int SelectedIndex
+        {
+            get { return _selectedIndex; }
+            set
+            {
+                int old = _selectedIndex;
+                _selectedIndex = value;
+                if(SelectionChangedEvent != null) SelectionChangedEvent(old, _selectedIndex);
+                OnPropertyChanged();
+            }
+        }
         public DisplayMode DisplayMode { get; set; }
-        
+
+        public event SelectionChangedEventHandler SelectionChangedEvent;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -36,12 +103,12 @@ namespace Pulsar4X.ViewModel
         public DictionaryVM(DisplayMode displayMode = DisplayMode.Value)
         {
             DisplayMode = displayMode;
-            DisplayList = new ObservableCollection<string>();
+            DisplayList = new ObservableCollection<TListValue>();
             _dictionary = new Dictionary<TKey, TValue>();
             SelectedIndex = -1;
         }
 
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -115,12 +182,16 @@ namespace Pulsar4X.ViewModel
         {
             int i = _index.Count;
             _dictionary.Add(item.Key, item.Value);
-            _index.Add(i, item);
+            _index.Add(item);
             _reverseIndex.Add(item, i);
+            var conv = TypeDescriptor.GetConverter(typeof(TListValue));
             if (DisplayMode == DisplayMode.Key)
-                DisplayList.Add(_index[i].Key.ToString());
+            {
+                
+                DisplayList.Add((TListValue)conv.ConvertFrom(_index[i].Key));
+            }
             else
-                DisplayList.Add(_index[i].Value.ToString());           
+                DisplayList.Add((TListValue)conv.ConvertFrom(_index[i].Value));
         }
 
         public void Clear()
@@ -147,9 +218,17 @@ namespace Pulsar4X.ViewModel
             {
                 int i = _reverseIndex[item];
                 _dictionary.Remove(item.Key);
-                _index.Remove(i);
+                _index.RemoveAt(i);
                 _reverseIndex.Remove(item);
                 DisplayList.RemoveAt(i);
+                //_reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>();
+                int i2 = 0;
+                foreach (var thing in _dictionary)
+                {
+                    
+                    _reverseIndex[thing] = i2;
+                    i2++;
+                }
                 return true;
             }
             return false;
@@ -202,8 +281,9 @@ namespace Pulsar4X.ViewModel
                 _index[i] = newitem;
                 _reverseIndex.Remove(olditem);
                 _reverseIndex.Add(newitem,i);
+                var conv = TypeDescriptor.GetConverter(typeof(TListValue));
                 if (this.DisplayMode == DisplayMode.Value)
-                    DisplayList[i] = value.ToString();
+                    DisplayList[i] = (TListValue)conv.ConvertFrom(value);
             }
         }
 

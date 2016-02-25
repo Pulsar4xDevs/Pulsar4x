@@ -5,7 +5,7 @@ using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
 
-namespace Pulsar4X.CrossPlatformUI.Views
+namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {
     public class MineralFormulaView : Panel
     {
@@ -20,8 +20,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             DataContext = viewModel;
             SelectionComboBox.DataContext = viewModel.Minerals;
-            SelectionComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid,string> m) => m.DisplayList);
-            SelectionComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid,string> m) => m.SelectedIndex);
+            SelectionComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid,string, string> m) => m.DisplayList);
+            SelectionComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid,string, string> m) => m.SelectedIndex);
             SelectionComboBox.SelectedIndexChanged += _viewModel.OnSelectionChange;
         }
 
