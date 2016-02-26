@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -66,10 +65,63 @@ namespace Pulsar4X.ECSLib
             return pathfindingGraph;
         }
 
+        public Stack<Node> GetPath(Node sourceNode, Node destinationNode, Graph graph, out double totalCost)
+        {
+            lock (_syncRoot)
+            {
+                _dist.Clear();
+                _path.Clear();
+
+                foreach (Node node in graph.Nodes)
+                {
+                    _dist.Add(node.Key, double.MaxValue);
+                    _path.Add(node.Key, null);
+                }
+
+                _dist[sourceNode.Key] = 0d;
+
+                NodeList nodes = new NodeList(graph.Nodes); // Nodes == Q
+
+                // [Dijkstra]
+                while (nodes.Count > 0)
+                {
+                    Node u = GetMin(nodes); // Get the Minimum Node
+                    nodes.Remove(u); // Remove it from set Q.
+
+                    foreach (EdgeToNeighbor edge in u.Neighbors)
+                    {
+                        Relax(u, edge.Neighbor, edge.Cost);
+                    }
+                }
+                // [/Dijkstra]
+
+                // Determine if a path exists.
+                totalCost = (double)_dist[destinationNode.Key];
+                if (totalCost == double.MaxValue)
+                {
+                    // No path to target.
+                    return new Stack<Node>();
+                }
+
+                // Create the stack from the shortest path.
+                var pathStack = new Stack<Node>();
+                Node currentNode = destinationNode;
+                pathStack.Push(currentNode);
+                do
+                {
+                    Node prevNode = currentNode;
+                    currentNode = (Node)_path[prevNode.Key];
+
+                    pathStack.Push(currentNode);
+                } while (currentNode != sourceNode);
+                return pathStack;
+            }
+        }
+
         /// <summary>
         /// Gets a stack of nodes representing the path from the source to the destination.
         /// </summary>
-        public Stack GetPath(Entity source, Entity destination)
+        public Stack<Node> GetPath(Entity source, Entity destination, out double totalCost)
         {
             Graph graph;
             if (source.HasDataBlob<OwnedDB>())
@@ -87,55 +139,7 @@ namespace Pulsar4X.ECSLib
             var destinationNode = new JPNode(destination, destination, new List<EdgeToNeighbor>());
             graph.AddNode(destinationNode);
 
-            lock (_syncRoot)
-            {
-                _dist.Clear();
-                _path.Clear();
-
-                foreach (JPNode node in graph.Nodes)
-                {
-                    _dist.Add(node.Key, double.MaxValue);
-                    _path.Add(node.Key, null);
-                }
-
-                _dist[sourceNode.Key] = 0;
-
-                NodeList nodes = graph.Nodes; // Nodes == Q
-
-                // [Dijkstra]
-                while (nodes.Count > 0)
-                {
-                    Node u = GetMin(nodes); // Get the Minimum Node
-                    nodes.Remove(u); // Remove it from set Q.
-
-                    foreach (EdgeToNeighbor edge in u.Neighbors)
-                    {
-                        Relax(u, edge.Neighbor, edge.Cost);
-                    }
-                }
-                // [/Dijkstra]
-
-                // Determine if a path exists.
-                double totalDistance = (double)_dist[destinationNode.Key];
-                if (totalDistance == double.MaxValue)
-                {
-                    // No path to target.
-                    return new Stack();
-                }
-
-                // Create the stack from the shortest path.
-                var pathStack = new Stack();
-                Node currentJPNode = destinationNode;
-                pathStack.Push(currentJPNode);
-                do
-                {
-                    Node prevJPNode = currentJPNode;
-                    currentJPNode = (Node)_path[prevJPNode.Key];
-
-                    pathStack.Push(currentJPNode);
-                } while (currentJPNode != sourceNode);
-                return pathStack;
-            }
+            return GetPath(sourceNode, destinationNode, graph, out totalCost);
         }
 
         /// <summary>
@@ -145,17 +149,17 @@ namespace Pulsar4X.ECSLib
         {
             // find the node in nodes with the smallest distance value
             double minDist = double.MaxValue;
-            Node minJPNode = null;
+            Node minNode = null;
             foreach (Node n in nodes)
             {
                 if ((double)_dist[n.Key] <= minDist)
                 {
                     minDist = (double)_dist[n.Key];
-                    minJPNode = n;
+                    minNode = n;
                 }
             }
 
-            return minJPNode;
+            return minNode;
         }
 
         /// <summary>

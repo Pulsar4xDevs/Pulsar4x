@@ -155,11 +155,15 @@
     <Compile Include="DataBlobs\TransitableDB.cs" />
     <Compile Include="EventLog\EventLog.cs" />
     <Compile Include="EventLog\EventType.cs" />
+    <Compile Include="Factories\SystemGen\JPFactory.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
     <Compile Include="Helpers\GameMath.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />
     <Compile Include="Helpers\MiscHelpers.cs" />
-    <Compile Include="Helpers\Pathfinding\Graph.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\EdgeToNeighbor.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\Graph.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\Node.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\NodeList.cs" />
     <Compile Include="Helpers\Pathfinding\PathfindingManager.cs" />
     <Compile Include="Helpers\Pulse.cs" />
     <Compile Include="Helpers\Vector4.cs" />

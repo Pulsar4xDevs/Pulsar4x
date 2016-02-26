@@ -54,6 +54,14 @@ namespace Pulsar4X.ECSLib
     {
         public Guid PlayerID { get; set; }
         public string Password { get; set; }
+
+        public AuthenticationToken() { }
+
+        public AuthenticationToken(Guid playerID, string password = "")
+        {
+            PlayerID = playerID;
+            Password = password;
+        }
     }
 
     [JsonObject(MemberSerialization.OptIn)]

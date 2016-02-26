@@ -12,12 +12,23 @@ namespace Pulsar4X.ECSLib
     /// the Node class exposes an AddDirected() method, which adds a directed edge with an (optional) weight to
     /// some other Node.  These methods are marked internal, and are called by the Graph class.
     /// </summary>
-    public abstract class Node
+    public class Node
     {
         public string Key { get; protected set; }
         public object Data { get; protected set; }
 
         public List<EdgeToNeighbor> Neighbors { get; protected set; }
+
+
+        protected Node()
+        {
+            Neighbors = new List<EdgeToNeighbor>();
+        }
+
+        public Node(string key) : this()
+        {
+            Key = key;
+        }
 
         /// <summary>
         /// Adds a directed edge to this node.
@@ -35,7 +46,24 @@ namespace Pulsar4X.ECSLib
             Neighbors.Add(e);
         }
 
-        internal abstract bool IsNeighbor(Node v, out double cost);
+        internal virtual bool IsNeighbor(Node v, out double cost)
+        {
+            cost = 0;
+            foreach (EdgeToNeighbor edge in Neighbors)
+            {
+                if (edge.Neighbor == v)
+                {
+                    cost = edge.Cost;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public virtual void ClearNeighbors()
+        {
+            Neighbors = new List<EdgeToNeighbor>();
+        }
     }
 
     /// <summary>

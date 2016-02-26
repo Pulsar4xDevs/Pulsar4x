@@ -11,6 +11,13 @@ namespace Pulsar4X.ECSLib
     {
         private readonly Hashtable _data = new Hashtable();
 
+        public NodeList() { }
+
+        public NodeList(NodeList nodes)
+        {
+            _data = (Hashtable)nodes._data.Clone();
+        }
+
         #region Public Properties
 
         /// <summary>

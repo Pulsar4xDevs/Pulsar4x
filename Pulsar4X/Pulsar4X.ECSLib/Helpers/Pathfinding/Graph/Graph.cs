@@ -24,15 +24,6 @@ namespace Pulsar4X.ECSLib
             _nodes = new NodeList();
         }
 
-        /// <summary>
-        /// Creates a new graph class instance based on a list of nodes.
-        /// </summary>
-        /// <param name="nodes">The list of nodes to populate the newly created Graph class with.</param>
-        public Graph(NodeList nodes)
-        {
-            _nodes = nodes;
-        }
-
         #endregion
 
         #region Public Methods
@@ -47,6 +38,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Adds a new node to the graph.
+        /// This also adds undirected edges to neighbors automatically for Pulsar pathfinding.
         /// </summary>
         /// <param name="u">The node to add.</param>
         public virtual void AddNode(Node u)
@@ -74,34 +66,25 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Adds a directed edge from one node to another.
-        /// </summary>
-        /// <param name="u">The node from which the directed edge eminates.</param>
-        /// <param name="v">The node from which the directed edge leads to.</param>
-        /// <exception cref="ArgumentException">Thrown if the provided nodes are not part of this graph.</exception>
-        public virtual void AddDirectedEdge(Node u, Node v)
-        {
-            AddDirectedEdge(u, v, 0);
-        }
-
-        /// <summary>
         /// Adds a directed, weighted edge from one node to another.
         /// </summary>
         /// <param name="u">The node from which the directed edge eminates.</param>
         /// <param name="v">The node from which the directed edge leads to.</param>
         /// <param name="cost">The weight of the edge.</param>
         /// <exception cref="ArgumentException">Thrown if the provided nodes are not part of this graph.</exception>
-        public virtual void AddDirectedEdge(Node u, Node v, double cost)
+        public virtual void AddDirectedEdge(Node u, Node v, double cost = 0)
         {
-            // get references to uKey and vKey
-            if (Contains(u) && Contains(v))
+            if (cost < 0)
             {
-                u.AddDirected(v, cost);
+                throw new ArgumentException($"{nameof(cost)} cannot be negative", nameof(cost));
             }
-            else
+
+            if (!Contains(u) || !Contains(v))
             {
                 throw new ArgumentException("One or both of the nodes supplied were not members of the graph.");
             }
+
+            u.AddDirected(v, cost);
         }
 
         /// <summary>
@@ -111,19 +94,21 @@ namespace Pulsar4X.ECSLib
         /// <param name="v">The node from which the directed edge leads to.</param>
         /// <param name="cost">The weight of the edge.</param>
         /// <exception cref="ArgumentException">Thrown if the provided nodes are not part of this graph.</exception>
-        public virtual void AddUndirectedEdge(Node u, Node v, double cost)
+        public virtual void AddUndirectedEdge(Node u, Node v, double cost = 0)
         {
-            // Make sure u and v are Nodes in this graph
-            if (Contains(u) && Contains(v))
+            if (cost < 0)
             {
-                // Add an edge from u -> v and from v -> u
-                _nodes[u.Key].AddDirected(v, cost);
-                _nodes[v.Key].AddDirected(u, cost);
+                throw new ArgumentException($"{nameof(cost)} cannot be negative", nameof(cost));
             }
-            else
+            
+            if (!Contains(u) || !Contains(v))
             {
                 throw new ArgumentException("One or both of the nodes supplied were not members of the graph.");
             }
+
+            // Add an edge from u -> v and from v -> u
+            _nodes[u.Key].AddDirected(v, cost);
+            _nodes[v.Key].AddDirected(u, cost);
         }
 
         /// <summary>

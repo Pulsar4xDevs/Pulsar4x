@@ -13,9 +13,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal Dictionary<Entity, int> bridgeDictionary = new Dictionary<Entity, int>();
 
-        public bool IsStabilized => isStabilized;
+        public bool IsStabilized => _isStabilized;
         [JsonProperty]
-        private bool isStabilized;
+        private bool _isStabilized;
 
         /// <summary>
         /// Default public constructor for Json
@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
         public TransitableDB(Entity destination, bool isStabilized)
         {
             Destination = destination;
-            this.isStabilized = isStabilized;
+            _isStabilized = isStabilized;
         }
 
         public override object Clone()

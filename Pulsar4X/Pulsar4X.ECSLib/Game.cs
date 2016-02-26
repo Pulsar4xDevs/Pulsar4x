@@ -105,7 +105,7 @@ namespace Pulsar4X.ECSLib
 
         internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
-
+        private PathfindingManager _pathfindingManager;
 
         #endregion
 
@@ -139,6 +139,8 @@ namespace Pulsar4X.ECSLib
 
         internal void PostGameLoad()
         {
+            _pathfindingManager = new PathfindingManager(this);
+
             // Invoke the Post Load event down the chain.
             PostLoad?.Invoke(this, EventArgs.Empty);
 
@@ -294,7 +296,7 @@ namespace Pulsar4X.ECSLib
         }
 
         [PublicAPI]
-        public Player AddPlayer(string playerName, string playerPassword)
+        public Player AddPlayer(string playerName, string playerPassword = "")
         {
             var player = new Player(playerName, playerPassword);
             Players.Add(player);
