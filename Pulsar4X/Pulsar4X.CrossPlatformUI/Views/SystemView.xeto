@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:p="clr-namespace:Pulsar4X.CrossPlatformUI;assembly=Pulsar4X.CrossPlatformUI"
+  >
+  <StackLayout Orientation="Vertical" x:Name="MapOverlay" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+    <StackLayout Orientation="Horizontal" x:Name="TopButtonBar" HorizontalContentAlignment="Left">
+      <Button x:Name="btn_system_info" />
+      <Button x:Name="btn_industry" />
+      <Button x:Name="btn_research" />
+      <Button x:Name="btn_wealth" />
+      <Button x:Name="btn_ground_units" />
+      <Button x:Name="btn_commanders" />
+      <Button x:Name="btn_class_design" />
+      <Button x:Name="btn_unit_details" />
+      <Button x:Name="btn_fleet_orders" />
+      <Button x:Name="btn_task_forces" />
+      <Button x:Name="btn_fighters" />
+      <Button x:Name="btn_combat_assignments" />
+      <Button x:Name="btn_system_display" />
+      <Button x:Name="btn_galactic_map" />
+      <Button x:Name="btn_races" />
+      <Button x:Name="btn_research_project" />
+      <Button x:Name="btn_available_colonies" />
+      <Button x:Name="btn_fuel_report" />
+      <Button x:Name="btn_damaged_ships" />
+      <Button x:Name="btn_production_overview" />
+      <Button x:Name="btn_tech_report" />
+      <Button x:Name="btn_geo_survey_report" />
+      <Button x:Name="btn_shipping_lines" />
+      <Button x:Name="btn_sector_assignment" />
+      <Button x:Name="btn_refresh" />
+      <Button x:Name="btn_events" />
+      <Button x:Name="btn_intelligence" />
+    </StackLayout>
+    <StackLayout Orientation="Horizontal">
+      <GroupBox Text="Scroll Map">
+        <TableLayout>
+          <TableRow>
+            <TableCell/>
+            <TableCell>
+              <Button x:Name="btn_up"/>
+            </TableCell>
+            <TableCell/>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              <Button x:Name="btn_left"/>
+            </TableCell>
+            <TableCell/>
+            <TableCell>
+              <Button x:Name="btn_right"/>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell/>
+            <TableCell>
+              <Button x:Name="btn_down"/>
+            </TableCell>
+            <TableCell/>
+          </TableRow>
+        </TableLayout>
+      </GroupBox>
+      <GroupBox Text="Zoom Map">
+        <TableLayout>
+          <TableRow>
+            <TableCell>
+              <TableLayout>
+                <TableRow>
+                  <TableCell>
+                    <Button x:Name="btn_zoom_in"/>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>
+                    <Button x:Name="btn_zoom_out"/>
+                  </TableCell>
+                </TableRow>
+              </TableLayout>
+            </TableCell>
+            <TableCell>
+              <TableLayout>
+                <TableRow ScaleHeight="False">
+                  <TableCell>
+                    <Button x:Name="btn_min_zoom" Text="Min Zoom"/>
+                  </TableCell>
+                </TableRow>
+              </TableLayout>
+            </TableCell>
+          </TableRow>
+        </TableLayout>
+      </GroupBox>
+      <StackLayout Orientation="Vertical">
+        <GroupBox Text="Increment Time (Time will advance by the specified amount and pause)">
+          <StackLayout Orientation="Horizontal" x:Name="adv_buttons">
+            <Button x:Name="btn_time_5sec" Text="5 Seconds" />
+            <Button x:Name="btn_time_30sec" Text="30 Seconds" />
+            <Button x:Name="btn_time_2min" Text="2 Minutes" />
+            <Button x:Name="btn_time_5min" Text="5 Minutes" />
+            <Button x:Name="btn_time_20min" Text="20 Minutes" />
+            <Button x:Name="btn_time_1hr" Text="1 Hour" />
+            <Button x:Name="btn_time_3hrs" Text="3 Hours" />
+            <Button x:Name="btn_time_8hrs" Text="8 Hours" />
+            <Button x:Name="btn_time_1day" Text="1 Day" />
+            <Button x:Name="btn_time_5day" Text="5 Days" />
+            <Button x:Name="btn_time_30day" Text="30 Days" />
+          </StackLayout>
+        </GroupBox>
+        <GroupBox Text="Sub-pulse-length: The length of each movement sub-pulse within each time increment. Automatic allows Pulsar4X to select a suitable sub-pulse length.">
+          <StackLayout Orientation="Horizontal" x:Name="pulse_buttons">
+            <Button x:Name="btn_pulse_auto" Text="Automatic" />
+            <Button x:Name="btn_pulse_5sec" Text="5 Seconds" />
+            <Button x:Name="btn_pulse_30sec" Text="30 Seconds" />
+            <Button x:Name="btn_pulse_2min" Text="2 Minutes" />
+            <Button x:Name="btn_pulse_5min" Text="5 Minutes" />
+            <Button x:Name="btn_pulse_20min" Text="20 Minutes" />
+            <Button x:Name="btn_pulse_1hr" Text="1 Hour" />
+            <Button x:Name="btn_pulse_2hrs" Text="2 Hours" />
+            <Button x:Name="btn_pulse_6hrs" Text="6 Hours" />
+            <Button x:Name="btn_pulse_1day" Text="1 Day" />
+            <TextBox x:Name="tb_current_pulse_length" />
+          </StackLayout>
+        </GroupBox>
+      </StackLayout>
+    </StackLayout>
+    <StackLayout Orientation="Horizontal">
+      <GroupBox>
+        <Panel>
+          <ListBox x:Name="Systems"/>
+        </Panel>
+      </GroupBox>
+      <p:RenderCanvas x:Name="RenderCanvas"/>
+    </StackLayout>
+  </StackLayout>
+</Panel>
