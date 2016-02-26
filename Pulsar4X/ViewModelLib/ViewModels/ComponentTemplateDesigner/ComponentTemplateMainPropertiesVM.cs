@@ -20,7 +20,13 @@ namespace Pulsar4X.ViewModel
             get { return _subControlInFocus; }
             set { _subControlInFocus = value; FocusedText = FocusedText; } }
 
-        //public virtual string FocusedText { get { return ""; } set { OnPropertyChanged(); } }
+        protected ComponentTemplateParentVM ParentVM { get; private set; }
+
+        public ComponentTemplateDesignerBaseVM(ComponentTemplateParentVM parent)
+        {
+            ParentVM = parent;
+        }
+
         public abstract string FocusedText { get; set; }
         public abstract event PropertyChangedEventHandler PropertyChanged;
         internal abstract void OnPropertyChanged([CallerMemberName] string propertyName = null);
@@ -91,12 +97,8 @@ namespace Pulsar4X.ViewModel
                         CreditCostFormula = value;                        
                         break;
                 }
-                //if (FormulaEditor != null)
-                //{
-                //    ControlInFocus = this;
-                //    OnPropertyChanged();
-                //    //FormulaEditor.Formula = FormulaEditor.Formula; //force propertyUpdate
-                //}
+
+                   ParentVM.ControlInFocus = this;
             }
         }
 
@@ -173,21 +175,16 @@ namespace Pulsar4X.ViewModel
         public override event PropertyChangedEventHandler PropertyChanged;
 
 
-
-
-
-        public ComponentTemplateMainPropertiesVM(GameVM gameVM)
+        public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameVM): base(parent)
         {
             _staticData = gameVM.Game.StaticData;
-
             SubControlInFocus = FocusedControl.SizeControl;
-            //ControlInFocus = this;
-            //FormulaEditor = new FormulaEditorVM(this);
-            
-
         }
 
-
+        public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameData, ComponentSD designSD) : this(parent, gameData)
+        {
+            SetDesignSD(designSD);
+        }
 
         private void ComponentTemplateVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -198,8 +195,7 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        public ComponentTemplateMainPropertiesVM(GameVM gameData, ComponentSD designSD) : this(gameData)
-        { SetDesignSD(designSD); }
+
 
 
 
@@ -249,17 +245,10 @@ namespace Pulsar4X.ViewModel
             {
                 MountType[item.Key] = item.Value;
             }
-
-
         }
-
-
-
-
 
         internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            //ControlInFocus = this;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

@@ -28,7 +28,7 @@
           <Scrollable >
             <StackLayout ID ="AbilityTemplates"/>              
           </Scrollable>
-          <c:FormulaEditorView x:Name="FormulaEditorView"/>
+          <c:FormulaEditorView DataContext="{Binding FormulaEditor}" />
         </TableRow>
       </TableLayout>
      

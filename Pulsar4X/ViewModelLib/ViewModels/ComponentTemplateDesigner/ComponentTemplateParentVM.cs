@@ -12,8 +12,6 @@ namespace Pulsar4X.ViewModel
 {
     public class ComponentTemplateParentVM : INotifyPropertyChanged
     {
-
-
         private StaticDataStore _staticData;
         private GameVM _gameVM;
 
@@ -34,24 +32,25 @@ namespace Pulsar4X.ViewModel
         }
 
         private FormulaEditorVM _formulaEditor;
-        public FormulaEditorVM FormulaEditor { get { return _formulaEditor; }
-            set { _formulaEditor = value; OnPropertyChanged(); } }
+        public FormulaEditorVM FormulaEditor
+        {
+            get { return _formulaEditor; }
+            set { _formulaEditor = value; OnPropertyChanged(); }
+        }
 
 
         private ComponentTemplateDesignerBaseVM _controlInFocus;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public ComponentTemplateDesignerBaseVM ControlInFocus
         {
             get { return _controlInFocus; }
             set
             {
-                if (_controlInFocus != value)
-                {
-                    _controlInFocus = value;
-                    FormulaEditor = new FormulaEditorVM(this);
-                }
+                //if (_controlInFocus != value)
+                //{
+                _controlInFocus = value;
+                OnPropertyChanged(nameof(FormulaEditor));
+                //}
             }
         }
 
@@ -78,14 +77,13 @@ namespace Pulsar4X.ViewModel
 
         private void Components_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            SelectedComponent = new ComponentTemplateMainPropertiesVM(_gameVM, Components.GetKey());
+            SelectedComponent = new ComponentTemplateMainPropertiesVM(this, _gameVM, Components.GetKey());
             ComponentAbilitySDs.Clear();
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in Components.GetKey().ComponentAbilitySDs)
             {
                 var vm = new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData);               
                 tmp.Add(vm);
-
             }
             ComponentAbilitySDs.AddRange(tmp);
         }
@@ -131,6 +129,8 @@ namespace Pulsar4X.ViewModel
             StaticDataManager.ExportStaticData(_staticData.Components, "./NewComponentData.json");
         }
 
+
+        public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -34,7 +34,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         {
             base.OnExecuted(e);
 
-            ComponentTemplateParentVM designVM = new ComponentTemplateParentVM(_gameVM); //ComponentTemplateVM.Create(GameData);
+            ComponentTemplateParentVM designVM = new ComponentTemplateParentVM(_gameVM); 
             Application.Instance.MainForm.Content = new Views.ComponentTemplateDesigner.ComponentTemplateDesignerParentView(designVM);
         }
     }

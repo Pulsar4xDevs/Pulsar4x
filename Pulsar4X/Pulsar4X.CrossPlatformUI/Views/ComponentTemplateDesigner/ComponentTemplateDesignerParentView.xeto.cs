@@ -12,7 +12,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         private ComponentTemplateParentVM _viewModel;
         protected ComboBox ComponentsComBox { get; set; }
         protected StackLayout AbilityTemplates { get; set; }
-        protected FormulaEditorView FormulaEditorView { get; set; }
 
         public ComponentTemplateDesignerParentView()
         {
@@ -25,7 +24,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             _viewModel = viewModel;
             DataContext = viewModel;
-            FormulaEditorView.SetViewModel(viewModel.FormulaEditor);
 
             foreach (var item in viewModel.ComponentAbilitySDs)
             {

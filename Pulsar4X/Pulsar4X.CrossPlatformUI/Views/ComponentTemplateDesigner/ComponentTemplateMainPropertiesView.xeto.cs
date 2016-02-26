@@ -14,6 +14,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         protected StackLayout MountTypes { get; set; }
         private ComponentTemplateMainPropertiesVM _viewModel;
         
+        protected TextBox NameTBx { get; set; }
         protected TextBox DescriptionTBx { get; set; }
         protected TextBox SizeFormulaTBx { get; set; }
         protected TextBox HTKTBx { get; set; }
@@ -28,7 +29,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             XamlReader.Load(this);
 
-            //ComponentsComBox.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.NameControl;
+            NameTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.NameControl;
             DescriptionTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.DescriptionControl;
             SizeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.SizeControl;
             HTKTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.HTKControl;
@@ -36,6 +37,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             ResearchCostTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.ResearchCostControl;
             BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.BPCostControl;
             CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.CreditCostControl;
+
 
             DataContextChanged += ComponentTemplateMainPropertiesView_DataContextChanged;
         }
@@ -47,6 +49,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 ComponentTemplateMainPropertiesVM dc = (ComponentTemplateMainPropertiesVM)DataContext;
                 SetViewModel(dc);
             }
+            
         }
 
         private void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 

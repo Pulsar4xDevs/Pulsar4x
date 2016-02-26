@@ -8,7 +8,7 @@
   <TableLayout>
     <TableRow>
       <Label Text="Name" />
-      <TextBox ID="NameTBx" DataContext="{Binding Name}" />
+      <TextBox ID="NameTBx" Text="{Binding Name}" />
       <Label Text="Description" />
       <TextBox ID="DescriptionTBx" Text="{Binding Description}" />
       <Label Text="ID" />
