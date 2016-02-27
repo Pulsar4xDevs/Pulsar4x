@@ -23,19 +23,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public Entity GameMasterFaction;
-
-        [PublicAPI]
-        public string GameName
-        {
-            get { return _gameName; }
-            internal set { _gameName = value; }
-        }
-        [JsonProperty]
-        private string _gameName;
-
-        [PublicAPI]
-        public VersionInfo Version => VersionInfo.PulsarVersionInfo;
-
+        
         [PublicAPI]
         public bool IsLoaded { get; internal set; }
 
@@ -48,28 +36,14 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private DateTime _currentDateTime;
 
-        [JsonProperty]
-        internal int NumSystems;
-
-        [PublicAPI]
-        [Obsolete("Use game.GetSystems(AuthenticationToken) or game.GetSystem(AuthenticationToken, Guid)")]
-        public ReadOnlyDictionary<Guid, StarSystem> Systems => new ReadOnlyDictionary<Guid, StarSystem>(StarSystems);
-
         /// <summary>
         /// List of StarSystems currently in the game.
         /// </summary>
         [JsonProperty]
-        internal Dictionary<Guid, StarSystem> StarSystems { get; private set; }
-
-        /// <summary>
-        /// Global Entity Manager.
-        /// </summary>
-        [PublicAPI]
-        [Obsolete("Will be made internal to conform with data hiding.")]
-        public EntityManager GlobalManager => _globalManager;
+        internal Dictionary<Guid, StarSystem> Systems { get; private set; }
 
         [JsonProperty]
-        private readonly EntityManager _globalManager;
+        internal readonly EntityManager GlobalManager;
 
         [PublicAPI]
         [JsonProperty]
@@ -85,27 +59,16 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
 
-        public bool EnableMultiThreading
-        {
-            get
-            {
-                return _enableMultiThreading;
-            }
-
-            set
-            {
-                _enableMultiThreading = value;
-            }
-        }
-        [JsonProperty]
-        private bool _enableMultiThreading = true;
-
         [PublicAPI]
         public EventLog EventLog { get; internal set; }
 
         internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
         internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
         private PathfindingManager _pathfindingManager;
+
+        [PublicAPI]
+        [JsonProperty]
+        public GameSettings Settings { get; set; }
 
         #endregion
 
@@ -122,8 +85,8 @@ namespace Pulsar4X.ECSLib
         internal Game()
         {
             IsLoaded = false;
-            _globalManager = new EntityManager(this);
-            StarSystems = new Dictionary<Guid, StarSystem>();
+            GlobalManager = new EntityManager(this);
+            Systems = new Dictionary<Guid, StarSystem>();
             NextSubpulse = new SubpulseLimit();
             GalaxyGen = new GalaxyFactory(true);
             StaticData = new StaticDataStore();
@@ -168,21 +131,25 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="gameName"></param>
         /// <param name="startDateTime"></param>
-        /// <param name="numSystems"></param>
+        /// <param name="maxSystems"></param>
         /// <param name="smPassword">Password for the SpaceMaster</param>
         /// <param name="dataSets">IEnumerable containing filePaths to mod directories to load.</param>
         /// <param name="progress"></param>
         /// <exception cref="ArgumentNullException"><paramref name="gameName"/> is <see langword="null" />.</exception>
         /// <exception cref="StaticDataLoadException">Thrown in a variety of situations when StaticData could not be loaded.</exception>
         [PublicAPI]
-        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int numSystems, string smPassword = "", IEnumerable<string> dataSets = null, IProgress<double> progress = null)
+        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int maxSystems, string smPassword = "", IEnumerable<string> dataSets = null, IProgress<double> progress = null)
         {
             if (gameName == null)
             {
                 throw new ArgumentNullException(nameof(gameName));
             }
 
-            var newGame = new Game {GameName = gameName, CurrentDateTime = startDateTime};
+            
+
+            var newGame = new Game {CurrentDateTime = startDateTime};
+
+            newGame.Settings = new GameSettings {GameName = gameName, MaxSystems = maxSystems};
 
             // Load static data
             if (dataSets != null)
@@ -201,13 +168,6 @@ namespace Pulsar4X.ECSLib
             newGame.SpaceMaster = new Player("Space Master", smPassword);
             newGame.Players = new List<Player>();
             newGame.GameMasterFaction = FactionFactory.CreatePlayerFaction(newGame, newGame.SpaceMaster, "SpaceMaster Faction");
-
-            // Generate systems
-            for (int i = 0; i < numSystems; i++)
-            {
-                newGame.GalaxyGen.StarSystemFactory.CreateSystem(newGame, "System #" + i);
-                progress?.Report((double)newGame.StarSystems.Count / numSystems);
-            }
 
             newGame.PostGameLoad();
 

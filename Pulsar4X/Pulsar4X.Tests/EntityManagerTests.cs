@@ -74,7 +74,7 @@ namespace Pulsar4X.Tests
             Entity testEntity = Entity.Create(_game.GlobalManager);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
-            testEntity.SetDataBlob(new PositionDB(0, 0, 0, null), EntityManager.GetTypeIndex<PositionDB>());
+            testEntity.SetDataBlob(new PositionDB(0, 0, 0, Guid.Empty), EntityManager.GetTypeIndex<PositionDB>());
 
             // test bad input:
             Assert.Catch(typeof(ArgumentNullException), () =>

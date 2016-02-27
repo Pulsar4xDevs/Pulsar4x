@@ -108,16 +108,21 @@ namespace Pulsar4X.ECSLib
             Entity otherJP2 = otherJPNode.Data.Item2;
 
             var jp1PositionDB = thisJP1.GetDataBlob<PositionDB>();
-            StarSystem jp1System = jp1PositionDB?.System;
             var jp2PositionDB = thisJP2.GetDataBlob<PositionDB>();
-            StarSystem jp2System = jp2PositionDB?.System;
-
             var otherJP1PositionDB = otherJP1.GetDataBlob<PositionDB>();
-            StarSystem otherJP1System = otherJP1PositionDB?.System;
             var otherJP2PositionDB = otherJP2.GetDataBlob<PositionDB>();
-            StarSystem otherJP2System = otherJP2PositionDB?.System;
 
-            if (jp1System != null)
+            if (jp1PositionDB == null || jp2PositionDB == null || otherJP1PositionDB == null || otherJP2PositionDB == null)
+            {
+                return false;
+            }
+
+            Guid jp1System = jp1PositionDB.SystemGuid;
+            Guid jp2System = jp2PositionDB.SystemGuid;
+            Guid otherJP1System = otherJP1PositionDB.SystemGuid;
+            Guid otherJP2System = otherJP2PositionDB.SystemGuid;
+
+            if (jp1System != Guid.Empty)
             {
                 if (jp1System == otherJP1System)
                 {
@@ -131,7 +136,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            if (jp2System != null)
+            if (jp2System != Guid.Empty)
             {
                 if (jp2System == otherJP1System)
                 {

@@ -13,6 +13,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid Guid { get; private set; }
 
+        [JsonProperty]
+        internal int SystemIndex { get; set; }
+
         [PublicAPI]
         [JsonProperty]
         public NameDB NameDB { get; private set; }
@@ -46,7 +49,7 @@ namespace Pulsar4X.ECSLib
             Seed = seed;
             RNG = new Random(seed);
 
-            game.StarSystems.Add(Guid, this);
+            game.Systems.Add(Guid, this);
         }
 
         /// <summary>
@@ -66,7 +69,7 @@ namespace Pulsar4X.ECSLib
                 Entity faction = keyValuePair.Key;
                 AccessRole accessRole = keyValuePair.Value;
 
-                if ((accessRole & AccessRole.SystemKnowledge) == AccessRole.SystemKnowledge)
+                if ((accessRole & AccessRole.SystemKnowledge) != 0)
                 {
                     var factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
                     foreach (Guid knownSystem in factionInfoDB.KnownSystems)
