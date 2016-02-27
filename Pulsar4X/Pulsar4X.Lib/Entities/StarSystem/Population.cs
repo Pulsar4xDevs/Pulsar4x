@@ -674,31 +674,52 @@ namespace Pulsar4X.Entities
             if (faction == this.Faction)
             {
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadCrewFromColony);
+
                 if (this.FuelStockpile > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromColony);
+
                 if (this.MaintenanceSupplies > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);
+
+#warning check size class here
                 if (Array.Exists(this.Installations, x => x.Type == Installation.InstallationType.MaintenanceFacility))
                     legalOrders.Add(Constants.ShipTN.OrderType.BeginOverhaul);
+
                 if (this.Installations.Count() > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadInstallation);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadInstallation);
+
                 if (this.ComponentStockpile.Count() > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadShipComponent);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadAllMinerals);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadShipComponent);
+
+                for (int minIterator = 0; minIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; minIterator++)
+                {
+                    if (Minerials[minIterator] > 0.0f)
+                    {
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadAllMinerals);
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
+                        break;
+                    }
+                }
+                
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);
+
                 if (this.CivilianPopulation > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadColonists);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadColonists);
+
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadFuelToPlanet);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet);
-                if (Array.Exists(this.Installations, x => x.Type == Installation.InstallationType.OrdnanceFactory) || this.MissileStockpile.Count > 0)
-                    legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
+
+                if (this.MissileStockpile.Count > 0)                   
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);
+
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAll);
             }
             return legalOrders;
         }
@@ -932,6 +953,27 @@ namespace Pulsar4X.Entities
                     _SensorUpdateAck++;
                 break;
             }
+        }
+
+        /// <summary>
+        /// Handle any issues with loading minerals
+        /// </summary>
+        /// <param name="mType">Mineral type</param>
+        /// <param name="massToLoad">tonnage to load</param>
+#warning Check reserves for mineral loading
+        public void LoadMineral(Constants.Minerals.MinerialNames mType, int massToLoad)
+        {
+            Minerials[(int)mType] = Minerials[(int)mType] - (float)massToLoad;
+        }
+
+        /// <summary>
+        /// Handle any issues with unloading minerals here
+        /// </summary>
+        /// <param name="mType"></param>
+        /// <param name="massToUnload"></param>
+        public void UnloadMineral(Constants.Minerals.MinerialNames mType, int massToUnload)
+        {
+            Minerials[(int)mType] = Minerials[(int)mType] + (float)massToUnload;
         }
 
         /// <summary>

@@ -488,12 +488,113 @@ namespace Pulsar4X.UI.Handlers
                 if (ActionIndex != -1)
                 {
                     Constants.ShipTN.OrderType selected_ordertype = (Constants.ShipTN.OrderType)m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
+                    int SecondaryOrder = -1;
 
                     /// <summary>
                     /// Now figure out what the hell order this would be.
                     /// </summary>
                     var entity = selected.Entity;
                     var etype = selected.EntityType;
+
+                    switch (selected_ordertype)
+                    {
+                        case Constants.ShipTN.OrderType.LoadInstallation:
+                            int InstSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+
+                            /// <summary>
+                            /// This is a bad order.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            Population popTargetOfOrder = (Population)entity;
+                            if (InstSelection != -1)
+                            {
+                                int ActualInst = 0;
+                                for (Installation.InstallationType InstIterator = 0; InstIterator < Installation.InstallationType.InstallationCount; InstIterator++)
+                                {
+                                    /// <summary>
+                                    /// Skip over these installations, they should never be loadable.
+                                    /// </summary>
+                                    if ( !(InstIterator == Installation.InstallationType.ConventionalIndustry || InstIterator == Installation.InstallationType.CivilianMiningComplex ||
+                                        InstIterator == Installation.InstallationType.MilitaryAcademy || InstIterator == Installation.InstallationType.SectorCommand ||
+                                        InstIterator == Installation.InstallationType.Spaceport || InstIterator == Installation.InstallationType.CommercialShipyard ||
+                                        InstIterator == Installation.InstallationType.NavalShipyardComplex) )
+                                    {
+                                        if (popTargetOfOrder.Installations[(int)InstIterator].Number >= 1.0f)
+                                        {
+                                            if (ActualInst == InstSelection)
+                                            {
+                                                SecondaryOrder = (int)InstIterator;
+                                                break;
+                                            }
+                                            ActualInst++;
+                                        }
+                                    }
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadInstallation:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadMineral:
+                            int MineralSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+                            /// <summary>
+                            /// This is a bad order.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            popTargetOfOrder = (Population)entity;
+                            if (MineralSelection != -1)
+                            {
+                                for (Constants.Minerals.MinerialNames MinIterator = 0; MinIterator < Constants.Minerals.MinerialNames.MinerialCount; MinIterator++)
+                                {
+                                    if (popTargetOfOrder.Minerials[(int)MinIterator] >= 1.0f)
+                                    {
+                                        if (MineralSelection != -1)
+                                        {
+                                            SecondaryOrder = (int)MinIterator;
+                                        }
+                                    }
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadMineral:
+                            break;
+
+
+#warning All of the rest of these load types need to be implemented
+                        case Constants.ShipTN.OrderType.LoadMineralWhenX:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadShipComponent:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadShipComponent:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadPDCPart:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadPDCPart:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadGroundUnit:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadGroundUnit:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadCommander:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadCommander:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadTeam:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadTeam:
+                            break;
+                        default:
+                            break;
+                    }
+
+
 #warning handle secondary,tertiary, and order delays. also handle taskgroup split condition for move to contact orders if not already done so.
                     switch (etype)
                     {
@@ -505,28 +606,28 @@ namespace Pulsar4X.UI.Handlers
                             break;
                         case SystemListObject.ListEntityType.Planets:
                             SystemBody planet = (SystemBody)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, planet);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, planet);
                             break;
                         case SystemListObject.ListEntityType.JumpPoint:
                             JumpPoint jp = (JumpPoint)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, jp);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, jp);
                             break;
                         case SystemListObject.ListEntityType.Colonies:
                             Population popTargetOfOrder = (Population)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, popTargetOfOrder);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, popTargetOfOrder);
                             break;
                         case SystemListObject.ListEntityType.TaskGroups:
                             TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, TargetOfOrder);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, TargetOfOrder);
                             TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Waypoints:
                             Waypoint waypoint = (Waypoint)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, waypoint);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, waypoint);
                             break;
                         case SystemListObject.ListEntityType.SurveyPoints:
                             SurveyPoint SPoint = (SurveyPoint)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, SPoint);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, SPoint);
                             break;
                     }
                     if (NewOrder != null)
@@ -589,6 +690,19 @@ namespace Pulsar4X.UI.Handlers
                                 }
                             }
                             break;
+                        case Constants.ShipTN.OrderType.UnloadInstallation:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Installation";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                            {
+                                foreach(KeyValuePair<Installation.InstallationType,Entities.Components.CargoListEntryTN> pair in CurShip.CargoList)
+                                {
+                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                }
+                            }
+                            break;
                         case Constants.ShipTN.OrderType.LoadMineral:
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
@@ -596,7 +710,24 @@ namespace Pulsar4X.UI.Handlers
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
                             for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                             {
-                                m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(((Constants.Minerals.MinerialNames)mineralIterator).ToString());
+                                if ((selected.Entity as Population).Minerials[mineralIterator] > 0.0f)
+                                {
+                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(((Constants.Minerals.MinerialNames)mineralIterator).ToString());
+                                }
+                            }
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadMineral:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Mineral";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                            {
+                                foreach (KeyValuePair<Constants.Minerals.MinerialNames, Entities.Components.CargoListEntryTN> pair in CurShip.CargoMineralList)
+                                {
+                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                }
                             }
                             break;
 #warning All of the rest of these load types need to be implemented
@@ -610,7 +741,17 @@ namespace Pulsar4X.UI.Handlers
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Component";
                             break;
+                        case Constants.ShipTN.OrderType.UnloadShipComponent:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Component";
+                            break;
                         case Constants.ShipTN.OrderType.LoadPDCPart:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select PDC Part";
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadPDCPart:
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select PDC Part";
@@ -620,12 +761,27 @@ namespace Pulsar4X.UI.Handlers
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Ground Unit";
                             break;
+                        case Constants.ShipTN.OrderType.UnloadGroundUnit:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Ground Unit";
+                            break;
                         case Constants.ShipTN.OrderType.LoadCommander:
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Commander";
                             break;
+                        case Constants.ShipTN.OrderType.UnloadCommander:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Commander";
+                            break;
                         case Constants.ShipTN.OrderType.LoadTeam:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Team";
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadTeam:
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Team";

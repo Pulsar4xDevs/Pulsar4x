@@ -1125,7 +1125,14 @@ namespace Pulsar4X.Entities
                             if (System.FactionDetectionLists[FactionID].CheckThermal(detListIterator,GameState.Instance.CurrentSecond,GameState.Instance.CurrentYear) == false)
                             {
                                 sig = Pop.ThermalSignature;
-                                detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                if (CurrentTaskGroup.BestThermalCount != 0)
+                                {
+                                    detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                }
+                                else
+                                {
+                                    detection = CurrentTaskGroup.TaskGroupFaction.ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                }
 
                                 /// <summary>
                                 /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
@@ -1147,7 +1154,14 @@ namespace Pulsar4X.Entities
                             if (System.FactionDetectionLists[FactionID].CheckEM(detListIterator, GameState.Instance.CurrentSecond, GameState.Instance.CurrentYear) == false)
                             {
                                 sig = Pop.EMSignature;
-                                detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                if (CurrentTaskGroup.BestEMCount != 0)
+                                {
+                                    detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                }
+                                else
+                                {
+                                    detection = CurrentTaskGroup.TaskGroupFaction.ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                }
 
                                 bool det = LargeDetection(dist, detection);
 

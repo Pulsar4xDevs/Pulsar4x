@@ -213,6 +213,11 @@ namespace Pulsar4X.Entities
         public Dictionary<ComponentDefTN, CargoListEntryTN> CargoComponentList { get; set; }
 
         /// <summary>
+        /// List of any minerals this ship is holding.
+        /// </summary>
+        public Dictionary<Constants.Minerals.MinerialNames, CargoListEntryTN> CargoMineralList { get; set; }
+
+        /// <summary>
         /// Ships can also have several cryo storage bays and bay types.
         /// </summary>
         public BindingList<ColonyTN> ShipColony { get; set; }
@@ -647,6 +652,7 @@ namespace Pulsar4X.Entities
             CurrentCargoTonnage = 0;
             CargoList = new Dictionary<Installation.InstallationType, CargoListEntryTN>();
             CargoComponentList = new Dictionary<ComponentDefTN, CargoListEntryTN>();
+            CargoMineralList = new Dictionary<Constants.Minerals.MinerialNames, CargoListEntryTN>();
 
             /// <summary>
             /// While only colonyships will have the major bays, just about any craft can have an emergency cryo bay.

@@ -310,13 +310,13 @@ namespace Pulsar4X.UI.SceenGraph
                     if (CurrentPop._sensorUpdateAck != _LastSensorUpdateAck)
                     {
                         _SensorContactElements.Clear();
+                        int DSTS = (int)Math.Floor(CurrentPop.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number);
 
-                        if (ParentSceen.ShowPassives == true)
+                        if (ParentSceen.ShowPassives == true && DSTS != 0)
                         {
                             /// <summary>
                             /// This calculates the default detection distance for strength 1000 signatures.
                             /// </summary>
-                            int DSTS = (int)Math.Floor(CurrentPop.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number);
                             int SensorTech = CurrentPop.Faction.FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength];
                             if (SensorTech > Constants.Colony.DeepSpaceMax)
                                 SensorTech = Constants.Colony.DeepSpaceMax;

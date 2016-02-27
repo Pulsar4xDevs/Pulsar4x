@@ -356,6 +356,8 @@ namespace Pulsar4X.Entities
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
         {
+            bool anyUnload = false;
+
             List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
             legalOrders.AddRange(_legalOrders);
             ShipTN[] shipsArray = this.Ships.ToArray();
@@ -365,6 +367,28 @@ namespace Pulsar4X.Entities
                 legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromTargetFleet);
             if (Array.Exists(shipsArray, x => x.ShipClass.IsCollier))//if this fleet is targeted and has a IsCollier.
                 legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromTargetFleet);
+            if (Array.Exists(shipsArray, x => (x.CargoList.Count() > 0)))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadInstallation);
+                anyUnload = true;
+            }
+            if (Array.Exists(shipsArray, x => (x.CargoMineralList.Count() > 0)))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
+                anyUnload = true;
+            }
+            if (Array.Exists(shipsArray, x => (x.CargoComponentList.Count() > 0)))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadShipComponent);
+                anyUnload = true;
+            }
+
+            if (anyUnload == true)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAll);
+            }
+
             return legalOrders;
         }
 
@@ -3577,7 +3601,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// In this case load as much as possible up to AvailableMass.
             /// </summary>
-            if (Limit == 0)
+            if (Limit == 0 || Limit == -1)
             {
                 MassToLoad = Math.Min(RemainingTaskGroupTonnage, AvailableMass);
 
@@ -3648,7 +3672,7 @@ namespace Pulsar4X.Entities
                     CargoListEntryTN CLE = Ships[loop].CargoList[InstType];
                     int ShipMassToUnload = 0;
 
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         ShipMassToUnload = CLE.tons;
                     }
@@ -3669,7 +3693,117 @@ namespace Pulsar4X.Entities
                     Pop.UnloadInstallation(InstType, ShipMassToUnload);
                 }
             }
+        }
 
+        /// <summary>
+        /// Load minerals onto ships in this taskgroup
+        /// </summary>
+        /// <param name="Pop"></param>
+        /// <param name="MinType"></param>
+        /// <param name="Limit"></param>
+        public void LoadMineral(Population Pop, Constants.Minerals.MinerialNames MinType, int Limit)
+        {
+            int RemainingTaskGroupTonnage = TotalCargoTonnage - CurrentCargoTonnage;
+            int TotalMass = Limit;
+            int AvailableMass = (int)(Pop.Minerials[(int)MinType]);
+
+            int MassToLoad = 0;
+
+            /// <summary>
+            /// In this case load as much as possible up to AvailableMass.
+            /// </summary>
+            if (Limit == 0 || Limit == -1)
+            {
+                MassToLoad = Math.Min(RemainingTaskGroupTonnage, AvailableMass);
+
+            }
+            /// <summary>
+            /// In this case only load up to Total mass.
+            /// </summary>
+            else
+            {
+                MassToLoad = Math.Min(RemainingTaskGroupTonnage, TotalMass);
+            }
+
+            /// <summary>
+            /// Mark the taskgroup total cargo tonnage
+            /// </summary>
+            CurrentCargoTonnage = CurrentCargoTonnage + MassToLoad;
+
+            /// <summary>
+            /// Decrement the installation count on the planet.
+            /// </summary>
+            Pop.LoadMineral(MinType, MassToLoad);
+
+            /// <summary>
+            /// Now start loading mass onto each ship.
+            /// </summary>
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                int RemainingShipTonnage = Ships[loop].ShipClass.TotalCargoCapacity - Ships[loop].CurrentCargoTonnage;
+                if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && RemainingShipTonnage != 0)
+                {
+                    int ShipMassToLoad = Math.Min(MassToLoad, RemainingShipTonnage);
+
+                    /// <summary>
+                    /// Load the mass onto the taskgroup as a whole for display purposes.
+                    /// The actual mass will go into the ship cargoholds.
+                    /// </summary>
+                    if (Ships[loop].CargoMineralList.ContainsKey(MinType))
+                    {
+                        CargoListEntryTN CLE = Ships[loop].CargoMineralList[MinType];
+                        CLE.tons = CLE.tons + ShipMassToLoad;
+
+                    }
+                    else
+                    {
+                        CargoListEntryTN CargoListEntry = new CargoListEntryTN(MinType, ShipMassToLoad);
+                        Ships[loop].CargoMineralList.Add(MinType, CargoListEntry);
+                    }
+
+                    MassToLoad = MassToLoad - ShipMassToLoad;
+                    Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unload minerals to the population from the taskgroup.
+        /// </summary>
+        /// <param name="Pop">Pop to unload minerals to</param>
+        /// <param name="MinType">mineral to unload</param>
+        /// <param name="Limit">limit on how many to part with.</param>
+        public void UnloadMineral(Population Pop, Constants.Minerals.MinerialNames MinType, int Limit)
+        {
+            int TotalMass = Limit;
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && Ships[loop].CurrentCargoTonnage != 0 && Ships[loop].CargoMineralList.ContainsKey(MinType) == true)
+                {
+                    CargoListEntryTN CLE = Ships[loop].CargoMineralList[MinType];
+                    int ShipMassToUnload = 0;
+
+                    if (Limit == 0 || Limit == -1)
+                    {
+                        ShipMassToUnload = CLE.tons;
+                    }
+                    else
+                    {
+                        ShipMassToUnload = Math.Min(CLE.tons, TotalMass);
+                        TotalMass = TotalMass - ShipMassToUnload;
+                    }
+
+                    if (ShipMassToUnload == CLE.tons)
+                    {
+                        Ships[loop].CargoMineralList.Remove(MinType);
+                    }
+
+                    CLE.tons = CLE.tons - ShipMassToUnload;
+                    CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
+
+                    Pop.UnloadMineral(MinType, ShipMassToUnload);
+                }
+            }
         }
 
         /// <summary>
@@ -3689,7 +3823,7 @@ namespace Pulsar4X.Entities
                     int RemainingShipCryo = Ships[loop].ShipClass.SpareCryoBerths - Ships[loop].CurrentCryoStorage;
                     int AvailablePopulation = (int)Math.Floor(Pop.CivilianPopulation * 1000000.0f);
 
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         Colonists = Math.Min(RemainingShipCryo, AvailablePopulation);
                     }
@@ -3731,7 +3865,7 @@ namespace Pulsar4X.Entities
                 {
                     int Colonists;
 
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         Colonists = Ships[loop].CurrentCryoStorage;
                         CurrentCryoStorage = CurrentCryoStorage - Ships[loop].CurrentCryoStorage;
@@ -3766,7 +3900,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// In this case load as much as possible up to AvailableMass.
             /// </summary>
-            if (Limit == 0)
+            if (Limit == 0 || Limit == -1)
             {
                 MassToLoad = Math.Min(RemainingTonnage, AvailableMass);
 
@@ -3850,7 +3984,7 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Limit == 0 means unload all, else unload to limit if limit is lower than total tonnage.
                     /// </summary>
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         ShipMassToUnload = CLE.tons;
                     }
