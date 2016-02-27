@@ -40,10 +40,10 @@ namespace Pulsar4X.ECSLib
                 _systemBodyFactory.GenerateSystemBodiesForStar(game.StaticData, newSystem, star, game.CurrentDateTime);
             }
 
-            JPSurveyFactory.GenerateJPSurveyPoints(newSystem);
 
-            // < @todo generate JumpPoints
-            //JumpPointFactory.GenerateJumpPoints(newSystem, numJumpPoints);
+            // Generate Jump Points
+            JPSurveyFactory.GenerateJPSurveyPoints(newSystem);
+            JPFactory.GenerateJumpPoints(newSystem);
 
             //add this system to the GameMaster's Known Systems list.
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.Guid);
@@ -119,28 +119,38 @@ namespace Pulsar4X.ECSLib
             Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
             _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
 
+            PositionDB lunaPositionDB = new PositionDB();
+            SystemBodyDB lunaBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.ToAU(1738.14));
+            NameDB lunaNameDB = new NameDB("Luna");
+            double lunaSemiMajAxis = Distance.ToAU(0.3844E6);
+            double lunaEccentricity = 0.0549;
+            double lunaInclination = 5.1;
+            // Next three values are unimportant. Luna's LoAN and AoP regress/progress by one revolution every 18.6/8.85 years respectively.
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double lunaLoAN = 125.08;
+            double lunaAoP = 318.0634;
+            double lunaMeanAnomaly = 115.3654;
+            OrbitDB lunaOrbitDB = OrbitDB.FromAsteroidFormat(earth, earthMVDB.Mass, lunaMVDB.Mass, lunaSemiMajAxis, lunaEccentricity, lunaInclination, lunaLoAN, lunaAoP, lunaMeanAnomaly, _galaxyGen.Settings.J2000);
+            lunaPositionDB.Position = OrbitProcessor.GetPosition(lunaOrbitDB, game.CurrentDateTime);
+            Entity luna = new Entity(sol.SystemManager, new List<BaseDataBlob> { lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
 
-            PositionDB moonPositionDB = new PositionDB();
-            SystemBodyDB moonBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.ToAU(1738.14));
-            NameDB moonNameDB = new NameDB("Venus");
-            double moonSemiMajAxis = 0.3844;
-            double moonEccentricity = 0.0549;
-            double moonInclination = 0;
-            double moonLoAN = 125.08;
-            double moonLoP = 318.0634; //check
-            double moonMeanAnomaly = 115.3654; //check
-            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(earth, earthMVDB.Mass, moonMVDB.Mass, moonSemiMajAxis, moonEccentricity, moonInclination, moonLoAN, moonLoP, moonMeanAnomaly, _galaxyGen.Settings.J2000);
-            moonPositionDB.Position = OrbitProcessor.GetPosition(moonOrbitDB, game.CurrentDateTime);
-            Entity moon = new Entity(sol.SystemManager, new List<BaseDataBlob> { moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
-            _systemBodyFactory.MineralGeneration(game.StaticData, sol, moon);
-            //public static OrbitDB FromAsteroidFormat([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis, double eccentricity, double inclination,
-                                               // double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
+            PositionDB marsPositionDB = new PositionDB();
+            SystemBodyDB marsBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius(0.64174E24, Distance.ToAU(3396.2));
+            NameDB marsNameDB = new NameDB("Mars");
+            double marsSemiMajAxis = Distance.ToAU(227.92E6);
+            double marsEccentricity = 0.0935;
+            double marsInclination = 1.85;
+            double marsLoAN = 49.57854;
+            double marsAoP = 336.04084;
+            double marsMeanLong = 355.45332;
+            OrbitDB marsOrbitDB =OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, marsMVDB.Mass, marsSemiMajAxis, marsEccentricity, marsInclination, marsLoAN, marsAoP, marsMeanLong, _galaxyGen.Settings.J2000);
+            marsPositionDB.Position = OrbitProcessor.GetPosition(marsOrbitDB, game.CurrentDateTime);
 
-            //        public static Orbit FromMajorPlanetFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
-            //                                        double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
-
-
+            Entity mars = new Entity(sol.SystemManager, new List<BaseDataBlob> { marsPositionDB, marsBodyDB, marsMVDB, marsNameDB, marsOrbitDB} );
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, mars);
             /*
 
             SystemBody Mars = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);
