@@ -62,6 +62,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
 
+        public Entity Owner { get; set; }
+
         public FactionInfoDB()
             : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() )
         {

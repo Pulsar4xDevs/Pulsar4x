@@ -129,6 +129,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ACEntityManager.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ComponentDesignDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="EventLog\EventType.cs" />
     <Compile Include="Factories\SystemGen\JPFactory.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
+    <Compile Include="Helpers\EntityAccessControl.cs" />
     <Compile Include="Helpers\GameMath.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />
     <Compile Include="Helpers\MiscHelpers.cs" />
@@ -255,6 +257,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
+    <Folder Include="NewFolder1\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

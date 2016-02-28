@@ -318,7 +318,12 @@ namespace Pulsar4X.ECSLib
                 return SpaceMaster;
             }
 
-            return Players.FirstOrDefault(player => player.IsTokenValid(authToken));
+            foreach (Player player in Players.Where(player => player.ID == authToken.PlayerID))
+            {
+                return player.IsTokenValid(authToken) ? player : null;
+            }
+
+            return null;
         }
 
         public void GenerateSystems(AuthenticationToken authToken, int numSystems)

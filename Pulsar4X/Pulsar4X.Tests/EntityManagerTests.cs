@@ -217,26 +217,26 @@ namespace Pulsar4X.Tests
             PopulateEntityManager();
 
             // Find all entities with a specific DataBlob.
-            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
+            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>(_smAuthToken);
             Assert.AreEqual(2, entities.Count);
 
             // again, but look for a datablob that no entity has:
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<AtmosphereDB>();
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<AtmosphereDB>(_smAuthToken);
             Assert.AreEqual(0, entities.Count);
 
             // check with invalid data blob type:
-            Assert.Catch(typeof(KeyNotFoundException), () => _game.GlobalManager.GetAllEntitiesWithDataBlob<BaseDataBlob>());
+            Assert.Catch(typeof(KeyNotFoundException), () => _game.GlobalManager.GetAllEntitiesWithDataBlob<BaseDataBlob>(_smAuthToken));
 
             // now lets lookup using a mask:
             ComparableBitArray dataBlobMask = EntityManager.BlankDataBlobMask();
             dataBlobMask.Set(EntityManager.GetTypeIndex<ColonyInfoDB>(), true);
             dataBlobMask.Set(EntityManager.GetTypeIndex<OrbitDB>(), true);
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, dataBlobMask);
             Assert.AreEqual(2, entities.Count);
 
             // and with a mask that will not match any entities:
             dataBlobMask.Set(EntityManager.GetTypeIndex<AtmosphereDB>(), true);
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, dataBlobMask);
             Assert.AreEqual(0, entities.Count);
 
             // and an empty mask:

@@ -118,9 +118,9 @@ namespace Pulsar4X.ViewModel
             _starDictionary = new Dictionary<Guid, StarVM>();
             _planetDictionary = new Dictionary<Guid, PlanetVM>();
             //find most massive star, this is the parent.
-            Entity parentStar = starSystem.SystemManager.GetFirstEntityWithDataBlob<StarInfoDB>();
+            Entity parentStar = starSystem.SystemManager.GetFirstEntityWithDataBlob<StarInfoDB>(gameVM.CurrentAuthToken);
             StarVM parentstarVM = StarVM.Create(_gameVM, parentStar, this);
-            foreach (var star in starSystem.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>())
+            foreach (var star in starSystem.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>(gameVM.CurrentAuthToken))
             {
                 StarVM starVM = StarVM.Create(_gameVM, star, this);
                 if(!_stars.Contains(starVM))
@@ -135,7 +135,7 @@ namespace Pulsar4X.ViewModel
             }
             _parentStar = parentstarVM;
             ID = _parentStar.Entity.Guid;
-            foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>())
+            foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(gameVM.CurrentAuthToken))
             {
                 PlanetVM planetVM = PlanetVM.Create(_gameVM, planet, parentstarVM);
                 if (!_planets.Contains(planetVM))

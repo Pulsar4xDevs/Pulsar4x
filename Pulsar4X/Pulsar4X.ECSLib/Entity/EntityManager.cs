@@ -7,19 +7,6 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    [PublicAPI]
-    public class GuidNotFoundException : Exception
-    {
-        [PublicAPI]
-        public Guid MissingGuid { get; private set; }
-
-        [PublicAPI]
-        public GuidNotFoundException(Guid missingGuid)
-        {
-            MissingGuid = missingGuid;
-        }
-    }
-
     public class EntityManager : ISerializable
     {
         [CanBeNull]
@@ -249,6 +236,7 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Public API Functions
+
         /// <summary>
         /// Returns a list of entities that have datablob type T.
         /// <para></para>
@@ -258,7 +246,32 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         [NotNull]
-        public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
+        public List<Entity> GetAllEntitiesWithDataBlob<T>(AuthenticationToken authToken) where T : BaseDataBlob
+        {
+            List<Entity> allEntities = GetAllEntitiesWithDataBlob<T>();
+            var authorizedEntities = new List<Entity>();
+
+            foreach (Entity entity in allEntities)
+            {
+                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                {
+                    authorizedEntities.Add(entity);
+                }
+            }
+
+            return authorizedEntities;
+        }
+
+        /// <summary>
+        /// Returns a list of entities that have datablob type T.
+        /// <para></para>
+        /// Returns a blank list if no entities have that datablob.
+        /// <para></para>
+        /// DO NOT ASSUME THE ORDER OF THE RETURNED LIST!
+        /// </summary>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
+        [NotNull]
+        internal List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
 
@@ -278,7 +291,33 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException">Thrown when dataBlobMask is null.</exception>
         /// <exception cref="ArgumentException">Thrown when passed a malformed (incorrect length) dataBlobMask.</exception>
         [NotNull]
-        public List<Entity> GetAllEntitiesWithDataBlobs([NotNull] ComparableBitArray dataBlobMask)
+        public List<Entity> GetAllEntitiesWithDataBlobs(AuthenticationToken authToken, [NotNull] ComparableBitArray dataBlobMask)
+        {
+            List<Entity> allEntities = GetAllEntitiesWithDataBlobs(dataBlobMask);
+            var authorizedEntities = new List<Entity>();
+
+            foreach (Entity entity in allEntities)
+            {
+                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                {
+                    authorizedEntities.Add(entity);
+                }
+            }
+
+            return authorizedEntities;
+        }
+
+        /// <summary>
+        /// Returns a list of entities that contain all dataBlobs defined by the dataBlobMask.
+        /// <para></para>
+        /// Returns a blank list if no entities have all needed DataBlobs
+        /// <para></para>
+        /// DO NOT ASSUME THE ORDER OF THE RETURNED LIST!
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown when dataBlobMask is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when passed a malformed (incorrect length) dataBlobMask.</exception>
+        [NotNull]
+        internal List<Entity> GetAllEntitiesWithDataBlobs([NotNull] ComparableBitArray dataBlobMask)
         {
             if (dataBlobMask == null)
             {
@@ -308,7 +347,25 @@ namespace Pulsar4X.ECSLib
             return entities;
         }
 
-        public List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask) // TODO: Find a better name for this method?
+
+        [NotNull]
+        public List<Entity> GetAllEntitiesWithOUTDataBlobs(AuthenticationToken authToken, [NotNull] ComparableBitArray dataBlobMask)
+        {
+            List<Entity> allEntities = GetAllEntitiesWithOUTDataBlobs(dataBlobMask);
+            var authorizedEntities = new List<Entity>();
+
+            foreach (Entity entity in allEntities)
+            {
+                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                {
+                    authorizedEntities.Add(entity);
+                }
+            }
+
+            return authorizedEntities;
+        }
+
+        internal virtual List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask) 
         {
             if (dataBlobMask == null)
             {
@@ -342,12 +399,23 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Returns the first entityID found with the specified DataBlobType.
         /// <para></para>
-        /// Returns -1 if no entities have the specified DataBlobType.
+        /// Returns Entity.InvalidEntity if no entities have the specified DataBlobType.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         [NotNull]
-        [PublicAPI]
-        public Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
+        public Entity GetFirstEntityWithDataBlob<T>(AuthenticationToken authToken) where T : BaseDataBlob
+        {
+            return GetFirstEntityWithDataBlob(authToken, GetTypeIndex<T>());
+        }
+
+        /// <summary>
+        /// Returns the first entityID found with the specified DataBlobType.
+        /// <para></para>
+        /// Returns Entity.InvalidEntity if no entities have the specified DataBlobType.
+        /// </summary>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
+        [NotNull]
+        internal Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
         {
             return GetFirstEntityWithDataBlob(GetTypeIndex<T>());
         }
@@ -355,11 +423,27 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Returns the first entityID found with the specified DataBlobType.
         /// <para></para>
-        /// Returns -1 if no entities have the specified DataBlobType.
+        /// Returns Entity.InvalidEntity if no entities have the specified DataBlobType.
         /// </summary>
         [NotNull]
-        [PublicAPI]
-        public Entity GetFirstEntityWithDataBlob(int typeIndex)
+        public Entity GetFirstEntityWithDataBlob(AuthenticationToken authToken, int typeIndex)
+        {
+            Entity entity = GetFirstEntityWithDataBlob(typeIndex);
+
+            if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+            {
+                return entity;
+            }
+            return Entity.InvalidEntity;
+        }
+
+        /// <summary>
+        /// Returns the first entityID found with the specified DataBlobType.
+        /// <para></para>
+        /// Returns Entity.InvalidEntity if no entities have the specified DataBlobType.
+        /// </summary>
+        [NotNull]
+        internal Entity GetFirstEntityWithDataBlob(int typeIndex)
         {
             foreach (Entity entity in _entities)
             {

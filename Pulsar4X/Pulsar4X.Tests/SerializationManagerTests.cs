@@ -55,13 +55,13 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(totalSystems, _game.GetSystems(_smAuthToken).Count);
             Assert.AreEqual(_testTime, _game.CurrentDateTime);
-            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
+            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>(_smAuthToken);
             Assert.AreEqual(3, entities.Count);
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>();
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>(_smAuthToken);
             Assert.AreEqual(2, entities.Count);
 
             // lets check the the refs were hocked back up:
-            Entity species = _game.GlobalManager.GetFirstEntityWithDataBlob<SpeciesDB>();
+            Entity species = _game.GlobalManager.GetFirstEntityWithDataBlob<SpeciesDB>(_smAuthToken);
             NameDB speciesName = species.GetDataBlob<NameDB>();
             Assert.AreSame(speciesName.OwningEntity, species);
 
@@ -84,7 +84,7 @@ namespace Pulsar4X.Tests
 
             // Export/Reinport all system bodies in that system.
 
-            foreach (Entity entity in system.GetSystemBodies(_smAuthToken))
+            foreach (Entity entity in system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken))
             {
                 string jsonString = SerializationManager.Export(_game, entity);
 
@@ -148,7 +148,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(system.Guid, importedSystem.Guid);
 
             // See that the entities were imported.
-            Assert.AreEqual(system.GetSystemBodies(_smAuthToken).Count, importedSystem.GetSystemBodies(_smAuthToken).Count);
+            Assert.AreEqual(system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken).Count, importedSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken).Count);
 
             // Ensure the system was added to the game's system list.
             List<StarSystem> systems = _game.GetSystems(_smAuthToken);

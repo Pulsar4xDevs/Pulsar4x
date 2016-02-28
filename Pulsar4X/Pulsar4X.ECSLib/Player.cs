@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         ManageShipyards = 128,          // UNUSED - EXAMPLE ONLY Player can manage shipyards.
         ManageResearch  = 256,          // UNUSED - EXAMPLE ONLY Player can manage research projects.
         ManageTeams     = 512,          // UNUSED - EXAMPLE ONLY Player can manage teams.
-        Unused3         = 1024,
+        Intelligence    = 1024,
         Unused4         = 2048,
         Unused5         = 4096,
         Unused6         = 8192,

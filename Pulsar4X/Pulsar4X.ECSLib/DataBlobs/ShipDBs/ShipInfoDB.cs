@@ -15,6 +15,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public Guid ShipClassDefinition { get; set; }
 
+        // Note, Ship owner can differ from entity owner. (Sensor objects are owned by the detecting faction. The ship represented by the sensor object is still owned by the actual ship owner)
+        public Entity Owner { get; set; }
+
         public bool Obsolete { get; set; }
         public bool Conscript { get; set; }
 
