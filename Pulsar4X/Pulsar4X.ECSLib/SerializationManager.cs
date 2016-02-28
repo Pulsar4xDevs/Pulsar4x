@@ -175,7 +175,6 @@ namespace Pulsar4X.ECSLib
         {
             var system = new StarSystem();
             system = Import(game, inputStream, system);
-            game.StarSystems.Add(system.Guid, system);
             game.PostGameLoad();
             return system;
         }

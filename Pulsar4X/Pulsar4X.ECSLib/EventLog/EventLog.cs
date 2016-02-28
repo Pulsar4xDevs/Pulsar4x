@@ -141,7 +141,7 @@ namespace Pulsar4X.ECSLib
                             continue;
                         }
 
-                        List<Entity> ownedEntities = _game.StarSystems[knownSystem].SystemManager.GetAllEntitiesWithDataBlob<OwnedDB>();
+                        List<Entity> ownedEntities = _game.Systems[knownSystem].SystemManager.GetAllEntitiesWithDataBlob<OwnedDB>();
                         if (ownedEntities.Any(ownedEntity => ownedEntity.GetDataBlob<OwnedDB>().Faction == arFaction))
                         {
                             return true;

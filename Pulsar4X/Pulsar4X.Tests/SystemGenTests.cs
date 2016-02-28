@@ -9,11 +9,13 @@ namespace Pulsar4X.Tests
     public class SystemGenTests
     {
         private Game _game;
+        private AuthenticationToken _smAuthToken;
 
         [OneTimeSetUpAttribute]
         public void GlobalInit()
         {
             _game = Game.NewGame("Unit Test Game", DateTime.Now, 10); // init the game class as we will need it for these tests.
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
         }
 
         [Test]
@@ -28,6 +30,7 @@ namespace Pulsar4X.Tests
         public void CreateAndFillStarSystem()
         {
             _game = Game.NewGame("Unit Test Game", DateTime.Now, 0); // reinit with empty game, so we can do a clean test.
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Argon Prime"); // Keeping with the X3 theme :P
 
@@ -61,9 +64,10 @@ namespace Pulsar4X.Tests
 
             const int numSystems = 1000;
             _game = Game.NewGame("Unit Test Game", DateTime.Now, 0); // reinit with empty game, so we can do a clean test.
-            GC.Collect();
-
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             var ssf = new StarSystemFactory(_game);
+
+            GC.Collect();
 
             // lets get our memory before starting:
             long startMemory = GC.GetTotalMemory(true);
@@ -78,9 +82,9 @@ namespace Pulsar4X.Tests
             double totalTime = timer.Elapsed.TotalSeconds;
 
             int totalEntities = 0;
-            foreach (KeyValuePair<Guid, StarSystem> system in _game.Systems)
+            foreach (StarSystem system in _game.GetSystems(_smAuthToken))
             {
-                List<Entity> entities = system.Value.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>();
+                List<Entity> entities = system.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>();
                 totalEntities += entities.Count;
             }
 
@@ -91,9 +95,7 @@ namespace Pulsar4X.Tests
             string output = $"Total run time: {totalTime.ToString("N4")}s, per system: {(totalTime / numSystems * 1000).ToString("N2")}ms.\ntotal memory used: {(totalMemory / 1024.0).ToString("N2")} MB, per system: {(totalMemory / numSystems).ToString("N2")} KB.\nTotal Entities: {totalEntities}, per system: {totalEntities / (float)numSystems}.\nMemory per entity: {(totalMemory / totalEntities).ToString("N2")}KB";
 
             Console.WriteLine(output);
-
-
-
+            
             // print results:
             Assert.Pass(output);
         }

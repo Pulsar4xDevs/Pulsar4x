@@ -11,6 +11,7 @@ namespace Pulsar4X.Tests
     class EntityManagerTests
     {
         private Game _game;
+        private AuthenticationToken _smAuthToken;
         private Entity _species1;
         private Dictionary<Entity, long> _pop1;
         private Dictionary<Entity, long> _pop2;
@@ -19,6 +20,8 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _game = Game.NewGame("Test Game", DateTime.Now, 1);
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+            _game.GenerateSystems(_smAuthToken, 1);
             _species1 = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> {new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45)});
             _pop1 = new Dictionary<Entity, long> { { _species1, 10 } };
             _pop2 = new Dictionary<Entity, long> { { _species1, 5 } };
@@ -304,7 +307,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void EntityTransfer()
         {
-            EntityManager manager2 = _game.Systems.First().Value.SystemManager;
+            EntityManager manager2 = _game.GetSystems(_smAuthToken).First().SystemManager;
 
             PopulateEntityManager();
 
@@ -377,11 +380,7 @@ namespace Pulsar4X.Tests
         private Entity PopulateEntityManager()
         {
             // Clear out any previous test results.
-            for (int i = _game.GlobalManager.Entities.Count; i > 0; i--)
-            {
-                Entity entity = _game.GlobalManager.Entities[i - 1];
-                entity.Destroy();
-            }
+            _game.GlobalManager.Clear();
 
             // Create an entity with individual DataBlobs.
             Entity testEntity = Entity.Create(_game.GlobalManager);

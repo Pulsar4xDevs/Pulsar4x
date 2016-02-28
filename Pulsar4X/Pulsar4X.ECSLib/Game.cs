@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
         internal Dictionary<Guid, StarSystem> Systems { get; private set; }
 
         [JsonProperty]
-        internal readonly EntityManager GlobalManager;
+        public readonly EntityManager GlobalManager;
 
         [PublicAPI]
         [JsonProperty]
@@ -144,12 +144,10 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentNullException(nameof(gameName));
             }
-
             
+            var settings = new GameSettings { GameName = gameName, MaxSystems = maxSystems };
+            var newGame = new Game {CurrentDateTime = startDateTime, Settings = settings};
 
-            var newGame = new Game {CurrentDateTime = startDateTime};
-
-            newGame.Settings = new GameSettings {GameName = gameName, MaxSystems = maxSystems};
 
             // Load static data
             if (dataSets != null)
@@ -226,7 +224,7 @@ namespace Pulsar4X.ECSLib
                 CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
 
                 // Execute all processors. Magic happens here.
-                RunProcessors(StarSystems.Values.ToList(), deltaSeconds);
+                RunProcessors(Systems.Values.ToList(), deltaSeconds);
 
                 // Update our remaining values.
                 deltaSeconds -= subpulseTime;
@@ -279,7 +277,7 @@ namespace Pulsar4X.ECSLib
                 // TODO: Implement vision access roles.
                 if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
                 {
-                    systems.AddRange(accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Select(systemGuid => StarSystems[systemGuid]));
+                    systems.AddRange(accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Select(systemGuid => Systems[systemGuid]));
                 }
             }
             return systems;
@@ -302,7 +300,7 @@ namespace Pulsar4X.ECSLib
                 {
                     foreach (Guid system in accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Where(system => system == systemGuid))
                     {
-                        return StarSystems[system];
+                        return Systems[system];
                     }
                 }
             }
@@ -321,6 +319,18 @@ namespace Pulsar4X.ECSLib
             }
 
             return Players.FirstOrDefault(player => player.IsTokenValid(authToken));
+        }
+
+        public void GenerateSystems(AuthenticationToken authToken, int numSystems)
+        {
+            if (SpaceMaster.IsTokenValid(authToken))
+            {
+                while (numSystems > 0)
+                {
+                    GalaxyGen.StarSystemFactory.CreateSystem(this, $"Star System #{Systems.Count + 1}", GalaxyGen.SeedRNG.Next());
+                    numSystems--;
+                }
+            }
         }
 
         #endregion

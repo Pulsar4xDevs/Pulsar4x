@@ -34,8 +34,8 @@ namespace Pulsar4X.ViewModel
         {
             _gameVM = gameVM;
             _staticData = gameVM.Game.StaticData;
-            _factionEntity = gameVM.PlayerFaction;
-            _factionTech = gameVM.PlayerFaction.GetDataBlob<FactionTechDB>();
+            _factionEntity = gameVM.CurrentFaction;
+            _factionTech = gameVM.CurrentFaction.GetDataBlob<FactionTechDB>();
 
             //ComponentTypes = new Dictionary<string, Guid>();
             ComponentTypes = new DictionaryVM<string, Guid, string>(DisplayMode.Key);

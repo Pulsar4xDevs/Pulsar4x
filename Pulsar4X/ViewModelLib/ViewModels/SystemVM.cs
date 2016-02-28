@@ -157,12 +157,16 @@ namespace Pulsar4X.ViewModel
             {
                 throw new InvalidOperationException("Cannot create a StarVM without an initialized game.");
             }
-
-            StarSystem starSystem;
-            if (!gameVM.Game.Systems.TryGetValue(starSystemGuid, out starSystem))
-                throw new GuidNotFoundException(starSystemGuid);
- 
-            return Create(gameVM, starSystem);
+            
+            List<StarSystem> systems = gameVM.Game.GetSystems(gameVM.CurrentAuthToken);
+            foreach (StarSystem system in systems)
+            {
+                if (system.Guid == starSystemGuid)
+                {
+                    return Create(gameVM, system);
+                }
+            }
+            throw new GuidNotFoundException(starSystemGuid);
         }
 
         /// <summary>

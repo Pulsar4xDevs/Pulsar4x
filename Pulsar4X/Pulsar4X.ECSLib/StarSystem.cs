@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
@@ -26,7 +27,6 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        [Obsolete("This property will be made internal. Use StarSystem GetEntity functions if accessing from outside Pulsar4x.ECSLib")]
         public EntityManager SystemManager { get; private set; }
 
         [PublicAPI]
@@ -61,8 +61,13 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public List<Entity> GetSystemBodies(AuthenticationToken authToken)
         {
-            Player player = Game.GetPlayerForToken(authToken);
+            Player player = Game?.GetPlayerForToken(authToken);
             bool systemFound = false;
+
+            if (player == null)
+            {
+                return new List<Entity>();
+            }
 
             foreach (KeyValuePair<Entity, AccessRole> keyValuePair in player.AccessRoles)
             {
@@ -141,6 +146,23 @@ namespace Pulsar4X.ECSLib
             }
 
             return factionEntities;
+        }
+
+        [OnDeserialized]
+        public void OnDeserialized(StreamingContext context)
+        {
+            Game = (Game)context.Context;
+            Game.PostLoad += GameOnPostLoad;
+
+        }
+
+        private void GameOnPostLoad(object sender, EventArgs eventArgs)
+        {
+            if (!Game.Systems.ContainsKey(Guid))
+            {
+                Game.Systems.Add(Guid, this);
+                Game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(Guid);
+            }
         }
     }
 }

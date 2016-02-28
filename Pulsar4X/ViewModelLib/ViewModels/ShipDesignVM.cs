@@ -54,7 +54,7 @@ namespace Pulsar4X.ViewModel
 
         public static ShipDesignVM Create(GameVM game)
         {
-            return new ShipDesignVM(game.PlayerFaction);
+            return new ShipDesignVM(game.CurrentFaction);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

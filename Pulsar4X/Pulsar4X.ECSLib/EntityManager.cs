@@ -36,8 +36,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static ReadOnlyDictionary<Type, int> DataBlobTypes = new ReadOnlyDictionary<Type, int>(InternalDataBlobTypes);
 
-        [PublicAPI]
-        public ReadOnlyCollection<Entity> Entities => new ReadOnlyCollection<Entity>(_entities);
+        internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
         #region Constructors
 
@@ -558,9 +557,6 @@ namespace Pulsar4X.ECSLib
             {
                 throw new InvalidOperationException("Fake managers cannot be serialized.");
             }
-
-            SerializationManager.ManagersProcessed++;
-            SerializationManager.Progress?.Report((double)SerializationManager.ManagersProcessed / (_game.NumSystems + 1));
         }
 
         /// <summary>
@@ -573,11 +569,17 @@ namespace Pulsar4X.ECSLib
             {
                 throw new InvalidOperationException("Fake managers cannot be deserialized.");
             }
-
-            SerializationManager.ManagersProcessed++;
-            SerializationManager.Progress?.Report((double)SerializationManager.ManagersProcessed / (_game.NumSystems + 1));
         }
 
         #endregion
+
+        public void Clear()
+        {
+            for (int index = 0; index < _entities.Count; index++)
+            {
+                Entity entity = _entities[index];
+                entity?.Destroy();
+            }
+        }
     }
 }
