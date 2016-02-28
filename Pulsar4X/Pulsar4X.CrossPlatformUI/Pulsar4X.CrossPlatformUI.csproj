@@ -103,8 +103,6 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Views\NewGame.jeto" />
-    <EmbeddedResource Include="Views\Startup.jeto" />
     <EmbeddedResource Include="Views\ScientistUC.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -153,6 +151,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\SystemView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NewGame.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -209,8 +210,8 @@
     <Compile Include="Views\MinMaxSlider.xeto.cs">
       <DependentUpon>MinMaxSlider.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\NewGame.jeto.cs">
-      <DependentUpon>NewGame.jeto</DependentUpon>
+    <Compile Include="Views\NewGame.xeto.cs">
+      <DependentUpon>NewGame.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ResearchAbilityView.xeto.cs">
       <DependentUpon>ResearchAbilityView.xeto</DependentUpon>
@@ -223,9 +224,6 @@
     </Compile>
     <Compile Include="Views\ShipDesignView.xeto.cs">
       <DependentUpon>ShipDesignView.xeto</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Startup.jeto.cs">
-      <DependentUpon>Startup.jeto</DependentUpon>
     </Compile>
     <Compile Include="Lib\OpenGLRenderer.cs" />
     <Compile Include="Views\SystemView.xeto.cs">
