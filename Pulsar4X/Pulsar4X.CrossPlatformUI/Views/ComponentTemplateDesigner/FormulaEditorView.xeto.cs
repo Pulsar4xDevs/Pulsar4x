@@ -14,11 +14,21 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         public FormulaEditorView()
         {
             XamlReader.Load(this);
+            DataContextChanged += FormulaEditorView_DataContextChanged;
         }
 
-        public void SetViewModel(FormulaEditorVM viewModel)
+
+        private void FormulaEditorView_DataContextChanged(object sender, EventArgs e)
         {
-            DataContext = viewModel;
+            if (DataContext is FormulaEditorVM)
+            {
+                FormulaEditorVM dc = (FormulaEditorVM)DataContext;
+                SetViewModel(dc);
+            }
+        }
+
+        private void SetViewModel(FormulaEditorVM viewModel)
+        {
             ParameterButtonsStackLayout.Orientation = Orientation.Horizontal;
             foreach (var item in viewModel.ParameterButtons)
             {
