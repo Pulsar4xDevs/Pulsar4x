@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner;assembly=Pulsar4X.CrossPlatformUI"
+  >
+  <TableLayout>    
+    <TableRow>
+      <TableLayout>
+        <TableRow>
+          <Label Text="Name" />
+          <ComboBox ID="ComponentsComBox" DataContext="{Binding Components}" />
+          <Button ID="NewComponent" Text="Add New Component" Enabled ="False"/>
+          <TableCell/>
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+    <TableRow>
+      <TableLayout>
+        <TableRow>
+        <c:ComponentTemplateMainPropertiesView DataContext="{Binding SelectedComponent}" />
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+    <TableRow ScaleHeight ="True">
+      <TableLayout>
+        <TableRow>
+          <Scrollable >
+            <StackLayout ID ="AbilityTemplates"/>              
+          </Scrollable>
+          <c:FormulaEditorView DataContext="{Binding FormulaEditor}" />
+        </TableRow>
+      </TableLayout>
+     
+    </TableRow>
+    <TableRow ScaleHeight="False">
+      <TableLayout >
+        <TableRow >
+          <Button Command="{Binding SaveCommand}" Text="Save to datastore"/>
+          <Button Command="{Binding ExportCommand}" Text="Export datastore to file" />
+        </TableRow>
+      </TableLayout>
+    </TableRow>
+  </TableLayout>
+</Panel>

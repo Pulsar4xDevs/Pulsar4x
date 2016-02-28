@@ -13,7 +13,6 @@ namespace Pulsar4X.ViewModel
    public class ComponentAbilityTemplateVM : ComponentTemplateDesignerBaseVM
     {
         private StaticDataStore _staticData;
-        private ComponentTemplateVM _parent;
 
         private string _name;
         public string Name { get { return _name; } set { _name = value; OnPropertyChanged(); } }
@@ -113,18 +112,18 @@ namespace Pulsar4X.ViewModel
                         AbilityFormula = value;
                         break;
                 }
-                OnPropertyChanged();
+                ParentVM.ControlInFocus = this;
             }
         }
 
 
         public TechListVM GuidDict { get; set; }
 
-        public ComponentAbilityTemplateVM(ComponentTemplateVM parent, ObservableCollection<ComponentAbilityTemplateVM> parentList, Pulsar4X.ECSLib.StaticDataStore staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : base(parent)
         {
 
             _staticData = staticData;
-            _parent = parent;
+          
             //SelectedGuiHint = new DictionaryVM<GuiHint, string>(DisplayMode.Value);
             ParentList = parentList;
             foreach (var item in Enum.GetValues(typeof(GuiHint)))
@@ -135,7 +134,7 @@ namespace Pulsar4X.ViewModel
             AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
         }
 
-        public ComponentAbilityTemplateVM(ComponentTemplateVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
@@ -204,13 +203,11 @@ namespace Pulsar4X.ViewModel
                 guidict.Add(item.Key, item.Value);
             }
             sd.GuidDictionary = guidict;
-            return sd;
-                
+            return sd;                
         }
 
         internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            _parent.ControlInFocus = this;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
