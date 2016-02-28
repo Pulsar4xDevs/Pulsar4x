@@ -129,7 +129,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ACEntityManager.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ComponentDesignDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
@@ -154,6 +153,8 @@
     <Compile Include="DataBlobs\JPSurveyableDB.cs" />
     <Compile Include="DataBlobs\OwnedDB.cs" />
     <Compile Include="DataBlobs\TransitableDB.cs" />
+    <Compile Include="Entity\GuidNotFoundException.cs" />
+    <Compile Include="Entity\ProtoEntity.cs" />
     <Compile Include="EventLog\EventLog.cs" />
     <Compile Include="EventLog\EventType.cs" />
     <Compile Include="Factories\SystemGen\JPFactory.cs" />
@@ -231,8 +232,8 @@
     <Compile Include="DataBlobs\ShipDBs\TroopTransportDB.cs" />
     <Compile Include="DataBlobs\SpeciesDB.cs" />
     <Compile Include="DataBlobs\TreeHierarchyDB.cs" />
-    <Compile Include="Entity.cs" />
-    <Compile Include="EntityManager.cs" />
+    <Compile Include="Entity\Entity.cs" />
+    <Compile Include="Entity\EntityManager.cs" />
     <Compile Include="Factories\ColonyFactory.cs" />
     <Compile Include="Factories\FactionFactory.cs" />
     <Compile Include="Factories\ShipFactory.cs" />
@@ -257,7 +258,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
-    <Folder Include="NewFolder1\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

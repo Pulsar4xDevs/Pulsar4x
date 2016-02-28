@@ -35,7 +35,7 @@ namespace Pulsar4X.Tests
             var system = ssf.CreateSystem(_game, "Argon Prime"); // Keeping with the X3 theme :P
 
             // lets test that the stars generated okay:
-            List<Entity> stars = system.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>();
+            List<Entity> stars = system.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
             Assert.IsNotEmpty(stars);
 
             if (stars.Count > 1)
@@ -84,7 +84,7 @@ namespace Pulsar4X.Tests
             int totalEntities = 0;
             foreach (StarSystem system in _game.GetSystems(_smAuthToken))
             {
-                List<Entity> entities = system.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>();
+                List<Entity> entities = system.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>(_smAuthToken);
                 totalEntities += entities.Count;
             }
 
@@ -114,7 +114,7 @@ namespace Pulsar4X.Tests
 
             foreach (StarSystem starSystem in systems)
             {
-                List<Entity> systemJumpPoints = starSystem.SystemManager.GetAllEntitiesWithDataBlob<TransitableDB>();
+                List<Entity> systemJumpPoints = starSystem.SystemManager.GetAllEntitiesWithDataBlob<TransitableDB>(_smAuthToken);
 
                 jumpPointCounts.Add(starSystem.Guid, systemJumpPoints.Count);
             }

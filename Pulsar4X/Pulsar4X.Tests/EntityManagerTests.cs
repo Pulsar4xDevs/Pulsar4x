@@ -241,43 +241,43 @@ namespace Pulsar4X.Tests
 
             // and an empty mask:
             dataBlobMask = EntityManager.BlankDataBlobMask();
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, dataBlobMask);
             Assert.AreEqual(3, entities.Count); // this is counter intuitive... but it is what happens.
 
             // test bad mask:
             ComparableBitArray badMask = new ComparableBitArray(4242); // use a big number so we never rach that many data blobs.
-            Assert.Catch(typeof(ArgumentException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(badMask));
+            Assert.Catch(typeof(ArgumentException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, badMask));
 
-            Assert.Catch(typeof(ArgumentNullException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(null));
+            Assert.Catch(typeof(ArgumentNullException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, null));
 
 
             // now lets just get the one entity:
-            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
+            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>(_smAuthToken);
             Assert.IsTrue(testEntity.IsValid);
 
             // lookup an entity that does not exist:
-            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<AtmosphereDB>();
+            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<AtmosphereDB>(_smAuthToken);
             Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type:
             Assert.Catch(typeof(KeyNotFoundException), () =>
             {
-                _game.GlobalManager.GetFirstEntityWithDataBlob<BaseDataBlob>();
+                _game.GlobalManager.GetFirstEntityWithDataBlob<BaseDataBlob>(_smAuthToken);
             });
 
 
             // now lets just get the one entity, but use a different function to do it:
             int type = EntityManager.GetTypeIndex<ColonyInfoDB>();
-            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(type);
+            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(_smAuthToken, type);
             Assert.IsTrue(testEntity.IsValid);
 
             // lookup an entity that does not exist:
             type = EntityManager.GetTypeIndex<AtmosphereDB>();
-            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(type);
+            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(_smAuthToken, type);
             Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type index:
-            Assert.AreEqual(Entity.InvalidEntity, _game.GlobalManager.GetFirstEntityWithDataBlob(4242));
+            Assert.AreEqual(Entity.InvalidEntity, _game.GlobalManager.GetFirstEntityWithDataBlob(_smAuthToken, 4242));
         }
 
         [Test]
@@ -312,7 +312,7 @@ namespace Pulsar4X.Tests
             PopulateEntityManager();
 
             // Get an entity from the manager.
-            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<OrbitDB>();
+            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<OrbitDB>(_smAuthToken);
             // Ensure we got a valid entity.
             Assert.IsTrue(testEntity.IsValid);
             // Store it's datablobs for later.
