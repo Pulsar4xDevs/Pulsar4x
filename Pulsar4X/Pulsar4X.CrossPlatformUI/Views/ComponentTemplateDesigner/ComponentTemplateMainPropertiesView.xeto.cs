@@ -55,16 +55,19 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         private void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 
         {
             _viewModel = viewModel;
-
+            DataContext = viewModel;
             //FormulaEditorView.SetViewModel(_viewModel.FormulaEditor);
-
-
+            MineralCostFormulaStackLayout.SuspendLayout();
+            MineralCostFormulaStackLayout.Items.Clear();
             foreach (var item in viewModel.MineralCostFormula)
             {
                 MineralCostFormulaStackLayout.Items.Add(new MineralFormulaView(item));
             }
             viewModel.MineralCostFormula.CollectionChanged += MineralCostFormula_CollectionChanged;
+            MineralCostFormulaStackLayout.ResumeLayout();
 
+            MountTypes.SuspendLayout();
+            MountTypes.Items.Clear();
             foreach (var item in _viewModel.MountType)
             {
 
@@ -76,6 +79,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 chkbx.DataContext = _viewModel.MountType;
                 MountTypes.Items.Add(chkbx);
             }
+            MountTypes.ResumeLayout();
             _viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
 
         }

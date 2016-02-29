@@ -19,53 +19,57 @@ namespace Pulsar4X.Tests
         private Entity _shipClass;
         private Entity _ship;
         private Entity _engineComponent;
+        private ComponentSD _engineSD;
+
         [SetUp]
         public void Init()
         {
             _game = Game.NewGame("Test Game", DateTime.Now, 1);
+
             _faction = FactionFactory.CreateFaction(_game, "Terran");
-            
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e"), 3);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de"), 3);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("8557acb9-c764-44e7-8ee4-db2c2cebf0bc"), 5);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"), 1);
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"), 1); //Nuclear Thermal Engine Technology
+            _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
             _starSystem = new StarSystem(_game, "Sol", -1);
             /////Ship Class/////
-            _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "TestClass");
+           
+
+
+                
         }
 
-        private void CreateShipFromClass()
-        {
-            _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, "Serial Peacemaker");
-        }
 
         [Test]
-        public void TestEngineComponentFactory()
+        public void TestShipCreation()
         {
-            int size = 5;
 
-            double consumptionPerHour = 0.5;
+            ComponentDesignDB engineDesignDB;
 
-            int totalPower = 80;
+            _engineSD = _game.StaticData.Components[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
+            engineDesignDB = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            engineDesignDB.ComponentDesignAbilities[0].SetValueFromInput(5); //size
+            //engineDesignDB.ComponentDesignAbilities[1]
+            _engineComponent = GenericComponentFactory.DesignToEntity(_game, _faction, engineDesignDB);
 
-            int thermalSig = 80;
+            _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
+            ShipFactory.AddShipComponent(_shipClass, _engineComponent);
 
-            int hitTokill = 5;
 
-            Dictionary<Guid, int> costs = new Dictionary<Guid, int>();
-            Guid gallicite = new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"); //Gallicite.
-            costs.Add(gallicite, 8 * 5);
-            
-            int crew = 5;
-            
-            Guid tech = new Guid();
-            //_engineComponent = EngineFactory.CreateEngineComponent(_starSystem.SystemManager, 5, hitTokill, costs, tech, crew, totalPower, consumptionPerHour, thermalSig);
+            _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, "Serial Peacemaker");
+            PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
+            ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
+
+            Assert.True(shipInfo.ComponentList.Contains(_engineComponent));
+            Assert.AreEqual(100, propulsion.MaximumSpeed);
         }
 
-        //[Test] //TODO re add this after figuring out how to re-write it.
-        //public void TestAddcomponent()
-        //{
-        //    TestEngineComponentFactory();
-        //    ShipFactory.AddShipComponent(_shipClass, _engineComponent);
-        //    int expectedSpeed = 320;
-        //    int maxSpeed = _shipClass.GetDataBlob<PropulsionDB>().MaximumSpeed;
-        //    Assert.AreEqual(expectedSpeed, maxSpeed);
-        //}
+
+
+
+
+
     }
 }

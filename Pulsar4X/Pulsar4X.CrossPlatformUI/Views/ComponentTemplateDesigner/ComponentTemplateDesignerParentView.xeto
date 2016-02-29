@@ -18,7 +18,7 @@
     <TableRow>
       <TableLayout>
         <TableRow>
-        <c:ComponentTemplateMainPropertiesView DataContext="{Binding SelectedComponent}" />
+        <c:ComponentTemplateMainPropertiesView x:Name="MainPropertiesCtrl" DataContext="{Binding SelectedComponent}" />
         </TableRow>
       </TableLayout>
     </TableRow>
@@ -28,7 +28,7 @@
           <Scrollable >
             <StackLayout ID ="AbilityTemplates"/>              
           </Scrollable>
-          <c:FormulaEditorView DataContext="{Binding FormulaEditor}" />
+          <c:FormulaEditorView x:Name="FormulaEditorCtrl" DataContext="{Binding FormulaEditor}" />
         </TableRow>
       </TableLayout>
      
