@@ -159,7 +159,7 @@ namespace Pulsar4X.ECSLib
         {
             if (parent == null)
             {
-                throw new ArgumentNullException("parent");
+                throw new ArgumentNullException(nameof(parent));
             }
 
             // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
@@ -185,7 +185,7 @@ namespace Pulsar4X.ECSLib
         {
             if (parent == null)
             {
-                throw new ArgumentNullException("parent");
+                throw new ArgumentNullException(nameof(parent));
             }
 
             return new OrbitDB(parent, parentMass, myMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);

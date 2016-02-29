@@ -10,11 +10,13 @@ namespace Pulsar4X.Tests
     public class FactoryTests
     {
         private Game _game;
+        private AuthenticationToken _smAuthToken;
 
         [SetUp]
         public void Init()
         {
             _game = Game.NewGame("Unit Test Game", DateTime.Now, 0);
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
         }
 
         [Test]
@@ -49,7 +51,7 @@ namespace Pulsar4X.Tests
             StarSystem sol = sysfac.CreateSol(_game);
             //Entity starSystem = Entity.Create(_game.GlobalManager);
             //Entity planet = Entity.Create(starSystem.Manager, new List<BaseDataBlob>());
-            List<Entity> solBodies = sol.SystemManager.GetAllEntitiesWithDataBlob<NameDB>();
+            List<Entity> solBodies = sol.SystemManager.GetAllEntitiesWithDataBlob<NameDB>(_smAuthToken);
             Entity planet = solBodies.Find(item => item.GetDataBlob<NameDB>().DefaultName == "Earth");
             Entity species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
             var requiredDataBlobs = new List<Type>()

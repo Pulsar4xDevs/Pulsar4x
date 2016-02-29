@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
 
             int orbitsProcessed = 0;
 
-            if (game.EnableMultiThreading)
+            if (game.Settings.EnableMultiThreading)
             {
                 Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime, ref orbitsProcessed));
             }

@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
             foreach (ProtoEntity surveyPoint in surveyPoints)
             {
                 var realPoint = Entity.Create(system.SystemManager, surveyPoint);
-                realPoint.GetDataBlob<PositionDB>().System = system;
+                realPoint.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
             }
         }
 
@@ -54,10 +54,10 @@ namespace Pulsar4X.ECSLib
         {
             // TODO: Rebalance "pointsRequired" here.
             // TODO: Load "pointsRequired" from GalaxyGen settings
-            const int pointsRequired = 500;
+            const int pointsRequired = 400;
 
             var surveyDB = new JPSurveyableDB(pointsRequired, new Dictionary<Entity, int>());
-            var posDB = new PositionDB(x, y, 0, null);
+            var posDB = new PositionDB(x, y, 0, Guid.Empty);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
 
             return ProtoEntity.Create(Guid.Empty, new BaseDataBlob[] { surveyDB, posDB, nameDB });

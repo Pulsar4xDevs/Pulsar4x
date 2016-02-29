@@ -95,6 +95,11 @@ namespace Pulsar4X.ECSLib
             get { return _scientists; }
             internal set { _scientists = value; }
         }
+
+        // Note, Colony Owner can differ from OwnerDB. OwnerDB represents who owns the Entity.
+        // ColonyInfoDB.Owner represents who owns the actual colony. In the case of a sensor contact, these are different factions.
+        public Entity Owner { get; set; }
+
         [JsonProperty]
         private List<Entity> _scientists = new List<Entity>();
 
