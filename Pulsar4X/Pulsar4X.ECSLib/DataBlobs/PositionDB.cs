@@ -104,9 +104,10 @@ namespace Pulsar4X.ECSLib
             SystemGuid = systemGuid;
         }
 
-        public PositionDB()
+        public PositionDB(Guid systemGuid)
         {
             Position = Vector4.Zero;
+            SystemGuid = systemGuid;
         }
 
         public PositionDB(PositionDB positionDB)
