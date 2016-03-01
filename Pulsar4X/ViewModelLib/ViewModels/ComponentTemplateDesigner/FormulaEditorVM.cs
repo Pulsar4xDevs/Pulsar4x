@@ -61,18 +61,18 @@ namespace Pulsar4X.ViewModel
             ParameterButtons.Add(new ButtonInfo("[CreditCost]", "Links to the Credit Cost formula field", this));
             ParameterButtons.Add(new ButtonInfo("[GuidDict]", "A special parameter for a key value pair collection, used in ability formula fields", this));
 
-            //_parent.PropertyChanged += _parent_PropertyChanged;
+            FunctionButtons = new List<ButtonInfo>();
+            FunctionButtons.Add(new ButtonInfo("Ability()", "Reference an ability by index", this));
+            FunctionButtons.Add(new ButtonInfo("TechData()", "Reference a tech by guid", this));
+            FunctionButtons.Add(new ButtonInfo("DataBlobArgs()", "Used for setting an abilities datblob arguments", this));
+            
         }
 
         public void RefreshFormula()
         {
             OnPropertyChanged(nameof(Formula));
         }
-        //private void _parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        //{
-        //    if (e.PropertyName == "FocusedText")
-        //        OnPropertyChanged("Formula");
-        //}
+
 
         public void AddParam(string param)
         {

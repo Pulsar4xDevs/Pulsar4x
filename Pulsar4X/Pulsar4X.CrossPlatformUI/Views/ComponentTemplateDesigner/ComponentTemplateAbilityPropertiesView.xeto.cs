@@ -111,8 +111,13 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             GuiHintControls.Items.Clear();
             Label label = new Label();
-            label.Text = "Does Not display anything, however, \r\nAbilityFormula still works 'under the hood'";
+            label.Text = "Does Not display anything, however, \r\nAbilityFormula still works 'under the hood' \r\nOr use in conjunction with Datablob type and args";
+            ComboBox dataBlobSelection = new ComboBox();
+            dataBlobSelection.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM m) => m.AbilityDataBlobTypeSelection);
+            dataBlobSelection.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM m) => m.AbilityDataBlobType);
+            dataBlobSelection.DataContext = _viewModel;
             GuiHintControls.Items.Add(label);
+            GuiHintControls.Items.Add(dataBlobSelection);
 
         }
     }

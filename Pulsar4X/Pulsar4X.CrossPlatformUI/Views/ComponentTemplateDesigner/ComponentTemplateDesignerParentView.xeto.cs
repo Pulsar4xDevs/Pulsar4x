@@ -47,6 +47,10 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             //can be removed when the next version of eto.forms comes out as of this writing we're using 2.2 (it's fixed in the dev version of eto.forms)
             AbilityTemplates.Items.Add(new Label());
             AbilityTemplates.Items.Add(new Label());
+            AbilityTemplates.Items.Add(new Label());
+            AbilityTemplates.Items.Add(new Label());
+            AbilityTemplates.Items.Add(new Label());
+            AbilityTemplates.Items.Add(new Label());
 
             AbilityTemplates.ResumeLayout();
         }
