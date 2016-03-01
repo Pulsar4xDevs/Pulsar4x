@@ -159,7 +159,7 @@
     <Compile Include="EventLog\EventType.cs" />
     <Compile Include="Factories\SystemGen\JPFactory.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
-    <Compile Include="Helpers\EntityAccessControl.cs" />
+    <Compile Include="Entity\EntityAccessControl.cs" />
     <Compile Include="Helpers\GameMath.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />
     <Compile Include="Helpers\MiscHelpers.cs" />
@@ -182,7 +182,7 @@
     <Compile Include="Factories\SystemGen\JPSurveyFactory.cs" />
     <Compile Include="Factories\SystemGen\StarFactory.cs" />
     <Compile Include="Factories\SystemGen\SystemBodyFactory.cs" />
-    <Compile Include="Factories\SystemGen\SystemFactory.cs" />
+    <Compile Include="Factories\SystemGen\StarSystemFactory.cs" />
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
     <Compile Include="Player.cs" />

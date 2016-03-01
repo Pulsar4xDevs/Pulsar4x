@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
     /// WARNING: Not including weights/values for all possible enum values (Spectral type, body Type, etc.)
     /// could cause system generation to crash.
     /// </remarks>
-    [StaticDataAttribute(false)]
+    [StaticData(false)]
     public struct SystemGenSettingsSD
     {
         public static SystemGenSettingsSD DefaultSettings
@@ -294,10 +294,8 @@ namespace Pulsar4X.ECSLib
             {
                 case SystemBand.InnerBand:
                     return InnerBandTypeWeights;
-                    break;
                 case SystemBand.HabitableBand:
                     return HabitableBandTypeWeights;
-                    break;
                 case SystemBand.OuterBand:
                 default:
                     return OuterBandTypeWeights;
