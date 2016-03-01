@@ -5,12 +5,29 @@ namespace Pulsar4X.ECSLib
 {
     public static class JPFactory
     {
-        public static Entity CreateJumpPoint(StarSystem system)
+        public static Entity CreateJumpPoint(StarSystemFactory ssf, StarSystem system)
         {
+            var primaryStarInfoDB = system.SystemManager.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<OrbitDB>().Root.GetDataBlob<StarInfoDB>();
+
             NameDB jpNameDB = new NameDB("Jump Point");
             PositionDB jpPositionDB = new PositionDB(0,0,0, system.Guid);
             TransitableDB jpTransitableDB = new TransitableDB();
             
+            var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Max);
+
+            jpPositionDB.X = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
+            jpPositionDB.Y = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
+
+            // Randomly flip the position sign to allow negative values.
+            if (system.RNG.Next(0, 100) < 50)
+            {
+                jpPositionDB.X = 0 - jpPositionDB.X;
+            }
+            if (system.RNG.Next(0, 100) < 50)
+            {
+                jpPositionDB.Y = 0 - jpPositionDB.Y;
+            }
+
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};
 
             Entity jumpPoint = Entity.Create(system.SystemManager, dataBlobs);
@@ -63,7 +80,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Generates jump points for this system.
         /// </summary>
-        public static void GenerateJumpPoints(StarSystem system)
+        public static void GenerateJumpPoints(StarSystemFactory ssf, StarSystem system)
         {
             int numJumpPoints = GetNumJPForSystem(system);
 
@@ -71,7 +88,7 @@ namespace Pulsar4X.ECSLib
             {
                 numJumpPoints--;
 
-                CreateJumpPoint(system);
+                CreateJumpPoint(ssf, system);
             }
         }
 
