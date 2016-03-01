@@ -63,7 +63,7 @@ namespace Pulsar4X.ViewModel
         }
         private string _maxFormula;
 
-        public override event PropertyChangedEventHandler PropertyChanged;
+
 
         public string MaxFormula
         {
@@ -204,11 +204,6 @@ namespace Pulsar4X.ViewModel
             }
             sd.GuidDictionary = guidict;
             return sd;                
-        }
-
-        internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

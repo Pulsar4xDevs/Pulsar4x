@@ -64,6 +64,10 @@ namespace Pulsar4X.ViewModel
             //_parent.PropertyChanged += _parent_PropertyChanged;
         }
 
+        public void RefreshFormula()
+        {
+            OnPropertyChanged(nameof(Formula));
+        }
         //private void _parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
         //{
         //    if (e.PropertyName == "FocusedText")

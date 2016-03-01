@@ -11,23 +11,24 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
     {
         private MineralFormulaVM _viewModel;
         protected ComboBox SelectionComboBox { get; set; }
+        protected TextBox FormulaTBx { get; set; }
         public MineralFormulaView()
         {
             XamlReader.Load(this);
+
+            SelectionComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
+            SelectionComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
+
+            FormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.AbilityFormulaControl;
+
         }
         public MineralFormulaView(MineralFormulaVM viewModel) : this()
         {
             _viewModel = viewModel;
             DataContext = viewModel;
             SelectionComboBox.DataContext = viewModel.Minerals;
-            SelectionComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid,string, string> m) => m.DisplayList);
-            SelectionComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid,string, string> m) => m.SelectedIndex);
+
             SelectionComboBox.SelectedIndexChanged += _viewModel.OnSelectionChange;
         }
-
-        //private void SelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    _viewModel.SetSelectedMineral(SelectionComboBox.SelectedIndex);
-        //}
     }
 }

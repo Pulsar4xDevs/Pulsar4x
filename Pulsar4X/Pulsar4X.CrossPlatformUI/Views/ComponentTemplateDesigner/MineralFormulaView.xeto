@@ -6,7 +6,7 @@
   <TableLayout>
     <TableRow>
       <ComboBox ID="SelectionComboBox"/>
-      <TextBox Text="{Binding Formula}" />
+      <TextBox ID="FormulaTBx" Text="{Binding MineralFormula}" />
     </TableRow>
   </TableLayout>
 </Panel>

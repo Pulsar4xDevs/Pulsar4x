@@ -28,8 +28,12 @@ namespace Pulsar4X.ViewModel
         }
 
         public abstract string FocusedText { get; set; }
-        public abstract event PropertyChangedEventHandler PropertyChanged;
-        internal abstract void OnPropertyChanged([CallerMemberName] string propertyName = null);
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            ParentVM.FormulaEditor.RefreshFormula();
+        }
 
     }
 
@@ -98,7 +102,10 @@ namespace Pulsar4X.ViewModel
                         break;
                 }
 
-                   ParentVM.ControlInFocus = this;
+                ParentVM.ControlInFocus = this;
+                
+
+
             }
         }
 
@@ -172,9 +179,6 @@ namespace Pulsar4X.ViewModel
         public ObservableDictionary<ComponentMountType, bool?> MountType { get { return _mountType; } }
 
 
-        public override event PropertyChangedEventHandler PropertyChanged;
-
-
         public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameVM): base(parent)
         {
             _staticData = gameVM.Game.StaticData;
@@ -190,7 +194,7 @@ namespace Pulsar4X.ViewModel
         {
             if (MineralCostFormula.Last().Minerals.SelectedIndex >= 0 && MineralCostFormula[0].Minerals.SelectedIndex >= 0)
             {
-                MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+                MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData));
                 MineralCostFormula.Last().PropertyChanged += ComponentTemplateVM_PropertyChanged;
             }
         }
@@ -208,7 +212,7 @@ namespace Pulsar4X.ViewModel
             HTKFormula = "";
             CrewReqFormula = "";
             MineralCostFormula.Clear();
-            MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+            MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData));
             MineralCostFormula.Last().PropertyChanged += ComponentTemplateVM_PropertyChanged;
             ResearchCostFormula = "";
             CreditCostFormula = "";
@@ -233,9 +237,9 @@ namespace Pulsar4X.ViewModel
             MineralCostFormula.Clear(); 
             foreach (var item in designSD.MineralCostFormula)
             {
-                MineralCostFormula.Add(new MineralFormulaVM(_staticData, item));
+                MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData, item));
             }
-            MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+            MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData));
             
             ResearchCostFormula = designSD.ResearchCostFormula;
             CreditCostFormula = designSD.CreditCostFormula;
@@ -247,9 +251,6 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+
     }
 }

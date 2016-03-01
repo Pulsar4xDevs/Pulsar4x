@@ -32,23 +32,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             }
             viewModel.ComponentAbilitySDs.CollectionChanged += ComponentAbilitySDs_CollectionChanged;
 
-            viewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
 
-        private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case "SelectedComponent":
-                    MainPropertiesCtrl.DataContext = _viewModel.SelectedComponent;
-                    //MainPropertiesCtrl.UpdateBindings(BindingUpdateMode.Source);
-                    break;
-                case "FormulaEditor":
-                    FormulaEditorCtrl.DataContext = _viewModel.FormulaEditor;
-                    //FormulaEditorCtrl.UpdateBindings(BindingUpdateMode.Source);
-                    break;
-            }
-        }
 
         private void ComponentAbilitySDs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
