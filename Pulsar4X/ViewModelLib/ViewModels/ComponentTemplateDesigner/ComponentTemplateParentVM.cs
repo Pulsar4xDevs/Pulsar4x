@@ -67,7 +67,7 @@ namespace Pulsar4X.ViewModel
         {
             _staticData = gameVM.Game.StaticData;
             _gameVM = gameVM;
-            FormulaEditor = new FormulaEditorVM(this);
+            FormulaEditor = new FormulaEditorVM(this, _staticData);
             
             foreach (var item in _staticData.Components.Values)
             {

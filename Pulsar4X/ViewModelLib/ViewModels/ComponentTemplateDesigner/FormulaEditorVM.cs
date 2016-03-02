@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel
 {
@@ -17,6 +18,7 @@ namespace Pulsar4X.ViewModel
 
         public string FormulaName { get; set; }
 
+        public DictionaryVM<Guid, string, string> TechList { get; private set; }
         
         public string Formula
         {
@@ -49,9 +51,17 @@ namespace Pulsar4X.ViewModel
         public List <ButtonInfo> ParameterButtons { get; set; }
         public List<ButtonInfo> FunctionButtons { get; set; }
 
-        public FormulaEditorVM(ComponentTemplateParentVM parent)
+        public FormulaEditorVM(ComponentTemplateParentVM parent, StaticDataStore staticData)
         {
             _parent = parent;
+
+            TechList = new DictionaryVM<Guid, string, string>();
+            foreach (var item in staticData.Techs.Values)
+            {
+                TechList.Add(item.ID, item.Name);
+            }
+            TechList.SelectionChangedEvent += TechList_SelectionChangedEvent;
+
             ParameterButtons = new List<ButtonInfo>();
             ParameterButtons.Add(new ButtonInfo("[Size]","Links to the Size formula field", this ));
             ParameterButtons.Add(new ButtonInfo("[Crew]", "Links to the Crew requred formula field", this));
@@ -62,10 +72,13 @@ namespace Pulsar4X.ViewModel
             ParameterButtons.Add(new ButtonInfo("[GuidDict]", "A special parameter for a key value pair collection, used in ability formula fields", this));
 
             FunctionButtons = new List<ButtonInfo>();
-            FunctionButtons.Add(new ButtonInfo("Ability()", "Reference an ability by index", this));
-            FunctionButtons.Add(new ButtonInfo("TechData()", "Reference a tech by guid", this));
-            FunctionButtons.Add(new ButtonInfo("DataBlobArgs()", "Used for setting an abilities datblob arguments", this));
+
             
+        }
+
+        private void TechList_SelectionChangedEvent(int oldSelection, int newSelection)
+        {
+            AddParam("TechData('" + TechList.GetKey().ToString() + "')");
         }
 
         public void RefreshFormula()

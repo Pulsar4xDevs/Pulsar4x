@@ -22,8 +22,8 @@
       </TableRow>
       <TableRow>
         <Button Text="DataBlobArgs()"/>
-        <Button Text="Tech('guid')" />
-        <ComboBox ID="TechSelection" />
+        <ComboBox ID="TechSelection" DataContext="{Binding TechList}" />
+        <TableCell/>
       </TableRow>
       <TableRow>
         <Label Text="TODO instructions/description on whatever item is selected" />
