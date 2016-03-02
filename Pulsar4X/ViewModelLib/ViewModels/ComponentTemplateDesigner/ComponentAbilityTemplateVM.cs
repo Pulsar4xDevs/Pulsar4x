@@ -8,6 +8,7 @@ using Pulsar4X.ECSLib;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
@@ -116,6 +117,17 @@ namespace Pulsar4X.ViewModel
 
         public TechListVM GuidDict { get; set; }
 
+
+        
+        public ICommand AddToEditCommand { get { return new RelayCommand<object>(obj => AddMe()); } }
+        public ICommand DeleteCommand { get { return new RelayCommand<object>(obj => DeleteMe()); } }
+
+        /// <summary>
+        /// Constructor for empty
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="parentList"></param>
+        /// <param name="staticData"></param>
         public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : base(parent)
         {
 
@@ -131,6 +143,13 @@ namespace Pulsar4X.ViewModel
             _abilityDataBlobTypeSelection = AbilityTypes();
         }
 
+        /// <summary>
+        /// Constructor for filled
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="abilitySD"></param>
+        /// <param name="parentList"></param>
+        /// <param name="staticData"></param>
         public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
             Name = abilitySD.Name;
@@ -155,6 +174,16 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+
+        private void DeleteMe()
+        {
+            ParentList.RemoveAt(Index);
+        }
+        private void AddMe()
+        {
+            ParentVM.FormulaEditor.AddParam("Ability(" + Index + ")");
+            ParentVM.FormulaEditor.RefreshFormula();
+        }
         private static List<string> AbilityTypes()
         {
             List<string> typelist = new List<string>();

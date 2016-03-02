@@ -3,7 +3,7 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-  <GroupBox Width="400" Text="{Binding Index}">
+  <GroupBox ID="GrpBx" Width="400" Text="{Binding Index}">
   <TableLayout>
     <TableRow >
       <!--Button Width="26" Text="{Binding Index}"/-->

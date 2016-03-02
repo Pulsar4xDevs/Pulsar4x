@@ -38,17 +38,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.BPCostControl;
             CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.CreditCostControl;
 
-            //DataContextChanged += ComponentTemplateMainPropertiesView_DataContextChanged;
         }
 
-        //private void ComponentTemplateMainPropertiesView_DataContextChanged(object sender, System.EventArgs e)
-        //{
-        //    if (DataContext is ComponentTemplateMainPropertiesVM)
-        //    {
-        //        ComponentTemplateMainPropertiesVM dc = (ComponentTemplateMainPropertiesVM)DataContext;
-        //        SetViewModel(dc);
-        //    }           
-        //}
 
         public void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 
         {
