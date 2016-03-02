@@ -12,7 +12,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         protected StackLayout MineralCostFormulaStackLayout { get; set; }
 
         protected StackLayout MountTypes { get; set; }
-        private ComponentTemplateMainPropertiesVM _viewModel;
+        //private ComponentTemplateMainPropertiesVM _viewModel;
         
         protected TextBox NameTBx { get; set; }
         protected TextBox DescriptionTBx { get; set; }
@@ -38,13 +38,22 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.BPCostControl;
             CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.CreditCostControl;
 
+            DataContextChanged += ComponentTemplateMainPropertiesView_DataContextChanged;
         }
 
+        private void ComponentTemplateMainPropertiesView_DataContextChanged(object sender, System.EventArgs e)
+        {
+            if (DataContext is ComponentTemplateMainPropertiesVM)
+            {
+                ComponentTemplateMainPropertiesVM dc = (ComponentTemplateMainPropertiesVM)DataContext;
+                SetViewModel(dc);
+            }
+        }
 
         public void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 
         {
-            _viewModel = viewModel;
-            DataContext = viewModel;
+            //_viewModel = viewModel;
+            //DataContext = viewModel;
             //FormulaEditorView.SetViewModel(_viewModel.FormulaEditor);
             MineralCostFormulaStackLayout.SuspendLayout();
             MineralCostFormulaStackLayout.Items.Clear();
@@ -57,7 +66,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
             MountTypes.SuspendLayout();
             MountTypes.Items.Clear();
-            foreach (var item in _viewModel.MountType)
+            foreach (var item in viewModel.MountType)
             {
 
                 ECSLib.ComponentMountType key = item.Key;
@@ -65,11 +74,11 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 chkbx.Text = key.ToString();
                 //chkbx.CheckedBinding.BindDataContext((DictionaryVM<ECSLib.ComponentMountType, bool?, bool?> x) => x[kvp.Key], (m, val) => m[kvp.Key] = val);
                 chkbx.CheckedBinding.BindDataContext((ObservableDictionary<ECSLib.ComponentMountType, bool?> x) => x[key], (m, val) => m[key] = val);
-                chkbx.DataContext = _viewModel.MountType;
+                chkbx.DataContext = viewModel.MountType;
                 MountTypes.Items.Add(chkbx);
             }
             MountTypes.ResumeLayout();
-            _viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
+            viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
 
         }        
 
@@ -83,8 +92,9 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
         private void MineralCostFormula_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            ComponentTemplateMainPropertiesVM viewModel = (ComponentTemplateMainPropertiesVM)DataContext;
             MineralCostFormulaStackLayout.Items.Clear();
-            foreach (var item in _viewModel.MineralCostFormula)
+            foreach (var item in viewModel.MineralCostFormula)
             {
                 MineralCostFormulaStackLayout.Items.Add(new MineralFormulaView(item));
             }

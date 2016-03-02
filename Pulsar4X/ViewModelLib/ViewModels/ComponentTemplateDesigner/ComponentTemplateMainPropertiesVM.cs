@@ -178,12 +178,27 @@ namespace Pulsar4X.ViewModel
         public ObservableDictionary<ComponentMountType, bool?> MountType { get { return _mountType; } }
 
 
+        /// <summary>
+        /// Constructor for empty VM
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="gameVM"></param>
         public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameVM): base(parent)
         {
             _staticData = gameVM.Game.StaticData;
             SubControlInFocus = FocusedControl.SizeControl;
+            foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
+            {
+                MountType.Add((ComponentMountType)item, false);
+            }
         }
 
+        /// <summary>
+        /// Constructor for VM filled with componentSD
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="gameData"></param>
+        /// <param name="designSD"></param>
         public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameData, ComponentSD designSD) : this(parent, gameData)
         {
             SetDesignSD(designSD);
@@ -216,11 +231,12 @@ namespace Pulsar4X.ViewModel
             ResearchCostFormula = "";
             CreditCostFormula = "";
             BuildPointCostFormula = "";
-            MountType.Clear();// = new ObservableDictionary<ComponentMountType, bool?>();
+            //MountType.Clear();// = new ObservableDictionary<ComponentMountType, bool?>();
 
-            foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
+
+            foreach (var item in MountType.ToArray())
             {
-                MountType.Add((ComponentMountType)item, false);
+                MountType[item.Key] = false;
             }
         }
 

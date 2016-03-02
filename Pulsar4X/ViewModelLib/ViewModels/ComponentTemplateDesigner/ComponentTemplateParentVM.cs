@@ -119,7 +119,8 @@ namespace Pulsar4X.ViewModel
             sd.MineralCostFormula = new Dictionary<Guid, string>();
             foreach (var item in SelectedComponent.MineralCostFormula)
             {
-                sd.MineralCostFormula.Add(item.Minerals.GetKey(), item.MineralFormula);
+                if(item.MineralFormula != null)
+                    sd.MineralCostFormula.Add(item.Minerals.GetKey(), item.MineralFormula);
             }
             sd.ResearchCostFormula = SelectedComponent.ResearchCostFormula;
             sd.CreditCostFormula = SelectedComponent.CreditCostFormula;

@@ -21,7 +21,7 @@
         <Label Text="Functions:" />
       </TableRow>
       <TableRow>
-        <Button Text="Ability()"/>
+        <Button Text="DataBlobArgs()"/>
         <Button Text="Tech('guid')" />
         <ComboBox ID="TechSelection" />
       </TableRow>

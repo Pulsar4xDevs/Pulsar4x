@@ -216,12 +216,15 @@ namespace Pulsar4X.ViewModel
             sd.AbilityFormula = AbilityFormula;
             sd.MinFormula = MinFormula;
             sd.MaxFormula = MaxFormula;
-            Dictionary<Guid, string> guidict = new Dictionary<Guid, string>();
-            foreach (var item in GuidDict.SelectedItems)
+            if (GuidDict != null)
             {
-                guidict.Add(item.Key, item.Value);
+                Dictionary<Guid, string> guidict = new Dictionary<Guid, string>();
+                foreach (var item in GuidDict.SelectedItems)
+                {
+                    guidict.Add(item.Key, item.Value);
+                }
+                sd.GuidDictionary = guidict;
             }
-            sd.GuidDictionary = guidict;
             return sd;                
         }
     }
