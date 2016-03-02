@@ -93,7 +93,5 @@ namespace Pulsar4X.ViewModel
         {
             Text = text; ToolTipText = tooltext; Parent = parent;
         }
-
-
     }
 }

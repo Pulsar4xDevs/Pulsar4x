@@ -14,6 +14,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         protected StackLayout AbilityTemplates { get; set; }
         protected ComponentTemplateMainPropertiesView MainPropertiesCtrl { get; set; }
         protected FormulaEditorView FormulaEditorCtrl { get; set; }
+        protected Panel PaddingPnl { get; set; }
         public ComponentTemplateDesignerParentView()
         {
             XamlReader.Load(this);
@@ -32,8 +33,15 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             }
             viewModel.ComponentAbilitySDs.CollectionChanged += ComponentAbilitySDs_CollectionChanged;
 
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
         }
 
+        private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "SelectedComponent")
+                MainPropertiesCtrl.SetViewModel(_viewModel.SelectedComponent);
+        }
 
         private void ComponentAbilitySDs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
@@ -42,15 +50,10 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             foreach (var item in _viewModel.ComponentAbilitySDs)
             {
                 AbilityTemplates.Items.Add(new ComponentTemplateAbilityPropertiesView(item));
-            }
+            }            
             //padding to fix a bug with eto scrollable not scrolling down far enough. 
             //can be removed when the next version of eto.forms comes out as of this writing we're using 2.2 (it's fixed in the dev version of eto.forms)
-            AbilityTemplates.Items.Add(new Label());
-            AbilityTemplates.Items.Add(new Label());
-            AbilityTemplates.Items.Add(new Label());
-            AbilityTemplates.Items.Add(new Label());
-            AbilityTemplates.Items.Add(new Label());
-            AbilityTemplates.Items.Add(new Label());
+            PaddingPnl.Height = AbilityTemplates.Items.Count * 32;
 
             AbilityTemplates.ResumeLayout();
         }

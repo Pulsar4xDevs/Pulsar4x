@@ -54,6 +54,8 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+        public ICommand NewComponentCommand { get { return new RelayCommand<object>(obj => StartNewComponent()); } }
+        public ICommand NewAbilityCommand { get { return new RelayCommand<object>(obj => AddNewAbility()); } }
         public ICommand SaveCommand { get { return new RelayCommand<object>(obj => SaveToStaticData()); } }
         public ICommand ExportCommand { get { return new RelayCommand<object>(obj => ExportToFile()); } }
 
@@ -77,7 +79,8 @@ namespace Pulsar4X.ViewModel
 
         private void Components_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            SelectedComponent = new ComponentTemplateMainPropertiesVM(this, _gameVM, Components.GetKey());
+            var mainTemplateVM = new ComponentTemplateMainPropertiesVM(this, _gameVM, Components.GetKey());
+            SelectedComponent = mainTemplateVM;
             ComponentAbilitySDs.Clear();
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in Components.GetKey().ComponentAbilitySDs)
@@ -88,6 +91,21 @@ namespace Pulsar4X.ViewModel
             ComponentAbilitySDs.AddRange(tmp);
         }
 
+        public void StartNewComponent()
+        {
+            ComponentTemplateMainPropertiesVM vm = new ComponentTemplateMainPropertiesVM(this, _gameVM);
+
+            vm.ClearSelection();
+            vm.ID = Guid.NewGuid().ToString();
+            vm.Name = "NewComponent";
+            SelectedComponent = vm;
+            ComponentAbilitySDs.Clear();
+        }
+
+        public void AddNewAbility()
+        {
+            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(this, ComponentAbilitySDs, _staticData));
+        }
 
         public void SaveToStaticData()
         {

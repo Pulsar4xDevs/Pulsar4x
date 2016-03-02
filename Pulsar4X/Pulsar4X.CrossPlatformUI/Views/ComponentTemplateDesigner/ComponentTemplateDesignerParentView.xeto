@@ -10,7 +10,7 @@
         <TableRow>
           <Label Text="Name" />
           <ComboBox ID="ComponentsComBox" DataContext="{Binding Components}" />
-          <Button ID="NewComponent" Text="Add New Component" Enabled ="False"/>
+          <Button Text="Add New Component" Command="{Binding NewComponentCommand}" />
           <TableCell/>
         </TableRow>
       </TableLayout>
@@ -26,7 +26,12 @@
       <TableLayout>
         <TableRow>
           <Scrollable >
-            <StackLayout ID ="AbilityTemplates"/>              
+            <TableLayout>             
+              <StackLayout ID ="AbilityTemplates"/>
+              <Panel Height="2" />
+              <Button Command="{Binding NewAbilityCommand}" Text="AddAbility"/>
+              <Panel ID="PaddingPnl"/>
+            </TableLayout>
           </Scrollable>
           <c:FormulaEditorView x:Name="FormulaEditorCtrl" DataContext="{Binding FormulaEditor}" />
         </TableRow>

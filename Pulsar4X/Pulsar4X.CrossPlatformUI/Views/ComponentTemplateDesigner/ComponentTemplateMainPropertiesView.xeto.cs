@@ -38,21 +38,19 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.BPCostControl;
             CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.CreditCostControl;
 
-
-            DataContextChanged += ComponentTemplateMainPropertiesView_DataContextChanged;
+            //DataContextChanged += ComponentTemplateMainPropertiesView_DataContextChanged;
         }
 
-        private void ComponentTemplateMainPropertiesView_DataContextChanged(object sender, System.EventArgs e)
-        {
-            if (DataContext is ComponentTemplateMainPropertiesVM)
-            {
-                ComponentTemplateMainPropertiesVM dc = (ComponentTemplateMainPropertiesVM)DataContext;
-                SetViewModel(dc);
-            }
-            
-        }
+        //private void ComponentTemplateMainPropertiesView_DataContextChanged(object sender, System.EventArgs e)
+        //{
+        //    if (DataContext is ComponentTemplateMainPropertiesVM)
+        //    {
+        //        ComponentTemplateMainPropertiesVM dc = (ComponentTemplateMainPropertiesVM)DataContext;
+        //        SetViewModel(dc);
+        //    }           
+        //}
 
-        private void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 
+        public void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 
         {
             _viewModel = viewModel;
             DataContext = viewModel;
@@ -82,17 +80,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             MountTypes.ResumeLayout();
             _viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
 
-        }
-
-        //private void Export_Click(object sender, System.EventArgs e)
-        //{
-        //    _viewModel.SaveToFile();
-        //}
-
-        //private void Save_Click(object sender, System.EventArgs e)
-        //{
-        //    _viewModel.CreateSD();
-        //}
+        }        
 
         private void MountType_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -102,8 +90,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             }
         }
 
-
-
         private void MineralCostFormula_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             MineralCostFormulaStackLayout.Items.Clear();
@@ -111,8 +97,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             {
                 MineralCostFormulaStackLayout.Items.Add(new MineralFormulaView(item));
             }
-        }
-
-        
+        }        
     }
 }

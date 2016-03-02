@@ -34,7 +34,6 @@ namespace Pulsar4X.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             ParentVM.FormulaEditor.RefreshFormula();
         }
-
     }
 
     public class ComponentTemplateMainPropertiesVM : ComponentTemplateDesignerBaseVM
