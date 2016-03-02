@@ -32,16 +32,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 AbilityTemplates.Items.Add(new ComponentTemplateAbilityPropertiesView(item));
             }
             viewModel.ComponentAbilitySDs.CollectionChanged += ComponentAbilitySDs_CollectionChanged;
-
-            viewModel.PropertyChanged += ViewModel_PropertyChanged;
-
         }
 
-        private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == "SelectedComponent")
-                MainPropertiesCtrl.SetViewModel(_viewModel.SelectedComponent);
-        }
 
         private void ComponentAbilitySDs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {

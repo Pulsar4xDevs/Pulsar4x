@@ -73,14 +73,15 @@ namespace Pulsar4X.ViewModel
             {
                 Components.Add(item, item.Name);
             }
+            SelectedComponent = new ComponentTemplateMainPropertiesVM(this, _gameVM);
             Components.SelectionChangedEvent += Components_SelectionChangedEvent;
             Components.SelectedIndex = 0;
         }
 
         private void Components_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            var mainTemplateVM = new ComponentTemplateMainPropertiesVM(this, _gameVM, Components.GetKey());
-            SelectedComponent = mainTemplateVM;
+
+            SelectedComponent.SetDesignSD(Components.GetKey());// = mainTemplateVM;
             ComponentAbilitySDs.Clear();
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in Components.GetKey().ComponentAbilitySDs)
@@ -93,12 +94,10 @@ namespace Pulsar4X.ViewModel
 
         public void StartNewComponent()
         {
-            ComponentTemplateMainPropertiesVM vm = new ComponentTemplateMainPropertiesVM(this, _gameVM);
 
-            vm.ClearSelection();
-            vm.ID = Guid.NewGuid().ToString();
-            vm.Name = "NewComponent";
-            SelectedComponent = vm;
+            SelectedComponent.ClearSelection();
+            SelectedComponent.ID = Guid.NewGuid().ToString();
+            SelectedComponent.Name = "NewComponent";
             ComponentAbilitySDs.Clear();
         }
 
