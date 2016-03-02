@@ -19,7 +19,7 @@ namespace Pulsar4X.Tests
         private Entity _shipClass;
         private Entity _ship;
         private Entity _engineComponent;
-        private ComponentSD _engineSD;
+        private ComponentTemplateSD _engineSD;
 
         [SetUp]
         public void Init()

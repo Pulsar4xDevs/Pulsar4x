@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionTech">this factions TechDB</param>
         /// <param name="staticData">the game staticData</param>
         /// <returns></returns>
-        public static ComponentDesignDB StaticToDesign(ComponentSD component, FactionTechDB factionTech, StaticDataStore staticData)
+        public static ComponentDesignDB StaticToDesign(ComponentTemplateSD component, FactionTechDB factionTech, StaticDataStore staticData)
         {
             ComponentDesignDB design = new ComponentDesignDB();
 

@@ -199,7 +199,7 @@ namespace Pulsar4X.ViewModel
         /// <param name="parent"></param>
         /// <param name="gameData"></param>
         /// <param name="designSD"></param>
-        public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameData, ComponentSD designSD) : this(parent, gameData)
+        public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameData, ComponentTemplateSD designSD) : this(parent, gameData)
         {
             SetDesignSD(designSD);
         }
@@ -240,7 +240,7 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        public void SetDesignSD(ComponentSD designSD)
+        public void SetDesignSD(ComponentTemplateSD designSD)
         {
             Name = designSD.Name;
             Description = designSD.Description;

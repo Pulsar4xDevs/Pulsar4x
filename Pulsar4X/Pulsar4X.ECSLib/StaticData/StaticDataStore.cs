@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
         /// Dictionary which stores all Components.
         /// </summary>
         [JsonIgnore]
-        public Dictionary<Guid, ComponentSD> Components = new Dictionary<Guid, ComponentSD>();
+        public Dictionary<Guid, ComponentTemplateSD> Components = new Dictionary<Guid, ComponentTemplateSD>();
 
         /// <summary>
         /// Settings used by system generation. 
@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
                     "RefinedMaterials", typeof(Dictionary<Guid, RefinedMaterialSD>)
                 },
                 {
-                    "Components", typeof(Dictionary<Guid, ComponentSD>)
+                    "Components", typeof(Dictionary<Guid, ComponentTemplateSD>)
                 },
                 {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
@@ -154,7 +154,7 @@ namespace Pulsar4X.ECSLib
                     typeof(Dictionary<Guid, RefinedMaterialSD>), "RefinedMaterials"
                 },
                 {
-                    typeof(Dictionary<Guid, ComponentSD>), "Components"
+                    typeof(Dictionary<Guid, ComponentTemplateSD>), "Components"
                 },
                 {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
@@ -311,11 +311,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores Component Static Data. Will overwrite any existing Component with the same ID.
         /// </summary>
-        internal void Store(Dictionary<Guid, ComponentSD> components)
+        internal void Store(Dictionary<Guid, ComponentTemplateSD> components)
         {
             if (components != null)
             {
-                foreach (KeyValuePair<Guid, ComponentSD> component in components)
+                foreach (KeyValuePair<Guid, ComponentTemplateSD> component in components)
                     Components[component.Key] = component.Value;
             }
         }
@@ -362,7 +362,7 @@ namespace Pulsar4X.ECSLib
             {
                 AtmosphericGases = new WeightedList<AtmosphericGasSD>(AtmosphericGases),
                 CommanderNameThemes = new List<CommanderNameThemeSD>(CommanderNameThemes),
-                Components = new Dictionary<Guid, ComponentSD>(Components),
+                Components = new Dictionary<Guid, ComponentTemplateSD>(Components),
                 Installations = new Dictionary<Guid, InstallationSD>(Installations),
                 _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
                 Minerals = new List<MineralSD>(Minerals),

@@ -53,7 +53,7 @@ namespace Pulsar4X.ViewModel
 
         public void SetComponent(Guid componentGuid)
         {
-            ComponentSD componentSD = _staticData.Components[componentGuid];
+            ComponentTemplateSD componentSD = _staticData.Components[componentGuid];
 
             DesignDB = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
 

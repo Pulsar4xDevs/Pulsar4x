@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Pulsar4X.ECSLib
 {
     [StaticDataAttribute(true, IDPropertyName = "ID")]
-    public struct ComponentSD
+    public struct ComponentTemplateSD
     {
         public string Name;
         public string Description;
@@ -20,11 +20,11 @@ namespace Pulsar4X.ECSLib
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
         public Dictionary<ComponentMountType, bool> MountType; 
 
-        public List<ComponentAbilitySD> ComponentAbilitySDs;
+        public List<ComponentTemplateAbilitySD> ComponentAbilitySDs;
     }
 
     [StaticDataAttribute(false)]
-    public struct ComponentAbilitySD
+    public struct ComponentTemplateAbilitySD
     {
         public string Name;
         public string Description;

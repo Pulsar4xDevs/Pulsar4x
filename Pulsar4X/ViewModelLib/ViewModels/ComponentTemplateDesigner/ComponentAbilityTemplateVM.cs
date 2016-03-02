@@ -150,7 +150,7 @@ namespace Pulsar4X.ViewModel
         /// <param name="abilitySD"></param>
         /// <param name="parentList"></param>
         /// <param name="staticData"></param>
-        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentTemplateAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
@@ -206,9 +206,9 @@ namespace Pulsar4X.ViewModel
 
 
 
-        public ComponentAbilitySD CreateSD()
+        public ComponentTemplateAbilitySD CreateSD()
         {
-            ComponentAbilitySD sd = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD sd = new ComponentTemplateAbilitySD();
             sd.Name = Name;
             sd.Description = Description;
             sd.AbilityDataBlobType = AbilityDataBlobType;

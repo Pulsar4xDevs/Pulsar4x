@@ -15,8 +15,8 @@ namespace Pulsar4X.ViewModel
         private StaticDataStore _staticData;
         private GameVM _gameVM;
 
-        private readonly DictionaryVM<ComponentSD, string, string> _components = new DictionaryVM<ComponentSD, string, string>();
-        public DictionaryVM<ComponentSD, string, string> Components { get { return _components; } }
+        private readonly DictionaryVM<ComponentTemplateSD, string, string> _components = new DictionaryVM<ComponentTemplateSD, string, string>();
+        public DictionaryVM<ComponentTemplateSD, string, string> Components { get { return _components; } }
 
         private ComponentTemplateMainPropertiesVM _selectedComponent;
         public ComponentTemplateMainPropertiesVM SelectedComponent
@@ -108,7 +108,7 @@ namespace Pulsar4X.ViewModel
 
         public void SaveToStaticData()
         {
-            ComponentSD sd = new ComponentSD();
+            ComponentTemplateSD sd = new ComponentTemplateSD();
             sd.Name = SelectedComponent.Name;
             sd.Description = SelectedComponent.Description;
             sd.ID = Guid.Parse(SelectedComponent.ID);
@@ -126,7 +126,7 @@ namespace Pulsar4X.ViewModel
             sd.CreditCostFormula = SelectedComponent.CreditCostFormula;
             sd.BuildPointCostFormula = SelectedComponent.BuildPointCostFormula;
             sd.MountType = new Dictionary<ComponentMountType, bool>();
-            sd.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            sd.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
             foreach (var item in ComponentAbilitySDs)
             {
                 sd.ComponentAbilitySDs.Add(item.CreateSD());
