@@ -200,6 +200,13 @@ namespace Pulsar4X.ViewModel
             typelist.Add(typeof(ResearchPointsAbilityDB).ToString());
             typelist.Add(typeof(SensorSignatureDB).ToString());
             typelist.Add(typeof(ActiveSensorDB).ToString());
+            typelist.Add(typeof(BeamFireControlAbilityDB).ToString());
+            typelist.Add(typeof(BeamWeaponAbilityDB).ToString());
+            typelist.Add(typeof(CloakAbilityDB).ToString());
+            typelist.Add(typeof(JumpDriveAbilityDB).ToString());
+            typelist.Add(typeof(MissileStorageAbilityDB).ToString());
+            typelist.Add(typeof(PassiveEMSensorAbilityDB).ToString());
+            typelist.Add(typeof(PassiveThermalSensorAbilityDB).ToString());
 
             return typelist;
         }
