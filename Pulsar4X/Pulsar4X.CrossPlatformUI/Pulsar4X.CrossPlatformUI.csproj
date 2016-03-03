@@ -154,7 +154,12 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NewGame.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerParentView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MainWindow.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -210,6 +215,9 @@
     </Compile>
     <Compile Include="Views\JobUC.xeto.cs">
       <DependentUpon>JobUC.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MainWindow.xeto.cs">
+      <DependentUpon>MainWindow.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\MinMaxSlider.xeto.cs">
       <DependentUpon>MinMaxSlider.xeto</DependentUpon>

@@ -32,7 +32,8 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
-            Application.Instance.MainForm.Content = new Views.ColonyScreenView(_gameVM);
+            Views.MainWindow mw = (Views.MainWindow)Application.Instance.MainForm.Content;
+            mw.AddTabPanel("Colony View", new Views.ColonyScreenView(_gameVM));
         }
     }
 }

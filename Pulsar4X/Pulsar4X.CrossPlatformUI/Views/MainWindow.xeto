@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="My Form"
+  >
+    <!--
+    <StackLayout Orientation="Horizontal" x:Name="TopButtonBar">
+      <Button x:Name="btn_system_map" Text="SM" Click="btn_system_map_Click"/>
+      <Button x:Name="btn_system_info" Click="btn_system_info_Click" />
+      <Button x:Name="btn_industry" Click="btn_industry_Click" />
+      <Button x:Name="btn_research" Click="btn_research_Click" />
+      <Button x:Name="btn_wealth" Click="btn_wealth_Click" />
+      <Button x:Name="btn_ground_units" Click="btn_ground_units_Click" />
+      <Button x:Name="btn_commanders" Click="btn_commanders_Click" />
+      <Button x:Name="btn_class_design" Click="btn_class_design_Click" />
+      <Button x:Name="btn_unit_details" Click="btn_unit_details_Click" />
+      <Button x:Name="btn_fleet_orders" Click="btn_fleet_orders_Click" />
+      <Button x:Name="btn_task_forces" Click="btn_task_forces_Click" />
+      <Button x:Name="btn_fighters" Click="btn_fighters_Click" />
+      <Button x:Name="btn_combat_assignments" Click="btn_combat_assignments_Click" />
+      <Button x:Name="btn_system_display" Click="btn_system_display_Click" />
+      <Button x:Name="btn_galactic_map" Click="btn_galactic_map_Click" />
+      <Button x:Name="btn_races" Click="btn_races_Click" />
+      <Button x:Name="btn_research_project" Click="btn_research_project_Click" />
+      <Button x:Name="btn_available_colonies" Click="btn_available_colonies_Click" />
+      <Button x:Name="btn_fuel_report" Click="btn_fuel_report_Click" />
+      <Button x:Name="btn_damaged_ships" Click="btn_damaged_ships_Click" />
+      <Button x:Name="btn_production_overview" Click="btn_production_overview_Click" />
+      <Button x:Name="btn_tech_report" Click="btn_tech_report_Click" />
+      <Button x:Name="btn_geo_survey_report" Click="btn_geo_survey_report_Click" />
+      <Button x:Name="btn_shipping_lines" Click="btn_shipping_lines_Click" />
+      <Button x:Name="btn_sector_assignment" Click="btn_sector_assignment_Click" />
+      <Button x:Name="btn_refresh" Click="btn_refresh_Click" />
+      <Button x:Name="btn_events" Click="btn_events_Click" />
+      <Button x:Name="btn_intelligence" Click="btn_intelligence_Click" />
+    </StackLayout>
+    -->
+  <TableLayout>
+    <TableRow ScaleHeight="False">
+      <TableCell>
+        <StackLayout Orientation="Horizontal" x:Name="adv_buttons" Padding="10,5,5,5" VerticalContentAlignment="Stretch">
+          <Label Text="Advance Time:" VerticalAlignment="Center" BackgroundColor="Red"/>
+          <Button x:Name="btn_time_5sec" Text="5 Seconds" />
+          <Button x:Name="btn_time_30sec" Text="30 Seconds" />
+          <Button x:Name="btn_time_2min" Text="2 Minutes" />
+          <Button x:Name="btn_time_5min" Text="5 Minutes" />
+          <Button x:Name="btn_time_20min" Text="20 Minutes" />
+          <Button x:Name="btn_time_1hr" Text="1 Hour" />
+          <Button x:Name="btn_time_3hrs" Text="3 Hours" />
+          <Button x:Name="btn_time_8hrs" Text="8 Hours" />
+          <Button x:Name="btn_time_1day" Text="1 Day" />
+          <Button x:Name="btn_time_5day" Text="5 Days" />
+          <Button x:Name="btn_time_30day" Text="30 Days" />
+          <Label Text="Sub-pulse length:" VerticalAlignment="Stretch" BackgroundColor="Bisque"/>
+          <DropDown x:Name="dd_subpulse" SelectedIndex="0" ToolTip="The length of each movement sub-pulse within each time increment. Automatic allows Pulsar4X to select a suitable sub-pulse length.">
+            <ListItem Text="Automatic" />
+            <ListItem Text="5 Seconds" />
+            <ListItem Text="30 Seconds" />
+            <ListItem Text="2 Minutes" />
+            <ListItem Text="5 Minutes" />
+            <ListItem Text="20 Minutes" />
+            <ListItem Text="1 Hour" />
+            <ListItem Text="2 Hours" />
+            <ListItem Text="6 Hours" />
+            <ListItem Text="1 Day" />
+          </DropDown>
+          <Label Text="Auto-Turns:" VerticalAlignment="Center" BackgroundColor="Goldenrod"/>
+          <CheckBox x:Name="auto_turns"/>
+        </StackLayout>
+      </TableCell>
+    </TableRow>
+    <TableRow ScaleHeight="True">
+      <TableCell ScaleWidth="True">
+        <TabControl x:Name="view_tabs"/>
+      </TableCell>
+    </TableRow>
+  </TableLayout>
+</Panel>
