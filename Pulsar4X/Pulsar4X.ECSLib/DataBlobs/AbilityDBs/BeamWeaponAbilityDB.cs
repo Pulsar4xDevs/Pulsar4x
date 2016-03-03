@@ -14,6 +14,11 @@ namespace Pulsar4X.ECSLib
         Railgun,
     }
 
+    public class BeamWeaponStateInfo
+    {
+        public float CurrentCharge { get; internal set; }
+    }
+
     public class BeamWeaponAbilityDB : BaseDataBlob
     {
         [JsonProperty]
@@ -22,17 +27,19 @@ namespace Pulsar4X.ECSLib
         public int DamageAtMaxRange { get; internal set; }
 
         [JsonProperty]
-        public int RateOfFire { get; internal set; }
-        [JsonProperty]
         public float AccuracyMultiplier { get; internal set; }
         
         [JsonProperty]
         public int PowerRequired { get; internal set; }
+
         /// <summary>
         /// Power recharged per second
         /// </summary>
         [JsonProperty]
         public int PowerRechargeRate { get; internal set; }
+
+        [JsonProperty]
+        public int ShotsPerVolley { get; internal set; }
 
         [JsonProperty]
         public BeamWeaponType WeaponType { get; internal set; }
@@ -42,7 +49,6 @@ namespace Pulsar4X.ECSLib
             return new BeamWeaponAbilityDB
             {
                 MaxRange = MaxRange,
-                RateOfFire = RateOfFire,
                 DamageAtMaxRange = DamageAtMaxRange,
                 AccuracyMultiplier = AccuracyMultiplier,
                 PowerRequired = PowerRequired,

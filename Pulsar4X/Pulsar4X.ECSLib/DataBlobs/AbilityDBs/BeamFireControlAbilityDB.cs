@@ -1,32 +1,31 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using Newtonsoft.Json;
+
+namespace Pulsar4X.ECSLib
 {
-    public enum PlatformRestriction
-    {
-        None = 0,
-        FighterOnly,
-        FACOnly,
-        FullsizeOnly,
-        PDCOnly,
-    }
-
-    public enum PointDefenseRestriction
-    {
-        None = 0,
-        FinalFireOnly,
-    }
-
     public class BeamFireControlAbilityDB : BaseDataBlob
     {
+        [JsonProperty]
         public int Range { get; internal set; }
+        [JsonProperty]
         public int TrackingSpeed { get; internal set; }
-
-        public int EWHardening { get; internal set; }
-        public PlatformRestriction PlatformRestriction { get; internal set; }
-        public PointDefenseRestriction PointDefenseRestriction { get; internal set; }
         
+        [JsonProperty]
+        public bool FinalFireOnly { get; internal set; }
+
+        public BeamFireControlAbilityDB() { }
+
+        public BeamFireControlAbilityDB(double range, double trackingSpeed, bool finalFireOnly) : this((int)range, (int)trackingSpeed, finalFireOnly) { }
+
+        public BeamFireControlAbilityDB(int range, int trackingSpeed, bool finalFireOnly)
+        {
+            Range = range;
+            TrackingSpeed = trackingSpeed;
+            FinalFireOnly = finalFireOnly;
+        }
+
         public override object Clone()
         {
-            return new BeamFireControlAbilityDB {Range = Range, TrackingSpeed = TrackingSpeed, EWHardening = EWHardening, PlatformRestriction = PlatformRestriction, OwningEntity = OwningEntity};
+            return new BeamFireControlAbilityDB(Range, TrackingSpeed, FinalFireOnly);
         }
     }
 }

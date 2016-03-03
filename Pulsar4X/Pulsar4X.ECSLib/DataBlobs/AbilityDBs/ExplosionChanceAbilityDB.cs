@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    class ExplosionChanceAbilityDB : BaseDataBlob
+    public class ExplosionChanceAbilityDB : BaseDataBlob
     {
         /// <summary>
         /// Chance this component will causs a secondary explosion when hit.

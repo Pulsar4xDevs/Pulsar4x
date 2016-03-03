@@ -9,66 +9,39 @@ namespace Pulsar4X.ECSLib
     public class FactionInfoDB : BaseDataBlob
     {
         [PublicAPI]
-        public List<Entity> Species
-        {
-            get { return _species; }
-            internal set { _species = value; }
-        }
         [JsonProperty]
-        private List<Entity> _species;
-
-        [PublicAPI]
-        public List<Guid> KnownSystems
-        {
-            get { return _knownSystems; }
-            internal set { _knownSystems = value; }
-        }
-        [JsonProperty]
-        private List<Guid> _knownSystems;
-
-        [PublicAPI]
-        public ReadOnlyDictionary<Guid, List<Entity>> KnownJumpPoints => new ReadOnlyDictionary<Guid, List<Entity>>(_knownJumpPoints);
-        internal Dictionary<Guid, List<Entity>> _knownJumpPoints = new Dictionary<Guid, List<Entity>>();
-
-        [PublicAPI]
-        public List<Entity> KnownFactions 
-        {
-            get {return _knownFactions;} 
-            internal set { _knownFactions = value; }
-        }
-        [JsonProperty]
-        private List<Entity> _knownFactions;
-
-
-        [PublicAPI]
-        public List<Entity> Colonies
-        {
-            get { return _colonies; }
-            internal set { _colonies = value; }
-        }
-        [JsonProperty]
-        private List<Entity> _colonies;
-
-        [PublicAPI]
-        public List<Entity> ShipClasses
-        {
-            get { return _shipClasses; }
-            internal set { _shipClasses = value; }
-        }
-        [JsonProperty]
-        private List<Entity> _shipClasses;
+        public List<Entity> Species { get; internal set; }
 
         [PublicAPI]
         [JsonProperty]
-        public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
+        public List<Guid> KnownSystems { get; internal set; }
+
+        [PublicAPI]
+        public ReadOnlyDictionary<Guid, List<Entity>> KnownJumpPoints => new ReadOnlyDictionary<Guid, List<Entity>>(InternalKnownJumpPoints);
+        [JsonProperty]
+        internal Dictionary<Guid, List<Entity>> InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>();
+
+        [PublicAPI]
+        [JsonProperty]
+        public List<Entity> KnownFactions { get; internal set; }
+
+
+        [PublicAPI]
+        [JsonProperty]
+        public List<Entity> Colonies { get; internal set; }
+
+        [PublicAPI]
+        [JsonProperty]
+        public List<Entity> ShipClasses { get; internal set; }
+
+        [PublicAPI]
+        [JsonProperty]
+        public ReadOnlyDictionary<Guid, Entity> ComponentDesigns => new ReadOnlyDictionary<Guid, Entity>(InternalComponentDesigns);
+        internal Dictionary<Guid, Entity> InternalComponentDesigns = new Dictionary<Guid, Entity>(); 
 
         public Entity Owner { get; set; }
 
-        public FactionInfoDB()
-            : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() )
-        {
-
-        }
+        public FactionInfoDB() : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() ) { }
 
         public FactionInfoDB(
             List<Entity> species,
@@ -81,7 +54,7 @@ namespace Pulsar4X.ECSLib
             Colonies = colonies;
             ShipClasses = shipClasses;
             KnownFactions = new List<Entity>();
-            ComponentDesigns = new Dictionary<Guid, Entity>();
+            InternalComponentDesigns = new Dictionary<Guid, Entity>();
         }
         
 

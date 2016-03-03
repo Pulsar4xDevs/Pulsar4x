@@ -5,85 +5,40 @@ namespace Pulsar4X.ECSLib
     public class SpeciesDB : BaseDataBlob
     {
         [PublicAPI]
-        public double BaseGravity
-        {
-            get { return _baseGravity; }
-            internal set { _baseGravity = value; }
-        }
         [JsonProperty]
-        private double _baseGravity;
+        public double BaseGravity { get; internal set; }
 
         [PublicAPI]
-        public double MinimumGravityConstraint
-        {
-            get { return _minimumGravityConstraint; }
-            internal set { _minimumGravityConstraint = value; }
-        }
         [JsonProperty]
-        private double _minimumGravityConstraint;
+        public double MinimumGravityConstraint { get; internal set; }
 
         [PublicAPI]
-        public double MaximumGravityConstraint
-        {
-            get { return _maximumGravityConstraint; }
-            internal set { _maximumGravityConstraint = value; }
-        }
         [JsonProperty]
-        private double _maximumGravityConstraint;
+        public double MaximumGravityConstraint { get; internal set; }
 
         [PublicAPI]
-        public double BasePressure
-        {
-            get { return _basePressure; }
-            internal set { _basePressure = value; }
-        }
         [JsonProperty]
-        private double _basePressure;
+        public double BasePressure { get; internal set; }
 
         [PublicAPI]
-        public double MinimumPressureConstraint
-        {
-            get { return _minimumPressureConstraint; }
-            internal set { _minimumPressureConstraint = value; }
-        }
         [JsonProperty]
-        private double _minimumPressureConstraint;
+        public double MinimumPressureConstraint { get; internal set; }
 
         [PublicAPI]
-        public double MaximumPressureConstraint
-        {
-            get { return _maximumPressureConstraint; }
-            internal set { _maximumPressureConstraint = value; }
-        }
         [JsonProperty]
-        private double _maximumPressureConstraint;
+        public double MaximumPressureConstraint { get; internal set; }
 
         [PublicAPI]
-        public double BaseTemperature
-        {
-            get { return _baseTemperature; }
-            internal set { _baseTemperature = value; }
-        }
         [JsonProperty]
-        private double _baseTemperature;
+        public double BaseTemperature { get; internal set; }
 
         [PublicAPI]
-        public double MinimumTemperatureConstraint
-        {
-            get { return _minimumTemperatureConstraint; }
-            internal set { _minimumTemperatureConstraint = value; }
-        }
         [JsonProperty]
-        private double _minimumTemperatureConstraint;
+        public double MinimumTemperatureConstraint { get; internal set; }
 
         [PublicAPI]
-        public double MaximumTemperatureConstraint
-        {
-            get { return _maximumTemperatureConstraint; }
-            internal set { _maximumTemperatureConstraint = value; }
-        }
         [JsonProperty]
-        private double _maximumTemperatureConstraint;
+        public double MaximumTemperatureConstraint { get; internal set; }
 
         public SpeciesDB(double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp)
         {
@@ -100,20 +55,13 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public SpeciesDB()
-        {
-        }
-
-        public SpeciesDB(SpeciesDB speciesDB)
-            : this(speciesDB.BaseGravity, speciesDB.MinimumGravityConstraint, speciesDB.MaximumGravityConstraint, 
-            speciesDB.BasePressure, speciesDB.MinimumPressureConstraint, speciesDB.MaximumPressureConstraint,
-            speciesDB.BaseTemperature, speciesDB.MinimumTemperatureConstraint, speciesDB.MaximumTemperatureConstraint)
-        {
-        }
+        public SpeciesDB() { }
 
         public override object Clone()
         {
-            return new SpeciesDB(this);
+            return new SpeciesDB(BaseGravity, MinimumGravityConstraint, MaximumGravityConstraint,
+                BasePressure, MinimumPressureConstraint, MaximumPressureConstraint,
+                BaseTemperature, MinimumTemperatureConstraint, MaximumTemperatureConstraint);
         }
     }
 }

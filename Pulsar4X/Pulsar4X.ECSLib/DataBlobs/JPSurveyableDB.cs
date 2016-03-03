@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Attached to entities that are surveyed for the discovery of JumpPoints.
     /// </summary>
-    class JPSurveyableDB : BaseDataBlob
+    public class JPSurveyableDB : BaseDataBlob
     {
         [JsonProperty]
         public int SurveyPointsRequired;
@@ -16,10 +16,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Default public constructor for Json
         /// </summary>
-        public JPSurveyableDB()
-        {
-
-        }
+        public JPSurveyableDB() { }
 
         /// <summary>
         /// Copy constructor

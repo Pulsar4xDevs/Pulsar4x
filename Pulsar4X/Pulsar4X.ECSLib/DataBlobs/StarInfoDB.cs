@@ -33,82 +33,52 @@ namespace Pulsar4X.ECSLib
     public class StarInfoDB : BaseDataBlob
     {
         [PublicAPI]
-        public double Age
-        {
-            get { return _age; }
-            internal set { _age = value; }
-        }
         [JsonProperty]
-        private double _age;
+        public double Age { get; internal set; }
 
         // Effective ("Photosphere") temperature in Degrees C.
         [PublicAPI]
-        public double Temperature
-        {
-            get { return _temperature; }
-            internal set { _temperature = value; }
-        }
         [JsonProperty]
-        private double _temperature;
+        public double Temperature { get; internal set; }
 
         [PublicAPI]
-        public double Luminosity
-        {
-            get { return _luminosity; }
-            internal set { _luminosity = value; }
-        }
         [JsonProperty]
-        private double _luminosity;
+        public double Luminosity { get; internal set; }
 
         [PublicAPI]
-        public string Class
-        {
-            get { return _class; }
-            internal set { _class = value; }
-        }
         [JsonProperty]
-        private string _class;
-
+        public string Class { get; internal set; }
 
 
         [PublicAPI]
-        public SpectralType SpectralType
-        {
-            get { return _spectralType; }
-            internal set { _spectralType = value; }
-        }
         [JsonProperty]
-        private SpectralType _spectralType;
+        public SpectralType SpectralType { get; internal set; }
 
         // number from  0 (hottest) to 9 (coolest)
         [PublicAPI]
-        public ushort SpectralSubDivision
-        {
-            get { return _spectralSubDivision; }
-            internal set { _spectralSubDivision = value; }
-        }
         [JsonProperty]
-        private ushort _spectralSubDivision;
+        public ushort SpectralSubDivision { get; internal set; }
 
         [PublicAPI]
-        public LuminosityClass LuminosityClass
-        {
-            get { return _luminosityClass; }
-            internal set { _luminosityClass = value; }
-        }
         [JsonProperty]
-        private LuminosityClass _luminosityClass;
+        public LuminosityClass LuminosityClass { get; internal set; }
 
         /// <summary>
         /// Calculates and sets the Habitable Zone of this star based on it Luminosity.
         /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
         /// </summary>
         [PublicAPI]
-        public double EcoSphereRadius { get { return (MinHabitableRadius + MaxHabitableRadius) / 2; } } // Average Habitable Radius, in AU.
+        public double EcoSphereRadius => (MinHabitableRadius + MaxHabitableRadius) / 2;
+
+        // Average Habitable Radius, in AU.
         [PublicAPI]
-        public double MinHabitableRadius { get { return Math.Sqrt(Luminosity / 1.1); } }  // in au
+        public double MinHabitableRadius => Math.Sqrt(Luminosity / 1.1);
+
+        // in au
         [PublicAPI]
-        public double MaxHabitableRadius { get { return Math.Sqrt(Luminosity / 0.53); } }  // in au
+        public double MaxHabitableRadius => Math.Sqrt(Luminosity / 0.53);
+
+        // in au
 
         public StarInfoDB()
         {

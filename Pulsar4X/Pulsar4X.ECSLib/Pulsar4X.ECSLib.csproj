@@ -132,12 +132,15 @@
     <Compile Include="DataBlobs\AbilityDBs\BeamFireControlAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\BeamWeaponAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\CloakAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\ElectronicDACAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ExplosionChanceAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\JumpDriveAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\JumpPointStabilizationAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\MissileStorageAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PassiveEMSensorAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PassiveThermalSensorAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PowerGeneratorAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\StandardShieldAbilityDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="Factories\ShipComponents\ComponentDesign.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
@@ -145,7 +148,7 @@
     <Compile Include="DataBlobs\AbilityDBs\FuelStorageAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\FuelConsumptionAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\MineResources.cs" />
-    <Compile Include="DataBlobs\AbilityDBs\MissileLauncherSize.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\MissileLauncherAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\RefineResourcesDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ResearchPointsDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\SensorSignatureDB.cs" />

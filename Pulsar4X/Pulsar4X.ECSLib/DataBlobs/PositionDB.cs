@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
             internal set { _position = value; }
         }
         [JsonProperty]
-        internal Vector4 _position;
+        private Vector4 _position;
 
         /// <summary>
         /// System X coordinate in AU
@@ -87,7 +87,8 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         /// <summary>
-        /// Initialized constructor.
+        /// Initialized 
+        /// .
         /// </summary>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>

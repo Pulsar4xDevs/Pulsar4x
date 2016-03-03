@@ -10,10 +10,9 @@ namespace Pulsar4X.ECSLib
     public class ComponentInstancesDB : BaseDataBlob
     {
         [JsonProperty]
-        Dictionary<Entity, List<ComponentInstance>> _specificInstances = new Dictionary<Entity, List<ComponentInstance>>();
         [PublicAPI]
-        Dictionary<Entity, List<ComponentInstance>> SpecificInstances { get; set; }
-        
+        public Dictionary<Entity, List<ComponentInstance>> SpecificInstances { get; internal set; } = new Dictionary<Entity, List<ComponentInstance>>();
+
         public ComponentInstancesDB() { }
 
         public ComponentInstancesDB(List<Entity> componentDesigns)
@@ -41,9 +40,6 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-
-
-
     public class ComponentInstance
     {
         public Entity DesignEntity { get; internal set; }
@@ -68,6 +64,5 @@ namespace Pulsar4X.ECSLib
             else
                 throw new Exception("designEntity Must contain a ComponentInfoDB");
         }
-
     }
 }

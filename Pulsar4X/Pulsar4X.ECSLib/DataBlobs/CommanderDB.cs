@@ -11,41 +11,22 @@ namespace Pulsar4X.ECSLib
 
     public class CommanderDB : BaseDataBlob
     {
-        public CommanderNameSD Name
-        {
-            get { return _name; }
-            internal set { _name = value; }
-        }
         [JsonProperty]
-        private CommanderNameSD _name;
+        public CommanderNameSD Name { get; internal set; }
 
-        public int Rank //maybe rank/title should be part of name
-        {
-            get { return _rank; }
-            internal set { _rank = value; }
-        } 
         [JsonProperty]
-        private int _rank;
+        public int Rank { get; internal set; }
 
-        public CommanderTypes Type
-        {
-            get { return _type; }
-            internal set { _type = value; }
-        }
         [JsonProperty]
-        private CommanderTypes _type;
+        public CommanderTypes Type { get; internal set; }
 
-        public CommanderDB()
-        {
-          
-        }
+        public CommanderDB() { }
 
         public CommanderDB(CommanderNameSD name, int rank, CommanderTypes type)
         {
             Name = name;
             Rank = rank;
             Type = type;
-            
         }
 
         public CommanderDB(CommanderDB commanderDB)
@@ -55,7 +36,6 @@ namespace Pulsar4X.ECSLib
 
             Rank = commanderDB.Rank;
             Type = commanderDB.Type;
-
         }
 
         public override object Clone()

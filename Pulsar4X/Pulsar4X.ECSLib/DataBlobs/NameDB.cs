@@ -15,9 +15,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public string DefaultName => _names[Entity.InvalidEntity];
 
-        public NameDB()
-        {
-        }
+        public NameDB() { }
 
         public NameDB(string defaultName)
         {

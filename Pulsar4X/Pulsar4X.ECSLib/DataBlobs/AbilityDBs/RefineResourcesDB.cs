@@ -7,13 +7,11 @@ namespace Pulsar4X.ECSLib
 {
     public class RefineResourcesDB : BaseDataBlob
     {
+        [JsonProperty]
+        public List<Guid> RefinableMatsList { get; internal set; }
 
         [JsonProperty]
-        private List<Guid> _refinableMatsList;
-        public List<Guid> RefinableMatsList { get { return _refinableMatsList; } internal set { _refinableMatsList = value; } }
-
-        [JsonProperty] private int _refinaryPoints;
-        public int RefinaryPoints { get { return _refinaryPoints; } internal set { _refinaryPoints = value; } }
+        public int RefinaryPoints { get; internal set; }
 
         public RefineResourcesDB()
         {
@@ -26,20 +24,20 @@ namespace Pulsar4X.ECSLib
         /// <param name="refinaryPoints"></param>
         public RefineResourcesDB(Dictionary<Guid, double> refinableMatsList, double refinaryPoints)
         {
-            _refinableMatsList = refinableMatsList.Keys.ToList();
-            _refinaryPoints = (int)refinaryPoints;
+            RefinableMatsList = refinableMatsList.Keys.ToList();
+            RefinaryPoints = (int)refinaryPoints;
         }
 
         public RefineResourcesDB(List<Guid> refinableMatsList, int refinaryPoints)
         {
-            _refinableMatsList = refinableMatsList;
-            _refinaryPoints = (int)refinaryPoints;
+            RefinableMatsList = refinableMatsList;
+            RefinaryPoints = refinaryPoints;
         }
 
         public RefineResourcesDB(RefineResourcesDB db)
         {
-            _refinableMatsList = new List<Guid>(db.RefinableMatsList);
-            _refinaryPoints = db.RefinaryPoints;
+            RefinableMatsList = new List<Guid>(db.RefinableMatsList);
+            RefinaryPoints = db.RefinaryPoints;
         }
 
         public override object Clone()

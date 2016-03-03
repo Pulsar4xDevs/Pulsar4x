@@ -55,6 +55,11 @@ namespace Pulsar4X.ECSLib
         // If we want this value to be saved in the savegame for this datablob, we need to mark it for JSON.
         [JsonProperty]
         private int _viewableInt;
+
+        // The above is actually equivilent to this, use this format for reabibility.
+        [PublicAPI]
+        [JsonProperty]
+        public int ViewableInt2 { get; internal set; }
         
         [PublicAPI]
         public void BadFunction()
@@ -75,6 +80,7 @@ namespace Pulsar4X.ECSLib
         public IntermediateExampleDB(IntermediateExampleDB clone)
         {
             _viewableInt = clone.ViewableInt;
+            ViewableInt2 = clone.ViewableInt2;
         }
 
         public override object Clone()
@@ -114,7 +120,7 @@ namespace Pulsar4X.ECSLib
         private void Deserialized(StreamingContext context)
         {
             // Star system resolver loads myStarSystem from mySystemGuid after the game is done loading.
-            Game game = (Game)context.Context;
+            var game = (Game)context.Context;
             game.PostLoad += (sender, args) => { if (!game.Systems.TryGetValue(MySystemGuid, out MyStarSystem)) throw new GuidNotFoundException(MySystemGuid); };
         }
 

@@ -9,46 +9,26 @@ namespace Pulsar4X.ECSLib
         /// Atmospheric Pressure
         /// In Earth Atmospheres (atm).
         /// </summary>
-        public float Pressure
-        {
-            get { return _pressure; }
-            internal set { _pressure = value; }
-        }
         [JsonProperty]
-        private float _pressure;
+        public float Pressure { get; internal set; }
 
         /// <summary>
         /// Weather or not the planet has abundent water.
         /// </summary>
-        public bool Hydrosphere
-        {
-            get { return _hydrosphere; }
-            internal set { _hydrosphere = value; }
-        }
         [JsonProperty]
-        private bool _hydrosphere;
+        public bool Hydrosphere { get; internal set; }
 
         /// <summary>
         /// The percentage of the bodies sureface covered by water.
         /// </summary>
-        public short HydrosphereExtent
-        {
-            get { return _hydrosphereExtent; }
-            internal set { _hydrosphereExtent = value; }
-        }
         [JsonProperty]
-        private short _hydrosphereExtent;
+        public short HydrosphereExtent { get; internal set; }
 
         /// <summary>
         /// A measure of the greenhouse factor provided by this Atmosphere.
         /// </summary>
-        public float GreenhouseFactor
-        {
-            get { return _greenhouseFactor; }
-            internal set { _greenhouseFactor = value; }
-        }
         [JsonProperty]
-        private float _greenhouseFactor;
+        public float GreenhouseFactor { get; internal set; }
 
         /// <summary>
         /// Pressure (in atm) of greenhouse gasses. but not really.
@@ -56,50 +36,30 @@ namespace Pulsar4X.ECSLib
         /// in the atmosphere and times it by the gasses GreenhouseEffect 
         /// which is a number between 1 and -1 normally.
         /// </summary>
-        public float GreenhousePressure
-        {
-            get { return _greenhousePressure; }
-            internal set { _greenhousePressure = value; }
-        }
         [JsonProperty]
-        private float _greenhousePressure;
+        public float GreenhousePressure { get; internal set; }
 
         /// <summary>
         /// How much light the body reflects. Affects temp.
         /// a number from 0 to 1.
         /// </summary>
-        public float Albedo
-        {
-            get { return _albedo; }
-            internal set { _albedo = value; }
-        }
         [JsonProperty]
-        private float _albedo;
+        public float Albedo { get; internal set; }
 
         /// <summary>
         /// Temperature of the planet AFTER greenhouse effects are taken into consideration. 
         /// This is a factor of the base temp and Green House effects.
         /// In Degrees C.
         /// </summary>
-        public float SurfaceTemperature
-        {
-            get { return _surfaceTemperature; }
-            internal set { _surfaceTemperature = value; }
-        }
         [JsonProperty]
-        private float _surfaceTemperature;
+        public float SurfaceTemperature { get; internal set; }
 
         //<summary>
         //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
         //In Earth Atmospheres (atm).
         //</summary>
-        public Dictionary<AtmosphericGasSD, float> Composition
-        {
-            get { return _composition; }
-            internal set { _composition = value; }
-        }
         [JsonProperty]
-        private Dictionary<AtmosphericGasSD, float> _composition;
+        public Dictionary<AtmosphericGasSD, float> Composition { get; internal set; }
 
         /// <summary>
         /// A sting describing the Atmosphere in Percentages, like this:

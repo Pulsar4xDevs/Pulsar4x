@@ -5,16 +5,12 @@ namespace Pulsar4X.ECSLib
     public class SensorSignatureDB : BaseDataBlob
     {
         [JsonProperty]
-        private int _thermalSig;
-        public int ThermalSig { get { return _thermalSig; } internal set { _thermalSig = value; } }
+        public int ThermalSig { get; internal set; }
 
         [JsonProperty]
-        private int _electroMagneticSig;
-        public int ElectroMagneticSig { get { return _electroMagneticSig; } internal set { _electroMagneticSig = value; } }
+        public int ElectroMagneticSig { get; internal set; }
 
-        public SensorSignatureDB()
-        {
-        }
+        public SensorSignatureDB() { }
 
         /// <summary>
         /// Constructor for Factory. note int cast.
@@ -23,14 +19,14 @@ namespace Pulsar4X.ECSLib
         /// <param name="electroMagneticSig"></param>
         public SensorSignatureDB(double thermalSig, double electroMagneticSig)
         {
-            _thermalSig = (int)thermalSig;
-            _electroMagneticSig = (int)electroMagneticSig;
+            ThermalSig = (int)thermalSig;
+            ElectroMagneticSig = (int)electroMagneticSig;
         }
 
         public SensorSignatureDB(SensorSignatureDB db)
         {
-            _thermalSig = db.ThermalSig;
-            _electroMagneticSig = db.ElectroMagneticSig;
+            ThermalSig = db.ThermalSig;
+            ElectroMagneticSig = db.ElectroMagneticSig;
         }
 
         public override object Clone()

@@ -103,26 +103,22 @@ namespace Pulsar4X.ECSLib
             return !entity.IsValid ? null : entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
         }
 
-        #region Unit Test
-
-        private class ConcreteTreeHierarchyDB : TreeHierarchyDB
-        {
-            public ConcreteTreeHierarchyDB(Entity parent) : base(parent)
-            {
-            }
-
-            private ConcreteTreeHierarchyDB() : base(null) { }
-
-            public override object Clone()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
         [TestFixture]
         [Description("TreeHierarchyDB Tests")]
-        private class TreeHierarchyTestFixture
+        internal class TreeHierarchyTests
         {
+            private class ConcreteTreeHierarchyDB : TreeHierarchyDB
+            {
+                public ConcreteTreeHierarchyDB(Entity parent) : base(parent)
+                {
+                }
+
+                public override object Clone()
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
             private readonly EntityManager _manager = new EntityManager(null);
 
             /// <summary>
@@ -146,7 +142,7 @@ namespace Pulsar4X.ECSLib
                 Entity parent1Child2 = CreateNode(parent1Node);
 
                 // Store a list of children for later comparison.
-                var parent1ChildEntities = new List<Entity> {parent1Child1, parent1Child2};
+                var parent1ChildEntities = new List<Entity> { parent1Child1, parent1Child2 };
 
                 // Create a second set of children.
                 Entity parent2Node = CreateNode(rootNode);
@@ -154,7 +150,7 @@ namespace Pulsar4X.ECSLib
                 Entity parent2Child2 = CreateNode(parent2Node);
 
                 // Store the second set of children.
-                var parent2ChildEntities = new List<Entity> {parent2Child1, parent2Child2};
+                var parent2ChildEntities = new List<Entity> { parent2Child1, parent2Child2 };
 
                 // Get the dataBlobs of each child.
                 ConcreteTreeHierarchyDB parent1DB = parent1Node.GetDataBlob<ConcreteTreeHierarchyDB>();
@@ -174,8 +170,8 @@ namespace Pulsar4X.ECSLib
                 Assert.AreSame(parent2DB, parent2Child1DB.ParentDB);
 
                 // Store a list of dataBlobs for later comparison.
-                var parent1Children = new List<ConcreteTreeHierarchyDB> {parent1Child1DB, parent1Child2DB};
-                var parent2Children = new List<ConcreteTreeHierarchyDB> {parent2Child1DB, parent2Child2DB};
+                var parent1Children = new List<ConcreteTreeHierarchyDB> { parent1Child1DB, parent1Child2DB };
+                var parent2Children = new List<ConcreteTreeHierarchyDB> { parent2Child1DB, parent2Child2DB };
 
                 parent1ChildEntities.Sort((entity1, entity2) => entity1.Guid.CompareTo(entity2.Guid));
                 parent2ChildEntities.Sort((entity1, entity2) => entity1.Guid.CompareTo(entity2.Guid));
@@ -192,7 +188,7 @@ namespace Pulsar4X.ECSLib
                 // Change P2C1's parent to P1.
                 parent2Child1DB.SetParent(parent1DB.OwningEntity);
                 // Make sure P2C1 is owned by P1;
-                Debug.Assert(parent2Child1DB.ParentDB != null, "parent2Child1DB.ParentDB != null");
+                Assert.IsNotNull(parent2Child1DB.ParentDB);
                 Assert.AreEqual(parent1DB.OwningEntity, parent2Child1DB.ParentDB.OwningEntity);
 
                 // Make sure P1's children list updated.
@@ -228,7 +224,5 @@ namespace Pulsar4X.ECSLib
                 return nodeEntity;
             }
         }
-        #endregion
-
     }
 }

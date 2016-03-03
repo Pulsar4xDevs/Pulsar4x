@@ -2,7 +2,6 @@
 
 namespace Pulsar4X.ECSLib
 {
-
     public class  ConstructInstationsAbilityDB : BaseDataBlob
     {
         [JsonProperty] private int _constructionPoints;
