@@ -63,5 +63,19 @@ namespace Pulsar4X.Tests
             // No constructors exist for this datablob that JSON can use to instantiate this datablob type during deserialization.
             Assert.Fail(dataBlobType.ToString() + " does not have a Json constructor");
         }
+
+        [Test]
+        [TestCaseSource(nameof(DataBlobTypes))]
+        public void AccessibilityTest(Type dataBlobType)
+        {
+            if (dataBlobType.IsAbstract)
+            {
+                return;
+            }
+            if (!dataBlobType.IsPublic)
+            {
+                Assert.IsNotNull(dataBlobType.GetCustomAttribute<TestUseOnlyAttribute>(true), "DataBlob is not public");
+            }
+        }
     }
 }

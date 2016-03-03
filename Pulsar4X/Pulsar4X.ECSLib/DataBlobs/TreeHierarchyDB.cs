@@ -107,6 +107,7 @@ namespace Pulsar4X.ECSLib
         [Description("TreeHierarchyDB Tests")]
         internal class TreeHierarchyTests
         {
+            [TestUseOnly]
             private class ConcreteTreeHierarchyDB : TreeHierarchyDB
             {
                 public ConcreteTreeHierarchyDB(Entity parent) : base(parent)
