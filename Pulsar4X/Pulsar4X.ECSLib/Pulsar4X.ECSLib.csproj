@@ -146,7 +146,6 @@
     <Compile Include="DataBlobs\ColonyMineingDB.cs" />
     <Compile Include="DataBlobs\ColonyRefiningDB.cs" />
     <Compile Include="DataBlobs\ColonyResearchDB.cs" />
-    <Compile Include="DataBlobs\ComponentDB.cs" />
     <Compile Include="DataBlobs\ExampleDB.cs" />
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
@@ -158,6 +157,7 @@
     <Compile Include="EventLog\EventLog.cs" />
     <Compile Include="EventLog\EventType.cs" />
     <Compile Include="Factories\ShipComponents\ComponentDesignAbility.cs" />
+    <Compile Include="DataBlobs\ComponentInstancesDB.cs" />
     <Compile Include="Factories\SystemGen\JPFactory.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
     <Compile Include="Entity\EntityAccessControl.cs" />
