@@ -14,20 +14,20 @@ namespace Pulsar4X.ECSLib
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
 
             ComponentTemplateSD mineSD = game.StaticData.Components[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
-            ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity mineEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, mineDesign);
 
 
             ComponentTemplateSD refinarySD = game.StaticData.Components[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
-            ComponentDesignDB refinaryDesign = GenericComponentFactory.StaticToDesign(refinarySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            ComponentDesign refinaryDesign = GenericComponentFactory.StaticToDesign(refinarySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity refinaryEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, refinaryDesign);
 
             ComponentTemplateSD labSD = game.StaticData.Components[new Guid("c203b7cf-8b41-4664-8291-d20dfe1119ec")];
-            ComponentDesignDB labDesign = GenericComponentFactory.StaticToDesign(labSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            ComponentDesign labDesign = GenericComponentFactory.StaticToDesign(labSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity labEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, labDesign);
 
             ComponentTemplateSD facSD = game.StaticData.Components[new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}")];
-            ComponentDesignDB facDesign = GenericComponentFactory.StaticToDesign(facSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            ComponentDesign facDesign = GenericComponentFactory.StaticToDesign(facSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity facEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, facDesign);
 
             Entity scientistEntity = CommanderFactory.CreateScientist(game.GlobalManager, factionEntity);

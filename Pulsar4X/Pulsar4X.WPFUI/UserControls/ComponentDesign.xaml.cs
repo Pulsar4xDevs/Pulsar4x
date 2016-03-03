@@ -67,7 +67,7 @@ namespace Pulsar4X.WPFUI
 
         private void ButtonCreate_Click(object sender, RoutedEventArgs e)
         {
-            _designVM.DesignDB.Name = NameTextbox.Text;
+            _designVM.Design.Name = NameTextbox.Text;
             _designVM.CreateComponent();
         }
 

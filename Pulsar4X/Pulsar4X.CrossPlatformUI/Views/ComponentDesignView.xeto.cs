@@ -34,7 +34,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         void Create_Click(object sender, EventArgs e)
         {
-            _designVM.DesignDB.Name = Name.Text;
+            _designVM.Design.Name = Name.Text;
             _designVM.CreateComponent();
         }
 
@@ -58,7 +58,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         AbilitysLayout.Items.Add(mms);
                         break;
                 }
-                Name.Text = _designVM.DesignDB.Name;
+                Name.Text = _designVM.Design.Name;
                 componentAbilityVM.ValueChanged += OnValueChanged;
                 OnValueChanged(GuiHint.None, 0);
             }

@@ -14,7 +14,7 @@ namespace Pulsar4X.ViewModel
     {
         //public Dictionary<string, Guid> ComponentTypes { get; set; }
         public DictionaryVM<string, Guid, string> ComponentTypes { get; set; } 
-        public ComponentDesignDB DesignDB { get; private set; }
+        public ComponentDesign Design { get; private set; }
         
         private readonly StaticDataStore _staticData;
         private readonly Entity _factionEntity;
@@ -55,10 +55,10 @@ namespace Pulsar4X.ViewModel
         {
             ComponentTemplateSD componentSD = _staticData.Components[componentGuid];
 
-            DesignDB = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
+            Design = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
 
             AbilityList = new List<ComponentAbilityDesignVM>();
-            foreach (var componentAbility in DesignDB.ComponentDesignAbilities)
+            foreach (var componentAbility in Design.ComponentDesignAbilities)
             {
                 AbilityList.Add(new ComponentAbilityDesignVM(this, componentAbility, _staticData));
             }            
@@ -66,7 +66,7 @@ namespace Pulsar4X.ViewModel
 
         public void CreateComponent()
         {
-            GenericComponentFactory.DesignToEntity(_gameVM.Game, _factionEntity, DesignDB);             
+            GenericComponentFactory.DesignToEntity(_gameVM.Game, _factionEntity, Design);             
         }
 
         public string StatsText
@@ -74,19 +74,19 @@ namespace Pulsar4X.ViewModel
             get
             {
                 string text = "";
-                if (DesignDB != null)
+                if (Design != null)
                 {
-                    text = DesignDB.Name + Environment.NewLine;
-                    text += "Size: " + DesignDB.SizeValue + Environment.NewLine;
-                    text += "HTK: " + DesignDB.HTKValue + Environment.NewLine;
-                    text += "Crew: " + DesignDB.CrewReqValue + Environment.NewLine;
-                    text += "ResearchCost: " + DesignDB.ResearchCostValue + Environment.NewLine;
-                    foreach (var kvp in DesignDB.MineralCostValues)
+                    text = Design.Name + Environment.NewLine;
+                    text += "Size: " + Design.SizeValue + Environment.NewLine;
+                    text += "HTK: " + Design.HTKValue + Environment.NewLine;
+                    text += "Crew: " + Design.CrewReqValue + Environment.NewLine;
+                    text += "ResearchCost: " + Design.ResearchCostValue + Environment.NewLine;
+                    foreach (var kvp in Design.MineralCostValues)
                     {
                         string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
                         text += mineralName + ": " + kvp.Value + Environment.NewLine;
                     }
-                    text += "Credit Cost: " + DesignDB.CreditCostValue + Environment.NewLine;
+                    text += "Credit Cost: " + Design.CreditCostValue + Environment.NewLine;
                 }
                 return text;
             }
@@ -128,7 +128,7 @@ namespace Pulsar4X.ViewModel
 
     public class ComponentAbilityDesignVM : IViewModel
     {
-        private ComponentDesignAbilityDB _designAbility;
+        private ComponentDesignAbility _designAbility;
         private StaticDataStore _staticData;
         private ComponentDesignVM _parentDesignVM;
         
@@ -151,7 +151,7 @@ namespace Pulsar4X.ViewModel
         
 
 
-        public ComponentAbilityDesignVM(ComponentDesignVM designVM, ComponentDesignAbilityDB designAbility, StaticDataStore staticData)
+        public ComponentAbilityDesignVM(ComponentDesignVM designVM, ComponentDesignAbility designAbility, StaticDataStore staticData)
         {
             _designAbility = designAbility;
             _staticData = staticData;

@@ -46,13 +46,13 @@ namespace Pulsar4X.Tests
         public void TestShipCreation()
         {
 
-            ComponentDesignDB engineDesignDB;
+            ComponentDesign engineDesign;
 
             _engineSD = _game.StaticData.Components[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
-            engineDesignDB = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            engineDesignDB.ComponentDesignAbilities[0].SetValueFromInput(5); //size
+            engineDesign = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size
             //engineDesignDB.ComponentDesignAbilities[1]
-            _engineComponent = GenericComponentFactory.DesignToEntity(_game, _faction, engineDesignDB);
+            _engineComponent = GenericComponentFactory.DesignToEntity(_game, _faction, engineDesign);
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
             ShipFactory.AddShipComponent(_shipClass, _engineComponent);

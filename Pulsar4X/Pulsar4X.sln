@@ -23,9 +23,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.WPFUI", "Pulsar4X.WPFUI\Pulsar4X.WPFUI.csproj", "{76508ABF-600E-4B86-9764-DB82D4E429B0}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug (No Tests|Any CPU = Debug (No Tests|Any CPU
 		Debug (No Tests|Mixed Platforms = Debug (No Tests|Mixed Platforms

@@ -59,7 +59,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD engine = EngineComponentSD();
 
-            ComponentDesignDB design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            ComponentDesign design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
 
             foreach (var ability in design.ComponentDesignAbilities)
             {
@@ -94,7 +94,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD mine = MineInstallation();
 
-            ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             mineDesign.ComponentDesignAbilities[0].SetValue();
             Entity mineEntity = GenericComponentFactory.DesignToEntity(_game, _faction, mineDesign);
 

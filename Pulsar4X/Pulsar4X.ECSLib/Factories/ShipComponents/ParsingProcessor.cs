@@ -11,8 +11,8 @@ namespace Pulsar4X.ECSLib
     {
         private StaticDataStore _staticDataStore;
         private FactionTechDB _factionTechDB;
-        private ComponentDesignDB _design;
-        private ComponentDesignAbilityDB _designAbility;
+        private ComponentDesign _design;
+        private ComponentDesignAbility _designAbility;
         private Expression _expression;
         
         // ReSharper disable once NotAccessedField.Local (Used for debuging puroposes. though maybe it could be public and shown in the UI?)
@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="design"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        internal ChainedExpression(string expressionString, ComponentDesignDB design, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        internal ChainedExpression(string expressionString, ComponentDesign design, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="designAbility"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        internal ChainedExpression(string expressionString, ComponentDesignAbilityDB designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        internal ChainedExpression(string expressionString, ComponentDesignAbility designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
@@ -130,7 +130,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="design"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        private ChainedExpression(Expression expression, ComponentDesignDB design, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        private ChainedExpression(Expression expression, ComponentDesign design, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
@@ -147,7 +147,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="designAbility"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        private ChainedExpression(Expression expression, ComponentDesignAbilityDB designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        private ChainedExpression(Expression expression, ComponentDesignAbility designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
