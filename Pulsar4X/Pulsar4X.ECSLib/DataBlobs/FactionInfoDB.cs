@@ -27,6 +27,10 @@ namespace Pulsar4X.ECSLib
         private List<Guid> _knownSystems;
 
         [PublicAPI]
+        public ReadOnlyDictionary<Guid, List<Entity>> KnownJumpPoints => new ReadOnlyDictionary<Guid, List<Entity>>(_knownJumpPoints);
+        internal Dictionary<Guid, List<Entity>> _knownJumpPoints = new Dictionary<Guid, List<Entity>>();
+
+        [PublicAPI]
         public List<Entity> KnownFactions 
         {
             get {return _knownFactions;} 
@@ -57,6 +61,8 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public Dictionary<Guid, Entity> ComponentDesigns { get; internal set; }
+
+        public Entity Owner { get; set; }
 
         public FactionInfoDB()
             : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() )

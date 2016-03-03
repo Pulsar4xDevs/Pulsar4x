@@ -12,7 +12,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         protected StackLayout MineralCostFormulaStackLayout { get; set; }
 
         protected StackLayout MountTypes { get; set; }
-        private ComponentTemplateMainPropertiesVM _viewModel;
+        //private ComponentTemplateMainPropertiesVM _viewModel;
         
         protected TextBox NameTBx { get; set; }
         protected TextBox DescriptionTBx { get; set; }
@@ -38,7 +38,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             BuildPointTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.BPCostControl;
             CreditCostTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.CreditCostControl;
 
-
             DataContextChanged += ComponentTemplateMainPropertiesView_DataContextChanged;
         }
 
@@ -49,23 +48,25 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 ComponentTemplateMainPropertiesVM dc = (ComponentTemplateMainPropertiesVM)DataContext;
                 SetViewModel(dc);
             }
-            
         }
 
-        private void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 
+        public void SetViewModel(ComponentTemplateMainPropertiesVM viewModel) 
         {
-            _viewModel = viewModel;
-
+            //_viewModel = viewModel;
+            //DataContext = viewModel;
             //FormulaEditorView.SetViewModel(_viewModel.FormulaEditor);
-
-
+            MineralCostFormulaStackLayout.SuspendLayout();
+            MineralCostFormulaStackLayout.Items.Clear();
             foreach (var item in viewModel.MineralCostFormula)
             {
                 MineralCostFormulaStackLayout.Items.Add(new MineralFormulaView(item));
             }
             viewModel.MineralCostFormula.CollectionChanged += MineralCostFormula_CollectionChanged;
+            MineralCostFormulaStackLayout.ResumeLayout();
 
-            foreach (var item in _viewModel.MountType)
+            MountTypes.SuspendLayout();
+            MountTypes.Items.Clear();
+            foreach (var item in viewModel.MountType)
             {
 
                 ECSLib.ComponentMountType key = item.Key;
@@ -73,22 +74,13 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
                 chkbx.Text = key.ToString();
                 //chkbx.CheckedBinding.BindDataContext((DictionaryVM<ECSLib.ComponentMountType, bool?, bool?> x) => x[kvp.Key], (m, val) => m[kvp.Key] = val);
                 chkbx.CheckedBinding.BindDataContext((ObservableDictionary<ECSLib.ComponentMountType, bool?> x) => x[key], (m, val) => m[key] = val);
-                chkbx.DataContext = _viewModel.MountType;
+                chkbx.DataContext = viewModel.MountType;
                 MountTypes.Items.Add(chkbx);
             }
-            _viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
+            MountTypes.ResumeLayout();
+            viewModel.MountType.PropertyChanged += MountType_PropertyChanged;
 
-        }
-
-        //private void Export_Click(object sender, System.EventArgs e)
-        //{
-        //    _viewModel.SaveToFile();
-        //}
-
-        //private void Save_Click(object sender, System.EventArgs e)
-        //{
-        //    _viewModel.CreateSD();
-        //}
+        }        
 
         private void MountType_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -98,17 +90,14 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             }
         }
 
-
-
         private void MineralCostFormula_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            ComponentTemplateMainPropertiesVM viewModel = (ComponentTemplateMainPropertiesVM)DataContext;
             MineralCostFormulaStackLayout.Items.Clear();
-            foreach (var item in _viewModel.MineralCostFormula)
+            foreach (var item in viewModel.MineralCostFormula)
             {
                 MineralCostFormulaStackLayout.Items.Add(new MineralFormulaView(item));
             }
-        }
-
-        
+        }        
     }
 }

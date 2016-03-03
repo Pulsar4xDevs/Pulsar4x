@@ -9,13 +9,43 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ViewModel
 {
-    public class MineralFormulaVM : IViewModel
+    public class MineralFormulaVM : ComponentTemplateDesignerBaseVM
     {
         private StaticDataStore _dataStore;
-        public string Formula { get; set; }
+        private string _mineralFormula;
+        public string MineralFormula {
+            get { return _mineralFormula; }
+            set { _mineralFormula = value; OnPropertyChanged(); } }
         public DictionaryVM<Guid, string, string> Minerals { get; set; }
 
-        public MineralFormulaVM(StaticDataStore staticDataStore)
+        public override string FocusedText
+        {
+            get
+            {
+                switch (SubControlInFocus)
+                {
+                    case FocusedControl.AbilityFormulaControl:
+                        return MineralFormula;
+                    default:
+                        return "";
+                }
+            }
+
+            set
+            {
+                switch (SubControlInFocus)
+                {
+
+                    case FocusedControl.AbilityFormulaControl:
+                        MineralFormula = value;
+                        break;
+                }
+                ParentVM.ControlInFocus = this;
+            }
+        }
+        
+
+        public MineralFormulaVM(ComponentTemplateParentVM parent, StaticDataStore staticDataStore): base(parent)
         {
             _dataStore = staticDataStore;
             Minerals = new DictionaryVM<Guid, string, string>(DisplayMode.Value);
@@ -26,9 +56,9 @@ namespace Pulsar4X.ViewModel
                         
         }
 
-        public MineralFormulaVM(StaticDataStore staticDataStore, KeyValuePair<Guid, string> guidFormulaKVP) : this(staticDataStore)
+        public MineralFormulaVM(ComponentTemplateParentVM parent, StaticDataStore staticDataStore, KeyValuePair<Guid, string> guidFormulaKVP) : this(parent, staticDataStore)
         {
-            this.Formula = guidFormulaKVP.Value;
+            MineralFormula = guidFormulaKVP.Value;
             Minerals.SelectedIndex = Minerals.GetIndex(new KeyValuePair<Guid, string>(guidFormulaKVP.Key, Minerals[guidFormulaKVP.Key]));
         }
 
@@ -36,24 +66,6 @@ namespace Pulsar4X.ViewModel
         {
             OnPropertyChanged();
         }
-        //public void SetSelectedMineral(int index)
-        //{            
-        //    //selectedMineralKVP = Minerals.GetKeyValuePair(index);
-        //    //OnPropertyChanged("selectedMineralKVP");
-        //}
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-        public void Refresh(bool partialRefresh = false)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

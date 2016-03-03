@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -14,6 +15,8 @@ namespace Pulsar4X.ECSLib
         internal readonly Random SeedRNG;
 
         public SystemGenSettingsSD Settings;
+
+        public Dictionary<int, Guid> SystemIndexes; 
 
         internal readonly StarSystemFactory StarSystemFactory;
 

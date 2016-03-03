@@ -63,5 +63,16 @@
 
     public class GameSettings
     {
+        [PublicAPI]
+        public string GameName { get; set; }
+
+        [PublicAPI]
+        public int MaxSystems { get; set; }
+
+        [PublicAPI]
+        public VersionInfo Version => VersionInfo.PulsarVersionInfo;
+
+        [PublicAPI]
+        public bool EnableMultiThreading { get; set; } = true;
     }
 }

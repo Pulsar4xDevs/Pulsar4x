@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
+using System.Reflection;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
@@ -34,21 +36,17 @@ namespace Pulsar4X.ViewModel
         {
             get { return _selectedGuiHint; }
             set { _selectedGuiHint = value; OnPropertyChanged(); }
-        } 
+        }
 
-        private DictionaryVM<Type, string, string> _abilityDataBlobTypeSelection = new DictionaryVM<Type, string, string>();
-        public DictionaryVM<Type,string, string> AbilityDataBlobTypeSelection
+        private List<string> _abilityDataBlobTypeSelection = new List<string>();
+        public List<string> AbilityDataBlobTypeSelection
         {
             get { return _abilityDataBlobTypeSelection; }
-            set { _abilityDataBlobTypeSelection = value; OnPropertyChanged(); }
         }
 
         private string _abilityDataBlobType;
-        public string AbilityDataBlobType
-        {
-            get { return _abilityDataBlobType; }
-            set { _abilityDataBlobType = value; OnPropertyChanged(); }
-        }
+        public string AbilityDataBlobType { get { return _abilityDataBlobType; } set { _abilityDataBlobType = value; OnPropertyChanged(); } }
+
         private string _abilityFormula;
         public string AbilityFormula
         {
@@ -63,7 +61,7 @@ namespace Pulsar4X.ViewModel
         }
         private string _maxFormula;
 
-        public override event PropertyChangedEventHandler PropertyChanged;
+
 
         public string MaxFormula
         {
@@ -119,6 +117,17 @@ namespace Pulsar4X.ViewModel
 
         public TechListVM GuidDict { get; set; }
 
+
+        
+        public ICommand AddToEditCommand { get { return new RelayCommand<object>(obj => AddMe()); } }
+        public ICommand DeleteCommand { get { return new RelayCommand<object>(obj => DeleteMe()); } }
+
+        /// <summary>
+        /// Constructor for empty
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="parentList"></param>
+        /// <param name="staticData"></param>
         public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : base(parent)
         {
 
@@ -131,15 +140,25 @@ namespace Pulsar4X.ViewModel
                 SelectedGuiHint.Add((GuiHint)item, Enum.GetName(typeof(GuiHint), item));
             }
             SelectedGuiHint.SelectedIndex = 0;
-            AbilityDataBlobTypeSelection = GetTypeDict(AbilityTypes());
+            _abilityDataBlobTypeSelection = AbilityTypes();
         }
 
-        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
+        /// <summary>
+        /// Constructor for filled
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="abilitySD"></param>
+        /// <param name="parentList"></param>
+        /// <param name="staticData"></param>
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentTemplateAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
             Name = abilitySD.Name;
             Description = abilitySD.Description;
             SelectedGuiHint.SelectedIndex = (int)abilitySD.GuiHint;
-            AbilityDataBlobType = abilitySD.AbilityDataBlobType;
+            if (abilitySD.AbilityDataBlobType != null)
+            {
+                AbilityDataBlobType = abilitySD.AbilityDataBlobType;
+            }
             AbilityFormula = abilitySD.AbilityFormula;
             MinFormula = abilitySD.MinFormula;
             MaxFormula = abilitySD.MaxFormula;
@@ -155,41 +174,48 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        private static List<Type> AbilityTypes()
+
+        private void DeleteMe()
         {
-            List<Type> typelist = new List<Type>();
-            typelist.Add(typeof(ConstructInstationsAbilityDB));
-            typelist.Add(typeof(ConstructShipComponentsAbilityDB));
-            typelist.Add(typeof(ConstructAmmoAbilityDB));
-            typelist.Add(typeof(ConstructFightersAbilityDB));
-            typelist.Add(typeof(EnginePowerDB));
-            typelist.Add(typeof(FuelStorageDB));
-            typelist.Add(typeof(FuelUseDB));
-            typelist.Add(typeof(MineResourcesDB));
-            typelist.Add(typeof(MissileLauncherSizeDB));
-            typelist.Add(typeof(RefineResourcesDB));
-            typelist.Add(typeof(ResearchPointsAbilityDB));
-            typelist.Add(typeof(SensorSignatureDB));
-            typelist.Add(typeof(ActiveSensorDB));
+            ParentList.RemoveAt(Index);
+        }
+        private void AddMe()
+        {
+            ParentVM.FormulaEditor.AddParam("Ability(" + Index + ")");
+            ParentVM.FormulaEditor.RefreshFormula();
+        }
+        private static List<string> AbilityTypes()
+        {
+            List<string> typelist = new List<string>();
+            typelist.Add(typeof(ConstructInstationsAbilityDB).ToString());
+            typelist.Add(typeof(ConstructShipComponentsAbilityDB).ToString());
+            typelist.Add(typeof(ConstructAmmoAbilityDB).ToString());
+            typelist.Add(typeof(ConstructFightersAbilityDB).ToString());
+            typelist.Add(typeof(EnginePowerDB).ToString());
+            typelist.Add(typeof(FuelStorageAbilityDB).ToString());
+            typelist.Add(typeof(FuelConsumptionAbilityDB).ToString());
+            typelist.Add(typeof(MineResourcesDB).ToString());
+            typelist.Add(typeof(MissileLauncherSizeDB).ToString());
+            typelist.Add(typeof(RefineResourcesDB).ToString());
+            typelist.Add(typeof(ResearchPointsAbilityDB).ToString());
+            typelist.Add(typeof(SensorSignatureDB).ToString());
+            typelist.Add(typeof(ActiveSensorDB).ToString());
+            typelist.Add(typeof(BeamFireControlAbilityDB).ToString());
+            typelist.Add(typeof(BeamWeaponAbilityDB).ToString());
+            typelist.Add(typeof(CloakAbilityDB).ToString());
+            typelist.Add(typeof(JumpDriveAbilityDB).ToString());
+            typelist.Add(typeof(MissileStorageAbilityDB).ToString());
+            typelist.Add(typeof(PassiveEMSensorAbilityDB).ToString());
+            typelist.Add(typeof(PassiveThermalSensorAbilityDB).ToString());
 
             return typelist;
         }
 
-        private static DictionaryVM<Type, string, string> GetTypeDict(List<Type> abilityTypes)
+
+
+        public ComponentTemplateAbilitySD CreateSD()
         {
-            DictionaryVM<Type, string, string> dict = new DictionaryVM<Type, string, string>(DisplayMode.Value);
-            foreach (var type in abilityTypes)
-            {
-                dict.Add(type, type.Name);
-            }
-
-            return dict;
-
-        }
-
-        public ComponentAbilitySD CreateSD()
-        {
-            ComponentAbilitySD sd = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD sd = new ComponentTemplateAbilitySD();
             sd.Name = Name;
             sd.Description = Description;
             sd.AbilityDataBlobType = AbilityDataBlobType;
@@ -197,18 +223,16 @@ namespace Pulsar4X.ViewModel
             sd.AbilityFormula = AbilityFormula;
             sd.MinFormula = MinFormula;
             sd.MaxFormula = MaxFormula;
-            Dictionary<Guid, string> guidict = new Dictionary<Guid, string>();
-            foreach (var item in GuidDict.SelectedItems)
+            if (GuidDict != null)
             {
-                guidict.Add(item.Key, item.Value);
+                Dictionary<Guid, string> guidict = new Dictionary<Guid, string>();
+                foreach (var item in GuidDict.SelectedItems)
+                {
+                    guidict.Add(item.Key, item.Value);
+                }
+                sd.GuidDictionary = guidict;
             }
-            sd.GuidDictionary = guidict;
             return sd;                
-        }
-
-        internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

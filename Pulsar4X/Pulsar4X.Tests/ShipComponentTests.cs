@@ -40,12 +40,12 @@ namespace Pulsar4X.Tests
         [Test]
         public void ExportComponents()
         {
-            ComponentSD engine = EngineComponentSD();
-            ComponentSD mine = MineInstallation();
-            ComponentSD lab = ResearchLab();
-            ComponentSD refinary = Refinary();
-            ComponentSD factory = Factory();
-            Dictionary<Guid, ComponentSD> componentsDict = new Dictionary<Guid, ComponentSD>();
+            ComponentTemplateSD engine = EngineComponentSD();
+            ComponentTemplateSD mine = MineInstallation();
+            ComponentTemplateSD lab = ResearchLab();
+            ComponentTemplateSD refinary = Refinary();
+            ComponentTemplateSD factory = Factory();
+            Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(engine.ID, engine);
             componentsDict.Add(mine.ID, mine);
             componentsDict.Add(lab.ID,lab);
@@ -57,9 +57,9 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestEngineComponentFactory()
         {
-            ComponentSD engine = EngineComponentSD();
+            ComponentTemplateSD engine = EngineComponentSD();
 
-            ComponentDesignDB design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            ComponentDesign design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
 
             foreach (var ability in design.ComponentDesignAbilities)
             {
@@ -83,7 +83,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
 
-            Dictionary<Guid, ComponentSD> componentsDict = new Dictionary<Guid, ComponentSD>();
+            Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(engine.ID, engine);
             StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
 
@@ -92,24 +92,24 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMineInstalationFactory()
         {
-            ComponentSD mine = MineInstallation();
+            ComponentTemplateSD mine = MineInstallation();
 
-            ComponentDesignDB mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             mineDesign.ComponentDesignAbilities[0].SetValue();
             Entity mineEntity = GenericComponentFactory.DesignToEntity(_game, _faction, mineDesign);
 
             Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick.Values.ElementAt(0));
 
-            Dictionary<Guid, ComponentSD> componentsDict = new Dictionary<Guid, ComponentSD>();
+            Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(mine.ID, mine);
             StaticDataManager.ExportStaticData(componentsDict, "./MineComponentTest.json");
 
         }
 
 
-        public static ComponentSD EngineComponentSD()
+        public static ComponentTemplateSD EngineComponentSD()
         {
-            ComponentSD component = new ComponentSD();
+            ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Engine";
             component.Description = "Moves a ship";
             component.ID = new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6");
@@ -134,9 +134,9 @@ namespace Pulsar4X.Tests
             component.MountType.Add(ComponentMountType.PlanetFacility, false);
             component.MountType.Add(ComponentMountType.PDS, false);
 
-            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
-            ComponentAbilitySD SizeFormula0 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD SizeFormula0 = new ComponentTemplateAbilitySD();
             SizeFormula0.Name = "Engine Size";
             SizeFormula0.Description = "Size of this engine in Tons";
             SizeFormula0.GuiHint = GuiHint.GuiSelectionMaxMin;
@@ -145,7 +145,7 @@ namespace Pulsar4X.Tests
             SizeFormula0.MinFormula = "1";
             component.ComponentAbilitySDs.Add(SizeFormula0);
 
-            ComponentAbilitySD engineTypeAbility1 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD engineTypeAbility1 = new ComponentTemplateAbilitySD();
             engineTypeAbility1.Name = "Engine Type";
             engineTypeAbility1.Description = "Type of engine Tech";
             engineTypeAbility1.GuiHint = GuiHint.GuiTechSelectionList;
@@ -169,7 +169,7 @@ namespace Pulsar4X.Tests
 
             component.ComponentAbilitySDs.Add(engineTypeAbility1);
 
-            ComponentAbilitySD enginePowerEfficency2 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD enginePowerEfficency2 = new ComponentTemplateAbilitySD();
             enginePowerEfficency2.Name = "Engine Consumption vs Power";
             enginePowerEfficency2.Description = "More Powerfull engines are less efficent for a given size";
             enginePowerEfficency2.GuiHint = GuiHint.GuiSelectionMaxMin;
@@ -178,14 +178,14 @@ namespace Pulsar4X.Tests
             enginePowerEfficency2.MinFormula = "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')";
             component.ComponentAbilitySDs.Add(enginePowerEfficency2);
 
-            ComponentAbilitySD enginePowerAbility3 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD enginePowerAbility3 = new ComponentTemplateAbilitySD();
             enginePowerAbility3.Name = "Engine Power";
             enginePowerAbility3.Description = "Move Power for ship";
             enginePowerAbility3.GuiHint = GuiHint.GuiTextDisplay;
             enginePowerAbility3.AbilityFormula = "Ability(1) * [Size] * Ability(2)";
             component.ComponentAbilitySDs.Add(enginePowerAbility3);
 
-            ComponentAbilitySD enginePowerDBArgs4 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD enginePowerDBArgs4 = new ComponentTemplateAbilitySD();
             enginePowerDBArgs4.Name = "Engine Power";
             enginePowerDBArgs4.Description = "Move Power for ship";
             enginePowerDBArgs4.GuiHint = GuiHint.None;
@@ -193,29 +193,29 @@ namespace Pulsar4X.Tests
             enginePowerDBArgs4.AbilityFormula = "DataBlobArgs(Ability(3))";
             component.ComponentAbilitySDs.Add(enginePowerDBArgs4);
 
-            ComponentAbilitySD fuelConsumptionTechMod5 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD fuelConsumptionTechMod5 = new ComponentTemplateAbilitySD();
             fuelConsumptionTechMod5.Name = "Fuel Consumption";
             fuelConsumptionTechMod5.Description = "From Tech";
             fuelConsumptionTechMod5.GuiHint = GuiHint.None;
             fuelConsumptionTechMod5.AbilityFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)";
             component.ComponentAbilitySDs.Add(fuelConsumptionTechMod5);
 
-            ComponentAbilitySD fuelConsumptionFinalCalc6 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD fuelConsumptionFinalCalc6 = new ComponentTemplateAbilitySD();
             fuelConsumptionFinalCalc6.Name = "Fuel Consumption";
             fuelConsumptionFinalCalc6.Description = "Fuel Consumption Calc";
             fuelConsumptionFinalCalc6.GuiHint = GuiHint.GuiTextDisplay;
             fuelConsumptionFinalCalc6.AbilityFormula = "Ability(3) - Ability(3) * [Size] * 0.002 * Ability(5)";
             component.ComponentAbilitySDs.Add(fuelConsumptionFinalCalc6);
 
-            ComponentAbilitySD fuelConsumptionArgsDB7 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD fuelConsumptionArgsDB7 = new ComponentTemplateAbilitySD();
             fuelConsumptionArgsDB7.Name = "Fuel Consumption";
             fuelConsumptionArgsDB7.Description = "Size Mod";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
-            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelUseDB).ToString();
+            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelConsumptionAbilityDB).ToString();
             fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(Ability(6))";
             component.ComponentAbilitySDs.Add(fuelConsumptionArgsDB7);
 
-            ComponentAbilitySD thermalReduction8 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD thermalReduction8 = new ComponentTemplateAbilitySD();
             thermalReduction8.Name = "Thermal Signature Reduction";
             thermalReduction8.Description = "";
             thermalReduction8.GuiHint = GuiHint.GuiSelectionMaxMin;
@@ -224,14 +224,14 @@ namespace Pulsar4X.Tests
             thermalReduction8.MaxFormula = "0.5"; 
             component.ComponentAbilitySDs.Add(thermalReduction8);
 
-            ComponentAbilitySD sensorSigDisplay9 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD sensorSigDisplay9 = new ComponentTemplateAbilitySD();
             sensorSigDisplay9.Name = "Thermal Signature";
             sensorSigDisplay9.Description = "";
             sensorSigDisplay9.GuiHint = GuiHint.GuiTextDisplay;
             sensorSigDisplay9.AbilityFormula = "Ability(3) * Ability(8)";
             component.ComponentAbilitySDs.Add(sensorSigDisplay9);
 
-            ComponentAbilitySD sensorSigDBArgs10 = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD sensorSigDBArgs10 = new ComponentTemplateAbilitySD();
             sensorSigDBArgs10.Name = "Sensor Signature";
             sensorSigDBArgs10.Description = "";
             sensorSigDBArgs10.GuiHint = GuiHint.None;
@@ -242,9 +242,9 @@ namespace Pulsar4X.Tests
             return component;
         }
 
-        public static ComponentSD MineInstallation()
+        public static ComponentTemplateSD MineInstallation()
         {
-            ComponentSD component = new ComponentSD();
+            ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Mine";
             component.Description = "Mines Resources";
             component.ID = new Guid("F7084155-04C3-49E8-BF43-C7EF4BEFA550");
@@ -270,10 +270,10 @@ namespace Pulsar4X.Tests
             component.MountType.Add(ComponentMountType.PlanetFacility, true);
             component.MountType.Add(ComponentMountType.PDS, false);
 
-            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
 
-            ComponentAbilitySD mineAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD mineAbility = new ComponentTemplateAbilitySD();
             mineAbility.Name = "MiningAmount";
             mineAbility.Description = "";
             mineAbility.GuiHint = GuiHint.None;
@@ -300,9 +300,9 @@ namespace Pulsar4X.Tests
 
         }
 
-        public static ComponentSD ResearchLab()
+        public static ComponentTemplateSD ResearchLab()
         {
-            ComponentSD component = new ComponentSD();
+            ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "ResearchLab";
             component.Description = "Creates Research Points";
             component.ID = new Guid("C203B7CF-8B41-4664-8291-D20DFE1119EC");
@@ -328,10 +328,10 @@ namespace Pulsar4X.Tests
             component.MountType.Add(ComponentMountType.PlanetFacility, true);
             component.MountType.Add(ComponentMountType.PDS, false);
 
-            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
 
-            ComponentAbilitySD researchPointsAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD researchPointsAbility = new ComponentTemplateAbilitySD();
             researchPointsAbility.Name = "RP Amount Per EconTick";
             researchPointsAbility.Description = "";
             researchPointsAbility.GuiHint = GuiHint.None;
@@ -345,9 +345,9 @@ namespace Pulsar4X.Tests
 
 
 
-        public static ComponentSD Refinary()
+        public static ComponentTemplateSD Refinary()
         {
-            ComponentSD component = new ComponentSD();
+            ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Refinary";
             component.Description = "Creates Research Points";
             component.ID = new Guid("{90592586-0BD6-4885-8526-7181E08556B5}");
@@ -373,11 +373,11 @@ namespace Pulsar4X.Tests
             component.MountType.Add(ComponentMountType.PlanetFacility, true);
             component.MountType.Add(ComponentMountType.PDS, false);
 
-            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
 
 
-            ComponentAbilitySD refinePointsAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD refinePointsAbility = new ComponentTemplateAbilitySD();
             refinePointsAbility.Name = "RP Amount Per EconTick";
             refinePointsAbility.Description = "";
             refinePointsAbility.GuiHint = GuiHint.None;
@@ -385,7 +385,7 @@ namespace Pulsar4X.Tests
             refinePointsAbility.AbilityFormula = "100";
             component.ComponentAbilitySDs.Add(refinePointsAbility);
 
-            ComponentAbilitySD refineJobsAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD refineJobsAbility = new ComponentTemplateAbilitySD();
             refineJobsAbility.Name = "RefineAbilitys";
             refineJobsAbility.Description = "";
             refineJobsAbility.GuiHint = GuiHint.None;
@@ -400,9 +400,9 @@ namespace Pulsar4X.Tests
             return component;
         }
 
-        public static ComponentSD Factory()
+        public static ComponentTemplateSD Factory()
         {
-            ComponentSD component = new ComponentSD();
+            ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Factory";
             component.Description = "Constructs Facilities, Fighters Ammo and Components";
             component.ID = new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}");
@@ -428,16 +428,16 @@ namespace Pulsar4X.Tests
             component.MountType.Add(ComponentMountType.PlanetFacility, true);
             component.MountType.Add(ComponentMountType.PDS, false);
 
-            component.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
-            ComponentAbilitySD instalationPointsAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD instalationPointsAbility = new ComponentTemplateAbilitySD();
             instalationPointsAbility.Name = "Construction Points";
             instalationPointsAbility.Description = "";
             instalationPointsAbility.GuiHint = GuiHint.None;
             instalationPointsAbility.AbilityFormula = "100";
             component.ComponentAbilitySDs.Add(instalationPointsAbility);
 
-            ComponentAbilitySD instalationConstructionAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD instalationConstructionAbility = new ComponentTemplateAbilitySD();
             instalationConstructionAbility.Name = "Construction Points";
             instalationConstructionAbility.Description = "";
             instalationConstructionAbility.GuiHint = GuiHint.None;
@@ -445,7 +445,7 @@ namespace Pulsar4X.Tests
             instalationConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(instalationConstructionAbility);
 
-            ComponentAbilitySD shipComponentsConstructionAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD shipComponentsConstructionAbility = new ComponentTemplateAbilitySD();
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
@@ -453,7 +453,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(shipComponentsConstructionAbility);
 
-            ComponentAbilitySD fighterConstructionAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD fighterConstructionAbility = new ComponentTemplateAbilitySD();
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
@@ -461,7 +461,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(fighterConstructionAbility);
 
-            ComponentAbilitySD ammoConstructionAbility = new ComponentAbilitySD();
+            ComponentTemplateAbilitySD ammoConstructionAbility = new ComponentTemplateAbilitySD();
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;

@@ -30,7 +30,7 @@ namespace Pulsar4X.Tests
         [TestCaseSource(nameof(DataBlobTypes))]
         public void JSONConstructor(Type dataBlobType)
         {
-            ConstructorInfo[] constructors = dataBlobType.GetConstructors();
+            ConstructorInfo[] constructors = dataBlobType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             Attribute jsonConstructorAttribute = new JsonConstructorAttribute();
 
             foreach (ConstructorInfo constructorInfo in constructors.Where(constructorInfo => constructorInfo.GetCustomAttributes().Contains(jsonConstructorAttribute)))

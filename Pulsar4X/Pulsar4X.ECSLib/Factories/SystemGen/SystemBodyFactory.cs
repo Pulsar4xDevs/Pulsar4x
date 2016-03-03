@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static ProtoEntity CreateBaseBody()
         {
-            var position = new PositionDB(0, 0, 0, null);
+            var position = new PositionDB(0, 0, 0, Guid.Empty);
             var massVolume = new MassVolumeDB();
             var planetInfo = new SystemBodyDB();
             var name = new NameDB();
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
                 FinalizeSystemBodyDB(staticData, system, newCometProto);
                 
                 var comet = Entity.Create(system.SystemManager, newCometProto);
-                comet.GetDataBlob<PositionDB>().System = system;
+                comet.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
             }
         }
 
@@ -460,7 +460,7 @@ namespace Pulsar4X.ECSLib
 
             // Finalize Orbit
             var positionDB = body.GetDataBlob<PositionDB>();
-            positionDB.System = system;
+            positionDB.SystemGuid = system.Guid;
             positionDB.Position = OrbitProcessor.GetPosition(body.GetDataBlob<OrbitDB>(), currentDateTime);
 
             GenerateMoons(system, body, currentDateTime);
@@ -545,7 +545,7 @@ namespace Pulsar4X.ECSLib
             foreach (var moon in moons)
             {
                 var realMoon = Entity.Create(system.SystemManager, moon);
-                realMoon.GetDataBlob<PositionDB>().System = system;
+                realMoon.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
             }
         }
 
@@ -559,7 +559,7 @@ namespace Pulsar4X.ECSLib
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
                 Entity newBody = Entity.Create(system.SystemManager, newProtoBody);
-                newBody.GetDataBlob<PositionDB>().System = system;
+                newBody.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
                 SystemBodyDB newBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
                 if (system.RNG.NextDouble() > (1.0 / _galaxyGen.Settings.NumberOfAsteroidsPerDwarfPlanet))

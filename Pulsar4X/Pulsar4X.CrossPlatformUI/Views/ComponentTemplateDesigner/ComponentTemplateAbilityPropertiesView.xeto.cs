@@ -2,19 +2,24 @@
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {
     public class ComponentTemplateAbilityPropertiesView : Panel
     {
+
+        protected GroupBox GrpBx { get; set; }
         protected ComboBox GuiHint { get; set; }
         protected StackLayout GuiHintControls { get; set; }
 
         protected TextBox NameTBx { get; set; }
         protected TextBox DescriptionTBx { get; set; }
         protected TextBox AbilityFormulaTBx { get; set; }
-        
+
+        protected ContextMenu ContextMenuItem = new ContextMenu();
+        private List<ButtonMenuItem> ContextMenuButtons = new List<ButtonMenuItem>();
 
         private ComponentAbilityTemplateVM _viewModel;
 
@@ -27,6 +32,9 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             NameTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.NameControl;
             DescriptionTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.DescriptionControl;
             AbilityFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.AbilityFormulaControl;
+
+
+            GrpBx.MouseDown += (sender, e) => { if (e.Buttons == MouseButtons.Alternate) ContextMenuItem.Show(GrpBx); };
         }
 
         public ComponentTemplateAbilityPropertiesView(ComponentAbilityTemplateVM viewModel) : this()
@@ -36,6 +44,18 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
             _viewModel.SelectedGuiHint.PropertyChanged += GuiHint_SelectedIndexChanged;
             GuiHint_SelectedIndexChanged(this, null);
+
+            ButtonMenuItem btnAdd = new ButtonMenuItem();
+            btnAdd.Command = _viewModel.AddToEditCommand;
+            btnAdd.Text = "Add To Edit Field";
+            ButtonMenuItem btnDel = new ButtonMenuItem();
+            btnDel.Text = "Delete This Ability Item";
+            btnDel.Command = _viewModel.DeleteCommand;
+
+            ContextMenuButtons.Add(btnAdd);
+            ContextMenuButtons.Add(btnDel);
+            ContextMenuItem = new ContextMenu(ContextMenuButtons);
+
         }
 
         private void GuiHint_SelectedIndexChanged(object sender, EventArgs e)
@@ -111,8 +131,13 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             GuiHintControls.Items.Clear();
             Label label = new Label();
-            label.Text = "Does Not display anything, however, \r\nAbilityFormula still works 'under the hood'";
+            label.Text = "Does Not display anything, however, \r\nAbilityFormula still works 'under the hood' \r\nOr use in conjunction with Datablob type and args";
+            ComboBox dataBlobSelection = new ComboBox();
+            dataBlobSelection.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM m) => m.AbilityDataBlobTypeSelection);
+            dataBlobSelection.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM m) => m.AbilityDataBlobType);
+            dataBlobSelection.DataContext = _viewModel;
             GuiHintControls.Items.Add(label);
+            GuiHintControls.Items.Add(dataBlobSelection);
 
         }
     }

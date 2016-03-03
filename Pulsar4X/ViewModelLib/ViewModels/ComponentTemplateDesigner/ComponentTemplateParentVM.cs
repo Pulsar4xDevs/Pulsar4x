@@ -15,8 +15,8 @@ namespace Pulsar4X.ViewModel
         private StaticDataStore _staticData;
         private GameVM _gameVM;
 
-        private readonly DictionaryVM<ComponentSD, string, string> _components = new DictionaryVM<ComponentSD, string, string>();
-        public DictionaryVM<ComponentSD, string, string> Components { get { return _components; } }
+        private readonly DictionaryVM<ComponentTemplateSD, string, string> _components = new DictionaryVM<ComponentTemplateSD, string, string>();
+        public DictionaryVM<ComponentTemplateSD, string, string> Components { get { return _components; } }
 
         private ComponentTemplateMainPropertiesVM _selectedComponent;
         public ComponentTemplateMainPropertiesVM SelectedComponent
@@ -46,14 +46,16 @@ namespace Pulsar4X.ViewModel
             get { return _controlInFocus; }
             set
             {
-                //if (_controlInFocus != value)
-                //{
-                _controlInFocus = value;
-                OnPropertyChanged(nameof(FormulaEditor));
-                //}
+                if (_controlInFocus != value)
+                {
+                    _controlInFocus = value;
+                    FormulaEditor.RefreshFormula();
+                }
             }
         }
 
+        public ICommand NewComponentCommand { get { return new RelayCommand<object>(obj => StartNewComponent()); } }
+        public ICommand NewAbilityCommand { get { return new RelayCommand<object>(obj => AddNewAbility()); } }
         public ICommand SaveCommand { get { return new RelayCommand<object>(obj => SaveToStaticData()); } }
         public ICommand ExportCommand { get { return new RelayCommand<object>(obj => ExportToFile()); } }
 
@@ -65,19 +67,21 @@ namespace Pulsar4X.ViewModel
         {
             _staticData = gameVM.Game.StaticData;
             _gameVM = gameVM;
-            FormulaEditor = new FormulaEditorVM(this);
+            FormulaEditor = new FormulaEditorVM(this, _staticData);
             
             foreach (var item in _staticData.Components.Values)
             {
                 Components.Add(item, item.Name);
             }
+            SelectedComponent = new ComponentTemplateMainPropertiesVM(this, _gameVM);
             Components.SelectionChangedEvent += Components_SelectionChangedEvent;
             Components.SelectedIndex = 0;
         }
 
         private void Components_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            SelectedComponent = new ComponentTemplateMainPropertiesVM(this, _gameVM, Components.GetKey());
+
+            SelectedComponent.SetDesignSD(Components.GetKey());// = mainTemplateVM;
             ComponentAbilitySDs.Clear();
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in Components.GetKey().ComponentAbilitySDs)
@@ -88,10 +92,23 @@ namespace Pulsar4X.ViewModel
             ComponentAbilitySDs.AddRange(tmp);
         }
 
+        public void StartNewComponent()
+        {
+
+            SelectedComponent.ClearSelection();
+            SelectedComponent.ID = Guid.NewGuid().ToString();
+            SelectedComponent.Name = "NewComponent";
+            ComponentAbilitySDs.Clear();
+        }
+
+        public void AddNewAbility()
+        {
+            ComponentAbilitySDs.Add(new ComponentAbilityTemplateVM(this, ComponentAbilitySDs, _staticData));
+        }
 
         public void SaveToStaticData()
         {
-            ComponentSD sd = new ComponentSD();
+            ComponentTemplateSD sd = new ComponentTemplateSD();
             sd.Name = SelectedComponent.Name;
             sd.Description = SelectedComponent.Description;
             sd.ID = Guid.Parse(SelectedComponent.ID);
@@ -102,13 +119,14 @@ namespace Pulsar4X.ViewModel
             sd.MineralCostFormula = new Dictionary<Guid, string>();
             foreach (var item in SelectedComponent.MineralCostFormula)
             {
-                sd.MineralCostFormula.Add(item.Minerals.GetKey(), item.Formula);
+                if(item.MineralFormula != null)
+                    sd.MineralCostFormula.Add(item.Minerals.GetKey(), item.MineralFormula);
             }
             sd.ResearchCostFormula = SelectedComponent.ResearchCostFormula;
             sd.CreditCostFormula = SelectedComponent.CreditCostFormula;
             sd.BuildPointCostFormula = SelectedComponent.BuildPointCostFormula;
             sd.MountType = new Dictionary<ComponentMountType, bool>();
-            sd.ComponentAbilitySDs = new List<ComponentAbilitySD>();
+            sd.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
             foreach (var item in ComponentAbilitySDs)
             {
                 sd.ComponentAbilitySDs.Add(item.CreateSD());

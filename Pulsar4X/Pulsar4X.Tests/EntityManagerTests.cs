@@ -11,6 +11,7 @@ namespace Pulsar4X.Tests
     class EntityManagerTests
     {
         private Game _game;
+        private AuthenticationToken _smAuthToken;
         private Entity _species1;
         private Dictionary<Entity, long> _pop1;
         private Dictionary<Entity, long> _pop2;
@@ -19,6 +20,8 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _game = Game.NewGame("Test Game", DateTime.Now, 1);
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+            _game.GenerateSystems(_smAuthToken, 1);
             _species1 = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> {new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45)});
             _pop1 = new Dictionary<Entity, long> { { _species1, 10 } };
             _pop2 = new Dictionary<Entity, long> { { _species1, 5 } };
@@ -74,7 +77,7 @@ namespace Pulsar4X.Tests
             Entity testEntity = Entity.Create(_game.GlobalManager);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
-            testEntity.SetDataBlob(new PositionDB(0, 0, 0, null), EntityManager.GetTypeIndex<PositionDB>());
+            testEntity.SetDataBlob(new PositionDB(0, 0, 0, Guid.Empty), EntityManager.GetTypeIndex<PositionDB>());
 
             // test bad input:
             Assert.Catch(typeof(ArgumentNullException), () =>
@@ -214,67 +217,67 @@ namespace Pulsar4X.Tests
             PopulateEntityManager();
 
             // Find all entities with a specific DataBlob.
-            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
+            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>(_smAuthToken);
             Assert.AreEqual(2, entities.Count);
 
             // again, but look for a datablob that no entity has:
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<AtmosphereDB>();
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<AtmosphereDB>(_smAuthToken);
             Assert.AreEqual(0, entities.Count);
 
             // check with invalid data blob type:
-            Assert.Catch(typeof(KeyNotFoundException), () => _game.GlobalManager.GetAllEntitiesWithDataBlob<BaseDataBlob>());
+            Assert.Catch(typeof(KeyNotFoundException), () => _game.GlobalManager.GetAllEntitiesWithDataBlob<BaseDataBlob>(_smAuthToken));
 
             // now lets lookup using a mask:
             ComparableBitArray dataBlobMask = EntityManager.BlankDataBlobMask();
             dataBlobMask.Set(EntityManager.GetTypeIndex<ColonyInfoDB>(), true);
             dataBlobMask.Set(EntityManager.GetTypeIndex<OrbitDB>(), true);
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, dataBlobMask);
             Assert.AreEqual(2, entities.Count);
 
             // and with a mask that will not match any entities:
             dataBlobMask.Set(EntityManager.GetTypeIndex<AtmosphereDB>(), true);
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, dataBlobMask);
             Assert.AreEqual(0, entities.Count);
 
             // and an empty mask:
             dataBlobMask = EntityManager.BlankDataBlobMask();
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, dataBlobMask);
             Assert.AreEqual(3, entities.Count); // this is counter intuitive... but it is what happens.
 
             // test bad mask:
             ComparableBitArray badMask = new ComparableBitArray(4242); // use a big number so we never rach that many data blobs.
-            Assert.Catch(typeof(ArgumentException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(badMask));
+            Assert.Catch(typeof(ArgumentException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, badMask));
 
-            Assert.Catch(typeof(ArgumentNullException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(null));
+            Assert.Catch(typeof(ArgumentNullException), () => _game.GlobalManager.GetAllEntitiesWithDataBlobs(_smAuthToken, null));
 
 
             // now lets just get the one entity:
-            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
+            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>(_smAuthToken);
             Assert.IsTrue(testEntity.IsValid);
 
             // lookup an entity that does not exist:
-            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<AtmosphereDB>();
+            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<AtmosphereDB>(_smAuthToken);
             Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type:
             Assert.Catch(typeof(KeyNotFoundException), () =>
             {
-                _game.GlobalManager.GetFirstEntityWithDataBlob<BaseDataBlob>();
+                _game.GlobalManager.GetFirstEntityWithDataBlob<BaseDataBlob>(_smAuthToken);
             });
 
 
             // now lets just get the one entity, but use a different function to do it:
             int type = EntityManager.GetTypeIndex<ColonyInfoDB>();
-            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(type);
+            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(_smAuthToken, type);
             Assert.IsTrue(testEntity.IsValid);
 
             // lookup an entity that does not exist:
             type = EntityManager.GetTypeIndex<AtmosphereDB>();
-            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(type);
+            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob(_smAuthToken, type);
             Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type index:
-            Assert.AreEqual(Entity.InvalidEntity, _game.GlobalManager.GetFirstEntityWithDataBlob(4242));
+            Assert.AreEqual(Entity.InvalidEntity, _game.GlobalManager.GetFirstEntityWithDataBlob(_smAuthToken, 4242));
         }
 
         [Test]
@@ -304,12 +307,12 @@ namespace Pulsar4X.Tests
         [Test]
         public void EntityTransfer()
         {
-            EntityManager manager2 = _game.Systems.First().Value.SystemManager;
+            EntityManager manager2 = _game.GetSystems(_smAuthToken).First().SystemManager;
 
             PopulateEntityManager();
 
             // Get an entity from the manager.
-            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<OrbitDB>();
+            Entity testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<OrbitDB>(_smAuthToken);
             // Ensure we got a valid entity.
             Assert.IsTrue(testEntity.IsValid);
             // Store it's datablobs for later.
@@ -377,11 +380,7 @@ namespace Pulsar4X.Tests
         private Entity PopulateEntityManager()
         {
             // Clear out any previous test results.
-            for (int i = _game.GlobalManager.Entities.Count; i > 0; i--)
-            {
-                Entity entity = _game.GlobalManager.Entities[i - 1];
-                entity.Destroy();
-            }
+            _game.GlobalManager.Clear();
 
             // Create an entity with individual DataBlobs.
             Entity testEntity = Entity.Create(_game.GlobalManager);

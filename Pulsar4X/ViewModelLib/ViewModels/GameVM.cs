@@ -16,8 +16,43 @@ namespace Pulsar4X.ViewModel
     {
         private ObservableCollection<SystemVM> _systems;
 
-        private Entity _playerFaction;
- 
+        public Player CurrentPlayer { get; set; }
+        public AuthenticationToken CurrentAuthToken { get; set; }
+
+        internal Entity CurrentFaction
+        {
+            get { return _currentFaction; }
+            set
+            {
+                _currentFaction = value;
+                //TODO: factionDB.knownfactions need to be filled with... a blank copy of the actual faction that gets filled as the facion finds out more about it?
+                //excepting in the case of GM where the actual faction should be good. 
+                _visibleFactions = new List<Guid>();
+                foreach (var knownFaction in _currentFaction.GetDataBlob<FactionInfoDB>().KnownFactions)
+                {
+                    _visibleFactions.Add(knownFaction.Guid);
+                }
+                _systems.Clear();
+                _systemDictionary.Clear();
+                foreach (var knownsystem in _currentFaction.GetDataBlob<FactionInfoDB>().KnownSystems)
+                {
+                    SystemVM systemVM = SystemVM.Create(this, knownsystem);
+                    _systems.Add(systemVM);
+                    _systemDictionary.Add(systemVM.ID, systemVM);
+                }
+                ColonyScreens = new List<ColonyScreenVM>();
+                Colonys = new DictionaryVM<Guid, string, string>(DisplayMode.Value);
+                foreach (var colonyEntity in _currentFaction.GetDataBlob<FactionInfoDB>().Colonies)
+                {
+                    ColonyScreens.Add(new ColonyScreenVM(colonyEntity, Game.StaticData));
+                    Colonys.Add(colonyEntity.Guid, colonyEntity.GetDataBlob<NameDB>().GetName(_currentFaction));
+                }
+
+
+            }
+        }
+        private Entity _currentFaction;
+
         //progress bar in MainWindow should be bound to this
         public double ProgressValue
         {
@@ -30,45 +65,16 @@ namespace Pulsar4X.ViewModel
         }
         private double _progressValue;
 
-        public string StatusText { get{return _statusText;} set { _statusText = value; OnPropertyChanged(); } }
+        public string StatusText { get { return _statusText; } set { _statusText = value; OnPropertyChanged(); } }
         private string _statusText;
 
-        internal Entity PlayerFaction { get{return _playerFaction;}
-            set
-            {
-                _playerFaction = value;
-                //TODO: factionDB.knownfactions need to be filled with... a blank copy of the actual faction that gets filled as the facion finds out more about it?
-                //excepting in the case of GM where the actual faction should be good. 
-                _visibleFactions = new List<Guid>();
-                foreach (var knownFaction in _playerFaction.GetDataBlob<FactionInfoDB>().KnownFactions)
-                {
-                    _visibleFactions.Add(knownFaction.Guid);
-                }
-                _systems.Clear();
-                _systemDictionary.Clear();
-                foreach (var knownsystem in _playerFaction.GetDataBlob<FactionInfoDB>().KnownSystems)
-                {
-                    SystemVM systemVM = SystemVM.Create(this, knownsystem);
-                    _systems.Add(systemVM);
-                    _systemDictionary.Add(systemVM.ID, systemVM);
-                }
-                ColonyScreens = new List<ColonyScreenVM>();
-                Colonys = new DictionaryVM<Guid, string, string>(DisplayMode.Value);
-                foreach (var colonyEntity in _playerFaction.GetDataBlob<FactionInfoDB>().Colonies)
-                {
-                    ColonyScreens.Add(new ColonyScreenVM(colonyEntity, Game.StaticData));
-                    Colonys.Add(colonyEntity.Guid, colonyEntity.GetDataBlob<NameDB>().GetName(_playerFaction));
-                }
-                
 
-            }
-        }
 
         //factions that this client has full visability of. for GM this will be all factions.
-        private List<Guid> _visibleFactions; 
+        private List<Guid> _visibleFactions;
 
         //faction data. for GM this will be compleate, for normal play this will be factions known to the faction, and the factionVM will only contain data that is known to the faction
-        private BindingList<FactionVM> _factions; 
+        private BindingList<FactionVM> _factions;
 
         public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
 
@@ -79,11 +85,13 @@ namespace Pulsar4X.ViewModel
         public ColonyScreenVM ColonyScreen { get; set; }
 
         private Guid _selectedColonyGuid;
-        public Guid SetColonyScreen {
+        public Guid SetColonyScreen
+        {
             get { return _selectedColonyGuid; }
             set
             {
-                _selectedColonyGuid = value; ColonyScreen = new ColonyScreenVM(Game.GlobalManager.GetEntityByGuid(value), Game.StaticData); }
+                _selectedColonyGuid = value; ColonyScreen = new ColonyScreenVM(Game.GlobalManager.GetEntityByGuid(value), Game.StaticData);
+            }
         }
 
         private Dictionary<Guid, SystemVM> _systemDictionary;
@@ -94,12 +102,12 @@ namespace Pulsar4X.ViewModel
             Guid rootGuid = new Guid();
             if (_systemDictionary.ContainsKey(bodyGuid))
                 rootGuid = bodyGuid;
-            
+
             else if (Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
-            {                
+            {
                 if (bodyEntity.HasDataBlob<OrbitDB>())
                 {
-                     rootGuid = bodyEntity.GetDataBlob<OrbitDB>().ParentDB.Root.Guid;
+                    rootGuid = bodyEntity.GetDataBlob<OrbitDB>().ParentDB.Root.Guid;
                 }
             }
             else throw new GuidNotFoundException(bodyGuid);
@@ -108,11 +116,10 @@ namespace Pulsar4X.ViewModel
             {
                 SystemVM systemVM = SystemVM.Create(this, rootGuid);
                 _systems.Add(systemVM);
-                _systemDictionary.Add(rootGuid,systemVM);
+                _systemDictionary.Add(rootGuid, systemVM);
             }
             return _systemDictionary[rootGuid];
         }
-
 
         public void CreateGame(NewGameOptionsVM options)
         {
@@ -121,12 +128,13 @@ namespace Pulsar4X.ViewModel
             Game = newGame;
 
             // TODO: Add options for Player name to be different than faction name.
-            Player defaultPlayer = Game.AddPlayer(options.FactionName, options.FactionPassword);
+            CurrentPlayer = Game.AddPlayer(options.FactionName, options.FactionPassword);
+            CurrentAuthToken = new AuthenticationToken(CurrentPlayer, options.FactionPassword);
 
-            PlayerFaction = Game.GameMasterFaction;
+            CurrentFaction = Game.GameMasterFaction;
             if (options.CreatePlayerFaction && options.DefaultStart)
             {
-                PlayerFaction = DefaultStartFactory.DefaultHumans(newGame, defaultPlayer, options.FactionName);
+                CurrentFaction = DefaultStartFactory.DefaultHumans(newGame, CurrentPlayer, options.FactionName);
             }
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
@@ -137,7 +145,7 @@ namespace Pulsar4X.ViewModel
             StatusText = "Loading Game...";
             Game = SerializationManager.ImportGame(pathToFile);
 
-            PlayerFaction = Game.GameMasterFaction;
+            CurrentFaction = Game.GameMasterFaction;
             ProgressValue = 0;
             StatusText = "Game Loaded.";
         }
@@ -156,7 +164,7 @@ namespace Pulsar4X.ViewModel
             var pulseProgress = new Progress<double>(UpdatePulseProgress);
 
             int secondsPulsed;
-            
+
             secondsPulsed = Game.AdvanceTime((int)pulseLength.TotalSeconds, pulseCancellationToken, pulseProgress);
             Refresh();
             //e.Handled = true;
@@ -212,10 +220,8 @@ namespace Pulsar4X.ViewModel
 
         public GameVM()
         {
-            //Game = game;
             _systems = new ObservableCollection<SystemVM>();
             _systemDictionary = new Dictionary<Guid, SystemVM>();
-            //PlayerFaction = game.GameMasterFaction; //on creation the player faction can be set to GM I guess... for now anyway.
         }
 
         #region IViewModel

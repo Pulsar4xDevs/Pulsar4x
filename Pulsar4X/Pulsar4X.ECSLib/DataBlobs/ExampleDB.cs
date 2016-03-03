@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
         {
             // Star system resolver loads myStarSystem from mySystemGuid after the game is done loading.
             Game game = (Game)context.Context;
-            game.PostLoad += (sender, args) => { if (!game.StarSystems.TryGetValue(MySystemGuid, out MyStarSystem)) throw new GuidNotFoundException(MySystemGuid); };
+            game.PostLoad += (sender, args) => { if (!game.Systems.TryGetValue(MySystemGuid, out MyStarSystem)) throw new GuidNotFoundException(MySystemGuid); };
         }
 
         #region Stuff we already talked about.

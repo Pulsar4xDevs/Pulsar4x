@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, int> componentStockpile = colony.GetDataBlob<ColonyInfoDB>().ComponentStockpile;
 
             var colonyConstruction = colony.GetDataBlob<ColonyConstructionDB>();
-            var factionInfo = colony.GetDataBlob<OwnedDB>().Faction.GetDataBlob<FactionInfoDB>();
+            var factionInfo = colony.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
 
 
             var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
             batchJob.MineralsRequired = designInfo.ComponentCosts;
             if (batchJob.ConstructionType == ConstructionType.Facility)
             {
-                var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().Faction.GetDataBlob<FactionInfoDB>();
+                var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
                 Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
                 var colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
                 colonyInfo.Installations.SafeValueAdd(facilityDesignEntity,1);
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
         public static void AddJob(Entity colonyEntity, ConstructionJob job)
         {
             var constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
-            var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().Faction.GetDataBlob<FactionInfoDB>();
+            var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //check that this faction does have the design on file. I *think* all this type of construction design will get stored in factionInfo.ComponentDesigns

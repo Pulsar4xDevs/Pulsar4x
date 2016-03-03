@@ -6,7 +6,7 @@ namespace Pulsar4X.ViewModel
 {
     public class ConstructionAbilityVM : JobAbilityBaseVM<ColonyConstructionDB, ConstructionJob>
     {
-        private FactionInfoDB FactionInfo { get { return _colonyEntity_.GetDataBlob<OwnedDB>().Faction.GetDataBlob<FactionInfoDB>(); } }
+        private FactionInfoDB FactionInfo { get { return _colonyEntity_.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>(); } }
 
         public ConstructionAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {

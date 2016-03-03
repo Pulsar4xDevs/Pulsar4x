@@ -28,9 +28,12 @@ namespace Pulsar4X.ViewModel
         }
 
         public abstract string FocusedText { get; set; }
-        public abstract event PropertyChangedEventHandler PropertyChanged;
-        internal abstract void OnPropertyChanged([CallerMemberName] string propertyName = null);
-
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            ParentVM.FormulaEditor.RefreshFormula();
+        }
     }
 
     public class ComponentTemplateMainPropertiesVM : ComponentTemplateDesignerBaseVM
@@ -98,7 +101,10 @@ namespace Pulsar4X.ViewModel
                         break;
                 }
 
-                   ParentVM.ControlInFocus = this;
+                ParentVM.ControlInFocus = this;
+                
+
+
             }
         }
 
@@ -172,16 +178,28 @@ namespace Pulsar4X.ViewModel
         public ObservableDictionary<ComponentMountType, bool?> MountType { get { return _mountType; } }
 
 
-        public override event PropertyChangedEventHandler PropertyChanged;
-
-
+        /// <summary>
+        /// Constructor for empty VM
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="gameVM"></param>
         public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameVM): base(parent)
         {
             _staticData = gameVM.Game.StaticData;
             SubControlInFocus = FocusedControl.SizeControl;
+            foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
+            {
+                MountType.Add((ComponentMountType)item, false);
+            }
         }
 
-        public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameData, ComponentSD designSD) : this(parent, gameData)
+        /// <summary>
+        /// Constructor for VM filled with componentSD
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="gameData"></param>
+        /// <param name="designSD"></param>
+        public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameData, ComponentTemplateSD designSD) : this(parent, gameData)
         {
             SetDesignSD(designSD);
         }
@@ -190,7 +208,7 @@ namespace Pulsar4X.ViewModel
         {
             if (MineralCostFormula.Last().Minerals.SelectedIndex >= 0 && MineralCostFormula[0].Minerals.SelectedIndex >= 0)
             {
-                MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+                MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData));
                 MineralCostFormula.Last().PropertyChanged += ComponentTemplateVM_PropertyChanged;
             }
         }
@@ -208,20 +226,21 @@ namespace Pulsar4X.ViewModel
             HTKFormula = "";
             CrewReqFormula = "";
             MineralCostFormula.Clear();
-            MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+            MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData));
             MineralCostFormula.Last().PropertyChanged += ComponentTemplateVM_PropertyChanged;
             ResearchCostFormula = "";
             CreditCostFormula = "";
             BuildPointCostFormula = "";
-            MountType.Clear();// = new ObservableDictionary<ComponentMountType, bool?>();
+            //MountType.Clear();// = new ObservableDictionary<ComponentMountType, bool?>();
 
-            foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
+
+            foreach (var item in MountType.ToArray())
             {
-                MountType.Add((ComponentMountType)item, false);
+                MountType[item.Key] = false;
             }
         }
 
-        public void SetDesignSD(ComponentSD designSD)
+        public void SetDesignSD(ComponentTemplateSD designSD)
         {
             Name = designSD.Name;
             Description = designSD.Description;
@@ -233,9 +252,9 @@ namespace Pulsar4X.ViewModel
             MineralCostFormula.Clear(); 
             foreach (var item in designSD.MineralCostFormula)
             {
-                MineralCostFormula.Add(new MineralFormulaVM(_staticData, item));
+                MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData, item));
             }
-            MineralCostFormula.Add(new MineralFormulaVM(_staticData));
+            MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData));
             
             ResearchCostFormula = designSD.ResearchCostFormula;
             CreditCostFormula = designSD.CreditCostFormula;
@@ -247,9 +266,6 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        internal override void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+
     }
 }

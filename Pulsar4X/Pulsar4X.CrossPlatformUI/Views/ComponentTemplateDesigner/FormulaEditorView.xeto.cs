@@ -10,11 +10,15 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
     public class FormulaEditorView : Panel
     {
         protected StackLayout ParameterButtonsStackLayout { get; set; }
+        protected ComboBox TechSelection { get; set; }
 
         public FormulaEditorView()
         {
             XamlReader.Load(this);
             DataContextChanged += FormulaEditorView_DataContextChanged;
+
+            TechSelection.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
+            TechSelection.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);
         }
 
 

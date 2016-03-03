@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionTechs"></param>
         internal static void DoResearch(Entity colonyEntity)
         {
-            var Faction = colonyEntity.GetDataBlob<OwnedDB>().Faction;
+            var Faction = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner;
             FactionAbilitiesDB factionAbilities = Faction.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = Faction.GetDataBlob<FactionTechDB>();
             Dictionary<Entity, int> labs = new Dictionary<Entity, int>();

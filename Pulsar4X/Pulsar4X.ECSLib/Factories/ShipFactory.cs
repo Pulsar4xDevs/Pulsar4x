@@ -21,9 +21,11 @@ namespace Pulsar4X.ECSLib
             NameDB nameDB = new NameDB(shipName);
             protoShip.SetDataBlob(nameDB);
 
-
-            var OwnedDB = new OwnedDB(ownerFaction);
+            var OwnedDB = new OwnedDB(ownerFaction);           
             protoShip.SetDataBlob(OwnedDB);
+
+            ComponentInstancesDB componentInstances = new ComponentInstancesDB(classEntity.GetDataBlob<ShipInfoDB>().ComponentList);
+            protoShip.SetDataBlob(componentInstances);
 
             return new Entity(systemEntityManager, protoShip);
         }

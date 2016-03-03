@@ -95,6 +95,7 @@ namespace Pulsar4X.ECSLib
             get { return _scientists; }
             internal set { _scientists = value; }
         }
+
         [JsonProperty]
         private List<Entity> _scientists = new List<Entity>();
 

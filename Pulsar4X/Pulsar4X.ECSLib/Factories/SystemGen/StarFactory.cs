@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
 
             MassVolumeDB starMassVolumeDB = MassVolumeDB.NewFromMassAndRadius(mass, radius);
             StarInfoDB starInfoDB = new StarInfoDB {Age = age, Class = starClass, Luminosity = luminosity, SpectralType = spectralType, Temperature = temperature, LuminosityClass = luminosityClass, SpectralSubDivision = subDivision};
-            PositionDB starPositionDB = new PositionDB();
+            PositionDB starPositionDB = new PositionDB(new Vector4(0,0,0,0), system.Guid);
             NameDB starNameDB = new NameDB(starName);
             OrbitDB starOrbitDB = new OrbitDB();
 
@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
                 StarInfoDB starData = GenerateStarInfo(starMVDB, starType, randomSelection);
 
                 // Initialize Position as 0,0,0. It will be updated when the star's orbit is calculated.
-                PositionDB positionData = new PositionDB(0, 0, 0, system);
+                PositionDB positionData = new PositionDB(0, 0, 0, system.Guid);
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
 

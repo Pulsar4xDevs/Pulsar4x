@@ -21,9 +21,9 @@
         <Label Text="Functions:" />
       </TableRow>
       <TableRow>
-        <Button Text="Ability()"/>
-        <Button Text="Tech('guid')" />
-        <ComboBox ID="TechSelection" />
+        <Button Text="DataBlobArgs()"/>
+        <ComboBox ID="TechSelection" DataContext="{Binding TechList}" />
+        <TableCell/>
       </TableRow>
       <TableRow>
         <Label Text="TODO instructions/description on whatever item is selected" />

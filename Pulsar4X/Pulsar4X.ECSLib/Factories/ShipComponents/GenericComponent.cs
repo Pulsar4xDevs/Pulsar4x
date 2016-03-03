@@ -16,9 +16,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionTech">this factions TechDB</param>
         /// <param name="staticData">the game staticData</param>
         /// <returns></returns>
-        public static ComponentDesignDB StaticToDesign(ComponentSD component, FactionTechDB factionTech, StaticDataStore staticData)
+        public static ComponentDesign StaticToDesign(ComponentTemplateSD component, FactionTechDB factionTech, StaticDataStore staticData)
         {
-            ComponentDesignDB design = new ComponentDesignDB();
+            ComponentDesign design = new ComponentDesign();
 
             design.Name = component.Name;
             design.Description = component.Description;
@@ -38,10 +38,10 @@ namespace Pulsar4X.ECSLib
                 design.MineralCostFormulas.Add(kvp.Key, new ChainedExpression(kvp.Value, design, factionTech, staticData));
             }
 
-            design.ComponentDesignAbilities = new List<ComponentDesignAbilityDB>();
+            design.ComponentDesignAbilities = new List<ComponentDesignAbility>();
             foreach (var abilitySD in component.ComponentAbilitySDs)
             {
-                ComponentDesignAbilityDB designAbility = new ComponentDesignAbilityDB(design);
+                ComponentDesignAbility designAbility = new ComponentDesignAbility(design);
 
                 designAbility.Name = abilitySD.Name;
                 designAbility.Description = abilitySD.Description;
@@ -102,7 +102,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="componentDesign"></param>
         /// <param name="factionTech"></param>
         /// <returns></returns>
-        public static Entity DesignToEntity(Game game, Entity factionEntity, ComponentDesignDB componentDesign)
+        public static Entity DesignToEntity(Game game, Entity factionEntity, ComponentDesign componentDesign)
         {
             EntityManager globalEntityManager = game.GlobalManager;
             StaticDataStore staticData = game.StaticData;
