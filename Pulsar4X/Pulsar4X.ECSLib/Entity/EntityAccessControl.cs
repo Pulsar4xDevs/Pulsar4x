@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
         {
             if (entityMask[EntityManager.GetTypeIndex<OwnedDB>()])
             {
-                var ownerFaction = entity.GetDataBlob<OwnedDB>().Faction;
+                var entityOwnedDB = entity.GetDataBlob<OwnedDB>();
                 var factions = new List<Entity>();
 
                 if (entityMask[EntityManager.GetTypeIndex<SensorProfileDB>()])
@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
                 if (entityMask[EntityManager.GetTypeIndex<ColonyInfoDB>()])
                 {
                     // Check if entity is a SensorContact
-                    if (entity.GetDataBlob<ColonyInfoDB>().Owner == ownerFaction)
+                    if (entityOwnedDB.EntityOwner == entityOwnedDB.ObjectOwner)
                     {
                         // Entity is not a SensorContact
                         factions = FactionsWithAccess(authorizedPlayer, AccessRole.ColonyVision);
@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
                 else if (entityMask[EntityManager.GetTypeIndex<ShipInfoDB>()])
                 {
                     var entityShipInfoDB = entity.GetDataBlob<ShipInfoDB>();
-                    if (entityShipInfoDB.Owner == ownerFaction)
+                    if (entityOwnedDB.EntityOwner == entityOwnedDB.ObjectOwner)
                     {
                         if (entityShipInfoDB.IsClassDefinition())
                         {
@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else if (entityMask[EntityManager.GetTypeIndex<FactionInfoDB>()])
                 {
-                    if (entity.GetDataBlob<FactionInfoDB>().Owner == ownerFaction)
+                    if (entityOwnedDB.EntityOwner == entityOwnedDB.ObjectOwner)
                     {
                         factions = FactionsWithAccess(authorizedPlayer, AccessRole.FullAccess);
                     }
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
 
                 foreach (Entity faction in factions)
                 {
-                    if (faction == ownerFaction)
+                    if (faction == entityOwnedDB.EntityOwner)
                     {
                         return true;
                     }

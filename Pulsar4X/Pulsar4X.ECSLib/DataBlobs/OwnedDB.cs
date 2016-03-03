@@ -4,8 +4,8 @@ namespace Pulsar4X.ECSLib
 {
     public class OwnedDB : BaseDataBlob
     {
-        [PublicAPI]
-        public Entity Faction { get; internal set; }
+        public Entity EntityOwner { get; internal set; }
+        public Entity ObjectOwner { get; internal set; }
 
         [JsonConstructor]
         private OwnedDB()
@@ -13,15 +13,13 @@ namespace Pulsar4X.ECSLib
             // JsonConstructor
         }
 
-        internal OwnedDB(Entity faction)
+        internal OwnedDB(Entity entityOwner, Entity objectOwner)
         {
-            Faction = faction;
+            EntityOwner = entityOwner;
+            ObjectOwner = objectOwner;
         }
 
-        public OwnedDB(OwnedDB ownedDB)
-        {
-            Faction = ownedDB.Faction;
-        }
+        public OwnedDB(OwnedDB ownedDB) : this(ownedDB.EntityOwner, ownedDB.ObjectOwner) { }
 
         public override object Clone()
         {
