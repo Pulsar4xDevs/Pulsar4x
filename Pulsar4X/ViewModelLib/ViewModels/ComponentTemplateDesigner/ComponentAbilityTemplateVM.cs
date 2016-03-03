@@ -192,8 +192,8 @@ namespace Pulsar4X.ViewModel
             typelist.Add(typeof(ConstructAmmoAbilityDB).ToString());
             typelist.Add(typeof(ConstructFightersAbilityDB).ToString());
             typelist.Add(typeof(EnginePowerDB).ToString());
-            typelist.Add(typeof(FuelStorageDB).ToString());
-            typelist.Add(typeof(FuelUseDB).ToString());
+            typelist.Add(typeof(FuelStorageAbilityDB).ToString());
+            typelist.Add(typeof(FuelConsumptionAbilityDB).ToString());
             typelist.Add(typeof(MineResourcesDB).ToString());
             typelist.Add(typeof(MissileLauncherSizeDB).ToString());
             typelist.Add(typeof(RefineResourcesDB).ToString());

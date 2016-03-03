@@ -5,10 +5,13 @@ namespace Pulsar4X.ECSLib
     public class EnginePowerDB : BaseDataBlob
     {
         [JsonProperty]
-        private int _enginePower;
-
-        public int EnginePower { get { return _enginePower; } internal set { _enginePower = value; } }
-
+        public int EnginePower { get; internal set; }
+        
+        /// <summary>
+        /// EngineThermalSig = EnginePower * ThermalReductionMultiplier
+        /// </summary>
+        [JsonProperty]
+        public float ThermalReductionMultiplier { get; internal set; }
 
         public EnginePowerDB()
         {
@@ -16,17 +19,17 @@ namespace Pulsar4X.ECSLib
 
         public EnginePowerDB(double power)
         {
-            _enginePower = (int)power;
+            EnginePower = (int)power;
         }
 
         public EnginePowerDB(int enginePower)
         {
-            _enginePower = enginePower;
+            EnginePower = enginePower;
         }
 
         public EnginePowerDB(EnginePowerDB db)
         {
-            _enginePower = db.EnginePower;
+            EnginePower = db.EnginePower;
         }
 
         public override object Clone()

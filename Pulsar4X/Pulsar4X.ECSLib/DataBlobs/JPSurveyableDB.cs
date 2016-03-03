@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Copy constructor
         /// </summary>
-        public JPSurveyableDB(int pointsRequired, Dictionary<Entity, int> pointsAccumulated)
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated)
         {
             SurveyPointsRequired = pointsRequired;
             SurveyPointsAccumulated = new Dictionary<Entity, int>(pointsAccumulated);
