@@ -35,8 +35,8 @@ namespace Pulsar4X.ECSLib
         public List<Entity> ShipClasses { get; internal set; }
 
         [PublicAPI]
-        [JsonProperty]
         public ReadOnlyDictionary<Guid, Entity> ComponentDesigns => new ReadOnlyDictionary<Guid, Entity>(InternalComponentDesigns);
+        [JsonProperty]
         internal Dictionary<Guid, Entity> InternalComponentDesigns = new Dictionary<Guid, Entity>(); 
 
         public Entity Owner { get; set; }

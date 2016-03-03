@@ -31,10 +31,11 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class MineralDepositInfo
     {
+        [JsonProperty]
         public int Amount { get; internal set; }
-
+        [JsonProperty]
         public int HalfOriginalAmount { get; internal set; }
-
+        [JsonProperty]
         public double Accessibility { get; internal set; }
     }
 
