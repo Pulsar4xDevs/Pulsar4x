@@ -4,18 +4,18 @@ namespace Pulsar4X.ECSLib
 {
     public class ActiveSensorDB : BaseDataBlob
     {
+        [JsonProperty]
+        public int GravSensorStrength { get; internal set; }
 
         [JsonProperty]
-        private int _gravSensorStrength;
-        public int GravSensorStrength { get { return _gravSensorStrength; } internal set { _gravSensorStrength = value; } }
+        public int EMSensitivity { get; internal set; }
 
         [JsonProperty]
-        private int _emSensitivity;
-        public int EMSensitivity { get { return _emSensitivity; } internal set { _emSensitivity = value; } }
+        public int Resolution { get; internal set; }
 
         [JsonProperty]
-        private int _resolution;
-        public int Resolution { get { return _resolution; } internal set { _resolution = value; } }
+        public bool IsSearchSensor { get; internal set; }
+        public bool IsTrackingSensor => !IsSearchSensor;
 
         public ActiveSensorDB()
         {
@@ -30,14 +30,14 @@ namespace Pulsar4X.ECSLib
         /// <param name="resolution"></param>
         public ActiveSensorDB(double gravStrenght, double emSensitivity, double resolution)
         {
-            _gravSensorStrength = (int)gravStrenght;
-            _emSensitivity = (int)emSensitivity;
-            _resolution = (int)resolution;
+            GravSensorStrength = (int)gravStrenght;
+            EMSensitivity = (int)emSensitivity;
+            Resolution = (int)resolution;
         }
 
         public ActiveSensorDB(ActiveSensorDB db)
         {
-            _gravSensorStrength = db.GravSensorStrength;
+            GravSensorStrength = db.GravSensorStrength;
         }
 
         public override object Clone()

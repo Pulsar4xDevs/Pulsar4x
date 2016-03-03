@@ -211,7 +211,7 @@ namespace Pulsar4X.Tests
             fuelConsumptionArgsDB7.Name = "Fuel Consumption";
             fuelConsumptionArgsDB7.Description = "Size Mod";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
-            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelUseDB).ToString();
+            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelConsumptionAbilityDB).ToString();
             fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(Ability(6))";
             component.ComponentAbilitySDs.Add(fuelConsumptionArgsDB7);
 

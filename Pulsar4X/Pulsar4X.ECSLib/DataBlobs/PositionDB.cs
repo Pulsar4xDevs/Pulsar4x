@@ -115,6 +115,9 @@ namespace Pulsar4X.ECSLib
         {
         }
 
+        [UsedImplicitly]
+        private PositionDB() : this(Guid.Empty) { }
+
         /// <summary>
         /// Static function to find the distance between two positions.
         /// </summary>
