@@ -7,85 +7,95 @@ namespace Pulsar4X.ECSLib
 
         #region Shipyard Events
 
-        ShipConstruction,
-        ShipRepair,
-        ShipRefit,
-        ShipOverhaul,
-        ShipScrapped,
-        
-        ShipyardModified,
-        OverhaulComplete,
-        OverhaulAbandoned,
+        ShipConstructionBegan,
+        ShipConstructionAborted,
+        ShipConstructionCompleted,
 
-        SlipwayDestroyed,
+        ShipRepairBegan,
+        ShipRepairAborted,
+        ShipRepairCompleted,
+
+        ShipRefitBegan,
+        ShipRefitCompleted,
+
+        ShipOverhaulBegan,
+        ShipOverhaulCompleted,
+
+        ShipScrappingBegan,
+        ShipScrappingCompleted,
+
+        ShipyardCapacityExpanded,
+        ShipyardSlipwayAdded,
+
+        ShipyardSlipwayDestroyed,
         ShipyardDestroyed,
 
         #endregion
 
         #region Population Events
         
-        PlanetBombarded,
-        CollateralDamage,
-        MassDriverAttack,
-
+        PopulationBombarded,
         POWRescued, // Friendly POW's returned to population
 
         // Political Status Events
-        PopulationSurrender,
-        PopStatusChange,
-        UnrestIncreasing,
-        UnrestDecreasing,
+        PopulationSurrendered,
+        PopStatusChanged,
+        UnrestIncreased,
+        UnrestDecreased,
 
         // Mining Events
         MineralExhausted,
         AllMineralsExhausted,
-        NewMineralDeposit,
-        AccessibilityIncrease,
         MineralsLocated,
-        GeoSurveyComplete,
+        GeoSurveyCompleted,
 
         // Research Events
         ResearchStarted,
         ResearchCompleted,
         InactiveLab,
         OverallocationOfLabs,
-        ReductionInLabs,
 
         // Industry Events
-        Production,
-        BombardmentLosses,
+        ProductionStarted,
+        ProductionCompleted,
+        ProductionQueueEmpty,
         MineralShortage,
         ComponentsScrapped,
         FightersScrapped,
+        MissilesScrapped,
         FuelShortage,
-        CivilianMiningColony,
-        ProductionQueueEmpty,
+        CMCEstablished, // Civilian Mining Colony
 
         // Ground Unit Events
-        UnitTrained,
-        GroundCombat,
-        GroundUnitLost,
-        GroundUnitDelivered,
-        MoraleIncrease,
-        MoraleLoss,
-        ReplacementsExpended,
-        EnemyCasualties,
-        ReadinessLoss,
+        UnitTrainingStarted,
+        UnitTrainingCompleted,
 
+        GroundForcesUnderAttack,
+        GroundUnitLost,
+        GroundForcesAttackedEnemy,
+        EnemyUnitDestroyed,
+
+        GroundUnitDelivered,
+        GroundUnitMoraleIncreased,
+        GroundUnitMoraleDecreased,
+
+        ReplacementsExpended,
+        
         // Environment Events
+        TerraformingCompleted,
         TerraformingReport,
-        GasRemoved,
         IceSheetMelted,
-        RadiationIncrease,
         BreathableAtmosphere,
+        RadiationIncreased,
 
         // Xenology Events
-        MineRestored,
-        FactoryRestored,
-        RuinsExploited,
-        TechDiscovered,
         RuinsLocated,
         AnomalyDiscovered,
+        RuinsExploited,
+
+        MineRestored,
+        FactoryRestored,
+        TechDiscovered,
         RoboticGuardians,
         TechDataLearned,
 
@@ -93,13 +103,18 @@ namespace Pulsar4X.ECSLib
 
         #region Leader events
 
-        TeamSkill,
+        TeamSkillIncreased,
+        TeamSkillDecreased,
+        TeamNotFull,
+
         OfficerUpdate,
-        PickupFailed,
-        DropoffFailed,
-        CommanderDelivered,
         OfficerPromoted,
         OfficerHealth,
+
+        LeaderPickedUp,
+        LeaderPickupFailed,
+        LeaderDroppedOff,
+        LeaderDropoffFailed,
         CommandAssignment,
 
         OutstandingNewOfficer,
