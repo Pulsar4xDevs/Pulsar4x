@@ -45,7 +45,7 @@ namespace Pulsar4X.Tests
             SerializationManager.Export(_game, File);
 
             Assert.IsTrue(System.IO.File.Exists(Path.Combine(SerializationManager.GetWorkingDirectory(), File)));
-            Console.WriteLine(Path.GetFullPath(File));
+            Console.WriteLine(Path.Combine(SerializationManager.GetWorkingDirectory(), File));
             // now lets give ourselves a clean game:
             _game = null;
 

@@ -7,20 +7,7 @@ namespace Pulsar4X.ECSLib
 {
     public static class ConstructionProcessor
     {
-
-        /// <summary>
-        /// Initializes this Processor.
-        /// </summary>
-        internal static void Initialize()
-        {
-        }
-
-        internal static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
-        {
-
-        }
-
-        internal static void ConstructStuff(Entity colony, Game game, int econTicks)
+        internal static void ConstructStuff(Entity colony, Game game)
         {
             Dictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             Dictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
@@ -31,7 +18,7 @@ namespace Pulsar4X.ECSLib
 
 
             var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
-            int maxPoints = colonyConstruction.PointsPerTick * econTicks;
+            int maxPoints = colonyConstruction.PointsPerTick;
 
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
             foreach (ConstructionJob batchJob in constructionJobs.ToArray())

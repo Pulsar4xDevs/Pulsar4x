@@ -12,6 +12,13 @@ namespace Pulsar4X.ECSLib
             NameDB jpNameDB = new NameDB("Jump Point");
             PositionDB jpPositionDB = new PositionDB(0,0,0, system.Guid);
             TransitableDB jpTransitableDB = new TransitableDB();
+
+            jpTransitableDB.IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false;
+
+            if (!jpTransitableDB.IsStabilized)
+            {
+                // TODO: Introduce a random chance to stablize jumppoints.
+            }
             
             var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Max);
 

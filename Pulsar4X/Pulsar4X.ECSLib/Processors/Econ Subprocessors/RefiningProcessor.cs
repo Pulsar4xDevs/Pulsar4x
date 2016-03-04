@@ -12,14 +12,14 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// TODO: refineing rates should also limit the amount that can be refined for a specific mat each tick. 
         /// </summary>
-        internal static void RefineMaterials(Entity colony, Game game, int econTicks)
+        internal static void RefineMaterials(Entity colony, Game game)
         {
 
             Dictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             Dictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
 
             ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
-            int refinaryPoints = refiningDB.PointsPerTick * econTicks;
+            int refinaryPoints = refiningDB.PointsPerTick;
 
             for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
             {

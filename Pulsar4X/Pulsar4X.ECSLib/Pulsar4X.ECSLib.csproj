@@ -214,7 +214,7 @@
     <Compile Include="Processors\ReCalcProcessor.cs" />
     <Compile Include="Processors\ShipDamageProcessor.cs" />
     <Compile Include="Processors\ShipMovement.cs" />
-    <Compile Include="Processors\TechProcessor.cs" />
+    <Compile Include="Processors\Econ Subprocessors\TechProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />

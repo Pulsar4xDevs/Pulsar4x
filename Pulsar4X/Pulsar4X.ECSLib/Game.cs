@@ -70,6 +70,12 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public GameSettings Settings { get; set; }
 
+        [JsonProperty]
+        private readonly OrbitProcessor _orbitProcessor = new OrbitProcessor();
+
+        [JsonProperty]
+        private readonly EconProcessor _econProcessor = new EconProcessor();
+
         #endregion
 
         #region Events
@@ -145,7 +151,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(gameName));
             }
             
-            var settings = new GameSettings { GameName = gameName, MaxSystems = maxSystems };
+            var settings = new GameSettings { GameName = gameName, MaxSystems = maxSystems, StartDateTime = startDateTime};
             var newGame = new Game {CurrentDateTime = startDateTime, Settings = settings};
 
 
@@ -247,10 +253,10 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public void RunProcessors(List<StarSystem> systems, int deltaSeconds)
         {
-            OrbitProcessor.Process(this, systems, deltaSeconds);
+            _orbitProcessor.Process(this, systems, deltaSeconds);
             ShipMovementProcessor.Process(this, systems, deltaSeconds);
             
-            EconProcessor.Process(this, systems, deltaSeconds);
+            _econProcessor.Process(this, systems, deltaSeconds);
         }
 
         [PublicAPI]

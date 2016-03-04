@@ -10,23 +10,11 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public static class TechProcessor
     {
-        private static Game _game;
-        private const int _timeBetweenRuns = 68400; //one terran day.
-
-
-        internal static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        internal static void ProcessSystem(StarSystem system, Game game)
         {
-            foreach (var system in systems)
+            foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             {
-                system.EconLastTickRun += deltaSeconds;
-                if (system.EconLastTickRun >= _timeBetweenRuns)
-                {
-                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
-                    {
-                        DoResearch(colonyEntity);
-                    }
-                    system.EconLastTickRun -= _timeBetweenRuns;
-                }
+                DoResearch(colonyEntity, game);
             }
         }
 
@@ -36,7 +24,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
-        internal static void DoResearch(Entity colonyEntity)
+        internal static void DoResearch(Entity colonyEntity, Game game)
         {
             var Faction = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner;
             FactionAbilitiesDB factionAbilities = Faction.GetDataBlob<FactionAbilitiesDB>();
@@ -54,7 +42,7 @@ namespace Pulsar4X.ECSLib
             {
                 //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
                 Guid projectGuid = scientist.GetDataBlob<ScientistDB>().ProjectQueue[0];
-                TechSD project = _game.StaticData.Techs[projectGuid];
+                TechSD project = game.StaticData.Techs[projectGuid];
                 int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
                 float bonus = scientist.GetDataBlob<ScientistDB>().Bonuses[project.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);

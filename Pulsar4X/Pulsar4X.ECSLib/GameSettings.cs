@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System;
+
+namespace Pulsar4X.ECSLib
 {
     public static class GameConstants
     {
@@ -63,16 +65,34 @@
 
     public class GameSettings
     {
-        [PublicAPI]
-        public string GameName { get; set; }
+        #region General Game Settings
 
-        [PublicAPI]
-        public int MaxSystems { get; set; }
+        public string GameName { get; set; } = "New Game";
 
-        [PublicAPI]
+        public int MaxSystems { get; set; } = 1000;
+
+        public DateTime StartDateTime { get; set; } = DateTime.Parse("2050-01-01T00:00:00");
+
         public VersionInfo Version => VersionInfo.PulsarVersionInfo;
 
-        [PublicAPI]
-        public bool EnableMultiThreading { get; set; } = true;
+        #endregion
+
+        #region Game Processing Settings
+
+        public TimeSpan OrbitCycleTime { get; set; } = TimeSpan.FromHours(1);
+
+        public TimeSpan ConstructionCycleTime { get; set; } = TimeSpan.FromDays(1);
+
+        public bool? EnableMultiThreading { get; set; } = true;
+
+        #endregion
+
+        public bool? OrbitalMotionForPlanets { get; set; } = true;
+
+        public bool? OrbitalMotionForAsteroids { get; set; } = true;
+
+        public bool? RealisticCommanderPromotions { get; set; } = true;
+
+        public bool? AllJumpPointsStabilized { get; set; } = false;
     }
 }

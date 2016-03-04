@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public static class OrbitProcessor
+    public class OrbitProcessor
     {
         /// <summary>
         /// TypeIndexes for several dataBlobs used frequently by this processor.
@@ -14,16 +15,31 @@ namespace Pulsar4X.ECSLib
         private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
         private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
 
+        [JsonProperty]
+        private DateTime _lastRun = DateTime.MinValue;
+
+        internal OrbitProcessor()
+        {
+            
+        }
+
         /// <summary>
         /// Function called by Game.RunProcessors to run this processor.
         /// </summary>
-        internal static int Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        internal int Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
             DateTime currentTime = game.CurrentDateTime;
 
+            if (currentTime - _lastRun < game.Settings.OrbitCycleTime)
+            {
+                return 0;
+            }
+
+            _lastRun = currentTime;
+
             int orbitsProcessed = 0;
 
-            if (game.Settings.EnableMultiThreading)
+            if (game.Settings.EnableMultiThreading ?? false)
             {
                 Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime, ref orbitsProcessed));
             }
