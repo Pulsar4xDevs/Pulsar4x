@@ -262,41 +262,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\ColonyView.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\AuroraButtons\available_colonies.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\class_design.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\combat_assignments.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\commanders.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\damaged_ships.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\down.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\events.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\fighters.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\fleet_orders.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\fuel_report.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\galactic_map.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\geo_survey_report.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\ground_units.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\industry.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\intelligence.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\left.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\production_overview.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\races.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\refresh.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\research.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\research_project.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\right.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\sector_assignment.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\shipping_lines.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\system_display.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\system_info.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\task_forces.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\tech_report.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\unit_details.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\up.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\wealth.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\zoom_in.png" />
-    <EmbeddedResource Include="Resources\AuroraButtons\zoom_out.png" />
-  </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties Views_2NewGame_1jeto__JSONSchema="" />
