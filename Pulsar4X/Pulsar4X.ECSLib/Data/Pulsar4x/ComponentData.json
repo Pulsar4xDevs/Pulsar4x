@@ -79,7 +79,7 @@
             },
             {
               "Name": "Engine Consumption vs Power",
-              "Description": "More Powerfull engines are less efficent for a given size",
+              "Description": "More Powerful engines are less efficent for a given size",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')",
               "MinFormula": "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')",
@@ -147,7 +147,7 @@
             {
               "Name": "Explosion Chance",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(11)",
+              "AbilityFormula": "DataBlobArgs(Ability(11), Ability(3) * 0.05)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ExplosionChanceAbilityDB"
             }
           ]
