@@ -33,7 +33,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         {
             base.OnExecuted(e);
             Views.MainWindow mw = (Views.MainWindow)Application.Instance.MainForm.Content;
-            mw.AddTabPanel("Colony View", new Views.ColonyScreenView(_gameVM));
+            mw.AddOrSelectTabPanel("Colony View", new Views.ColonyScreenView(_gameVM));
         }
     }
 }

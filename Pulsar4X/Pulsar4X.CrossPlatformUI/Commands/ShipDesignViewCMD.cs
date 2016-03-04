@@ -35,7 +35,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
 
             ShipDesignVM designVM = ShipDesignVM.Create(_gameVM);
             Views.MainWindow mw = (Views.MainWindow)Application.Instance.MainForm.Content;
-            mw.AddTabPanel("Ship Design", new Views.ShipDesignView(designVM));
+            mw.AddOrSelectTabPanel("Ship Design", new Views.ShipDesignView(designVM));
         }
     }
 }

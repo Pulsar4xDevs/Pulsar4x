@@ -18,17 +18,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		protected RenderCanvas RenderCanvas;
 		private UITimer timDraw;
 
-		#region Map Movement Buttons
-		protected Button btn_up;
-		protected Button btn_down;
-		protected Button btn_left;
-		protected Button btn_right;
-		protected Button btn_zoom_in;
-		protected Button btn_zoom_out;
-		protected Button btn_min_zoom;
-		#endregion
-
-		protected ListBox systems;
+		protected DropDown systems;
 
 		protected SystemVM CurrentSystem;
 		public RenderVM RenderVM { get; set; }
@@ -68,26 +58,6 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 			RenderCanvas.MouseLeave += WhenMouseLeave;
 
 			RenderCanvasLocation.Content = RenderCanvas;
-
-			Func<string,string> resource_for = s => $"Pulsar4X.CrossPlatformUI.Resources.{s}";
-
-			btn_up.Image = Bitmap.FromResource(resource_for("AuroraButtons.up.png"));
-			btn_up.Size = btn_up.Image.Size;
-
-			btn_down.Image = Bitmap.FromResource(resource_for("AuroraButtons.down.png"));
-			btn_down.Size = btn_down.Image.Size;
-
-			btn_left.Image = Bitmap.FromResource(resource_for("AuroraButtons.left.png"));
-			btn_left.Size = btn_left.Image.Size;
-
-			btn_right.Image = Bitmap.FromResource(resource_for("AuroraButtons.right.png"));
-			btn_right.Size = btn_right.Image.Size;
-
-			btn_zoom_in.Image = Bitmap.FromResource(resource_for("AuroraButtons.zoom_in.png"));
-			btn_zoom_in.Size = btn_zoom_in.Image.Size;
-
-			btn_zoom_out.Image = Bitmap.FromResource(resource_for("AuroraButtons.zoom_out.png"));
-			btn_zoom_out.Size = btn_zoom_out.Image.Size;
 		}
 
 		private void WhenMouseLeave(object sender, MouseEventArgs e) {

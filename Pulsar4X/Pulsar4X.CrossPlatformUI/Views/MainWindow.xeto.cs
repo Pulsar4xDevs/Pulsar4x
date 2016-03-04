@@ -66,11 +66,20 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 			//SetupAllTheButtons();
 		}
 		
-		public void AddTabPanel(string title, Container c) {
+		public void AddOrSelectTabPanel(string title, Container c, bool activate = true, bool force_new = false) {
+            if (!force_new) {
+                foreach (TabPage p in view_tabs.Pages) {
+                    if (p.Text == title) {
+                        if (activate) { view_tabs.SelectedPage = p; }
+                        return;
+                    }
+                }
+            }
 			TabPage tp = new TabPage();
 			tp.Content = c;
 			tp.Text = title;
 			view_tabs.Pages.Add(tp);
+            if (activate) { view_tabs.SelectedPage = tp; }
 		}
 
 		private void SetupAllTheButtons() {
