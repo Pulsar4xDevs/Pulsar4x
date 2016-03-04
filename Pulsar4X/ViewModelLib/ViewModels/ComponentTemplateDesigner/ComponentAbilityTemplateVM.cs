@@ -186,27 +186,37 @@ namespace Pulsar4X.ViewModel
         }
         private static List<string> AbilityTypes()
         {
-            List<string> typelist = new List<string>();
-            typelist.Add(typeof(ConstructInstationsAbilityDB).ToString());
-            typelist.Add(typeof(ConstructShipComponentsAbilityDB).ToString());
-            typelist.Add(typeof(ConstructAmmoAbilityDB).ToString());
-            typelist.Add(typeof(ConstructFightersAbilityDB).ToString());
-            typelist.Add(typeof(EnginePowerDB).ToString());
-            typelist.Add(typeof(FuelStorageAbilityDB).ToString());
-            typelist.Add(typeof(FuelConsumptionAbilityDB).ToString());
-            typelist.Add(typeof(MineResourcesDB).ToString());
-            typelist.Add(typeof(MissileLauncherAbilityDB).ToString());
-            typelist.Add(typeof(RefineResourcesDB).ToString());
-            typelist.Add(typeof(ResearchPointsAbilityDB).ToString());
-            typelist.Add(typeof(SensorSignatureDB).ToString());
-            typelist.Add(typeof(ActiveSensorDB).ToString());
-            typelist.Add(typeof(BeamFireControlAbilityDB).ToString());
-            typelist.Add(typeof(BeamWeaponAbilityDB).ToString());
-            typelist.Add(typeof(CloakAbilityDB).ToString());
-            typelist.Add(typeof(JumpDriveAbilityDB).ToString());
-            typelist.Add(typeof(MissileStorageAbilityDB).ToString());
-            typelist.Add(typeof(PassiveEMSensorAbilityDB).ToString());
-            typelist.Add(typeof(PassiveThermalSensorAbilityDB).ToString());
+            var typelist = new List<string>
+            {
+                typeof(ActiveSensorAbilityDB).ToString(),
+                typeof(BeamFireControlAbilityDB).ToString(),
+                typeof(BeamWeaponAbilityDB).ToString(),
+                typeof(CargoStorageAbilityDB).ToString(),
+                typeof(CloakAbilityDB).ToString(),
+                typeof(CommandAbilityDB).ToString(),
+                typeof(ConstructionAbilityDB).ToString(),
+                typeof(DamageControlAbilityDB).ToString(),
+                typeof(ElectronicDACAbilityDB).ToString(),
+                typeof(EnginePowerAbilityDB).ToString(),
+                typeof(ExplosionChanceAbilityDB).ToString(),
+                typeof(FailureRateMitigationAbilityDB).ToString(),
+                typeof(FuelConsumptionAbilityDB).ToString(),
+                typeof(FuelStorageAbilityDB).ToString(),
+                typeof(JumpDriveAbilityDB).ToString(),
+                typeof(JumpPointStabilizationAbilityDB).ToString(),
+                typeof(LifeSupportAbilityDB).ToString(),
+                typeof(MineResourcesDB).ToString(),
+                typeof(MissileLauncherAbilityDB).ToString(),
+                typeof(MissileStorageAbilityDB).ToString(),
+                typeof(MSPCapacityAbilityDB).ToString(),
+                typeof(PassiveEMSensorAbilityDB).ToString(),
+                typeof(PassiveThermalSensorAbilityDB).ToString(),
+                typeof(PowerGeneratorAbilityDB).ToString(),
+                typeof(RefineResourcesDB).ToString(),
+                typeof(ResearchPointsAbilityDB).ToString(),
+                typeof(SensorSignatureDB).ToString(),
+                typeof(StandardShieldAbilityDB).ToString()
+            };
 
             return typelist;
         }

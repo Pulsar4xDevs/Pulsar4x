@@ -21,41 +21,68 @@ namespace Pulsar4X.ECSLib
 
     public class BeamWeaponAbilityDB : BaseDataBlob
     {
+        /// <summary>
+        /// Max range of this weapon. Measured in KM.
+        /// </summary>
         [JsonProperty]
         public int MaxRange { get; internal set; }
+
+        /// <summary>
+        /// Damage of this weapon at MaxRange
+        /// </summary>
         [JsonProperty]
         public int DamageAtMaxRange { get; internal set; }
 
+        /// <summary>
+        /// AccuracyPenalty. ChanceToHit = (Speed/Range/other penalties) * AccuracyMultiplier
+        /// </summary>
         [JsonProperty]
         public float AccuracyMultiplier { get; internal set; }
         
-        [JsonProperty]
-        public int PowerRequired { get; internal set; }
-
         /// <summary>
-        /// Power recharged per second
+        /// Power required for this weapon to fire.
         /// </summary>
         [JsonProperty]
-        public int PowerRechargeRate { get; internal set; }
+        public float PowerRequired { get; internal set; }
 
+        /// <summary>
+        /// Power this weapon can charge per second.
+        /// </summary>
+        [JsonProperty]
+        public float PowerRechargeRate { get; internal set; }
+
+        /// <summary>
+        /// Number of shots fired in a single volley.
+        /// </summary>
         [JsonProperty]
         public int ShotsPerVolley { get; internal set; }
 
+        /// <summary>
+        /// Type of weapon this beam weapon is.
+        /// </summary>
         [JsonProperty]
         public BeamWeaponType WeaponType { get; internal set; }
         
+        [JsonConstructor]
+        internal BeamWeaponAbilityDB() { }
+
+        public BeamWeaponAbilityDB(double maxRange, double damageAtMaxRange, double accuracyMultiplier, double powerRequired, double powerRechargeRate, double shotsPerVolley, BeamWeaponType weaponType) 
+            : this((int) maxRange, (int) damageAtMaxRange, (float) accuracyMultiplier, (float) powerRequired, (float) powerRechargeRate, (int) shotsPerVolley, weaponType) { }
+
+        public BeamWeaponAbilityDB(int maxRange, int damageAtMaxRange, float accuracyMultiplier, float powerRequired, float powerRechargeRate, int shotsPerVolley, BeamWeaponType weaponType)
+        {
+            MaxRange = maxRange;
+            DamageAtMaxRange = damageAtMaxRange;
+            AccuracyMultiplier = accuracyMultiplier;
+            PowerRequired = powerRequired;
+            PowerRechargeRate = powerRechargeRate;
+            ShotsPerVolley = shotsPerVolley;
+            WeaponType = weaponType;
+        }
+
         public override object Clone()
         {
-            return new BeamWeaponAbilityDB
-            {
-                MaxRange = MaxRange,
-                DamageAtMaxRange = DamageAtMaxRange,
-                AccuracyMultiplier = AccuracyMultiplier,
-                PowerRequired = PowerRequired,
-                PowerRechargeRate = PowerRechargeRate,
-                WeaponType = WeaponType,
-                OwningEntity = OwningEntity,
-            };
+            return new BeamWeaponAbilityDB(MaxRange, DamageAtMaxRange, AccuracyMultiplier, PowerRequired, PowerRechargeRate, ShotsPerVolley, WeaponType);
         }
     }
 }

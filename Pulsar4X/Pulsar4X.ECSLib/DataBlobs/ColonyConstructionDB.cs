@@ -7,10 +7,12 @@ namespace Pulsar4X.ECSLib
 
     public enum ConstructionType
     {
-        Facility,
-        ShipComponent,
-        Fighter,
-        Ammo
+        None = 0,
+        Installations = 1 << 0,
+        ShipComponents = 1 << 1,
+        Ships = 1 << 2,
+        Fighters = 1 << 3,
+        Ordnance = 1 << 4,
     }
 
     public class JobBase
@@ -69,10 +71,11 @@ namespace Pulsar4X.ECSLib
         {
             ConstructionRates = new Dictionary<ConstructionType, int>
             {
-                {ConstructionType.Ammo, 0}, 
-                {ConstructionType.Facility, 0}, 
-                {ConstructionType.Fighter, 0}, 
-                {ConstructionType.ShipComponent, 0}
+                {ConstructionType.Ordnance, 0}, 
+                {ConstructionType.Installations, 0}, 
+                {ConstructionType.Fighters, 0}, 
+                {ConstructionType.ShipComponents, 0},
+                {ConstructionType.Ships, 0},
             };
             JobBatchList = new List<ConstructionJob>();
         }

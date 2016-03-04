@@ -28,7 +28,7 @@ namespace Pulsar4X.Tests
         /// </summary>
         [Test]
         [TestCaseSource(nameof(DataBlobTypes))]
-        public void JSONConstructor(Type dataBlobType)
+        public void JsonConstructor(Type dataBlobType)
         {
             ConstructorInfo[] constructors = dataBlobType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             Attribute jsonConstructorAttribute = new JsonConstructorAttribute();

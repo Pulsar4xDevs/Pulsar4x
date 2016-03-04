@@ -12,26 +12,17 @@ namespace Pulsar4X.ECSLib
 
         public SensorSignatureDB() { }
 
-        /// <summary>
-        /// Constructor for Factory. note int cast.
-        /// </summary>
-        /// <param name="thermalSig"></param>
-        /// <param name="electroMagneticSig"></param>
-        public SensorSignatureDB(double thermalSig, double electroMagneticSig)
-        {
-            ThermalSig = (int)thermalSig;
-            ElectroMagneticSig = (int)electroMagneticSig;
-        }
+        public SensorSignatureDB(double thermalSig, double electroMagneticSig) : this((int)thermalSig, (int)electroMagneticSig) { }
 
-        public SensorSignatureDB(SensorSignatureDB db)
+        public SensorSignatureDB(int thermalSig, int electroMagneticSig)
         {
-            ThermalSig = db.ThermalSig;
-            ElectroMagneticSig = db.ElectroMagneticSig;
+            ThermalSig = thermalSig;
+            ElectroMagneticSig = electroMagneticSig;
         }
 
         public override object Clone()
         {
-            return new SensorSignatureDB(this);
+            return new SensorSignatureDB(ThermalSig, ElectroMagneticSig);
         }
     }
 }

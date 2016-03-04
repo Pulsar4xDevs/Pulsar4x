@@ -131,11 +131,17 @@
   <ItemGroup>
     <Compile Include="DataBlobs\AbilityDBs\BeamFireControlAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\BeamWeaponAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\CargoStorageAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\CloakAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\CommandAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\DamageControlAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ElectronicDACAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ExplosionChanceAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\FailureRateMitigationAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\JumpDriveAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\JumpPointStabilizationAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\LifeSupportAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\MSPCapacityAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\MissileStorageAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PassiveEMSensorAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PassiveThermalSensorAbilityDB.cs" />

@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class ActiveSensorDB : BaseDataBlob
+    public class ActiveSensorAbilityDB : BaseDataBlob
     {
         [JsonProperty]
         public int GravSensorStrength { get; internal set; }
@@ -16,30 +16,21 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public bool IsSearchSensor { get; internal set; }
         public bool IsTrackingSensor => !IsSearchSensor;
-        
-        public ActiveSensorDB() { }
 
-        public ActiveSensorDB(ActiveSensorDB db) : this (db.GravSensorStrength, db.EMSensitivity, db.Resolution) { }
-
-        /// <summary>
-        /// This is the constructor for the component DesignToEntity factory.
-        /// note that while the params are doubles, it casts them to ints.
-        /// </summary>
-        /// <param name="gravStrenghth"></param>
-        /// <param name="emSensitivity"></param>
-        /// <param name="resolution"></param>
-        public ActiveSensorDB(double gravStrenghth, double emSensitivity, double resolution) : this ((int) gravStrenghth, (int) emSensitivity, (int) resolution) { }
+        public ActiveSensorAbilityDB(double gravStrenghth, double emSensitivity, double resolution, bool isSearchSensor) : this ((int) gravStrenghth, (int) emSensitivity, (int) resolution, isSearchSensor) { }
         
-        public ActiveSensorDB(int gravStrength, int emSensitivity, int resolution)
+        [JsonConstructor]
+        public ActiveSensorAbilityDB(int gravStrength = 0, int emSensitivity = 0, int resolution = 0, bool isSearchSensor = true)
         {
             GravSensorStrength = gravStrength;
             EMSensitivity = emSensitivity;
             Resolution = resolution;
+            IsSearchSensor = isSearchSensor;
         }
 
         public override object Clone()
         {
-            return new ActiveSensorDB(this);
+            return new ActiveSensorAbilityDB(GravSensorStrength, EMSensitivity, Resolution, IsSearchSensor);
         }
     }
 
