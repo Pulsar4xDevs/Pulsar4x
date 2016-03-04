@@ -1,4 +1,0 @@
-﻿{
-	"$type": "Panel",
-	"Content": { "$type": "Label", "Text": "Some Content" }
-}

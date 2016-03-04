@@ -34,7 +34,8 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             base.OnExecuted(e);
 
             ComponentDesignVM designVM = ComponentDesignVM.Create(_gameVM);
-            Application.Instance.MainForm.Content = new Views.ComponentDesignView(designVM);
+            Views.MainWindow mw = (Views.MainWindow)Application.Instance.MainForm.Content;
+            mw.AddOrSelectTabPanel("Component Design", new Views.ComponentDesignView(designVM));
         }
     }
 }
