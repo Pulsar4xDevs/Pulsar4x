@@ -103,9 +103,6 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Views\NewGame.jeto" />
-    <EmbeddedResource Include="Views\Startup.jeto" />
-    <EmbeddedResource Include="Views\SystemView.jeto" />
     <EmbeddedResource Include="Views\ScientistUC.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -153,7 +150,16 @@
     <EmbeddedResource Include="Views\ComponentTemplateDesigner\TechList.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\SystemView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NewGame.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\ComponentTemplateDesigner\ComponentTemplateDesignerParentView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\MainWindow.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
@@ -210,11 +216,14 @@
     <Compile Include="Views\JobUC.xeto.cs">
       <DependentUpon>JobUC.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\MainWindow.xeto.cs">
+      <DependentUpon>MainWindow.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\MinMaxSlider.xeto.cs">
       <DependentUpon>MinMaxSlider.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\NewGame.jeto.cs">
-      <DependentUpon>NewGame.jeto</DependentUpon>
+    <Compile Include="Views\NewGame.xeto.cs">
+      <DependentUpon>NewGame.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ResearchAbilityView.xeto.cs">
       <DependentUpon>ResearchAbilityView.xeto</DependentUpon>
@@ -228,13 +237,10 @@
     <Compile Include="Views\ShipDesignView.xeto.cs">
       <DependentUpon>ShipDesignView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\Startup.jeto.cs">
-      <DependentUpon>Startup.jeto</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SystemView.jeto.cs">
-      <DependentUpon>SystemView.jeto</DependentUpon>
-    </Compile>
     <Compile Include="Lib\OpenGLRenderer.cs" />
+    <Compile Include="Views\SystemView.xeto.cs">
+      <DependentUpon>SystemView.xeto</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
@@ -256,7 +262,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\ColonyView.ico" />
   </ItemGroup>
-  <ItemGroup />
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties Views_2NewGame_1jeto__JSONSchema="" />

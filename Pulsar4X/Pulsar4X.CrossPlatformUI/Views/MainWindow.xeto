@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="My Form"
+  >
+  <TableLayout>
+    <TableRow ScaleHeight="False">
+      <TableCell>
+        <StackLayout Orientation="Horizontal" x:Name="adv_buttons" Padding="10,5,5,5" VerticalContentAlignment="Center">
+          <Panel Padding="5,0,10,0">
+            <Label Text="Advance Time:"/>
+          </Panel>
+          <Button x:Name="btn_time_5sec" Text="5 Seconds" />
+          <Button x:Name="btn_time_30sec" Text="30 Seconds" />
+          <Button x:Name="btn_time_2min" Text="2 Minutes" />
+          <Button x:Name="btn_time_5min" Text="5 Minutes" />
+          <Button x:Name="btn_time_20min" Text="20 Minutes" />
+          <Button x:Name="btn_time_1hr" Text="1 Hour" />
+          <Button x:Name="btn_time_3hrs" Text="3 Hours" />
+          <Button x:Name="btn_time_8hrs" Text="8 Hours" />
+          <Button x:Name="btn_time_1day" Text="1 Day" />
+          <Button x:Name="btn_time_5day" Text="5 Days" />
+          <Button x:Name="btn_time_30day" Text="30 Days" />
+          <Panel Padding="10,0,10,0">
+            <Label Text="Sub-pulse length:"/>
+          </Panel>
+          <DropDown x:Name="dd_subpulse" SelectedIndex="0" ToolTip="The length of each movement sub-pulse within each time increment. Automatic allows Pulsar4X to select a suitable sub-pulse length.">
+            <ListItem Text="Automatic" />
+            <ListItem Text="5 Seconds" />
+            <ListItem Text="30 Seconds" />
+            <ListItem Text="2 Minutes" />
+            <ListItem Text="5 Minutes" />
+            <ListItem Text="20 Minutes" />
+            <ListItem Text="1 Hour" />
+            <ListItem Text="2 Hours" />
+            <ListItem Text="6 Hours" />
+            <ListItem Text="1 Day" />
+          </DropDown>
+          <Panel Padding="10,0,0,0">
+            <CheckBox x:Name="auto_turns" Text="Auto-Turns"/>
+          </Panel>
+        </StackLayout>
+      </TableCell>
+    </TableRow>
+    <TableRow ScaleHeight="True">
+      <TableCell ScaleWidth="True">
+        <TabControl x:Name="view_tabs"/>
+      </TableCell>
+    </TableRow>
+  </TableLayout>
+</Panel>

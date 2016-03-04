@@ -25,7 +25,7 @@ namespace Pulsar4X.CrossPlatformUI
         {
             _gameVM = new GameVM();
             ClientSize = new Size(600, 400);
-            Content = new SystemView(_gameVM);
+            Content = new MainWindow(_gameVM);
             CreateMenuToolBar();
             Title = "Pulsar4X";
         }
