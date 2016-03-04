@@ -32,7 +32,7 @@ namespace Pulsar4X.Tests
 
             atmoGases.Add(1.0, gas);
 
-            StaticDataManager.ExportStaticData(atmoGases, "./AtmoGasesExportTest.json");
+            StaticDataManager.ExportStaticData(atmoGases, "AtmoGasesExportTest.json");
 
             List<CommanderNameThemeSD> nameThemes = new List<CommanderNameThemeSD>();
             CommanderNameThemeSD nameTheme = new CommanderNameThemeSD();
@@ -54,9 +54,9 @@ namespace Pulsar4X.Tests
 
             nameThemes.Add(nameTheme);
 
-            StaticDataManager.ExportStaticData(nameThemes, "./CommanderNameThemeExportTest.json");
+            StaticDataManager.ExportStaticData(nameThemes, "CommanderNameThemeExportTest.json");
 
-            StaticDataManager.ExportStaticData(VersionInfo.PulsarVersionInfo, "./VersionInfoExportTest.vinfo");
+            StaticDataManager.ExportStaticData(VersionInfo.PulsarVersionInfo, "VersionInfoExportTest.vinfo");
 
             List<MineralSD> minList = new List<MineralSD>();
             MineralSD min = new MineralSD();
@@ -74,7 +74,7 @@ namespace Pulsar4X.Tests
             min.Description = "des";
             minList.Add(min);
 
-            StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
+            StaticDataManager.ExportStaticData(minList, "MineralsExportTest.json");
 
             //Dictionary<Guid, TechSD> techs = Tech();
             //TechSD tech1 = new TechSD();
@@ -121,7 +121,7 @@ namespace Pulsar4X.Tests
 
             //installations.Add(install);
 
-            StaticDataManager.ExportStaticData(installations, "./InstallationExportTest.json");
+            StaticDataManager.ExportStaticData(installations, "InstallationExportTest.json");
 
             //ComponentAbilitySD launchAbility = new ComponentAbilitySD();
             //launchAbility.Ability = AbilityType.LaunchMissileSize;
@@ -155,7 +155,7 @@ namespace Pulsar4X.Tests
 
             // test export of galaxy settings:
             GalaxyFactory gf = new GalaxyFactory(true, 1);
-            StaticDataManager.ExportStaticData(gf.Settings, "./SystemGenSettings.json");
+            StaticDataManager.ExportStaticData(gf.Settings, "SystemGenSettings.json");
         }
 
         [Test]
@@ -185,7 +185,7 @@ namespace Pulsar4X.Tests
             DepleatedDuranuim.OutputAmount = 6;
             mats.Add(DepleatedDuranuim.ID, DepleatedDuranuim);
 
-            StaticDataManager.ExportStaticData(mats, "./ReinfedMaterialsDataExportTest.json");
+            StaticDataManager.ExportStaticData(mats, "ReinfedMaterialsDataExportTest.json");
             
         }
 
@@ -277,7 +277,7 @@ namespace Pulsar4X.Tests
             EngineTech4.Requirements.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
             techs.Add(EngineTech4.ID, EngineTech4);
 
-            StaticDataManager.ExportStaticData(techs, "./TechnologyDataExportTest.json");
+            StaticDataManager.ExportStaticData(techs, "TechnologyDataExportTest.json");
             
         }
 

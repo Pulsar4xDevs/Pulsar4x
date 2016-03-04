@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static List<DataVersionInfo> AvailableData()
         {
-            string dataDirectory = GetWorkingDataDirectory();
+            string dataDirectory = Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory);
             var availableDirs = new List<string>(Directory.GetDirectories(dataDirectory));
             var availableData = new List<DataVersionInfo>();
 
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
             StaticDataStore newStore = game.StaticData.Clone();
             try
             {
-                string dataDirectory = Path.Combine(GetWorkingDataDirectory(), dataDir);
+                string dataDirectory = Path.Combine(Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory), dataDir);
 
                 // we start by looking for a version file, no version file, no load.
                 DataVersionInfo dataVInfo;
@@ -186,6 +186,10 @@ namespace Pulsar4X.ECSLib
         {
             var data = new DataExportContainer {Data = staticData, Type = StaticDataStore.GetTypeString(staticData.GetType())};
 
+            string workingDir = Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory);
+
+            file = Path.Combine(workingDir, file);
+
             if (string.IsNullOrEmpty(data.Type) == false)
             {
                 using (var sw = new StreamWriter(file))
@@ -194,17 +198,6 @@ namespace Pulsar4X.ECSLib
                     Serializer.Serialize(writer, data);
                 }
             }
-        }
-
-        private static string GetWorkingDataDirectory()
-        {
-            // get list of default sub-directories:
-            string dataDirectory = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
-            if (dataDirectory == null)
-            {
-                throw new DirectoryNotFoundException("StaticDataStore could not find/access the executable's directory.");
-            }
-            return Path.Combine(dataDirectory, DataDirectory);
         }
     }
 

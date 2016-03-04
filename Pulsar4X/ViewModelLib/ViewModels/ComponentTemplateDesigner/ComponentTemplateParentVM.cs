@@ -149,7 +149,7 @@ namespace Pulsar4X.ViewModel
 
         public void ExportToFile()
         {
-            StaticDataManager.ExportStaticData(_staticData.Components, "./NewComponentData.json");
+            StaticDataManager.ExportStaticData(_staticData.Components, "NewComponentData.json");
         }
 
 

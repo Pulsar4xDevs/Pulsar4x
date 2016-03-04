@@ -51,7 +51,7 @@ namespace Pulsar4X.Tests
             componentsDict.Add(lab.ID,lab);
             componentsDict.Add(refinary.ID, refinary);
             componentsDict.Add(factory.ID, factory);
-            StaticDataManager.ExportStaticData(componentsDict, "./ComponentData.json");
+            StaticDataManager.ExportStaticData(componentsDict, "ComponentData.json");
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Pulsar4X.Tests
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(engine.ID, engine);
-            StaticDataManager.ExportStaticData(componentsDict, "./EngineComponentTest.json");
+            StaticDataManager.ExportStaticData(componentsDict, "EngineComponentTest.json");
 
         }
 
@@ -102,7 +102,7 @@ namespace Pulsar4X.Tests
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(mine.ID, mine);
-            StaticDataManager.ExportStaticData(componentsDict, "./MineComponentTest.json");
+            StaticDataManager.ExportStaticData(componentsDict, "MineComponentTest.json");
 
         }
 

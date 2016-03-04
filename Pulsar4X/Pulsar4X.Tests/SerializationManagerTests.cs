@@ -14,8 +14,8 @@ namespace Pulsar4X.Tests
     {
         private Game _game;
         private AuthenticationToken _smAuthToken;
-        private const string File = "./testSave.json";
-        private const string File2 = "./testSave2.json";
+        private const string File = "testSave.json";
+        private const string File2 = "testSave2.json";
         private readonly DateTime _testTime = DateTime.Now;
 
         [Test]
@@ -30,11 +30,11 @@ namespace Pulsar4X.Tests
 
             // Check default nulls throw:
             Assert.Catch<ArgumentNullException>(() => SerializationManager.Export(null, File));
-            Assert.Catch<ArgumentNullException>(() => SerializationManager.Export(_game, (string)null));
-            Assert.Catch<ArgumentNullException>(() => SerializationManager.Export(_game, string.Empty));
+            Assert.Catch<ArgumentException>(() => SerializationManager.Export(_game, (string)null));
+            Assert.Catch<ArgumentException>(() => SerializationManager.Export(_game, string.Empty));
 
-            Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((string)null));
-            Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame(string.Empty));
+            Assert.Catch<ArgumentException>(() => SerializationManager.ImportGame((string)null));
+            Assert.Catch<ArgumentException>(() => SerializationManager.ImportGame(string.Empty));
             Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((Stream)null));
 
             if (_game == null)
@@ -44,7 +44,7 @@ namespace Pulsar4X.Tests
             // lets create a good saveGame
             SerializationManager.Export(_game, File);
 
-            Assert.IsTrue(System.IO.File.Exists(File));
+            Assert.IsTrue(System.IO.File.Exists(Path.Combine(SerializationManager.GetWorkingDirectory(), File)));
             Console.WriteLine(Path.GetFullPath(File));
             // now lets give ourselves a clean game:
             _game = null;
@@ -172,8 +172,8 @@ namespace Pulsar4X.Tests
                 _game = SerializationManager.ImportGame(File);
                 SerializationManager.Export(_game, File2);
 
-                var fs1 = new FileStream(File, FileMode.Open);
-                var fs2 = new FileStream(File2, FileMode.Open);
+                var fs1 = new FileStream(Path.Combine(SerializationManager.GetWorkingDirectory(), File), FileMode.Open);
+                var fs2 = new FileStream(Path.Combine(SerializationManager.GetWorkingDirectory(), File2), FileMode.Open);
 
                 if (fs1.Length == fs2.Length)
                 {
@@ -215,7 +215,7 @@ namespace Pulsar4X.Tests
 
             StarSystemFactory starsysfac = new StarSystemFactory(_game);
             StarSystem sol  = starsysfac.CreateSol(_game);
-            StaticDataManager.ExportStaticData(sol, "./solsave.json");
+            StaticDataManager.ExportStaticData(sol, "solsave.json");
         }
 
         private void CreateTestUniverse(int numSystems, bool generateDefaultHumans = false)

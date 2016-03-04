@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
@@ -238,7 +239,7 @@ namespace Pulsar4X.ECSLib
         public static void ExportStarSystemsToXML(Game game)
         {
             var ser = new XmlSerializer(typeof(XmlNode));
-            var writer = new StreamWriter(".\\SystemsExport.xml");
+            var writer = new StreamWriter(Path.Combine(GetWorkingDirectory(), "SystemsExport.xml"));
 
             var xmlDoc = new XmlDocument();
             XmlNode toplevelNode = xmlDoc.CreateNode(XmlNodeType.Element, "Systems", "NS");
@@ -542,6 +543,18 @@ namespace Pulsar4X.ECSLib
 
         private static FileStream GetFileStream(string filePath, FileAccess requiredAccess)
         {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("Argument is null or empty", nameof(filePath));
+            }
+
+            string fullPath = Path.GetFullPath(filePath);
+            string workingDirectory = GetWorkingDirectory();
+            if (Path.GetDirectoryName(fullPath) != workingDirectory)
+            {
+                filePath = Path.Combine(workingDirectory, Path.GetFileName(filePath));
+            }
+
             CheckFile(filePath, requiredAccess);
             if (requiredAccess == FileAccess.Read)
             {
@@ -608,6 +621,17 @@ namespace Pulsar4X.ECSLib
             // First two bytes should be 31 and 139 according to the GZip file format.
             // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
             return headerBytes[0] == 31 && headerBytes[1] == 139;
+        }
+
+        internal static string GetWorkingDirectory()
+        {
+            // get list of default sub-directories:
+            string workingDirectory = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+            if (workingDirectory == null)
+            {
+                throw new DirectoryNotFoundException("SerializationManager could not find/access the executable's directory.");
+            }
+            return workingDirectory;
         }
     }
 }
