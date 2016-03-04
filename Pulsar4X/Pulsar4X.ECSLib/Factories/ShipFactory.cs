@@ -106,7 +106,7 @@ namespace Pulsar4X.ECSLib
             
             // now update the ship system DBs to reflect the components:
             ///< @todo update ship to reflect added components
-            
+
             return shipClassEntity;
         }
 

@@ -96,7 +96,7 @@
               "Description": "Move Power for ship",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(3))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAbilityDB"
             },
             {
               "Name": "Fuel Consumption",
@@ -115,7 +115,7 @@
               "Description": "Size Mod",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(6))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelUseDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelConsumptionAbilityDB"
             },
             {
               "Name": "Thermal Signature Reduction",
