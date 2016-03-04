@@ -22,26 +22,7 @@
           "ResearchCostFormula": "[Size] * 10",
           "CreditCostFormula": "[Size]",
           "BuildPointCostFormula": "[Size]",
-          "MountType": {
-            "Entries": [
-              {
-                "Key": "ShipComponent",
-                "Value": true
-              },
-              {
-                "Key": "ShipCargo",
-                "Value": true
-              },
-              {
-                "Key": "PlanetFacility",
-                "Value": false
-              },
-              {
-                "Key": "PDS",
-                "Value": false
-              }
-            ]
-          },
+          "MountType": "ShipComponent, ShipCargo, Fighter",
           "ComponentAbilitySDs": [
             {
               "Name": "Engine Size",
@@ -177,26 +158,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": {
-            "Entries": [
-              {
-                "Key": "ShipComponent",
-                "Value": false
-              },
-              {
-                "Key": "ShipCargo",
-                "Value": true
-              },
-              {
-                "Key": "PlanetFacility",
-                "Value": true
-              },
-              {
-                "Key": "PDS",
-                "Value": false
-              }
-            ]
-          },
+          "MountType": "PlanetInstallation, ShipCargo",
           "ComponentAbilitySDs": [
             {
               "Name": "MiningAmount",
@@ -280,26 +242,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": {
-            "Entries": [
-              {
-                "Key": "ShipComponent",
-                "Value": false
-              },
-              {
-                "Key": "ShipCargo",
-                "Value": true
-              },
-              {
-                "Key": "PlanetFacility",
-                "Value": true
-              },
-              {
-                "Key": "PDS",
-                "Value": false
-              }
-            ]
-          },
+          "MountType": "PlanetInstallation, ShipCargo",
           "ComponentAbilitySDs": [
             {
               "Name": "RP Amount Per EconTick",
@@ -335,26 +278,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": {
-            "Entries": [
-              {
-                "Key": "ShipComponent",
-                "Value": false
-              },
-              {
-                "Key": "ShipCargo",
-                "Value": true
-              },
-              {
-                "Key": "PlanetFacility",
-                "Value": true
-              },
-              {
-                "Key": "PDS",
-                "Value": false
-              }
-            ]
-          },
+          "MountType": "PlanetInstallation, ShipCargo",
           "ComponentAbilitySDs": [
             {
               "Name": "RP Amount Per EconTick",
@@ -409,26 +333,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": {
-            "Entries": [
-              {
-                "Key": "ShipComponent",
-                "Value": false
-              },
-              {
-                "Key": "ShipCargo",
-                "Value": true
-              },
-              {
-                "Key": "PlanetFacility",
-                "Value": true
-              },
-              {
-                "Key": "PDS",
-                "Value": false
-              }
-            ]
-          },
+          "MountType": "PlanetInstallation, ShipCargo",
           "ComponentAbilitySDs": [
             {
               "Name": "Construction Points",

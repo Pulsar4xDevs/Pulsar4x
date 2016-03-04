@@ -4,17 +4,19 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-
+    [Flags]
     public enum ComponentMountType
     {
-        ShipComponent,
-        ShipCargo,
-        PlanetFacility,
-        PDS
+        None                = 0,
+        ShipComponent       = 1 << 0,
+        ShipCargo           = 1 << 1,
+        PlanetInstallation  = 1 << 2,
+        PDC                 = 1 << 3,
+        Fighter             = 1 << 4,
     }
+
     public class ComponentInfoDB : BaseDataBlob
     {
-        [PublicAPI]
         [JsonProperty]
         public Guid DesignGuid { get; internal set; }
 
@@ -41,9 +43,9 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public int CrewRequrements { get; internal set; }
-
+        
         [JsonProperty]
-        public Dictionary<ComponentMountType, bool> ComponentMountTypes { get; internal set; }
+        public ComponentMountType ComponentMountType { get; internal set; }
 
 
         public ComponentInfoDB()

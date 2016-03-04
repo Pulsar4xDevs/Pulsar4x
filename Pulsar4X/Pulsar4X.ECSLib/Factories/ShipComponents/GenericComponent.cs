@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
             design.BuildCostFormula = new ChainedExpression(component.BuildPointCostFormula, design, factionTech, staticData);
             design.MineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
             design.CreditCostFormula = new ChainedExpression(component.CreditCostFormula, design, factionTech, staticData);
-
+            design.ComponentMountType = component.MountType;
 
 
             foreach (var kvp in component.MineralCostFormula)
@@ -145,7 +145,8 @@ namespace Pulsar4X.ECSLib
             }
 
             ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.BuildCostValue , mineralCosts,materalCosts,componentCosts , tech.ID, componentDesign.CrewReqValue);
-            
+            componentInfo.ComponentMountType = componentDesign.ComponentMountType;
+
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);
             foreach (var designAbility in componentDesign.ComponentDesignAbilities)

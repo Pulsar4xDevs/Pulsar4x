@@ -128,11 +128,7 @@ namespace Pulsar4X.Tests
 
             component.CreditCostFormula = "[Size]";
 
-            component.MountType = new Dictionary<ComponentMountType, bool>();
-            component.MountType.Add(ComponentMountType.ShipComponent, true);
-            component.MountType.Add(ComponentMountType.ShipCargo, true);
-            component.MountType.Add(ComponentMountType.PlanetFacility, false);
-            component.MountType.Add(ComponentMountType.PDS, false);
+            component.MountType = ComponentMountType.ShipComponent | ComponentMountType.ShipCargo | ComponentMountType.Fighter;
 
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
@@ -264,11 +260,7 @@ namespace Pulsar4X.Tests
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new Dictionary<ComponentMountType, bool>();
-            component.MountType.Add(ComponentMountType.ShipComponent, false);
-            component.MountType.Add(ComponentMountType.ShipCargo, true);
-            component.MountType.Add(ComponentMountType.PlanetFacility, true);
-            component.MountType.Add(ComponentMountType.PDS, false);
+            component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
 
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
@@ -322,11 +314,7 @@ namespace Pulsar4X.Tests
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new Dictionary<ComponentMountType, bool>();
-            component.MountType.Add(ComponentMountType.ShipComponent, false);
-            component.MountType.Add(ComponentMountType.ShipCargo, true);
-            component.MountType.Add(ComponentMountType.PlanetFacility, true);
-            component.MountType.Add(ComponentMountType.PDS, false);
+            component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
 
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
@@ -367,11 +355,7 @@ namespace Pulsar4X.Tests
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new Dictionary<ComponentMountType, bool>();
-            component.MountType.Add(ComponentMountType.ShipComponent, false);
-            component.MountType.Add(ComponentMountType.ShipCargo, true);
-            component.MountType.Add(ComponentMountType.PlanetFacility, true);
-            component.MountType.Add(ComponentMountType.PDS, false);
+            component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
 
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
             
@@ -420,11 +404,7 @@ namespace Pulsar4X.Tests
 
             component.CreditCostFormula = "120";
 
-            component.MountType = new Dictionary<ComponentMountType, bool>();
-            component.MountType.Add(ComponentMountType.ShipComponent, false);
-            component.MountType.Add(ComponentMountType.ShipCargo, true);
-            component.MountType.Add(ComponentMountType.PlanetFacility, true);
-            component.MountType.Add(ComponentMountType.PDS, false);
+            component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
 
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 

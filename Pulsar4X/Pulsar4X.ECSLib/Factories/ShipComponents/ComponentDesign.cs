@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
             CreditCostFormula.Evaluate();
         }
 
-        public Dictionary<ComponentMountType, bool> ComponentMountType { get; internal set; }
+        public ComponentMountType ComponentMountType { get; internal set; }
 
         public List<ComponentDesignAbility> ComponentDesignAbilities;
 

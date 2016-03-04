@@ -125,10 +125,13 @@ namespace Pulsar4X.ViewModel
             sd.ResearchCostFormula = SelectedComponent.ResearchCostFormula;
             sd.CreditCostFormula = SelectedComponent.CreditCostFormula;
             sd.BuildPointCostFormula = SelectedComponent.BuildPointCostFormula;
-            sd.MountType = new Dictionary<ComponentMountType, bool>();
+            sd.MountType = ComponentMountType.None;
             foreach (KeyValuePair<ComponentMountType, bool?> mountTypePair in SelectedComponent.MountType)
             {
-                sd.MountType.Add(mountTypePair.Key, mountTypePair.Value != null && mountTypePair.Value == true);
+                if (mountTypePair.Value != null && mountTypePair.Value == true)
+                {
+                    sd.MountType = sd.MountType | mountTypePair.Key;
+                }
             }
 
             sd.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();

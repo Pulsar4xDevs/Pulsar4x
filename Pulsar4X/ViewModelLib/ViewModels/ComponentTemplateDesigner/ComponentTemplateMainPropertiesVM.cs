@@ -189,7 +189,10 @@ namespace Pulsar4X.ViewModel
             SubControlInFocus = FocusedControl.SizeControl;
             foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
             {
-                MountType.Add((ComponentMountType)item, false);
+                if ((ComponentMountType)item != ComponentMountType.None)
+                {
+                    MountType.Add((ComponentMountType)item, false);
+                }
             }
         }
 
@@ -260,9 +263,13 @@ namespace Pulsar4X.ViewModel
             CreditCostFormula = designSD.CreditCostFormula;
             BuildPointCostFormula = designSD.BuildPointCostFormula;
 
-            foreach (var item in designSD.MountType)
+            foreach (object value in Enum.GetValues(typeof(ComponentMountType)))
             {
-                MountType[item.Key] = item.Value;
+                var currentValue = (ComponentMountType)value;
+                if ((currentValue & designSD.MountType) != 0)
+                {
+                    MountType[currentValue] = true;
+                }
             }
         }
 

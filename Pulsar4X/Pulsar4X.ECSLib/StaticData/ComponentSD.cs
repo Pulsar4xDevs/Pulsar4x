@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         public string CreditCostFormula;
         public string BuildPointCostFormula;
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
-        public Dictionary<ComponentMountType, bool> MountType; 
+        public ComponentMountType MountType; 
 
         public List<ComponentTemplateAbilitySD> ComponentAbilitySDs;
     }
