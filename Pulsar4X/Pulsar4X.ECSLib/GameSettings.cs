@@ -99,8 +99,6 @@ namespace Pulsar4X.ECSLib
 
         public bool? OrbitalMotionForAsteroids { get; set; } = true;
 
-        public bool? RealisticCommanderPromotions { get; set; } = true;
-
         public bool? AllJumpPointsStabilized { get; set; } = false;
     }
 }
