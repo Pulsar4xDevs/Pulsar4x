@@ -25,7 +25,12 @@ namespace Pulsar4X.ViewModel
             set { _description = value; OnPropertyChanged(); }
         }
 
-
+        private string _toolTipText ="";
+        public string ToolTipText
+        {
+            get { return _toolTipText; }
+            set { _toolTipText = value; OnPropertyChanged(); }
+        }
 
         private ObservableCollection<ComponentAbilityTemplateVM> ParentList { get; set; }
         public int Index
@@ -141,8 +146,15 @@ namespace Pulsar4X.ViewModel
             {
                 SelectedGuiHint.Add((GuiHint)item, Enum.GetName(typeof(GuiHint), item));
             }
+            SelectedGuiHint.SelectionChangedEvent += SelectedGuiHint_SelectionChangedEvent;
             SelectedGuiHint.SelectedIndex = 0;
             _abilityDataBlobTypeSelection = AbilityTypes();
+            
+        }
+
+        private void SelectedGuiHint_SelectionChangedEvent(int oldSelection, int newSelection)
+        {
+            SetToolTipText();
         }
 
         /// <summary>
@@ -176,7 +188,31 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+        private void SetToolTipText()
+        {
+            switch (SelectedGuiHint.GetKey())
+            {
+                case GuiHint.GuiSelectionMaxMin:
+                    ToolTipText = _minMaxTTT;
+                    break;
+                case GuiHint.GuiTechSelectionList:
+                    ToolTipText = _techSelectionTTT;
+                    break;
+                case GuiHint.GuiTextDisplay:
+                    ToolTipText = _textDisplayTTT;
+                    break;
+                case GuiHint.None:
+                    ToolTipText = _noneTTT;
+                    break;
 
+            }
+
+        }
+
+        private string _minMaxTTT = "In this mode the component designer will display a slider for the user to select a value between the min and max values.";
+        private string _techSelectionTTT = "In this mode the component designer will display a combo box for the user to select from a list of tech, only tech researched will be shown.";
+        private string _textDisplayTTT = "In this mode the component designer will display the AbilityFormula";
+        private string _noneTTT = "In this mode the component designer will not display anything, used for; \r\nUse for hidden AbilityFormula calcs. \r\nUse in conjunction with Datablob type and args. \r\nUse with ItemDictionary and EnumDict(myEnum)";
 
         private void DeleteMe()
         {

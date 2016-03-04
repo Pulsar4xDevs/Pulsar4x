@@ -88,13 +88,15 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             Label lblMin = new Label();
             lblMin.Text = "MinFormula";
             TextBox minFormula = new TextBox();
+            minFormula.ToolTip = "Formula Field";
             minFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.MinFormula);
-            minFormula.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.MinControl;
+            minFormula.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.MinControl;            
             minFormula.DataContext = _viewModel;
             
             Label lblMax = new Label();
             lblMax.Text = "MaxFormula:";
             TextBox maxFormula = new TextBox();
+            maxFormula.ToolTip = "Formula Field";
             maxFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.MaxFormula);
             maxFormula.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.MaxControl;
             maxFormula.DataContext = _viewModel;
@@ -122,21 +124,21 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             //this just uses the exsisting Abilityformula
             GuiHintControls.Items.Clear();
-            Label label = new Label();
-            label.Text = "Displays AbilityFormula";
-            GuiHintControls.Items.Add(label);
+            //Label label = new Label();
+            //label.Text = "Displays AbilityFormula";
+            //GuiHintControls.Items.Add(label);
         }
 
         private void GuiHintNone()
         {
             GuiHintControls.Items.Clear();
-            Label label = new Label();
-            label.Text = "Does Not display anything, however, \r\nAbilityFormula still works 'under the hood' \r\nOr use in conjunction with Datablob type and args";
+            //Label label = new Label();
+            //label.Text = "Does Not display anything, however, \r\nAbilityFormula still works 'under the hood' \r\nOr use in conjunction with Datablob type and args";
             ComboBox dataBlobSelection = new ComboBox();
             dataBlobSelection.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM m) => m.AbilityDataBlobTypeSelection);
             dataBlobSelection.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM m) => m.AbilityDataBlobType);
             dataBlobSelection.DataContext = _viewModel;
-            GuiHintControls.Items.Add(label);
+            //GuiHintControls.Items.Add(label);
             GuiHintControls.Items.Add(dataBlobSelection);
 
         }

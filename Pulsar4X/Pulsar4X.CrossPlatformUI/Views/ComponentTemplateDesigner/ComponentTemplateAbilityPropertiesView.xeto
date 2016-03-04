@@ -2,6 +2,7 @@
 <Panel
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  ToolTip="{Binding ToolTipText}" 
   >
   <GroupBox ID="GrpBx" Width="400" Text="{Binding Index}">
   <TableLayout>
@@ -21,8 +22,8 @@
           <TextBox ID="AbilityFormulaTBx" Text="{Binding AbilityFormula}" />
         </TableRow>
         <TableRow>
-          <Label Text="GuiHint" />
-          <ComboBox ID="GuiHint" DataContext="{Binding SelectedGuiHint}" />
+          <Label Text="GuiHint" ToolTip="{Binding ToolTipText}" />
+          <ComboBox ID="GuiHint" DataContext="{Binding SelectedGuiHint}" ToolTip="{Binding ToolTipText}" />
         </TableRow>
       </TableLayout>
       <TableLayout>
