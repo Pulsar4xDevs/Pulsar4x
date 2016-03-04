@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -22,6 +23,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal IDictionary<ConstructionType, int> InternalConstructionPoints { get; set; } = new Dictionary<ConstructionType, int>();
 
+        public ConstructionAbilityDB(IDictionary<ConstructionType, double> constructionPoints) 
+            : this(constructionPoints.ToDictionary(constructionPoint => constructionPoint.Key, constructionPoint => (int)constructionPoint.Value)) { }
+        
+        [JsonConstructor]
         public ConstructionAbilityDB(IDictionary<ConstructionType, int> constructionPoints = null)
         {
             if (constructionPoints != null)

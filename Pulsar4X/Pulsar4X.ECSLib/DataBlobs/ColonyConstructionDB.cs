@@ -4,15 +4,15 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-
+    [Flags]
     public enum ConstructionType
     {
-        None = 0,
-        Installations = 1 << 0,
-        ShipComponents = 1 << 1,
-        Ships = 1 << 2,
-        Fighters = 1 << 3,
-        Ordnance = 1 << 4,
+        None            = 0,
+        Installations   = 1 << 0,
+        ShipComponents  = 1 << 1,
+        Ships           = 1 << 2,
+        Fighters        = 1 << 3,
+        Ordnance        = 1 << 4,
     }
 
     public class JobBase
