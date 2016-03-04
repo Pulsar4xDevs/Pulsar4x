@@ -5,37 +5,24 @@ namespace Pulsar4X.ECSLib
     public class SensorSignatureDB : BaseDataBlob
     {
         [JsonProperty]
-        private int _thermalSig;
-        public int ThermalSig { get { return _thermalSig; } internal set { _thermalSig = value; } }
+        public int ThermalSig { get; internal set; }
 
         [JsonProperty]
-        private int _electroMagneticSig;
-        public int ElectroMagneticSig { get { return _electroMagneticSig; } internal set { _electroMagneticSig = value; } }
+        public int ElectroMagneticSig { get; internal set; }
 
-        public SensorSignatureDB()
-        {
-        }
+        public SensorSignatureDB() { }
 
-        /// <summary>
-        /// Constructor for Factory. note int cast.
-        /// </summary>
-        /// <param name="thermalSig"></param>
-        /// <param name="electroMagneticSig"></param>
-        public SensorSignatureDB(double thermalSig, double electroMagneticSig)
-        {
-            _thermalSig = (int)thermalSig;
-            _electroMagneticSig = (int)electroMagneticSig;
-        }
+        public SensorSignatureDB(double thermalSig, double electroMagneticSig) : this((int)thermalSig, (int)electroMagneticSig) { }
 
-        public SensorSignatureDB(SensorSignatureDB db)
+        public SensorSignatureDB(int thermalSig, int electroMagneticSig)
         {
-            _thermalSig = db.ThermalSig;
-            _electroMagneticSig = db.ElectroMagneticSig;
+            ThermalSig = thermalSig;
+            ElectroMagneticSig = electroMagneticSig;
         }
 
         public override object Clone()
         {
-            return new SensorSignatureDB(this);
+            return new SensorSignatureDB(ThermalSig, ElectroMagneticSig);
         }
     }
 }

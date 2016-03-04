@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         {
             _game = game;
 
-            for (int i = 0; i < DataBlobTypes.Keys.Count; i++)
+            for (int i = 0; i < InternalDataBlobTypes.Keys.Count; i++)
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
@@ -48,6 +48,7 @@ namespace Pulsar4X.ECSLib
                 dbTypes.Add(type, i);
                 i++;
             }
+
             return dbTypes;
         }
 
@@ -147,7 +148,7 @@ namespace Pulsar4X.ECSLib
 
             _nextID = entityID;
 
-            for (int i = 0; i < DataBlobTypes.Count; i++)
+            for (int i = 0; i < InternalDataBlobTypes.Count; i++)
             {
                 if (_dataBlobMap[i][entityID] != null)
                 {
@@ -179,7 +180,7 @@ namespace Pulsar4X.ECSLib
         internal List<BaseDataBlob> GetAllDataBlobs(int id)
         {
             var dataBlobs = new List<BaseDataBlob>();
-            for (int i = 0; i < DataBlobTypes.Count; i++)
+            for (int i = 0; i < InternalDataBlobTypes.Count; i++)
             {
                 BaseDataBlob dataBlob = _dataBlobMap[i][id];
                 if (dataBlob != null)
@@ -324,7 +325,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(dataBlobMask));
             }
 
-            if (dataBlobMask.Length != DataBlobTypes.Count)
+            if (dataBlobMask.Length != InternalDataBlobTypes.Count)
             {
                 throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
             }
@@ -372,7 +373,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(dataBlobMask));
             }
 
-            if (dataBlobMask.Length != DataBlobTypes.Count)
+            if (dataBlobMask.Length != InternalDataBlobTypes.Count)
             {
                 throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
             }
@@ -462,7 +463,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static ComparableBitArray BlankDataBlobMask()
         {
-            return new ComparableBitArray(DataBlobTypes.Count);
+            return new ComparableBitArray(InternalDataBlobTypes.Count);
         }
 
         /// <summary>
@@ -472,8 +473,8 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static List<BaseDataBlob> BlankDataBlobList()
         {
-            var blankList = new List<BaseDataBlob>(DataBlobTypes.Count);
-            for (int i = 0; i < DataBlobTypes.Count; i++)
+            var blankList = new List<BaseDataBlob>(InternalDataBlobTypes.Count);
+            for (int i = 0; i < InternalDataBlobTypes.Count; i++)
             {
                 blankList.Add(null);
             }
@@ -589,7 +590,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static int GetTypeIndex<T>() where T : BaseDataBlob
         {
-            return DataBlobTypes[typeof(T)];
+            return InternalDataBlobTypes[typeof(T)];
         }
 
         #endregion

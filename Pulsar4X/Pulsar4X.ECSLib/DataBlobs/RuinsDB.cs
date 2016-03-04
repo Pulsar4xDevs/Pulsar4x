@@ -33,46 +33,26 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// How many ruins are on this world. or something.
         /// </summary>
-        public uint RuinCount
-        {
-            get { return _ruinCount; }
-            internal set { _ruinCount = value; }
-        }
         [JsonProperty]
-        private uint _ruinCount;
+        public uint RuinCount { get; internal set; }
 
         /// <summary>
         /// What kinds of things should be found in this ruin? including sophistication of killbots?
         /// </summary>
-        public int RuinTechLevel
-        {
-            get { return _ruinTechLevel; }
-            internal set { _ruinTechLevel = value; }
-        }
         [JsonProperty]
-        private int _ruinTechLevel;
+        public int RuinTechLevel { get; internal set; }
 
         /// <summary>
         /// How big are these ruins?
         /// </summary>
-        public RSize RuinSize
-        {
-            get { return _ruinSize; }
-            internal set { _ruinSize = value; }
-        }
         [JsonProperty]
-        private RSize _ruinSize;
+        public RSize RuinSize { get; internal set; }
 
         /// <summary>
         /// What shape are these ruins in?
         /// </summary>
-        public RQuality RuinQuality
-        {
-            get { return _ruinQuality; }
-            internal set { _ruinQuality = value; }
-        }
         [JsonProperty]
-        private RQuality _ruinQuality;
+        public RQuality RuinQuality { get; internal set; }
 
         /// <summary>
         /// Empty constructor for RuinsDataBlob.
@@ -99,15 +79,10 @@ namespace Pulsar4X.ECSLib
             RuinSize = ruinSize;
             RuinQuality = ruinQuality;
         }
-
-        public RuinsDB(RuinsDB ruinsDB)
-            : this(ruinsDB.RuinCount, ruinsDB.RuinTechLevel, ruinsDB.RuinSize, ruinsDB.RuinQuality)
-        {
-        }
-
+        
         public override object Clone()
         {
-            return new RuinsDB(this);
+            return new RuinsDB(RuinCount, RuinTechLevel, RuinSize, RuinQuality);
         }
     }
 }

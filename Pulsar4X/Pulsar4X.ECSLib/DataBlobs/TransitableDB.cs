@@ -9,35 +9,28 @@ namespace Pulsar4X.ECSLib
     {
         [JsonProperty]
         public Entity Destination { get; internal set; }
-        public ReadOnlyDictionary<Entity, int> BridgeDictionary => new ReadOnlyDictionary<Entity, int>(bridgeDictionary);
+
+        public ReadOnlyDictionary<Entity, int> BridgeDictionary => new ReadOnlyDictionary<Entity, int>(_bridgeDictionary);
         [JsonProperty]
-        internal Dictionary<Entity, int> bridgeDictionary = new Dictionary<Entity, int>();
+        internal Dictionary<Entity, int> _bridgeDictionary = new Dictionary<Entity, int>();
 
-        public bool IsStabilized => _isStabilized;
         [JsonProperty]
-        private bool _isStabilized;
+        public bool IsStabilized { get; internal set; }
 
-        /// <summary>
-        /// Default public constructor for Json
-        /// </summary>
-        public TransitableDB()
-        {
+        public TransitableDB() { }
 
-        }
+        public TransitableDB(Entity destination) : this(destination, false, new Dictionary<Entity, int>()) { }
 
-        public TransitableDB(Entity destination) : this(destination, false)
-        {
-        }
-
-        public TransitableDB(Entity destination, bool isStabilized)
+        public TransitableDB(Entity destination, bool isStabilized, IDictionary<Entity, int> bridgeDictionary)
         {
             Destination = destination;
-            _isStabilized = isStabilized;
+            IsStabilized = isStabilized;
+            _bridgeDictionary = new Dictionary<Entity, int>(bridgeDictionary);
         }
 
         public override object Clone()
         {
-            return new TransitableDB(Destination);
+            return new TransitableDB(Destination, IsStabilized, _bridgeDictionary);
         }
     }
 }

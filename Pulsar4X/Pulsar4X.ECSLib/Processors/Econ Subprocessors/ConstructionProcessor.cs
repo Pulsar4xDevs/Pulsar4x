@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
             batchJob.MineralsRequired = designInfo.MinerialCosts;
             batchJob.MineralsRequired = designInfo.MaterialCosts;
             batchJob.MineralsRequired = designInfo.ComponentCosts;
-            if (batchJob.ConstructionType == ConstructionType.Facility)
+            if (batchJob.ConstructionType == ConstructionType.Installations)
             {
                 var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
                 Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
@@ -127,43 +127,29 @@ namespace Pulsar4X.ECSLib
             var factories = new List<Entity>();
             foreach (Entity inst in installations)
             {
-                if (inst.HasDataBlob<ConstructInstationsAbilityDB>() ||                    
-                    inst.HasDataBlob<ConstructShipComponentsAbilityDB>() ||
-                    inst.HasDataBlob<ConstructFightersAbilityDB>() ||
-                    inst.HasDataBlob<ConstructAmmoAbilityDB>())
-      
+                if (inst.HasDataBlob<ConstructionAbilityDB>())
                     factories.Add(inst);
             }
 
             var typeRate = new Dictionary<ConstructionType, int>{
-                {ConstructionType.Ammo, 0}, 
-                {ConstructionType.Facility, 0}, 
-                {ConstructionType.Fighter, 0}, 
-                {ConstructionType.ShipComponent, 0}
+                {ConstructionType.Ordnance, 0}, 
+                {ConstructionType.Installations, 0}, 
+                {ConstructionType.Fighters, 0},
+                {ConstructionType.ShipComponents, 0},
+                {ConstructionType.Ships, 0},
             };
+
             foreach (Entity factory in factories)
             {
-                if (factory.HasDataBlob<ConstructInstationsAbilityDB>())
+                if (factory.HasDataBlob<ConstructionAbilityDB>())
                 {
-                    int installationPoints = factory.GetDataBlob<ConstructInstationsAbilityDB>().ConstructionPoints;
-                    typeRate.SafeValueAdd(ConstructionType.Facility, installationPoints);
+                    var constructionAbilityDB = factory.GetDataBlob<ConstructionAbilityDB>();
+                    foreach (KeyValuePair<ConstructionType, int> keyValuePair in typeRate)
+                    {
+                        ConstructionType currentType = keyValuePair.Key;
+                        typeRate[currentType] += constructionAbilityDB.GetConstructionPoints(currentType);
+                    }
                 }
-                if (factory.HasDataBlob<ConstructShipComponentsAbilityDB>())
-                {
-                    int shipComponentPoints = factory.GetDataBlob<ConstructShipComponentsAbilityDB>().ConstructionPoints;
-                    typeRate.SafeValueAdd(ConstructionType.Facility, shipComponentPoints);
-                }
-                if (factory.HasDataBlob<ConstructFightersAbilityDB>())
-                {
-                    int fighterPoints = factory.GetDataBlob<ConstructFightersAbilityDB>().ConstructionPoints;
-                    typeRate.SafeValueAdd(ConstructionType.Facility, fighterPoints);
-                }
-                if (factory.HasDataBlob<ConstructAmmoAbilityDB>())
-                {
-                    int ammoPoints = factory.GetDataBlob<ConstructAmmoAbilityDB>().ConstructionPoints;
-                    typeRate.SafeValueAdd(ConstructionType.Facility, ammoPoints);
-                }
-
             }
             colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionRates = typeRate;
             int maxPoints = 0;

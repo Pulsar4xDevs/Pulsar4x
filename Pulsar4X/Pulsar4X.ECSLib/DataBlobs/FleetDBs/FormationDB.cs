@@ -1,6 +1,6 @@
 ﻿namespace Pulsar4X.ECSLib
 {
-    class FormationDB : TreeHierarchyDB
+    public class FormationDB : TreeHierarchyDB
     {
         /// <summary>
         /// The Commander of this Formation (or ship if it is a single ship)

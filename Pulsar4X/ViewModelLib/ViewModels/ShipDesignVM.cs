@@ -84,7 +84,7 @@ namespace Pulsar4X.ViewModel
             Engines = new ObservableCollection<ComponentListEngineVM>();
             foreach (var componentDesign in factionInfo.ComponentDesigns.Values)
             {
-                if (componentDesign.HasDataBlob<EnginePowerDB>())
+                if (componentDesign.HasDataBlob<EnginePowerAbilityDB>())
                 {
                     Engines.Add(new ComponentListEngineVM(componentDesign));
                 }
@@ -131,7 +131,7 @@ namespace Pulsar4X.ViewModel
     {
         public ComponentListEngineVM(Entity component) : base(component)
         {
-            AbilityAmount = _componentEntity_.GetDataBlob<EnginePowerDB>().EnginePower;
+            AbilityAmount = _componentEntity_.GetDataBlob<EnginePowerAbilityDB>().EnginePower;
         }
     }
 

@@ -1,124 +1,57 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-
-    public class  ConstructInstationsAbilityDB : BaseDataBlob
+    /// <summary>
+    /// A single ability can provide multiple types of CP's. Some may even overlap. 
+    /// For example, you can have a component that provides 5 Installations CP's, and provides 2 Installations | Ships CP's.
+    /// Final result will be 7 Installation CP's, and 2 Ship CP's.
+    /// </summary>
+    public class ConstructionAbilityDB : BaseDataBlob
     {
-        [JsonProperty] private int _constructionPoints;
-        public int ConstructionPoints
-        {
-            get { return _constructionPoints; } 
-            internal set { _constructionPoints = value; }
-        }
+        public ReadOnlyDictionary<ConstructionType, int> ConstructionPoints => new ReadOnlyDictionary<ConstructionType, int>(InternalConstructionPoints);
 
-        public ConstructInstationsAbilityDB()
-        {
-        }
+        public int InstallationConstrustionPoints => GetConstructionPoints(ConstructionType.Installations);
+        public int ShipConstructionPoints => GetConstructionPoints(ConstructionType.Ships);
+        public int FighterConstructionPoints => GetConstructionPoints(ConstructionType.Fighters);
+        public int OrdnanceConstructionPoints => GetConstructionPoints(ConstructionType.Ordnance);
 
-        public ConstructInstationsAbilityDB(double constructionPoints)
-        {           
-            _constructionPoints = (int)constructionPoints;
-        }
-
-        public ConstructInstationsAbilityDB(ConstructInstationsAbilityDB db)
-        {
-            _constructionPoints = db.ConstructionPoints;
-        }
-
-        public override object Clone()
-        {
-            return new ConstructInstationsAbilityDB(this);
-        }
-    }
-
-    public class ConstructShipComponentsAbilityDB : BaseDataBlob
-    {
         [JsonProperty]
-        private int _constructionPoints;
-        public int ConstructionPoints
-        {
-            get { return _constructionPoints; }
-            internal set { _constructionPoints = value; }
-        }
+        internal IDictionary<ConstructionType, int> InternalConstructionPoints { get; set; } = new Dictionary<ConstructionType, int>();
 
-        public ConstructShipComponentsAbilityDB()
+        public ConstructionAbilityDB(IDictionary<ConstructionType, int> constructionPoints = null)
         {
-        }
-
-        public ConstructShipComponentsAbilityDB(double constructionPoints)
-        {
-            _constructionPoints = (int)constructionPoints;
-        }
-
-        public ConstructShipComponentsAbilityDB(ConstructShipComponentsAbilityDB db)
-        {
-            _constructionPoints = db.ConstructionPoints;
+            if (constructionPoints != null)
+            {
+                InternalConstructionPoints = new Dictionary<ConstructionType, int>(constructionPoints);
+            }
         }
 
         public override object Clone()
         {
-            return new ConstructShipComponentsAbilityDB(this);
-        }
-    }
-
-    public class ConstructAmmoAbilityDB : BaseDataBlob
-    {
-        [JsonProperty]
-        private int _constructionPoints;
-        public int ConstructionPoints
-        {
-            get { return _constructionPoints; }
-            internal set { _constructionPoints = value; }
+            return new ConstructionAbilityDB(ConstructionPoints);
         }
 
-        public ConstructAmmoAbilityDB()
+        /// <summary>
+        /// Adds up all construstion points this ability provides for a given type.
+        /// </summary>
+        public int GetConstructionPoints(ConstructionType type)
         {
-        }
+            int totalConstructionPoints = 0;
+            foreach (KeyValuePair<ConstructionType, int> keyValuePair in InternalConstructionPoints)
+            {
+                ConstructionType entryType = keyValuePair.Key;
+                int constructionPoints = keyValuePair.Value;
 
-        public ConstructAmmoAbilityDB(double constructionPoints)
-        {
-            _constructionPoints = (int)constructionPoints;
-        }
-
-        public ConstructAmmoAbilityDB(ConstructAmmoAbilityDB db)
-        {
-            _constructionPoints = db.ConstructionPoints;
-        }
-
-        public override object Clone()
-        {
-            return new ConstructAmmoAbilityDB(this);
-        }
-    }
-
-    public class ConstructFightersAbilityDB : BaseDataBlob
-    {
-        [JsonProperty]
-        private int _constructionPoints;
-        public int ConstructionPoints
-        {
-            get { return _constructionPoints; }
-            internal set { _constructionPoints = value; }
-        }
-
-        public ConstructFightersAbilityDB()
-        {
-        }
-
-        public ConstructFightersAbilityDB(double constructionPoints)
-        {
-            _constructionPoints = (int)constructionPoints;
-        }
-
-        public ConstructFightersAbilityDB(ConstructFightersAbilityDB db)
-        {
-            _constructionPoints = db.ConstructionPoints;
-        }
-
-        public override object Clone()
-        {
-            return new ConstructFightersAbilityDB(this);
+                if ((entryType & type) != 0)
+                {
+                    totalConstructionPoints += constructionPoints;
+                }
+            }
+            return totalConstructionPoints;
         }
     }
 }

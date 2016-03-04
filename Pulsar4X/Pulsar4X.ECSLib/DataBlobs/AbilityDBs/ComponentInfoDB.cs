@@ -14,47 +14,36 @@ namespace Pulsar4X.ECSLib
     }
     public class ComponentInfoDB : BaseDataBlob
     {
-        [JsonProperty] private Guid _designGuid;
         [PublicAPI]
-        public Guid DesignGuid {
-            get{return _designGuid;}
-            internal set { _designGuid = value; }
-        }
+        [JsonProperty]
+        public Guid DesignGuid { get; internal set; }
 
         [JsonProperty]
-        private int _sizeInTons;
-        public int SizeInTons { get { return _sizeInTons; } internal set { _sizeInTons = value; } }
+        public int SizeInTons { get; internal set; }
 
         [JsonProperty]
-        private int _htk;
-        public int HTK { get { return _htk; } internal set { _htk = value; } }
+        public int HTK { get; internal set; }
 
         [JsonProperty]
-        private Dictionary<Guid, int> _minerialCosts;
-        public Dictionary<Guid, int> MinerialCosts { get { return _minerialCosts; } internal set { _minerialCosts = value; } }
+        public Dictionary<Guid, int> MinerialCosts { get; internal set; }
 
         [JsonProperty]
-        private Dictionary<Guid, int> _materialCosts;
-        public Dictionary<Guid, int> MaterialCosts { get { return _materialCosts; } internal set { _materialCosts = value; } }
+        public Dictionary<Guid, int> MaterialCosts { get; internal set; }
 
         [JsonProperty]
-        private Dictionary<Guid, int> _componentCosts;
-        public Dictionary<Guid, int> ComponentCosts { get { return _componentCosts; } internal set { _componentCosts = value; } }
+        public Dictionary<Guid, int> ComponentCosts { get; internal set; }
 
         [JsonProperty]
         public int BuildPointCost { get; internal set; }
 
         [JsonProperty]
-        private Guid _techReqToBuild; //maybe have a requirement to use as well? might be usefull later down the track...
-        public Guid TechRequirementToBuild { get { return _techReqToBuild; } internal set { _techReqToBuild = value; } }
+        public Guid TechRequirementToBuild { get; internal set; }
 
-        [JsonProperty] 
-        private int _crewRequirement;
-        public int CrewRequrements { get { return _crewRequirement; } internal set { _crewRequirement = value; } }
+        [JsonProperty]
+        public int CrewRequrements { get; internal set; }
 
-        [JsonProperty] 
-        private Dictionary<ComponentMountType, bool> _componentMountType;
-        public Dictionary<ComponentMountType, bool> ComponentMountTypes { get { return _componentMountType; } internal set { _componentMountType = value; } } 
+        [JsonProperty]
+        public Dictionary<ComponentMountType, bool> ComponentMountTypes { get; internal set; }
 
 
         public ComponentInfoDB()
@@ -72,23 +61,23 @@ namespace Pulsar4X.ECSLib
         /// <param name="crewReqirement"></param>
         public ComponentInfoDB(Guid designGuid, int size, int htk, int buildPointCost, Dictionary<Guid, int> minerialCosts, Dictionary<Guid, int> materialCosts, Dictionary<Guid, int> componentCosts, Guid techRequrement, int crewReqirement)
         {
-            _designGuid = designGuid;
-            _sizeInTons = size;
-            _htk = htk;
+            DesignGuid = designGuid;
+            SizeInTons = size;
+            HTK = htk;
             BuildPointCost = buildPointCost;
-            _minerialCosts = minerialCosts;
-            _materialCosts = materialCosts;
-            _componentCosts = componentCosts;
-            _techReqToBuild = techRequrement;
-            _crewRequirement = crewReqirement;
+            MinerialCosts = minerialCosts;
+            MaterialCosts = materialCosts;
+            ComponentCosts = componentCosts;
+            TechRequirementToBuild = techRequrement;
+            CrewRequrements = crewReqirement;
         }
 
         public ComponentInfoDB(ComponentInfoDB db)
         {
-            _sizeInTons = db.SizeInTons;
-            _htk = db.HTK;
-            _materialCosts = db.MaterialCosts;
-            _techReqToBuild = db.TechRequirementToBuild;
+            SizeInTons = db.SizeInTons;
+            HTK = db.HTK;
+            MaterialCosts = db.MaterialCosts;
+            TechRequirementToBuild = db.TechRequirementToBuild;
         }
 
         public override object Clone()

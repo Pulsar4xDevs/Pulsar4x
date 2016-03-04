@@ -189,7 +189,7 @@ namespace Pulsar4X.Tests
             enginePowerDBArgs4.Name = "Engine Power";
             enginePowerDBArgs4.Description = "Move Power for ship";
             enginePowerDBArgs4.GuiHint = GuiHint.None;
-            enginePowerDBArgs4.AbilityDataBlobType = typeof(EnginePowerDB).ToString();
+            enginePowerDBArgs4.AbilityDataBlobType = typeof(EnginePowerAbilityDB).ToString();
             enginePowerDBArgs4.AbilityFormula = "DataBlobArgs(Ability(3))";
             component.ComponentAbilitySDs.Add(enginePowerDBArgs4);
 
@@ -374,9 +374,7 @@ namespace Pulsar4X.Tests
             component.MountType.Add(ComponentMountType.PDS, false);
 
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
-
-
-
+            
             ComponentTemplateAbilitySD refinePointsAbility = new ComponentTemplateAbilitySD();
             refinePointsAbility.Name = "RP Amount Per EconTick";
             refinePointsAbility.Description = "";
@@ -441,7 +439,7 @@ namespace Pulsar4X.Tests
             instalationConstructionAbility.Name = "Construction Points";
             instalationConstructionAbility.Description = "";
             instalationConstructionAbility.GuiHint = GuiHint.None;
-            instalationConstructionAbility.AbilityDataBlobType = typeof(ConstructInstationsAbilityDB).ToString();
+            instalationConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
             instalationConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(instalationConstructionAbility);
 
@@ -449,7 +447,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructShipComponentsAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(shipComponentsConstructionAbility);
 
@@ -457,7 +455,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructFightersAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(fighterConstructionAbility);
 
@@ -465,7 +463,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructAmmoAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(ammoConstructionAbility);
 

@@ -11,6 +11,8 @@ namespace Pulsar4X.ECSLib
         
         // Json Constructor
         public OwnedDB() { }
+        
+        public OwnedDB(Entity ownerFaction) : this(ownerFaction, ownerFaction) { }
 
         internal OwnedDB(Entity entityOwner, Entity objectOwner)
         {
@@ -18,13 +20,9 @@ namespace Pulsar4X.ECSLib
             ObjectOwner = objectOwner;
         }
 
-        public OwnedDB(OwnedDB ownedDB) : this(ownedDB.EntityOwner, ownedDB.ObjectOwner) { }
-
-        public OwnedDB(Entity ownerFaction) : this(ownerFaction, ownerFaction) { }
-
         public override object Clone()
         {
-            return new OwnedDB(this);
+            return new OwnedDB(EntityOwner, ObjectOwner);
         }
     }
 }

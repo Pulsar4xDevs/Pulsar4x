@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class ActiveSensorDB : BaseDataBlob
+    public class ActiveSensorAbilityDB : BaseDataBlob
     {
         [JsonProperty]
         public int GravSensorStrength { get; internal set; }
@@ -17,32 +17,25 @@ namespace Pulsar4X.ECSLib
         public bool IsSearchSensor { get; internal set; }
         public bool IsTrackingSensor => !IsSearchSensor;
 
-        public ActiveSensorDB()
+        public ActiveSensorAbilityDB(double gravStrenghth, double emSensitivity, double resolution, bool isSearchSensor) : this ((int) gravStrenghth, (int) emSensitivity, (int) resolution, isSearchSensor) { }
+        
+        [JsonConstructor]
+        public ActiveSensorAbilityDB(int gravStrength = 0, int emSensitivity = 0, int resolution = 0, bool isSearchSensor = true)
         {
-        }
-
-        /// <summary>
-        /// This is the constructor for the component DesignToEntity factory.
-        /// note that while the params are doubles, it casts them to ints.
-        /// </summary>
-        /// <param name="gravStrenght"></param>
-        /// <param name="emSensitivity"></param>
-        /// <param name="resolution"></param>
-        public ActiveSensorDB(double gravStrenght, double emSensitivity, double resolution)
-        {
-            GravSensorStrength = (int)gravStrenght;
-            EMSensitivity = (int)emSensitivity;
-            Resolution = (int)resolution;
-        }
-
-        public ActiveSensorDB(ActiveSensorDB db)
-        {
-            GravSensorStrength = db.GravSensorStrength;
+            GravSensorStrength = gravStrength;
+            EMSensitivity = emSensitivity;
+            Resolution = resolution;
+            IsSearchSensor = isSearchSensor;
         }
 
         public override object Clone()
         {
-            return new ActiveSensorDB(this);
+            return new ActiveSensorAbilityDB(GravSensorStrength, EMSensitivity, Resolution, IsSearchSensor);
         }
+    }
+
+    public class ActiveSensorStateInfo
+    {
+        public Entity Target { get; internal set; } = Entity.InvalidEntity;
     }
 }

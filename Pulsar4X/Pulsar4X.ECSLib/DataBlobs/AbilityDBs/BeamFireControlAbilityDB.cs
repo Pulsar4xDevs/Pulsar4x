@@ -1,32 +1,40 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using Newtonsoft.Json;
+
+namespace Pulsar4X.ECSLib
 {
-    public enum PlatformRestriction
-    {
-        None = 0,
-        FighterOnly,
-        FACOnly,
-        FullsizeOnly,
-        PDCOnly,
-    }
-
-    public enum PointDefenseRestriction
-    {
-        None = 0,
-        FinalFireOnly,
-    }
-
     public class BeamFireControlAbilityDB : BaseDataBlob
     {
+        /// <summary>
+        /// Max range of this Beam Fire Control
+        /// </summary>
+        [JsonProperty]
         public int Range { get; internal set; }
-        public int TrackingSpeed { get; internal set; }
 
-        public int EWHardening { get; internal set; }
-        public PlatformRestriction PlatformRestriction { get; internal set; }
-        public PointDefenseRestriction PointDefenseRestriction { get; internal set; }
+        /// <summary>
+        /// Tracking Speed of this Beam Fire Control
+        /// </summary>
+        [JsonProperty]
+        public int TrackingSpeed { get; internal set; }
         
+        /// <summary>
+        /// Determines if this Beam Fire Control is only capable of FinalDefensiveFire (Like CIWS)
+        /// </summary>
+        [JsonProperty]
+        public bool FinalFireOnly { get; internal set; }
+
+        public BeamFireControlAbilityDB(double range, double trackingSpeed, bool finalFireOnly) : this((int)range, (int)trackingSpeed, finalFireOnly) { }
+
+        [JsonConstructor]
+        public BeamFireControlAbilityDB(int range = 0, int trackingSpeed = 0, bool finalFireOnly = false)
+        {
+            Range = range;
+            TrackingSpeed = trackingSpeed;
+            FinalFireOnly = finalFireOnly;
+        }
+
         public override object Clone()
         {
-            return new BeamFireControlAbilityDB {Range = Range, TrackingSpeed = TrackingSpeed, EWHardening = EWHardening, PlatformRestriction = PlatformRestriction, OwningEntity = OwningEntity};
+            return new BeamFireControlAbilityDB(Range, TrackingSpeed, FinalFireOnly);
         }
     }
 }

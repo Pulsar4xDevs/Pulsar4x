@@ -7,30 +7,18 @@ namespace Pulsar4X.ECSLib
     public class ScientistDB : BaseDataBlob
     {
         [PublicAPI]
-        public Dictionary<ResearchCategories, float> Bonuses
-        {
-            get { return _bonuses; }
-            internal set { _bonuses = value; }
-        }
         [JsonProperty]
-        private Dictionary<ResearchCategories, float> _bonuses;
+        public Dictionary<ResearchCategories, float> Bonuses { get; internal set; }
 
         [PublicAPI]
-        public byte MaxLabs
-        {
-            get { return _maxLabs; }
-            internal set { _maxLabs = value; }
-        }
         [JsonProperty]
-        private byte _maxLabs;
-        
+        public byte MaxLabs { get; internal set; }
+
         [JsonProperty]
         public byte AssignedLabs { get; internal set; }
 
         public List<Guid> ProjectQueue { get; internal set; } 
 
-
-        [UsedImplicitly]
         public ScientistDB() { } // needed by json
 
         public ScientistDB(Dictionary<ResearchCategories,float> bonuses, byte maxLabs )
@@ -44,7 +32,7 @@ namespace Pulsar4X.ECSLib
         public ScientistDB(ScientistDB dB)
         {
             Bonuses = new Dictionary<ResearchCategories, float>(dB.Bonuses);
-            _maxLabs = dB.MaxLabs;
+            MaxLabs = dB.MaxLabs;
             AssignedLabs = dB.AssignedLabs;
             ProjectQueue = dB.ProjectQueue;
         }

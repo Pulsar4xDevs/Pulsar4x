@@ -9,46 +9,26 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
-        public double Mass
-        {
-            get { return _mass; }
-            internal set { _mass = value; }
-        }
         [JsonProperty]
-        private double _mass;
+        public double Mass { get; internal set; }
 
         /// <summary>
         /// Volume of this entity in Km^3.
         /// </summary>
-        public double Volume
-        {
-            get { return _volume; }
-            internal set { _volume = value; }
-        }
         [JsonProperty]
-        private double _volume;
+        public double Volume { get; internal set; }
 
         /// <summary>
         /// The density of the body in kg/cm^3
         /// </summary> 
-        public double Density
-        {
-            get { return _density; }
-            internal set { _density = value; }
-        }
         [JsonProperty]
-        private double _density;
+        public double Density { get; internal set; }
 
         /// <summary>
         /// The Average Radius in AU.
         /// </summary>
-        public double Radius
-        {
-            get { return _radius; }
-            internal set { _radius = value; }
-        }
         [JsonProperty]
-        private double _radius;
+        public double Radius { get; internal set; }
 
         /// <summary>
         /// The Average Radius in Km.
@@ -56,17 +36,14 @@ namespace Pulsar4X.ECSLib
         public double RadiusInKM
         {
             get { return Distance.ToKm(Radius); }
-            internal set { Radius = Distance.ToAU(Radius); }
+            internal set { Radius = Distance.ToAU(value); }
         }
 
         /// <summary>
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
-        public double SurfaceGravity
-        {
-            get { return GMath.GetStandardGravitationAttraction(Mass, RadiusInKM * 1000); }  // radius needs to be i meters here.
-        }
+        public double SurfaceGravity => GMath.GetStandardGravitationAttraction(Mass, RadiusInKM * 1000);
 
         public MassVolumeDB()
         {
@@ -80,10 +57,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         internal static MassVolumeDB NewFromMassAndRadius(double mass, double radius)
         {
-            MassVolumeDB mvDB = new MassVolumeDB();
-            mvDB.Mass = mass;
-            mvDB.Radius = radius;
-            mvDB.Volume = CalculateVolume(radius);
+            var mvDB = new MassVolumeDB {Mass = mass, Radius = radius, Volume = CalculateVolume(radius)};
             mvDB.Density = CalculateDensity(mass, mvDB.Volume);
 
             return mvDB;
@@ -97,11 +71,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         internal static MassVolumeDB NewFromMassAndDensity(double mass, double density)
         {
-            MassVolumeDB mvDB = new MassVolumeDB();
-            mvDB.Mass = mass;
-            mvDB.Density = density;
-            mvDB.Volume = CalculateVolume(mass, density);
-            mvDB.Radius = CalculateRadius(mass, density);
+            var mvDB = new MassVolumeDB {Mass = mass, Density = density, Volume = CalculateVolume(mass, density), Radius = CalculateRadius(mass, density)};
 
             return mvDB;
         }

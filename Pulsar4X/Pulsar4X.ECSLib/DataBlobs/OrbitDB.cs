@@ -11,64 +11,39 @@ namespace Pulsar4X.ECSLib
         /// Average distance of orbit from center.
         /// </summary>
         [PublicAPI]
-        public double SemiMajorAxis
-        {
-            get { return _semiMajorAxis; }
-            private set { _semiMajorAxis = value; }
-        }
         [JsonProperty]
-        private double _semiMajorAxis;
+        public double SemiMajorAxis { get; private set; }
 
         /// <summary>
         /// Eccentricity of orbit.
         /// Shape of the orbit. 0 = perfectly circular, 1 = parabolic.
         /// </summary>
         [PublicAPI]
-        public double Eccentricity
-        {
-            get { return _eccentricity; }
-            private set { _eccentricity = value; }
-        }
         [JsonProperty]
-        private double _eccentricity;
+        public double Eccentricity { get; private set; }
 
         /// <summary>
         /// Angle between the orbit and the flat reference plane.
         /// Stored in degrees.
         /// </summary>
         [PublicAPI]
-        public double Inclination
-        {
-            get { return _inclination; }
-            private set { _inclination = value; }
-        }
         [JsonProperty]
-        private double _inclination;
+        public double Inclination { get; private set; }
 
         /// <summary>
         /// Horizontal orientation of the point where the orbit crosses
         /// the reference frame stored in degrees.
         /// </summary>
         [PublicAPI]
-        public double LongitudeOfAscendingNode
-        {
-            get { return _longitudeOfAscendingNode; }
-            private set { _longitudeOfAscendingNode = value; }
-        }
         [JsonProperty]
-        private double _longitudeOfAscendingNode;
+        public double LongitudeOfAscendingNode { get; private set; }
 
         /// <summary>
         /// Angle from the Ascending Node to the Periapsis stored in degrees.
         /// </summary>
         [PublicAPI]
-        public double ArgumentOfPeriapsis
-        {
-            get { return _argumentOfPeriapsis; }
-            private set { _argumentOfPeriapsis = value; }
-        }
         [JsonProperty]
-        private double _argumentOfPeriapsis;
+        public double ArgumentOfPeriapsis { get; private set; }
 
         /// <summary>
         /// Definition of the position of the body in the orbit at the reference time
@@ -76,25 +51,15 @@ namespace Pulsar4X.ECSLib
         /// Stored in degrees.
         /// </summary>
         [PublicAPI]
-        public double MeanAnomaly
-        {
-            get { return _meanAnomaly; }
-            private set { _meanAnomaly = value; }
-        }
         [JsonProperty]
-        private double _meanAnomaly;
+        public double MeanAnomaly { get; private set; }
 
         /// <summary>
         /// reference time. Orbital parameters are stored relative to this reference.
         /// </summary>
         [PublicAPI]
-        public DateTime Epoch
-        {
-            get { return _epoch; }
-            internal set { _epoch = value; }
-        }
         [JsonProperty]
-        private DateTime _epoch;
+        public DateTime Epoch { get; internal set; }
 
         /// <summary>
         /// 2-Body gravitational parameter of system.
@@ -130,13 +95,8 @@ namespace Pulsar4X.ECSLib
         /// Stationary orbits don't have all of the data to update. They always return (0, 0).
         /// </summary>
         [PublicAPI]
-        public bool IsStationary
-        {
-            get { return _isStationary; }
-            private set { _isStationary = value; }
-        }
         [JsonProperty]
-        private bool _isStationary;
+        public bool IsStationary { get; private set; }
 
         [JsonProperty]
         private readonly double _parentMass;
