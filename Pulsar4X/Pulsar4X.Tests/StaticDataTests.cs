@@ -284,7 +284,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestLoadDefaultData()
         {
-            Game game = Game.NewGame("", DateTime.Now, 0);
+            Game game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 });
             var staticDataStore = game.StaticData;
 
             // store counts for later:
@@ -324,7 +324,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestOverwriteDefaultData()
         {
-            Game game = Game.NewGame("", DateTime.Now, 0);
+            Game game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 });
             StaticDataManager.LoadData("Pulsar4x", game);
             var staticDataStore = game.StaticData;
 
@@ -347,7 +347,7 @@ namespace Pulsar4X.Tests
         public void TestIDLookup()
         {
             // Create an empty data store:
-            Game game = Game.NewGame("", DateTime.Now, 0);
+            Game game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 });
             var staticDataStore = game.StaticData;
 
             // test when the store is empty:

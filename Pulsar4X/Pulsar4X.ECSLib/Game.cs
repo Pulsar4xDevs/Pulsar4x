@@ -23,9 +23,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public Entity GameMasterFaction;
-        
+
         [PublicAPI]
-        public bool IsLoaded { get; internal set; }
+        public bool IsLoaded { get; internal set; } = false;
 
         [PublicAPI]
         public DateTime CurrentDateTime
@@ -40,21 +40,20 @@ namespace Pulsar4X.ECSLib
         /// List of StarSystems currently in the game.
         /// </summary>
         [JsonProperty]
-        internal Dictionary<Guid, StarSystem> Systems { get; private set; }
+        internal Dictionary<Guid, StarSystem> Systems { get; private set; } = new Dictionary<Guid, StarSystem>();
 
-        [JsonProperty]
-        public readonly EntityManager GlobalManager;
+        [JsonProperty] public readonly EntityManager GlobalManager;
 
         [PublicAPI]
         [JsonProperty]
-        public StaticDataStore StaticData { get; internal set; }
+        public StaticDataStore StaticData { get; internal set; } = new StaticDataStore();
 
         [CanBeNull]
         [PublicAPI]
         public PulseInterrupt CurrentInterrupt { get; private set; }
 
         [PublicAPI]
-        public SubpulseLimit NextSubpulse { get; private set; }
+        public SubpulseLimit NextSubpulse { get; private set; } = new SubpulseLimit();
 
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
@@ -90,13 +89,40 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
-            IsLoaded = false;
             GlobalManager = new EntityManager(this);
-            Systems = new Dictionary<Guid, StarSystem>();
-            NextSubpulse = new SubpulseLimit();
-            GalaxyGen = new GalaxyFactory(true);
-            StaticData = new StaticDataStore();
+        }
 
+        public Game([NotNull] GameSettings settings) : this()
+        {
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            GalaxyGen = new GalaxyFactory(true);
+
+            Settings = settings;
+            CurrentDateTime = Settings.StartDateTime;
+
+            // Load Static Data
+            if (Settings.DataSets != null)
+            {
+                foreach (string dataSet in settings.DataSets)
+                {
+                    StaticDataManager.LoadData(dataSet, this);
+                }
+            }
+            if (StaticData.LoadedDataSets.Count == 0)
+            {
+                StaticDataManager.LoadData("Pulsar4x", this);
+            }
+            
+            // Create SM
+            SpaceMaster = new Player("Space Master", settings.SMPassword);
+            Players = new List<Player>();
+            GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
+
+            // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
         }
 
@@ -132,51 +158,6 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Public API
-
-        /// <summary>
-        /// </summary>
-        /// <param name="gameName"></param>
-        /// <param name="startDateTime"></param>
-        /// <param name="maxSystems"></param>
-        /// <param name="smPassword">Password for the SpaceMaster</param>
-        /// <param name="dataSets">IEnumerable containing filePaths to mod directories to load.</param>
-        /// <param name="progress"></param>
-        /// <exception cref="ArgumentNullException"><paramref name="gameName"/> is <see langword="null" />.</exception>
-        /// <exception cref="StaticDataLoadException">Thrown in a variety of situations when StaticData could not be loaded.</exception>
-        [PublicAPI]
-        public static Game NewGame([NotNull] string gameName, DateTime startDateTime, int maxSystems, string smPassword = "", IEnumerable<string> dataSets = null, IProgress<double> progress = null)
-        {
-            if (gameName == null)
-            {
-                throw new ArgumentNullException(nameof(gameName));
-            }
-            
-            var settings = new GameSettings { GameName = gameName, MaxSystems = maxSystems, StartDateTime = startDateTime};
-            var newGame = new Game {CurrentDateTime = startDateTime, Settings = settings};
-
-
-            // Load static data
-            if (dataSets != null)
-            {
-                foreach (string dataSet in dataSets)
-                {
-                    StaticDataManager.LoadData(dataSet, newGame);
-                }
-            }
-            if (newGame.StaticData.LoadedDataSets.Count == 0)
-            {
-                StaticDataManager.LoadData("Pulsar4x", newGame);
-            }
-
-            // Create SM
-            newGame.SpaceMaster = new Player("Space Master", smPassword);
-            newGame.Players = new List<Player>();
-            newGame.GameMasterFaction = FactionFactory.CreatePlayerFaction(newGame, newGame.SpaceMaster, "SpaceMaster Faction");
-
-            newGame.PostGameLoad();
-
-            return newGame;
-        }
 
         /// <summary>
         /// Time advancement code. Attempts to advance time by the number of seconds

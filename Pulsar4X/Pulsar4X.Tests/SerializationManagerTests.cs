@@ -142,7 +142,7 @@ namespace Pulsar4X.Tests
         {
             string jsonString = SerializationManager.Export(_game, system);
             int entityCount = system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken).Count;
-            _game = Game.NewGame("StarSystem Import Test", DateTime.Now, 0);
+            _game = new Game(new GameSettings { GameName = "System Import Test Game", StartDateTime = DateTime.Now, MaxSystems = 10 });
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
             StarSystem importedSystem = SerializationManager.ImportSystemJson(_game, jsonString);
@@ -220,7 +220,7 @@ namespace Pulsar4X.Tests
 
         private void CreateTestUniverse(int numSystems, bool generateDefaultHumans = false)
         {
-            _game = Game.NewGame("Unit Test Game", _testTime, numSystems);
+            _game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = _testTime, MaxSystems = numSystems });
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             _game.GenerateSystems(_smAuthToken, numSystems);
 

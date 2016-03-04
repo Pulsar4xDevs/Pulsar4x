@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -72,6 +74,12 @@ namespace Pulsar4X.ECSLib
         public int MaxSystems { get; set; } = 1000;
 
         public DateTime StartDateTime { get; set; } = DateTime.Parse("2050-01-01T00:00:00");
+
+        [JsonIgnore]
+        public string SMPassword { get; set; } = "";
+
+        [JsonIgnore]
+        public IEnumerable<string> DataSets { get; set; } = new List<string>(); 
 
         public VersionInfo Version => VersionInfo.PulsarVersionInfo;
 
