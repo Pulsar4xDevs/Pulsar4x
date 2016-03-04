@@ -25,6 +25,8 @@ namespace Pulsar4X.ViewModel
             set { _description = value; OnPropertyChanged(); }
         }
 
+
+
         private ObservableCollection<ComponentAbilityTemplateVM> ParentList { get; set; }
         public int Index
         {
@@ -173,6 +175,7 @@ namespace Pulsar4X.ViewModel
                 GuidDict = new TechListVM(techSelected, _staticData);
             }
         }
+
 
 
         private void DeleteMe()

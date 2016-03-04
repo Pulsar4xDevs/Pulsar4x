@@ -50,7 +50,7 @@
       {
         "Key": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
         "Value": {
-          "Name": "Fuel Consumption: 1 Litre per Engine Power Hour",
+          "Name": "Fuel Consumption: Litres per Engine Power Hour",
           "Description": "",
           "ID": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
           "MaxLevel": 12,
@@ -135,6 +135,66 @@
             ]
           },
           "CostFormula": "[Level] * 10000"
+        }
+      },
+      {
+        "Key": "609ADF57-98CD-4C7F-87B3-60F7E9B1E48A",
+        "Value": {
+          "Name": "JumpPoint Stabilization",
+          "Description": "A ship equipped with this module can Stabilise a JumpPoint",
+          "Category": "ConstructionProduction",
+          "ID": "609ADF57-98CD-4C7F-87B3-60F7E9B1E48A",
+          "MaxLevel": 1,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": [
+              {
+                "Key": "6c4ea02c-3d5b-4e92-b16c-ed5981377c20",
+                "Value": 1
+              }
+            ]
+          },
+          "CostFormula": "2500"
+        }
+      },
+      {
+        "Key": "41EFABC1-9E96-40E9-BB32-0637903CE1C6",
+        "Value": {
+          "Name": "JumpPoint Stabilization Size Reduction",
+          "Description": "Reduces the size of a component required for Jump Point Stabilisation",
+          "Category": "ConstructionProduction",
+          "ID": "41EFABC1-9E96-40E9-BB32-0637903CE1C6",
+          "MaxLevel": 10,
+          "DataFormula": "100 - [Level] * 5",
+          "Requirements": {
+            "List": [
+              {
+                "Key": "609ADF57-98CD-4C7F-87B3-60F7E9B1E48A",
+                "Value": 1
+              }
+            ]
+          },
+          "CostFormula": "[Level] * 2500"
+        }
+      },
+      {
+        "Key": "1016882D-8869-4607-BF27-1F066B2972AA",
+        "Value": {
+          "Name": "JumpPoint Stabilization Time Reduction",
+          "Description": "Reduces the time it takes to stabilise a Jump Point",
+          "Category": "ConstructionProduction",
+          "ID": "1016882D-8869-4607-BF27-1F066B2972AA",
+          "MaxLevel": 10,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": [
+              {
+                "Key": "609ADF57-98CD-4C7F-87B3-60F7E9B1E48A",
+                "Value": 1
+              }
+            ]
+          },
+          "CostFormula": "[Level] * 2500"
         }
       }
     ]

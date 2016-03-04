@@ -65,7 +65,7 @@ namespace Pulsar4X.Tests
             {
                 if (ability.GuiHint == GuiHint.GuiTechSelectionList)
                 {
-                    List<Guid> selectionlist = ability.GuidDictionary.Keys.ToList();
+                    List<Guid> selectionlist = ability.GuidDictionary.Keys.Cast<Guid>().ToList();
                     ability.SetValueFromGuidList(selectionlist[selectionlist.Count - 1]);
                 }
                 else if (ability.GuiHint == GuiHint.GuiSelectionMaxMin)

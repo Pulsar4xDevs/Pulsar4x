@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
 
                 if (abilitySD.GuidDictionary != null)
                 {
-                    designAbility.GuidDictionary = new Dictionary<Guid, ChainedExpression>();
+                    designAbility.GuidDictionary = new Dictionary<object, ChainedExpression>();
                     if (designAbility.GuiHint == GuiHint.GuiTechSelectionList)
                     {
                         foreach (var kvp in abilitySD.GuidDictionary)

@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
             ParentComponent = parentComponent;
         }
 
-        public Dictionary<Guid, ChainedExpression> GuidDictionary;
+        public Dictionary<object, ChainedExpression> GuidDictionary;
 
         public void SetValueFromGuidList(Guid techguid)
         {

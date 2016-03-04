@@ -269,7 +269,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var kvp in _designAbility.GuidDictionary)
                 {
                     //MakeThisDependant(kvp.Value);
-                    dict.Add(kvp.Key,kvp.Value.DResult);     
+                    dict.Add((Guid)kvp.Key,kvp.Value.DResult);     
                 }
                 args.Result = dict;
             }
@@ -315,6 +315,25 @@ namespace Pulsar4X.ECSLib
                 catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
             }
 
+            if (name == "EnumDict")
+            {
+                Type type = Type.GetType((string)args.EvaluateParameters()[0]);
+                Type dictType = typeof(Dictionary<,>).MakeGenericType(type, typeof(double));
+                dynamic dict = Activator.CreateInstance(dictType);
+                foreach (var kvp in _designAbility.GuidDictionary)
+                {                    
+                    dict.Add(kvp.Key, kvp.Value.DResult);
+                }
+                args.Result = dict;
+
+                //Dictionary<object, double> d1 = new Dictionary<object, double>();
+                //Dictionary<ConstructionType, double> d2 = new Dictionary<ConstructionType, double>();
+                //foreach (var item in d1)
+                //{
+                //    d2.Add((ConstructionType)item.Key, item.Value);
+                //}
+            }
+
             if (name == "TechData")
             {
 
@@ -322,6 +341,17 @@ namespace Pulsar4X.ECSLib
                 TechSD techSD = _staticDataStore.Techs[techGuid];
                 args.Result = TechProcessor.DataFormula(_factionTechDB, techSD);
             }
+
+            //Returns the tech level for the given guid
+            if (name == "TechLevel")
+            {
+
+                Guid techGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+                if (_factionTechDB.ResearchedTechs.ContainsKey(techGuid))
+                    args.Result = _factionTechDB.ResearchedTechs[techGuid];
+                else args.Result = 0;
+            }
+
             //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
             //The datablob will be the one defined in designAbility.DataBlobType
             //TODO document blobs and what args they take!!
