@@ -131,20 +131,23 @@ namespace Pulsar4X.ViewModel
                 GameName = "Test Game",
                 MaxSystems = options.NumberOfSystems,
                 SMPassword = options.GmPassword,
-                DataSets = options.SelectedModList.Select(dvi => dvi.Directory)
+                DataSets = options.SelectedModList.Select(dvi => dvi.Directory),
+                CreatePlayerFaction =  options.CreatePlayerFaction,
+                DefaultFactionName = options.FactionName,
+                DefaultPlayerPassword = options.FactionPassword,
+                DefaultSolStart = options.DefaultStart,
             };
 
             Game = new Game(gameSettings);
-
-            // TODO: Add options for Player name to be different than faction name.
-            CurrentPlayer = Game.AddPlayer(options.FactionName, options.FactionPassword);
+            
+            // TODO: Select default player more reliably
+            CurrentPlayer = Game.Players[0];
             CurrentAuthToken = new AuthenticationToken(CurrentPlayer, options.FactionPassword);
 
-            CurrentFaction = Game.GameMasterFaction;
-            if (options.CreatePlayerFaction && options.DefaultStart)
-            {
-                CurrentFaction = DefaultStartFactory.DefaultHumans(Game, CurrentPlayer, options.FactionName);
-            }
+            ReadOnlyDictionary<Entity, AccessRole> roles = CurrentPlayer.GetAccessRoles(CurrentAuthToken);
+
+            CurrentFaction = roles.FirstOrDefault(role => (role.Value & AccessRole.Owner) != 0).Key;
+
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
         }
@@ -154,7 +157,11 @@ namespace Pulsar4X.ViewModel
             StatusText = "Loading Game...";
             Game = SerializationManager.ImportGame(pathToFile);
 
+
+            // TODO: Select Default player, generate auth token for them.
+            CurrentAuthToken = new AuthenticationToken(Game.SpaceMaster);
             CurrentFaction = Game.GameMasterFaction;
+
             ProgressValue = 0;
             StatusText = "Game Loaded.";
         }

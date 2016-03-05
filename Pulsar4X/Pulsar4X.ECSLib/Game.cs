@@ -285,6 +285,7 @@ namespace Pulsar4X.ECSLib
         }
 
         [PublicAPI]
+        [CanBeNull]
         public StarSystem GetSystem(AuthenticationToken authToken, Guid systemGuid)
         {
             Player player = GetPlayerForToken(authToken);
