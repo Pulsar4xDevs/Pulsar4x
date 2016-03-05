@@ -1,50 +1,53 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    internal static class EconProcessor
+    internal class EconProcessor
     {
+        [JsonProperty]
+        private DateTime _lastRun = DateTime.MinValue;
 
-        private const int _timeBetweenRuns = 68400; //one terran day.
-
-        /// <summary>
-        /// Initializes this Processor.
-        /// </summary>
-        internal static void Initialize()
+        internal void Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
-        }
-
-        internal static void Process(Game game, List<StarSystem> systems, int deltaSeconds)
-        {
-            foreach (var system in systems) //TODO thread this
+            if (game.CurrentDateTime - _lastRun < game.Settings.ConstructionCycleTime)
             {
-                system.EconLastTickRun += deltaSeconds;
-                if (system.EconLastTickRun >= _timeBetweenRuns)
+                return;
+            }
+
+            _lastRun = game.CurrentDateTime;
+
+            if (game.Settings.EnableMultiThreading ?? false)
+            {
+                Parallel.ForEach(systems, system => ProcessSystem(system, game));
+            }
+            else
+            {
+                foreach (var system in systems) //TODO thread this
                 {
-                    int econTicks = system.EconLastTickRun / _timeBetweenRuns;
-                    //should each colony be run in sequence, or each process... does it matter?
-                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyMinesDB>())
-                    {
-                        MineProcessor.MineResources(colonyEntity, econTicks);                        
-                    }
-                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyRefiningDB>())
-                    {
-                        RefiningProcessor.RefineMaterials(colonyEntity, game, econTicks);
-                    }
-                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyConstructionDB>())
-                    {
-                        ConstructionProcessor.ConstructStuff(colonyEntity, game, econTicks);
-                    }
-  
-                    system.EconLastTickRun -= _timeBetweenRuns * econTicks;
+                    ProcessSystem(system, game);
                 }
             }
         }
 
-        internal static void ReCalc(Entity entity)
+        private void ProcessSystem(StarSystem system, Game game)
         {
+            TechProcessor.ProcessSystem(system, game);
 
-
+            foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyMinesDB>())
+            {
+                MineProcessor.MineResources(colonyEntity);
+            }
+            foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyRefiningDB>())
+            {
+                RefiningProcessor.RefineMaterials(colonyEntity, game);
+            }
+            foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyConstructionDB>())
+            {
+                ConstructionProcessor.ConstructStuff(colonyEntity, game);
+            }
         }
     }
 }

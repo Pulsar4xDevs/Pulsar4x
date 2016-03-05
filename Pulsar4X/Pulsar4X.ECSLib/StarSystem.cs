@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
@@ -23,10 +22,6 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public int EconLastTickRun { get; internal set; }
-
-        [PublicAPI]
-        [JsonProperty]
         public EntityManager SystemManager { get; private set; }
 
         [PublicAPI]
@@ -44,7 +39,6 @@ namespace Pulsar4X.ECSLib
             Game = game;
             Guid = Guid.NewGuid();
             NameDB = new NameDB(name);
-            EconLastTickRun = 0;
             SystemManager = new EntityManager(game);
             Seed = seed;
             RNG = new Random(seed);

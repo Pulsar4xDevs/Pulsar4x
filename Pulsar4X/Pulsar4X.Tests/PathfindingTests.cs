@@ -111,7 +111,7 @@ namespace Pulsar4X.Tests
 
         private void CreateTestUniverse()
         {
-            _game = Game.NewGame("Pathfinding Test", DateTime.Now, 10);
+            _game = new Game(new GameSettings { GameName = "Pathfinding Test Game", StartDateTime = DateTime.Now, MaxSystems = 10 });
             _pathfindingManager = new PathfindingManager(_game);
 
             _testPlayer = _game.AddPlayer("TestPlayer");

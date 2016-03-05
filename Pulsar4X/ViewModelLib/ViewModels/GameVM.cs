@@ -124,8 +124,17 @@ namespace Pulsar4X.ViewModel
         public void CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
-            Game newGame = Game.NewGame("Test Game", new DateTime(2050, 1, 1), options.NumberOfSystems, options.GmPassword, options.SelectedModList.Select(dvi => dvi.Directory).ToList(), new Progress<double>(OnProgressUpdate));
-            Game = newGame;
+
+            // TODO: Databind the GameSettings object in the NewGameOptionsVM
+            var gameSettings = new GameSettings
+            {
+                GameName = "Test Game",
+                MaxSystems = options.NumberOfSystems,
+                SMPassword = options.GmPassword,
+                DataSets = options.SelectedModList.Select(dvi => dvi.Directory)
+            };
+
+            Game = new Game(gameSettings);
 
             // TODO: Add options for Player name to be different than faction name.
             CurrentPlayer = Game.AddPlayer(options.FactionName, options.FactionPassword);
@@ -134,7 +143,7 @@ namespace Pulsar4X.ViewModel
             CurrentFaction = Game.GameMasterFaction;
             if (options.CreatePlayerFaction && options.DefaultStart)
             {
-                CurrentFaction = DefaultStartFactory.DefaultHumans(newGame, CurrentPlayer, options.FactionName);
+                CurrentFaction = DefaultStartFactory.DefaultHumans(Game, CurrentPlayer, options.FactionName);
             }
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";

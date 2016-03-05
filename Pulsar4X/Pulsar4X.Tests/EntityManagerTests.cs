@@ -19,7 +19,9 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = Game.NewGame("Test Game", DateTime.Now, 1);
+            var settings = new GameSettings {GameName = "Test Game", StartDateTime = DateTime.Now, MaxSystems = 1};
+
+            _game = new Game(settings);
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             _game.GenerateSystems(_smAuthToken, 1);
             _species1 = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> {new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45)});

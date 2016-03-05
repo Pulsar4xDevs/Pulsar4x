@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public static class OrbitProcessor
+    public class OrbitProcessor
     {
         /// <summary>
         /// TypeIndexes for several dataBlobs used frequently by this processor.
@@ -14,30 +15,45 @@ namespace Pulsar4X.ECSLib
         private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
         private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
 
+        [JsonProperty]
+        private DateTime _lastRun = DateTime.MinValue;
+
+        internal OrbitProcessor()
+        {
+            
+        }
+
         /// <summary>
         /// Function called by Game.RunProcessors to run this processor.
         /// </summary>
-        internal static int Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        internal int Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
             DateTime currentTime = game.CurrentDateTime;
 
+            if (currentTime - _lastRun < game.Settings.OrbitCycleTime)
+            {
+                return 0;
+            }
+
+            _lastRun = currentTime;
+
             int orbitsProcessed = 0;
 
-            if (game.Settings.EnableMultiThreading)
+            if (game.Settings.EnableMultiThreading ?? false)
             {
-                Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime, ref orbitsProcessed));
+                Parallel.ForEach(systems, system => UpdateSystemOrbits(system, game, ref orbitsProcessed));
             }
             else
             {
                 foreach (StarSystem system in systems)
                 {
-                    UpdateSystemOrbits(system, currentTime, ref orbitsProcessed);
+                    UpdateSystemOrbits(system, game, ref orbitsProcessed);
                 }
             }
             return orbitsProcessed;
         }
 
-        private static void UpdateSystemOrbits(StarSystem system, DateTime currentTime, ref int orbitsProcessed)
+        private static void UpdateSystemOrbits(StarSystem system, Game game, ref int orbitsProcessed)
         {
             EntityManager currentManager = system.SystemManager;
 
@@ -54,18 +70,38 @@ namespace Pulsar4X.ECSLib
             var rootPositionDB = root.GetDataBlob<PositionDB>(PositionTypeIndex);
 
             // Call recursive function to update every orbit in this system.
-            UpdateOrbit(root, rootPositionDB, currentTime, ref orbitsProcessed);
+            UpdateOrbit(root, rootPositionDB, game, ref orbitsProcessed);
         }
 
-        private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime currentTime, ref int orbitsProcessed)
+        private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, Game game, ref int orbitsProcessed)
         {
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
 
+            if (game.Settings.OrbitalMotionForPlanets ?? false)
+            {
+                var systemBodyDB = entity.GetDataBlob<SystemBodyDB>();
+                if (systemBodyDB != null && systemBodyDB.Type != BodyType.Asteroid && systemBodyDB.Type != BodyType.Comet)
+                {
+                    // Do not process this planet or moon.
+                    return;
+                }
+            }
+
+            if (game.Settings.OrbitalMotionForAsteroids ?? false)
+            {
+                var systemBodyDB = entity.GetDataBlob<SystemBodyDB>();
+                if (systemBodyDB != null && systemBodyDB.Type == BodyType.Asteroid)
+                {
+                    // Do not process this asteroid
+                    return;
+                }
+            }
+
             // Get our Parent-Relative coordinates.
             try
             {
-                Vector4 newPosition = GetPosition(entityOrbitDB, currentTime);
+                Vector4 newPosition = GetPosition(entityOrbitDB, game.CurrentDateTime);
 
                 // Get our Absolute coordinates.
                 entityPosition.Position = parentPositionDB.Position + newPosition;
@@ -82,7 +118,7 @@ namespace Pulsar4X.ECSLib
             foreach (Entity child in entityOrbitDB.Children)
             {
                 // RECURSION!
-                UpdateOrbit(child, entityPosition, currentTime, ref orbitsProcessed);
+                UpdateOrbit(child, entityPosition, game, ref orbitsProcessed);
             }
         }
 

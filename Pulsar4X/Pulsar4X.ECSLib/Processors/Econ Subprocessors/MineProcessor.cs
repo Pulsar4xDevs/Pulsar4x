@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
 {
     internal static class MineProcessor
     {
-        internal static void MineResources(Entity colonyEntity, int econTicks)
+        internal static void MineResources(Entity colonyEntity)
         {
             Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyDB>().Minerals;
@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in mineRates)
             {                
                 double accessability = planetMinerals[kvp.Key].Accessibility;
-                double actualRate = kvp.Value * mineBonuses * accessability * econTicks;
+                double actualRate = kvp.Value * mineBonuses * accessability;
                 int mineralsMined = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
 
                 colonyMineralStockpile.SafeValueAdd<Guid>(kvp.Key, mineralsMined);
