@@ -124,7 +124,8 @@ namespace Pulsar4X.ViewModel
 
         public TechListVM GuidDict { get; set; }
         public DictionaryVM<Type, string> ItemDictTypes { get; } = new DictionaryVM<Type, string>();
-        public ItemDictVM<object> ItemDict { get; } = new ItemDictVM<object>();
+        public ObservableCollection<ItemDictVM<object>> ItemDict { get; } = new ObservableCollection<ItemDictVM<object>>();
+        //public ItemDictVM<object> ItemDict { get; } = new ItemDictVM<object>();
 
         
         public ICommand AddToEditCommand { get { return new RelayCommand<object>(obj => AddMe()); } }
@@ -162,15 +163,27 @@ namespace Pulsar4X.ViewModel
 
         private void ItemDictTypes_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            DictionaryVM<object, string> dict = new DictionaryVM<object, string>(DisplayMode.Key);
-            foreach (var item in Enum.GetValues(ItemDictTypes.SelectedKey))
-            {
+            ItemDict.Clear();
+            ItemDictVM<object> itdvm = new ItemDictVM<object>(ParentVM, ItemDictTypes.SelectedKey);
+            itdvm.PropertyChanged += Itdvm_PropertyChanged;
+            ItemDict.Add(itdvm );
 
-                dict.Add(item, "");
-                
+        }
+
+        private void Itdvm_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            foreach (var item in ItemDict.ToList())
+            {
+                if (string.IsNullOrWhiteSpace(item.Formula) && ItemDict.IndexOf(item) < ItemDict.Count -1)
+                    ItemDict.Remove(item);
             }
-            ItemDict.Items.Add(dict);
-            dict.SelectedIndex = 0;
+
+            if (!string.IsNullOrWhiteSpace(ItemDict.Last().Formula))
+            {
+                ItemDictVM<object> itdvm = new ItemDictVM<object>(ParentVM, ItemDictTypes.SelectedKey);
+                itdvm.PropertyChanged += Itdvm_PropertyChanged;
+                ItemDict.Add(itdvm);
+            }
         }
 
         private void SelectedGuiHint_SelectionChangedEvent(int oldSelection, int newSelection)
@@ -281,10 +294,12 @@ namespace Pulsar4X.ViewModel
             return typelist;
         }
 
+        public enum None { };
         private static List<Type> EnumTypes()
         {
             var typelist = new List<Type>
             {
+                typeof(None),
                 typeof(ConstructionType)
             };
 
@@ -317,9 +332,49 @@ namespace Pulsar4X.ViewModel
     }
 
 
-    public class ItemDictVM<T1>
+    public class ItemDictVM<T1> : ComponentTemplateDesignerBaseVM
     {
-        public Type KeyType { get { return typeof(T1); } }
-        public ObservableCollection<DictionaryVM<T1, string>> Items { get; } = new ObservableCollection<DictionaryVM<T1, string>>();
+        public override string FocusedText
+        {
+            get
+            {
+                switch (SubControlInFocus)
+                {
+                    case FocusedControl.AbilityFormulaControl:
+                        return Formula;
+                    default:
+                        return "";
+                }
+            }
+
+            set
+            {
+                switch (SubControlInFocus)
+                {
+
+                    case FocusedControl.AbilityFormulaControl:
+                        Formula = value;
+                        break;
+                }
+                ParentVM.ControlInFocus = this;
+            }
+        }
+
+        private string _formula;
+        public string Formula
+        {
+            get { return _formula; }
+            set { _formula = value; OnPropertyChanged(); }
+        }
+
+        public DictionaryVM<T1, string> Items { get; } = new DictionaryVM<T1, string>();
+
+        public ItemDictVM(ComponentTemplateParentVM parent, Type enumtype): base(parent)
+        {
+            foreach (var item in Enum.GetValues(enumtype))
+            {
+                Items.Add((T1)item, item.ToString());
+            }
+        }
     }
 }

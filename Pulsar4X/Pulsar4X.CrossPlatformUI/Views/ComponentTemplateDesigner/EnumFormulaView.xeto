@@ -6,7 +6,7 @@
   <TableLayout>
     <TableRow>
       <ComboBox ID="EnumComBox" />
-      <TextBox Text="{Binding SelectedValue}" ToolTip="Formula Field"/>
+      <TextBox ID="FormulaTBx" Text="{Binding Formula}" ToolTip="Formula Field"/>
     </TableRow>
   </TableLayout>	
 </Panel>

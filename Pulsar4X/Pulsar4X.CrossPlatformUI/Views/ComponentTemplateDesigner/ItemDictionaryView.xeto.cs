@@ -10,6 +10,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {
     public class ItemDictionaryView : Panel
     {
+        private ComponentAbilityTemplateVM _vm;
         protected StackLayout ControlStack { get; set; }
         protected ComboBox TypesComBox { get; set; }
         public ItemDictionaryView()
@@ -23,13 +24,31 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         public void SetViewmodel(ComponentAbilityTemplateVM vm)
         {
             DataContext = vm;
+            _vm = vm;
             TypesComBox.DataContext = vm.ItemDictTypes;
-            foreach (var item in vm.ItemDict.Items)
+            vm.ItemDictTypes.SelectionChangedEvent += ItemDictTypes_SelectionChangedEvent;
+            vm.ItemDict.CollectionChanged += ItemDict_CollectionChanged;
+
+        }
+
+        private void ItemDict_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            ItemDictTypes_SelectionChangedEvent(0, 0);
+        }
+
+        private void ItemDictTypes_SelectionChangedEvent(int oldSelection, int newSelection)
+        {
+            ControlStack.SuspendLayout();
+            ControlStack.Items.Clear();
+            EnumFormulaView efv = new EnumFormulaView();
+            foreach (var item in _vm.ItemDict)
             {
-                EnumFormulaView efv = new EnumFormulaView();
-                efv.DataContext = item;
+                efv = new EnumFormulaView();
+                efv.SetDatacontext(item);
                 ControlStack.Items.Add(efv);
             }
+            ControlStack.ResumeLayout();
+
         }
     }
 
