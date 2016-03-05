@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
@@ -175,10 +176,12 @@ namespace Pulsar4X.ViewModel
             StatusText = "Game Saved";
         }
 
+        
+
         public void AdvanceTime(TimeSpan pulseLength, CancellationToken pulseCancellationToken)
         {
             var pulseProgress = new Progress<double>(UpdatePulseProgress);
-
+            
             int secondsPulsed;
 
             secondsPulsed = Game.AdvanceTime((int)pulseLength.TotalSeconds, pulseCancellationToken, pulseProgress);
@@ -187,6 +190,15 @@ namespace Pulsar4X.ViewModel
             ProgressValue = 0;
         }
 
+        public ICommand AdvanceTimeCmd { get { return new RelayCommand<string>(param => AdvanceTime(param)); } }
+        public void AdvanceTime(string seconds)
+        {
+            var pulseProgress = new Progress<double>(UpdatePulseProgress);
+            int secondsPulsed;
+            secondsPulsed = Game.AdvanceTime(int.Parse(seconds), pulseProgress);
+            Refresh();
+               
+        }
 
         private void UpdatePulseProgress(double progress)
         {

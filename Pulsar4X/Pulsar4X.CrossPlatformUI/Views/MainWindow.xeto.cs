@@ -32,6 +32,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
         private GameVM _game;
         public MainWindow(GameVM game) {
             _game = game;
+            DataContext = _game;
             XamlReader.Load(this);
         }
         

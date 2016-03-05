@@ -2,6 +2,7 @@
 <Panel
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="My Form"
+   xmlns:sys="clr-namespace:System;assembly=mscorlib"
   >
   <TableLayout>
     <TableRow ScaleHeight="False">
@@ -10,17 +11,17 @@
           <Panel Padding="5,0,10,0">
             <Label Text="Advance Time:"/>
           </Panel>
-          <Button x:Name="btn_time_5sec" Text="5 Seconds" />
-          <Button x:Name="btn_time_30sec" Text="30 Seconds" />
-          <Button x:Name="btn_time_2min" Text="2 Minutes" />
-          <Button x:Name="btn_time_5min" Text="5 Minutes" />
-          <Button x:Name="btn_time_20min" Text="20 Minutes" />
-          <Button x:Name="btn_time_1hr" Text="1 Hour" />
-          <Button x:Name="btn_time_3hrs" Text="3 Hours" />
-          <Button x:Name="btn_time_8hrs" Text="8 Hours" />
-          <Button x:Name="btn_time_1day" Text="1 Day" />
-          <Button x:Name="btn_time_5day" Text="5 Days" />
-          <Button x:Name="btn_time_30day" Text="30 Days" />
+          <Button x:Name="btn_time_5sec" Text="5 Seconds" Command="{Binding AdvanceTimeCmd}" CommandParameter="5" />
+          <Button x:Name="btn_time_30sec" Text="30 Seconds" Command="{Binding AdvanceTimeCmd}" CommandParameter="30"/>
+          <Button x:Name="btn_time_2min" Text="2 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="120"/>
+          <Button x:Name="btn_time_5min" Text="5 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="300"/>
+          <Button x:Name="btn_time_20min" Text="20 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="1200"/>
+          <Button x:Name="btn_time_1hr" Text="1 Hour" Command="{Binding AdvanceTimeCmd}" CommandParameter="3600"/>
+          <Button x:Name="btn_time_3hrs" Text="3 Hours" Command="{Binding AdvanceTimeCmd}" CommandParameter="10800"/>
+          <Button x:Name="btn_time_8hrs" Text="8 Hours" Command="{Binding AdvanceTimeCmd}" CommandParameter="28800"/>
+          <Button x:Name="btn_time_1day" Text="1 Day" Command="{Binding AdvanceTimeCmd}" CommandParameter="86400"/>
+          <Button x:Name="btn_time_5day" Text="5 Days" Command="{Binding AdvanceTimeCmd}" CommandParameter="432000"/>
+          <Button x:Name="btn_time_30day" Text="30 Days" Command="{Binding AdvanceTimeCmd}" CommandParameter="2592000"/>
           <Panel Padding="10,0,10,0">
             <Label Text="Sub-pulse length:"/>
           </Panel>
