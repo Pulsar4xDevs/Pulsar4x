@@ -269,7 +269,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var kvp in _designAbility.GuidDictionary)
                 {
                     //MakeThisDependant(kvp.Value);
-                    dict.Add((Guid)kvp.Key,kvp.Value.DResult);     
+                    dict.Add((Guid.Parse( kvp.Key.ToString())),kvp.Value.DResult);     
                 }
                 args.Result = dict;
             }

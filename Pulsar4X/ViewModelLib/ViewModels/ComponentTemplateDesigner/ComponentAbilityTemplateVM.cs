@@ -216,7 +216,7 @@ namespace Pulsar4X.ViewModel
             {
                 foreach (var item in abilitySD.GuidDictionary)
                 {
-                    techSelected.Add(item.Key, _staticData.Techs[item.Key].Name);
+                    techSelected.Add(Guid.Parse(item.Key.ToString()), _staticData.Techs[Guid.Parse(item.Key.ToString())].Name);
                 }
                 GuidDict = new TechListVM(techSelected, _staticData);
             }
@@ -320,10 +320,20 @@ namespace Pulsar4X.ViewModel
             sd.MaxFormula = MaxFormula;
             if (GuidDict != null)
             {
-                Dictionary<Guid, string> guidict = new Dictionary<Guid, string>();
+                Dictionary<object, string> guidict = new Dictionary<object, string>();
                 foreach (var item in GuidDict.SelectedItems)
                 {
                     guidict.Add(item.Key, item.Value);
+                }
+                sd.GuidDictionary = guidict;
+            }
+            if (ItemDict != null)
+            {
+                Dictionary<object, string> guidict = new Dictionary<object, string>();
+                foreach (var item in ItemDict)
+                {
+                    if(item.Items.SelectedIndex >= 0 && !string.IsNullOrWhiteSpace(item.Formula))
+                        guidict.Add(item.Items.SelectedKey, item.Formula);                  
                 }
                 sd.GuidDictionary = guidict;
             }

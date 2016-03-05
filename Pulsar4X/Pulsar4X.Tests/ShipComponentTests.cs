@@ -145,7 +145,7 @@ namespace Pulsar4X.Tests
             engineTypeAbility1.Name = "Engine Type";
             engineTypeAbility1.Description = "Type of engine Tech";
             engineTypeAbility1.GuiHint = GuiHint.GuiTechSelectionList;
-            engineTypeAbility1.GuidDictionary = new Dictionary<Guid, string>
+            engineTypeAbility1.GuidDictionary = new Dictionary<object, string>
             {
                 {new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c"),""},
                 {new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"),""},
@@ -269,7 +269,7 @@ namespace Pulsar4X.Tests
             mineAbility.Name = "MiningAmount";
             mineAbility.Description = "";
             mineAbility.GuiHint = GuiHint.None;
-            mineAbility.GuidDictionary = new Dictionary<Guid, string>
+            mineAbility.GuidDictionary = new Dictionary<object, string>
             {
                 {new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"),"10"},
                 {new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"),"10"},
@@ -371,7 +371,7 @@ namespace Pulsar4X.Tests
             refineJobsAbility.Name = "RefineAbilitys";
             refineJobsAbility.Description = "";
             refineJobsAbility.GuiHint = GuiHint.None;
-            refineJobsAbility.GuidDictionary = new Dictionary<Guid, string>
+            refineJobsAbility.GuidDictionary = new Dictionary<object, string>
             {
                 { new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),"0"},
                 { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}

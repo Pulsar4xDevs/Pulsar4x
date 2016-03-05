@@ -50,16 +50,16 @@ namespace Pulsar4X.ECSLib
                 if(abilitySD.AbilityFormula !=  null)
                     designAbility.Formula = new ChainedExpression(abilitySD.AbilityFormula, designAbility, factionTech, staticData);
 
-                if (abilitySD.GuidDictionary != null)
+                if (abilitySD.GuidDictionary != null )
                 {
                     designAbility.GuidDictionary = new Dictionary<object, ChainedExpression>();
                     if (designAbility.GuiHint == GuiHint.GuiTechSelectionList)
                     {
                         foreach (var kvp in abilitySD.GuidDictionary)
                         {
-                            if (factionTech.ResearchedTechs.ContainsKey(kvp.Key))
+                            if (factionTech.ResearchedTechs.ContainsKey(Guid.Parse(kvp.Key.ToString())))
                             {
-                                TechSD techSD = staticData.Techs[kvp.Key];
+                                TechSD techSD = staticData.Techs[Guid.Parse(kvp.Key.ToString())];
                                 designAbility.GuidDictionary.Add(kvp.Key, new ChainedExpression(TechProcessor.DataFormula(factionTech, techSD).ToString(), designAbility, factionTech, staticData));                      
                             }
                         }

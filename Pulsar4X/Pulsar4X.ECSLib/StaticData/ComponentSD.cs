@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public GuiHint GuiHint; //if AbilityFormula uses AbilityArgs(), this should be none!
 
         //used if guihint is GuiSelectionList
-        public Dictionary<Guid, string> GuidDictionary;
+        public Dictionary<object, string> GuidDictionary;
 
         //used if GuiHint is GuiMinMax
         public string MaxFormula;
