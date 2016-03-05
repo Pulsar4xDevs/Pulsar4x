@@ -128,6 +128,7 @@
     <Compile Include="ShipTests.cs" />
     <Compile Include="StaticDataTests.cs" />
     <Compile Include="SystemGenTests.cs" />
+    <Compile Include="TestingUtilities.cs" />
     <Compile Include="UnitHelperTests.cs" />
     <Compile Include="Vector4Tests.cs" />
   </ItemGroup>

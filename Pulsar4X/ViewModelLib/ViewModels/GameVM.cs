@@ -126,7 +126,7 @@ namespace Pulsar4X.ViewModel
             StatusText = "Creating Game...";
 
             // TODO: Databind the GameSettings object in the NewGameOptionsVM
-            var gameSettings = new GameSettings
+            var gameSettings = new NewGameSettings
             {
                 GameName = "Test Game",
                 MaxSystems = options.NumberOfSystems,

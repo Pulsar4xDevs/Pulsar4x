@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
             public const double KelvinToDegreesC = -273.15;
         }
     }
-
+    
     public class GameSettings
     {
         #region General Game Settings
@@ -74,12 +74,6 @@ namespace Pulsar4X.ECSLib
         public int MaxSystems { get; set; } = 1000;
 
         public DateTime StartDateTime { get; set; } = DateTime.Parse("2050-01-01T00:00:00");
-
-        [JsonIgnore]
-        public string SMPassword { get; set; } = "";
-
-        [JsonIgnore]
-        public IEnumerable<string> DataSets { get; set; } = new List<string>(); 
 
         public VersionInfo Version => VersionInfo.PulsarVersionInfo;
 
@@ -95,10 +89,93 @@ namespace Pulsar4X.ECSLib
 
         #endregion
 
-        public bool? OrbitalMotionForPlanets { get; set; } = true;
+        /// <summary>
+        /// Enables orbital motion for Planets and Moons
+        /// </summary>
+        public bool? OrbitalMotionForPlanetsMoons { get; set; } = true;
 
+        /// <summary>
+        /// Enables orbital motion for asteroids.
+        /// </summary>
         public bool? OrbitalMotionForAsteroids { get; set; } = true;
 
+        /// <summary>
+        /// Determines if all newly discovered JumpPoints will be stabilized.
+        /// </summary>
         public bool? AllJumpPointsStabilized { get; set; } = false;
+
+        #region Not Implemented in ECSLib
+
+        /// <summary>
+        /// Enables maintenance failures and overhaul mechanics.
+        /// </summary>
+        public bool? OverhaulsAndMaintenance { get; set; } = true;
+
+        /// <summary>
+        /// Enables political reliablity bonuses for commanders
+        /// </summary>
+        public bool? CommanderPoliticalReliablity { get; set; } = true;
+
+        /// <summary>
+        /// Enables inexperienced fleets having delayed orders
+        /// </summary>
+        public bool? TaskgroupTraining { get; set; } = true;
+
+        /// <summary>
+        /// "Difficulty Modifier" from Aurora.
+        /// </summary>
+        public float NPREconomyBonus { get; set; } = 1.0f;
+
+        #endregion
+    }
+    
+    public class NewGameSettings : GameSettings
+    {
+        [JsonIgnore]
+        public string SMPassword { get; set; } = "";
+
+        [JsonIgnore]
+        public IEnumerable<string> DataSets { get; set; } = new List<string>();
+
+        #region Player Generation
+
+        /// <summary>
+        /// False is equivilent to the "Create Spacemaster Empire" option.
+        /// Sol will not be generated, and only the SM Player/Faction will be created.
+        /// <para></para>
+        /// Player will have to manually create a regular player faction.
+        /// <para></para>
+        /// If this is false, none of the other options in this region will work.
+        /// </summary>
+        [JsonIgnore]
+        public bool? CreatePlayerFaction { get; set; } = true;
+
+        [JsonIgnore]
+        public string DefaultPlayerName { get; set; } = "Player 1";
+
+        [JsonIgnore]
+        public string DefaultPlayerPassword { get; set; } = "";
+
+        [JsonIgnore]
+        public string DefaultFactionName { get; set; } = "Terran Federation";
+
+        /// <summary>
+        /// Defines if the default Sol Start will be used.
+        /// Player faction can still be generated without generating Sol.
+        /// </summary>
+        [JsonIgnore]
+        public bool? DefaultSolStart { get; set; } = true;
+
+        #endregion
+
+        #region Not Implemented in ECSLib
+
+        [JsonIgnore]
+        public int NumberOfStartingNPR { get; set; } = 1;
+
+        [JsonIgnore]
+        public bool? StartingNPRAreConventional { get; set; } = false;
+
+        #endregion
     }
 }

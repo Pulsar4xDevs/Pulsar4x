@@ -22,7 +22,7 @@ namespace Pulsar4X.Tests
         [Description("Creates and tests a single star system")]
         public void CreateAndFillStarSystem()
         {
-            _game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Argon Prime"); // Keeping with the X3 theme :P
@@ -50,13 +50,14 @@ namespace Pulsar4X.Tests
 
         [Test]
         [Description("generates 1000 test systems to test performance of the run.")]
+        [Ignore("Long-Running Integration Test")]
         public void PerformanceTest()
         {
             // use a stop watch to get more accurate time.
             System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
 
             const int numSystems = 1000;
-            _game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             var ssf = new StarSystemFactory(_game);
 
@@ -95,11 +96,11 @@ namespace Pulsar4X.Tests
 
         [Test]
         [Description("Allows statisical analysis of the connectivity of generated systems")]
-        [Ignore("Manual statistical analysis")]
+        [Ignore("Manual statistical analysis Integration test")]
         public void JPConnectivity()
         {
             const int numSystems = 2000;
-            _game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems });
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems });
             List<StarSystem> systems = _game.GetSystems(new AuthenticationToken(_game.SpaceMaster));
 
 

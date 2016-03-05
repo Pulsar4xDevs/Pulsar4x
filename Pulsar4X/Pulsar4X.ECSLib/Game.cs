@@ -92,22 +92,22 @@ namespace Pulsar4X.ECSLib
             GlobalManager = new EntityManager(this);
         }
 
-        public Game([NotNull] GameSettings settings) : this()
+        public Game([NotNull] NewGameSettings newGameSettings) : this()
         {
-            if (settings == null)
+            if (newGameSettings == null)
             {
-                throw new ArgumentNullException(nameof(settings));
+                throw new ArgumentNullException(nameof(newGameSettings));
             }
 
             GalaxyGen = new GalaxyFactory(true);
 
-            Settings = settings;
-            CurrentDateTime = Settings.StartDateTime;
+            Settings = newGameSettings;
+            CurrentDateTime = newGameSettings.StartDateTime;
 
             // Load Static Data
-            if (Settings.DataSets != null)
+            if (newGameSettings.DataSets != null)
             {
-                foreach (string dataSet in settings.DataSets)
+                foreach (string dataSet in newGameSettings.DataSets)
                 {
                     StaticDataManager.LoadData(dataSet, this);
                 }
@@ -118,9 +118,23 @@ namespace Pulsar4X.ECSLib
             }
             
             // Create SM
-            SpaceMaster = new Player("Space Master", settings.SMPassword);
+            SpaceMaster = new Player("Space Master", newGameSettings.SMPassword);
             Players = new List<Player>();
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
+
+            if (newGameSettings.CreatePlayerFaction ?? false)
+            {
+                Player defaultPlayer = AddPlayer(newGameSettings.DefaultPlayerName, newGameSettings.DefaultPlayerPassword);
+
+                if (newGameSettings.DefaultSolStart ?? false)
+                {
+                    DefaultStartFactory.DefaultHumans(this, defaultPlayer, newGameSettings.DefaultFactionName);
+                }
+                else
+                {
+                    FactionFactory.CreatePlayerFaction(this, defaultPlayer, newGameSettings.DefaultFactionName);
+                }
+            }
 
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
@@ -305,7 +319,7 @@ namespace Pulsar4X.ECSLib
                 return SpaceMaster;
             }
 
-            foreach (Player player in Players.Where(player => player.ID == authToken.PlayerID))
+            foreach (Player player in Players.Where(player => player.ID == authToken?.PlayerID))
             {
                 return player.IsTokenValid(authToken) ? player : null;
             }

@@ -15,7 +15,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new GameSettings {GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0});
+            _game = new Game(new NewGameSettings {GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0});
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
         }
 
