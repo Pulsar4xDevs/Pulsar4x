@@ -13,7 +13,7 @@ namespace Pulsar4X.ViewModel
     public class ComponentDesignVM : IViewModel
     {
         //public Dictionary<string, Guid> ComponentTypes { get; set; }
-        public DictionaryVM<string, Guid, string> ComponentTypes { get; set; } 
+        public DictionaryVM<string, Guid> ComponentTypes { get; set; } 
         public ComponentDesign Design { get; private set; }
         
         private readonly StaticDataStore _staticData;
@@ -38,7 +38,7 @@ namespace Pulsar4X.ViewModel
             _factionTech = gameVM.CurrentFaction.GetDataBlob<FactionTechDB>();
 
             //ComponentTypes = new Dictionary<string, Guid>();
-            ComponentTypes = new DictionaryVM<string, Guid, string>(DisplayMode.Key);
+            ComponentTypes = new DictionaryVM<string, Guid>(DisplayMode.Key);
             foreach (var componentSD in gameVM.Game.StaticData.Components.Values)
             {
                 ComponentTypes.Add(componentSD.Name, componentSD.ID);

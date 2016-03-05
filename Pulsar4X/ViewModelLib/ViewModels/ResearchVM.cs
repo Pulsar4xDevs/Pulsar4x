@@ -91,7 +91,7 @@ namespace Pulsar4X.ViewModel
         private int _freeLabs;
 
         //public ObservableCollection<TechSD> ResearchableTechs { get; set; }
-        public DictionaryVM<TechSD, string, string> ResearchableTechs { get; set; }
+        public DictionaryVM<TechSD, string> ResearchableTechs { get; set; }
 
         public List<ScientistControlVM> Scientists { get; set; }
 
@@ -130,7 +130,7 @@ namespace Pulsar4X.ViewModel
             if (_factionTech.ResearchableTechs.Count > 0)
             {
                 //ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
-                ResearchableTechs = new DictionaryVM<TechSD, string, string>(DisplayMode.Value);
+                ResearchableTechs = new DictionaryVM<TechSD, string>(DisplayMode.Value);
                 foreach (var tech in _factionTech.ResearchableTechs.Keys)
                     ResearchableTechs.Add(tech, tech.Name);
                 SelectedTechIndex = 0;
@@ -187,7 +187,7 @@ namespace Pulsar4X.ViewModel
             _allLabs = new Dictionary<Guid, int>();
 
             //ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
-            ResearchableTechs = new DictionaryVM<TechSD, string, string>(DisplayMode.Value);
+            ResearchableTechs = new DictionaryVM<TechSD, string>(DisplayMode.Value);
             foreach (var tech in _factionTech.ResearchableTechs.Keys)
                 ResearchableTechs.Add(tech, tech.Name);
 

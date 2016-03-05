@@ -17,8 +17,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             XamlReader.Load(this);
             DataContextChanged += FormulaEditorView_DataContextChanged;
 
-            TechSelection.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
-            TechSelection.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);
+            TechSelection.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            TechSelection.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
         }
 
 

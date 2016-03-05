@@ -18,7 +18,7 @@ namespace Pulsar4X.ViewModel
 
         public string FormulaName { get; set; }
 
-        public DictionaryVM<Guid, string, string> TechList { get; private set; }
+        public DictionaryVM<Guid, string> TechList { get; private set; }
         
         public string Formula
         {
@@ -55,7 +55,7 @@ namespace Pulsar4X.ViewModel
         {
             _parent = parent;
 
-            TechList = new DictionaryVM<Guid, string, string>();
+            TechList = new DictionaryVM<Guid, string>();
             foreach (var item in staticData.Techs.Values)
             {
                 TechList.Add(item.ID, item.Name);

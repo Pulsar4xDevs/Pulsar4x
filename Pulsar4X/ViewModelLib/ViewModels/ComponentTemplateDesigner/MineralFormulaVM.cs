@@ -16,7 +16,7 @@ namespace Pulsar4X.ViewModel
         public string MineralFormula {
             get { return _mineralFormula; }
             set { _mineralFormula = value; OnPropertyChanged(); } }
-        public DictionaryVM<Guid, string, string> Minerals { get; set; }
+        public DictionaryVM<Guid, string> Minerals { get; set; }
 
         public override string FocusedText
         {
@@ -48,7 +48,7 @@ namespace Pulsar4X.ViewModel
         public MineralFormulaVM(ComponentTemplateParentVM parent, StaticDataStore staticDataStore): base(parent)
         {
             _dataStore = staticDataStore;
-            Minerals = new DictionaryVM<Guid, string, string>(DisplayMode.Value);
+            Minerals = new DictionaryVM<Guid, string>(DisplayMode.Value);
             foreach (var item in staticDataStore.Minerals)
             {
                 Minerals.Add(item.ID, item.Name);

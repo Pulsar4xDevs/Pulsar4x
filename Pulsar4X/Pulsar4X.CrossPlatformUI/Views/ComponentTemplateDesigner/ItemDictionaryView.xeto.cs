@@ -15,8 +15,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         public ItemDictionaryView()
         {
             XamlReader.Load(this);
-            TypesComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
-            TypesComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);
+            TypesComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            TypesComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
             
         }
 

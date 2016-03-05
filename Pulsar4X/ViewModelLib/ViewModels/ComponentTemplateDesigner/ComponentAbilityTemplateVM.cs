@@ -38,8 +38,8 @@ namespace Pulsar4X.ViewModel
             get { return ParentList.IndexOf(this); }
         }
 
-        private DictionaryVM<GuiHint, string, string> _selectedGuiHint = new DictionaryVM<GuiHint, string, string>();
-        public DictionaryVM<GuiHint, string, string> SelectedGuiHint
+        private DictionaryVM<GuiHint, string> _selectedGuiHint = new DictionaryVM<GuiHint, string>();
+        public DictionaryVM<GuiHint, string> SelectedGuiHint
         {
             get { return _selectedGuiHint; }
             set { _selectedGuiHint = value; OnPropertyChanged(); }
@@ -123,7 +123,7 @@ namespace Pulsar4X.ViewModel
 
 
         public TechListVM GuidDict { get; set; }
-        public DictionaryVM<Type, string, string> ItemDictTypes { get; } = new DictionaryVM<Type, string, string>();
+        public DictionaryVM<Type, string> ItemDictTypes { get; } = new DictionaryVM<Type, string>();
         public ItemDictVM<object> ItemDict { get; } = new ItemDictVM<object>();
 
         
@@ -162,7 +162,7 @@ namespace Pulsar4X.ViewModel
 
         private void ItemDictTypes_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            DictionaryVM<object, string, string> dict = new DictionaryVM<object, string, string>(DisplayMode.Key);
+            DictionaryVM<object, string> dict = new DictionaryVM<object, string>(DisplayMode.Key);
             foreach (var item in Enum.GetValues(ItemDictTypes.SelectedKey))
             {
 
@@ -198,7 +198,7 @@ namespace Pulsar4X.ViewModel
             MinFormula = abilitySD.MinFormula;
             MaxFormula = abilitySD.MaxFormula;
             //GuidDictionary = abilitySD.GuidDictionary;
-            DictionaryVM<Guid, string, string> techSelected = new DictionaryVM<Guid, string, string>();
+            DictionaryVM<Guid, string> techSelected = new DictionaryVM<Guid, string>();
             if (abilitySD.GuiHint == GuiHint.GuiTechSelectionList)
             {
                 foreach (var item in abilitySD.GuidDictionary)
@@ -320,6 +320,6 @@ namespace Pulsar4X.ViewModel
     public class ItemDictVM<T1>
     {
         public Type KeyType { get { return typeof(T1); } }
-        public ObservableCollection<DictionaryVM<T1, string, string>> Items { get; } = new ObservableCollection<DictionaryVM<T1, string, string>>();
+        public ObservableCollection<DictionaryVM<T1, string>> Items { get; } = new ObservableCollection<DictionaryVM<T1, string>>();
     }
 }

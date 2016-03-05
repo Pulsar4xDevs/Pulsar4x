@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel
 {
@@ -68,12 +69,12 @@ namespace Pulsar4X.ViewModel
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public class DictionaryVM<TKey,TValue, TListValue> :IDictionary<TKey,TValue>, INotifyPropertyChanged
+    public class DictionaryVM<TKey,TValue> : IDictionary<TKey,TValue>, INotifyPropertyChanged
     {
         private Dictionary<TKey, TValue> _dictionary;
         private List<KeyValuePair<TKey, TValue>> _index = new List<KeyValuePair<TKey, TValue>>(); 
         private Dictionary<KeyValuePair<TKey,TValue>,int> _reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>(); 
-        public ObservableCollection<TListValue> DisplayList { get; set; }
+        public ObservableCollection<string> DisplayList { get; set; }
         private int _selectedIndex;
         public int SelectedIndex
         {
@@ -103,7 +104,7 @@ namespace Pulsar4X.ViewModel
         public DictionaryVM(DisplayMode displayMode = DisplayMode.Value)
         {
             DisplayMode = displayMode;
-            DisplayList = new ObservableCollection<TListValue>();
+            DisplayList = new ObservableCollection<string>();
             _dictionary = new Dictionary<TKey, TValue>();
             SelectedIndex = -1;
         }
@@ -185,14 +186,14 @@ namespace Pulsar4X.ViewModel
             _dictionary.Add(item.Key, item.Value);
             _index.Add(item);
             _reverseIndex.Add(item, i);
-            var conv = TypeDescriptor.GetConverter(typeof(TListValue));
             if (DisplayMode == DisplayMode.Key)
             {
-                
-                DisplayList.Add((TListValue)conv.ConvertFrom(_index[i].Key));
+                DisplayList.Add(_index[i].Key.ToString());
             }
             else
-                DisplayList.Add((TListValue)conv.ConvertFrom(_index[i].Value));
+            {
+                DisplayList.Add(_index[i].Value.ToString());
+            }
         }
 
         public void Clear()
@@ -282,9 +283,8 @@ namespace Pulsar4X.ViewModel
                 _index[i] = newitem;
                 _reverseIndex.Remove(olditem);
                 _reverseIndex.Add(newitem,i);
-                var conv = TypeDescriptor.GetConverter(typeof(TListValue));
                 if (this.DisplayMode == DisplayMode.Value)
-                    DisplayList[i] = (TListValue)conv.ConvertFrom(value);
+                    DisplayList[i] = value.ToString();
             }
         }
 

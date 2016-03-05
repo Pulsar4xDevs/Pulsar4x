@@ -26,8 +26,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         public ComponentTemplateAbilityPropertiesView()
         {
             XamlReader.Load(this);
-            GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
-            GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
+            GuiHint.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            GuiHint.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
 
             NameTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.NameControl;
             DescriptionTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.DescriptionControl;

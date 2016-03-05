@@ -15,8 +15,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             XamlReader.Load(this);
 
-            EnumComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string, string> m) => m.DisplayList);
-            EnumComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string, string> m) => m.SelectedIndex);
+            EnumComBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            EnumComBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
             EnumComBox.DataContext = DataContext;
         }
     }

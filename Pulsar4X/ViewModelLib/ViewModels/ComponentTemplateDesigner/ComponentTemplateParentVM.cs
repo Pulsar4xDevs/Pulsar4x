@@ -15,8 +15,8 @@ namespace Pulsar4X.ViewModel
         private StaticDataStore _staticData;
         private GameVM _gameVM;
 
-        private readonly DictionaryVM<ComponentTemplateSD, string, string> _components = new DictionaryVM<ComponentTemplateSD, string, string>();
-        public DictionaryVM<ComponentTemplateSD, string, string> Components { get { return _components; } }
+        private readonly DictionaryVM<ComponentTemplateSD, string> _components = new DictionaryVM<ComponentTemplateSD, string>();
+        public DictionaryVM<ComponentTemplateSD, string> Components { get { return _components; } }
 
         private ComponentTemplateMainPropertiesVM _selectedComponent;
         public ComponentTemplateMainPropertiesVM SelectedComponent

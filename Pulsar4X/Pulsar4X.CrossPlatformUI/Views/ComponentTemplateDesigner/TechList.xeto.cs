@@ -16,11 +16,11 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         public TechList()
         {
             XamlReader.Load(this);
-            PossibleItems.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
-            PossibleItems.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
+            PossibleItems.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            PossibleItems.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
 
-            SelectedItems.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
-            SelectedItems.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
+            SelectedItems.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            SelectedItems.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
 
         }
 

@@ -8,22 +8,22 @@ namespace Pulsar4X.ViewModel
 {
     public class TechListVM : INotifyPropertyChanged
     {
-        public DictionaryVM<Guid, string, string> SelectedItems {get; private set;}
-        public DictionaryVM<Guid, string, string> PossibleItems { get; private set; }
+        public DictionaryVM<Guid, string> SelectedItems {get; private set;}
+        public DictionaryVM<Guid, string> PossibleItems { get; private set; }
 
         public ICommand AddCommand { get { return new RelayCommand<object>(obj => AddSelectedPossibleToSelected()); } }
 
         public TechListVM(StaticDataStore staticData)
         {
-            SelectedItems = new DictionaryVM<Guid, string, string>();
-            PossibleItems = new DictionaryVM<Guid, string, string>();
+            SelectedItems = new DictionaryVM<Guid, string>();
+            PossibleItems = new DictionaryVM<Guid, string>();
             foreach (var item in staticData.Techs.Values)
             {
                 PossibleItems.Add(item.ID, item.Name);
             }
         }
 
-        public TechListVM(DictionaryVM<Guid, string, string> selectedItems, StaticDataStore staticData) : this(staticData)
+        public TechListVM(DictionaryVM<Guid, string> selectedItems, StaticDataStore staticData) : this(staticData)
         {
             SelectedItems = selectedItems;
             foreach (var item in SelectedItems)

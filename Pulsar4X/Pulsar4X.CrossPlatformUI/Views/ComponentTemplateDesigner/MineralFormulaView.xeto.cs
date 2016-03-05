@@ -16,8 +16,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             XamlReader.Load(this);
 
-            SelectionComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
-            SelectionComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
+            SelectionComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            SelectionComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
 
             FormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.AbilityFormulaControl;
 
