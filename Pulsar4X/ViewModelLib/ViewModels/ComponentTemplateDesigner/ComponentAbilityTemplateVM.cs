@@ -123,7 +123,8 @@ namespace Pulsar4X.ViewModel
 
 
         public TechListVM GuidDict { get; set; }
-
+        public DictionaryVM<Type, string, string> ItemDictTypes { get; } = new DictionaryVM<Type, string, string>();
+        public ItemDictVM<object> ItemDict { get; } = new ItemDictVM<object>();
 
         
         public ICommand AddToEditCommand { get { return new RelayCommand<object>(obj => AddMe()); } }
@@ -139,7 +140,7 @@ namespace Pulsar4X.ViewModel
         {
 
             _staticData = staticData;
-          
+            
             //SelectedGuiHint = new DictionaryVM<GuiHint, string>(DisplayMode.Value);
             ParentList = parentList;
             foreach (var item in Enum.GetValues(typeof(GuiHint)))
@@ -149,7 +150,27 @@ namespace Pulsar4X.ViewModel
             SelectedGuiHint.SelectionChangedEvent += SelectedGuiHint_SelectionChangedEvent;
             SelectedGuiHint.SelectedIndex = 0;
             _abilityDataBlobTypeSelection = AbilityTypes();
+
+            foreach (var item in EnumTypes())
+            {
+                ItemDictTypes.Add(item, item.Name);
+            }
+            ItemDictTypes.SelectionChangedEvent += ItemDictTypes_SelectionChangedEvent;
+            ItemDictTypes.SelectedIndex = 0;
             
+        }
+
+        private void ItemDictTypes_SelectionChangedEvent(int oldSelection, int newSelection)
+        {
+            DictionaryVM<object, string, string> dict = new DictionaryVM<object, string, string>(DisplayMode.Key);
+            foreach (var item in Enum.GetValues(ItemDictTypes.SelectedKey))
+            {
+
+                dict.Add(item, "");
+                
+            }
+            ItemDict.Items.Add(dict);
+            dict.SelectedIndex = 0;
         }
 
         private void SelectedGuiHint_SelectionChangedEvent(int oldSelection, int newSelection)
@@ -260,6 +281,16 @@ namespace Pulsar4X.ViewModel
             return typelist;
         }
 
+        private static List<Type> EnumTypes()
+        {
+            var typelist = new List<Type>
+            {
+                typeof(ConstructionType)
+            };
+
+            return typelist;
+        }
+
 
 
         public ComponentTemplateAbilitySD CreateSD()
@@ -283,5 +314,12 @@ namespace Pulsar4X.ViewModel
             }
             return sd;                
         }
+    }
+
+
+    public class ItemDictVM<T1>
+    {
+        public Type KeyType { get { return typeof(T1); } }
+        public ObservableCollection<DictionaryVM<T1, string, string>> Items { get; } = new ObservableCollection<DictionaryVM<T1, string, string>>();
     }
 }

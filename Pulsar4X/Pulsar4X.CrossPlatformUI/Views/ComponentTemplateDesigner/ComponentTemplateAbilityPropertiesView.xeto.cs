@@ -138,9 +138,13 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             dataBlobSelection.BindDataContext(c => c.DataStore, (ComponentAbilityTemplateVM m) => m.AbilityDataBlobTypeSelection);
             dataBlobSelection.SelectedValueBinding.BindDataContext((ComponentAbilityTemplateVM m) => m.AbilityDataBlobType);
             dataBlobSelection.DataContext = _viewModel;
+
+            ItemDictionaryView idict = new ItemDictionaryView();
+            idict.SetViewmodel(_viewModel);
+
             //GuiHintControls.Items.Add(label);
             GuiHintControls.Items.Add(dataBlobSelection);
-
+            GuiHintControls.Items.Add(idict);
         }
     }
 }

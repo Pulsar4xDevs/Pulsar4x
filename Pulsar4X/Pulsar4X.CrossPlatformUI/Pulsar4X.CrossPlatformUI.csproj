@@ -162,6 +162,12 @@
     <EmbeddedResource Include="Views\MainWindow.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\ItemDictionaryView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ComponentTemplateDesigner\EnumFormulaView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -201,8 +207,14 @@
     <Compile Include="Views\ComponentTemplateDesigner\ComponentTemplateMainPropertiesView.xeto.cs">
       <DependentUpon>ComponentTemplateMainPropertiesView.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\ComponentTemplateDesigner\EnumFormulaView.xeto.cs">
+      <DependentUpon>EnumFormulaView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ComponentTemplateDesigner\FormulaEditorView.xeto.cs">
       <DependentUpon>FormulaEditorView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentTemplateDesigner\ItemDictionaryView.xeto.cs">
+      <DependentUpon>ItemDictionaryView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ComponentTemplateDesigner\MineralFormulaView.xeto.cs">
       <DependentUpon>MineralFormulaView.xeto</DependentUpon>

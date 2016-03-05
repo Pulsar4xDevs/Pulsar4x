@@ -108,7 +108,8 @@ namespace Pulsar4X.ViewModel
             SelectedIndex = -1;
         }
 
-
+        public TKey SelectedKey { get { return GetKey(); } }
+        public TValue SelectedValue { get { return GetValue(); } }
         /// <summary>
         /// 
         /// </summary>
