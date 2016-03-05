@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan OrbitCycleTime { get; set; } = TimeSpan.FromHours(1);
 
-        public TimeSpan ConstructionCycleTime { get; set; } = TimeSpan.FromDays(1);
+        public TimeSpan EconomyCycleTime { get; set; } = TimeSpan.FromDays(1);
 
         public bool? EnableMultiThreading { get; set; } = true;
 

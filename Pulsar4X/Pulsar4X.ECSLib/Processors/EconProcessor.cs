@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
 
         internal void Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
-            if (game.CurrentDateTime - _lastRun < game.Settings.ConstructionCycleTime)
+            if (game.CurrentDateTime - _lastRun < game.Settings.EconomyCycleTime)
             {
                 return;
             }
