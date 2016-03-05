@@ -78,7 +78,7 @@ namespace Pulsar4X.ECSLib
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
 
-            if (game.Settings.OrbitalMotionForPlanets ?? false)
+            if (game.Settings.OrbitalMotionForPlanetsMoons ?? false)
             {
                 var systemBodyDB = entity.GetDataBlob<SystemBodyDB>();
                 if (systemBodyDB != null && systemBodyDB.Type != BodyType.Asteroid && systemBodyDB.Type != BodyType.Comet)

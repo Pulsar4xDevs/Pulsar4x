@@ -23,7 +23,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 1 });
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 1 });
             //Tech();
             _faction = FactionFactory.CreateFaction(_game, "Terran");
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e"),3);

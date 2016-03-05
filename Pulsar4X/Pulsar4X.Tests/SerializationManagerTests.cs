@@ -36,10 +36,8 @@ namespace Pulsar4X.Tests
             Assert.Catch<ArgumentException>(() => SerializationManager.ImportGame((string)null));
             Assert.Catch<ArgumentException>(() => SerializationManager.ImportGame(string.Empty));
             Assert.Catch<ArgumentNullException>(() => SerializationManager.ImportGame((Stream)null));
-
-            if (_game == null)
-                CreateTestUniverse(numSystems, generateSol);
-            Assert.NotNull(_game);
+            
+            _game = TestingUtilities.CreateTestUniverse(numSystems, _testTime, generateSol);
 
             // lets create a good saveGame
             SerializationManager.Export(_game, File);
@@ -72,8 +70,9 @@ namespace Pulsar4X.Tests
         public void EntityImportExport()
         {
             // Ensure we have a test universe.
-            if (_game == null)
-                CreateTestUniverse(10);
+            _game = TestingUtilities.CreateTestUniverse(10);
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+
             Assert.NotNull(_game);
 
             // Choose a random system.
@@ -117,9 +116,9 @@ namespace Pulsar4X.Tests
         [Test]
         public void StarSystemImportExport()
         {
-            // Ensure we have a test universe.
-            if (_game == null)
-                CreateTestUniverse(10);
+            _game = TestingUtilities.CreateTestUniverse(10);
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+
             Assert.NotNull(_game);
 
             // Choose a procedural system.
@@ -142,7 +141,7 @@ namespace Pulsar4X.Tests
         {
             string jsonString = SerializationManager.Export(_game, system);
             int entityCount = system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken).Count;
-            _game = new Game(new GameSettings { GameName = "System Import Test Game", StartDateTime = DateTime.Now, MaxSystems = 10 });
+            _game = TestingUtilities.CreateTestUniverse(0);
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
             StarSystem importedSystem = SerializationManager.ImportSystemJson(_game, jsonString);
@@ -167,7 +166,7 @@ namespace Pulsar4X.Tests
 
             for (int numTries = 0; numTries < maxTries; numTries++)
             {
-                CreateTestUniverse(10);
+                TestingUtilities.CreateTestUniverse(10);
                 SerializationManager.Export(_game, File);
                 _game = SerializationManager.ImportGame(File);
                 SerializationManager.Export(_game, File2);
@@ -211,41 +210,12 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestSingleSystemSave()
         {
-            CreateTestUniverse(1);
+            _game = TestingUtilities.CreateTestUniverse(1);
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
             StarSystemFactory starsysfac = new StarSystemFactory(_game);
             StarSystem sol  = starsysfac.CreateSol(_game);
             StaticDataManager.ExportStaticData(sol, "solsave.json");
-        }
-
-        private void CreateTestUniverse(int numSystems, bool generateDefaultHumans = false)
-        {
-            _game = new Game(new GameSettings { GameName = "Unit Test Game", StartDateTime = _testTime, MaxSystems = numSystems });
-            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
-            _game.GenerateSystems(_smAuthToken, numSystems);
-
-            // add a faction:
-            Entity humanFaction = FactionFactory.CreateFaction(_game, "New Terran Utopian Empire");
-
-            // add a species:
-            Entity humanSpecies = SpeciesFactory.CreateSpeciesHuman(humanFaction, _game.GlobalManager);
-
-            // add another faction:
-            Entity greyAlienFaction = FactionFactory.CreateFaction(_game, "The Grey Empire");
-            // Add another species:
-            Entity greyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(greyAlienFaction, _game.GlobalManager);
-
-            // Greys Name the Humans.
-            humanSpecies.GetDataBlob<NameDB>().SetName(greyAlienFaction, "Stupid Terrans");
-            // Humans name the Greys.
-            greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction, "Space bugs");
-
-            //TODO Expand the "Test Universe" to cover more datablobs and entities. And ships. Etc.
-
-            if (generateDefaultHumans)
-            {
-                DefaultStartFactory.DefaultHumans(_game, _game.SpaceMaster, "Humans");
-            }
         }
     }
 }
