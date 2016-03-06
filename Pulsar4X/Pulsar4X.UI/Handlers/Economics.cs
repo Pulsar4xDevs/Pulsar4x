@@ -763,7 +763,14 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void NewShipClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+            if(m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1)
+            {
+                Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+                int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex]);
+                String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
+                                             (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
+                m_oSummaryPanel.SYShipNameTextBox.Text = Entry;
+            }
         }
 
         /// <summary>

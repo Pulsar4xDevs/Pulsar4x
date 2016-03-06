@@ -348,7 +348,7 @@ namespace Pulsar4X.UI.Handlers
                             if (m_oSummaryPanel.SYNewClassComboBox.Items.Count != 0)
                                 m_oSummaryPanel.SYNewClassComboBox.SelectedIndex = 0;
 
-                            int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[0]);
+                            int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex]);
                             String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
                                                          (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
                             m_oSummaryPanel.SYShipNameTextBox.Text = Entry;

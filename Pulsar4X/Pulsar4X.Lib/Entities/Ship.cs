@@ -3600,6 +3600,17 @@ namespace Pulsar4X.Entities
             ActiveDetection[FactionID] = tick;
             ActiveYearDetection[FactionID] = year;
         }
+
+        /// <summary>
+        /// When ships are moved from taskgroups, their ship index will change in the ships list, the thermal, em, active, and any other detection lists must be updated to reflect this.
+        /// </summary>
+        /// <param name="NewIndex">New index this ship is located at</param>
+        public void UpdateShipIndex(int NewIndex)
+        {
+            ThermalList.Value = NewIndex;
+            EMList.Value = NewIndex;
+            ActiveList.Value = NewIndex;
+        }
         #endregion
     }
     /// <summary>

@@ -636,6 +636,9 @@ namespace Pulsar4X.Entities
         {
             Ships.Add(Ship);
 
+            int NewIndexOfShip = Ships.IndexOf(Ship);
+            Ship.UpdateShipIndex(NewIndexOfShip);
+
             if(Ships.Count == 1)
             {
                 MaxSpeed = Ship.ShipClass.MaxSpeed;

@@ -537,6 +537,52 @@ namespace Pulsar4X.UI.Handlers
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
                             break;
                         case Constants.ShipTN.OrderType.UnloadInstallation:
+                            InstSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+
+                            /// <summary>
+                            /// Only unload at colonies.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            if (InstSelection != -1)
+                            {
+                                /// <summary>
+                                /// List out all the taskgroup cargo here. each ship has its own cargoListEntries for what it is carrying and there can be overlap. I only want each thing once in this list.
+                                /// </summary>
+                                BindingList<Installation.InstallationType> TaskGroupCargoList = new BindingList<Installation.InstallationType>();
+                                foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                                {
+                                    foreach (KeyValuePair<Installation.InstallationType, Entities.Components.CargoListEntryTN> pair in CurShip.CargoList)
+                                    {
+                                        if (TaskGroupCargoList.Contains(pair.Key) == false)
+                                            TaskGroupCargoList.Add(pair.Key);     
+                                    }
+                                }
+                                /// <summary>
+                                /// Be sure to check to see if the unload order is coming from a previous load instruction as well. It is right now up to the player to make sure this doesn't bomb.
+                                /// </summary>
+                                foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                                {
+                                    if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadInstallation)
+                                    {
+                                        if (TaskGroupCargoList.Contains((Installation.InstallationType)TGOrder.secondary) == false)
+                                            TaskGroupCargoList.Add((Installation.InstallationType)TGOrder.secondary);
+                                    }
+                                }
+                                int ActualInst = 0;
+                                foreach (Installation.InstallationType iType in TaskGroupCargoList)
+                                {
+                                    if (ActualInst == InstSelection)
+                                    {
+                                        SecondaryOrder = (int)iType;
+                                        break;
+                                    }
+                                    ActualInst++;
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
                             break;
                         case Constants.ShipTN.OrderType.LoadMineral:
                             int MineralSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
@@ -564,6 +610,53 @@ namespace Pulsar4X.UI.Handlers
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
                             break;
                         case Constants.ShipTN.OrderType.UnloadMineral:
+                            MineralSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+
+                            /// <summary>
+                            /// Only unload at colonies.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            if (MineralSelection != -1)
+                            {
+                                /// <summary>
+                                /// List out all the taskgroup cargo here. each ship has its own cargoListEntries for what it is carrying and there can be overlap. I only want each thing once in this list.
+                                /// </summary>
+                                BindingList<Constants.Minerals.MinerialNames> TaskGroupCargoList = new BindingList<Constants.Minerals.MinerialNames>();
+                                foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                                {
+                                    foreach (KeyValuePair<Constants.Minerals.MinerialNames, Entities.Components.CargoListEntryTN> pair in CurShip.CargoMineralList)
+                                    {
+                                        if (TaskGroupCargoList.Contains(pair.Key) == false)
+                                            TaskGroupCargoList.Add(pair.Key);     
+                                    }
+                                }
+                                /// <summary>
+                                /// Be sure to check to see if the unload order is coming from a previous load instruction as well. It is right now up to the player to make sure this doesn't bomb.
+                                /// </summary>
+                                foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                                {
+                                    if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadMineral)
+                                    {
+                                        if (TaskGroupCargoList.Contains((Constants.Minerals.MinerialNames)TGOrder.secondary) == false)
+                                            TaskGroupCargoList.Add((Constants.Minerals.MinerialNames)TGOrder.secondary);
+                                    }
+                                }
+                                int ActualInst = 0;
+                                foreach (Constants.Minerals.MinerialNames mType in TaskGroupCargoList)
+                                {
+                                    if (ActualInst == MineralSelection)
+                                    {
+                                        SecondaryOrder = (int)mType;
+                                        break;
+                                    }
+                                    ActualInst++;
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+
                             break;
 
 
@@ -695,11 +788,31 @@ namespace Pulsar4X.UI.Handlers
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Installation";
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            /// <summary>
+                            /// Check for existing entries in the ship cargo list, and also check the orders to load installations. 
+                            /// </summary>
                             foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
                             {
                                 foreach(KeyValuePair<Installation.InstallationType,Entities.Components.CargoListEntryTN> pair in CurShip.CargoList)
                                 {
-                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                    /// <summary>
+                                    /// there can and will be duplicates here, so avoid that issue.
+                                    /// </summary>
+                                    if(m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains(pair.Key) == false)
+                                        m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                }
+                            }
+                            /// <summary>
+                            /// If the player has made a load order for this item, put it in the unload category as well. For now it is up to the player to not mess this one up.
+                            /// </summary>
+                            foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                            {
+                                if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadInstallation)
+                                {
+                                    if (m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains((Installation.InstallationType)TGOrder.secondary) == false)
+                                    {
+                                        m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add((Installation.InstallationType)TGOrder.secondary);
+                                    }
                                 }
                             }
                             break;
@@ -721,12 +834,28 @@ namespace Pulsar4X.UI.Handlers
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
                             m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Mineral";
                             m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
-                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            /// <summary>
+                            /// Check for existing entries in the ship cargo list, and also check orders to load minerals.
+                            /// </summary>
                             foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
                             {
                                 foreach (KeyValuePair<Constants.Minerals.MinerialNames, Entities.Components.CargoListEntryTN> pair in CurShip.CargoMineralList)
                                 {
-                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                    if(m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains(pair.Key) == false)
+                                       m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                }
+                            }
+                            /// <summary>
+                            /// If the player has made a load order for this item, put it in the unload category as well. For now it is up to the player to not mess this one up.
+                            /// </summary>
+                            foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                            {
+                                if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadMineral)
+                                {
+                                    if (m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains((Constants.Minerals.MinerialNames)TGOrder.secondary) == false)
+                                    {
+                                        m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add((Constants.Minerals.MinerialNames)TGOrder.secondary);
+                                    }
                                 }
                             }
                             break;
