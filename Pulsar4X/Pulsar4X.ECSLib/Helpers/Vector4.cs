@@ -54,6 +54,11 @@ namespace Pulsar4X.ECSLib
             get { return new Vector4(1,1,1,1); }
         }
 
+        public static explicit operator global::OpenTK.Vector4(Vector4 v)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Gets a vector whose 4 elements are equal to zero. 
         /// </summary>

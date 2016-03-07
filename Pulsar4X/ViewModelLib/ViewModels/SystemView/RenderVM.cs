@@ -1,12 +1,11 @@
-﻿//using Pulsar4X.Sceen;
-using OpenTK;
+﻿using OpenTK;
 using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Pulsar4X.ViewModel
+namespace Pulsar4X.ViewModel.SystemView
 {
     /// <summary>
     /// This is the VM for the opengl window, it handles updating the scene manager and triggering draws.
@@ -205,23 +204,7 @@ namespace Pulsar4X.ViewModel
         }
     }
 
-    public class Scene
-    {
-        public List<Vector3> position_data;
-        public List<float> scale_data;
-        public Mesh mesh;
-        public Camera camera;
-        public bool IsInitialized = false;
-        public int position_buffer_id;
 
-        public Scene(List<Vector3> position_data, List<float> scale_data, Mesh mesh, Camera camera)
-        {
-            this.position_data = position_data;
-            this.scale_data = scale_data;
-            this.mesh = mesh;
-            this.camera = camera;
-        }
-    }
 
     public class Mesh
     {
