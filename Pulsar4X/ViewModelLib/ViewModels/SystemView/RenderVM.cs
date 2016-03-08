@@ -14,6 +14,7 @@ namespace Pulsar4X.ViewModel.SystemView
     /// </summary>
     public class RenderVM : IViewModel
     {
+        private AuthenticationToken _authToken;
         private int viewport_width;
         private int viewport_height;
         private SystemVM active_system;
@@ -29,7 +30,7 @@ namespace Pulsar4X.ViewModel.SystemView
 
         public bool drawPending = false;
 
-        public RenderVM()
+        public RenderVM(AuthenticationToken authToken)
         {
             scenes = new Dictionary<String, Scene>();
         }
@@ -109,7 +110,8 @@ namespace Pulsar4X.ViewModel.SystemView
                 var pos = planet.Position;
                 position_data.Add(new Vector3((float)pos.X, (float)pos.Y, 0.0f));
             }
-            scenes.Add("system_space", new Scene(position_data, scale_data, mesh, cam));
+            //scenes.Add("system_space", new Scene(position_data, scale_data, mesh, cam));
+            scenes.Add("system_space", new Scene(system.StarSystem, _authToken, scale_data, cam));
             OnSceneLoaded();
             drawPending = true;
         }

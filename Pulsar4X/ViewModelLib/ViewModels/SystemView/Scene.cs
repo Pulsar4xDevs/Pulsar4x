@@ -18,21 +18,27 @@ namespace Pulsar4X.ViewModel.SystemView
         public int position_buffer_id;
 
 
-        public Dictionary<Guid, SystemObjectRenderInfo> SystemBodies { get; set; }
+        public List<SystemObjectRenderInfo> SystemBodies { get; set; } = new List<SystemObjectRenderInfo>();
 
-        public Scene(List<Vector3> position_data, List<float> scale_data, Mesh mesh, Camera camera)
+        //public Scene(List<Vector3> position_data, List<float> scale_data, Mesh mesh, Camera camera)
+        //{
+        //    this.position_data = position_data;
+        //    this.scale_data = scale_data;
+        //    this.mesh = mesh;
+        //    this.camera = camera;
+        //}
+
+        public Scene(StarSystem starSys, AuthenticationToken authToken, List<float> scale_data, Camera camera)
         {
-            this.position_data = position_data;
             this.scale_data = scale_data;
-            this.mesh = mesh;
             this.camera = camera;
-        }
-
-        public Scene(StarSystem starSys, AuthenticationToken authToken)
-        {
-            foreach(var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>(authToken))
+            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>(authToken))
             {
-                SystemBodies.Add(item.Guid, new SystemObjectRenderInfo(item));
+                SystemBodies.Add(new SystemObjectRenderInfo(item));
+            }
+            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(authToken))
+            {
+                SystemBodies.Add(new SystemObjectRenderInfo(item));
             }
         }
     }
@@ -75,9 +81,9 @@ namespace Pulsar4X.ViewModel.SystemView
 
         #region TODO move to View
 
-        GLUtilities.GLQuad Graphic { get; set; } 
+        public GLUtilities.GLQuad Graphic { get; set; } 
         // create name lable:
-        GLUtilities.GLFont NameLabel { get; set; }
+        public GLUtilities.GLFont NameLabel { get; set; }
 
         Vector2 _size;
         

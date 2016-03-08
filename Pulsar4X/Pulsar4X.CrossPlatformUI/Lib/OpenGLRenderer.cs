@@ -51,23 +51,29 @@ namespace Pulsar4X.CrossPlatformUI
                 var scene = scene_kv.Value;
                 if (!scene.IsInitialized)
                 {
-                    GL.GenBuffers(1, out scene.mesh.vertex_buffer_id);
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, scene.mesh.vertex_buffer_id);
-                    GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.mesh.vertices.Count * Vector3.SizeInBytes), scene.mesh.vertices.ToArray(), BufferUsageHint.StaticDraw);
-                    // 1st attribute buffer : vertices
-                    GL.EnableVertexAttribArray(0);
-                    GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
+                    //GL.GenBuffers(1, out scene.mesh.vertex_buffer_id);
+                    //GL.BindBuffer(BufferTarget.ArrayBuffer, scene.mesh.vertex_buffer_id);
+                    //GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.mesh.vertices.Count * Vector3.SizeInBytes), scene.mesh.vertices.ToArray(), BufferUsageHint.StaticDraw);
+                    //// 1st attribute buffer : vertices
+                    //GL.EnableVertexAttribArray(0);
+                    //GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-                    GL.GenBuffers(1, out scene.mesh.index_buffer_id);
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, scene.mesh.index_buffer_id);
-                    GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(scene.mesh.indices.Count * sizeof(uint)), scene.mesh.indices.ToArray(), BufferUsageHint.StaticDraw);
+                    //GL.GenBuffers(1, out scene.mesh.index_buffer_id);
+                    //GL.BindBuffer(BufferTarget.ElementArrayBuffer, scene.mesh.index_buffer_id);
+                    //GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(scene.mesh.indices.Count * sizeof(uint)), scene.mesh.indices.ToArray(), BufferUsageHint.StaticDraw);
 
-                    // The VBO containing the positions and sizes of the particles
-                    GL.GenBuffers(1, out scene.position_buffer_id);
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
-                    // Initialize with empty (NULL) buffer : it will be updated later, each frame.
-                    GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), IntPtr.Zero, BufferUsageHint.StreamDraw);
-                    scene.IsInitialized = true;
+                    //// The VBO containing the positions and sizes of the particles
+                    //GL.GenBuffers(1, out scene.position_buffer_id);
+                    //GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
+                    //// Initialize with empty (NULL) buffer : it will be updated later, each frame.
+                    //GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), IntPtr.Zero, BufferUsageHint.StreamDraw);
+                    //scene.IsInitialized = true;
+
+                    foreach (var item in scene_kv.Value.SystemBodies)
+                    {
+                        item.Graphic.Render();
+                        item.Graphic.UpdateVBOs();
+                    }
                 }
             }
         }

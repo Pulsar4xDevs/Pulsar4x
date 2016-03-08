@@ -33,7 +33,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		private OpenGLRenderer Renderer;
 
 		public SystemView(GameVM GameVM) {
-			RenderVM = new RenderVM();
+			RenderVM = new RenderVM(GameVM.CurrentAuthToken);
 			Renderer = new OpenGLRenderer(RenderVM);
 			DataContext = GameVM;
 			RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);

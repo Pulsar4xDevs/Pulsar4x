@@ -17,7 +17,7 @@ namespace Pulsar4X.ViewModel.GLUtilities
     /// <summary>
     /// A Quad Primitive
     /// </summary>
-    class GLQuad : GLPrimitive
+    public class GLQuad : GLPrimitive
     {
         /// <summary>   Constructor. </summary>
         /// <param name="a_oEffect"> The shader program to use. </param>
