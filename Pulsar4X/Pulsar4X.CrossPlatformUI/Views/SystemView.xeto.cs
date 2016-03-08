@@ -4,6 +4,7 @@ using Eto.Serialization.Xaml;
 using OpenTK;
 using OpenTK.Graphics;
 using Pulsar4X.ViewModel;
+using Pulsar4X.ViewModel.SystemView;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -168,6 +168,18 @@
     <EmbeddedResource Include="Views\ComponentTemplateDesigner\EnumFormulaView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <Content Include="Resources\Shaders\Basic20_Fragment_Shader.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Shaders\Basic20_Vertex_Shader.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Shaders\Basic30_Fragment_Shader.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Shaders\Basic30_Vertex_Shader.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -273,6 +285,35 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icons\ColonyView.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Fonts\DejaVuSansMonoBold.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Fonts\DejaVuSansMonoBold.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Fonts\PulsarFont.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Fonts\PulsarFont.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Textures\DefaultIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Textures\DefaultJPIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Textures\DefaultTexture.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Textures\DefaultTGIcon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Textures\PulsarLogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>

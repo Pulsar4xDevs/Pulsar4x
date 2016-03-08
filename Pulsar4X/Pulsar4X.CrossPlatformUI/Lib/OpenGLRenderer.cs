@@ -3,6 +3,7 @@ using OpenTK.Graphics.OpenGL;
 using Pulsar4X.ViewModel;
 using System;
 using System.Collections.Generic;
+using Pulsar4X.ViewModel.SystemView;
 
 namespace Pulsar4X.CrossPlatformUI
 {
