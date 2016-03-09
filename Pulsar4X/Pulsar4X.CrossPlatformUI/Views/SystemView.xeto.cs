@@ -38,8 +38,6 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 			RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
 			XamlReader.Load(this);
 
-			//SetupAllTheButtons();
-			
 			systems.BindDataContext(s => s.DataStore, (GameVM g) => g.StarSystems);
 			systems.ItemTextBinding = Binding.Property((SystemVM vm) => vm.Name);
 			systems.ItemKeyBinding = Binding.Property((SystemVM vm) => vm.ID).Convert((Guid ID) => ID.ToString());
@@ -47,10 +45,22 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 			//direct binding - might need to be replaced later
 			systems.Bind(s => s.SelectedValue, RenderVM, (RenderVM rvm) => rvm.ActiveSystem);
 
+			// @Hack: so far the only way I've found to make the RenderCanvas properly update the
+			//        size information when the window is resized is to completely detach it from
+			//        the window, and then re-attach it, before calling Resize.
+			//
+			//        There's nothing 'right' about doing it this way, except that it works.
+		    SizeChanged += (sender, args) =>
+		    {
+		        RenderCanvasLocation.Remove(RenderCanvas);
+		        RenderCanvasLocation.Content = RenderCanvas;
+		        Resize(sender, args);
+		    };
+
 			RenderCanvas.GLInitalized += Initialize;
 			RenderCanvas.GLDrawNow += DrawNow;
 			RenderCanvas.GLShuttingDown += Teardown;
-			RenderCanvas.GLResize += Resize;
+			//RenderCanvas.GLResize += Resize; // replaced by the @Hack above ^^^
 			RenderCanvas.MouseMove += WhenMouseMove;
 			RenderCanvas.MouseDown += WhenMouseDown;
 			RenderCanvas.MouseUp += WhenMouseUp;
