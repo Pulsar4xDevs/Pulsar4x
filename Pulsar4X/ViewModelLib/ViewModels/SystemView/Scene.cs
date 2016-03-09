@@ -48,12 +48,12 @@ namespace Pulsar4X.ViewModel.SystemView
     {
 
         #region MoveSomehwereElse                        
-        string DEFAULT_PLANET_ICON = "./Resources/Textures/DefaultIcon.png";
-        string DEFAULT_TASKGROUP_ICON = "./Resources/Textures/DefaultTGIcon.png";
-        string DEFAULT_JUMPPOINT_ICON = "./Resources/Textures/DefaultJPIcon.png";
-        string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
-        string DEFAULT_GLFONT = "./Resources/Fonts/PulsarFont.xml";
-        string DEFAULT_GLFONT2 = "./Resources/Fonts/DejaVuSansMonoBold.xml";
+        public string DEFAULT_PLANET_ICON = "./Resources/Textures/DefaultIcon.png";
+        public string DEFAULT_TASKGROUP_ICON = "./Resources/Textures/DefaultTGIcon.png";
+        public string DEFAULT_JUMPPOINT_ICON = "./Resources/Textures/DefaultJPIcon.png";
+        public string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
+        public string DEFAULT_GLFONT = "./Resources/Fonts/PulsarFont.xml";
+        public string DEFAULT_GLFONT2 = "./Resources/Fonts/DejaVuSansMonoBold.xml";
         //Vector2 DEFAULT_TEXT_SIZE = new Vector2(16, 16);
         #endregion MoveSomewhereElse
 

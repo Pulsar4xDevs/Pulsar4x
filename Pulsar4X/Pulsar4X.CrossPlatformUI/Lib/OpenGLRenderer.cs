@@ -12,17 +12,12 @@ namespace Pulsar4X.CrossPlatformUI
 	{
 
         #region MoveSomehwereElse                        
-        string DEFAULT_PLANET_ICON = "./Resources/Textures/DefaultIcon.png";
-        string DEFAULT_TASKGROUP_ICON = "./Resources/Textures/DefaultTGIcon.png";
-        string DEFAULT_JUMPPOINT_ICON = "./Resources/Textures/DefaultJPIcon.png";
-        string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
-        string DEFAULT_GLFONT = "./Resources/Fonts/PulsarFont.xml";
-        string DEFAULT_GLFONT2 = "./Resources/Fonts/DejaVuSansMonoBold.xml";
+
         Vector2 DEFAULT_TEXT_SIZE = new Vector2(16, 16);
         #endregion MoveSomewhereElse
 
         private RenderVM RenderVM;
-		private List<int> shaderList;
+		//private List<int> shaderList;
 
 		int theProgram;
         int VP_Matrix_Unif;
@@ -51,7 +46,7 @@ namespace Pulsar4X.CrossPlatformUI
 
 		public OpenGLRenderer (RenderVM render_data)
 		{
-            shaderList = new List<int>();
+           // shaderList = new List<int>();
             RenderVM = render_data;
             RenderVM.SceneLoaded += LoadScenes;
 		}
@@ -98,7 +93,7 @@ namespace Pulsar4X.CrossPlatformUI
         {
             var NameLabel = new GLUtilities.GLFont(glEffect,
             new Vector3(sysObj.PositionGL.X, (float)(sysObj.PositionGL.Y - sysObj.ItemRadiusKM), 0),
-            DEFAULT_TEXT_SIZE, Color4.White, DEFAULT_GLFONT2, sysObj.LabelName);
+            DEFAULT_TEXT_SIZE, Color4.White, sysObj.DEFAULT_GLFONT2, sysObj.LabelName);
         }
 
         private void CreateGraphic(SystemObjectRenderInfo sysObj)
@@ -236,15 +231,15 @@ namespace Pulsar4X.CrossPlatformUI
 
 		void InitializeProgram()
 		{
-			shaderList.Add(CreateShader(ShaderType.VertexShader, strVertexShader));
-			shaderList.Add(CreateShader(ShaderType.FragmentShader, strFragmentShader));
+			//shaderList.Add(CreateShader(ShaderType.VertexShader, strVertexShader));
+			//shaderList.Add(CreateShader(ShaderType.FragmentShader, strFragmentShader));
 
-			theProgram = CreateProgram(shaderList);
+			//theProgram = CreateProgram(shaderList);
 
-			foreach (int shader in shaderList)
-			{
-				GL.DeleteShader(shader);
-			}
+			//foreach (int shader in shaderList)
+			//{
+			//	GL.DeleteShader(shader);
+			//}
 		}
 	}
 }
