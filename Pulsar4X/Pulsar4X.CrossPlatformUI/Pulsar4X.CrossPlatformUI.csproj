@@ -98,6 +98,7 @@
       <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
@@ -192,6 +193,15 @@
     <Compile Include="Commands\ShipDesignViewCMD.cs" />
     <Compile Include="Commands\SystemMap.cs" />
     <Compile Include="CustomControls\RenderCanvas.cs" />
+    <Compile Include="GLUtilities\GLEffect.cs" />
+    <Compile Include="GLUtilities\GLEffectBasic21.cs" />
+    <Compile Include="GLUtilities\GLEffectBasic30.cs" />
+    <Compile Include="GLUtilities\GLFont.cs" />
+    <Compile Include="GLUtilities\GLLine.cs" />
+    <Compile Include="GLUtilities\GLPrimitive.cs" />
+    <Compile Include="GLUtilities\GLQuad.cs" />
+    <Compile Include="GLUtilities\GLVertex.cs" />
+    <Compile Include="GLUtilities\ResourceManager.cs" />
     <Compile Include="MainForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pulsar4XApplication.cs" />

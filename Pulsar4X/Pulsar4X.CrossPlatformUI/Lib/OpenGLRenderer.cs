@@ -4,11 +4,23 @@ using Pulsar4X.ViewModel;
 using System;
 using System.Collections.Generic;
 using Pulsar4X.ViewModel.SystemView;
+using OpenTK.Graphics;
 
 namespace Pulsar4X.CrossPlatformUI
 {
     public class OpenGLRenderer
 	{
+
+        #region MoveSomehwereElse                        
+        string DEFAULT_PLANET_ICON = "./Resources/Textures/DefaultIcon.png";
+        string DEFAULT_TASKGROUP_ICON = "./Resources/Textures/DefaultTGIcon.png";
+        string DEFAULT_JUMPPOINT_ICON = "./Resources/Textures/DefaultJPIcon.png";
+        string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
+        string DEFAULT_GLFONT = "./Resources/Fonts/PulsarFont.xml";
+        string DEFAULT_GLFONT2 = "./Resources/Fonts/DejaVuSansMonoBold.xml";
+        Vector2 DEFAULT_TEXT_SIZE = new Vector2(16, 16);
+        #endregion MoveSomewhereElse
+
         private RenderVM RenderVM;
 		private List<int> shaderList;
 
@@ -44,6 +56,10 @@ namespace Pulsar4X.CrossPlatformUI
             RenderVM.SceneLoaded += LoadScenes;
 		}
 
+        //IDK what this is
+        GLUtilities.GLEffectBasic21 glEffect = new GLUtilities.GLEffectBasic21("./Resources/Shaders/Basic20_Vertex_Shader.glsl", "./Resources/Shaders/Basic20_Fragment_Shader.glsl");
+        //var glEffect = new GLUtilities.GLEffectBasic30("./Resources/Shaders/Basic30_Vertex_Shader.glsl", "./Resources/Shaders/Basic30_Fragment_Shader.glsl");
+
         public void LoadScenes(object sender, EventArgs e)
         {
             foreach(var scene_kv in RenderVM.scenes)
@@ -71,11 +87,24 @@ namespace Pulsar4X.CrossPlatformUI
 
                     foreach (var item in scene_kv.Value.SystemBodies)
                     {
-                        item.Graphic.Render();
-                        item.Graphic.UpdateVBOs();
+                        CreateGraphic(item);
+                        CreateLabel(item);
                     }
                 }
             }
+        }
+
+        void CreateLabel(SystemObjectRenderInfo sysObj)
+        {
+            var NameLabel = new GLUtilities.GLFont(glEffect,
+            new Vector3(sysObj.PositionGL.X, (float)(sysObj.PositionGL.Y - sysObj.ItemRadiusKM), 0),
+            DEFAULT_TEXT_SIZE, Color4.White, DEFAULT_GLFONT2, sysObj.LabelName);
+        }
+
+        private void CreateGraphic(SystemObjectRenderInfo sysObj)
+        {
+           var Graphic = new GLUtilities.GLQuad(glEffect, sysObj.PositionGL,
+            sysObj.Size, sysObj.ItemColour, sysObj.ItemTextureName);
         }
 
 		int CreateShader(ShaderType eShaderType, string strShaderFile)

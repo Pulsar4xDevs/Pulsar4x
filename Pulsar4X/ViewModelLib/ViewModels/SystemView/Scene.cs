@@ -54,7 +54,7 @@ namespace Pulsar4X.ViewModel.SystemView
         string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
         string DEFAULT_GLFONT = "./Resources/Fonts/PulsarFont.xml";
         string DEFAULT_GLFONT2 = "./Resources/Fonts/DejaVuSansMonoBold.xml";
-        Vector2 DEFAULT_TEXT_SIZE = new Vector2(16, 16);
+        //Vector2 DEFAULT_TEXT_SIZE = new Vector2(16, 16);
         #endregion MoveSomewhereElse
 
         public DateTime _currentTime;
@@ -81,13 +81,13 @@ namespace Pulsar4X.ViewModel.SystemView
 
         #region TODO move to View
 
-        public GLUtilities.GLQuad Graphic { get; set; } 
+ 
         // create name lable:
-        public GLUtilities.GLFont NameLabel { get; set; }
-
-        Vector2 _size;
         
-        Vector3 PositionGL { get { return new Vector3((float)Position.X, (float)Position.Y, (float)Position.Z); } } //TODO fix this.use different units for display? 
+
+        public Vector2 Size { get; set; }
+        
+        public Vector3 PositionGL { get { return new Vector3((float)Position.X, (float)Position.Y, (float)Position.Z); } } //TODO fix this.use different units for display? 
 
 
 
@@ -108,24 +108,6 @@ namespace Pulsar4X.ViewModel.SystemView
                 StarSetup(systemObjectEntity.GetDataBlob<StarInfoDB>());
             else if (systemObjectEntity.HasDataBlob<SystemBodyDB>())//is an object other than a star
                 Planetetup(systemObjectEntity.GetDataBlob<SystemBodyDB>());
-
-            #region TODO move to View
-
-            var glEffect = new GLUtilities.GLEffectBasic21("./Resources/Shaders/Basic20_Vertex_Shader.glsl", "./Resources/Shaders/Basic20_Fragment_Shader.glsl");
-            //var glEffect = new GLUtilities.GLEffectBasic30("./Resources/Shaders/Basic30_Vertex_Shader.glsl", "./Resources/Shaders/Basic30_Fragment_Shader.glsl");
-
-
-            Graphic = new GLUtilities.GLQuad(glEffect,
-                                                        PositionGL,
-                                                        _size,
-                                                        ItemColour,
-                                                        ItemTextureName);
-
-            NameLabel = new GLUtilities.GLFont(glEffect,
-            new Vector3(PositionGL.X, (float)(PositionGL.Y - ItemRadiusKM), 0),
-            DEFAULT_TEXT_SIZE, Color4.White, DEFAULT_GLFONT2, LabelName);
-            #endregion TODO move to View
-
         }
 
         private void StarSetup(StarInfoDB starInfo)

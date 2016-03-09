@@ -95,15 +95,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GLUtilities\GLEffect.cs" />
-    <Compile Include="GLUtilities\GLEffectBasic21.cs" />
-    <Compile Include="GLUtilities\GLEffectBasic30.cs" />
-    <Compile Include="GLUtilities\GLFont.cs" />
-    <Compile Include="GLUtilities\GLLine.cs" />
-    <Compile Include="GLUtilities\GLPrimitive.cs" />
-    <Compile Include="GLUtilities\GLQuad.cs" />
-    <Compile Include="GLUtilities\GLVertex.cs" />
-    <Compile Include="GLUtilities\ResourceManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\ColonyScreenVM.cs" />
     <Compile Include="ViewModels\Commands.cs" />
