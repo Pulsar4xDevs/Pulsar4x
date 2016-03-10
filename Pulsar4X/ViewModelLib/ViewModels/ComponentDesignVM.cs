@@ -127,7 +127,7 @@ namespace Pulsar4X.ViewModel
         
         public event ValueChangedEventHandler ValueChanged;
 
-        public List<TechSD> TechList { get; private set; }
+        public DictionaryVM<TechSD, string> TechList { get; } = new DictionaryVM<TechSD, string>();
         public string Name { get { return _designAbility.Name; } }
         public string Description { get { return _designAbility.Description; } }
 
@@ -154,11 +154,14 @@ namespace Pulsar4X.ViewModel
             switch (designAbility.GuiHint)
             {
                 case GuiHint.GuiTechSelectionList:
-                    TechList = new List<TechSD>();
+                  
                     foreach (var kvp in designAbility.GuidDictionary)
                     {
-                        TechList.Add(_staticData.Techs[Guid.Parse((string)kvp.Key)]);
+                        TechSD sd = _staticData.Techs[Guid.Parse((string)kvp.Key)];
+                        TechList.Add(sd, sd.Name );
                     }
+                    TechList.SelectedIndex = 0;
+                    TechList.SelectionChangedEvent += TechList_SelectionChangedEvent;
                     break;
                 case GuiHint.GuiSelectionMaxMin:
                     {
@@ -178,35 +181,19 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        void MinMaxSlider_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void TechList_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            OnValueChanged( MinMaxSlider.Value);
-        }
-
-
-        private void OnValueChanged(double value)
-        {
-            if (GuiHint == GuiHint.GuiSelectionMaxMin)
-                _designAbility.SetValueFromInput(value);
-            else if (GuiHint == GuiHint.GuiTechSelectionList)
-                _designAbility.SetValueFromGuidList(TechList[(int)value].ID);
-
+            _designAbility.SetValueFromGuidList(TechList.SelectedKey.ID);
             _parentDesignVM.Refresh();
         }
 
-        public void OnValueChanged(GuiHint controlType, double value)
+        void MinMaxSlider_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (controlType == GuiHint.GuiSelectionMaxMin)
-                _designAbility.SetValueFromInput(value);
-            else if (controlType == GuiHint.GuiTechSelectionList)
-                _designAbility.SetValueFromGuidList(TechList[(int)value].ID);
-
-            //_parentDesignVM.Refresh();
-            //if (ValueChanged != null) //bubble it up to ComponentDesignVM?
-            //{
-            //    ValueChanged.Invoke(controlType, value);
-            //}
+            _designAbility.SetValueFromInput(MinMaxSlider.Value);
+            _parentDesignVM.Refresh();
         }
+
+
 
         public string AbilityStat {
             get
@@ -232,7 +219,6 @@ namespace Pulsar4X.ViewModel
         {
             if (PropertyChanged != null)
             {
-                OnValueChanged( _value );
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }

@@ -6,7 +6,7 @@
   <TableLayout>
     <TableRow>
       <Label ID="AbilityName" Text="{Binding Name}" />
-      <ComboBox  ID="AbilitySelection"   />
+      <ComboBox  ID="AbilitySelection"  DataContext="{Binding TechList}" />
     </TableRow>
     
   </TableLayout>

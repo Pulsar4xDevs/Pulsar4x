@@ -18,35 +18,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public AbilitySelectionList()
         {
             XamlReader.Load(this);
+                 AbilitySelection.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+                 AbilitySelection.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+
         }
 
         public AbilitySelectionList(ComponentAbilityDesignVM designAbility)
             : this()
         {
             _designAbility = designAbility;
-            DataContext = _designAbility;
-            AbilitySelection.DataStore = _designAbility.TechList.Cast<object>();
-            AbilitySelection.SelectedIndex = 0;
-            AbilitySelection.SelectedKeyChanged += SelectionComboBox_SelectionChanged;
-        }
-
-        //public void GuiListSetup(ComponentAbilityDesignVM designAbility)
-        //{
-        //    _designAbility = designAbility;
-
-        //    //AbilitySelection.ItemTextBinding = "Name";
-
-            
-
-        //}
-
-        private void SelectionComboBox_SelectionChanged(object sender, EventArgs e)
-        {
-            if (ValueChanged != null)
-            {
-                _designAbility.OnValueChanged(GuiHint.GuiTechSelectionList, AbilitySelection.SelectedIndex);
-                ValueChanged.Invoke(GuiHint.GuiTechSelectionList, AbilitySelection.SelectedIndex);
-            }
+            DataContext = _designAbility;            
+            AbilitySelection.SelectedIndex = 0;      
         }
     }
 }
