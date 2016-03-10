@@ -13,7 +13,7 @@ namespace Pulsar4X.ViewModel
     public class ComponentDesignVM : IViewModel
     {
         //public Dictionary<string, Guid> ComponentTypes { get; set; }
-        public DictionaryVM<string, Guid> ComponentTypes { get; set; } 
+        public DictionaryVM<string, Guid> ComponentTypes { get; } = new DictionaryVM<string, Guid>(DisplayMode.Key);
         public ComponentDesign Design { get; private set; }
         
         private readonly StaticDataStore _staticData;
@@ -22,29 +22,22 @@ namespace Pulsar4X.ViewModel
         private readonly GameVM _gameVM;
         //public event ValueChangedEventHandler ValueChanged;
 
-        public List<ComponentAbilityDesignVM> AbilityList { get; private set; }
+        public List<ComponentAbilityDesignVM> AbilityList { get; private set; } = new List<ComponentAbilityDesignVM>();
 
-
-        public ComponentDesignVM()
-        {
-            AbilityList = new List<ComponentAbilityDesignVM>();
-        }
-
-        public ComponentDesignVM(GameVM gameVM):this()
+        public ComponentDesignVM(GameVM gameVM)
         {
             _gameVM = gameVM;
             _staticData = gameVM.Game.StaticData;
             _factionEntity = gameVM.CurrentFaction;
             _factionTech = gameVM.CurrentFaction.GetDataBlob<FactionTechDB>();
 
-            //ComponentTypes = new Dictionary<string, Guid>();
-            ComponentTypes = new DictionaryVM<string, Guid>(DisplayMode.Key);
+
             foreach (var componentSD in gameVM.Game.StaticData.Components.Values)
             {
                 ComponentTypes.Add(componentSD.Name, componentSD.ID);
             }
+            ComponentTypes.SelectedIndex = 0;
         }
-
 
         public static ComponentDesignVM Create(GameVM gameVM)
         {

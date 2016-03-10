@@ -20,16 +20,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public ComponentDesignView()
         {
             XamlReader.Load(this);
+            ComponentSelection.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            ComponentSelection.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
         }
         public ComponentDesignView(ComponentDesignVM viewmodel) :this()
         {
             _designVM = viewmodel;
             DataContext = viewmodel;
 
-            ComponentSelection.DataStore = _designVM.ComponentTypes.DisplayList;          
-            ComponentSelection.SelectedKeyChanged += SetViewModel;
+            viewmodel.ComponentTypes.SelectionChangedEvent += SetViewModel;
             Create.Click += Create_Click;
-
+            SetViewModel(0, 0);
         }
 
         void Create_Click(object sender, EventArgs e)
@@ -38,10 +39,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _designVM.CreateComponent();
         }
 
-        private void SetViewModel(object sender, EventArgs e)
+        private void SetViewModel(int oldindex, int newindex)
         {
-            _designVM.SetComponent(_designVM.ComponentTypes.GetValue(ComponentSelection.SelectedIndex));  //(Guid)ComponentSelection.SelectedValue);
-            
+            _designVM.SetComponent(_designVM.ComponentTypes.GetValue(newindex));  //(Guid)ComponentSelection.SelectedValue);
+            AbilitysLayout.Items.Clear();
+            AbilitysLayout.SuspendLayout();
             foreach (var componentAbilityVM in _designVM.AbilityList)
             {
                 switch (componentAbilityVM.GuiHint)
@@ -62,6 +64,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 componentAbilityVM.ValueChanged += OnValueChanged;
                 OnValueChanged(GuiHint.None, 0);
             }
+            AbilitysLayout.ResumeLayout();
         }
 
         private void OnValueChanged(GuiHint controlType, double value)

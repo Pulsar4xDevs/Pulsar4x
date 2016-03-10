@@ -63,9 +63,14 @@ namespace Pulsar4X.ViewModel
     /// <summary>
     /// An attempt at creating a class to make binding dictionaries to UI more streamlined.
     /// To Use in the View:
+    /// Bind the combobox to the dictionaryVM type:
+    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+    ///     
+    /// Bind the combobox datacontext in the .cs:
     ///     myComboBox.DataContext = viewModel.myDictionaryVM;
-    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string, string> m) => m.DisplayList);
-    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string, string> m) => m.SelectedIndex);
+    /// Or bind it in the xaml:
+    ///     <ComboBox ID="myComboBox" DataContext="{Binding myDictionaryVM}" />
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>

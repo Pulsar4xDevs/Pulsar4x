@@ -5,7 +5,7 @@
   >
   <TableLayout>
     <TableRow>
-      <ComboBox ID="ComponentSelection"  />
+      <ComboBox ID="ComponentSelection" DataContext="{Binding ComponentTypes}" />
     </TableRow>
     <TableRow ScaleHeight="True">
       <StackLayout ID="AbilitysLayout" />
