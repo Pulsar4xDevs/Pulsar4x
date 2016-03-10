@@ -100,6 +100,10 @@
       <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
       <Name>Pulsar4X.ECSLib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ViewModelLib\Pulsar4X.ViewModels.csproj">
+      <Project>{37f5b88b-f1aa-410e-9fcb-4ca26a4dd887}</Project>
+      <Name>Pulsar4X.ViewModels</Name>
+    </ProjectReference>
     <Reference Include="dotMemory.Unit">
       <HintPath>..\packages\JetBrains.DotMemoryUnit.2.1.20150828.125449\Lib\dotMemory.Unit.dll</HintPath>
     </Reference>
@@ -131,6 +135,7 @@
     <Compile Include="TestingUtilities.cs" />
     <Compile Include="UnitHelperTests.cs" />
     <Compile Include="Vector4Tests.cs" />
+    <Compile Include="ViewModelTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
