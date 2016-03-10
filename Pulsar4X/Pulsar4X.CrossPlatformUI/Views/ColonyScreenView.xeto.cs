@@ -21,33 +21,33 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected ResearchAbilityView ResearchAbilityView { get; set; }
 
 
-        private ColonyScreenVM colonyScreenVM { get; set; }
+        //private ColonyScreenVM colonyScreenVM { get; set; }
         private GameVM gameVM { get; set; }
 
         protected ColonyScreenView()
         {
             XamlReader.Load(this);
+            ColonySelection.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            ColonySelection.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
         }
 
         public ColonyScreenView(GameVM gameVM) :this()
         {
             this.gameVM = gameVM;
 
-
-            //ColonySelection.ItemTextBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Value);
-            //ColonySelection.ItemKeyBinding = Binding.Property((KeyValuePair<Guid, string> r) => r.Key).Convert(r => r.ToString());
-
-            //ColonySelection.DataStore = gameVM.Colonys.Cast<object>();
-            ColonySelection.DataStore = gameVM.Colonys.DisplayList;
-            //ColonySelection.SelectedKeyBinding.Convert(r => new Guid(r), g => g.ToString()).BindDataContext((GameVM m) => m.SetColonyScreen);
-            //Guid guid1 = ColonySelection.SelectedKeyBinding.Convert(new Guid(r),)
-            ColonySelection.SelectedKeyChanged += SetViewModel;
-
+            ColonySelection.DataContext = gameVM.Colonys;
+            //ColonySelection.SelectedKeyChanged += SetViewModel;
+            gameVM.Colonys.SelectionChangedEvent += SetViewModel;
+            SetViewModel(0, 0);
         }
 
-        private void SetViewModel(object sender, EventArgs e)
+
+        private void SetViewModel(int oldSelection, int newSelection)
         {
-            colonyScreenVM = gameVM.ColonyScreens[0];
+            //colonyScreenVM = gameVM.ColonyScreens[0];
+            ColonyScreenVM colonyScreenVM = gameVM.SelectedColonyScreenVM;
+            DataContext = gameVM.SelectedColonyScreenVM;
+
 
             FacDataGrid.DataStore = colonyScreenVM.Facilities;
             FacDataGrid.Columns.Add(new GridColumn

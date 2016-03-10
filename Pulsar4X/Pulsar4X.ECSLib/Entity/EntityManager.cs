@@ -521,12 +521,27 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Gets the entity with the associated Guid, this checks globaly
+        /// </summary>
+        /// <param name="entityGuid"></param>
+        /// <returns>Entity if found</returns>
+        /// <exception cref="GuidNotFoundException">Guid was not found</exception>
+        [PublicAPI]
+        public Entity GetGlobalEntityByGuid(Guid entityGuid)
+        {
+            Entity entity;
+            if (!FindEntityByGuid(entityGuid, out entity))
+                throw new GuidNotFoundException(entityGuid);
+            return entity;
+        }
+
+        /// <summary>
         /// Gets the entity with the associated Guid. Checks only this EntityManager.
         /// </summary>
         /// <returns>The Entity if found</returns>
         /// <exception cref="GuidNotFoundException">Guid was not found in Global list, orlocally</exception>
         [PublicAPI]
-        public Entity GetEntityByGuid(Guid entityGuid)
+        public Entity GetLocalEntityByGuid(Guid entityGuid)
         {
             Entity entity;
             if (!TryGetEntityByGuid(entityGuid, out entity))

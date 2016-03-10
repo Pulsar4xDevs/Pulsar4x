@@ -87,8 +87,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 RefinaryAbilityVM viewModel = (RefinaryAbilityVM)DataContext;
                 ItemJobs.Items.Clear();
+                ItemJobs.SuspendLayout();
                 foreach (var vm in viewModel.ItemJobs)
                     ItemJobs.Items.Add(new JobUC(vm));
+                ItemJobs.ResumeLayout();
 
             }
 
@@ -96,9 +98,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 ConstructionAbilityVM viewModel = (ConstructionAbilityVM)DataContext;
                 ItemJobs.Items.Clear();
+                ItemJobs.SuspendLayout();
                 foreach (var vm in viewModel.ItemJobs)
                     ItemJobs.Items.Add(new JobUC(vm));
-
+                ItemJobs.ResumeLayout();
             }
         }
 
