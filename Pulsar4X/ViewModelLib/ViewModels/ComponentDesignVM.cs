@@ -157,7 +157,7 @@ namespace Pulsar4X.ViewModel
                     TechList = new List<TechSD>();
                     foreach (var kvp in designAbility.GuidDictionary)
                     {
-                        TechList.Add(_staticData.Techs[(Guid)kvp.Key]);
+                        TechList.Add(_staticData.Techs[Guid.Parse((string)kvp.Key)]);
                     }
                     break;
                 case GuiHint.GuiSelectionMaxMin:

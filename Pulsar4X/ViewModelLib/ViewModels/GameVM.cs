@@ -41,11 +41,10 @@ namespace Pulsar4X.ViewModel
                     _systems.Add(systemVM);
                     _systemDictionary.Add(systemVM.ID, systemVM);
                 }
-                //ColonyScreens = new List<ColonyScreenVM>();
+
                 Colonys.Clear();
                 foreach (var colonyEntity in _currentFaction.GetDataBlob<FactionInfoDB>().Colonies)
                 {
-                    //ColonyScreens.Add(new ColonyScreenVM(colonyEntity, Game.StaticData));
                     Colonys.Add(colonyEntity.Guid, colonyEntity.GetDataBlob<NameDB>().GetName(_currentFaction));
                 }
                 Colonys.SelectedIndex = 0;
@@ -79,8 +78,6 @@ namespace Pulsar4X.ViewModel
         private BindingList<FactionVM> _factions;
 
         public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
-
-        //public List<ColonyScreenVM> ColonyScreens { get; set; } //TODO create the VM as a view is requested?
 
         public DictionaryVM<Guid, string> Colonys { get; } = new DictionaryVM<Guid, string>(DisplayMode.Value);
 
@@ -260,10 +257,6 @@ namespace Pulsar4X.ViewModel
             {
                 system.Refresh();
             }
-            //foreach (var colonyVM in ColonyScreens)
-            //{
-            //    colonyVM.Refresh();
-            //}
         }
 
         #endregion

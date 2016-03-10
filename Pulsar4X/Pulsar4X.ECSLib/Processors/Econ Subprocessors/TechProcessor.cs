@@ -103,28 +103,41 @@ namespace Pulsar4X.ECSLib
         /// <param name="techdb"></param>
         internal static void MakeResearchable(FactionTechDB techdb)
         {
-            foreach (var kvpTech in techdb.UnavailableTechs)
+            List<TechSD> requrementsMetTechs = new List<TechSD>();
+            foreach (var kvpTech in techdb.UnavailableTechs.ToArray())
             {
                 bool requrementsMet = false;
 
-                foreach (var kvpRequrement in kvpTech.Key.Requirements)
-                {                       
-                    if (techdb.ResearchedTechs.ContainsKey(kvpRequrement.Key) 
-                        && techdb.ResearchedTechs[kvpRequrement.Key] >= kvpRequrement.Value)
+                if (kvpTech.Key.Requirements.Count == 0) //if requirements is an empty dict
+                {
+                    requrementsMet = true;
+                }
+                else {
+                    foreach (var kvpRequrement in kvpTech.Key.Requirements)
                     {
-                        requrementsMet = true;
-                    }
-                    else
-                    {
-                        requrementsMet = false;
-                        break;
+                        if (techdb.ResearchedTechs.ContainsKey(kvpRequrement.Key)
+                            && techdb.ResearchedTechs[kvpRequrement.Key] >= kvpRequrement.Value)
+                        {
+                            requrementsMet = true;
+                        }
+                        else
+                        {
+                            requrementsMet = false;
+                            break;
+                        }
                     }
                 }
                 if (requrementsMet)
                 {
-                    ApplyTech(techdb, kvpTech.Key);
+                    requrementsMetTechs.Add(kvpTech.Key);             
                 }
             }
+            foreach (var item in requrementsMetTechs)
+            {
+                ApplyTech(techdb, item);
+            }
+            if (requrementsMetTechs.Count > 0)
+                MakeResearchable(techdb);//run again.
         }
 
 
@@ -138,8 +151,10 @@ namespace Pulsar4X.ECSLib
         public static void ApplyTech(FactionTechDB factionTechs, TechSD research)
         {
 
-
-            factionTechs.ResearchedTechs[research.ID] += 1;
+            if (factionTechs.ResearchedTechs.ContainsKey(research.ID))
+                factionTechs.ResearchedTechs[research.ID] += 1;
+            else
+                factionTechs.ResearchedTechs.Add(research.ID, 0);
 
            
             if (factionTechs.LevelforTech(research) >= research.MaxLevel)
@@ -155,7 +170,7 @@ namespace Pulsar4X.ECSLib
                 factionTechs.UnavailableTechs[research] += 1;
             
             //check if it's opened up other reasearch.
-            MakeResearchable(factionTechs);
+            //MakeResearchable(factionTechs);
         }
 
 
