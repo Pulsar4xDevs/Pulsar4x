@@ -312,6 +312,7 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.ShipyardDataGrid.SelectionChanged += new EventHandler(ShipyardDataGrid_SelectionChanged);
             m_oSummaryPanel.ExpandCapUntilXTextBox.TextChanged += new EventHandler(ExpandCapUntilXTextBox_TextChanged);
             m_oSummaryPanel.NewShipClassComboBox.SelectedIndexChanged += new EventHandler(NewShipClassComboBox_SelectedIndexChanged);
+            m_oSummaryPanel.SYNewClassComboBox.SelectedIndexChanged += new EventHandler(SYNewClassComboBox_SelectedIndexChanged);
             m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndexChanged += new EventHandler(RepairRefitScrapClassComboBox_SelectedIndexChanged);
             m_oSummaryPanel.AddTaskButton.Click += new EventHandler(AddTaskButton_Click);
 
@@ -707,6 +708,11 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ShipyardCreateTaskGroupBox.Text = Entry;
                     }
 
+                    if(m_oSummaryPanel.SYNewClassComboBox.Items.Count > 0 && m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1)
+                        m_oSummaryPanel.SYNewClassComboBox.Items[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex] = "";
+                    m_oSummaryPanel.SYNewClassComboBox.Items.Clear();
+                    m_oSummaryPanel.SYShipNameTextBox.Text = "";
+
                     /// <summary>
                     /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
                     /// So. they have to be refs.
@@ -763,13 +769,32 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void NewShipClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1)
+            if (m_oSummaryPanel.NewClassComboBox.SelectedIndex != -1)
             {
                 Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
-                int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex]);
-                String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
-                                             (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
-                m_oSummaryPanel.SYShipNameTextBox.Text = Entry;
+            }
+        }
+
+        /// <summary>
+        /// be sure to change the name of the ship currently selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SYNewClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1)
+            {
+                Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+                BindingList<ShipClassTN> ECL = EligibleClassList;
+                Eco_ShipyardTabHandler.GetEligibleClassList(CurrentFaction, CurrentSYInfo, ref ECL);
+                EligibleClassList = ECL;
+                if (EligibleClassList.Count != 0)
+                {
+                    int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex]);
+                    String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
+                                                 (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
+                    m_oSummaryPanel.SYShipNameTextBox.Text = Entry;
+                }
             }
         }
 

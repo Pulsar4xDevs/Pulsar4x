@@ -3692,6 +3692,7 @@ namespace Pulsar4X.Entities
 
                     CLE.tons = CLE.tons - ShipMassToUnload;
                     CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
+                    Ships[loop].CurrentCargoTonnage = Ships[loop].CurrentCargoTonnage - ShipMassToUnload;
 
                     Pop.UnloadInstallation(InstType, ShipMassToUnload);
                 }
