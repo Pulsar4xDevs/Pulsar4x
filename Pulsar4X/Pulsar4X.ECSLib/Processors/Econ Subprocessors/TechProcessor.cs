@@ -40,6 +40,13 @@ namespace Pulsar4X.ECSLib
 
             foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
             {
+                var scientistDB = scientist.GetDataBlob<ScientistDB>();
+
+                if (scientistDB.ProjectQueue.Count == 0)
+                {
+                    continue;
+                }
+
                 //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
                 Guid projectGuid = scientist.GetDataBlob<ScientistDB>().ProjectQueue[0];
                 TechSD project = game.StaticData.Techs[projectGuid];
