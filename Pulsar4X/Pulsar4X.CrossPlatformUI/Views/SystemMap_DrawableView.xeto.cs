@@ -34,27 +34,29 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private float ViewPosX(float sysPos)
         {
-            return sysPos + (this.Width / 2);
+            return (sysPos * _zoom) + (this.Width / 2);
         }
         private float ViewPosY(float sysPos)
         {
-            return sysPos + (this.Height / 2);
+            return (sysPos * _zoom) + (this.Height / 2) ;
         }
-
+        private float _zoom = 100;
         protected override void OnPaint(PaintEventArgs e)
         {
             // your custom drawing
             e.Graphics.FillRectangle(Colors.Blue, e.ClipRectangle);
 
-
             if (_viewModel != null)
+            {
+
                 foreach (var sysBody in _viewModel.SystemBodies)
                 {
                     Color iconcolor = new Color();
                     iconcolor.A = sysBody.Icon.Pendata.Alpha;
                     iconcolor.B = sysBody.Icon.Pendata.Blue;
                     iconcolor.G = sysBody.Icon.Pendata.Green;
-                    Pen iconPen = new Pen(iconcolor, sysBody.Icon.Pendata.Thickness);
+                    
+                    Pen iconPen = new Pen(Colors.Green, sysBody.Icon.Pendata.Thickness);
                     e.Graphics.DrawEllipse(iconPen, ViewPosX(sysBody.Icon.PosX), ViewPosY(sysBody.Icon.PosY), sysBody.Icon.Width, sysBody.Icon.Height);
 
                     foreach (var item in sysBody.OrbitEllipse.ArcList)
@@ -63,12 +65,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         orblineColor.A = item.Pendata.Alpha;
                         orblineColor.B = item.Pendata.Blue;
                         orblineColor.G = item.Pendata.Green;
-                        Pen orblinePen = new Pen(orblineColor, item.Pendata.Thickness);
+                        Pen orblinePen = new Pen(Colors.White, item.Pendata.Thickness);
                         e.Graphics.DrawArc(orblinePen, ViewPosX(item.PosX), ViewPosY(item.PosY), item.Width, item.Height, item.StartAngle, item.SweepAngle);
                         //e.Graphics.RotateTransform(sysBody.OrbitEllipse.AngleOfPeriapsis);
                     }
 
                 }
+            }
         }
     }
 }
