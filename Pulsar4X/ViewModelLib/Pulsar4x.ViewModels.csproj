@@ -117,6 +117,8 @@
     <Compile Include="ViewModels\PlanetVM.cs" />
     <Compile Include="ViewModels\RefinaryAbilityVM.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
+    <Compile Include="ViewModels\SystemView\StarSystemVM.cs" />
+    <Compile Include="ViewModels\SystemView\SystemMap_DrawableVM.cs" />
     <Compile Include="ViewModels\SystemView\RenderVM.cs" />
     <Compile Include="ViewModels\ResearchVM.cs" />
     <Compile Include="ViewModels\ShipDesignVM.cs" />

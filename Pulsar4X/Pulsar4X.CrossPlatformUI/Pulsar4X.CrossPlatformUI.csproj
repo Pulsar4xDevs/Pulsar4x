@@ -181,6 +181,8 @@
     <Content Include="Resources\Shaders\Basic30_Vertex_Shader.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Views\SystemMap_DrawableObject.xeto" />
+    <EmbeddedResource Include="Views\SystemMap_DrawableView.xeto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
@@ -272,6 +274,12 @@
       <DependentUpon>ShipDesignView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Lib\OpenGLRenderer.cs" />
+    <Compile Include="Views\SystemMap_DrawableObject.xeto.cs">
+      <DependentUpon>SystemMap_DrawableObject.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SystemMap_DrawableView.xeto.cs">
+      <DependentUpon>SystemMap_DrawableView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\SystemView.xeto.cs">
       <DependentUpon>SystemView.xeto</DependentUpon>
     </Compile>

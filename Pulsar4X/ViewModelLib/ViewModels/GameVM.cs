@@ -69,7 +69,7 @@ namespace Pulsar4X.ViewModel
         public string StatusText { get { return _statusText; } set { _statusText = value; OnPropertyChanged(); } }
         private string _statusText;
 
-
+        public SystemView.StarSystemVM StarSystemViewModel {get; private set;}
 
         //factions that this client has full visability of. for GM this will be all factions.
         private List<Guid> _visibleFactions;
@@ -151,6 +151,8 @@ namespace Pulsar4X.ViewModel
 
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
+
+            StarSystemViewModel = new SystemView.StarSystemVM(Game, CurrentFaction, CurrentAuthToken);
         }
 
         public void LoadGame(string pathToFile)
