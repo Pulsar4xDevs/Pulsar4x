@@ -41,13 +41,13 @@ namespace Pulsar4X.ViewModel
                     _systems.Add(systemVM);
                     _systemDictionary.Add(systemVM.ID, systemVM);
                 }
-                ColonyScreens = new List<ColonyScreenVM>();
-                Colonys = new DictionaryVM<Guid, string>(DisplayMode.Value);
+
+                Colonys.Clear();
                 foreach (var colonyEntity in _currentFaction.GetDataBlob<FactionInfoDB>().Colonies)
                 {
-                    ColonyScreens.Add(new ColonyScreenVM(colonyEntity, Game.StaticData));
                     Colonys.Add(colonyEntity.Guid, colonyEntity.GetDataBlob<NameDB>().GetName(_currentFaction));
                 }
+                Colonys.SelectedIndex = 0;
 
 
             }
@@ -79,21 +79,10 @@ namespace Pulsar4X.ViewModel
 
         public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
 
-        public List<ColonyScreenVM> ColonyScreens { get; set; } //TODO create the VM as a view is requested?
+        public DictionaryVM<Guid, string> Colonys { get; } = new DictionaryVM<Guid, string>(DisplayMode.Value);
 
-        public DictionaryVM<Guid, string> Colonys { get; set; }
+        public ColonyScreenVM SelectedColonyScreenVM { get { return new ColonyScreenVM(Game.GlobalManager.GetGlobalEntityByGuid(Colonys.SelectedKey), Game.StaticData); } }
 
-        public ColonyScreenVM ColonyScreen { get; set; }
-
-        private Guid _selectedColonyGuid;
-        public Guid SetColonyScreen
-        {
-            get { return _selectedColonyGuid; }
-            set
-            {
-                _selectedColonyGuid = value; ColonyScreen = new ColonyScreenVM(Game.GlobalManager.GetEntityByGuid(value), Game.StaticData);
-            }
-        }
 
         private Dictionary<Guid, SystemVM> _systemDictionary;
 
@@ -269,10 +258,6 @@ namespace Pulsar4X.ViewModel
             foreach (var system in _systems)
             {
                 system.Refresh();
-            }
-            foreach (var colonyVM in ColonyScreens)
-            {
-                colonyVM.Refresh();
             }
         }
 
