@@ -31,7 +31,8 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		private const float mouse_move_threshold = 20f;
 		
 		private OpenGLRenderer Renderer;
-        private SystemMap_DrawableView _sysMapDrawable;
+        protected SystemMap_DrawableView SysMapDrawable;
+
 		public SystemView(GameVM GameVM) {
 			RenderVM = new RenderVM(GameVM.CurrentAuthToken);
 			//Renderer = new OpenGLRenderer(RenderVM);
@@ -73,8 +74,9 @@ namespace Pulsar4X.CrossPlatformUI.Views {
             systems.DataContext = GameVM.StarSystemViewModel.StarSystems;
             systems.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
             systems.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
-            _sysMapDrawable = new SystemMap_DrawableView(GameVM.StarSystemViewModel.SelectedSystemVM);
-            RenderCanvasLocation.Content = _sysMapDrawable;
+            //SysMapDrawable = new SystemMap_DrawableView(GameVM.StarSystemViewModel.SelectedSystemVM);
+            SysMapDrawable.SetViewmodel(GameVM.StarSystemViewModel.SelectedSystemVM);
+            //RenderCanvasLocation.Content = SysMapDrawable;
             timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
             timDraw.Elapsed += timDraw_Elapsed;
             timDraw.Start();
@@ -135,7 +137,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 
         private void timDraw_Elapsed(object sender, EventArgs e)
         {
-            _sysMapDrawable.Invalidate();
+            SysMapDrawable.Invalidate();
         }
 
         //private void timDraw_Elapsed(object sender, EventArgs e) {

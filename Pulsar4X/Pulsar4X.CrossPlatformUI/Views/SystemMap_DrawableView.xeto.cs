@@ -14,7 +14,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             XamlReader.Load(this);
         }
-        public SystemMap_DrawableView(SystemMap_DrawableVM viewModel)
+
+
+        public void SetViewmodel(SystemMap_DrawableVM viewModel)
         {
             _viewModel = viewModel;
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
@@ -30,32 +32,43 @@ namespace Pulsar4X.CrossPlatformUI.Views
             Invalidate();
         }
 
+        private float ViewPosX(float sysPos)
+        {
+            return sysPos + (this.Width / 2);
+        }
+        private float ViewPosY(float sysPos)
+        {
+            return sysPos + (this.Height / 2);
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             // your custom drawing
-            //e.Graphics.FillRectangle(Colors.Blue, e.ClipRectangle);
-            if(_viewModel != null)
-            foreach (var sysBody in _viewModel.SystemBodies)
-            {
-                Color iconcolor = new Color();
-                iconcolor.A = sysBody.Icon.Pendata.Alpha;
-                iconcolor.B = sysBody.Icon.Pendata.Blue;
-                iconcolor.G = sysBody.Icon.Pendata.Green;
-                Pen iconPen = new Pen(iconcolor, sysBody.Icon.Pendata.Thickness);
-                e.Graphics.DrawEllipse(iconPen, sysBody.Icon.PosX, sysBody.Icon.PosY, sysBody.Icon.Width, sysBody.Icon.Height);
+            e.Graphics.FillRectangle(Colors.Blue, e.ClipRectangle);
 
-                foreach (var item in sysBody.OrbitEllipse.ArcList)
+
+            if (_viewModel != null)
+                foreach (var sysBody in _viewModel.SystemBodies)
                 {
-                    Color orblineColor = new Color();
-                    orblineColor.A = item.Pendata.Alpha;
-                    orblineColor.B = item.Pendata.Blue;
-                    orblineColor.G = item.Pendata.Green;
-                    Pen orblinePen = new Pen(orblineColor, item.Pendata.Thickness);
-                    e.Graphics.DrawArc(orblinePen, item.PosX, item.PosY, item.Width, item.Height, item.StartAngle, item.SweepAngle);
-                    e.Graphics.RotateTransform(sysBody.OrbitEllipse.AngleOfPeriapsis);
+                    Color iconcolor = new Color();
+                    iconcolor.A = sysBody.Icon.Pendata.Alpha;
+                    iconcolor.B = sysBody.Icon.Pendata.Blue;
+                    iconcolor.G = sysBody.Icon.Pendata.Green;
+                    Pen iconPen = new Pen(iconcolor, sysBody.Icon.Pendata.Thickness);
+                    e.Graphics.DrawEllipse(iconPen, ViewPosX(sysBody.Icon.PosX), ViewPosY(sysBody.Icon.PosY), sysBody.Icon.Width, sysBody.Icon.Height);
+
+                    foreach (var item in sysBody.OrbitEllipse.ArcList)
+                    {
+                        Color orblineColor = new Color();
+                        orblineColor.A = item.Pendata.Alpha;
+                        orblineColor.B = item.Pendata.Blue;
+                        orblineColor.G = item.Pendata.Green;
+                        Pen orblinePen = new Pen(orblineColor, item.Pendata.Thickness);
+                        e.Graphics.DrawArc(orblinePen, ViewPosX(item.PosX), ViewPosY(item.PosY), item.Width, item.Height, item.StartAngle, item.SweepAngle);
+                        //e.Graphics.RotateTransform(sysBody.OrbitEllipse.AngleOfPeriapsis);
+                    }
+
                 }
-                
-            }
         }
     }
 }
