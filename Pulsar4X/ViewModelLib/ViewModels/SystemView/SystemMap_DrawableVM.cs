@@ -41,16 +41,12 @@ namespace Pulsar4X.ViewModel.SystemView
         public SystemObjectGraphicsInfo(Entity item)
         {
             Icon = new IconData(item.GetDataBlob<PositionDB>());
-            if(item.HasDataBlob<OrbitDB>())
+            if(item.HasDataBlob<OrbitDB>() && !item.GetDataBlob<OrbitDB>().IsStationary)
                 OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>());
         }
     }
 
-    /// <summary>
-    /// generic vector graphics data for an icon
-    /// TODO: expand this to be a vector graphics path. 
-    /// </summary>
-    public class IconData : ViewModelBase
+    public class VectorGraphicDataBase : ViewModelBase
     {
         public PenData Pendata { get; set; }
         /// <summary>
@@ -75,11 +71,22 @@ namespace Pulsar4X.ViewModel.SystemView
         /// <summary>
         /// Size of the rectangle
         /// </summary>
-        public float Width { get; private set; }
+        public float Width { get; protected set; }
         /// <summary>
         /// Height of the rectangle
         /// </summary>
-        public float Height { get; private set; }
+        public float Height { get; protected set; }
+
+        public float Zoom { get; set; } = 100;
+
+    }
+
+    /// <summary>
+    /// generic vector graphics data for an icon
+    /// TODO: expand this to be a vector graphics path. 
+    /// </summary>
+    public class IconData : VectorGraphicDataBase
+    {
 
         public IconData(PositionDB position)
         {
@@ -95,7 +102,7 @@ namespace Pulsar4X.ViewModel.SystemView
     /// <summary>
     /// generic data for drawing an OrbitEllipse which fades towards the tail
     /// </summary>
-    public class OrbitEllipseFading : ViewModelBase
+    public class OrbitEllipseFading : VectorGraphicDataBase
     {
         /// <summary>
         /// number of segments in the orbit, this is mostly for an increasing alpha chan.
@@ -109,31 +116,6 @@ namespace Pulsar4X.ViewModel.SystemView
         /// This is the index that the body is currently at. (or maybe the next one..)
         /// </summary>
         public byte StartIndex { get; set; }
-        /// <summary>
-        /// position from 0,0
-        /// </summary>
-        public float PosX {
-            get { return posx; }
-            set { posx = value; OnPropertyChanged(); } }
-        private float posx;
-        /// <summary>
-        /// position from 0,0
-        /// </summary>
-        public float PosY
-        {
-            get { return posy; }
-            set { posy = value; OnPropertyChanged(); }
-        }
-        private float posy;
-
-        /// <summary>
-        /// Size of the rectangle
-        /// </summary>
-        public float Width { get; private set; }
-        /// <summary>
-        /// Height of the rectangle
-        /// </summary>
-        public float Height { get; private set; }
 
         /// <summary>
         /// rotation of the rectangle
@@ -155,18 +137,21 @@ namespace Pulsar4X.ViewModel.SystemView
                 PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X;
                 PosY = (float)orbit.Parent.GetDataBlob<PositionDB>().Y;
             }
-            float x = PosX + (float)orbit.Periapsis;
-            float y = PosY + (float)orbit.Apoapsis;
+            //float x = PosX + (float)orbit.Periapsis;
+            //float y = PosY + (float)orbit.Apoapsis;
             float start = 0;
+            float sweep = 360.0f / Segments;
             for (int i = 0; i < Segments; i++)
             {
                 PenData pen = new PenData();
-                pen.Red = 0;
-                pen.Green = 0;
-                pen.Blue = 255;
-                ArcData arc = new ArcData(pen, x, y, Width, Height, start, 360 / Segments);
+                pen.Red = 255;
+                pen.Green = 248;
+                pen.Blue = 220;
+                ArcData arc = new ArcData(pen, PosX, PosY, Width, Height, start, sweep);
                 ArcList.Add(arc);
+                start += sweep;
             }
+            updateAlphaFade();
         }
 
         public void updateAlphaFade()
@@ -183,13 +168,9 @@ namespace Pulsar4X.ViewModel.SystemView
     /// <summary>
     /// generic data for an arc segment
     /// </summary>
-    public class ArcData
+    public class ArcData : VectorGraphicDataBase
     {
-        public PenData Pendata { get; set; }
-        public float PosX { get; set; }
-        public float PosY { get; set; }
-        public float Width { get; set; }
-        public float Height { get; set; }
+
         public float StartAngle { get; set; }
         public float SweepAngle { get; set; }
         public ArcData(PenData pen, float x, float y, float width, float height, float start, float sweep)
@@ -210,7 +191,7 @@ namespace Pulsar4X.ViewModel.SystemView
     public class PenData
     {
         int ColorARGB { get; set; }
-        public byte Alpha { get; set; } = 0;
+        public byte Alpha { get; set; } = 255;
         public byte Red { get; set; } = 0;
         public byte Green { get; set; } = 0;
         public byte Blue { get; set; } = 0;
