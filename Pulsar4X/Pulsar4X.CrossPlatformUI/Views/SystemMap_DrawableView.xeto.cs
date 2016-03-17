@@ -48,7 +48,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected override void OnPaint(PaintEventArgs e)
         {
             // your custom drawing
-            e.Graphics.FillRectangle(Colors.Blue, e.ClipRectangle);
+            e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
 
             if (_viewModel != null)
             {
@@ -56,30 +56,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 {
                     item.DrawMe(e.Graphics);
                 }
-                //foreach (var sysBody in _viewModel.SystemBodies)
-                //{
-                //    Color iconcolor = new Color();
-                //    iconcolor.Ab = sysBody.Icon.Pendata.Alpha;
-                //    iconcolor.Rb = sysBody.Icon.Pendata.Red;
-                //    iconcolor.Bb = sysBody.Icon.Pendata.Blue;
-                //    iconcolor.Gb = sysBody.Icon.Pendata.Green;
-
-                //    Pen iconPen = new Pen(iconcolor, sysBody.Icon.Pendata.Thickness);
-                //    e.Graphics.DrawEllipse(iconPen, ViewPosX(sysBody.Icon.PosX), ViewPosY(sysBody.Icon.PosY), sysBody.Icon.Width, sysBody.Icon.Height);
-
-                //    foreach (var item in sysBody.OrbitEllipse.ArcList)
-                //    {
-                //        Color orblineColor = new Color();
-                //        orblineColor.Ab = item.Pendata.Alpha;
-                //        orblineColor.Rb = item.Pendata.Red;
-                //        orblineColor.Bb = item.Pendata.Blue;
-                //        orblineColor.Gb = item.Pendata.Green;
-                //        Pen orblinePen = new Pen(iconcolor, item.Pendata.Thickness);
-                //        e.Graphics.DrawArc(orblinePen, ViewPosX(item.PosX), ViewPosY(item.PosY), item.Width * _zoom, item.Height * _zoom, item.StartAngle, item.SweepAngle);
-                //        //e.Graphics.RotateTransform(sysBody.OrbitEllipse.AngleOfPeriapsis);
-                //    }
-
-                //}
             }
         }
     }
@@ -104,11 +80,19 @@ namespace Pulsar4X.CrossPlatformUI.Views
         }
         private float ViewPosX(float sysPos)
         {
-            return (sysPos * _zoom) + (_parent.Width / 2);
+            float posAdjust = sysPos * _zoom + _parent.Width / 2;   //adjust position for viewscreen.
+            float sizeAdjust = _objectData.Width / 2;               //adjust position for size
+            if (_objectData.SizeAffectedbyZoom)                     //if the size of the vectorimage should be affected by zooming. 
+                sizeAdjust *= _zoom;
+            return  posAdjust - sizeAdjust;
         }
         private float ViewPosY(float sysPos)
         {
-            return (sysPos * _zoom) + (_parent.Height / 2);
+            float posAdjust = sysPos * _zoom + _parent.Height / 2;
+            float sizeAdjust = _objectData.Height / 2;
+            if (_objectData.SizeAffectedbyZoom)
+                sizeAdjust *= _zoom;
+            return posAdjust - sizeAdjust;
         }
         public void DrawMe(Graphics g)
         {
@@ -117,9 +101,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             else if (_objectData is ArcData)
             {
                 ArcData arcData = (ArcData)_objectData;
-                g.DrawArc(_pen, ViewPosX(_objectData.PosX), ViewPosY(_objectData.PosY), _objectData.Width * _zoom, _objectData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
+                g.DrawArc(_pen, ViewPosX(_objectData.PosX) , ViewPosY(_objectData.PosY), _objectData.Width * _zoom, _objectData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
             }
         }
     }
-
 }

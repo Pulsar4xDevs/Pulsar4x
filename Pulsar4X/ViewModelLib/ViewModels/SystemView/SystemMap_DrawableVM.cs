@@ -78,7 +78,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public float Height { get; protected set; }
 
         public float Zoom { get; set; } = 100;
-
+        public bool SizeAffectedbyZoom { get; set; } = false;
     }
 
     /// <summary>
@@ -132,6 +132,7 @@ namespace Pulsar4X.ViewModel.SystemView
             AngleOfPeriapsis = (float)orbit.ArgumentOfPeriapsis;
             Width = (float)orbit.Periapsis * 2; //TODO this could break if the orbit size is bigger than a float
             Height = (float)orbit.Apoapsis * 2;
+            SizeAffectedbyZoom = true;
             if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
             {
                 PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X;
