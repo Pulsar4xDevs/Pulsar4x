@@ -149,6 +149,7 @@ namespace Pulsar4X.ViewModel.SystemView
                 pen.Green = 248;
                 pen.Blue = 220;
                 ArcData arc = new ArcData(pen, PosX, PosY, Width, Height, start, sweep);
+                arc.SizeAffectedbyZoom = true;
                 ArcList.Add(arc);
                 start += sweep;
             }

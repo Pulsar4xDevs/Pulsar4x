@@ -83,7 +83,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             float posAdjust = sysPos * _zoom + _parent.Width / 2;   //adjust position for viewscreen.
             float sizeAdjust = _objectData.Width / 2;               //adjust position for size
             if (_objectData.SizeAffectedbyZoom)                     //if the size of the vectorimage should be affected by zooming. 
-                sizeAdjust *= _zoom;
+                sizeAdjust *= _zoom ;
             return  posAdjust - sizeAdjust;
         }
         private float ViewPosY(float sysPos)
