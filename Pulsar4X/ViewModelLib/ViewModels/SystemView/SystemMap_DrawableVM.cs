@@ -127,8 +127,8 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
             Rotation = (float)orbit.ArgumentOfPeriapsis;
-            Width = (float)orbit.Periapsis * 2; //TODO this could break if the orbit size is bigger than a float
-            Height = (float)orbit.Apoapsis * 2;
+            Width = (float)orbit.Apoapsis * 2; //TODO this could break if the orbit size is bigger than a float
+            Height = (float)orbit.Periapsis * 2;
             SizeAffectedbyZoom = true;
             if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
             {
