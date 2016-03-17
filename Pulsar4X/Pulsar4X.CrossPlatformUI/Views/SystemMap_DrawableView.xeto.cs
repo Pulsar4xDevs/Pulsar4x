@@ -78,31 +78,41 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _pen = new Pen(iconcolor, objectInfo.Pendata.Thickness);
 
         }
-        private float ViewPosX(float sysPos)
+        private float ViewPosX
         {
-            float posAdjust = sysPos * _zoom + _parent.Width / 2;   //adjust position for viewscreen.
-            float sizeAdjust = _objectData.Width / 2;               //adjust position for size
-            if (_objectData.SizeAffectedbyZoom)                     //if the size of the vectorimage should be affected by zooming. 
-                sizeAdjust *= _zoom ;
-            return  posAdjust - sizeAdjust;
+            get
+            {
+                float posAdjust = _objectData.PosX * _zoom + _parent.Width / 2;   //adjust position for viewscreen.
+                float sizeAdjust = _objectData.Width / 2;               //adjust position for size
+                if (_objectData.SizeAffectedbyZoom)                     //if the size of the vectorimage should be affected by zooming. 
+                    sizeAdjust *= _zoom;
+                return posAdjust - sizeAdjust;
+            }
         }
-        private float ViewPosY(float sysPos)
+        private float ViewPosY
         {
-            float posAdjust = sysPos * _zoom + _parent.Height / 2;
-            float sizeAdjust = _objectData.Height / 2;
-            if (_objectData.SizeAffectedbyZoom)
-                sizeAdjust *= _zoom;
-            return posAdjust - sizeAdjust;
+            get
+            {
+                float posAdjust = _objectData.PosY * _zoom + _parent.Height / 2;
+                float sizeAdjust = _objectData.Height / 2;
+                if (_objectData.SizeAffectedbyZoom)
+                    sizeAdjust *= _zoom;
+                return posAdjust - sizeAdjust;                
+            }
         }
         public void DrawMe(Graphics g)
         {
-            if (_objectData is IconData)
-                g.DrawEllipse(_pen, ViewPosX(_objectData.PosX), ViewPosY(_objectData.PosY), _objectData.Width, _objectData.Height);
+            g.SaveTransform();
+            g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, ViewPosX, ViewPosY));
+            if (_objectData is IconData)               
+                g.DrawEllipse(_pen, ViewPosX, ViewPosY, _objectData.Width, _objectData.Height);
             else if (_objectData is ArcData)
             {
                 ArcData arcData = (ArcData)_objectData;
-                g.DrawArc(_pen, ViewPosX(_objectData.PosX) , ViewPosY(_objectData.PosY), _objectData.Width * _zoom, _objectData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
+                g.DrawArc(_pen, ViewPosX, ViewPosY, _objectData.Width * _zoom, _objectData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
             }
+            g.RestoreTransform();
+            
         }
     }
 }

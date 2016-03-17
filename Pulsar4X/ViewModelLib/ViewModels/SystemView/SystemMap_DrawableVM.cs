@@ -77,6 +77,8 @@ namespace Pulsar4X.ViewModel.SystemView
         /// </summary>
         public float Height { get; protected set; }
 
+        public float Rotation { get; set; }
+
         public float Zoom { get; set; } = 100;
         public bool SizeAffectedbyZoom { get; set; } = false;
     }
@@ -118,18 +120,13 @@ namespace Pulsar4X.ViewModel.SystemView
         public byte StartIndex { get; set; }
 
         /// <summary>
-        /// rotation of the rectangle
-        /// </summary>
-        public float AngleOfPeriapsis { get; set; }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="orbit"></param>
         public OrbitEllipseFading(OrbitDB orbit)
         {
             //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
-            AngleOfPeriapsis = (float)orbit.ArgumentOfPeriapsis;
+            Rotation = (float)orbit.ArgumentOfPeriapsis;
             Width = (float)orbit.Periapsis * 2; //TODO this could break if the orbit size is bigger than a float
             Height = (float)orbit.Apoapsis * 2;
             SizeAffectedbyZoom = true;
@@ -150,6 +147,7 @@ namespace Pulsar4X.ViewModel.SystemView
                 pen.Blue = 220;
                 ArcData arc = new ArcData(pen, PosX, PosY, Width, Height, start, sweep);
                 arc.SizeAffectedbyZoom = true;
+                arc.Rotation = Rotation;
                 ArcList.Add(arc);
                 start += sweep;
             }
