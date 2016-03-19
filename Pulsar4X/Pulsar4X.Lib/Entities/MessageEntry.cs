@@ -24,6 +24,8 @@ namespace Pulsar4X.Entities
             ContactUpdate,
             ContactLost,
 
+            FailureToLoad,
+
             Firing,
             FiringHit,
             FiringMissed,

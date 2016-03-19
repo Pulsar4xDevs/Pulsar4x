@@ -225,6 +225,11 @@ namespace Pulsar4X.Entities
         public ConditionalOrders _SpecialOrders { get; set; }
 
         /// <summary>
+        /// Should this TG repeat completed orders(by placing them at the bottom of the orders list)?
+        /// </summary>
+        public bool CycleMoves { get; set; }
+
+        /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
         /// <param name="Title">Name</param>
@@ -333,6 +338,8 @@ namespace Pulsar4X.Entities
             _GeoSurveyPoints = 0;
             _GravSurveyPoints = 0;
             _SurveyHourFraction = 0.0f;
+
+            CycleMoves = false;
 
             //add default legal order for targeting TGs.
             _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
@@ -2200,10 +2207,20 @@ namespace Pulsar4X.Entities
                     }
 
                     /// <summary>
-                    /// This order was completed successfully, so do not bother checking it for any conditions.
+                    /// This order was completed successfully, add it back in if CycleMoves is true. no special conditions need to be checked for, hence skipCheck = true.
+                    /// Don't repeat single orders by accident.
                     /// </summary>
-                    RemoveOrder(0, true);
-                    //TaskGroupOrders.RemoveAt(0);
+                    if (CycleMoves == true && TaskGroupOrders.Count > 1)
+                    {
+                        Order TGOrder = TaskGroupOrders[0];
+                        RemoveOrder(0, true);
+                        TaskGroupOrders.Add(TGOrder);
+                    }
+                    else
+                    {
+                        RemoveOrder(0, true);
+                    }
+ 
 
                     if (TaskGroupOrders.Count > 0)
                     {
@@ -2363,7 +2380,15 @@ namespace Pulsar4X.Entities
                         {
                             TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                             TaskGroupOrders[0].orderTimeRequirement = 0;
-                            LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                            if(!LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary))
+                            {
+                                String Entry = String.Format("No installations could be loaded to cargoships in {1} at {0}, orders have been cleared.", TaskGroupOrders[0].pop, Name);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.FailureToLoad, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                                TaskGroupFaction.MessageLog.Add(NME);
+                                for (int orderIterator = 0; orderIterator < TaskGroupOrders.Count; orderIterator++)
+                                    RemoveOrder(0, false);
+                                CycleMoves = false;
+                            }
                             CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                         }
                         else
@@ -2392,7 +2417,15 @@ namespace Pulsar4X.Entities
                         {
                             TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                             TaskGroupOrders[0].orderTimeRequirement = 0;
-                            LoadComponents(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                            if (!LoadComponents(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary))
+                            {
+                                String Entry = String.Format("No components could be loaded to cargoships in {1} at {0}, orders have been cleared.", TaskGroupOrders[0].pop,Name);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.FailureToLoad, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                                TaskGroupFaction.MessageLog.Add(NME);
+                                for (int orderIterator = 0; orderIterator < TaskGroupOrders.Count; orderIterator++)
+                                    RemoveOrder(0, false);
+                                CycleMoves = false;
+                            }
                             CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                         }
                         else
@@ -2505,7 +2538,15 @@ namespace Pulsar4X.Entities
                         {
                             TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                             TaskGroupOrders[0].orderTimeRequirement = 0;
-                            LoadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].tertiary);
+                            if(!LoadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].tertiary))
+                            {
+                                String Entry = String.Format("No Colonists could be loaded to colonyships in {1} at {0}, orders have been cleared.", TaskGroupOrders[0].pop, Name);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.FailureToLoad, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                                TaskGroupFaction.MessageLog.Add(NME);
+                                for (int orderIterator = 0; orderIterator < TaskGroupOrders.Count; orderIterator++)
+                                    RemoveOrder(0, false);
+                                CycleMoves = false;
+                            }
                             CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                         }
                         else
@@ -3534,6 +3575,7 @@ namespace Pulsar4X.Entities
             TaskGroupOrders.Clear();
             TimeRequirement = 0;
             TotalOrderDistance = 0;
+            CycleMoves = false;
         }
 
 
@@ -3593,11 +3635,14 @@ namespace Pulsar4X.Entities
         /// <param name="Pop">Population to load from.</param>
         /// <param name="InstType">installation type to load.</param>
         /// <param name="Limit">Limit in number of facilities to load.</param>
-        public void LoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
+        public bool LoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
         {
             int RemainingTaskGroupTonnage = TotalCargoTonnage - CurrentCargoTonnage;
             int TotalMass = TaskGroupFaction.InstallationTypes[(int)InstType].Mass * Limit;
             int AvailableMass = (int)(Pop.Installations[(int)InstType].Number * (float)TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
+
+            if (AvailableMass == 0)
+                return false;
 
             int MassToLoad = 0;
 
@@ -3657,6 +3702,7 @@ namespace Pulsar4X.Entities
                     Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
                 }
             }
+            return true;
         }
 
         /// <summary>
@@ -3705,11 +3751,14 @@ namespace Pulsar4X.Entities
         /// <param name="Pop"></param>
         /// <param name="MinType"></param>
         /// <param name="Limit"></param>
-        public void LoadMineral(Population Pop, Constants.Minerals.MinerialNames MinType, int Limit)
+        public bool LoadMineral(Population Pop, Constants.Minerals.MinerialNames MinType, int Limit)
         {
             int RemainingTaskGroupTonnage = TotalCargoTonnage - CurrentCargoTonnage;
             int TotalMass = Limit;
             int AvailableMass = (int)(Pop.Minerials[(int)MinType]);
+
+            if (AvailableMass == 0)
+                return false;
 
             int MassToLoad = 0;
 
@@ -3769,6 +3818,7 @@ namespace Pulsar4X.Entities
                     Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
                 }
             }
+            return true;
         }
 
         /// <summary>
@@ -3815,8 +3865,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Pop">Population to load from.</param>
         /// <param name="Limit">Limit on colonists who can be put onto taskgroup.</param>
-        public void LoadColonists(Population Pop, int Limit)
+        public bool LoadColonists(Population Pop, int Limit)
         {
+            if (Pop.CivilianPopulation == 0.0f)
+                return false;
+
             for (int loop = 0; loop < Ships.Count; loop++)
             {
                 if (Ships[loop].ShipClass.SpareCryoBerths != 0)
@@ -3851,6 +3904,8 @@ namespace Pulsar4X.Entities
                     Pop.CivilianPopulation = Pop.CivilianPopulation - ((float)Colonists / 1000000.0f);
                 }
             }
+
+            return true;
         }
 
         /// <summary>
@@ -3893,11 +3948,17 @@ namespace Pulsar4X.Entities
         /// <param name="Pop">Population of the component pickup.</param>
         /// <param name="ComponentIndex">location in pop.ComponentStockpile.</param>
         /// <param name="Limit">Number of said components to pick up if not all of them.</param>
-        public void LoadComponents(Population Pop, int ComponentIndex, int Limit)
+        public bool LoadComponents(Population Pop, int ComponentIndex, int Limit)
         {
+            if (Pop.ComponentStockpile.Count <= ComponentIndex)
+                return false;
+
             int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
             int TotalMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * (float)Limit);
             int AvailableMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * Pop.ComponentStockpileCount[ComponentIndex]);
+
+            if (AvailableMass == 0)
+                return false;
 
             int MassToLoad = 0;
 
@@ -3966,6 +4027,8 @@ namespace Pulsar4X.Entities
                     MassToLoad = MassToLoad - ShipMassToLoad;
                 }
             }
+
+            return true;
         }
 
         /// <summary>

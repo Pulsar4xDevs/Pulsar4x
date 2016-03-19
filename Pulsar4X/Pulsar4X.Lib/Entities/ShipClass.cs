@@ -2656,6 +2656,33 @@ namespace Pulsar4X.Entities
 
             Summary = String.Format("{0}{1}", Summary, Entry);
 
+            bool didCarrying = false;
+            if (ShipCargoDef.Count != 0)
+            {
+                Entry = String.Format("Cargo {0}    ", TotalCargoCapacity);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                didCarrying = true;
+            }
+
+            if (ShipColonyDef.Count != 0)
+            {
+                Entry = String.Format("Cyrogenic Berths {0}    ", SpareCryoBerths);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                didCarrying = true;
+            }
+
+            if (ShipCHSDef.Count != 0)
+            {
+                Entry = String.Format("Cargo Handling Multiplier {0}    ", TractorMultiplier);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                didCarrying = true;
+            }
+
+            if (didCarrying == true)
+            {
+                Summary = String.Format("{0}\n", Summary, Entry);
+            }
+
             if (ShipMagazineDef.Count != 0)
             {
                 Entry = String.Format("Magazine {0}\n", TotalMagazineCapacity);

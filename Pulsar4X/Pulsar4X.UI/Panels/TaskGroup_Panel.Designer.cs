@@ -154,6 +154,14 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Place any completed orders back in the order list so that a taskgroup will repeatedly perform an order cycle such as "go to here, get a mine, go to there, drop it off"
+        /// </summary>
+        public CheckBox CycleMovesCheckBox
+        {
+            get { return m_oCycleMovesCheckBox; }
+        }
+
+        /// <summary>
         /// creates a new task group.
         /// </summary>
         public Button NewTaskGroupButton

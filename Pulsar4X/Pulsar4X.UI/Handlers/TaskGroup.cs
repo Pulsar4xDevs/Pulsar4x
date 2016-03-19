@@ -229,6 +229,8 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.PlottedMovesListBox.MouseDown += new MouseEventHandler(PlottedMovesListBox_MouseDown);
             SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
+            m_oTaskGroupPanel.CycleMovesCheckBox.CheckStateChanged += new EventHandler(CycleMovesCheckBox_CheckStateChanged);
+
             #region Organization Tab
             m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndexChanged += new EventHandler(OrgSelectedTGComboBox_SelectedIndexChanged);
             m_oTaskGroupPanel.OrgMoveLeftButton.Click += new EventHandler(OrgMoveLeftButton_Click);
@@ -309,12 +311,25 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Set the currently selected taskgroup to cycle its own moves.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CycleMovesCheckBox_CheckStateChanged(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.CycleMoves = m_oTaskGroupPanel.CycleMovesCheckBox.Checked;
+        }
+
+        /// <summary>
         /// If a location is chosen build the action list.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void SystemLocationListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
             BuildActionList();
         }
 
@@ -456,7 +471,7 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// Adds the selected order to the task group's list of orders. This function is going to get giant.
-        /// Not handled: Order filtering, delays, secondary and tertiary orders.
+        /// Not handled: Order filtering, delays, secondary and tertiary orders. secondaries partially done now.
         /// As for adding new things here, look at the logic for how they were added to the SystemLocationListBox to derive how to get to them for this code.
         /// Don't forget filtering of destinations by survey status.
         /// </summary>
@@ -1336,7 +1351,6 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void PlottedMovesListBox_MouseDown(object sender, MouseEventArgs e)
         {
-
             if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex != -1)
             {
                 var rect = m_oTaskGroupPanel.PlottedMovesListBox.GetItemRectangle(m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex);
@@ -2034,6 +2048,7 @@ namespace Pulsar4X.UI.Handlers
         {
             if (CurrentTaskGroup != null)
             {
+                m_oTaskGroupPanel.CycleMovesCheckBox.Checked = CurrentTaskGroup.CycleMoves;
                 m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.Position.System.Name;
                 m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
                 m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();

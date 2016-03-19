@@ -924,7 +924,7 @@ namespace Pulsar4X.Entities
         /// <param name="massToLoad">Total mass of the installation of type iType to take from the planet.</param>
         public void LoadInstallation(Installation.InstallationType iType, int massToLoad)
         {
-            Installations[(int)iType].Number =Installations[(int)iType].Number - (float)(massToLoad / Faction.InstallationTypes[(int)iType].Mass);
+            Installations[(int)iType].Number =Installations[(int)iType].Number - (float)((float)massToLoad / Faction.InstallationTypes[(int)iType].Mass);
             switch (iType)
             {
                 case Installation.InstallationType.DeepSpaceTrackingStation:
@@ -943,7 +943,7 @@ namespace Pulsar4X.Entities
         /// <param name="massToUnload">Total mass of said installation to unload. this can result in fractional changes to installation[].number</param>
         public void UnloadInstallation(Installation.InstallationType iType, int massToUnload)
         {
-            Installations[(int)iType].Number = Installations[(int)iType].Number + (float)(massToUnload / Faction.InstallationTypes[(int)iType].Mass);
+            Installations[(int)iType].Number = Installations[(int)iType].Number + (float)((float)massToUnload / Faction.InstallationTypes[(int)iType].Mass);
             switch(iType)
             {
                 case Installation.InstallationType.DeepSpaceTrackingStation:

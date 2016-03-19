@@ -908,9 +908,7 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     if (CurrentSYInfo.Slipways > CurrentSYInfo.BuildingShips.Count)
                     {
-                        Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, m_oSummaryPanel.SYShipNameTextBox.Text, ConstructRefit);
-                        CurrentSYInfo.BuildingShips.Add(NewTask);
-                        CurrentPopulation.ShipyardTasks.Add(NewTask, CurrentSYInfo);
+                        CurrentSYInfo.AddTask(CurrentPopulation, CurrentShip, SYITask, TargetTG, BaseBuildRate, m_oSummaryPanel.SYShipNameTextBox.Text, ConstructRefit);
 
                         /// <summary>
                         /// Cost display for the new order.
@@ -4512,6 +4510,22 @@ namespace Pulsar4X.UI.Handlers
             {
                 SystemBody CurrentPlanet = CurrentPopulation.Planet;
                 Atmosphere CurrentAtmosphere = CurrentPlanet.Atmosphere;
+
+                m_oSummaryPanel.TerraformingAddGasCheckBox.Checked = CurrentPopulation._GasAddSubtract;
+                m_oSummaryPanel.TerraformingMaxGasTextBox.Text = CurrentPopulation._GasAmt.ToString();
+
+                if (m_oSummaryPanel.TerraformingGasComboBox.Items.Count != 0)
+                {
+                    m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = 0;
+                    for (int gasIterator = 0; gasIterator < m_oSummaryPanel.TerraformingGasComboBox.Items.Count; gasIterator++)
+                    {
+                        if (m_oSummaryPanel.TerraformingGasComboBox.Items[gasIterator] == CurrentPopulation._GasToAdd)
+                        {
+                            m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = gasIterator;
+                        }
+                    }
+                }
+
                 m_oSummaryPanel.TerraformingAtmosphereListBox.Items.Clear();
                 float TotalGas = CurrentAtmosphere.Pressure;
                 String Entry = "N/A";

@@ -541,12 +541,21 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Terraforming will go over the limit specified by the user.
                         /// </summary>
+                        bool limit = false;
                         if (CurrentTerraforming + CurrentGasAmt > pop._GasAmt)
                         {
                             CurrentTerraforming = pop._GasAmt - CurrentGasAmt;
+                            limit = true;
                         }
 
                         pop.Planet.Atmosphere.AddGas(pop._GasToAdd, CurrentTerraforming);
+
+                        if (limit == true)
+                        {
+                            pop._GasAmt = 0.0f;
+                            pop._GasToAdd = null;
+                            pop._GasAddSubtract = false;
+                        }
                     }
                 }
                 else if (pop._GasAddSubtract == false)
@@ -558,11 +567,20 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Terraforming will go under the limit specified by the user.
                         /// </summary>
+                        bool limit = false;
                         if (CurrentTerraforming - CurrentGasAmt < pop._GasAmt)
                         {
                             CurrentTerraforming = CurrentGasAmt - pop._GasAmt;
+                            limit = true;
                         }
                         pop.Planet.Atmosphere.AddGas(pop._GasToAdd, CurrentTerraforming);
+
+                        if (limit == true)
+                        {
+                            pop._GasAmt = 0.0f;
+                            pop._GasToAdd = null;
+                            pop._GasAddSubtract = false;
+                        }
                     }
                 }
             }            
@@ -689,6 +707,7 @@ namespace Pulsar4X.Entities
                         case Constants.ShipyardInfo.Task.Construction:
                             Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget, Task.Title);
                             CurrentPopulation.FuelStockpile = Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].Refuel(CurrentPopulation.FuelStockpile);
+                            Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].ShipClass.ShipsUnderConstruction--;
                             break;
                         case Constants.ShipyardInfo.Task.Repair:
                             /// <summary>

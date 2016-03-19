@@ -692,6 +692,17 @@ namespace Pulsar4X.Entities
             }
 
             /// <summary>
+            /// Make a new task and add it to this Shipyard, as well as to the Current Population.
+            /// </summary>
+            public void AddTask(Population CurrentPopulation, ShipTN CurrentShip, Constants.ShipyardInfo.Task SYITask, TaskGroupTN TargetTG, int BaseBuildRate, string TextBox, ShipClassTN ConstructRefit)
+            {
+                Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, TextBox, ConstructRefit);
+                BuildingShips.Add(NewTask);
+                CurrentPopulation.ShipyardTasks.Add(NewTask, this);
+                ConstructRefit.ShipsUnderConstruction++;
+            }
+
+            /// <summary>
             /// Helper function for repetitive code.
             /// </summary>
             /// <param name="NewActivity">Activity to set</param>
