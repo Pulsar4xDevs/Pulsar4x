@@ -129,8 +129,8 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
             Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
-            Width = (float)orbit.Apoapsis * 2; //TODO this could break if the orbit size is bigger than a float
-            Height = (float)orbit.Periapsis * 2;
+            Height = (float)orbit.SemiMajorAxis * 2; 
+            Width = (float)Math.Sqrt(((orbit.SemiMajorAxis * Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity)) * orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity))) * 2;   //semi minor
             SizeAffectedbyZoom = true;
             Orbit = orbit;
             if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
@@ -138,8 +138,6 @@ namespace Pulsar4X.ViewModel.SystemView
                 PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X;
                 PosY = (float)orbit.Parent.GetDataBlob<PositionDB>().Y;
             }
-            //float x = PosX + (float)orbit.Periapsis;
-            //float y = PosY + (float)orbit.Apoapsis;
             float start = 0;
             float sweep = 360.0f / Segments;
             for (int i = 0; i < Segments; i++)
