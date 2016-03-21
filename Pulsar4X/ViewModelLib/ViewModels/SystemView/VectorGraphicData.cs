@@ -60,15 +60,33 @@ namespace Pulsar4X.ViewModel.SystemView
     /// </summary>
     public class IconData : VectorGraphicDataBase
     {
+        private Entity _bodyEntity;
+        private PositionDB PositionBlob { get { return _bodyEntity.GetDataBlob<PositionDB>(); } }
 
-        public IconData(PositionDB position)
+        private DateTime _currentDateTime;
+        public DateTime CurrentDateTime
+        {
+            get { return _currentDateTime; }
+            set { _currentDateTime = value; updatePosition(); }
+        }
+
+        private void updatePosition()
+        {
+            //TODO positionDB is not working. 
+            Vector4 position = OrbitProcessor.GetPosition(_bodyEntity.GetDataBlob<OrbitDB>(), CurrentDateTime);
+            PosX = (float)position.X;//(float)PositionBlob.Position.X;
+            PosY = (float)position.Y;//(float)PositionBlob.Position.Y;
+
+        }
+
+        public IconData(Entity bodyEntity)
         {
             PenData penData = new PenData();
             penData.Green = 255;
             Width = 6;
             Height = 6;
-            PosX = (float)position.Position.X;
-            PosY = (float)position.Position.Y;
+            _bodyEntity = bodyEntity;
+            updatePosition();
 
             VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
             PathList.Add(pathPair);
@@ -95,11 +113,11 @@ namespace Pulsar4X.ViewModel.SystemView
 
         public OrbitDB Orbit { get; set; }
 
-        private DateTime _dateTime;
-        public DateTime DateTime
+        private DateTime _currentDateTime;
+        public DateTime CurrentDateTime
         {
-            get { return _dateTime; }
-            set { _dateTime = value; updateAlphaFade(); }
+            get { return _currentDateTime; }
+            set { _currentDateTime = value; updatePosition(); updateAlphaFade(); }
         }
 
 
@@ -142,10 +160,23 @@ namespace Pulsar4X.ViewModel.SystemView
 
         public void SetStartPos()
         {
-            float angle = (float)(Orbit.LongitudeOfAscendingNode + Orbit.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(Orbit, _dateTime));
-            StartIndex = (byte)(angle / 360f / Convert.ToSingle(Segments));
+            float angle = (float)(Orbit.LongitudeOfAscendingNode + Orbit.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(Orbit, _currentDateTime));
+            float degreesPerSegment = 360 / (Convert.ToSingle(Segments));
+            StartIndex = (byte)(degreesPerSegment * angle);
 
         }
+
+        private void updatePosition()
+        {
+            //TODO positionDB is not working. 
+            if (Orbit.Parent != null && Orbit.Parent.HasDataBlob<OrbitDB>())
+            {
+                Vector4 position = OrbitProcessor.GetPosition(Orbit.Parent.GetDataBlob<OrbitDB>(), CurrentDateTime);
+                PosX = (float)position.X;//(float)PositionBlob.Position.X;
+                PosY = (float)position.Y;//(float)PositionBlob.Position.Y;
+            }
+        }
+
         public void updateAlphaFade()
         {
             SetStartPos();

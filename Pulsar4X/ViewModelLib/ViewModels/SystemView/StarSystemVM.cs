@@ -12,13 +12,14 @@ namespace Pulsar4X.ViewModel.SystemView
         public DictionaryVM<StarSystem, string> StarSystems { get; } = new DictionaryVM<StarSystem, string>();
         public SystemMap_DrawableVM SelectedSystemVM { get; private set; }
         private AuthenticationToken _authToken;
-
+        private GameVM _gameVM;
         private int viewport_width;
         private int viewport_height;
 
-        public StarSystemVM(Game game, Entity factionEntity, AuthenticationToken authToken)
+        public StarSystemVM(GameVM gameVM, Game game, Entity factionEntity, AuthenticationToken authToken)
         {
             _authToken = authToken;
+            _gameVM = gameVM;
             foreach (var item in game.GetSystems(authToken))
             {
                 StarSystems.Add(item, item.NameDB.GetName(factionEntity));
@@ -39,7 +40,7 @@ namespace Pulsar4X.ViewModel.SystemView
                             -1f
                            );
 
-            SelectedSystemVM = new SystemMap_DrawableVM(StarSystems.SelectedKey, _authToken, scale_data, cam);
+            SelectedSystemVM = new SystemMap_DrawableVM(_gameVM, StarSystems.SelectedKey, _authToken, scale_data, cam);
         }
     }
 }

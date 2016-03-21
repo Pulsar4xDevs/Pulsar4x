@@ -10,13 +10,26 @@ using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
+    public delegate void DateChangedEventHandler(DateTime oldDate, DateTime newDate);
     /// <summary>
     /// This view model maps to the main game class. It provides lists of factions, systems and other high level info.
     /// </summary>
     public class GameVM : IViewModel
     {
         private ObservableCollection<SystemVM> _systems;
-
+        public event DateChangedEventHandler DateChangedEvent;
+        private DateTime _currentDateTime;
+        public DateTime CurrentDateTime
+        {
+            get { return _currentDateTime; }
+            set
+            {
+                DateTime old = _currentDateTime;
+                _currentDateTime = value;
+                if (DateChangedEvent != null) DateChangedEvent(old, _currentDateTime);
+                OnPropertyChanged();
+            }
+        }
         public Player CurrentPlayer { get; set; }
         public AuthenticationToken CurrentAuthToken { get; set; }
 
@@ -137,11 +150,11 @@ namespace Pulsar4X.ViewModel
             ReadOnlyDictionary<Entity, AccessRole> roles = CurrentPlayer.GetAccessRoles(CurrentAuthToken);
 
             CurrentFaction = roles.FirstOrDefault(role => (role.Value & AccessRole.Owner) != 0).Key;
-
+            CurrentDateTime = Game.CurrentDateTime;
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
 
-            StarSystemViewModel = new SystemView.StarSystemVM(Game, CurrentFaction, CurrentAuthToken);
+            StarSystemViewModel = new SystemView.StarSystemVM(this, Game, CurrentFaction, CurrentAuthToken);
         }
 
         public void LoadGame(string pathToFile)
@@ -153,7 +166,7 @@ namespace Pulsar4X.ViewModel
             // TODO: Select Default player, generate auth token for them.
             CurrentAuthToken = new AuthenticationToken(Game.SpaceMaster);
             CurrentFaction = Game.GameMasterFaction;
-
+            CurrentDateTime = Game.CurrentDateTime;
             ProgressValue = 0;
             StatusText = "Game Loaded.";
         }
@@ -188,6 +201,7 @@ namespace Pulsar4X.ViewModel
             int secondsPulsed;
             secondsPulsed = Game.AdvanceTime(int.Parse(seconds), pulseProgress);
             Refresh();
+            CurrentDateTime = Game.CurrentDateTime;
                
         }
 

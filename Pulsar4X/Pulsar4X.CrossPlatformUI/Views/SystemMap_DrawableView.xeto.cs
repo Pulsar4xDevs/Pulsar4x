@@ -63,11 +63,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             _parent = parent;
             _objectData = objectInfo;
-
+           
             foreach (var pathPenPair in _objectData.PathList)
             {
                     GraphicsPath path = new GraphicsPath();
                 if (_objectData is IconData)
+                    
                     foreach (var shape in pathPenPair.VectorShapes)
                     {
                         if (shape is EllipseData)
@@ -129,8 +130,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var item in _pathDictionary)
             {
                 g.SaveTransform();
-                g.TranslateTransform(ViewPosX, ViewPosY);
+
                 g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, PosXViewAdjusted, PosYViewAdjusted));
+                g.TranslateTransform(ViewPosX, ViewPosY);
+                
                 g.DrawPath(item.Value, item.Key);
                 g.RestoreTransform();
             }  
