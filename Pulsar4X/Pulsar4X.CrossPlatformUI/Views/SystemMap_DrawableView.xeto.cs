@@ -29,11 +29,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 if (item.OrbitEllipse != null)
                 {
                     item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
-
-                    foreach (var arc in item.OrbitEllipse.ArcList)
-                    {
-                        _shapesList.Add(new DrawableObject(this, arc));
-                    }
+                    _shapesList.Add(new DrawableObject(this, item.OrbitEllipse));
                 }
             }
         }
@@ -43,41 +39,65 @@ namespace Pulsar4X.CrossPlatformUI.Views
             Invalidate();
         }
 
-
-        private float _zoom = 100;
         protected override void OnPaint(PaintEventArgs e)
         {
-            // your custom drawing
             e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
 
-            if (_viewModel != null)
+            foreach (var item in _shapesList)
             {
-                foreach (var item in _shapesList)
-                {
-                    item.DrawMe(e.Graphics);
-                }
+                item.DrawMe(e.Graphics);
             }
         }
     }
 
     public class DrawableObject
     {
-        private Pen _pen;
+
         private Drawable _parent;
         float _zoom { get { return _objectData.Zoom; } }
         private VectorGraphicDataBase _objectData;
+
+        private Dictionary<GraphicsPath, Pen> _pathDictionary = new Dictionary<GraphicsPath, Pen>();
+
         public DrawableObject(Drawable parent, VectorGraphicDataBase objectInfo)
         {
             _parent = parent;
             _objectData = objectInfo;
-            Color iconcolor = new Color();
-            iconcolor.Ab = objectInfo.Pendata.Alpha;
-            iconcolor.Rb = objectInfo.Pendata.Red;
-            iconcolor.Bb = objectInfo.Pendata.Blue;
-            iconcolor.Gb = objectInfo.Pendata.Green;
-            _pen = new Pen(iconcolor, objectInfo.Pendata.Thickness);
 
+            foreach (var pathPenPair in _objectData.PathList)
+            {
+                    GraphicsPath path = new GraphicsPath();
+                if (_objectData is IconData)
+                    foreach (var shape in pathPenPair.VectorShapes)
+                    {
+                        if (shape is EllipseData)
+                            path.AddEllipse(shape.X1, shape.Y1, shape.X2, shape.Y2);
+                        else if (shape is RectangleData)
+                            path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
+                        else if (shape is ArcData)
+                        {
+                            ArcData arcData = (ArcData)pathPenPair.VectorShapes[0];
+                            path.AddArc(shape.X1, shape.Y1, shape.X2, shape.Y2, arcData.StartAngle, arcData.SweepAngle);
+                        }
+                    }
+                    
+
+                else if (_objectData is OrbitEllipseFading)
+                { 
+                    ArcData arcData = (ArcData)pathPenPair.VectorShapes[0];
+                    path.AddArc(arcData.X1, arcData.X2, arcData.Width * _zoom, arcData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
+                    
+                }
+                Color iconcolor = new Color();
+                iconcolor.Ab = pathPenPair.Pen.Alpha;
+                iconcolor.Rb = pathPenPair.Pen.Red;
+                iconcolor.Bb = pathPenPair.Pen.Blue;
+                iconcolor.Gb = pathPenPair.Pen.Green;
+
+                _pathDictionary.Add(path, new Pen(iconcolor, pathPenPair.Pen.Thickness));               
+            }
         }
+
         private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width / 2; } }
 
         private float ViewPosX
@@ -89,7 +109,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
                     sizeAdjust *= _zoom;
                 return PosXViewAdjusted - sizeAdjust;
             }
-
         }
 
         private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height / 2; } }
@@ -104,20 +123,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 return PosYViewAdjusted - sizeAdjust;                
             }
         }
+
         public void DrawMe(Graphics g)
         {
-            g.SaveTransform();
-            g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, PosXViewAdjusted, PosYViewAdjusted));
-            if (_objectData is IconData)               
-                g.DrawEllipse(_pen, ViewPosX, ViewPosY, _objectData.Width, _objectData.Height);
-            else if (_objectData is ArcData)
+            foreach (var item in _pathDictionary)
             {
-                ArcData arcData = (ArcData)_objectData;
-                g.DrawArc(_pen, ViewPosX, ViewPosY, _objectData.Width * _zoom, _objectData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
-            }
-            g.RestoreTransform();
-            
-            
+                g.SaveTransform();
+                g.TranslateTransform(ViewPosX, ViewPosY);
+                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, PosXViewAdjusted, PosYViewAdjusted));
+                g.DrawPath(item.Value, item.Key);
+                g.RestoreTransform();
+            }  
         }
     }
 }

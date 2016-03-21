@@ -125,6 +125,7 @@
     <Compile Include="ViewModels\SpeciesVM.cs" />
     <Compile Include="ViewModels\StarVM.cs" />
     <Compile Include="ViewModels\SystemView\Scene.cs" />
+    <Compile Include="ViewModels\SystemView\VectorGraphicData.cs" />
     <Compile Include="ViewModels\SystemVM.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
   </ItemGroup>

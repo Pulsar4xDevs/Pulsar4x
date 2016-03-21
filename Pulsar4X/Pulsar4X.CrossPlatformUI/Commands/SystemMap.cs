@@ -35,7 +35,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         {
             base.OnExecuted(e);
             MainWindow mw = (MainWindow)Application.Instance.MainForm.Content;
-            mw.AddOrSelectTabPanel("System Map",new SystemView(_gameVM));
+            mw.AddOrSelectTabPanel("System Map",new SystemView(_gameVM.StarSystemViewModel));
         }
     }
 }

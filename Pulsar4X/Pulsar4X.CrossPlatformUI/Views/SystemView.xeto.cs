@@ -33,13 +33,17 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		private OpenGLRenderer Renderer;
         protected SystemMap_DrawableView SysMapDrawable;
 
-		public SystemView(GameVM GameVM) {
-			RenderVM = new RenderVM(GameVM.CurrentAuthToken);
-			//Renderer = new OpenGLRenderer(RenderVM);
-			DataContext = GameVM;
-			//RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
+		public SystemView(StarSystemVM viewmodel) {
+			
+			DataContext = viewmodel;			
 			XamlReader.Load(this);
 
+            #region OpenGL stuff
+            //intend to make opengl vs drawable system view an option. an openGL pannel could be a bit fancier. 
+
+            //RenderVM = new RenderVM(GameVM.CurrentAuthToken);
+            //Renderer = new OpenGLRenderer(RenderVM);
+            //RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
             //systems.BindDataContext(s => s.DataStore, (GameVM g) => g.StarSystems);
             //systems.ItemTextBinding = Binding.Property((SystemVM vm) => vm.Name);
             //systems.ItemKeyBinding = Binding.Property((SystemVM vm) => vm.ID).Convert((Guid ID) => ID.ToString());
@@ -70,14 +74,18 @@ namespace Pulsar4X.CrossPlatformUI.Views {
             //RenderCanvas.MouseLeave += WhenMouseLeave;
 
             //RenderCanvasLocation.Content = RenderCanvas;
+            //RenderCanvasLocation.Content = SysMapDrawable;
+            //SysMapDrawable = new SystemMap_DrawableView(GameVM.StarSystemViewModel.SelectedSystemVM);
+            #endregion
 
-            systems.DataContext = GameVM.StarSystemViewModel.StarSystems;
+
+            systems.DataContext = viewmodel.StarSystems;
             systems.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
             systems.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
-            //SysMapDrawable = new SystemMap_DrawableView(GameVM.StarSystemViewModel.SelectedSystemVM);
-            SysMapDrawable.SetViewmodel(GameVM.StarSystemViewModel.SelectedSystemVM);
-            //RenderCanvasLocation.Content = SysMapDrawable;
-            timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
+            
+            SysMapDrawable.SetViewmodel(viewmodel.SelectedSystemVM);
+            
+            timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond. TODO: change to update using OnPropertyChanged 
             timDraw.Elapsed += timDraw_Elapsed;
             timDraw.Start();
         }
