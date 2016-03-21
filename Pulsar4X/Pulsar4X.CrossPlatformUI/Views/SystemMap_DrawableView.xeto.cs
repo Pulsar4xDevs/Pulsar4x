@@ -4,6 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel.SystemView;
+using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -50,6 +51,19 @@ namespace Pulsar4X.CrossPlatformUI.Views
         }
     }
 
+    public class PathData
+    {
+        public Pen EtoPen { get; set; }
+        public PenData PenData { get; set; }
+        public GraphicsPath EtoPath { get; set; }
+        public PathData(Pen etoPen, PenData penData, GraphicsPath etoPath)
+        {
+            EtoPen = etoPen;
+            PenData = penData;
+            EtoPath = etoPath;
+        }
+    }
+
     public class DrawableObject
     {
 
@@ -57,19 +71,19 @@ namespace Pulsar4X.CrossPlatformUI.Views
         float _zoom { get { return _objectData.Zoom; } }
         private VectorGraphicDataBase _objectData;
 
-        private Dictionary<GraphicsPath, Pen> _pathDictionary = new Dictionary<GraphicsPath, Pen>();
+        private List<PathData> _pathDataList = new List<PathData>();
 
         public DrawableObject(Drawable parent, VectorGraphicDataBase objectInfo)
         {
             _parent = parent;
             _objectData = objectInfo;
            
-            foreach (var pathPenPair in _objectData.PathList)
+            foreach (var pathPenDataPair in _objectData.PathList)
             {
-                    GraphicsPath path = new GraphicsPath();
+                GraphicsPath path = new GraphicsPath();
                 if (_objectData is IconData)
                     
-                    foreach (var shape in pathPenPair.VectorShapes)
+                    foreach (var shape in pathPenDataPair.VectorShapes)
                     {
                         if (shape is EllipseData)
                             path.AddEllipse(shape.X1, shape.Y1, shape.X2, shape.Y2);
@@ -77,7 +91,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                             path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is ArcData)
                         {
-                            ArcData arcData = (ArcData)pathPenPair.VectorShapes[0];
+                            ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[0];
                             path.AddArc(shape.X1, shape.Y1, shape.X2, shape.Y2, arcData.StartAngle, arcData.SweepAngle);
                         }
                     }
@@ -85,17 +99,20 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
                 else if (_objectData is OrbitEllipseFading)
                 { 
-                    ArcData arcData = (ArcData)pathPenPair.VectorShapes[0];
+                    ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[0];
                     path.AddArc(arcData.X1, arcData.X2, arcData.Width * _zoom, arcData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
                     
                 }
                 Color iconcolor = new Color();
-                iconcolor.Ab = pathPenPair.Pen.Alpha;
-                iconcolor.Rb = pathPenPair.Pen.Red;
-                iconcolor.Bb = pathPenPair.Pen.Blue;
-                iconcolor.Gb = pathPenPair.Pen.Green;
+                iconcolor.Ab = pathPenDataPair.Pen.Alpha;
+                iconcolor.Rb = pathPenDataPair.Pen.Red;
+                iconcolor.Bb = pathPenDataPair.Pen.Blue;
+                iconcolor.Gb = pathPenDataPair.Pen.Green;
 
-                _pathDictionary.Add(path, new Pen(iconcolor, pathPenPair.Pen.Thickness));               
+                Pen pen = new Pen(iconcolor, pathPenDataPair.Pen.Thickness);
+
+                PathData pathData = new PathData(pen, pathPenDataPair.Pen, path);
+                _pathDataList.Add(pathData);
             }
         }
 
@@ -125,16 +142,31 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
         }
 
+        private Pen UpdatePen(PenData penData, Pen penEto)
+        {
+            Color newColor = new Color();
+            newColor.Ab = penData.Alpha;
+            newColor.Rb = penData.Red;
+            newColor.Bb = penData.Blue;
+            newColor.Gb = penData.Green;
+
+            penEto.Color = newColor;
+            penEto.Thickness = penData.Thickness;
+            return penEto;
+        }
+
         public void DrawMe(Graphics g)
         {
-            foreach (var item in _pathDictionary)
+            foreach (var pathData in _pathDataList)
             {
+                UpdatePen(pathData.PenData, pathData.EtoPen);
+
                 g.SaveTransform();
 
                 g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, PosXViewAdjusted, PosYViewAdjusted));
                 g.TranslateTransform(ViewPosX, ViewPosY);
                 
-                g.DrawPath(item.Value, item.Key);
+                g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
             }  
         }

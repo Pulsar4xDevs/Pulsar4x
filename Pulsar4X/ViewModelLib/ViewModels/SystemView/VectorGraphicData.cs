@@ -128,7 +128,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public OrbitEllipseFading(OrbitDB orbit)
         {
             //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
-            Rotation = (float)orbit.ArgumentOfPeriapsis;
+            Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
             Width = (float)orbit.Apoapsis * 2; //TODO this could break if the orbit size is bigger than a float
             Height = (float)orbit.Periapsis * 2;
             SizeAffectedbyZoom = true;
@@ -148,9 +148,7 @@ namespace Pulsar4X.ViewModel.SystemView
                 pen.Red = 255;
                 pen.Green = 248;
                 pen.Blue = 220;
-                ArcData arc = new ArcData(PosX, PosY, Width, Height, start, sweep);
-                SizeAffectedbyZoom = true;
-                Rotation = Rotation;
+                ArcData arc = new ArcData(PosX, PosY, Width, Height, start, sweep);                
                 VectorPathPenPair pathPenPair = new VectorPathPenPair(pen, arc);
                 PathList.Add(pathPenPair);
                 start += sweep;
@@ -276,7 +274,7 @@ namespace Pulsar4X.ViewModel.SystemView
         /// <param name="centerPosition">if true, x1 and y1 inputs are the center position</param>
         protected VectorShapeBase(float x1, float y1, float x2, float y2, bool centerPosition = true)
         {
-            X2 = y2;
+            X2 = x2;
             Y2 = y2;
             if (centerPosition)
             {
