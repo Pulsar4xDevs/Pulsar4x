@@ -12,25 +12,27 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         SystemMap_DrawableVM _viewModel;
         private List<DrawableObject> _shapesList = new List<DrawableObject>();
+        private Camera2D _camera; 
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);
+            _camera = new Camera2D(this.Size);
         }
-        
 
-        public void SetViewmodel(SystemMap_DrawableVM viewModel)
+
+        public void SetViewmodel(SystemMap_DrawableVM viewModel) 
         {
             _viewModel = viewModel;
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
             foreach (var item in viewModel.SystemBodies)
             {
                 item.Icon.PropertyChanged += ViewModel_PropertyChanged;
-                _shapesList.Add(new DrawableObject(this, item.Icon));
+                _shapesList.Add(new DrawableObject(this, item.Icon, _camera));
 
                 if (item.OrbitEllipse != null)
                 {
                     item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
-                    _shapesList.Add(new DrawableObject(this, item.OrbitEllipse));
+                    _shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
                 }
             }
         }
@@ -70,14 +72,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private Drawable _parent;
         float _zoom { get { return _objectData.Zoom; } }
         private VectorGraphicDataBase _objectData;
-
+        private Camera2D _camera;
         private List<PathData> _pathDataList = new List<PathData>();
 
-        public DrawableObject(Drawable parent, VectorGraphicDataBase objectInfo)
+        public DrawableObject(Drawable parent, VectorGraphicDataBase objectInfo, Camera2D camera)
         {
             _parent = parent;
             _objectData = objectInfo;
-           
+            _camera = camera;
             foreach (var pathPenDataPair in _objectData.PathList)
             {
                 GraphicsPath path = new GraphicsPath();

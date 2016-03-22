@@ -128,7 +128,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public OrbitEllipseFading(OrbitDB orbit)
         {
             //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
-            Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
+            Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis); //TODO adjust for 3d orbits. ie if the orbit has an Z axis, this is likely to be wrong. 
             Width = (float)orbit.SemiMajorAxis * 2; //Major Axis
             Height = (float)Math.Sqrt(((orbit.SemiMajorAxis * Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity)) * orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity))) * 2;   //minor Axis
             SizeAffectedbyZoom = true;
@@ -157,7 +157,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public void SetStartPos()
         {
             float angle = (float)(Orbit.LongitudeOfAscendingNode + Orbit.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(Orbit, _currentDateTime));
-
+            float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(Orbit, _currentDateTime);
             Vector4 position = OrbitProcessor.GetPosition(Orbit, CurrentDateTime);
             float angle2 = (float)(Math.Atan2(position.Y , position.X) * 180 / Math.PI );
 
