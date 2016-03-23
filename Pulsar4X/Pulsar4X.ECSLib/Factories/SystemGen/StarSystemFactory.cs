@@ -116,7 +116,7 @@ namespace Pulsar4X.ECSLib
             Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
             _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
 
-            SystemBodyDB lunaBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            SystemBodyDB lunaBodyDB = new SystemBodyDB { Type = BodyType.Moon, SupportsPopulations = true };
             MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.ToAU(1738.14));
             NameDB lunaNameDB = new NameDB("Luna");
             double lunaSemiMajAxis = Distance.ToAU(0.3844E6);

@@ -88,8 +88,6 @@ namespace Pulsar4X.ViewModel.SystemView
             else if (entity.HasDataBlob<StarInfoDB>())
                 StarIcon(entity);
 
-
-
         }
 
         private void FleetIcon(Entity fleet)
@@ -107,21 +105,23 @@ namespace Pulsar4X.ViewModel.SystemView
 
         private void StarIcon(Entity star)
         {
-
             PenData penData = new PenData();
             penData.Red = 100;
             penData.Green = 100;
             penData.Blue = 0;
-            Width = 4;
-            Height = 4;
+            Width = 8;
+            Height = 8;
             _bodyEntity = star;
             updatePosition();
 
+            float hw = Width * 0.25f;
+            float hh = Height * 0.25f;
+
             VectorPathPenPair pathPair = new VectorPathPenPair(penData, new RectangleData(PosX, PosY, Width, Height));
-            pathPair.VectorShapes.Add(new BezierData(0,-4, -4,0, -1,-1, -1,-1));
-            pathPair.VectorShapes.Add(new BezierData(-4,0, 0,4, -1,1, -1,1));
-            pathPair.VectorShapes.Add(new BezierData(0,4, 4,0, 1,1,  1,1));
-            pathPair.VectorShapes.Add(new BezierData(4,0, 0,-4, 1,-1, 1,-1));
+            pathPair.VectorShapes.Add(new BezierData(0,-Height, -Width,0, -hw,-hh, -hw,-hh));
+            pathPair.VectorShapes.Add(new BezierData(-Width,0, 0,Height, -hw,hh, -hw,hh));
+            pathPair.VectorShapes.Add(new BezierData(0,Height, Width,0, hw,hh,  hw,hh));
+            pathPair.VectorShapes.Add(new BezierData(Width,0, 0,-Height, hw,-hh , hw,-hh));
             PathList.Add(pathPair);
         }
 
@@ -155,7 +155,8 @@ namespace Pulsar4X.ViewModel.SystemView
                 case BodyType.Terrestrial:
                     {
                         PenData penData = new PenData();
-                        penData.Green = 255;
+                        penData.Green = 100;
+                        penData.Blue = 200;
                         Width = 6;
                         Height = 6;
                         _bodyEntity = planet;
@@ -168,15 +169,15 @@ namespace Pulsar4X.ViewModel.SystemView
 
                 default:
                     {
-                        PenData penData = new PenData();
-                        penData.Green = 255;
-                        Width = 6;
-                        Height = 6;
-                        _bodyEntity = planet;
-                        updatePosition();
+                        //PenData penData = new PenData();
+                        //penData.Green = 255;
+                        //Width = 6;
+                        //Height = 6;
+                        //_bodyEntity = planet;
+                        //updatePosition();
 
-                        VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
-                        PathList.Add(pathPair);
+                        //VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
+                        //PathList.Add(pathPair);
                     }
                     break;
 
