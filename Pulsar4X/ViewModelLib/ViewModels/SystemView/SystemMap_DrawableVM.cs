@@ -44,8 +44,7 @@ namespace Pulsar4X.ViewModel.SystemView
 
             if (item.HasDataBlob<OrbitDB>() && !item.GetDataBlob<OrbitDB>().IsStationary)
             {
-                OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>());
-                
+                OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>());                
             }
             gameviewModel.DateChangedEvent += GameviewModel_DateChangedEvent;
         }

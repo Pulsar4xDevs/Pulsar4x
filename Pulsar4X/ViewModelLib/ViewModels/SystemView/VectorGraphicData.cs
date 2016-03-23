@@ -79,18 +79,112 @@ namespace Pulsar4X.ViewModel.SystemView
 
         }
 
-        public IconData(Entity bodyEntity)
+
+
+        public IconData(Entity entity)
+        {
+            if (entity.HasDataBlob<SystemBodyDB>())
+                PlanetIcon(entity);
+            else if (entity.HasDataBlob<StarInfoDB>())
+                StarIcon(entity);
+
+
+
+        }
+
+        private void FleetIcon(Entity fleet)
         {
             PenData penData = new PenData();
             penData.Green = 255;
             Width = 6;
             Height = 6;
-            _bodyEntity = bodyEntity;
+            _bodyEntity = fleet;
             updatePosition();
 
             VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
             PathList.Add(pathPair);
         }
+
+        private void StarIcon(Entity star)
+        {
+
+            PenData penData = new PenData();
+            penData.Red = 100;
+            penData.Green = 100;
+            penData.Blue = 0;
+            Width = 4;
+            Height = 4;
+            _bodyEntity = star;
+            updatePosition();
+
+            VectorPathPenPair pathPair = new VectorPathPenPair(penData, new RectangleData(PosX, PosY, Width, Height));
+            pathPair.VectorShapes.Add(new BezierData(0,-4, -4,0, -1,-1, -1,-1));
+            pathPair.VectorShapes.Add(new BezierData(-4,0, 0,4, -1,1, -1,1));
+            pathPair.VectorShapes.Add(new BezierData(0,4, 4,0, 1,1,  1,1));
+            pathPair.VectorShapes.Add(new BezierData(4,0, 0,-4, 1,-1, 1,-1));
+            PathList.Add(pathPair);
+        }
+
+        private void PlanetIcon(Entity planet)
+        {
+            SystemBodyDB sysBody = planet.GetDataBlob<SystemBodyDB>();
+
+            switch (sysBody.Type)
+            {
+                case BodyType.Asteroid:
+                    { }
+                break;
+                case BodyType.Comet:
+                    { }
+                    break;
+                case BodyType.DwarfPlanet:
+                    { }
+                    break;
+                case BodyType.GasDwarf:
+                    { }
+                    break;
+                case BodyType.GasGiant:
+                    { }
+                    break;
+                case BodyType.IceGiant:
+                    { }
+                    break;
+                case BodyType.Moon:
+                    { }
+                    break;
+                case BodyType.Terrestrial:
+                    {
+                        PenData penData = new PenData();
+                        penData.Green = 255;
+                        Width = 6;
+                        Height = 6;
+                        _bodyEntity = planet;
+                        updatePosition();
+
+                        VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
+                        PathList.Add(pathPair);
+                    }
+                    break;
+
+                default:
+                    {
+                        PenData penData = new PenData();
+                        penData.Green = 255;
+                        Width = 6;
+                        Height = 6;
+                        _bodyEntity = planet;
+                        updatePosition();
+
+                        VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
+                        PathList.Add(pathPair);
+                    }
+                    break;
+
+            }
+
+
+        }
+
     }
 
     /// <summary>
@@ -351,6 +445,23 @@ namespace Pulsar4X.ViewModel.SystemView
             SweepAngle = sweep;
         }
     }
+
+    public class BezierData : VectorShapeBase
+    {
+        public float ControlX1 { get; set; }
+        public float ControlY1 { get; set; }
+        public float ControlX2 { get; set; }
+        public float ControlY2 { get; set; }
+
+        public BezierData(float startX, float startY, float endX, float endY, float controlX1, float controlY1, float controlX2, float controlY2, bool centerPosition = false) : base(startX, startY, endX, endY, centerPosition)
+        {
+            ControlX1 = controlX1;
+            ControlY1 = controlY1;
+            ControlX2 = controlX2;
+            ControlY2 = controlY2;
+        }
+    }
+
 
     /// <summary>
     /// generic data for a graphics Pen. 

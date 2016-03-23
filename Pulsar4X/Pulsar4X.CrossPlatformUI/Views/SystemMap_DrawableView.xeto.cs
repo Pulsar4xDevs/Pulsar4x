@@ -84,7 +84,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 GraphicsPath path = new GraphicsPath();
                 if (_objectData is IconData)
-                    
+                {
+                    int i = 0;
                     foreach (var shape in pathPenDataPair.VectorShapes)
                     {
                         if (shape is EllipseData)
@@ -93,17 +94,28 @@ namespace Pulsar4X.CrossPlatformUI.Views
                             path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is ArcData)
                         {
-                            ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[0];
+                            ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[i];
                             path.AddArc(shape.X1, shape.Y1, shape.X2, shape.Y2, arcData.StartAngle, arcData.SweepAngle);
                         }
+                        else if (shape is BezierData)
+                        {
+                            BezierData bezData = (BezierData)pathPenDataPair.VectorShapes[i];
+                            PointF start = new PointF(bezData.X1, bezData.Y1);
+                            PointF end = new PointF(bezData.X2, bezData.Y2);
+                            PointF control1 = new PointF(bezData.ControlX1, bezData.ControlY1);
+                            PointF control2 = new PointF(bezData.ControlX2, bezData.ControlY2);
+                            path.AddBezier(start, control1, control2, end);
+                        }
+                        i++;
                     }
-                    
+                }
+
 
                 else if (_objectData is OrbitEllipseFading)
-                { 
+                {
                     ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[0];
                     path.AddArc(arcData.X1, arcData.X2, arcData.Width * _zoom, arcData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
-                    
+
                 }
                 Color iconcolor = new Color();
                 iconcolor.Ab = pathPenDataPair.Pen.Alpha;
