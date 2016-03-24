@@ -94,7 +94,7 @@ namespace Pulsar4X.ViewModel
 
         public DictionaryVM<Guid, string> Colonys { get; } = new DictionaryVM<Guid, string>(DisplayMode.Value);
 
-        public ColonyScreenVM SelectedColonyScreenVM { get { return new ColonyScreenVM(Game.GlobalManager.GetGlobalEntityByGuid(Colonys.SelectedKey), Game.StaticData); } }
+        public ColonyScreenVM SelectedColonyScreenVM { get { return new ColonyScreenVM(this, Game.GlobalManager.GetGlobalEntityByGuid(Colonys.SelectedKey), Game.StaticData); } }
 
 
         private Dictionary<Guid, SystemVM> _systemDictionary;

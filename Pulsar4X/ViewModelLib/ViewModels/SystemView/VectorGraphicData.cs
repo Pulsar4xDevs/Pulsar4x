@@ -83,6 +83,7 @@ namespace Pulsar4X.ViewModel.SystemView
 
         public IconData(Entity entity)
         {
+            _bodyEntity = entity;
             if (entity.HasDataBlob<SystemBodyDB>())
                 PlanetIcon(entity);
             else if (entity.HasDataBlob<StarInfoDB>())
@@ -96,7 +97,6 @@ namespace Pulsar4X.ViewModel.SystemView
             penData.Green = 255;
             Width = 6;
             Height = 6;
-            _bodyEntity = fleet;
             updatePosition();
 
             VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
@@ -111,7 +111,6 @@ namespace Pulsar4X.ViewModel.SystemView
             penData.Blue = 0;
             Width = 8;
             Height = 8;
-            _bodyEntity = star;
             updatePosition();
 
             float hw = Width * 0.25f;
