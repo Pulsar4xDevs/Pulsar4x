@@ -83,7 +83,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         {
             GuiHintControls.Items.Clear();
 
-            TableLayout tl1 = new TableLayout(2, 2);
+            TableLayout tl1 = new TableLayout(2, 3);
 
             Label lblMin = new Label();
             lblMin.Text = "MinFormula";
@@ -101,10 +101,20 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             maxFormula.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.MaxControl;
             maxFormula.DataContext = _viewModel;
 
+            Label lblStep = new Label();
+            lblStep.Text = "StepFormula:";
+            TextBox stepFormula = new TextBox();
+            stepFormula.ToolTip = "Formula Field";
+            stepFormula.TextBinding.BindDataContext((ComponentAbilityTemplateVM n) => n.StepFormula);
+            stepFormula.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.StepControl;
+            stepFormula.DataContext = _viewModel;
+
             tl1.Add(lblMin, 0, 0);
             tl1.Add(minFormula, 1, 0);
             tl1.Add(lblMax, 0, 1);
             tl1.Add(maxFormula, 1, 1);
+            tl1.Add(lblStep, 0, 2);
+            tl1.Add(stepFormula, 1, 2);
             GuiHintControls.Items.Add(tl1);
             
             

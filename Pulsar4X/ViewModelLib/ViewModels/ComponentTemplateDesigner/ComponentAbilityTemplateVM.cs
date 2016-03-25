@@ -66,14 +66,19 @@ namespace Pulsar4X.ViewModel
             get { return _minFormula; }
             set { _minFormula = value; OnPropertyChanged(); }
         }
+
         private string _maxFormula;
-
-
-
         public string MaxFormula
         {
             get { return _maxFormula; }
             set { _maxFormula = value; OnPropertyChanged(); }
+        }
+
+        private string _stepFormula;
+        public string StepFormula
+        {
+            get { return _stepFormula; }
+            set { _stepFormula = value; OnPropertyChanged(); }
         }
 
         public override string FocusedText
@@ -91,6 +96,8 @@ namespace Pulsar4X.ViewModel
                         return MinFormula;
                     case FocusedControl.MaxControl:
                         return MaxFormula;
+                    case FocusedControl.StepControl:
+                        return StepFormula;
                     case FocusedControl.AbilityFormulaControl:
                         return AbilityFormula;
                     default:
@@ -112,6 +119,9 @@ namespace Pulsar4X.ViewModel
                         break;
                     case FocusedControl.MaxControl:
                         MaxFormula = value;
+                        break;
+                    case FocusedControl.StepControl:
+                        StepFormula = value;
                         break;
                     case FocusedControl.AbilityFormulaControl:
                         AbilityFormula = value;
@@ -210,6 +220,7 @@ namespace Pulsar4X.ViewModel
             AbilityFormula = abilitySD.AbilityFormula;
             MinFormula = abilitySD.MinFormula;
             MaxFormula = abilitySD.MaxFormula;
+            StepFormula = abilitySD.StepFormula;
             //GuidDictionary = abilitySD.GuidDictionary;
             DictionaryVM<Guid, string> techSelected = new DictionaryVM<Guid, string>();
             if (abilitySD.GuiHint == GuiHint.GuiTechSelectionList)
