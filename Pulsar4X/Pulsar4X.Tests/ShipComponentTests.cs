@@ -139,6 +139,7 @@ namespace Pulsar4X.Tests
             SizeFormula0.AbilityFormula = "250";
             SizeFormula0.MaxFormula = "2500";
             SizeFormula0.MinFormula = "1";
+            SizeFormula0.StepFormula = "1";
             component.ComponentAbilitySDs.Add(SizeFormula0);
 
             ComponentTemplateAbilitySD engineTypeAbility1 = new ComponentTemplateAbilitySD();
@@ -172,6 +173,7 @@ namespace Pulsar4X.Tests
             enginePowerEfficency2.AbilityFormula = "1";
             enginePowerEfficency2.MaxFormula = "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')";
             enginePowerEfficency2.MinFormula = "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')";
+            enginePowerEfficency2.StepFormula = "0.1";
             component.ComponentAbilitySDs.Add(enginePowerEfficency2);
 
             ComponentTemplateAbilitySD enginePowerAbility3 = new ComponentTemplateAbilitySD();
@@ -217,7 +219,8 @@ namespace Pulsar4X.Tests
             thermalReduction8.GuiHint = GuiHint.GuiSelectionMaxMin;
             thermalReduction8.AbilityFormula = "0";
             thermalReduction8.MinFormula = "0";
-            thermalReduction8.MaxFormula = "0.5"; 
+            thermalReduction8.MaxFormula = "0.5";
+            thermalReduction8.StepFormula = "0.1";
             component.ComponentAbilitySDs.Add(thermalReduction8);
 
             ComponentTemplateAbilitySD sensorSigDisplay9 = new ComponentTemplateAbilitySD();
