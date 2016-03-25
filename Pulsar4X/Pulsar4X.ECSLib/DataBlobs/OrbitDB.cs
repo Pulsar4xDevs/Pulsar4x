@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
     {
         /// <summary>
         /// Semimajor Axis of orbit stored in AU.
-        /// Average distance of orbit from center.
+        /// Radius of an orbit at the orbit's two most distant points.
         /// </summary>
         [PublicAPI]
         [JsonProperty]

@@ -8,30 +8,20 @@ namespace Pulsar4X.ViewModel
     public class MinMaxSliderVM : IViewModel
     {
 
-        public string Name { get; set; }
-        public double MaxValue { get; set; }
-        public double MinValue { get; set; }
+        public string Name { get; set; } = "MinMaxSlider";
+        public double MaxValue { get; set; } = 100;
+        public double MinValue { get; set; } = 0;
+        public double StepValue { get; set; } = 0.0001;
         public double Value { get {return _value;} set { _value = value; OnPropertyChanged(); OnPropertyChanged("SliderValue"); } }
         private double _value;
 
-        public int SliderMaxValue { get { return (int)MaxValue * 10000; } set { OnPropertyChanged(); }}
-        public int SliderMinValue { get { return (int)MinValue * 10000; } set { OnPropertyChanged(); } }
-        public int SliderValue { get { return (int)Value * 10000; } set { Value = value * 0.0001f; OnPropertyChanged(); } }
+        public int SliderMaxValue { get { return (int)(MaxValue * 10000); } set { OnPropertyChanged(); }}
+        public int SliderMinValue { get { return (int)(MinValue * 10000); } set { OnPropertyChanged(); }}
+        public int SliderStepValue { get { return (int)(StepValue * 10000); } set { OnPropertyChanged(); }}
+        public int SliderValue { get { return (int)(Value * 10000); } set { Value = value * 0.0001f; OnPropertyChanged(); } }
 
+        public bool StrictStepValue { get; set; } = true;
 
-
-
-
-        //public float TickFrequency
-        //{
-        //    get { return _tickFrequency; }
-        //    set
-        //    {
-        //        _tickFrequency = value;
-        //        Slider.TickFrequency = (int)value * 10000;
-        //    }
-        //}
-        //public bool SnapToTick { get { return Slider.SnapToTick; } set { Slider.SnapToTick = value; } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

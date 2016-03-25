@@ -7,11 +7,22 @@
   <TableLayout>
     <TableRow>
       <Label Text="{Binding Name}"  />
-      <Slider ID="Slider" />
+      <Slider ID="Slider"
+       Value="{Binding SliderValue}"
+       MinValue="{Binding SliderMinValue}"
+       MaxValue="{Binding SliderMaxValue}"
+       TickFrequency="{Binding SliderStepValue}"     
+       SnapToTick="{Binding StrictStepValue}"       
+      />
     </TableRow>
     <TableRow>
       <Label Text="{Binding MinValue}"  />
-      <NumericUpDown ID="NumericUpDown"  />
+      <NumericUpDown ID="NumericUpDown"  
+       Value ="{Binding Value}"
+       MaxValue ="{Binding MaxValue}"              
+       MinValue ="{Binding MinValue}"   
+                     
+       />
       <Label Text="{Binding MaxValue}" />
     </TableRow>
   </TableLayout>

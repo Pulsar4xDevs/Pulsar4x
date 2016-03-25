@@ -22,12 +22,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
             
             NumericUpDown.DecimalPlaces = 4;
             
-            NumericUpDown.ValueBinding.BindDataContext((MinMaxSliderVM m) => m.Value);
-            NumericUpDown.BindDataContext(c => c.MaxValue, (MinMaxSliderVM m) => m.MaxValue);
-            NumericUpDown.BindDataContext(c => c.MinValue, (MinMaxSliderVM m) => m.MinValue);
-            Slider.BindDataContext(c => c.Value, (MinMaxSliderVM m) => m.SliderValue);
-            Slider.BindDataContext(c => c.MaxValue, (MinMaxSliderVM m) => m.SliderMaxValue);
-            Slider.BindDataContext(c => c.MinValue, (MinMaxSliderVM m) => m.SliderMinValue);
+            //NumericUpDown.ValueBinding.BindDataContext((MinMaxSliderVM m) => m.Value);
+            //NumericUpDown.BindDataContext(c => c.MaxValue, (MinMaxSliderVM m) => m.MaxValue);
+            //NumericUpDown.BindDataContext(c => c.MinValue, (MinMaxSliderVM m) => m.MinValue);
+            //Slider.BindDataContext(c => c.Value, (MinMaxSliderVM m) => m.SliderValue);
+            //Slider.BindDataContext(c => c.MaxValue, (MinMaxSliderVM m) => m.SliderMaxValue);
+            //Slider.BindDataContext(c => c.MinValue, (MinMaxSliderVM m) => m.SliderMinValue);
+            //Slider.BindDataContext(c => c.TickFrequency, (MinMaxSliderVM m) => m.SliderStepValue);
+            
 
         }
 
