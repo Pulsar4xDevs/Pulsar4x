@@ -72,11 +72,8 @@ namespace Pulsar4X.ViewModel.SystemView
 
         private void updatePosition()
         {
-            //TODO positionDB is not working. 
-            Vector4 position = OrbitProcessor.GetPosition(_bodyEntity.GetDataBlob<OrbitDB>(), CurrentDateTime);
-            PosX = (float)position.X;//(float)PositionBlob.Position.X;
-            PosY = (float)position.Y;//(float)PositionBlob.Position.Y;
-
+            PosX = (float)PositionBlob.Position.X;
+            PosY = (float)PositionBlob.Position.Y;
         }
 
 
@@ -205,8 +202,8 @@ namespace Pulsar4X.ViewModel.SystemView
         /// </summary>
         public byte StartIndex { get; set; }
 
-        public OrbitDB Orbit { get; set; }
-
+        public OrbitDB OrbitDB { get; set; }
+        public PositionDB PositionDB { get; set; }
         private DateTime _currentDateTime;
         public DateTime CurrentDateTime
         {
@@ -219,14 +216,15 @@ namespace Pulsar4X.ViewModel.SystemView
         /// 
         /// </summary>
         /// <param name="orbit"></param>
-        public OrbitEllipseFading(OrbitDB orbit)
+        public OrbitEllipseFading(OrbitDB orbit, PositionDB positionDB)
         {
             //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
             Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis); //TODO adjust for 3d orbits. ie if the orbit has an Z axis, this is likely to be wrong. 
             Width = (float)orbit.SemiMajorAxis * 2; //Major Axis
             Height = (float)Math.Sqrt(((orbit.SemiMajorAxis * Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity)) * orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity))) * 2;   //minor Axis
             SizeAffectedbyZoom = true;
-            Orbit = orbit;
+            OrbitDB = orbit;
+            PositionDB = positionDB;
             if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
             {
                 PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X; //TODO: adjust so focal point of ellipse is at position. 
@@ -250,9 +248,9 @@ namespace Pulsar4X.ViewModel.SystemView
 
         public void SetStartPos()
         {
-            float angle = (float)(Orbit.LongitudeOfAscendingNode + Orbit.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(Orbit, _currentDateTime));
-            float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(Orbit, _currentDateTime);
-            Vector4 position = OrbitProcessor.GetPosition(Orbit, CurrentDateTime);
+            float angle = (float)(OrbitDB.LongitudeOfAscendingNode + OrbitDB.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime));
+            float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime);
+            Vector4 position = OrbitProcessor.GetPosition(OrbitDB, CurrentDateTime);
             float angle2 = (float)(Math.Atan2(position.Y , position.X) * 180 / Math.PI );
 
             float degreesPerSegment = 360 / (Convert.ToSingle(Segments));
@@ -263,11 +261,11 @@ namespace Pulsar4X.ViewModel.SystemView
         private void updatePosition()
         {
             //TODO positionDB is not working. 
-            if (Orbit.Parent != null && Orbit.Parent.HasDataBlob<OrbitDB>())
+            if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
             {
-                Vector4 position = OrbitProcessor.GetPosition(Orbit.Parent.GetDataBlob<OrbitDB>(), CurrentDateTime);
-                PosX = (float)position.X;//(float)PositionBlob.Position.X;
-                PosY = (float)position.Y;//(float)PositionBlob.Position.Y;
+
+                PosX = (float)PositionDB.Position.X;
+                PosY = (float)PositionDB.Position.Y;
             }
         }
 
