@@ -1023,7 +1023,8 @@ namespace Pulsar4X.Entities
                     }
                 case InstallationType.ConvertMineToAutomated:
                     {
-                        Name = "Convert mine to Automated";
+                        Name = "Convert Mine to Automated";
+                        Cost = 150;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 75;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 75;
                         ThermalSignature = 5;
@@ -1293,6 +1294,7 @@ namespace Pulsar4X.Entities
             {
                 return false;
             }
+
 
             /// <summary>
             /// Technology Check

@@ -634,6 +634,9 @@ namespace Pulsar4X.Entities
 #warning Is this ok for the dieoff calculation for population?
                         float CurrentDieoff = -1.0f *( ((float)CurrentInfrastructure / (float)TotalInfraRequirement) * Constants.Colony.ConstructionCycleFraction);
 
+                        if (CurrentInfrastructure == 0)
+                            CurrentDieoff = -1.0f * (CurrentPopulation.CivilianPopulation * 0.1f);
+
                         CurrentPopulation.AddPopulation(CurrentDieoff);
                     }
                 }

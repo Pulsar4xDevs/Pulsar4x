@@ -345,6 +345,7 @@ namespace Pulsar4X.UI.Handlers
             #region Terraforming Tab
             m_oSummaryPanel.TerraformingSaveAtmButton.Click += new EventHandler(TerraformingSaveAtmButton_Click);
 
+            m_oSummaryPanel.TerraformingGasComboBox.Items.Add("Terraforming Inactive");
             foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
             {
                 m_oSummaryPanel.TerraformingGasComboBox.Items.Add(Gas.Value.Name);
@@ -1022,25 +1023,27 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void TerraformingSaveAtmButton_Click(object sender, EventArgs e)
         {
-            /// <summary>
-            /// True = add gas, false = subtract gas.
-            /// </summary>
-            if (m_oSummaryPanel.TerraformingAddGasCheckBox.Checked == true)
-                CurrentPopulation._GasAddSubtract = true;
-            else
-                CurrentPopulation._GasAddSubtract = false;
-
-            float getAtm;
-            bool r1 = float.TryParse(m_oSummaryPanel.TerraformingMaxGasTextBox.Text, out getAtm);
-
-            if (r1 == true)
+            //index zero is inactive terraforming
+            if (m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex != -1 && m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex != 0)
             {
-                CurrentPopulation._GasAmt = getAtm;
-            }
+                /// <summary>
+                /// True = add gas, false = subtract gas.
+                /// </summary>
+                if (m_oSummaryPanel.TerraformingAddGasCheckBox.Checked == true)
+                    CurrentPopulation._GasAddSubtract = true;
+                else
+                    CurrentPopulation._GasAddSubtract = false;
 
-            if (m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex != -1)
-            {
-                int Count = 0;
+                float getAtm;
+                bool r1 = float.TryParse(m_oSummaryPanel.TerraformingMaxGasTextBox.Text, out getAtm);
+
+                if (r1 == true)
+                {
+                    CurrentPopulation._GasAmt = getAtm;
+                }
+
+
+                int Count = 1;
                 foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
                 {
                     if (Count == m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex)
@@ -1589,9 +1592,18 @@ namespace Pulsar4X.UI.Handlers
             if (m_oCurrnetFaction != null)
             {
                 /// <summary>
+                /// Update population growth and new colonies.
+                /// </summary>
+                BuildTreeView();
+
+                /// <summary>
                 /// Summary Tab:
                 /// </summary>
                 RefreshSummaryCells();
+
+                /// <summary>
+                /// after finishing building things that require CI, the ability to select them should go away.
+                RefreshIndustryTab();
 
                 /// <summary>
                 /// Refresh the construction queue:
@@ -2203,6 +2215,31 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0:N2}m", CurrentPopulation.PopulationWorkingInManufacturing);
                         m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[1].Value = Entry;
                         Entry = String.Format("{0:N2}%", CurrentPopulation.PopulationGrowthRate);
+
+                        if (ColCost != 0.0)
+                        {
+                            /// <summary>
+                            /// How much Infra does this colony need per 1M colonists?
+                            /// </summary>
+                            int InfrastructureRequirement = (int)Math.Floor(ColCost * 100.0f);
+
+                            /// <summary>
+                            /// How much infra is currently on the planet?
+                            /// </summary>
+                            int CurrentInfrastructure = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+                            /// <summary>
+                            /// How much does this planet need? if the planet does need some it should generate a little on its own.
+                            /// </summary>
+                            int TotalInfraRequirement = (int)Math.Floor(InfrastructureRequirement * CurrentPopulation.CivilianPopulation);
+
+                            if (TotalInfraRequirement > CurrentInfrastructure)
+                            {
+                                Entry = "Population Dieoff";
+                            }
+                        }
+
+
                         m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = Entry;
 
                         Adjust1 = 5;
@@ -2686,7 +2723,9 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[1].Value = null; //CurrentPopulation.SystemBody.PlanetaryTectonics;
                     if (CurrentPopulation.Planet.GeoSurveyList.ContainsKey(CurrentFaction) == true)
                     {
-                        Entry = "Completed";
+#warning this needs to be reworked for the addition of geo teams. right now it is checking whether a survey ship has surveyed from orbit, not the team surveying.
+                        //Entry = "Completed";
+                        Entry = "No";
                     }
                     else
                     {
@@ -4438,7 +4477,7 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// 4 is YTD. reserves / mining
                     /// </summary>
-                    if (m_oCurrnetPopulation.CalcTotalMining() != 0.0f)
+                    if (m_oCurrnetPopulation.CalcTotalMining() != 0.0f && m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator] != 0.0f)
                     {
                         int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator])));
                         if (YTD > YearsToDepletion)
@@ -4517,13 +4556,22 @@ namespace Pulsar4X.UI.Handlers
                 if (m_oSummaryPanel.TerraformingGasComboBox.Items.Count != 0)
                 {
                     m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = 0;
-                    for (int gasIterator = 0; gasIterator < m_oSummaryPanel.TerraformingGasComboBox.Items.Count; gasIterator++)
+
+                    int count = 1;
+                    bool gasSet = false;
+                    foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
                     {
-                        if (m_oSummaryPanel.TerraformingGasComboBox.Items[gasIterator] == CurrentPopulation._GasToAdd)
+                        if (CurrentPopulation._GasToAdd == Gas.Value)
                         {
-                            m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = gasIterator;
+                            gasSet = true;
+                            break;
                         }
+
+                        count++;
                     }
+
+                    if (gasSet == true)
+                        m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = count;
                 }
 
                 m_oSummaryPanel.TerraformingAtmosphereListBox.Items.Clear();

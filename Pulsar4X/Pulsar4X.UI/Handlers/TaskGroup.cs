@@ -208,6 +208,7 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.OrderFilteringCheckBox.CheckStateChanged += new EventHandler(OrderFilteringCheckBox_CheckChanged);
             m_oTaskGroupPanel.DisplaySurveyLocationsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
             m_oTaskGroupPanel.ExcludeSurveyedCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayMoonsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
 
             m_oTaskGroupPanel.NewTaskGroupButton.Click += new EventHandler(NewTaskGroupButton_Click);
             m_oTaskGroupPanel.RenameTaskGroupButton.Click += new EventHandler(RenameTaskGroupButton_Click);
@@ -614,10 +615,8 @@ namespace Pulsar4X.UI.Handlers
                                 {
                                     if (popTargetOfOrder.Minerials[(int)MinIterator] >= 1.0f)
                                     {
-                                        if (MineralSelection != -1)
-                                        {
-                                            SecondaryOrder = (int)MinIterator;
-                                        }
+                                        SecondaryOrder = (int)MinIterator;
+                                        break;
                                     }
                                 }
                             }
@@ -1510,6 +1509,44 @@ namespace Pulsar4X.UI.Handlers
                         SystemLocationGuidDict.Add(entObj.Id, keyName);
                         SystemLocationDict.Add(entObj.Id, valueObj);
                     }
+
+                    if (m_oTaskGroupPanel.DisplayMoonsCheckBox.Checked == true)
+                    {
+                        foreach (SystemBody moon in planet.Moons)
+                        {
+                            PopCount = 0;
+                            keyName = "N/A";
+                            foreach (Population CurrentPopulation in moon.Populations)
+                            {
+                                if (CurrentPopulation.Faction == CurrentFaction)
+                                {
+                                    keyName = string.Format("{0} - {1}", CurrentPopulation.Name, CurrentPopulation.Species.Name);
+                                    if (CurrentFaction.Capitol == CurrentPopulation)
+                                        keyName = string.Format("{0}(Capitol)", keyName);
+
+                                    keyName = string.Format("{0}: {1:n2}m", keyName, CurrentPopulation.CivilianPopulation);
+
+                                    StarSystemEntity entObj = CurrentPopulation;
+                                    SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Colonies;
+                                    SystemListObject valueObj = new SystemListObject(entType, entObj);
+                                    SystemLocationGuidDict.Add(entObj.Id, keyName);
+                                    SystemLocationDict.Add(entObj.Id, valueObj);
+
+                                    PopCount++;
+                                }
+                            }
+
+                            if (PopCount == 0)
+                            {
+                                keyName = moon.Name;
+                                StarSystemEntity entObj = moon;
+                                SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets; //moons are in the planets category
+                                SystemListObject valueObj = new SystemListObject(entType, entObj);
+                                SystemLocationGuidDict.Add(entObj.Id, keyName);
+                                SystemLocationDict.Add(entObj.Id, valueObj);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -2041,6 +2078,29 @@ namespace Pulsar4X.UI.Handlers
         }
         #endregion
 
+        #region Special Orders Tab
+        private void BuildSpecialOrdersTab()
+        {
+#warning the special orders system can be substantially improved, and the rest of the conditional orders aren't done at all.
+            if (CurrentTaskGroup._SpecialOrders._DefaultOrdersList.Count == 0 && m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.Items.Count != 0 && m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.Items.Count != 0)
+            {
+                m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = 0;
+                m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex = 0;
+            }
+            else
+            {
+                if (CurrentTaskGroup._SpecialOrders._DefaultOrdersList.Count == 1)
+                    m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = (int)CurrentTaskGroup._SpecialOrders._DefaultOrdersList[0];
+                if (CurrentTaskGroup._SpecialOrders._DefaultOrdersList.Count == 2)
+                {
+                    m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = (int)CurrentTaskGroup._SpecialOrders._DefaultOrdersList[0];
+                    m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex = (int)CurrentTaskGroup._SpecialOrders._DefaultOrdersList[1];
+                }
+
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Refresh the TG page.
         /// </summary>
@@ -2061,6 +2121,7 @@ namespace Pulsar4X.UI.Handlers
 
                 BuildOrgSelectedTGList();
                 BuildOrganizationTab();
+                BuildSpecialOrdersTab();
             }
         }
 

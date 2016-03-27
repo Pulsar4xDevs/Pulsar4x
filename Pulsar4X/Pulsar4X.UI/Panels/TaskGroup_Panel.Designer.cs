@@ -114,6 +114,14 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Should moons be destinations?
+        /// </summary>
+        public CheckBox DisplayMoonsCheckBox
+        {
+            get { return m_oMoonsCheckBox; }
+        }
+
+        /// <summary>
         /// display taskgroups checkbox.
         /// </summary>
         public CheckBox DisplayTaskGroupsCheckBox

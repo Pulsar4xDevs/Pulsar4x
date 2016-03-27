@@ -924,7 +924,14 @@ namespace Pulsar4X.Entities
         /// <param name="massToLoad">Total mass of the installation of type iType to take from the planet.</param>
         public void LoadInstallation(Installation.InstallationType iType, int massToLoad)
         {
-            Installations[(int)iType].Number =Installations[(int)iType].Number - (float)((float)massToLoad / Faction.InstallationTypes[(int)iType].Mass);
+            Installations[(int)iType].Number = Installations[(int)iType].Number - (float)((float)massToLoad / Faction.InstallationTypes[(int)iType].Mass);
+
+            /// <summary>
+            /// floating points!
+            /// </summary>
+            if (Installations[(int)iType].Number < 0.00001f)
+                Installations[(int)iType].Number = 0.0f;
+
             switch (iType)
             {
                 case Installation.InstallationType.DeepSpaceTrackingStation:
@@ -1335,6 +1342,7 @@ namespace Pulsar4X.Entities
 #warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled. also efficiencies. also for OF and FF, mining and refining.
 #warning implement radiation in addition to governor/sector bonuses. industrial penalty is Rad / 100(45 = -0.45%)
             float BP = (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number) * 10.0f + (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
 
@@ -1345,6 +1353,7 @@ namespace Pulsar4X.Entities
         public float CalcTotalOrdnanceIndustry()
         {
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.OrdnanceFactory].Number) * 10.0f);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
 
@@ -1355,6 +1364,7 @@ namespace Pulsar4X.Entities
         public float CalcTotalFighterIndustry()
         {
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FighterFactory].Number) * 10.0f);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
 
@@ -1366,6 +1376,7 @@ namespace Pulsar4X.Entities
         {
             float MP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.Mine].Number) * 10.0f) + (float)(Math.Floor(Installations[(int)Installation.InstallationType.AutomatedMine].Number) * 10.0f)
                               + (float)(Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number));
+            MP = MP * ModifierManfacturing;
 
             return MP;
         }
@@ -1378,6 +1389,7 @@ namespace Pulsar4X.Entities
         {
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FuelRefinery].Number) * Constants.Colony.SoriumToFuel * 10.0f) +
                        (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number * Constants.Colony.SoriumToFuel);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
         
@@ -1389,6 +1401,7 @@ namespace Pulsar4X.Entities
         {
             int modules = (int)Math.Floor(_OrbitalTerraformModules);
             float TP = (float)((int)Math.Floor(Installations[(int)Installation.InstallationType.TerraformingInstallation].Number) + modules) * Constants.Colony.TerraformRate[0];
+            TP = TP * ModifierManfacturing;
 
             return TP;
         }
@@ -1577,6 +1590,153 @@ namespace Pulsar4X.Entities
         public void AddPopulation(float Growth)
         {
             CivilianPopulation = CivilianPopulation + Growth;
+
+            float TotalWorkerReq = 0.0f;
+            int iShipyards = (int)(Installations[(int)Installation.InstallationType.CommercialShipyard].Number + Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+
+#warning Magic numbers here for worker calculations same as in economics.cs
+            float ShipyardWorkers = 1000000.0f * iShipyards;
+
+            int iSlipways = 0;
+            for (int CSYIterator = 0; CSYIterator < (int)Installations[(int)Installation.InstallationType.CommercialShipyard].Number; CSYIterator++)
+            {
+                int slips = Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[CSYIterator].Slipways;
+                int tons = Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[CSYIterator].Tonnage;
+
+                /// <summary>
+                /// Manpower requirement = 1,000,000 + num_slipways * capacity_per_slipway_in_tons * 100 / DIVISOR.  DIVISOR is 1 for military yards and 10 for commercial yards.  Thus, the flat 1,000,000 manpower required is not reduced for commercial yards, only the capacity-based component.
+                /// </summary>
+                ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 10);
+            }
+
+            for (int NSYIterator = 0; NSYIterator < (int)Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number; NSYIterator++)
+            {
+                int slips = Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[NSYIterator].Slipways;
+                int tons = Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[NSYIterator].Tonnage;
+                /// <summary>
+                /// Manpower requirement = 1,000,000 + num_slipways * capacity_per_slipway_in_tons * 100 / DIVISOR.  DIVISOR is 1 for military yards and 10 for commercial yards.  Thus, the flat 1,000,000 manpower required is not reduced for commercial yards, only the capacity-based component.
+                /// </summary>
+                ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 1);
+            }
+
+            /// <summary>
+            /// Shipyards
+            /// </summary>
+            if (iShipyards != 0)
+            {
+                TotalWorkerReq = TotalWorkerReq + (ShipyardWorkers / 1000000.0f);
+            }
+
+            /// <summary>
+            /// Maintenance Facility Workers. This is separate from Maintenance factories above as shipyards needed to be calculated first for offset adjustment.
+            /// </summary
+            if (Installations[(int)Installation.InstallationType.MaintenanceFacility].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.MaintenanceFacility].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Construction Factories
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.ConstructionFactory].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number);
+                /// <summary>
+                /// Conventional Industry worker adjustment.
+                /// </summary>
+                if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number >= 1.0f)
+                {
+                    workers = workers + (0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number));
+                }
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Conventional Industry
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number >= 1.0f)
+            {
+                if (Installations[(int)Installation.InstallationType.ConstructionFactory].Number < 1.0f)
+                {
+                    float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
+                    TotalWorkerReq = TotalWorkerReq + workers;
+                }
+            }
+
+
+            /// <summary>
+            /// Ordnance Factories
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.OrdnanceFactory].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.OrdnanceFactory].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Fighter Factories
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.FighterFactory].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.FighterFactory].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Refineries
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.FuelRefinery].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.FuelRefinery].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+
+
+            }
+
+            /// <summary>
+            /// Financial Centre Workers
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.FinancialCentre].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.FinancialCentre].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// mines
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.Mine].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.Mine].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Terraformers
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.TerraformingInstallation].Number >= 1.0f)
+            {
+                float workers = 0.25f * (float)Math.Floor(Installations[(int)Installation.InstallationType.TerraformingInstallation].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Research labs
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.ResearchLab].Number >= 1.0f)
+            {
+                float workers = 1.0f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ResearchLab].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+
+            if (TotalWorkerReq > PopulationWorkingInManufacturing)
+            {
+                ModifierManfacturing = PopulationWorkingInManufacturing / TotalWorkerReq;
+            }
+            else
+                ModifierManfacturing = 1.0f;
         }
         #endregion
 
