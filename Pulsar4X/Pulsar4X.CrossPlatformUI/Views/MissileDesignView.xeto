@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
+  >
+  <TableLayout>
+    <TableRow>
+      <GroupBox Text="Size Allocation">
+        <TableLayout>
+          <TableRow>
+            <NumericUpDown Value="{Binding MissileSize}" />
+          </TableRow>
+          <TableRow>
+            <c:ChainedSlidersControl  x:Name="ChainedSlidersCtrl" />
+          </TableRow>
+          <TableRow/>
+        </TableLayout>
+      </GroupBox>
+      <TabControl>
+        <TabPage Text ="Payload">
+          <TableLayout>
+            <TableRow>
+              <Label Text="Payload Type:"/>
+              <ComboBox></ComboBox>
+              <NumericUpDown />
+              <TableCell/>
+            </TableRow>
+            <TableRow>
+              <Label Text="Seperation Range" />
+              <NumericUpDown></NumericUpDown>
+            </TableRow>
+            <TableRow ScaleHeight="True"/>           
+          </TableLayout>
+        </TabPage>
+        <TabPage Text ="Engine">
+
+        </TabPage>
+        <TabPage Text ="Sensors / EW">
+
+        </TabPage>
+      </TabControl>      
+    </TableRow>
+  </TableLayout>
+</Panel>

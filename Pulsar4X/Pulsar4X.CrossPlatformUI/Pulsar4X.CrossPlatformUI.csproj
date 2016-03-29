@@ -182,12 +182,19 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Views\SystemMap_DrawableView.xeto" />
+    <EmbeddedResource Include="Views\MissileDesignView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ChainedSlidersControl.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\ColonyView.cs" />
     <Compile Include="Commands\ComponentDesignViewCMD.cs" />
     <Compile Include="Commands\ComponentTemplateViewCMD.cs" />
     <Compile Include="Commands\LoadGame.cs" />
+    <Compile Include="Commands\MissileDesignCMD.cs" />
     <Compile Include="Commands\NewGame.cs" />
     <Compile Include="Commands\Quit.cs" />
     <Compile Include="Commands\SaveGame.cs" />
@@ -210,6 +217,9 @@
       <DependentUpon>AbilitySelectionList.xeto</DependentUpon>
     </Compile>
     <Compile Include="Lib\Camera2D.cs" />
+    <Compile Include="Views\ChainedSlidersControl.xeto.cs">
+      <DependentUpon>ChainedSlidersControl.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ColonyScreenView.xeto.cs">
       <DependentUpon>ColonyScreenView.xeto</DependentUpon>
     </Compile>
@@ -257,6 +267,9 @@
     </Compile>
     <Compile Include="Views\MinMaxSlider.xeto.cs">
       <DependentUpon>MinMaxSlider.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MissileDesignView.xeto.cs">
+      <DependentUpon>MissileDesignView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\NewGame.xeto.cs">
       <DependentUpon>NewGame.xeto</DependentUpon>

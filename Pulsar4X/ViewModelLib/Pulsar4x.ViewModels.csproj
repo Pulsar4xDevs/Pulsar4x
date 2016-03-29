@@ -112,6 +112,7 @@
     <Compile Include="ViewModels\IViewModel.cs" />
     <Compile Include="ViewModels\JobVM.cs" />
     <Compile Include="ViewModels\MinMaxSliderVM.cs" />
+    <Compile Include="ViewModels\MissileDesignVM.cs" />
     <Compile Include="ViewModels\NewGameOptionsVM.cs" />
     <Compile Include="ViewModels\ObservableDictionary.cs" />
     <Compile Include="ViewModels\PlanetVM.cs" />
