@@ -15,7 +15,7 @@
        MaxValue="{Binding SliderMaxValue}"
        TickFrequency="{Binding SliderStepValue}"     
        SnapToTick="{Binding StrictStepValue}"  
-       
+       Enabled="{Binding IsUnLocked}"
       />
     </TableRow>
     <TableRow>
@@ -26,7 +26,8 @@
       <NumericUpDown ID="NumericUpDown"  
         Value ="{Binding Value}"
         MaxValue ="{Binding MaxValue}"              
-        MinValue ="{Binding MinValue}" />
+        MinValue ="{Binding MinValue}"
+        Enabled="{Binding IsUnLocked}"/>
       <Label Text="{Binding MaxValue}" />
       </TableRow>
       </TableLayout>

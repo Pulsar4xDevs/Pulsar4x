@@ -58,8 +58,13 @@ namespace Pulsar4X.ViewModel
         public bool IsLocked
         {
             get { return _isLocked; }
-            set { _isLocked = value; OnPropertyChanged(); }
+            set { _isLocked = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsUnLocked));}
         }
+        public bool IsUnLocked
+        {
+            get { return !_isLocked; }
+        }
+
 
         private double _oldValue;
         public event ValuePropertyChangedEventHandler ValueChanged;
@@ -162,6 +167,7 @@ namespace Pulsar4X.ViewModel
             foreach (var item in UnlockedSliders)
             {
                 item.OnPropertyChanged(nameof(ChainedSliderVM.Value));
+                item.OnPropertyChanged(nameof(ChainedSliderVM.SliderValue));
             }
         }
 
