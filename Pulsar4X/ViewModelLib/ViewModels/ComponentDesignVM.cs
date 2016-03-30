@@ -125,7 +125,7 @@ namespace Pulsar4X.ViewModel
         private StaticDataStore _staticData;
         private ComponentDesignVM _parentDesignVM;
         
-        public event ValueChangedEventHandler ValueChanged;
+        //public event ValueChangedEventHandler ValueChanged;
 
         public DictionaryVM<TechSD, string> TechList { get; } = new DictionaryVM<TechSD, string>();
         public string Name { get { return _designAbility.Name; } }
@@ -227,5 +227,5 @@ namespace Pulsar4X.ViewModel
         }
     }
 
-    public delegate void ValueChangedEventHandler(GuiHint controlType, double value);
+    //public delegate void ValueChangedEventHandler(GuiHint controlType, double value);
 }
