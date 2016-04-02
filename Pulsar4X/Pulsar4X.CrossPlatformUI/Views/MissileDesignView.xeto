@@ -21,8 +21,8 @@
         <TabPage Text ="Payload">
           <TableLayout>
             <TableRow>
-              <Label Text="Payload Type:"/>
-              <ComboBox></ComboBox>
+              <Label Text="Payload Type:" />
+              <ComboBox x:Name="PayloadTypeCombox" DataContext="{Binding PayloadTypes}" />
               <NumericUpDown />
               <TableCell/>
             </TableRow>

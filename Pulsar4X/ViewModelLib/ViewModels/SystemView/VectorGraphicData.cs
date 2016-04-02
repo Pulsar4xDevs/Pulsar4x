@@ -176,12 +176,8 @@ namespace Pulsar4X.ViewModel.SystemView
                         //PathList.Add(pathPair);
                     }
                     break;
-
             }
-
-
         }
-
     }
 
     /// <summary>
@@ -260,10 +256,8 @@ namespace Pulsar4X.ViewModel.SystemView
 
         private void updatePosition()
         {
-            //TODO positionDB is not working. 
             if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
             {
-
                 PosX = (float)PositionDB.Position.X;
                 PosY = (float)PositionDB.Position.Y;
             }

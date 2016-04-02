@@ -8,11 +8,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
 {
     public class MissileDesignView : Panel
     {
-        ChainedSlidersControl ChainedSlidersCtrl { get; set; }
+        protected ChainedSlidersControl ChainedSlidersCtrl { get; set; }
+        protected ComboBox PayloadTypeCombox { get; set; }
 
         private MissileDesignView()
         {
             XamlReader.Load(this);
+            PayloadTypeCombox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            PayloadTypeCombox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
         }
 
         public MissileDesignView(MissileDesignVM viewmodel) :this()
