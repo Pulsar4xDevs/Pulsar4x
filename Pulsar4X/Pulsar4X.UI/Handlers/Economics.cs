@@ -2264,7 +2264,8 @@ namespace Pulsar4X.UI.Handlers
                     {
                         m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = "Underground Infra not implemented";
                     }
-                    m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number.ToString();
+                    Entry = String.Format("{0:N2}", CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number);
+                    m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = Entry;
 
                     if (ColCost > 0.0f)
                     {

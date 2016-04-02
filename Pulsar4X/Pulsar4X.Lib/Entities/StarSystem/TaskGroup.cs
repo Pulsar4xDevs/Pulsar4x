@@ -3681,6 +3681,7 @@ namespace Pulsar4X.Entities
                 if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && RemainingShipTonnage != 0)
                 {
                     int ShipMassToLoad = Math.Min(MassToLoad, RemainingShipTonnage);
+                    
 
                     /// <summary>
                     /// Load the mass onto the taskgroup as a whole for display purposes.
@@ -3701,6 +3702,8 @@ namespace Pulsar4X.Entities
                     MassToLoad = MassToLoad - ShipMassToLoad;
                     Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
                 }
+                if (MassToLoad == 0)
+                    break;
             }
             return true;
         }
@@ -3739,6 +3742,14 @@ namespace Pulsar4X.Entities
                     CLE.tons = CLE.tons - ShipMassToUnload;
                     CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
                     Ships[loop].CurrentCargoTonnage = Ships[loop].CurrentCargoTonnage - ShipMassToUnload;
+
+                    /// <summary>
+                    /// Extra sanity check
+                    /// </summary>
+                    if (CLE.tons == 0 && Ships[loop].CargoList.ContainsKey(InstType) == true)
+                    {
+                        Ships[loop].CargoList.Remove(InstType);
+                    }
 
                     Pop.UnloadInstallation(InstType, ShipMassToUnload);
                 }
@@ -3817,6 +3828,8 @@ namespace Pulsar4X.Entities
                     MassToLoad = MassToLoad - ShipMassToLoad;
                     Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
                 }
+                if (MassToLoad == 0)
+                    break;
             }
             return true;
         }
@@ -4026,6 +4039,8 @@ namespace Pulsar4X.Entities
 
                     MassToLoad = MassToLoad - ShipMassToLoad;
                 }
+                if (MassToLoad == 0)
+                    break;
             }
 
             return true;
