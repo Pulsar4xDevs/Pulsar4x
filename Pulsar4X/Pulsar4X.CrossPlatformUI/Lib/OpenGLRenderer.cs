@@ -3,13 +3,21 @@ using OpenTK.Graphics.OpenGL;
 using Pulsar4X.ViewModel;
 using System;
 using System.Collections.Generic;
+using Pulsar4X.ViewModel.SystemView;
+using OpenTK.Graphics;
 
 namespace Pulsar4X.CrossPlatformUI
 {
     public class OpenGLRenderer
 	{
+
+        #region MoveSomehwereElse                        
+
+        Vector2 DEFAULT_TEXT_SIZE = new Vector2(16, 16);
+        #endregion MoveSomewhereElse
+
         private RenderVM RenderVM;
-		private List<int> shaderList;
+		//private List<int> shaderList;
 
 		int theProgram;
         int VP_Matrix_Unif;
@@ -38,10 +46,14 @@ namespace Pulsar4X.CrossPlatformUI
 
 		public OpenGLRenderer (RenderVM render_data)
 		{
-            shaderList = new List<int>();
+           // shaderList = new List<int>();
             RenderVM = render_data;
             RenderVM.SceneLoaded += LoadScenes;
 		}
+
+        //IDK what this is
+        GLUtilities.GLEffectBasic21 glEffect = new GLUtilities.GLEffectBasic21("./Resources/Shaders/Basic20_Vertex_Shader.glsl", "./Resources/Shaders/Basic20_Fragment_Shader.glsl");
+        //var glEffect = new GLUtilities.GLEffectBasic30("./Resources/Shaders/Basic30_Vertex_Shader.glsl", "./Resources/Shaders/Basic30_Fragment_Shader.glsl");
 
         public void LoadScenes(object sender, EventArgs e)
         {
@@ -50,25 +62,44 @@ namespace Pulsar4X.CrossPlatformUI
                 var scene = scene_kv.Value;
                 if (!scene.IsInitialized)
                 {
-                    GL.GenBuffers(1, out scene.mesh.vertex_buffer_id);
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, scene.mesh.vertex_buffer_id);
-                    GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.mesh.vertices.Count * Vector3.SizeInBytes), scene.mesh.vertices.ToArray(), BufferUsageHint.StaticDraw);
-                    // 1st attribute buffer : vertices
-                    GL.EnableVertexAttribArray(0);
-                    GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
+                    //GL.GenBuffers(1, out scene.mesh.vertex_buffer_id);
+                    //GL.BindBuffer(BufferTarget.ArrayBuffer, scene.mesh.vertex_buffer_id);
+                    //GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.mesh.vertices.Count * Vector3.SizeInBytes), scene.mesh.vertices.ToArray(), BufferUsageHint.StaticDraw);
+                    //// 1st attribute buffer : vertices
+                    //GL.EnableVertexAttribArray(0);
+                    //GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
 
-                    GL.GenBuffers(1, out scene.mesh.index_buffer_id);
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, scene.mesh.index_buffer_id);
-                    GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(scene.mesh.indices.Count * sizeof(uint)), scene.mesh.indices.ToArray(), BufferUsageHint.StaticDraw);
+                    //GL.GenBuffers(1, out scene.mesh.index_buffer_id);
+                    //GL.BindBuffer(BufferTarget.ElementArrayBuffer, scene.mesh.index_buffer_id);
+                    //GL.BufferData(BufferTarget.ElementArrayBuffer, (IntPtr)(scene.mesh.indices.Count * sizeof(uint)), scene.mesh.indices.ToArray(), BufferUsageHint.StaticDraw);
 
-                    // The VBO containing the positions and sizes of the particles
-                    GL.GenBuffers(1, out scene.position_buffer_id);
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
-                    // Initialize with empty (NULL) buffer : it will be updated later, each frame.
-                    GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), IntPtr.Zero, BufferUsageHint.StreamDraw);
-                    scene.IsInitialized = true;
+                    //// The VBO containing the positions and sizes of the particles
+                    //GL.GenBuffers(1, out scene.position_buffer_id);
+                    //GL.BindBuffer(BufferTarget.ArrayBuffer, scene.position_buffer_id);
+                    //// Initialize with empty (NULL) buffer : it will be updated later, each frame.
+                    //GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(scene.position_data.Count * Vector3.SizeInBytes), IntPtr.Zero, BufferUsageHint.StreamDraw);
+                    //scene.IsInitialized = true;
+
+                    foreach (var item in scene_kv.Value.SystemBodies)
+                    {
+                        CreateGraphic(item);
+                        CreateLabel(item);
+                    }
                 }
             }
+        }
+
+        void CreateLabel(SystemObjectRenderInfo sysObj)
+        {
+            var NameLabel = new GLUtilities.GLFont(glEffect,
+            new Vector3(sysObj.PositionGL.X, (float)(sysObj.PositionGL.Y - sysObj.ItemRadiusKM), 0),
+            DEFAULT_TEXT_SIZE, Color4.White, sysObj.DEFAULT_GLFONT2, sysObj.LabelName);
+        }
+
+        private void CreateGraphic(SystemObjectRenderInfo sysObj)
+        {
+           var Graphic = new GLUtilities.GLQuad(glEffect, sysObj.PositionGL,
+            sysObj.Size, sysObj.ItemColour, sysObj.ItemTextureName);
         }
 
 		int CreateShader(ShaderType eShaderType, string strShaderFile)
@@ -200,15 +231,15 @@ namespace Pulsar4X.CrossPlatformUI
 
 		void InitializeProgram()
 		{
-			shaderList.Add(CreateShader(ShaderType.VertexShader, strVertexShader));
-			shaderList.Add(CreateShader(ShaderType.FragmentShader, strFragmentShader));
+			//shaderList.Add(CreateShader(ShaderType.VertexShader, strVertexShader));
+			//shaderList.Add(CreateShader(ShaderType.FragmentShader, strFragmentShader));
 
-			theProgram = CreateProgram(shaderList);
+			//theProgram = CreateProgram(shaderList);
 
-			foreach (int shader in shaderList)
-			{
-				GL.DeleteShader(shader);
-			}
+			//foreach (int shader in shaderList)
+			//{
+			//	GL.DeleteShader(shader);
+			//}
 		}
 	}
 }

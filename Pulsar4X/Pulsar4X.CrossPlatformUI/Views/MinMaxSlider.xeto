@@ -6,13 +6,31 @@
 
   <TableLayout>
     <TableRow>
-      <Label Text="{Binding Name}"  />
-      <Slider ID="Slider" />
+
+      <Label Text="{Binding Name}" />
+
+      <Slider ID="Slider"
+       Value="{Binding SliderValue}"
+       MinValue="{Binding SliderMinValue}"
+       MaxValue="{Binding SliderMaxValue}"
+       TickFrequency="{Binding SliderStepValue}"     
+       SnapToTick="{Binding StrictStepValue}"  
+       Enabled="{Binding IsUnLocked}"
+      />
     </TableRow>
     <TableRow>
+      <CheckBox Visible="{Binding IsLockable}" Checked="{Binding IsLocked}"/>
+      <TableLayout>
+      <TableRow>
       <Label Text="{Binding MinValue}"  />
-      <NumericUpDown ID="NumericUpDown"  />
+      <NumericUpDown ID="NumericUpDown"  
+        Value ="{Binding Value}"
+        MaxValue ="{Binding MaxValue}"              
+        MinValue ="{Binding MinValue}"
+        Enabled="{Binding IsUnLocked}"/>
       <Label Text="{Binding MaxValue}" />
+      </TableRow>
+      </TableLayout>
     </TableRow>
   </TableLayout>
 	

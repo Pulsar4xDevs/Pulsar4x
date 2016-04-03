@@ -23,7 +23,7 @@
           <Label Text="Mineral Deposits" /> 
         </TableRow>
         <TableRow>
-          <GridView ID="MineralDeposits" />
+          <GridView ID="MineralDeposits"  />
         </TableRow>
       </TableLayout>
       <TableLayout>
@@ -31,7 +31,7 @@
           <Label Text="Mineral Stockpile" />
         </TableRow>
         <TableRow>
-          <GridView ID="MineralStockpile" />
+          <GridView ID="MineralStockpile"  />
         </TableRow>
       </TableLayout>
     </TableRow>
@@ -42,7 +42,7 @@
           <Label Text="Refined Materials Stockpile" />
         </TableRow>
         <TableRow>
-          <GridView ID="RefinedMats" />
+          <GridView ID="RefinedMats"  />
         </TableRow>
       </TableLayout>
       <c:JobAbilityView x:Name="ConstructionAbilityView" />

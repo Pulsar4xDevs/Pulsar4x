@@ -79,6 +79,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -111,16 +112,21 @@
     <Compile Include="ViewModels\IViewModel.cs" />
     <Compile Include="ViewModels\JobVM.cs" />
     <Compile Include="ViewModels\MinMaxSliderVM.cs" />
+    <Compile Include="ViewModels\MissileDesignVM.cs" />
     <Compile Include="ViewModels\NewGameOptionsVM.cs" />
     <Compile Include="ViewModels\ObservableDictionary.cs" />
     <Compile Include="ViewModels\PlanetVM.cs" />
     <Compile Include="ViewModels\RefinaryAbilityVM.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
-    <Compile Include="ViewModels\RenderVM.cs" />
+    <Compile Include="ViewModels\SystemView\StarSystemVM.cs" />
+    <Compile Include="ViewModels\SystemView\SystemMap_DrawableVM.cs" />
+    <Compile Include="ViewModels\SystemView\RenderVM.cs" />
     <Compile Include="ViewModels\ResearchVM.cs" />
     <Compile Include="ViewModels\ShipDesignVM.cs" />
     <Compile Include="ViewModels\SpeciesVM.cs" />
     <Compile Include="ViewModels\StarVM.cs" />
+    <Compile Include="ViewModels\SystemView\Scene.cs" />
+    <Compile Include="ViewModels\SystemView\VectorGraphicData.cs" />
     <Compile Include="ViewModels\SystemVM.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
   </ItemGroup>

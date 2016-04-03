@@ -59,6 +59,14 @@ namespace Pulsar4X.ECSLib
             MaxValue = MaxValueFormula.DResult;
         }
 
+        public double StepValue;
+        internal ChainedExpression StepValueFormula { get; set; }
+        public void SetStep()
+        {
+            StepValueFormula.Evaluate();
+            StepValue = StepValueFormula.DResult;
+        }
+
         internal object[] DataBlobArgs { get; set; }
     }
 }

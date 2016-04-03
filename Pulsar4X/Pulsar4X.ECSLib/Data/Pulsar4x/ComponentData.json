@@ -30,6 +30,7 @@
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "2500",
               "MinFormula": "1",
+              "StepFormula": "1",
               "AbilityFormula": "250"
             },
             {
@@ -64,6 +65,7 @@
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')",
               "MinFormula": "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')",
+              "StepFormula": "0.1",
               "AbilityFormula": "1"
             },
             {
@@ -104,6 +106,7 @@
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "0.5",
               "MinFormula": "0",
+              "StepFormula": "0.1",
               "AbilityFormula": "0"
             },
             {

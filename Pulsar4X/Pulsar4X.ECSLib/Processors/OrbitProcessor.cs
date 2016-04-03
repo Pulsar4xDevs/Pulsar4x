@@ -78,17 +78,19 @@ namespace Pulsar4X.ECSLib
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
 
-            if (game.Settings.OrbitalMotionForPlanetsMoons ?? false)
+            //TODO why are we not just removing the OrbitDB for these settings?
+
+            if (!game.Settings.OrbitalMotionForPlanetsMoons ?? true) //if NOT orbital motion or NOT null
             {
                 var systemBodyDB = entity.GetDataBlob<SystemBodyDB>();
-                if (systemBodyDB != null && systemBodyDB.Type != BodyType.Asteroid && systemBodyDB.Type != BodyType.Comet)
+                if (systemBodyDB != null && systemBodyDB.Type == BodyType.Moon) //what were you trying to do here? if (systemBodyDB != null && systemBodyDB.Type != BodyType.Asteroid && systemBodyDB.Type != BodyType.Comet)
                 {
                     // Do not process this planet or moon.
                     return;
                 }
             }
 
-            if (game.Settings.OrbitalMotionForAsteroids ?? false)
+            if (!game.Settings.OrbitalMotionForAsteroids ?? true) //if NOT orbital motion or NOT null
             {
                 var systemBodyDB = entity.GetDataBlob<SystemBodyDB>();
                 if (systemBodyDB != null && systemBodyDB.Type == BodyType.Asteroid)
@@ -112,6 +114,7 @@ namespace Pulsar4X.ECSLib
             {
                 // TODO: Debug log this exception. Do NOT fail to the UI. There is NO data-corruption on this exception.
                 // In this event, we did NOT update our position.
+                throw new Exception("Position Exception thrown in OrbitProcessor");
             }
 
             // Update our children.

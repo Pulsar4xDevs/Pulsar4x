@@ -4,6 +4,7 @@ using Eto.Serialization.Xaml;
 using OpenTK;
 using OpenTK.Graphics;
 using Pulsar4X.ViewModel;
+using Pulsar4X.ViewModel.SystemView;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ using System.Linq.Expressions;
 namespace Pulsar4X.CrossPlatformUI.Views {
 	public class SystemView : Panel {
 		protected Panel RenderCanvasLocation;
-		protected RenderCanvas RenderCanvas;
+		//protected RenderCanvas RenderCanvas;
 		private UITimer timDraw;
 
 		protected DropDown systems;
@@ -30,45 +31,64 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		private const float mouse_move_threshold = 20f;
 		
 		private OpenGLRenderer Renderer;
+        protected SystemMap_DrawableView SysMapDrawable;
 
-		public SystemView(GameVM GameVM) {
-			RenderVM = new RenderVM();
-			Renderer = new OpenGLRenderer(RenderVM);
-			DataContext = GameVM;
-			RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
+		public SystemView(StarSystemVM viewmodel) {
+			
+			DataContext = viewmodel;			
 			XamlReader.Load(this);
 
-			systems.BindDataContext(s => s.DataStore, (GameVM g) => g.StarSystems);
-			systems.ItemTextBinding = Binding.Property((SystemVM vm) => vm.Name);
-			systems.ItemKeyBinding = Binding.Property((SystemVM vm) => vm.ID).Convert((Guid ID) => ID.ToString());
+            #region OpenGL stuff
+            //intend to make opengl vs drawable system view an option. an openGL pannel could be a bit fancier. 
 
-			//direct binding - might need to be replaced later
-			systems.Bind(s => s.SelectedValue, RenderVM, (RenderVM rvm) => rvm.ActiveSystem);
+            //RenderVM = new RenderVM(GameVM.CurrentAuthToken);
+            //Renderer = new OpenGLRenderer(RenderVM);
+            //RenderCanvas = new RenderCanvas(GraphicsMode.Default, 3, 3, GraphicsContextFlags.Default);
+            //systems.BindDataContext(s => s.DataStore, (GameVM g) => g.StarSystems);
+            //systems.ItemTextBinding = Binding.Property((SystemVM vm) => vm.Name);
+            //systems.ItemKeyBinding = Binding.Property((SystemVM vm) => vm.ID).Convert((Guid ID) => ID.ToString());
 
-			// @Hack: so far the only way I've found to make the RenderCanvas properly update the
-			//        size information when the window is resized is to completely detach it from
-			//        the window, and then re-attach it, before calling Resize.
-			//
-			//        There's nothing 'right' about doing it this way, except that it works.
-		    SizeChanged += (sender, args) =>
-		    {
-		        RenderCanvasLocation.Remove(RenderCanvas);
-		        RenderCanvasLocation.Content = RenderCanvas;
-		        Resize(sender, args);
-		    };
+            //direct binding - might need to be replaced later
+            //systems.Bind(s => s.SelectedValue, RenderVM, (RenderVM rvm) => rvm.ActiveSystem);
 
-			RenderCanvas.GLInitalized += Initialize;
-			RenderCanvas.GLDrawNow += DrawNow;
-			RenderCanvas.GLShuttingDown += Teardown;
-			//RenderCanvas.GLResize += Resize; // replaced by the @Hack above ^^^
-			RenderCanvas.MouseMove += WhenMouseMove;
-			RenderCanvas.MouseDown += WhenMouseDown;
-			RenderCanvas.MouseUp += WhenMouseUp;
-			RenderCanvas.MouseWheel += WhenMouseWheel;
-			RenderCanvas.MouseLeave += WhenMouseLeave;
+            // @Hack: so far the only way I've found to make the RenderCanvas properly update the
+            //        size information when the window is resized is to completely detach it from
+            //        the window, and then re-attach it, before calling Resize.
+            //
+            //        There's nothing 'right' about doing it this way, except that it works.
+            //   SizeChanged += (sender, args) =>
+            //   {
+            //       RenderCanvasLocation.Remove(RenderCanvas);
+            //       RenderCanvasLocation.Content = RenderCanvas;
+            //       Resize(sender, args);
+            //   };
 
-			RenderCanvasLocation.Content = RenderCanvas;
-		}
+            //RenderCanvas.GLInitalized += Initialize;
+            //RenderCanvas.GLDrawNow += DrawNow;
+            //RenderCanvas.GLShuttingDown += Teardown;
+            ////RenderCanvas.GLResize += Resize; // replaced by the @Hack above ^^^
+            //RenderCanvas.MouseMove += WhenMouseMove;
+            //RenderCanvas.MouseDown += WhenMouseDown;
+            //RenderCanvas.MouseUp += WhenMouseUp;
+            //RenderCanvas.MouseWheel += WhenMouseWheel;
+            //RenderCanvas.MouseLeave += WhenMouseLeave;
+
+            //RenderCanvasLocation.Content = RenderCanvas;
+            //RenderCanvasLocation.Content = SysMapDrawable;
+            //SysMapDrawable = new SystemMap_DrawableView(GameVM.StarSystemViewModel.SelectedSystemVM);
+            #endregion
+
+
+            systems.DataContext = viewmodel.StarSystems;
+            systems.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            systems.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
+            
+            SysMapDrawable.SetViewmodel(viewmodel.SelectedSystemVM);
+            
+            timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond. TODO: change to update using OnPropertyChanged 
+            timDraw.Elapsed += timDraw_Elapsed;
+            timDraw.Start();
+        }
 
 		private void WhenMouseLeave(object sender, MouseEventArgs e) {
 			e.Handled = true;
@@ -112,42 +132,47 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		}
 
 		public void Initialize(object sender, EventArgs e) {
-			RenderCanvas.MakeCurrent();
-			var bounds = RenderCanvas.Bounds;
-			Renderer.Initialize(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+			//RenderCanvas.MakeCurrent();
+			//var bounds = RenderCanvas.Bounds;
+			//Renderer.Initialize(bounds.X, bounds.Y, bounds.Width, bounds.Height);
 
-			//we need this to run on its own because we cant have rendering blocked by the
-			//the rest of the system or waiting for an advance time command
-			timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
-			timDraw.Elapsed += timDraw_Elapsed;
-			timDraw.Start();
+			////we need this to run on its own because we cant have rendering blocked by the
+			////the rest of the system or waiting for an advance time command
+			//timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond.
+			//timDraw.Elapsed += timDraw_Elapsed;
+			//timDraw.Start();
 		}
 
-		private void timDraw_Elapsed(object sender, EventArgs e) {
-			if (!RenderVM.drawPending || !RenderCanvas.IsInitialized) {
-				return;
-			}
+        private void timDraw_Elapsed(object sender, EventArgs e)
+        {
+            SysMapDrawable.Invalidate();
+        }
 
-			RenderCanvas.MakeCurrent();
+        //private void timDraw_Elapsed(object sender, EventArgs e) {
+        //	if (!RenderVM.drawPending || !RenderCanvas.IsInitialized) {
+        //		return;
+        //	}
 
-			Renderer.Draw(RenderVM);
+        //RenderCanvas.MakeCurrent();
 
-			RenderCanvas.SwapBuffers();
+        //Renderer.Draw(RenderVM);
 
-			RenderVM.drawPending = false;
-		}
+        //RenderCanvas.SwapBuffers();
 
-		public void DrawNow(object sender, EventArgs e) {
+        //RenderVM.drawPending = false;
+        //}
+
+        public void DrawNow(object sender, EventArgs e) {
 			Draw();
 			
 		}
 
 		public void Resize(object sender, EventArgs e) {
-			RenderCanvas.MakeCurrent();
-			var bounds = RenderCanvas.Bounds;
-			RenderVM.Resize(bounds.Width, bounds.Height);
-			Renderer.Resize(bounds.X, bounds.Y, bounds.Width, bounds.Height);
-			RenderVM.drawPending = true;
+			//RenderCanvas.MakeCurrent();
+			//var bounds = RenderCanvas.Bounds;
+			//RenderVM.Resize(bounds.Width, bounds.Height);
+			//Renderer.Resize(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+			//RenderVM.drawPending = true;
 		}
 
 		public void Teardown(object sender, EventArgs e) {

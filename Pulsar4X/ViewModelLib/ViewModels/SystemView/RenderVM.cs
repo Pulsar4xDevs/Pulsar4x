@@ -1,12 +1,11 @@
-﻿//using Pulsar4X.Sceen;
-using OpenTK;
+﻿using OpenTK;
 using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Pulsar4X.ViewModel
+namespace Pulsar4X.ViewModel.SystemView
 {
     /// <summary>
     /// This is the VM for the opengl window, it handles updating the scene manager and triggering draws.
@@ -15,6 +14,7 @@ namespace Pulsar4X.ViewModel
     /// </summary>
     public class RenderVM : IViewModel
     {
+        private AuthenticationToken _authToken;
         private int viewport_width;
         private int viewport_height;
         private SystemVM active_system;
@@ -30,7 +30,7 @@ namespace Pulsar4X.ViewModel
 
         public bool drawPending = false;
 
-        public RenderVM()
+        public RenderVM(AuthenticationToken authToken)
         {
             scenes = new Dictionary<String, Scene>();
         }
@@ -110,7 +110,8 @@ namespace Pulsar4X.ViewModel
                 var pos = planet.Position;
                 position_data.Add(new Vector3((float)pos.X, (float)pos.Y, 0.0f));
             }
-            scenes.Add("system_space", new Scene(position_data, scale_data, mesh, cam));
+            //scenes.Add("system_space", new Scene(position_data, scale_data, mesh, cam));
+            scenes.Add("system_space", new Scene(system.StarSystem, _authToken, scale_data, cam));
             OnSceneLoaded();
             drawPending = true;
         }
@@ -205,23 +206,7 @@ namespace Pulsar4X.ViewModel
         }
     }
 
-    public class Scene
-    {
-        public List<Vector3> position_data;
-        public List<float> scale_data;
-        public Mesh mesh;
-        public Camera camera;
-        public bool IsInitialized = false;
-        public int position_buffer_id;
 
-        public Scene(List<Vector3> position_data, List<float> scale_data, Mesh mesh, Camera camera)
-        {
-            this.position_data = position_data;
-            this.scale_data = scale_data;
-            this.mesh = mesh;
-            this.camera = camera;
-        }
-    }
 
     public class Mesh
     {

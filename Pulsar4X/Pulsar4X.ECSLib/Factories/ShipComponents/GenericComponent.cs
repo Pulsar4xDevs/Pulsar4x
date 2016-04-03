@@ -76,6 +76,7 @@ namespace Pulsar4X.ECSLib
                 {
                     designAbility.MaxValueFormula = new ChainedExpression(abilitySD.MaxFormula, designAbility, factionTech, staticData);
                     designAbility.MinValueFormula = new ChainedExpression(abilitySD.MinFormula, designAbility, factionTech, staticData);
+                    designAbility.StepValueFormula = new ChainedExpression(abilitySD.StepFormula, designAbility, factionTech, staticData);
                 }
                 if (abilitySD.AbilityDataBlobType != null)
                 {

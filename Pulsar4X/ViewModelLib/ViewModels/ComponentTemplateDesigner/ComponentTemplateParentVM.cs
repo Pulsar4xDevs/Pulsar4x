@@ -177,6 +177,7 @@ namespace Pulsar4X.ViewModel
         CreditCostControl,
         MinControl,
         MaxControl,
+        StepControl,
         AbilityFormulaControl
     }
 }

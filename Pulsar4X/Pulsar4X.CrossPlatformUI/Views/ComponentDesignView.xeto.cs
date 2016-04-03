@@ -50,29 +50,19 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 {
                     case GuiHint.GuiTechSelectionList:
                         AbilitySelectionList asl = new AbilitySelectionList(componentAbilityVM);
-                        //asl.GuiListSetup(componentAbilityVM);
-                        asl.ValueChanged += OnValueChanged;
                         AbilitysLayout.Items.Add(asl);
                         break;
                     case GuiHint.GuiSelectionMaxMin:
                         MinMaxSlider mms = new MinMaxSlider(componentAbilityVM.MinMaxSlider);
-                        mms.ValueChanged += OnValueChanged;
                         AbilitysLayout.Items.Add(mms);
                         break;
                 }
                 Name.Text = _designVM.Design.Name;
-                componentAbilityVM.ValueChanged += OnValueChanged;
-                OnValueChanged(GuiHint.None, 0);
+
+                ComponentStats.Text = _designVM.StatsText;
+                AbilityStats.Text = _designVM.AbilityStatsText;  
             }
             AbilitysLayout.ResumeLayout();
-        }
-
-        private void OnValueChanged(GuiHint controlType, double value)
-        {
-
-            ComponentStats.Text = _designVM.StatsText;
-            AbilityStats.Text = _designVM.AbilityStatsText;
-
         }
     }
 }

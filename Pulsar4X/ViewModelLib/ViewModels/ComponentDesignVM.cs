@@ -125,7 +125,7 @@ namespace Pulsar4X.ViewModel
         private StaticDataStore _staticData;
         private ComponentDesignVM _parentDesignVM;
         
-        public event ValueChangedEventHandler ValueChanged;
+        //public event ValueChangedEventHandler ValueChanged;
 
         public DictionaryVM<TechSD, string> TechList { get; } = new DictionaryVM<TechSD, string>();
         public string Name { get { return _designAbility.Name; } }
@@ -133,6 +133,7 @@ namespace Pulsar4X.ViewModel
 
         public double MaxValue { get { return _designAbility.MaxValue; } }
         public double MinValue { get { return _designAbility.MinValue; } }
+        public double StepValue { get { return _designAbility.StepValue; } }
         private double _value;
         public double Value { get { return _designAbility.Value; }set
         {
@@ -170,9 +171,11 @@ namespace Pulsar4X.ViewModel
                         designAbility.SetMax();
                         designAbility.SetMin();
                         designAbility.SetValue();
+                        designAbility.SetStep();
                         MinMaxSlider.Name = Name;
                         MinMaxSlider.MaxValue = MaxValue;
                         MinMaxSlider.MinValue = MinValue;
+                        MinMaxSlider.StepValue = StepValue;
                         MinMaxSlider.Value = Value;
                         MinMaxSlider.PropertyChanged += MinMaxSlider_PropertyChanged;
 
@@ -224,5 +227,5 @@ namespace Pulsar4X.ViewModel
         }
     }
 
-    public delegate void ValueChangedEventHandler(GuiHint controlType, double value);
+    //public delegate void ValueChangedEventHandler(GuiHint controlType, double value);
 }

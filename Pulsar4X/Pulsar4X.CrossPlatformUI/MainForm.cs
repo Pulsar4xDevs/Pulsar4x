@@ -19,6 +19,7 @@ namespace Pulsar4X.CrossPlatformUI
         private static Command colView;
         private static Command componentDesign;
         private static Command shipDesign;
+        private static Command missileDesign;
         private static Command componentTemplateDesign;
 
         public MainForm()
@@ -40,6 +41,7 @@ namespace Pulsar4X.CrossPlatformUI
             colView = new ColonyView(_gameVM);
             componentDesign = new ComponentDesignViewCMD(_gameVM);
             shipDesign = new ShipDesignViewCMD(_gameVM);
+            missileDesign = new MissileDesignCMD(_gameVM);
             componentTemplateDesign = new ComponentTemplateViewCMD(_gameVM);
 			
 
@@ -71,6 +73,7 @@ namespace Pulsar4X.CrossPlatformUI
                 ToolBar.Items.Add(colView);
                 ToolBar.Items.Add(componentDesign);
                 ToolBar.Items.Add(shipDesign);
+                ToolBar.Items.Add(missileDesign);
                 ToolBar.Items.Add(componentTemplateDesign);
             }
         }
