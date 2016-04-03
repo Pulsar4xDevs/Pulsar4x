@@ -536,6 +536,7 @@ namespace Pulsar4X.Entities
         {
             GameState.Instance.CurrentSecond += deltaSeconds;
             ConstructionTick += deltaSeconds;
+            GameState.Instance.LastTimestep = deltaSeconds;
 
             foreach (StarSystem CurrentSystem in GameState.Instance.StarSystems)
             {
@@ -642,6 +643,12 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Adding new taskgroups means adding a loop here to run through them all.
                     /// </summary>
+                    if (TaskGroup.TaskGroupOrders.Count == 0 && ( TaskGroup._SpecialOrders._DefaultOrdersList.Count != 0 || TaskGroup._SpecialOrders._ConditionList.Count != 0 ))
+                    {
+                        TaskGroup.ProcessDefaultOrders();
+                        TaskGroup.ProcessConditionalOrders();
+                    }
+
                     if (TaskGroup.TaskGroupOrders.Count != 0)
                     {
                         TaskGroup.FollowOrders((uint)deltaSeconds);
@@ -1022,8 +1029,14 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if ((value & (int)Faction.RechargeStatus.Destroyed) == (int)Faction.RechargeStatus.Destroyed)
                     {
+                        /// <summary>
+                        /// Every ship ordered to travel to this ship needs to update to reflect that it is now destroyed.
+                        /// </summary>
                         RemoveTaskGroupsOrdered(pair);
 
+                        /// <summary>
+                        /// Every faction that has detected this ship needs to have that cleared.
+                        /// </summary>
                         foreach (Faction CurrentFaction in P)
                         {
                             StarSystem CurSystem = Ship.ShipsTaskGroup.Contact.Position.System;
@@ -1077,9 +1090,21 @@ namespace Pulsar4X.Entities
                         Ship.ShipsTaskGroup.Ships.Remove(pair.Key);
                         Ship.ShipsFaction.Ships.Remove(pair.Key);
 
+                        /// <summary>
+                        /// This taskgroup is now empty, so remove friendly taskgroups moving to this taskgroup.
+                        /// </summary>
                         if (Ship.ShipsTaskGroup.Ships.Count == 0)
                         {
                             RemoveFriendlyTaskGroupsOrdered(pair);
+
+                            /// <summary>
+                            /// Remove every order issued to this taskgroup. some of them may have special conditions such as they survey orders, and the simulation needs to know
+                            /// that a survey in progress isn't being carried out by a body anymore due to ship destruction.
+                            /// </summary>
+                            foreach (Order TGO in Ship.ShipsTaskGroup.TaskGroupOrders)
+                            {
+                                Ship.ShipsTaskGroup.RemoveOrder(TGO);
+                            }
                         }
 
                         RemoveShipsTargetting(pair);
@@ -1161,7 +1186,7 @@ namespace Pulsar4X.Entities
                             int lastOrder = TaskGroupOrdered.TaskGroupOrders.Count - 1;
                             for (int orderListIterator = lastOrder; orderListIterator >= orderIterator; orderListIterator--)
                             {
-                                TaskGroupOrdered.TaskGroupOrders.RemoveAt(orderListIterator);
+                                TaskGroupOrdered.RemoveOrder(orderListIterator);
                             }
                             break;
                         }
@@ -1203,7 +1228,7 @@ namespace Pulsar4X.Entities
                             int lastOrder = TaskGroupOrdered.TaskGroupOrders.Count - 1;
                             for (int orderListIterator = lastOrder; orderListIterator >= orderIterator; orderListIterator--)
                             {
-                                TaskGroupOrdered.TaskGroupOrders.RemoveAt(orderListIterator);
+                                TaskGroupOrdered.RemoveOrder(orderListIterator);
                             }
                             break;
                         }

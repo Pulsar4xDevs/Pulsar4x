@@ -24,6 +24,8 @@ namespace Pulsar4X.Entities
             ContactUpdate,
             ContactLost,
 
+            FailureToLoad,
+
             Firing,
             FiringHit,
             FiringMissed,
@@ -42,6 +44,9 @@ namespace Pulsar4X.Entities
             MissileLostTracking,
             MissileMissed,
             MissileOutOfFuel,
+
+            NoGeoSurveyTarget,
+            NoGravSurveyTarget,
 
             OrdersCompleted,
             OrdersNotCompleted,

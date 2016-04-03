@@ -227,8 +227,8 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Tree view
             /// </summary>
-            m_oSummaryPanel.PopulationTreeView.KeyPress += new KeyPressEventHandler(PopulationTreeView_Input);
-            m_oSummaryPanel.PopulationTreeView.MouseClick += new MouseEventHandler(PopulationTreeView_Input);
+            m_oSummaryPanel.PopulationTreeView.AfterSelect += new TreeViewEventHandler(PopulationTreeView_Input);
+
 
             /// <summary>
             /// Time Advancement Buttons:
@@ -312,6 +312,7 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.ShipyardDataGrid.SelectionChanged += new EventHandler(ShipyardDataGrid_SelectionChanged);
             m_oSummaryPanel.ExpandCapUntilXTextBox.TextChanged += new EventHandler(ExpandCapUntilXTextBox_TextChanged);
             m_oSummaryPanel.NewShipClassComboBox.SelectedIndexChanged += new EventHandler(NewShipClassComboBox_SelectedIndexChanged);
+            m_oSummaryPanel.SYNewClassComboBox.SelectedIndexChanged += new EventHandler(SYNewClassComboBox_SelectedIndexChanged);
             m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndexChanged += new EventHandler(RepairRefitScrapClassComboBox_SelectedIndexChanged);
             m_oSummaryPanel.AddTaskButton.Click += new EventHandler(AddTaskButton_Click);
 
@@ -344,6 +345,7 @@ namespace Pulsar4X.UI.Handlers
             #region Terraforming Tab
             m_oSummaryPanel.TerraformingSaveAtmButton.Click += new EventHandler(TerraformingSaveAtmButton_Click);
 
+            m_oSummaryPanel.TerraformingGasComboBox.Items.Add("Terraforming Inactive");
             foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
             {
                 m_oSummaryPanel.TerraformingGasComboBox.Items.Add(Gas.Value.Name);
@@ -426,9 +428,10 @@ namespace Pulsar4X.UI.Handlers
                         CurrentSYInfo = null;
                     }
 
-                    RefreshPanels();
+                    RefreshPanels(true);
                 }
             }
+
         }
 
         /// <summary>
@@ -706,6 +709,11 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ShipyardCreateTaskGroupBox.Text = Entry;
                     }
 
+                    if(m_oSummaryPanel.SYNewClassComboBox.Items.Count > 0 && m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1)
+                        m_oSummaryPanel.SYNewClassComboBox.Items[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex] = "";
+                    m_oSummaryPanel.SYNewClassComboBox.Items.Clear();
+                    m_oSummaryPanel.SYShipNameTextBox.Text = "";
+
                     /// <summary>
                     /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
                     /// So. they have to be refs.
@@ -762,7 +770,33 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void NewShipClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+            if (m_oSummaryPanel.NewClassComboBox.SelectedIndex != -1)
+            {
+                Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+            }
+        }
+
+        /// <summary>
+        /// be sure to change the name of the ship currently selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SYNewClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1)
+            {
+                Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+                BindingList<ShipClassTN> ECL = EligibleClassList;
+                Eco_ShipyardTabHandler.GetEligibleClassList(CurrentFaction, CurrentSYInfo, ref ECL);
+                EligibleClassList = ECL;
+                if (EligibleClassList.Count != 0)
+                {
+                    int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex]);
+                    String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
+                                                 (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
+                    m_oSummaryPanel.SYShipNameTextBox.Text = Entry;
+                }
+            }
         }
 
         /// <summary>
@@ -875,9 +909,7 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     if (CurrentSYInfo.Slipways > CurrentSYInfo.BuildingShips.Count)
                     {
-                        Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, m_oSummaryPanel.SYShipNameTextBox.Text, ConstructRefit);
-                        CurrentSYInfo.BuildingShips.Add(NewTask);
-                        CurrentPopulation.ShipyardTasks.Add(NewTask, CurrentSYInfo);
+                        CurrentSYInfo.AddTask(CurrentPopulation, CurrentShip, SYITask, TargetTG, BaseBuildRate, m_oSummaryPanel.SYShipNameTextBox.Text, ConstructRefit);
 
                         /// <summary>
                         /// Cost display for the new order.
@@ -991,25 +1023,27 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void TerraformingSaveAtmButton_Click(object sender, EventArgs e)
         {
-            /// <summary>
-            /// True = add gas, false = subtract gas.
-            /// </summary>
-            if (m_oSummaryPanel.TerraformingAddGasCheckBox.Checked == true)
-                CurrentPopulation._GasAddSubtract = true;
-            else
-                CurrentPopulation._GasAddSubtract = false;
-
-            float getAtm;
-            bool r1 = float.TryParse(m_oSummaryPanel.TerraformingMaxGasTextBox.Text, out getAtm);
-
-            if (r1 == true)
+            //index zero is inactive terraforming
+            if (m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex != -1 && m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex != 0)
             {
-                CurrentPopulation._GasAmt = getAtm;
-            }
+                /// <summary>
+                /// True = add gas, false = subtract gas.
+                /// </summary>
+                if (m_oSummaryPanel.TerraformingAddGasCheckBox.Checked == true)
+                    CurrentPopulation._GasAddSubtract = true;
+                else
+                    CurrentPopulation._GasAddSubtract = false;
 
-            if (m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex != -1)
-            {
-                int Count = 0;
+                float getAtm;
+                bool r1 = float.TryParse(m_oSummaryPanel.TerraformingMaxGasTextBox.Text, out getAtm);
+
+                if (r1 == true)
+                {
+                    CurrentPopulation._GasAmt = getAtm;
+                }
+
+
+                int Count = 1;
                 foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
                 {
                     if (Count == m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex)
@@ -1043,6 +1077,14 @@ namespace Pulsar4X.UI.Handlers
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oSummaryPanel.Activate();
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        /// <summary>
+        /// The system map needs a way to refresh the economics panel based on the passage of time there, so a way to call SoftRefresh publically is needed.
+        /// </summary>
+        public void RefreshDisplay()
+        {
+            SoftRefresh();
         }
 
         #endregion
@@ -1226,6 +1268,13 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void BuildDataGrid_SelectionChanged(object sender, EventArgs e)
         {
+            if (m_oSummaryPanel.BuildDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    m_oSummaryPanel.IndustrialProjectGroupBox.Text = String.Format("Create Industrial Project For {0}", m_oSummaryPanel.BuildDataGrid.CurrentCell.Value.ToString());
+                }
+            }
             BuildCostListBox();
         }
 
@@ -1255,6 +1304,12 @@ namespace Pulsar4X.UI.Handlers
                     float PercentCapacity = -1.0f;
                     bool r1 = float.TryParse(m_oSummaryPanel.ItemNumberTextBox.Text, out NumToBuild);
                     bool r2 = float.TryParse(m_oSummaryPanel.ItemPercentTextBox.Text, out PercentCapacity);
+
+                    if (PercentCapacity < 0.0f)
+                        PercentCapacity = 0.0f;
+
+                    if (PercentCapacity > 100.0f)
+                        PercentCapacity = 100.0f;
 
                     if (m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex != -1 && r1 == true && r2 == true)
                     {
@@ -1308,6 +1363,12 @@ namespace Pulsar4X.UI.Handlers
                     float PercentCapacity = -1.0f;
                     bool r1 = float.TryParse(m_oSummaryPanel.ItemNumberTextBox.Text, out NumToBuild);
                     bool r2 = float.TryParse(m_oSummaryPanel.ItemPercentTextBox.Text, out PercentCapacity);
+
+                    if (PercentCapacity < 0.0f)
+                        PercentCapacity = 0.0f;
+
+                    if (PercentCapacity > 100.0f)
+                        PercentCapacity = 100.0f;
 
                     int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
                     if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
@@ -1437,7 +1498,7 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Refresh all the various panels that make up this display.
         /// </summary>
-        private void RefreshPanels()
+        private void RefreshPanels(bool skipTree=false)
         {
             if (m_oCurrnetFaction != null)
             {
@@ -1453,7 +1514,8 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Build the population lists.
                 /// </summary>
-                BuildTreeView();
+                if(skipTree == false)
+                    BuildTreeView();
 
                 /// <summary>
                 /// Summary Tab:
@@ -1484,6 +1546,7 @@ namespace Pulsar4X.UI.Handlers
                 ClearCB(m_oSummaryPanel.NewShipClassComboBox);
                 m_oSummaryPanel.SYShipNameTextBox.Clear();
 
+                
                 
                 /// <summary>
                 /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
@@ -1529,9 +1592,18 @@ namespace Pulsar4X.UI.Handlers
             if (m_oCurrnetFaction != null)
             {
                 /// <summary>
+                /// Update population growth and new colonies.
+                /// </summary>
+                BuildTreeView();
+
+                /// <summary>
                 /// Summary Tab:
                 /// </summary>
                 RefreshSummaryCells();
+
+                /// <summary>
+                /// after finishing building things that require CI, the ability to select them should go away.
+                RefreshIndustryTab();
 
                 /// <summary>
                 /// Refresh the construction queue:
@@ -1549,6 +1621,7 @@ namespace Pulsar4X.UI.Handlers
                 BuildConstructionLabel();
                 BuildRefiningLabel();
                 UpdateBuildTexts();
+                BuildCostListBox();
 
                 /// <summary>
                 /// Mining Tab:
@@ -1658,16 +1731,20 @@ namespace Pulsar4X.UI.Handlers
                 {
                     StarSystem CurrentSystem = Pop.Planet.Position.System;
 
-                    if (m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes.ContainsKey(CurrentSystem.Name) == false)
-                    {
-                        m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes.Add(CurrentSystem.Name, CurrentSystem.Name);
-                    }
-
-
                     /// <summary>
                     /// What type of colony is this, and should it be placed into the tree view(no if CMC and CMC are hidden)
                     /// <summary>
                     String Class = "";
+
+                    /// <summary>
+                    /// What key will be put into the display tree?
+                    /// </summary>
+                    String Entry = "";
+
+                    /// <summary>
+                    /// Which node display should be used?
+                    /// </summary>
+                    int DisplayIndex = -1;
 
                     /// <summary>
                     /// Populated colony, can do basically anything
@@ -1688,14 +1765,10 @@ namespace Pulsar4X.UI.Handlers
 
                         Class = String.Format("{0}: {1:n2}m",Class, Pop.CivilianPopulation);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
 #warning DisplayIndex here is kludgy, do a find on the appropriate section? if so alter the adds to include a key string in addition to a text string
-                        int DisplayIndex = 0;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
+                        DisplayIndex = 0;
                     }
                     /// <summary>
                     /// Automining colony will only mine, but may have CMCs listening posts, terraforming gear and ruins
@@ -1705,13 +1778,9 @@ namespace Pulsar4X.UI.Handlers
                         int mines = (int)Math.Floor(Pop.Installations[(int)Installation.InstallationType.AutomatedMine].Number);
                         Class = String.Format(": {0}x Auto Mines", mines);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 1;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
+                        DisplayIndex = 1;
                     }
                     /// <summary>
                     /// CMCs. don't print this one if they should be hidden(by user input request). will also have a DSTS(or should I roll that into the CMC?), and may have terraforming and ruins)
@@ -1721,13 +1790,9 @@ namespace Pulsar4X.UI.Handlers
                         int mines = (int)Math.Floor(Pop.Installations[(int)Installation.InstallationType.CivilianMiningComplex].Number);
                         Class = String.Format(": {0}x Civ Mines", mines);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 2;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
+                        DisplayIndex = 2;
 
                     }
                     /// <summary>
@@ -1738,15 +1803,11 @@ namespace Pulsar4X.UI.Handlers
                         int DSTS = (int)Math.Floor(Pop.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number);
                         Class = String.Format(": {0}x DSTS", DSTS);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 2;
+                        DisplayIndex = 2;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 3;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
 
                     /// <summary>
@@ -1756,15 +1817,11 @@ namespace Pulsar4X.UI.Handlers
                     {
                         Class = String.Format(" Archeological Dig");
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 3;
+                        DisplayIndex = 3;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 4;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
                     /// <summary>
                     /// Orbital Terraforming modules. a planet with ships in orbit that will terraform it.
@@ -1773,15 +1830,11 @@ namespace Pulsar4X.UI.Handlers
                     {
                         Class = String.Format(": {0:n1}x Orbital Terraform", Pop._OrbitalTerraformModules);
 
-                        String Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
+                        Entry = String.Format("{0} - {1}{2}", Pop.Name, Pop.Species.Name, Class);
 
-                        int DisplayIndex = 4;
+                        DisplayIndex = 4;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 5;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
                     else
                     {
@@ -1790,16 +1843,25 @@ namespace Pulsar4X.UI.Handlers
                         /// If none of the above are true, then the colony is simply dropped into the other colonies category.
                         /// </summary>
 
-                        String Entry = String.Format("{0} - {1}", Pop.Name, Pop.Species.Name);
+                        Entry = String.Format("{0} - {1}", Pop.Name, Pop.Species.Name);
 
-                        int DisplayIndex = 5;
+                        DisplayIndex = 5;
                         if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                             DisplayIndex = 6;
-                        int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
-                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
-
-                        TreeViewDictionary.Add(Entry, Pop);
                     }
+
+                    /// <summary>
+                    /// Every displayIndex node needs to have the current system in it added somewhere, so I'll do it here.
+                    /// </summary>
+                    if (m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.ContainsKey(CurrentSystem.Name) == false)
+                    {
+                        m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.Add(CurrentSystem.Name, CurrentSystem.Name);
+                    }
+
+                    int CurrentSystemIndex = m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes.IndexOfKey(CurrentSystem.Name);
+                    m_oSummaryPanel.PopulationTreeView.Nodes[DisplayIndex].Nodes[CurrentSystemIndex].Nodes.Add(Entry, Entry);
+
+                    TreeViewDictionary.Add(Entry, Pop);
                 }
             }
             else
@@ -2114,7 +2176,10 @@ namespace Pulsar4X.UI.Handlers
                     // need planetary hab rating vs species tolerance
                     double ColCost = CurrentPopulation.Species.GetTNHabRating(CurrentPopulation.Planet);
 
-                    m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[1].Value = ColCost.ToString();
+                    String CCCost = "Not Habitable";
+                    if(ColCost != -1.0)
+                       CCCost = String.Format("{0:N2}",ColCost);
+                    m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[1].Value = CCCost;
                     m_oSummaryPanel.SummaryDataGrid.Rows[3].Cells[1].Value = CurrentPopulation.AdminRating;
 
                     /// <summary>
@@ -2135,11 +2200,11 @@ namespace Pulsar4X.UI.Handlers
 
                     if (CurrentPopulation.CivilianPopulation != 0.0f)
                     {
-                        Entry = String.Format("   Agriculture and Enviromental ({0:N2}%)", CurrentPopulation.PopulationWorkingInAgriAndEnviro / CurrentPopulation.CivilianPopulation);
+                        Entry = String.Format("   Agriculture and Enviromental ({0:N2}%)", ((CurrentPopulation.PopulationWorkingInAgriAndEnviro / CurrentPopulation.CivilianPopulation) * 100.0f));
                         m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[0].Value = Entry;
-                        Entry = String.Format("   Service Industries ({0:N2}%)", CurrentPopulation.PopulationWorkingInServiceIndustries / CurrentPopulation.CivilianPopulation);
+                        Entry = String.Format("   Service Industries ({0:N2}%)", ((CurrentPopulation.PopulationWorkingInServiceIndustries / CurrentPopulation.CivilianPopulation) * 100.0f));
                         m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[0].Value = Entry;
-                        Entry = String.Format("   Manufacturing ({0:N2}%)", CurrentPopulation.PopulationWorkingInManufacturing / CurrentPopulation.CivilianPopulation);
+                        Entry = String.Format("   Manufacturing ({0:N2}%)", ((CurrentPopulation.PopulationWorkingInManufacturing / CurrentPopulation.CivilianPopulation) * 100.0f));
                         m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[0].Value = Entry;
                         m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[0].Value = "Annual Growth Rate";
 
@@ -2150,18 +2215,68 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0:N2}m", CurrentPopulation.PopulationWorkingInManufacturing);
                         m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[1].Value = Entry;
                         Entry = String.Format("{0:N2}%", CurrentPopulation.PopulationGrowthRate);
+
+                        if (ColCost != 0.0)
+                        {
+                            /// <summary>
+                            /// How much Infra does this colony need per 1M colonists?
+                            /// </summary>
+                            int InfrastructureRequirement = (int)Math.Floor(ColCost * 100.0f);
+
+                            /// <summary>
+                            /// How much infra is currently on the planet?
+                            /// </summary>
+                            int CurrentInfrastructure = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+                            /// <summary>
+                            /// How much does this planet need? if the planet does need some it should generate a little on its own.
+                            /// </summary>
+                            int TotalInfraRequirement = (int)Math.Floor(InfrastructureRequirement * CurrentPopulation.CivilianPopulation);
+
+                            if (TotalInfraRequirement > CurrentInfrastructure)
+                            {
+                                Entry = "Population Dieoff";
+                            }
+                        }
+
+
                         m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = Entry;
 
                         Adjust1 = 5;
                     }
+                    else
+                    {
+                        Entry = String.Format("0.0%");
+                        m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = Entry;
+                    }
                     /// <summary>
                     /// Infrastructure information.
                     /// </summary>
-                    m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = (ColCost * 200.0).ToString();
-                    m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number.ToString();
+                    m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[0].Value = "Infrastructure Required per Million Population";
+                    m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[0].Value = "Current Infrastructure";
+                    m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[0].Value = "Population supported by Infrastructure";
+                    if (ColCost != -1.0)
+                    {
+                        Entry = String.Format("{0:N2}", CurrentPopulation.GetInfrastructureRequirement());
+                        m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = Entry;
+                    }
+                    else
+                    {
+                        m_oSummaryPanel.SummaryDataGrid.Rows[8 + Adjust1].Cells[1].Value = "Underground Infra not implemented";
+                    }
+                    Entry = String.Format("{0:N2}", CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number);
+                    m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = Entry;
 
-                    if (ColCost != 0.0f)
-                        m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = (CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number / (ColCost * 200.0)).ToString();
+                    if (ColCost > 0.0f)
+                    {
+                        Entry = String.Format("{0:N2}", (CurrentPopulation.GetPopulationMaximum()));
+                        m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = Entry;
+                    }
+                    else if (ColCost == -1.0f)
+                    {
+#warning Underground infrastructure should be handled here if implemented. as well as further up.
+                        m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = "Not Habitable";
+                    }
                     else
                         m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = "No Maximum";
 
@@ -2466,7 +2581,7 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0:N2}m", workers);
                         m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[1].Value = Entry;
 
-                        m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Ordnance Factories";
+                        m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Fuel Refineries";
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[3].Value = Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.FuelRefinery].Number).ToString();
 
                         Adjust1++;
@@ -2609,7 +2724,9 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[1].Value = null; //CurrentPopulation.SystemBody.PlanetaryTectonics;
                     if (CurrentPopulation.Planet.GeoSurveyList.ContainsKey(CurrentFaction) == true)
                     {
-                        Entry = "Completed";
+#warning this needs to be reworked for the addition of geo teams. right now it is checking whether a survey ship has surveyed from orbit, not the team surveying.
+                        //Entry = "Completed";
+                        Entry = "No";
                     }
                     else
                     {
@@ -3224,6 +3341,42 @@ namespace Pulsar4X.UI.Handlers
                                 BuildTabMaxRows++;
                             }
                         }
+                    }
+
+                    foreach (SurveySensorDefTN Survey in CurrentFaction.ComponentList.SurveySensorDef)
+                    {
+                        if (Survey.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Survey);
+                                BuildLocationDisplayDict.Add(Survey.Id, Survey.Name);
+                                BuildLocationDict.Add(Survey.Id, Temp);
+
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Survey.Name;
+                                row++;
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Survey);
+                                BuildLocationDisplayDict.Add(Survey.Id, Survey.Name);
+                                BuildLocationDict.Add(Survey.Id, Temp);
+
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Survey.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                        
                     }
 
                     foreach (ActiveSensorDefTN Active in CurrentFaction.ComponentList.ActiveSensorDef)
@@ -4325,11 +4478,16 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// 4 is YTD. reserves / mining
                     /// </summary>
-                    int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator])));
-                    if (YTD > YearsToDepletion)
-                        YearsToDepletion = YTD;
-                    if (YTD != 0)
-                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = String.Format("{0}", YTD);
+                    if (m_oCurrnetPopulation.CalcTotalMining() != 0.0f && m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator] != 0.0f)
+                    {
+                        int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator])));
+                        if (YTD > YearsToDepletion)
+                            YearsToDepletion = YTD;
+                        if (YTD != 0)
+                            m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = String.Format("{0}", YTD);
+                        else
+                            m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = "-";
+                    }
                     else
                         m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = "-";
 
@@ -4392,6 +4550,31 @@ namespace Pulsar4X.UI.Handlers
             {
                 SystemBody CurrentPlanet = CurrentPopulation.Planet;
                 Atmosphere CurrentAtmosphere = CurrentPlanet.Atmosphere;
+
+                m_oSummaryPanel.TerraformingAddGasCheckBox.Checked = CurrentPopulation._GasAddSubtract;
+                m_oSummaryPanel.TerraformingMaxGasTextBox.Text = CurrentPopulation._GasAmt.ToString();
+
+                if (m_oSummaryPanel.TerraformingGasComboBox.Items.Count != 0)
+                {
+                    m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = 0;
+
+                    int count = 1;
+                    bool gasSet = false;
+                    foreach (WeightedValue<AtmosphericGas> Gas in AtmosphericGas.AtmosphericGases)
+                    {
+                        if (CurrentPopulation._GasToAdd == Gas.Value)
+                        {
+                            gasSet = true;
+                            break;
+                        }
+
+                        count++;
+                    }
+
+                    if (gasSet == true)
+                        m_oSummaryPanel.TerraformingGasComboBox.SelectedIndex = count;
+                }
+
                 m_oSummaryPanel.TerraformingAtmosphereListBox.Items.Clear();
                 float TotalGas = CurrentAtmosphere.Pressure;
                 String Entry = "N/A";

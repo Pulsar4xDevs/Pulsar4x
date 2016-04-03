@@ -450,6 +450,9 @@ namespace Pulsar4X.UI.Handlers
                             case ComponentTypeTN.JumpEngine:
                                 List.JumpEngineDef[CIndex].isObsolete = true;
                                 break;
+                            case ComponentTypeTN.SurveySensor:
+                                List.SurveySensorDef[CIndex].isObsolete = true;
+                                break;
                         }
                         #endregion
 
@@ -537,6 +540,9 @@ namespace Pulsar4X.UI.Handlers
                                 break;
                             case ComponentTypeTN.JumpEngine:
                                 List.JumpEngineDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.SurveySensor:
+                                List.SurveySensorDef[CIndex].isObsolete = false;
                                 break;
                         }
                         #endregion
@@ -1214,8 +1220,7 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// Builds the design tab. Really wishing I'd done these as a dictionary originally.
-        /// Not implemented: ECCM, ECM,Cloak, Jump Engines, Maintenance Storage Bays,Hangar,Boat Bay,Troop Bay,Drop Pod,Orbital Hab,Rec Facilities,
-        /// Geo Sensors,Grav Sensors, 
+        /// Not implemented: ECCM, ECM,Cloak, Jump Engines, Maintenance Storage Bays,Hangar,Boat Bay,Troop Bay,Drop Pod,Orbital Hab,Rec Facilities.
         /// </summary>
         private void BuildDesignTab()
         {
@@ -1352,7 +1357,7 @@ namespace Pulsar4X.UI.Handlers
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                 }
 
-                if (CurrentShipClass.ShipASensorDef.Count != 0 || CurrentShipClass.ShipPSensorDef.Count != 0)
+                if (CurrentShipClass.ShipASensorDef.Count != 0 || CurrentShipClass.ShipPSensorDef.Count != 0 || CurrentShipClass.ShipSurveyDef.Count != 0)
                 {
                     Entry = "Sensors:";
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
@@ -1366,6 +1371,12 @@ namespace Pulsar4X.UI.Handlers
                     for (int loop = 0; loop < CurrentShipClass.ShipPSensorDef.Count; loop++)
                     {
                         Entry = String.Format("{0}x {1}", CurrentShipClass.ShipPSensorCount[loop], CurrentShipClass.ShipPSensorDef[loop].Name);
+                        m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    }
+
+                    for (int loop = 0; loop < CurrentShipClass.ShipSurveyDef.Count; loop++)
+                    {
+                        Entry = String.Format("{0}x {1}", CurrentShipClass.ShipSurveyCount[loop], CurrentShipClass.ShipSurveyDef[loop].Name);
                         m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                     }
 
@@ -1642,7 +1653,7 @@ namespace Pulsar4X.UI.Handlers
                 CurrentLine++;
             }
 
-            if (CurrentShipClass.ShipASensorDef.Count != 0 || CurrentShipClass.ShipPSensorDef.Count != 0)
+            if (CurrentShipClass.ShipASensorDef.Count != 0 || CurrentShipClass.ShipPSensorDef.Count != 0 || CurrentShipClass.ShipSurveyDef.Count != 0)
             {
                 if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
                 {
@@ -1667,6 +1678,17 @@ namespace Pulsar4X.UI.Handlers
                     {
                         CType = (int)CurrentShipClass.ShipPSensorDef[loop].componentType;
                         CIndex = CurrentShipClass.ShipPSensorDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipSurveyDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipSurveyDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipSurveyDef[loop].Id;
                         return;
                     }
                     CurrentLine++;
@@ -2220,7 +2242,7 @@ namespace Pulsar4X.UI.Handlers
                     }
                     #endregion
 
-                    #region Passive Sensors (Geo/Grav not yet implemented)
+                    #region Passive Sensors
                     using (DataGridViewRow NewRow = new DataGridViewRow())
                     {
                         /// <summary>
@@ -2244,6 +2266,12 @@ namespace Pulsar4X.UI.Handlers
                     for (int ComponentIterator = 0; ComponentIterator < List.PassiveSensorDef.Count; ComponentIterator++)
                     {
                         PopulateComponentRow(List.PassiveSensorDef[ComponentIterator], row, "Sensor Strength", List.PassiveSensorDef[ComponentIterator].rating.ToString(), ComponentIterator);
+                        row++;
+                    }
+
+                    for (int ComponentIterator = 0; ComponentIterator < List.SurveySensorDef.Count; ComponentIterator++)
+                    {
+                        PopulateComponentRow(List.SurveySensorDef[ComponentIterator], row, "Survey Points", ((int)Math.Floor(List.SurveySensorDef[ComponentIterator].sensorStrength)).ToString(), ComponentIterator);
                         row++;
                     }
                     #endregion
@@ -2994,7 +3022,7 @@ namespace Pulsar4X.UI.Handlers
 
                     #region Passives
                     /// <summary>
-                    /// An engine was added to the component list.
+                    /// A passive sensor was added to the component list.
                     /// </summary>
                     if (CompLocation[(int)ComponentGroup.Shields] != (List.PassiveSensorDef.Count + CompLocation[(int)ComponentGroup.Passives] + 1))
                     {
@@ -3026,6 +3054,41 @@ namespace Pulsar4X.UI.Handlers
                         for (int ComponentIterator = PassiveCount; ComponentIterator <= (List.PassiveSensorDef.Count - 1); ComponentIterator++)
                         {
                             PopulateComponentRow(List.PassiveSensorDef[ComponentIterator], rowLine, "Sensor Strength", List.PassiveSensorDef[ComponentIterator].rating.ToString(), ComponentIterator, true);
+                            rowLine++;
+                        }
+
+                        /// <summary>
+                        /// Survey Sensor Section
+                        /// </summary>
+                        int PSEnd = rowLine;
+                        int SSCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type "SurveySensor". I am not exactly sure which index it is.
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.SurveySensor).ToString())
+                        {
+                            rowLine++;
+                        }
+
+                        SSCount = rowLine - PSEnd;
+
+                        AddedRows = List.SurveySensorDef.Count - SSCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Shields; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int ComponentIterator = SSCount; ComponentIterator <= (List.SurveySensorDef.Count - 1); ComponentIterator++)
+                        {
+                            PopulateComponentRow(List.SurveySensorDef[ComponentIterator], rowLine, "Survey Points", List.SurveySensorDef[ComponentIterator].sensorStrength.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3697,6 +3760,26 @@ namespace Pulsar4X.UI.Handlers
                     else
                         CurrentShipClass.AddJumpEngine(List.JumpEngineDef[CIndex], (short)CompAmt);
                     break;
+                case ComponentTypeTN.SurveySensor:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipSurveyDef.IndexOf(List.SurveySensorDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipSurveyCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipSurveyCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddSurveySensor(List.SurveySensorDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddSurveySensor(List.SurveySensorDef[CIndex], (short)CompAmt);
+                    break;
             }
             #endregion
 
@@ -3925,6 +4008,16 @@ namespace Pulsar4X.UI.Handlers
                     for (int loop = 0; loop < List.JumpEngineDef.Count; loop++)
                     {
                         if (List.JumpEngineDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.SurveySensor:
+                    for (int loop = 0; loop < List.SurveySensorDef.Count; loop++)
+                    {
+                        if (List.SurveySensorDef[loop].Id == CID)
                         {
                             AddComponent(CT, loop, CAmt);
                             break;

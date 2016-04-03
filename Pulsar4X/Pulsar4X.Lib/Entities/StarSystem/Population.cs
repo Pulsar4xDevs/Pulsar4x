@@ -81,7 +81,7 @@ namespace Pulsar4X.Entities
         /// <param name="BuildNum">Number to build</param>
         /// <param name="BuildPercent">Percent of industry to devote to production.</param>
         /// <param name="Production">Is this item paused?</param>
-        public void UpdateBuildQueueInfo(float BuildNum, float BuildPercent, bool Production, decimal Cost)
+        public void UpdateBuildQueueInfo(float BuildNum, float BuildPercent, bool Production, decimal Cost, float TotalIndustry)
         {
             m_NumToBuild = BuildNum;
             m_BuildCapcity = BuildPercent;
@@ -89,7 +89,11 @@ namespace Pulsar4X.Entities
 
             float BPRequirement = (float)Math.Floor(m_NumToBuild) * (float)Cost;
             float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-            float YearsOfProduction = (BPRequirement / m_BuildCapcity);
+
+
+            float YearlyDevotedIndustry = (m_BuildCapcity / 100.0f) * TotalIndustry;
+            float YearsOfProduction = (BPRequirement / YearlyDevotedIndustry);
+
             int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
 
             /// <summary>
@@ -331,17 +335,24 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Which factions have detected a thermal sig from this population?
         /// </summary>
-        public BindingList<int> ThermalDetection { get; set; }
+        private BindingList<int> ThermalDetection { get; set; }
 
         /// <summary>
         /// Which factions have detected an EM signature?
         /// </summary>
-        public BindingList<int> EMDetection { get; set; }
+        private BindingList<int> EMDetection { get; set; }
 
         /// <summary>
         /// Any active sensor in range detects a planet.
         /// </summary>
-        public BindingList<int> ActiveDetection { get; set; }
+        private BindingList<int> ActiveDetection { get; set; }
+
+        /// <summary>
+        /// change to how tick works means that year must also be recorded.
+        /// </summary>
+        private BindingList<int> ThermalYearDetection { get; set; }
+        private BindingList<int> EMYearDetection { get; set; }
+        private BindingList<int> ActiveYearDetection { get; set; }
 
         /// <summary>
         /// Populations with structures tend to emit a thermal signature. 5 per installation I believe.
@@ -550,7 +561,7 @@ namespace Pulsar4X.Entities
                 m_aoInstallations[i] = new Installation((Installation.InstallationType)i);
             }
 
-            CivilianPopulation = 0;
+            CivilianPopulation = 0.0f;
             PopulationGrowthRate = 0.1f;
             FuelStockpile = 0;
             MaintenanceSupplies = 0;
@@ -577,7 +588,13 @@ namespace Pulsar4X.Entities
 
             SSEntity = StarSystemEntityType.Population;
 
+            /// <summary>
+            /// Not particularly happy with adding these right here, any events will run off and process in the middle of population creation. In particular, SSEntity must be defined before doing this for
+            /// the display.
+            /// </summary>
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
+            a_oFaction.Populations.Add(this);
+
             Planet.Position.System.Populations.Add(this);
             Contact = new SystemContact(Faction, this);
             Contact.Position.System = Planet.Position.System;
@@ -623,12 +640,18 @@ namespace Pulsar4X.Entities
             ThermalDetection = new BindingList<int>();
             EMDetection = new BindingList<int>();
             ActiveDetection = new BindingList<int>();
+            ThermalYearDetection = new BindingList<int>();
+            EMYearDetection = new BindingList<int>();
+            ActiveYearDetection = new BindingList<int>();
 
             for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
             {
                 ThermalDetection.Add(CurrentTimeSlice);
                 EMDetection.Add(CurrentTimeSlice);
                 ActiveDetection.Add(CurrentTimeSlice);
+                ThermalYearDetection.Add(GameState.Instance.CurrentYear);
+                EMYearDetection.Add(GameState.Instance.CurrentYear);
+                ActiveYearDetection.Add(GameState.Instance.CurrentYear);
             }
 
             ShipsTargetting = new BindingList<ShipTN>();
@@ -651,31 +674,52 @@ namespace Pulsar4X.Entities
             if (faction == this.Faction)
             {
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadCrewFromColony);
+
                 if (this.FuelStockpile > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromColony);
+
                 if (this.MaintenanceSupplies > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);
+
+#warning check size class here
                 if (Array.Exists(this.Installations, x => x.Type == Installation.InstallationType.MaintenanceFacility))
                     legalOrders.Add(Constants.ShipTN.OrderType.BeginOverhaul);
+
                 if (this.Installations.Count() > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadInstallation);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadInstallation);
+
                 if (this.ComponentStockpile.Count() > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadShipComponent);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadAllMinerals);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadShipComponent);
+
+                for (int minIterator = 0; minIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; minIterator++)
+                {
+                    if (Minerials[minIterator] > 0.0f)
+                    {
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadAllMinerals);
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
+                        break;
+                    }
+                }
+                
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);
+
                 if (this.CivilianPopulation > 0)
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadColonists);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadColonists);
+
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadFuelToPlanet);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet);
-                if (Array.Exists(this.Installations, x => x.Type == Installation.InstallationType.OrdnanceFactory) || this.MissileStockpile.Count > 0)
-                    legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
+
+                if (this.MissileStockpile.Count > 0)                   
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);
+
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAll);
             }
             return legalOrders;
         }
@@ -758,7 +802,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ComponentDef">Component to be added. This is the class all components inherit from, not any particular type of component.</param>
         /// <param name="increment">Number to add to the stockpile.</param>
-        public void AddComponentsToStockpile(ComponentDefTN ComponentDef, float increment)
+        /// <param name="numToBuild">Total production run(if applicable)</param>
+        public void AddComponentsToStockpile(ComponentDefTN ComponentDef, float increment, float numToBuild = -10.0f)
         {
             if (ComponentStockpileLookup.ContainsKey(ComponentDef.Id) == true)
             {
@@ -770,6 +815,17 @@ namespace Pulsar4X.Entities
                 ComponentStockpileCount.Add(increment);
                 ComponentStockpileLookup.Add(ComponentDef.Id, ComponentStockpile.IndexOf(ComponentDef));
             }
+
+            if (numToBuild != -10.0f && numToBuild <= 0.0f)
+            {
+                /// <summary>
+                /// round the installation number if this is the last build, and we are within a thousandth of a point of another component.
+                /// </summary>
+                if (Math.Ceiling(ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]]) - ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]] < 0.001f)
+                {
+                    ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]] = (float)Math.Ceiling(ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]]);
+                }
+            }
         }
 
         /// <summary>
@@ -777,7 +833,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Inst">Installation to be built</param>
         /// <param name="increment">Amount of said installation to be built</param>
-        public void AddInstallation(Installation Inst, float increment)
+        /// <param name="numToBuild">Total production order from the player, used to check for rounding issues.</param>
+        public void AddInstallation(Installation Inst, float increment, float numToBuild)
         {
             int Index = (int)Inst.Type;
             switch (Inst.Type)
@@ -819,7 +876,6 @@ namespace Pulsar4X.Entities
                         Number++;
                         
                         Installations[Index].SYInfo.Add(SYI);
-
                         Adjustment = Adjustment - 1.0f;
                     }
                     break;
@@ -837,7 +893,6 @@ namespace Pulsar4X.Entities
                         Number++;
 
                         Installations[Index].SYInfo.Add(SYI);
-
                         Adjustment = Adjustment - 1.0f;
                     }
                     break;
@@ -849,6 +904,17 @@ namespace Pulsar4X.Entities
                     break;
             }
             Installations[Index].Number = Installations[Index].Number + increment;
+
+            if (numToBuild <= 0.0f)
+            {
+                /// <summary>
+                /// round the installation number if this is the last build, and we are within a thousandth of a point of another installation.
+                /// </summary>
+                if (Math.Ceiling(Installations[Index].Number) - Installations[Index].Number < 0.001f)
+                {
+                    Installations[Index].Number = (float)Math.Ceiling(Installations[Index].Number);
+                }
+            }
         }
 
         /// <summary>
@@ -858,7 +924,14 @@ namespace Pulsar4X.Entities
         /// <param name="massToLoad">Total mass of the installation of type iType to take from the planet.</param>
         public void LoadInstallation(Installation.InstallationType iType, int massToLoad)
         {
-            Installations[(int)iType].Number =Installations[(int)iType].Number - (float)(massToLoad / Faction.InstallationTypes[(int)iType].Mass);
+            Installations[(int)iType].Number = Installations[(int)iType].Number - (float)((float)massToLoad / Faction.InstallationTypes[(int)iType].Mass);
+
+            /// <summary>
+            /// floating points!
+            /// </summary>
+            if (Installations[(int)iType].Number < 0.00001f)
+                Installations[(int)iType].Number = 0.0f;
+
             switch (iType)
             {
                 case Installation.InstallationType.DeepSpaceTrackingStation:
@@ -877,7 +950,7 @@ namespace Pulsar4X.Entities
         /// <param name="massToUnload">Total mass of said installation to unload. this can result in fractional changes to installation[].number</param>
         public void UnloadInstallation(Installation.InstallationType iType, int massToUnload)
         {
-            Installations[(int)iType].Number = Installations[(int)iType].Number + (float)(massToUnload / Faction.InstallationTypes[(int)iType].Mass);
+            Installations[(int)iType].Number = Installations[(int)iType].Number + (float)((float)massToUnload / Faction.InstallationTypes[(int)iType].Mass);
             switch(iType)
             {
                 case Installation.InstallationType.DeepSpaceTrackingStation:
@@ -890,12 +963,45 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Handle any issues with loading minerals
+        /// </summary>
+        /// <param name="mType">Mineral type</param>
+        /// <param name="massToLoad">tonnage to load</param>
+#warning Check reserves for mineral loading
+        public void LoadMineral(Constants.Minerals.MinerialNames mType, int massToLoad)
+        {
+            Minerials[(int)mType] = Minerials[(int)mType] - (float)massToLoad;
+        }
+
+        /// <summary>
+        /// Handle any issues with unloading minerals here
+        /// </summary>
+        /// <param name="mType"></param>
+        /// <param name="massToUnload"></param>
+        public void UnloadMineral(Constants.Minerals.MinerialNames mType, int massToUnload)
+        {
+            Minerials[(int)mType] = Minerials[(int)mType] + (float)massToUnload;
+        }
+
+        /// <summary>
         /// Constructs maintenance supply parts at this population.
         /// </summary>
         /// <param name="increment">number to build.</param>
-        public void AddMSP(float increment)
+        /// <param name="numToBuild">Number of total MSP the player ordered, used to check for rounding issues when completing a production run.</param>
+        public void AddMSP(float increment,float numToBuild)
         {
             MaintenanceSupplies = MaintenanceSupplies + increment;
+
+            if (numToBuild <= 0.0f)
+            {
+                /// <summary>
+                /// round the installation number if this is the last build, and we are within a thousandth of a point of another installation.
+                /// </summary>
+                if (Math.Ceiling(MaintenanceSupplies) - MaintenanceSupplies < 0.001f)
+                {
+                    MaintenanceSupplies = (float)Math.Ceiling(MaintenanceSupplies);
+                }
+            }
         }
 
         /// <summary>
@@ -982,6 +1088,31 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// How much infrastructure does this species require for every million inhabitants on this world?
+        /// </summary>
+        /// <returns></returns>
+        public float GetInfrastructureRequirement()
+        {
+            return (float)Math.Round(Species.GetTNHabRating(Planet) * 100.0f);
+        }
+
+        /// <summary>
+        /// If infrastructure is required for habitation, calculated the required value here.
+        /// </summary>
+        /// <returns>a positive number or zero if infrastructure is present, or -1.0f if no maximum, and -2.0f if the planet is not habitable.</returns>
+        public float GetPopulationMaximum()
+        {
+            if (Species.GetTNHabRating(Planet) > 0.0f)
+            {
+                return (Installations[(int)Installation.InstallationType.Infrastructure].Number / GetInfrastructureRequirement());
+            }
+            else if (Species.GetTNHabRating(Planet) == -1.0f)
+                return -2.0f;
+            else
+                return -1.0f;
+        }
+
         #region Sensor Characteristcs
         /// <summary>
         /// Calculate the thermal signature of this colony
@@ -1058,6 +1189,91 @@ namespace Pulsar4X.Entities
             EMSignature = signature;
             return signature;
         }
+
+        /// <summary>
+        /// Is this planet detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedThermal(int FactionID, int tick, int year)
+        {
+            if (ThermalDetection[FactionID] == tick && ThermalYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this planet detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedEM(int FactionID, int tick, int year)
+        {
+            if (EMDetection[FactionID] == tick && EMYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this planet detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedActive(int FactionID, int tick, int year)
+        {
+            if (ActiveDetection[FactionID] == tick && ActiveYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Set this planet as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetThermalDetection(int FactionID, int tick, int year)
+        {
+            ThermalDetection[FactionID] = tick;
+            ThermalYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this planet as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetEMDetection(int FactionID, int tick, int year)
+        {
+            EMDetection[FactionID] = tick;
+            EMYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this planet as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetActiveDetection(int FactionID, int tick, int year)
+        {
+            ActiveDetection[FactionID] = tick;
+            ActiveYearDetection[FactionID] = year;
+        }
+
         #endregion
 
         #region Build Queue
@@ -1070,7 +1286,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddInstallation(Installation Install, float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(Install);
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,Install.Cost);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,Install.Cost,CalcTotalIndustry());
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -1084,7 +1300,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddComponent(ComponentDefTN ComponentDef, float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(ComponentDef);
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,ComponentDef.cost);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,ComponentDef.cost,CalcTotalIndustry());
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -1097,7 +1313,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddMSP(float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem();
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, Constants.Colony.MaintenanceSupplyCost);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, Constants.Colony.MaintenanceSupplyCost,CalcTotalIndustry());
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -1111,7 +1327,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddMissile(OrdnanceDefTN MissileDef, float BuildAmt, float RequestedBuildPercentage)
         {
             MissileBuildQueueItem NewMBQItem = new MissileBuildQueueItem(MissileDef);
-            NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, MissileDef.cost);
+            NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, MissileDef.cost,CalcTotalOrdnanceIndustry());
 
             MissileBuildQueue.Add(NewMBQItem);
         }
@@ -1126,6 +1342,7 @@ namespace Pulsar4X.Entities
 #warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled. also efficiencies. also for OF and FF, mining and refining.
 #warning implement radiation in addition to governor/sector bonuses. industrial penalty is Rad / 100(45 = -0.45%)
             float BP = (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number) * 10.0f + (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
 
@@ -1136,6 +1353,7 @@ namespace Pulsar4X.Entities
         public float CalcTotalOrdnanceIndustry()
         {
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.OrdnanceFactory].Number) * 10.0f);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
 
@@ -1146,6 +1364,7 @@ namespace Pulsar4X.Entities
         public float CalcTotalFighterIndustry()
         {
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FighterFactory].Number) * 10.0f);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
 
@@ -1157,6 +1376,7 @@ namespace Pulsar4X.Entities
         {
             float MP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.Mine].Number) * 10.0f) + (float)(Math.Floor(Installations[(int)Installation.InstallationType.AutomatedMine].Number) * 10.0f)
                               + (float)(Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number));
+            MP = MP * ModifierManfacturing;
 
             return MP;
         }
@@ -1169,6 +1389,7 @@ namespace Pulsar4X.Entities
         {
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FuelRefinery].Number) * Constants.Colony.SoriumToFuel * 10.0f) +
                        (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number * Constants.Colony.SoriumToFuel);
+            BP = BP * ModifierManfacturing;
             return BP;
         }
         
@@ -1180,6 +1401,7 @@ namespace Pulsar4X.Entities
         {
             int modules = (int)Math.Floor(_OrbitalTerraformModules);
             float TP = (float)((int)Math.Floor(Installations[(int)Installation.InstallationType.TerraformingInstallation].Number) + modules) * Constants.Colony.TerraformRate[0];
+            TP = TP * ModifierManfacturing;
 
             return TP;
         }
@@ -1229,7 +1451,10 @@ namespace Pulsar4X.Entities
         public bool CIRequirement(float CIReq)
         {
             bool ret = false;
-            if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number >= CIReq)
+            /// <summary>
+            /// Occasionally rounding will steal the last CI, so this is an attempt to fix that by adding 0.005f to this calculation.
+            /// </summary>
+            if ((Installations[(int)Installation.InstallationType.ConventionalIndustry].Number + 0.005f) >= CIReq)
             {
                 ret = true;
             }
@@ -1244,7 +1469,7 @@ namespace Pulsar4X.Entities
         public bool MineRequirement(float MineReq)
         {
             bool ret = false;
-            if (Installations[(int)Installation.InstallationType.Mine].Number >= MineReq)
+            if (Installations[(int)Installation.InstallationType.Mine].Number + 0.005f >= MineReq)
             {
                 ret = true;
             }
@@ -1310,6 +1535,12 @@ namespace Pulsar4X.Entities
             if (CIConvReq == true)
             {
                 Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = Installations[(int)Installation.InstallationType.ConventionalIndustry].Number - Completion;
+
+                /// <summary>
+                /// Account for the 0.005 fudge factor introduced above.
+                /// </summary>
+                if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number < 0.0f)
+                    Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = 0.0f;
             }
 
             /// <summary>
@@ -1318,6 +1549,12 @@ namespace Pulsar4X.Entities
             if (MineConvReq == true)
             {
                 Installations[(int)Installation.InstallationType.Mine].Number = Installations[(int)Installation.InstallationType.Mine].Number - Completion;
+
+                /// <summary>
+                /// Account for the 0.005 fudge factor introduced above.
+                /// </summary>
+                if (Installations[(int)Installation.InstallationType.Mine].Number < 0.0f)
+                    Installations[(int)Installation.InstallationType.Mine].Number = 0.0f;
             }
         }
 
@@ -1353,6 +1590,153 @@ namespace Pulsar4X.Entities
         public void AddPopulation(float Growth)
         {
             CivilianPopulation = CivilianPopulation + Growth;
+
+            float TotalWorkerReq = 0.0f;
+            int iShipyards = (int)(Installations[(int)Installation.InstallationType.CommercialShipyard].Number + Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+
+#warning Magic numbers here for worker calculations same as in economics.cs
+            float ShipyardWorkers = 1000000.0f * iShipyards;
+
+            int iSlipways = 0;
+            for (int CSYIterator = 0; CSYIterator < (int)Installations[(int)Installation.InstallationType.CommercialShipyard].Number; CSYIterator++)
+            {
+                int slips = Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[CSYIterator].Slipways;
+                int tons = Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[CSYIterator].Tonnage;
+
+                /// <summary>
+                /// Manpower requirement = 1,000,000 + num_slipways * capacity_per_slipway_in_tons * 100 / DIVISOR.  DIVISOR is 1 for military yards and 10 for commercial yards.  Thus, the flat 1,000,000 manpower required is not reduced for commercial yards, only the capacity-based component.
+                /// </summary>
+                ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 10);
+            }
+
+            for (int NSYIterator = 0; NSYIterator < (int)Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number; NSYIterator++)
+            {
+                int slips = Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[NSYIterator].Slipways;
+                int tons = Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[NSYIterator].Tonnage;
+                /// <summary>
+                /// Manpower requirement = 1,000,000 + num_slipways * capacity_per_slipway_in_tons * 100 / DIVISOR.  DIVISOR is 1 for military yards and 10 for commercial yards.  Thus, the flat 1,000,000 manpower required is not reduced for commercial yards, only the capacity-based component.
+                /// </summary>
+                ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 1);
+            }
+
+            /// <summary>
+            /// Shipyards
+            /// </summary>
+            if (iShipyards != 0)
+            {
+                TotalWorkerReq = TotalWorkerReq + (ShipyardWorkers / 1000000.0f);
+            }
+
+            /// <summary>
+            /// Maintenance Facility Workers. This is separate from Maintenance factories above as shipyards needed to be calculated first for offset adjustment.
+            /// </summary
+            if (Installations[(int)Installation.InstallationType.MaintenanceFacility].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.MaintenanceFacility].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Construction Factories
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.ConstructionFactory].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number);
+                /// <summary>
+                /// Conventional Industry worker adjustment.
+                /// </summary>
+                if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number >= 1.0f)
+                {
+                    workers = workers + (0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number));
+                }
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Conventional Industry
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number >= 1.0f)
+            {
+                if (Installations[(int)Installation.InstallationType.ConstructionFactory].Number < 1.0f)
+                {
+                    float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
+                    TotalWorkerReq = TotalWorkerReq + workers;
+                }
+            }
+
+
+            /// <summary>
+            /// Ordnance Factories
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.OrdnanceFactory].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.OrdnanceFactory].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Fighter Factories
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.FighterFactory].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.FighterFactory].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Refineries
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.FuelRefinery].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.FuelRefinery].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+
+
+            }
+
+            /// <summary>
+            /// Financial Centre Workers
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.FinancialCentre].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.FinancialCentre].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// mines
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.Mine].Number >= 1.0f)
+            {
+                float workers = 0.05f * (float)Math.Floor(Installations[(int)Installation.InstallationType.Mine].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Terraformers
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.TerraformingInstallation].Number >= 1.0f)
+            {
+                float workers = 0.25f * (float)Math.Floor(Installations[(int)Installation.InstallationType.TerraformingInstallation].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+            /// <summary>
+            /// Research labs
+            /// </summary>
+            if (Installations[(int)Installation.InstallationType.ResearchLab].Number >= 1.0f)
+            {
+                float workers = 1.0f * (float)Math.Floor(Installations[(int)Installation.InstallationType.ResearchLab].Number);
+                TotalWorkerReq = TotalWorkerReq + workers;
+            }
+
+
+            if (TotalWorkerReq > PopulationWorkingInManufacturing)
+            {
+                ModifierManfacturing = PopulationWorkingInManufacturing / TotalWorkerReq;
+            }
+            else
+                ModifierManfacturing = 1.0f;
         }
         #endregion
 
@@ -1477,5 +1861,6 @@ namespace Pulsar4X.Entities
             return false;
         }
         #endregion
+
     }
 }

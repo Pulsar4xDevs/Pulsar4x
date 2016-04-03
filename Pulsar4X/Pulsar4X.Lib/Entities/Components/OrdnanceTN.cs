@@ -867,9 +867,16 @@ namespace Pulsar4X.Entities.Components
         /// What this all means is that on any given tick it is possible to quickly determine whether or not a ship has been detected by a faction.
         /// I am thinking that ticks will be counted in 5 second intervals, there should not be any issue with this for my code.
         /// </summary>
-        public BindingList<int> ThermalDetection { get; set; }
-        public BindingList<int> EMDetection { get; set; }
-        public BindingList<int> ActiveDetection { get; set; }
+        private BindingList<int> ThermalDetection { get; set; }
+        private BindingList<int> EMDetection { get; set; }
+        private BindingList<int> ActiveDetection { get; set; }
+
+        /// <summary>
+        /// change to how tick works means that year must also be recorded.
+        /// </summary>
+        private BindingList<int> ThermalYearDetection { get; set; }
+        private BindingList<int> EMYearDetection { get; set; }
+        private BindingList<int> ActiveYearDetection { get; set; }
 
 
         /// <summary>
@@ -901,6 +908,27 @@ namespace Pulsar4X.Entities.Components
 
             Separated = false;
             OnOwnSensors = false;
+
+            /// <summary>
+            /// Missile Detection Statistics:
+            /// This is the first missile so created, so it is in spot 0.
+            /// </summary>
+            ThermalDetection = new BindingList<int>();
+            EMDetection = new BindingList<int>();
+            ActiveDetection = new BindingList<int>();
+            ThermalYearDetection = new BindingList<int>();
+            EMYearDetection = new BindingList<int>();
+            ActiveYearDetection = new BindingList<int>();
+
+            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
+            {
+                ThermalDetection.Add(GameState.Instance.CurrentSecond);
+                EMDetection.Add(GameState.Instance.CurrentSecond);
+                ActiveDetection.Add(GameState.Instance.CurrentSecond);
+                ThermalYearDetection.Add(GameState.Instance.CurrentYear);
+                EMYearDetection.Add(GameState.Instance.CurrentYear);
+                ActiveYearDetection.Add(GameState.Instance.CurrentYear);
+            }
         }
 
         /// <summary>
@@ -1070,6 +1098,92 @@ namespace Pulsar4X.Entities.Components
 
             return OnOwnSensors;
         }
+
+        #region Sensor detection getting and setting
+        /// <summary>
+        /// Is this missile detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedThermal(int FactionID, int tick, int year)
+        {
+            if (ThermalDetection[FactionID] == tick && ThermalYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this missile detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedEM(int FactionID, int tick, int year)
+        {
+            if (EMDetection[FactionID] == tick && EMYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this missile detected this tick?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedActive(int FactionID, int tick, int year)
+        {
+            if (ActiveDetection[FactionID] == tick && ActiveYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Set this missile as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetThermalDetection(int FactionID, int tick, int year)
+        {
+            ThermalDetection[FactionID] = tick;
+            ThermalYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this missile as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetEMDetection(int FactionID, int tick, int year)
+        {
+            EMDetection[FactionID] = tick;
+            EMYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this missile as detected
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetActiveDetection(int FactionID, int tick, int year)
+        {
+            ActiveDetection[FactionID] = tick;
+            ActiveYearDetection[FactionID] = year;
+        }
+        #endregion
     }
 
     public class OrdnanceGroupTN : StarSystemEntity
@@ -1238,21 +1352,6 @@ namespace Pulsar4X.Entities.Components
 
             Missiles = new BindingList<OrdnanceTN>();
 
-            /// <summary>
-            /// Missile Detection Statistics:
-            /// This is the first missile so created, so it is in spot 0.
-            /// </summary>
-            Missile.ThermalDetection = new BindingList<int>();
-            Missile.EMDetection = new BindingList<int>();
-            Missile.ActiveDetection = new BindingList<int>();
-
-            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
-            {
-                Missile.ThermalDetection.Add(GameState.Instance.CurrentSecond);
-                Missile.EMDetection.Add(GameState.Instance.CurrentSecond);
-                Missile.ActiveDetection.Add(GameState.Instance.CurrentSecond);
-            }
-
             OrdnanceGroupFaction = LaunchedFrom.TaskGroupFaction;
 
             Contact.Position.System = LaunchedFrom.Contact.Position.System;
@@ -1281,24 +1380,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="Missile">Missile to add, think of this as the ShipTN to OrdnanceGroupTN's TaskGroupTN</param>
         public void AddMissile(OrdnanceTN Missile)
         {
-            /// <summary>
-            /// Missile Detection Statistics:
-            /// This is the first missile so created, so it is in spot 0.
-            /// </summary>
-            Missile.ThermalDetection = new BindingList<int>();
-            Missile.EMDetection = new BindingList<int>();
-            Missile.ActiveDetection = new BindingList<int>();
-
-            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
-            {
-                Missile.ThermalDetection.Add(GameState.Instance.CurrentSecond);
-                Missile.EMDetection.Add(GameState.Instance.CurrentSecond);
-                Missile.ActiveDetection.Add(GameState.Instance.CurrentSecond);
-            }
-
             Missiles.Add(Missile);
             Missile.missileGroup = this;
-
         }
 
         /// <summary>

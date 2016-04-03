@@ -64,6 +64,14 @@ namespace Pulsar4X.Entities
         public uint activeTick { get; set; }
 
         /// <summary>
+        /// year detection event took place. tick above refers to second now.
+        /// </summary>
+        public uint thermalYear { get; set; }
+        public uint EMYear { get; set; }
+        public uint activeYear { get; set; }
+
+
+        /// <summary>
         /// Initializer for detected ship event. FactionContact is the detector side of what is detected, while ShipTN itself stores the detectee side. 
         /// multiple of these can exist, but only 1 per faction hopefully.
         /// </summary>
@@ -72,7 +80,7 @@ namespace Pulsar4X.Entities
         /// <param name="em">Detection via EM?</param>
         /// <param name="Active">Active detection?</param>
         /// <param name="tick">What tick did this detection event occur on?</param>
-        public FactionContact(Faction CurrentFaction, ShipTN DetectedShip, bool Thermal, bool em, int EMSig, bool Active, uint tick)
+        public FactionContact(Faction CurrentFaction, ShipTN DetectedShip, bool Thermal, bool em, int EMSig, bool Active, uint tick, uint year)
         {
             ship = DetectedShip;
             missileGroup = null;
@@ -87,18 +95,21 @@ namespace Pulsar4X.Entities
             if (thermal == true)
             {
                 thermalTick = tick;
+                thermalYear = year;
                 Contact = String.Format("{0} Thermal Signature {1}", Contact, DetectedShip.CurrentThermalSignature);
             }
 
             if (EM == true)
             {
                 EMTick = tick;
+                EMYear = year;
                 Contact = String.Format("{0} EM Signature {1}", Contact, EMSignature);
             }
 
             if (active == true)
             {
                 activeTick = tick;
+                activeYear = year;
                 Contact = String.Format("{0} TCS {1}", Contact, DetectedShip.TotalCrossSection);
             }
 
@@ -126,7 +137,7 @@ namespace Pulsar4X.Entities
         /// <param name="em">Detection via EM?</param>
         /// <param name="Active">Active detection?</param>
         /// <param name="tick">What tick did this detection event occur on?</param>
-        public FactionContact(Faction CurrentFaction, OrdnanceGroupTN DetectedMissileGroup, bool Thermal, bool em, bool Active, uint tick)
+        public FactionContact(Faction CurrentFaction, OrdnanceGroupTN DetectedMissileGroup, bool Thermal, bool em, bool Active, uint tick, uint year)
         {
             missileGroup = DetectedMissileGroup;
             ship = null;
@@ -142,12 +153,14 @@ namespace Pulsar4X.Entities
             if (thermal == true)
             {
                 thermalTick = tick;
+                thermalYear = year;
                 Contact = String.Format("{0} Thermal Signature {1} x{2}", Contact, (int)Math.Ceiling(DetectedMissileGroup.missiles[0].missileDef.totalThermalSignature), DetectedMissileGroup.missiles.Count);
             }
 
             if (EM == true)
             {
                 EMTick = tick;
+                EMYear = year;
                 if (DetectedMissileGroup.missiles[0].missileDef.aSD != null)
                 {
                     EMSignature =  DetectedMissileGroup.missiles[0].missileDef.aSD.gps;
@@ -167,6 +180,7 @@ namespace Pulsar4X.Entities
             if (active == true)
             {
                 activeTick = tick;
+                activeYear = year;
                 Contact = String.Format("{0} TCS {1} x{2}", Contact, (int)Math.Ceiling(DetectedMissileGroup.missiles[0].missileDef.size), DetectedMissileGroup.missiles.Count);
             }
 
@@ -193,7 +207,7 @@ namespace Pulsar4X.Entities
         /// <param name="em">Was it detected via em?</param>
         /// <param name="Active">was this population detected via actives?</param>
         /// <param name="tick">Tick this happened on.</param>
-        public FactionContact(Faction CurrentFaction, Population DetectedPopulation, bool Thermal, bool em, bool Active, uint tick)
+        public FactionContact(Faction CurrentFaction, Population DetectedPopulation, bool Thermal, bool em, bool Active, uint tick, uint year)
         {
             pop = DetectedPopulation;
             ship = null;
@@ -208,18 +222,21 @@ namespace Pulsar4X.Entities
             if (thermal == true)
             {
                 thermalTick = tick;
+                thermalYear = year;
                 Contact = String.Format("{0} Thermal Signature {1}", Contact, pop.ThermalSignature);
             }
 
             if (EM == true)
             {
                 EMTick = tick;
+                EMYear = year;
                 Contact = String.Format("{0} EM Signature {1}", Contact, EMSignature);
             }
 
             if (active == true)
             {
                 activeTick = tick;
+                activeYear = year;
                 Contact = String.Format("{0} Active Ping", Contact);
             }
 
@@ -244,7 +261,7 @@ namespace Pulsar4X.Entities
         /// <param name="Em">Detected on EM?</param>
         /// <param name="Active">Detected by actives?</param>
         /// <param name="tick">Current tick.</param>
-        public void updateFactionContact(Faction CurrentFaction, bool Thermal, bool Em, int EMSig, bool Active, uint tick)
+        public void updateFactionContact(Faction CurrentFaction, bool Thermal, bool Em, int EMSig, bool Active, uint tick, uint year)
         {
             if (thermal == Thermal && EM == Em && active == Active)
             {
@@ -270,6 +287,7 @@ namespace Pulsar4X.Entities
                     /// New thermal detection event, message logic should be here.
                     /// </summary>
                     thermalTick = tick;
+                    thermalYear = year;
 
                     if (ship != null)
                         Contact = String.Format("{0} Thermal Signature {1}", Contact, ship.CurrentThermalSignature);
@@ -297,6 +315,7 @@ namespace Pulsar4X.Entities
                     /// New EM detection event, message logic should be here.
                     /// </summary>
                     EMTick = tick;
+                    EMYear = year;
 
                     EMSignature = EMSig;
 
@@ -338,8 +357,7 @@ namespace Pulsar4X.Entities
                     /// New active detection event, message logic should be here.
                     /// </summary>
                     activeTick = tick;
-
-
+                    activeYear = year;
 
                     if (ship != null)
                         Contact = String.Format("{0} TCS {1}", Contact, ship.TotalCrossSection);
@@ -440,17 +458,24 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Last time this contact index was spotted via thermals.
         /// </summary>
-        public BindingList<int> Thermal { get; set; }
+        private BindingList<int> Thermal { get; set; }
 
         /// <summary>
         /// Last time this contact index was spotted via EM.
         /// </summary>
-        public BindingList<int> EM { get; set; }
+        private BindingList<int> EM { get; set; }
 
         /// <summary>
         /// Last time this contact index was spotted via Active.
         /// </summary>
-        public BindingList<int> Active { get; set; }
+        private BindingList<int> Active { get; set; }
+
+        /// <summary>
+        /// Year value for when this contact index was spotted. change to time value away from ticks and towards actual time necessitates this change.
+        /// </summary>
+        private BindingList<int> ThermalYear { get; set; }
+        private BindingList<int> EMYear { get; set; }
+        private BindingList<int> ActiveYear { get; set; }
 
         /// <summary>
         /// Creates a faction contact list for the specified system.
@@ -465,24 +490,40 @@ namespace Pulsar4X.Entities
             EM = new BindingList<int>();
             Active = new BindingList<int>();
 
+            ThermalYear = new BindingList<int>();
+            EMYear = new BindingList<int>();
+            ActiveYear = new BindingList<int>();
+
             Thermal.RaiseListChangedEvents = false;
             EM.RaiseListChangedEvents = false;
             Active.RaiseListChangedEvents = false;
-
+            ThermalYear.RaiseListChangedEvents = false;
+            EMYear.RaiseListChangedEvents = false;
+            ActiveYear.RaiseListChangedEvents = false;
             for (int loop = 0; loop < system.SystemContactList.Count; loop++)
             {
                 Thermal.Add(0);
+                ThermalYear.Add(0);
                 EM.Add(0);
+                EMYear.Add(0);
                 Active.Add(0);
+                ActiveYear.Add(0);
             }
 
             Thermal.RaiseListChangedEvents = true;
             EM.RaiseListChangedEvents = true;
             Active.RaiseListChangedEvents = true;
+            ThermalYear.RaiseListChangedEvents = true;
+            EMYear.RaiseListChangedEvents = true;
+            ActiveYear.RaiseListChangedEvents = true;
 
             Thermal.ResetBindings();
             EM.ResetBindings();
             Active.ResetBindings();
+
+            ThermalYear.ResetBindings();
+            EMYear.ResetBindings();
+            ActiveYear.ResetBindings();
         }
 
         /// <summary>
@@ -491,8 +532,12 @@ namespace Pulsar4X.Entities
         public void AddContact()
         {
             Thermal.Add(0);
+            ThermalYear.Add(0);
             EM.Add(0);
+            EMYear.Add(0);
             Active.Add(0);
+            ActiveYear.Add(0);
+
         }
 
         /// <summary>
@@ -502,8 +547,120 @@ namespace Pulsar4X.Entities
         public void RemoveContact(int RemIndex)
         {
             Thermal.RemoveAt(RemIndex);
+            ThermalYear.RemoveAt(RemIndex);
             EM.RemoveAt(RemIndex);
+            EMYear.RemoveAt(RemIndex);
             Active.RemoveAt(RemIndex);
+            ActiveYear.RemoveAt(RemIndex);
+        }
+
+        /// <summary>
+        /// Check all detection characteristics to see if this contact is detected this tick
+        /// </summary>
+        /// <param name="Index">place of this contact</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>True if any detection characteristic does not match, meaning this contact has not yet been fully detected this tick. false if this contact has been fully detected, and subsequent detections should not be run.</returns>
+        public bool CheckIfNotDetected(int Index, int tick, int year)
+        {
+            if ((Thermal[Index] != tick || ThermalYear[Index] != year) || (EM[Index] != tick || EMYear[Index] != year) || (Active[Index] != tick || ActiveYear[Index] != year))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Was this contact detected via thermal this tick?
+        /// </summary>
+        /// <param name="Index"></param>
+        /// <param name="tick"></param>
+        /// <param name="year"></param>
+        /// <returns></returns>
+        public bool CheckThermal(int Index, int tick, int year)
+        {
+            if (Thermal[Index] == tick && ThermalYear[Index] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Was this contact detected via EM this tick?
+        /// </summary>
+        /// <param name="Index"></param>
+        /// <param name="tick"></param>
+        /// <param name="year"></param>
+        /// <returns></returns>
+        public bool CheckEM(int Index, int tick, int year)
+        {
+            if (EM[Index] == tick && EMYear[Index] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Was this contact detected via active search sensors this tick?
+        /// </summary>
+        /// <param name="Index"></param>
+        /// <param name="tick"></param>
+        /// <param name="year"></param>
+        /// <returns></returns>
+        public bool CheckActive(int Index, int tick, int year)
+        {
+            if (Active[Index] == tick && ActiveYear[Index] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Set this contact as detected via thermal
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetThermalDetection(int Index, int tick, int year)
+        {
+            Thermal[Index] = tick;
+            ThermalYear[Index] = year;
+        }
+
+        /// <summary>
+        /// Set this contact as detected via EM
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetEMDetection(int Index, int tick, int year)
+        {
+            EM[Index] = tick;
+            EMYear[Index] = year;
+        }
+
+        /// <summary>
+        /// Set this contact as detected via active
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetActiveDetection(int Index, int tick, int year)
+        {
+            Active[Index] = tick;
+            ActiveYear[Index] = year;
+        }
+
+        /// <summary>
+        /// How many contacts are there?
+        /// </summary>
+        /// <returns>count of thermal contacts, all should be the same.</returns>
+        public int GetDetectionCount()
+        {
+            return Thermal.Count;
         }
     }
 

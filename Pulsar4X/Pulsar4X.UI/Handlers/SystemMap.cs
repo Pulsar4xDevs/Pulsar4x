@@ -104,6 +104,11 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         public Pulsar4X.UI.Forms.MainForm MainFormReference { get; set; }
 
+        /// <summary>
+        /// When time is advanced things can move, so I need this to update the Economics display if it is currently in use.
+        /// </summary>
+        public Pulsar4X.UI.Handlers.Economics EconomicsReference { get; set; }
+
         #endregion
 
         public SystemMap()
@@ -245,6 +250,8 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.Instance.CurrentSecond.ToString() + " " + GameState.Instance.LastTimestep;
 
             MainFormReference.Text = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString();
+
+            EconomicsReference.RefreshDisplay();
 
             m_oCurrentSceen.Refresh();
         }
@@ -732,6 +739,13 @@ namespace Pulsar4X.UI.Handlers
             }
             else if (m_oGLCanvas.Loaded == false)
             {
+                return;
+            }
+            else if (m_oCurrnetSystem == null)
+            {
+                /// <summary>
+                /// Not even sure how I made it do this.
+                /// </summary>
                 return;
             }
 

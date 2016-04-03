@@ -76,6 +76,7 @@ namespace Pulsar4X.UI.Forms
             Helpers.UIController.Instance.SystemMap.MainFormReference = this;
             Helpers.UIController.Instance.Economics.MainFormReference = this;
             Helpers.UIController.Instance.Economics.SystemMapReference = Helpers.UIController.Instance.SystemMap;
+            Helpers.UIController.Instance.SystemMap.EconomicsReference = Helpers.UIController.Instance.Economics;
         }
 
         #region MenuAndToolStripEvents

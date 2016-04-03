@@ -205,6 +205,31 @@ namespace Pulsar4X.Entities
         public uint SensorUpdateAck { get; set; }
 
         /// <summary>
+        /// How many GP has this taskgroup accumulated thus far?
+        /// </summary>
+        public int _GeoSurveyPoints { get; set; }
+
+        /// <summary>
+        /// How many SP has this taskgroup accumulated from surveying gravitational survey points thus far?
+        /// </summary>
+        public int _GravSurveyPoints { get; set; }
+
+        /// <summary>
+        /// GP and SP are incremented by the hour, so how long has it been since the last hour?
+        /// </summary>
+        public float _SurveyHourFraction { get; set; }
+
+        /// <summary>
+        /// What default and conditional orders does this taskgroup have, if any.
+        /// </summary>
+        public ConditionalOrders _SpecialOrders { get; set; }
+
+        /// <summary>
+        /// Should this TG repeat completed orders(by placing them at the bottom of the orders list)?
+        /// </summary>
+        public bool CycleMoves { get; set; }
+
+        /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
         /// <param name="Title">Name</param>
@@ -247,6 +272,7 @@ namespace Pulsar4X.Entities
             TimeRequirement = 0;
 
             TaskGroupOrders = new BindingList<Order>();
+            _SpecialOrders = new ConditionalOrders();
 
             TotalOrderDistance = 0.0;
 
@@ -309,6 +335,12 @@ namespace Pulsar4X.Entities
 
             SensorUpdateAck = 0;
 
+            _GeoSurveyPoints = 0;
+            _GravSurveyPoints = 0;
+            _SurveyHourFraction = 0.0f;
+
+            CycleMoves = false;
+
             //add default legal order for targeting TGs.
             _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
             _legalOrders.Add(Constants.ShipTN.OrderType.Join);
@@ -331,6 +363,8 @@ namespace Pulsar4X.Entities
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
         {
+            bool anyUnload = false;
+
             List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
             legalOrders.AddRange(_legalOrders);
             ShipTN[] shipsArray = this.Ships.ToArray();
@@ -340,6 +374,28 @@ namespace Pulsar4X.Entities
                 legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromTargetFleet);
             if (Array.Exists(shipsArray, x => x.ShipClass.IsCollier))//if this fleet is targeted and has a IsCollier.
                 legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromTargetFleet);
+            if (Array.Exists(shipsArray, x => (x.CargoList.Count() > 0)))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadInstallation);
+                anyUnload = true;
+            }
+            if (Array.Exists(shipsArray, x => (x.CargoMineralList.Count() > 0)))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
+                anyUnload = true;
+            }
+            if (Array.Exists(shipsArray, x => (x.CargoComponentList.Count() > 0)))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadShipComponent);
+                anyUnload = true;
+            }
+
+            if (anyUnload == true)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAll);
+            }
+
             return legalOrders;
         }
 
@@ -449,13 +505,19 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// GeoSurvey specific orders:
             /// </summary>
-            //if (hasgeo)
-            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
+            if (CalcGeoSurveyPoints() != 0.0f)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
+            }
             /// <summary>
             /// Grav survey specific orders:
             /// </summary>
-            //if (hasGrav)
-            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
+            if (CalcGravSurveyPoints() != 0.0f)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.GravSurvey);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
+            }
 
 
             /// <summary>
@@ -580,6 +642,9 @@ namespace Pulsar4X.Entities
         public void AddShipTo(ShipTN Ship)
         {
             Ships.Add(Ship);
+
+            int NewIndexOfShip = Ships.IndexOf(Ship);
+            Ship.UpdateShipIndex(NewIndexOfShip);
 
             if(Ships.Count == 1)
             {
@@ -981,7 +1046,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Update the taskgroup lookup missile table if this sensor is better than the previous ones for any particular resolution.
                         /// </summary>
-                        for (int loop = 0; loop < 15; loop++)
+                        for (int loop = 0; loop < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); loop++)
                         {
                             if (ActiveSensorQue[(ActiveSensorQue.Count - 1)].aSensorDef.lookUpMT[loop] > ActiveSensorQue[TaskGroupLookUpMT[loop]].aSensorDef.lookUpMT[loop])
                             {
@@ -1075,7 +1140,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Missile Table reassignment.
                             /// </summary>
-                            for (int loop = 0; loop < 15; loop++)
+                            for (int loop = 0; loop < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); loop++)
                             {
                                 if (TaskGroupLookUpMT[loop] == inQue)
                                 {
@@ -1564,8 +1629,30 @@ namespace Pulsar4X.Entities
                         dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
                         break;
                 }
-
-                CurrentHeading = Pulsar4X.Helpers.GameMath.Angle.ToDegrees(Math.Atan(dY / dX));
+                /// <summary>
+                /// Do yourself a favor and don't divide by zero here. if X is exactly the same then we either want to go up or down, depending on the sign of dY. if dX and dY are both zero then currentHeading
+                /// doesn't matter and can be set to 0.0.
+                /// </summary>
+                if (dY == 0.0 && dX == 0.0)
+                {
+                    CurrentHeading = 0.0;
+                }
+                else if (dY == 0.0)
+                {
+                    if (dX > 0.0)
+                        CurrentHeading = 0.0;
+                    else if (dX < 0.0)
+                        CurrentHeading = 180.0;
+                }
+                else
+                {
+                    if (dX != 0.0)
+                        CurrentHeading = Pulsar4X.Helpers.GameMath.Angle.ToDegrees(Math.Atan(dY / dX));
+                    else if (dY > 0.0)
+                        CurrentHeading = 270.0;
+                    else if (dY < 0.0)
+                        CurrentHeading = 90.0;
+                }
             }
             else
                 CurrentHeading = 0.0;
@@ -1857,6 +1944,144 @@ namespace Pulsar4X.Entities
             }
             dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
             TotalOrderDistance = TotalOrderDistance + dZ;
+
+            /// <summary>
+            /// Check to see if a GeoSurvey Order or GravSurvey order was added. The survey body should be added to the survey in progress list for the current system.
+            /// </summary>
+            if (OrderToTaskGroup.typeOf == Constants.ShipTN.OrderType.GeoSurvey)
+            {
+                /// <summary>
+                /// A geoSurvey order without a OrderToTaskGroup.body is a problem further up the chain.
+                /// </summary>
+                if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                {
+                    if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(OrderToTaskGroup.body) == false)
+                    {
+                        /// <summary>
+                        /// if this is true then someone else is also geosurveying the world, but I don't care about that.
+                        /// </summary>
+                        Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Add(OrderToTaskGroup.body);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// JPDetection also stores geo survey results.
+                    /// </summary>
+                    JPDetection NewDetection = new JPDetection();
+                    Contact.Position.System._SurveyResults.Add(TaskGroupFaction, NewDetection);
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Add(OrderToTaskGroup.body);
+                }
+            }
+            else if (OrderToTaskGroup.typeOf == Constants.ShipTN.OrderType.GravSurvey)
+            {
+                /// <summary>
+                /// A gravSurvey order without a surveyPointOrder is a problem further up the chain.
+                /// </summary>
+                if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                {
+                    if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(OrderToTaskGroup.surveyPointOrder) == false)
+                    {
+                        /// <summary>
+                        /// if this is true then someone else is also geosurveying the world, but I don't care about that.
+                        /// </summary>
+                        Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Add(OrderToTaskGroup.surveyPointOrder);
+                    }
+                }
+                else
+                {
+                    JPDetection NewDetection = new JPDetection();
+                    Contact.Position.System._SurveyResults.Add(TaskGroupFaction, NewDetection);
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Add(OrderToTaskGroup.surveyPointOrder);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Order removal needs to check the survey results member for the current system to check to see if a survey is in progress because of this order. if so remove it.
+        /// </summary>
+        /// <param name="orderIndex"></param>
+        /// <param name="SkipCheck">Orders that successfully complete do not need to check Geo/grav survey and will be removed with this function.</param>
+        public void RemoveOrder(int orderIndex, bool SkipCheck = false)
+        {
+            if (SkipCheck == true)
+            {
+                if (TaskGroupOrders.Count > orderIndex)
+                {
+                    if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.GeoSurvey)
+                    {
+                        if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(TaskGroupOrders[orderIndex].body) == true)
+                        {
+                            Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Remove(TaskGroupOrders[orderIndex].body);
+                        }
+                    }
+                    if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.GravSurvey)
+                    {
+                        if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(TaskGroupOrders[orderIndex].surveyPointOrder) == true)
+                        {
+                            Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Remove(TaskGroupOrders[orderIndex].surveyPointOrder);
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// If we just jumped through an unknown gate, allow orders again, same with following.
+            /// </summary>
+            if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersUnknownJump)
+            {
+                if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.StandardTransit ||
+                    TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
+                    TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
+                {
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                }
+            }
+            else if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersFollowingTarget)
+            {
+                if (TaskGroupOrders[orderIndex].typeOf == Constants.ShipTN.OrderType.Follow)
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+            }
+
+            TaskGroupOrders.RemoveAt(orderIndex);
+        }
+
+        public void RemoveOrder(Order orderToRemove)
+        {
+            if (orderToRemove.typeOf == Constants.ShipTN.OrderType.GeoSurvey)
+            {
+                if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(orderToRemove.body) == true)
+                {
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Remove(orderToRemove.body);
+                }
+            }
+            if (orderToRemove.typeOf == Constants.ShipTN.OrderType.GravSurvey)
+            {
+                if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(orderToRemove.surveyPointOrder) == true)
+                {
+                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Remove(orderToRemove.surveyPointOrder);
+                }
+            }
+
+            /// <summary>
+            /// If we just jumped through an unknown gate, allow orders again, same with following.
+            /// </summary>
+            if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersUnknownJump)
+            {
+                if (orderToRemove.typeOf == Constants.ShipTN.OrderType.StandardTransit ||
+                    orderToRemove.typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
+                    orderToRemove.typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
+                {
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                }
+            }
+            else if (CanOrder == Constants.ShipTN.OrderState.DisallowOrdersFollowingTarget)
+            {
+                if (orderToRemove.typeOf == Constants.ShipTN.OrderType.Follow)
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+            }
+
+            TaskGroupOrders.Remove(orderToRemove);
         }
 
 
@@ -1980,7 +2205,22 @@ namespace Pulsar4X.Entities
                             }
                         }
                     }
-                    TaskGroupOrders.RemoveAt(0);
+
+                    /// <summary>
+                    /// This order was completed successfully, add it back in if CycleMoves is true. no special conditions need to be checked for, hence skipCheck = true.
+                    /// Don't repeat single orders by accident.
+                    /// </summary>
+                    if (CycleMoves == true && TaskGroupOrders.Count > 1)
+                    {
+                        Order TGOrder = TaskGroupOrders[0];
+                        RemoveOrder(0, true);
+                        TaskGroupOrders.Add(TGOrder);
+                    }
+                    else
+                    {
+                        RemoveOrder(0, true);
+                    }
+ 
 
                     if (TaskGroupOrders.Count > 0)
                     {
@@ -1989,11 +2229,28 @@ namespace Pulsar4X.Entities
                     }
                     else
                     {
-                        DrawTravelLine = 1;
-                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
-                    }
-                }
-            }
+                        /// <summary>
+                        /// Check conditional and default orders if any.
+                        /// </summary>
+                        ProcessDefaultOrders();
+                        ProcessConditionalOrders();
+
+                        /// <summary>
+                        /// Check again to see if no conditional orders got added to taskgroup orders.
+                        /// </summary>
+                        if (TaskGroupOrders.Count == 0)
+                        {
+                            DrawTravelLine = 1;
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
+                        else
+                        {
+                            NewOrders = true;
+                            FollowOrders(TimeSlice);
+                        }
+                    }//end else taskgrouporders.Count > 0. as a result check for conditional and default orders.
+                }//end if timeslice > 0, which means follow orders for the timeslice.
+            }//end if timeRequirement for orders < timeSlice, which means orders can be completed within the timeslice.
             else
             {
 
@@ -2123,7 +2380,15 @@ namespace Pulsar4X.Entities
                         {
                             TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                             TaskGroupOrders[0].orderTimeRequirement = 0;
-                            LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                            if(!LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary))
+                            {
+                                String Entry = String.Format("No installations could be loaded to cargoships in {1} at {0}, orders have been cleared.", TaskGroupOrders[0].pop, Name);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.FailureToLoad, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                                TaskGroupFaction.MessageLog.Add(NME);
+                                for (int orderIterator = 0; orderIterator < TaskGroupOrders.Count; orderIterator++)
+                                    RemoveOrder(0, false);
+                                CycleMoves = false;
+                            }
                             CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                         }
                         else
@@ -2152,7 +2417,15 @@ namespace Pulsar4X.Entities
                         {
                             TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                             TaskGroupOrders[0].orderTimeRequirement = 0;
-                            LoadComponents(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                            if (!LoadComponents(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary))
+                            {
+                                String Entry = String.Format("No components could be loaded to cargoships in {1} at {0}, orders have been cleared.", TaskGroupOrders[0].pop,Name);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.FailureToLoad, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                                TaskGroupFaction.MessageLog.Add(NME);
+                                for (int orderIterator = 0; orderIterator < TaskGroupOrders.Count; orderIterator++)
+                                    RemoveOrder(0, false);
+                                CycleMoves = false;
+                            }
                             CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                         }
                         else
@@ -2265,7 +2538,15 @@ namespace Pulsar4X.Entities
                         {
                             TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                             TaskGroupOrders[0].orderTimeRequirement = 0;
-                            LoadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].tertiary);
+                            if(!LoadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].tertiary))
+                            {
+                                String Entry = String.Format("No Colonists could be loaded to colonyships in {1} at {0}, orders have been cleared.", TaskGroupOrders[0].pop, Name);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.FailureToLoad, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                                TaskGroupFaction.MessageLog.Add(NME);
+                                for (int orderIterator = 0; orderIterator < TaskGroupOrders.Count; orderIterator++)
+                                    RemoveOrder(0, false);
+                                CycleMoves = false;
+                            }
                             CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                         }
                         else
@@ -2850,11 +3131,399 @@ namespace Pulsar4X.Entities
                         break;
                     #endregion
 
+                    #region GeoSurvey
+                        case (int)Constants.ShipTN.OrderType.GeoSurvey:
+                           SystemBody OB = OrbitingBody as SystemBody;
+                           int BodySurveyCost = OB.GetSurveyCost();
+
+                           /// <summary>
+                           /// This survey was finished on the dot last tick.
+                           /// </summary>
+                           if (OB._mineralsGenerated == true)
+                           {
+                               break;
+                           }
+
+                           float hourFract = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
+                           _SurveyHourFraction = _SurveyHourFraction + hourFract;
+                           int hours = (int)Math.Floor(_SurveyHourFraction);
+                           if (hours != 0)
+                           {
+                               _SurveyHourFraction = _SurveyHourFraction - hours;
+                           }
+
+                           int RemainderGP = BodySurveyCost - _GeoSurveyPoints;
+                           int TotalGP = (int)(CalcGeoSurveyPoints() * (float)hours);
+                           if (TotalGP < RemainderGP)
+                           {
+                               _GeoSurveyPoints = _GeoSurveyPoints + TotalGP;
+                               TimeSlice = 0;
+                           }
+                           else
+                           {
+                               /// <summary>
+                               /// Some time will be left over, return that fraction of time.
+                               /// </summary>
+                               int hoursToComplete = (int)Math.Ceiling((float)RemainderGP / CalcGeoSurveyPoints());
+                               TimeSlice = TimeSlice - ((uint)hoursToComplete * Constants.TimeInSeconds.Hour);
+                               _GeoSurveyPoints = BodySurveyCost;
+                           }
+                           
+                           
+                           if (_GeoSurveyPoints >= BodySurveyCost)
+                           {
+                               if (OB.GeoSurveyList.ContainsKey(TaskGroupFaction) == false)
+                               {
+                                   OB.GeoSurveyList.Add(TaskGroupFaction, true);
+                                   if (OB._mineralsGenerated == false)
+                                       OB.GenerateMinerals();
+                               }
+
+                               /// <summary>
+                               /// Clear the survey in progress list.
+                               /// </summary>
+                               if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                               {
+                                   if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(OB) == true)
+                                       Contact.Position.System._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Remove(OB);
+                               }
+
+                               //handle adding the faction to the survey list when complete 
+                               //generate minerals?
+                               _GeoSurveyPoints = 0;
+                               _SurveyHourFraction = 0.0f;
+                           }
+                           
+                        break;
+                    #endregion
+
+                    #region GravSurvey
+                        case (int)Constants.ShipTN.OrderType.GravSurvey:
+                        /// <summary>
+                        /// Figure out how to store survey results with a star. I think that Partial for each point, and then a full system wide 0% or 100% bool will work.
+                        /// get the cost to survey this system, see above geo survey costs.
+                        /// reveal detected jumppoints. how will this work? also jumppoint generation needs to be looked at.
+                        /// </summary>
+                        int SystemSurveyCost = Contact.Position.System.GetSurveyCost();
+                        StarSystem CurrentSystem = Contact.Position.System;
+
+                        /// <summary>
+                        /// This point was surveyed, but the survey ended right on the dot of the last tick.
+                        /// </summary>
+                        if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Contains(TaskGroupOrders[0].surveyPointOrder) == true)
+                        {
+                            break;
+                        }
+
+                        float hourFraction = (float)TimeSlice / (float)Constants.TimeInSeconds.Hour;
+                        _SurveyHourFraction = _SurveyHourFraction + hourFraction;
+
+                        int totalHours = (int)Math.Floor(_SurveyHourFraction);
+                        if (totalHours != 0)
+                        {
+                            _SurveyHourFraction = _SurveyHourFraction - totalHours;
+                        }
+
+                        int RemainderSP = SystemSurveyCost - _GravSurveyPoints;
+                        int TotalSP = (int)(CalcGravSurveyPoints() * (float)totalHours);
+
+                        if (TotalSP < RemainderSP)
+                        {
+                            _GravSurveyPoints = _GravSurveyPoints + TotalSP;
+                            TimeSlice = 0;
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// Some time will be left over, return that fraction of time.
+                            /// </summary>
+                            _GravSurveyPoints = SystemSurveyCost;
+                            int hoursToComplete = (int)Math.Ceiling((float)RemainderSP / CalcGravSurveyPoints());
+                            TimeSlice = TimeSlice - ((uint)hoursToComplete * Constants.TimeInSeconds.Hour);
+                        }
+
+                        if (_GravSurveyPoints >= SystemSurveyCost)
+                        {
+
+                            /// <summary>
+                            /// 1st mark the survey point as surveyed.
+                            /// </summary>
+                            if (CurrentSystem._SurveyResults.ContainsKey(TaskGroupFaction) == false)
+                            {
+                                JPDetection newJPDet = new JPDetection();
+                                newJPDet._SurveyedPoints.Add(TaskGroupOrders[0].surveyPointOrder);
+                                CurrentSystem._SurveyResults.Add(TaskGroupFaction,newJPDet);
+                                CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus = JPDetection.Status.Incomplete;
+                            }
+                            else
+                            {
+                                CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Add(TaskGroupOrders[0].surveyPointOrder);
+
+                                /// <summary>
+                                /// if 30 points have been surveyed mark the system as totally surveyed.
+                                /// </summary>
+                                if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Count == Constants.SensorTN.SurveyPointCount)
+                                {
+                                    /// <summary>
+                                    /// All survey work is complete, so free up these pointers.
+                                    /// </summary>
+                                    CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus = JPDetection.Status.Complete;
+                                    CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints = null;
+                                    CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs = null;
+                                }
+                            }
+                            int SPIndex = CurrentSystem._SurveyPoints.IndexOf(TaskGroupOrders[0].surveyPointOrder);
+
+                            /// <summary>
+                            /// These pointers will be null if status is complete. check for that. otherwise mark any jps at this index as found.
+                            /// </summary>
+                            if(CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus != JPDetection.Status.Complete)
+                            {
+                               foreach (JumpPoint JP in CurrentSystem.JumpPoints)
+                               {
+                                  int JPIndex = CurrentSystem.GetSurveyPointArea(JP.Position.X,JP.Position.Y);
+                                  if (JPIndex == (SPIndex+1))
+                                  {
+                                      CurrentSystem._SurveyResults[TaskGroupFaction]._DetectedJPs.Add(JP);
+
+                                      if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus == JPDetection.Status.None)
+                                          CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus = JPDetection.Status.Incomplete;
+                                  }
+                               }
+                            }
+
+                            /// <summary>
+                            /// Clear the survey in progress list.
+                            /// </summary>
+                            if (Contact.Position.System._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                            {
+                                if (Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(TaskGroupOrders[0].surveyPointOrder) == true)
+                                    Contact.Position.System._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Remove(TaskGroupOrders[0].surveyPointOrder);
+                            }
+
+                            _GravSurveyPoints = 0;
+                            _SurveyHourFraction = 0.0f;
+                        }
+
+                        break;
+                    #endregion
+
 
 
                 }
             }
             return TimeSlice;
+        }
+
+        /// <summary>
+        /// Any conditional or default orders must also be accomplished here. these will insert real orders based on the conditions involved into the TaskGroupOrders list.
+        /// </summary>
+        public void ProcessDefaultOrders()
+        {
+            bool noGeo = false;
+            bool noGrav = false;
+            foreach(Constants.ShipTN.DefaultOrders DO in _SpecialOrders._DefaultOrdersList)
+            {
+                if (DO == Constants.ShipTN.DefaultOrders.NoSpecialOrder)
+                    continue;
+
+                /// <summary>
+                /// Default orders need to be checked to see if they are possible, and if so then placed into the list of Taskgroup orders. there is no reason to interrupt
+                /// regular orders for a default order.
+                /// </summary>
+                switch (DO)
+                {
+                    #region Survey Nearest Body
+                    case Constants.ShipTN.DefaultOrders.SurveyNearestBody:
+                        float lowestDistance = -1.0f;
+                        SystemBody ClosestSB = null;
+                        StarSystem CurrentSystem = Contact.Position.System;
+
+                        /// <summary>
+                        /// Look through every point. If the point is not surveyed, not marked as going to be surveyed then it is available to be considered a survey target.
+                        /// Check to see if it is closer than any other point. This is the greedy method, and a more optimal search pattern can be done, especially for multiple ships.
+                        /// </summary>
+                        foreach (Star Stellar in CurrentSystem.Stars)
+                        {
+                            foreach (SystemBody SB in Stellar.Planets)
+                            {
+                                if (SB.GeoSurveyList.ContainsKey(TaskGroupFaction) == true)
+                                {
+                                    if (SB.GeoSurveyList[TaskGroupFaction] == true)
+                                    {
+                                        /// <summary>
+                                        /// This body is surveyed, move on to the next one.
+                                        /// </summary>
+                                        continue;
+                                    }
+                                }
+
+                                if (CurrentSystem._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                                {
+                                    if (CurrentSystem._SurveyResults[TaskGroupFaction]._GeoSurveyInProgress.Contains(SB) == false)
+                                    {
+                                        float dX = (float)Math.Abs(SB.Position.X - Contact.Position.X);
+                                        float dY = (float)Math.Abs(SB.Position.Y - Contact.Position.Y);
+                                        float distSq = (dX * dX) + (dY * dY);
+                                        if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                        {
+                                            lowestDistance = distSq;
+                                            ClosestSB = SB;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    float dX = (float)Math.Abs(SB.Position.X - Contact.Position.X);
+                                    float dY = (float)Math.Abs(SB.Position.Y - Contact.Position.Y);
+                                    float distSq = (dX * dX) + (dY * dY);
+                                    if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                    {
+                                        lowestDistance = distSq;
+                                        ClosestSB = SB;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (lowestDistance == -1.0f)
+                        {
+                            noGeo = true;
+                        }
+                        else
+                        {
+                            Order SBOrder = new Order(Constants.ShipTN.OrderType.GeoSurvey, -1, -1, 0, ClosestSB);
+                            IssueOrder(SBOrder);
+
+                            /// <summary>
+                            /// The order has been issued so cancel out of this function.
+                            /// </summary>
+                            return;
+                        }    
+                    break;
+                    #endregion
+
+                    #region Survey Nearest Survey Location
+                    case Constants.ShipTN.DefaultOrders.SurveyNearestSurveyLocation:
+                        lowestDistance = -1.0f;
+                        SurveyPoint ClosestSP = null;
+                        CurrentSystem = Contact.Position.System;
+
+                        /// <summary>
+                        /// Look through every point. If the point is not surveyed, not marked as going to be surveyed then it is available to be considered a survey target.
+                        /// Check to see if it is closer than any other point. This is the greedy method, and a more optimal search pattern can be done, especially for multiple ships.
+                        /// </summary>
+                        foreach (SurveyPoint SP in CurrentSystem._SurveyPoints)
+                        {
+                            if (CurrentSystem._SurveyResults.ContainsKey(TaskGroupFaction) == true)
+                            {
+                                if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyStatus == JPDetection.Status.Complete)
+                                    break;
+
+                                if (CurrentSystem._SurveyResults[TaskGroupFaction]._SurveyedPoints.Contains(SP) == false)
+                                {
+                                    if (CurrentSystem._SurveyResults[TaskGroupFaction]._GravSurveyInProgress.Contains(SP) == false)
+                                    {
+                                        float dX = (float)Math.Abs(SP.Position.X - Contact.Position.X);
+                                        float dY = (float)Math.Abs(SP.Position.Y - Contact.Position.Y);
+                                        float distSq = (dX * dX) + (dY * dY);
+                                        if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                        {
+                                            lowestDistance = distSq;
+                                            ClosestSP = SP;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                float dX = (float)Math.Abs(SP.Position.X - Contact.Position.X);
+                                float dY = (float)Math.Abs(SP.Position.Y - Contact.Position.Y);
+                                float distSq = (dX * dX) + (dY * dY);
+                                if (distSq < lowestDistance || lowestDistance == -1.0f)
+                                {
+                                    lowestDistance = distSq;
+                                    ClosestSP = SP;
+                                }
+                            }
+                        }
+
+                        if (lowestDistance == -1.0f)
+                        {
+                            noGrav = true;
+                        }
+                        else
+                        {
+                            Order SPOrder = new Order(Constants.ShipTN.OrderType.GravSurvey, -1, -1, 0, ClosestSP);
+                            IssueOrder(SPOrder);
+
+                            /// <summary>
+                            /// The order has been issued so cancel out of this function.
+                            /// </summary>
+                            return;
+                        }
+                    break;
+                    #endregion
+                }
+            }
+
+            /// <summary>
+            /// If 1 conditional order fails, but another succeeds don't print the warnings yet. this may get bloated.
+            /// </summary>
+            if (noGeo == true)
+            {
+                /// <summary>
+                /// No suitable target was found.
+                /// </summary>
+                String Entry = String.Format("No suitable geo survey target for {0} in {1}", Name, Contact.Position.System);
+                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGeoSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                TaskGroupFaction.MessageLog.Add(NME);
+            }
+            if (noGrav == true)
+            {
+                /// <summary>
+                /// No suitable target was found.
+                /// </summary>
+                String Entry = String.Format("No suitable grav survey target for {0} in {1}", Name, Contact.Position.System);
+                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.NoGravSurveyTarget, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
+                TaskGroupFaction.MessageLog.Add(NME);
+            }
+        }
+
+        /// <summary>
+        /// Add a default order to be processed by this TG when it has no other business.
+        /// </summary>
+        /// <param name="OrderToAdd">Default Order to add</param>
+        /// <param name="index">index order should be placed at</param>
+        public void AddDefaultOrder(Constants.ShipTN.DefaultOrders OrderToAdd, int index)
+        {
+            if (_SpecialOrders._DefaultOrdersList.Count <= index)
+            {
+                while (_SpecialOrders._DefaultOrdersList.Count != index)
+                    _SpecialOrders._DefaultOrdersList.Add(Constants.ShipTN.DefaultOrders.NoSpecialOrder);
+                _SpecialOrders._DefaultOrdersList.Add(OrderToAdd);
+            }
+            else
+                _SpecialOrders._DefaultOrdersList[index] = OrderToAdd;
+        }
+
+        /// <summary>
+        /// Same for this function.
+        /// </summary>
+        public void ProcessConditionalOrders()
+        {
+            foreach (Constants.ShipTN.Condition Cond in _SpecialOrders._ConditionList)
+            {
+                if (Cond == Constants.ShipTN.Condition.NoCondition)
+                    continue;
+
+                /// <summary>
+                /// First Cond needs to be checked to see if it has occurred or not. if that is the case, then the conditional order must also be processed, and a regular order
+                /// added to the list of TaskGroupOrders. Conditional order checking may be worthwhile to interrupt regular orders for, such as fuel constraints.
+                /// </summary>
+                int cIndex = _SpecialOrders._ConditionList.IndexOf(Cond);
+                Constants.ShipTN.ConditionalOrders CO = _SpecialOrders._ConditionalOrdersList[cIndex];
+            }
         }
 
         /// <summary>
@@ -2864,6 +3533,9 @@ namespace Pulsar4X.Entities
         {
             if (TaskGroupOrders.Count > 0)
             {
+                /// <summary>
+                /// Check whether we are in orbit.
+                /// </summary>
                 if ((TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     && (Contact.Position.X == TaskGroupOrders[0].target.Position.X && Contact.Position.Y == TaskGroupOrders[0].target.Position.Y))
                 {
@@ -2885,10 +3557,25 @@ namespace Pulsar4X.Entities
                         OrbitingPlanet.TaskGroupsInOrbit.Add(this);
                     }
                 }
+
+                /// <summary>
+                /// inform taskgroups that this taskgroup is no longer ordered to target them in some manner.
+                /// </summary>
+                foreach (Order TGO in TaskGroupOrders)
+                {
+                    if (TGO.target.SSEntity == StarSystemEntityType.TaskGroup)
+                    {
+                        if (TGO.taskGroup.TaskGroupsOrdered.Contains(this) == true)
+                        {
+                            TGO.taskGroup.TaskGroupsOrdered.Remove(this);
+                        }
+                    }
+                }
             }
             TaskGroupOrders.Clear();
             TimeRequirement = 0;
             TotalOrderDistance = 0;
+            CycleMoves = false;
         }
 
 
@@ -2948,18 +3635,21 @@ namespace Pulsar4X.Entities
         /// <param name="Pop">Population to load from.</param>
         /// <param name="InstType">installation type to load.</param>
         /// <param name="Limit">Limit in number of facilities to load.</param>
-        public void LoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
+        public bool LoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
         {
             int RemainingTaskGroupTonnage = TotalCargoTonnage - CurrentCargoTonnage;
             int TotalMass = TaskGroupFaction.InstallationTypes[(int)InstType].Mass * Limit;
             int AvailableMass = (int)(Pop.Installations[(int)InstType].Number * (float)TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
+
+            if (AvailableMass == 0)
+                return false;
 
             int MassToLoad = 0;
 
             /// <summary>
             /// In this case load as much as possible up to AvailableMass.
             /// </summary>
-            if (Limit == 0)
+            if (Limit == 0 || Limit == -1)
             {
                 MassToLoad = Math.Min(RemainingTaskGroupTonnage, AvailableMass);
 
@@ -2991,6 +3681,7 @@ namespace Pulsar4X.Entities
                 if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && RemainingShipTonnage != 0)
                 {
                     int ShipMassToLoad = Math.Min(MassToLoad, RemainingShipTonnage);
+                    
 
                     /// <summary>
                     /// Load the mass onto the taskgroup as a whole for display purposes.
@@ -3011,7 +3702,10 @@ namespace Pulsar4X.Entities
                     MassToLoad = MassToLoad - ShipMassToLoad;
                     Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
                 }
+                if (MassToLoad == 0)
+                    break;
             }
+            return true;
         }
 
         /// <summary>
@@ -3030,7 +3724,7 @@ namespace Pulsar4X.Entities
                     CargoListEntryTN CLE = Ships[loop].CargoList[InstType];
                     int ShipMassToUnload = 0;
 
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         ShipMassToUnload = CLE.tons;
                     }
@@ -3047,11 +3741,136 @@ namespace Pulsar4X.Entities
 
                     CLE.tons = CLE.tons - ShipMassToUnload;
                     CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
+                    Ships[loop].CurrentCargoTonnage = Ships[loop].CurrentCargoTonnage - ShipMassToUnload;
+
+                    /// <summary>
+                    /// Extra sanity check
+                    /// </summary>
+                    if (CLE.tons == 0 && Ships[loop].CargoList.ContainsKey(InstType) == true)
+                    {
+                        Ships[loop].CargoList.Remove(InstType);
+                    }
 
                     Pop.UnloadInstallation(InstType, ShipMassToUnload);
                 }
             }
+        }
 
+        /// <summary>
+        /// Load minerals onto ships in this taskgroup
+        /// </summary>
+        /// <param name="Pop"></param>
+        /// <param name="MinType"></param>
+        /// <param name="Limit"></param>
+        public bool LoadMineral(Population Pop, Constants.Minerals.MinerialNames MinType, int Limit)
+        {
+            int RemainingTaskGroupTonnage = TotalCargoTonnage - CurrentCargoTonnage;
+            int TotalMass = Limit;
+            int AvailableMass = (int)(Pop.Minerials[(int)MinType]);
+
+            if (AvailableMass == 0)
+                return false;
+
+            int MassToLoad = 0;
+
+            /// <summary>
+            /// In this case load as much as possible up to AvailableMass.
+            /// </summary>
+            if (Limit == 0 || Limit == -1)
+            {
+                MassToLoad = Math.Min(RemainingTaskGroupTonnage, AvailableMass);
+
+            }
+            /// <summary>
+            /// In this case only load up to Total mass.
+            /// </summary>
+            else
+            {
+                MassToLoad = Math.Min(RemainingTaskGroupTonnage, TotalMass);
+            }
+
+            /// <summary>
+            /// Mark the taskgroup total cargo tonnage
+            /// </summary>
+            CurrentCargoTonnage = CurrentCargoTonnage + MassToLoad;
+
+            /// <summary>
+            /// Decrement the installation count on the planet.
+            /// </summary>
+            Pop.LoadMineral(MinType, MassToLoad);
+
+            /// <summary>
+            /// Now start loading mass onto each ship.
+            /// </summary>
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                int RemainingShipTonnage = Ships[loop].ShipClass.TotalCargoCapacity - Ships[loop].CurrentCargoTonnage;
+                if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && RemainingShipTonnage != 0)
+                {
+                    int ShipMassToLoad = Math.Min(MassToLoad, RemainingShipTonnage);
+
+                    /// <summary>
+                    /// Load the mass onto the taskgroup as a whole for display purposes.
+                    /// The actual mass will go into the ship cargoholds.
+                    /// </summary>
+                    if (Ships[loop].CargoMineralList.ContainsKey(MinType))
+                    {
+                        CargoListEntryTN CLE = Ships[loop].CargoMineralList[MinType];
+                        CLE.tons = CLE.tons + ShipMassToLoad;
+
+                    }
+                    else
+                    {
+                        CargoListEntryTN CargoListEntry = new CargoListEntryTN(MinType, ShipMassToLoad);
+                        Ships[loop].CargoMineralList.Add(MinType, CargoListEntry);
+                    }
+
+                    MassToLoad = MassToLoad - ShipMassToLoad;
+                    Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
+                }
+                if (MassToLoad == 0)
+                    break;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Unload minerals to the population from the taskgroup.
+        /// </summary>
+        /// <param name="Pop">Pop to unload minerals to</param>
+        /// <param name="MinType">mineral to unload</param>
+        /// <param name="Limit">limit on how many to part with.</param>
+        public void UnloadMineral(Population Pop, Constants.Minerals.MinerialNames MinType, int Limit)
+        {
+            int TotalMass = Limit;
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && Ships[loop].CurrentCargoTonnage != 0 && Ships[loop].CargoMineralList.ContainsKey(MinType) == true)
+                {
+                    CargoListEntryTN CLE = Ships[loop].CargoMineralList[MinType];
+                    int ShipMassToUnload = 0;
+
+                    if (Limit == 0 || Limit == -1)
+                    {
+                        ShipMassToUnload = CLE.tons;
+                    }
+                    else
+                    {
+                        ShipMassToUnload = Math.Min(CLE.tons, TotalMass);
+                        TotalMass = TotalMass - ShipMassToUnload;
+                    }
+
+                    if (ShipMassToUnload == CLE.tons)
+                    {
+                        Ships[loop].CargoMineralList.Remove(MinType);
+                    }
+
+                    CLE.tons = CLE.tons - ShipMassToUnload;
+                    CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
+
+                    Pop.UnloadMineral(MinType, ShipMassToUnload);
+                }
+            }
         }
 
         /// <summary>
@@ -3059,8 +3878,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Pop">Population to load from.</param>
         /// <param name="Limit">Limit on colonists who can be put onto taskgroup.</param>
-        public void LoadColonists(Population Pop, int Limit)
+        public bool LoadColonists(Population Pop, int Limit)
         {
+            if (Pop.CivilianPopulation == 0.0f)
+                return false;
+
             for (int loop = 0; loop < Ships.Count; loop++)
             {
                 if (Ships[loop].ShipClass.SpareCryoBerths != 0)
@@ -3071,7 +3893,7 @@ namespace Pulsar4X.Entities
                     int RemainingShipCryo = Ships[loop].ShipClass.SpareCryoBerths - Ships[loop].CurrentCryoStorage;
                     int AvailablePopulation = (int)Math.Floor(Pop.CivilianPopulation * 1000000.0f);
 
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         Colonists = Math.Min(RemainingShipCryo, AvailablePopulation);
                     }
@@ -3095,6 +3917,8 @@ namespace Pulsar4X.Entities
                     Pop.CivilianPopulation = Pop.CivilianPopulation - ((float)Colonists / 1000000.0f);
                 }
             }
+
+            return true;
         }
 
         /// <summary>
@@ -3113,7 +3937,7 @@ namespace Pulsar4X.Entities
                 {
                     int Colonists;
 
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         Colonists = Ships[loop].CurrentCryoStorage;
                         CurrentCryoStorage = CurrentCryoStorage - Ships[loop].CurrentCryoStorage;
@@ -3137,18 +3961,24 @@ namespace Pulsar4X.Entities
         /// <param name="Pop">Population of the component pickup.</param>
         /// <param name="ComponentIndex">location in pop.ComponentStockpile.</param>
         /// <param name="Limit">Number of said components to pick up if not all of them.</param>
-        public void LoadComponents(Population Pop, int ComponentIndex, int Limit)
+        public bool LoadComponents(Population Pop, int ComponentIndex, int Limit)
         {
+            if (Pop.ComponentStockpile.Count <= ComponentIndex)
+                return false;
+
             int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
             int TotalMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * (float)Limit);
             int AvailableMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * Pop.ComponentStockpileCount[ComponentIndex]);
+
+            if (AvailableMass == 0)
+                return false;
 
             int MassToLoad = 0;
 
             /// <summary>
             /// In this case load as much as possible up to AvailableMass.
             /// </summary>
-            if (Limit == 0)
+            if (Limit == 0 || Limit == -1)
             {
                 MassToLoad = Math.Min(RemainingTonnage, AvailableMass);
 
@@ -3209,7 +4039,11 @@ namespace Pulsar4X.Entities
 
                     MassToLoad = MassToLoad - ShipMassToLoad;
                 }
+                if (MassToLoad == 0)
+                    break;
             }
+
+            return true;
         }
 
         /// <summary>
@@ -3232,7 +4066,7 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Limit == 0 means unload all, else unload to limit if limit is lower than total tonnage.
                     /// </summary>
-                    if (Limit == 0)
+                    if (Limit == 0 || Limit == -1)
                     {
                         ShipMassToUnload = CLE.tons;
                     }
@@ -3300,7 +4134,6 @@ namespace Pulsar4X.Entities
 
         #endregion
 
-
         #region Fire Control targetting
         /// <summary>
         /// Clear all targeting info for this taskgroup
@@ -3361,7 +4194,6 @@ namespace Pulsar4X.Entities
             return min;
         }
         #endregion
-
 
         #region Jump Transit taskgroup functions.
         /// <summary>
@@ -3491,6 +4323,37 @@ namespace Pulsar4X.Entities
             }
 
             return false;
+        }
+        #endregion
+
+        #region Survey Point Count
+        /// <summary>
+        /// How many Geo Survey points can this Taskgroup generate?
+        /// </summary>
+        /// <returns></returns>
+        public float CalcGeoSurveyPoints()
+        {
+            float TotalGeoSurveyPoints = 0.0f;
+            foreach (ShipTN Ship in Ships)
+            {
+                TotalGeoSurveyPoints = TotalGeoSurveyPoints + Ship.CurrentGeoSurveyStrength;
+            }
+
+            return TotalGeoSurveyPoints;
+        }
+        /// <summary>
+        /// How many Geo Survey points can this Taskgroup generate?
+        /// </summary>
+        /// <returns></returns>
+        public float CalcGravSurveyPoints()
+        {
+            float TotalGravSurveyPoints = 0.0f;
+            foreach (ShipTN Ship in Ships)
+            {
+                TotalGravSurveyPoints = TotalGravSurveyPoints + Ship.CurrentGravSurveyStrength;
+            }
+
+            return TotalGravSurveyPoints;
         }
         #endregion
 

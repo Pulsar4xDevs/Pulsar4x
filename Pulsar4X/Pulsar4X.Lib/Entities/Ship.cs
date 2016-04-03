@@ -213,6 +213,11 @@ namespace Pulsar4X.Entities
         public Dictionary<ComponentDefTN, CargoListEntryTN> CargoComponentList { get; set; }
 
         /// <summary>
+        /// List of any minerals this ship is holding.
+        /// </summary>
+        public Dictionary<Constants.Minerals.MinerialNames, CargoListEntryTN> CargoMineralList { get; set; }
+
+        /// <summary>
         /// Ships can also have several cryo storage bays and bay types.
         /// </summary>
         public BindingList<ColonyTN> ShipColony { get; set; }
@@ -294,6 +299,13 @@ namespace Pulsar4X.Entities
         public BindingList<int> ThermalDetection { get; set; }
         public BindingList<int> EMDetection { get; set; }
         public BindingList<int> ActiveDetection { get; set; }
+
+        /// <summary>
+        /// change to how tick works means that year must also be recorded.
+        /// </summary>
+        private BindingList<int> ThermalYearDetection { get; set; }
+        private BindingList<int> EMYearDetection { get; set; }
+        private BindingList<int> ActiveYearDetection { get; set; }
 
         /// <summary>
         /// Each ship will store its placement in the overall taskgroup.
@@ -424,18 +436,35 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int JumpSickness { get; set; }
 
+        #region Survey Sensor Info
+        /// <summary>
+        /// All of the survey sensors on this ship.
+        /// </summary>
+        public BindingList<SurveySensorTN> ShipSurvey { get; set; }
+
+        /// <summary>
+        /// What is the current ability of this ship to perform geosurveys?
+        /// </summary>
+        public float CurrentGeoSurveyStrength { get; set; }
+
+        /// <summary>
+        /// What is the current ability of this ship to perform gravsurveys?
+        /// </summary>
+        public float CurrentGravSurveyStrength { get; set; }
+        #endregion
+
         /// <summary>
         /// If this ship has been destroyed. this will need more sophisticated handling.
         /// </summary>
         public bool IsDestroyed { get; set; }
 
         /// <summary>
-        /// List of ships targeted on this vessel.
+        /// List of ships targeted on this vessel. On ship destruction this is needed for cleanup.
         /// </summary>
         public BindingList<ShipTN> ShipsTargetting { get; set; }
 
         /// <summary>
-        /// Taskgroups with orders to this ship.
+        /// Taskgroups with orders to this ship. On ship destruction this is needed for cleanup.
         /// </summary>
         public BindingList<TaskGroupTN> TaskGroupsOrdered { get; set; }
 
@@ -623,6 +652,7 @@ namespace Pulsar4X.Entities
             CurrentCargoTonnage = 0;
             CargoList = new Dictionary<Installation.InstallationType, CargoListEntryTN>();
             CargoComponentList = new Dictionary<ComponentDefTN, CargoListEntryTN>();
+            CargoMineralList = new Dictionary<Constants.Minerals.MinerialNames, CargoListEntryTN>();
 
             /// <summary>
             /// While only colonyships will have the major bays, just about any craft can have an emergency cryo bay.
@@ -722,11 +752,18 @@ namespace Pulsar4X.Entities
             EMDetection = new BindingList<int>();
             ActiveDetection = new BindingList<int>();
 
+            ThermalYearDetection = new BindingList<int>();
+            EMYearDetection = new BindingList<int>();
+            ActiveYearDetection = new BindingList<int>();
+
             for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
             {
                 ThermalDetection.Add(CurrentTimeSlice);
                 EMDetection.Add(CurrentTimeSlice);
                 ActiveDetection.Add(CurrentTimeSlice);
+                ThermalYearDetection.Add(GameState.Instance.CurrentYear);
+                EMYearDetection.Add(GameState.Instance.CurrentYear);
+                ActiveYearDetection.Add(GameState.Instance.CurrentYear);
             }
 
             ShipCommanded = false;
@@ -916,6 +953,26 @@ namespace Pulsar4X.Entities
                 }
             }
             JumpSickness = 0;
+
+            ShipSurvey = new BindingList<SurveySensorTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipSurveyDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipSurveyDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipSurveyCount[loop]; loop2++)
+                {
+                    SurveySensorTN Survey = new SurveySensorTN(ClassDefinition.ShipSurveyDef[loop]);
+                    Survey.componentIndex = ShipSurvey.Count;
+
+                    int SurveyIndex = loop2 + 1;
+                    Survey.Name = Survey.surveyDef.Name + " #" + SurveyIndex.ToString();
+
+                    ShipSurvey.Add(Survey);
+                    ShipComponents.Add(Survey);
+                }
+            }
+            CurrentGeoSurveyStrength = ShipClass.ShipGeoSurveyStrength;
+            CurrentGravSurveyStrength = ShipClass.ShipGravSurveyStrength;
 
             IsDestroyed = false;
 
@@ -2152,6 +2209,22 @@ namespace Pulsar4X.Entities
                     /// Nothing special needs to be done to ship in this case.
                     /// </summary>
                     break;
+
+                case ComponentTypeTN.SurveySensor:
+                    SurveySensorDefTN sDef = ShipSurvey[ShipComponents[ID].componentIndex].surveyDef;
+                    if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Geological)
+                    {
+                        CurrentGeoSurveyStrength = CurrentGeoSurveyStrength - sDef.sensorStrength;
+                        if (CurrentGeoSurveyStrength < 0)
+                            CurrentGeoSurveyStrength = 0;
+                    }
+                    else if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Gravitational)
+                    {
+                        CurrentGravSurveyStrength = CurrentGravSurveyStrength - sDef.sensorStrength;
+                        if (CurrentGravSurveyStrength < 0)
+                            CurrentGravSurveyStrength = 0;
+                    }
+                    break;
             }
             return DamageReturn;
         }
@@ -2354,6 +2427,18 @@ namespace Pulsar4X.Entities
 
                 case ComponentTypeTN.JumpEngine:
                     break;
+
+                case ComponentTypeTN.SurveySensor:
+                    SurveySensorDefTN sDef = ShipSurvey[ShipComponents[ComponentIndex].componentIndex].surveyDef;
+                    if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Geological)
+                    {
+                        CurrentGeoSurveyStrength = CurrentGeoSurveyStrength + sDef.sensorStrength;
+                    }
+                    else if (sDef.sensorType == SurveySensorDefTN.SurveySensorType.Gravitational)
+                    {
+                        CurrentGravSurveyStrength = CurrentGravSurveyStrength + sDef.sensorStrength;
+                    }
+                    break;
             }
         }
 
@@ -2448,6 +2533,9 @@ namespace Pulsar4X.Entities
 
                 case ComponentTypeTN.JumpEngine:
                     return ShipJumpEngine[ShipComponents[ID].componentIndex].jumpEngineDef.cost;
+
+                case ComponentTypeTN.SurveySensor:
+                    return ShipSurvey[ShipComponents[ID].componentIndex].surveyDef.cost;
             }
 
             return 0.0m;
@@ -3381,6 +3469,7 @@ namespace Pulsar4X.Entities
         }
         #endregion
 
+        #region Ship jump functionality
         /// <summary>
         /// Reduce the jump sickness of this ship. if it is zero the ship is no longer sick
         /// </summary>
@@ -3425,6 +3514,104 @@ namespace Pulsar4X.Entities
         {
             JumpSickness = Constants.JumpEngineTN.SquadronTransitPenalty;
         }
+        #endregion
+
+        #region Ship detection setting and getting
+        /// <summary>
+        /// Is this ship detected this tick via thermal?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedThermal(int FactionID, int tick, int year)
+        {
+            if (ThermalDetection[FactionID] == tick && ThermalYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this ship detected this tick via em?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedEM(int FactionID, int tick, int year)
+        {
+            if (EMDetection[FactionID] == tick && EMYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Is this ship detected this tick via active?
+        /// </summary>
+        /// <param name="FactionID">by which faction</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        /// <returns>true = yes, false = no</returns>
+        public bool IsDetectedActive(int FactionID, int tick, int year)
+        {
+            if (ActiveDetection[FactionID] == tick && ActiveYearDetection[FactionID] == year)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Set this ship as detected via thermal
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetThermalDetection(int FactionID, int tick, int year)
+        {
+            ThermalDetection[FactionID] = tick;
+            ThermalYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this ship as detected via em
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetEMDetection(int FactionID, int tick, int year)
+        {
+            EMDetection[FactionID] = tick;
+            EMYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// Set this ship as detected via active. really should have made detectableEntity a class that ships, populations, and ordnance groups inherit from.
+        /// </summary>
+        /// <param name="FactionID">faction detecting</param>
+        /// <param name="tick">current second</param>
+        /// <param name="year">current year</param>
+        public void SetActiveDetection(int FactionID, int tick, int year)
+        {
+            ActiveDetection[FactionID] = tick;
+            ActiveYearDetection[FactionID] = year;
+        }
+
+        /// <summary>
+        /// When ships are moved from taskgroups, their ship index will change in the ships list, the thermal, em, active, and any other detection lists must be updated to reflect this.
+        /// </summary>
+        /// <param name="NewIndex">New index this ship is located at</param>
+        public void UpdateShipIndex(int NewIndex)
+        {
+            ThermalList.Value = NewIndex;
+            EMList.Value = NewIndex;
+            ActiveList.Value = NewIndex;
+        }
+        #endregion
     }
     /// <summary>
     /// End of ShipTN class
@@ -3457,9 +3644,6 @@ namespace Pulsar4X.Entities
             PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
             PointDefenseType = new Dictionary<ComponentTN, bool>();
         }
-
-
-#warning When jump transits are fully implemented, PointDefenseFC listings will have to be moved as appropriate, be sure to handle that.
 
         /// <summary>
         /// Handles adding a new FC to the list.

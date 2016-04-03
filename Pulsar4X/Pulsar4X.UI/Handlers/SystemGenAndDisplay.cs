@@ -36,6 +36,13 @@ namespace Pulsar4X.UI.Handlers
             // setup view model:
             VM = new StarSystemViewModel();
 
+            // bind Faction combo box:
+            m_oControlsPanel.CurrentFactionComboBox.DataSource = VM.Factions;
+            m_oControlsPanel.CurrentFactionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentFaction, DataSourceUpdateMode.OnPropertyChanged);
+            m_oControlsPanel.CurrentFactionComboBox.DisplayMember = "Name";
+
+            m_oControlsPanel.CurrentFactionComboBox.SelectedIndexChanged += (s, args) => m_oControlsPanel.CurrentFactionComboBox.DataBindings["SelectedItem"].WriteValue();
+
             // bind System Selection combo box:
             m_oControlsPanel.SystemSelectionComboBox.DataSource = VM.StarSystems;
             m_oControlsPanel.SystemSelectionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem, DataSourceUpdateMode.OnPropertyChanged);
@@ -109,7 +116,45 @@ namespace Pulsar4X.UI.Handlers
 
         void AddColonyButton_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            /// <summary>
+            /// Is there a selection?
+            /// </summary>
+            if (m_oDataPanel.PlanetsDataGrid.CurrentCell.RowIndex != -1)
+            {
+                /// <summary>
+                /// this is kind of wierd, the databinding is effortlessly putting all planets into the list, even if they are moons, and not strictly in the planet list.
+                /// So I have to count through every planet and moon to get the right index.
+                /// </summary>
+                int Count = 0;
+                bool MoonSet = false;
+                foreach (SystemBody Planet in VM.CurrentStar.Planets)
+                {
+                    if (m_oDataPanel.PlanetsDataGrid.CurrentCell.RowIndex == Count)
+                    {
+                        VM.CurrentPlanet = Planet;
+                        break;
+                    }
+
+                    Count++;
+
+                    foreach (SystemBody Moon in Planet.Moons)
+                    {
+                        if (m_oDataPanel.PlanetsDataGrid.CurrentCell.RowIndex == Count)
+                        {
+                            VM.CurrentPlanet = Moon;
+                            MoonSet = true;
+                            break;
+                        }
+
+                        Count++;
+                    }
+
+                    if (MoonSet == true)
+                        break;
+                    
+                }
+                VM.CurrentPlanet.AddPopulation(VM.CurrentFaction, GameState.Instance.CurrentSecond, VM.CurrentFaction.Species);
+            }
         }
 
         void AutoRenameButton_Click(object sender, EventArgs e)
@@ -152,6 +197,11 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// This seems to be always failing for some reason.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void PlanetsDataGrid_SelectionChanged(object sender, EventArgs e)
         {
             var sel = m_oDataPanel.PlanetsDataGrid.SelectedRows;

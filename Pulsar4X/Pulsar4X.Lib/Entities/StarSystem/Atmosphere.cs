@@ -210,6 +210,7 @@ namespace Pulsar4X.Entities
                 Pressure = 0;
                 SurfaceTemperature = Temperature.ToKelvin(ParentBody.BaseTemperature);
                 SurfaceTemperature = SurfaceTemperature * (float)Math.Pow(1 - Albedo, 0.25);   // We need to raise albedo to the power of 1/4
+                SurfaceTemperature = Temperature.ToCelsius(SurfaceTemperature);
                 _atmosphereDescriptionInATM = "None";
                 _atmosphereDescriptionInPercent = "None";
             }

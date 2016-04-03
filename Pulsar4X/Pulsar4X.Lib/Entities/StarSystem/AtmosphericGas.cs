@@ -298,7 +298,7 @@ namespace Pulsar4X.Entities
                  HazardOne = false,
                  HazardTwo = false,
                  MeltingPoint = 0,
-                 BoilingPoint = 100,
+                 BoilingPoint = -300, //if SGG ever won't work, that is bad.
                  GreenhouseEffect = 1
              }},
 
@@ -310,7 +310,7 @@ namespace Pulsar4X.Entities
                  HazardOne = false,
                  HazardTwo = false,
                  MeltingPoint = 0,
-                 BoilingPoint = 100,
+                 BoilingPoint = -300,
                  GreenhouseEffect = -1
              }}
         };

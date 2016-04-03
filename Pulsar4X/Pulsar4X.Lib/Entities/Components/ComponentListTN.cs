@@ -128,6 +128,11 @@ namespace Pulsar4X.Entities.Components
         public BindingList<JumpEngineDefTN> JumpEngineDef { get; set; }
 
         /// <summary>
+        /// Survey sensor definitions.
+        /// </summary>
+        public BindingList<SurveySensorDefTN> SurveySensorDef { get; set; }
+
+        /// <summary>
         /// Number of the total components this faction has for ship building purposes. MissileEngineDef and MissileDef are excluded from this.
         /// </summary>
         public int TotalComponents { get; set; }
@@ -173,6 +178,8 @@ namespace Pulsar4X.Entities.Components
             TurretDef = new BindingList<TurretDefTN>();
 
             JumpEngineDef = new BindingList<JumpEngineDefTN>();
+
+            SurveySensorDef = new BindingList<SurveySensorDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -356,6 +363,18 @@ namespace Pulsar4X.Entities.Components
             MissileDef.Add(MissileAMMDef);
 
 
+            /// <summary>
+            /// Sensor components should be added upon researching the appropriate technology, as they cannot be designed, Count should be at 46
+            /// </summary>
+            SurveySensorDefTN GeoSurvey = new SurveySensorDefTN("Geological Survey Sensor", SurveySensorDefTN.SurveySensorType.Geological, 1.0f);
+            SurveySensorDefTN GravSurvey = new SurveySensorDefTN("Gravitational Survey Sensor", SurveySensorDefTN.SurveySensorType.Gravitational, 1.0f);
+
+            SurveySensorDef.Add(GeoSurvey);
+            SurveySensorDef.Add(GravSurvey);
+
+            TotalComponents = TotalComponents + 2;
+
+
 
         }
 
@@ -367,7 +386,7 @@ namespace Pulsar4X.Entities.Components
             TotalComponents = CrewQuarters.Count + FuelStorage.Count + EngineeringSpaces.Count + OtherComponents.Count + Engines.Count +
                               PassiveSensorDef.Count + ActiveSensorDef.Count + CargoHoldDef.Count + ColonyBayDef.Count + CargoHandleSystemDef.Count +
                               BeamFireControlDef.Count + BeamWeaponDef.Count + ReactorDef.Count + ShieldDef.Count + MLauncherDef.Count + MagazineDef.Count +
-                              MissileFireControlDef.Count + CIWSDef.Count + TurretDef.Count + JumpEngineDef.Count;
+                              MissileFireControlDef.Count + CIWSDef.Count + TurretDef.Count + JumpEngineDef.Count + SurveySensorDef.Count;
 
         }
     }

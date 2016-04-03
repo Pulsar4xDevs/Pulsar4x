@@ -198,6 +198,7 @@ namespace Pulsar4X
             Sun.Class = "G2";
             SetHabitableZone(Sun);
             Sol.Stars.Add(Sun);
+            Sol.GenerateSurveyPoints(); //must be done after the construction of orbit,and after stars[0] is created as that is where the mass value in use is created.
 
             SystemBody Mercury = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
             Mercury.Name = "Mercury";
@@ -209,6 +210,9 @@ namespace Pulsar4X
             Mercury.Position.System = Sol;
             Mercury.Position.X = x;
             Mercury.Position.Y = y;
+            Mercury.Atmosphere.Albedo = 0.068f; //bond and not geometric albedo.
+            Mercury.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Mercury.Orbit.SemiMajorAxis);
+            Mercury.Atmosphere.UpdateState();
             Sun.Planets.Add(Mercury);
 
             SystemBody Venus = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
@@ -219,6 +223,8 @@ namespace Pulsar4X
             Venus.SurfaceGravity = 8.918f; //from aurora, not necessarily accurate.
             AddGasToAtmoSafely(Venus.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(6), 50.0f); //N, value is from aurora
             AddGasToAtmoSafely(Venus.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(12), 50.0f); //CO2, value is from aurora
+            Venus.Atmosphere.Albedo = 0.090f; //bond and not geometric albedo.
+            Venus.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Venus.Orbit.SemiMajorAxis);
             Venus.Atmosphere.UpdateState();
             Venus.Position.System = Sol;
             Venus.Position.X = x;
@@ -254,6 +260,9 @@ namespace Pulsar4X
             Moon.Position.System = Sol;
             Moon.Position.X = Earth.Position.X + x;
             Moon.Position.Y = Earth.Position.Y + y;
+            Moon.Atmosphere.Albedo = 0.136f; //not sure if bond or geo.
+            Moon.BaseTemperature = Temperature.ToCelsius(279.3f);
+            Moon.Atmosphere.UpdateState();
             Earth.Moons.Add(Moon);
 
             SystemBody Mars = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
@@ -285,6 +294,10 @@ namespace Pulsar4X
             Jupiter.Position.System = Sol;
             Jupiter.Position.X = x;
             Jupiter.Position.Y = y;
+            Jupiter.SurfaceGravity = 24.79f;
+            Jupiter.Atmosphere.Albedo = 0.343f;
+            Jupiter.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Jupiter.Orbit.SemiMajorAxis);
+            Jupiter.Atmosphere.UpdateState();
             Sun.Planets.Add(Jupiter);
 
             SystemBody Saturn = new SystemBody(Sun, SystemBody.PlanetType.GasGiant);
@@ -295,6 +308,10 @@ namespace Pulsar4X
             Saturn.Position.System = Sol;
             Saturn.Position.X = x;
             Saturn.Position.Y = y;
+            Saturn.SurfaceGravity = 10.44f;
+            Saturn.Atmosphere.Albedo = 0.342f;
+            Saturn.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Saturn.Orbit.SemiMajorAxis);
+            Saturn.Atmosphere.UpdateState();
             Sun.Planets.Add(Saturn);
 
             SystemBody Uranus = new SystemBody(Sun, SystemBody.PlanetType.IceGiant);
@@ -305,6 +322,10 @@ namespace Pulsar4X
             Uranus.Position.System = Sol;
             Uranus.Position.X = x;
             Uranus.Position.Y = y;
+            Uranus.SurfaceGravity = 8.69f;
+            Uranus.Atmosphere.Albedo = 0.300f;
+            Uranus.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Uranus.Orbit.SemiMajorAxis);
+            Uranus.Atmosphere.UpdateState();
             Sun.Planets.Add(Uranus);
 
             SystemBody Neptune = new SystemBody(Sun, SystemBody.PlanetType.IceGiant);
@@ -315,6 +336,10 @@ namespace Pulsar4X
             Neptune.Position.System = Sol;
             Neptune.Position.X = x;
             Neptune.Position.Y = y;
+            Neptune.SurfaceGravity = 11.15f;
+            Neptune.Atmosphere.Albedo = 0.290f;
+            Neptune.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Neptune.Orbit.SemiMajorAxis);
+            Neptune.Atmosphere.UpdateState();
             Sun.Planets.Add(Neptune);
 
             SystemBody Pluto = new SystemBody(Sun, SystemBody.PlanetType.DwarfPlanet);
@@ -325,6 +350,10 @@ namespace Pulsar4X
             Pluto.Position.System = Sol;
             Pluto.Position.X = x;
             Pluto.Position.Y = y;
+            Pluto.SurfaceGravity = 0.658f;
+            Pluto.Atmosphere.Albedo = 0.069f;
+            Pluto.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Pluto.Orbit.SemiMajorAxis);
+            Pluto.Atmosphere.UpdateState();
             Sun.Planets.Add(Pluto);
 
             GenerateJumpPoints(Sol);
@@ -737,6 +766,7 @@ namespace Pulsar4X
             Star star = PopulateStarDataBasedOnSpectralType(st, starName, system);
 
             system.Stars.Add(star);
+            system.GenerateSurveyPoints(); //must happen after mass is created. PopulateStarData sets the mass value among other things up properly.
             return star;
         }
 
@@ -1030,6 +1060,7 @@ namespace Pulsar4X
         /// <item>
         /// <b>Minerials:</b> Currently an ugly hack of using homworld minerials. Note that minerial generation 
         /// functions should be part of the SystemBody class as the player will likly want to re-generate them.
+        /// Update: mineral generation is done by surveying when the planet is surveyed, not here. see systemBody.cs for details.
         /// </item>
         /// <item>
         /// <b>Moons:</b> If we a generating a planet we genmerate moons using GenerateMoons().
@@ -1083,9 +1114,6 @@ namespace Pulsar4X
 
             // Generate Ruins, note that it will only do so for suitable planets:
             GenerateRuins(star, body);
-            
-            ///< @todo Generate Minerials Properly instead of this ugly hack:
-            body.HomeworldMineralGeneration();
 
             // generate moons if required for this body type:
             if (IsPlanet(body.Type))
@@ -1614,6 +1642,31 @@ namespace Pulsar4X
                 numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointHubConnectivity);
             }
 
+            /// <summary>
+            /// 6.5 jumppoint generation rules. This will generate JPs on a flat chance based only on star mass, not on system bodies or other criteria.
+            /// </summary>
+            if (Constants.GameSettings.Aurora65JPGeneration == true)
+            {
+                int numJPs = 1;
+                int BaseJPChance = 90;
+                int JPChance = (BaseJPChance + (int)Math.Round(system.Stars[0].Orbit.MassRelativeToSol));
+                while (m_RNG.Next(100) < JPChance)
+                {
+                    numJPs++;
+
+                    if (BaseJPChance == 40)
+                        BaseJPChance = 30;
+                    else if (BaseJPChance == 60)
+                        BaseJPChance = 40;
+                    else if (BaseJPChance == 90)
+                        BaseJPChance = 60;
+
+                    JPChance = (BaseJPChance + (int)Math.Round(system.Stars[0].Orbit.MassRelativeToSol));
+                }
+
+                numJumpPoints = numJPs;
+            }
+
             int jumpPointsGenerated = 0;
             while (jumpPointsGenerated < numJumpPoints)
             {
@@ -1680,46 +1733,145 @@ namespace Pulsar4X
         /// </summary>
         private static JumpPoint GenerateJumpPoint(Star star)
         {
-            double minRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min;
-            double maxRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max;
-
-            // Clamp generation to within the planetary system.
-            foreach (SystemBody currentPlanet in star.Planets)
+            JumpPoint newJumpPoint;
+            /// <summary>
+            /// Generate jump points connected to survey locations.
+            /// </summary>
+            if (Constants.GameSettings.PrimaryOnlyJumpPoints == true)
             {
-                if (currentPlanet.Type == SystemBody.PlanetType.Comet || currentPlanet.Type == SystemBody.PlanetType.Asteroid)
+                /// <summary>
+                /// Get the SP this JP should belong to.
+                /// </summary>
+                int SP = m_RNG.Next(30);
+                double RingDist = Constants.SensorTN.EarthRingDistance * Math.Sqrt(star.Orbit.MassRelativeToSol);
+                int RingFactor = 0;
+                int angle = -1;
+                int angleMax = 30;
+
+                /// <summary>
+                /// And get the angle for this SP. 0 - 5 for the 1st 6.
+                /// </summary>
+                if (SP <= 5)
                 {
-                    // Don't gen JP's around comets or asteroids.
-                    continue;
+                    RingFactor = 1;
+                    angleMax = 60;
+                    int SPCount = 0;
+                    for (int surveyPointIterator = 30; surveyPointIterator < 360; surveyPointIterator += 60)
+                    {
+                        if (SPCount == SP)
+                        {
+                            angle = surveyPointIterator;
+                            break;
+                        }
+                        SPCount++;
+                    }
+                }
+                /// <summary>
+                /// 6 through 17 for the next 12
+                /// </summary>
+                else if (SP <= 17)
+                {
+                    RingFactor = 2;
+                    int SPCount = 6;
+                    for (int surveyPointIterator = 15; surveyPointIterator < 360; surveyPointIterator += 30)
+                    {
+                        if (SPCount == SP)
+                        {
+                            angle = surveyPointIterator;
+                            break;
+                        }
+                        SPCount++;
+                    }
+                }
+                else
+                {
+                    RingFactor = 3;
+                    int SPCount = 18;
+                    for (int surveyPointIterator = 0; surveyPointIterator < 360; surveyPointIterator += 30)
+                    {
+                        if (SPCount == SP)
+                        {
+                            angle = surveyPointIterator;
+                            break;
+                        }
+                        SPCount++;
+                    }
                 }
 
-                if (minRadius > currentPlanet.Orbit.Periapsis)
+                /// <summary>
+                /// Generate a random angle from the above
+                /// </summary>
+                int TheAngle = 0;
+                if (angle == 0)
                 {
-                    minRadius = currentPlanet.Orbit.Periapsis;
+                    if (m_RNG.Next(100) > 50)
+                    {
+                        TheAngle = 0 + m_RNG.Next((angleMax / 2));
+                    }
+                    else
+                    {
+                        TheAngle = 360 - (angleMax / 2) + m_RNG.Next((angleMax / 2));
+                    }
                 }
-                if (maxRadius < currentPlanet.Orbit.Apoapsis)
+                else
                 {
-                    maxRadius = currentPlanet.Orbit.Apoapsis;
+                    TheAngle = angle - (angleMax / 2) + m_RNG.Next(angleMax);
                 }
+
+                /// <summary>
+                /// Now get a distance for this jump point. RingFactor of 1 means from 0 to RingDist. RingFactor of 2 means from RingDist to RingDist * 2. and RingFactor of 3 means from
+                /// RingDist * 2 to RingDist * 3
+                /// </summary>
+                double Distance = (RingDist * ((double)m_RNG.Next(100000) / 100000.0)) + (RingDist * ((RingFactor - 1))) ;
+
+                double fX = Math.Cos(Helpers.GameMath.Angle.ToRadians((double)TheAngle)) * Distance;
+                double fY = Math.Sin(Helpers.GameMath.Angle.ToRadians((double)TheAngle)) * Distance;
+
+                newJumpPoint = new JumpPoint(star, fX, fY);
             }
-
-            // Determine a location for the new JP.
-            // Location will be between minDistance and 75% of maxDistance.
-            double offsetX = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
-            double offsetY = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
-
-            // Randomly flip the sign of the offsets.
-            if (m_RNG.NextDouble() >= 0.5)
+            else
             {
-                offsetX = -offsetX;
-            }
-            if (m_RNG.NextDouble() >= 0.5)
-            {
-                offsetY = -offsetY;
-            }
 
-            // Create the new jumpPoint and link it to it's parent system.
-            JumpPoint newJumpPoint = new JumpPoint(star, offsetX, offsetY);
+                double minRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min;
+                double maxRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max;
 
+                // Clamp generation to within the planetary system.
+                foreach (SystemBody currentPlanet in star.Planets)
+                {
+                    if (currentPlanet.Type == SystemBody.PlanetType.Comet || currentPlanet.Type == SystemBody.PlanetType.Asteroid)
+                    {
+                        // Don't gen JP's around comets or asteroids.
+                        continue;
+                    }
+
+                    if (minRadius > currentPlanet.Orbit.Periapsis)
+                    {
+                        minRadius = currentPlanet.Orbit.Periapsis;
+                    }
+                    if (maxRadius < currentPlanet.Orbit.Apoapsis)
+                    {
+                        maxRadius = currentPlanet.Orbit.Apoapsis;
+                    }
+                }
+
+                // Determine a location for the new JP.
+                // Location will be between minDistance and 75% of maxDistance.
+                double offsetX = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
+                double offsetY = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
+
+                // Randomly flip the sign of the offsets.
+                if (m_RNG.NextDouble() >= 0.5)
+                {
+                    offsetX = -offsetX;
+                }
+                if (m_RNG.NextDouble() >= 0.5)
+                {
+                    offsetY = -offsetY;
+                }
+
+                // Create the new jumpPoint and link it to it's parent system.
+                newJumpPoint = new JumpPoint(star, offsetX, offsetY);
+            }
             return newJumpPoint;
         }
 

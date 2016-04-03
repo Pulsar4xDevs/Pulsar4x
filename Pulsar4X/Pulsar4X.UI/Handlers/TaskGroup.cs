@@ -36,6 +36,7 @@ namespace Pulsar4X.UI.Handlers
             TaskGroups,
             Waypoints,
             JumpPoint,
+            SurveyPoints,
             Count,
         }
 
@@ -201,10 +202,13 @@ namespace Pulsar4X.UI.Handlers
             SetupShipDataGrid();
 
             m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndexChanged += new EventHandler(SystemLocationListBox_SelectedIndexChanged);
-            m_oTaskGroupPanel.DisplayContactsCheckBox.CheckStateChanged += new EventHandler(DisplayContactsCheckBox_CheckChanged);
-            m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayTaskGroupsCheckBox_CheckChanged);
-            m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayWaypointsCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayContactsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
             m_oTaskGroupPanel.OrderFilteringCheckBox.CheckStateChanged += new EventHandler(OrderFilteringCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplaySurveyLocationsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.ExcludeSurveyedCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayMoonsCheckBox.CheckStateChanged += new EventHandler(DisplayCheckBox_CheckChanged);
 
             m_oTaskGroupPanel.NewTaskGroupButton.Click += new EventHandler(NewTaskGroupButton_Click);
             m_oTaskGroupPanel.RenameTaskGroupButton.Click += new EventHandler(RenameTaskGroupButton_Click);
@@ -217,6 +221,7 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.CurrentTDRadioButton.CheckedChanged += new EventHandler(CurrentTDRadioButton_CheckChanged);
             m_oTaskGroupPanel.AllOrdersTDRadioButton.CheckedChanged += new EventHandler(AllOrdersTDRadioButton_CheckChanged);
 
+            m_oTaskGroupPanel.AvailableActionsListBox.MouseClick += new MouseEventHandler(AvailableActionsListBox_MouseClick);
             m_oTaskGroupPanel.AvailableActionsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
             m_oTaskGroupPanel.SystemLocationsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
             m_oTaskGroupPanel.PlottedMovesListBox.MouseDoubleClick += new MouseEventHandler(RemoveButton_Clicked);
@@ -225,12 +230,19 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.PlottedMovesListBox.MouseDown += new MouseEventHandler(PlottedMovesListBox_MouseDown);
             SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
+            m_oTaskGroupPanel.CycleMovesCheckBox.CheckStateChanged += new EventHandler(CycleMovesCheckBox_CheckStateChanged);
+
             #region Organization Tab
             m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndexChanged += new EventHandler(OrgSelectedTGComboBox_SelectedIndexChanged);
             m_oTaskGroupPanel.OrgMoveLeftButton.Click += new EventHandler(OrgMoveLeftButton_Click);
             m_oTaskGroupPanel.OrgMoveRightButton.Click += new EventHandler(OrgMoveRightButton_Click);
             #endregion
 
+            #region Special Orders Tab
+            SetupDefaultAndConditionalOrders();
+            m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndexChanged += new EventHandler(PrimaryDefaultOrderComboBox_SelectedIndexChanged);
+            m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndexChanged += new EventHandler(SecondaryDefaultOrderComboBox_SelectedIndexChanged);
+            #endregion
 
             /// <summary>
             /// Rename Class Button Handlers:
@@ -264,33 +276,11 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// If the contacts checkbox is changed:
+        /// If any checkbox gets checked or unchecked clear the action list and build the system location list
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void DisplayContactsCheckBox_CheckChanged(object sender, EventArgs e)
-        {
-            BuildSystemLocationList();
-            ClearActionList();
-        }
-
-        /// <summary>
-        /// If Taskgroups checkbox is changed:
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DisplayTaskGroupsCheckBox_CheckChanged(object sender, EventArgs e)
-        {
-            BuildSystemLocationList();
-            ClearActionList();
-        }
-
-        /// <summary>
-        /// If Waypoints checkbox is changed:
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DisplayWaypointsCheckBox_CheckChanged(object sender, EventArgs e)
+        private void DisplayCheckBox_CheckChanged(object sender, EventArgs e)
         {
             BuildSystemLocationList();
             ClearActionList();
@@ -322,13 +312,45 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Set the currently selected taskgroup to cycle its own moves.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CycleMovesCheckBox_CheckStateChanged(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.CycleMoves = m_oTaskGroupPanel.CycleMovesCheckBox.Checked;
+        }
+
+        /// <summary>
         /// If a location is chosen build the action list.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void SystemLocationListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
             BuildActionList();
+        }
+
+
+        /// <summary>
+        /// Selecting a primary order will place that order into the taskgroup default orders list.
+        /// </summary>
+        private void PrimaryDefaultOrderComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.AddDefaultOrder((Constants.ShipTN.DefaultOrders)m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex, 0);
+        }
+
+        /// <summary>
+        /// Selecting a secondary order will place that order into the taskgroup default orders list.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SecondaryDefaultOrderComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.AddDefaultOrder((Constants.ShipTN.DefaultOrders)m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex, 1);
         }
 
         /// <summary>
@@ -450,7 +472,7 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// Adds the selected order to the task group's list of orders. This function is going to get giant.
-        /// Not handled: Order filtering, delays, secondary and tertiary orders.
+        /// Not handled: Order filtering, delays, secondary and tertiary orders. secondaries partially done now.
         /// As for adding new things here, look at the logic for how they were added to the SystemLocationListBox to derive how to get to them for this code.
         /// Don't forget filtering of destinations by survey status.
         /// </summary>
@@ -482,12 +504,204 @@ namespace Pulsar4X.UI.Handlers
                 if (ActionIndex != -1)
                 {
                     Constants.ShipTN.OrderType selected_ordertype = (Constants.ShipTN.OrderType)m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
+                    int SecondaryOrder = -1;
 
                     /// <summary>
                     /// Now figure out what the hell order this would be.
                     /// </summary>
                     var entity = selected.Entity;
                     var etype = selected.EntityType;
+
+                    switch (selected_ordertype)
+                    {
+                        case Constants.ShipTN.OrderType.LoadInstallation:
+                            int InstSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+
+                            /// <summary>
+                            /// This is a bad order.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            Population popTargetOfOrder = (Population)entity;
+                            if (InstSelection != -1)
+                            {
+                                int ActualInst = 0;
+                                for (Installation.InstallationType InstIterator = 0; InstIterator < Installation.InstallationType.InstallationCount; InstIterator++)
+                                {
+                                    /// <summary>
+                                    /// Skip over these installations, they should never be loadable.
+                                    /// </summary>
+                                    if ( !(InstIterator == Installation.InstallationType.ConventionalIndustry || InstIterator == Installation.InstallationType.CivilianMiningComplex ||
+                                        InstIterator == Installation.InstallationType.MilitaryAcademy || InstIterator == Installation.InstallationType.SectorCommand ||
+                                        InstIterator == Installation.InstallationType.Spaceport || InstIterator == Installation.InstallationType.CommercialShipyard ||
+                                        InstIterator == Installation.InstallationType.NavalShipyardComplex) )
+                                    {
+                                        if (popTargetOfOrder.Installations[(int)InstIterator].Number >= 1.0f)
+                                        {
+                                            if (ActualInst == InstSelection)
+                                            {
+                                                SecondaryOrder = (int)InstIterator;
+                                                break;
+                                            }
+                                            ActualInst++;
+                                        }
+                                    }
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadInstallation:
+                            InstSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+
+                            /// <summary>
+                            /// Only unload at colonies.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            if (InstSelection != -1)
+                            {
+                                /// <summary>
+                                /// List out all the taskgroup cargo here. each ship has its own cargoListEntries for what it is carrying and there can be overlap. I only want each thing once in this list.
+                                /// </summary>
+                                BindingList<Installation.InstallationType> TaskGroupCargoList = new BindingList<Installation.InstallationType>();
+                                foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                                {
+                                    foreach (KeyValuePair<Installation.InstallationType, Entities.Components.CargoListEntryTN> pair in CurShip.CargoList)
+                                    {
+                                        if (TaskGroupCargoList.Contains(pair.Key) == false)
+                                            TaskGroupCargoList.Add(pair.Key);     
+                                    }
+                                }
+                                /// <summary>
+                                /// Be sure to check to see if the unload order is coming from a previous load instruction as well. It is right now up to the player to make sure this doesn't bomb.
+                                /// </summary>
+                                foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                                {
+                                    if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadInstallation)
+                                    {
+                                        if (TaskGroupCargoList.Contains((Installation.InstallationType)TGOrder.secondary) == false)
+                                            TaskGroupCargoList.Add((Installation.InstallationType)TGOrder.secondary);
+                                    }
+                                }
+                                int ActualInst = 0;
+                                foreach (Installation.InstallationType iType in TaskGroupCargoList)
+                                {
+                                    if (ActualInst == InstSelection)
+                                    {
+                                        SecondaryOrder = (int)iType;
+                                        break;
+                                    }
+                                    ActualInst++;
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+                            break;
+                        case Constants.ShipTN.OrderType.LoadMineral:
+                            int MineralSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+                            /// <summary>
+                            /// This is a bad order.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            popTargetOfOrder = (Population)entity;
+                            if (MineralSelection != -1)
+                            {
+                                for (Constants.Minerals.MinerialNames MinIterator = 0; MinIterator < Constants.Minerals.MinerialNames.MinerialCount; MinIterator++)
+                                {
+                                    if (popTargetOfOrder.Minerials[(int)MinIterator] >= 1.0f)
+                                    {
+                                        SecondaryOrder = (int)MinIterator;
+                                        break;
+                                    }
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadMineral:
+                            MineralSelection = m_oTaskGroupPanel.TaskgroupSecondaryListBox.SelectedIndex;
+
+                            /// <summary>
+                            /// Only unload at colonies.
+                            /// </summary>
+                            if (etype != SystemListObject.ListEntityType.Colonies)
+                                return;
+
+                            if (MineralSelection != -1)
+                            {
+                                /// <summary>
+                                /// List out all the taskgroup cargo here. each ship has its own cargoListEntries for what it is carrying and there can be overlap. I only want each thing once in this list.
+                                /// </summary>
+                                BindingList<Constants.Minerals.MinerialNames> TaskGroupCargoList = new BindingList<Constants.Minerals.MinerialNames>();
+                                foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                                {
+                                    foreach (KeyValuePair<Constants.Minerals.MinerialNames, Entities.Components.CargoListEntryTN> pair in CurShip.CargoMineralList)
+                                    {
+                                        if (TaskGroupCargoList.Contains(pair.Key) == false)
+                                            TaskGroupCargoList.Add(pair.Key);     
+                                    }
+                                }
+                                /// <summary>
+                                /// Be sure to check to see if the unload order is coming from a previous load instruction as well. It is right now up to the player to make sure this doesn't bomb.
+                                /// </summary>
+                                foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                                {
+                                    if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadMineral)
+                                    {
+                                        if (TaskGroupCargoList.Contains((Constants.Minerals.MinerialNames)TGOrder.secondary) == false)
+                                            TaskGroupCargoList.Add((Constants.Minerals.MinerialNames)TGOrder.secondary);
+                                    }
+                                }
+                                int ActualInst = 0;
+                                foreach (Constants.Minerals.MinerialNames mType in TaskGroupCargoList)
+                                {
+                                    if (ActualInst == MineralSelection)
+                                    {
+                                        SecondaryOrder = (int)mType;
+                                        break;
+                                    }
+                                    ActualInst++;
+                                }
+                            }
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+
+                            break;
+
+
+#warning All of the rest of these load types need to be implemented
+                        case Constants.ShipTN.OrderType.LoadMineralWhenX:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadShipComponent:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadShipComponent:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadPDCPart:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadPDCPart:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadGroundUnit:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadGroundUnit:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadCommander:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadCommander:
+                            break;
+                        case Constants.ShipTN.OrderType.LoadTeam:
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadTeam:
+                            break;
+                        default:
+                            break;
+                    }
+
+
 #warning handle secondary,tertiary, and order delays. also handle taskgroup split condition for move to contact orders if not already done so.
                     switch (etype)
                     {
@@ -499,24 +713,28 @@ namespace Pulsar4X.UI.Handlers
                             break;
                         case SystemListObject.ListEntityType.Planets:
                             SystemBody planet = (SystemBody)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, planet);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, planet);
                             break;
                         case SystemListObject.ListEntityType.JumpPoint:
                             JumpPoint jp = (JumpPoint)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, jp);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, jp);
                             break;
                         case SystemListObject.ListEntityType.Colonies:
                             Population popTargetOfOrder = (Population)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, popTargetOfOrder);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, popTargetOfOrder);
                             break;
                         case SystemListObject.ListEntityType.TaskGroups:
                             TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, TargetOfOrder);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, TargetOfOrder);
                             TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Waypoints:
                             Waypoint waypoint = (Waypoint)entity;
-                            NewOrder = new Order(selected_ordertype, -1, -1, 0, waypoint);
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, waypoint);
+                            break;
+                        case SystemListObject.ListEntityType.SurveyPoints:
+                            SurveyPoint SPoint = (SurveyPoint)entity;
+                            NewOrder = new Order(selected_ordertype, SecondaryOrder, -1, 0, SPoint);
                             break;
                     }
                     if (NewOrder != null)
@@ -528,6 +746,196 @@ namespace Pulsar4X.UI.Handlers
             BuildPlottedMoveList();
             BuildSystemLocationList();
             CalculateTimeDistance();
+        }
+
+        /// <summary>
+        /// If an appropriate action is selected, make the Taskgroup secondary listbox visible and populate it.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AvailableActionsListBox_MouseClick(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Planets, Contacts, TG, WP
+            /// </summary>
+            int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
+
+            /// <summary>
+            /// If AddMove is clicked with no system location it will bomb.
+            /// </summary>
+            if (PlaceIndex != -1)
+            {
+                List<Guid> GID = SystemLocationGuidDict.Keys.ToList();
+                SystemListObject selected = SystemLocationDict[GID[PlaceIndex]];
+
+                int ActionIndex = m_oTaskGroupPanel.AvailableActionsListBox.SelectedIndex;
+                if (ActionIndex != -1)
+                {
+                    Constants.ShipTN.OrderType selected_ordertype = (Constants.ShipTN.OrderType)m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
+
+                    /// <summary>
+                    /// Now figure out what the hell order this would be.
+                    /// </summary>
+                    var entity = selected.Entity;
+                    var etype = selected.EntityType;
+
+                    switch (selected_ordertype)
+                    {
+                        case Constants.ShipTN.OrderType.LoadInstallation:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Installation";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            foreach (Installation inst in (selected.Entity as Population).Installations)
+                            {
+                                if (inst.Number >= 1.0f && inst.Type != Installation.InstallationType.ConventionalIndustry &&
+                                    inst.Type != Installation.InstallationType.CivilianMiningComplex && inst.Type != Installation.InstallationType.MilitaryAcademy &&
+                                    inst.Type != Installation.InstallationType.SectorCommand && inst.Type != Installation.InstallationType.Spaceport &&
+                                    inst.Type != Installation.InstallationType.CommercialShipyard && inst.Type != Installation.InstallationType.NavalShipyardComplex)
+                                {
+                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(inst.Type);
+                                }
+                            }
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadInstallation:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Installation";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            /// <summary>
+                            /// Check for existing entries in the ship cargo list, and also check the orders to load installations. 
+                            /// </summary>
+                            foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                            {
+                                foreach(KeyValuePair<Installation.InstallationType,Entities.Components.CargoListEntryTN> pair in CurShip.CargoList)
+                                {
+                                    /// <summary>
+                                    /// there can and will be duplicates here, so avoid that issue.
+                                    /// </summary>
+                                    if(m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains(pair.Key) == false)
+                                        m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                }
+                            }
+                            /// <summary>
+                            /// If the player has made a load order for this item, put it in the unload category as well. For now it is up to the player to not mess this one up.
+                            /// </summary>
+                            foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                            {
+                                if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadInstallation)
+                                {
+                                    if (m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains((Installation.InstallationType)TGOrder.secondary) == false)
+                                    {
+                                        m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add((Installation.InstallationType)TGOrder.secondary);
+                                    }
+                                }
+                            }
+                            break;
+                        case Constants.ShipTN.OrderType.LoadMineral:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Mineral";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                            {
+                                if ((selected.Entity as Population).Minerials[mineralIterator] > 0.0f)
+                                {
+                                    m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(((Constants.Minerals.MinerialNames)mineralIterator).ToString());
+                                }
+                            }
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadMineral:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Mineral";
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Clear();
+                            /// <summary>
+                            /// Check for existing entries in the ship cargo list, and also check orders to load minerals.
+                            /// </summary>
+                            foreach (ShipTN CurShip in CurrentTaskGroup.Ships)
+                            {
+                                foreach (KeyValuePair<Constants.Minerals.MinerialNames, Entities.Components.CargoListEntryTN> pair in CurShip.CargoMineralList)
+                                {
+                                    if(m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains(pair.Key) == false)
+                                       m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add(pair.Key);
+                                }
+                            }
+                            /// <summary>
+                            /// If the player has made a load order for this item, put it in the unload category as well. For now it is up to the player to not mess this one up.
+                            /// </summary>
+                            foreach (Order TGOrder in CurrentTaskGroup.TaskGroupOrders)
+                            {
+                                if (TGOrder.typeOf == Constants.ShipTN.OrderType.LoadMineral)
+                                {
+                                    if (m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Contains((Constants.Minerals.MinerialNames)TGOrder.secondary) == false)
+                                    {
+                                        m_oTaskGroupPanel.TaskgroupSecondaryListBox.Items.Add((Constants.Minerals.MinerialNames)TGOrder.secondary);
+                                    }
+                                }
+                            }
+                            break;
+#warning All of the rest of these load types need to be implemented
+                        case Constants.ShipTN.OrderType.LoadMineralWhenX:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Mineral";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadShipComponent:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Component";
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadShipComponent:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Component";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadPDCPart:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select PDC Part";
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadPDCPart:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select PDC Part";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadGroundUnit:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Ground Unit";
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadGroundUnit:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Ground Unit";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadCommander:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Commander";
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadCommander:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Commander";
+                            break;
+                        case Constants.ShipTN.OrderType.LoadTeam:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Team";
+                            break;
+                        case Constants.ShipTN.OrderType.UnloadTeam:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = true;
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Text = "Select Team";
+                            break;
+                        default:
+                            m_oTaskGroupPanel.TaskgroupSecondaryGroupBox.Visible = false;
+                            m_oTaskGroupPanel.TaskgroupSecondaryListBox.Visible = false;
+                            break;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -555,10 +963,12 @@ namespace Pulsar4X.UI.Handlers
                 }
 
                 if (removeindex == -1)
-                    CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
+                    CurrentTaskGroup.RemoveOrder(CurrentTaskGroup.TaskGroupOrders.Last());
+                //CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
                 else
                 {
-                    CurrentTaskGroup.TaskGroupOrders.RemoveAt(removeindex);
+                    CurrentTaskGroup.RemoveOrder(removeindex);
+                    //CurrentTaskGroup.TaskGroupOrders.RemoveAt(removeindex);
                     //int prevIndex = SelectedOrderIndex;
                     //SelectedOrderIndex = -1;
                     //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
@@ -577,7 +987,11 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RemoveAllButton_Clicked(object sender, EventArgs e)
         {
-            CurrentTaskGroup.TaskGroupOrders.Clear();
+            foreach(Order TGO in CurrentTaskGroup.TaskGroupOrders)
+            {
+                CurrentTaskGroup.RemoveOrder(TGO);
+            }
+            //CurrentTaskGroup.TaskGroupOrders.Clear();
             ClearActionList();
             m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
             CalculateTimeDistance();
@@ -709,6 +1123,37 @@ namespace Pulsar4X.UI.Handlers
                 logger.Error("Something went wrong Creating Columns for Taskgroup summary screen...");
 #endif
             }
+        }
+
+        /// <summary>
+        /// Fill the combo boxes for default orders, conditional conditions, and conditional orders.
+        /// Typecasting all these to ints produces shorter lines than going by the enum type.
+        /// </summary>
+        private void SetupDefaultAndConditionalOrders()
+        {
+            for (int defaultOrderIterator = 0; defaultOrderIterator < (int)Constants.ShipTN.DefaultOrders.TypeCount; defaultOrderIterator++)
+            {
+                m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.Items.Add((Constants.ShipTN.DefaultOrders)defaultOrderIterator);
+                m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.Items.Add((Constants.ShipTN.DefaultOrders)defaultOrderIterator);
+            }
+            m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = 0;
+            m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex = 0;
+
+            for (int condIterator = 0; condIterator < (int)Constants.ShipTN.Condition.TypeCount; condIterator++)
+            {
+                m_oTaskGroupPanel.ConditionalAConditionComboBox.Items.Add((Constants.ShipTN.Condition)condIterator);
+                m_oTaskGroupPanel.ConditionalBConditionComboBox.Items.Add((Constants.ShipTN.Condition)condIterator);
+            }
+            m_oTaskGroupPanel.ConditionalAConditionComboBox.SelectedIndex = 0;
+            m_oTaskGroupPanel.ConditionalBConditionComboBox.SelectedIndex = 0;
+
+            for (int condOrderIterator = 0; condOrderIterator < (int)Constants.ShipTN.ConditionalOrders.TypeCount; condOrderIterator++)
+            {
+                m_oTaskGroupPanel.ConditionalAOrderComboBox.Items.Add((Constants.ShipTN.ConditionalOrders)condOrderIterator);
+                m_oTaskGroupPanel.ConditionalBOrderComboBox.Items.Add((Constants.ShipTN.ConditionalOrders)condOrderIterator);
+            }
+            m_oTaskGroupPanel.ConditionalAOrderComboBox.SelectedIndex = 0;
+            m_oTaskGroupPanel.ConditionalBOrderComboBox.SelectedIndex = 0;
         }
 
         private void RefreshShipCells()
@@ -891,6 +1336,9 @@ namespace Pulsar4X.UI.Handlers
 
                 if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
                     AddWaypointsToList(targetsystem);
+
+                if (m_oTaskGroupPanel.DisplaySurveyLocationsCheckBox.Checked == true)
+                    AddSurveyPointsToList(targetsystem);
             }
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
@@ -902,7 +1350,6 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void PlottedMovesListBox_MouseDown(object sender, MouseEventArgs e)
         {
-
             if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex != -1)
             {
                 var rect = m_oTaskGroupPanel.PlottedMovesListBox.GetItemRectangle(m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex);
@@ -1062,6 +1509,44 @@ namespace Pulsar4X.UI.Handlers
                         SystemLocationGuidDict.Add(entObj.Id, keyName);
                         SystemLocationDict.Add(entObj.Id, valueObj);
                     }
+
+                    if (m_oTaskGroupPanel.DisplayMoonsCheckBox.Checked == true)
+                    {
+                        foreach (SystemBody moon in planet.Moons)
+                        {
+                            PopCount = 0;
+                            keyName = "N/A";
+                            foreach (Population CurrentPopulation in moon.Populations)
+                            {
+                                if (CurrentPopulation.Faction == CurrentFaction)
+                                {
+                                    keyName = string.Format("{0} - {1}", CurrentPopulation.Name, CurrentPopulation.Species.Name);
+                                    if (CurrentFaction.Capitol == CurrentPopulation)
+                                        keyName = string.Format("{0}(Capitol)", keyName);
+
+                                    keyName = string.Format("{0}: {1:n2}m", keyName, CurrentPopulation.CivilianPopulation);
+
+                                    StarSystemEntity entObj = CurrentPopulation;
+                                    SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Colonies;
+                                    SystemListObject valueObj = new SystemListObject(entType, entObj);
+                                    SystemLocationGuidDict.Add(entObj.Id, keyName);
+                                    SystemLocationDict.Add(entObj.Id, valueObj);
+
+                                    PopCount++;
+                                }
+                            }
+
+                            if (PopCount == 0)
+                            {
+                                keyName = moon.Name;
+                                StarSystemEntity entObj = moon;
+                                SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets; //moons are in the planets category
+                                SystemListObject valueObj = new SystemListObject(entType, entObj);
+                                SystemLocationGuidDict.Add(entObj.Id, keyName);
+                                SystemLocationDict.Add(entObj.Id, valueObj);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1070,16 +1555,41 @@ namespace Pulsar4X.UI.Handlers
         /// Add jump points to the available locations list.
         /// </summary>
         /// <param name="starsystem"></param>
-#warning check to see if jump point is detected eventually when grav survey is implemented
         private void AddJumpPointsToList(StarSystem starsystem)
         {
-            foreach (JumpPoint jp in starsystem.JumpPoints)
+            /// <summary>
+            /// If this starsystem has no survey results for this faction, or the results aren't complete or incomplete then do nothing.
+            /// </summary>
+            if (starsystem._SurveyResults.ContainsKey(CurrentFaction) == true)
             {
-                StarSystemEntity entObj = jp;
-                SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
-                SystemListObject valueObj = new SystemListObject(entType, entObj);
-                SystemLocationGuidDict.Add(entObj.Id, jp.Name);
-                SystemLocationDict.Add(entObj.Id, valueObj);
+                /// <summary>
+                /// Every JP is detected. add them all.
+                /// </summary>
+                if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Complete)
+                {
+                    foreach (JumpPoint jp in starsystem.JumpPoints)
+                    {
+                        StarSystemEntity entObj = jp;
+                        SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
+                        SystemListObject valueObj = new SystemListObject(entType, entObj);
+                        SystemLocationGuidDict.Add(entObj.Id, jp.Name);
+                        SystemLocationDict.Add(entObj.Id, valueObj);
+                    }
+                }
+                /// <summary>
+                /// Only some of the JPs are detected, so list only those.
+                /// </summary>
+                else if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Incomplete)
+                {
+                    foreach (JumpPoint jp in starsystem._SurveyResults[CurrentFaction]._DetectedJPs)
+                    {
+                        StarSystemEntity entObj = jp;
+                        SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
+                        SystemListObject valueObj = new SystemListObject(entType, entObj);
+                        SystemLocationGuidDict.Add(entObj.Id, jp.Name);
+                        SystemLocationDict.Add(entObj.Id, valueObj);
+                    }
+                }
             }
         }
 
@@ -1192,7 +1702,73 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// Adds grav survey points to the location list.
+        /// </summary>
+        /// <param name="starsystem"></param>
+        private void AddSurveyPointsToList(StarSystem starsystem)
+        {
+            int SPIndex = 1;
+            bool DisplaySP = false;
+            foreach (SurveyPoint SP in starsystem._SurveyPoints)
+            {
+                if (m_oTaskGroupPanel.ExcludeSurveyedCheckBox.Checked == true)
+                {
+                    /// <summary>
+                    /// it is important to always check to see if the desired key is in the dictionary before using said dictionary to prevent null references, crashes, and so on.
+                    /// </summary>
+                    if (starsystem._SurveyResults.ContainsKey(CurrentFaction) == true)
+                    {
+                        if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Complete)
+                        {
+                            /// <summary>
+                            /// Don't display any survey points, they are all surveyed, and surveyed points should be excluded.
+                            /// </summary>
+                            return;
+                        }
+                        else if (starsystem._SurveyResults[CurrentFaction]._SurveyStatus == JPDetection.Status.Incomplete)
+                        {
+                            if (starsystem._SurveyResults[CurrentFaction]._SurveyedPoints.Contains(SP) == false)
+                            {
+                                /// <summary>
+                                /// Display only those sps not yet surveyed.
+                                /// </summary>
+                                DisplaySP = true;
+                            }
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// Display everything, as the survey status should be none in this case.
+                            /// </summary>
+                            DisplaySP = true;
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// This faction has performed no survey, so add all points.
+                        /// </summary>
+                        DisplaySP = true;
+                    }
+                }
+                else
+                {
+                    DisplaySP = true;
+                }
 
+                if (DisplaySP == true)
+                {
+                    string keyName = String.Format("Survey Location #{0}", SPIndex);
+                    StarSystemEntity entObj = SP;
+                    SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.SurveyPoints, entObj);
+                    SystemLocationGuidDict.Add(entObj.Id, keyName);
+                    SystemLocationDict.Add(entObj.Id, valueObj);
+                    DisplaySP = false;
+                }   
+                SPIndex++;
+            }
+        }
 
         /// <summary>
         /// Time and distance or orders should be calculated here based on the radio button selection choices.
@@ -1502,6 +2078,29 @@ namespace Pulsar4X.UI.Handlers
         }
         #endregion
 
+        #region Special Orders Tab
+        private void BuildSpecialOrdersTab()
+        {
+#warning the special orders system can be substantially improved, and the rest of the conditional orders aren't done at all.
+            if (CurrentTaskGroup._SpecialOrders._DefaultOrdersList.Count == 0 && m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.Items.Count != 0 && m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.Items.Count != 0)
+            {
+                m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = 0;
+                m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex = 0;
+            }
+            else
+            {
+                if (CurrentTaskGroup._SpecialOrders._DefaultOrdersList.Count == 1)
+                    m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = (int)CurrentTaskGroup._SpecialOrders._DefaultOrdersList[0];
+                if (CurrentTaskGroup._SpecialOrders._DefaultOrdersList.Count == 2)
+                {
+                    m_oTaskGroupPanel.PrimaryDefaultOrderComboBox.SelectedIndex = (int)CurrentTaskGroup._SpecialOrders._DefaultOrdersList[0];
+                    m_oTaskGroupPanel.SecondaryDefaultOrderComboBox.SelectedIndex = (int)CurrentTaskGroup._SpecialOrders._DefaultOrdersList[1];
+                }
+
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Refresh the TG page.
         /// </summary>
@@ -1509,6 +2108,7 @@ namespace Pulsar4X.UI.Handlers
         {
             if (CurrentTaskGroup != null)
             {
+                m_oTaskGroupPanel.CycleMovesCheckBox.Checked = CurrentTaskGroup.CycleMoves;
                 m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.Position.System.Name;
                 m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
                 m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
@@ -1521,6 +2121,7 @@ namespace Pulsar4X.UI.Handlers
 
                 BuildOrgSelectedTGList();
                 BuildOrganizationTab();
+                BuildSpecialOrdersTab();
             }
         }
 

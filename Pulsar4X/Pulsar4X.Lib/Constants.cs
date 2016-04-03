@@ -361,8 +361,10 @@ namespace Pulsar4X
                 /// </summary>
                 LoadInstallation,
                 LoadShipComponent,
+                LoadPDCPart,
                 UnloadInstallation,
                 UnloadShipComponent,
+                UnloadPDCPart,
                 UnloadAll,
                 LoadAllMinerals,
                 UnloadAllMinerals,
@@ -445,6 +447,20 @@ namespace Pulsar4X
                 ReleaseAt,
 
                 /// <summary>
+                /// Transport equipped ships
+                /// </summary>
+                LoadGroundUnit,
+                UnloadGroundUnit,
+
+                /// <summary>
+                /// Any ship can carry teams or commanders.
+                /// </summary>
+                LoadCommander,
+                LoadTeam,
+                UnloadCommander,
+                UnloadTeam,
+
+                /// <summary>
                 /// Number of orders available.
                 /// </summary>
                 TypeCount
@@ -472,6 +488,120 @@ namespace Pulsar4X
                 Cargo,
                 Cryo,
                 Troop,
+                TypeCount
+            }
+
+            public enum DefaultOrders
+            {
+                NoSpecialOrder,
+                SurveyNearestAsteroid,
+                SurveyNearestMoon,
+                SurveyNearestPlanet,
+                SurveyNearestPlanetOrMoon,
+                SurveyNearestBody,
+                SurveyNextFiveBodies,
+                SurveyNearestSurveyLocation,
+                SurveyNextThreeSurveyLocations,
+
+                /// <summary>
+                /// Superior formation.
+                /// </summary>
+                FollowHigherFleetInSystem,
+                MoveToEntryJumpPoint,
+                RefuelInCurrentSystem,
+
+                /// <summary>
+                /// Any Colony with > 25M people that is set as a colonist source.
+                /// </summary>
+                LoadColonistsAtNearestSource,
+                LoadColonistsAtCapital,
+
+                /// <summary>
+                /// Any colony with less than 25M people, or otherwise set as a colonist destination.
+                /// </summary>
+                UnloadColonistsAtNearestDestination,
+                BuildJumpGateAtNearestJumpPoint,
+
+                /// <summary>
+                /// Colony with citizens who likely don't need automines.
+                /// </summary>
+                LoadAutomineFromPopulation,
+
+                /// <summary>
+                /// No people, only mines present,
+                /// </summary>
+                UnloadAutomineToMiningColony,
+
+                /// <summary>
+                /// Special tradeship only conditional.
+                /// </summary>
+                MoveToTradeLocation,
+
+                /// <summary>
+                /// Luxury ships? rescue vessels?
+                /// </summary>
+                UnloadPassengersAtNearestColony,
+
+                /// <summary>
+                /// World with minerals available above world reserve levels?
+                /// </summary>
+                MoveToMineralSource,
+                MoveToSoriumGasGiant,
+                SalvageNearestWreck,
+                TerraformColony,
+                TypeCount
+            }
+
+            public enum Condition
+            {
+                NoCondition,
+                FuelLessThan50,
+                FuelLessThan40,
+                FuelLessThan30,
+                FuelLessThan20,
+                FuelLessThan10,
+                FuelTanksFull,
+                ParentFleetInSystem,
+                SubFleetInSameLocation,
+                SpeedLessThanMax,
+                SupplyPointsLessThan20,
+                SupplyPointsLessThan10,
+                HostileActiveContactInSystem,
+                TypeCount
+            }
+
+            public enum ConditionalOrders
+            {
+                NoConditionalOrder,
+                Unload90PercentOfFuelAtNearestColony,
+                UnloadFuelAtColonyAndMoveToSoriumGasGiant,
+                JoinParentFleetIfInSystem,
+                RefuelAtNearestColony,
+
+                /// <summary>
+                /// Tanker must have more than 10% of its fuel available to refuel with.
+                /// </summary>
+                RefuelAtNearestAvailableTanker,
+
+                /// <summary>
+                /// Can be world or tanker.
+                /// </summary>
+                RefuelAtNearestAvailableSource,
+
+                /// <summary>
+                /// All restrictions that apply to fuel harvesting apply here.
+                /// </summary>
+                ResupplyAtNearestColony,
+                ResupplyAtNearestSupplyShip,
+                RessuplyAtNearestSource,
+
+                ActivateShields,
+                DeactivateShields,
+                ClearOrders,
+                IncorporateSubFleetsAtLocation,
+                ChangeToMaximumSpeed,
+                ActiveSensorsOn,
+                OverhaulAtNearestColony,
                 TypeCount
             }
         }
@@ -724,9 +854,35 @@ namespace Pulsar4X
             public static byte[] PassiveStrength = { 5, 6, 8, 11, 14, 18, 24, 32, 40, 50, 60, 75 };
 
             /// <summary>
+            /// Strength of geological and gravitational survey sensors for standard,improved,advanced, and phased sensors.
+            /// </summary>
+            public static byte[] SurveyStrength = { 1, 2, 3, 5 };
+            public const int SurveyStrengthMax = 4;
+
+            /// <summary>
             /// What value are sensors calibrated around searching for?
             /// </summary>
             public const uint DefaultPassiveSignature = 1000;
+
+            /// <summary>
+            /// Survey point requirement will be based on body radius relative to earth.
+            /// </summary>
+            public const float EarthRadius = (float)(6378.1 / Constants.Units.KmPerAu);
+
+            /// <summary>
+            /// And relative to earth's point value from Aurora.
+            /// </summary>
+            public const uint EarthSurvey = 637;
+
+            /// <summary>
+            /// Each survey ring is 2B km out for every 1.0 unit of solar mass present. solar mass is sqrted for this calculation as per survey cost and then multiplied by this value. units in AU.
+            /// </summary>
+            public const double EarthRingDistance = 13.36917422;
+
+            /// <summary>
+            /// How many survey points are there? this is only referenced in taskgroup grav survey code for now.
+            /// </summary>
+            public const int SurveyPointCount = 30;
         }
 
         /// <summary>
@@ -1005,6 +1161,14 @@ namespace Pulsar4X
 
         }
 
+        public static class GameConstants
+        {
+            /// <summary>
+            /// 10k km is the basic unit of AuroraTN distance that pretty much all calculations will go to. I don't expect this to ever change, but would prefer to keep it as a constant regardless.
+            /// </summary>
+            public const double BasicUnitOfDistance = 10000.0; 
+        }
+
         /// <summary>
         /// List of game-specific settings.
         /// Since we don't have save/load yet, I'm just sticking this here.
@@ -1052,9 +1216,17 @@ namespace Pulsar4X
             /// <summary>
             /// Jumppoints will not appear on secondary stars if true.
             /// </summary>
-            public static bool PrimaryOnlyJumpPoints = false;
+            public static bool PrimaryOnlyJumpPoints = true;
 
+            /// <summary>
+            /// Follow TN terraforming rules regarding what can be terraformed, and what gases generate what hostile effects.
+            /// </summary>
             public static bool TNTerraformingRules = false;
+
+            /// <summary>
+            /// Jumppoint generation uses the current 6.50 method of reducing the total number of JPs created.
+            /// </summary>
+            public static bool Aurora65JPGeneration = true;
         }
     }
 }

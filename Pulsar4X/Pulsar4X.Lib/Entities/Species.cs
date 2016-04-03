@@ -31,6 +31,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Respiration GasToBreathe { get; set; }
 
+#warning Newly created species must have unique names, the tree display for populations relies on a dictionary that will crash if two species have the same name.
         public Species()
             : base()
         {

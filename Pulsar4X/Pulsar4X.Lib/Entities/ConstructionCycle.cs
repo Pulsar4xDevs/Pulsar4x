@@ -61,6 +61,9 @@ namespace Pulsar4X.Entities
             float CurrentIndustry = CurrentPopulation.CalcTotalIndustry() * Constants.Colony.ConstructionCycleFraction;
             float BuildPercentage = 0.0f;
 
+            if (CurrentIndustry == 0.0f)
+                return;
+
             foreach (ConstructionBuildQueueItem CurrentConstruction in CurrentPopulation.ConstructionBuildQueue)
             {
                 /// <summary>
@@ -78,9 +81,11 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// Calculate Completion Estimate:
                 /// </summary>
-                float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
+                float BPRequirement = (float)CurrentConstruction.numToBuild * (float)CurrentConstruction.costPerItem;
                 float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-                float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+
+                float YearlyDevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
+                float YearsOfProduction = (BPRequirement / YearlyDevotedIndustry);
 
                 if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
                 {
@@ -104,6 +109,15 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
                 float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
+
+                if ((CurrentConstruction.numToBuild - Completion) <= 0.0f)
+                {
+                    /// <summary>
+                    /// floating point errors will sometimes produce a situation where completion, numToBuild and installation.Number may be slightly off by a small delta, this 0.00001f is to correct that.
+                    /// it slightly increases the overall cost of the installation, and slightly gives more of an installation than the player ordered.
+                    /// </summary>
+                    Completion = CurrentConstruction.numToBuild + 0.00001f;
+                }
 
                 bool CIRequired = false;
                 bool MineRequired = false;
@@ -202,7 +216,7 @@ namespace Pulsar4X.Entities
                             CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
                         else if (CIRequired == false && MineRequired == true)
                             CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
-                        CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion);
+                        CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion,CurrentConstruction.numToBuild);
                         break;
                     case ConstructionBuildQueueItem.CBType.ShipComponent:
                         CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.componentBuild.minerialsCost, Completion);
@@ -218,7 +232,7 @@ namespace Pulsar4X.Entities
                         break;
                     case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
                         CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, Constants.Colony.MaintenanceMineralCost, Completion);
-                        CurrentPopulation.AddMSP(Completion);
+                        CurrentPopulation.AddMSP(Completion,CurrentConstruction.numToBuild);
                         break;
                 }
 
@@ -250,6 +264,9 @@ namespace Pulsar4X.Entities
             float CurrentIndustry = CurrentPopulation.CalcTotalOrdnanceIndustry() * Constants.Colony.ConstructionCycleFraction;
             float BuildPercentage = 0.0f;
 
+            if (CurrentIndustry == 0.0f)
+                return;
+
             foreach (MissileBuildQueueItem CurrentConstruction in CurrentPopulation.MissileBuildQueue)
             {
                 /// <summary>
@@ -269,7 +286,9 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
                 float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-                float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+
+                float YearlyDevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
+                float YearsOfProduction = (BPRequirement / YearlyDevotedIndustry);
 
                 if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
                 {
@@ -440,6 +459,9 @@ namespace Pulsar4X.Entities
             int CY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number);
             int NY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
 
+            if (CY == 0 && NY == 0)
+                return;
+
             List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o => o.Priority).ToList();
 
             BuildShips(CurrentFaction, CurrentPopulation, SortedList);
@@ -519,12 +541,21 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Terraforming will go over the limit specified by the user.
                         /// </summary>
+                        bool limit = false;
                         if (CurrentTerraforming + CurrentGasAmt > pop._GasAmt)
                         {
                             CurrentTerraforming = pop._GasAmt - CurrentGasAmt;
+                            limit = true;
                         }
 
                         pop.Planet.Atmosphere.AddGas(pop._GasToAdd, CurrentTerraforming);
+
+                        if (limit == true)
+                        {
+                            pop._GasAmt = 0.0f;
+                            pop._GasToAdd = null;
+                            pop._GasAddSubtract = false;
+                        }
                     }
                 }
                 else if (pop._GasAddSubtract == false)
@@ -536,11 +567,20 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Terraforming will go under the limit specified by the user.
                         /// </summary>
+                        bool limit = false;
                         if (CurrentTerraforming - CurrentGasAmt < pop._GasAmt)
                         {
                             CurrentTerraforming = CurrentGasAmt - pop._GasAmt;
+                            limit = true;
                         }
                         pop.Planet.Atmosphere.AddGas(pop._GasToAdd, CurrentTerraforming);
+
+                        if (limit == true)
+                        {
+                            pop._GasAmt = 0.0f;
+                            pop._GasToAdd = null;
+                            pop._GasAddSubtract = false;
+                        }
                     }
                 }
             }            
@@ -593,6 +633,9 @@ namespace Pulsar4X.Entities
                         /// </summary>
 #warning Is this ok for the dieoff calculation for population?
                         float CurrentDieoff = -1.0f *( ((float)CurrentInfrastructure / (float)TotalInfraRequirement) * Constants.Colony.ConstructionCycleFraction);
+
+                        if (CurrentInfrastructure == 0)
+                            CurrentDieoff = -1.0f * (CurrentPopulation.CivilianPopulation * 0.1f);
 
                         CurrentPopulation.AddPopulation(CurrentDieoff);
                     }
@@ -667,6 +710,7 @@ namespace Pulsar4X.Entities
                         case Constants.ShipyardInfo.Task.Construction:
                             Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget, Task.Title);
                             CurrentPopulation.FuelStockpile = Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].Refuel(CurrentPopulation.FuelStockpile);
+                            Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].ShipClass.ShipsUnderConstruction--;
                             break;
                         case Constants.ShipyardInfo.Task.Repair:
                             /// <summary>

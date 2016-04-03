@@ -26,6 +26,17 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// What type of mineral is being carried?
+        /// </summary>
+        private Constants.Minerals.MinerialNames MineralType;
+        public Constants.Minerals.MinerialNames mineralType
+        {
+            get { return MineralType; }
+        }
+
+#warning Cargo entries should be reworked to account for the various things that can be held in cargo, there is no PDC holding yet for example.
+
+        /// <summary>
         /// Size of Installation being carried.
         /// </summary>
         private int Tons;
@@ -46,9 +57,25 @@ namespace Pulsar4X.Entities.Components
             Tons = SizeInTons;
         }
 
+        /// <summary>
+        /// Constructor for Component transfers.
+        /// </summary>
+        /// <param name="Type">Type of component</param>
+        /// <param name="SizeInTons">Tons of said component</param>
         public CargoListEntryTN(ComponentDefTN Type, int SizeInTons)
         {
             CargoComponentType = Type;
+            Tons = SizeInTons;
+        }
+
+        /// <summary>
+        /// This is the constructor for minerals in cargo.
+        /// </summary>
+        /// <param name="Type">Type of mineral</param>
+        /// <param name="SizeInTons">Tons of said mineral</param>
+        public CargoListEntryTN(Constants.Minerals.MinerialNames Type, int SizeInTons)
+        {
+            MineralType = Type;
             Tons = SizeInTons;
         }
     }

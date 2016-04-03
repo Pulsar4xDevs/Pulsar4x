@@ -25,16 +25,26 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
+        /// <summary>
+        /// Is this circle element a survey point circle?
+        /// </summary>
+        private bool _IsSurveyPoint;
+        public bool _isSurveyPoint
+        {
+            get { return _IsSurveyPoint; }
+            set { _IsSurveyPoint = value; }
+        }
+
         public CircleElement()
             : base()
         {
-
+            _IsSurveyPoint = false;
         }
 
         public CircleElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, OrbitingEntity a_oOrbitEntity, System.Drawing.Color a_oColor)
             : base()
         {
-
+            _IsSurveyPoint = false;
             m_oPrimaryPrimitive = new GLCircle(a_oDefaultEffect,
                         a_oPosition,
                         a_oOrbitEntity,
@@ -58,10 +68,24 @@ namespace Pulsar4X.UI.SceenGraph
                     oElement.Render();
                 }
             }
+
+            if (_IsSurveyPoint == true)
+                Lable.Render();
         }
 
         public override void Refresh(float a_fZoomScaler)
         {
+            if (_IsSurveyPoint == true)
+            {
+                Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler;
+                RealSize = new Vector2(0.0001f, 0.0001f) / a_fZoomScaler;
+
+                GLCircle temp = this.PrimaryPrimitive as GLCircle;
+                if (temp != null)
+                {
+                    temp.ChangeRadius(4.0f / a_fZoomScaler);
+                }
+            }
             // loop through any children:
             foreach (SceenElement oElement in m_lChildren)
             {

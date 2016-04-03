@@ -241,7 +241,7 @@ namespace Pulsar4X.UI.SceenGraph
             Vector3 v3MoonPos = Vector3.Zero;                                   // Used to store the Moons Position.
 
             // start creating star branches in the sceen graph:
-            SceenElement oRootStar;
+            SceenElement oRootStar = null;
             SceenElement oCurrStar;
             foreach (Pulsar4X.Entities.Star oStar in a_oStarSystem.Stars)
             {
@@ -249,7 +249,7 @@ namespace Pulsar4X.UI.SceenGraph
                 if (iStarCounter <= 0)
                 {
                     // then we have a secondary, etc star give random position around its orbit!
-                    oRootStar = new StarElement(oStar, a_oDefaultEffect, Vector3.Zero, Pulsar4X.Constants.StarColor.LookupColor(oStar), true);
+                    oRootStar = new StarElement(oStar, a_oDefaultEffect, Vector3.Zero, Pulsar4X.Constants.StarColor.LookupColor(oStar), null, true);
                     oCurrStar = oRootStar;
                 }
                 else
@@ -258,7 +258,7 @@ namespace Pulsar4X.UI.SceenGraph
                     v3StarPos.X = (float)(oStar.Position.X);
                     v3StarPos.Y = (float)(oStar.Position.Y);    
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.Orbit.SemiMajorAxis);
-                    oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar), false);
+                    oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar), oRootStar, false);
                 }
 
 
@@ -283,7 +283,7 @@ namespace Pulsar4X.UI.SceenGraph
                 // now go though and add each planet to render list.
                 foreach (Pulsar4X.Entities.SystemBody oPlanet in oStar.Planets)
                 {
-                    SceenElement oPlanetElement = new PlanetElement(a_oDefaultEffect, v3StarPos, oPlanet, Color.FromArgb(255, 0, 205, 0));
+                    SceenElement oPlanetElement = new PlanetElement(a_oDefaultEffect, v3StarPos, oPlanet, Color.FromArgb(255, 0, 205, 0), oCurrStar);
                     oPlanetElement.EntityID = oPlanet.Id;
 
                     if (iPlanetCounter == 0)
@@ -318,7 +318,7 @@ namespace Pulsar4X.UI.SceenGraph
                     // now again for the moons:
                     foreach (Pulsar4X.Entities.SystemBody oMoon in oPlanet.Moons)
                     {
-                        SceenElement oMoonElement = new PlanetElement(a_oDefaultEffect, v3PlanetPos, oMoon, Color.FromArgb(255, 0, 205, 0));
+                        SceenElement oMoonElement = new PlanetElement(a_oDefaultEffect, v3PlanetPos, oMoon, Color.FromArgb(255, 0, 205, 0), oPlanetElement);
                         oMoonElement.EntityID = oMoon.Id;
 
                         if (iMoonCounter == 0)
@@ -357,6 +357,13 @@ namespace Pulsar4X.UI.SceenGraph
                 foreach (Pulsar4X.Entities.JumpPoint oJumpPoint in a_oStarSystem.JumpPoints)
                 {
                     CreateJumpPoint(oCurrStar, oJumpPoint);
+                }
+
+                int SPIndex = 1;
+                foreach (Pulsar4X.Entities.SurveyPoint oSurveyPoint in a_oStarSystem._SurveyPoints)
+                {
+                    CreateSurveyPoint(oCurrStar, oSurveyPoint, a_oDefaultEffect, SPIndex);
+                    SPIndex++;
                 }
 
                 iStarCounter++;
@@ -428,6 +435,39 @@ namespace Pulsar4X.UI.SceenGraph
             oJumpPointElement.AddPrimitive(oJPQuad);
             oJumpPointElement.RealSize = new Vector2(0.0001f, 0.0001f);
             parent.AddChildElement(oJumpPointElement);
+        }
+
+        /// <summary>
+        /// Create a survey element by making a default circle element, then creating the GLCircle, and then adding this to the parent element list.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="oSurveyPoint"></param>
+        /// <param name="a_oDefaultEffect"></param>
+        /// <param name="SPIndex"></param>
+        private void CreateSurveyPoint(SceenElement parent, SurveyPoint oSurveyPoint, GLEffect a_oDefaultEffect, int SPIndex)
+        {
+            Vector3 v3SPPos = new Vector3((float)oSurveyPoint.Position.X, (float)oSurveyPoint.Position.Y, 0.0f);
+
+            CircleElement oSurveyPointElement = new CircleElement();
+            oSurveyPointElement.EntityID = oSurveyPoint.Id;
+
+            GLCircle oSPCircle = new GLCircle(a_oDefaultEffect,
+                        v3SPPos,
+                        4.0f/m_fZoomScaler,
+                        Color.White,
+                        UIConstants.Textures.DEFAULT_TEXTURE);
+
+
+            GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(SceenDefaultEffect, v3SPPos,
+            UIConstants.DEFAULT_TEXT_SIZE, Color.White, UIConstants.Textures.DEFAULT_GLFONT2, SPIndex.ToString());
+
+            oSurveyPointElement._isSurveyPoint = true;
+            oSurveyPointElement.Lable = oNameLable;
+            oSurveyPointElement.Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / m_fZoomScaler; //Initial taskgroup names weren't being scaled properly for whatever reason.
+            oSurveyPointElement.RealSize = new Vector2(0.0001f, 0.0001f) / m_fZoomScaler;
+            oSurveyPointElement.PrimaryPrimitive = oSPCircle;
+            oSurveyPointElement.AddPrimitive(oSPCircle);
+            parent.AddChildElement(oSurveyPointElement);
         }
 
         /// <summary>

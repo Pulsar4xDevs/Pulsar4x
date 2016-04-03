@@ -462,7 +462,7 @@ namespace Pulsar4X.Entities
                 {
                     case Constants.ShipyardInfo.SYType.Commercial:
                         Name = "Commercial Yard #" + Number.ToString();
-                        Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage * Constants.ShipyardInfo.NavalToCommercialRatio;
+                        Tonnage = (Constants.ShipyardInfo.BaseShipyardTonnage * Constants.ShipyardInfo.NavalToCommercialRatio);
                         break;
                     case Constants.ShipyardInfo.SYType.Naval:
                         Name = "Naval Yard #" + Number.ToString();
@@ -479,7 +479,6 @@ namespace Pulsar4X.Entities
                 BuildingShips = new BindingList<ShipyardTask>();
                 CurrentActivity = new ShipyardActivity();
 
-                Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage;
                 Slipways = 1;
                 AssignedClass = null;
 
@@ -538,6 +537,9 @@ namespace Pulsar4X.Entities
 
                 switch (NewActivity)
                 {
+                    case Constants.ShipyardInfo.ShipyardActivity.NoActivity:
+                        CurrentActivity = new ShipyardActivity();
+                        break;
                     case Constants.ShipyardInfo.ShipyardActivity.AddSlipway:
                         decimal TotalSlipwayCost = 0.0m;
                         for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
@@ -687,6 +689,17 @@ namespace Pulsar4X.Entities
                 if (BuildTech > Constants.ShipyardInfo.MaxShipProductionRate)
                     BuildTech = Constants.ShipyardInfo.MaxShipProductionRate;
                 return Constants.ShipyardInfo.ShipProductionRate[BuildTech];
+            }
+
+            /// <summary>
+            /// Make a new task and add it to this Shipyard, as well as to the Current Population.
+            /// </summary>
+            public void AddTask(Population CurrentPopulation, ShipTN CurrentShip, Constants.ShipyardInfo.Task SYITask, TaskGroupTN TargetTG, int BaseBuildRate, string TextBox, ShipClassTN ConstructRefit)
+            {
+                Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, TextBox, ConstructRefit);
+                BuildingShips.Add(NewTask);
+                CurrentPopulation.ShipyardTasks.Add(NewTask, this);
+                ConstructRefit.ShipsUnderConstruction++;
             }
 
             /// <summary>
@@ -898,7 +911,7 @@ namespace Pulsar4X.Entities
                         Cost = 120;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 60;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = 30;
-                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 30;
+                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = 30;
                         ThermalSignature = 5;
                         EMSignature = 5;
                         RequiredTechnology = Faction.FactionTechnology.TransNewtonianTech;
@@ -927,7 +940,7 @@ namespace Pulsar4X.Entities
                         Cost = 20;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 10;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = 5;
-                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 5;
+                        m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = 5;
                         ThermalSignature = 5;
                         EMSignature = 5;
                         RequiredTechnology = Faction.FactionTechnology.TransNewtonianTech;
@@ -1010,7 +1023,8 @@ namespace Pulsar4X.Entities
                     }
                 case InstallationType.ConvertMineToAutomated:
                     {
-                        Name = "Convert mine to Automated";
+                        Name = "Convert Mine to Automated";
+                        Cost = 150;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 75;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 75;
                         ThermalSignature = 5;
@@ -1280,6 +1294,7 @@ namespace Pulsar4X.Entities
             {
                 return false;
             }
+
 
             /// <summary>
             /// Technology Check

@@ -90,11 +90,35 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Secondary orders listbox: minerals, installation, ground units, commanders, teams, pdc parts, and anything else.
+        /// </summary>
+        public ListBox TaskgroupSecondaryListBox
+        {
+            get { return m_oTaskgroupSecondaryListBox; }
+        }
+
+        /// <summary>
+        /// Secondary orders groupbox: will have text for the above.
+        /// </summary>
+        public GroupBox TaskgroupSecondaryGroupBox
+        {
+            get { return m_oTaskGroupSecondaryGroupBox; }
+        }
+
+        /// <summary>
         /// Should detected contacts be displayed?
         /// </summary>
         public CheckBox DisplayContactsCheckBox
         {
             get { return m_oContactsCheckBox; }
+        }
+
+        /// <summary>
+        /// Should moons be destinations?
+        /// </summary>
+        public CheckBox DisplayMoonsCheckBox
+        {
+            get { return m_oMoonsCheckBox; }
         }
 
         /// <summary>
@@ -113,9 +137,36 @@ namespace Pulsar4X.UI.Panels
             get { return m_oWaypointCheckBox; }
         }
 
+        /// <summary>
+        /// Filter orders based on what is possible to accomplish given the selected place and taskgroup?
+        /// </summary>
         public CheckBox OrderFilteringCheckBox
         {
             get { return m_oOrderFilteringCheckBox; }  
+        }
+
+        /// <summary>
+        /// Display survey points as taskgroup move orders targets.
+        /// </summary>
+        public CheckBox DisplaySurveyLocationsCheckBox
+        {
+            get { return m_oSurveyLocationsCheckBox; }
+        }
+
+        /// <summary>
+        /// Do not display any surveyed bodies or survey points.
+        /// </summary>
+        public CheckBox ExcludeSurveyedCheckBox
+        {
+            get { return m_oExcludeSurveyedCheckBox; }
+        }
+
+        /// <summary>
+        /// Place any completed orders back in the order list so that a taskgroup will repeatedly perform an order cycle such as "go to here, get a mine, go to there, drop it off"
+        /// </summary>
+        public CheckBox CycleMovesCheckBox
+        {
+            get { return m_oCycleMovesCheckBox; }
         }
 
         /// <summary>
@@ -242,6 +293,41 @@ namespace Pulsar4X.UI.Panels
         
         #endregion 
 
+        #region Special Orders Tab
+        /// <summary>
+        /// The list of primary default orders. these will be done before secondary default orders.
+        /// </summary>
+        public ComboBox PrimaryDefaultOrderComboBox
+        {
+            get { return m_oPrimaryDefaultOrdersComboBox; }
+        }
+        public ComboBox SecondaryDefaultOrderComboBox
+        {
+            get { return m_oSecondaryDefaultOrdersComboBox; }
+        }
+
+        /// <summary>
+        /// How should conditionals be handled? should they interrupt orders?
+        /// </summary>
+        public ComboBox ConditionalAConditionComboBox
+        {
+            get { return m_oCondAConditionComboBox; }
+        }
+        public ComboBox ConditionalAOrderComboBox
+        {
+            get { return m_oCondAOrderComboBox; }
+        }
+
+        public ComboBox ConditionalBConditionComboBox
+        {
+            get { return m_oCondBConditionComboBox; }
+        }
+        public ComboBox ConditionalBOrderComboBox
+        {
+            get { return m_oCondBOrderComboBox; }
+        }
+        #endregion
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -338,6 +424,46 @@ namespace Pulsar4X.UI.Panels
             this.m_oAsteroidsCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oMoonsCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oSpecialOrdersTabPage = new System.Windows.Forms.TabPage();
+            this.m_oTaskforceTrainingGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oStartTaskforceTrainingButton = new System.Windows.Forms.Button();
+            this.m_oSubordinateFormationGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSubordinateFormationsListBox = new System.Windows.Forms.ListBox();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.m_oCopyConditionalCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oCopyDefaultCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oMatchSpeedsCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oCopyOrdersToSubordinateButton = new System.Windows.Forms.Button();
+            this.m_oCondOrderAGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oCondAOrderLabel = new System.Windows.Forms.Label();
+            this.m_oCondACondLabel = new System.Windows.Forms.Label();
+            this.m_oCondAOrderComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oCondAConditionComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSuperiorFormationGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSaveFormationButton = new System.Windows.Forms.Button();
+            this.m_oSuperiorFormationComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oCombineTaskgroupGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSaveCombineButton = new System.Windows.Forms.Button();
+            this.m_oCombineTaskgroupsComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oCondOrderBGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oCondBOrderLabel = new System.Windows.Forms.Label();
+            this.m_oCondBCondLabel = new System.Windows.Forms.Label();
+            this.m_oCondBOrderComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oCondBConditionComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oDefaultOrderGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oDefaultSecondaryLabel = new System.Windows.Forms.Label();
+            this.m_oDefaultPrimaryLabel = new System.Windows.Forms.Label();
+            this.m_oSecondaryDefaultOrdersComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oPrimaryDefaultOrdersComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oProtectThreatAxisGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oBearingThreatLabel = new System.Windows.Forms.Label();
+            this.m_oOffsetthreatLabel = new System.Windows.Forms.Label();
+            this.m_oThreatDistanceLabel = new System.Windows.Forms.Label();
+            this.m_oTaskGroupThreatLabel = new System.Windows.Forms.Label();
+            this.m_oThreatLabel = new System.Windows.Forms.Label();
+            this.comboBox12 = new System.Windows.Forms.ComboBox();
+            this.comboBox11 = new System.Windows.Forms.ComboBox();
+            this.comboBox10 = new System.Windows.Forms.ComboBox();
+            this.comboBox9 = new System.Windows.Forms.ComboBox();
             this.m_oOrganizationTabPage = new System.Windows.Forms.TabPage();
             this.m_oShipMoveToTGGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oOrgSelectedTGListBox = new System.Windows.Forms.ListBox();
@@ -387,6 +513,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oAddColonyButton = new System.Windows.Forms.Button();
             this.m_oSystemMapButton = new System.Windows.Forms.Button();
             this.m_oNewTGButton = new System.Windows.Forms.Button();
+            this.m_oTaskGroupSecondaryGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oTaskgroupSecondaryListBox = new System.Windows.Forms.ListBox();
             this.m_oGeneralTGDetailsBox.SuspendLayout();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oTaskGroupOrdersTabPage.SuspendLayout();
@@ -399,6 +527,16 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersBox.SuspendLayout();
             this.m_oCopyOrdersGroupBox.SuspendLayout();
             this.m_oSystemDisplayOptionsBox.SuspendLayout();
+            this.m_oSpecialOrdersTabPage.SuspendLayout();
+            this.m_oTaskforceTrainingGroupBox.SuspendLayout();
+            this.m_oSubordinateFormationGroupBox.SuspendLayout();
+            this.groupBox7.SuspendLayout();
+            this.m_oCondOrderAGroupBox.SuspendLayout();
+            this.m_oSuperiorFormationGroupBox.SuspendLayout();
+            this.m_oCombineTaskgroupGroupBox.SuspendLayout();
+            this.m_oCondOrderBGroupBox.SuspendLayout();
+            this.m_oDefaultOrderGroupBox.SuspendLayout();
+            this.m_oProtectThreatAxisGroupBox.SuspendLayout();
             this.m_oOrganizationTabPage.SuspendLayout();
             this.m_oShipMoveToTGGroupBox.SuspendLayout();
             this.m_oTaskGroupInfoTabPage.SuspendLayout();
@@ -409,6 +547,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCenterShowGF.SuspendLayout();
             this.m_oSpeedBox.SuspendLayout();
             this.m_oButtonBox.SuspendLayout();
+            this.m_oTaskGroupSecondaryGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupName
@@ -828,6 +967,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oTaskGroupOrdersBox.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oTaskGroupSecondaryGroupBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrdersTextBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrderButton);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oCycleMovesCheckBox);
@@ -1300,6 +1440,15 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oSpecialOrdersTabPage
             // 
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oTaskforceTrainingGroupBox);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oSubordinateFormationGroupBox);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.groupBox7);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oCondOrderAGroupBox);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oSuperiorFormationGroupBox);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oCombineTaskgroupGroupBox);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oCondOrderBGroupBox);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oDefaultOrderGroupBox);
+            this.m_oSpecialOrdersTabPage.Controls.Add(this.m_oProtectThreatAxisGroupBox);
             this.m_oSpecialOrdersTabPage.Location = new System.Drawing.Point(4, 22);
             this.m_oSpecialOrdersTabPage.Name = "m_oSpecialOrdersTabPage";
             this.m_oSpecialOrdersTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -1307,6 +1456,401 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpecialOrdersTabPage.TabIndex = 1;
             this.m_oSpecialOrdersTabPage.Text = "Special Orders";
             this.m_oSpecialOrdersTabPage.UseVisualStyleBackColor = true;
+            // 
+            // m_oTaskforceTrainingGroupBox
+            // 
+            this.m_oTaskforceTrainingGroupBox.Controls.Add(this.m_oStartTaskforceTrainingButton);
+            this.m_oTaskforceTrainingGroupBox.Location = new System.Drawing.Point(6, 345);
+            this.m_oTaskforceTrainingGroupBox.Name = "m_oTaskforceTrainingGroupBox";
+            this.m_oTaskforceTrainingGroupBox.Size = new System.Drawing.Size(320, 78);
+            this.m_oTaskforceTrainingGroupBox.TabIndex = 7;
+            this.m_oTaskforceTrainingGroupBox.TabStop = false;
+            // 
+            // m_oStartTaskforceTrainingButton
+            // 
+            this.m_oStartTaskforceTrainingButton.Location = new System.Drawing.Point(60, 31);
+            this.m_oStartTaskforceTrainingButton.Name = "m_oStartTaskforceTrainingButton";
+            this.m_oStartTaskforceTrainingButton.Size = new System.Drawing.Size(200, 25);
+            this.m_oStartTaskforceTrainingButton.TabIndex = 0;
+            this.m_oStartTaskforceTrainingButton.Text = "Start Task Force Training";
+            this.m_oStartTaskforceTrainingButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSubordinateFormationGroupBox
+            // 
+            this.m_oSubordinateFormationGroupBox.Controls.Add(this.m_oSubordinateFormationsListBox);
+            this.m_oSubordinateFormationGroupBox.Location = new System.Drawing.Point(6, 181);
+            this.m_oSubordinateFormationGroupBox.Name = "m_oSubordinateFormationGroupBox";
+            this.m_oSubordinateFormationGroupBox.Size = new System.Drawing.Size(320, 158);
+            this.m_oSubordinateFormationGroupBox.TabIndex = 6;
+            this.m_oSubordinateFormationGroupBox.TabStop = false;
+            this.m_oSubordinateFormationGroupBox.Text = "Subordinate Formations";
+            // 
+            // m_oSubordinateFormationsListBox
+            // 
+            this.m_oSubordinateFormationsListBox.FormattingEnabled = true;
+            this.m_oSubordinateFormationsListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oSubordinateFormationsListBox.Name = "m_oSubordinateFormationsListBox";
+            this.m_oSubordinateFormationsListBox.Size = new System.Drawing.Size(308, 134);
+            this.m_oSubordinateFormationsListBox.TabIndex = 0;
+            // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.m_oCopyConditionalCheckBox);
+            this.groupBox7.Controls.Add(this.m_oCopyDefaultCheckBox);
+            this.groupBox7.Controls.Add(this.m_oMatchSpeedsCheckBox);
+            this.groupBox7.Controls.Add(this.m_oCopyOrdersToSubordinateButton);
+            this.groupBox7.Location = new System.Drawing.Point(659, 232);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(312, 70);
+            this.groupBox7.TabIndex = 5;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Copy Orders to Subordinate Formation";
+            // 
+            // m_oCopyConditionalCheckBox
+            // 
+            this.m_oCopyConditionalCheckBox.AutoSize = true;
+            this.m_oCopyConditionalCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCopyConditionalCheckBox.Location = new System.Drawing.Point(227, 42);
+            this.m_oCopyConditionalCheckBox.Name = "m_oCopyConditionalCheckBox";
+            this.m_oCopyConditionalCheckBox.Size = new System.Drawing.Size(75, 17);
+            this.m_oCopyConditionalCheckBox.TabIndex = 3;
+            this.m_oCopyConditionalCheckBox.Text = "Inc. Cond.";
+            this.m_oCopyConditionalCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oCopyDefaultCheckBox
+            // 
+            this.m_oCopyDefaultCheckBox.AutoSize = true;
+            this.m_oCopyDefaultCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCopyDefaultCheckBox.Location = new System.Drawing.Point(221, 19);
+            this.m_oCopyDefaultCheckBox.Name = "m_oCopyDefaultCheckBox";
+            this.m_oCopyDefaultCheckBox.Size = new System.Drawing.Size(81, 17);
+            this.m_oCopyDefaultCheckBox.TabIndex = 2;
+            this.m_oCopyDefaultCheckBox.Text = "Inc. Default";
+            this.m_oCopyDefaultCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oMatchSpeedsCheckBox
+            // 
+            this.m_oMatchSpeedsCheckBox.AutoSize = true;
+            this.m_oMatchSpeedsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oMatchSpeedsCheckBox.Location = new System.Drawing.Point(119, 19);
+            this.m_oMatchSpeedsCheckBox.Name = "m_oMatchSpeedsCheckBox";
+            this.m_oMatchSpeedsCheckBox.Size = new System.Drawing.Size(95, 17);
+            this.m_oMatchSpeedsCheckBox.TabIndex = 1;
+            this.m_oMatchSpeedsCheckBox.Text = "Match Speeds";
+            this.m_oMatchSpeedsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oCopyOrdersToSubordinateButton
+            // 
+            this.m_oCopyOrdersToSubordinateButton.Location = new System.Drawing.Point(38, 19);
+            this.m_oCopyOrdersToSubordinateButton.Name = "m_oCopyOrdersToSubordinateButton";
+            this.m_oCopyOrdersToSubordinateButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oCopyOrdersToSubordinateButton.TabIndex = 0;
+            this.m_oCopyOrdersToSubordinateButton.Text = "Copy";
+            this.m_oCopyOrdersToSubordinateButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCondOrderAGroupBox
+            // 
+            this.m_oCondOrderAGroupBox.Controls.Add(this.m_oCondAOrderLabel);
+            this.m_oCondOrderAGroupBox.Controls.Add(this.m_oCondACondLabel);
+            this.m_oCondOrderAGroupBox.Controls.Add(this.m_oCondAOrderComboBox);
+            this.m_oCondOrderAGroupBox.Controls.Add(this.m_oCondAConditionComboBox);
+            this.m_oCondOrderAGroupBox.Location = new System.Drawing.Point(333, 119);
+            this.m_oCondOrderAGroupBox.Name = "m_oCondOrderAGroupBox";
+            this.m_oCondOrderAGroupBox.Size = new System.Drawing.Size(320, 107);
+            this.m_oCondOrderAGroupBox.TabIndex = 2;
+            this.m_oCondOrderAGroupBox.TabStop = false;
+            this.m_oCondOrderAGroupBox.Text = "Conditional Order A(act on order if condition is met)";
+            // 
+            // m_oCondAOrderLabel
+            // 
+            this.m_oCondAOrderLabel.AutoSize = true;
+            this.m_oCondAOrderLabel.Location = new System.Drawing.Point(6, 61);
+            this.m_oCondAOrderLabel.Name = "m_oCondAOrderLabel";
+            this.m_oCondAOrderLabel.Size = new System.Drawing.Size(33, 13);
+            this.m_oCondAOrderLabel.TabIndex = 5;
+            this.m_oCondAOrderLabel.Text = "Order";
+            // 
+            // m_oCondACondLabel
+            // 
+            this.m_oCondACondLabel.AutoSize = true;
+            this.m_oCondACondLabel.Location = new System.Drawing.Point(6, 26);
+            this.m_oCondACondLabel.Name = "m_oCondACondLabel";
+            this.m_oCondACondLabel.Size = new System.Drawing.Size(51, 13);
+            this.m_oCondACondLabel.TabIndex = 4;
+            this.m_oCondACondLabel.Text = "Condition";
+            // 
+            // m_oCondAOrderComboBox
+            // 
+            this.m_oCondAOrderComboBox.FormattingEnabled = true;
+            this.m_oCondAOrderComboBox.Location = new System.Drawing.Point(75, 58);
+            this.m_oCondAOrderComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oCondAOrderComboBox.Name = "m_oCondAOrderComboBox";
+            this.m_oCondAOrderComboBox.Size = new System.Drawing.Size(235, 21);
+            this.m_oCondAOrderComboBox.TabIndex = 3;
+            // 
+            // m_oCondAConditionComboBox
+            // 
+            this.m_oCondAConditionComboBox.FormattingEnabled = true;
+            this.m_oCondAConditionComboBox.Location = new System.Drawing.Point(75, 23);
+            this.m_oCondAConditionComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oCondAConditionComboBox.Name = "m_oCondAConditionComboBox";
+            this.m_oCondAConditionComboBox.Size = new System.Drawing.Size(235, 21);
+            this.m_oCondAConditionComboBox.TabIndex = 2;
+            // 
+            // m_oSuperiorFormationGroupBox
+            // 
+            this.m_oSuperiorFormationGroupBox.Controls.Add(this.m_oSaveFormationButton);
+            this.m_oSuperiorFormationGroupBox.Controls.Add(this.m_oSuperiorFormationComboBox);
+            this.m_oSuperiorFormationGroupBox.Location = new System.Drawing.Point(659, 119);
+            this.m_oSuperiorFormationGroupBox.Name = "m_oSuperiorFormationGroupBox";
+            this.m_oSuperiorFormationGroupBox.Size = new System.Drawing.Size(312, 107);
+            this.m_oSuperiorFormationGroupBox.TabIndex = 4;
+            this.m_oSuperiorFormationGroupBox.TabStop = false;
+            this.m_oSuperiorFormationGroupBox.Text = "Superior Formation";
+            // 
+            // m_oSaveFormationButton
+            // 
+            this.m_oSaveFormationButton.Location = new System.Drawing.Point(119, 54);
+            this.m_oSaveFormationButton.Name = "m_oSaveFormationButton";
+            this.m_oSaveFormationButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oSaveFormationButton.TabIndex = 4;
+            this.m_oSaveFormationButton.Text = "Save";
+            this.m_oSaveFormationButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSuperiorFormationComboBox
+            // 
+            this.m_oSuperiorFormationComboBox.FormattingEnabled = true;
+            this.m_oSuperiorFormationComboBox.Location = new System.Drawing.Point(10, 23);
+            this.m_oSuperiorFormationComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oSuperiorFormationComboBox.Name = "m_oSuperiorFormationComboBox";
+            this.m_oSuperiorFormationComboBox.Size = new System.Drawing.Size(292, 21);
+            this.m_oSuperiorFormationComboBox.TabIndex = 3;
+            // 
+            // m_oCombineTaskgroupGroupBox
+            // 
+            this.m_oCombineTaskgroupGroupBox.Controls.Add(this.m_oSaveCombineButton);
+            this.m_oCombineTaskgroupGroupBox.Controls.Add(this.m_oCombineTaskgroupsComboBox);
+            this.m_oCombineTaskgroupGroupBox.Location = new System.Drawing.Point(659, 6);
+            this.m_oCombineTaskgroupGroupBox.Name = "m_oCombineTaskgroupGroupBox";
+            this.m_oCombineTaskgroupGroupBox.Size = new System.Drawing.Size(312, 107);
+            this.m_oCombineTaskgroupGroupBox.TabIndex = 3;
+            this.m_oCombineTaskgroupGroupBox.TabStop = false;
+            this.m_oCombineTaskgroupGroupBox.Text = "Combine with other Task Group";
+            // 
+            // m_oSaveCombineButton
+            // 
+            this.m_oSaveCombineButton.Location = new System.Drawing.Point(118, 54);
+            this.m_oSaveCombineButton.Name = "m_oSaveCombineButton";
+            this.m_oSaveCombineButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oSaveCombineButton.TabIndex = 3;
+            this.m_oSaveCombineButton.Text = "Save";
+            this.m_oSaveCombineButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCombineTaskgroupsComboBox
+            // 
+            this.m_oCombineTaskgroupsComboBox.FormattingEnabled = true;
+            this.m_oCombineTaskgroupsComboBox.Location = new System.Drawing.Point(10, 23);
+            this.m_oCombineTaskgroupsComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oCombineTaskgroupsComboBox.Name = "m_oCombineTaskgroupsComboBox";
+            this.m_oCombineTaskgroupsComboBox.Size = new System.Drawing.Size(292, 21);
+            this.m_oCombineTaskgroupsComboBox.TabIndex = 2;
+            // 
+            // m_oCondOrderBGroupBox
+            // 
+            this.m_oCondOrderBGroupBox.Controls.Add(this.m_oCondBOrderLabel);
+            this.m_oCondOrderBGroupBox.Controls.Add(this.m_oCondBCondLabel);
+            this.m_oCondOrderBGroupBox.Controls.Add(this.m_oCondBOrderComboBox);
+            this.m_oCondOrderBGroupBox.Controls.Add(this.m_oCondBConditionComboBox);
+            this.m_oCondOrderBGroupBox.Location = new System.Drawing.Point(333, 232);
+            this.m_oCondOrderBGroupBox.Name = "m_oCondOrderBGroupBox";
+            this.m_oCondOrderBGroupBox.Size = new System.Drawing.Size(320, 107);
+            this.m_oCondOrderBGroupBox.TabIndex = 3;
+            this.m_oCondOrderBGroupBox.TabStop = false;
+            this.m_oCondOrderBGroupBox.Text = "Conditional Order B(act on order if condition is met)";
+            // 
+            // m_oCondBOrderLabel
+            // 
+            this.m_oCondBOrderLabel.AutoSize = true;
+            this.m_oCondBOrderLabel.Location = new System.Drawing.Point(6, 61);
+            this.m_oCondBOrderLabel.Name = "m_oCondBOrderLabel";
+            this.m_oCondBOrderLabel.Size = new System.Drawing.Size(33, 13);
+            this.m_oCondBOrderLabel.TabIndex = 7;
+            this.m_oCondBOrderLabel.Text = "Order";
+            // 
+            // m_oCondBCondLabel
+            // 
+            this.m_oCondBCondLabel.AutoSize = true;
+            this.m_oCondBCondLabel.Location = new System.Drawing.Point(6, 24);
+            this.m_oCondBCondLabel.Name = "m_oCondBCondLabel";
+            this.m_oCondBCondLabel.Size = new System.Drawing.Size(51, 13);
+            this.m_oCondBCondLabel.TabIndex = 6;
+            this.m_oCondBCondLabel.Text = "Condition";
+            // 
+            // m_oCondBOrderComboBox
+            // 
+            this.m_oCondBOrderComboBox.FormattingEnabled = true;
+            this.m_oCondBOrderComboBox.Location = new System.Drawing.Point(75, 58);
+            this.m_oCondBOrderComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oCondBOrderComboBox.Name = "m_oCondBOrderComboBox";
+            this.m_oCondBOrderComboBox.Size = new System.Drawing.Size(235, 21);
+            this.m_oCondBOrderComboBox.TabIndex = 5;
+            // 
+            // m_oCondBConditionComboBox
+            // 
+            this.m_oCondBConditionComboBox.FormattingEnabled = true;
+            this.m_oCondBConditionComboBox.Location = new System.Drawing.Point(75, 23);
+            this.m_oCondBConditionComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oCondBConditionComboBox.Name = "m_oCondBConditionComboBox";
+            this.m_oCondBConditionComboBox.Size = new System.Drawing.Size(235, 21);
+            this.m_oCondBConditionComboBox.TabIndex = 4;
+            // 
+            // m_oDefaultOrderGroupBox
+            // 
+            this.m_oDefaultOrderGroupBox.Controls.Add(this.m_oDefaultSecondaryLabel);
+            this.m_oDefaultOrderGroupBox.Controls.Add(this.m_oDefaultPrimaryLabel);
+            this.m_oDefaultOrderGroupBox.Controls.Add(this.m_oSecondaryDefaultOrdersComboBox);
+            this.m_oDefaultOrderGroupBox.Controls.Add(this.m_oPrimaryDefaultOrdersComboBox);
+            this.m_oDefaultOrderGroupBox.Location = new System.Drawing.Point(333, 6);
+            this.m_oDefaultOrderGroupBox.Name = "m_oDefaultOrderGroupBox";
+            this.m_oDefaultOrderGroupBox.Size = new System.Drawing.Size(320, 105);
+            this.m_oDefaultOrderGroupBox.TabIndex = 1;
+            this.m_oDefaultOrderGroupBox.TabStop = false;
+            this.m_oDefaultOrderGroupBox.Text = "Default Orders(if no other orders are set)";
+            // 
+            // m_oDefaultSecondaryLabel
+            // 
+            this.m_oDefaultSecondaryLabel.AutoSize = true;
+            this.m_oDefaultSecondaryLabel.Location = new System.Drawing.Point(6, 61);
+            this.m_oDefaultSecondaryLabel.Name = "m_oDefaultSecondaryLabel";
+            this.m_oDefaultSecondaryLabel.Size = new System.Drawing.Size(58, 13);
+            this.m_oDefaultSecondaryLabel.TabIndex = 3;
+            this.m_oDefaultSecondaryLabel.Text = "Secondary";
+            // 
+            // m_oDefaultPrimaryLabel
+            // 
+            this.m_oDefaultPrimaryLabel.AutoSize = true;
+            this.m_oDefaultPrimaryLabel.Location = new System.Drawing.Point(6, 26);
+            this.m_oDefaultPrimaryLabel.Name = "m_oDefaultPrimaryLabel";
+            this.m_oDefaultPrimaryLabel.Size = new System.Drawing.Size(41, 13);
+            this.m_oDefaultPrimaryLabel.TabIndex = 2;
+            this.m_oDefaultPrimaryLabel.Text = "Primary";
+            // 
+            // m_oSecondaryDefaultOrdersComboBox
+            // 
+            this.m_oSecondaryDefaultOrdersComboBox.FormattingEnabled = true;
+            this.m_oSecondaryDefaultOrdersComboBox.Location = new System.Drawing.Point(75, 58);
+            this.m_oSecondaryDefaultOrdersComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oSecondaryDefaultOrdersComboBox.Name = "m_oSecondaryDefaultOrdersComboBox";
+            this.m_oSecondaryDefaultOrdersComboBox.Size = new System.Drawing.Size(235, 21);
+            this.m_oSecondaryDefaultOrdersComboBox.TabIndex = 1;
+            // 
+            // m_oPrimaryDefaultOrdersComboBox
+            // 
+            this.m_oPrimaryDefaultOrdersComboBox.FormattingEnabled = true;
+            this.m_oPrimaryDefaultOrdersComboBox.Location = new System.Drawing.Point(75, 23);
+            this.m_oPrimaryDefaultOrdersComboBox.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oPrimaryDefaultOrdersComboBox.Name = "m_oPrimaryDefaultOrdersComboBox";
+            this.m_oPrimaryDefaultOrdersComboBox.Size = new System.Drawing.Size(235, 21);
+            this.m_oPrimaryDefaultOrdersComboBox.TabIndex = 0;
+            // 
+            // m_oProtectThreatAxisGroupBox
+            // 
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.m_oBearingThreatLabel);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.m_oOffsetthreatLabel);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.m_oThreatDistanceLabel);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.m_oTaskGroupThreatLabel);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.m_oThreatLabel);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.comboBox12);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.comboBox11);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.comboBox10);
+            this.m_oProtectThreatAxisGroupBox.Controls.Add(this.comboBox9);
+            this.m_oProtectThreatAxisGroupBox.Location = new System.Drawing.Point(6, 6);
+            this.m_oProtectThreatAxisGroupBox.Name = "m_oProtectThreatAxisGroupBox";
+            this.m_oProtectThreatAxisGroupBox.Size = new System.Drawing.Size(320, 169);
+            this.m_oProtectThreatAxisGroupBox.TabIndex = 0;
+            this.m_oProtectThreatAxisGroupBox.TabStop = false;
+            this.m_oProtectThreatAxisGroupBox.Text = "Protect Threat Axis(Acts as Highest Priority default order)";
+            // 
+            // m_oBearingThreatLabel
+            // 
+            this.m_oBearingThreatLabel.AutoSize = true;
+            this.m_oBearingThreatLabel.Location = new System.Drawing.Point(6, 144);
+            this.m_oBearingThreatLabel.Name = "m_oBearingThreatLabel";
+            this.m_oBearingThreatLabel.Size = new System.Drawing.Size(43, 13);
+            this.m_oBearingThreatLabel.TabIndex = 12;
+            this.m_oBearingThreatLabel.Text = "Bearing";
+            // 
+            // m_oOffsetthreatLabel
+            // 
+            this.m_oOffsetthreatLabel.AutoSize = true;
+            this.m_oOffsetthreatLabel.Location = new System.Drawing.Point(6, 131);
+            this.m_oOffsetthreatLabel.Name = "m_oOffsetthreatLabel";
+            this.m_oOffsetthreatLabel.Size = new System.Drawing.Size(35, 13);
+            this.m_oOffsetthreatLabel.TabIndex = 11;
+            this.m_oOffsetthreatLabel.Text = "Offset";
+            // 
+            // m_oThreatDistanceLabel
+            // 
+            this.m_oThreatDistanceLabel.AutoSize = true;
+            this.m_oThreatDistanceLabel.Location = new System.Drawing.Point(6, 96);
+            this.m_oThreatDistanceLabel.Name = "m_oThreatDistanceLabel";
+            this.m_oThreatDistanceLabel.Size = new System.Drawing.Size(49, 13);
+            this.m_oThreatDistanceLabel.TabIndex = 10;
+            this.m_oThreatDistanceLabel.Text = "Distance";
+            // 
+            // m_oTaskGroupThreatLabel
+            // 
+            this.m_oTaskGroupThreatLabel.AutoSize = true;
+            this.m_oTaskGroupThreatLabel.Location = new System.Drawing.Point(6, 59);
+            this.m_oTaskGroupThreatLabel.Name = "m_oTaskGroupThreatLabel";
+            this.m_oTaskGroupThreatLabel.Size = new System.Drawing.Size(58, 13);
+            this.m_oTaskGroupThreatLabel.TabIndex = 9;
+            this.m_oTaskGroupThreatLabel.Text = "Taskgroup";
+            // 
+            // m_oThreatLabel
+            // 
+            this.m_oThreatLabel.AutoSize = true;
+            this.m_oThreatLabel.Location = new System.Drawing.Point(6, 26);
+            this.m_oThreatLabel.Name = "m_oThreatLabel";
+            this.m_oThreatLabel.Size = new System.Drawing.Size(38, 13);
+            this.m_oThreatLabel.TabIndex = 8;
+            this.m_oThreatLabel.Text = "Threat";
+            // 
+            // comboBox12
+            // 
+            this.comboBox12.FormattingEnabled = true;
+            this.comboBox12.Location = new System.Drawing.Point(75, 128);
+            this.comboBox12.Margin = new System.Windows.Forms.Padding(7);
+            this.comboBox12.Name = "comboBox12";
+            this.comboBox12.Size = new System.Drawing.Size(235, 21);
+            this.comboBox12.TabIndex = 7;
+            // 
+            // comboBox11
+            // 
+            this.comboBox11.FormattingEnabled = true;
+            this.comboBox11.Location = new System.Drawing.Point(75, 93);
+            this.comboBox11.Margin = new System.Windows.Forms.Padding(7);
+            this.comboBox11.Name = "comboBox11";
+            this.comboBox11.Size = new System.Drawing.Size(235, 21);
+            this.comboBox11.TabIndex = 6;
+            // 
+            // comboBox10
+            // 
+            this.comboBox10.FormattingEnabled = true;
+            this.comboBox10.Location = new System.Drawing.Point(75, 58);
+            this.comboBox10.Margin = new System.Windows.Forms.Padding(7);
+            this.comboBox10.Name = "comboBox10";
+            this.comboBox10.Size = new System.Drawing.Size(235, 21);
+            this.comboBox10.TabIndex = 5;
+            // 
+            // comboBox9
+            // 
+            this.comboBox9.FormattingEnabled = true;
+            this.comboBox9.Location = new System.Drawing.Point(75, 23);
+            this.comboBox9.Margin = new System.Windows.Forms.Padding(7);
+            this.comboBox9.Name = "comboBox9";
+            this.comboBox9.Size = new System.Drawing.Size(235, 21);
+            this.comboBox9.TabIndex = 4;
             // 
             // m_oOrganizationTabPage
             // 
@@ -1824,6 +2368,25 @@ namespace Pulsar4X.UI.Panels
             this.m_oNewTGButton.Text = "&New TG";
             this.m_oNewTGButton.UseVisualStyleBackColor = true;
             // 
+            // m_oTaskGroupSecondaryGroupBox
+            // 
+            this.m_oTaskGroupSecondaryGroupBox.Controls.Add(this.m_oTaskgroupSecondaryListBox);
+            this.m_oTaskGroupSecondaryGroupBox.Location = new System.Drawing.Point(517, 69);
+            this.m_oTaskGroupSecondaryGroupBox.Name = "m_oTaskGroupSecondaryGroupBox";
+            this.m_oTaskGroupSecondaryGroupBox.Size = new System.Drawing.Size(275, 201);
+            this.m_oTaskGroupSecondaryGroupBox.TabIndex = 45;
+            this.m_oTaskGroupSecondaryGroupBox.TabStop = false;
+            this.m_oTaskGroupSecondaryGroupBox.Visible = false;
+            // 
+            // m_oTaskgroupSecondaryListBox
+            // 
+            this.m_oTaskgroupSecondaryListBox.FormattingEnabled = true;
+            this.m_oTaskgroupSecondaryListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oTaskgroupSecondaryListBox.Name = "m_oTaskgroupSecondaryListBox";
+            this.m_oTaskgroupSecondaryListBox.Size = new System.Drawing.Size(263, 147);
+            this.m_oTaskgroupSecondaryListBox.TabIndex = 0;
+            this.m_oTaskgroupSecondaryListBox.Visible = false;
+            // 
             // TaskGroup_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1855,6 +2418,21 @@ namespace Pulsar4X.UI.Panels
             this.m_oCopyOrdersGroupBox.PerformLayout();
             this.m_oSystemDisplayOptionsBox.ResumeLayout(false);
             this.m_oSystemDisplayOptionsBox.PerformLayout();
+            this.m_oSpecialOrdersTabPage.ResumeLayout(false);
+            this.m_oTaskforceTrainingGroupBox.ResumeLayout(false);
+            this.m_oSubordinateFormationGroupBox.ResumeLayout(false);
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
+            this.m_oCondOrderAGroupBox.ResumeLayout(false);
+            this.m_oCondOrderAGroupBox.PerformLayout();
+            this.m_oSuperiorFormationGroupBox.ResumeLayout(false);
+            this.m_oCombineTaskgroupGroupBox.ResumeLayout(false);
+            this.m_oCondOrderBGroupBox.ResumeLayout(false);
+            this.m_oCondOrderBGroupBox.PerformLayout();
+            this.m_oDefaultOrderGroupBox.ResumeLayout(false);
+            this.m_oDefaultOrderGroupBox.PerformLayout();
+            this.m_oProtectThreatAxisGroupBox.ResumeLayout(false);
+            this.m_oProtectThreatAxisGroupBox.PerformLayout();
             this.m_oOrganizationTabPage.ResumeLayout(false);
             this.m_oShipMoveToTGGroupBox.ResumeLayout(false);
             this.m_oShipMoveToTGGroupBox.PerformLayout();
@@ -1872,6 +2450,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpeedBox.ResumeLayout(false);
             this.m_oSpeedBox.PerformLayout();
             this.m_oButtonBox.ResumeLayout(false);
+            this.m_oTaskGroupSecondaryGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2002,5 +2581,47 @@ namespace Pulsar4X.UI.Panels
         private Button m_oOrgMoveRightButton;
         private ComboBox m_oOrgSelectedTGComboBox;
         private TextBox m_oOrgCurrentTGTextBox;
+        private GroupBox m_oCombineTaskgroupGroupBox;
+        private GroupBox m_oCondOrderBGroupBox;
+        private GroupBox m_oCondOrderAGroupBox;
+        private GroupBox m_oDefaultOrderGroupBox;
+        private GroupBox m_oProtectThreatAxisGroupBox;
+        private GroupBox m_oSuperiorFormationGroupBox;
+        private GroupBox groupBox7;
+        private GroupBox m_oSubordinateFormationGroupBox;
+        private ComboBox m_oCondAOrderComboBox;
+        private ComboBox m_oCondAConditionComboBox;
+        private ComboBox m_oSuperiorFormationComboBox;
+        private ComboBox m_oCombineTaskgroupsComboBox;
+        private ComboBox m_oCondBOrderComboBox;
+        private ComboBox m_oCondBConditionComboBox;
+        private ComboBox m_oSecondaryDefaultOrdersComboBox;
+        private ComboBox m_oPrimaryDefaultOrdersComboBox;
+        private ComboBox comboBox12;
+        private ComboBox comboBox11;
+        private ComboBox comboBox10;
+        private ComboBox comboBox9;
+        private GroupBox m_oTaskforceTrainingGroupBox;
+        private Button m_oStartTaskforceTrainingButton;
+        private Button m_oCopyOrdersToSubordinateButton;
+        private Button m_oSaveFormationButton;
+        private Button m_oSaveCombineButton;
+        private ListBox m_oSubordinateFormationsListBox;
+        private CheckBox m_oCopyConditionalCheckBox;
+        private CheckBox m_oCopyDefaultCheckBox;
+        private CheckBox m_oMatchSpeedsCheckBox;
+        private Label m_oCondAOrderLabel;
+        private Label m_oCondACondLabel;
+        private Label m_oCondBOrderLabel;
+        private Label m_oCondBCondLabel;
+        private Label m_oDefaultSecondaryLabel;
+        private Label m_oDefaultPrimaryLabel;
+        private Label m_oBearingThreatLabel;
+        private Label m_oOffsetthreatLabel;
+        private Label m_oThreatDistanceLabel;
+        private Label m_oTaskGroupThreatLabel;
+        private Label m_oThreatLabel;
+        private GroupBox m_oTaskGroupSecondaryGroupBox;
+        private ListBox m_oTaskgroupSecondaryListBox;
     }
 }

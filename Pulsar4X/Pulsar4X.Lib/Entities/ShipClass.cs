@@ -923,6 +923,48 @@ namespace Pulsar4X.Entities
         public int JumpRadius { get; set; }
         #endregion
 
+        #region Survey sensors
+        /// <summary>
+        /// Definitions for this ships survey sensors.
+        /// </summary>
+        [DisplayName("Ship Survey sensor List"),
+        Category("Component Lists"),
+        Description("The model/type of this ships survey sensors"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<SurveySensorDefTN> ShipSurveyDef { get; set; }
+
+        /// <summary>
+        /// Counts for this ships survey sensors.
+        /// </summary>
+        [DisplayName("Survey Sensor Count"),
+        Category("Component Counts"),
+        Description("Number of survey sensors on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<int> ShipSurveyCount { get; set; }
+
+        /// <summary>
+        /// Total Geological Survey Strength available to this ship.
+        /// </summary>
+        [DisplayName("Geo Survey Strength"),
+        Category("Detials"),
+        Description("How many Geo survey points this ship will generate per unit of time."),
+        Browsable(true),
+        ReadOnly(true)]
+        public float ShipGeoSurveyStrength { get; set; }
+
+        /// <summary>
+        /// Total Gravitational Survey Strength available to this ship.
+        /// </summary>
+        [DisplayName("Grav Survey Strength"),
+        Category("Detials"),
+        Description("How many Grav survey points this ship will generate per unit of time."),
+        Browsable(true),
+        ReadOnly(true)]
+        public float ShipGravSurveyStrength { get; set; }
+        #endregion
+
         #endregion
 
         #region Constructor
@@ -1074,6 +1116,11 @@ namespace Pulsar4X.Entities
             ShipJumpEngineCount = new BindingList<int>();
             SquadronSize = 0;
             JumpRadius = 0;
+
+            ShipSurveyDef = new BindingList<SurveySensorDefTN>();
+            ShipSurveyCount = new BindingList<int>();
+            ShipGeoSurveyStrength = 0.0f;
+            ShipGravSurveyStrength = 0.0f;
 
             ShipArmorDef = new ArmorDefTN("Conventional");
             NewArmor("Conventional", 2, 1);
@@ -1596,13 +1643,26 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Right now all this function does is overwrite the previous engine entry if switching types.
+        /// Right now all this function does is overwrite the previous engine entry if switching types. Update: this causes problems.
         /// I think I'll add a static variable to ComponentDefTN to deal with that. Can subtract.
         /// </summary>
         /// <param name="Engine">Engine Definition</param>
         /// <param name="inc">Number of engines to be added.</param>
         public void AddEngine(EngineDefTN Engine, short inc)
         {
+            if (ShipEngineDef != Engine && ShipEngineDef != null)
+            {
+                /// <summary>
+                /// The old engine has to be subtracted from the ship, so handle that here.
+                /// </summary>
+                short OldShipEngineCount = (short)ShipEngineCount;
+                AddEngine(ShipEngineDef, (short)(OldShipEngineCount * -1));
+
+                /// <summary>
+                /// Preserve the overall engine count. gah, casting is annoying, I should have just made everything ints.
+                /// </summary>
+                inc = (short)(inc + OldShipEngineCount);
+            }
             ShipEngineDef = Engine;
             ShipEngineCount = (ushort)((short)ShipEngineCount + inc);
 
@@ -2376,6 +2436,59 @@ namespace Pulsar4X.Entities
             UpdateClass(JumpEngine, inc);
         }
 
+        /// <summary>
+        /// Function to add and subtract Survey Sensors to this design.
+        /// </summary>
+        /// <param name="SurveySensor">Survey sensor to add or subtract.</param>
+        /// <param name="inc">number to add or subtract.</param>
+        public void AddSurveySensor(SurveySensorDefTN SurveySensor, short inc)
+        {
+            int SurveySensorIndex = ShipSurveyDef.IndexOf(SurveySensor);
+            if (SurveySensorIndex != -1)
+            {
+                ShipSurveyCount[SurveySensorIndex] = (ushort)((short)ShipSurveyCount[SurveySensorIndex] + inc);
+            }
+
+            if (SurveySensorIndex == -1 && inc >= 1)
+            {
+                ShipSurveyDef.Add(SurveySensor);
+                ShipSurveyCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (SurveySensorIndex != -1)
+                {
+                    if (ShipSurveyCount[SurveySensorIndex] <= 0)
+                    {
+                        ShipSurveyCount.RemoveAt(SurveySensorIndex);
+                        ShipSurveyDef.RemoveAt(SurveySensorIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            if (SurveySensor.sensorType == SurveySensorDefTN.SurveySensorType.Geological)
+            {
+                ShipGeoSurveyStrength = ShipGeoSurveyStrength + (SurveySensor.sensorStrength * inc);
+                if (ShipGeoSurveyStrength < 0)
+                    ShipGeoSurveyStrength = 0;
+            }
+            else if (SurveySensor.sensorType == SurveySensorDefTN.SurveySensorType.Gravitational)
+            {
+                ShipGravSurveyStrength = ShipGravSurveyStrength + (SurveySensor.sensorStrength * inc);
+                if (ShipGravSurveyStrength < 0)
+                    ShipGravSurveyStrength = 0;
+            }
+
+            UpdateClass(SurveySensor, inc);
+        }
+
 
         /// <summary>
         /// Set preferred ordnance adds or subtracts missiles from the preferred ordnance list of this class.
@@ -2528,8 +2641,8 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            Entry = String.Format("{0} km/s    JR {1}-{2}     Armour {3}-{4}   Shields {5}-{6}   Sensors {7}/{8}/{9}/{10}   Damage Control Rating {11}  PPV {12}\n", MaxSpeed,
-                                  SquadronSize, ((int)Math.Round((float)(JumpRadius / 1000))), ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating,
+            Entry = String.Format("{0} km/s    JR {1}-{2}     Armour {3}-{4}   Shields {5}-{6}   Sensors {7}/{8}/{9:N0}/{10:N0}   Damage Control Rating {11}  PPV {12}\n", MaxSpeed,
+                                  SquadronSize, ((int)Math.Round((float)(JumpRadius / 1000))), ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, ShipGeoSurveyStrength, ShipGravSurveyStrength, MaxDamageControlRating,
                                   PlanetaryProtectionValue);
 
             Summary = String.Format("{0}{1}", Summary, Entry);
@@ -2542,6 +2655,33 @@ namespace Pulsar4X.Entities
             Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n", MaxDeploymentTime, SpareCrewQuarters);
 
             Summary = String.Format("{0}{1}", Summary, Entry);
+
+            bool didCarrying = false;
+            if (ShipCargoDef.Count != 0)
+            {
+                Entry = String.Format("Cargo {0}    ", TotalCargoCapacity);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                didCarrying = true;
+            }
+
+            if (ShipColonyDef.Count != 0)
+            {
+                Entry = String.Format("Cyrogenic Berths {0}    ", SpareCryoBerths);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                didCarrying = true;
+            }
+
+            if (ShipCHSDef.Count != 0)
+            {
+                Entry = String.Format("Cargo Handling Multiplier {0}    ", TractorMultiplier);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                didCarrying = true;
+            }
+
+            if (didCarrying == true)
+            {
+                Summary = String.Format("{0}\n", Summary, Entry);
+            }
 
             if (ShipMagazineDef.Count != 0)
             {
@@ -3021,6 +3161,14 @@ namespace Pulsar4X.Entities
                 Entry = String.Format("{0} ({1})     Sensitivity {2}     Detect Sig Strength 1000:  {3} km\n", ShipPSensorDef[loop].Name,
                                           ShipPSensorCount[loop], ShipPSensorDef[loop].rating, RangeString);
 
+                Summary = String.Format("{0}{1}", Summary, Entry);
+
+                control = true;
+            }
+
+            for (int loop = 0; loop < ShipSurveyDef.Count; loop++)
+            {
+                Entry = String.Format("{0} ({1})   {2:N0} Survey Points Per Hour\n", ShipSurveyDef[loop].Name, ShipSurveyCount[loop], ShipSurveyDef[loop].sensorStrength);
                 Summary = String.Format("{0}{1}", Summary, Entry);
 
                 control = true;

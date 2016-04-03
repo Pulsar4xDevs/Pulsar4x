@@ -264,5 +264,15 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.DrawElements(PrimitiveType.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
+
+        /// <summary>
+        /// I want sensor survey points to remain a constant size, so I'll have to adjust the radius of the circle, using this function.
+        /// </summary>
+        /// <param name="a_fRadus"></param>
+        public void ChangeRadius(float a_fRadus)
+        {
+            m_v2Size.X = (a_fRadus);
+            RecalculateModelMatrix();
+        }
     }
 }

@@ -49,9 +49,10 @@ namespace Pulsar4X.UI
             /// <summary>
             /// This following section should probably be moved to the Faction constructor at some point.
             /// </summary>
-            oNewFaction.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets[2], oNewFaction, 0)); //.FirstOrDefault() for planets.
+            new Entities.Population(sol.Stars.FirstOrDefault().Planets[2], oNewFaction, 0); //.FirstOrDefault() for planets. constructor now adds population to planet and faction listing.
             oNewFaction.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction.Populations[0].ConventionalStart();
+            oNewFaction.KnownSystems.Add(sol);
             /// <summary>
             /// Add Contact lists.
             /// </summary>
@@ -70,9 +71,10 @@ namespace Pulsar4X.UI
 
             Entities.Faction oNewFaction2 = new Entities.Faction(1);
             oNewFaction2.Name = "Terran Federation";
-            oNewFaction2.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets[2], oNewFaction2, 0)); //.FirstOrDefault()
+            new Entities.Population(sol.Stars.FirstOrDefault().Planets[2], oNewFaction2, 0); //.FirstOrDefault()
             oNewFaction2.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction2.Populations[0].ConventionalStart();
+            oNewFaction2.KnownSystems.Add(sol);
 
             /// <summary>
             /// Add Contact lists.
@@ -89,7 +91,7 @@ namespace Pulsar4X.UI
 
             oNewFaction2.Capitol = oNewFaction2.Populations[0];
             oNewFaction2.Capitol.Planet.GeoSurveyList.Add(oNewFaction2, true);
-            oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, sol);
+            //oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, sol);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 
             oNewFaction.AddNewShipDesign("Sword");
@@ -150,7 +152,7 @@ namespace Pulsar4X.UI
             }
             oNewFaction.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction.ShipDesigns[1].PreferredOrdnanceSize;
 
-            oNewFaction2.AddNewShipDesign("Mace");
+            /*oNewFaction2.AddNewShipDesign("Mace");
             CL = oNewFaction2.ComponentList;
 
 
@@ -205,7 +207,7 @@ namespace Pulsar4X.UI
             {
                 oNewFaction2.TaskGroups.Last().Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);
             }
-            oNewFaction2.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction2.ShipDesigns[1].PreferredOrdnanceSize;
+            oNewFaction2.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction2.ShipDesigns[1].PreferredOrdnanceSize;*/
 
             oNewFaction.GiveAllTechs();
             oNewFaction2.GiveAllTechs();

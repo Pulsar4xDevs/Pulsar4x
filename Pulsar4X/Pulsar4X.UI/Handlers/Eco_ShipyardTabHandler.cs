@@ -138,6 +138,10 @@ namespace Pulsar4X.UI.Handlers
             DamagedShipList = new BindingList<ShipTN>();
             ClassesInOrbit = new BindingList<ShipClassTN>();
 
+            GetEligibleClassList(CurrentFaction, SYInfo, ref EligibleClassList);
+            GetDamagedShipList(CurrentFaction, CurrentPopulation, ref DamagedShipList);
+            GetShipClassesInOrbit(CurrentFaction, CurrentPopulation, ref ClassesInOrbit);
+
             if (CurrentFaction != null && CurrentPopulation != null && SYInfo != null)
             {
                 RefreshShipyardDataGrid(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
@@ -155,6 +159,17 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.ShipyardCreateTaskGroupBox.Text = Entry;
 
                 RefreshShipyardTasksTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
+            }
+            else if (SYInfo == null)
+            {
+                m_oSummaryPanel.ShipyardDataGrid.ClearSelection();
+                /// <summary>
+                /// Do not display any rows at all as there is no shipyard for this world.
+                /// </summary>
+                for (int rowIterator = 0; rowIterator < m_oSummaryPanel.ShipyardDataGrid.Rows.Count; rowIterator++)
+                {
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[rowIterator].Visible = false;
+                }
             }
         }
 
@@ -337,7 +352,7 @@ namespace Pulsar4X.UI.Handlers
                             if (m_oSummaryPanel.SYNewClassComboBox.Items.Count != 0)
                                 m_oSummaryPanel.SYNewClassComboBox.SelectedIndex = 0;
 
-                            int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[0]);
+                            int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[m_oSummaryPanel.SYNewClassComboBox.SelectedIndex]);
                             String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
                                                          (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
                             m_oSummaryPanel.SYShipNameTextBox.Text = Entry;
@@ -1040,9 +1055,9 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="CurrentFaction">Current faction from the economics handler.</param>
         /// <param name="SYInfo">Currently selected shipyard.</param>
         /// <param name="EligibleClassList">List of shipclasses that this shipyard can produce.</param>
-        private static void GetEligibleClassList(Faction CurrentFaction, Installation.ShipyardInformation SYInfo, ref BindingList<ShipClassTN> EligibleClassList)
+        public static void GetEligibleClassList(Faction CurrentFaction, Installation.ShipyardInformation SYInfo, ref BindingList<ShipClassTN> EligibleClassList)
         {
-            if (SYInfo.AssignedClass == null)
+            if (SYInfo == null || SYInfo.AssignedClass == null)
             {
                 return;
             }

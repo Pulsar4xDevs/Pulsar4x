@@ -117,6 +117,11 @@ namespace Pulsar4X.UI.Panels
             get { return m_oPlanetFighterGroupBox; }
         }
 
+        public GroupBox IndustrialProjectGroupBox
+        {
+            get { return m_oIndustrialProjectGroupBox; }
+        }
+
         public ComboBox InstallationTypeComboBox
         {
             get { return m_oInstallationTypeComboBox; }

@@ -42,6 +42,20 @@ namespace Pulsar4X.Entities
             NA
         }
 
+        public enum MineralType
+        {
+            NotGenerated,
+            NoMinerals,        //Nothing.
+            Asteroid,          //500-10k of each mineral, above 1.0 accessibility? 1-5 minerals
+            Comet,             //10-100k 6-10 minerals high accessibility.
+            FewGood,           //Rich world with few but decent quality mineral reserves. 500k-4M range, 2-4 minerals.
+            ManyGood,          //Rich world with many high quality mineral deposits, but not truly massive deposits 500k-4M range 4-8 minerals
+            MassiveReserves,   //Gargantuan amount of resources, low accessibility. 10-150M 8-11 minerals.
+            Homeworld,         //50k-150k of every resource in good amounts. Everything a starting faction will need.
+            GasGiant,          //500k to 50M Sorium only, varying accessibility but not extremely low.
+            Count,
+        }
+
         public PlanetType Type { get; set; }
 
         /// <summary>
@@ -162,6 +176,24 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// Has mineral generation been run for this world?
+        /// </summary>
+        private bool _MineralsGenerated;
+        public bool _mineralsGenerated
+        {
+            get { return _MineralsGenerated; }
+        }
+
+        /// <summary>
+        /// What type of minerals should be generated for this world?
+        /// </summary>
+        private MineralType _BodyMineralType;
+        public MineralType _bodyMineralType
+        {
+            get { return _BodyMineralType; }
+        }
+
         public SystemBody(OrbitingEntity parent, PlanetType type)
             : base()
         {
@@ -195,12 +227,17 @@ namespace Pulsar4X.Entities
                 m_aiMinerialReserves[mineralIterator] = 0.0f;
                 m_aiMinerialAccessibility[mineralIterator] = 0.0f;
             }
+            _MineralsGenerated = false;
+            _BodyMineralType = MineralType.NotGenerated;
 
 #warning planet generation needs minerals, anomalies, and ruins generation.
             PlanetaryRuins = new Ruins();
 
 
             Atmosphere = new Atmosphere(this);
+
+            if(Type != PlanetType.GasDwarf && Type != PlanetType.GasGiant && Type != PlanetType.IceGiant)
+                SupportsPopulations = true;
         }
 
 
@@ -208,7 +245,11 @@ namespace Pulsar4X.Entities
         {
             List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
             legalOrders.AddRange(_legalOrders);
-            if (this.GeoSurveyList.ContainsKey(faction) == true)
+            if (this.GeoSurveyList.ContainsKey(faction) == false)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
+            }
+            else if (this.GeoSurveyList.ContainsKey(faction) == true)
             {
                 if (this.GeoSurveyList[faction] == false)
                     legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
@@ -267,6 +308,7 @@ namespace Pulsar4X.Entities
         /// This generates the rich assortment of all minerals for a homeworld. non-hw planets have less, or even no resources.
         /// should some resources be scarcer than others?
         /// </summary>
+#warning More of a bellcurve distribution of minerals would be better, with the lowest and highest results relatively rare. Accessibility, and even mineral type should be the same.
         public void HomeworldMineralGeneration()
         {
             m_aiMinerialReserves[0] = 150000.0f + (100000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
@@ -276,6 +318,250 @@ namespace Pulsar4X.Entities
                 m_aiMinerialReserves[mineralIterator] = 50000.0f + (70000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
                 m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
             }
+        }
+
+        /// <summary>
+        /// Asteroids have a small amount of a few types of minerals. but accessibility will be very high.
+        /// </summary>
+        public void AsteroidMineralGeneration()
+        {
+            int mCount = 1 + GameState.RNG.Next(4);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 500.0f + (9500.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(8, 10) / 10.0f);
+
+                        mCount--;
+
+                        if (mCount == 0)
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Comets are fairly rich and have a good assortment of minerals
+        /// </summary>
+        public void CometMineralGeneration()
+        {
+            int mCount = 6 + GameState.RNG.Next(4);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 10000.0f + (90000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(4, 10) / 10.0f);
+
+                        mCount--;
+
+                        if (mCount == 0)
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Low Planet means that this world should have only a few deposits, though there should be a good amount of resources on them.
+        /// </summary>
+        public void LowPlanetMineralGeneration()
+        {
+            int mCount = 2 + GameState.RNG.Next(2);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 500000.0f + (3500000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
+
+                        mCount--;
+
+                        if (mCount == 0)
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// High planet indicates that this will be a fairly desirable mining spot.
+        /// </summary>
+        public void HighPlanetMineralGeneration()
+        {
+            int mCount = 4 + GameState.RNG.Next(4);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 500000.0f + (3500000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
+
+                        mCount--;
+
+                        if (mCount == 0)
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Planets with truly stupendous amounts of resources, but at low accessibility.
+        /// </summary>
+        public void MassiveMineralGeneration()
+        {
+            int mCount = 8 + GameState.RNG.Next(3);
+            while (mCount != 0)
+            {
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    /// <summary>
+                    /// randomly pick a mineral to generate, and don't double up on mineral generation.
+                    /// </summary>
+                    if (GameState.RNG.Next(10) == 1 && m_aiMinerialReserves[mineralIterator] == 0.0f)
+                    {
+                        m_aiMinerialReserves[mineralIterator] = 10000000.0f + (140000000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                        m_aiMinerialAccessibility[mineralIterator] = 0.1f;
+
+                        mCount--;
+
+                        /// <summary>
+                        /// So important thing: if mCount keeps getting incremented past -1, this can go into an infinite loop.
+                        /// </summary>
+                        if (mCount == 0)
+                            break;
+                    }
+                }
+            }
+        }
+
+        public void GasGiantMineralGeneration()
+        {
+            m_aiMinerialReserves[(int)Constants.Minerals.MinerialNames.Sorium] = 500000.0f + (49500000.0f * ((float)GameState.RNG.Next(0,100000) / 100000.0f));
+            m_aiMinerialAccessibility[(int)Constants.Minerals.MinerialNames.Sorium] = 0.4f + ((float)GameState.RNG.Next(0, 6) / 10.0f);
+        }
+
+        /// <summary>
+        /// determine what type of world this is with regards to mineral generation and generate those minerals.
+        /// </summary>
+        /// <param name="isHomeworld">Should this world have homeworld mineral generation?</param>
+        public void GenerateMinerals(bool isHomeWorld = false)
+        {
+
+            MineralType MType = MineralType.Homeworld;
+
+
+
+            if (isHomeWorld == false)
+            {
+                int MineralTest = GameState.RNG.Next(0,100);
+                MType = MineralType.NoMinerals;
+
+                /// <summary>
+                /// Minerals should be generated.
+                /// </summary>
+                if(MineralTest > 60)
+                {
+                    if (Type == PlanetType.GasGiant || Type == PlanetType.IceGiant || Type == PlanetType.GasDwarf)
+                    {
+                        MType = SystemBody.MineralType.GasGiant;
+                    }
+                    else if (Type == PlanetType.Comet)
+                    {
+                        MType = SystemBody.MineralType.Comet;
+                    }
+                    else if (Type == PlanetType.Asteroid)
+                    {
+                        MType = MineralType.Asteroid;
+                    }
+                    else
+                    {
+                        MType = (MineralType)GameState.RNG.Next((int)SystemBody.MineralType.FewGood, (int)SystemBody.MineralType.Homeworld);
+                    }
+                }
+            }
+
+            switch (MType)
+            {
+                case SystemBody.MineralType.NoMinerals:
+                    break;
+                case SystemBody.MineralType.Asteroid:
+                    AsteroidMineralGeneration();
+                    break;
+                case SystemBody.MineralType.Comet:
+                    CometMineralGeneration();
+                    break;
+                case SystemBody.MineralType.FewGood:
+                    LowPlanetMineralGeneration();
+                    break;
+                case SystemBody.MineralType.ManyGood:
+                    HighPlanetMineralGeneration();
+                    break;
+                case SystemBody.MineralType.MassiveReserves:
+                    MassiveMineralGeneration();
+                    break;
+                case SystemBody.MineralType.Homeworld:
+                    HomeworldMineralGeneration();
+                    break;
+                case SystemBody.MineralType.GasGiant:
+                    GasGiantMineralGeneration();
+                    break;
+            }
+            _MineralsGenerated = true;
+        }
+
+        /// <summary>
+        /// Survey cost for bodies is based on their radius relative to that of Earth.
+        /// </summary>
+        /// <returns>Cost in geopoints to survey this world.</returns>
+        public int GetSurveyCost()
+        {
+            return (int)Math.Floor((float)Constants.SensorTN.EarthSurvey * ((float)Radius / Constants.SensorTN.EarthRadius));
+        }
+
+
+        /// <summary>
+        /// Add a population if possible for the selected faction of species CurrentSpecies.
+        /// </summary>
+        /// <param name="PopFaction">Faction of population.</param>
+        /// <param name="TimeSlice">Sensor info needs timeslice I think</param>
+        /// <param name="CurrentSpecies">Species of this population.</param>
+        public void AddPopulation(Faction PopFaction, int TimeSlice, Species CurrentSpecies)
+        {
+            /// <summary>
+            /// Some planet types can't host populations. Gas Giants for example.
+            /// </summary>
+            if (SupportsPopulations == false)
+                return;
+
+            /// <summary>
+            /// If such a population already exists do not allow duplicates. this will crash if a duplicate is allowed, and it also potentially perverts gameplay mechanics.
+            /// </summary>
+            foreach (Population CurrentPop in Populations)
+            {
+                if (CurrentPop.Faction == PopFaction && CurrentPop.Species == CurrentSpecies)
+                    return;
+            }
+
+            /// <summary>
+            /// Assuming that we got this far, add the population. The constructor will add the population to the planet's population list and the faction population list, but this function
+            /// should prevent duplicate populations from being made if it is always called.
+            /// </summary>
+            Population NewPopulation = new Population(this, PopFaction, TimeSlice, Name, CurrentSpecies);
+
+            //Populations.Add(NewPopulation);
+            //PopFaction.Populations.Add(NewPopulation);
         }
     }
 
