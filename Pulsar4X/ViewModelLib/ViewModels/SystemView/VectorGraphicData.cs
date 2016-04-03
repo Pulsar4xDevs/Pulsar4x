@@ -17,28 +17,28 @@ namespace Pulsar4X.ViewModel.SystemView
         /// </summary>
         public float PosX
         {
-            get { return posx; }
-            set { posx = value; OnPropertyChanged(); }
+            get { return _posx; }
+            set { _posx = value; OnPropertyChanged(); }
         }
-        private float posx;
+        private float _posx = 0;
         /// <summary>
         /// position from 0,0
         /// </summary>
         public float PosY
         {
-            get { return posy; }
-            set { posy = value; OnPropertyChanged(); }
+            get { return _posy; }
+            set { _posy = value; OnPropertyChanged(); }
         }
-        private float posy;
+        private float _posy = 0;
 
         /// <summary>
         /// Size of the rectangle
         /// </summary>
-        public float Width { get; protected set; }
+        public float Width { get; set; }
         /// <summary>
         /// Height of the rectangle
         /// </summary>
-        public float Height { get; protected set; }
+        public float Height { get; set; }
 
         public float Rotation { get; set; }
 
@@ -291,7 +291,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public VectorPathPenPair(PenData pen, VectorShapeBase shape) : this(shape)
         { Pen = pen; }
 
-        VectorPathPenPair(PenData pen, List<VectorShapeBase> shapes)
+        public VectorPathPenPair(PenData pen, List<VectorShapeBase> shapes)
         {
             Pen = pen;
             foreach (var shape in shapes)
@@ -377,6 +377,21 @@ namespace Pulsar4X.ViewModel.SystemView
 
         }
         
+    }
+
+    public class LineData : VectorShapeBase
+    {
+        public float XStart { get { return X1; } set { X1 = value; OnPropertyChanged(); } }
+        public float YStart { get { return Y1; } set { Y1 = value; OnPropertyChanged(); } }
+
+        public float XEnd { get { return X2; } set { X2 = value; OnPropertyChanged(); } }
+        public float YEnd { get { return Y2; } set { Y2 = value; OnPropertyChanged(); } }
+
+        public LineData() : base()
+        { }
+
+        public LineData(float xStart, float yStart, float xEnd, float yEnd, bool centerPosition = false) : base(xStart, yStart, xEnd, yEnd, centerPosition)
+        { }
     }
 
     /// <summary>

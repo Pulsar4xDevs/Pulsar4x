@@ -12,7 +12,7 @@ namespace Pulsar4X.ViewModel.SystemView
     {
 
         public List<SystemObjectGraphicsInfo> SystemBodies { get; set; } = new List<SystemObjectGraphicsInfo>();
-
+        public VectorGraphicDataBase BackGroundHud { get; set; } = new VectorGraphicDataBase();
         public Camera camera;
         public List<float> scale_data;
 
@@ -28,6 +28,51 @@ namespace Pulsar4X.ViewModel.SystemView
             {
                 SystemBodies.Add(new SystemObjectGraphicsInfo(item, gameVM));
             }
+
+            PenData hudPen = new PenData();
+            hudPen.Alpha = 100;
+            hudPen.Red = 255;
+            hudPen.Green = 255;
+            hudPen.Blue = 255;
+
+            List<VectorShapeBase> hudShapes1 = new List<VectorShapeBase>();
+            hudShapes1.Add(new LineData(0, -200, 0, -150));
+
+
+            hudShapes1.Add(new LineData(0, -150, 2, -150));
+            hudShapes1.Add(new LineData(0, -150, 0, -100));
+            hudShapes1.Add(new LineData(0, -100, 2, -100));
+            hudShapes1.Add(new LineData(0, -100, 0, -50));
+            hudShapes1.Add(new LineData(0, -50, 2, -50));
+            hudShapes1.Add(new LineData(0, -50, 0, 50));
+            hudShapes1.Add(new LineData(0, 50, 2, 50));
+            hudShapes1.Add(new LineData(0, 50, 0, 100));
+            hudShapes1.Add(new LineData(0, 100, 2, 100));
+            hudShapes1.Add(new LineData(0, 100, 0, 150));
+            hudShapes1.Add(new LineData(0, 150, 2, 150));
+            hudShapes1.Add(new LineData(0, 150, 0, 200));
+
+
+            List<VectorShapeBase> hudShapes2 = new List<VectorShapeBase>();
+            //hudShapes2.Add(new LineData(200, 0, -200, 0));
+            hudShapes2.Add(new LineData(-200, 0, -150, 0));
+            hudShapes2.Add(new LineData(-150, 2, -150, 0));
+            hudShapes2.Add(new LineData(-150, 0, -100, 0));
+            hudShapes2.Add(new LineData(-100, 2, -100, 0));
+            hudShapes2.Add(new LineData(-100, 0, -50, 0));
+            hudShapes2.Add(new LineData(-50, 2, -50, 0));
+            hudShapes2.Add(new LineData(-50, 0, 50, 0));
+            hudShapes2.Add(new LineData(50, 2, 50, 0));
+            hudShapes2.Add(new LineData(50, 0, 100, 0));
+            hudShapes2.Add(new LineData(100, 2, 100, 0));
+            hudShapes2.Add(new LineData(100, 0, 150, 0));
+            hudShapes2.Add(new LineData(150, 2, 150, 0));
+            hudShapes2.Add(new LineData(150, 0, 200, 0));
+
+
+            BackGroundHud.PathList.Add(new VectorPathPenPair(hudPen, hudShapes1));
+            BackGroundHud.PathList.Add(new VectorPathPenPair(hudPen, hudShapes2));
+            BackGroundHud.SizeAffectedbyZoom = true;
             OnPropertyChanged();
         }        
     }

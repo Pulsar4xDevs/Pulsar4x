@@ -24,6 +24,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             _viewModel = viewModel;
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+
+            _shapesList.Add(new DrawableObject(this, viewModel.BackGroundHud, _camera));
+            
+            
+
             foreach (var item in viewModel.SystemBodies)
             {
                 item.Icon.PropertyChanged += ViewModel_PropertyChanged;
@@ -83,40 +89,44 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var pathPenDataPair in _objectData.PathList)
             {
                 GraphicsPath path = new GraphicsPath();
-                if (_objectData is IconData)
+
+
+
+                if (_objectData is OrbitEllipseFading)
                 {
-                    int i = 0;
+                    ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[0];
+                    path.AddArc(arcData.X1, arcData.X2, arcData.Width * _zoom, arcData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
+
+                }
+
+                else
+                {
                     foreach (var shape in pathPenDataPair.VectorShapes)
                     {
                         if (shape is EllipseData)
                             path.AddEllipse(shape.X1, shape.Y1, shape.X2, shape.Y2);
+                        else if (shape is LineData)
+                            path.AddLine(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is RectangleData)
                             path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is ArcData)
                         {
-                            ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[i];
+                            ArcData arcData = (ArcData)shape;
                             path.AddArc(shape.X1, shape.Y1, shape.X2, shape.Y2, arcData.StartAngle, arcData.SweepAngle);
                         }
                         else if (shape is BezierData)
                         {
-                            BezierData bezData = (BezierData)pathPenDataPair.VectorShapes[i];
+                            BezierData bezData = (BezierData)shape;
                             PointF start = new PointF(bezData.X1, bezData.Y1);
                             PointF end = new PointF(bezData.X2, bezData.Y2);
                             PointF control1 = new PointF(bezData.ControlX1, bezData.ControlY1);
                             PointF control2 = new PointF(bezData.ControlX2, bezData.ControlY2);
                             path.AddBezier(start, control1, control2, end);
                         }
-                        i++;
                     }
                 }
 
 
-                else if (_objectData is OrbitEllipseFading)
-                {
-                    ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[0];
-                    path.AddArc(arcData.X1, arcData.X2, arcData.Width * _zoom, arcData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
-
-                }
                 Color iconcolor = new Color();
                 iconcolor.Ab = pathPenDataPair.Pen.Alpha;
                 iconcolor.Rb = pathPenDataPair.Pen.Red;
