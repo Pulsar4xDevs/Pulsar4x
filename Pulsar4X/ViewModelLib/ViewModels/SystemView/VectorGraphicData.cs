@@ -13,7 +13,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public List<VectorPathPenPair> PathList { get; set; } = new List<VectorPathPenPair>();
 
         /// <summary>
-        /// position from 0,0
+        /// system position in AU
         /// </summary>
         public float PosX
         {
@@ -22,7 +22,7 @@ namespace Pulsar4X.ViewModel.SystemView
         }
         private float _posx = 0;
         /// <summary>
-        /// position from 0,0
+        /// systemPosition in AU
         /// </summary>
         public float PosY
         {
@@ -31,23 +31,15 @@ namespace Pulsar4X.ViewModel.SystemView
         }
         private float _posy = 0;
 
-        /// <summary>
-        /// Size of the rectangle
-        /// </summary>
-        public float Width { get; set; }
-        /// <summary>
-        /// Height of the rectangle
-        /// </summary>
-        public float Height { get; set; }
 
         public float Rotation { get; set; }
 
-        public float Zoom
+        public float Scale
         {
-            get { return _zoom; }
-            set { _zoom = value; OnPropertyChanged(); }
+            get { return _scale; }
+            set { _scale = value; OnPropertyChanged(); }
         }
-        private float _zoom = 200;
+        private float _scale = 200;
 
         /// <summary>
         /// most icons wont change size with zoom, however things like the orbit lines will. 
@@ -93,11 +85,11 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             PenData penData = new PenData();
             penData.Green = 255;
-            Width = 6;
-            Height = 6;
+            float width = 6;
+            float height = 6;
             updatePosition();
 
-            VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
+            VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, width, height));
             PathList.Add(pathPair);
         }
 
@@ -107,18 +99,18 @@ namespace Pulsar4X.ViewModel.SystemView
             penData.Red = 100;
             penData.Green = 100;
             penData.Blue = 0;
-            Width = 8;
-            Height = 8;
+            float width = 8;
+            float height = 8;
             updatePosition();
 
-            float hw = Width * 0.25f;
-            float hh = Height * 0.25f;
+            float hw = width * 0.25f;
+            float hh = height * 0.25f;
 
-            VectorPathPenPair pathPair = new VectorPathPenPair(penData, new RectangleData(PosX, PosY, Width, Height));
-            pathPair.VectorShapes.Add(new BezierData(0, -Height, -Width, 0, -hw, -hh, -hw, -hh));
-            pathPair.VectorShapes.Add(new BezierData(-Width, 0, 0, Height, -hw, hh, -hw, hh));
-            pathPair.VectorShapes.Add(new BezierData(0, Height, Width, 0, hw, hh, hw, hh));
-            pathPair.VectorShapes.Add(new BezierData(Width, 0, 0, -Height, hw, -hh, hw, -hh));
+            VectorPathPenPair pathPair = new VectorPathPenPair(penData, new RectangleData(PosX, PosY, width, height));
+            pathPair.VectorShapes.Add(new BezierData(0, -height, -width, 0, -hw, -hh, -hw, -hh));
+            pathPair.VectorShapes.Add(new BezierData(-width, 0, 0, height, -hw, hh, -hw, hh));
+            pathPair.VectorShapes.Add(new BezierData(0, height, width, 0, hw, hh, hw, hh));
+            pathPair.VectorShapes.Add(new BezierData(width, 0, 0, -height, hw, -hh, hw, -hh));
             PathList.Add(pathPair);
         }
 
@@ -154,12 +146,12 @@ namespace Pulsar4X.ViewModel.SystemView
                         PenData penData = new PenData();
                         penData.Green = 100;
                         penData.Blue = 200;
-                        Width = 6;
-                        Height = 6;
+                        float width = 6;
+                        float height = 6;
                         _bodyEntity = planet;
                         updatePosition();
 
-                        VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
+                        VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, width, height));
                         PathList.Add(pathPair);
                     }
                     break;
@@ -267,11 +259,11 @@ namespace Pulsar4X.ViewModel.SystemView
         }
     }
 
-    /// <summary>
+        /// <summary>
         /// generic data for drawing an OrbitEllipse which fades towards the tail
         /// </summary>
         public class OrbitEllipseFading : VectorGraphicDataBase
-    {
+        {
         /// <summary>
         /// number of segments in the orbit, this is mostly for an increasing alpha chan.
         /// </summary>
@@ -294,7 +286,8 @@ namespace Pulsar4X.ViewModel.SystemView
             set { _currentDateTime = value; updatePosition(); updateAlphaFade(); }
         }
 
-
+        private float _width;
+        private float _height;
         /// <summary>
         /// 
         /// </summary>
@@ -303,16 +296,17 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
             Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis); //TODO adjust for 3d orbits. ie if the orbit has an Z axis, this is likely to be wrong. 
-            Width = (float)orbit.SemiMajorAxis * 2; //Major Axis
-            Height = (float)Math.Sqrt(((orbit.SemiMajorAxis * Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity)) * orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity))) * 2;   //minor Axis
+            _width = (float)orbit.SemiMajorAxis * 2; //Major Axis
+            _height = (float)Math.Sqrt(((orbit.SemiMajorAxis * Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity)) * orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity))) * 2;   //minor Axis
             SizeAffectedbyZoom = true;
             OrbitDB = orbit;
             PositionDB = positionDB;
-            if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
-            {
-                PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X; //TODO: adjust so focal point of ellipse is at position. 
-                PosY = (float)orbit.Parent.GetDataBlob<PositionDB>().Y;
-            }
+            updatePosition();
+            //if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
+            //{
+            //    PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X - _width / 2; //TODO: adjust so focal point of ellipse is at position. 
+            //    PosY = (float)orbit.Parent.GetDataBlob<PositionDB>().Y - _height / 2;
+            //}
             float start = 0;
             float sweep = 360.0f / Segments;
             for (int i = 0; i < Segments; i++)
@@ -321,7 +315,7 @@ namespace Pulsar4X.ViewModel.SystemView
                 pen.Red = 255;
                 pen.Green = 248;
                 pen.Blue = 220;
-                ArcData arc = new ArcData(PosX, PosY, Width, Height, start, sweep);
+                ArcData arc = new ArcData(PosX, PosY, _width, _height, start, sweep);
                 VectorPathPenPair pathPenPair = new VectorPathPenPair(pen, arc);
                 PathList.Add(pathPenPair);
                 start += sweep;
@@ -345,8 +339,8 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
             {
-                PosX = (float)PositionDB.Position.X;
-                PosY = (float)PositionDB.Position.Y;
+                PosX = (float)PositionDB.Position.X - _width / 2;
+                PosY = (float)PositionDB.Position.Y - _width / 2;
             }
         }
 

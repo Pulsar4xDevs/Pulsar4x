@@ -80,7 +80,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
 
         private Drawable _parent;
-        float _zoom { get { return _objectData.Zoom; } }
+        float _zoom { get { return _objectData.Scale; } }
         private VectorGraphicDataBase _objectData;
         private Camera2D _camera;
         private List<PathData> _pathDataList = new List<PathData>();
@@ -151,29 +151,29 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width / 2; } }
 
-        private float ViewPosX
-        {
-            get
-            {
-                float sizeAdjust = _objectData.Width / 2;               //adjust position for size
-                if (_objectData.SizeAffectedbyZoom)                     //if the size of the vectorimage should be affected by zooming. 
-                    sizeAdjust *= _zoom;
-                return PosXViewAdjusted - sizeAdjust;
-            }
-        }
+        //private float ViewPosX
+        //{
+        //    get
+        //    {
+        //        float sizeAdjust = _objectData.Width / 2;               //adjust position for size
+        //        if (_objectData.SizeAffectedbyZoom)                     //if the size of the vectorimage should be affected by zooming. 
+        //            sizeAdjust *= _zoom;
+        //        return PosXViewAdjusted; - sizeAdjust;
+        //    }
+        //}
 
         private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height / 2; } }
 
-        private float ViewPosY
-        {
-            get
-            {                
-                float sizeAdjust = _objectData.Height / 2;
-                if (_objectData.SizeAffectedbyZoom)
-                    sizeAdjust *= _zoom;
-                return PosYViewAdjusted - sizeAdjust;                
-            }
-        }
+        //private float ViewPosY
+        //{
+        //    get
+        //    {                
+        //        float sizeAdjust = _objectData.Height / 2;
+        //        if (_objectData.SizeAffectedbyZoom)
+        //            sizeAdjust *= _zoom;
+        //        return PosYViewAdjusted - sizeAdjust;                
+        //    }
+        //}
 
         private Pen UpdatePen(PenData penData, Pen penEto)
         {
@@ -195,17 +195,18 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 UpdatePen(pathData.PenData, pathData.EtoPen);
 
                 g.SaveTransform();
-
-                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, PosXViewAdjusted, PosYViewAdjusted));
-                g.TranslateTransform(ViewPosX, ViewPosY);
                 
+                g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
+                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, PosXViewAdjusted, PosYViewAdjusted));
+                
+
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
             }
             foreach (var item in _textData)
             {
                 g.SaveTransform();
-                g.TranslateTransform(ViewPosX, ViewPosY);
+                g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
 
                 Font font = new Font(item.Font.FontFamily.ToString(), item.Y2);
                 Color color = new Color(item.Color.R, item.Color.G, item.Color.B);
