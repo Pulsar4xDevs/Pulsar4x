@@ -34,7 +34,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 item.Icon.PropertyChanged += ViewModel_PropertyChanged;
                 _shapesList.Add(new DrawableObject(this, item.Icon, _camera));
-
+     
                 if (item.OrbitEllipse != null)
                 {
                     item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
@@ -80,7 +80,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private VectorGraphicDataBase _objectData;
         private Camera2D _camera;
         private List<PathData> _pathDataList = new List<PathData>();
-
+        private List<TextData> _textData = new List<TextData>();
         public DrawableObject(Drawable parent, VectorGraphicDataBase objectInfo, Camera2D camera)
         {
             _parent = parent;
@@ -122,6 +122,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                             PointF control1 = new PointF(bezData.ControlX1, bezData.ControlY1);
                             PointF control2 = new PointF(bezData.ControlX2, bezData.ControlY2);
                             path.AddBezier(start, control1, control2, end);
+                        }
+                        else if (shape is TextData)
+                        {
+                            _textData.Add((TextData)shape);
+
                         }
                     }
                 }
@@ -192,7 +197,18 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
-            }  
+            }
+            foreach (var item in _textData)
+            {
+                g.SaveTransform();
+                g.TranslateTransform(ViewPosX, ViewPosY);
+
+                Font font = new Font(item.Font.FontFamily.ToString(), item.Y2);
+                Color color = new Color(item.Color.R, item.Color.G, item.Color.B);
+                g.DrawText(font, color, item.X1, item.X2, item.Text);
+
+                g.RestoreTransform();
+            } 
         }
     }
 }

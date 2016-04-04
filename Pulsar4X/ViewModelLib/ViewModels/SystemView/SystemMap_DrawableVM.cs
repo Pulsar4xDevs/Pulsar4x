@@ -81,11 +81,14 @@ namespace Pulsar4X.ViewModel.SystemView
     {
         private Entity item;
         public IconData Icon { get; set; }
+        public TextData NameString { get; set; }
         public OrbitEllipseFading OrbitEllipse { get; set; }
         public DateTime CurrentDate { get; }
         public SystemObjectGraphicsInfo(Entity item, GameVM gameviewModel)
         {
             Icon = new IconData(item);
+            NameString = new TextData(item.GetDataBlob<NameDB>().GetName(gameviewModel.CurrentFaction), (float)item.GetDataBlob<PositionDB>().X, (float)item.GetDataBlob<PositionDB>().Y, 8);
+            Icon.PathList.Add(new VectorPathPenPair(NameString));
 
             if (item.HasDataBlob<OrbitDB>() && !item.GetDataBlob<OrbitDB>().IsStationary)
             {

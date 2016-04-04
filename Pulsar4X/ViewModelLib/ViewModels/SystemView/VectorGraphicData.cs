@@ -55,6 +55,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public bool SizeAffectedbyZoom { get; set; } = false;
     }
 
+
     /// <summary>
     /// generic vector graphics data for an icon
     /// </summary>
@@ -114,10 +115,10 @@ namespace Pulsar4X.ViewModel.SystemView
             float hh = Height * 0.25f;
 
             VectorPathPenPair pathPair = new VectorPathPenPair(penData, new RectangleData(PosX, PosY, Width, Height));
-            pathPair.VectorShapes.Add(new BezierData(0,-Height, -Width,0, -hw,-hh, -hw,-hh));
-            pathPair.VectorShapes.Add(new BezierData(-Width,0, 0,Height, -hw,hh, -hw,hh));
-            pathPair.VectorShapes.Add(new BezierData(0,Height, Width,0, hw,hh,  hw,hh));
-            pathPair.VectorShapes.Add(new BezierData(Width,0, 0,-Height, hw,-hh , hw,-hh));
+            pathPair.VectorShapes.Add(new BezierData(0, -Height, -Width, 0, -hw, -hh, -hw, -hh));
+            pathPair.VectorShapes.Add(new BezierData(-Width, 0, 0, Height, -hw, hh, -hw, hh));
+            pathPair.VectorShapes.Add(new BezierData(0, Height, Width, 0, hw, hh, hw, hh));
+            pathPair.VectorShapes.Add(new BezierData(Width, 0, 0, -Height, hw, -hh, hw, -hh));
             PathList.Add(pathPair);
         }
 
@@ -129,7 +130,7 @@ namespace Pulsar4X.ViewModel.SystemView
             {
                 case BodyType.Asteroid:
                     { }
-                break;
+                    break;
                 case BodyType.Comet:
                     { }
                     break;
@@ -234,7 +235,7 @@ namespace Pulsar4X.ViewModel.SystemView
                 pen.Red = 255;
                 pen.Green = 248;
                 pen.Blue = 220;
-                ArcData arc = new ArcData(PosX, PosY, Width, Height, start, sweep);                
+                ArcData arc = new ArcData(PosX, PosY, Width, Height, start, sweep);
                 VectorPathPenPair pathPenPair = new VectorPathPenPair(pen, arc);
                 PathList.Add(pathPenPair);
                 start += sweep;
@@ -247,7 +248,7 @@ namespace Pulsar4X.ViewModel.SystemView
             float angle = (float)(OrbitDB.LongitudeOfAscendingNode + OrbitDB.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime));
             float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime);
             Vector4 position = OrbitProcessor.GetPosition(OrbitDB, CurrentDateTime);
-            float angle2 = (float)(Math.Atan2(position.Y , position.X) * 180 / Math.PI );
+            float angle2 = (float)(Math.Atan2(position.Y, position.X) * 180 / Math.PI);
 
             float degreesPerSegment = 360 / (Convert.ToSingle(Segments));
             StartIndex = (byte)(angle2 / degreesPerSegment);
@@ -376,7 +377,7 @@ namespace Pulsar4X.ViewModel.SystemView
             }
 
         }
-        
+
     }
 
     public class LineData : VectorShapeBase
@@ -469,6 +470,19 @@ namespace Pulsar4X.ViewModel.SystemView
         }
     }
 
+    public class TextData : VectorShapeBase
+    {
+        public System.Drawing.Font Font { get; set; } = new System.Drawing.Font(new System.Drawing.FontFamily(System.Drawing.Text.GenericFontFamilies.SansSerif), 8);
+        public System.Drawing.Color Color { get; set; } = new System.Drawing.Color();
+
+        public string Text { get; set; }
+
+        public TextData(string text, float x, float y, float size) : base(x, y, 0, size )
+        {
+            Text = text;
+            
+        }
+    }
 
     /// <summary>
     /// generic data for a graphics Pen. 
