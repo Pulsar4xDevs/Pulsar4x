@@ -83,6 +83,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public IconData Icon { get; set; }
         public TextData NameString { get; set; }
         public OrbitEllipseFading OrbitEllipse { get; set; }
+        public OrbitEllipseSimple SimpleOrbitEllipse { get; set; }
         public DateTime CurrentDate { get; }
         public SystemObjectGraphicsInfo(Entity item, GameVM gameviewModel)
         {
@@ -92,7 +93,8 @@ namespace Pulsar4X.ViewModel.SystemView
 
             if (item.HasDataBlob<OrbitDB>() && !item.GetDataBlob<OrbitDB>().IsStationary)
             {
-                OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>(), item.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>());                
+                OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>(), item.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>());
+                SimpleOrbitEllipse = new OrbitEllipseSimple(item.GetDataBlob<OrbitDB>());
             }
             gameviewModel.DateChangedEvent += GameviewModel_DateChangedEvent;
         }

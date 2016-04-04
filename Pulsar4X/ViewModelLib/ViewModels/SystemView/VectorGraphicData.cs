@@ -181,10 +181,96 @@ namespace Pulsar4X.ViewModel.SystemView
         }
     }
 
+    public class OrbitEllipseSimple : VectorGraphicDataBase
+    {
+        public byte Segments { get; set; } = 255;
+
+        public OrbitDB OrbitDB { get; set; }
+        private DateTime _currentDateTime;
+        public DateTime CurrentDateTime
+        {
+            get { return _currentDateTime; }
+            set { _currentDateTime = value;}
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orbit"></param>
+        public OrbitEllipseSimple(OrbitDB orbit)
+        {
+            SizeAffectedbyZoom = true;
+            OrbitDB = orbit;
+
+            Rotation = 0;
+            Width = 2;
+            Height = 2;
+            PosX = 0;
+            PosY = 0;
+
+            if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
+            {
+               PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X;
+               PosY = (float)orbit.Parent.GetDataBlob<PositionDB>().Y;
+            }
+
+            // setup date time etc.
+            DateTime currTime = DateTime.Now;
+            DateTime EndTime = currTime + OrbitDB.OrbitalPeriod;
+            TimeSpan stepTime = new TimeSpan((EndTime - currTime).Ticks / 360);
+            EndTime -= stepTime; // to end the loop 1 early.
+
+            // get inital positions on orbit
+            var startPos = OrbitProcessor.GetPosition(orbit, currTime);
+            currTime += stepTime;
+            var currPos = OrbitProcessor.GetPosition(orbit, currTime);
+            var prevPos = currPos;
+
+            // create first line segment.
+            PenData pen = new PenData();
+            pen.Red = 255;
+            pen.Green = 248;
+            pen.Blue = 220;
+            pen.Thickness = 2.2f;
+            LineData line = new LineData((float)startPos.X, (float)startPos.Y, (float)currPos.X, (float)currPos.Y);
+            VectorPathPenPair pathPenPair = new VectorPathPenPair(pen, line);
+            PathList.Add(pathPenPair);
+
+            // create rest of the lin segments.
+            for (; currTime < EndTime; currTime += stepTime)
+            {
+                currPos = OrbitProcessor.GetPosition(orbit, currTime);
+
+                pen = new PenData();
+                pen.Red = 255;
+                pen.Green = 248;
+                pen.Blue = 220;
+                pen.Thickness = 2.2f;
+                line = new LineData((float)prevPos.X, (float)prevPos.Y, (float)currPos.X, (float)currPos.Y);
+                pathPenPair = new VectorPathPenPair(pen, line);
+                PathList.Add(pathPenPair);
+
+                prevPos = currPos;
+
+            }
+
+            // create last line segment, hoking up the ends.
+            currPos = OrbitProcessor.GetPosition(orbit, EndTime);
+            pen = new PenData();
+            pen.Red = 255;
+            pen.Green = 248;
+            pen.Blue = 220;
+            pen.Thickness = 2.2f;
+            line = new LineData((float)prevPos.X, (float)prevPos.Y, (float)currPos.X, (float)currPos.Y);
+            pathPenPair = new VectorPathPenPair(pen, line);
+            PathList.Add(pathPenPair);
+        }
+    }
+
     /// <summary>
-    /// generic data for drawing an OrbitEllipse which fades towards the tail
-    /// </summary>
-    public class OrbitEllipseFading : VectorGraphicDataBase
+        /// generic data for drawing an OrbitEllipse which fades towards the tail
+        /// </summary>
+        public class OrbitEllipseFading : VectorGraphicDataBase
     {
         /// <summary>
         /// number of segments in the orbit, this is mostly for an increasing alpha chan.

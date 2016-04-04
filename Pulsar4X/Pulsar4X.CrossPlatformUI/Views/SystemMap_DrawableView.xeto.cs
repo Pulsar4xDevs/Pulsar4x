@@ -38,7 +38,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 if (item.OrbitEllipse != null)
                 {
                     item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
-                    _shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
+                    //_shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
+                }
+                if (item.SimpleOrbitEllipse != null)
+                {
+                    _shapesList.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
                 }
             }
         }
@@ -106,7 +110,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         if (shape is EllipseData)
                             path.AddEllipse(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is LineData)
-                            path.AddLine(shape.X1, shape.Y1, shape.X2, shape.Y2);
+                            path.AddLine(shape.X1 * _zoom, shape.Y1 * _zoom, shape.X2 * _zoom, shape.Y2 * _zoom);
                         else if (shape is RectangleData)
                             path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is ArcData)
