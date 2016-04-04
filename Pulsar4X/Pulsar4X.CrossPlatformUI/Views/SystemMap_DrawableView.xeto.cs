@@ -37,12 +37,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
      
                 if (item.OrbitEllipse != null)
                 {
-                    item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
-                    _shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
+                    //item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
+                    //_shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
                 }
                 if (item.SimpleOrbitEllipse != null)
                 {
-                    _shapesList.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
+                    //_shapesList.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
+                }
+                if (item.SimpleOrbitEllipseFading != null)
+                {
+                    item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
+                    _shapesList.Add(new DrawableObject(this, item.SimpleOrbitEllipseFading, _camera));
                 }
             }
         }

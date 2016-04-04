@@ -263,6 +263,132 @@ namespace Pulsar4X.ViewModel.SystemView
         }
     }
 
+
+    public class OrbitEllipseSimpleFading : VectorGraphicDataBase
+    {
+        public byte Segments { get; set; } = 255;
+
+        public OrbitDB OrbitDB { get; set; }
+
+        public PositionDB PositionDB { get; set; }
+        private DateTime _currentDateTime;
+        public DateTime CurrentDateTime
+        {
+            get { return _currentDateTime; }
+            set { _currentDateTime = value; updatePosition(); updateAlphaFade(); }
+        }
+        /// <summary>
+        /// This is the index that the body is currently at. (or maybe the next one..)
+        /// </summary>
+        public byte StartIndex { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orbit"></param>
+        public OrbitEllipseSimpleFading(OrbitDB orbit)
+        {
+            SizeAffectedbyZoom = true;
+            OrbitDB = orbit;
+
+            Rotation = 0;
+            //Width = 2;
+            //Height = 2;
+            PosX = 0;
+            PosY = 0;
+
+            if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
+            {
+                PositionDB = orbit.Parent.GetDataBlob<PositionDB>();
+
+            }
+            updatePosition();
+
+            // setup date time etc.
+            DateTime currTime = DateTime.Now;
+            DateTime EndTime = currTime + OrbitDB.OrbitalPeriod;
+            TimeSpan stepTime = new TimeSpan((EndTime - currTime).Ticks / 365);
+            EndTime -= stepTime; // to end the loop 1 early.
+
+            // get inital positions on orbit
+            var startPos = OrbitProcessor.GetPosition(orbit, currTime);
+            currTime += stepTime;
+            var currPos = OrbitProcessor.GetPosition(orbit, currTime);
+            var prevPos = currPos;
+            currTime += stepTime;
+
+            // create first line segment.
+            PenData pen = new PenData();
+            pen.Red = 255;
+            pen.Green = 248;
+            pen.Blue = 220;
+            pen.Thickness = 1f;
+            LineData line = new LineData((float)startPos.X, (float)startPos.Y, (float)currPos.X, (float)currPos.Y);
+            VectorPathPenPair pathPenPair = new VectorPathPenPair(pen, line);
+            PathList.Add(pathPenPair);
+
+            // create rest of the lin segments.
+            for (; currTime < EndTime; currTime += stepTime)
+            {
+                currPos = OrbitProcessor.GetPosition(orbit, currTime);
+
+                pen = new PenData();
+                pen.Red = 255;
+                pen.Green = 248;
+                pen.Blue = 220;
+                pen.Thickness = 1f;
+                line = new LineData((float)prevPos.X, (float)prevPos.Y, (float)currPos.X, (float)currPos.Y);
+                pathPenPair = new VectorPathPenPair(pen, line);
+                PathList.Add(pathPenPair);
+
+                prevPos = currPos;
+            }
+
+            // create last line segment, hoking up the ends.
+            currPos = OrbitProcessor.GetPosition(orbit, EndTime);
+            pen = new PenData();
+            pen.Red = 255;
+            pen.Green = 248;
+            pen.Blue = 220;
+            pen.Thickness = 2.2f;
+            line = new LineData((float)prevPos.X, (float)prevPos.Y, (float)currPos.X, (float)currPos.Y);
+            pathPenPair = new VectorPathPenPair(pen, line);
+            PathList.Add(pathPenPair);
+        }
+
+        public void SetStartPos()
+        {
+            float angle = (float)(OrbitDB.LongitudeOfAscendingNode + OrbitDB.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime)) + Rotation;
+            float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime);
+            Vector4 position = OrbitProcessor.GetPosition(OrbitDB, CurrentDateTime);
+            float angle2 = (float)(Math.Atan2(position.Y, position.X) * 180 / Math.PI);
+
+            float degreesPerSegment = 360 / (Convert.ToSingle(Segments));
+            StartIndex = (byte)(angle2 / degreesPerSegment);
+
+        }
+
+        private void updatePosition()
+        {
+            if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
+            {
+                PosX = (float)PositionDB.Position.X ;
+                PosY = (float)PositionDB.Position.Y ;
+            }
+        }
+
+        public void updateAlphaFade()
+        {
+            SetStartPos();
+            byte i = 0;
+            foreach (var item in PathList)
+            {
+                item.Pen.Alpha = (byte)(255 - StartIndex + i);
+                i++;
+            }
+        }
+    }
+
     /// <summary>
     /// generic data for drawing an OrbitEllipse which fades towards the tail
     /// </summary>
