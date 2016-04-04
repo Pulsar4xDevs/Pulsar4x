@@ -175,9 +175,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 UpdatePen(pathData.PenData, pathData.EtoPen);
 
                 g.SaveTransform();
-                
+                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width / 2, _parent.Height / 2));
                 g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
-                //g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _objectData.PosX, _objectData.PosY));
+                
                 
 
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
@@ -191,7 +191,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 Font font = new Font(item.Font.FontFamily.ToString(), item.Y2);
                 Color color = new Color(item.Color.R, item.Color.G, item.Color.B);
                 g.DrawText(font, color, item.X1, item.X2, item.Text);
-
+                
                 g.RestoreTransform();
             } 
         }
