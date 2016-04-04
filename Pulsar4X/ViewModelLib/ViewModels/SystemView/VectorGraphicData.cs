@@ -47,7 +47,7 @@ namespace Pulsar4X.ViewModel.SystemView
             get { return _zoom; }
             set { _zoom = value; OnPropertyChanged(); }
         }
-        private float _zoom = 100;
+        private float _zoom = 200;
 
         /// <summary>
         /// most icons wont change size with zoom, however things like the orbit lines will. 
@@ -203,8 +203,8 @@ namespace Pulsar4X.ViewModel.SystemView
             OrbitDB = orbit;
 
             Rotation = 0;
-            Width = 2;
-            Height = 2;
+            //Width = 2;
+            //Height = 2;
             PosX = 0;
             PosY = 0;
 
@@ -217,7 +217,7 @@ namespace Pulsar4X.ViewModel.SystemView
             // setup date time etc.
             DateTime currTime = DateTime.Now;
             DateTime EndTime = currTime + OrbitDB.OrbitalPeriod;
-            TimeSpan stepTime = new TimeSpan((EndTime - currTime).Ticks / 360);
+            TimeSpan stepTime = new TimeSpan((EndTime - currTime).Ticks / 365);
             EndTime -= stepTime; // to end the loop 1 early.
 
             // get inital positions on orbit
@@ -225,6 +225,7 @@ namespace Pulsar4X.ViewModel.SystemView
             currTime += stepTime;
             var currPos = OrbitProcessor.GetPosition(orbit, currTime);
             var prevPos = currPos;
+            currTime += stepTime;
 
             // create first line segment.
             PenData pen = new PenData();
@@ -251,7 +252,6 @@ namespace Pulsar4X.ViewModel.SystemView
                 PathList.Add(pathPenPair);
 
                 prevPos = currPos;
-
             }
 
             // create last line segment, hoking up the ends.
