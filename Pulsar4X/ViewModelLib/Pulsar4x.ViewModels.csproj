@@ -96,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\PlayerOptionsVM.cs" />
     <Compile Include="ViewModels\ColonyScreenVM.cs" />
     <Compile Include="ViewModels\Commands.cs" />
     <Compile Include="ViewModels\ComponentDesignVM.cs" />

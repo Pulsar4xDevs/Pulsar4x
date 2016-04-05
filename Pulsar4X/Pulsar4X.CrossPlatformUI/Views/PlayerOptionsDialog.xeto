@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Dialog
+  xmlns="http://schema.picoe.ca/eto.forms"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  Title="Player Options"
+  >
+  <StackLayout Padding="10" Spacing="5">
+    <TableLayout>
+      <TableRow>
+        <Label Text="Players"/>
+        <ComboBox ID="PlayersComBox" DataStore="{Binding Players}" />
+      </TableRow>
+      <TableRow>
+        <Label Text="Password: "/>
+        <TextBox DataContext="{Binding PassWord}" />
+      </TableRow>
+      <TableRow>
+        <Label Text="AddPlayer stuff here too"/>
+      </TableRow>
+    </TableLayout>
+    <StackLayout Orientation="Horizontal" Spacing="5">
+      <Button ID="DefaultButton" Text="OK" Click="DefaultButton_Click" Command="{Binding SwitchToPlayerCMD}"/>
+      <Button ID="AbortButton" Text="C&amp;ancel" Click="AbortButton_Click" />
+    </StackLayout>
+
+  </StackLayout>
+</Dialog>

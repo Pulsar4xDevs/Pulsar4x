@@ -36,6 +36,8 @@ namespace Pulsar4X.CrossPlatformUI
             var newgame = new NewGame(_gameVM);
             var loadgame = new LoadGame(_gameVM);
             var quit = new Quit(_gameVM);
+            var playerOptions = new PlayerOptionsCMD(_gameVM);
+
             savegame = new SaveGame(_gameVM);
             sysMap = new SystemMap(_gameVM);
             colView = new ColonyView(_gameVM);
@@ -56,6 +58,8 @@ namespace Pulsar4X.CrossPlatformUI
                               savegame,
                               loadgame,
                               new SeparatorMenuItem(),
+                              playerOptions,
+                              new SeparatorMenuItem(),
                               quit
                           },
                     HelpItems =
@@ -63,6 +67,7 @@ namespace Pulsar4X.CrossPlatformUI
                               new Command { MenuText = "Help Command" }
                           }
                 };
+                
             }
             if (Platform.Supports<ToolBar>())
             {
