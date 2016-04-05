@@ -96,7 +96,7 @@ namespace Pulsar4X.ViewModel.SystemView
             {
                 OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>(), item.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>());
                 SimpleOrbitEllipse = new OrbitEllipseSimple(item.GetDataBlob<OrbitDB>());
-                SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item.GetDataBlob<OrbitDB>());
+                SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
             }
             gameviewModel.DateChangedEvent += GameviewModel_DateChangedEvent;
         }
