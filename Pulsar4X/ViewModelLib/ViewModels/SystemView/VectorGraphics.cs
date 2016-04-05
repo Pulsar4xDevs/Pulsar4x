@@ -315,6 +315,8 @@ namespace Pulsar4X.ViewModel.SystemView
         /// </summary>
         public byte StartIndex { get; set; }
 
+        private TimeSpan StepTime { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -334,17 +336,17 @@ namespace Pulsar4X.ViewModel.SystemView
             UpdatePosition();
 
             // setup date time etc.
-            DateTime currTime = DateTime.Now;
+            DateTime currTime = OrbitDB.Epoch;
             DateTime EndTime = currTime + OrbitDB.OrbitalPeriod;
-            TimeSpan stepTime = new TimeSpan((EndTime - currTime).Ticks / Segments );//365);
+            StepTime = new TimeSpan((EndTime - currTime).Ticks / Segments );//365);
             //EndTime -= stepTime; // to end the loop 1 early.
 
             // get inital positions on orbit
             var startPos = OrbitProcessor.GetPosition(OrbitDB, currTime);
-            currTime += stepTime;
+            currTime += StepTime;
             var currPos = OrbitProcessor.GetPosition(OrbitDB, currTime);
             var prevPos = currPos;
-            currTime += stepTime;
+            currTime += StepTime;
 
             //create first line segment.
             PenData pen = new PenData();
@@ -357,7 +359,7 @@ namespace Pulsar4X.ViewModel.SystemView
             PathList.Add(pathPenPair);
 
             // create rest of the lin segments.
-            for (; currTime < EndTime; currTime += stepTime)
+            for (; currTime < EndTime; currTime += StepTime)
             {
                 currPos = OrbitProcessor.GetPosition(OrbitDB, currTime);
                 pen = new PenData();
@@ -420,14 +422,8 @@ namespace Pulsar4X.ViewModel.SystemView
         /// </summary>
         public void SetStartPos()
         {
-            float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime);
-            float angle = (float)(OrbitDB.LongitudeOfAscendingNode + OrbitDB.ArgumentOfPeriapsis + trueAnomaly);
-
-            float angle2 = (float)(Math.Atan2(BodyPositionDB.Y, BodyPositionDB.X) * 180 / Math.PI);
-
-            float degreesPerSegment = 360 / PathList.Count;
-            StartIndex = (byte)(angle2 / degreesPerSegment);
-
+            TimeSpan timeSinceEpoch = CurrentDateTime - OrbitDB.Epoch;
+            StartIndex = (byte)((timeSinceEpoch.Ticks / StepTime.Ticks) -1);
         }
     }
 
