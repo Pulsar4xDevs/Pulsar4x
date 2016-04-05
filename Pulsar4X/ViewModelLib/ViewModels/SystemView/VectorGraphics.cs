@@ -57,12 +57,18 @@ namespace Pulsar4X.ViewModel.SystemView
         private PositionDB PositionBlob { get { return _bodyEntity.GetDataBlob<PositionDB>(); } }
 
         private DateTime _currentDateTime;
+        /// <summary>
+        /// setting the CurrentDateTime causes the UpdatePosition() method to run.
+        /// </summary>
         public DateTime CurrentDateTime
         {
             get { return _currentDateTime; }
             set { _currentDateTime = value; updatePosition(); }
         }
 
+        /// <summary>
+        /// setting the PosX and PosY causes an OnPropertyChanged event. (in base class)
+        /// </summary>
         private void updatePosition()
         {
             PosX = (float)PositionBlob.Position.X;
@@ -70,10 +76,15 @@ namespace Pulsar4X.ViewModel.SystemView
         }
 
 
-
+        /// <summary>
+        /// Constructor for IconData
+        /// </summary>
+        /// <param name="entity">The Object Entity</param>
         public IconData(Entity entity)
         {
             _bodyEntity = entity;
+
+            //TODO: filter/sort what the object is by the datablobs that it has, and run the apropriate method for the type of icon.  
             if (entity.HasDataBlob<SystemBodyDB>())
                 PlanetIcon(entity);
             else if (entity.HasDataBlob<StarInfoDB>())
@@ -81,6 +92,10 @@ namespace Pulsar4X.ViewModel.SystemView
 
         }
 
+        /// <summary>
+        /// creates the shape for a fleet icon. 
+        /// </summary>
+        /// <param name="fleet"></param>
         private void FleetIcon(Entity fleet)
         {
             PenData penData = new PenData();
@@ -93,8 +108,14 @@ namespace Pulsar4X.ViewModel.SystemView
             PathList.Add(pathPair);
         }
 
+
+        /// <summary>
+        /// creates teh shame for a StarIcon
+        /// </summary>
+        /// <param name="star"></param>
         private void StarIcon(Entity star)
         {
+            //TODO: change pen colour depending on star temp?
             PenData penData = new PenData();
             penData.Red = 100;
             penData.Green = 100;
@@ -114,13 +135,21 @@ namespace Pulsar4X.ViewModel.SystemView
             PathList.Add(pathPair);
         }
 
+
+        /// <summary>
+        /// creates te shape for a planet icon
+        /// </summary>
+        /// <param name="planet"></param>
         private void PlanetIcon(Entity planet)
         {
             SystemBodyDB sysBody = planet.GetDataBlob<SystemBodyDB>();
+            //TODO tweak shape/add symbol and colour depending on planet type, and other stats. ie: size, temp, colony cost for current faction, etc etc.  
+            float width = 6;
+            float height = 6;
 
             switch (sysBody.Type)
             {
-                case BodyType.Asteroid:
+                case BodyType.Asteroid: //throw some rand in the shape?
                     { }
                     break;
                 case BodyType.Comet:
@@ -146,11 +175,9 @@ namespace Pulsar4X.ViewModel.SystemView
                         PenData penData = new PenData();
                         penData.Green = 100;
                         penData.Blue = 200;
-                        float width = 6;
-                        float height = 6;
+
                         _bodyEntity = planet;
                         updatePosition();
-
                         VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, width, height));
                         PathList.Add(pathPair);
                     }
@@ -158,15 +185,12 @@ namespace Pulsar4X.ViewModel.SystemView
 
                 default:
                     {
-                        //PenData penData = new PenData();
-                        //penData.Green = 255;
-                        //Width = 6;
-                        //Height = 6;
-                        //_bodyEntity = planet;
-                        //updatePosition();
-
-                        //VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
-                        //PathList.Add(pathPair);
+                        PenData penData = new PenData();
+                        penData.Green = 255;
+                        _bodyEntity = planet;
+                        updatePosition();
+                        VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, width, height));
+                        PathList.Add(pathPair);
                     }
                     break;
             }
@@ -307,10 +331,6 @@ namespace Pulsar4X.ViewModel.SystemView
             PosX = 0;
             PosY = 0;
 
-            //if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<PositionDB>())
-            //{
-            //    ParentPositionDB = OrbitDB.Parent.GetDataBlob<PositionDB>();
-            //}
             UpdatePosition();
 
             // setup date time etc.
@@ -353,7 +373,7 @@ namespace Pulsar4X.ViewModel.SystemView
                 prevPos = currPos;
             }
 
-            // create last line segment, hoking up the ends.
+            // create last line segment, hooking up the ends.
             currPos = OrbitProcessor.GetPosition(OrbitDB, EndTime);
             pen = new PenData();
             pen.Red = 255;
@@ -367,6 +387,37 @@ namespace Pulsar4X.ViewModel.SystemView
             CurrentDateTime = OrbitDB.Epoch;
         }
 
+
+
+        /// <summary>
+        /// Updates the position, is fired when CurrentDateTime is set. (required for a moons orbit for example)
+        /// </summary>
+        private void UpdatePosition()
+        {
+            if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
+            {
+                PosX = (float)ParentPositionDB.Position.X ;
+                PosY = (float)ParentPositionDB.Position.Y ;
+            }
+        }
+
+        /// <summary>
+        /// updates the pen to get a fading line on the orbit. 
+        /// </summary>
+        public void UpdateAlphaFade()
+        {
+            SetStartPos();
+            byte i = 0;
+            foreach (var item in PathList)
+            {
+                item.Pen.Alpha = (byte)(255 - StartIndex + i);
+                i++;
+            }
+        }
+
+        /// <summary>
+        /// finds the angle to the current position and sets the startIndex to the apropriate number. the index should now represent which line the body is at. 
+        /// </summary>
         public void SetStartPos()
         {
             float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime);
@@ -377,26 +428,6 @@ namespace Pulsar4X.ViewModel.SystemView
             float degreesPerSegment = 360 / PathList.Count;
             StartIndex = (byte)(angle2 / degreesPerSegment);
 
-        }
-
-        private void UpdatePosition()
-        {
-            if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
-            {
-                PosX = (float)ParentPositionDB.Position.X ;
-                PosY = (float)ParentPositionDB.Position.Y ;
-            }
-        }
-
-        public void UpdateAlphaFade()
-        {
-            SetStartPos();
-            byte i = 0;
-            foreach (var item in PathList)
-            {
-                item.Pen.Alpha = (byte)(255 - StartIndex + i);
-                i++;
-            }
         }
     }
 
