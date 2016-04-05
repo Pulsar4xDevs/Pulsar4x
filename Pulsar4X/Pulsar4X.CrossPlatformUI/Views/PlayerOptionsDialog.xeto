@@ -8,7 +8,7 @@
     <TableLayout>
       <TableRow>
         <Label Text="Players"/>
-        <ComboBox ID="PlayersComBox" DataStore="{Binding Players}" />
+        <ComboBox ID="PlayersComBox" DataContext="{Binding Players}" />
       </TableRow>
       <TableRow>
         <Label Text="Password: "/>

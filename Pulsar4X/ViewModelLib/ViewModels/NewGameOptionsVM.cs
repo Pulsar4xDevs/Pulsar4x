@@ -26,7 +26,7 @@ namespace Pulsar4X.ViewModel
             DefaultStart = true;
             FactionName = "United Earth Federation";
             FactionPassword = "FPnotImplemented";
-            GmPassword = "GMPWnotImplemented";
+            GmPassword = "SMPass";
             NumberOfSystems = 50;
             AvailableModList = new ObservableCollection<DataVersionInfo>(StaticDataManager.AvailableData());
             SelectedModList = new ObservableCollection<DataVersionInfo>();
