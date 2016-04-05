@@ -275,7 +275,7 @@ namespace Pulsar4X.ViewModel.SystemView
         public DateTime CurrentDateTime
         {
             get { return _currentDateTime; }
-            set { _currentDateTime = value; updatePosition(); updateAlphaFade(); }
+            set { _currentDateTime = value; UpdatePosition(); UpdateAlphaFade(); }
         }
         /// <summary>
         /// This is the index that the body is currently at. (or maybe the next one..)
@@ -290,7 +290,7 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             SizeAffectedbyZoom = true;
             OrbitDB = orbit;
-
+            
             Rotation = 0;
             //Width = 2;
             //Height = 2;
@@ -300,14 +300,13 @@ namespace Pulsar4X.ViewModel.SystemView
             if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
             {
                 PositionDB = orbit.Parent.GetDataBlob<PositionDB>();
-
             }
-            updatePosition();
+            UpdatePosition();
 
             // setup date time etc.
             DateTime currTime = DateTime.Now;
             DateTime EndTime = currTime + OrbitDB.OrbitalPeriod;
-            TimeSpan stepTime = new TimeSpan((EndTime - currTime).Ticks / 365);
+            TimeSpan stepTime = new TimeSpan((EndTime - currTime).Ticks / Segments);//365);
             EndTime -= stepTime; // to end the loop 1 early.
 
             // get inital positions on orbit
@@ -350,25 +349,28 @@ namespace Pulsar4X.ViewModel.SystemView
             pen.Red = 255;
             pen.Green = 248;
             pen.Blue = 220;
-            pen.Thickness = 2.2f;
+            pen.Thickness = 1f;
             line = new LineData((float)prevPos.X, (float)prevPos.Y, (float)currPos.X, (float)currPos.Y);
             pathPenPair = new VectorPathPenPair(pen, line);
             PathList.Add(pathPenPair);
+
+            CurrentDateTime = orbit.Epoch;
         }
 
         public void SetStartPos()
         {
-            float angle = (float)(OrbitDB.LongitudeOfAscendingNode + OrbitDB.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime)) + Rotation;
             float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime);
+            float angle = (float)(OrbitDB.LongitudeOfAscendingNode + OrbitDB.ArgumentOfPeriapsis + trueAnomaly);
+                        
             Vector4 position = OrbitProcessor.GetPosition(OrbitDB, CurrentDateTime);
             float angle2 = (float)(Math.Atan2(position.Y, position.X) * 180 / Math.PI);
 
-            float degreesPerSegment = 360 / (Convert.ToSingle(Segments));
+            float degreesPerSegment = 360 / PathList.Count;
             StartIndex = (byte)(angle2 / degreesPerSegment);
 
         }
 
-        private void updatePosition()
+        private void UpdatePosition()
         {
             if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
             {
@@ -377,7 +379,7 @@ namespace Pulsar4X.ViewModel.SystemView
             }
         }
 
-        public void updateAlphaFade()
+        public void UpdateAlphaFade()
         {
             SetStartPos();
             byte i = 0;
