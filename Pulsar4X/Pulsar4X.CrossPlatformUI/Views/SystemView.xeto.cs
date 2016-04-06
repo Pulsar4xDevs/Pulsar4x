@@ -85,9 +85,6 @@ namespace Pulsar4X.CrossPlatformUI.Views {
             
             SysMapDrawable.SetViewmodel(viewmodel.SelectedSystemVM);
             
-            timDraw = new UITimer { Interval = 0.013 }; // Every Millisecond. TODO: change to update using OnPropertyChanged 
-            timDraw.Elapsed += timDraw_Elapsed;
-            timDraw.Start();
         }
 
 		private void WhenMouseLeave(object sender, MouseEventArgs e) {
