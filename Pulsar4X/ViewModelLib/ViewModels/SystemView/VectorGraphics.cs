@@ -467,7 +467,7 @@ namespace Pulsar4X.ViewModel.SystemView
             Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis) + 180; //TODO adjust for 3d orbits. ie if the orbit has an Z axis, this is likely to be wrong. 
             _width = (float)orbit.SemiMajorAxis * 2; //Major Axis
             _height = (float)Math.Sqrt(((orbit.SemiMajorAxis * Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity)) * orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity))) * 2;   //minor Axis
-            _focalPoint = (float)Math.Sqrt(_width * _width / 2 - _height * _height / 2);
+            _focalPoint = (float)Math.Sqrt(_width * _width * 0.5f - _height * _height * 0.5f);
             SizeAffectedbyZoom = true;
             OrbitDB = orbit;
             PositionDB = positionDB;
@@ -505,8 +505,8 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
             {
-                PosX = (float)PositionDB.Position.X - _width / 2 + _focalPoint;
-                PosY = (float)PositionDB.Position.Y - _width / 2;
+                PosX = (float)PositionDB.Position.X - _width * 0.5f + _focalPoint;
+                PosY = (float)PositionDB.Position.Y - _width * 0.5f;
             }
         }
 

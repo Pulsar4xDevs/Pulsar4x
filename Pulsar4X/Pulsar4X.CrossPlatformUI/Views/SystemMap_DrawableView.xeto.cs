@@ -162,10 +162,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
         }
 
-        private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width / 2; } }
+        private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width * 0.5f; } }
 
 
-        private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height / 2; } }
+        private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height * 0.5f; } }
 
 
         private Pen UpdatePen(PenData penData, Pen penEto)
@@ -188,7 +188,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 UpdatePen(pathData.PenData, pathData.EtoPen);
 
                 g.SaveTransform();
-                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width / 2, _parent.Height / 2));
+                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width * 0.5f, _parent.Height * 0.5f));
                 g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
                 
                 
