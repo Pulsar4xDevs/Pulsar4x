@@ -45,18 +45,7 @@ namespace Pulsar4X.ECSLib
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             
-            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid); //hack test because currently stuff doesnt get added to knownSystems automaticaly
-
-
-            StarSystemFactory Factory = new StarSystemFactory(game);
-
-            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(Factory.CreateEccTest(game).Guid);
-            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(Factory.CreateLongitudeTest(game).Guid);
-
-            for (int i = 0; i < 10; i++)
-            {
-                factionEntity.GetDataBlob < FactionInfoDB>().KnownSystems.Add(Factory.CreateSystem(game, i.ToString()).Guid);
-            }
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
 
             return factionEntity;
         }

@@ -136,6 +136,9 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
+            // Temp: This will be reworked later.
+            GenerateSystems(new AuthenticationToken(SpaceMaster, newGameSettings.SMPassword), newGameSettings.MaxSystems);
+
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
         }

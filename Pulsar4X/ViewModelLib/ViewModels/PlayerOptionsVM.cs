@@ -44,8 +44,7 @@ namespace Pulsar4X.ViewModel
 
         private void ChangeToPlayer(string password)
         {
-            _gameVM.CurrentPlayer = Players.SelectedKey;
-            _gameVM.CurrentAuthToken = new AuthenticationToken(_gameVM.CurrentPlayer, password);
+            _gameVM.SetPlayer(Players.SelectedKey, password);
         }
     }
 }
