@@ -10,7 +10,7 @@ namespace Pulsar4X.ViewModel.SystemView
     public class StarSystemVM : ViewModelBase
     {
         public DictionaryVM<StarSystem, string> StarSystems { get; } = new DictionaryVM<StarSystem, string>();
-        public SystemMap_DrawableVM SelectedSystemVM { get; private set; }
+        public SystemMap_DrawableVM SelectedSystemVM { get; } = new SystemMap_DrawableVM();
         private AuthenticationToken _authToken;
         private GameVM _gameVM;
         private int viewport_width;
@@ -40,7 +40,7 @@ namespace Pulsar4X.ViewModel.SystemView
                             -1f
                            );
 
-            SelectedSystemVM = new SystemMap_DrawableVM(_gameVM, StarSystems.SelectedKey, _authToken, scale_data, cam);
+            SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey, _authToken, scale_data);
         }
     }
 }

@@ -5,21 +5,28 @@ using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 using System.Windows;
+using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ViewModel.SystemView
 {
     public class SystemMap_DrawableVM : ViewModelBase
     {
+        public List<SystemObjectGraphicsInfo> SystemBodies { get; } = new List<SystemObjectGraphicsInfo>();
 
-        public List<SystemObjectGraphicsInfo> SystemBodies { get; set; } = new List<SystemObjectGraphicsInfo>();
+        //public List<SystemObjectGraphicsInfo> SystemBodies { get { return _systemBodies; }
+        //    set { _systemBodies = value; OnPropertyChanged(); } }
+
+            //private List<SystemObjectGraphicsInfo> _systemBodies = new List<SystemObjectGraphicsInfo>();
+
         public VectorGraphicDataBase BackGroundHud { get; set; } = new VectorGraphicDataBase();
-        public Camera camera;
+    
         public List<float> scale_data;
 
-        public SystemMap_DrawableVM(GameVM gameVM, StarSystem starSys, AuthenticationToken authToken, List<float> scale_data, Camera camera)
+        public void Initialise(GameVM gameVM, StarSystem starSys, AuthenticationToken authToken, List<float> scale_data)
         {
+            SystemBodies.Clear();
             this.scale_data = scale_data;
-            this.camera = camera;
+
             foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>(authToken))
             {
                 SystemBodies.Add(new SystemObjectGraphicsInfo(item, gameVM));
@@ -74,6 +81,7 @@ namespace Pulsar4X.ViewModel.SystemView
             BackGroundHud.PathList.Add(new VectorPathPenPair(hudPen, hudShapes2));
             BackGroundHud.SizeAffectedbyZoom = true;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(SystemBodies));
         }        
     }
 

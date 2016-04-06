@@ -25,16 +25,20 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
 
-
             _shapesList.Add(new DrawableObject(this, viewModel.BackGroundHud, _camera));
-            
-            
 
-            foreach (var item in viewModel.SystemBodies)
+            SystemBodies_CollectionChanged();
+        }
+
+        private void SystemBodies_CollectionChanged()
+        {
+            List<DrawableObject> newShapelist = new List<DrawableObject>();
+
+            foreach (var item in _viewModel.SystemBodies)
             {
                 item.Icon.PropertyChanged += ViewModel_PropertyChanged;
-                _shapesList.Add(new DrawableObject(this, item.Icon, _camera));
-     
+                newShapelist.Add(new DrawableObject(this, item.Icon, _camera));
+
                 if (item.OrbitEllipse != null)
                 {
                     //item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
@@ -47,13 +51,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 if (item.SimpleOrbitEllipseFading != null)
                 {
                     item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
-                    _shapesList.Add(new DrawableObject(this, item.SimpleOrbitEllipseFading, _camera));
+                    newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipseFading, _camera));
                 }
             }
+            _shapesList = newShapelist;
+
         }
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(SystemMap_DrawableVM.SystemBodies))
+                SystemBodies_CollectionChanged();
             Invalidate();
         }
 
