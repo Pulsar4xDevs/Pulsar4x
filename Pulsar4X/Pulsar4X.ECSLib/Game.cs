@@ -328,14 +328,27 @@ namespace Pulsar4X.ECSLib
             return null;
         }
 
+        [PublicAPI]
         public void GenerateSystems(AuthenticationToken authToken, int numSystems)
+        {
+            var systemSeeds = new List<int>(numSystems);
+
+            for (int i = 0; i < numSystems; i++)
+            {
+                systemSeeds.Add(GalaxyGen.SeedRNG.Next());
+            }
+
+            GenerateSystems(authToken, systemSeeds);
+        }
+
+        [PublicAPI]
+        public void GenerateSystems(AuthenticationToken authToken, List<int> systemSeeds)
         {
             if (SpaceMaster.IsTokenValid(authToken))
             {
-                while (numSystems > 0)
+                foreach (int systemSeed in systemSeeds)
                 {
-                    GalaxyGen.StarSystemFactory.CreateSystem(this, $"Star System #{Systems.Count + 1}", GalaxyGen.SeedRNG.Next());
-                    numSystems--;
+                    GalaxyGen.StarSystemFactory.CreateSystem(this, $"Star System #{Systems.Count + 1}", systemSeed);
                 }
             }
         }
