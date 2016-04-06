@@ -22,16 +22,16 @@ namespace Pulsar4X.ViewModel.SystemView
     
         public List<float> scale_data;
 
-        public void Initialise(GameVM gameVM, StarSystem starSys, AuthenticationToken authToken, List<float> scale_data)
+        public void Initialise(GameVM gameVM, StarSystem starSys, List<float> scale_data)
         {
             SystemBodies.Clear();
             this.scale_data = scale_data;
 
-            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>(authToken))
+            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>(gameVM.CurrentAuthToken))
             {
                 SystemBodies.Add(new SystemObjectGraphicsInfo(item, gameVM));
             }
-            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(authToken))
+            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(gameVM.CurrentAuthToken))
             {
                 SystemBodies.Add(new SystemObjectGraphicsInfo(item, gameVM));
             }

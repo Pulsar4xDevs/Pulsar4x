@@ -156,7 +156,7 @@ namespace Pulsar4X.ViewModel
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
 
-            StarSystemViewModel = new SystemView.StarSystemVM(this, Game, CurrentFaction, CurrentAuthToken);
+            StarSystemViewModel = new SystemView.StarSystemVM(this, Game, CurrentFaction);
         }
 
         public void LoadGame(string pathToFile)
