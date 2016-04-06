@@ -122,7 +122,11 @@ namespace Pulsar4X.ViewModel
         /// <returns>The Selected Value</returns>
         public TValue GetValue()
         {
-            return _index[SelectedIndex].Value;
+            if (SelectedIndex >= 0 && SelectedIndex < _index.Count)
+            {
+                return _index[SelectedIndex].Value;
+            }
+            return default(TValue);
         }
         /// <summary>
         /// 
@@ -140,7 +144,11 @@ namespace Pulsar4X.ViewModel
         /// <returns>The Selected Key</returns>
         public TKey GetKey()
         {
-            return _index[SelectedIndex].Key;
+            if (SelectedIndex >= 0 && SelectedIndex < _index.Count)
+            {
+                return _index[SelectedIndex].Key;
+            }
+            return default(TKey);
         }
         /// <summary>
         /// 
@@ -158,7 +166,11 @@ namespace Pulsar4X.ViewModel
         /// <returns>The Selected KeyValuePair</returns>
         public KeyValuePair<TKey, TValue> GetKeyValuePair()
         {
-            return _index[SelectedIndex];
+            if (SelectedIndex >= 0 && SelectedIndex < _index.Count)
+            {
+                return _index[SelectedIndex];
+            }
+            return new KeyValuePair<TKey, TValue>(default(TKey), default(TValue));
         }
         /// <summary>
         /// 
