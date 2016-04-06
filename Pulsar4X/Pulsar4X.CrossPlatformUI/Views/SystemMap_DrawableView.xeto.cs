@@ -39,18 +39,18 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 item.Icon.PropertyChanged += ViewModel_PropertyChanged;
                 newShapelist.Add(new DrawableObject(this, item.Icon, _camera));
 
-                if (item.OrbitEllipse != null)
-                {
+                //if (item.OrbitEllipse != null)
+                //{
                     //item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
                     //_shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
-                }
+                //}
                 if (item.SimpleOrbitEllipse != null)
                 {
-                    //_shapesList.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
+                    newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
                 }
                 if (item.SimpleOrbitEllipseFading != null)
                 {
-                    item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
+                    item.SimpleOrbitEllipseFading.PropertyChanged += ViewModel_PropertyChanged;
                     newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipseFading, _camera));
                 }
             }
@@ -175,6 +175,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             newColor.Rb = penData.Red;
             newColor.Bb = penData.Blue;
             newColor.Gb = penData.Green;
+
+            penEto.Color = newColor;
 
             penEto.Color = newColor;
             penEto.Thickness = penData.Thickness;

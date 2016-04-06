@@ -102,9 +102,38 @@ namespace Pulsar4X.ViewModel.SystemView
 
             if (item.HasDataBlob<OrbitDB>() && !item.GetDataBlob<OrbitDB>().IsStationary)
             {
-                OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>(), item.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>());
-                SimpleOrbitEllipse = new OrbitEllipseSimple(item.GetDataBlob<OrbitDB>());
-                SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
+                switch (item.GetDataBlob<SystemBodyDB>()?.Type)
+                {
+                    case BodyType.Comet:
+                        SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
+                        break;
+                    case BodyType.DwarfPlanet:
+                        SimpleOrbitEllipse = new OrbitEllipseSimple(item.GetDataBlob<OrbitDB>());
+                        break;
+                    case BodyType.Moon:
+                        SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
+                        break;
+                    case BodyType.GasDwarf:
+                        SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
+                        break;
+                    case BodyType.GasGiant:
+                        SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
+                        break;
+                    case BodyType.IceGiant:
+                        SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
+                        break;
+                    case BodyType.Terrestrial:
+                        SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
+                        break;
+                    case BodyType.Asteroid:
+                        break;
+                    default:
+                        break;
+                }
+
+                //OrbitEllipse = new OrbitEllipseFading(item.GetDataBlob<OrbitDB>(), item.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>());
+                //SimpleOrbitEllipse = new OrbitEllipseSimple(item.GetDataBlob<OrbitDB>());
+                //SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
             }
             gameviewModel.DateChangedEvent += GameviewModel_DateChangedEvent;
         }
