@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,31 @@ namespace Pulsar4X.ViewModel.SystemView
             
             StarSystems.SelectionChangedEvent += StarSystems_SelectionChangedEvent;
             StarSystems.SelectedIndex = 0;
+            _gameVM.StarSystems.CollectionChanged += StarSystems_CollectionChanged;
+        }
+
+        private void StarSystems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (SystemVM systemVM in e.NewItems)
+                    {
+                        StarSystems.Add(systemVM.StarSystem, systemVM.StarSystem.NameDB.GetName(_gameVM.CurrentFaction));
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (SystemVM systemVM in e.OldItems)
+                    {
+                        StarSystems.Remove(systemVM.StarSystem);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    StarSystems.Clear();
+                    break;
+                default:
+                    throw new NotSupportedException("Unsupported change of underlying viewmodel.");
+            }
         }
 
         private void StarSystems_SelectionChangedEvent(int oldSelection, int newSelection)
@@ -40,7 +66,11 @@ namespace Pulsar4X.ViewModel.SystemView
                             -1f
                            );
 
-            SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey, _authToken, scale_data);
+            var selectedSystem = StarSystems.SelectedKey;
+            if (selectedSystem != null)
+            { 
+                SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey, _authToken, scale_data);
+            }
         }
     }
 }
