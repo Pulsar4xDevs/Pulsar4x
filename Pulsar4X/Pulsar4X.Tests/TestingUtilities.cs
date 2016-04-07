@@ -14,7 +14,10 @@ namespace Pulsar4X.Tests
             var game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false });
 
             var smAuthToken = new AuthenticationToken(game.SpaceMaster);
-            game.GenerateSystems(smAuthToken, numSystems);
+            
+            // Systems are currently generated in the Game Constructor.
+            // Later, Systems will be initialized in the game constructor, but not actually generated until player discovery.
+            //game.GenerateSystems(smAuthToken, numSystems);
 
             // add a faction:
             Entity humanFaction = FactionFactory.CreateFaction(game, "New Terran Utopian Empire");
