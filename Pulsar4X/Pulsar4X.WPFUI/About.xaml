@@ -1,8 +1,0 @@
-﻿<Window x:Class="Pulsar4X.WPFUI.About"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="About" Height="Auto" Width="400">
-    <Grid Height="Auto" Width="Auto" Margin="0,0,0,0">
-       
-    </Grid>
-</Window>

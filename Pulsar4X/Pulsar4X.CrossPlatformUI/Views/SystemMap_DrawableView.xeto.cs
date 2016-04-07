@@ -25,26 +25,43 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _viewModel = viewModel;
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
 
-
             _shapesList.Add(new DrawableObject(this, viewModel.BackGroundHud, _camera));
-            
-            
 
-            foreach (var item in viewModel.SystemBodies)
+            SystemBodies_CollectionChanged();
+        }
+
+        private void SystemBodies_CollectionChanged()
+        {
+            List<DrawableObject> newShapelist = new List<DrawableObject>();
+
+            foreach (var item in _viewModel.SystemBodies)
             {
                 item.Icon.PropertyChanged += ViewModel_PropertyChanged;
-                _shapesList.Add(new DrawableObject(this, item.Icon, _camera));
+                newShapelist.Add(new DrawableObject(this, item.Icon, _camera));
 
-                if (item.OrbitEllipse != null)
+                //if (item.OrbitEllipse != null)
+                //{
+                    //item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
+                    //_shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
+                //}
+                if (item.SimpleOrbitEllipse != null)
                 {
-                    item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
-                    _shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
+                    newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
+                }
+                if (item.SimpleOrbitEllipseFading != null)
+                {
+                    item.SimpleOrbitEllipseFading.PropertyChanged += ViewModel_PropertyChanged;
+                    newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipseFading, _camera));
                 }
             }
+            _shapesList = newShapelist;
+
         }
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(SystemMap_DrawableVM.SystemBodies))
+                SystemBodies_CollectionChanged();
             Invalidate();
         }
 
@@ -76,11 +93,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
 
         private Drawable _parent;
-        float _zoom { get { return _objectData.Zoom; } }
+        float _zoom { get { return _objectData.Scale; } }
         private VectorGraphicDataBase _objectData;
         private Camera2D _camera;
         private List<PathData> _pathDataList = new List<PathData>();
-
+        private List<TextData> _textData = new List<TextData>();
         public DrawableObject(Drawable parent, VectorGraphicDataBase objectInfo, Camera2D camera)
         {
             _parent = parent;
@@ -106,7 +123,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         if (shape is EllipseData)
                             path.AddEllipse(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is LineData)
-                            path.AddLine(shape.X1, shape.Y1, shape.X2, shape.Y2);
+                            path.AddLine(shape.X1 * _zoom, shape.Y1 * _zoom, shape.X2 * _zoom, shape.Y2 * _zoom);
                         else if (shape is RectangleData)
                             path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is ArcData)
@@ -122,6 +139,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                             PointF control1 = new PointF(bezData.ControlX1, bezData.ControlY1);
                             PointF control2 = new PointF(bezData.ControlX2, bezData.ControlY2);
                             path.AddBezier(start, control1, control2, end);
+                        }
+                        else if (shape is TextData)
+                        {
+                            _textData.Add((TextData)shape);
+
                         }
                     }
                 }
@@ -140,31 +162,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
         }
 
-        private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width / 2; } }
+        private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width * 0.5f; } }
 
-        private float ViewPosX
-        {
-            get
-            {
-                float sizeAdjust = _objectData.Width / 2;               //adjust position for size
-                if (_objectData.SizeAffectedbyZoom)                     //if the size of the vectorimage should be affected by zooming. 
-                    sizeAdjust *= _zoom;
-                return PosXViewAdjusted - sizeAdjust;
-            }
-        }
 
-        private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height / 2; } }
+        private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height * 0.5f; } }
 
-        private float ViewPosY
-        {
-            get
-            {                
-                float sizeAdjust = _objectData.Height / 2;
-                if (_objectData.SizeAffectedbyZoom)
-                    sizeAdjust *= _zoom;
-                return PosYViewAdjusted - sizeAdjust;                
-            }
-        }
 
         private Pen UpdatePen(PenData penData, Pen penEto)
         {
@@ -173,6 +175,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             newColor.Rb = penData.Red;
             newColor.Bb = penData.Blue;
             newColor.Gb = penData.Green;
+
+            penEto.Color = newColor;
 
             penEto.Color = newColor;
             penEto.Thickness = penData.Thickness;
@@ -186,13 +190,25 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 UpdatePen(pathData.PenData, pathData.EtoPen);
 
                 g.SaveTransform();
-
-                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, PosXViewAdjusted, PosYViewAdjusted));
-                g.TranslateTransform(ViewPosX, ViewPosY);
+                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width * 0.5f, _parent.Height * 0.5f));
+                g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
                 
+                
+
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
-            }  
+            }
+            foreach (var item in _textData)
+            {
+                g.SaveTransform();
+                g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
+
+                Font font = new Font(item.Font.FontFamily.ToString(), item.Y2);
+                Color color = new Color(item.Color.R, item.Color.G, item.Color.B);
+                g.DrawText(font, color, item.X1, item.X2, item.Text);
+                
+                g.RestoreTransform();
+            } 
         }
     }
 }

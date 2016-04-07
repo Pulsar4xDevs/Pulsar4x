@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,17 +11,15 @@ namespace Pulsar4X.ViewModel.SystemView
     public class StarSystemVM : ViewModelBase
     {
         public DictionaryVM<StarSystem, string> StarSystems { get; } = new DictionaryVM<StarSystem, string>();
-        public SystemMap_DrawableVM SelectedSystemVM { get; private set; }
-        private AuthenticationToken _authToken;
+        public SystemMap_DrawableVM SelectedSystemVM { get; } = new SystemMap_DrawableVM();
         private GameVM _gameVM;
         private int viewport_width;
         private int viewport_height;
 
-        public StarSystemVM(GameVM gameVM, Game game, Entity factionEntity, AuthenticationToken authToken)
+        public StarSystemVM(GameVM gameVM, Game game, Entity factionEntity)
         {
-            _authToken = authToken;
             _gameVM = gameVM;
-            foreach (var item in game.GetSystems(authToken))
+            foreach (var item in game.GetSystems(gameVM.CurrentAuthToken))
             {
                 StarSystems.Add(item, item.NameDB.GetName(factionEntity));
                 
@@ -28,6 +27,31 @@ namespace Pulsar4X.ViewModel.SystemView
             
             StarSystems.SelectionChangedEvent += StarSystems_SelectionChangedEvent;
             StarSystems.SelectedIndex = 0;
+            _gameVM.StarSystems.CollectionChanged += StarSystems_CollectionChanged;
+        }
+
+        private void StarSystems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (SystemVM systemVM in e.NewItems)
+                    {
+                        StarSystems.Add(systemVM.StarSystem, systemVM.StarSystem.NameDB.GetName(_gameVM.CurrentFaction));
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (SystemVM systemVM in e.OldItems)
+                    {
+                        StarSystems.Remove(systemVM.StarSystem);
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Reset:
+                    StarSystems.Clear();
+                    break;
+                default:
+                    throw new NotSupportedException("Unsupported change of underlying viewmodel.");
+            }
         }
 
         private void StarSystems_SelectionChangedEvent(int oldSelection, int newSelection)
@@ -40,7 +64,11 @@ namespace Pulsar4X.ViewModel.SystemView
                             -1f
                            );
 
-            SelectedSystemVM = new SystemMap_DrawableVM(_gameVM, StarSystems.SelectedKey, _authToken, scale_data, cam);
+            var selectedSystem = StarSystems.SelectedKey;
+            if (selectedSystem != null)
+            { 
+                SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey, scale_data);
+            }
         }
     }
 }

@@ -30,8 +30,10 @@ namespace Pulsar4X.ViewModel
                 OnPropertyChanged();
             }
         }
-        public Player CurrentPlayer { get; set; }
-        public AuthenticationToken CurrentAuthToken { get; set; }
+
+        public Player CurrentPlayer { get; private set; }
+
+        public AuthenticationToken CurrentAuthToken { get; private set; }
 
         internal Entity CurrentFaction
         {
@@ -62,7 +64,7 @@ namespace Pulsar4X.ViewModel
                 }
                 Colonys.SelectedIndex = 0;
 
-
+                OnPropertyChanged();
             }
         }
         private Entity _currentFaction;
@@ -154,7 +156,7 @@ namespace Pulsar4X.ViewModel
             ProgressValue = 0;//reset the progressbar
             StatusText = "Game Created.";
 
-            StarSystemViewModel = new SystemView.StarSystemVM(this, Game, CurrentFaction, CurrentAuthToken);
+            StarSystemViewModel = new SystemView.StarSystemVM(this, Game, CurrentFaction);
         }
 
         public void LoadGame(string pathToFile)
@@ -180,6 +182,25 @@ namespace Pulsar4X.ViewModel
             StatusText = "Game Saved";
         }
 
+        public void SetPlayer(Player player, string password)
+        {
+            CurrentPlayer = player;
+            CurrentAuthToken = new AuthenticationToken(player, password);
+
+            ReadOnlyDictionary<Entity, AccessRole> playerAccessRoles = player.GetAccessRoles(CurrentAuthToken);
+            foreach (KeyValuePair<Entity, AccessRole> kvp in playerAccessRoles)
+            {
+                Entity faction = kvp.Key;
+                AccessRole role = kvp.Value;
+
+                // For now, just select the first faction with the Owner role.
+                if ((role & AccessRole.Owner) == AccessRole.Owner)
+                {
+                    CurrentFaction = faction;
+                    break;
+                }
+            }
+        }
         
 
         public void AdvanceTime(TimeSpan pulseLength, CancellationToken pulseCancellationToken)
@@ -228,6 +249,7 @@ namespace Pulsar4X.ViewModel
         }
 
         private Game _game;
+        private Player _currentPlayer;
 
         internal Game Game
         {

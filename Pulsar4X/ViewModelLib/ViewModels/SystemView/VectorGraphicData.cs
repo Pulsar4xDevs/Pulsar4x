@@ -7,302 +7,9 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ViewModel.SystemView
 {
-    public class VectorGraphicDataBase : ViewModelBase
-    {
-
-        public List<VectorPathPenPair> PathList { get; set; } = new List<VectorPathPenPair>();
-
-        /// <summary>
-        /// position from 0,0
-        /// </summary>
-        public float PosX
-        {
-            get { return _posx; }
-            set { _posx = value; OnPropertyChanged(); }
-        }
-        private float _posx = 0;
-        /// <summary>
-        /// position from 0,0
-        /// </summary>
-        public float PosY
-        {
-            get { return _posy; }
-            set { _posy = value; OnPropertyChanged(); }
-        }
-        private float _posy = 0;
-
-        /// <summary>
-        /// Size of the rectangle
-        /// </summary>
-        public float Width { get; set; }
-        /// <summary>
-        /// Height of the rectangle
-        /// </summary>
-        public float Height { get; set; }
-
-        public float Rotation { get; set; }
-
-        public float Zoom
-        {
-            get { return _zoom; }
-            set { _zoom = value; OnPropertyChanged(); }
-        }
-        private float _zoom = 100;
-
-        /// <summary>
-        /// most icons wont change size with zoom, however things like the orbit lines will. 
-        /// </summary>
-        public bool SizeAffectedbyZoom { get; set; } = false;
-    }
 
     /// <summary>
-    /// generic vector graphics data for an icon
-    /// </summary>
-    public class IconData : VectorGraphicDataBase
-    {
-        private Entity _bodyEntity;
-        private PositionDB PositionBlob { get { return _bodyEntity.GetDataBlob<PositionDB>(); } }
-
-        private DateTime _currentDateTime;
-        public DateTime CurrentDateTime
-        {
-            get { return _currentDateTime; }
-            set { _currentDateTime = value; updatePosition(); }
-        }
-
-        private void updatePosition()
-        {
-            PosX = (float)PositionBlob.Position.X;
-            PosY = (float)PositionBlob.Position.Y;
-        }
-
-
-
-        public IconData(Entity entity)
-        {
-            _bodyEntity = entity;
-            if (entity.HasDataBlob<SystemBodyDB>())
-                PlanetIcon(entity);
-            else if (entity.HasDataBlob<StarInfoDB>())
-                StarIcon(entity);
-
-        }
-
-        private void FleetIcon(Entity fleet)
-        {
-            PenData penData = new PenData();
-            penData.Green = 255;
-            Width = 6;
-            Height = 6;
-            updatePosition();
-
-            VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
-            PathList.Add(pathPair);
-        }
-
-        private void StarIcon(Entity star)
-        {
-            PenData penData = new PenData();
-            penData.Red = 100;
-            penData.Green = 100;
-            penData.Blue = 0;
-            Width = 8;
-            Height = 8;
-            updatePosition();
-
-            float hw = Width * 0.25f;
-            float hh = Height * 0.25f;
-
-            VectorPathPenPair pathPair = new VectorPathPenPair(penData, new RectangleData(PosX, PosY, Width, Height));
-            pathPair.VectorShapes.Add(new BezierData(0,-Height, -Width,0, -hw,-hh, -hw,-hh));
-            pathPair.VectorShapes.Add(new BezierData(-Width,0, 0,Height, -hw,hh, -hw,hh));
-            pathPair.VectorShapes.Add(new BezierData(0,Height, Width,0, hw,hh,  hw,hh));
-            pathPair.VectorShapes.Add(new BezierData(Width,0, 0,-Height, hw,-hh , hw,-hh));
-            PathList.Add(pathPair);
-        }
-
-        private void PlanetIcon(Entity planet)
-        {
-            SystemBodyDB sysBody = planet.GetDataBlob<SystemBodyDB>();
-
-            switch (sysBody.Type)
-            {
-                case BodyType.Asteroid:
-                    { }
-                break;
-                case BodyType.Comet:
-                    { }
-                    break;
-                case BodyType.DwarfPlanet:
-                    { }
-                    break;
-                case BodyType.GasDwarf:
-                    { }
-                    break;
-                case BodyType.GasGiant:
-                    { }
-                    break;
-                case BodyType.IceGiant:
-                    { }
-                    break;
-                case BodyType.Moon:
-                    { }
-                    break;
-                case BodyType.Terrestrial:
-                    {
-                        PenData penData = new PenData();
-                        penData.Green = 100;
-                        penData.Blue = 200;
-                        Width = 6;
-                        Height = 6;
-                        _bodyEntity = planet;
-                        updatePosition();
-
-                        VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
-                        PathList.Add(pathPair);
-                    }
-                    break;
-
-                default:
-                    {
-                        //PenData penData = new PenData();
-                        //penData.Green = 255;
-                        //Width = 6;
-                        //Height = 6;
-                        //_bodyEntity = planet;
-                        //updatePosition();
-
-                        //VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, Width, Height));
-                        //PathList.Add(pathPair);
-                    }
-                    break;
-            }
-        }
-    }
-
-    /// <summary>
-    /// generic data for drawing an OrbitEllipse which fades towards the tail
-    /// </summary>
-    public class OrbitEllipseFading : VectorGraphicDataBase
-    {
-        /// <summary>
-        /// number of segments in the orbit, this is mostly for an increasing alpha chan.
-        /// </summary>
-        public byte Segments { get; set; } = 255;
-        /// <summary>
-        /// each of the arcs are stored here
-        /// </summary>
-        //public List<ArcData> ArcList { get; } = new List<ArcData>();
-        /// <summary>
-        /// This is the index that the body is currently at. (or maybe the next one..)
-        /// </summary>
-        public byte StartIndex { get; set; }
-
-        public OrbitDB OrbitDB { get; set; }
-        public PositionDB PositionDB { get; set; }
-        private DateTime _currentDateTime;
-        public DateTime CurrentDateTime
-        {
-            get { return _currentDateTime; }
-            set { _currentDateTime = value; updatePosition(); updateAlphaFade(); }
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="orbit"></param>
-        public OrbitEllipseFading(OrbitDB orbit, PositionDB positionDB)
-        {
-            //TODO:May have to create a smaller arc for the first segment, and full alpha the segment the body is at.
-            Rotation = (float)(orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis); //TODO adjust for 3d orbits. ie if the orbit has an Z axis, this is likely to be wrong. 
-            Width = (float)orbit.SemiMajorAxis * 2; //Major Axis
-            Height = (float)Math.Sqrt(((orbit.SemiMajorAxis * Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity)) * orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity))) * 2;   //minor Axis
-            SizeAffectedbyZoom = true;
-            OrbitDB = orbit;
-            PositionDB = positionDB;
-            if (orbit.Parent != null && orbit.Parent.HasDataBlob<PositionDB>())
-            {
-                PosX = (float)orbit.Parent.GetDataBlob<PositionDB>().X; //TODO: adjust so focal point of ellipse is at position. 
-                PosY = (float)orbit.Parent.GetDataBlob<PositionDB>().Y;
-            }
-            float start = 0;
-            float sweep = 360.0f / Segments;
-            for (int i = 0; i < Segments; i++)
-            {
-                PenData pen = new PenData();
-                pen.Red = 255;
-                pen.Green = 248;
-                pen.Blue = 220;
-                ArcData arc = new ArcData(PosX, PosY, Width, Height, start, sweep);                
-                VectorPathPenPair pathPenPair = new VectorPathPenPair(pen, arc);
-                PathList.Add(pathPenPair);
-                start += sweep;
-            }
-            updateAlphaFade();
-        }
-
-        public void SetStartPos()
-        {
-            float angle = (float)(OrbitDB.LongitudeOfAscendingNode + OrbitDB.ArgumentOfPeriapsis + OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime));
-            float trueAnomaly = (float)OrbitProcessor.GetTrueAnomaly(OrbitDB, _currentDateTime);
-            Vector4 position = OrbitProcessor.GetPosition(OrbitDB, CurrentDateTime);
-            float angle2 = (float)(Math.Atan2(position.Y , position.X) * 180 / Math.PI );
-
-            float degreesPerSegment = 360 / (Convert.ToSingle(Segments));
-            StartIndex = (byte)(angle2 / degreesPerSegment);
-
-        }
-
-        private void updatePosition()
-        {
-            if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
-            {
-                PosX = (float)PositionDB.Position.X;
-                PosY = (float)PositionDB.Position.Y;
-            }
-        }
-
-        public void updateAlphaFade()
-        {
-            SetStartPos();
-            byte i = 0;
-            foreach (var item in PathList)
-            {
-                item.Pen.Alpha = (byte)(255 - StartIndex + i);
-                i++;
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// a list of vector shapes with a pen
-    /// </summary>
-    public class VectorPathPenPair
-    {
-        public PenData Pen { get; set; } = new PenData();
-        public List<VectorShapeBase> VectorShapes { get; set; } = new List<VectorShapeBase>();
-        public VectorPathPenPair(VectorShapeBase shape)
-        {
-            VectorShapes.Add(shape);
-        }
-
-        public VectorPathPenPair(PenData pen, VectorShapeBase shape) : this(shape)
-        { Pen = pen; }
-
-        public VectorPathPenPair(PenData pen, List<VectorShapeBase> shapes)
-        {
-            Pen = pen;
-            foreach (var shape in shapes)
-            {
-                VectorShapes.Add(shape);
-            }
-        }
-    }
-
-    /// <summary>
-    /// base class for VectorShapes
+    /// base class for VectorShapes. basic vector primitives should inherit from this class. (see eto graphics)
     /// </summary>
     public class VectorShapeBase : ViewModelBase
     {
@@ -376,9 +83,12 @@ namespace Pulsar4X.ViewModel.SystemView
             }
 
         }
-        
+
     }
 
+    /// <summary>
+    /// generic data for drawing a line. 
+    /// </summary>
     public class LineData : VectorShapeBase
     {
         public float XStart { get { return X1; } set { X1 = value; OnPropertyChanged(); } }
@@ -453,6 +163,9 @@ namespace Pulsar4X.ViewModel.SystemView
         }
     }
 
+    /// <summary>
+    /// generic data for drawing a Bezier
+    /// </summary>
     public class BezierData : VectorShapeBase
     {
         public float ControlX1 { get; set; }
@@ -469,6 +182,23 @@ namespace Pulsar4X.ViewModel.SystemView
         }
     }
 
+
+    /// <summary>
+    /// generic data for text 
+    /// </summary>
+    public class TextData : VectorShapeBase
+    {
+        public System.Drawing.Font Font { get; set; } = new System.Drawing.Font(new System.Drawing.FontFamily(System.Drawing.Text.GenericFontFamilies.SansSerif), 8);
+        public System.Drawing.Color Color { get; set; } = new System.Drawing.Color();
+
+        public string Text { get; set; }
+
+        public TextData(string text, float x, float y, float size) : base(x, y, 0, size )
+        {
+            Text = text;
+            
+        }
+    }
 
     /// <summary>
     /// generic data for a graphics Pen. 

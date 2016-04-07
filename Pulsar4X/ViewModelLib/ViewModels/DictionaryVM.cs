@@ -64,8 +64,8 @@ namespace Pulsar4X.ViewModel
     /// An attempt at creating a class to make binding dictionaries to UI more streamlined.
     /// To Use in the View:
     /// Bind the combobox to the dictionaryVM type:
-    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
-    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+    ///     myComboBox.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+    ///     myComboBox.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
     ///     
     /// Bind the combobox datacontext in the .cs:
     ///     myComboBox.DataContext = viewModel.myDictionaryVM;
@@ -122,7 +122,11 @@ namespace Pulsar4X.ViewModel
         /// <returns>The Selected Value</returns>
         public TValue GetValue()
         {
-            return _index[SelectedIndex].Value;
+            if (SelectedIndex >= 0 && SelectedIndex < _index.Count)
+            {
+                return _index[SelectedIndex].Value;
+            }
+            return default(TValue);
         }
         /// <summary>
         /// 
@@ -140,7 +144,11 @@ namespace Pulsar4X.ViewModel
         /// <returns>The Selected Key</returns>
         public TKey GetKey()
         {
-            return _index[SelectedIndex].Key;
+            if (SelectedIndex >= 0 && SelectedIndex < _index.Count)
+            {
+                return _index[SelectedIndex].Key;
+            }
+            return default(TKey);
         }
         /// <summary>
         /// 
@@ -158,7 +166,11 @@ namespace Pulsar4X.ViewModel
         /// <returns>The Selected KeyValuePair</returns>
         public KeyValuePair<TKey, TValue> GetKeyValuePair()
         {
-            return _index[SelectedIndex];
+            if (SelectedIndex >= 0 && SelectedIndex < _index.Count)
+            {
+                return _index[SelectedIndex];
+            }
+            return new KeyValuePair<TKey, TValue>(default(TKey), default(TValue));
         }
         /// <summary>
         /// 

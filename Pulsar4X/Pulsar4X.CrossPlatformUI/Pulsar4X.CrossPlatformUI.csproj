@@ -188,8 +188,12 @@
     <EmbeddedResource Include="Views\ChainedSlidersControl.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\PlayerOptionsDialog.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\PlayerOptionsCMD.cs" />
     <Compile Include="Commands\ColonyView.cs" />
     <Compile Include="Commands\ComponentDesignViewCMD.cs" />
     <Compile Include="Commands\ComponentTemplateViewCMD.cs" />
@@ -273,6 +277,9 @@
     </Compile>
     <Compile Include="Views\NewGame.xeto.cs">
       <DependentUpon>NewGame.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PlayerOptionsDialog.xeto.cs">
+      <DependentUpon>PlayerOptionsDialog.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ResearchAbilityView.xeto.cs">
       <DependentUpon>ResearchAbilityView.xeto</DependentUpon>

@@ -201,6 +201,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <returns>ReadOnlyDictionary containing the access roles.</returns>
         [PublicAPI]
+        [Pure]
         public ReadOnlyDictionary<Entity, AccessRole> GetAccessRoles(AuthenticationToken authToken)
         {
             return !IsTokenValid(authToken) ? new ReadOnlyDictionary<Entity, AccessRole>(new Dictionary<Entity, AccessRole>()) : AccessRoles;
