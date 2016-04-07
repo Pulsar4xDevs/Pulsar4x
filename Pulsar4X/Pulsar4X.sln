@@ -20,8 +20,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.CrossPlatformUI.Wp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.CrossPlatformUI.Mac", "Pulsar4X.CrossPlatformUI.Mac\Pulsar4X.CrossPlatformUI.Mac.csproj", "{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.WPFUI", "Pulsar4X.WPFUI\Pulsar4X.WPFUI.csproj", "{76508ABF-600E-4B86-9764-DB82D4E429B0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug (No Tests|Any CPU = Debug (No Tests|Any CPU
@@ -352,47 +350,6 @@ Global
 		{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}.Windows|x64.ActiveCfg = Windows|Any CPU
 		{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}.Windows|x86.ActiveCfg = Windows|Any CPU
 		{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}.Windows|x86.Build.0 = Windows|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug (No Tests|Any CPU.ActiveCfg = Debug (No Tests|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug (No Tests|Any CPU.Build.0 = Debug (No Tests|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug (No Tests|Mixed Platforms.ActiveCfg = Debug (No Tests|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug (No Tests|Mixed Platforms.Build.0 = Debug (No Tests|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug (No Tests|x64.ActiveCfg = Debug (No Tests|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug (No Tests|x64.Build.0 = Debug (No Tests|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug (No Tests|x86.ActiveCfg = Debug (No Tests|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|x64.ActiveCfg = Debug|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|x64.Build.0 = Debug|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Linux|Any CPU.ActiveCfg = Linux|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Linux|Mixed Platforms.ActiveCfg = Linux|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Linux|x64.ActiveCfg = Linux|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Linux|x64.Build.0 = Linux|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Linux|x86.ActiveCfg = Linux|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Linux|x86.Build.0 = Linux|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Mac|Any CPU.ActiveCfg = Mac|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Mac|Mixed Platforms.ActiveCfg = Mac|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Mac|x64.ActiveCfg = Mac|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Mac|x64.Build.0 = Mac|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Mac|x86.ActiveCfg = Mac|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Mac|x86.Build.0 = Mac|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|x64.ActiveCfg = Release|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|x64.Build.0 = Release|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|x86.ActiveCfg = Release|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|Any CPU.ActiveCfg = Windows|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|Any CPU.Build.0 = Windows|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|Mixed Platforms.ActiveCfg = Windows|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|Mixed Platforms.Build.0 = Windows|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|x64.ActiveCfg = Windows|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|x64.Build.0 = Windows|x64
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|x86.ActiveCfg = Windows|Any CPU
-		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Windows|x86.Build.0 = Windows|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
