@@ -278,6 +278,7 @@
     <Compile Include="Views\NewGame.xeto.cs">
       <DependentUpon>NewGame.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\OrbitRing.cs" />
     <Compile Include="Views\PlayerOptionsDialog.xeto.cs">
       <DependentUpon>PlayerOptionsDialog.xeto</DependentUpon>
     </Compile>
