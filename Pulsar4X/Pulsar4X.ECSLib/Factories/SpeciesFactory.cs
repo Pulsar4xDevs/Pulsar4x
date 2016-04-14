@@ -35,6 +35,14 @@ namespace Pulsar4X.ECSLib
             return species;
         }
 
+        public static Entity CreateSpeciesFromBlobs(Entity faction, EntityManager globalManager, NameDB nameDB, SpeciesDB speciesDB)
+        {
+            var blobs = new List<BaseDataBlob> { nameDB, speciesDB };
+            Entity species = new Entity(globalManager, blobs);
+            faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
+            return species;
+        }
+
         /// <summary>
         /// 
         /// </summary>

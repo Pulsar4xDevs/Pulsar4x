@@ -191,6 +191,9 @@
     <EmbeddedResource Include="Views\PlayerOptionsDialog.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\NewSpeciesView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -277,6 +280,9 @@
     </Compile>
     <Compile Include="Views\NewGame.xeto.cs">
       <DependentUpon>NewGame.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NewSpeciesView.xeto.cs">
+      <DependentUpon>NewSpeciesView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\OrbitRing.cs" />
     <Compile Include="Views\PlayerOptionsDialog.xeto.cs">

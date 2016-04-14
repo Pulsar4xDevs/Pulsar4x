@@ -66,7 +66,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             g.SaveTransform();
             g.RotateTransform(Rotation);
             //g.TranslateTransform();
-            //g.ScaleTransform();
+            //g.ScaleTransform(); //for zoom?
             int i = 0;
             foreach (var pen in _segmentPens)
             {
