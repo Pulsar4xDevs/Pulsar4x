@@ -16,22 +16,25 @@ namespace Pulsar4X.CrossPlatformUI.Views
             set { _orbitPercent = value; OnPropertyChanged(nameof(SweepAngle)); } }
         private PercentValue _orbitPercent = new PercentValue();
 
-        public byte Segments { private get { return _segments; }
+        public byte Segments { private get { return _segments; } //TODO we could adjust the Segments and OrbitPercent by the size of the orbit and the zoom level to get a level of detail effect.
             set { _segments = value; OnPropertyChanged(nameof(SweepAngle)); }}
         private byte _segments = 255;
 
         public float StartArcAngle { get; set; }
 
         public float SweepAngle { get { return (360f * OrbitPercent.Percent) / Segments; } }
-        private List<Pen> _segmentPens;
+        private List<Pen> _segmentPens = new List<Pen>();
 
-        //some of this stuff will be related to the camera, still not sure how to do this.
+        //some of this stuff will be related to the camera, and transform matrix. still not sure how to do this.
         float TopLeftX = 0;
         float TopLeftY = 0;
         float Width;
         float Height;
-        float Rotation = 0; //this should be the angle from the orbital reference direction, to the Argument of Periapsis, as seen from above.
+        //this should be the angle from the orbital reference direction, to the Argument of Periapsis, as seen from above, this sets the angle for the ecentricity.
+        //ie an elipse is created from a rectangle (position, width and height), then rotated so that the ecentricity is at the right angle. 
+        float Rotation = 0;
 
+        private Camera2D _camera;
 
         private Entity OrbitEntity { get; set; }
 
@@ -42,8 +45,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private PositionDB BodyPositionDB { get { return OrbitEntity.GetDataBlob<PositionDB>(); } }
 
 
-        public OrbitRing(Entity entityWithOrbit)
+        public OrbitRing(Entity entityWithOrbit, Camera2D camera)
         {
+            _camera = camera;
             OrbitEntity = entityWithOrbit;
         }
 
@@ -65,8 +69,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             g.SaveTransform();
             g.RotateTransform(Rotation);
-            //g.TranslateTransform();
-            //g.ScaleTransform(); //for zoom?
+            g.MultiplyTransform(_camera.GetViewProjectionMatrix());
             int i = 0;
             foreach (var pen in _segmentPens)
             {

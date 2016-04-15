@@ -16,8 +16,8 @@ namespace Pulsar4X.ViewModel.SystemView
         //public List<SystemObjectGraphicsInfo> SystemBodies { get { return _systemBodies; }
         //    set { _systemBodies = value; OnPropertyChanged(); } }
 
-            //private List<SystemObjectGraphicsInfo> _systemBodies = new List<SystemObjectGraphicsInfo>();
-
+        //private List<SystemObjectGraphicsInfo> _systemBodies = new List<SystemObjectGraphicsInfo>();
+        public List<Entity> OrbitalEntities { get; } = new List<Entity>();
         public VectorGraphicDataBase BackGroundHud { get; set; } = new VectorGraphicDataBase();
     
         public List<float> scale_data;
@@ -35,6 +35,8 @@ namespace Pulsar4X.ViewModel.SystemView
             {
                 SystemBodies.Add(new SystemObjectGraphicsInfo(item, gameVM));
             }
+            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>(gameVM.CurrentAuthToken))
+                OrbitalEntities.Add(item);
 
             PenData hudPen = new PenData();
             hudPen.Alpha = 100;
