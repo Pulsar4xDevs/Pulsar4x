@@ -18,6 +18,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             XamlReader.Load(this);
             _camera = new Camera2D(this.Size);
+            this.MouseDown += SystemMap_DrawableView_MouseDown;
         }
 
 
@@ -29,6 +30,18 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _shapesList.Add(new DrawableObject(this, viewModel.BackGroundHud, _camera));
 
             SystemBodies_CollectionChanged();
+        }
+
+        private void SystemMap_DrawableView_MouseDown(object sender, MouseEventArgs e)
+        {
+            //Point VP = _camera.GetViewPort();
+            //Point loc = new Point();
+            //loc.X = ((int)e.Location.X - (this.Size.Width / 2));
+            //loc.Y = ((int)e.Location.Y - (this.Size.Height / 2));
+            //Point newVP = new Point((VP - loc));
+            //_camera.setViewPort(newVP);
+            //_camera.CenterOn(loc);
+            Invalidate();
         }
 
         private void SystemBodies_CollectionChanged()
@@ -201,11 +214,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 UpdatePen(pathData.PenData, pathData.EtoPen);
 
                 g.SaveTransform();
-                //g.MultiplyTransform(_camera.GetViewProjectionMatrix());
+                g.MultiplyTransform(_camera.GetViewProjectionMatrix());
                 //g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width * 0.5f, _parent.Height * 0.5f));
                 g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
-                
-                
+
+
 
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
@@ -213,15 +226,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var item in _textData)
             {
                 g.SaveTransform();
-                //g.MultiplyTransform(_camera.GetViewProjectionMatrix());
+                g.MultiplyTransform(_camera.GetViewProjectionMatrix());
                 g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
 
                 Font font = new Font(item.Font.FontFamily.ToString(), item.Y2);
                 Color color = new Color(item.Color.R, item.Color.G, item.Color.B);
                 g.DrawText(font, color, item.X1, item.X2, item.Text);
-                
+
                 g.RestoreTransform();
-            } 
+            }
         }
     }
 }

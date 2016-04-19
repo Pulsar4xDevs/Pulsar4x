@@ -21,6 +21,7 @@ namespace Pulsar4X.CrossPlatformUI
         public Camera2D(Size viewport)
         {
             updateViewPort(viewport);
+            readjustZoom(0, 0, zoomLevel);
         }
         /// <summary>
         /// Gets or sets the position of the camera.
@@ -135,7 +136,8 @@ namespace Pulsar4X.CrossPlatformUI
         /// </summary>
         public int ZoomFactor()
         {
-            return (1 << zoomLevel);
+            //return (1 << zoomLevel);
+            return zoomLevel * zoomLevel;
         }
 
         /// <param name="x">The X mouse coordinate</param>
@@ -168,7 +170,7 @@ namespace Pulsar4X.CrossPlatformUI
             var transformMatrix = Matrix.Create();
             transformMatrix.Translate(viewportCenter);  // Adjust point of view from top left corner to center. 
             transformMatrix.Translate(position);        // Adjust offest position i.e. how far panned from the center.
-            transformMatrix.Scale(ZoomFactor());         // Adjust based on the 
+            //transformMatrix.Scale(ZoomFactor());         // Adjust based on the 
 
             return transformMatrix;
 

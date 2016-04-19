@@ -11,21 +11,21 @@
           <Panel Padding="5,0,10,0">
             <Label Text="Advance Time:"/>
           </Panel>
-          <Button x:Name="btn_time_5sec" Text="5 Seconds" Command="{Binding AdvanceTimeCmd}" CommandParameter="5" />
-          <Button x:Name="btn_time_30sec" Text="30 Seconds" Command="{Binding AdvanceTimeCmd}" CommandParameter="30"/>
-          <Button x:Name="btn_time_2min" Text="2 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="120"/>
-          <Button x:Name="btn_time_5min" Text="5 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="300"/>
-          <Button x:Name="btn_time_20min" Text="20 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="1200"/>
-          <Button x:Name="btn_time_1hr" Text="1 Hour" Command="{Binding AdvanceTimeCmd}" CommandParameter="3600"/>
-          <Button x:Name="btn_time_3hrs" Text="3 Hours" Command="{Binding AdvanceTimeCmd}" CommandParameter="10800"/>
-          <Button x:Name="btn_time_8hrs" Text="8 Hours" Command="{Binding AdvanceTimeCmd}" CommandParameter="28800"/>
-          <Button x:Name="btn_time_1day" Text="1 Day" Command="{Binding AdvanceTimeCmd}" CommandParameter="86400"/>
-          <Button x:Name="btn_time_5day" Text="5 Days" Command="{Binding AdvanceTimeCmd}" CommandParameter="432000"/>
-          <Button x:Name="btn_time_30day" Text="30 Days" Command="{Binding AdvanceTimeCmd}" CommandParameter="2592000"/>
+          <Button x:Name="btn_time_5sec" Text="5 Seconds" Command="{Binding AdvanceTimeCmd}" CommandParameter="5" Enabled ="{Binding HasGame}" />
+          <Button x:Name="btn_time_30sec" Text="30 Seconds" Command="{Binding AdvanceTimeCmd}" CommandParameter="30" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_2min" Text="2 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="120" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_5min" Text="5 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="300" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_20min" Text="20 Minutes" Command="{Binding AdvanceTimeCmd}" CommandParameter="1200" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_1hr" Text="1 Hour" Command="{Binding AdvanceTimeCmd}" CommandParameter="3600" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_3hrs" Text="3 Hours" Command="{Binding AdvanceTimeCmd}" CommandParameter="10800" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_8hrs" Text="8 Hours" Command="{Binding AdvanceTimeCmd}" CommandParameter="28800" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_1day" Text="1 Day" Command="{Binding AdvanceTimeCmd}" CommandParameter="86400" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_5day" Text="5 Days" Command="{Binding AdvanceTimeCmd}" CommandParameter="432000" Enabled ="{Binding HasGame}"/>
+          <Button x:Name="btn_time_30day" Text="30 Days" Command="{Binding AdvanceTimeCmd}" CommandParameter="2592000" Enabled ="{Binding HasGame}"/>
           <Panel Padding="10,0,10,0">
             <Label Text="Sub-pulse length:"/>
           </Panel>
-          <DropDown x:Name="dd_subpulse" SelectedIndex="0" ToolTip="The length of each movement sub-pulse within each time increment. Automatic allows Pulsar4X to select a suitable sub-pulse length.">
+          <DropDown Enabled="False" x:Name="dd_subpulse" SelectedIndex="0" ToolTip="The length of each movement sub-pulse within each time increment. Automatic allows Pulsar4X to select a suitable sub-pulse length.">
             <ListItem Text="Automatic" />
             <ListItem Text="5 Seconds" />
             <ListItem Text="30 Seconds" />
@@ -38,7 +38,7 @@
             <ListItem Text="1 Day" />
           </DropDown>
           <Panel Padding="10,0,0,0">
-            <CheckBox x:Name="auto_turns" Text="Auto-Turns"/>
+            <CheckBox Enabled="False" x:Name="auto_turns" Text="Auto-Turns"/>
           </Panel>
         </StackLayout>
       </TableCell>
