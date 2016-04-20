@@ -4,21 +4,20 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   
   >
-  <TableLayout>
-    <TableRow>
-      <Label ID="Item" Text="{Binding Item}" />
+  <StackLayout Orientation="Horizontal">
+      <Label ID="Item" Text="{Binding Item}" Width ="128"/>
       <ProgressBar ID="PercentComplete" Value ="{Binding ItemPercentRemaining}" />
       <Label ID="Completed" Text ="{Binding Completed}" />
       <NumericUpDown ID="BatchQuantity" Value="{Binding BatchQuantity}"/>
       <CheckBox ID="RepeatJob" Checked ="{Binding Repeat}" />
       <TableLayout>
-        <TableRow>
-        <Button ID="IncPriority" />
+        <TableRow ScaleHeight =" false">
+        <Button ID="IncPriority" Command="{Binding ChangePriorityCmd}" CommandParameter="-1" Width ="12" Height ="12" ToolTip="IncreasePriority"/>
         </TableRow>
         <TableRow>
-        <Button ID="DecPriority" />
+        <Button ID="DecPriority" Command="{Binding ChangePriorityCmd}" CommandParameter="1" Width ="12" Height ="12" ToolTip="DecreasePriority"/>
         </TableRow>
       </TableLayout>
-    </TableRow>
-  </TableLayout>
+
+  </StackLayout>
 </Panel>

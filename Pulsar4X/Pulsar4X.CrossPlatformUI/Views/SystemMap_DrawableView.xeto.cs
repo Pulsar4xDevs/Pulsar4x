@@ -41,6 +41,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //Point newVP = new Point((VP - loc));
             //_camera.setViewPort(newVP);
             //_camera.CenterOn(loc);
+            Point loc = new Point();
+            loc.X = (int)e.Location.X - (this.Size.Width / 2);
+            loc.Y = (int)e.Location.Y - (this.Size.Height / 2);
+            _camera.CenterOn(loc);
             Invalidate();
         }
 

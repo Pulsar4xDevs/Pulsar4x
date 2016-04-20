@@ -6,8 +6,10 @@
   >
   <TableLayout>
     <TableRow>
+      <StackLayout Orientation="Horizontal">
       <Label Text="Points" />
       <Label ID="PointsPerDay" Text="{Binding PointsPerDay}" />
+      </StackLayout>
     </TableRow>
     <TableRow ScaleHeight="True">
       <StackLayout ID="ItemJobs" >
@@ -15,10 +17,12 @@
       </StackLayout>
     </TableRow>
     <TableRow ScaleHeight="False">
+      <StackLayout Orientation="Horizontal">
       <ComboBox ID="ItemComboBox" SelectedIndex="{Binding NewJobSelectedIndex}"/> 
       <NumericUpDown ID="NewJobBatchAmount" Value="{Binding NewJobBatchCount}" />
       <CheckBox ID="NewJobIsRepeated" Checked="{Binding NewJobRepeat}"/>
       <Button ID="NewJobAdd" Text="Add" />
+      </StackLayout>
     </TableRow>
   </TableLayout>
 </Panel>

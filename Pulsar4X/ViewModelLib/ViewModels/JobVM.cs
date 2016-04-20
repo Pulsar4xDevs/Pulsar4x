@@ -1,6 +1,7 @@
 ﻿using Pulsar4X.ECSLib;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
@@ -58,21 +59,20 @@ namespace Pulsar4X.ViewModel
             JobPriorityCommand = new JobPriorityCommand<TDataBlob, TJob>(this);
         }
 
+
+        public ICommand ChangePriorityCmd { get { return new RelayCommand<int>(param => ChangePriority(param)); } }
         public void ChangePriority(int delta)
         {
             _parentJobAbility.ChangeJobPriority(_job, delta);
         }
 
-
         public event PropertyChangedEventHandler PropertyChanged;
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
         public void Refresh(bool partialRefresh = false)
         {
             if (PropertyChanged != null)

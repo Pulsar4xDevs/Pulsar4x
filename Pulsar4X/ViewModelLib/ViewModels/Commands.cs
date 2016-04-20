@@ -26,7 +26,7 @@ namespace Pulsar4X.ViewModel
 
         public void Execute(object parameter)
         {
-            _jobVM.ChangePriority((int)parameter);
+            //_jobVM.ChangePriority((int)parameter);
         }
 
         public event EventHandler CanExecuteChanged;
