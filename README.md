@@ -32,5 +32,8 @@ Instructions:
  b. Linux: See 3b
  c. Mac:  See 3c
 
+Note! there are a number of nuget packages that VS should automaticaly get the first time you attempt to build. 
+the IDE will have a number of errors, build the solution anyway, VS will get the packages for you.
+
 ##Working with the code:
 I need to flesh this section out a bit more, but for now, read the pages in the wiki, or ask me on IRC.
