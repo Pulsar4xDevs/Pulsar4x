@@ -34,17 +34,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SystemMap_DrawableView_MouseDown(object sender, MouseEventArgs e)
         {
-            //Point VP = _camera.GetViewPort();
-            //Point loc = new Point();
-            //loc.X = ((int)e.Location.X - (this.Size.Width / 2));
-            //loc.Y = ((int)e.Location.Y - (this.Size.Height / 2));
-            //Point newVP = new Point((VP - loc));
-            //_camera.setViewPort(newVP);
-            //_camera.CenterOn(loc);
-            Point loc = new Point();
-            loc.X = (int)e.Location.X - (this.Size.Width / 2);
-            loc.Y = (int)e.Location.Y - (this.Size.Height / 2);
-            _camera.CenterOn(loc);
+
+            Point loc = (Point)e.Location - Size / 2;  
+            _camera.ViewPortCenter -= loc;
+            //_camera.CenterOn(e);
             Invalidate();
         }
 
