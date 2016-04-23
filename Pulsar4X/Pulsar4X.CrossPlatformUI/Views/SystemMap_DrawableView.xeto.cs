@@ -13,14 +13,46 @@ namespace Pulsar4X.CrossPlatformUI.Views
         SystemMap_DrawableVM _viewModel;
         private List<DrawableObject> _shapesList = new List<DrawableObject>();
         private List<OrbitRing> _orbitRings = new List<OrbitRing>();
-        private Camera2D _camera; 
+        private Camera2D _camera;
+        private bool IsMouseDown;
+        private Point LastLoc;
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);
             _camera = new Camera2D(this.Size);
             this.MouseDown += SystemMap_DrawableView_MouseDown;
+            this.MouseUp += SystemMap_DrawableView_MouseUp;
+            this.MouseWheel += SystemMap_DrawableView_MouseWheel;
+            this.MouseMove += SystemMap_DrawableView_MouseMove;
+
+            IsMouseDown = false;
+            LastLoc.X = -1;
+            LastLoc.Y = -1;
         }
 
+        private void SystemMap_DrawableView_MouseMove(object sender, MouseEventArgs e)
+        {
+            if(IsMouseDown == true)
+            {
+                //Point loc = (Point)e.Location - Size / 2;
+                Point loc = (Point)e.Location - LastLoc;
+                _camera.ViewPortCenter += loc;
+                //_camera.CenterOn(e);
+                Invalidate();
+            }
+
+            LastLoc = (Point)e.Location;
+        }
+
+        private void SystemMap_DrawableView_MouseWheel(object sender, MouseEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SystemMap_DrawableView_MouseUp(object sender, MouseEventArgs e)
+        {
+            IsMouseDown = false;
+        }
 
         public void SetViewmodel(SystemMap_DrawableVM viewModel) 
         {
@@ -34,11 +66,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SystemMap_DrawableView_MouseDown(object sender, MouseEventArgs e)
         {
-
-            Point loc = (Point)e.Location - Size / 2;  
-            _camera.ViewPortCenter -= loc;
-            //_camera.CenterOn(e);
-            Invalidate();
+            IsMouseDown = true;
         }
 
         private void SystemBodies_CollectionChanged()
