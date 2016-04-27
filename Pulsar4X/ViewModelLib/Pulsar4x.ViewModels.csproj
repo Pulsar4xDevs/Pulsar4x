@@ -109,11 +109,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\ItemPair.cs" />
+    <Compile Include="Helpers\RangeEnableObservibleCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\NewSpeciesVM.cs" />
     <Compile Include="ViewModels\PlayerOptionsVM.cs" />
     <Compile Include="ViewModels\ColonyScreenVM.cs" />
-    <Compile Include="ViewModels\Commands.cs" />
+    <Compile Include="Helpers\Commands.cs" />
     <Compile Include="ViewModels\ComponentDesignVM.cs" />
     <Compile Include="ViewModels\ComponentTemplateDesigner\ComponentAbilityTemplateVM.cs" />
     <Compile Include="ViewModels\ComponentTemplateDesigner\ComponentTemplateParentVM.cs" />
@@ -122,7 +124,7 @@
     <Compile Include="ViewModels\ComponentTemplateDesigner\MineralFormulaVM.cs" />
     <Compile Include="ViewModels\ComponentTemplateDesigner\TechListVM.cs" />
     <Compile Include="ViewModels\ConstructionAbilityVM.cs" />
-    <Compile Include="ViewModels\DictionaryVM.cs" />
+    <Compile Include="Helpers\DictionaryVM.cs" />
     <Compile Include="ViewModels\FactionVM.cs" />
     <Compile Include="ViewModels\GameVM.cs" />
     <Compile Include="ViewModels\IViewModel.cs" />
@@ -130,10 +132,10 @@
     <Compile Include="ViewModels\MinMaxSliderVM.cs" />
     <Compile Include="ViewModels\MissileDesignVM.cs" />
     <Compile Include="ViewModels\NewGameOptionsVM.cs" />
-    <Compile Include="ViewModels\ObservableDictionary.cs" />
+    <Compile Include="Helpers\ObservableDictionary.cs" />
     <Compile Include="ViewModels\PlanetVM.cs" />
     <Compile Include="ViewModels\RefinaryAbilityVM.cs" />
-    <Compile Include="ViewModels\RelayCommand.cs" />
+    <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="ViewModels\SystemView\StarSystemVM.cs" />
     <Compile Include="ViewModels\SystemView\SystemMap_DrawableVM.cs" />
     <Compile Include="ViewModels\SystemView\RenderVM.cs" />
