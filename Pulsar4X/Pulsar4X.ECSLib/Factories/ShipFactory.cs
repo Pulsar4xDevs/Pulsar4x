@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("Entity is not a ShipComponent or does not contain a ShipComponent datablob");
             ComponentInfoDB componentInfo = component.GetDataBlob<ComponentInfoDB>();
 
-            ColonyFactory.AddComponentDesignToEntity(component, ship);
+            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(component, ship);
             
             shipinfo.InternalHTK += componentInfo.HTK; 
             shipinfo.Tonnage += componentInfo.SizeInTons;  

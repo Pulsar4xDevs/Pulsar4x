@@ -37,15 +37,10 @@ namespace Pulsar4X.ECSLib
             //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 
             TechProcessor.MakeResearchable(factionTech);
 
-
-            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(mineEntity,1);
-            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(refinaryEntity,1);
-            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(labEntity,1);
-            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(facEntity, 1);
-            ColonyFactory.AddComponentDesignToEntity(mineEntity, colonyEntity);
-            ColonyFactory.AddComponentDesignToEntity(refinaryEntity, colonyEntity);
-            ColonyFactory.AddComponentDesignToEntity(labEntity, colonyEntity);
-            ColonyFactory.AddComponentDesignToEntity(facEntity, colonyEntity);
+            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(mineEntity, colonyEntity);
+            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(refinaryEntity, colonyEntity);
+            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(labEntity, colonyEntity);
+            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(facEntity, colonyEntity);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             

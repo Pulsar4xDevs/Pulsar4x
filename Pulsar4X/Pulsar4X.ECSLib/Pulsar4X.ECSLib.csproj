@@ -230,6 +230,7 @@
     <Compile Include="Processors\ShipDamageProcessor.cs" />
     <Compile Include="Processors\ShipMovement.cs" />
     <Compile Include="Processors\Econ Subprocessors\TechProcessor.cs" />
+    <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />

@@ -56,6 +56,7 @@ namespace Pulsar4X.Tests
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
             ShipFactory.AddShipComponent(_shipClass, _engineComponent);
+            ShipFactory.AddShipComponent(_shipClass, _engineComponent);
 
 
             _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, "Serial Peacemaker");
