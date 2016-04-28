@@ -74,8 +74,9 @@ namespace Pulsar4X.ECSLib
             {
                 var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
                 Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
-                var colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
-                colonyInfo.Installations.SafeValueAdd(facilityDesignEntity,1);
+                //var colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
+                //colonyInfo.Installations.SafeValueAdd(facilityDesignEntity,1);
+                ColonyFactory.AddComponentDesignToEntity(facilityDesignEntity, colonyEntity);
                 ReCalcProcessor.ReCalcAbilities(colonyEntity);
             }
 
@@ -110,37 +111,37 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         public static void ReCalcConstructionRate(Entity colonyEntity)
         {
-            List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
-            var factories = new List<Entity>();
-            foreach (Entity inst in installations)
-            {
-                if (inst.HasDataBlob<ConstructionAbilityDB>())
-                    factories.Add(inst);
-            }
 
-            var typeRate = new Dictionary<ConstructionType, int>{
-                {ConstructionType.Ordnance, 0}, 
-                {ConstructionType.Installations, 0}, 
+            //List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
+            
+            var factories = new List<Entity>();
+
+            Dictionary<ConstructionType, int> typeRates = new Dictionary<ConstructionType, int>
+            {
+                {ConstructionType.Ordnance, 0},
+                {ConstructionType.Installations, 0},
                 {ConstructionType.Fighters, 0},
                 {ConstructionType.ShipComponents, 0},
                 {ConstructionType.Ships, 0},
             };
 
-            foreach (Entity factory in factories)
+            List<KeyValuePair<Entity, List<ComponentInstance>>> factoryEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<ConstructionAbilityDB>()).ToList();
+            foreach (var factoryDesignList in factoryEntities)
             {
-                if (factory.HasDataBlob<ConstructionAbilityDB>())
+                foreach (var factoryInstance in factoryDesignList.Value)
                 {
-                    var constructionAbilityDB = factory.GetDataBlob<ConstructionAbilityDB>();
-                    foreach (KeyValuePair<ConstructionType, int> keyValuePair in typeRate)
+                    //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
+                    foreach (var item in factoryDesignList.Key.GetDataBlob<ConstructionAbilityDB>().InternalConstructionPoints)
                     {
-                        ConstructionType currentType = keyValuePair.Key;
-                        typeRate[currentType] += constructionAbilityDB.GetConstructionPoints(currentType);
+                        typeRates.SafeValueAdd(item.Key, item.Value);
                     }
                 }
             }
-            colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionRates = typeRate;
+
+
+            colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionRates = typeRates;
             int maxPoints = 0;
-            foreach (int p in typeRate.Values)
+            foreach (int p in typeRates.Values)
             {
                 if (p > maxPoints)
                     maxPoints = p;

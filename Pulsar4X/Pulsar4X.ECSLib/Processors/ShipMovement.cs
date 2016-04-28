@@ -37,11 +37,15 @@ namespace Pulsar4X.ECSLib
         {
             int totalEnginePower = 0;
 
-            List<Entity> engineEntities = ship.GetDataBlob<ShipInfoDB>().ComponentList.Where(item => item.HasDataBlob<EnginePowerAbilityDB>()).ToList();
-            foreach (var engine in engineEntities)
+            List<KeyValuePair<Entity,List<ComponentInstance>>> engineEntities = ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<EnginePowerAbilityDB>()).ToList();
+            foreach (var engineDesign in engineEntities)
             {
-                //todo check if it's damaged
-                totalEnginePower += engine.GetDataBlob<EnginePowerAbilityDB>().EnginePower;
+                foreach (var engineInstance in engineDesign.Value)
+                {
+                    //todo check if it's damaged
+                    totalEnginePower += engineDesign.Key.GetDataBlob<EnginePowerAbilityDB>().EnginePower;
+                }
+
             }
 
             //Note: TN aurora uses the TCS for max speed calcs. 

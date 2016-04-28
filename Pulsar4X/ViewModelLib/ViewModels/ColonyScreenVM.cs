@@ -54,9 +54,10 @@ namespace Pulsar4X.ViewModel
             gameVM.DateChangedEvent += GameVM_DateChangedEvent;
             _colonyEntity = colonyEntity;
             _facilities = new ObservableCollection<FacilityVM>();
-            foreach (var installation in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations)
+            ComponentInstancesDB instaces = colonyEntity.GetDataBlob<ComponentInstancesDB>();
+            foreach (var installation in instaces.SpecificInstances)
             {
-                Facilities.Add(new FacilityVM(installation.Key, ColonyInfo));
+                Facilities.Add(new FacilityVM(installation.Key, instaces));
             }
             _species = new Dictionary<string, long>();
 
@@ -375,12 +376,13 @@ namespace Pulsar4X.ViewModel
     public class FacilityVM : IViewModel
     {
         private Entity _facilityEntity;
-        private ColonyInfoDB _colonyInfo;
+        //private ColonyInfoDB _colonyInfo;
+        private ComponentInstancesDB _componentInstancesDB;
 
         public string Name { get { return _facilityEntity.GetDataBlob<NameDB>().DefaultName; } }
         public int Count
         {
-            get{ return _colonyInfo.Installations[_facilityEntity];}
+            get { return _componentInstancesDB.SpecificInstances[_facilityEntity].Count; }//_colonyInfo.Installations[_facilityEntity];}
         }
         public int WorkersRequired { get { return _facilityEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements * Count; } }
 
@@ -388,10 +390,11 @@ namespace Pulsar4X.ViewModel
         {
         }
 
-        public FacilityVM(Entity facilityEntity, ColonyInfoDB colonyInfo)
+        public FacilityVM(Entity facilityEntity, ComponentInstancesDB componentInstances)
         {
             _facilityEntity = facilityEntity;
-            _colonyInfo = colonyInfo;
+            //_colonyInfo = colonyInfo;
+            _componentInstancesDB = componentInstances;
             Refresh();
 
         }

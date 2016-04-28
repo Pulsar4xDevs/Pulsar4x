@@ -62,14 +62,8 @@ namespace Pulsar4X.Tests
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
-            Assert.True(shipInfo.ComponentList.Contains(_engineComponent));
+            Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
             Assert.AreEqual(100, propulsion.MaximumSpeed);
         }
-
-
-
-
-
-
     }
 }

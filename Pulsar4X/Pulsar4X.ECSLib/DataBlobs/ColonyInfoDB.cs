@@ -44,8 +44,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public List<Entity> FighterStockpile { get; internal set; } = new List<Entity>();
 
-        [JsonProperty]
-        public Dictionary<Entity, int> Installations { get; internal set; } = new Dictionary<Entity, int>();
+        //[JsonProperty]
+        //public Dictionary<Entity, int> Installations { get; internal set; } = new Dictionary<Entity, int>();
 
         [JsonProperty]
         public Entity PlanetEntity { get; internal set; } = Entity.InvalidEntity;
@@ -70,7 +70,7 @@ namespace Pulsar4X.ECSLib
             ComponentStockpile = new Dictionary<Guid, int>();
             OrdinanceStockpile = new Dictionary<Guid, float>();
             FighterStockpile = new List<Entity>();
-            Installations = new Dictionary<Entity, int>();
+            //Installations = new Dictionary<Entity, int>();
             Scientists = new List<Entity>();
         }
 
@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
             ComponentStockpile = new Dictionary<Guid, int>(colonyInfoDB.ComponentStockpile);
             OrdinanceStockpile = new Dictionary<Guid, float>(colonyInfoDB.OrdinanceStockpile);
             FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);
-            Installations = new Dictionary<Entity, int>(colonyInfoDB.Installations);
+            //Installations = new Dictionary<Entity, int>(colonyInfoDB.Installations);
             Scientists = new List<Entity>(colonyInfoDB.Scientists);
         }
 

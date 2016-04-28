@@ -24,8 +24,6 @@ namespace Pulsar4X.ECSLib
             var OwnedDB = new OwnedDB(ownerFaction);           
             protoShip.SetDataBlob(OwnedDB);
 
-            ComponentInstancesDB componentInstances = new ComponentInstancesDB(classEntity.GetDataBlob<ShipInfoDB>().ComponentList);
-            protoShip.SetDataBlob(componentInstances);
 
             return new Entity(systemEntityManager, protoShip);
         }
@@ -59,7 +57,7 @@ namespace Pulsar4X.ECSLib
             var tractor = new TractorDB();
             var troopTransport = new TroopTransportDB();
             var name = new NameDB(className);
-
+            var componentInstancesDB = new ComponentInstancesDB();
             // now lets create a list of all these datablobs so we can create our new entity:
             List<BaseDataBlob> shipDBList = new List<BaseDataBlob>()
             {
@@ -81,7 +79,8 @@ namespace Pulsar4X.ECSLib
                 shields,
                 tractor,
                 troopTransport,
-                name
+                name,
+                componentInstancesDB
             };
 
             // now lets create the ship class:
@@ -119,10 +118,11 @@ namespace Pulsar4X.ECSLib
             if(!component.HasDataBlob<ComponentInfoDB>())
                 throw new Exception("Entity is not a ShipComponent or does not contain a ShipComponent datablob");
             ComponentInfoDB componentInfo = component.GetDataBlob<ComponentInfoDB>();
+
+            ColonyFactory.AddComponentDesignToEntity(component, ship);
             
-            shipinfo.ComponentList.Add(component);
-            shipinfo.InternalHTK += componentInfo.HTK;
-            shipinfo.Tonnage += componentInfo.SizeInTons; 
+            shipinfo.InternalHTK += componentInfo.HTK; 
+            shipinfo.Tonnage += componentInfo.SizeInTons;  
             ReCalcProcessor.ReCalcAbilities(ship);
 
             return ship;

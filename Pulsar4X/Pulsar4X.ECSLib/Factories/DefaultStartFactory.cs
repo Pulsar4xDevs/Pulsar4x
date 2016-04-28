@@ -38,10 +38,14 @@ namespace Pulsar4X.ECSLib
             TechProcessor.MakeResearchable(factionTech);
 
 
-            colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(mineEntity,1);
-            colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(refinaryEntity,1);
-            colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(labEntity,1);
-            colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(facEntity, 1);
+            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(mineEntity,1);
+            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(refinaryEntity,1);
+            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(labEntity,1);
+            //colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Add(facEntity, 1);
+            ColonyFactory.AddComponentDesignToEntity(mineEntity, colonyEntity);
+            ColonyFactory.AddComponentDesignToEntity(refinaryEntity, colonyEntity);
+            ColonyFactory.AddComponentDesignToEntity(labEntity, colonyEntity);
+            ColonyFactory.AddComponentDesignToEntity(facEntity, colonyEntity);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             

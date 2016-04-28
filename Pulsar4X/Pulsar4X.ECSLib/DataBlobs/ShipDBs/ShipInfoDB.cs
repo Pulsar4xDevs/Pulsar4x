@@ -38,12 +38,12 @@ namespace Pulsar4X.ECSLib
         /// List of the ships components. 
         /// The Components should be in the same EntityManager as the Ship.
         /// </summary>
-        public List<Entity> ComponentList { get; set; } 
+        //public List<Entity> ComponentList { get; set; } 
 
 
         public ShipInfoDB()
         {
-            ComponentList = new List<Entity>();
+            //ComponentList = new List<Entity>();
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
@@ -59,7 +59,7 @@ namespace Pulsar4X.ECSLib
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
             IsMilitary = shipInfoDB.IsMilitary;
-            ComponentList = shipInfoDB.ComponentList.ToList();
+            //ComponentList = shipInfoDB.ComponentList.ToList();
         }
 
         /// <summary>
