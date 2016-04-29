@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Channels;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
+    [TestFixture, Description("Population Growth Test")]
     class PopulationProcessorTest
     {
         private Game _game;
@@ -24,7 +22,7 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _game = new Game(new NewGameSettings());
-            StaticDataManager.LoadData(".\\", _game);  // TODO: Figure out correct directory
+            //StaticDataManager.LoadData(".\\", _game);  // TODO: Figure out correct directory
             _entityManager = new EntityManager(_game);
             _faction = FactionFactory.CreateFaction(_game, "Terrian");  // Terrian? 
 
@@ -32,132 +30,142 @@ namespace Pulsar4X.Tests
             _starSystemFactory = new StarSystemFactory(_galaxyFactory);
 
             _starSystem = _starSystemFactory.CreateSol(_game);
-            //Entity planetEntity = SystemBodyFactory.CreateBaseBody(starSystem);
-            SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
 
-//            List<BaseDataBlob> blobs = new List<BaseDataBlob>();
-//            SystemBodyDB planetDB = new SystemBodyDB();
-//            planetDB.SupportsPopulations = true;
+            _planetEntity = (Entity)SystemBodyFactory.CreateBaseBody();
+            _planetEntity.SetDataBlob(new ColonyInfoDB());
 
-//            blobs.Add(planetDB);
-//            Entity planetEntity = new Entity(_entityManager, blobs);
+            SystemBodyDB planetDB = _planetEntity.GetDataBlob<SystemBodyDB>();
 
+            List<BaseDataBlob> blobs = new List<BaseDataBlob>();
+            planetDB.SupportsPopulations = true;
 
-//            Entity species = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
+            blobs.Add(planetDB);
 
-//            _colonyEntity = ColonyFactory.CreateColony(_faction, species, planetEntity);
+            Entity species = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
 
-//            InstallationsDB installationsDB = _colonyEntity.GetDataBlob<InstallationsDB>();
+            _colonyEntity = ColonyFactory.CreateColony(_faction, species, _planetEntity);
+        }
 
-//            //wow holy shit, this is a pain. definatly need to add an "AddInstallation" to the InstallationProcessor. (and RemoveInstallation);
-//            Guid mineguidGuid = new Guid("406E22B5-65DB-4C7E-B956-B120B0466503");
-//            //InstallationSD mineSD = StaticDataManager.StaticDataStore.Installations[mineguidGuid];
-//            installationsDB.Installations[mineguidGuid] = 1f;
-//            InstallationEmployment installationEmployment = new InstallationEmployment {Enabled = true, Type = mineguidGuid};
-//            installationsDB.EmploymentList.Add(installationEmployment);
+        [TearDown]
+        public void Cleanup()
+        {
+            _game = null;
+            _entityManager = null;
+            _faction = null;
+            _colonyEntity = null;
+            //StaticDataManager..ClearAllData();
+        }
 
-//        }
+        [Test]
+        public void testPopulationGrowth()
+        {
+            long basePop = 5;
 
-//        [TearDown]
-//        public void Cleanup()
-//        {
-//            _game = null;
-//            _entityManager = null;
-//            _faction = null;
-//            _colonyEntity = null;
-//            StaticDataManager.ClearAllData();
-//        }
+            // Set the colony population to five million to start
+            Dictionary<Entity, long> pop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
+            foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
+            {
+                if (pop.ContainsKey(kvp.Key))
+                {
+                    pop[kvp.Key] = 0;
+                }
+            }
 
-//        [Test]
-//        public void TestMineing()
-//        {
-//            //first with no population;
-//            Entity colonyEntity = _faction.GetDataBlob<FactionDB>().Colonies[0];
-//            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
-//            Dictionary<Guid, float> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-//            Dictionary<Guid, float> mineralstockpilePreMined = new Dictionary<Guid, float>(mineralstockpile);
+            PopulationProcessor.GrowPopulation(_colonyEntity);
 
-
-//            InstallationProcessor.Employment(colonyEntity); //do employment check;
-//            InstallationProcessor.Mine(_faction, colonyEntity); //run mines
-
-//            Assert.AreEqual(mineralstockpile[_corundiumSD.ID], 0);
-//            Assert.AreEqual(mineralstockpile[_duraniumSD.ID], 0);
+        }
 
 
-//            ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
-//            Dictionary<Entity, long> pop = colonyInfo.Population;
-//            var species = pop.Keys.ToList();
-//            colonyInfo.Population[species[0]] = 5; //5mil pop
-
-//            InstallationProcessor.Employment(colonyEntity); //do employment check;
-//            InstallationProcessor.Mine(_faction, colonyEntity); //run mines
-
-//            Assert.AreNotEqual(mineralstockpile[_corundiumSD.ID], 10);
-//            Assert.AreNotEqual(mineralstockpile[_duraniumSD.ID], 5);
-
-//        }
-
-//        [Test]
-//        public void TestConstruction()
-//        {
-//            ColonyInfoDB colonyInfo = _colonyEntity.GetDataBlob<ColonyInfoDB>();
-//            Guid itemConstructing = new Guid();//just a random guid for now.
-//            double ablityPointsThisColony = 100;
-//            List<ConstructionJob> jobList = new List<ConstructionJob>();
-
-//            Dictionary<Guid,float> stockpileOut = new Dictionary<Guid, float>();
-
-//            PercentValue priority = new PercentValue {Percent = 1};
-//            Dictionary<Guid,int> jobRawMaterials = new Dictionary<Guid, int>();
-//            jobRawMaterials.Add(_duraniumSD.ID, 5000); //500 per item
-//            jobRawMaterials.Add(_corundiumSD.ID, 70); //7 per item
-//            ConstructionJob newJob = new ConstructionJob 
-//            {
-//                Type = itemConstructing,  
-//                ItemsRemaining = 10, 
-//                PriorityPercent = priority,
-//                RawMaterialsRemaining = jobRawMaterials,
-//                BuildPointsRemaining = 1000,
-//                BuildPointsPerItem = 100
-//            };
-//            jobList.Add(newJob);
-
-//            colonyInfo.MineralStockpile.Add(_duraniumSD.ID, 2250); //not enough of this should get 4.5  total installations. 
-//            colonyInfo.MineralStockpile.Add(_corundiumSD.ID, 100); //enough of this
-//            stockpileOut.Add(itemConstructing,0);
+        //[test]
+        //public void testmineing()
+        //{
+        //    //first with no population;
+        //    entity colonyentity = _faction.getdatablob<factiondb>().colonies[0];
+        //    installationsdb installations = colonyentity.getdatablob<installationsdb>();
+        //    dictionary<guid, float> mineralstockpile = colonyentity.getdatablob<colonyinfodb>().mineralstockpile;
+        //    dictionary<guid, float> mineralstockpilepremined = new dictionary<guid, float>(mineralstockpile);
 
 
-//            //firstpass 
-//            InstallationProcessor.GenericConstructionJobs(0, jobList, colonyInfo, stockpileOut);
-//            Assert.AreEqual(0, stockpileOut[itemConstructing], "Should not have constructed anything due to no buildpoints");
-//            Assert.AreEqual(2250, colonyInfo.MineralStockpile[_duraniumSD.ID], "Mineral Usage Incorrect");
-//            Assert.AreEqual(100, colonyInfo.MineralStockpile[_corundiumSD.ID], "Mineral Usage Incorrect");
+        //    installationprocessor.employment(colonyentity); //do employment check;
+        //    installationprocessor.mine(_faction, colonyentity); //run mines
 
-//            //todo: fix floating point math.
+        //    assert.areequal(mineralstockpile[_corundiumsd.id], 0);
+        //    assert.areequal(mineralstockpile[_duraniumsd.id], 0);
 
-//            //secondPass
-//            InstallationProcessor.GenericConstructionJobs(100, jobList, colonyInfo, stockpileOut);
-//            Assert.AreEqual(1, stockpileOut[itemConstructing]);
 
-//            //thirdPass
-//            //InstallationProcessor.GenericConstructionJobs(50, jobList, colonyInfo, stockpileOut);
-//            //Assert.AreEqual(1.5, stockpileOut[itemConstructing]);            
+        //    colonyinfodb colonyinfo = colonyentity.getdatablob<colonyinfodb>();
+        //    dictionary<entity, long> pop = colonyinfo.population;
+        //    var species = pop.keys.tolist();
+        //    colonyinfo.population[species[0]] = 5; //5mil pop
 
-//            //fourthPass
-//            //InstallationProcessor.GenericConstructionJobs(5000, jobList, colonyInfo, stockpileOut);
-//            //Assert.AreEqual(4.5, stockpileOut[itemConstructing]);
+        //    installationprocessor.employment(colonyentity); //do employment check;
+        //    installationprocessor.mine(_faction, colonyentity); //run mines
 
-//            //todo there's probilby some edge cases to check.
-//        }
+        //    assert.arenotequal(mineralstockpile[_corundiumsd.id], 10);
+        //    assert.arenotequal(mineralstockpile[_duraniumsd.id], 5);
 
-//        [Test]
-//        public void TestEconTick()
-//        {
-//            Game.Instance.AdvanceTime(68300);
-//            Game.Instance.AdvanceTime(100);
-//            Game.Instance.AdvanceTime(68400);
-//        }
-//    }
+        //}
+
+        //        [Test]
+        //        public void TestConstruction()
+        //        {
+        //            ColonyInfoDB colonyInfo = _colonyEntity.GetDataBlob<ColonyInfoDB>();
+        //            Guid itemConstructing = new Guid();//just a random guid for now.
+        //            double ablityPointsThisColony = 100;
+        //            List<ConstructionJob> jobList = new List<ConstructionJob>();
+
+        //            Dictionary<Guid,float> stockpileOut = new Dictionary<Guid, float>();
+
+        //            PercentValue priority = new PercentValue {Percent = 1};
+        //            Dictionary<Guid,int> jobRawMaterials = new Dictionary<Guid, int>();
+        //            jobRawMaterials.Add(_duraniumSD.ID, 5000); //500 per item
+        //            jobRawMaterials.Add(_corundiumSD.ID, 70); //7 per item
+        //            ConstructionJob newJob = new ConstructionJob 
+        //            {
+        //                Type = itemConstructing,  
+        //                ItemsRemaining = 10, 
+        //                PriorityPercent = priority,
+        //                RawMaterialsRemaining = jobRawMaterials,
+        //                BuildPointsRemaining = 1000,
+        //                BuildPointsPerItem = 100
+        //            };
+        //            jobList.Add(newJob);
+
+        //            colonyInfo.MineralStockpile.Add(_duraniumSD.ID, 2250); //not enough of this should get 4.5  total installations. 
+        //            colonyInfo.MineralStockpile.Add(_corundiumSD.ID, 100); //enough of this
+        //            stockpileOut.Add(itemConstructing,0);
+
+
+        //            //firstpass 
+        //            InstallationProcessor.GenericConstructionJobs(0, jobList, colonyInfo, stockpileOut);
+        //            Assert.AreEqual(0, stockpileOut[itemConstructing], "Should not have constructed anything due to no buildpoints");
+        //            Assert.AreEqual(2250, colonyInfo.MineralStockpile[_duraniumSD.ID], "Mineral Usage Incorrect");
+        //            Assert.AreEqual(100, colonyInfo.MineralStockpile[_corundiumSD.ID], "Mineral Usage Incorrect");
+
+        //            //todo: fix floating point math.
+
+        //            //secondPass
+        //            InstallationProcessor.GenericConstructionJobs(100, jobList, colonyInfo, stockpileOut);
+        //            Assert.AreEqual(1, stockpileOut[itemConstructing]);
+
+        //            //thirdPass
+        //            //InstallationProcessor.GenericConstructionJobs(50, jobList, colonyInfo, stockpileOut);
+        //            //Assert.AreEqual(1.5, stockpileOut[itemConstructing]);            
+
+        //            //fourthPass
+        //            //InstallationProcessor.GenericConstructionJobs(5000, jobList, colonyInfo, stockpileOut);
+        //            //Assert.AreEqual(4.5, stockpileOut[itemConstructing]);
+
+        //            //todo there's probilby some edge cases to check.
+        //        }
+
+        //        [Test]
+        //        public void TestEconTick()
+        //        {
+        //            Game.Instance.AdvanceTime(68300);
+        //            Game.Instance.AdvanceTime(100);
+        //            Game.Instance.AdvanceTime(68400);
+        //        }
+        //    }
     }
 }
