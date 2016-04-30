@@ -47,12 +47,15 @@ namespace Pulsar4X.ECSLib
         public int HTKRemaining { get; internal set; }
         public object StateInfo { get; internal set; }
 
+        public ComponentInstance() { }
+
         /// <summary>
-        /// Constructor
+        /// Constructor for a componentInstance.
+        /// ComponentInstance stores component specific data such as hit points remaining etc.
         /// </summary>
         /// <param name="designEntity">The Component Entity, MUST have a ComponentInfoDB</param>
         /// <param name="isEnabled">whether the component is enabled on construction. default=true</param>
-        internal ComponentInstance(Entity designEntity, bool isEnabled = true)
+        public ComponentInstance(Entity designEntity, bool isEnabled = true)
         {
             if (designEntity.HasDataBlob<ComponentInfoDB>())
             {
@@ -63,6 +66,14 @@ namespace Pulsar4X.ECSLib
             }
             else
                 throw new Exception("designEntity Must contain a ComponentInfoDB");
+        }
+
+        public ComponentInstance(ComponentInstance instance)
+        {
+            DesignEntity = instance.DesignEntity;
+            IsEnabled = instance.IsEnabled;
+            HTKRemaining = instance.HTKRemaining;
+            StateInfo = instance.StateInfo;
         }
     }
 }

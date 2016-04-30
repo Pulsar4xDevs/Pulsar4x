@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -28,9 +29,11 @@ namespace Pulsar4X.ECSLib
             blobs.Add(colonyRefining);
             ColonyConstructionDB colonyConstruction = new ColonyConstructionDB();
             blobs.Add(colonyConstruction);
-            //InstallationsDB colonyInstallationsDB = new InstallationsDB();
-            //blobs.Add(colonyInstallationsDB);
-            
+
+            //installations get added to the componentInstancesDB
+            ComponentInstancesDB installations = new ComponentInstancesDB();
+            blobs.Add(installations);
+
             Entity colonyEntity = new Entity(planetEntity.Manager, blobs);
             factionEntity.GetDataBlob<FactionInfoDB>().Colonies.Add(colonyEntity);
             return colonyEntity;

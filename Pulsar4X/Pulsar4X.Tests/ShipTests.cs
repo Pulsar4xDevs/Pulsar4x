@@ -56,20 +56,15 @@ namespace Pulsar4X.Tests
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
             ShipFactory.AddShipComponent(_shipClass, _engineComponent);
+            ShipFactory.AddShipComponent(_shipClass, _engineComponent);
 
 
             _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, "Serial Peacemaker");
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
-            Assert.True(shipInfo.ComponentList.Contains(_engineComponent));
+            Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
             Assert.AreEqual(100, propulsion.MaximumSpeed);
         }
-
-
-
-
-
-
     }
 }

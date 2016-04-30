@@ -105,7 +105,7 @@ namespace Pulsar4X.ViewModel
         private ComponentInfoDB _designDB;
 
         public string Name { get; private set ; }
-        public int Size { get { return _designDB.SizeInTons; } }
+        public float Size { get { return _designDB.SizeInTons; } }
         public int CrewReq { get { return _designDB.CrewRequrements; } }
 
         public int AbilityAmount { get; protected set; }

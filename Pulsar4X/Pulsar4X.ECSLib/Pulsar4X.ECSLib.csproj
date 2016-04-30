@@ -222,6 +222,7 @@
     <Compile Include="Player.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\MineProcessor.cs" />
+    <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\RefiningProcessor.cs" />
     <Compile Include="Processors\EconProcessor.cs" />
     <Compile Include="Processors\AtmosphereProcessor.cs" />
@@ -230,6 +231,7 @@
     <Compile Include="Processors\ShipDamageProcessor.cs" />
     <Compile Include="Processors\ShipMovement.cs" />
     <Compile Include="Processors\Econ Subprocessors\TechProcessor.cs" />
+    <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />

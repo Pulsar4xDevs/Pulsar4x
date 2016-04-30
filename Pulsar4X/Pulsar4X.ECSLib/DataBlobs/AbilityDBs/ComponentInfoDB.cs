@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         public Guid DesignGuid { get; internal set; }
 
         [JsonProperty]
-        public int SizeInTons { get; internal set; }
+        public float SizeInTons { get; internal set; }
 
         [JsonProperty]
         public int HTK { get; internal set; }

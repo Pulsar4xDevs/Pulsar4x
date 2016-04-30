@@ -51,7 +51,8 @@ namespace Pulsar4X.ViewModel
             foreach (var colony in _factionEntity.GetDataBlob<FactionInfoDB>().Colonies)
             {
                 List<Guid> labDesigns = _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Select(design => design.Key).ToList();
-                foreach (var kvp in colony.GetDataBlob<ColonyInfoDB>().Installations)
+                ComponentInstancesDB instances = colony.GetDataBlob<ComponentInstancesDB>();
+                foreach (var kvp in instances.SpecificInstances)
                 {
                     if (labDesigns.Contains(kvp.Key.Guid))
                     {
@@ -191,10 +192,10 @@ namespace Pulsar4X.ViewModel
             foreach (var tech in _factionTech.ResearchableTechs.Keys)
                 ResearchableTechs.Add(tech, tech.Name);
 
-            foreach (var kvp in _colonyEntity.GetDataBlob<ColonyInfoDB>().Installations)
+            foreach (var kvp in _colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
             {
                 if (labDesigns.Contains(kvp.Key))
-                    _allLabs.Add(kvp.Key.Guid, kvp.Value);
+                    _allLabs.Add(kvp.Key.Guid, kvp.Value.Count);
             }
             AllLabs = AllLabs;
 

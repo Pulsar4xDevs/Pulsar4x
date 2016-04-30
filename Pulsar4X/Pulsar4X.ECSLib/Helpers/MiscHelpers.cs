@@ -6,6 +6,8 @@ namespace Pulsar4X.ECSLib
 {
     public static class Misc
     {
+
+
         public static bool HasReqiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
         {
             if (costs == null)
