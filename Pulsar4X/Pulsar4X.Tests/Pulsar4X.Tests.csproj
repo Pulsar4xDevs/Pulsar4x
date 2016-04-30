@@ -124,6 +124,7 @@
     <Compile Include="DataBlobTests.cs" />
     <Compile Include="FactoryTests.cs" />
     <Compile Include="PathfindingTests.cs" />
+    <Compile Include="PopulationProcessorTest.cs" />
     <Compile Include="ProcessorTests.cs" />
     <Compile Include="EntityManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
