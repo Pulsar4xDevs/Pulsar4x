@@ -174,6 +174,19 @@ namespace Pulsar4X.CrossPlatformUI
                 _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
                 _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
             }
+            else if(_zoomLevel == 1.0f)
+            {
+                if (_lastZoomLevel > 1.0f)
+                {
+                    _viewportCenter.X = _viewportCenter.X + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
+                    _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
+                }
+                else if(_lastZoomLevel < 1.0f)
+                {
+                    _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
+                    _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
+                }
+            }
             //record the current zoomLevel as the last zoomlevel so that the next time zoom changes we have this value to check against.
             _lastZoomLevel = _zoomLevel;
             //don't know if this still matters
