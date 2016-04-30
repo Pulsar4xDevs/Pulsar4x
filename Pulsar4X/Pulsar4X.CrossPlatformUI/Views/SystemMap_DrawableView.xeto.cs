@@ -46,7 +46,31 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SystemMap_DrawableView_MouseWheel(object sender, MouseEventArgs e)
         {
-            throw new NotImplementedException();
+            if ((int)e.Delta.Height == 1)
+            {
+               /* int x, y;
+                x = Size.Width / 5;
+                y = Size.Height/ 5;
+                Point loc = Point.Empty;
+                loc.X = x;
+                loc.Y = y;
+                _camera.ViewPortCenter -= loc;*/
+                _camera.ZoomIn(Size);
+                Invalidate();
+            }
+            else if ((int)e.Delta.Height == -1)
+            {
+                /*int x, y;
+                x = Size.Width / 5;
+                y = Size.Height / 5;
+                Point loc = Point.Empty;
+                loc.X = x;
+                loc.Y = y;
+                _camera.ViewPortCenter += loc;*/
+                _camera.ZoomOut(Size);
+                Invalidate();
+            }
+            //throw new NotImplementedException();
         }
 
         private void SystemMap_DrawableView_MouseUp(object sender, MouseEventArgs e)
