@@ -9,7 +9,10 @@ namespace Pulsar4X.ECSLib
     {
         internal static void GrowPopulation(Entity colony)
         {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 011f193b77bfc0ed11bbe2221626ea1a5413264f
             // Get current population
             Dictionary<Entity, long> currentPopulation = colony.GetDataBlob<ColonyInfoDB>().Population;
 
@@ -23,10 +26,15 @@ namespace Pulsar4X.ECSLib
                     if (growthRate > 10.0)
                         growthRate = 10.0;
                     // TODO: get external factors in population growth (or death)
+<<<<<<< HEAD
                     long newPop = (long)(kvp.Value * (1.0 + growthRate));
                     if (newPop < 0)
                         newPop = 0;
                     currentPopulation[kvp.Key] = newPop;
+=======
+
+                    currentPopulation[kvp.Key] = (long)(kvp.Value * (1.0 + growthRate));
+>>>>>>> 011f193b77bfc0ed11bbe2221626ea1a5413264f
                 }
             }
             // TODO: Set population to new value  (necessary, or is currentPop a reference to the object in colony?)

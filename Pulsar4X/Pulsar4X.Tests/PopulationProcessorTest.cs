@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+<<<<<<< HEAD
 using System.Diagnostics;
 
 namespace Pulsar4X.Tests
@@ -10,6 +11,13 @@ namespace Pulsar4X.Tests
     [TestFixture]
     [Description("Population Growth Test")]
     public class PopulationProcessorTest
+=======
+
+namespace Pulsar4X.Tests
+{
+    [TestFixture, Description("Population Growth Test")]
+    class PopulationProcessorTest
+>>>>>>> 011f193b77bfc0ed11bbe2221626ea1a5413264f
     {
         private Game _game;
         private EntityManager _entityManager;
@@ -24,6 +32,7 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _game = new Game(new NewGameSettings());
+<<<<<<< HEAD
             StaticDataManager.LoadData("", _game);  // TODO: Figure out correct directory
             _entityManager = new EntityManager(_game);
             _faction = FactionFactory.CreateFaction(_game, "Terran");  // Terrian?
@@ -38,6 +47,19 @@ namespace Pulsar4X.Tests
             _planetEntity = Entity.Create(_entityManager, SystemBodyFactory.CreateBaseBody());
             _planetEntity.SetDataBlob(new ColonyInfoDB());
             _planetEntity.GetDataBlob<NameDB>().SetName(_faction, "Terran");
+=======
+            //StaticDataManager.LoadData(".\\", _game);  // TODO: Figure out correct directory
+            _entityManager = new EntityManager(_game);
+            _faction = FactionFactory.CreateFaction(_game, "Terrian");  // Terrian? 
+
+            _galaxyFactory = new GalaxyFactory();
+            _starSystemFactory = new StarSystemFactory(_galaxyFactory);
+
+            _starSystem = _starSystemFactory.CreateSol(_game);
+
+            _planetEntity = (Entity)SystemBodyFactory.CreateBaseBody();
+            _planetEntity.SetDataBlob(new ColonyInfoDB());
+>>>>>>> 011f193b77bfc0ed11bbe2221626ea1a5413264f
 
             SystemBodyDB planetDB = _planetEntity.GetDataBlob<SystemBodyDB>();
 
@@ -64,6 +86,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void testPopulationGrowth()
         {
+<<<<<<< HEAD
             // Assumption - the population of any planet will not reach the maximum size of a long variable type, therefore
             // I am not testing that edge case
 
@@ -126,6 +149,22 @@ namespace Pulsar4X.Tests
             if (newPop < 0)
                 newPop = 0;
             return newPop;
+=======
+            long basePop = 5;
+
+            // Set the colony population to five million to start
+            Dictionary<Entity, long> pop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
+            foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
+            {
+                if (pop.ContainsKey(kvp.Key))
+                {
+                    pop[kvp.Key] = 0;
+                }
+            }
+
+            PopulationProcessor.GrowPopulation(_colonyEntity);
+
+>>>>>>> 011f193b77bfc0ed11bbe2221626ea1a5413264f
         }
 
 
