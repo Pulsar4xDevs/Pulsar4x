@@ -12,13 +12,47 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         SystemMap_DrawableVM _viewModel;
         private List<DrawableObject> _shapesList = new List<DrawableObject>();
-        private Camera2D _camera; 
+        private List<OrbitRing> _orbitRings = new List<OrbitRing>();
+        private Camera2D _camera;
+        private bool IsMouseDown;
+        private Point LastLoc;
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);
             _camera = new Camera2D(this.Size);
+            this.MouseDown += SystemMap_DrawableView_MouseDown;
+            this.MouseUp += SystemMap_DrawableView_MouseUp;
+            this.MouseWheel += SystemMap_DrawableView_MouseWheel;
+            this.MouseMove += SystemMap_DrawableView_MouseMove;
+
+            IsMouseDown = false;
+            LastLoc.X = -1;
+            LastLoc.Y = -1;
         }
 
+        private void SystemMap_DrawableView_MouseMove(object sender, MouseEventArgs e)
+        {
+            if(IsMouseDown == true)
+            {
+                //Point loc = (Point)e.Location - Size / 2;
+                Point loc = (Point)e.Location - LastLoc;
+                _camera.ViewPortCenter += loc;
+                //_camera.CenterOn(e);
+                Invalidate();
+            }
+
+            LastLoc = (Point)e.Location;
+        }
+
+        private void SystemMap_DrawableView_MouseWheel(object sender, MouseEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SystemMap_DrawableView_MouseUp(object sender, MouseEventArgs e)
+        {
+            IsMouseDown = false;
+        }
 
         public void SetViewmodel(SystemMap_DrawableVM viewModel) 
         {
@@ -28,6 +62,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _shapesList.Add(new DrawableObject(this, viewModel.BackGroundHud, _camera));
 
             SystemBodies_CollectionChanged();
+        }
+
+        private void SystemMap_DrawableView_MouseDown(object sender, MouseEventArgs e)
+        {
+            IsMouseDown = true;
         }
 
         private void SystemBodies_CollectionChanged()
@@ -44,10 +83,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
                     //item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
                     //_shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
                 //}
-                if (item.SimpleOrbitEllipse != null)
-                {
-                    newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
-                }
+                //if (item.SimpleOrbitEllipse != null)
+                //{
+                //    newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
+                //}
                 if (item.SimpleOrbitEllipseFading != null)
                 {
                     item.SimpleOrbitEllipseFading.PropertyChanged += ViewModel_PropertyChanged;
@@ -56,6 +95,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
             _shapesList = newShapelist;
 
+            List<OrbitRing> newOrbitList = new List<OrbitRing>();
+            foreach (var item in _viewModel.OrbitalEntities)
+            {
+                newOrbitList.Add(new OrbitRing(item, _camera));
+            }
+            _orbitRings = newOrbitList;
         }
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -70,6 +115,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
 
             foreach (var item in _shapesList)
+            {
+                item.DrawMe(e.Graphics);
+            }
+            foreach (var item in _orbitRings)
             {
                 item.DrawMe(e.Graphics);
             }
@@ -190,10 +239,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 UpdatePen(pathData.PenData, pathData.EtoPen);
 
                 g.SaveTransform();
-                g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width * 0.5f, _parent.Height * 0.5f));
+                g.MultiplyTransform(_camera.GetViewProjectionMatrix());
+                //g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width * 0.5f, _parent.Height * 0.5f));
                 g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
-                
-                
+
+
 
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
@@ -201,14 +251,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var item in _textData)
             {
                 g.SaveTransform();
+                g.MultiplyTransform(_camera.GetViewProjectionMatrix());
                 g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
 
                 Font font = new Font(item.Font.FontFamily.ToString(), item.Y2);
                 Color color = new Color(item.Color.R, item.Color.G, item.Color.B);
                 g.DrawText(font, color, item.X1, item.X2, item.Text);
-                
+
                 g.RestoreTransform();
-            } 
+            }
         }
     }
 }

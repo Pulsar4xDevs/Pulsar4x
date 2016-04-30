@@ -40,48 +40,36 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             DataContext = viewModel;
 
-            //ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyConstructionDB, ConstructionJob>>(viewModel.ItemJobs);
-            viewModel.ItemJobs.CollectionChanged += NewJobAdd_Click;//ItemJobs_CollectionChanged;
+            viewModel.ItemJobs.CollectionChanged += OnItemJobsChanged;
             ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
-            //NewJobIsRepeated.Checked = viewModel.NewJobRepeat;
-            
+
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
             NewJobAdd.Command = viewModel.AddNewJob;
-            NewJobAdd.Click += NewJobAdd_Click;
+            NewJobAdd.Click += OnItemJobsChanged;
         }
 
-        //private void ItemJobs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        //{
-        //    switch (e.Action)
-        //    {
-        //        case System.Collections.Specialized.NotifyCollectionChangedAction.Add:
-        //            foreach (var vm in e.NewItems)
-        //            {
-        //                ItemJobs.Items.Add(new JobUC((JobVM<BaseDataBlob, object>)vm));
-        //            }
-        //            break;
-        //        case System.Collections.Specialized.NotifyCollectionChangedAction.Remove:
-        //            ItemJobs.Items.Clear();
+        private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ConstructionAbilityVM.ItemJobs))
+                OnItemJobsChanged(sender, e);
+        }
 
-        //            break;
 
-        //    }
-
-        //}
 
         public void SetViewModel(RefinaryAbilityVM viewModel)
         {
             DataContext = viewModel;
 
             //ItemJobs.DataStore = new ObservableCollection<JobVM<ColonyRefiningDB, RefineingJob>>(viewModel.ItemJobs);
-            viewModel.ItemJobs.CollectionChanged += NewJobAdd_Click; //ItemJobs_CollectionChanged;
+            viewModel.ItemJobs.CollectionChanged += OnItemJobsChanged; //ItemJobs_CollectionChanged;
             //ItemJobs.DataStore = viewModel.ItemJobs;
             ItemComboBox.DataStore = viewModel.ItemDictionary.DisplayList;
             NewJobAdd.Command = viewModel.AddNewJob;
-            NewJobAdd.Click += NewJobAdd_Click;
+            NewJobAdd.Click += OnItemJobsChanged;
 
         }
 
-        private void NewJobAdd_Click(object sender, EventArgs e)
+        private void OnItemJobsChanged(object sender, EventArgs e)
         {
             if (DataContext is RefinaryAbilityVM)
             {
@@ -91,7 +79,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 foreach (var vm in viewModel.ItemJobs)
                     ItemJobs.Items.Add(new JobUC(vm));
                 ItemJobs.ResumeLayout();
-
             }
 
             if (DataContext is ConstructionAbilityVM)

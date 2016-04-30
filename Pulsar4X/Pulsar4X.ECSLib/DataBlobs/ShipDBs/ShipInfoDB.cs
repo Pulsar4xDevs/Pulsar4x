@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -30,20 +28,12 @@ namespace Pulsar4X.ECSLib
 
         public bool IsMilitary { get; set; }
 
-        public int Tonnage { get; set; }
+        public float Tonnage { get; set; }
 
         public double TCS { get {return Tonnage * 0.02;} }
 
-        /// <summary>
-        /// List of the ships components. 
-        /// The Components should be in the same EntityManager as the Ship.
-        /// </summary>
-        public List<Entity> ComponentList { get; set; } 
-
-
         public ShipInfoDB()
         {
-            ComponentList = new List<Entity>();
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
@@ -59,7 +49,6 @@ namespace Pulsar4X.ECSLib
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
             IsMilitary = shipInfoDB.IsMilitary;
-            ComponentList = shipInfoDB.ComponentList.ToList();
         }
 
         /// <summary>

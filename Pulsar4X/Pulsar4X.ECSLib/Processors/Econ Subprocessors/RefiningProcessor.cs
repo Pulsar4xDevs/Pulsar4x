@@ -86,22 +86,47 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         public static void ReCalcRefiningRate(Entity colonyEntity)
         {
-            Dictionary<Entity, int> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
-            Dictionary<Entity, int> refinarys = installations.Where(kvp => kvp.Key.HasDataBlob<RefineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        //    Dictionary<Entity, int> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
+        //    Dictionary<Entity, int> refinarys = installations.Where(kvp => kvp.Key.HasDataBlob<RefineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-            int pointsRate = 0;
-            Dictionary<Guid, int> matRate = new Dictionary<Guid, int>();
-            foreach (var refinaryKvp in refinarys)
-            {
-                int points = refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinaryPoints;
+        //    int pointsRate = 0;
+        //    Dictionary<Guid, int> matRate = new Dictionary<Guid, int>();
+        //    foreach (var refinaryKvp in refinarys)
+        //    {
+        //        int points = refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinaryPoints;
                 
-                foreach (var mat in refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinableMatsList)
+        //        foreach (var mat in refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinableMatsList)
+        //        {
+        //           matRate.SafeValueAdd(mat, points * refinaryKvp.Value); 
+        //        }
+        //        pointsRate += points;
+        //    }
+
+            Dictionary<Guid, int> rates = new Dictionary<Guid, int>();
+
+            List<KeyValuePair<Entity, List<ComponentInstance>>> mineEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<RefineResourcesDB>()).ToList();
+            foreach (var mineComponentDesignList in mineEntities)
+            {
+                RefineResourcesDB refineblob = mineComponentDesignList.Key.GetDataBlob<RefineResourcesDB>();
+                foreach (var mineInstance in mineComponentDesignList.Value)
                 {
-                   matRate.SafeValueAdd(mat, points * refinaryKvp.Value); 
+                    //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
+                    foreach (var item in refineblob.RefinableMatsList)
+                    {
+                        rates.SafeValueAdd(item, refineblob.RefinaryPoints);
+                    }
                 }
-                pointsRate += points;
             }
-            colonyEntity.GetDataBlob<ColonyRefiningDB>().PointsPerTick = pointsRate;
+            int maxPoints = 0;
+            foreach (int p in rates.Values)
+            {
+                if (p > maxPoints)
+                    maxPoints = p;
+            }
+
+            var refining = colonyEntity.GetDataBlob<ColonyRefiningDB>();
+            refining.RefiningRates = rates;
+            refining.PointsPerTick = maxPoints;
         }
 
 

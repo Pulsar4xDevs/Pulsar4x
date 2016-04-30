@@ -30,7 +30,9 @@ namespace Pulsar4X.ECSLib
             FactionAbilitiesDB factionAbilities = Faction.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = Faction.GetDataBlob<FactionTechDB>();
             Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
-            foreach (var lab in colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.Where(inst => inst.HasDataBlob<ResearchPointsAbilityDB>()))
+
+            //why am I doing this here instead of as a recalc.
+            foreach (var lab in colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Keys.Where(inst => inst.HasDataBlob<ResearchPointsAbilityDB>()))
             {               
                 int points = lab.GetDataBlob<ResearchPointsAbilityDB>().PointsPerEconTick;
                 labs.Add(lab, points);

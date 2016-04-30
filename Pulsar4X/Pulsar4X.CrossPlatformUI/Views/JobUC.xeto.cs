@@ -18,6 +18,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public JobUC()
         {
             XamlReader.Load(this);
+            IncPriority.CommandParameter = -1;
+            DecPriority.CommandParameter = 1;
         }
 
         //public JobUC(JobVM<BaseDataBlob, object> viewModel) : this()
@@ -33,27 +35,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public JobUC(JobVM<ColonyRefiningDB, RefineingJob> viewModel) : this()
         {
             DataContext = viewModel;
-            IncPriority.Command = viewModel.JobPriorityCommand;
-            IncPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaDown;
-            DecPriority.Command = viewModel.JobPriorityCommand;
-            DecPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaUp;
             //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
             //Completed.Text = viewModel.Completed.ToString();
-
-
         }
 
         public JobUC(JobVM<ColonyConstructionDB, ConstructionJob> viewModel) : this()
         {
             DataContext = viewModel;
-            IncPriority.Command = viewModel.JobPriorityCommand;
-            IncPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaUp;
-            DecPriority.Command = viewModel.JobPriorityCommand;
-            DecPriority.CommandParameter = viewModel.JobPriorityCommand.DeltaDown;
             //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
             //Completed.Text = viewModel.Completed.ToString();
-
-
         }
 
     }

@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"  
+  >
+  <TableLayout>
+    <TableRow>
+      <Label Text="Name" />
+      <TextBox DataContext="{Binding Name}"/>
+    </TableRow>
+    <TableRow>
+    <GroupBox Text ="Physical Characteristics">
+    <TableLayout>
+      <TableRow>
+        <Label Text="Base Gravity" />
+        <c:MinMaxSlider x:Name="BaseGravitySlider" DataContext="{Binding BaseGravity}" />
+        <Label Text ="{Binding BaseGravityCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Base Gravity" />
+        <c:MinMaxSlider x:Name="MinGravitySlider" DataContext="{Binding MinGravity}" />
+        <Label Text ="{Binding MinGravityCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Base Gravity" />
+        <c:MinMaxSlider x:Name="MaxGravitySlider" DataContext="{Binding MaxGravity}" />
+        <Label Text ="{Binding MaxGravityCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Base Pressure" />
+        <c:MinMaxSlider x:Name="BasePressureSlider" DataContext="{Binding BasePressure}" />
+        <Label Text ="{Binding BasePressureCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Min Pressure" />
+        <c:MinMaxSlider x:Name="MinPressureSlider" DataContext="{Binding MinPressure}" />
+        <Label Text ="{Binding MinPressureCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Max Pressure" />
+        <c:MinMaxSlider x:Name="MaxPressureSlider" DataContext="{Binding MaxPressure}" />
+        <Label Text ="{Binding MaxPressureCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Base Temprature" />
+        <c:MinMaxSlider x:Name="BaseTempratureSlider" DataContext="{Binding BaseTemprature}" />
+        <Label Text ="{Binding BaseTempratureCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Min Temprature" />
+        <c:MinMaxSlider x:Name="MinTempratureSlider" DataContext="{Binding MinTempratureCost}" />
+        <Label Text ="{Binding MinTempratureCost}"/>
+      </TableRow>
+      <TableRow>
+        <Label Text="Max Temprature" />
+        <c:MinMaxSlider x:Name="MaxTempratureSlider" DataContext="{Binding MaxTemprature}" />
+        <Label Text ="{Binding MaxTempratureCost}"/>
+      </TableRow>
+    </TableLayout>
+    </GroupBox>
+      <GroupBox  Text="Bonuses">
+        <TableLayout>
+          <TableRow>
+            <Label Text="Mineing" />
+            <c:MinMaxSlider  DataContext="{Binding MiningBonus}" />
+            <Label Text ="{Binding MiningBonusCost}"/>
+          </TableRow>
+          <TableRow>
+            <Label Text="Refining" />
+            <c:MinMaxSlider  DataContext="{Binding RefiningBonus}" />
+            <Label Text ="{Binding RefiningBonusCost}"/>
+          </TableRow>
+          <TableRow>
+            <Label Text="Construction" />
+            <c:MinMaxSlider  DataContext="{Binding ConstructionBonus}" />
+            <Label Text ="{Binding ConstructionBonusCost}"/>
+          </TableRow>
+          <TableRow>
+            <Label Text="Training" />
+            <c:MinMaxSlider  DataContext="{Binding TrainingBonus}" />
+            <Label Text ="{Binding TrainingBonusCost}"/>
+          </TableRow>
+          <TableRow>
+            <Label Text="Reproduction" />
+            <c:MinMaxSlider  DataContext="{Binding ReproductionBonus}" />
+            <Label Text ="{Binding ReproductionBonusCost}"/>
+          </TableRow>
+          <TableRow>
+            <Label Text="Research" />
+            <c:MinMaxSlider  DataContext="{Binding ResearchBonus}" />
+            <Label Text ="{Binding ResearchBonusCost}"/>
+          </TableRow>
+        </TableLayout>
+      </GroupBox>
+    </TableRow>
+  </TableLayout>
+</Panel>

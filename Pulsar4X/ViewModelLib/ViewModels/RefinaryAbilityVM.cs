@@ -1,5 +1,6 @@
 using Pulsar4X.ECSLib;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -8,7 +9,7 @@ using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
-    public abstract class JobAbilityBaseVM<TDataBlob, TJob> : IViewModel
+    public abstract class JobAbilityBaseVM<TDataBlob, TJob> : ViewModelBase
         where TDataBlob : BaseDataBlob
     {
         protected Entity _colonyEntity_;
@@ -22,12 +23,10 @@ namespace Pulsar4X.ViewModel
 
         public MVMCollectionSyncher<TJob> JobCollectionSyncher { get { return _jobCollectionSyncher; } }
         private MVMCollectionSyncher<TJob> _jobCollectionSyncher { get; set; }
-        private ObservableCollection<JobVM<TDataBlob, TJob>> _itemJobs;
-        public ObservableCollection<JobVM<TDataBlob, TJob>> ItemJobs
-        {
-            get { return _itemJobs; }
-            set { _itemJobs = value; OnPropertyChanged(); }
-        }
+
+        public RangeEnabledObservableCollection<JobVM<TDataBlob, TJob>> ItemJobs { get { return _itemJobs; } }
+        private RangeEnabledObservableCollection<JobVM<TDataBlob, TJob>> _itemJobs = new RangeEnabledObservableCollection<JobVM<TDataBlob, TJob>>();
+
         public int JobSelectedIndex { get; set; }
 
 
@@ -74,7 +73,7 @@ namespace Pulsar4X.ViewModel
                     ItemJobs.RemoveAt(e.OldStartingIndex);
                     break;
             }
-
+            //Refresh();
         }
         #endregion
 
@@ -93,30 +92,22 @@ namespace Pulsar4X.ViewModel
         private void SetupJobs()
         {
             var jobs = DataBlob.JobBatchList;
-            _itemJobs = new ObservableCollection<JobVM<TDataBlob, TJob>>();
+
+
+            List<JobVM<TDataBlob, TJob>> newJobs = new List<JobVM<TDataBlob, TJob>>();
+
             foreach (var item in jobs)
             {
-                _itemJobs.Add(new JobVM<TDataBlob, TJob>(_staticData_, _colonyEntity_, item, this));
+                newJobs.Add(new JobVM<TDataBlob, TJob>(_staticData_, _colonyEntity_, item, this));
             }
-            ItemJobs = ItemJobs;
+            ItemJobs.Clear();
+            ItemJobs.AddRange(newJobs);
         }
 
         public void ChangeJobPriority(object job, int delta)
         {
             TJob jobitem = (TJob)job;
             ListPriority<TJob>.ChangeJobPriority(JobCollectionSyncher, (TJob)job, delta);
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
         }
 
         public void Refresh(bool partialRefresh = false)
