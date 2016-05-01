@@ -98,7 +98,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             FacDataGrid.DataStore = _colonyScreenVM.Facilities;
 
             PopDataGrid.DataStore = _colonyScreenVM.Species.Cast<object>();
-
+            _colonyScreenVM.Species.CollectionChanged += Species_CollectionChanged;
             
             MineralDeposits.DataStore = _colonyScreenVM.PlanetMineralDepositVM.MineralDeposits.Values;
             gameVM.SelectedColonyScreenVM.PlanetMineralDepositVM.PropertyChanged += PlanetMineralDepositVM_PropertyChanged;
@@ -118,6 +118,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
 
+        }
+
+        private void Species_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            PopDataGrid.DataStore = _colonyScreenVM.Species.Cast<object>();
         }
 
         private void RefinedMatsStockpileVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

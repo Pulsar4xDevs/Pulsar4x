@@ -21,8 +21,8 @@ namespace Pulsar4X.ViewModel
             get { return _facilities; }
         }
 
-        private Dictionary<string, long> _species;
-        public Dictionary<string, long> Species { get { return _species; } }
+        private readonly ObservableDictionary<string, long> _species = new ObservableDictionary<string, long>();
+        public ObservableDictionary<string, long> Species { get { return _species; } }
 
         public PlanetMineralDepositVM PlanetMineralDepositVM { get; set; }
         public RawMineralStockpileVM RawMineralStockpileVM { get; set; }
@@ -59,14 +59,9 @@ namespace Pulsar4X.ViewModel
             {
                 Facilities.Add(new FacilityVM(installation.Key, instaces));
             }
-            _species = new Dictionary<string, long>();
 
-            foreach (var kvp in ColonyInfo.Population)
-            {
-                string name = kvp.Key.GetDataBlob<NameDB>().DefaultName;
 
-                _species.Add(name, kvp.Value);
-            }
+            UpdatePop();
 
             _mineralDictionary = new Dictionary<Guid, MineralSD>();
             foreach (var mineral in staticData.Minerals)
@@ -86,6 +81,16 @@ namespace Pulsar4X.ViewModel
             ConstructionAbilityVM = new ConstructionAbilityVM(staticData, _colonyEntity);
 
             ColonyResearchVM = new ColonyResearchVM(staticData, _colonyEntity);
+        }
+
+        private void UpdatePop()
+        {
+            _species.Clear();
+            foreach (var kvp in ColonyInfo.Population)
+            {
+                string name = kvp.Key.GetDataBlob<NameDB>().DefaultName;
+                _species.Add(name, kvp.Value);
+            }
         }
 
         private void GameVM_DateChangedEvent(DateTime oldDate, DateTime newDate)
@@ -110,6 +115,7 @@ namespace Pulsar4X.ViewModel
             RefinedMatsStockpileVM.Refresh();
             RefinaryAbilityVM.Refresh();
             ConstructionAbilityVM.Refresh();
+            UpdatePop();
             foreach (var facilityvm in Facilities)
             {
                 facilityvm.Refresh();
