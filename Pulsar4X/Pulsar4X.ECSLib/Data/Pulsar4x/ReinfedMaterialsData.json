@@ -16,7 +16,7 @@
               }
             ]
           },
-          "RefinaryPointCost": 10,
+          "RefineryPointCost": 10,
           "WealthCost": 0,
           "OutputAmount": 1
         }
@@ -25,7 +25,7 @@
         "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
         "Value": {
           "Name": "Depleated Duranuim",
-          "Description": "A mix of Duranium and refined fuel to teset refinarys",
+          "Description": "A mix of Duranium and refined fuel to teset Refinerys",
           "ID": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
           "RawMineralCosts": {
             "List": [
@@ -43,7 +43,7 @@
               }
             ]
           },
-          "RefinaryPointCost": 20,
+          "RefineryPointCost": 20,
           "WealthCost": 0,
           "OutputAmount": 6
         }

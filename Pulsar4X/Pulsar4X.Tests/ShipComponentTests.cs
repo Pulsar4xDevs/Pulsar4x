@@ -43,13 +43,13 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD engine = EngineComponentSD();
             ComponentTemplateSD mine = MineInstallation();
             ComponentTemplateSD lab = ResearchLab();
-            ComponentTemplateSD refinary = Refinary();
+            ComponentTemplateSD Refinery = Refinery();
             ComponentTemplateSD factory = Factory();
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(engine.ID, engine);
             componentsDict.Add(mine.ID, mine);
             componentsDict.Add(lab.ID,lab);
-            componentsDict.Add(refinary.ID, refinary);
+            componentsDict.Add(Refinery.ID, Refinery);
             componentsDict.Add(factory.ID, factory);
             StaticDataManager.ExportStaticData(componentsDict, "ComponentData.json");
         }
@@ -336,10 +336,10 @@ namespace Pulsar4X.Tests
 
 
 
-        public static ComponentTemplateSD Refinary()
+        public static ComponentTemplateSD Refinery()
         {
             ComponentTemplateSD component = new ComponentTemplateSD();
-            component.Name = "Refinary";
+            component.Name = "Refinery";
             component.Description = "Creates Research Points";
             component.ID = new Guid("{90592586-0BD6-4885-8526-7181E08556B5}");
 

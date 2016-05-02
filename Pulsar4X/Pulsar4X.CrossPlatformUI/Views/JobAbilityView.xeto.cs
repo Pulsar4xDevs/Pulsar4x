@@ -24,7 +24,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //NewJobAdd.Click += AddSelectedProjectOnClick;
         }
 
-        public JobAbilityView(RefinaryAbilityVM viewModel) :this()
+        public JobAbilityView(RefineryAbilityVM viewModel) :this()
         {
             SetViewModel(viewModel);
         }
@@ -56,7 +56,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
 
-        public void SetViewModel(RefinaryAbilityVM viewModel)
+        public void SetViewModel(RefineryAbilityVM viewModel)
         {
             DataContext = viewModel;
 
@@ -71,9 +71,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void OnItemJobsChanged(object sender, EventArgs e)
         {
-            if (DataContext is RefinaryAbilityVM)
+            if (DataContext is RefineryAbilityVM)
             {
-                RefinaryAbilityVM viewModel = (RefinaryAbilityVM)DataContext;
+                RefineryAbilityVM viewModel = (RefineryAbilityVM)DataContext;
                 ItemJobs.Items.Clear();
                 ItemJobs.SuspendLayout();
                 foreach (var vm in viewModel.ItemJobs)

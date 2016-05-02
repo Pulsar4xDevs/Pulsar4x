@@ -13,14 +13,14 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Entity, long> Population { get; internal set; } = new Dictionary<Entity, long>();
 
         /// <summary>
-        /// Raw Mined minerals. Mines push here, Refinary pulls from here, Construction pulls from here.
+        /// Raw Mined minerals. Mines push here, Refinery pulls from here, Construction pulls from here.
         /// </summary>
         [JsonProperty]
         public Dictionary<Guid, int> MineralStockpile { get; internal set; } = new Dictionary<Guid, int>();
 
         /// <summary>
         ///refined Fuel, or refined minerals if the modder so desires.
-        /// Refinary pushes here, Construction pulls from here.
+        /// Refinery pushes here, Construction pulls from here.
         /// </summary>
         [JsonProperty]
         public Dictionary<Guid, int> RefinedStockpile { get; internal set; } = new Dictionary<Guid, int>();
