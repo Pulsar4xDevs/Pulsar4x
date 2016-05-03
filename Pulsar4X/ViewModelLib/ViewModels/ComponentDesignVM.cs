@@ -76,7 +76,7 @@ namespace Pulsar4X.ViewModel
                     text += "ResearchCost: " + Design.ResearchCostValue + Environment.NewLine;
                     foreach (var kvp in Design.MineralCostValues)
                     {
-                        string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
+                        string mineralName = _staticData.Minerals[kvp.Key].Name;
                         text += mineralName + ": " + kvp.Value + Environment.NewLine;
                     }
                     text += "Credit Cost: " + Design.CreditCostValue + Environment.NewLine;

@@ -13,7 +13,6 @@ namespace Pulsar4X.ViewModel
         private Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
         private Entity FactionEntity { get { return _colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner; } }
-        private Dictionary<Guid, MineralSD> _mineralDictionary;
 
         private ObservableCollection<FacilityVM> _facilities;
         public ObservableCollection<FacilityVM> Facilities
@@ -63,11 +62,7 @@ namespace Pulsar4X.ViewModel
 
             UpdatePop();
 
-            _mineralDictionary = new Dictionary<Guid, MineralSD>();
-            foreach (var mineral in staticData.Minerals)
-            {
-                _mineralDictionary.Add(mineral.ID, mineral);
-            }
+
 
 
             PlanetMineralDepositVM = new PlanetMineralDepositVM(staticData, _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);
@@ -128,24 +123,16 @@ namespace Pulsar4X.ViewModel
     {
         private Entity _planetEntity;
         private SystemBodyDB systemBodyInfo { get { return _planetEntity.GetDataBlob<SystemBodyDB>(); } }
-        private Dictionary<Guid, MineralSD> _mineralDictionary;
-
+        private StaticDataStore _staticData;
         private readonly ObservableDictionary<Guid, PlanetMineralInfoVM> _mineralDeposits = new ObservableDictionary<Guid, PlanetMineralInfoVM>();
-        public ObservableDictionary<Guid, PlanetMineralInfoVM> MineralDeposits
-        {
-            get { return _mineralDeposits; }
-        }
+        public ObservableDictionary<Guid, PlanetMineralInfoVM> MineralDeposits { get { return _mineralDeposits; } }
 
 
 
         public PlanetMineralDepositVM(StaticDataStore staticData, Entity planetEntity)
         {
-            _mineralDictionary = new Dictionary<Guid, MineralSD>();
-            foreach (var mineral in staticData.Minerals)
-            {
-                _mineralDictionary.Add(mineral.ID, mineral);
-            }
             _planetEntity = planetEntity;
+            _staticData = staticData;
             Initialise();
         }
 
@@ -155,8 +142,8 @@ namespace Pulsar4X.ViewModel
             _mineralDeposits.Clear();
             foreach (var kvp in minerals)
             {
-                MineralSD mineral = _mineralDictionary[kvp.Key];
-                if(!_mineralDeposits.ContainsKey(kvp.Key))
+                MineralSD mineral = _staticData.Minerals[kvp.Key];
+                if (!_mineralDeposits.ContainsKey(kvp.Key))
                     _mineralDeposits.Add(kvp.Key, new PlanetMineralInfoVM(mineral.Name, kvp.Value));
             }
             OnPropertyChanged(nameof(MineralDeposits));
@@ -219,7 +206,7 @@ namespace Pulsar4X.ViewModel
     {
         private Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
-        private Dictionary<Guid, MineralSD> _mineralDictionary;
+        private Dictionary<Guid, MineralSD> _mineralDictionary = new Dictionary<Guid, MineralSD>();
 
         private readonly ObservableDictionary<Guid, RawMineralInfoVM> _mineralStockpile = new ObservableDictionary<Guid, RawMineralInfoVM>();
         public ObservableDictionary<Guid, RawMineralInfoVM> MineralStockpile
@@ -229,8 +216,8 @@ namespace Pulsar4X.ViewModel
 
         public RawMineralStockpileVM(StaticDataStore staticData, Entity colonyEntity)
         {
-            _mineralDictionary = new Dictionary<Guid, MineralSD>();
-            foreach (var mineral in staticData.Minerals)
+
+            foreach (var mineral in staticData.Minerals.Values)
             {
                 _mineralDictionary.Add(mineral.ID, mineral);
             }

@@ -23,7 +23,7 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _game = new Game(new NewGameSettings());
-            //StaticDataManager.LoadData("", _game);  // TODO: Figure out correct directory
+            StaticDataManager.LoadData("Pulsar4x", _game);
             _entityManager = new EntityManager(_game);
             _faction = FactionFactory.CreateFaction(_game, "Terran");  // Terrian?
             

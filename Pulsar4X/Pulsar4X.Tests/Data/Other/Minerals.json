@@ -1,46 +1,53 @@
 {
-    "Type": "Minerals",
-    "Data": [
-        {
-            "Name": "Sorium2",
-            "Description": "test overwrite of Sorium",
-            "ID": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
-            "Abundance": {
-                "List": [
-                    {
-                        "Key": "Asteroid",
-                        "Value": 0.01
-                    },
-                    {
-                        "Key": "Comet",
-                        "Value": 0.05
-                    },
-                    {
-                        "Key": "DwarfPlanet",
-                        "Value": 0.075
-                    },
-                    {
-                        "Key": "GasDwarf",
-                        "Value": 0.1
-                    },
-                    {
-                        "Key": "GasGiant",
-                        "Value": 1.0
-                    },
-                    {
-                        "Key": "IceGiant",
-                        "Value": 0.5
-                    },
-                    {
-                        "Key": "Moon",
-                        "Value": 0.5
-                    },
-                    {
-                        "Key": "Terrestrial",
-                        "Value": 1.0
-                    }
-                ]
-            }
+  "Type": "Minerals",
+  "Data": {
+    "List": [
+      {
+        "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
+        "Value": {
+          "Name": "Sorium2",
+          "Description": "Gas used to convert into fuel.",
+          "ID": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
+          "CargoType": "General",
+          "Weight": 1.0,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.01
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.05
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.075
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.1
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 1.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.5
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.5
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
         }
+      }
     ]
+  }
 }
