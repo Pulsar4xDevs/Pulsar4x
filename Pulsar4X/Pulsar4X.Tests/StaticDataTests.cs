@@ -170,7 +170,7 @@ namespace Pulsar4X.Tests
             soriumFuel.RawMineralCosts.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
             soriumFuel.Weight = 1;
             //soriumFuel.CargoType = CargoType.Fuel;
-            soriumFuel.RefinaryPointCost = 10;
+            soriumFuel.RefineryPointCost = 10;
             soriumFuel.OutputAmount = 1;
             mats.Add(soriumFuel.ID, soriumFuel);
 
@@ -184,7 +184,7 @@ namespace Pulsar4X.Tests
             DepleatedDuranuim.RefinedMateraialsCosts.Add(new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"), 1);
             DepleatedDuranuim.Weight = 1;
             //DepleatedDuranuim.CargoType = CargoType.General;
-            DepleatedDuranuim.RefinaryPointCost = 20;
+            DepleatedDuranuim.RefineryPointCost = 20;
             DepleatedDuranuim.OutputAmount = 6;
             mats.Add(DepleatedDuranuim.ID, DepleatedDuranuim);
 
