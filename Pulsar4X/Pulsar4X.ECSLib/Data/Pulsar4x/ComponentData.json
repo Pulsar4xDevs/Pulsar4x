@@ -347,7 +347,7 @@
             },
             {
               "GuiHint": "GuiTechSelectionList"
-            },
+            }
           ]
         }
       },
