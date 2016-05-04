@@ -52,7 +52,7 @@ namespace Pulsar4X.ViewModel
             {
                 int old = _selectedIndex;
                 _selectedIndex = value;
-                if(SelectionChangedEvent != null) SelectionChangedEvent(old, _selectedIndex);
+                SelectionChangedEvent?.Invoke(old, _selectedIndex);
                 OnPropertyChanged();
             }
         }
