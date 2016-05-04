@@ -344,9 +344,6 @@
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(0))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAbilityDB"
-            },
-            {
-              "GuiHint": "GuiTechSelectionList"
             }
           ]
         }
