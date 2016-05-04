@@ -27,7 +27,7 @@ namespace Pulsar4X.ViewModel
         public RawMineralStockpileVM RawMineralStockpileVM { get; set; }
         public RefinedMatsStockpileVM RefinedMatsStockpileVM { get; set; }
 
-        public RefinaryAbilityVM RefinaryAbilityVM { get; set; }
+        public RefineryAbilityVM RefineryAbilityVM { get; set; }
         public ConstructionAbilityVM ConstructionAbilityVM { get; set; }
 
         public ColonyResearchVM ColonyResearchVM { get; set; }
@@ -71,7 +71,7 @@ namespace Pulsar4X.ViewModel
 
             RefinedMatsStockpileVM = new RefinedMatsStockpileVM(staticData, _colonyEntity);
             
-            RefinaryAbilityVM = new RefinaryAbilityVM(staticData, _colonyEntity);
+            RefineryAbilityVM = new RefineryAbilityVM(staticData, _colonyEntity);
 
             ConstructionAbilityVM = new ConstructionAbilityVM(staticData, _colonyEntity);
 
@@ -105,7 +105,7 @@ namespace Pulsar4X.ViewModel
             PlanetMineralDepositVM.Refresh();
             RawMineralStockpileVM.Refresh();
             RefinedMatsStockpileVM.Refresh();
-            RefinaryAbilityVM.Refresh();
+            RefineryAbilityVM.Refresh();
             ConstructionAbilityVM.Refresh();
             UpdatePop();
             foreach (var facilityvm in Facilities)

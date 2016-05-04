@@ -19,11 +19,11 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, int> materialsStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
 
             ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
-            int refinaryPoints = refiningDB.PointsPerTick;
+            int RefineryPoints = refiningDB.PointsPerTick;
 
             for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
             {
-                if (refinaryPoints > 0)
+                if (RefineryPoints > 0)
                 {
                     var job = refiningDB.JobBatchList[jobIndex];
                     RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.ItemGuid];
@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
 
                     while (job.NumberCompleted < job.NumberOrdered && job.PointsLeft > 0)
                     {
-                        if (job.PointsLeft == material.RefinaryPointCost)
+                        if (job.PointsLeft == material.RefineryPointCost)
                         {
                             //consume all ingredients for this job on the first point use. 
                             if (Misc.HasReqiredItems(mineralStockpile, mineralCosts) && Misc.HasReqiredItems(materialsStockpile, materialCosts))
@@ -46,17 +46,17 @@ namespace Pulsar4X.ECSLib
                             }
                         }
                    
-                        //use refinary points
-                        ushort pointsUsed = (ushort)Math.Min(job.PointsLeft, material.RefinaryPointCost);
+                        //use Refinery points
+                        ushort pointsUsed = (ushort)Math.Min(job.PointsLeft, material.RefineryPointCost);
                         job.PointsLeft -= pointsUsed;
-                        refinaryPoints -= pointsUsed;
+                        RefineryPoints -= pointsUsed;
 
                         //if job is complete
                         if (job.PointsLeft == 0)
                         {
                             job.NumberCompleted++; //complete job,                          
                             materialsStockpile.SafeValueAdd(material.ID, material.OutputAmount); //and add the product to the stockpile
-                            job.PointsLeft = material.RefinaryPointCost; //and reset the points left for the next job in the batch.
+                            job.PointsLeft = material.RefineryPointCost; //and reset the points left for the next job in the batch.
                         }
                         
                     }
@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
                         refiningDB.JobBatchList.RemoveAt(jobIndex);
                         if (job.Auto) //but if it's set to auto, re-add it. 
                         {
-                            job.PointsLeft = material.RefinaryPointCost;
+                            job.PointsLeft = material.RefineryPointCost;
                             job.NumberCompleted = 0;
                             refiningDB.JobBatchList.Add(job);
                         }
@@ -87,17 +87,17 @@ namespace Pulsar4X.ECSLib
         public static void ReCalcRefiningRate(Entity colonyEntity)
         {
         //    Dictionary<Entity, int> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations;
-        //    Dictionary<Entity, int> refinarys = installations.Where(kvp => kvp.Key.HasDataBlob<RefineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        //    Dictionary<Entity, int> Refinerys = installations.Where(kvp => kvp.Key.HasDataBlob<RefineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         //    int pointsRate = 0;
         //    Dictionary<Guid, int> matRate = new Dictionary<Guid, int>();
-        //    foreach (var refinaryKvp in refinarys)
+        //    foreach (var RefineryKvp in Refinerys)
         //    {
-        //        int points = refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinaryPoints;
+        //        int points = RefineryKvp.Key.GetDataBlob<RefineResourcesDB>().RefineryPoints;
                 
-        //        foreach (var mat in refinaryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinableMatsList)
+        //        foreach (var mat in RefineryKvp.Key.GetDataBlob<RefineResourcesDB>().RefinableMatsList)
         //        {
-        //           matRate.SafeValueAdd(mat, points * refinaryKvp.Value); 
+        //           matRate.SafeValueAdd(mat, points * RefineryKvp.Value); 
         //        }
         //        pointsRate += points;
         //    }
@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
                     //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
                     foreach (var item in refineblob.RefinableMatsList)
                     {
-                        rates.SafeValueAdd(item, refineblob.RefinaryPoints);
+                        rates.SafeValueAdd(item, refineblob.RefineryPoints);
                     }
                 }
             }
