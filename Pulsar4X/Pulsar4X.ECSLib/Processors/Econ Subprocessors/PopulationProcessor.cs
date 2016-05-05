@@ -12,6 +12,11 @@ namespace Pulsar4X.ECSLib
             // Get current population
             Dictionary<Entity, long> currentPopulation = colony.GetDataBlob<ColonyInfoDB>().Population;
 
+            // @todo: Get colony cost and infrastructure, figure out population cap
+            //  Pop Cap = 1m * Infrastructure Count / (100 * Colony Cost)
+
+
+
             foreach (KeyValuePair<Entity, long> kvp in currentPopulation.ToArray())
             {
                 if( currentPopulation.ContainsKey(kvp.Key))
@@ -29,7 +34,7 @@ namespace Pulsar4X.ECSLib
 
                   }
             }
-            // TODO: Set population to new value  (necessary, or is currentPop a reference to the object in colony?)
+            // @todo: Set population to new value  (necessary, or is currentPop a reference to the object in colony?)
         }
     }
 }
