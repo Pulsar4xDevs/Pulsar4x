@@ -25,6 +25,7 @@ namespace Pulsar4X.Tests
         {
             _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 1 });
             //Tech();
+            // @todo: change this so we can look up researched techs by name
             _faction = FactionFactory.CreateFaction(_game, "Terran");
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e"),3);
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de"), 3);
@@ -43,13 +44,13 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD engine = EngineComponentSD();
             ComponentTemplateSD mine = MineInstallation();
             ComponentTemplateSD lab = ResearchLab();
-            ComponentTemplateSD Refinery = Refinery();
+            ComponentTemplateSD refinery = Refinery();
             ComponentTemplateSD factory = Factory();
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(engine.ID, engine);
             componentsDict.Add(mine.ID, mine);
             componentsDict.Add(lab.ID,lab);
-            componentsDict.Add(Refinery.ID, Refinery);
+            componentsDict.Add(refinery.ID, refinery);
             componentsDict.Add(factory.ID, factory);
             StaticDataManager.ExportStaticData(componentsDict, "ComponentData.json");
         }
