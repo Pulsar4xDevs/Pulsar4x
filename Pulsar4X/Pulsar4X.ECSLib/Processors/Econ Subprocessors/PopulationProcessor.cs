@@ -26,6 +26,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // find colony cost, divide the population support value by it
+            // @todo: Get colony cost, or do I need to calculate it?
 
 
 
