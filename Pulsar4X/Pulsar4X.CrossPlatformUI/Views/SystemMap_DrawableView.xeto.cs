@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
+using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel.SystemView;
 using Pulsar4X.ViewModel;
 
@@ -70,6 +71,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             _shapesList.Add(new DrawableObject(this, viewModel.BackGroundHud, _camera));
 
+
             SystemBodies_CollectionChanged();
         }
 
@@ -89,13 +91,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
                 //if (item.OrbitEllipse != null)
                 //{
-                    //item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
-                    //_shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
+                //item.OrbitEllipse.PropertyChanged += ViewModel_PropertyChanged;
+                //_shapesList.Add(new DrawableObject(this, item.OrbitEllipse, _camera));
                 //}
                 //if (item.SimpleOrbitEllipse != null)
                 //{
                 //    newShapelist.Add(new DrawableObject(this, item.SimpleOrbitEllipse, _camera));
                 //}
+
+
                 if (item.SimpleOrbitEllipseFading != null)
                 {
                     item.SimpleOrbitEllipseFading.PropertyChanged += ViewModel_PropertyChanged;
@@ -104,10 +108,16 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
             _shapesList = newShapelist;
 
+            Color ringColor = Colors.Wheat;
             List<OrbitRing> newOrbitList = new List<OrbitRing>();
             foreach (var item in _viewModel.OrbitalEntities)
             {
-                newOrbitList.Add(new OrbitRing(item, _camera));
+                OrbitRing ring = new OrbitRing(item, _camera);
+                ring.PenColor = ringColor;
+                PercentValue percent = new PercentValue();
+                percent.Percent = 1.0f;
+                ring.OrbitPercent = percent;
+                newOrbitList.Add(ring);
             }
             _orbitRings = newOrbitList;
         }
