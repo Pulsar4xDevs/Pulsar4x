@@ -49,6 +49,10 @@ namespace Pulsar4X.ECSLib
         // The maximum temperature the species can tolerate
         public double MaximumTemperatureConstraint { get; internal set; }
 
+        [PublicAPI]
+        [JsonProperty]
+        public double TemperatureToleranceRange { get; internal set; }
+
         public SpeciesDB(double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp)
         {
             // set default values:

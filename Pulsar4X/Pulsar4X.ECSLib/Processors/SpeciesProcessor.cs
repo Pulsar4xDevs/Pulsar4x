@@ -18,8 +18,15 @@ namespace Pulsar4X.ECSLib
 
         private static bool ColonyGravityIsHabitible(SystemBodyDB planet, SpeciesDB species)
         {
-            throw new NotImplementedException();
-            //return planet.SurfaceGravity < species.MaximumGravityConstraint && planet.SurfaceGravity > species.MinimumGravityConstraint;
+            double planetGravity = planet.Gravity;
+            double maxGravity = species.MaximumGravityConstraint;
+            double minGravity = species.MinimumGravityConstraint;
+
+            if (planetGravity < minGravity || planetGravity > maxGravity)
+                return false;
+            return true;
+
+ //           throw new NotImplementedException();
         }
 
         /// <summary>
@@ -47,6 +54,11 @@ namespace Pulsar4X.ECSLib
 
         private static double ColonyTemperatureCost(SystemBodyDB planet)
         {
+
+            //More Math (the | | signs are for Absolute Value in case you forgot)
+            //TempColCost = | Ideal Temp - Current Temp | / TRU
+
+
             throw new NotImplementedException();
         }
 
