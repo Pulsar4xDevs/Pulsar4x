@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="planet"></param>
         /// <param name="species"></param>
         /// <returns></returns>
-        private static double ColonyToxidityCost(SystemBodyDB planet, SpeciesDB species)
+        private static double ColonyToxicityCost(SystemBodyDB planet, SpeciesDB species)
         {
             throw new NotImplementedException();
             double cost = 0;
