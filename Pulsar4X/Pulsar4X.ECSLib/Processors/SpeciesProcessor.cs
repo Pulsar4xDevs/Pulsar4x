@@ -126,8 +126,11 @@ namespace Pulsar4X.ECSLib
                     O2Pressure = kvp.Value;
             }
 
+            if (totalPressure == 0.0)
+                return 2.0;
+
             if (O2Pressure / totalPressure < 0.30)  // not enough oxygen to breathe outside
-                cost = Math.Max(cost, 2.0);
+                return 2.0;
 
             return cost;
         }
