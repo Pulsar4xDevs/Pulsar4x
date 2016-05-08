@@ -9,12 +9,12 @@ using System.Diagnostics;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture, Description("Population Growth Test")]
+    [TestFixture, Description("Species Processor Test")]
     class SpeciesProcessorTest
     {
         private Game _game;
         private EntityManager _entityManager;
-        private Entity _atmosPlanet, _coldPlanet, _hotPlanet, _lowGravPlanet, _highGravPlanet;
+        private Entity _atmosPlanet, _coldPlanet, _hotPlanet, _lowGravPlanet, _highGravPlanet, _noatmosPlanet;
         private Entity _earthPlanet;
         private Entity _faction;
         private Entity _colonyEntity;
@@ -22,8 +22,9 @@ namespace Pulsar4X.Tests
         private StarSystemFactory _starSystemFactory;
         private StarSystem _starSystem;
         private Entity _humanSpecies;
+        private Entity _lowGravSpecies, _highGravSpecies, _lowTempSpecies, _highTempSpecies;
         private Entity _exampleSpecies;
-        private Dictionary<AtmosphericGasSD, string> _gasDictionary;
+        private Dictionary<string, AtmosphericGasSD> _gasDictionary;
 
         [SetUp]
         public void Init()
@@ -60,27 +61,39 @@ namespace Pulsar4X.Tests
             _lowGravPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, earthAtmosphereDB });
             _highGravPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, earthAtmosphereDB });
 
+
             _coldPlanet.GetDataBlob<SystemBodyDB>().BaseTemperature = -20.0f;
             _hotPlanet.GetDataBlob<SystemBodyDB>().BaseTemperature = 120.0f;
             _lowGravPlanet.GetDataBlob<SystemBodyDB>().Gravity = 0.05;
             _highGravPlanet.GetDataBlob<SystemBodyDB>().Gravity = 5.0;
 
-            atmoGasses = new Dictionary<AtmosphericGasSD, float>();
+            _gasDictionary = new Dictionary<string, AtmosphericGasSD>();
 
-            //@todo: figure out how to specify gases by name or symbol
-            //_gasDictionary = _game.StaticData.AtmosphericGases.ToDictionary<>
+            foreach(WeightedValue<AtmosphericGasSD> atmos in _game.StaticData.AtmosphericGases)
+            {
+                _gasDictionary.Add(atmos.Value.ChemicalSymbol, atmos.Value);
+            }
 
-            atmoGasses.Add(_game.StaticData.AtmosphericGases.SelectAt(6), 0.78f);
-            atmoGasses.Add(_game.StaticData.AtmosphericGases.SelectAt(9), 0.12f);
-            atmoGasses.Add(_game.StaticData.AtmosphericGases.SelectAt(11), 0.01f);
+            // Empty atmosphere
+            atmoGasses = new Dictionary<AtmosphericGasSD, float>;    
             earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+            _noatmosPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, earthAtmosphereDB });
 
-            _atmosPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, earthAtmosphereDB });
+            // Nonstandard atmosphere
+            atmoGasses = new Dictionary<AtmosphericGasSD, float>;
+            atmoGasses.Add(_gasDictionary["N2"], 0.05f);
+            earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+            _noatmosPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, earthAtmosphereDB });
+
 
             _faction = FactionFactory.CreateFaction(_game, "Terran");
 
             _humanSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
             _exampleSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
+            _lowGravSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
+            _highGravSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
+            _lowTempSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
+            _highTempSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
         }
 
         [TearDown]
@@ -90,11 +103,20 @@ namespace Pulsar4X.Tests
             _entityManager = null;
             _faction = null;
             _earthPlanet = null;
-            _examplePlanet = null;
+            _atmosPlanet = null;
+            _coldPlanet = null;
+            _hotPlanet = null;
+            _lowGravPlanet = null;
+            _highGravPlanet = null;
+            _noatmosPlanet = null;
             _colonyEntity = null;
             _starSystem = null;
             _humanSpecies = null;
             _exampleSpecies = null;
+            _lowGravSpecies = null;
+            _highGravSpecies = null;
+            _lowTempSpecies = null;
+            _highTempSpecies = null;
         }
 
         [Test]
@@ -109,8 +131,13 @@ namespace Pulsar4X.Tests
 
 
             // test for humans on a planet with low gravity
+            Assert.Equals(-1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+
             // test for humans on a planet with gravity too low for humans to live on
+
             // test for humans on a planet with high gravity
+            Assert.Equals(-1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+
             // test for humans on a planet with gravity too high for humans to live on
 
             // similar tests as above, but for a species with high and low ideal gravity
@@ -148,9 +175,6 @@ namespace Pulsar4X.Tests
         [Test]
         public void testColonyCost()
         {
-            // set _earthPlanet to have earth gravity (1.0)
-            _earthPlanet.GetDataBlob<SystemBodyDB>().Gravity = 1.0;
-
             // @todo
             // test for humans on earth
             Assert.Equals(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
