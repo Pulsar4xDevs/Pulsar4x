@@ -44,3 +44,5 @@ _ReSharper.AuroraExtract
 # Monodevelop user specific files
 *.userprefs
 *.usertasks
+Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj
+Pulsar4X/TestResults/Pulsar4X.TE.Tests.mdf

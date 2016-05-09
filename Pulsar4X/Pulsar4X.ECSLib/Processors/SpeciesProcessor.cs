@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
                     if (symbol == "Cl2" || symbol == "F2" || symbol == "Br2" || symbol == "I2")
                         cost = Math.Max(cost, 3.0);
                 }
-                if (symbol == "O2")
+                if (symbol == "O")
                 {
                     O2Pressure = kvp.Value;
                 }
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
 
         private static double ColonyPressureCost(Entity planet, SpeciesDB species)
         {
-            double totalPressure = 0.0;
+            float totalPressure = 0.0f;
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
 
             Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
@@ -104,19 +104,21 @@ namespace Pulsar4X.ECSLib
             double tempRange = species.TemperatureToleranceRange;
 
             //More Math (the | | signs are for Absolute Value in case you forgot)
-            //TempColCost = | Ideal Temp - Current Temp | / TRU
-            cost = Math.Abs(idealTemp - planetTemp) / tempRange;
+            //TempColCost = | Ideal Temp - Current Temp | / TRU (temps in Kelvin)
+            // Converting to Kelvin.  It probably doesn't matter, but just in case
+            cost = Math.Abs((idealTemp + 273.15) - (planetTemp + 273.15)) / tempRange;
 
             return cost;
-            // throw new NotImplementedException();
         }
 
         // Returns cost based on amount of breathable gas in atmosphere
         private static double ColonyGasCost(Entity planet, SpeciesDB species)
         {
+            // @todo: update to check species for its breathable gas
+
             double cost = 1.0;
-            double O2Pressure = 0.0;
-            double totalPressure = 0.0;
+            float O2Pressure = 0.0f;
+            float totalPressure = 0.0f;
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
 
             Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
@@ -125,17 +127,20 @@ namespace Pulsar4X.ECSLib
             {
                 string symbol = kvp.Key.ChemicalSymbol;
                 totalPressure += kvp.Value;
-                if (symbol == "O2")
+                if (symbol == "O")
                     O2Pressure = kvp.Value;
             }
 
-            if (totalPressure == 0.0) // No atmosphere, obviously not breathable
+            if (totalPressure >= 4.0f && O2Pressure <= 0.31f)
+                cost = cost; // created for the break point
+
+            if (totalPressure == 0.0f) // No atmosphere, obviously not breathable
                 return 2.0;
 
-            if (O2Pressure < 0.1 || O2Pressure > 0.3)  // wrong amount of oxygen
+            if (O2Pressure < 0.1f || O2Pressure > 0.3f)  // wrong amount of oxygen
                 return 2.0;
 
-            if (O2Pressure / totalPressure > 0.3) // Oxygen cannot be more than 30% of atmosphere to be breathable
+            if (O2Pressure / totalPressure > 0.3f) // Oxygen cannot be more than 30% of atmosphere to be breathable
                 return 2.0;
 
             return cost;
