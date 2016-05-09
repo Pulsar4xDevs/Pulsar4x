@@ -5,10 +5,15 @@ namespace Pulsar4X.CrossPlatformUI
 {
     public class Camera2D
     {
-        private Point _position = Point.Empty; // Position of the ~Camera within the viewport in pixels.
-        public Point ViewPortCenter { get { return _viewportCenter; } set { _viewportCenter = value; } }
-        private Point _viewportCenter = Point.Empty; // Center of our viewport "window" in pixels.
-        private Size _viewportSize = Size.Empty;
+        //private Point _position = Point.Empty; // Position of the ~Camera within the viewport in pixels.
+
+        private PointF _worldPosition = new PointF(0, 0);
+
+        private Size ViewPortCenter { get { return _viewPort.Size / 2; }}
+        //private Point _viewportCenter = Point.Empty; // Center of our viewport "window" in pixels.
+        //private Size _viewportSize = Size.Empty;
+
+        private Drawable _viewPort;
 
         private float _zoomLevel = 1.0f;          // Current Zoom level
         private float _lastZoomLevel = 1.0f;
@@ -18,45 +23,79 @@ namespace Pulsar4X.CrossPlatformUI
         /// <summary>
         /// Construct a new Camera class within the Graphic Control Viewport. 
         /// </summary>
-        public Camera2D(Size viewport)
+        //public Camera2D(Size viewport)
+        //{
+        //    _viewportSize = viewport;
+        //    UpdateViewPort(viewport);
+        //    readjustZoom(viewport,1.0f);
+        //}
+
+        public Camera2D(Drawable viewPort)
         {
-            _viewportSize = viewport;
-            UpdateViewPort(viewport);
-            readjustZoom(viewport,1.0f);
+            _viewPort = viewPort;
+            _viewPort.SizeChanged += _viewPort_SizeChanged;
         }
 
+        private void _viewPort_SizeChanged(object sender, System.EventArgs e)
+        {
+            //
+        }
+
+        /// <summary>
+        /// returns teh viewCoordinate of a given world Coordinate 
+        /// </summary>
+        /// <param name="worldCoord"></param>
+        /// <returns></returns>
+        public Point ViewCoordinate(PointF worldCoord)
+        {
+            Point viewCoord = (Point)(worldCoord + _worldPosition * ZoomLevel);
+            return viewCoord;
+        }
+
+        /// <summary>
+        /// returns the world coordinate of a given point in the viewscreen
+        /// </summary>
+        /// <param name="viewCoord"></param>
+        /// <returns></returns>
+        public PointF WorldCoordinate(PointF viewCoord)
+        {
+            PointF worldCoord = _worldPosition + viewCoord * ZoomLevel;            
+            return worldCoord;
+        }
 
         /// <summary>
         /// Gets or sets the position of the camera.
         /// </summary>
-        public void UpdateViewPort(Size viewport)
-        {
-            _viewportSize = viewport;
-            _viewportCenter.X = viewport.Width / 2;
-            _viewportCenter.Y = viewport.Height / 2;
-        }
+        //public void UpdateViewPort(Size viewport)
+        //{
+        //    _viewportSize = viewport;
+        //    _viewportCenter.X = viewport.Width / 2;
+        //    _viewportCenter.Y = viewport.Height / 2;
+        //}
 
 
         /// <summary>
-        /// Center the camera on specific pixel coordinates
+        /// Center on a view position
         /// </summary>
-        public void CenterOn(Point newPosition)
+        /// <param name="newViewPosition"></param>
+        public void CenterOn(Point newViewPosition)
         {
-            _position = newPosition;
+            _worldPosition = WorldCoordinate(newViewPosition);
         }
         /// <summary>
         /// Offset the position of the camare i.e. Pan 
         /// </summary>
         public void Offset(Point offset)
         {
-            _position.Offset(offset);
+            _worldPosition.Offset(offset);
             LimitOffsets();
         }
 
         public void CenterOn(MouseEventArgs e)
         {
-            Point loc = (Point)e.Location - _viewportSize / 2;
-            _viewportCenter -= loc;
+            //Point loc = (Point)e.Location - _viewportSize / 2;
+            //_viewportCenter -= loc;
+            _worldPosition = WorldCoordinate(e.Location);
         }
 
         /// <summary>
@@ -65,7 +104,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <param name="dx">The horizontal difference in pixels</param>
         public void OffsetX(int dx)
         {
-            _position.X += dx;
+            _worldPosition.X += dx;
             LimitOffsets();
         }
         /// <summary>
@@ -74,7 +113,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <param name="dy">The vertical difference in pixels</param>
         public void OffsetY(int dy)
         {
-            _position.Y += dy;
+            _worldPosition.Y += dy;
             LimitOffsets();
         }
         /// <summary>
@@ -82,26 +121,26 @@ namespace Pulsar4X.CrossPlatformUI
         /// </summary>
         public void LimitOffsets()
         {
-            int maxXOffest = (int)(MAX_MapRadius * ZoomFactor() - _viewportCenter.X);
-            int maxYOffest = (int)(MAX_MapRadius * ZoomFactor() - _viewportCenter.Y);
+            int maxXOffest = MAX_MapRadius; //(int)(MAX_MapRadius * ZoomFactor() - _viewportCenter.X);
+            int maxYOffest = MAX_MapRadius;//(int)(MAX_MapRadius * ZoomFactor() - _viewportCenter.Y);
 
             if (maxXOffest > 0)
             {
-                if (_position.X > maxXOffest) // We panned to much, nothing to see here folks.
-                    _viewportCenter.X = maxXOffest;
-                else if (-_position.X > maxXOffest)
-                    _viewportCenter.X = -maxXOffest;
+                if (_worldPosition.X > maxXOffest) // We panned to much, nothing to see here folks.
+                    _worldPosition.X = maxXOffest;
+                else if (-_worldPosition.X > maxXOffest)
+                    _worldPosition.X = -maxXOffest;
             }
-            else _viewportCenter.X = 0;  //Our viewport is larger than the map.  
+            else _worldPosition.X = 0;  //Our viewport is larger than the map.  
 
             if (maxYOffest > 0)
             {
-                if (_position.Y > maxYOffest)
-                    _position.Y = maxYOffest;
-                else if (-_position.Y > maxYOffest)
-                    _position.Y = -maxYOffest;
+                if (_worldPosition.Y > maxYOffest)
+                    _worldPosition.Y = maxYOffest;
+                else if (- _worldPosition.Y > maxYOffest)
+                    _worldPosition.Y = -maxYOffest;
             }
-            else _viewportCenter.Y = 0;
+            else _worldPosition.Y = 0;
         }
 
         /// <summary>
@@ -158,31 +197,31 @@ namespace Pulsar4X.CrossPlatformUI
             _zoomLevel = _zoomLevel * zoomAdjust;
 
             //recalculate the viewport center, it will have changed by a factor of the difference in zoomLevel * half of width or height.
-            if (_zoomLevel > 1.0f)
-            {
-                _viewportCenter.X = _viewportCenter.X + (int)(( _zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
-                _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
-            }
-            else if(_zoomLevel < 1.0f)
-            {
-                _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
-                _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
-            }
-            else if(_zoomLevel == 1.0f)
-            {
-                if (_lastZoomLevel > 1.0f)
-                {
-                    _viewportCenter.X = _viewportCenter.X + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
-                    _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
-                }
-                else if(_lastZoomLevel < 1.0f)
-                {
-                    _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
-                    _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
-                }
-            }
+            //if (_zoomLevel > 1.0f)
+            //{
+            //    _viewportCenter.X = _viewportCenter.X + (int)(( _zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
+            //    _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
+            //}
+            //else if(_zoomLevel < 1.0f)
+            //{
+            //    _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
+            //    _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
+            //}
+            //else if(_zoomLevel == 1.0f)
+            //{
+            //    if (_lastZoomLevel > 1.0f)
+            //    {
+            //        _viewportCenter.X = _viewportCenter.X + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
+            //        _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
+            //    }
+            //    else if(_lastZoomLevel < 1.0f)
+            //    {
+            //        _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
+            //        _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
+            //    }
+            //}
             //record the current zoomLevel as the last zoomlevel so that the next time zoom changes we have this value to check against.
-            _lastZoomLevel = _zoomLevel;
+            //_lastZoomLevel = _zoomLevel;
             //don't know if this still matters
             LimitOffsets();
         }
@@ -190,12 +229,13 @@ namespace Pulsar4X.CrossPlatformUI
         /// <summary>
         ///  Create a matrix to offset everything we draw, accounts for viewport size, and user pan/zoom
         /// </summary>
-        public IMatrix GetViewProjectionMatrix()
+        public IMatrix GetViewProjectionMatrix(bool scaleWithZoom = true)
         {
             var transformMatrix = Matrix.Create();
-            transformMatrix.Translate(_viewportCenter);  // Adjust point of view from top left corner to center. 
-            transformMatrix.Translate(_position);        // Adjust offest position i.e. how far panned from the center.
-            transformMatrix.Scale(ZoomFactor());         // Adjust based on the 
+            //transformMatrix.Translate(_viewportCenter);  // Adjust point of view from top left corner to center. 
+            transformMatrix.Translate(ViewCoordinate(_worldPosition) + ViewPortCenter);        // Adjust offest position i.e. how far panned from the center.
+            if(scaleWithZoom) 
+                transformMatrix.Scale(ZoomFactor());         // Adjust scale of the item based on the zoom
 
 
             return transformMatrix;

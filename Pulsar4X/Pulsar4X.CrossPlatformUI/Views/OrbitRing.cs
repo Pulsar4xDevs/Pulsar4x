@@ -70,14 +70,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public void DrawMe(Graphics g)
         {
+            PointF centerOfOrbit = new PointF((float)_parentPositionDB.Position.X, (float)_parentPositionDB.Position.Y);
+            PointF focalOffset = new PointF(-_width / 2 - _focalPoint, -_height / 2);
             g.SaveTransform();
-            //g.TranslateTransform(-_width / 2 + _focalPoint, -_height / 2);
+            g.TranslateTransform(focalOffset);
             //g.RotateTransform(_rotation);          
-           PointF focal = new PointF(-_width / 2 + _focalPoint, -_height / 2);
 
             IMatrix matrix = _camera.GetViewProjectionMatrix();
-            matrix.RotateAt(_rotation, focal);
-
+            //matrix.RotateAt(_rotation, _camera.ViewCoordinate(centerOfOrbit));
+            //matrix.RotateAt(_rotation, focalOffset);
             g.MultiplyTransform(matrix);
             
             int i = 0;

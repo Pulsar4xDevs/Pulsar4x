@@ -20,7 +20,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);
-            _camera = new Camera2D(this.Size);
+            _camera = new Camera2D(this);
             this.MouseDown += SystemMap_DrawableView_MouseDown;
             this.MouseUp += SystemMap_DrawableView_MouseUp;
             this.MouseWheel += SystemMap_DrawableView_MouseWheel;
@@ -37,8 +37,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 //Point loc = (Point)e.Location - Size / 2;
                 Point loc = (Point)e.Location - LastLoc;
-                _camera.ViewPortCenter += loc;
+                //_camera.ViewPortCenter += loc;
                 //_camera.CenterOn(e);
+                _camera.CenterOn(loc);
                 Invalidate();
             }
 
@@ -161,7 +162,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
 
         private Drawable _parent;
-        float _zoom { get { return _objectData.Scale; } }
+        float _scale { get { return _objectData.Scale; } }
         private VectorGraphicDataBase _objectData;
         private Camera2D _camera;
         private List<PathData> _pathDataList = new List<PathData>();
@@ -180,7 +181,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 if (_objectData is OrbitEllipseFading)
                 {
                     ArcData arcData = (ArcData)pathPenDataPair.VectorShapes[0];
-                    path.AddArc(arcData.X1, arcData.X2, arcData.Width * _zoom, arcData.Height * _zoom, arcData.StartAngle, arcData.SweepAngle);
+                    path.AddArc(arcData.X1, arcData.X2, arcData.Width * _scale, arcData.Height * _scale, arcData.StartAngle, arcData.SweepAngle);
 
                 }
 
@@ -191,7 +192,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         if (shape is EllipseData)
                             path.AddEllipse(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is LineData)
-                            path.AddLine(shape.X1 * _zoom, shape.Y1 * _zoom, shape.X2 * _zoom, shape.Y2 * _zoom);
+                            path.AddLine(shape.X1 * _scale, shape.Y1 * _scale, shape.X2 * _scale, shape.Y2 * _scale);
                         else if (shape is RectangleData)
                             path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is ArcData)
@@ -230,10 +231,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
         }
 
-        private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width * 0.5f; } }
+        //private float PosXViewAdjusted { get { return _objectData.PosX * _scale + _parent.Width * 0.5f; } }
 
 
-        private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height * 0.5f; } }
+        //private float PosYViewAdjusted { get { return _objectData.PosY * _scale + _parent.Height * 0.5f; } }
 
 
         private Pen UpdatePen(PenData penData, Pen penEto)
@@ -260,8 +261,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.SaveTransform();
                 g.MultiplyTransform(_camera.GetViewProjectionMatrix());
                 //g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width * 0.5f, _parent.Height * 0.5f));
-                g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
-
+                //g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
+                g.TranslateTransform(_objectData.PosX * _scale, _objectData.PosY * _scale);
 
 
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
@@ -271,8 +272,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 g.SaveTransform();
                 g.MultiplyTransform(_camera.GetViewProjectionMatrix());
-                g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
-
+                //g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
+                g.TranslateTransform(_objectData.PosX * _scale, _objectData.PosY * _scale);
                 Font font = new Font(item.Font.FontFamily.ToString(), item.Y2);
                 Color color = new Color(item.Color.R, item.Color.G, item.Color.B);
                 g.DrawText(font, color, item.X1, item.X2, item.Text);
