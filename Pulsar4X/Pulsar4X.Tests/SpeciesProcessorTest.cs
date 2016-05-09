@@ -75,13 +75,13 @@ namespace Pulsar4X.Tests
             }
 
             // Empty atmosphere
-            atmoGasses = new Dictionary<AtmosphericGasSD, float>;    
+            atmoGasses = new Dictionary<AtmosphericGasSD, float>();    
             earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
             _noatmosPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, earthAtmosphereDB });
 
             // Nonstandard atmosphere
-            atmoGasses = new Dictionary<AtmosphericGasSD, float>;
-            atmoGasses.Add(_gasDictionary["N2"], 0.05f);
+            atmoGasses = new Dictionary<AtmosphericGasSD, float>();
+            atmoGasses.Add(_gasDictionary["N"], 0.05f);
             earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
             _noatmosPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, earthAtmosphereDB });
 
@@ -89,11 +89,35 @@ namespace Pulsar4X.Tests
             _faction = FactionFactory.CreateFaction(_game, "Terran");
 
             _humanSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
-            _exampleSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
-            _lowGravSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
-            _highGravSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
-            _lowTempSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
-            _highTempSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  // To be changed in tests
+            _exampleSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  
+            _lowGravSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);  
+            _highGravSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager); 
+            _lowTempSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
+            _highTempSpecies = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
+
+            _humanSpecies.GetDataBlob<SpeciesDB>().TemperatureToleranceRange = 20;
+            _exampleSpecies.GetDataBlob<SpeciesDB>().TemperatureToleranceRange = 20;
+            _lowGravSpecies.GetDataBlob<SpeciesDB>().TemperatureToleranceRange = 20;
+            _highGravSpecies.GetDataBlob<SpeciesDB>().TemperatureToleranceRange = 20;
+            _lowTempSpecies.GetDataBlob<SpeciesDB>().TemperatureToleranceRange = 20;
+            _highTempSpecies.GetDataBlob<SpeciesDB>().TemperatureToleranceRange = 20;
+
+
+            _lowGravSpecies.GetDataBlob<SpeciesDB>().BaseGravity = 0.4;
+            _lowGravSpecies.GetDataBlob<SpeciesDB>().MaximumGravityConstraint = 0.5;
+            _lowGravSpecies.GetDataBlob<SpeciesDB>().MinimumGravityConstraint = 0.1;
+
+            _highGravSpecies.GetDataBlob<SpeciesDB>().BaseGravity = 3.0;
+            _highGravSpecies.GetDataBlob<SpeciesDB>().MaximumGravityConstraint = 3.5;
+            _highGravSpecies.GetDataBlob<SpeciesDB>().MinimumGravityConstraint = 2.5;
+
+            _lowTempSpecies.GetDataBlob<SpeciesDB>().BaseTemperature = -50.0;
+            _lowTempSpecies.GetDataBlob<SpeciesDB>().MaximumTemperatureConstraint = 0.0;
+            _lowTempSpecies.GetDataBlob<SpeciesDB>().MinimumTemperatureConstraint = -100.0;
+
+            _highTempSpecies.GetDataBlob<SpeciesDB>().BaseTemperature = 200.0;
+            _highTempSpecies.GetDataBlob<SpeciesDB>().MaximumTemperatureConstraint = 300.0;
+            _highTempSpecies.GetDataBlob<SpeciesDB>().MinimumTemperatureConstraint = 100.0;
         }
 
         [TearDown]
@@ -127,21 +151,23 @@ namespace Pulsar4X.Tests
 
             // @todo
             // test for humans on earth
-            Assert.Equals(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
 
+            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
 
             // test for humans on a planet with low gravity
-            Assert.Equals(-1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
-
-            // test for humans on a planet with gravity too low for humans to live on
+            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
 
             // test for humans on a planet with high gravity
-            Assert.Equals(-1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
-
-            // test for humans on a planet with gravity too high for humans to live on
+            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
 
             // similar tests as above, but for a species with high and low ideal gravity
+            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _lowGravSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _lowGravSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _lowGravSpecies.GetDataBlob<SpeciesDB>()));
 
+            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _highGravSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _highGravSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _highGravSpecies.GetDataBlob<SpeciesDB>()));
         }
 
         [Test]
@@ -151,6 +177,14 @@ namespace Pulsar4X.Tests
             // test atmospheres with each toxic gas as the only component of the atmosphere
             // test with atmposheres composed of two toxic gases that have the same colony cost
             // test with atmospheres composed of two toxic gases that have different colony costs 
+
+            //Toxic Gasses(CC = 2): Hydrogen(H2), Methane(CH4), Ammonia(NH3), Carbon Monoxide(CO), Nitrogen Monoxide(NO), Hydrogen Sulfide(H2S), Nitrogen Dioxide(NO2), Sulfur Dioxide(SO2)
+            //Toxic Gasses(CC = 3): Chlorine(Cl2), Florine(F2), Bromine(Br2), and Iodine(I2)
+            //Toxic Gasses at 30% or greater of atm: Oxygen(O2) *
+
+
+            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+
 
         }
 
@@ -177,7 +211,8 @@ namespace Pulsar4X.Tests
         {
             // @todo
             // test for humans on earth
-            Assert.Equals(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+
+            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>() ));
         }
     }
 }

@@ -65,7 +65,10 @@ namespace Pulsar4X.ECSLib
                         cost = Math.Max(cost, 3.0);
                 }
                 if (symbol == "O2")
-                    O2Pressure = kvp.Value;                
+                {
+                    O2Pressure = kvp.Value;
+                }
+                                    
             }
 
             return cost;
@@ -126,10 +129,13 @@ namespace Pulsar4X.ECSLib
                     O2Pressure = kvp.Value;
             }
 
-            if (totalPressure == 0.0)
+            if (totalPressure == 0.0) // No atmosphere, obviously not breathable
                 return 2.0;
 
-            if (O2Pressure / totalPressure < 0.30)  // not enough oxygen to breathe outside
+            if (O2Pressure < 0.1 || O2Pressure > 0.3)  // wrong amount of oxygen
+                return 2.0;
+
+            if (O2Pressure / totalPressure > 0.3) // Oxygen cannot be more than 30% of atmosphere to be breathable
                 return 2.0;
 
             return cost;
