@@ -160,6 +160,7 @@
     <Compile Include="DataBlobs\AbilityDBs\MissileStorageAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PassiveEMSensorAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PassiveThermalSensorAbilityDB.cs" />
+    <Compile Include="DataBlobs\AbilityDBs\PopulationSupportDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\PowerGeneratorAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\StandardShieldAbilityDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />

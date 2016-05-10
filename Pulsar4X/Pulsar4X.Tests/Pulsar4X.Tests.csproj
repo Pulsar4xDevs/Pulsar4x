@@ -146,6 +146,7 @@
     <Compile Include="SerializationManagerTests.cs" />
     <Compile Include="ShipComponentTests.cs" />
     <Compile Include="ShipTests.cs" />
+    <Compile Include="SpeciesProcessorTest.cs" />
     <Compile Include="StaticDataTests.cs" />
     <Compile Include="SystemGenTests.cs" />
     <Compile Include="TestingUtilities.cs" />

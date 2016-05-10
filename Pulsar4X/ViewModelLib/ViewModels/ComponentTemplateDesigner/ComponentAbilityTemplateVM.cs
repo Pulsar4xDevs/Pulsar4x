@@ -295,6 +295,7 @@ namespace Pulsar4X.ViewModel
                 typeof(MSPCapacityAbilityDB).ToString(),
                 typeof(PassiveEMSensorAbilityDB).ToString(),
                 typeof(PassiveThermalSensorAbilityDB).ToString(),
+                typeof(PopulationSupportAbilityDB).ToString(),
                 typeof(PowerGeneratorAbilityDB).ToString(),
                 typeof(RefineResourcesDB).ToString(),
                 typeof(ResearchPointsAbilityDB).ToString(),
