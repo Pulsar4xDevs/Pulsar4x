@@ -5,13 +5,10 @@ namespace Pulsar4X.CrossPlatformUI
 {
     public class Camera2D
     {
-        //private Point _position = Point.Empty; // Position of the ~Camera within the viewport in pixels.
 
         private PointF _worldPosition = new PointF(0, 0);
 
         private Size ViewPortCenter { get { return _viewPort.Size / 2; }}
-        //private Point _viewportCenter = Point.Empty; // Center of our viewport "window" in pixels.
-        //private Size _viewportSize = Size.Empty;
 
         private Drawable _viewPort;
 
@@ -23,13 +20,6 @@ namespace Pulsar4X.CrossPlatformUI
         /// <summary>
         /// Construct a new Camera class within the Graphic Control Viewport. 
         /// </summary>
-        //public Camera2D(Size viewport)
-        //{
-        //    _viewportSize = viewport;
-        //    UpdateViewPort(viewport);
-        //    readjustZoom(viewport,1.0f);
-        //}
-
         public Camera2D(Drawable viewPort)
         {
             _viewPort = viewPort;
@@ -62,16 +52,6 @@ namespace Pulsar4X.CrossPlatformUI
             PointF worldCoord = _worldPosition + viewCoord * ZoomLevel;            
             return worldCoord;
         }
-
-        /// <summary>
-        /// Gets or sets the position of the camera.
-        /// </summary>
-        //public void UpdateViewPort(Size viewport)
-        //{
-        //    _viewportSize = viewport;
-        //    _viewportCenter.X = viewport.Width / 2;
-        //    _viewportCenter.Y = viewport.Height / 2;
-        //}
 
 
         /// <summary>
@@ -193,36 +173,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <param name="newZoomLevel">The new zoom level.</param>
         private void readjustZoom(Size size,float zoomAdjust)
         {
-            //Adjust the zoom level itself.
             _zoomLevel = _zoomLevel * zoomAdjust;
-
-            //recalculate the viewport center, it will have changed by a factor of the difference in zoomLevel * half of width or height.
-            //if (_zoomLevel > 1.0f)
-            //{
-            //    _viewportCenter.X = _viewportCenter.X + (int)(( _zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
-            //    _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
-            //}
-            //else if(_zoomLevel < 1.0f)
-            //{
-            //    _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
-            //    _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
-            //}
-            //else if(_zoomLevel == 1.0f)
-            //{
-            //    if (_lastZoomLevel > 1.0f)
-            //    {
-            //        _viewportCenter.X = _viewportCenter.X + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
-            //        _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
-            //    }
-            //    else if(_lastZoomLevel < 1.0f)
-            //    {
-            //        _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
-            //        _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
-            //    }
-            //}
-            //record the current zoomLevel as the last zoomlevel so that the next time zoom changes we have this value to check against.
-            //_lastZoomLevel = _zoomLevel;
-            //don't know if this still matters
             LimitOffsets();
         }
 

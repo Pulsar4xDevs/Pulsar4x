@@ -75,10 +75,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             g.SaveTransform();
             g.TranslateTransform(focalOffset);
             //g.RotateTransform(_rotation);          
-
+            var rmatrix = Matrix.Create();
+            //rmatrix.RotateAt(_rotation, _camera.ViewCoordinate(focalOffset));
+            //rmatrix.RotateAt(_rotation, focalOffset);
+            g.MultiplyTransform(rmatrix);
             IMatrix matrix = _camera.GetViewProjectionMatrix();
-            //matrix.RotateAt(_rotation, _camera.ViewCoordinate(centerOfOrbit));
-            //matrix.RotateAt(_rotation, focalOffset);
+
             g.MultiplyTransform(matrix);
             
             int i = 0;

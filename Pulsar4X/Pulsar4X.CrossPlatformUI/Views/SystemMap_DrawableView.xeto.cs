@@ -231,11 +231,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
         }
 
-        //private float PosXViewAdjusted { get { return _objectData.PosX * _scale + _parent.Width * 0.5f; } }
-
-
-        //private float PosYViewAdjusted { get { return _objectData.PosY * _scale + _parent.Height * 0.5f; } }
-
 
         private Pen UpdatePen(PenData penData, Pen penEto)
         {
