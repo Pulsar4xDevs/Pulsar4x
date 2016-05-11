@@ -38,8 +38,8 @@ namespace Pulsar4X.CrossPlatformUI
         /// <returns></returns>
         public Point ViewCoordinate(PointF worldCoord)
         {
-            Point viewCoord = (Point)(worldCoord + _worldPosition * ZoomLevel);
-            return viewCoord;
+            Point viewCoord = (Point)(worldCoord + _worldPosition * ZoomLevel) + ViewPortCenter;
+            return viewCoord ;
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <returns></returns>
         public PointF WorldCoordinate(PointF viewCoord)
         {
-            PointF worldCoord = _worldPosition + viewCoord * ZoomLevel;            
+            PointF worldCoord = (_worldPosition + viewCoord * ZoomLevel);// - ViewPortCenter;            
             return worldCoord;
         }
 
@@ -184,7 +184,7 @@ namespace Pulsar4X.CrossPlatformUI
         {
             var transformMatrix = Matrix.Create();
             //transformMatrix.Translate(_viewportCenter);  // Adjust point of view from top left corner to center. 
-            transformMatrix.Translate(ViewCoordinate(_worldPosition) + ViewPortCenter);        // Adjust offest position i.e. how far panned from the center.
+            transformMatrix.Translate(ViewCoordinate(_worldPosition) );        // Adjust offest position i.e. how far panned from the center.
             if(scaleWithZoom) 
                 transformMatrix.Scale(ZoomFactor());         // Adjust scale of the item based on the zoom
 

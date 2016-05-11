@@ -72,7 +72,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             g.SaveTransform();
 
-            //PointF centerOfOrbit = new PointF((float)_parentPositionDB.Position.X, (float)_parentPositionDB.Position.Y);
+            PointF centerOfOrbit = new PointF((float)_parentPositionDB.Position.X, (float)_parentPositionDB.Position.Y);
 
             //the distance between the top left of the bounding rectangle, and one of the elipse's focal points
             PointF focalOffset = new PointF(-_width / 2 - _focalPoint, -_height / 2);
@@ -81,13 +81,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             //rotate the elipse so that the elipses major axis is in line with the orbits major axis. 
             //g.RotateTransform(_rotation);          
-            var rmatrix = Matrix.Create();
-            //rmatrix.RotateAt(_rotation, _camera.ViewCoordinate(focalOffset));
+            //var rmatrix = Matrix.Create();
+            //rmatrix.RotateAt(_rotation, _camera.ViewCoordinate(centerOfOrbit));
             //rmatrix.RotateAt(_rotation, focalOffset);
-            g.MultiplyTransform(rmatrix);
+            //g.MultiplyTransform(rmatrix);
 
             //get the offset from the camera, this is the distance from the top left of the viewport to the center of the viewport, accounting for zoom, pan etc.
             IMatrix cameraOffset = _camera.GetViewProjectionMatrix();
+            cameraOffset.RotateAt(_rotation, _camera.ViewCoordinate(centerOfOrbit));
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
             
