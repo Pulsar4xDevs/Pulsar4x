@@ -71,32 +71,33 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public void DrawMe(Graphics g)
         {
             g.SaveTransform();
-
-            PointF centerOfOrbit = new PointF((float)_parentPositionDB.Position.X, (float)_parentPositionDB.Position.Y);
-
+  
+            var rmatrix = Matrix.Create();
+            
             //the distance between the top left of the bounding rectangle, and one of the elipse's focal points
             PointF focalOffset = new PointF(-_width / 2 - _focalPoint, -_height / 2);
-            //translate the transform so the eplise's focal point is where we want it.
-            g.TranslateTransform(focalOffset); 
 
-            //rotate the elipse so that the elipses major axis is in line with the orbits major axis. 
-            //g.RotateTransform(_rotation);          
-            //var rmatrix = Matrix.Create();
-            //rmatrix.RotateAt(_rotation, _camera.ViewCoordinate(centerOfOrbit));
-            //rmatrix.RotateAt(_rotation, focalOffset);
-            //g.MultiplyTransform(rmatrix);
 
             //get the offset from the camera, this is the distance from the top left of the viewport to the center of the viewport, accounting for zoom, pan etc.
             IMatrix cameraOffset = _camera.GetViewProjectionMatrix();
-            cameraOffset.RotateAt(_rotation, _camera.ViewCoordinate(centerOfOrbit));
+            
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
             
+            //offset to the focal point
+            g.TranslateTransform(focalOffset);
+            //rotate
+            PointF rotatePoint = new PointF(_width / 2 +_focalPoint, _height / 2);
+            rmatrix.RotateAt(_rotation , rotatePoint);
+            g.MultiplyTransform(rmatrix);
+
+
+
             //draw the elipse (as a number of arcs each with a different pen, this gives the fading alpha channel effect) 
             int i = 0;
             foreach (var pen in _segmentPens)
             {
-                g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle + i * SweepAngle, SweepAngle);
+                g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle - _rotation + i * SweepAngle, SweepAngle);
                 i++;
             }
             g.RestoreTransform();

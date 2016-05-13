@@ -8,7 +8,7 @@ namespace Pulsar4X.CrossPlatformUI
 
         private PointF _worldPosition = new PointF(0, 0);
 
-        private Size ViewPortCenter { get { return _viewPort.Size / 2; }}
+        public Size ViewPortCenter { get { return _viewPort.Size / 2; }}
 
         private Drawable _viewPort;
 
