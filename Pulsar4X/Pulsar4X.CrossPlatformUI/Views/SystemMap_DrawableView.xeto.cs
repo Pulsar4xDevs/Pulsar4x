@@ -37,7 +37,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             LastLoc = (Point)e.Location;
             if (IsMouseDown == true)
             {
-                
+
                 //_camera.ViewOffset(LastOffset - e.Location);
                 _camera.CenterOn(e);
                 LastOffset = e.Location;

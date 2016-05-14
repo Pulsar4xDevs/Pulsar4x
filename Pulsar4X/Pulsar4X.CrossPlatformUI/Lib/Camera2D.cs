@@ -39,7 +39,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <returns></returns>
         public Point ViewCoordinate(PointF worldCoord)
         {
-            Point viewCoord = (Point)(worldCoord * ZoomLevel + ViewPortCenter);
+            Point viewCoord = (Point)(worldCoord * (ZoomLevel) + ViewPortCenter);
             return viewCoord ;
         }
 
@@ -50,7 +50,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <returns></returns>
         public PointF WorldCoordinate(PointF viewCoord)
         {
-            PointF worldCoord = (viewCoord - ViewPortCenter) * ZoomLevel ;            
+            PointF worldCoord = (viewCoord - ViewPortCenter) * (1.0f/ZoomLevel) ;            
             return worldCoord;
         }
 
