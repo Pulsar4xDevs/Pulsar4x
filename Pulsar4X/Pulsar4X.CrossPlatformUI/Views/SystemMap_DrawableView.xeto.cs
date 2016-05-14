@@ -36,8 +36,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 //Point loc = (Point)e.Location - Size / 2;
                 Point loc = (Point)e.Location - LastLoc;
-                _camera.ViewPortCenter += loc;
+                //_camera.ViewPortCenter += loc;
                 //_camera.CenterOn(e);
+                _camera.Offset(loc);
                 Invalidate();
             }
 
@@ -122,6 +123,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected override void OnPaint(PaintEventArgs e)
         {
             e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
+
+            e.Graphics.DrawLine(Colors.White, e.ClipRectangle.MiddleLeft, e.ClipRectangle.MiddleRight);
+            e.Graphics.DrawLine(Colors.White, e.ClipRectangle.MiddleTop, e.ClipRectangle.MiddleBottom);
+
+            _camera.updateViewPort(this.Size);
 
             foreach (var item in _shapesList)
             {
@@ -219,11 +225,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 _pathDataList.Add(pathData);
             }
         }
+        //I need to zoom scale this, and adjust for the camera position offset. viewportcenter should be done here.
+        private float PosXViewAdjusted { get { return _objectData.PosX * _zoom ; } }
 
-        private float PosXViewAdjusted { get { return _objectData.PosX * _zoom + _parent.Width * 0.5f; } }
 
-
-        private float PosYViewAdjusted { get { return _objectData.PosY * _zoom + _parent.Height * 0.5f; } }
+        private float PosYViewAdjusted { get { return _objectData.PosY * _zoom ; } }
 
 
         private Pen UpdatePen(PenData penData, Pen penEto)
@@ -251,6 +257,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.MultiplyTransform(_camera.GetViewProjectionMatrix());
                 //g.MultiplyTransform(Matrix.FromRotationAt(_objectData.Rotation, _parent.Width * 0.5f, _parent.Height * 0.5f));
                 g.TranslateTransform(PosXViewAdjusted, PosYViewAdjusted);
+                
 
 
 

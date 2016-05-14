@@ -133,7 +133,7 @@ namespace Pulsar4X.CrossPlatformUI
         public void ZoomIn(Size size)
         {
             if (ZoomLevel < MAX_ZOOMLEVEL)
-                readjustZoom(size,1.1f);
+                readjustZoom(size,2.0f);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Pulsar4X.CrossPlatformUI
 		public void ZoomOut(Size size)
         {
             if (ZoomLevel > 0)
-                readjustZoom(size,0.9f);
+                readjustZoom(size,0.5f);
         }
 
         /// <summary>
@@ -181,12 +181,36 @@ namespace Pulsar4X.CrossPlatformUI
                     _viewportCenter.X = _viewportCenter.X + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Width);
                     _viewportCenter.Y = _viewportCenter.Y + (int)((_zoomLevel - _lastZoomLevel) * (-0.5f) * (float)size.Height);
                 }
-                else if(_lastZoomLevel < 1.0f)
+                else if (_lastZoomLevel < 1.0f)
                 {
                     _viewportCenter.X = _viewportCenter.X + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Width);
                     _viewportCenter.Y = _viewportCenter.Y + (int)((_lastZoomLevel - _zoomLevel) * (0.5f) * (float)size.Height);
                 }
             }
+
+            /*
+             * 
+             * 
+             * Center Point is 1610,1025(screenwidth)?
+             * Earth's position is using 1280,800 or probably 163*8,111*8
+             * 163,111 at 1x
+              Mars is at 190,-265 and -1656,-2596 at 4x
+-125,-70 at 1.4494x
+
+-480,-291 at 2x
+
+486,310 at 0.5x
+
+592,378 at 0.33158x
+645,412 at 0.25x
+-1762,-1095 at 4x
+
+            position change of about 640,400 from 1x to 2x, and about 320,200 from 1x to 0.5x
+            1920x1200 from 1x to 4x, 1282,804 from 2x to 4x
+            160,100 from 0.5 to 0.25 480,300 from 1x to 0.25
+            problem may be in drawMe in DrawableView.
+             * 
+             * */
             //record the current zoomLevel as the last zoomlevel so that the next time zoom changes we have this value to check against.
             _lastZoomLevel = _zoomLevel;
             //don't know if this still matters
