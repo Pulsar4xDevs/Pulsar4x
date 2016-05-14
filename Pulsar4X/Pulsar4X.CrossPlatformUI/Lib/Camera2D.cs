@@ -59,24 +59,32 @@ namespace Pulsar4X.CrossPlatformUI
         /// Center on a view position
         /// </summary>
         /// <param name="newViewPosition"></param>
-        public void CenterOn(Point newViewPosition)
+        public void CenterOn(PointF newViewPosition)
         {
             _cameraWorldPosition = WorldCoordinate(newViewPosition);
         }
+
+        public void CenterOn(MouseEventArgs e)
+        {
+            _cameraWorldPosition = WorldCoordinate(e.Location);
+        }
+
         /// <summary>
-        /// Offset the position of the camare i.e. Pan 
+        /// Offset the position of the camare i.e. Pan in world units.
         /// </summary>
-        public void Offset(Point offset)
+        public void WorldOffset(PointF offset)
         {
             _cameraWorldPosition.Offset(offset);
             LimitOffsets();
         }
 
-        public void CenterOn(MouseEventArgs e)
+        /// <summary>
+        /// Offset the position of the camare i.e. Pan in view units.
+        /// </summary>
+        public void ViewOffset(PointF offset)
         {
-            //Point loc = (Point)e.Location - _viewportSize / 2;
-            //_viewportCenter -= loc;
-            _cameraWorldPosition = WorldCoordinate(e.Location);
+            _cameraWorldPosition.Offset(WorldCoordinate(offset));
+            LimitOffsets();
         }
 
         /// <summary>

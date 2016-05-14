@@ -16,8 +16,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private List<OrbitRing> _orbitRings = new List<OrbitRing>();
         private Camera2D _camera;
         private bool IsMouseDown;
-        private Point LastLoc;
-        public Point LastOffset;
+        public Point LastLoc;
+        private PointF LastOffset;
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);
@@ -34,19 +34,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SystemMap_DrawableView_MouseMove(object sender, MouseEventArgs e)
         {
-            if(IsMouseDown == true)
+            LastLoc = (Point)e.Location;
+            if (IsMouseDown == true)
             {
-                //Point loc = (Point)e.Location - Size / 2;
-                Point loc = (Point)(e.Location - LastLoc);
-                LastOffset = loc;
-                //_camera.ViewPortCenter += loc;
-                //_camera.CenterOn(e);
-                _camera.CenterOn(loc);
-                //_camera.Offset(loc);
+                
+                //_camera.ViewOffset(LastOffset - e.Location);
+                _camera.CenterOn(e);
+                LastOffset = e.Location;
                 Invalidate();
             }
 
-            LastLoc = (Point)e.Location;
+            
         }
 
         private void SystemMap_DrawableView_MouseWheel(object sender, MouseEventArgs e)
@@ -283,13 +281,28 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
             if (lastFont != null)
             {
-               g.SaveTransform();
-               String Entry = String.Format("{0} {1}", _camera.WorldPosition.X, _camera.WorldPosition.Y);
-               
-               g.DrawText(lastFont, Colors.White, 10, 10, Entry);
+                g.SaveTransform();
+                String Entry = String.Format("World P of camera (center screen):{0} {1}", _camera.WorldPosition.X, _camera.WorldPosition.Y);
 
-                Entry = String.Format("{0} {1}", (_parent as SystemMap_DrawableView).LastOffset.X, (_parent as SystemMap_DrawableView).LastOffset.Y);
+                g.DrawText(lastFont, Colors.White, 10, 10, Entry);
+
+                Entry = String.Format("Last Mouse view L:{0} {1}", (_parent as SystemMap_DrawableView).LastLoc.X, (_parent as SystemMap_DrawableView).LastLoc.Y);
                 g.DrawText(lastFont, Colors.White, 10, 30, Entry);
+
+                PointF lastWorldL = _camera.WorldCoordinate((_parent as SystemMap_DrawableView).LastLoc);
+                Entry = String.Format("Last Mouse world L:{0} {1}", lastWorldL.X, lastWorldL.Y);
+                g.DrawText(lastFont, Colors.White, 10, 50, Entry);
+
+                //PointF PSize = new PointF(_parent.Size.Width / 2, _parent.Size.Height / 2);
+                PointF worldZero = new PointF(0f,0f);
+                Entry = String.Format("World C at view 0,0:{0} {1}", _camera.WorldCoordinate(worldZero).X, _camera.WorldCoordinate(worldZero).Y);
+                g.DrawText(lastFont, Colors.White, 10, 70, Entry);
+
+                Entry = String.Format("View C at world 0,0:{0} {1}", _camera.ViewCoordinate(new PointF(0,0)).X, _camera.ViewCoordinate(new PointF(0, 0)).Y);
+                g.DrawText(lastFont, Colors.White, 10, 90, Entry);
+
+                Entry = String.Format("View width and height:{0} {1}", (_parent.Size.Width / 2), (_parent.Size.Height / 2));
+                g.DrawText(lastFont, Colors.White, 10, 110, Entry);
                 g.RestoreTransform();
             }
 
