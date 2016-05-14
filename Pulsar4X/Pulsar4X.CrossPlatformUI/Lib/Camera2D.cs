@@ -6,8 +6,8 @@ namespace Pulsar4X.CrossPlatformUI
     public class Camera2D
     {
 
-        private PointF _cameraWorldPosition = new PointF(0, 0);
-        public PointF WorldPosition { get { return _cameraWorldPosition; } }
+        private PointF _worldPosition = new PointF(0, 0);
+        public PointF WorldPosition { get { return _worldPosition; } }
 
         public Size ViewPortCenter { get { return _viewPort.Size / 2; }}
 
@@ -39,7 +39,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <returns></returns>
         public Point ViewCoordinate(PointF worldCoord)
         {
-            Point viewCoord = (Point)(worldCoord + _cameraWorldPosition * ZoomLevel) + ViewPortCenter;
+            Point viewCoord = (Point)(worldCoord + _worldPosition * ZoomLevel) + ViewPortCenter;
             return viewCoord ;
         }
 
@@ -50,7 +50,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <returns></returns>
         public PointF WorldCoordinate(PointF viewCoord)
         {
-            PointF worldCoord = (_cameraWorldPosition + viewCoord * ZoomLevel) - ViewPortCenter;            
+            PointF worldCoord = (_worldPosition + viewCoord * ZoomLevel);// - ViewPortCenter;            
             return worldCoord;
         }
 
@@ -61,14 +61,14 @@ namespace Pulsar4X.CrossPlatformUI
         /// <param name="newViewPosition"></param>
         public void CenterOn(Point newViewPosition)
         {
-            _cameraWorldPosition = WorldCoordinate(newViewPosition);
+            _worldPosition = WorldCoordinate(newViewPosition);
         }
         /// <summary>
         /// Offset the position of the camare i.e. Pan 
         /// </summary>
         public void Offset(Point offset)
         {
-            _cameraWorldPosition.Offset(offset);
+            _worldPosition.Offset(offset);
             LimitOffsets();
         }
 
@@ -76,7 +76,7 @@ namespace Pulsar4X.CrossPlatformUI
         {
             //Point loc = (Point)e.Location - _viewportSize / 2;
             //_viewportCenter -= loc;
-            _cameraWorldPosition = WorldCoordinate(e.Location);
+            _worldPosition = WorldCoordinate(e.Location);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <param name="dx">The horizontal difference in pixels</param>
         public void OffsetX(int dx)
         {
-            _cameraWorldPosition.X += dx;
+            _worldPosition.X += dx;
             LimitOffsets();
         }
         /// <summary>
@@ -94,7 +94,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <param name="dy">The vertical difference in pixels</param>
         public void OffsetY(int dy)
         {
-            _cameraWorldPosition.Y += dy;
+            _worldPosition.Y += dy;
             LimitOffsets();
         }
         /// <summary>
@@ -107,21 +107,21 @@ namespace Pulsar4X.CrossPlatformUI
 
             if (maxXOffest > 0)
             {
-                if (_cameraWorldPosition.X > maxXOffest) // We panned to much, nothing to see here folks.
-                    _cameraWorldPosition.X = maxXOffest;
-                else if (-_cameraWorldPosition.X > maxXOffest)
-                    _cameraWorldPosition.X = -maxXOffest;
+                if (_worldPosition.X > maxXOffest) // We panned to much, nothing to see here folks.
+                    _worldPosition.X = maxXOffest;
+                else if (-_worldPosition.X > maxXOffest)
+                    _worldPosition.X = -maxXOffest;
             }
-            else _cameraWorldPosition.X = 0;  //Our viewport is larger than the map.  
+            else _worldPosition.X = 0;  //Our viewport is larger than the map.  
 
             if (maxYOffest > 0)
             {
-                if (_cameraWorldPosition.Y > maxYOffest)
-                    _cameraWorldPosition.Y = maxYOffest;
-                else if (- _cameraWorldPosition.Y > maxYOffest)
-                    _cameraWorldPosition.Y = -maxYOffest;
+                if (_worldPosition.Y > maxYOffest)
+                    _worldPosition.Y = maxYOffest;
+                else if (- _worldPosition.Y > maxYOffest)
+                    _worldPosition.Y = -maxYOffest;
             }
-            else _cameraWorldPosition.Y = 0;
+            else _worldPosition.Y = 0;
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Pulsar4X.CrossPlatformUI
         {
             var transformMatrix = Matrix.Create();
             //transformMatrix.Translate(_viewportCenter);  // Adjust point of view from top left corner to center. 
-            transformMatrix.Translate((_cameraWorldPosition * (1.0f/ZoomLevel)) + ViewPortCenter/*ViewCoordinate(_worldPosition)*/ );        // Adjust offest position i.e. how far panned from the center.
+            transformMatrix.Translate((_worldPosition * (1.0f/ZoomLevel)) + ViewPortCenter/*ViewCoordinate(_worldPosition)*/ );        // Adjust offest position i.e. how far panned from the center.
             if(scaleWithZoom) 
                 transformMatrix.Scale(ZoomFactor());         // Adjust scale of the item based on the zoom
 
