@@ -7,6 +7,7 @@ namespace Pulsar4X.CrossPlatformUI
     {
 
         private PointF _worldPosition = new PointF(0, 0);
+        public PointF WorldPosition { get { return _worldPosition; } }
 
         public Size ViewPortCenter { get { return _viewPort.Size / 2; }}
 

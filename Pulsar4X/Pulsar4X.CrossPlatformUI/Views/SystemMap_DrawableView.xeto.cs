@@ -17,6 +17,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private Camera2D _camera;
         private bool IsMouseDown;
         private Point LastLoc;
+        public Point LastOffset;
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);
@@ -36,10 +37,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             if(IsMouseDown == true)
             {
                 //Point loc = (Point)e.Location - Size / 2;
-                Point loc = (Point)e.Location - LastLoc;
+                Point loc = (Point)(e.Location - LastLoc);
+                LastOffset = loc;
                 //_camera.ViewPortCenter += loc;
                 //_camera.CenterOn(e);
                 _camera.CenterOn(loc);
+                //_camera.Offset(loc);
                 Invalidate();
             }
 
@@ -263,6 +266,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
             }
+            Font lastFont = null;
             foreach (var item in _textData)
             {
                 g.SaveTransform();
@@ -274,7 +278,21 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawText(font, color, item.X1, item.X2, item.Text);
 
                 g.RestoreTransform();
+
+                lastFont = font;
             }
+            if (lastFont != null)
+            {
+               g.SaveTransform();
+               String Entry = String.Format("{0} {1}", _camera.WorldPosition.X, _camera.WorldPosition.Y);
+               
+               g.DrawText(lastFont, Colors.White, 10, 10, Entry);
+
+                Entry = String.Format("{0} {1}", (_parent as SystemMap_DrawableView).LastOffset.X, (_parent as SystemMap_DrawableView).LastOffset.Y);
+                g.DrawText(lastFont, Colors.White, 10, 30, Entry);
+                g.RestoreTransform();
+            }
+
         }
     }
 }
