@@ -1,10 +1,5 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pulsar4X.CrossPlatformUI
 {
@@ -26,7 +21,7 @@ namespace Pulsar4X.CrossPlatformUI
         public Camera2D(Size viewport)
         {
             _viewportSize = viewport;
-            updateViewPort(viewport);
+            UpdateViewPort(viewport);
             readjustZoom(viewport,1.0f);
         }
 
@@ -34,7 +29,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <summary>
         /// Gets or sets the position of the camera.
         /// </summary>
-        public void updateViewPort(Size viewport)
+        public void UpdateViewPort(Size viewport)
         {
             _viewportSize = viewport;
             _viewportCenter.X = viewport.Width / 2;
@@ -55,7 +50,7 @@ namespace Pulsar4X.CrossPlatformUI
         public void Offset(Point offset)
         {
             _position.Offset(offset);
-            limitOffsets();
+            LimitOffsets();
         }
 
         public void CenterOn(MouseEventArgs e)
@@ -71,7 +66,7 @@ namespace Pulsar4X.CrossPlatformUI
         public void OffsetX(int dx)
         {
             _position.X += dx;
-            limitOffsets();
+            LimitOffsets();
         }
         /// <summary>
         /// Offset the Y position of the camare i.e. Pan Y
@@ -80,12 +75,12 @@ namespace Pulsar4X.CrossPlatformUI
         public void OffsetY(int dy)
         {
             _position.Y += dy;
-            limitOffsets();
+            LimitOffsets();
         }
         /// <summary>
         /// Limits how far we pan the map. Making sure we never exceed “map” bounds.
         /// </summary>
-        public void limitOffsets()
+        public void LimitOffsets()
         {
             int maxXOffest = (int)(MAX_MapRadius * ZoomFactor() - _viewportCenter.X);
             int maxYOffest = (int)(MAX_MapRadius * ZoomFactor() - _viewportCenter.Y);
@@ -120,7 +115,7 @@ namespace Pulsar4X.CrossPlatformUI
                 if ((value > 0.0) && (value < MAX_ZOOMLEVEL))
                 {
                     _zoomLevel = value;
-                    limitOffsets();
+                    LimitOffsets();
                 }
             }
         }
@@ -139,8 +134,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// <summary>
         /// Zoom out and keep try to keep the given pixel under the mouse.
         /// </summary>
-        /// <param name="x">The X coordinate within the viewport</param>
-        /// <param name="y">The Y coordinate within the viewport</param>
+        /// <param name="size"></param>
 		public void ZoomOut(Size size)
         {
             if (ZoomLevel > 0)
@@ -214,7 +208,7 @@ namespace Pulsar4X.CrossPlatformUI
             //record the current zoomLevel as the last zoomlevel so that the next time zoom changes we have this value to check against.
             _lastZoomLevel = _zoomLevel;
             //don't know if this still matters
-            limitOffsets();
+            LimitOffsets();
         }
 
         /// <summary>

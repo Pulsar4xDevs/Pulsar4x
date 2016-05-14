@@ -3,8 +3,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-
-    [StaticDataAttribute(true, IDPropertyName = "ID")]
+    [StaticData(true, IDPropertyName = "ID")]
     public struct RefinedMaterialSD
     {
         public string Name;
@@ -13,8 +12,10 @@ namespace Pulsar4X.ECSLib
 
         public Dictionary<Guid, int> RawMineralCosts;
         public Dictionary<Guid, int> RefinedMateraialsCosts;
-        public ushort RefinaryPointCost;
+        public ushort RefineryPointCost;
         public ushort WealthCost;
         public ushort OutputAmount;
+        //public CargoType CargoType;
+        public float Weight;
     }
 }

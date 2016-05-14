@@ -20,12 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.CrossPlatformUI.Wp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.CrossPlatformUI.Mac", "Pulsar4X.CrossPlatformUI.Mac\Pulsar4X.CrossPlatformUI.Mac.csproj", "{D6CC2C60-BDF3-4379-A4C7-40AD6170A504}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{793D26A7-2BE7-4548-BE3C-B3FFDCF5D8E3}"
-	ProjectSection(SolutionItems) = preProject
-		Performance2.psess = Performance2.psess
-	EndProjectSection
-EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug (No Tests|Any CPU = Debug (No Tests|Any CPU
 		Debug (No Tests|Mixed Platforms = Debug (No Tests|Mixed Platforms

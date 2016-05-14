@@ -108,7 +108,7 @@ namespace Pulsar4X.ECSLib
             EntityManager globalEntityManager = game.GlobalManager;
             StaticDataStore staticData = game.StaticData;
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
+            FactionInfoDB faction = factionEntity.GetDataBlob<FactionInfoDB>();
             //TODO probilby do checking to see if valid here?
             Entity component = new Entity(globalEntityManager);
             
@@ -137,7 +137,7 @@ namespace Pulsar4X.ECSLib
                 {
                     componentCosts.Add(kvp.Key, kvp.Value);
                 }
-                else if (staticData.Minerals.Any(item => item.ID == kvp.Key))
+                else if (staticData.Minerals.ContainsKey(kvp.Key))
                 {
                     mineralCosts.Add(kvp.Key, kvp.Value);
                 }
@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            factionInfo.InternalComponentDesigns.Add(component.Guid,component);
+            faction.InternalComponentDesigns.Add(component.Guid,component);
             return component;
         }        
     }

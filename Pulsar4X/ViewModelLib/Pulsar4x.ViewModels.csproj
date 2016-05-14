@@ -88,6 +88,10 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework, Version=3.2.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.2.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -134,7 +138,7 @@
     <Compile Include="ViewModels\NewGameOptionsVM.cs" />
     <Compile Include="Helpers\ObservableDictionary.cs" />
     <Compile Include="ViewModels\PlanetVM.cs" />
-    <Compile Include="ViewModels\RefinaryAbilityVM.cs" />
+    <Compile Include="ViewModels\RefineryAbilityVM.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="ViewModels\SystemView\StarSystemVM.cs" />
     <Compile Include="ViewModels\SystemView\SystemMap_DrawableVM.cs" />

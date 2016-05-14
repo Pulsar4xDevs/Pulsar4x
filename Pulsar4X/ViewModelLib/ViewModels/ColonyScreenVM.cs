@@ -13,7 +13,6 @@ namespace Pulsar4X.ViewModel
         private Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
         private Entity FactionEntity { get { return _colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner; } }
-        private Dictionary<Guid, MineralSD> _mineralDictionary;
 
         private ObservableCollection<FacilityVM> _facilities;
         public ObservableCollection<FacilityVM> Facilities
@@ -21,14 +20,14 @@ namespace Pulsar4X.ViewModel
             get { return _facilities; }
         }
 
-        private Dictionary<string, long> _species;
-        public Dictionary<string, long> Species { get { return _species; } }
+        private readonly ObservableDictionary<string, long> _species = new ObservableDictionary<string, long>();
+        public ObservableDictionary<string, long> Species { get { return _species; } }
 
         public PlanetMineralDepositVM PlanetMineralDepositVM { get; set; }
         public RawMineralStockpileVM RawMineralStockpileVM { get; set; }
         public RefinedMatsStockpileVM RefinedMatsStockpileVM { get; set; }
 
-        public RefinaryAbilityVM RefinaryAbilityVM { get; set; }
+        public RefineryAbilityVM RefineryAbilityVM { get; set; }
         public ConstructionAbilityVM ConstructionAbilityVM { get; set; }
 
         public ColonyResearchVM ColonyResearchVM { get; set; }
@@ -59,20 +58,11 @@ namespace Pulsar4X.ViewModel
             {
                 Facilities.Add(new FacilityVM(installation.Key, instaces));
             }
-            _species = new Dictionary<string, long>();
 
-            foreach (var kvp in ColonyInfo.Population)
-            {
-                string name = kvp.Key.GetDataBlob<NameDB>().DefaultName;
 
-                _species.Add(name, kvp.Value);
-            }
+            UpdatePop();
 
-            _mineralDictionary = new Dictionary<Guid, MineralSD>();
-            foreach (var mineral in staticData.Minerals)
-            {
-                _mineralDictionary.Add(mineral.ID, mineral);
-            }
+
 
 
             PlanetMineralDepositVM = new PlanetMineralDepositVM(staticData, _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);
@@ -81,11 +71,21 @@ namespace Pulsar4X.ViewModel
 
             RefinedMatsStockpileVM = new RefinedMatsStockpileVM(staticData, _colonyEntity);
             
-            RefinaryAbilityVM = new RefinaryAbilityVM(staticData, _colonyEntity);
+            RefineryAbilityVM = new RefineryAbilityVM(staticData, _colonyEntity);
 
             ConstructionAbilityVM = new ConstructionAbilityVM(staticData, _colonyEntity);
 
             ColonyResearchVM = new ColonyResearchVM(staticData, _colonyEntity);
+        }
+
+        private void UpdatePop()
+        {
+            _species.Clear();
+            foreach (var kvp in ColonyInfo.Population)
+            {
+                string name = kvp.Key.GetDataBlob<NameDB>().DefaultName;
+                _species.Add(name, kvp.Value);
+            }
         }
 
         private void GameVM_DateChangedEvent(DateTime oldDate, DateTime newDate)
@@ -98,18 +98,16 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public void Refresh(bool partialRefresh = false)
         {
             PlanetMineralDepositVM.Refresh();
             RawMineralStockpileVM.Refresh();
             RefinedMatsStockpileVM.Refresh();
-            RefinaryAbilityVM.Refresh();
+            RefineryAbilityVM.Refresh();
             ConstructionAbilityVM.Refresh();
+            UpdatePop();
             foreach (var facilityvm in Facilities)
             {
                 facilityvm.Refresh();
@@ -122,24 +120,16 @@ namespace Pulsar4X.ViewModel
     {
         private Entity _planetEntity;
         private SystemBodyDB systemBodyInfo { get { return _planetEntity.GetDataBlob<SystemBodyDB>(); } }
-        private Dictionary<Guid, MineralSD> _mineralDictionary;
-
+        private StaticDataStore _staticData;
         private readonly ObservableDictionary<Guid, PlanetMineralInfoVM> _mineralDeposits = new ObservableDictionary<Guid, PlanetMineralInfoVM>();
-        public ObservableDictionary<Guid, PlanetMineralInfoVM> MineralDeposits
-        {
-            get { return _mineralDeposits; }
-        }
+        public ObservableDictionary<Guid, PlanetMineralInfoVM> MineralDeposits { get { return _mineralDeposits; } }
 
 
 
         public PlanetMineralDepositVM(StaticDataStore staticData, Entity planetEntity)
         {
-            _mineralDictionary = new Dictionary<Guid, MineralSD>();
-            foreach (var mineral in staticData.Minerals)
-            {
-                _mineralDictionary.Add(mineral.ID, mineral);
-            }
             _planetEntity = planetEntity;
+            _staticData = staticData;
             Initialise();
         }
 
@@ -149,8 +139,8 @@ namespace Pulsar4X.ViewModel
             _mineralDeposits.Clear();
             foreach (var kvp in minerals)
             {
-                MineralSD mineral = _mineralDictionary[kvp.Key];
-                if(!_mineralDeposits.ContainsKey(kvp.Key))
+                MineralSD mineral = _staticData.Minerals[kvp.Key];
+                if (!_mineralDeposits.ContainsKey(kvp.Key))
                     _mineralDeposits.Add(kvp.Key, new PlanetMineralInfoVM(mineral.Name, kvp.Value));
             }
             OnPropertyChanged(nameof(MineralDeposits));
@@ -164,10 +154,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public void Refresh(bool partialRefresh = false)
         {
@@ -213,7 +200,7 @@ namespace Pulsar4X.ViewModel
     {
         private Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
-        private Dictionary<Guid, MineralSD> _mineralDictionary;
+        private Dictionary<Guid, MineralSD> _mineralDictionary = new Dictionary<Guid, MineralSD>();
 
         private readonly ObservableDictionary<Guid, RawMineralInfoVM> _mineralStockpile = new ObservableDictionary<Guid, RawMineralInfoVM>();
         public ObservableDictionary<Guid, RawMineralInfoVM> MineralStockpile
@@ -223,8 +210,8 @@ namespace Pulsar4X.ViewModel
 
         public RawMineralStockpileVM(StaticDataStore staticData, Entity colonyEntity)
         {
-            _mineralDictionary = new Dictionary<Guid, MineralSD>();
-            foreach (var mineral in staticData.Minerals)
+
+            foreach (var mineral in staticData.Minerals.Values)
             {
                 _mineralDictionary.Add(mineral.ID, mineral);
             }
@@ -249,10 +236,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public void Refresh(bool partialRefresh = false)
         {
@@ -284,10 +268,7 @@ namespace Pulsar4X.ViewModel
         public event PropertyChangedEventHandler PropertyChanged;
         public void Refresh(bool partialRefresh = false)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(nameof(Amount)));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Amount)));
         }
     }
 
@@ -330,10 +311,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public void Refresh(bool partialRefresh = false)
         {
@@ -365,10 +343,7 @@ namespace Pulsar4X.ViewModel
 
         public void Refresh(bool partialRefresh = false)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(nameof(Amount)));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Amount)));
         }
     }
 
@@ -401,16 +376,12 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public event PropertyChangedEventHandler PropertyChanged;
         public void Refresh(bool partialRefresh = false)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs("Count"));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Count"));
         }
     }
 }

@@ -43,17 +43,16 @@ namespace Pulsar4X.ViewModel
                 ParentVM.ControlInFocus = this;
             }
         }
-        
 
-        public MineralFormulaVM(ComponentTemplateParentVM parent, StaticDataStore staticDataStore): base(parent)
+
+        public MineralFormulaVM(ComponentTemplateParentVM parent, StaticDataStore staticDataStore) : base(parent)
         {
             _dataStore = staticDataStore;
             Minerals = new DictionaryVM<Guid, string>(DisplayMode.Value);
-            foreach (var item in staticDataStore.Minerals)
+            foreach (var item in staticDataStore.Minerals.Values)
             {
                 Minerals.Add(item.ID, item.Name);
             }
-                        
         }
 
         public MineralFormulaVM(ComponentTemplateParentVM parent, StaticDataStore staticDataStore, KeyValuePair<Guid, string> guidFormulaKVP) : this(parent, staticDataStore)

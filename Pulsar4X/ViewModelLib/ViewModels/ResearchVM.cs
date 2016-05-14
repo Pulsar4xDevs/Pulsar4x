@@ -38,10 +38,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void Refresh(bool partialRefresh = false)
@@ -111,7 +108,7 @@ namespace Pulsar4X.ViewModel
 
         public void OnNewProject()
         {
-            //RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.RefinedMaterials[NewJobSelectedItem].RefinaryPointCost, NewJobRepeat);
+            //RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.RefinedMaterials[NewJobSelectedItem].RefineryPointCost, NewJobRepeat);
             //RefiningProcessor.AddJob(_staticData_, _colonyEntity_, newjob);
             TechProcessor.AssignProject(SelectedScientist.ScientistEntity, SelectedTech.ID);
             SelectedScientist.Refresh();
@@ -176,10 +173,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public void Refresh(bool partialRefresh = false)
         {
@@ -266,10 +260,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public void Refresh(bool partialRefresh = false)
         {
@@ -306,10 +297,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         public void Refresh(bool partialRefresh = false)
         {

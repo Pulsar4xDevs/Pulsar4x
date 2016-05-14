@@ -18,9 +18,9 @@ namespace Pulsar4X.ECSLib
             Entity mineEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, mineDesign);
 
 
-            ComponentTemplateSD refinarySD = game.StaticData.Components[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
-            ComponentDesign refinaryDesign = GenericComponentFactory.StaticToDesign(refinarySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity refinaryEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, refinaryDesign);
+            ComponentTemplateSD RefinerySD = game.StaticData.Components[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
+            ComponentDesign RefineryDesign = GenericComponentFactory.StaticToDesign(RefinerySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            Entity RefineryEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, RefineryDesign);
 
             ComponentTemplateSD labSD = game.StaticData.Components[new Guid("c203b7cf-8b41-4664-8291-d20dfe1119ec")];
             ComponentDesign labDesign = GenericComponentFactory.StaticToDesign(labSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
             TechProcessor.MakeResearchable(factionTech);
 
             ShipAndColonyInfoProcessor.AddComponentDesignToEntity(mineEntity, colonyEntity);
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(refinaryEntity, colonyEntity);
+            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(RefineryEntity, colonyEntity);
             ShipAndColonyInfoProcessor.AddComponentDesignToEntity(labEntity, colonyEntity);
             ShipAndColonyInfoProcessor.AddComponentDesignToEntity(facEntity, colonyEntity);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);

@@ -117,9 +117,9 @@ namespace Pulsar4X.ViewModel
         }
     }
 
-    public class RefinaryAbilityVM : JobAbilityBaseVM<ColonyRefiningDB, RefineingJob>
+    public class RefineryAbilityVM : JobAbilityBaseVM<ColonyRefiningDB, RefineingJob>
     {
-        public RefinaryAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
+        public RefineryAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {
             ItemDictionary = new DictionaryVM<string, Guid>(DisplayMode.Key);
             foreach (var kvp in _staticData_.RefinedMaterials)
@@ -134,7 +134,7 @@ namespace Pulsar4X.ViewModel
 
         public override void OnNewBatchJob()
         {
-            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.RefinedMaterials[NewJobSelectedItem].RefinaryPointCost, NewJobRepeat);
+            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.RefinedMaterials[NewJobSelectedItem].RefineryPointCost, NewJobRepeat);
             RefiningProcessor.AddJob(_staticData_, _colonyEntity_, newjob);
             Refresh();
         }

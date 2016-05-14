@@ -317,21 +317,24 @@ namespace Pulsar4X.ECSLib
 
             if (name == "EnumDict")
             {
-                Type type = Type.GetType((string)args.EvaluateParameters()[0]);
+                string typeAsString = (string)args.Parameters[0].Evaluate();
+                Type type = Type.GetType(typeAsString);
                 Type dictType = typeof(Dictionary<,>).MakeGenericType(type, typeof(double));
                 dynamic dict = Activator.CreateInstance(dictType);
+
+                Type enumDictType = typeof(Dictionary<,>).MakeGenericType(typeof(string), type);
+                dynamic enumConstants = Activator.CreateInstance(enumDictType);
+                foreach (dynamic value in Enum.GetValues(type))
+                {
+                    enumConstants.Add(Enum.GetName(type, value), value);
+                }
+
                 foreach (var kvp in _designAbility.GuidDictionary)
-                {                    
-                    dict.Add(kvp.Key, kvp.Value.DResult);
+                {
+                    dynamic key = enumConstants[(string)kvp.Key];
+                    dict.Add(key, kvp.Value.DResult);         
                 }
                 args.Result = dict;
-
-                //Dictionary<object, double> d1 = new Dictionary<object, double>();
-                //Dictionary<ConstructionType, double> d2 = new Dictionary<ConstructionType, double>();
-                //foreach (var item in d1)
-                //{
-                //    d2.Add((ConstructionType)item.Key, item.Value);
-                //}
             }
 
             if (name == "TechData")

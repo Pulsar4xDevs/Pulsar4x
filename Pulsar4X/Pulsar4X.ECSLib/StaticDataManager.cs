@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
 
                 throw;  // rethrow exception if not known ;)
             }
-        }
+}
 
         /// <summary>
         /// Checks for a valid vinfo file in the specified directory, if the file is found it loads it and 

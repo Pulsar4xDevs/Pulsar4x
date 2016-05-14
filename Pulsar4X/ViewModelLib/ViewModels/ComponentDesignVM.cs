@@ -76,7 +76,7 @@ namespace Pulsar4X.ViewModel
                     text += "ResearchCost: " + Design.ResearchCostValue + Environment.NewLine;
                     foreach (var kvp in Design.MineralCostValues)
                     {
-                        string mineralName = _staticData.Minerals.Find(item => item.ID == kvp.Key).Name;
+                        string mineralName = _staticData.Minerals[kvp.Key].Name;
                         text += mineralName + ": " + kvp.Value + Environment.NewLine;
                     }
                     text += "Credit Cost: " + Design.CreditCostValue + Environment.NewLine;
@@ -105,10 +105,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void Refresh(bool partialRefresh = false)
@@ -220,10 +217,7 @@ namespace Pulsar4X.ViewModel
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 

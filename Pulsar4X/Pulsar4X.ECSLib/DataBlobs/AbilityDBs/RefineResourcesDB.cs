@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         public List<Guid> RefinableMatsList { get; internal set; }
 
         [JsonProperty]
-        public int RefinaryPoints { get; internal set; }
+        public int RefineryPoints { get; internal set; }
 
         public RefineResourcesDB()
         {
@@ -21,23 +21,23 @@ namespace Pulsar4X.ECSLib
         /// this is for the parser, it takes a dictionary but turns it into a list of keys, ignoring the values.
         /// </summary>
         /// <param name="refinableMatsList"></param>
-        /// <param name="refinaryPoints"></param>
-        public RefineResourcesDB(Dictionary<Guid, double> refinableMatsList, double refinaryPoints)
+        /// <param name="RefineryPoints"></param>
+        public RefineResourcesDB(Dictionary<Guid, double> refinableMatsList, double RefineryPoints)
         {
             RefinableMatsList = refinableMatsList.Keys.ToList();
-            RefinaryPoints = (int)refinaryPoints;
+            RefineryPoints = (int)RefineryPoints;
         }
 
-        public RefineResourcesDB(List<Guid> refinableMatsList, int refinaryPoints)
+        public RefineResourcesDB(List<Guid> refinableMatsList, int RefineryPoints)
         {
             RefinableMatsList = refinableMatsList;
-            RefinaryPoints = refinaryPoints;
+            RefineryPoints = RefineryPoints;
         }
 
         public RefineResourcesDB(RefineResourcesDB db)
         {
             RefinableMatsList = new List<Guid>(db.RefinableMatsList);
-            RefinaryPoints = db.RefinaryPoints;
+            RefineryPoints = db.RefineryPoints;
         }
 
         public override object Clone()

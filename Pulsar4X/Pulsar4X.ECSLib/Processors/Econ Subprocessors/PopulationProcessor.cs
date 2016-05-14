@@ -11,6 +11,24 @@ namespace Pulsar4X.ECSLib
         {
             // Get current population
             Dictionary<Entity, long> currentPopulation = colony.GetDataBlob<ColonyInfoDB>().Population;
+            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructure = colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAbilityDB>()).ToList();
+            long popSupportValue;
+
+            // @todo: Get colony cost and infrastructure, figure out population cap
+            //  Pop Cap = Total Population Support Value / Colony Cost
+            // Get total popSupport
+            popSupportValue = 0;
+
+            foreach (var installation in infrastructure)
+            {
+                //if(installations[kvp.Key]
+                popSupportValue += installation.Key.GetDataBlob<PopulationSupportAbilityDB>().PopulationCapacity;
+            }
+
+            // find colony cost, divide the population support value by it
+            // @todo: Get colony cost, or do I need to calculate it?
+
+
 
             foreach (KeyValuePair<Entity, long> kvp in currentPopulation.ToArray())
             {
@@ -29,7 +47,7 @@ namespace Pulsar4X.ECSLib
 
                   }
             }
-            // TODO: Set population to new value  (necessary, or is currentPop a reference to the object in colony?)
+            // @todo: Set population to new value  (necessary, or is currentPop a reference to the object in colony?)
         }
     }
 }

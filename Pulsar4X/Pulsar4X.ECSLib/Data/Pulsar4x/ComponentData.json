@@ -161,7 +161,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": "PlanetInstallation, ShipCargo",
+          "MountType": "ShipCargo, PlanetInstallation",
           "ComponentAbilitySDs": [
             {
               "Name": "MiningAmount",
@@ -245,7 +245,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": "PlanetInstallation, ShipCargo",
+          "MountType": "ShipCargo, PlanetInstallation",
           "ComponentAbilitySDs": [
             {
               "Name": "RP Amount Per EconTick",
@@ -260,8 +260,8 @@
       {
         "Key": "90592586-0bd6-4885-8526-7181e08556b5",
         "Value": {
-          "Name": "Refinary",
-          "Description": "Creates Research Points",
+          "Name": "Refinery",
+          "Description": "Refines Sorium into fuel",
           "ID": "90592586-0bd6-4885-8526-7181e08556b5",
           "SizeFormula": "500000",
           "HTKFormula": "[Size]",
@@ -281,12 +281,15 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": "PlanetInstallation, ShipCargo",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "ComponentAbilitySDs": [
             {
-              "Name": "RP Amount Per EconTick",
+              "Name": "Fuel Processed Per EconTick",
               "Description": "",
               "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
               "AbilityFormula": "100",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsDB"
             },
@@ -295,16 +298,7 @@
               "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
-                "Entries": [
-                  {
-                    "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
-                    "Value": "0"
-                  },
-                  {
-                    "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
-                    "Value": "0"
-                  }
-                ]
+                "Entries": []
               },
               "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesDB"
@@ -336,7 +330,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
-          "MountType": "PlanetInstallation, ShipCargo",
+          "MountType": "ShipCargo, PlanetInstallation",
           "ComponentAbilitySDs": [
             {
               "Name": "Construction Points",
@@ -350,19 +344,39 @@
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(0))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAbilityDB"
-            },
+            }
+          ]
+        }
+      },
+      {
+        "Key": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
+        "Value": {
+          "Name": "Infrastructure",
+          "Description": "Component and buildings needed to keep colonists alive on hostile worlds",
+          "ID": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
+          "SizeFormula": "1",
+          "HTKFormula": "1",
+          "CrewReqFormula": "0",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "10"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "0",
+          "BuildPointCostFormula": "100",
+          "MountType": "ShipCargo, PlanetInstallation",
+          "ComponentAbilitySDs": [
             {
-              "Name": "Construction Points",
-              "Description": "",
+              "Name": "Support Colonists",
+              "Description": "Keeps colonists alive on hostile worlds",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructShipComponentsAbilityDB"
-            },
-            {
-              "GuiHint": "GuiTechSelectionList"
-            },
-            {
-              "GuiHint": "GuiTechSelectionList"
+              "GuidDictionary": {
+                "Entries": []
+              }
             }
           ]
         }

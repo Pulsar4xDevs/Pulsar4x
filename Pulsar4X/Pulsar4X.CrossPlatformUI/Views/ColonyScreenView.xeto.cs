@@ -15,7 +15,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected GridView PopDataGrid { get; set; }
         protected GridView MineralDeposits { get; set; }
         protected GridView MineralStockpile { get; set; }
-        protected JobAbilityView RefinaryAbilityView { get; set; }
+        protected JobAbilityView RefineryAbilityView { get; set; }
         protected GridView RefinedMats { get; set; }
         protected JobAbilityView ConstructionAbilityView { get; set; }
         protected ResearchAbilityView ResearchAbilityView { get; set; }
@@ -98,15 +98,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
             FacDataGrid.DataStore = _colonyScreenVM.Facilities;
 
             PopDataGrid.DataStore = _colonyScreenVM.Species.Cast<object>();
-
+            _colonyScreenVM.Species.CollectionChanged += Species_CollectionChanged;
             
             MineralDeposits.DataStore = _colonyScreenVM.PlanetMineralDepositVM.MineralDeposits.Values;
             gameVM.SelectedColonyScreenVM.PlanetMineralDepositVM.PropertyChanged += PlanetMineralDepositVM_PropertyChanged;
 
             MineralStockpile.DataStore = _colonyScreenVM.RawMineralStockpileVM.MineralStockpile.Values;
             gameVM.SelectedColonyScreenVM.RawMineralStockpileVM.PropertyChanged += RawMineralStockpileVM_PropertyChanged;
-            //RefinaryAbilityView = new JobAbilityView(colonyScreenVM.RefinaryAbilityVM);
-            RefinaryAbilityView.SetViewModel(_colonyScreenVM.RefinaryAbilityVM);
+            //RefineryAbilityView = new JobAbilityView(colonyScreenVM.RefineryAbilityVM);
+            RefineryAbilityView.SetViewModel(_colonyScreenVM.RefineryAbilityVM);
             
             RefinedMats.DataStore = _colonyScreenVM.RefinedMatsStockpileVM.MaterialStockpile.Values;
             gameVM.SelectedColonyScreenVM.RefinedMatsStockpileVM.PropertyChanged += RefinedMatsStockpileVM_PropertyChanged;
@@ -118,6 +118,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
 
+        }
+
+        private void Species_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            PopDataGrid.DataStore = _colonyScreenVM.Species.Cast<object>();
         }
 
         private void RefinedMatsStockpileVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

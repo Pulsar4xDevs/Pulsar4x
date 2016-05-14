@@ -26,7 +26,7 @@ namespace Pulsar4X.ViewModel
             {
                 DateTime old = _currentDateTime;
                 _currentDateTime = value;
-                if (DateChangedEvent != null) DateChangedEvent(old, _currentDateTime);
+                DateChangedEvent?.Invoke(old, _currentDateTime);
                 OnPropertyChanged();
             }
         }

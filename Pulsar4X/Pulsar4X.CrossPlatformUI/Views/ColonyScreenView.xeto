@@ -36,7 +36,7 @@
       </TableLayout>
     </TableRow>
     <TableRow>
-      <c:JobAbilityView x:Name="RefinaryAbilityView" />
+      <c:JobAbilityView x:Name="RefineryAbilityView" />
       <TableLayout>
         <TableRow>
           <Label Text="Refined Materials Stockpile" />
