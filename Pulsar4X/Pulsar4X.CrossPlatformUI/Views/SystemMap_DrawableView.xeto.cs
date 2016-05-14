@@ -109,7 +109,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
             _shapesList = newShapelist;
 
-            Color ringColor = Colors.Wheat;
+            Color ringColor = Colors.Red;
             List<OrbitRing> newOrbitList = new List<OrbitRing>();
             foreach (var item in _viewModel.OrbitalEntities)
             {
