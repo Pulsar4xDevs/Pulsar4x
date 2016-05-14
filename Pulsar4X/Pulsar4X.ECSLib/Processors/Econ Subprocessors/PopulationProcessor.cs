@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
 
                 if (colonyCost > 1.0)
                 {
-                    maxPopulation = popSupportValue / needsSupport;
+                    maxPopulation = (long)((double)(popSupportValue / needsSupport) / colonyCost) ;
                     if (currentPopulation[kvp.Key] > maxPopulation) // People will start dying
                     {
                         long excessPopulation = currentPopulation[kvp.Key] - maxPopulation;
@@ -66,7 +66,7 @@ namespace Pulsar4X.ECSLib
                         growthRate = (20.0 / (Math.Pow(kvp.Value, (1.0 / 3.0))));
                         if (growthRate > 10.0)
                             growthRate = 10.0;
-                        // TODO: get external factors in population growth (or death)
+                        // @todo: get external factors in population growth (or death)
                         newPop = (long)(kvp.Value * (1.0 + growthRate));
                         if (newPop > maxPopulation)
                             newPop = maxPopulation;
@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
                     growthRate = (20.0 / (Math.Pow(kvp.Value, (1.0 / 3.0))));
                     if (growthRate > 10.0)
                         growthRate = 10.0;
-                    // TODO: get external factors in population growth (or death)
+                    // @todo: get external factors in population growth (or death)
                     newPop = (long)(kvp.Value * (1.0 + growthRate));
                     if (newPop < 0)
                         newPop = 0;
