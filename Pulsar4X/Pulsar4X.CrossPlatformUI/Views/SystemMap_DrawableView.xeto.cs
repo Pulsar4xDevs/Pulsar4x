@@ -110,6 +110,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
             _shapesList = newShapelist;
 
+
+            /* uncomment this for the new orbit rings.
             Color ringColor = Colors.Red;
             List<OrbitRing> newOrbitList = new List<OrbitRing>();
             foreach (var item in _viewModel.OrbitalEntities)
@@ -122,6 +124,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 newOrbitList.Add(ring);
             }
             _orbitRings = newOrbitList;
+            */
         }
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
