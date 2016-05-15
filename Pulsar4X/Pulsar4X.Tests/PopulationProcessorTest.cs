@@ -19,6 +19,8 @@ namespace Pulsar4X.Tests
         private StarSystemFactory _starSystemFactory;
         private StarSystem _starSystem;
         private Dictionary<string, AtmosphericGasSD> _gasDictionary;
+        private List<Entity> _planetsList;
+        private List<Entity> _speciesList;
 
         [SetUp]
         public void Init()
@@ -51,7 +53,9 @@ namespace Pulsar4X.Tests
 
             // Set up colonies
             // @todo: add more colonies, especially ones with multiple species in one colony
-            _colonyEntity = ColonyFactory.CreateColony(_faction, species, _planetEntity);
+            _colonyEntity = ColonyFactory.CreateColony(_faction, species, _earthPlanet);
+            
+            _colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Add()
         }
 
         [TearDown]
@@ -136,6 +140,105 @@ namespace Pulsar4X.Tests
 
         }
 
+        private void testPlanetAndSpecies(Entity planet, Entity species)
+        {
+            long[] basePop = new long[] { 0, 5, 10, 100, 999, 1000, 10000, 100000, 10000000 };
+            long[] infrastructureAmounts = new long[] { 0, 1, 5, 100 };
+            Dictionary<Entity, long> newPop, returnedPop;
+
+            Entity testColony;
+
+            long maxPop, lastPop;
+
+            // Set the colony population to five million to start
+            Dictionary<Entity, long> pop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
+
+            // Single iteration growth test
+            int i, j;
+
+            // Create a new colony with this planet and species
+            testColony = ColonyFactory.CreateColony(_faction, species, planet);
+
+            // Create an infrastructure item
+            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructure = testColony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAbilityDB>()).ToList();
+
+            if (infrastructure.LongCount() == 0) // Empty
+            {
+                // Add infrastructure to the list of installations
+                //Entity infraItem = new Entity(;
+
+                //ComponentInfoDB infra = ;
+                //infra.
+
+                //testColony.GetDataBlob<ComponentInstancesDB>().SpecificInstances
+            }
+
+            for (i = 0; i < basePop.Length; i++)
+            {
+                for (j = 0; j < infrastructureAmounts.Length; j++)
+                {
+                    int supportValue = 0;
+
+                    // set up population and infrastructure for each test
+                    newPop = testColony.GetDataBlob<ColonyInfoDB>().Population;
+                    foreach (KeyValuePair<Entity, long> kvp in newPop.ToArray())
+                    {
+                        newPop[kvp.Key] = basePop[i];
+                    }
+
+                    for(int k = 0; k < infrastructureAmounts[j]; k++)
+                    {
+
+
+                        foreach (var installation in infrastructure)
+                        {
+                            supportValue += installation.Key.GetDataBlob<LifeSupportAbilityDB>().LifeSupportCapacity;
+                        }
+                        
+                    }
+
+                        returnedPop = calcGrowthIteration(_colonyEntity, newPop);
+                    PopulationProcessor.GrowPopulation(_colonyEntity);
+
+                    foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
+                    {
+                        Assert.AreEqual(returnedPop[kvp.Key], pop[kvp.Key]);
+                    }
+                }
+
+            }
+
+            newPop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
+            returnedPop = calcGrowthIteration(_colonyEntity, newPop);
+            PopulationProcessor.GrowPopulation(_colonyEntity);
+
+
+            // Multiple iteration growth test
+            for (j = 1; j < 10; j++)
+            {
+
+                for (i = 0; i < basePop.Length; i++)
+                {
+                    foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
+                    {
+                        if (pop.ContainsKey(kvp.Key))
+                        {
+                            pop[kvp.Key] = basePop[i];
+                        }
+                        newPop[kvp.Key] = basePop[i];
+
+                        for (int k = 0; k < j; k++)
+                        {
+                            newPop = calcGrowthIteration(testColony, newPop);
+                            PopulationProcessor.GrowPopulation(testColony);
+                        }
+
+                        Assert.AreEqual(returnedPop[kvp.Key], pop[kvp.Key]);
+                    }
+                }
+            }
+        }
+
 
         // Calculates the new population.  If maxPop = -1, there is no cap
         private long calcNewPop(long lastPop, long maxPop)
@@ -150,7 +253,7 @@ namespace Pulsar4X.Tests
             }
             else
             {
-                growthRate = (20.0 / (Math.Pow(kvp.Value, (1.0 / 3.0))));
+                growthRate = (20.0 / (Math.Pow(lastPop, (1.0 / 3.0))));
             }
 
             newPop = (long)(lastPop * (1.0 + growthRate));
@@ -249,6 +352,61 @@ namespace Pulsar4X.Tests
             Entity resultPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, atmosDB });
             return resultPlanet;
         }
+
+        private void AddComponentDesignToEntity(ComponentInstance specificInstance, Entity parentEntity)
+        {
+            if (parentEntity.HasDataBlob<ComponentInstancesDB>())
+            {
+                ComponentInstancesDB componentInstance = parentEntity.GetDataBlob<ComponentInstancesDB>();
+
+                if (!componentInstance.SpecificInstances.ContainsKey(specificInstance.DesignEntity)) //if the entity doesnt already have this component design listed, 
+                    componentInstance.SpecificInstances.Add(specificInstance.DesignEntity, new List<ComponentInstance>()); //add the design ID to the dictionary with a new empty list
+                componentInstance.SpecificInstances[specificInstance.DesignEntity].Add(specificInstance); //add the specificInstance
+                ReCalcProcessor.ReCalcAbilities(parentEntity);
+            }
+            else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
+        }
+
+        public static ComponentTemplateSD InfrastructureInstallation()
+        {
+            ComponentTemplateSD component = new ComponentTemplateSD();
+            component.Name = "Infrastructure";
+            component.Description = "Component and buildings needed to keep colonists alive on hostile worlds";
+            component.ID = new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb");
+
+            component.SizeFormula = "1";
+
+            component.HTKFormula = "[Size]";
+
+            component.CrewReqFormula = "0";
+
+            component.ResearchCostFormula = "0";
+
+            component.BuildPointCostFormula = "[Size]";
+
+            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "10"}};
+
+            component.CreditCostFormula = "0";
+
+            component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
+
+            component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
+
+
+            ComponentTemplateAbilitySD infrastructureAbility = new ComponentTemplateAbilitySD();
+            infrastructureAbility.Name = "Support Colonists";
+            infrastructureAbility.Description = "Keeps colonists alive on hostile worlds";
+            infrastructureAbility.GuiHint = GuiHint.None;
+            infrastructureAbility.GuidDictionary = new Dictionary<object, string>
+            {
+            };
+            infrastructureAbility.AbilityDataBlobType = typeof(LifeSupportAbilityDB).ToString();
+            component.ComponentAbilitySDs.Add(infrastructureAbility);
+
+            return component;
+        }
     }
+
+
 }
-}
+
