@@ -74,7 +74,7 @@ namespace Pulsar4X.CrossPlatformUI
         /// </summary>
         public void WorldOffset(PointF offset)
         {
-            _cameraWorldPosition.Offset(offset);
+            _cameraWorldPosition.Offset((offset * 1.0f/ZoomLevel));
             LimitOffsets();
         }
 

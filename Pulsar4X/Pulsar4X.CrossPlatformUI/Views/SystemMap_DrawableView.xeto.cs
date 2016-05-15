@@ -34,17 +34,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SystemMap_DrawableView_MouseMove(object sender, MouseEventArgs e)
         {
-            LastLoc = (Point)e.Location;
+            
             if (IsMouseDown == true)
             {
 
                 //_camera.ViewOffset(LastOffset - e.Location);
-                _camera.CenterOn(e);
+                //_camera.CenterOn(e);
+                _camera.WorldOffset(e.Location - LastLoc);
                 LastOffset = e.Location;
                 Invalidate();
             }
-
-            
+            LastLoc = (Point)e.Location;
         }
 
         private void SystemMap_DrawableView_MouseWheel(object sender, MouseEventArgs e)
