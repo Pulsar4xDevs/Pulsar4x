@@ -21,6 +21,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public float SweepAngle { get { return (360f * OrbitPercent.Percent) / Segments; } }
 
+        
         private List<Pen> _segmentPens;// = new List<Pen>();
 
         public Color PenColor { get { return _penColor; }
@@ -55,6 +56,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _height = 200 * (float)Math.Sqrt(_orbitDB.SemiMajorAxis * Math.Sqrt(1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity) 
                 * _orbitDB.SemiMajorAxis * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;   //minor Axis
             _focalPoint = (float)Math.Sqrt(_width * _width * 0.5f - _height * _height * 0.5f);
+            
         }
 
         private void UpdatePens()
@@ -109,4 +111,21 @@ namespace Pulsar4X.CrossPlatformUI.Views
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
+    class PenIndex : Dictionary<Color, List<Pen>>
+    {
+        public Pen this[Color key, int index]
+        {
+            get { return base[key][index]; }
+            set
+            {
+                if (!this.ContainsKey(key))
+                {
+                    this.Add(key, new List<Pen>());
+                    this[key].Add(value);
+                }
+            }
+        }
+    }
+
 }
