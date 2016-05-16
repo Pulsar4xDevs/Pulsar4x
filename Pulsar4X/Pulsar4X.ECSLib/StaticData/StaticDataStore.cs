@@ -36,10 +36,10 @@ namespace Pulsar4X.ECSLib
         public List<CommanderNameThemeSD> CommanderNameThemes = new List<CommanderNameThemeSD>();
 
         /// <summary>
-        /// List which stores all the Minerals.
+        /// Dictionary which stores all the Minerals.
         /// </summary>
         [JsonIgnore]
-        public List<MineralSD> Minerals = new List<MineralSD>();
+        public Dictionary<Guid, MineralSD> Minerals = new Dictionary<Guid, MineralSD>();
 
         /// <summary>
         /// Dictionary which stores all the Technologies.
@@ -47,12 +47,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonIgnore]
         public Dictionary<Guid, TechSD> Techs = new Dictionary<Guid, TechSD>();
-
-        /// <summary>
-        /// List which stores all of the installations
-        /// </summary>
-        [JsonIgnore]
-        public Dictionary<Guid, InstallationSD> Installations = new Dictionary<Guid, InstallationSD>();
 
         /// <summary>
         /// Dictionary which stores all the Recipes.
@@ -103,13 +97,10 @@ namespace Pulsar4X.ECSLib
                     "CommanderNameThemes", typeof(List<CommanderNameThemeSD>)
                 },
                 {
-                    "Minerals", typeof(List<MineralSD>)
+                    "Minerals", typeof(Dictionary<Guid, MineralSD>)
                 },
                 {
                     "Techs", typeof(Dictionary<Guid, TechSD>)
-                },
-                {
-                    "Installations", typeof(Dictionary<Guid, InstallationSD>)
                 },
                 {
                     "RefinedMaterials", typeof(Dictionary<Guid, RefinedMaterialSD>)
@@ -148,9 +139,6 @@ namespace Pulsar4X.ECSLib
                     typeof(Dictionary<Guid, TechSD>), "Techs"
                 },
                 {
-                    typeof(Dictionary<Guid, InstallationSD>), "Installations"
-                },
-                {
                     typeof(Dictionary<Guid, RefinedMaterialSD>), "RefinedMaterials"
                 },
                 {
@@ -178,17 +166,11 @@ namespace Pulsar4X.ECSLib
         [CanBeNull]
         public object FindDataObjectUsingID(Guid id)
         {
-            foreach (var m in Minerals)
-            {
-                if (m.ID == id)
-                    return m;
-            }
+            if (Minerals.ContainsKey(id))
+                return Minerals[id];
 
             if (Techs.ContainsKey(id))
                 return Techs[id];
-
-            if (Installations.ContainsKey(id))
-                return Installations[id];
 
             if (RefinedMaterials.ContainsKey(id))
                 return RefinedMaterials[id];
@@ -257,17 +239,13 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores Mineral Static Data. Will overwrite an existing mineral if the IDs match.
         /// </summary>
-        internal void Store(List<MineralSD> minerals)
+        internal void Store(Dictionary<Guid, MineralSD> minerals)
         {
             if (minerals != null)
             {
-                foreach (MineralSD min in minerals)
+                foreach (var mineral in minerals)
                 {
-                    int i = Minerals.FindIndex(x => x.ID == min.ID);
-                    if (i >= 0) // found existing element!
-                        Minerals[i] = min;
-                    else
-                        Minerals.Add(min);
+                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.
                 }
             }
         }
@@ -284,17 +262,6 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        /// <summary>
-        /// Stores Installation Static Data. Will overwrite any existing Installations with the same ID.
-        /// </summary>
-        internal void Store(Dictionary<Guid, InstallationSD> installations)
-        {
-            if (installations != null)
-            {
-                foreach (KeyValuePair<Guid, InstallationSD> facility in installations)
-                    Installations[facility.Key] = facility.Value;
-            }
-        }
 
         /// <summary>
         /// Stores ConstructableObj Static Data. Will overwrite any existing ConstructableObjs with the same ID.
@@ -363,9 +330,8 @@ namespace Pulsar4X.ECSLib
                 AtmosphericGases = new WeightedList<AtmosphericGasSD>(AtmosphericGases),
                 CommanderNameThemes = new List<CommanderNameThemeSD>(CommanderNameThemes),
                 Components = new Dictionary<Guid, ComponentTemplateSD>(Components),
-                Installations = new Dictionary<Guid, InstallationSD>(Installations),
                 _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
-                Minerals = new List<MineralSD>(Minerals),
+                Minerals = new Dictionary<Guid, MineralSD>(Minerals),
                 RefinedMaterials = new Dictionary<Guid, RefinedMaterialSD>(RefinedMaterials),
                 SystemGenSettings = SystemGenSettings, // Todo: Make this cloneable
                 Techs = new Dictionary<Guid, TechSD>(Techs)

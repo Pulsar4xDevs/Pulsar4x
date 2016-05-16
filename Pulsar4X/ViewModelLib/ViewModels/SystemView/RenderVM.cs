@@ -118,17 +118,13 @@ namespace Pulsar4X.ViewModel.SystemView
 
         private void OnSceneLoaded()
         {
-            EventHandler handler = SceneLoaded;
-            if (null != handler) handler(this, EventArgs.Empty);
+            SceneLoaded?.Invoke(this, EventArgs.Empty);
         }
 
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public void Refresh(bool partialRefresh = false)

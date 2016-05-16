@@ -48,6 +48,10 @@ namespace Pulsar4X.ECSLib
             {
                 ConstructionProcessor.ConstructStuff(colonyEntity, game);
             }
+            foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+            {
+                PopulationProcessor.GrowPopulation(colonyEntity);
+            }
         }
     }
 }

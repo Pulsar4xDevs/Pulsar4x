@@ -104,7 +104,6 @@ namespace Pulsar4X.Tests
 
             //StaticDataManager.ExportStaticData(techs, "./TechnologyDataExportTest.json");
 
-            List<InstallationSD> installations = new List<InstallationSD>();
             //InstallationSD install = new InstallationSD();
             //install.Name = "Mine";
             //install.Description = "Employs population to mine transnewtonian resources.";
@@ -121,7 +120,7 @@ namespace Pulsar4X.Tests
 
             //installations.Add(install);
 
-            StaticDataManager.ExportStaticData(installations, "InstallationExportTest.json");
+            
 
             //ComponentAbilitySD launchAbility = new ComponentAbilitySD();
             //launchAbility.Ability = AbilityType.LaunchMissileSize;
@@ -169,18 +168,22 @@ namespace Pulsar4X.Tests
             soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
             soriumFuel.RawMineralCosts = new Dictionary<Guid, int>();
             soriumFuel.RawMineralCosts.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
+            soriumFuel.Weight = 1;
+            //soriumFuel.CargoType = CargoType.Fuel;
             soriumFuel.RefineryPointCost = 10;
             soriumFuel.OutputAmount = 1;
             mats.Add(soriumFuel.ID, soriumFuel);
 
             RefinedMaterialSD DepleatedDuranuim = new RefinedMaterialSD();
             DepleatedDuranuim.Name = "Depleated Duranuim";
-            DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset Refinerys";
+            DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset refinarys";
             DepleatedDuranuim.ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB");
             DepleatedDuranuim.RawMineralCosts = new Dictionary<Guid, int>();
             DepleatedDuranuim.RawMineralCosts.Add(new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), 5);
             DepleatedDuranuim.RefinedMateraialsCosts = new Dictionary<Guid, int>();
             DepleatedDuranuim.RefinedMateraialsCosts.Add(new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"), 1);
+            DepleatedDuranuim.Weight = 1;
+            //DepleatedDuranuim.CargoType = CargoType.General;
             DepleatedDuranuim.RefineryPointCost = 20;
             DepleatedDuranuim.OutputAmount = 6;
             mats.Add(DepleatedDuranuim.ID, DepleatedDuranuim);
@@ -290,7 +293,6 @@ namespace Pulsar4X.Tests
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
             int techNum = staticDataStore.Techs.Count;
-            int installationsNum = staticDataStore.Installations.Count;
             int constructableObjectsNum = staticDataStore.RefinedMaterials.Count;
 
             // check that data was loaded:
@@ -299,7 +301,6 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(staticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(staticDataStore.Minerals);
             Assert.IsNotEmpty(staticDataStore.Techs);
-            Assert.IsNotEmpty(staticDataStore.Installations);
 
             // now lets re-load the same data, to test that duplicates don't occure as required:
             StaticDataManager.LoadData("Pulsar4x", game);
@@ -307,7 +308,6 @@ namespace Pulsar4X.Tests
             // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
             Assert.AreEqual(techNum, staticDataStore.Techs.Count);
-            Assert.AreEqual(installationsNum, staticDataStore.Installations.Count);
             Assert.AreEqual(constructableObjectsNum, staticDataStore.RefinedMaterials.Count);
 
             // now lets test some malformed data folders.
@@ -330,17 +330,16 @@ namespace Pulsar4X.Tests
 
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
-            string soriumName = staticDataStore.Minerals[0].Name;
-            Guid soriumGuid = staticDataStore.Minerals[0].ID;
+            Guid someGuid = new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9");
+            string someName = staticDataStore.Minerals[someGuid].Name;
+            
             StaticDataManager.LoadData("Other", game);
             staticDataStore = game.StaticData;
-
-            // check the test is still valid, should be the first mineral item (sorium) 
-            Assert.AreEqual(soriumGuid, staticDataStore.Minerals[0].ID);
+            
             // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
             //check the name has been overwritten
-            Assert.AreNotEqual(soriumName, staticDataStore.Minerals[0].Name);
+            Assert.AreNotEqual(someName, staticDataStore.Minerals[someGuid].Name);
         }
 
         [Test]
@@ -362,15 +361,13 @@ namespace Pulsar4X.Tests
             Assert.IsNull(testObj);
 
             // now lets test for values that are in the store:
-            Guid testID = staticDataStore.Minerals[0].ID;
+            Guid testID = staticDataStore.Minerals.FirstOrDefault().Key;
             testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
             Assert.AreEqual(testID, ((MineralSD)testObj).ID);
-
-            testID = staticDataStore.Installations.First().Key;
+            
             testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
-            Assert.AreEqual(testID, ((InstallationSD)testObj).ID);
 
             testID = staticDataStore.Techs.First().Key;
             testObj = staticDataStore.FindDataObjectUsingID(testID);

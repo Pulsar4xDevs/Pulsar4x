@@ -285,7 +285,6 @@
     <Compile Include="StarSystem.cs" />
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
     <Compile Include="StaticData\ComponentSD.cs" />
-    <Compile Include="StaticData\InstallationSD.cs" />
     <Compile Include="StaticData\PlayerSD.cs" />
     <Compile Include="StaticData\RefinedMaterialSD.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
@@ -305,9 +304,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Pulsar4x\ComponentData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Pulsar4x\InstallationData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Pulsar4x\Minerals.json">

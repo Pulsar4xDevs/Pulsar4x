@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
-using System.Windows;
-using System.Collections.ObjectModel;
+
 
 namespace Pulsar4X.ViewModel.SystemView
 {
@@ -36,7 +32,10 @@ namespace Pulsar4X.ViewModel.SystemView
                 SystemBodies.Add(new SystemObjectGraphicsInfo(item, gameVM));
             }
             foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>(gameVM.CurrentAuthToken))
-                OrbitalEntities.Add(item);
+            {
+                if(item.GetDataBlob<OrbitDB>().Parent != null)
+                    OrbitalEntities.Add(item);
+            }
 
             PenData hudPen = new PenData();
             hudPen.Alpha = 100;

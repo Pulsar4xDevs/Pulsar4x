@@ -25,8 +25,7 @@ namespace Pulsar4X.ViewModel
         /// <param name="e">Event arguments</param>
         protected virtual void OnCanExecuteChanged(EventArgs e)
         {
-            if (CanExecuteChanged != null)
-                CanExecuteChanged(this, e);
+            CanExecuteChanged?.Invoke(this, e);
         }
 
         /// <summary>
