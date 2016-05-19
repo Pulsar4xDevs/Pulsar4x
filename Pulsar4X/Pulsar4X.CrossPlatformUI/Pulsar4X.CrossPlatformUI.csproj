@@ -204,6 +204,9 @@
     <EmbeddedResource Include="Views\NewSpeciesView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\TimeControlView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -316,6 +319,9 @@
     </Compile>
     <Compile Include="Views\SystemView.xeto.cs">
       <DependentUpon>SystemView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TimeControlView.xeto.cs">
+      <DependentUpon>TimeControlView.xeto</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
