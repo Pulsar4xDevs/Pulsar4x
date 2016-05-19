@@ -90,5 +90,25 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
+
+        public static void ReCalcMaxPopulation(Entity colonyEntity)
+        {
+
+            var infrastructure = new List<Entity>();
+
+            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructureEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAbilityDB>()).ToList();
+            long totalMaxPop = 0;
+
+            foreach (var infrastructureDesignList in infrastructureEntities)
+            {
+                foreach (var infrastructureInstance in infrastructureDesignList.Value)
+                {
+                    totalMaxPop += infrastructureDesignList.Key.GetDataBlob<PopulationSupportAbilityDB>().PopulationCapacity;
+                }
+            }
+
+            colonyEntity.GetDataBlob<ColonyLifeSupportDB>().MaxPopulation = totalMaxPop;
+
+        }
     }
 }

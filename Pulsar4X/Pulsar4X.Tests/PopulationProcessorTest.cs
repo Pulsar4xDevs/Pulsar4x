@@ -103,31 +103,35 @@ namespace Pulsar4X.Tests
 
             int i, j, k;
 
-            // Create a new colony with this planet and species, add infrastructure item to it
-            _colonyEntity = ColonyFactory.CreateColony(_faction, species, planet);
-
             Guid infGUID = new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb");
             ComponentTemplateSD infrastructureSD = _game.StaticData.Components[infGUID];
             ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             Entity infrastructureEntity = GenericComponentFactory.DesignToEntity(_game, _faction, infrastructureDesign);
 
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
-            ReCalcProcessor.ReCalcAbilities(_colonyEntity);
-
             Dictionary<Entity, long> pop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
 
 
             // Single iteration growth test
-            for (i = 0; i < basePop.Length; i++)
+            for (i = 0; i < infrastructureAmounts.Length; i++)
             {
-                for (j = 0; j < infrastructureAmounts.Length; j++)
+                // Create a new colony with this planet and species, add infrastructure item to it
+                _colonyEntity = ColonyFactory.CreateColony(_faction, species, planet);
+
+                // Add the correct number of infrastructure to the colony
+                for (k = 0; k < infrastructureAmounts[i]; k++)
+                    ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
+                ReCalcProcessor.ReCalcAbilities(_colonyEntity);
+
+
+                for (j = 0; j < basePop.Length; j++)
                 {
+
                     // set up population and infrastructure for each test
                     newPop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
 
                     foreach (KeyValuePair<Entity, long> kvp in newPop.ToArray())
                     {
-                        newPop[kvp.Key] = basePop[i];
+                        newPop[kvp.Key] = basePop[j];
                     }
 
                     //var infrastuctures = _colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances[infrastructureEntity].Where(inf => inf.DesignEntity.HasDataBlob<LifeSupportAbilityDB>());
@@ -145,16 +149,24 @@ namespace Pulsar4X.Tests
 
 
             // Multiple iteration growth test
-            for (i = 0; i < basePop.Length; i++)
+            for (i = 0; i < infrastructureAmounts.Length; i++)
             {
-                for (j = 0; j < infrastructureAmounts.Length; j++)
+                // Create a new colony with this planet and species, add infrastructure item to it
+                _colonyEntity = ColonyFactory.CreateColony(_faction, species, planet);
+
+                // Add the correct number of infrastructure to the colony
+                for (k = 0; k < infrastructureAmounts[i]; k++)
+                    ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
+                ReCalcProcessor.ReCalcAbilities(_colonyEntity);
+
+                for (j = 0; j < basePop.Length; j++)
                 {
                     // set up population and infrastructure for each test
                     newPop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
 
                     foreach (KeyValuePair<Entity, long> kvp in newPop.ToArray())
                     {
-                        newPop[kvp.Key] = basePop[i];
+                        newPop[kvp.Key] = basePop[j];
                     }
 
                     _colonyEntity.GetDataBlob<InstallationsDB>().Installations[infGUID] = infrastructureAmounts[j];
