@@ -164,6 +164,7 @@
     <Compile Include="DataBlobs\AbilityDBs\PowerGeneratorAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\StandardShieldAbilityDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
+    <Compile Include="DataBlobs\ColonyLifeSupportDB.cs" />
     <Compile Include="Factories\ShipComponents\ComponentDesign.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\EnginePowerDB.cs" />

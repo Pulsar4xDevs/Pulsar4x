@@ -14,6 +14,7 @@ namespace Pulsar4X.ECSLib
                 { typeof(PropulsionDB), new Action<PropulsionDB>(processor => { ShipMovementProcessor.CalcMaxSpeed(CurrentEntity); }) },
                 { typeof(ColonyRefiningDB), new Action<ColonyRefiningDB>(processor => { RefiningProcessor.ReCalcRefiningRate(CurrentEntity); }) },
                 { typeof(ColonyConstructionDB), new Action<ColonyConstructionDB>(processor => { ConstructionProcessor.ReCalcConstructionRate(CurrentEntity); }) },
+                { typeof(ColonyLifeSupportDB), new Action<ColonyLifeSupportDB>(processor => {PopulationProcessor.ReCalcMaxPopulation(CurrentEntity); }) },
                 { typeof(ShipInfoDB), new Action<ShipInfoDB>(processor => {ShipAndColonyInfoProcessor.ReCalculateShipTonnaageAndHTK(CurrentEntity); }) },
             };
 
@@ -29,7 +30,6 @@ namespace Pulsar4X.ECSLib
                         TypeProcessorMap[t].DynamicInvoke(datablob); // invoke appropriate delegate  
                 }                
             }
-
         }
     }
 }
