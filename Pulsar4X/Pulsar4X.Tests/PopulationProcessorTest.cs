@@ -76,7 +76,21 @@ namespace Pulsar4X.Tests
             _entityManager = null;
             _faction = null;
             _colonyEntity = null;
-        }
+
+
+            _earthPlanet = null;
+            _marsPlanet = null;
+            _lunaPlanet = null; ;
+            _galaxyFactory = null;
+            _starSystemFactory = null;
+            _starSystem = null; 
+            _gasDictionary.Clear();
+            _gasDictionary = null;
+            _planetsList.Clear();
+            _planetsList = null;
+            _speciesList.Clear();
+            _speciesList = null;
+    }
 
         [Test]
         public void testPopulationGrowth()
@@ -169,8 +183,6 @@ namespace Pulsar4X.Tests
                         newPop[kvp.Key] = basePop[j];
                     }
 
-                    _colonyEntity.GetDataBlob<InstallationsDB>().Installations[infGUID] = infrastructureAmounts[j];
-
                     for(k = 0; k < 10; k++)
                     {
                         newPop = calcGrowthIteration(_colonyEntity, newPop);
@@ -216,11 +228,11 @@ namespace Pulsar4X.Tests
         {
             // Get current population
             Dictionary<Entity, long> returnPop = new Dictionary<Entity, long>();
-            
+            Entity colonyPlanet = colony.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+
             List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructure = colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAbilityDB>()).ToList();
             long popSupportValue;
 
-            // @todo: Get colony cost and infrastructure, figure out population cap
             //  Pop Cap = Total Population Support Value / Colony Cost
             // Get total popSupport
             popSupportValue = 0;
@@ -229,7 +241,6 @@ namespace Pulsar4X.Tests
 
             foreach (var installation in infrastructure)
             {
-                //if(installations[kvp.Key]
                 popSupportValue += installation.Key.GetDataBlob<PopulationSupportAbilityDB>().PopulationCapacity;
             }
 
@@ -238,18 +249,13 @@ namespace Pulsar4X.Tests
             foreach (KeyValuePair<Entity, long> kvp in lastPop)
             {
                 // count the number of different population groups that need infrastructure support
-                if (SpeciesProcessor.ColonyCost(colony, kvp.Key.GetDataBlob<SpeciesDB>()) > 1.0)
+                if (SpeciesProcessor.ColonyCost(colonyPlanet, kvp.Key.GetDataBlob<SpeciesDB>()) > 1.0)
                     needsSupport++;
             }
 
-            // find colony cost, divide the population support value by it
-            // @todo: Get colony cost, or do I need to calculate it?
-
-
-
             foreach (KeyValuePair<Entity, long> kvp in lastPop.ToArray())
             {
-                double colonyCost = SpeciesProcessor.ColonyCost(colony, kvp.Key.GetDataBlob<SpeciesDB>());
+                double colonyCost = SpeciesProcessor.ColonyCost(colonyPlanet, kvp.Key.GetDataBlob<SpeciesDB>());
                 long maxPopulation;
                 long newPop;
 
@@ -273,12 +279,14 @@ namespace Pulsar4X.Tests
         private Entity setEarthPlanet()
         {
             Entity resultPlanet;
+
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
 
             atmoGasses.Add(_gasDictionary["N"], 0.79f);
             atmoGasses.Add(_gasDictionary["O"], 0.20f);
             atmoGasses.Add(_gasDictionary["Ar"], 0.01f);
             AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses);
+
             resultPlanet = setAtmosphere(atmosphereDB);
 
             resultPlanet.GetDataBlob<SystemBodyDB>().BaseTemperature = 14.0f;
