@@ -221,8 +221,8 @@
     <Compile Include="Factories\SystemGen\StarSystemFactory.cs" />
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
+    <Compile Include="OrderQueue.cs" />
     <Compile Include="Player.cs" />
-    <Compile Include="PlayerOrders\PlayerOrder.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\MineProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />
@@ -295,6 +295,7 @@
     <Compile Include="StaticData\TechSD.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="DataBlobs\OrderDBs\" />
     <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
   </ItemGroup>
   <ItemGroup>
