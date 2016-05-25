@@ -79,6 +79,13 @@ namespace Pulsar4X.ECSLib
             float totalPressure = 0.0f;
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
 
+            if(atmosphere == null)
+            {
+                // No atmosphere on the planet, return 1.0?
+                // @todo - some other rule for no atmosphere planets?
+                return 1.0;
+            }
+
             Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
 
             foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
@@ -120,6 +127,13 @@ namespace Pulsar4X.ECSLib
             float O2Pressure = 0.0f;
             float totalPressure = 0.0f;
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
+
+            if (atmosphere == null)
+            {
+                // No atmosphere on the planet, return 2.0?
+                // @todo - some other rule for no atmosphere planets?
+                return 2.0;
+            }
 
             Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
 

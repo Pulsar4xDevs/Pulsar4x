@@ -14,7 +14,6 @@ namespace Pulsar4X.ECSLib
             List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructure = colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAbilityDB>()).ToList();
             long popSupportValue;
 
-            // @todo: Get colony cost and infrastructure, figure out population cap
             //  Pop Cap = Total Population Support Value / Colony Cost
             // Get total popSupport
             popSupportValue = 0;
@@ -30,18 +29,14 @@ namespace Pulsar4X.ECSLib
             foreach (KeyValuePair<Entity, long> kvp in currentPopulation)
             {
                 // count the number of different population groups that need infrastructure support
-                if (SpeciesProcessor.ColonyCost(colony, kvp.Key.GetDataBlob<SpeciesDB>()) > 1.0)
+                if (SpeciesProcessor.ColonyCost(colony.GetDataBlob<ColonyInfoDB>().PlanetEntity, kvp.Key.GetDataBlob<SpeciesDB>()) > 1.0)
                     needsSupport++;
             }
 
             // find colony cost, divide the population support value by it
-            // @todo: Get colony cost, or do I need to calculate it?
-
-
-
             foreach (KeyValuePair<Entity, long> kvp in currentPopulation.ToArray())
             {
-                double colonyCost = SpeciesProcessor.ColonyCost(colony, kvp.Key.GetDataBlob<SpeciesDB>());
+                double colonyCost = SpeciesProcessor.ColonyCost(colony.GetDataBlob<ColonyInfoDB>().PlanetEntity, kvp.Key.GetDataBlob<SpeciesDB>());
                 long maxPopulation;
                 double growthRate;
                 long newPop;
@@ -89,6 +84,26 @@ namespace Pulsar4X.ECSLib
                     currentPopulation[kvp.Key] = newPop;
                 }
             }
+        }
+
+        public static void ReCalcMaxPopulation(Entity colonyEntity)
+        {
+
+            var infrastructure = new List<Entity>();
+
+            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructureEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAbilityDB>()).ToList();
+            long totalMaxPop = 0;
+
+            foreach (var infrastructureDesignList in infrastructureEntities)
+            {
+                foreach (var infrastructureInstance in infrastructureDesignList.Value)
+                {
+                    totalMaxPop += infrastructureDesignList.Key.GetDataBlob<PopulationSupportAbilityDB>().PopulationCapacity;
+                }
+            }
+
+            colonyEntity.GetDataBlob<ColonyLifeSupportDB>().MaxPopulation = totalMaxPop;
+
         }
     }
 }
