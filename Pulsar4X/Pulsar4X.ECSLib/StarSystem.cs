@@ -29,6 +29,9 @@ namespace Pulsar4X.ECSLib
         public int Seed { get; private set; }
         internal Random RNG { get; private set; }
 
+        [JsonProperty]
+        internal SystemSubPulses SystemSubpulses { get; } = new SystemSubPulses();
+
         [JsonConstructor]
         internal StarSystem()
         {

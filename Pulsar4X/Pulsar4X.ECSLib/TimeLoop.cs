@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
         private float _timeMultiplier = 1f;
 
         private TimeSpan _tickInterval = TimeSpan.FromSeconds(1);
-        private TimeSpan _tickLenght = TimeSpan.FromSeconds(1);
+        private TimeSpan _tickLength = TimeSpan.FromSeconds(1);
 
         private bool _isProcessing = false;
         private bool _isOvertime = false;
@@ -96,21 +96,23 @@ namespace Pulsar4X.ECSLib
             //check validity of commands etc.
 
             StarSystem system = systemObj as StarSystem;
-            //the system may need to run several times for a wanted tickLength
-            //the system itself needs to keep track of how much time it can process
-            //should a system have a datetime? going to have to think about how to aproach this.
-            //maybe somthing like this?
+            DateTime currentDateTime = system.Game.CurrentDateTime;
+            
+
             TimeSpan systemElapsedTime = new TimeSpan();
-            while (systemElapsedTime < _tickLenght)
+            //the system may need to run several times for a wanted tickLength
+            //keep processing the system till we've reached the wanted ticklength
+            while (systemElapsedTime < _tickLength)
             {
                 
                 //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = _tickLenght - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
+                TimeSpan timeDelta = _tickLength - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
                 //ShipMovementProcessor.Process(_game, system, timeDelta);
                 //orbits 
-                //jump ships out
-                //econ & industry (as an interupt?)
-                //sensors (as an interupt?)
+
+                //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
+                system.SystemSubpulses.ProcessNextDateTime(currentDateTime + systemElapsedTime, timeDelta);
+
                 systemElapsedTime += timeDelta;
 
             }
@@ -119,5 +121,62 @@ namespace Pulsar4X.ECSLib
         }
 
 
+    }
+
+    /// <summary>
+    /// handles and processes entities for a specific datetime. 
+    /// TODO: 
+    /// need to handle removal of entities from the system.
+    /// need to handle removal of ability datablobs from an entity
+    /// need to handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
+    /// </summary>
+    internal class SystemSubPulses
+    {
+        //TODO there may be a more efficent datatype for this. 
+        private SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
+
+        /// <summary>
+        /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
+        /// </summary>
+        /// <param name="nextDateTime"></param>
+        /// <param name="action"></param>
+        /// <param name="entity"></param>
+        internal void AddInterupt(DateTime nextDateTime, Delegate action, Entity entity)
+        {
+            if (!EntityDictionary.ContainsKey(nextDateTime))                 
+                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate,List<Entity>>());
+            if(!EntityDictionary[nextDateTime].ContainsKey(action))
+                EntityDictionary[nextDateTime].Add(action, new List<Entity>());
+            EntityDictionary[nextDateTime][action].Add(entity);
+        }
+
+        /// <summary>
+        /// process to next subpulse
+        /// </summary>
+        /// <param name="currentDateTime"></param>
+        /// <param name="maxSpan">maximum time delta</param>
+        /// <returns>datetime processed to</returns>
+        internal DateTime ProcessNextDateTime(DateTime currentDateTime, TimeSpan maxSpan)
+        {
+            DateTime processedToDateTime;
+            DateTime firstDateTime = EntityDictionary.Keys.Min();
+            if (firstDateTime <= currentDateTime + maxSpan)
+            {
+                foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[firstDateTime])
+                {
+                    foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                    {
+                        delegateListPair.Key.DynamicInvoke(entity);
+                    }
+                }
+
+                processedToDateTime = firstDateTime;
+                EntityDictionary.Remove(firstDateTime);
+            }
+            else
+                processedToDateTime = currentDateTime + maxSpan;
+
+            return processedToDateTime;
+        }
     }
 }
