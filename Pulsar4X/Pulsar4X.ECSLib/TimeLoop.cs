@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,10 +16,20 @@ namespace Pulsar4X.ECSLib
         private Stopwatch _stopwatch = new Stopwatch();
         private Timer _timer = new Timer();
 
-        private TimeSpan tickLenght = TimeSpan.FromSeconds(1);
-        private TimeSpan gameSecondsPerSecond = TimeSpan.FromSeconds(1);
+        //changes how often the tick happens
+        public float TimeMultiplier
+        {
+            get {return _timeMultiplier;}
+            set
+            {
+                _timeMultiplier = value;
+                _timer.Interval = _tickInterval.Milliseconds * value;
+            }
+        } 
+        private float _timeMultiplier = 1f;
 
-        private TimeSpan tickInterval = TimeSpan.FromSeconds(1);
+        private TimeSpan _tickInterval = TimeSpan.FromSeconds(1);
+        private TimeSpan _tickLenght = TimeSpan.FromSeconds(1);
 
         private bool _isProcessing = false;
         private bool _isOvertime = false;
@@ -28,12 +39,22 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public TimeSpan LastProcessingTime { get; private set; } = TimeSpan.Zero;
 
-        public void StartLooping(Game game)
+        public TimeLoop(Game game)
         {
             _game = game;
-            _timer.Interval = tickInterval.Milliseconds;
+            _timer.Interval = _tickInterval.Milliseconds;
             _timer.Enabled = true;
             _timer.Elapsed += Timer_Elapsed;
+            
+        }
+
+        public void PauseTime()
+        {
+            _timer.Stop();
+        }
+
+        public void StartTime()
+        {
             _timer.Start();
         }
 
@@ -80,11 +101,11 @@ namespace Pulsar4X.ECSLib
             //should a system have a datetime? going to have to think about how to aproach this.
             //maybe somthing like this?
             TimeSpan systemElapsedTime = new TimeSpan();
-            while (systemElapsedTime < tickLenght)
+            while (systemElapsedTime < _tickLenght)
             {
                 
                 //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = tickLenght - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
+                TimeSpan timeDelta = _tickLenght - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
                 //ShipMovementProcessor.Process(_game, system, timeDelta);
                 //orbits 
                 //jump ships out
