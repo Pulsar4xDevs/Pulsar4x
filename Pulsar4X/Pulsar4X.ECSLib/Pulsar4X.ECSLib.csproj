@@ -165,6 +165,7 @@
     <Compile Include="DataBlobs\AbilityDBs\StandardShieldAbilityDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\ColonyLifeSupportDB.cs" />
+    <Compile Include="DataBlobs\OrderDBs\MoveOrderDB.cs" />
     <Compile Include="Factories\ShipComponents\ComponentDesign.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
     <Compile Include="DataBlobs\AbilityDBs\EnginePowerDB.cs" />
@@ -295,7 +296,6 @@
     <Compile Include="StaticData\TechSD.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DataBlobs\OrderDBs\" />
     <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
   </ItemGroup>
   <ItemGroup>
