@@ -141,6 +141,7 @@ namespace Pulsar4X.ECSLib
                 return Entity.InvalidEntity;
 
             // Check order's IsValid function
+            // @todo: do I need to check for every type of order?
 
             throw new NotImplementedException();
         }
