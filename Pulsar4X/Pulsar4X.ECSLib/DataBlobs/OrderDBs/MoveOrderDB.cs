@@ -14,7 +14,8 @@ namespace Pulsar4X.ECSLib.DataBlobs.OrderDBs
 
         public MoveOrderDB()
         {
-
+            Ship = Entity.InvalidEntity;
+            Target = Entity.InvalidEntity;
         }
 
         public MoveOrderDB(Entity ship, Entity target)
