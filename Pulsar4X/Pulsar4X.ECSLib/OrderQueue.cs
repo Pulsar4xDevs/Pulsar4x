@@ -9,6 +9,7 @@ namespace Pulsar4X.ECSLib
         #region Properties
 
         List<Entity> _orderList;
+        EntityManager _entityManager;
 
         #endregion 
 
@@ -19,11 +20,25 @@ namespace Pulsar4X.ECSLib
         public OrderQueue()
         {
             _orderList = new List<Entity>();
+            _entityManager = new EntityManager(new Game());
+        }
+
+        public OrderQueue(Game game)
+        {
+            _orderList = new List<Entity>();
+            _entityManager = new EntityManager(game);
+        }
+
+        public OrderQueue(EntityManager em)
+        {
+            _orderList = new List<Entity>();
+            _entityManager = em;
         }
 
         public OrderQueue(OrderQueue oq)
         {
             _orderList = oq._orderList.Select(item => (Entity)item.Clone()).ToList();
+            _entityManager = oq._entityManager;
         }
 
         #endregion
@@ -47,7 +62,7 @@ namespace Pulsar4X.ECSLib
         {
             throw new NotImplementedException();
         }
-        
+
         // Creates a new order at a colony to toggle a facility's function
         public bool ToggleFacility(Entity colony, string type)
         {
@@ -64,6 +79,18 @@ namespace Pulsar4X.ECSLib
         public bool MoveOrder(Entity ship, Entity target)
         {
             throw new NotImplementedException();
+
+            MoveOrderDB moveDB = new MoveOrderDB(ship, target);
+
+            Entity order = new Entity(_entityManager, new List<BaseDataBlob> { moveDB });
+            _orderList.Add(order);
+            
+        }
+
+        // Creates a new order for a ship to jump to another system through the given jump point
+        public bool JumpSystemOrder(Entity ship, Entity jumpPoint)
+        {
+            throw new NotImplementedException();
         }
 
         // Creates a new order for a ship to attack the target Entity
@@ -74,6 +101,12 @@ namespace Pulsar4X.ECSLib
 
         // Creates a new order for a ship to survey the given systemBody
         public bool SurveyOrder(Entity ship, Entity systemBody)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Creates a new order for a ship to survey the given jump survey point
+        public bool SurveyJumpOrder(Entity ship, Entity systemBody)
         {
             throw new NotImplementedException();
         }
@@ -100,10 +133,17 @@ namespace Pulsar4X.ECSLib
         // Processes the next order in the order list.  Checks for validity, then returns the order for loading into the colony or ship
         public Entity ProcessOrder()
         {
+            Entity order = _orderList.First<Entity>();
+            _orderList.Remove(order);
+
+            // Check order for validity
+            if (order == null)
+                return Entity.InvalidEntity;
+
+            // Check order's IsValid function
+
             throw new NotImplementedException();
         }
-
-
 
         #endregion
     }
