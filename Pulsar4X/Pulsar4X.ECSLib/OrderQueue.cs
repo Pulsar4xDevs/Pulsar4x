@@ -130,7 +130,8 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        // Processes the next order in the order list.  Checks for validity, then returns the order for loading into the colony or ship
+        // Processes the next order in the order list.  Checks for validity, then returns the order for loading into the colony or ship.  If invalid, it 
+        // returns the InvalidEntity
         public Entity ProcessOrder()
         {
             Entity order = _orderList.First<Entity>();
@@ -140,10 +141,17 @@ namespace Pulsar4X.ECSLib
             if (order == null)
                 return Entity.InvalidEntity;
 
-            // Check order's IsValid function
-            // @todo: do I need to check for every type of order?
+            BaseOrderDB orderDB = order.GetDataBlob<BaseOrderDB>();
 
-            throw new NotImplementedException();
+            // Check order's IsValid function
+            if (!orderDB.isValid())
+                return Entity.InvalidEntity;
+
+            // @todo: more tests?
+
+            return order;
+
+//            throw new NotImplementedException();
         }
 
         #endregion

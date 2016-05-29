@@ -165,6 +165,7 @@
     <Compile Include="DataBlobs\AbilityDBs\StandardShieldAbilityDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\ColonyLifeSupportDB.cs" />
+    <Compile Include="DataBlobs\OrderDBs\BaseOrderDB.cs" />
     <Compile Include="DataBlobs\OrderDBs\MoveOrderDB.cs" />
     <Compile Include="Factories\ShipComponents\ComponentDesign.cs" />
     <Compile Include="DataBlobs\AbilityDBs\ConstructionAbilityDB.cs" />
