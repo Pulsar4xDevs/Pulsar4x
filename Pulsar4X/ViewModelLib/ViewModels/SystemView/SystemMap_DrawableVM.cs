@@ -36,6 +36,10 @@ namespace Pulsar4X.ViewModel.SystemView
                 if(item.GetDataBlob<OrbitDB>().Parent != null)
                     OrbitalEntities.Add(item);
             }
+            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>(gameVM.CurrentAuthToken))
+            {
+                SystemBodies.Add(new SystemObjectGraphicsInfo(item, gameVM));
+            }
 
             PenData hudPen = new PenData();
             hudPen.Alpha = 100;

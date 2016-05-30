@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -46,7 +47,32 @@ namespace Pulsar4X.ECSLib
             
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
 
+            Entity shipClass = DefaultShipDesign(game, factionEntity);
+            Vector4 position = earth.GetDataBlob<PositionDB>().Position;
+            Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
+
+
             return factionEntity;
+        }
+
+
+        static Entity DefaultShipDesign(Game game, Entity faction)
+        {
+            var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
+            ShipFactory.AddShipComponent(shipDesign, DefaultEngineDesign(game, faction));
+            ShipFactory.AddShipComponent(shipDesign, DefaultEngineDesign(game, faction));
+            return shipDesign;
+        }
+
+        static Entity DefaultEngineDesign(Game game, Entity faction)
+        {
+            ComponentDesign engineDesign;
+
+            ComponentTemplateSD engineSD = game.StaticData.Components[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
+            engineDesign = GenericComponentFactory.StaticToDesign(engineSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size
+            //engineDesignDB.ComponentDesignAbilities[1]
+            return GenericComponentFactory.DesignToEntity(game, faction, engineDesign);
         }
     }
 

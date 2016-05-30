@@ -188,7 +188,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
                     path.AddArc(arcData.X1, arcData.X2, arcData.Width * _scale, arcData.Height * _scale, arcData.StartAngle, arcData.SweepAngle);
 
                 }
-
+                else if (_objectData is OrbitEllipseSimpleFading)
+                {
+                    foreach (var shape in pathPenDataPair.VectorShapes)
+                    {
+                        path.AddLine(shape.X1 * _scale, shape.Y1 * _scale, shape.X2 * _scale, shape.Y2 * _scale);
+                    }                
+                }
                 else
                 {
                     foreach (var shape in pathPenDataPair.VectorShapes)
@@ -196,7 +202,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         if (shape is EllipseData)
                             path.AddEllipse(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is LineData)
-                            path.AddLine(shape.X1 * _scale, shape.Y1 * _scale, shape.X2 * _scale, shape.Y2 * _scale);
+                            path.AddLine(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is RectangleData)
                             path.AddRectangle(shape.X1, shape.Y1, shape.X2, shape.Y2);
                         else if (shape is ArcData)
