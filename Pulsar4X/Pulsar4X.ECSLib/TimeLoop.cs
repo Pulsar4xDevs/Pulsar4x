@@ -93,7 +93,9 @@ namespace Pulsar4X.ECSLib
 
         void SystemProcessing(object systemObj)
         {
-            //check validity of commands etc.
+            //check validity of commands etc. here.
+
+            //do any system to system interaction here, ie ship jumping between systems.
 
             StarSystem system = systemObj as StarSystem;
             DateTime currentDateTime = system.Game.CurrentDateTime;
@@ -107,8 +109,9 @@ namespace Pulsar4X.ECSLib
                 
                 //calculate max time the system can run/time to next interupt
                 TimeSpan timeDelta = _tickLength - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
-                //ShipMovementProcessor.Process(_game, system, timeDelta);
-                //orbits 
+                ShipMovementProcessor.Process(system, timeDelta.Seconds);
+                int orbits = 0;
+                OrbitProcessor.UpdateSystemOrbits(system, _game, ref orbits);
 
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
                 system.SystemSubpulses.ProcessNextDateTime(currentDateTime + systemElapsedTime, timeDelta);
@@ -116,19 +119,14 @@ namespace Pulsar4X.ECSLib
                 systemElapsedTime += timeDelta;
 
             }
-
-
         }
-
-
     }
 
     /// <summary>
     /// handles and processes entities for a specific datetime. 
-    /// TODO: 
-    /// need to handle removal of entities from the system.
-    /// need to handle removal of ability datablobs from an entity
-    /// need to handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
+    /// TODO:  handle removal of entities from the system.
+    /// TODO:  handle removal of ability datablobs from an entity
+    /// TODO:  handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
     /// </summary>
     internal class SystemSubPulses
     {

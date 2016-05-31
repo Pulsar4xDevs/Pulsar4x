@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
             return orbitsProcessed;
         }
 
-        private static void UpdateSystemOrbits(StarSystem system, Game game, ref int orbitsProcessed)
+        internal static void UpdateSystemOrbits(StarSystem system, Game game, ref int orbitsProcessed)
         {
             EntityManager currentManager = system.SystemManager;
 
