@@ -132,6 +132,13 @@ namespace Pulsar4X.ECSLib
     {
         //TODO there may be a more efficent datatype for this. 
         private SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
+        private StarSystem _starSystem;
+        internal SystemSubPulses(StarSystem parentStarSystem)
+        {
+            _starSystem = parentStarSystem;
+            Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
+            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
+        }
 
         /// <summary>
         /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
@@ -139,13 +146,21 @@ namespace Pulsar4X.ECSLib
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
         /// <param name="entity"></param>
-        internal void AddInterupt(DateTime nextDateTime, Delegate action, Entity entity)
+        internal void AddEntityInterupt(DateTime nextDateTime, Delegate action, Entity entity)
         {
             if (!EntityDictionary.ContainsKey(nextDateTime))                 
                 EntityDictionary.Add(nextDateTime, new Dictionary<Delegate,List<Entity>>());
             if(!EntityDictionary[nextDateTime].ContainsKey(action))
                 EntityDictionary[nextDateTime].Add(action, new List<Entity>());
             EntityDictionary[nextDateTime][action].Add(entity);
+        }
+
+        internal void AddSystemInterupt(DateTime nextDateTime, Delegate action)
+        {
+            if(!EntityDictionary.ContainsKey(nextDateTime))
+                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate, List<Entity>>());
+            if(!EntityDictionary[nextDateTime].ContainsKey(action))
+                EntityDictionary[nextDateTime].Add(action, null); //a null entity list indicates a systemwide interupt. 
         }
 
         /// <summary>
@@ -162,10 +177,15 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[firstDateTime])
                 {
-                    foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                    if (delegateListPair.Value == null) //if the list is null, it's a systemwide interupt
                     {
-                        delegateListPair.Key.DynamicInvoke(entity);
+                        delegateListPair.Key.DynamicInvoke(_starSystem);
                     }
+                    else
+                        foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                        {
+                            delegateListPair.Key.DynamicInvoke(entity);
+                        }
                 }
 
                 processedToDateTime = firstDateTime;

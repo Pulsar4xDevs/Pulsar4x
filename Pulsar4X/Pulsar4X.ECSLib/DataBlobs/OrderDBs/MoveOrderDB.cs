@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    class MoveOrderDB : BaseDataBlob
+    public class MoveOrderDB : BaseDataBlob
     {
         [JsonProperty]
         public Entity Ship { get; internal set; }
