@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -32,6 +33,13 @@ namespace Pulsar4X.ECSLib
 
         public double TCS { get {return Tonnage * 0.02;} }
 
+        /// <summary>
+        ///  Ship non-combat orders.  
+        /// </summary>
+        /// 
+        public Queue<Entity> Orders;
+
+
         public ShipInfoDB()
         {
         }
@@ -49,6 +57,7 @@ namespace Pulsar4X.ECSLib
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
             IsMilitary = shipInfoDB.IsMilitary;
+            Orders = new Queue<Entity>(shipInfoDB.Orders);
         }
 
         /// <summary>
@@ -62,10 +71,35 @@ namespace Pulsar4X.ECSLib
             return true;
         }
 
-
         public override object Clone()
         {
             return new ShipInfoDB(this);
+        }
+
+        /// <summary>
+        /// Orders functions
+        /// </summary>
+
+        public Entity CheckNextOrder()
+        {
+            if (Orders == null)
+                return Entity.InvalidEntity;
+            if (Orders.ToArray().Length == 0)
+                return Entity.InvalidEntity;
+            Entity nextOrder = Orders.Peek();
+            return nextOrder;
+        }
+
+        public void AddOrder(Entity order)
+        {
+            Orders.Enqueue(order);
+            return;
+        }
+
+        public void RemoveNextOrder()
+        {
+            Orders.Dequeue();
+            return;
         }
     }
 }
