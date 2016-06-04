@@ -1,17 +1,22 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Panel 
   xmlns="http://schema.picoe.ca/eto.forms" 
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
   >
-  <TableLayout>
+  <StackLayout Orientation ="Horizontal" >
+  <TableLayout >
     <TableRow>
 	    <Label Text="Tick Length" />
-      <NumericUpDown></NumericUpDown>
+      <NumericUpDown Value ="{Binding TickLength}"/>
+      <Label Text="Tick Multiplier" />
+      <NumericUpDown Value ="{Binding TickMultiplier}"/>
     </TableRow>
     <TableRow >
 	    <Label Text="Tick Frequency" />
-      <NumericUpDown></NumericUpDown>
+      <NumericUpDown Value ="{Binding TickFreq}" />
     </TableRow>
   <TableRow></TableRow>
   </TableLayout>
+    <Button Command="{Binding PausePlayCMD}"  Text="||>" />    
+  </StackLayout>
 </Panel>

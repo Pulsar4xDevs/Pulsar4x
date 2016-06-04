@@ -31,6 +31,8 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+        public TimeControlVM TimeControl { get; set; } 
+
         public Player CurrentPlayer { get; private set; }
 
         public AuthenticationToken CurrentAuthToken { get; private set; }
@@ -157,6 +159,7 @@ namespace Pulsar4X.ViewModel
             StatusText = "Game Created.";
 
             StarSystemViewModel = new SystemView.StarSystemVM(this, Game, CurrentFaction);
+            StarSystemViewModel.Initialise();
         }
 
         public void LoadGame(string pathToFile)
@@ -261,7 +264,7 @@ namespace Pulsar4X.ViewModel
             {
                 _game = value;
                 OnPropertyChanged();
-
+                TimeControl = new TimeControlVM(_game.GameLoop);
                 //forces anything listing for a change in the HasGame property to update. 
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HasGame"));
             }

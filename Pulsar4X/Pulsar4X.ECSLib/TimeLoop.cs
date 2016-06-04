@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ using Timer = System.Timers.Timer;
 
 namespace Pulsar4X.ECSLib
 {
-    class TimeLoop
+    public class TimeLoop
     {
         private Stopwatch _stopwatch = new Stopwatch();
         private Timer _timer = new Timer();
@@ -23,13 +24,17 @@ namespace Pulsar4X.ECSLib
             set
             {
                 _timeMultiplier = value;
-                _timer.Interval = _tickInterval.Milliseconds * value;
+                _timer.Interval = _tickInterval.TotalMilliseconds * value;
             }
         } 
         private float _timeMultiplier = 1f;
 
         private TimeSpan _tickInterval = TimeSpan.FromSeconds(1);
-        private TimeSpan _tickLength = TimeSpan.FromSeconds(1);
+        public TimeSpan TickFrequency { get { return _tickInterval; } set { _tickInterval = value;
+            _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
+        } } 
+
+        public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(1);
 
         private bool _isProcessing = false;
         private bool _isOvertime = false;
@@ -42,7 +47,7 @@ namespace Pulsar4X.ECSLib
         public TimeLoop(Game game)
         {
             _game = game;
-            _timer.Interval = _tickInterval.Milliseconds;
+            _timer.Interval = _tickInterval.TotalMilliseconds;
             _timer.Enabled = true;
             _timer.Elapsed += Timer_Elapsed;
             
@@ -104,11 +109,11 @@ namespace Pulsar4X.ECSLib
             TimeSpan systemElapsedTime = new TimeSpan();
             //the system may need to run several times for a wanted tickLength
             //keep processing the system till we've reached the wanted ticklength
-            while (systemElapsedTime < _tickLength)
+            while (systemElapsedTime < Ticklength)
             {
                 
                 //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = _tickLength - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
+                TimeSpan timeDelta = Ticklength - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
                 ShipMovementProcessor.Process(system, timeDelta.Seconds);
                 int orbits = 0;
                 OrbitProcessor.UpdateSystemOrbits(system, _game, ref orbits);
@@ -122,23 +127,36 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    public delegate void SystemDateChangedEventHandler(DateTime newDate);
     /// <summary>
     /// handles and processes entities for a specific datetime. 
     /// TODO:  handle removal of entities from the system.
     /// TODO:  handle removal of ability datablobs from an entity
     /// TODO:  handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
     /// </summary>
-    internal class SystemSubPulses
+    public class SystemSubPulses
     {
         //TODO there may be a more efficent datatype for this. 
         private SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
         private StarSystem _starSystem;
+
+        private DateTime _systemLocalDateTime;
+        public DateTime SystemLocalDateTime
+        {
+            get { return _systemLocalDateTime; }
+            set { _systemLocalDateTime = value; SystemDateChangedEvent?.Invoke(value); }
+        }
+        public event SystemDateChangedEventHandler SystemDateChangedEvent;
+
         internal SystemSubPulses(StarSystem parentStarSystem)
         {
             _starSystem = parentStarSystem;
+            _systemLocalDateTime = parentStarSystem.Game.CurrentDateTime;
             Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
             AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
         }
+
+       
 
         /// <summary>
         /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
@@ -171,7 +189,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>datetime processed to</returns>
         internal DateTime ProcessNextDateTime(DateTime currentDateTime, TimeSpan maxSpan)
         {
-            DateTime processedToDateTime;
+
             DateTime firstDateTime = EntityDictionary.Keys.Min();
             if (firstDateTime <= currentDateTime + maxSpan)
             {
@@ -188,13 +206,13 @@ namespace Pulsar4X.ECSLib
                         }
                 }
 
-                processedToDateTime = firstDateTime;
+                SystemLocalDateTime = firstDateTime;
                 EntityDictionary.Remove(firstDateTime);
             }
             else
-                processedToDateTime = currentDateTime + maxSpan;
+                SystemLocalDateTime = currentDateTime + maxSpan;
 
-            return processedToDateTime;
+            return SystemLocalDateTime;
         }
     }
 }

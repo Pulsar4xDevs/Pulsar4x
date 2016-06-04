@@ -55,6 +55,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public SubpulseLimit NextSubpulse { get; private set; } = new SubpulseLimit();
 
+        [PublicAPI]
+        public TimeLoop GameLoop { get; set; }
+
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
 
@@ -90,6 +93,7 @@ namespace Pulsar4X.ECSLib
         internal Game()
         {
             GlobalManager = new EntityManager(this);
+            GameLoop = new TimeLoop(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()

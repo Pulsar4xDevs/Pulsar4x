@@ -7,6 +7,7 @@ using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel.SystemView;
 using Pulsar4X.ViewModel;
 
+
 namespace Pulsar4X.CrossPlatformUI.Views
 {
     public class SystemMap_DrawableView : Drawable
