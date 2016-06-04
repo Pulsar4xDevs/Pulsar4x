@@ -33,10 +33,7 @@ namespace Pulsar4X.ECSLib
 
         public double TCS { get {return Tonnage * 0.02;} }
 
-        /// <summary>
-        ///  Ship non-combat orders.  
-        /// </summary>
-        /// 
+        ///  Ship orders.  
         public Queue<Entity> Orders;
 
 

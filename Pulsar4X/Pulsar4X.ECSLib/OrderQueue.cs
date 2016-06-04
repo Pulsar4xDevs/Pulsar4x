@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    // Orders for ships
     public class OrderQueue
     {
         #region Properties
@@ -142,11 +143,13 @@ namespace Pulsar4X.ECSLib
         public Entity ProcessOrder()
         {
             Entity order = _orderList.First<Entity>();
-            _orderList.Remove(order);
-
             // Check order for validity
             if (order == null)
                 return Entity.InvalidEntity;
+
+            _orderList.Remove(order);
+
+
 
             BaseOrderDB orderDB = order.GetDataBlob<BaseOrderDB>();
 
@@ -154,11 +157,9 @@ namespace Pulsar4X.ECSLib
             if (!orderDB.isValid())
                 return Entity.InvalidEntity;
 
-            // @todo: more tests?
-
             return order;
 
-//            throw new NotImplementedException();
+            //  throw new NotImplementedException();
         }
 
         #endregion

@@ -19,20 +19,26 @@ namespace Pulsar4X.ECSLib
                 return;
             }
 
-            
+
 
             _lastRun = game.CurrentDateTime;
 
             if (game.Settings.EnableMultiThreading ?? false)
             {
                 // Process the orderqueue
-                Parallel.ForEach(game.Players, player => Process)
+                Parallel.ForEach(game.Players, player => player.ProcessOrders());
                 Parallel.ForEach(systems, system => ProcessSystem(system, game));
             }
             else
             {
+                foreach (var player in game.Players)
+                {
+                    player.ProcessOrders();
+                }
+
                 foreach (var system in systems) //TODO thread this
                 {
+
                     ProcessSystem(system, game);
                 }
             }
@@ -40,6 +46,11 @@ namespace Pulsar4X.ECSLib
 
         private void ProcessSystem(StarSystem system, Game game)
         {
-
+            foreach (Entity ship in system.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
+            {
+                if (ship.GetDataBlob<ShipInfoDB>().CheckNextOrder().GetDataBlob<BaseOrderDB>().processOrder())
+                    ship.GetDataBlob<ShipInfoDB>().RemoveNextOrder();
+            }
         }
+    }
 }

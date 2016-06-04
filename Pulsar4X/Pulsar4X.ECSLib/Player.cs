@@ -246,10 +246,16 @@ namespace Pulsar4X.ECSLib
         {
             int orders = Orders.Length();
 
-            for (int i = 0; i < orders; i++)
+            while (orders > 0)
             {
+                Entity nextOrder = Orders.ProcessOrder();
                 // Process all the orders
                 //@todo - finish
+                if(nextOrder != Entity.InvalidEntity)
+                {
+                    Entity owner = nextOrder.GetDataBlob<BaseOrderDB>().Owner;
+                    owner.GetDataBlob<ShipInfoDB>().AddOrder(nextOrder);
+                }
             }
         }
 
