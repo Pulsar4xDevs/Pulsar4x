@@ -4,7 +4,7 @@ namespace Pulsar4X.ECSLib
 {
 
     // Move order within a system
-    class MoveOrderDB : BaseOrderDB
+    public class MoveOrderDB : BaseOrderDB
     {
         // Owner is the ship in question
 
