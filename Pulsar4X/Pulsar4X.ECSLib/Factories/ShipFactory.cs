@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib
 {
     public static class ShipFactory
     {
-        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, string shipName = null)
+        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Vector4 pos, StarSystem starsys, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
             ProtoEntity protoShip = classEntity.Clone();
@@ -24,6 +24,8 @@ namespace Pulsar4X.ECSLib
             var OwnedDB = new OwnedDB(ownerFaction);           
             protoShip.SetDataBlob(OwnedDB);
 
+            PositionDB position = new PositionDB(pos, starsys.Guid);
+            protoShip.SetDataBlob(position);
 
             return new Entity(systemEntityManager, protoShip);
         }

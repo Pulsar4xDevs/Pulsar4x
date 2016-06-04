@@ -21,19 +21,22 @@ namespace Pulsar4X.ECSLib
 
             if (game.Settings.EnableMultiThreading ?? false)
             {
-                Parallel.ForEach(systems, system => ProcessSystem(system, game));
+                Parallel.ForEach(systems, system => ProcessSystem(system));
             }
             else
             {
                 foreach (var system in systems) //TODO thread this
                 {
-                    ProcessSystem(system, game);
+                    ProcessSystem(system);
                 }
             }
         }
 
-        private void ProcessSystem(StarSystem system, Game game)
+        internal static void ProcessSystem(StarSystem system)
         {
+            Game game = system.Game;
+            Action<StarSystem> economyMethod = ProcessSystem;
+            system.SystemSubpulses.AddSystemInterupt(system.Game.CurrentDateTime + system.Game.Settings.EconomyCycleTime, economyMethod);
             TechProcessor.ProcessSystem(system, game);
 
             foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyMinesDB>())

@@ -89,6 +89,8 @@ namespace Pulsar4X.ViewModel.SystemView
                 PlanetIcon(entity);
             else if (entity.HasDataBlob<StarInfoDB>())
                 StarIcon(entity);
+            else if (entity.HasDataBlob<ShipInfoDB>())
+                FleetIcon(entity);
 
         }
 
@@ -99,12 +101,17 @@ namespace Pulsar4X.ViewModel.SystemView
         private void FleetIcon(Entity fleet)
         {
             PenData penData = new PenData();
-            penData.Green = 255;
+            penData.Red = 255;
             float width = 6;
             float height = 6;
             updatePosition();
+            float hw = width * 0.5f;
+            float hh = height * 0.5f;
 
             VectorPathPenPair pathPair = new VectorPathPenPair(penData, new EllipseData(PosX, PosY, width, height));
+            pathPair.VectorShapes.Add(new LineData(0, -hh, hw, height));
+            pathPair.VectorShapes.Add(new LineData(hw, height, -hw, height));
+            pathPair.VectorShapes.Add(new LineData(-hw, height, 0, -hh));
             PathList.Add(pathPair);
         }
 
