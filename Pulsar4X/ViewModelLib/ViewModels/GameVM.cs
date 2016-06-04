@@ -31,7 +31,7 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        public TimeControlVM TimeControl { get; set; } 
+        public TimeControlVM TimeControl { get; } = new TimeControlVM();
 
         public Player CurrentPlayer { get; private set; }
 
@@ -264,7 +264,7 @@ namespace Pulsar4X.ViewModel
             {
                 _game = value;
                 OnPropertyChanged();
-                TimeControl = new TimeControlVM(_game.GameLoop);
+                TimeControl.Initialise(_game.GameLoop);
                 //forces anything listing for a change in the HasGame property to update. 
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HasGame"));
             }

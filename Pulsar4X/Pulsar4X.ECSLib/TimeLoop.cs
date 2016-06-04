@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
         {
             _game = game;
             _timer.Interval = _tickInterval.TotalMilliseconds;
-            _timer.Enabled = true;
+            _timer.Enabled = false;
             _timer.Elapsed += Timer_Elapsed;
             
         }
