@@ -83,6 +83,9 @@ namespace Pulsar4X.ECSLib
         public string Name { get; protected set; }
 
         [JsonProperty]
+        public OrderQueue Orders;
+
+        [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; }
         internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
@@ -91,6 +94,7 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         private string Salt { get; set; }
+
         
         #endregion
 
@@ -109,6 +113,7 @@ namespace Pulsar4X.ECSLib
             PasswordHash = info.GetString(nameof(PasswordHash));
             Salt = info.GetString(nameof(Salt));
             FactionAccessRoles = (Dictionary<Entity, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<Entity, uint>));
+            Orders = new OrderQueue();
         }
 
         internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
@@ -124,6 +129,7 @@ namespace Pulsar4X.ECSLib
             FactionAccessRoles = factionAccessRoles;
             Salt = GenerateSalt();
             PasswordHash = GeneratePasswordHash(password, Salt);
+            Orders = new OrderQueue();
         }
 
         #endregion
@@ -234,6 +240,23 @@ namespace Pulsar4X.ECSLib
             info.AddValue(nameof(PasswordHash), PasswordHash);
             info.AddValue(nameof(Salt), Salt);
             info.AddValue(nameof(FactionAccessRoles), FactionAccessRoles);
+        }
+
+        public void ProcessOrders()
+        {
+            int orders = Orders.Length();
+
+            while (orders > 0)
+            {
+                Entity nextOrder = Orders.ProcessOrder();
+                // Process all the orders
+                //@todo - finish
+                if(nextOrder != Entity.InvalidEntity)
+                {
+                    Entity owner = nextOrder.GetDataBlob<BaseOrderDB>().Owner;
+                    owner.GetDataBlob<ShipInfoDB>().AddOrder(nextOrder);
+                }
+            }
         }
 
         #endregion
