@@ -41,7 +41,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private PositionDB _parentPositionDB;
 
-        private PositionDB _bodyPositionDB; 
+        private PositionDB _bodyPositionDB;
+
+        public static int drawCount=0;
+
+        private Entity myEntity;
 
         public OrbitRing(Entity entityWithOrbit, Camera2D camera)
         {
@@ -55,6 +59,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _height = 200 * (float)Math.Sqrt(_orbitDB.SemiMajorAxis * Math.Sqrt(1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity) 
                 * _orbitDB.SemiMajorAxis * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;   //minor Axis
             _focalPoint = (float)Math.Sqrt(_width * _width * 0.5f - _height * _height * 0.5f);
+
+            myEntity = entityWithOrbit;
         }
 
         private void UpdatePens()
@@ -71,7 +77,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public void DrawMe(Graphics g)
         {
             g.SaveTransform();
-  
             var rmatrix = Matrix.Create();
             
             //the distance between the top left of the bounding rectangle, and one of the elipse's focal points
@@ -87,6 +92,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //offset to the focal point
             g.TranslateTransform(focalOffset);
             //rotate
+            RectangleF MyRect = new RectangleF(0,0,_width,_height);
+            g.DrawRectangle(Colors.White, MyRect);
+
             PointF rotatePoint = new PointF(_width / 2 +_focalPoint, _height / 2);
             rmatrix.RotateAt(_rotation , rotatePoint);
             g.MultiplyTransform(rmatrix);
@@ -101,6 +109,25 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 i++;
             }
             g.RestoreTransform();
+
+            Font lastFont = new Font(FontFamilies.MonospaceFamilyName, 10.0f);
+            if (drawCount == 0)
+            {
+                g.SaveTransform();
+                String Entry = String.Format("Focal Offset:{0} {1}", focalOffset.X, focalOffset.Y);
+                g.DrawText(lastFont, Colors.White, 10, 10, Entry);
+
+                Entry = String.Format("Rotate Point:{0} {1}", rotatePoint.X, rotatePoint.Y);
+                g.DrawText(lastFont, Colors.White, 10, 30, Entry);
+
+                Entry = String.Format("W/H/FP:{0} {1} {2}", _width, _height, _focalPoint);
+                g.DrawText(lastFont, Colors.White, 10, 50, Entry);
+
+                g.RestoreTransform();
+            }
+            drawCount++;
+            if (drawCount == 5)
+                drawCount = 0;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
