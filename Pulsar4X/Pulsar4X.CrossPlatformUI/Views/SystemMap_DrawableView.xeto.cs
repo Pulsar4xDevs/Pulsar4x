@@ -132,7 +132,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             if (e.PropertyName == nameof(SystemMap_DrawableVM.SystemBodies))
                 SystemBodies_CollectionChanged();
-            Invalidate();
+            Application.Instance.Invoke(() => { Invalidate(); });
+            
         }
 
         protected override void OnPaint(PaintEventArgs e)

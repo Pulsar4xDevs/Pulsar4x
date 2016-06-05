@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using static System.Net.Mime.MediaTypeNames;
 using Timer = System.Timers.Timer;
 
 namespace Pulsar4X.ECSLib
@@ -82,7 +84,7 @@ namespace Pulsar4X.ECSLib
             _timer.Start(); //reset timer
             _stopwatch.Start(); //start the processor loop stopwatch
             _isOvertime = false;
-
+            _game.CurrentDateTime += Ticklength;
             //do processors
             Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
             //I think the above 'blocks' till all the tasks are done.
@@ -106,22 +108,23 @@ namespace Pulsar4X.ECSLib
             DateTime currentDateTime = system.Game.CurrentDateTime;
             
 
-            TimeSpan systemElapsedTime = new TimeSpan();
+            //TimeSpan systemElapsedTime = new TimeSpan();
+            DateTime systemTime = system.SystemSubpulses.SystemLocalDateTime;
             //the system may need to run several times for a wanted tickLength
             //keep processing the system till we've reached the wanted ticklength
-            while (systemElapsedTime < Ticklength)
+            while (systemTime < currentDateTime)
             {
-                
+
                 //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = Ticklength - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
+                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (currentDateTime - systemTime).TotalSeconds)); //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
                 ShipMovementProcessor.Process(system, timeDelta.Seconds);
                 int orbits = 0;
                 OrbitProcessor.UpdateSystemOrbits(system, _game, ref orbits);
 
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                system.SystemSubpulses.ProcessNextDateTime(currentDateTime + systemElapsedTime, timeDelta);
+                systemTime = system.SystemSubpulses.ProcessNextDateTime(timeDelta);
 
-                systemElapsedTime += timeDelta;
+                
 
             }
         }
@@ -144,7 +147,9 @@ namespace Pulsar4X.ECSLib
         public DateTime SystemLocalDateTime
         {
             get { return _systemLocalDateTime; }
-            set { _systemLocalDateTime = value; SystemDateChangedEvent?.Invoke(value); }
+            set { _systemLocalDateTime = value;
+                
+                SystemDateChangedEvent?.Invoke(value); }
         }
         public event SystemDateChangedEventHandler SystemDateChangedEvent;
 
@@ -156,7 +161,6 @@ namespace Pulsar4X.ECSLib
             AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
         }
 
-       
 
         /// <summary>
         /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
@@ -187,30 +191,35 @@ namespace Pulsar4X.ECSLib
         /// <param name="currentDateTime"></param>
         /// <param name="maxSpan">maximum time delta</param>
         /// <returns>datetime processed to</returns>
-        internal DateTime ProcessNextDateTime(DateTime currentDateTime, TimeSpan maxSpan)
+        internal DateTime ProcessNextDateTime(TimeSpan maxSpan)
         {
-
-            DateTime firstDateTime = EntityDictionary.Keys.Min();
-            if (firstDateTime <= currentDateTime + maxSpan)
+            DateTime firstDateTime;
+            if (EntityDictionary.Keys.Count != 0)
             {
-                foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[firstDateTime])
+                firstDateTime = EntityDictionary.Keys.Min();
+                if (firstDateTime <= SystemLocalDateTime + maxSpan)
                 {
-                    if (delegateListPair.Value == null) //if the list is null, it's a systemwide interupt
+                    foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[firstDateTime])
                     {
-                        delegateListPair.Key.DynamicInvoke(_starSystem);
-                    }
-                    else
-                        foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                        if (delegateListPair.Value == null) //if the list is null, it's a systemwide interupt
                         {
-                            delegateListPair.Key.DynamicInvoke(entity);
+                            delegateListPair.Key.DynamicInvoke(_starSystem);
                         }
-                }
+                        else
+                            foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                            {
+                                delegateListPair.Key.DynamicInvoke(entity);
+                            }
+                    }
 
-                SystemLocalDateTime = firstDateTime;
-                EntityDictionary.Remove(firstDateTime);
+                    SystemLocalDateTime = firstDateTime;
+                    EntityDictionary.Remove(firstDateTime);
+                }
+                else
+                    SystemLocalDateTime  += maxSpan;
             }
             else
-                SystemLocalDateTime = currentDateTime + maxSpan;
+                SystemLocalDateTime  += maxSpan;
 
             return SystemLocalDateTime;
         }
