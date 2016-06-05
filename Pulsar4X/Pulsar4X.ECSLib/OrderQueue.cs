@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    // Orders for ships
     public class OrderQueue
     {
         #region Properties
@@ -44,6 +45,14 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Public API Functions
+
+        /// <summary>
+        /// Returns the length of the order queue
+        /// </summary>
+        public int Length()
+        {
+            return (_orderList.ToArray().Length);
+        }
 
         // Creates a new order at a colony to construct something
         public bool ConstructionOrder(Entity colony, string type, long amount)
@@ -129,17 +138,18 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
-
         // Processes the next order in the order list.  Checks for validity, then returns the order for loading into the colony or ship.  If invalid, it 
         // returns the InvalidEntity
         public Entity ProcessOrder()
         {
             Entity order = _orderList.First<Entity>();
-            _orderList.Remove(order);
-
             // Check order for validity
             if (order == null)
                 return Entity.InvalidEntity;
+
+            _orderList.Remove(order);
+
+
 
             BaseOrderDB orderDB = order.GetDataBlob<BaseOrderDB>();
 
@@ -147,11 +157,9 @@ namespace Pulsar4X.ECSLib
             if (!orderDB.isValid())
                 return Entity.InvalidEntity;
 
-            // @todo: more tests?
-
             return order;
 
-//            throw new NotImplementedException();
+            //  throw new NotImplementedException();
         }
 
         #endregion
