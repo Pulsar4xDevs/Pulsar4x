@@ -30,11 +30,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public DateTime CurrentDateTime
         {
-            get { return _currentDateTime; }
-            internal set { _currentDateTime = value; }
+            get { return GameLoop.GameGlobalDateTime; }
         }
-        [JsonProperty]
-        private DateTime _currentDateTime;
+
 
         /// <summary>
         /// List of StarSystems currently in the game.
@@ -106,7 +104,7 @@ namespace Pulsar4X.ECSLib
             GalaxyGen = new GalaxyFactory(true);
 
             Settings = newGameSettings;
-            CurrentDateTime = newGameSettings.StartDateTime;
+            GameLoop.GameGlobalDateTime = newGameSettings.StartDateTime;
 
             // Load Static Data
             if (newGameSettings.DataSets != null)
@@ -181,6 +179,7 @@ namespace Pulsar4X.ECSLib
         #region Public API
 
         /// <summary>
+        /// OBSOLETE
         /// Time advancement code. Attempts to advance time by the number of seconds
         /// passed to it.
         /// Interrupts may prevent the entire requested timeframe from being advanced.
@@ -195,7 +194,10 @@ namespace Pulsar4X.ECSLib
             return AdvanceTime(deltaSeconds, CancellationToken.None, progress);
         }
 
+        
+
         /// <summary>
+        /// OBSOLETE
         /// Time advancement code. Attempts to advance time by the number of seconds
         /// passed to it.
         /// 
@@ -207,6 +209,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="OperationCanceledException">Thrown when a cancellation request is honored.</exception>
         /// <returns>Total Time Advanced (in seconds)</returns>
         [PublicAPI]
+        
         public int AdvanceTime(int deltaSeconds, CancellationToken cancellationToken, IProgress<double> progress = null)
         {
             int timeAdvanced = 0;
@@ -229,7 +232,7 @@ namespace Pulsar4X.ECSLib
                 NextSubpulse.MaxSeconds = int.MaxValue;
 
                 // Update our date.
-                CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
+                GameLoop.GameGlobalDateTime += TimeSpan.FromSeconds(subpulseTime);
 
                 // Execute all processors. Magic happens here.
                 RunProcessors(Systems.Values.ToList(), deltaSeconds);
@@ -246,6 +249,7 @@ namespace Pulsar4X.ECSLib
             }
             return timeAdvanced;
         }
+        
 
         /// <summary>
         /// Runs all processors on the list of systems provided.

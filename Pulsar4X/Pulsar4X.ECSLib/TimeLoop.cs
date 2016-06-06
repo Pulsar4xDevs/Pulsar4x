@@ -14,6 +14,7 @@ using Timer = System.Timers.Timer;
 
 namespace Pulsar4X.ECSLib
 {
+    public delegate void DateChangedEventHandler(DateTime newDate);
     public class TimeLoop
     {
         private Stopwatch _stopwatch = new Stopwatch();
@@ -45,6 +46,19 @@ namespace Pulsar4X.ECSLib
         /// length of time it took to process the last DoProcess
         /// </summary>
         public TimeSpan LastProcessingTime { get; private set; } = TimeSpan.Zero;
+
+
+        private DateTime _gameGlobalDateTime;
+        public DateTime GameGlobalDateTime
+        {
+            get { return _gameGlobalDateTime; }
+            set
+            {
+                _gameGlobalDateTime = value;
+                GameGlobalDateChangedEvent?.Invoke(value);
+            }
+        }
+        public event DateChangedEventHandler GameGlobalDateChangedEvent;
 
         public TimeLoop(Game game)
         {
@@ -84,16 +98,16 @@ namespace Pulsar4X.ECSLib
             _timer.Start(); //reset timer
             _stopwatch.Start(); //start the processor loop stopwatch
             _isOvertime = false;
-            _game.CurrentDateTime += Ticklength;
+            GameGlobalDateTime += Ticklength; //TODO: move this to the end of processing. however to do this we will need to fix the orbit processor to take a date or timespan. 
             //do processors
-            Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
+            //Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
             //I think the above 'blocks' till all the tasks are done.
 
             LastProcessingTime = _stopwatch.Elapsed;
             _stopwatch.Reset();
             if (_isOvertime)
             {
-                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event.
+                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
             }
             _isProcessing = false;
         }
@@ -105,18 +119,18 @@ namespace Pulsar4X.ECSLib
             //do any system to system interaction here, ie ship jumping between systems.
 
             StarSystem system = systemObj as StarSystem;
-            DateTime currentDateTime = system.Game.CurrentDateTime;
+            //DateTime currentDateTime = system.Game.CurrentDateTime;
             
 
             //TimeSpan systemElapsedTime = new TimeSpan();
             DateTime systemTime = system.SystemSubpulses.SystemLocalDateTime;
             //the system may need to run several times for a wanted tickLength
             //keep processing the system till we've reached the wanted ticklength
-            while (systemTime < currentDateTime)
+            while (systemTime < GameGlobalDateTime)
             {
 
                 //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (currentDateTime - systemTime).TotalSeconds)); //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
+                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (GameGlobalDateTime - systemTime).TotalSeconds)); 
                 ShipMovementProcessor.Process(system, timeDelta.Seconds);
                 int orbits = 0;
                 OrbitProcessor.UpdateSystemOrbits(system, _game, ref orbits);
@@ -124,13 +138,11 @@ namespace Pulsar4X.ECSLib
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
                 systemTime = system.SystemSubpulses.ProcessNextDateTime(timeDelta);
 
-                
-
             }
         }
     }
 
-    public delegate void SystemDateChangedEventHandler(DateTime newDate);
+    
     /// <summary>
     /// handles and processes entities for a specific datetime. 
     /// TODO:  handle removal of entities from the system.
@@ -151,7 +163,7 @@ namespace Pulsar4X.ECSLib
                 
                 SystemDateChangedEvent?.Invoke(value); }
         }
-        public event SystemDateChangedEventHandler SystemDateChangedEvent;
+        public event DateChangedEventHandler SystemDateChangedEvent;
 
         internal SystemSubPulses(StarSystem parentStarSystem)
         {

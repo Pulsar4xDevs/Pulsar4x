@@ -10,7 +10,7 @@ namespace Pulsar4X.ViewModel
 {
     public class TimeControlVM : ViewModelBase
     {
-
+        private GameVM _gameVM;
         private TimeLoop _timeloop;
         public bool IsPaused { get; set; } = true;
 
@@ -25,23 +25,33 @@ namespace Pulsar4X.ViewModel
             get { return _timeloop?.TimeMultiplier ?? 1; }
             set { _timeloop.TimeMultiplier = value; OnPropertyChanged(); }
         }
-        public int TickFreq
+        public double TickFreq
         {
-            get { return _timeloop?.TickFrequency.Seconds ?? 5; }
-            set { _timeloop.TickFrequency = TimeSpan.FromSeconds(value); OnPropertyChanged(); }
+            get { return _timeloop?.TickFrequency.TotalMilliseconds ?? 5; }
+            set { _timeloop.TickFrequency = TimeSpan.FromMilliseconds(value); OnPropertyChanged(); }
         }
+
+        private SystemSubPulses SystemSubPulse { get { return _gameVM?.StarSystemViewModel?.StarSystems.SelectedKey.SystemSubpulses; } }
+        public string CurrentGameDate { get { return _timeloop?.GameGlobalDateTime.ToString(); } }
+
+        public string LastTickLen { get { return _timeloop?.LastProcessingTime.TotalMilliseconds.ToString(); } }
 
         public TimeControlVM()
         {         
         }
 
-        public void Initialise(TimeLoop gameTimeLoop)
+        public void Initialise(GameVM gameVM)
         {
-            _timeloop = gameTimeLoop;
+            _gameVM = gameVM;
+            _timeloop = gameVM.Game.GameLoop;
+       
             OnPropertyChanged(nameof(TickLength));
             OnPropertyChanged(nameof(TickMultiplier));
             OnPropertyChanged(nameof(TickFreq));
+            OnPropertyChanged(nameof(CurrentGameDate));
+            _timeloop.GameGlobalDateChangedEvent += OnTimeDateChange;
         }
+
 
         public ICommand PausePlayCMD { get { return new RelayCommand<object>(obj => PausePlay()); } }
 
@@ -53,5 +63,10 @@ namespace Pulsar4X.ViewModel
                 _timeloop.PauseTime();
         }
 
+        private void OnTimeDateChange(DateTime newDate)
+        {
+            OnPropertyChanged(nameof(CurrentGameDate));
+            OnPropertyChanged(nameof(LastTickLen));
+        }
     }
 }

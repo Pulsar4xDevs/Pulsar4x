@@ -3,20 +3,25 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
   >
-  <StackLayout Orientation ="Horizontal" >
+
   <TableLayout >
     <TableRow>
 	    <Label Text="Tick Length" />
       <NumericUpDown Value ="{Binding TickLength}"/>
       <Label Text="Tick Multiplier" />
       <NumericUpDown Value ="{Binding TickMultiplier}"/>
+      <Button Command="{Binding PausePlayCMD}"  Text="||>" />
+      <TableCell></TableCell>
     </TableRow>
     <TableRow >
 	    <Label Text="Tick Frequency" />
       <NumericUpDown Value ="{Binding TickFreq}" />
+      <Label Text="{Binding CurrentGameDate}" />
+      <Label Text="{Binding LastTickLen}" />
     </TableRow>
-  <TableRow></TableRow>
+    <TableRow>      
+    </TableRow>
   </TableLayout>
-    <Button Command="{Binding PausePlayCMD}"  Text="||>" />    
-  </StackLayout>
+
+
 </Panel>

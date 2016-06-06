@@ -264,7 +264,7 @@ namespace Pulsar4X.ViewModel
             {
                 _game = value;
                 OnPropertyChanged();
-                TimeControl.Initialise(_game.GameLoop);
+                TimeControl.Initialise(this);
                 //forces anything listing for a change in the HasGame property to update. 
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HasGame"));
             }
