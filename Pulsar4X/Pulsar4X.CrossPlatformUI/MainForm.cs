@@ -34,7 +34,7 @@ namespace Pulsar4X.CrossPlatformUI
 
         private void ChangeToUIThread(DateTime newDate)
         {
-            Application.Instance.Invoke(() => { _gameVM.TimeControl.OnTimeDateChange(newDate); });
+            Application.Instance.AsyncInvoke(() => { _gameVM.TimeControl.OnTimeDateChange(newDate); });
             
         }
 
