@@ -92,14 +92,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //offset to the focal point
             g.TranslateTransform(focalOffset);
             //rotate
-            RectangleF MyRect = new RectangleF(0,0,_width,_height);
-            g.DrawRectangle(Colors.White, MyRect);
+
 
             PointF rotatePoint = new PointF(_width / 2 +_focalPoint, _height / 2);
             rmatrix.RotateAt(_rotation , rotatePoint);
+
+
+
             g.MultiplyTransform(rmatrix);
 
-
+            RectangleF MyRect = new RectangleF(TopLeftX, TopLeftY, _width, _height);
+            g.DrawRectangle(Colors.White, MyRect);
 
             //draw the elipse (as a number of arcs each with a different pen, this gives the fading alpha channel effect) 
             int i = 0;
