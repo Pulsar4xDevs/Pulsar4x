@@ -264,7 +264,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
             }
-            Font lastFont = null;
             foreach (var item in _textData)
             {
                 g.SaveTransform();
@@ -276,36 +275,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawText(font, color, item.X1, item.X2, item.Text);
 
                 g.RestoreTransform();
-
-                lastFont = font;
             }
-            if (lastFont != null)
-            {
-                g.SaveTransform();
-                String Entry = String.Format("World P of camera (center screen):{0} {1}", _camera.WorldPosition.X, _camera.WorldPosition.Y);
-
-                g.DrawText(lastFont, Colors.White, 10, 10, Entry);
-
-                Entry = String.Format("Last Mouse view L:{0} {1}", (_parent as SystemMap_DrawableView).LastLoc.X, (_parent as SystemMap_DrawableView).LastLoc.Y);
-                g.DrawText(lastFont, Colors.White, 10, 30, Entry);
-
-                PointF lastWorldL = _camera.WorldCoordinate((_parent as SystemMap_DrawableView).LastLoc);
-                Entry = String.Format("Last Mouse world L:{0} {1}", lastWorldL.X, lastWorldL.Y);
-                g.DrawText(lastFont, Colors.White, 10, 50, Entry);
-
-                //PointF PSize = new PointF(_parent.Size.Width / 2, _parent.Size.Height / 2);
-                PointF worldZero = new PointF(0f,0f);
-                Entry = String.Format("World C at view 0,0:{0} {1}", _camera.WorldCoordinate(worldZero).X, _camera.WorldCoordinate(worldZero).Y);
-                g.DrawText(lastFont, Colors.White, 10, 70, Entry);
-
-                Entry = String.Format("View C at world 0,0:{0} {1}", _camera.ViewCoordinate(new PointF(0,0)).X, _camera.ViewCoordinate(new PointF(0, 0)).Y);
-                g.DrawText(lastFont, Colors.White, 10, 90, Entry);
-
-                Entry = String.Format("View width and height:{0} {1}", (_parent.Size.Width / 2), (_parent.Size.Height / 2));
-                g.DrawText(lastFont, Colors.White, 10, 110, Entry);
-                g.RestoreTransform();
-            }
-
         }
     }
 }
