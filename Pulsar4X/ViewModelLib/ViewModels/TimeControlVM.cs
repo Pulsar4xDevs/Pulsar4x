@@ -10,9 +10,13 @@ namespace Pulsar4X.ViewModel
 {
     public class TimeControlVM : ViewModelBase
     {
+
         private GameVM _gameVM;
         private TimeLoop _timeloop;
         public bool IsPaused { get; set; } = true;
+
+        public event ECSLib.DateChangedEventHandler InternalThreadDateChange;
+  
 
         public int TickLength
         {
@@ -49,7 +53,9 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(TickMultiplier));
             OnPropertyChanged(nameof(TickFreq));
             OnPropertyChanged(nameof(CurrentGameDate));
-            _timeloop.GameGlobalDateChangedEvent += OnTimeDateChange;
+            
+            _timeloop.GameGlobalDateChangedEvent += OnInteralThreadDateChange;
+
         }
 
 
@@ -63,10 +69,18 @@ namespace Pulsar4X.ViewModel
                 _timeloop.PauseTime();
         }
 
-        private void OnTimeDateChange(DateTime newDate)
+        private void OnInteralThreadDateChange(DateTime newdate)
         {
+            InternalThreadDateChange?.Invoke(newdate);
+        }
+
+        public void OnTimeDateChange(DateTime newDate)
+        {            
             OnPropertyChanged(nameof(CurrentGameDate));
             OnPropertyChanged(nameof(LastTickLen));
         }
+
+
+
     }
 }

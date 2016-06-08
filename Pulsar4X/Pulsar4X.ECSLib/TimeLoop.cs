@@ -55,10 +55,12 @@ namespace Pulsar4X.ECSLib
             set
             {
                 _gameGlobalDateTime = value;
-                GameGlobalDateChangedEvent?.Invoke(value);
+                _globalDateChangedEvent?.Invoke(value);
             }
         }
         public event DateChangedEventHandler GameGlobalDateChangedEvent;
+
+        private event DateChangedEventHandler _globalDateChangedEvent;
 
         public TimeLoop(Game game)
         {
@@ -66,6 +68,14 @@ namespace Pulsar4X.ECSLib
             _timer.Interval = _tickInterval.TotalMilliseconds;
             _timer.Enabled = false;
             _timer.Elapsed += Timer_Elapsed;
+            _globalDateChangedEvent += OnDateChangedEvent;
+            
+        }
+
+        private void OnDateChangedEvent(DateTime newDate)
+        {
+            DateChangedEventHandler threadsafechange = GameGlobalDateChangedEvent;
+            threadsafechange?.Invoke(newDate);
             
         }
 
@@ -100,8 +110,8 @@ namespace Pulsar4X.ECSLib
             _isOvertime = false;
             GameGlobalDateTime += Ticklength; //TODO: move this to the end of processing. however to do this we will need to fix the orbit processor to take a date or timespan. 
             //do processors
-            //Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
-            //I think the above 'blocks' till all the tasks are done.
+            Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
+            //The above 'blocks' till all the tasks are done.
 
             LastProcessingTime = _stopwatch.Elapsed;
             _stopwatch.Reset();

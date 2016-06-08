@@ -29,6 +29,13 @@ namespace Pulsar4X.CrossPlatformUI
             Content = new MainWindow(_gameVM);
             CreateMenuToolBar();
             Title = "Pulsar4X";
+            _gameVM.TimeControl.InternalThreadDateChange += ChangeToUIThread;
+        }
+
+        private void ChangeToUIThread(DateTime newDate)
+        {
+            Application.Instance.Invoke(() => { _gameVM.TimeControl.OnTimeDateChange(newDate); });
+            
         }
 
         void CreateMenuToolBar()
