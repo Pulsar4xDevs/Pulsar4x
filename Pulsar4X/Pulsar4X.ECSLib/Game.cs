@@ -56,6 +56,7 @@ namespace Pulsar4X.ECSLib
         internal SynchronizationContext SyncContext { get { return _syncContext; } }
 
         [PublicAPI]
+        [JsonProperty]
         public TimeLoop GameLoop { get; set; }
 
         [JsonProperty]
@@ -180,93 +181,6 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Public API
-
-        /// <summary>
-        /// OBSOLETE
-        /// Time advancement code. Attempts to advance time by the number of seconds
-        /// passed to it.
-        /// Interrupts may prevent the entire requested timeframe from being advanced.
-        /// </summary>
-        /// <param name="deltaSeconds">Time Advance Requested</param>
-        /// <param name="progress">IProgress implementation to report progress.</param>
-        /// <returns>Total Time Advanced</returns>
-        /// <exception cref="OperationCanceledException">Thrown when a cancellation request is honored.</exception>
-        [PublicAPI]
-        public int AdvanceTime(int deltaSeconds, IProgress<double> progress = null)
-        {
-            return AdvanceTime(deltaSeconds, CancellationToken.None, progress);
-        }
-
-        
-
-        /// <summary>
-        /// OBSOLETE
-        /// Time advancement code. Attempts to advance time by the number of seconds
-        /// passed to it.
-        /// 
-        /// Interrupts may prevent the entire requested timeframe from being advanced.
-        /// </summary>
-        /// <param name="deltaSeconds">Time Advance Requested</param>
-        /// <param name="cancellationToken">Cancellation token for this request.</param>
-        /// <param name="progress">IProgress implementation to report progress.</param>
-        /// <exception cref="OperationCanceledException">Thrown when a cancellation request is honored.</exception>
-        /// <returns>Total Time Advanced (in seconds)</returns>
-        [PublicAPI]
-        
-        public int AdvanceTime(int deltaSeconds, CancellationToken cancellationToken, IProgress<double> progress = null)
-        {
-            int timeAdvanced = 0;
-
-            // Clamp deltaSeconds to a multiple of our MinimumTimestep.
-            deltaSeconds = deltaSeconds - deltaSeconds % GameConstants.MinimumTimestep;
-            if (deltaSeconds == 0)
-            {
-                deltaSeconds = GameConstants.MinimumTimestep;
-            }
-
-            // Clear any interrupt flag before starting the pulse.
-            CurrentInterrupt = null;
-            while ((CurrentInterrupt == null) && (deltaSeconds > 0))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                int subpulseTime = Math.Min(NextSubpulse.MaxSeconds, deltaSeconds);
-                // Set next subpulse to max value. If it needs to be shortened, it will
-                // be shortened in the pulse execution.
-                NextSubpulse.MaxSeconds = int.MaxValue;
-
-                // Update our date.
-                GameLoop.GameGlobalDateTime += TimeSpan.FromSeconds(subpulseTime);
-
-                // Execute all processors. Magic happens here.
-                RunProcessors(Systems.Values.ToList(), deltaSeconds);
-
-                // Update our remaining values.
-                deltaSeconds -= subpulseTime;
-                timeAdvanced += subpulseTime;
-                progress?.Report((double)timeAdvanced / deltaSeconds);
-            }
-
-            if (CurrentInterrupt != null)
-            {
-                // Gamelog?
-            }
-            return timeAdvanced;
-        }
-        
-
-        /// <summary>
-        /// Runs all processors on the list of systems provided.
-        /// </summary>
-        /// <param name="systems">Systems to have processors run on them.</param>
-        /// <param name="deltaSeconds">Game-time to progress in the processors.</param>
-        [PublicAPI]
-        public void RunProcessors(List<StarSystem> systems, int deltaSeconds)
-        {
-            _orbitProcessor.Process(this, systems, deltaSeconds);
-            ShipMovementProcessor.Process(this, systems, deltaSeconds);
-            
-            _econProcessor.Process(this, systems, deltaSeconds);
-        }
 
         [PublicAPI]
         public Player AddPlayer(string playerName, string playerPassword = "")

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -15,6 +16,7 @@ using Timer = System.Timers.Timer;
 namespace Pulsar4X.ECSLib
 {
     public delegate void DateChangedEventHandler(DateTime newDate);
+    [JsonObject(MemberSerialization.OptIn)]
     public class TimeLoop
     {
         private Stopwatch _stopwatch = new Stopwatch();
@@ -55,14 +57,19 @@ namespace Pulsar4X.ECSLib
         {
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }
+        [JsonProperty]
         private DateTime _gameGlobalDateTime;
+
         public DateTime GameGlobalDateTime
         {
             get { return _gameGlobalDateTime; }
             internal set
             {
                 _gameGlobalDateTime = value;
-                _game.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread.
+                if (_game.SyncContext != null)
+                    _game.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread.
+                else
+                    InvokeDateChange(value);
             }
         }
         public event DateChangedEventHandler GameGlobalDateChangedEvent;
@@ -153,13 +160,14 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    
+
     /// <summary>
     /// handles and processes entities for a specific datetime. 
     /// TODO:  handle removal of entities from the system.
     /// TODO:  handle removal of ability datablobs from an entity
     /// TODO:  handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     public class SystemSubPulses
     {
         //TODO there may be a more efficent datatype for this. 
@@ -177,7 +185,8 @@ namespace Pulsar4X.ECSLib
         {            
             SystemDateChangedEvent?.Invoke(SystemLocalDateTime);
         }
-        
+
+        [JsonProperty]
         private DateTime _systemLocalDateTime;
         public DateTime SystemLocalDateTime
         {
@@ -185,7 +194,10 @@ namespace Pulsar4X.ECSLib
             private set
             {
                 _systemLocalDateTime = value;
-                _starSystem.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the UI thread          
+                if (_starSystem.Game.SyncContext != null)
+                    _starSystem.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the UI thread   
+                else
+                    InvokeDateChange(value);       
             }
         }
         
