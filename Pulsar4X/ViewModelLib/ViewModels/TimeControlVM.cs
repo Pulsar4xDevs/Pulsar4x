@@ -5,18 +5,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 using System.Windows.Input;
+using System.Threading;
+using System.ComponentModel;
 
 namespace Pulsar4X.ViewModel
 {
     public class TimeControlVM : ViewModelBase
     {
-
+        
         private GameVM _gameVM;
         private TimeLoop _timeloop;
         public bool IsPaused { get; set; } = true;
-
-        public event ECSLib.DateChangedEventHandler InternalThreadDateChange;
-  
 
         public int TickLength
         {
@@ -41,20 +40,22 @@ namespace Pulsar4X.ViewModel
         public string LastTickLen { get { return _timeloop?.LastProcessingTime.TotalMilliseconds.ToString(); } }
 
         public TimeControlVM()
-        {         
+        {
+
+            
         }
 
         public void Initialise(GameVM gameVM)
         {
             _gameVM = gameVM;
             _timeloop = gameVM.Game.GameLoop;
-       
+
             OnPropertyChanged(nameof(TickLength));
             OnPropertyChanged(nameof(TickMultiplier));
             OnPropertyChanged(nameof(TickFreq));
             OnPropertyChanged(nameof(CurrentGameDate));
-            
-            _timeloop.GameGlobalDateChangedEvent += OnInteralThreadDateChange;
+
+            _timeloop.GameGlobalDateChangedEvent += OnTimeDateChange;
 
         }
 
@@ -69,18 +70,10 @@ namespace Pulsar4X.ViewModel
                 _timeloop.PauseTime();
         }
 
-        private void OnInteralThreadDateChange(DateTime newdate)
-        {
-            InternalThreadDateChange?.Invoke(newdate);
-        }
-
-        public void OnTimeDateChange(DateTime newDate)
-        {            
+        private void OnTimeDateChange(DateTime newDate)
+        {                        
             OnPropertyChanged(nameof(CurrentGameDate));
             OnPropertyChanged(nameof(LastTickLen));
         }
-
-
-
     }
 }

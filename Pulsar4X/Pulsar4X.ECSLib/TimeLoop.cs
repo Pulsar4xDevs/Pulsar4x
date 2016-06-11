@@ -47,37 +47,38 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public TimeSpan LastProcessingTime { get; private set; } = TimeSpan.Zero;
 
-
+        /// <summary>
+        /// This invokes the DateChangedEvent.
+        /// </summary>
+        /// <param name="state"></param>
+        private void InvokeDateChange(object state)
+        {
+            GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
+        }
         private DateTime _gameGlobalDateTime;
         public DateTime GameGlobalDateTime
         {
             get { return _gameGlobalDateTime; }
-            set
+            internal set
             {
                 _gameGlobalDateTime = value;
-                _globalDateChangedEvent?.Invoke(value);
+                _game.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread.
             }
         }
         public event DateChangedEventHandler GameGlobalDateChangedEvent;
 
-        private event DateChangedEventHandler _globalDateChangedEvent;
+
 
         public TimeLoop(Game game)
         {
+            
             _game = game;
             _timer.Interval = _tickInterval.TotalMilliseconds;
             _timer.Enabled = false;
             _timer.Elapsed += Timer_Elapsed;
-            _globalDateChangedEvent += OnDateChangedEvent;
             
         }
 
-        private void OnDateChangedEvent(DateTime newDate)
-        {
-            DateChangedEventHandler threadsafechange = GameGlobalDateChangedEvent;
-            threadsafechange?.Invoke(newDate);
-            
-        }
 
         public void PauseTime()
         {
@@ -109,7 +110,7 @@ namespace Pulsar4X.ECSLib
             _stopwatch.Start(); //start the processor loop stopwatch
             _isOvertime = false;
             GameGlobalDateTime += Ticklength; //TODO: move this to the end of processing. however to do this we will need to fix the orbit processor to take a date or timespan. 
-            //do processors
+            //do system processors
             Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
             //The above 'blocks' till all the tasks are done.
 
@@ -164,16 +165,30 @@ namespace Pulsar4X.ECSLib
         //TODO there may be a more efficent datatype for this. 
         private SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
         private StarSystem _starSystem;
+        //_starSystem.Game.SyncContext;
 
+
+        public event DateChangedEventHandler SystemDateChangedEvent;
+        /// <summary>
+        /// Invoke the SystemDateChangedEvent
+        /// </summary>
+        /// <param name="state"></param>
+        private void InvokeDateChange(object state)
+        {            
+            SystemDateChangedEvent?.Invoke(SystemLocalDateTime);
+        }
+        
         private DateTime _systemLocalDateTime;
         public DateTime SystemLocalDateTime
         {
             get { return _systemLocalDateTime; }
-            set { _systemLocalDateTime = value;
-                
-                SystemDateChangedEvent?.Invoke(value); }
+            private set
+            {
+                _systemLocalDateTime = value;
+                _starSystem.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the UI thread          
+            }
         }
-        public event DateChangedEventHandler SystemDateChangedEvent;
+        
 
         internal SystemSubPulses(StarSystem parentStarSystem)
         {

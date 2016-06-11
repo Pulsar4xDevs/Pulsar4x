@@ -5,6 +5,7 @@ using Eto.Forms;
 using Pulsar4X.CrossPlatformUI.Commands;
 using Pulsar4X.CrossPlatformUI.Views;
 using Pulsar4X.ViewModel;
+using System.Threading;
 using NewGame = Pulsar4X.CrossPlatformUI.Commands.NewGame;
 
 namespace Pulsar4X.CrossPlatformUI
@@ -28,15 +29,9 @@ namespace Pulsar4X.CrossPlatformUI
             ClientSize = new Size(600, 400);
             Content = new MainWindow(_gameVM);
             CreateMenuToolBar();
-            Title = "Pulsar4X";
-            _gameVM.TimeControl.InternalThreadDateChange += ChangeToUIThread;
+            Title = "Pulsar4X";           
         }
 
-        private void ChangeToUIThread(DateTime newDate)
-        {
-            Application.Instance.AsyncInvoke(() => { _gameVM.TimeControl.OnTimeDateChange(newDate); });
-            
-        }
 
         void CreateMenuToolBar()
         {

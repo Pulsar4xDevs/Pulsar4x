@@ -52,6 +52,8 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         public SubpulseLimit NextSubpulse { get; private set; } = new SubpulseLimit();
+        private SynchronizationContext _syncContext;
+        internal SynchronizationContext SyncContext { get { return _syncContext; } }
 
         [PublicAPI]
         public TimeLoop GameLoop { get; set; }
@@ -90,6 +92,7 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
+            _syncContext = SynchronizationContext.Current;
             GlobalManager = new EntityManager(this);
             GameLoop = new TimeLoop(this);
         }

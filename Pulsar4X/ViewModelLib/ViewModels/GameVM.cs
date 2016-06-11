@@ -33,6 +33,9 @@ namespace Pulsar4X.ViewModel
 
         public TimeControlVM TimeControl { get; } = new TimeControlVM();
 
+        private SynchronizationContext _syncContext;
+        public SynchronizationContext SyncContext { get { return _syncContext; } }
+
         public Player CurrentPlayer { get; private set; }
 
         public AuthenticationToken CurrentAuthToken { get; private set; }
@@ -264,7 +267,9 @@ namespace Pulsar4X.ViewModel
             {
                 _game = value;
                 OnPropertyChanged();
+                _syncContext = SynchronizationContext.Current;
                 TimeControl.Initialise(this);
+                
                 //forces anything listing for a change in the HasGame property to update. 
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HasGame"));
             }
