@@ -37,7 +37,6 @@ namespace Pulsar4X.ECSLib
         } }
 
 
-
         public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(1);
 
         private bool _isProcessing = false;
@@ -58,7 +57,7 @@ namespace Pulsar4X.ECSLib
         }
         [JsonProperty]
         private DateTime _gameGlobalDateTime;
-
+        internal DateTime _targetDateTime;
         public DateTime GameGlobalDateTime
         {
             get { return _gameGlobalDateTime; }
@@ -66,9 +65,9 @@ namespace Pulsar4X.ECSLib
             {
                 _gameGlobalDateTime = value;
                 if (_game.SyncContext != null)
-                    _game.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread.
+                    _game.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
                 else
-                    InvokeDateChange(value);
+                    InvokeDateChange(value);//if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
             }
         }
         public event DateChangedEventHandler GameGlobalDateChangedEvent;
@@ -107,11 +106,12 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
+        /// this forces all systems to synch at this datetime.
         /// </summary>
         /// <param name="datetime"></param>
         /// <param name="action"></param>
         /// <param name="jumpPair"></param>
-        internal void AddSystemInteractionInterupt(DateTime datetime, Delegate action, SystemEntityJumpPair jumpPair)
+        internal void AddSystemInteractionInterupt(DateTime datetime, Action<Game, SystemEntityJumpPair> action, SystemEntityJumpPair jumpPair)
         {
             if (!EntityDictionary.ContainsKey(datetime))
                 EntityDictionary.Add(datetime, new Dictionary<Delegate, List<SystemEntityJumpPair>>());
@@ -119,17 +119,11 @@ namespace Pulsar4X.ECSLib
                 EntityDictionary[datetime].Add(action, new List<SystemEntityJumpPair>());
             EntityDictionary[datetime][action].Add(jumpPair);
         }
-        /// <summary>
-        /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
-        /// </summary>
-        /// <param name="datetime"></param>
-        /// <param name="action"></param>
-        /// <param name="jumpPair"></param>
-        internal void AddSystemInteractionInterupt(DateTime datetime, Action<Game, SystemEntityJumpPair> action, SystemEntityJumpPair jumpPair)
-        {
-            AddSystemInteractionInterupt(datetime, action, jumpPair);
-        }
 
+        internal void AddHaltingInterupt(DateTime datetime)
+        {
+            throw new NotImplementedException();
+        }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -180,14 +174,17 @@ namespace Pulsar4X.ECSLib
             _isOvertime = false;
 
             //check for global interupts
-            DateTime processTo = ProcessToNextDateTime(GameGlobalDateTime + Ticklength);
-            GameGlobalDateTime = processTo; //TODO: move this to the end of processing. however to do this we will need to fix the orbit processor to take a date or timespan. 
+            _targetDateTime = ProcessToNextDateTime(GameGlobalDateTime + Ticklength);
+            
             //do system processors
             Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
             //The above 'blocks' till all the tasks are done.
 
-            LastProcessingTime = _stopwatch.Elapsed;
+            
+            GameGlobalDateTime = _targetDateTime; //set the GlobalDateTime this will invoke the datechange event.
+            LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
             _stopwatch.Reset();
+
             if (_isOvertime)
             {
                 DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
@@ -199,25 +196,20 @@ namespace Pulsar4X.ECSLib
         {
             //check validity of commands etc. here.
 
-            //do any system to system interaction here, ie ship jumping between systems.
 
-            StarSystem system = systemObj as StarSystem;
-            //DateTime currentDateTime = system.Game.CurrentDateTime;
-            
+            StarSystem system = systemObj as StarSystem;            
 
             //TimeSpan systemElapsedTime = new TimeSpan();
             DateTime systemTime = system.SystemSubpulses.SystemLocalDateTime;
             //the system may need to run several times for a wanted tickLength
             //keep processing the system till we've reached the wanted ticklength
-            while (systemTime < GameGlobalDateTime)
+            while (systemTime < _targetDateTime)
             {
 
                 //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (GameGlobalDateTime - systemTime).TotalSeconds)); 
+                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (_targetDateTime - systemTime).TotalSeconds)); 
                 ShipMovementProcessor.Process(system, timeDelta.Seconds);
-                int orbits = 0;
-                OrbitProcessor.UpdateSystemOrbits(system, _game, ref orbits);
-
+      
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
                 systemTime = system.SystemSubpulses.ProcessToNextDateTime(timeDelta);
 
@@ -260,9 +252,9 @@ namespace Pulsar4X.ECSLib
             {
                 _systemLocalDateTime = value;
                 if (_starSystem.Game.SyncContext != null)
-                    _starSystem.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the UI thread   
+                    _starSystem.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the main (UI) thread, so the event is invoked on that thread.
                 else
-                    InvokeDateChange(value);       
+                    InvokeDateChange(value);    //if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
             }
         }
         
@@ -271,25 +263,15 @@ namespace Pulsar4X.ECSLib
         {
             _starSystem = parentStarSystem;
             _systemLocalDateTime = parentStarSystem.Game.CurrentDateTime;
+
+            //can add either by creating an Action
             Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
             AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
+            //or can add it by passing the method
+            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, OrbitProcessor.UpdateSystemOrbits);
         }
 
 
-        /// <summary>
-        /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
-        /// </summary>
-        /// <param name="nextDateTime"></param>
-        /// <param name="action"></param>
-        /// <param name="entity"></param>
-        internal void AddEntityInterupt(DateTime nextDateTime, Delegate action, Entity entity)
-        {
-            if (!EntityDictionary.ContainsKey(nextDateTime))                 
-                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate,List<Entity>>());
-            if(!EntityDictionary[nextDateTime].ContainsKey(action))
-                EntityDictionary[nextDateTime].Add(action, new List<Entity>());
-            EntityDictionary[nextDateTime][action].Add(entity);
-        }
         /// <summary>
         /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
         /// </summary>
@@ -298,29 +280,25 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         internal void AddEntityInterupt(DateTime nextDateTime, Action<Entity> action, Entity entity)
         {
-            AddEntityInterupt(nextDateTime, action, entity);
+            if (!EntityDictionary.ContainsKey(nextDateTime))
+                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate, List<Entity>>());
+            if (!EntityDictionary[nextDateTime].ContainsKey(action))
+                EntityDictionary[nextDateTime].Add(action, new List<Entity>());
+            EntityDictionary[nextDateTime][action].Add(entity);
         }
+
 
         /// <summary>
         /// this type of interupt will attempt to run the action processor on all entities within the system
         /// </summary>
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
-        internal void AddSystemInterupt(DateTime nextDateTime, Delegate action)
+        internal void AddSystemInterupt(DateTime nextDateTime, Action<StarSystem> action)
         {
-            if(!EntityDictionary.ContainsKey(nextDateTime))
+            if (!EntityDictionary.ContainsKey(nextDateTime))
                 EntityDictionary.Add(nextDateTime, new Dictionary<Delegate, List<Entity>>());
-            if(!EntityDictionary[nextDateTime].ContainsKey(action))
-                EntityDictionary[nextDateTime].Add(action, null); //a null entity list indicates a systemwide interupt. 
-        }
-        /// <summary>
-        /// this type of interupt will attempt to run the action processor on all entities within the system
-        /// </summary>
-        /// <param name="nextDateTime"></param>
-        /// <param name="action"></param>
-        internal void AddSystemInterupt(DateTime nextDateTime, Action action)
-        {
-            AddSystemInterupt(nextDateTime, action);
+            if (!EntityDictionary[nextDateTime].ContainsKey(action))
+                EntityDictionary[nextDateTime].Add(action, null);
         }
 
         /// <summary>
