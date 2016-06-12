@@ -1,16 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using static System.Net.Mime.MediaTypeNames;
 using Timer = System.Timers.Timer;
 
 namespace Pulsar4X.ECSLib
@@ -19,6 +13,9 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public class TimeLoop
     {
+        [JsonProperty]
+        private SortedDictionary<DateTime, Dictionary<Delegate, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<SystemEntityJumpPair>>>();
+
         private Stopwatch _stopwatch = new Stopwatch();
         private Timer _timer = new Timer();
 
@@ -37,7 +34,9 @@ namespace Pulsar4X.ECSLib
         private TimeSpan _tickInterval = TimeSpan.FromSeconds(1);
         public TimeSpan TickFrequency { get { return _tickInterval; } set { _tickInterval = value;
             _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
-        } } 
+        } }
+
+
 
         public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(1);
 
@@ -86,16 +85,51 @@ namespace Pulsar4X.ECSLib
             
         }
 
+        #region Public Time Methods. UI interacts with time here
 
+        /// <summary>
+        /// PausesTimeloop
+        /// </summary>
         public void PauseTime()
         {
             _timer.Stop();
         }
-
+        /// <summary>
+        /// Stars the timeloop
+        /// </summary>
         public void StartTime()
         {
             _timer.Start();
         }
+
+        #endregion
+
+
+        /// <summary>
+        /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
+        /// </summary>
+        /// <param name="datetime"></param>
+        /// <param name="action"></param>
+        /// <param name="jumpPair"></param>
+        internal void AddSystemInteractionInterupt(DateTime datetime, Delegate action, SystemEntityJumpPair jumpPair)
+        {
+            if (!EntityDictionary.ContainsKey(datetime))
+                EntityDictionary.Add(datetime, new Dictionary<Delegate, List<SystemEntityJumpPair>>());
+            if (!EntityDictionary[datetime].ContainsKey(action))
+                EntityDictionary[datetime].Add(action, new List<SystemEntityJumpPair>());
+            EntityDictionary[datetime][action].Add(jumpPair);
+        }
+        /// <summary>
+        /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
+        /// </summary>
+        /// <param name="datetime"></param>
+        /// <param name="action"></param>
+        /// <param name="jumpPair"></param>
+        internal void AddSystemInteractionInterupt(DateTime datetime, Action<Game, SystemEntityJumpPair> action, SystemEntityJumpPair jumpPair)
+        {
+            AddSystemInteractionInterupt(datetime, action, jumpPair);
+        }
+
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -109,14 +143,45 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        void DoProcessing()
+        private DateTime ProcessToNextDateTime(DateTime maxDateTime)
+        {
+            DateTime processedTo;
+            DateTime nextInteruptDateTime;
+            if (EntityDictionary.Keys.Count != 0)
+            {
+                nextInteruptDateTime = EntityDictionary.Keys.Min();
+                if (nextInteruptDateTime <= maxDateTime)
+                {
+                    foreach (var delegateListPair in EntityDictionary[nextInteruptDateTime])
+                    {
+                        foreach (var jumpPair in delegateListPair.Value) //foreach entity in the value list
+                        {
+                            delegateListPair.Key.DynamicInvoke(_game, jumpPair);
+                        }
+
+                    }
+                    processedTo = nextInteruptDateTime;
+                }
+                else
+                    processedTo = maxDateTime;
+            }
+            else
+                processedTo = maxDateTime;
+
+            return processedTo;
+        }
+
+        private void DoProcessing()
         {
             _isProcessing = true;
             _timer.Stop();
             _timer.Start(); //reset timer
             _stopwatch.Start(); //start the processor loop stopwatch
             _isOvertime = false;
-            GameGlobalDateTime += Ticklength; //TODO: move this to the end of processing. however to do this we will need to fix the orbit processor to take a date or timespan. 
+
+            //check for global interupts
+            DateTime processTo = ProcessToNextDateTime(GameGlobalDateTime + Ticklength);
+            GameGlobalDateTime = processTo; //TODO: move this to the end of processing. however to do this we will need to fix the orbit processor to take a date or timespan. 
             //do system processors
             Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
             //The above 'blocks' till all the tasks are done.
@@ -130,7 +195,7 @@ namespace Pulsar4X.ECSLib
             _isProcessing = false;
         }
 
-        void SystemProcessing(object systemObj)
+        private void SystemProcessing(object systemObj)
         {
             //check validity of commands etc. here.
 
@@ -154,7 +219,7 @@ namespace Pulsar4X.ECSLib
                 OrbitProcessor.UpdateSystemOrbits(system, _game, ref orbits);
 
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                systemTime = system.SystemSubpulses.ProcessNextDateTime(timeDelta);
+                systemTime = system.SystemSubpulses.ProcessToNextDateTime(timeDelta);
 
             }
         }
@@ -171,10 +236,10 @@ namespace Pulsar4X.ECSLib
     public class SystemSubPulses
     {
         //TODO there may be a more efficent datatype for this. 
+        [JsonProperty]
         private SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
-        private StarSystem _starSystem;
-        //_starSystem.Game.SyncContext;
 
+        private StarSystem _starSystem;
 
         public event DateChangedEventHandler SystemDateChangedEvent;
         /// <summary>
@@ -225,13 +290,37 @@ namespace Pulsar4X.ECSLib
                 EntityDictionary[nextDateTime].Add(action, new List<Entity>());
             EntityDictionary[nextDateTime][action].Add(entity);
         }
+        /// <summary>
+        /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
+        /// </summary>
+        /// <param name="nextDateTime"></param>
+        /// <param name="action"></param>
+        /// <param name="entity"></param>
+        internal void AddEntityInterupt(DateTime nextDateTime, Action<Entity> action, Entity entity)
+        {
+            AddEntityInterupt(nextDateTime, action, entity);
+        }
 
+        /// <summary>
+        /// this type of interupt will attempt to run the action processor on all entities within the system
+        /// </summary>
+        /// <param name="nextDateTime"></param>
+        /// <param name="action"></param>
         internal void AddSystemInterupt(DateTime nextDateTime, Delegate action)
         {
             if(!EntityDictionary.ContainsKey(nextDateTime))
                 EntityDictionary.Add(nextDateTime, new Dictionary<Delegate, List<Entity>>());
             if(!EntityDictionary[nextDateTime].ContainsKey(action))
                 EntityDictionary[nextDateTime].Add(action, null); //a null entity list indicates a systemwide interupt. 
+        }
+        /// <summary>
+        /// this type of interupt will attempt to run the action processor on all entities within the system
+        /// </summary>
+        /// <param name="nextDateTime"></param>
+        /// <param name="action"></param>
+        internal void AddSystemInterupt(DateTime nextDateTime, Action action)
+        {
+            AddSystemInterupt(nextDateTime, action);
         }
 
         /// <summary>
@@ -240,15 +329,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="currentDateTime"></param>
         /// <param name="maxSpan">maximum time delta</param>
         /// <returns>datetime processed to</returns>
-        internal DateTime ProcessNextDateTime(TimeSpan maxSpan)
+        internal DateTime ProcessToNextDateTime(TimeSpan maxSpan)
         {
-            DateTime firstDateTime;
+            DateTime nextInteruptDateTime;
             if (EntityDictionary.Keys.Count != 0)
             {
-                firstDateTime = EntityDictionary.Keys.Min();
-                if (firstDateTime <= SystemLocalDateTime + maxSpan)
+                nextInteruptDateTime = EntityDictionary.Keys.Min();
+                if (nextInteruptDateTime <= SystemLocalDateTime + maxSpan)
                 {
-                    foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[firstDateTime])
+                    foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
                     {
                         if (delegateListPair.Value == null) //if the list is null, it's a systemwide interupt
                         {
@@ -261,8 +350,8 @@ namespace Pulsar4X.ECSLib
                             }
                     }
 
-                    SystemLocalDateTime = firstDateTime;
-                    EntityDictionary.Remove(firstDateTime);
+                    SystemLocalDateTime = nextInteruptDateTime;
+                    EntityDictionary.Remove(nextInteruptDateTime);
                 }
                 else
                     SystemLocalDateTime  += maxSpan;

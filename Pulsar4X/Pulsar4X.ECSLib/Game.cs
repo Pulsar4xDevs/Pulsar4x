@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 
@@ -46,14 +45,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public StaticDataStore StaticData { get; internal set; } = new StaticDataStore();
 
-        [CanBeNull]
-        [PublicAPI]
-        public PulseInterrupt CurrentInterrupt { get; private set; }
 
-        [PublicAPI]
-        public SubpulseLimit NextSubpulse { get; private set; } = new SubpulseLimit();
-        private SynchronizationContext _syncContext;
-        internal SynchronizationContext SyncContext { get { return _syncContext; } }
+        /// <summary>
+        /// this is used to marshal events to the UI thread. 
+        /// </summary>
+        internal SynchronizationContext SyncContext { get; private set; }
 
         [PublicAPI]
         [JsonProperty]
@@ -93,7 +89,7 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
-            _syncContext = SynchronizationContext.Current;
+            SyncContext = SynchronizationContext.Current;
             GlobalManager = new EntityManager(this);
             GameLoop = new TimeLoop(this);
         }
