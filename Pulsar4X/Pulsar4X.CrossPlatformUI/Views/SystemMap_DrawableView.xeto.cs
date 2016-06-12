@@ -18,6 +18,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private bool IsMouseDown;
         public Point LastLoc;
         private PointF LastOffset;
+
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);

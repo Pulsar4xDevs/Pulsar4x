@@ -45,6 +45,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public static int drawCount=0;
 
+        public static int AddRot = 0;
+
         private Entity myEntity;
 
         public OrbitRing(Entity entityWithOrbit, Camera2D camera)
@@ -56,9 +58,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _bodyPositionDB = entityWithOrbit.GetDataBlob<PositionDB>();                        
             _rotation = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis);
             _width = 200 * (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
-            _height = 200 * (float)Math.Sqrt(_orbitDB.SemiMajorAxis * Math.Sqrt(1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity) 
-                * _orbitDB.SemiMajorAxis * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;   //minor Axis
-            _focalPoint = (float)Math.Sqrt(_width * _width * 0.5f - _height * _height * 0.5f);
+            //_height = 200 * (float)Math.Sqrt(_orbitDB.SemiMajorAxis * Math.Sqrt(1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity) 
+            //    * _orbitDB.SemiMajorAxis * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;   //minor Axis
+            _height = 200 * (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
+            //_focalPoint = (float)Math.Sqrt(_width * _width * 0.5f - _height * _height * 0.5f);
+            _focalPoint = (float)_orbitDB.Eccentricity * _width /2;
 
             myEntity = entityWithOrbit;
         }
@@ -78,7 +82,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             g.SaveTransform();
             var rmatrix = Matrix.Create();
-            
+
             //the distance between the top left of the bounding rectangle, and one of the elipse's focal points
             PointF focalOffset = new PointF(-_width / 2 - _focalPoint, -_height / 2);
 
@@ -93,16 +97,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
             g.TranslateTransform(focalOffset);
             //rotate
 
+            
 
-            PointF rotatePoint = new PointF(_width / 2 +_focalPoint, _height / 2);
-            rmatrix.RotateAt(_rotation , rotatePoint);
-
-
+            PointF rotatePoint = new PointF(_width / 2 + _focalPoint, _height / 2);
+            rmatrix.RotateAt(_rotation+AddRot, rotatePoint);
 
             g.MultiplyTransform(rmatrix);
 
             RectangleF MyRect = new RectangleF(TopLeftX, TopLeftY, _width, _height);
             g.DrawRectangle(Colors.White, MyRect);
+
+
 
             //draw the elipse (as a number of arcs each with a different pen, this gives the fading alpha channel effect) 
             int i = 0;
@@ -117,7 +122,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             if (drawCount == 0)
             {
                 g.SaveTransform();
-                String Entry = String.Format("Focal Offset:{0} {1}", focalOffset.X, focalOffset.Y);
+                String Entry = String.Format("Focal Offset:{0} {1} {2}", focalOffset.X, focalOffset.Y, AddRot);
                 g.DrawText(lastFont, Colors.White, 10, 10, Entry);
 
                 Entry = String.Format("Rotate Point:{0} {1}", rotatePoint.X, rotatePoint.Y);
@@ -127,6 +132,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawText(lastFont, Colors.White, 10, 50, Entry);
 
                 g.RestoreTransform();
+                AddRot++;
             }
             drawCount++;
             if (drawCount == 5)
