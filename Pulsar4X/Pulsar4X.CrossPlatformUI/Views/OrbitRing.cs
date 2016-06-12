@@ -45,8 +45,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public static int drawCount=0;
 
-        public static int AddRot = 0;
-
         private Entity myEntity;
 
         public OrbitRing(Entity entityWithOrbit, Camera2D camera)
@@ -56,12 +54,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _orbitDB = entityWithOrbit.GetDataBlob<OrbitDB>();
             _parentPositionDB = _orbitDB.Parent.GetDataBlob<PositionDB>();
             _bodyPositionDB = entityWithOrbit.GetDataBlob<PositionDB>();                        
-            _rotation = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis);
+            _rotation = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis*2); //This is the LoP, not sure if thats what we want.
             _width = 200 * (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
-            //_height = 200 * (float)Math.Sqrt(_orbitDB.SemiMajorAxis * Math.Sqrt(1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity) 
-            //    * _orbitDB.SemiMajorAxis * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;   //minor Axis
             _height = 200 * (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
-            //_focalPoint = (float)Math.Sqrt(_width * _width * 0.5f - _height * _height * 0.5f);
             _focalPoint = (float)_orbitDB.Eccentricity * _width /2;
 
             myEntity = entityWithOrbit;
@@ -100,7 +95,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             
 
             PointF rotatePoint = new PointF(_width / 2 + _focalPoint, _height / 2);
-            rmatrix.RotateAt(_rotation+AddRot, rotatePoint);
+            rmatrix.RotateAt(_rotation, rotatePoint);
 
             g.MultiplyTransform(rmatrix);
 
@@ -122,7 +117,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             if (drawCount == 0)
             {
                 g.SaveTransform();
-                String Entry = String.Format("Focal Offset:{0} {1} {2}", focalOffset.X, focalOffset.Y, AddRot);
+                String Entry = String.Format("Focal Offset:{0} {1} {2} {3}", focalOffset.X, focalOffset.Y, _orbitDB.LongitudeOfAscendingNode,_orbitDB.ArgumentOfPeriapsis);
                 g.DrawText(lastFont, Colors.White, 10, 10, Entry);
 
                 Entry = String.Format("Rotate Point:{0} {1}", rotatePoint.X, rotatePoint.Y);
@@ -132,7 +127,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawText(lastFont, Colors.White, 10, 50, Entry);
 
                 g.RestoreTransform();
-                AddRot++;
             }
             drawCount++;
             if (drawCount == 5)
