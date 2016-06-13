@@ -70,11 +70,17 @@ namespace Pulsar4X.ECSLib
                     InvokeDateChange(value);//if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
             }
         }
+        /// <summary>
+        /// Fired when the game date is incremented. 
+        /// All systems are in sync at this event.
+        /// </summary>
         public event DateChangedEventHandler GameGlobalDateChangedEvent;
 
-
-
-        public TimeLoop(Game game)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game"></param>
+        internal TimeLoop(Game game)
         {
             
             _game = game;
@@ -125,6 +131,7 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
+
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (!_isProcessing)
@@ -137,7 +144,41 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private DateTime ProcessToNextDateTime(DateTime maxDateTime)
+
+
+        private void DoProcessing()
+        {
+            _isProcessing = true;
+            _timer.Stop();
+            _timer.Start(); //reset timer
+            _stopwatch.Start(); //start the processor loop stopwatch
+            _isOvertime = false;
+
+            //check for global interupts
+            _targetDateTime = GameGlobalDateTime + Ticklength;
+
+         
+            while (GameGlobalDateTime < _targetDateTime)
+            {
+                DateTime nextInterupt = ProcessNextInterupt(_targetDateTime);
+                //do system processors
+                Parallel.ForEach<StarSystem>(_game.Systems.Values, item => ProcessSystem(item, nextInterupt));
+                //The above 'blocks' till all the tasks are done.
+
+                GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
+            }
+
+            LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
+            _stopwatch.Reset();
+
+            if (_isOvertime)
+            {
+                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
+            }
+            _isProcessing = false;
+        }
+
+        private DateTime ProcessNextInterupt(DateTime maxDateTime)
         {
             DateTime processedTo;
             DateTime nextInteruptDateTime;
@@ -165,34 +206,7 @@ namespace Pulsar4X.ECSLib
             return processedTo;
         }
 
-        private void DoProcessing()
-        {
-            _isProcessing = true;
-            _timer.Stop();
-            _timer.Start(); //reset timer
-            _stopwatch.Start(); //start the processor loop stopwatch
-            _isOvertime = false;
-
-            //check for global interupts
-            _targetDateTime = ProcessToNextDateTime(GameGlobalDateTime + Ticklength);
-            
-            //do system processors
-            Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
-            //The above 'blocks' till all the tasks are done.
-
-            
-            GameGlobalDateTime = _targetDateTime; //set the GlobalDateTime this will invoke the datechange event.
-            LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
-            _stopwatch.Reset();
-
-            if (_isOvertime)
-            {
-                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
-            }
-            _isProcessing = false;
-        }
-
-        private void SystemProcessing(object systemObj)
+        private void ProcessSystem(object systemObj, DateTime toDateTime)
         {
             //check validity of commands etc. here.
 
@@ -203,15 +217,15 @@ namespace Pulsar4X.ECSLib
             DateTime systemTime = system.SystemSubpulses.SystemLocalDateTime;
             //the system may need to run several times for a wanted tickLength
             //keep processing the system till we've reached the wanted ticklength
-            while (systemTime < _targetDateTime)
+            while (systemTime < toDateTime)
             {
 
                 //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (_targetDateTime - systemTime).TotalSeconds)); 
+                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (toDateTime - systemTime).TotalSeconds)); 
                 ShipMovementProcessor.Process(system, timeDelta.Seconds);
       
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                systemTime = system.SystemSubpulses.ProcessToNextDateTime(timeDelta);
+                systemTime = system.SystemSubpulses.ProcessNextInterupt(timeDelta);
 
             }
         }
@@ -229,10 +243,15 @@ namespace Pulsar4X.ECSLib
     {
         //TODO there may be a more efficent datatype for this. 
         [JsonProperty]
-        private SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
+        public SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
+
 
         private StarSystem _starSystem;
-
+        /// <summary>
+        /// Fires when the system date is updated, 
+        /// Any entitys that have move (though not neccicarly orbits) will have updated
+        /// other systems may not be in sync on this event. 
+        /// </summary>
         public event DateChangedEventHandler SystemDateChangedEvent;
         /// <summary>
         /// Invoke the SystemDateChangedEvent
@@ -253,18 +272,21 @@ namespace Pulsar4X.ECSLib
                 _systemLocalDateTime = value;
                 if (_starSystem.Game.SyncContext != null)
                     _starSystem.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the main (UI) thread, so the event is invoked on that thread.
-                else
-                    InvokeDateChange(value);    //if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
+                else //if context is null, we're probibly running tests or headless.
+                    InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)   
             }
         }
         
-
+        /// <summary>
+        /// Constructor 
+        /// </summary>
+        /// <param name="parentStarSystem"></param>
         internal SystemSubPulses(StarSystem parentStarSystem)
         {
             _starSystem = parentStarSystem;
             _systemLocalDateTime = parentStarSystem.Game.CurrentDateTime;
 
-            //can add either by creating an Action
+            //can add either by creating and passing an Action
             Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
             AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
             //or can add it by passing the method
@@ -307,7 +329,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="currentDateTime"></param>
         /// <param name="maxSpan">maximum time delta</param>
         /// <returns>datetime processed to</returns>
-        internal DateTime ProcessToNextDateTime(TimeSpan maxSpan)
+        internal DateTime ProcessNextInterupt(TimeSpan maxSpan)
         {
             DateTime nextInteruptDateTime;
             if (EntityDictionary.Keys.Count != 0)
