@@ -74,6 +74,13 @@ namespace Pulsar4X.Tests
             //create a new game
             Game newGame = TestingUtilities.CreateTestUniverse(10, _testTime, true);
 
+            Entity ship = newGame.GlobalManager.GetFirstEntityWithDataBlob<TransitableDB>();
+            StarSystem firstSystem = newGame.Systems.First().Value;
+            DateTime jumpTime = newGame.CurrentDateTime + TimeSpan.FromMinutes(1);
+
+            //insert a jump so that we can compair timeloop dictionary
+            IntraSystemJumpProcessor.SetJump(newGame, jumpTime,  firstSystem, jumpTime, ship);
+
             // lets create a good saveGame
             SerializationManager.Export(newGame, File);
             //then load it:
@@ -95,10 +102,9 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(firstOrigional.Guid, firstLoaded.Guid);
             Assert.AreEqual(firstOrigional.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
 
-            Assert.AreEqual(firstOrigional.SystemSubpulses.SystemLocalDateTime, firstLoaded.SystemSubpulses.SystemLocalDateTime);
+            Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
 
-            Assert.AreEqual(firstOrigional.SystemSubpulses.EntityDictionary, firstLoaded.SystemSubpulses.SystemLocalDateTime);
-
+            Assert.AreEqual(firstOrigional.SystemSubpulses, firstLoaded.SystemSubpulses);
 
         }
 
