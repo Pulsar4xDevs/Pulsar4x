@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
     public class TimeLoop
     {
         [JsonProperty]
-        private SortedDictionary<DateTime, Dictionary<Delegate, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<SystemEntityJumpPair>>>();
+        private SortedDictionary<DateTime, Dictionary<SystemActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<SystemActionEnum, List<SystemEntityJumpPair>>>();
 
         private Stopwatch _stopwatch = new Stopwatch();
         private Timer _timer = new Timer();
@@ -117,10 +117,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="datetime"></param>
         /// <param name="action"></param>
         /// <param name="jumpPair"></param>
-        internal void AddSystemInteractionInterupt(DateTime datetime, Action<Game, SystemEntityJumpPair> action, SystemEntityJumpPair jumpPair)
+        internal void AddSystemInteractionInterupt(DateTime datetime, SystemActionEnum action, SystemEntityJumpPair jumpPair)
         {
             if (!EntityDictionary.ContainsKey(datetime))
-                EntityDictionary.Add(datetime, new Dictionary<Delegate, List<SystemEntityJumpPair>>());
+                EntityDictionary.Add(datetime, new Dictionary<SystemActionEnum, List<SystemEntityJumpPair>>());
             if (!EntityDictionary[datetime].ContainsKey(action))
                 EntityDictionary[datetime].Add(action, new List<SystemEntityJumpPair>());
             EntityDictionary[datetime][action].Add(jumpPair);
@@ -191,7 +191,8 @@ namespace Pulsar4X.ECSLib
                     {
                         foreach (var jumpPair in delegateListPair.Value) //foreach entity in the value list
                         {
-                            delegateListPair.Key.DynamicInvoke(_game, jumpPair);
+                            //delegateListPair.Key.DynamicInvoke(_game, jumpPair);
+                            ActionDelegateDictionary.DoAction(delegateListPair.Key, _game, jumpPair);
                         }
 
                     }
@@ -243,7 +244,7 @@ namespace Pulsar4X.ECSLib
     {
         //TODO there may be a more efficent datatype for this. 
         [JsonProperty]
-        public SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
+        public SortedDictionary<DateTime, Dictionary<SystemActionEnum, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<SystemActionEnum, List<Entity>>>();
 
 
         private StarSystem _starSystem;
@@ -287,10 +288,12 @@ namespace Pulsar4X.ECSLib
             _systemLocalDateTime = parentStarSystem.Game.CurrentDateTime;
 
             //can add either by creating and passing an Action
-            Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
-            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
+            //Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
+            //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
             //or can add it by passing the method
-            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, OrbitProcessor.UpdateSystemOrbits);
+            //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, OrbitProcessor.UpdateSystemOrbits);
+            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, SystemActionEnum.EconProcessor);
+            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, SystemActionEnum.OrbitProcessor);
         }
 
 
@@ -300,10 +303,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
         /// <param name="entity"></param>
-        internal void AddEntityInterupt(DateTime nextDateTime, Action<Entity> action, Entity entity)
+        internal void AddEntityInterupt(DateTime nextDateTime, SystemActionEnum action, Entity entity)
         {
             if (!EntityDictionary.ContainsKey(nextDateTime))
-                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate, List<Entity>>());
+                EntityDictionary.Add(nextDateTime, new Dictionary<SystemActionEnum, List<Entity>>());
             if (!EntityDictionary[nextDateTime].ContainsKey(action))
                 EntityDictionary[nextDateTime].Add(action, new List<Entity>());
             EntityDictionary[nextDateTime][action].Add(entity);
@@ -315,10 +318,10 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
-        internal void AddSystemInterupt(DateTime nextDateTime, Action<StarSystem> action)
+        internal void AddSystemInterupt(DateTime nextDateTime, SystemActionEnum action)
         {
             if (!EntityDictionary.ContainsKey(nextDateTime))
-                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate, List<Entity>>());
+                EntityDictionary.Add(nextDateTime, new Dictionary<SystemActionEnum, List<Entity>>());
             if (!EntityDictionary[nextDateTime].ContainsKey(action))
                 EntityDictionary[nextDateTime].Add(action, null);
         }
@@ -337,16 +340,18 @@ namespace Pulsar4X.ECSLib
                 nextInteruptDateTime = EntityDictionary.Keys.Min();
                 if (nextInteruptDateTime <= SystemLocalDateTime + maxSpan)
                 {
-                    foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
+                    foreach (KeyValuePair<SystemActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
                     {
                         if (delegateListPair.Value == null) //if the list is null, it's a systemwide interupt
                         {
-                            delegateListPair.Key.DynamicInvoke(_starSystem);
+                            //delegateListPair.Key.DynamicInvoke(_starSystem);
+                            ActionDelegateDictionary.DoAction(delegateListPair.Key, _starSystem);
                         }
                         else
                             foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
                             {
-                                delegateListPair.Key.DynamicInvoke(entity);
+                                //delegateListPair.Key.DynamicInvoke(entity);
+                                ActionDelegateDictionary.DoAction(delegateListPair.Key, _starSystem, entity);
                             }
                     }
 

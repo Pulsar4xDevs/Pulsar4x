@@ -26,9 +26,9 @@ namespace Pulsar4X.ECSLib
                 JumpSystem = entrySystem,
                 JumpingEntity = jumpingEntity
             };
-            game.GameLoop.AddSystemInteractionInterupt(exitTime, JumpOut, jumpPair);
+            game.GameLoop.AddSystemInteractionInterupt(exitTime, SystemActionEnum.JumpOutProcessor, jumpPair);
 
-            game.GameLoop.AddSystemInteractionInterupt(entryTime, JumpIn, jumpPair);
+            game.GameLoop.AddSystemInteractionInterupt(entryTime, SystemActionEnum.JumpInProcessor, jumpPair);
         }
 
     }
