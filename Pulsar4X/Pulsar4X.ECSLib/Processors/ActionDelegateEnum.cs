@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Pulsar4X.ECSLib
 {
-    public enum SystemActionEnum
+    public enum PulseActionEnum
     {
         JumpOutProcessor,
         JumpInProcessor,
@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         SomeOtherProcessor
     }
 
-    internal static class ActionDelegateDictionary
+    internal static class PulseActionDictionary
     {
         #warning this possibly could be a crossplatform compatibility problem. 
         [ThreadStatic]//if this does what I think it does... mind = blown. need to write tests 
@@ -27,15 +27,15 @@ namespace Pulsar4X.ECSLib
         [ThreadStatic]
         private static SystemEntityJumpPair _jumpPair;
 
-        internal static Dictionary<SystemActionEnum, Delegate> EnumProcessorMap = new Dictionary<SystemActionEnum, Delegate>
+        internal static Dictionary<PulseActionEnum, Delegate> EnumProcessorMap = new Dictionary<PulseActionEnum, Delegate>
         {
-            { SystemActionEnum.JumpOutProcessor, new Action<StarSystem>(processor => { IntraSystemJumpProcessor.JumpOut(_game, _jumpPair) ;}) },
-            { SystemActionEnum.JumpInProcessor, new Action<StarSystem>(processor => { IntraSystemJumpProcessor.JumpIn(_game, _jumpPair) ;}) },
-            { SystemActionEnum.EconProcessor, new Action<StarSystem>(processor => { EconProcessor.ProcessSystem(_currentSystem);}) },
-            { SystemActionEnum.OrbitProcessor, new Action<StarSystem>(processor => { OrbitProcessor.UpdateSystemOrbits(_currentSystem);}) },
+            { PulseActionEnum.JumpOutProcessor, new Action<StarSystem>(processor => { IntraSystemJumpProcessor.JumpOut(_game, _jumpPair) ;}) },
+            { PulseActionEnum.JumpInProcessor, new Action<StarSystem>(processor => { IntraSystemJumpProcessor.JumpIn(_game, _jumpPair) ;}) },
+            { PulseActionEnum.EconProcessor, new Action<StarSystem>(processor => { EconProcessor.ProcessSystem(_currentSystem);}) },
+            { PulseActionEnum.OrbitProcessor, new Action<StarSystem>(processor => { OrbitProcessor.UpdateSystemOrbits(_currentSystem);}) },
             //{ SystemActionEnum.SomeOtherProcessor, new Action<StarSystem>(processor => { Something.SomeOtherProcess(CurrentEntity);}) },
         };
-        internal static void DoAction(SystemActionEnum action, StarSystem starSystem, Entity entity)
+        internal static void DoAction(PulseActionEnum action, StarSystem starSystem, Entity entity)
         {
             //lock (_currentSystem)
             //{
@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
                 EnumProcessorMap[action].DynamicInvoke(entity);
             //}
         }
-        internal static void DoAction(SystemActionEnum action, StarSystem starSystem)
+        internal static void DoAction(PulseActionEnum action, StarSystem starSystem)
         {
             //lock (_currentSystem)
             //{
@@ -55,7 +55,7 @@ namespace Pulsar4X.ECSLib
             //}
         }
 
-        internal static void DoAction(SystemActionEnum action, Game game, SystemEntityJumpPair jumpPair)
+        internal static void DoAction(PulseActionEnum action, Game game, SystemEntityJumpPair jumpPair)
         {
             _jumpPair = jumpPair;
             _game = game;

@@ -296,6 +296,7 @@
     <Compile Include="StaticData\MineralSD.cs" />
     <Compile Include="StaticData\SystemGenSettingsSD.cs" />
     <Compile Include="StaticData\TechSD.cs" />
+    <Compile Include="SystemSubpulses.cs" />
     <Compile Include="TimeLoop.cs" />
   </ItemGroup>
   <ItemGroup>

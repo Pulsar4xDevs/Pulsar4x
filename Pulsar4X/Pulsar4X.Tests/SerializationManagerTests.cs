@@ -95,13 +95,12 @@ namespace Pulsar4X.Tests
          void ComparitiveTests(Game origional, Game loadedGame)
         {
             
-
             StarSystem firstOrigional = origional.Systems.First().Value;
             StarSystem firstLoaded = loadedGame.Systems.First().Value;
 
             Assert.AreEqual(firstOrigional.Guid, firstLoaded.Guid);
             Assert.AreEqual(firstOrigional.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
-
+  
             Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
 
             Assert.AreEqual(firstOrigional.SystemSubpulses, firstLoaded.SystemSubpulses);

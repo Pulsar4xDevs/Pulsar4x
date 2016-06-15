@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
             TimeSpan orbitCycle = starSystem.Game.Settings.OrbitCycleTime;
             DateTime toDate = starSystem.SystemSubpulses.SystemLocalDateTime + orbitCycle;
             //starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, UpdateSystemOrbits);
-            starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, SystemActionEnum.OrbitProcessor);
+            starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.OrbitProcessor);
             // Find the first orbital entity.
             Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(StarInfoTypeIndex);
 

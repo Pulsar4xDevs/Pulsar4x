@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
             Game game = starSystem.Game;
             //Action<StarSystem> economyMethod = ProcessSystem;
             //system.SystemSubpulses.AddSystemInterupt(system.Game.CurrentDateTime + system.Game.Settings.EconomyCycleTime, economyMethod);
-            starSystem.SystemSubpulses.AddSystemInterupt(starSystem.Game.CurrentDateTime + starSystem.Game.Settings.EconomyCycleTime, SystemActionEnum.EconProcessor);
+            starSystem.SystemSubpulses.AddSystemInterupt(starSystem.Game.CurrentDateTime + starSystem.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
 
 
             TechProcessor.ProcessSystem(starSystem, game);
