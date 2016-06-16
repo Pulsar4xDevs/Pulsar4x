@@ -39,6 +39,7 @@ namespace Pulsar4X.ECSLib
 
         public ShipInfoDB()
         {
+            Orders = new Queue<Entity>();
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
@@ -54,7 +55,11 @@ namespace Pulsar4X.ECSLib
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
             IsMilitary = shipInfoDB.IsMilitary;
-            Orders = new Queue<Entity>(shipInfoDB.Orders);
+
+            if (shipInfoDB.Orders == null)
+                Orders = null;
+            else
+                Orders = new Queue<Entity>(shipInfoDB.Orders);
         }
 
         /// <summary>
@@ -97,6 +102,18 @@ namespace Pulsar4X.ECSLib
         {
             Orders.Dequeue();
             return;
+        }
+
+        public void ClearOrders()
+        {
+            while (Orders.Count > 0)
+                Orders.Dequeue();
+            return;
+        }
+
+        public int NumOrders()
+        {
+            return Orders.Count;
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    abstract class BaseOrderDB : BaseDataBlob
+    abstract public class BaseOrderDB : BaseDataBlob
     {
         // Orders can be given a delay before being executed
         public long DelayTime { get; internal set; }

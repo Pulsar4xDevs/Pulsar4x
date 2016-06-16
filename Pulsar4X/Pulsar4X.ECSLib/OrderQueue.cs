@@ -87,12 +87,12 @@ namespace Pulsar4X.ECSLib
         // Creates a new order for a ship to move to the target Entity
         public bool MoveOrder(Entity ship, Entity target)
         {
-            throw new NotImplementedException();
-
             MoveOrderDB moveDB = new MoveOrderDB(ship, target);
 
             Entity order = new Entity(_entityManager, new List<BaseDataBlob> { moveDB });
             _orderList.Add(order);
+
+            return true;
             
         }
 
@@ -160,6 +160,27 @@ namespace Pulsar4X.ECSLib
             return order;
 
             //  throw new NotImplementedException();
+        }
+        
+        //@todo: after testing, make this private
+        public Entity PeekNextOrder()
+        {
+            return _orderList.First<Entity>();
+        }
+
+        public void ClearOrders()
+        {
+            Entity order = _orderList.First<Entity>();
+            while (order != null)
+            {
+                _orderList.Remove(order);
+                order = _orderList.First<Entity>();
+            }
+        }
+
+        public int NumOrders()
+        {
+            return _orderList.Count;
         }
 
         #endregion

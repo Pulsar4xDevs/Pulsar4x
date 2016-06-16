@@ -259,6 +259,11 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public void ClearOrders()
+        {   
+            Orders.ClearOrders();
+        }
+
         #endregion
 
         #region Private Functions

@@ -48,6 +48,9 @@ namespace Pulsar4X.ECSLib
         {
             foreach (Entity ship in system.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
             {
+                if (ship.GetDataBlob<ShipInfoDB>().NumOrders() == 0)
+                    continue;
+                    
                 if (ship.GetDataBlob<ShipInfoDB>().CheckNextOrder().GetDataBlob<BaseOrderDB>().processOrder())
                     ship.GetDataBlob<ShipInfoDB>().RemoveNextOrder();
             }

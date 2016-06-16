@@ -138,6 +138,7 @@
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
     <Compile Include="FactoryTests.cs" />
+    <Compile Include="OrderQueueTest.cs" />
     <Compile Include="PathfindingTests.cs" />
     <Compile Include="PopulationProcessorTest.cs" />
     <Compile Include="ProcessorTests.cs" />

@@ -7,7 +7,7 @@ using Pulsar4X.ECSLib;
 namespace Pulsar4X.Tests
 {
     [TestFixture, Description("Population Growth Test")]
-    class PopulationProcessorTest
+    public class PopulationProcessorTest
     {
         private Game _game;
         private EntityManager _entityManager;
