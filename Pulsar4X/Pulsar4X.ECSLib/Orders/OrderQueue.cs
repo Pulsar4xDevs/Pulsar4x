@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     {
         #region Properties
 
-        List<Entity> _orderList;
+        List<BaseOrder> _orderList;
         EntityManager _entityManager;
 
         #endregion 
@@ -20,25 +20,25 @@ namespace Pulsar4X.ECSLib
 
         public OrderQueue()
         {
-            _orderList = new List<Entity>();
+            _orderList = new List<BaseOrder>();
             _entityManager = new EntityManager(new Game());
         }
 
         public OrderQueue(Game game)
         {
-            _orderList = new List<Entity>();
+            _orderList = new List<BaseOrder>();
             _entityManager = new EntityManager(game);
         }
 
         public OrderQueue(EntityManager em)
         {
-            _orderList = new List<Entity>();
+            _orderList = new List<BaseOrder>();
             _entityManager = em;
         }
 
         public OrderQueue(OrderQueue oq)
         {
-            _orderList = oq._orderList.Select(item => (Entity)item.Clone()).ToList();
+            _orderList = _orderList.Select(item => (BaseOrder)item.Clone()).ToList();
             _entityManager = oq._entityManager;
         }
 
@@ -87,9 +87,9 @@ namespace Pulsar4X.ECSLib
         // Creates a new order for a ship to move to the target Entity
         public bool MoveOrder(Entity ship, Entity target)
         {
-            MoveOrderDB moveDB = new MoveOrderDB(ship, target);
+            MoveOrder moveOrder = new MoveOrder(ship, target);
 
-            Entity order = new Entity(_entityManager, new List<BaseDataBlob> { moveDB });
+            MoveOrder order = new MoveOrder(ship, target);
             _orderList.Add(order);
 
             return true;
@@ -139,23 +139,21 @@ namespace Pulsar4X.ECSLib
         }
 
         // Processes the next order in the order list.  Checks for validity, then returns the order for loading into the colony or ship.  If invalid, it 
-        // returns the InvalidEntity
-        public Entity ProcessOrder()
+        // returns null
+        public BaseOrder ProcessOrder()
         {
-            Entity order = _orderList.First<Entity>();
+            if (_orderList.Count == 0)
+                return null;
+            BaseOrder order = _orderList.First<BaseOrder>();
             // Check order for validity
             if (order == null)
-                return Entity.InvalidEntity;
+                return null;
 
             _orderList.Remove(order);
 
-
-
-            BaseOrderDB orderDB = order.GetDataBlob<BaseOrderDB>();
-
             // Check order's IsValid function
-            if (!orderDB.isValid())
-                return Entity.InvalidEntity;
+            if (!order.isValid())
+                return null;
 
             return order;
 
@@ -163,18 +161,18 @@ namespace Pulsar4X.ECSLib
         }
         
         //@todo: after testing, make this private
-        public Entity PeekNextOrder()
+        public BaseOrder PeekNextOrder()
         {
-            return _orderList.First<Entity>();
+            return _orderList.First<BaseOrder>();
         }
 
         public void ClearOrders()
         {
-            Entity order = _orderList.First<Entity>();
+            BaseOrder order = _orderList.First<BaseOrder>();
             while (order != null)
             {
                 _orderList.Remove(order);
-                order = _orderList.First<Entity>();
+                order = _orderList.First<BaseOrder>();
             }
         }
 

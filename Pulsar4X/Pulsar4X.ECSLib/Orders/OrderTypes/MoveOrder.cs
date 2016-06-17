@@ -4,7 +4,7 @@ namespace Pulsar4X.ECSLib
 {
 
     // Move order within a system
-    public class MoveOrderDB : BaseOrderDB
+    public class MoveOrder : BaseOrder
     {
         // Owner is the ship in question
 
@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
 
         public int MaximumSpeed { get; internal set; }
 
-        public MoveOrderDB()
+        public MoveOrder()
         {
             DelayTime = 0;
             Owner = Entity.InvalidEntity;
@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
             MaximumSpeed = 0;
         }
 
-        public MoveOrderDB(Entity ship, Entity target, long orbitRadius = 0)
+        public MoveOrder(Entity ship, Entity target, long orbitRadius = 0)
         {
             DelayTime = 0;
             Owner = ship;
@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
             MaximumSpeed = ship.GetDataBlob<PropulsionDB>().MaximumSpeed;
         }
 
-        public MoveOrderDB(Entity ship, PositionDB target, long orbitRadius = 0)
+        public MoveOrder(Entity ship, PositionDB target, long orbitRadius = 0)
         {
             DelayTime = 0;
             Owner = ship;
@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            MoveOrderDB order = new MoveOrderDB();
+            MoveOrder order = new MoveOrder();
             order.DelayTime = DelayTime;
             order.Owner = Owner;
             order.Target = Target;
