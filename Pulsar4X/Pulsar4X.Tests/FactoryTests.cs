@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Pulsar4X.Tests
 {
     [TestFixture]
-    [Description("Test for all exists factories")]
+    [Description("Test for all existing factories")]
     public class FactoryTests
     {
         private Game _game;
