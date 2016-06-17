@@ -248,14 +248,17 @@ namespace Pulsar4X.ECSLib
 
             while (orders > 0)
             {
-                Entity nextOrder = Orders.ProcessOrder();
+                BaseOrder nextOrder = Orders.ProcessOrder();
                 // Process all the orders
                 //@todo - finish
-                if(nextOrder != Entity.InvalidEntity)
+                if (nextOrder != null)
                 {
-                    Entity owner = nextOrder.GetDataBlob<BaseOrderDB>().Owner;
+                    Entity owner = nextOrder.Owner;
                     owner.GetDataBlob<ShipInfoDB>().AddOrder(nextOrder);
+
                 }
+                else
+                    return;
             }
         }
 

@@ -53,7 +53,8 @@ namespace Pulsar4X.Tests
         {
 
             StaticDataManager.LoadData("Pulsar4x", _game);
-            _player = new Player("Test Player");
+
+            _player = _game.AddPlayer("Test Player");
 
             _faction = DefaultStartFactory.DefaultHumans(_game, _player, "Test Faction");
 
@@ -91,7 +92,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void testOrderQueue()
         {
-            Entity order;
+            //@todo: more stringent tests
+            BaseOrder order;
             Vector4 newPosition = new Vector4(_earth.GetDataBlob<PositionDB>().Position);
 
             newPosition.X += 0.2;

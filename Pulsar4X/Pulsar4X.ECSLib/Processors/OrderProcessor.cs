@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
                 if (ship.GetDataBlob<ShipInfoDB>().NumOrders() == 0)
                     continue;
                     
-                if (ship.GetDataBlob<ShipInfoDB>().CheckNextOrder().GetDataBlob<BaseOrderDB>().processOrder())
+                if (ship.GetDataBlob<ShipInfoDB>().CheckNextOrder().processOrder())
                     ship.GetDataBlob<ShipInfoDB>().RemoveNextOrder();
             }
         }
