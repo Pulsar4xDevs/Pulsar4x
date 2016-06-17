@@ -100,7 +100,28 @@ namespace Pulsar4X.ECSLib
             if (!EntityDictionary.ContainsKey(nextDateTime))
                 EntityDictionary.Add(nextDateTime, new Dictionary<PulseActionEnum, List<Entity>>());
             if (!EntityDictionary[nextDateTime].ContainsKey(action))
-                EntityDictionary[nextDateTime].Add(action, null);//new List<Entity>());
+                EntityDictionary[nextDateTime].Add(action, new List<Entity>());  //null);
+        }
+
+        /// <summary>
+        /// removes all references of an entity from the dictionary
+        /// </summary>
+        /// <param name="entity"></param>
+        internal void RemoveEntity(Entity entity)
+        {
+            //possibly need to implement a reverse dictionary so entities can be looked up backwards, rather than itterating through?
+            //MUST remove empty entries in the dictionary as an empty entitylist will be seen as a systemInterupt. 
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
+        /// transfers all references from this dictionary to the new one
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="starsys"></param>
+        internal void TransferEntity(Entity entity, StarSystem starsys)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -119,7 +140,7 @@ namespace Pulsar4X.ECSLib
                 {
                     foreach (KeyValuePair<PulseActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
                     {
-                        if (delegateListPair.Value == null) //if the list is null, it's a systemwide interupt
+                        if (delegateListPair.Value.Count == 0)// == null) //if the list is empty, it's a systemwide interupt
                         {
                             //delegateListPair.Key.DynamicInvoke(_starSystem);
                             PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem);
