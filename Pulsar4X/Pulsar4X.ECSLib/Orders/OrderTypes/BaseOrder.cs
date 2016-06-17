@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace Pulsar4X.ECSLib
 {
-    abstract public class BaseOrderDB : BaseDataBlob
+    public abstract class BaseOrder
     {
         // Orders can be given a delay before being executed
         public long DelayTime { get; internal set; }
@@ -14,5 +16,6 @@ namespace Pulsar4X.ECSLib
 
         abstract public bool isValid();
         abstract public bool processOrder();
+        abstract public object Clone();
     }
 }
