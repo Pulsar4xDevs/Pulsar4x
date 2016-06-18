@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib
             {
                 DateTime nextInterupt = ProcessNextInterupt(_targetDateTime);
                 //do system processors
-                Parallel.ForEach<StarSystem>(_game.Systems.Values, item => ProcessSystem(item, nextInterupt));
+                Parallel.ForEach<StarSystem>(_game.Systems.Values, item => item.SystemSubpulses.ProcessSystem(nextInterupt));
                 //The above 'blocks' till all the tasks are done.
 
                 GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
@@ -208,29 +208,7 @@ namespace Pulsar4X.ECSLib
             return processedTo;
         }
 
-        private void ProcessSystem(object systemObj, DateTime toDateTime)
-        {
-            //check validity of commands etc. here.
 
-
-            StarSystem system = systemObj as StarSystem;            
-
-            //TimeSpan systemElapsedTime = new TimeSpan();
-            DateTime systemTime = system.SystemSubpulses.SystemLocalDateTime;
-            //the system may need to run several times for a wanted tickLength
-            //keep processing the system till we've reached the wanted ticklength
-            while (systemTime < toDateTime)
-            {
-
-                //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = TimeSpan.FromSeconds( Math.Min(Ticklength.TotalSeconds, (toDateTime - systemTime).TotalSeconds)); 
-                ShipMovementProcessor.Process(system, timeDelta.Seconds);
-      
-                //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                systemTime = system.SystemSubpulses.ProcessNextInterupt(timeDelta);
-
-            }
-        }
 
         public bool Equals(TimeLoop other)
         {

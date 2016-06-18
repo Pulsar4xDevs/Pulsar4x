@@ -124,13 +124,41 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
+
+        internal void ProcessSystem(DateTime toDateTime)
+        {
+            //check validity of commands etc. here.
+
+
+      
+
+            //TimeSpan systemElapsedTime = new TimeSpan();
+            DateTime systemTime = SystemLocalDateTime;
+            //the system may need to run several times for a wanted tickLength
+            //keep processing the system till we've reached the wanted ticklength
+            while (systemTime < toDateTime)
+            {
+
+                //calculate max time the system can run/time to next interupt
+                //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
+                TimeSpan timeDelta = toDateTime - systemTime;
+                
+                systemTime = ProcessNextInterupt(timeDelta);
+                
+                ShipMovementProcessor.Process(_starSystem, timeDelta.Seconds);
+
+                
+
+            }
+        }
+
         /// <summary>
         /// process to next subpulse
         /// </summary>
         /// <param name="currentDateTime"></param>
         /// <param name="maxSpan">maximum time delta</param>
         /// <returns>datetime processed to</returns>
-        internal DateTime ProcessNextInterupt(TimeSpan maxSpan)
+        private DateTime ProcessNextInterupt(TimeSpan maxSpan)
         {
             DateTime nextInteruptDateTime;
             if (EntityDictionary.Keys.Count != 0)
