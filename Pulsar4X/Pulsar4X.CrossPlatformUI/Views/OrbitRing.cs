@@ -54,7 +54,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _orbitDB = entityWithOrbit.GetDataBlob<OrbitDB>();
             _parentPositionDB = _orbitDB.Parent.GetDataBlob<PositionDB>();
             _bodyPositionDB = entityWithOrbit.GetDataBlob<PositionDB>();                        
-            _rotation = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis*2); //This is the LoP, not sure if thats what we want.
+            _rotation = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis*2); //This is the LoP + AoP.
             _width = 200 * (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
             _height = 200 * (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
             _focalPoint = (float)_orbitDB.Eccentricity * _width /2;
