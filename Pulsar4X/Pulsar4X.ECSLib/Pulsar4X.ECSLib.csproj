@@ -233,7 +233,7 @@
     <Compile Include="Processors\EconProcessor.cs" />
     <Compile Include="Processors\AtmosphereProcessor.cs" />
     <Compile Include="Factories\ShipComponents\ParsingProcessor.cs" />
-    <Compile Include="Processors\IntraSystemJumpProcessor.cs" />
+    <Compile Include="Processors\InterSystemJumpProcessor.cs" />
     <Compile Include="Processors\OrderProcessor.cs" />
     <Compile Include="Processors\ReCalcProcessor.cs" />
     <Compile Include="Processors\ShipDamageProcessor.cs" />

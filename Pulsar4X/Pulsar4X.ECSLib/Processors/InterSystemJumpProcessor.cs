@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    public static class IntraSystemJumpProcessor
+    public static class InterSystemJumpProcessor
     {
         internal static void JumpOut(Game game, SystemEntityJumpPair jumpPair)
         {
