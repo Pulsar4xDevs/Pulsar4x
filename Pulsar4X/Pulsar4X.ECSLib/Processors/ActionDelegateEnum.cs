@@ -17,8 +17,7 @@ namespace Pulsar4X.ECSLib
 
     internal static class PulseActionDictionary
     {
-        #warning this possibly could be a crossplatform compatibility problem. 
-        [ThreadStatic]//if this does what I think it does... mind = blown. need to write tests 
+        [ThreadStatic]
         private static Entity _currentEntity;
         [ThreadStatic]
         private static StarSystem _currentSystem;
@@ -29,30 +28,27 @@ namespace Pulsar4X.ECSLib
 
         internal static Dictionary<PulseActionEnum, Delegate> EnumProcessorMap = new Dictionary<PulseActionEnum, Delegate>
         {
-            { PulseActionEnum.JumpOutProcessor, new Action<StarSystem>(processor => { IntraSystemJumpProcessor.JumpOut(_game, _jumpPair) ;}) },
-            { PulseActionEnum.JumpInProcessor, new Action<StarSystem>(processor => { IntraSystemJumpProcessor.JumpIn(_game, _jumpPair) ;}) },
+            { PulseActionEnum.JumpOutProcessor, new Action<StarSystem>(processor => { InterSystemJumpProcessor.JumpOut(_game, _jumpPair) ;}) },
+            { PulseActionEnum.JumpInProcessor, new Action<StarSystem>(processor => { InterSystemJumpProcessor.JumpIn(_game, _jumpPair) ;}) },
             { PulseActionEnum.EconProcessor, new Action<StarSystem>(processor => { EconProcessor.ProcessSystem(_currentSystem);}) },
             { PulseActionEnum.OrbitProcessor, new Action<StarSystem>(processor => { OrbitProcessor.UpdateSystemOrbits(_currentSystem);}) },
-            //{ SystemActionEnum.SomeOtherProcessor, new Action<StarSystem>(processor => { Something.SomeOtherProcess(CurrentEntity);}) },
+            //{ SystemActionEnum.SomeOtherProcessor, new Action<StarSystem>(processor => { Something.SomeOtherProcess(_currentSystem, _currentEntity);}) },
         };
         internal static void DoAction(PulseActionEnum action, StarSystem starSystem, Entity entity)
         {
-            //lock (_currentSystem)
-            //{
-                _currentSystem = starSystem;
-                _currentEntity = entity;
+            _currentSystem = starSystem;
+            _currentEntity = entity;
                 
-                EnumProcessorMap[action].DynamicInvoke(entity);
-            //}
+            EnumProcessorMap[action].DynamicInvoke(entity);
+
         }
         internal static void DoAction(PulseActionEnum action, StarSystem starSystem)
         {
-            //lock (_currentSystem)
-            //{
-                _currentSystem = starSystem;
 
-                EnumProcessorMap[action].DynamicInvoke(starSystem);
-            //}
+            _currentSystem = starSystem;
+
+            EnumProcessorMap[action].DynamicInvoke(starSystem);
+
         }
 
         internal static void DoAction(PulseActionEnum action, Game game, SystemEntityJumpPair jumpPair)

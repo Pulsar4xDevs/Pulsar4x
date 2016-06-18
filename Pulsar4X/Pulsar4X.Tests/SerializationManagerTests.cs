@@ -79,7 +79,7 @@ namespace Pulsar4X.Tests
             DateTime jumpTime = newGame.CurrentDateTime + TimeSpan.FromMinutes(1);
 
             //insert a jump so that we can compair timeloop dictionary
-            IntraSystemJumpProcessor.SetJump(newGame, jumpTime,  firstSystem, jumpTime, ship);
+            InterSystemJumpProcessor.SetJump(newGame, jumpTime,  firstSystem, jumpTime, ship);
 
             // lets create a good saveGame
             SerializationManager.Export(newGame, File);
