@@ -103,6 +103,7 @@ namespace Pulsar4X.ECSLib
             
             if (currentPosition == targetPosition) // We have reached the target
             {
+                Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0.0, 0.0, 0.0, 0.0);
                 return true;
             }
 
@@ -116,15 +117,19 @@ namespace Pulsar4X.ECSLib
         private Vector4 getSpeed(PositionDB currentPosition, PositionDB targetPosition, int speedMagnitude)
         {
             Vector4 speed = new Vector4( 0, 0, 0, 0 );
+            double length;
 
             Vector4 direction = new Vector4(0, 0, 0, 0);
-            direction.X = currentPosition.X - targetPosition.X;
-            direction.Y = currentPosition.Y - targetPosition.Y;
-            direction.Z = currentPosition.Z - targetPosition.Z;
+            direction.X = targetPosition.X - currentPosition.X;
+            direction.Y = targetPosition.Y - currentPosition.Y;
+            direction.Z = targetPosition.Z - currentPosition.Z;
+            direction.W = 0;
 
-            direction.X = (direction.X / direction.Length());
-            direction.Y = (direction.Y / direction.Length());
-            direction.Z = (direction.Z / direction.Length());
+            length = direction.Length();
+
+            direction.X = (direction.X / length);
+            direction.Y = (direction.Y / length);
+            direction.Z = (direction.Z / length);
 
             speed.X = direction.X * speedMagnitude;
             speed.Y = direction.Y * speedMagnitude;

@@ -115,5 +115,18 @@ namespace Pulsar4X.ECSLib
         {
             return Orders.Count;
         }
+
+        // Processes the next order on the queue.  If it is completed, return true.  If there is more work to do, return false.
+        public bool ProcessOrder()
+        {
+            BaseOrder nextOrder = CheckNextOrder();
+
+            if (nextOrder.processOrder())
+            {
+                RemoveNextOrder();
+                return true;
+            }
+            return false;
+        }
     }
 }
