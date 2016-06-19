@@ -14,15 +14,6 @@ namespace Pulsar4X.ECSLib
 
         internal void Process(Game game, List<StarSystem> systems, int deltaSeconds)
         {
-            if (game.CurrentDateTime - _lastRun < game.Settings.EconomyCycleTime)
-            {
-                return;
-            }
-
-
-
-            _lastRun = game.CurrentDateTime;
-
             if (game.Settings.EnableMultiThreading ?? false)
             {
                 // Process the orderqueue

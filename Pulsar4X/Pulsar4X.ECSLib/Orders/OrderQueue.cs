@@ -79,9 +79,14 @@ namespace Pulsar4X.ECSLib
         }
 
         // Creates a new order for a ship to move to the given coordinates in a star system
-        public bool MoveOrder(Entity ship, Entity System, long x, long y)
+        public bool MoveOrder(Entity ship, StarSystem system, double x, double y)
         {
-            throw new NotImplementedException();
+            PositionDB position = new PositionDB(new Vector4(x, y, 0.0, 0.0), system.Guid);
+            MoveOrder moveOrder = new MoveOrder(ship, position);
+
+            _orderList.Add(moveOrder);
+
+            return true;
         }
 
         // Creates a new order for a ship to move to the target Entity
@@ -89,8 +94,8 @@ namespace Pulsar4X.ECSLib
         {
             MoveOrder moveOrder = new MoveOrder(ship, target);
 
-            MoveOrder order = new MoveOrder(ship, target);
-            _orderList.Add(order);
+            
+            _orderList.Add(moveOrder);
 
             return true;
             

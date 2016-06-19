@@ -67,7 +67,9 @@ namespace Pulsar4X.Tests
         public void testOrderQueue()
         {
             //@todo: more stringent tests
+            PositionDB position;
             BaseOrder order;
+            Vector4 speed;
             Vector4 newPosition = new Vector4(_earth.GetDataBlob<PositionDB>().Position);
 
             newPosition.X += 0.2;
@@ -88,7 +90,49 @@ namespace Pulsar4X.Tests
             // The ship should now have the order
             Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
 
+            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+
+            // Check for ship speed
+            speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
+
+            Assert.AreEqual(100, speed.X);
+            Assert.AreEqual(0, speed.Y);
+
             _ship.GetDataBlob<ShipInfoDB>().ClearOrders();
+            Assert.AreEqual(0, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+
+            _game.CurrentDateTime.AddSeconds(5.0);
+
+            newPosition.X -= 0.1;
+            newPosition.Y += 0.4;
+
+            _player.Orders.MoveOrder(_ship, _starSystem, newPosition.X, newPosition.Y);
+            order = _player.Orders.PeekNextOrder();
+
+            Assert.AreEqual(1, _player.Orders.NumOrders());
+
+            _orderProcessor.Process(_game, _systems, 5);
+
+            Assert.AreEqual(0, _player.Orders.NumOrders());
+            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+
+            Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
+
+            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+
+            // Check speed 
+            speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
+
+            double length = Math.Sqrt(0.1 * 0.1 + 0.4 * 0.4);
+            double speedX, speedY;
+            speedX = (0.1 / length) * 100;
+            speedY = (0.4 / length) * 100;
+
+            // Allowing for very small discrepancies
+            Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
+            Assert.LessOrEqual(Math.Abs(speedY - speed.Y), 0.0001);
+
+
         }
     }
 }
