@@ -9,8 +9,7 @@ namespace Pulsar4X.ECSLib
     {
         #region Properties
 
-        List<Entity> _orderList;
-        EntityManager _entityManager;
+        List<BaseOrder> _orderList;
 
         #endregion 
 
@@ -87,9 +86,8 @@ namespace Pulsar4X.ECSLib
         // Creates a new order for a ship to move to the target Entity
         public bool MoveOrder(Entity ship, Entity target)
         {
-            MoveOrderDB moveDB = new MoveOrderDB(ship, target);
+            MoveOrder moveOrder = new MoveOrder(ship, target);
 
-            Entity order = new Entity(_entityManager, new List<BaseDataBlob> { moveDB });
             _orderList.Add(order);
 
             return true;
@@ -142,20 +140,17 @@ namespace Pulsar4X.ECSLib
         // returns the InvalidEntity
         public Entity ProcessOrder()
         {
-            Entity order = _orderList.First<Entity>();
+            BaseOrder order = _orderList.First<BaseOrder>();
             // Check order for validity
             if (order == null)
-                return Entity.InvalidEntity;
+                return null;
 
             _orderList.Remove(order);
 
 
-
-            BaseOrderDB orderDB = order.GetDataBlob<BaseOrderDB>();
-
             // Check order's IsValid function
-            if (!orderDB.isValid())
-                return Entity.InvalidEntity;
+            if (!order.isValid())
+                return null;
 
             return order;
 
@@ -165,16 +160,16 @@ namespace Pulsar4X.ECSLib
         //@todo: after testing, make this private
         public Entity PeekNextOrder()
         {
-            return _orderList.First<Entity>();
+            return _orderList.First<BaseOrder>();
         }
 
         public void ClearOrders()
         {
-            Entity order = _orderList.First<Entity>();
+            BaseOrder order = _orderList.First<BaseOrder>();
             while (order != null)
             {
                 _orderList.Remove(order);
-                order = _orderList.First<Entity>();
+                order = _orderList.First<BaseOrder>();
             }
         }
 
