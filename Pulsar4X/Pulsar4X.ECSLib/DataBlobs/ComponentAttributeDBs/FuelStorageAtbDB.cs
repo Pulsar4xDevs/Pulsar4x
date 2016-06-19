@@ -2,28 +2,28 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class FuelStorageAbilityDB : BaseDataBlob
+    public class FuelStorageAtbDB : BaseDataBlob
     {
         [JsonProperty]
         public int StorageCapacity { get; internal set; }
 
-        public FuelStorageAbilityDB()
+        public FuelStorageAtbDB()
         {
         }
 
-        public FuelStorageAbilityDB(double fuelStorage)
+        public FuelStorageAtbDB(double fuelStorage)
         {
             StorageCapacity = (int)fuelStorage;
         }
 
-        public FuelStorageAbilityDB(FuelStorageAbilityDB abilityDB)
+        public FuelStorageAtbDB(FuelStorageAtbDB abilityDB)
         {
             StorageCapacity = abilityDB.StorageCapacity;
         }
 
         public override object Clone()
         {
-            return new FuelStorageAbilityDB(this);
+            return new FuelStorageAtbDB(this);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class ExplosionChanceAbilityDB : BaseDataBlob
+    public class ExplosionChanceAtbDB : BaseDataBlob
     {
         /// <summary>
         /// Chance this component will cause a secondary explosion when hit.
@@ -13,10 +13,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public float ExplosionDamage { get; internal set; }
         
-        public ExplosionChanceAbilityDB(double explosionChance, double explosionDamage) : this((float)explosionChance, (float) explosionDamage) { }
+        public ExplosionChanceAtbDB(double explosionChance, double explosionDamage) : this((float)explosionChance, (float) explosionDamage) { }
 
         [JsonConstructor]
-        public ExplosionChanceAbilityDB(float explosionChance = 0, float explosionDamage = 0)
+        public ExplosionChanceAtbDB(float explosionChance = 0, float explosionDamage = 0)
         {
             ExplosionChance = explosionChance;
             ExplosionDamage = explosionDamage;
@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new ExplosionChanceAbilityDB(ExplosionChance, ExplosionDamage);
+            return new ExplosionChanceAtbDB(ExplosionChance, ExplosionDamage);
         }
     }
 }

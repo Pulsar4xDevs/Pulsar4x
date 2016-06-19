@@ -1,6 +1,6 @@
 ﻿namespace Pulsar4X.ECSLib
 {
-    public class JumpDriveAbilityDB : BaseDataBlob
+    public class JumpDriveAtbDB : BaseDataBlob
     {
         public int MaxShipSize { get; internal set; }
         public int MaxSquadronSize { get; internal set; }
@@ -11,7 +11,7 @@
 
         public override object Clone()
         {
-            return new JumpDriveAbilityDB
+            return new JumpDriveAtbDB
             {
                 MaxShipSize = MaxShipSize,
                 MaxSquadronSize = MaxSquadronSize,

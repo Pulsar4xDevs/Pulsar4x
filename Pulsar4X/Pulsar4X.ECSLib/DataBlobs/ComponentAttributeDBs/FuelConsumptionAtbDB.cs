@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class FuelConsumptionAbilityDB : BaseDataBlob
+    public class FuelConsumptionAtbDB : BaseDataBlob
     {
         [JsonProperty]
         public double FuelUsePerHour { get; internal set; }
@@ -15,23 +15,23 @@ namespace Pulsar4X.ECSLib
             FuelUsePerHour = data;
         }
 
-        public FuelConsumptionAbilityDB()
+        public FuelConsumptionAtbDB()
         {
         }
 
-        public FuelConsumptionAbilityDB(double fuelUsagePerHour)
+        public FuelConsumptionAtbDB(double fuelUsagePerHour)
         {
             FuelUsePerHour = fuelUsagePerHour;
         }
 
-        public FuelConsumptionAbilityDB(FuelConsumptionAbilityDB db)
+        public FuelConsumptionAtbDB(FuelConsumptionAtbDB db)
         {
             FuelUsePerHour = db.FuelUsePerHour;
         }
 
         public override object Clone()
         {
-            return new FuelConsumptionAbilityDB(this);
+            return new FuelConsumptionAtbDB(this);
         }
     }
 }

@@ -10,19 +10,19 @@ namespace Pulsar4X.ECSLib
         Flag,
     }
 
-    public class CommandAbilityDB : BaseDataBlob
+    public class CommandAtbDB : BaseDataBlob
     {
         [JsonProperty]
         public CommandType CommandType { get; internal set; }
 
-        public CommandAbilityDB(CommandType commandType)
+        public CommandAtbDB(CommandType commandType)
         {
             CommandType = commandType;
         }
         
         public override object Clone()
         {
-            return new CommandAbilityDB(CommandType);
+            return new CommandAtbDB(CommandType);
         }
     }
 }

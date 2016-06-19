@@ -2,14 +2,14 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class MissileStorageAbilityDB : BaseDataBlob
+    public class MissileStorageAtbDB : BaseDataBlob
     {
         [JsonProperty]
         public int StorageCapacity { get; internal set; }
 
         public override object Clone()
         {
-            return new MissileStorageAbilityDB {StorageCapacity = StorageCapacity};
+            return new MissileStorageAtbDB { StorageCapacity = StorageCapacity};
         }
     }
 }

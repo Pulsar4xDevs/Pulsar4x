@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoStorageAbilityDB : BaseDataBlob
+    public class CargoStorageAtbDB : BaseDataBlob
     {
         /// <summary>
         /// Storage Capacity of this module.
@@ -10,17 +10,17 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int StorageCapacity { get; internal set; }
 
-        public CargoStorageAbilityDB(double storageCapacity) : this((int)storageCapacity) { }
+        public CargoStorageAtbDB(double storageCapacity) : this((int)storageCapacity) { }
 
         [JsonConstructor]
-        public CargoStorageAbilityDB(int storageCapacity = 0)
+        public CargoStorageAtbDB(int storageCapacity = 0)
         {
             StorageCapacity = storageCapacity;
         }
 
         public override object Clone()
         {
-            return new CargoStorageAbilityDB(StorageCapacity);
+            return new CargoStorageAtbDB(StorageCapacity);
         }
     }
 }

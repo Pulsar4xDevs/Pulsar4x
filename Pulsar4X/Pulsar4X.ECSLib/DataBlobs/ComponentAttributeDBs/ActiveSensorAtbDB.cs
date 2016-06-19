@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class ActiveSensorAbilityDB : BaseDataBlob
+    public class ActiveSensorAtbDB : BaseDataBlob
     {
         [JsonProperty]
         public int GravSensorStrength { get; internal set; }
@@ -17,10 +17,10 @@ namespace Pulsar4X.ECSLib
         public bool IsSearchSensor { get; internal set; }
         public bool IsTrackingSensor => !IsSearchSensor;
 
-        public ActiveSensorAbilityDB(double gravStrenghth, double emSensitivity, double resolution, bool isSearchSensor) : this ((int) gravStrenghth, (int) emSensitivity, (int) resolution, isSearchSensor) { }
+        public ActiveSensorAtbDB(double gravStrenghth, double emSensitivity, double resolution, bool isSearchSensor) : this ((int) gravStrenghth, (int) emSensitivity, (int) resolution, isSearchSensor) { }
         
         [JsonConstructor]
-        public ActiveSensorAbilityDB(int gravStrength = 0, int emSensitivity = 0, int resolution = 0, bool isSearchSensor = true)
+        public ActiveSensorAtbDB(int gravStrength = 0, int emSensitivity = 0, int resolution = 0, bool isSearchSensor = true)
         {
             GravSensorStrength = gravStrength;
             EMSensitivity = emSensitivity;
@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new ActiveSensorAbilityDB(GravSensorStrength, EMSensitivity, Resolution, IsSearchSensor);
+            return new ActiveSensorAtbDB(GravSensorStrength, EMSensitivity, Resolution, IsSearchSensor);
         }
     }
 

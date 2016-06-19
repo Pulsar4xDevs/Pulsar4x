@@ -79,7 +79,7 @@
               "Description": "Move Power for ship",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(3))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
             },
             {
               "Name": "Fuel Consumption",
@@ -98,7 +98,7 @@
               "Description": "Size Mod",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(6))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelConsumptionAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelConsumptionAtbDB"
             },
             {
               "Name": "Thermal Signature Reduction",
@@ -120,7 +120,7 @@
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(9),0)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             },
             {
               "Name": "Explosion Chance",
@@ -132,7 +132,7 @@
               "Name": "Explosion Chance",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(11), Ability(3) * 0.05)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ExplosionChanceAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ExplosionChanceAtbDB"
             }
           ]
         }
@@ -216,7 +216,7 @@
                 ]
               },
               "AbilityFormula": "DataBlobArgs([GuidDict])",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.MineResourcesDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.MineResourcesAtbDB"
             }
           ]
         }
@@ -252,7 +252,7 @@
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(20)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             }
           ]
         }
@@ -291,7 +291,7 @@
                 "Entries": []
               },
               "AbilityFormula": "100",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             },
             {
               "Name": "RefineAbilitys",
@@ -301,7 +301,7 @@
                 "Entries": []
               },
               "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesAtbDB"
             }
           ]
         }
@@ -343,7 +343,7 @@
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAtbDB"
             }
           ]
         }

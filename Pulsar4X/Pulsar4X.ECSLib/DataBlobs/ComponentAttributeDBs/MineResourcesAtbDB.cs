@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public class MineResourcesDB : BaseDataBlob
+    public class MineResourcesAtbDB : BaseDataBlob
     {
         public Dictionary<Guid, int> ResourcesPerEconTick { get; internal set; }
 
-        public MineResourcesDB() { }
+        public MineResourcesAtbDB() { }
 
         /// <summary>
         /// Component factory constructor.
         /// </summary>
         /// <param name="resources">values will be cast to ints!</param>
-        public MineResourcesDB(Dictionary<Guid,double> resources)
+        public MineResourcesAtbDB(Dictionary<Guid,double> resources)
         {
             ResourcesPerEconTick = new Dictionary<Guid, int>();
             foreach (var kvp in resources)
@@ -22,14 +22,14 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public MineResourcesDB(MineResourcesDB db)
+        public MineResourcesAtbDB(MineResourcesAtbDB db)
         {
             ResourcesPerEconTick = db.ResourcesPerEconTick;
         }
 
         public override object Clone()
         {
-            return new MineResourcesDB(this);
+            return new MineResourcesAtbDB(this);
         }
     }
 }

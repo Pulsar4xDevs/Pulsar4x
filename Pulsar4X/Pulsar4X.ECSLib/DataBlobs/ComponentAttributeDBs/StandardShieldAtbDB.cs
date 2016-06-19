@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class StandardShieldAbilityDB : BaseDataBlob
+    public class StandardShieldAtbDB : BaseDataBlob
     {
         [JsonProperty]
         public int ShieldHP { get; internal set; }
@@ -10,11 +10,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int ShieldRechargeRate { get; internal set; }
 
-        public StandardShieldAbilityDB() { }
+        public StandardShieldAtbDB() { }
 
-        public StandardShieldAbilityDB(double shieldHP, double shieldRechargeRate) : this((int)shieldHP, (int)shieldRechargeRate) { }
+        public StandardShieldAtbDB(double shieldHP, double shieldRechargeRate) : this((int)shieldHP, (int)shieldRechargeRate) { }
 
-        public StandardShieldAbilityDB(int shieldHP, int shieldRechargeRate)
+        public StandardShieldAtbDB(int shieldHP, int shieldRechargeRate)
         {
             ShieldHP = shieldHP;
             ShieldRechargeRate = shieldRechargeRate;
@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new StandardShieldAbilityDB(ShieldHP, ShieldRechargeRate);
+            return new StandardShieldAtbDB(ShieldHP, ShieldRechargeRate);
         }
     }
 }

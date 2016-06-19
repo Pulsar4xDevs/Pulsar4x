@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     /// For example, you can have a component that provides 5 Installations CP's, and provides 2 Installations | Ships CP's.
     /// Final result will be 7 Installation CP's, and 2 Ship CP's.
     /// </summary>
-    public class ConstructionAbilityDB : BaseDataBlob
+    public class ConstructionAtbDB : BaseDataBlob
     {
         public ReadOnlyDictionary<ConstructionType, int> ConstructionPoints => new ReadOnlyDictionary<ConstructionType, int>(InternalConstructionPoints);
 
@@ -23,11 +23,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal IDictionary<ConstructionType, int> InternalConstructionPoints { get; set; } = new Dictionary<ConstructionType, int>();
 
-        public ConstructionAbilityDB(IDictionary<ConstructionType, double> constructionPoints) 
+        public ConstructionAtbDB(IDictionary<ConstructionType, double> constructionPoints) 
             : this(constructionPoints.ToDictionary(constructionPoint => constructionPoint.Key, constructionPoint => (int)constructionPoint.Value)) { }
         
         [JsonConstructor]
-        public ConstructionAbilityDB(IDictionary<ConstructionType, int> constructionPoints = null)
+        public ConstructionAtbDB(IDictionary<ConstructionType, int> constructionPoints = null)
         {
             if (constructionPoints != null)
             {
@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new ConstructionAbilityDB(ConstructionPoints);
+            return new ConstructionAtbDB(ConstructionPoints);
         }
 
         /// <summary>

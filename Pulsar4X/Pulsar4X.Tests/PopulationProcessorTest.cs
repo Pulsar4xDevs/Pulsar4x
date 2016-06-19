@@ -230,7 +230,7 @@ namespace Pulsar4X.Tests
             Dictionary<Entity, long> returnPop = new Dictionary<Entity, long>();
             Entity colonyPlanet = colony.GetDataBlob<ColonyInfoDB>().PlanetEntity;
 
-            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructure = colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAbilityDB>()).ToList();
+            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructure = colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
             long popSupportValue;
 
             //  Pop Cap = Total Population Support Value / Colony Cost
@@ -241,7 +241,7 @@ namespace Pulsar4X.Tests
 
             foreach (var installation in infrastructure)
             {
-                popSupportValue += installation.Key.GetDataBlob<PopulationSupportAbilityDB>().PopulationCapacity;
+                popSupportValue += installation.Key.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
             }
 
             long needsSupport = 0;

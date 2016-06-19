@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class MissileLauncherAbilityDB : BaseDataBlob
+    public class MissileLauncherAtbDB : BaseDataBlob
     {
         [JsonProperty]
         public double MissileSize { get; internal set; }
@@ -10,23 +10,23 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public double ReloadRate { get; internal set; }
 
-        public MissileLauncherAbilityDB()
+        public MissileLauncherAtbDB()
         {
         }
 
-        public MissileLauncherAbilityDB(double missileSize)
+        public MissileLauncherAtbDB(double missileSize)
         {
             MissileSize = missileSize;
         }
 
-        public MissileLauncherAbilityDB(MissileLauncherAbilityDB db)
+        public MissileLauncherAtbDB(MissileLauncherAtbDB db)
         {
             MissileSize = db.MissileSize;
         }
 
         public override object Clone()
         {
-            return new MissileLauncherAbilityDB(this);
+            return new MissileLauncherAtbDB(this);
         }
     }
 }

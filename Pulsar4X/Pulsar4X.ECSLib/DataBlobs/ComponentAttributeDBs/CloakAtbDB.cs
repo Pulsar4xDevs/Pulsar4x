@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CloakAbilityDB : BaseDataBlob
+    public class CloakAtbDB : BaseDataBlob
     {
         /// <summary>
         /// Max ship size this cloak can handle.
@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new CloakAbilityDB {MaxShipSize = MaxShipSize, CloakMultiplier = CloakMultiplier, OwningEntity = OwningEntity};
+            return new CloakAtbDB {MaxShipSize = MaxShipSize, CloakMultiplier = CloakMultiplier, OwningEntity = OwningEntity};
         }
     }
 }

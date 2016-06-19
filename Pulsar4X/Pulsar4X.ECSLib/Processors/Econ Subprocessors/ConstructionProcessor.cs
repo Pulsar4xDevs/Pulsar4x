@@ -125,13 +125,13 @@ namespace Pulsar4X.ECSLib
                 {ConstructionType.Ships, 0},
             };
 
-            List<KeyValuePair<Entity, List<ComponentInstance>>> factoryEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<ConstructionAbilityDB>()).ToList();
+            List<KeyValuePair<Entity, List<ComponentInstance>>> factoryEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<ConstructionAtbDB>()).ToList();
             foreach (var factoryDesignList in factoryEntities)
             {
                 foreach (var factoryInstance in factoryDesignList.Value)
                 {
                     //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
-                    foreach (var item in factoryDesignList.Key.GetDataBlob<ConstructionAbilityDB>().InternalConstructionPoints)
+                    foreach (var item in factoryDesignList.Key.GetDataBlob<ConstructionAtbDB>().InternalConstructionPoints)
                     {
                         typeRates.SafeValueAdd(item.Key, item.Value);
                     }

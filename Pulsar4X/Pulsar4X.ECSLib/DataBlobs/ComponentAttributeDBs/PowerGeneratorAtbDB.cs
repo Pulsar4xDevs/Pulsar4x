@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class PowerGeneratorAbilityDB : BaseDataBlob
+    public class PowerGeneratorAtbDB : BaseDataBlob
     {
         /// <summary>
         /// PowerOutput per second
@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new PowerGeneratorAbilityDB {PowerOutput = PowerOutput};
+            return new PowerGeneratorAtbDB {PowerOutput = PowerOutput};
         }
     }
 }

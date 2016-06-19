@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class BeamFireControlAbilityDB : BaseDataBlob
+    public class BeamFireControlAtbDB : BaseDataBlob
     {
         /// <summary>
         /// Max range of this Beam Fire Control
@@ -22,10 +22,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public bool FinalFireOnly { get; internal set; }
 
-        public BeamFireControlAbilityDB(double range, double trackingSpeed, bool finalFireOnly) : this((int)range, (int)trackingSpeed, finalFireOnly) { }
+        public BeamFireControlAtbDB(double range, double trackingSpeed, bool finalFireOnly) : this((int)range, (int)trackingSpeed, finalFireOnly) { }
 
         [JsonConstructor]
-        public BeamFireControlAbilityDB(int range = 0, int trackingSpeed = 0, bool finalFireOnly = false)
+        public BeamFireControlAtbDB(int range = 0, int trackingSpeed = 0, bool finalFireOnly = false)
         {
             Range = range;
             TrackingSpeed = trackingSpeed;
@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new BeamFireControlAbilityDB(Range, TrackingSpeed, FinalFireOnly);
+            return new BeamFireControlAtbDB(Range, TrackingSpeed, FinalFireOnly);
         }
     }
 }
