@@ -24,10 +24,15 @@ namespace Pulsar4X.ViewModel.SystemView
                 StarSystems.Add(item, item.NameDB.GetName(factionEntity));
                 
             }
-            
-            StarSystems.SelectionChangedEvent += StarSystems_SelectionChangedEvent;
             StarSystems.SelectedIndex = 0;
+            StarSystems.SelectionChangedEvent += StarSystems_SelectionChangedEvent;
+            
             _gameVM.StarSystems.CollectionChanged += StarSystems_CollectionChanged;
+        }
+
+        public void Initialise()
+        {
+            StarSystems.SelectedIndex = 0;
         }
 
         private void StarSystems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

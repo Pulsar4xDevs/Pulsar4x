@@ -113,12 +113,15 @@ namespace Pulsar4X.ECSLib
                                 return true;
                             }
 
-                            List<Entity> knownJumpPoints = factionInfoDB.KnownJumpPoints[knownSystem];
-                            foreach (Entity knownJumpPoint in knownJumpPoints)
+                            if (factionInfoDB.KnownJumpPoints.ContainsKey(knownSystem))
                             {
-                                if (knownJumpPoint == entity)
+                                List<Entity> knownJumpPoints = factionInfoDB.KnownJumpPoints[knownSystem];
+                                foreach (Entity knownJumpPoint in knownJumpPoints)
                                 {
-                                    return true;
+                                    if (knownJumpPoint == entity)
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }

@@ -41,13 +41,13 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid,int> rates = new Dictionary<Guid, int>();
 
-            List<KeyValuePair<Entity, List<ComponentInstance>>> mineEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<MineResourcesDB>()).ToList();
+            List<KeyValuePair<Entity, List<ComponentInstance>>> mineEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<MineResourcesAtbDB>()).ToList();
             foreach (var mineComponentDesignList in mineEntities)
             {
                 foreach (var mineInstance in mineComponentDesignList.Value)
                 {
                     //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
-                    foreach (var item in mineComponentDesignList.Key.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick)
+                    foreach (var item in mineComponentDesignList.Key.GetDataBlob<MineResourcesAtbDB>().ResourcesPerEconTick)
                     {
                         rates.SafeValueAdd(item.Key, item.Value);
                     }                    

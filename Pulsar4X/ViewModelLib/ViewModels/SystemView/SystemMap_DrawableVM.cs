@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
-
+using System.Windows.Threading;
 
 namespace Pulsar4X.ViewModel.SystemView
 {
@@ -104,7 +104,7 @@ namespace Pulsar4X.ViewModel.SystemView
             Icon = new IconData(item);
             NameString = new TextData(item.GetDataBlob<NameDB>().GetName(gameviewModel.CurrentFaction), (float)item.GetDataBlob<PositionDB>().X, (float)item.GetDataBlob<PositionDB>().Y, 8);
             Icon.PathList.Add(new VectorPathPenPair(NameString));
-
+            gameviewModel.StarSystemViewModel.StarSystems.SelectedKey.SystemSubpulses.SystemDateChangedEvent += SystemSubpulses_SystemDateChangedEvent;
             if (item.HasDataBlob<OrbitDB>() && !item.GetDataBlob<OrbitDB>().IsStationary)
             {
                 switch (item.GetDataBlob<SystemBodyDB>()?.Type)
@@ -140,9 +140,23 @@ namespace Pulsar4X.ViewModel.SystemView
                 //SimpleOrbitEllipse = new OrbitEllipseSimple(item.GetDataBlob<OrbitDB>());
                 //SimpleOrbitEllipseFading = new OrbitEllipseSimpleFading(item);
             }
-            gameviewModel.DateChangedEvent += GameviewModel_DateChangedEvent;
+            //gameviewModel.DateChangedEvent += GameviewModel_DateChangedEvent;
         }
+
+        private void SystemSubpulses_SystemDateChangedEvent(DateTime newDate)
+        {
         
+                Icon.CurrentDateTime = newDate;
+                if (OrbitEllipse != null)
+                    OrbitEllipse.CurrentDateTime = newDate;
+                if (SimpleOrbitEllipseFading != null)
+                    SimpleOrbitEllipseFading.CurrentDateTime = newDate;        
+
+        }
+
+        /// <summary>
+        /// This may be obsolite
+        /// </summary>
         private void GameviewModel_DateChangedEvent(DateTime oldDate, DateTime newDate)
         {
             Icon.CurrentDateTime = newDate;

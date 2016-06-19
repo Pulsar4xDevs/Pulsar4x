@@ -10,26 +10,17 @@ using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
-    public delegate void DateChangedEventHandler(DateTime oldDate, DateTime newDate);
+
     /// <summary>
     /// This view model maps to the main game class. It provides lists of factions, systems and other high level info.
     /// </summary>
     public class GameVM : IViewModel
     {
         private ObservableCollection<SystemVM> _systems;
-        public event DateChangedEventHandler DateChangedEvent;
-        private DateTime _currentDateTime;
-        public DateTime CurrentDateTime
-        {
-            get { return _currentDateTime; }
-            set
-            {
-                DateTime old = _currentDateTime;
-                _currentDateTime = value;
-                DateChangedEvent?.Invoke(old, _currentDateTime);
-                OnPropertyChanged();
-            }
-        }
+
+
+        public TimeControlVM TimeControl { get; } = new TimeControlVM();
+
 
         public Player CurrentPlayer { get; private set; }
 
@@ -69,17 +60,7 @@ namespace Pulsar4X.ViewModel
         }
         private Entity _currentFaction;
 
-        //progress bar in MainWindow should be bound to this
-        public double ProgressValue
-        {
-            get { return _progressValue; }
-            set
-            {
-                _progressValue = value;
-                OnPropertyChanged();
-            }
-        }
-        private double _progressValue;
+
 
         public string StatusText { get { return _statusText; } set { _statusText = value; OnPropertyChanged(); } }
         private string _statusText;
@@ -152,11 +133,12 @@ namespace Pulsar4X.ViewModel
             ReadOnlyDictionary<Entity, AccessRole> roles = CurrentPlayer.GetAccessRoles(CurrentAuthToken);
 
             CurrentFaction = roles.FirstOrDefault(role => (role.Value & AccessRole.Owner) != 0).Key;
-            CurrentDateTime = Game.CurrentDateTime;
-            ProgressValue = 0;//reset the progressbar
+
+
             StatusText = "Game Created.";
 
             StarSystemViewModel = new SystemView.StarSystemVM(this, Game, CurrentFaction);
+            StarSystemViewModel.Initialise();
         }
 
         public void LoadGame(string pathToFile)
@@ -168,8 +150,7 @@ namespace Pulsar4X.ViewModel
             // TODO: Select Default player, generate auth token for them.
             CurrentAuthToken = new AuthenticationToken(Game.SpaceMaster);
             CurrentFaction = Game.GameMasterFaction;
-            CurrentDateTime = Game.CurrentDateTime;
-            ProgressValue = 0;
+
             StatusText = "Game Loaded.";
         }
 
@@ -178,7 +159,7 @@ namespace Pulsar4X.ViewModel
             StatusText = "Saving Game...";
 
             SerializationManager.Export(Game, pathToFile);
-            ProgressValue = 0;
+
             StatusText = "Game Saved";
         }
 
@@ -203,51 +184,6 @@ namespace Pulsar4X.ViewModel
         }
         
 
-        public void AdvanceTime(TimeSpan pulseLength, CancellationToken pulseCancellationToken)
-        {
-            var pulseProgress = new Progress<double>(UpdatePulseProgress);
-            
-            int secondsPulsed;
-
-            secondsPulsed = Game.AdvanceTime((int)pulseLength.TotalSeconds, pulseCancellationToken, pulseProgress);
-            Refresh();
-            //e.Handled = true;
-            ProgressValue = 0;
-        }
-
-        public ICommand AdvanceTimeCmd { get { return new RelayCommand<string>(param => AdvanceTime(param)); } }
-        public void AdvanceTime(string seconds)
-        {
-            var pulseProgress = new Progress<double>(UpdatePulseProgress);
-            int secondsPulsed;
-            secondsPulsed = Game.AdvanceTime(int.Parse(seconds), pulseProgress);
-            Refresh();
-            CurrentDateTime = Game.CurrentDateTime;
-               
-        }
-
-        private void UpdatePulseProgress(double progress)
-        {
-            // Do some UI stuff with Progress percent
-            ProgressValue = progress * 100;
-        }
-
-        /// <summary>
-        /// OnProgressUpdate eventhandler for the Progress class.
-        /// Called from the task thread, this call must be marshalled to the UI thread.
-        /// </summary>
-        private void OnProgressUpdate(double progress)
-        {
-            // The Dispatcher contains the UI thread. Make sure we are on the UI thread.
-            //if (Thread.CurrentThread != Dispatcher.Thread)
-            //{
-            //    Dispatcher.BeginInvoke(new ProgressUpdate(OnProgressUpdate), progress);
-            //    return;
-            //}
-
-            ProgressValue = progress * 100;
-        }
-
         private Game _game;
         private Player _currentPlayer;
 
@@ -261,7 +197,8 @@ namespace Pulsar4X.ViewModel
             {
                 _game = value;
                 OnPropertyChanged();
-
+                TimeControl.Initialise(this);
+                
                 //forces anything listing for a change in the HasGame property to update. 
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("HasGame"));
             }

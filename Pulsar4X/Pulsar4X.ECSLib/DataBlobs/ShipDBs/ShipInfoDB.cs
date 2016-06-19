@@ -34,11 +34,12 @@ namespace Pulsar4X.ECSLib
         public double TCS { get {return Tonnage * 0.02;} }
 
         ///  Ship orders.  
-        public Queue<Entity> Orders;
+        public Queue<BaseOrder> Orders;
 
 
         public ShipInfoDB()
         {
+            Orders = new Queue<BaseOrder>();
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
@@ -54,7 +55,11 @@ namespace Pulsar4X.ECSLib
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
             IsMilitary = shipInfoDB.IsMilitary;
-            Orders = new Queue<Entity>(shipInfoDB.Orders);
+
+            if (shipInfoDB.Orders == null)
+                Orders = null;
+            else
+                Orders = new Queue<BaseOrder>(shipInfoDB.Orders);
         }
 
         /// <summary>
@@ -77,17 +82,17 @@ namespace Pulsar4X.ECSLib
         /// Orders functions
         /// </summary>
 
-        public Entity CheckNextOrder()
+        public BaseOrder CheckNextOrder()
         {
             if (Orders == null)
-                return Entity.InvalidEntity;
+                return null;
             if (Orders.ToArray().Length == 0)
-                return Entity.InvalidEntity;
-            Entity nextOrder = Orders.Peek();
+                return null;
+            BaseOrder nextOrder = Orders.Peek();
             return nextOrder;
         }
 
-        public void AddOrder(Entity order)
+        public void AddOrder(BaseOrder order)
         {
             Orders.Enqueue(order);
             return;
@@ -97,6 +102,18 @@ namespace Pulsar4X.ECSLib
         {
             Orders.Dequeue();
             return;
+        }
+
+        public void ClearOrders()
+        {
+            while (Orders.Count > 0)
+                Orders.Dequeue();
+            return;
+        }
+
+        public int NumOrders()
+        {
+            return Orders.Count;
         }
     }
 }
