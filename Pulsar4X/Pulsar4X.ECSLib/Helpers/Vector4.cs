@@ -162,7 +162,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double LengthSquared()
         {
-            return X * X + Y * Y + Z * Z + W * W;
+            return (X * X) + (Y * Y) + (Z * Z) + (W * W);
         }
 
         /// <summary>
