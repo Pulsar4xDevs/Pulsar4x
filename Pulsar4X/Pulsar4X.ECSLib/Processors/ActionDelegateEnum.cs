@@ -11,7 +11,8 @@ namespace Pulsar4X.ECSLib
         JumpOutProcessor,
         JumpInProcessor,
         EconProcessor,
-        OrbitProcessor, 
+        OrbitProcessor,
+        MoveOnlyProcessor, 
         SomeOtherProcessor
     }
 
@@ -32,6 +33,7 @@ namespace Pulsar4X.ECSLib
             { PulseActionEnum.JumpInProcessor, new Action<StarSystem>(processor => { InterSystemJumpProcessor.JumpIn(_game, _jumpPair) ;}) },
             { PulseActionEnum.EconProcessor, new Action<StarSystem>(processor => { EconProcessor.ProcessSystem(_currentSystem);}) },
             { PulseActionEnum.OrbitProcessor, new Action<StarSystem>(processor => { OrbitProcessor.UpdateSystemOrbits(_currentSystem);}) },
+            { PulseActionEnum.MoveOnlyProcessor, new Action<StarSystem>(processor => { DoNothing();}) }, //movement always runs on a subpulse prior to this. 
             //{ SystemActionEnum.SomeOtherProcessor, new Action<StarSystem>(processor => { Something.SomeOtherProcess(_currentSystem, _currentEntity);}) },
         };
         internal static void DoAction(PulseActionEnum action, StarSystem starSystem, Entity entity)
@@ -46,7 +48,6 @@ namespace Pulsar4X.ECSLib
         {
 
             _currentSystem = starSystem;
-
             EnumProcessorMap[action].DynamicInvoke(starSystem);
 
         }
@@ -58,6 +59,9 @@ namespace Pulsar4X.ECSLib
 
             EnumProcessorMap[action].DynamicInvoke(game, jumpPair);            
         }
+
+        private static void DoNothing()
+        { }
     }
 
     
