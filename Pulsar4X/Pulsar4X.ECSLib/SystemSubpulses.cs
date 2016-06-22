@@ -171,23 +171,25 @@ namespace Pulsar4X.ECSLib
         /// <returns>datetime processed to</returns>
         private void ProcessToNextInterupt(DateTime nextInteruptDateTime)
         {
-            
-            foreach (KeyValuePair<PulseActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
+            if (EntityDictionary.ContainsKey(nextInteruptDateTime))
             {
-                if (delegateListPair.Value.Count == 0)// == null) //if the list is empty, it's a systemwide interupt
+                foreach (KeyValuePair<PulseActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
                 {
-                    //delegateListPair.Key.DynamicInvoke(_starSystem);
-                    PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem);
-                }
-                else
-                    foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                    if (delegateListPair.Value.Count == 0)// == null) //if the list is empty, it's a systemwide interupt
                     {
-                        //delegateListPair.Key.DynamicInvoke(entity);
-                        PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem, entity);
+                        //delegateListPair.Key.DynamicInvoke(_starSystem);
+                        PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem);
                     }
-            }
+                    else
+                        foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                        {
+                            //delegateListPair.Key.DynamicInvoke(entity);
+                            PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem, entity);
+                        }
+                }
 
-            EntityDictionary.Remove(nextInteruptDateTime);
+                EntityDictionary.Remove(nextInteruptDateTime);
+            }
 
             SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent            
         }

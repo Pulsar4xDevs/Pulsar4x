@@ -19,6 +19,8 @@ namespace Pulsar4X.ECSLib
                 { typeof(ShipInfoDB), new Action<ShipInfoDB>(processor => {ShipAndColonyInfoProcessor.ReCalculateShipTonnaageAndHTK(CurrentEntity); }) },
             };
 
+        
+
         internal static void ReCalcAbilities(Entity entity)
         {
              
@@ -34,4 +36,7 @@ namespace Pulsar4X.ECSLib
             //}
         }
     }
+
+
+
 }

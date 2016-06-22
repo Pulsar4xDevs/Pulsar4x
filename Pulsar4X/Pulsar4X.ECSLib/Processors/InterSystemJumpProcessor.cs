@@ -8,6 +8,7 @@ namespace Pulsar4X.ECSLib
 {
     public static class InterSystemJumpProcessor
     {
+        //TODO look at turning the entity into a ProtoEntity instead of shifting it to the GlobalManager
         internal static void JumpOut(Game game, SystemEntityJumpPair jumpPair)
         {
             jumpPair.JumpingEntity.Transfer(game.GlobalManager);

@@ -165,6 +165,8 @@
     <Compile Include="DataBlobs\ComponentAttributeDBs\StandardShieldAtbDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\ColonyLifeSupportDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\WeaponStateDB.cs" />
+    <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\MoveOrder.cs" />
     <Compile Include="Factories\ShipComponents\ComponentDesign.cs" />
@@ -240,6 +242,7 @@
     <Compile Include="Processors\ShipMovementProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\TechProcessor.cs" />
     <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
+    <Compile Include="Processors\WeaponProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />

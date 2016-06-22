@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         {
             // Get current population
             Dictionary<Entity, long> currentPopulation = colony.GetDataBlob<ColonyInfoDB>().Population;
-            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructure = colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
+            List<KeyValuePair<Entity, List<Entity>>> infrastructure = colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
             long popSupportValue;
 
             //  Pop Cap = Total Population Support Value / Colony Cost
@@ -91,7 +91,7 @@ namespace Pulsar4X.ECSLib
 
             var infrastructure = new List<Entity>();
 
-            List<KeyValuePair<Entity, List<ComponentInstance>>> infrastructureEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
+            List<KeyValuePair<Entity, List<Entity>>> infrastructureEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
             long totalMaxPop = 0;
 
             foreach (var infrastructureDesignList in infrastructureEntities)

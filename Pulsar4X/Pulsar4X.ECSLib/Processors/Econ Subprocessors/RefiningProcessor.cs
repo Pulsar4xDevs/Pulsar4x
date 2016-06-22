@@ -104,11 +104,11 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid, int> rates = new Dictionary<Guid, int>();
 
-            List<KeyValuePair<Entity, List<ComponentInstance>>> mineEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<RefineResourcesAtbDB>()).ToList();
-            foreach (var mineComponentDesignList in mineEntities)
+            List<KeyValuePair<Entity, List<Entity>>> refineingEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<RefineResourcesAtbDB>()).ToList();
+            foreach (var refiningComponentDesignList in refineingEntities)
             {
-                RefineResourcesAtbDB refineblob = mineComponentDesignList.Key.GetDataBlob<RefineResourcesAtbDB>();
-                foreach (var mineInstance in mineComponentDesignList.Value)
+                RefineResourcesAtbDB refineblob = refiningComponentDesignList.Key.GetDataBlob<RefineResourcesAtbDB>();
+                foreach (var mineInstance in refiningComponentDesignList.Value)
                 {
                     //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
                     foreach (var item in refineblob.RefinableMatsList)
