@@ -18,7 +18,8 @@ namespace Pulsar4X.ECSLib
             if (stateInfo.CoolDown <= TimeSpan.FromSeconds(0) && stateInfo.Target != null)
             {
                 //TODO chance to hit
-                ShipDamageProcessor.OnTakingDamage(stateInfo.Target);
+                int damageAmount = 10;//TODO damageAmount calc
+                ShipDamageProcessor.OnTakingDamage(stateInfo.Target, damageAmount);
                 stateInfo.CoolDown = TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
                 //starSys.SystemSubpulses.AddEntityInterupt(starSys.SystemSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, highLevelEntity, beamWeapon);
             }            

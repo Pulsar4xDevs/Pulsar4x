@@ -33,19 +33,20 @@ namespace Pulsar4X.ECSLib
         //private static Entity CurrentEntity;
         internal static Dictionary<Type, Delegate> TypeMap = new Dictionary<Type, Delegate>
         {
-            { typeof(EnginePowerAtbDB), new Action<Entity>(entity => { if (!entity.HasDataBlob<PropulsionDB>()) entity.SetDataBlob<PropulsionDB>(new PropulsionDB()); }) },
+            { typeof(EnginePowerAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!shipOrColonyEntity.HasDataBlob<PropulsionDB>()) shipOrColonyEntity.SetDataBlob<PropulsionDB>(new PropulsionDB()); }) },
+            { typeof(BeamWeaponAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<BeamWeaponsDB>()) shipOrColonyEntity.SetDataBlob(new BeamWeaponsDB()); }) },
         };
 
 
-        internal static void AddAttribute(Entity shipOrColony, Entity component)
+        internal static void AddAttribute(Entity shipOrColony, Entity componentDesign, Entity componentInstance)
         {
 
             //CurrentEntity = shipOrColony;
-            foreach (var datablob in component.DataBlobs)
+            foreach (var datablob in componentDesign.DataBlobs)
             {
                 var t = datablob.GetType();
                 if (TypeMap.ContainsKey(t))
-                    TypeMap[t].DynamicInvoke(shipOrColony); // invoke appropriate delegate  
+                    TypeMap[t].DynamicInvoke(shipOrColony, componentInstance); // invoke appropriate delegate  
             }
         }
     }

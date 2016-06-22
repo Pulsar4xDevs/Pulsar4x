@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
             if (parentEntity.HasDataBlob<ComponentInstancesDB>())
             {
                 Entity design = instance.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
-                AttributeToAbilityMap.AddAttribute(parentEntity, design);
+                AttributeToAbilityMap.AddAttribute(parentEntity, design, instance);
                 
                 ComponentInstancesDB instancesDict = parentEntity.GetDataBlob<ComponentInstancesDB>();
 
@@ -60,12 +60,7 @@ namespace Pulsar4X.ECSLib
                     instancesDict.SpecificInstances.Add(design, new List<Entity>() { instance });
                 else
                     instancesDict.SpecificInstances[design].Add(instance);
-                //ComponentInstancesDB componentInstance = parentEntity.GetDataBlob<ComponentInstancesDB>();
 
-                //if (!componentInstance.SpecificInstances.ContainsKey(specificInstance.DesignEntity)) //if the entity doesnt already have this component design listed, 
-                //    componentInstance.SpecificInstances.Add(specificInstance.DesignEntity, new List<ComponentInstanceInfoDB>()); //add the design ID to the dictionary with a new empty list
-                //componentInstance.SpecificInstances[specificInstance.DesignEntity].Add(specificInstance); //add the specificInstance
-                //ReCalcProcessor.ReCalcAbilities(parentEntity);
             }
             else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
         }
