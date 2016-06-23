@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
         }
 
         // Creates a new order for a ship to move cargo from the origin to the target
-        public bool MoveCargoOrder(Entity ship, Entity origin, Entity target, string cargo, long amount)
+        public bool MoveCargoOrder(Entity ship, Entity origin, Entity target, Guid cargo, double amount)
         {
             throw new NotImplementedException();
         }
