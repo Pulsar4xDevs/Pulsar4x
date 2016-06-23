@@ -162,6 +162,7 @@
     <Compile Include="DataBlobs\ComponentAttributeDBs\PassiveThermalSensorAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\PopulationSupportAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\PowerGeneratorAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\SimpleBeamWeaponAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\StandardShieldAtbDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\ColonyLifeSupportDB.cs" />

@@ -14,11 +14,6 @@ namespace Pulsar4X.ECSLib
         Railgun,
     }
 
-    public class BeamWeaponStateInfo
-    {
-        public float CurrentCharge { get; internal set; }
-    }
-
     public class BeamWeaponAtbDB : BaseDataBlob
     {
         /// <summary>
