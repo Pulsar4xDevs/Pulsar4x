@@ -8,6 +8,8 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class ShipInfoDB : BaseDataBlob
     {
+
+        #region Properties
         /// <summary>
         /// The guid of the ship class, if this is a ship class then the Guid will be empty. 
         /// use IsClassDefinition() to determin if this is a ship class definmition
@@ -36,6 +38,9 @@ namespace Pulsar4X.ECSLib
         ///  Ship orders.  
         public Queue<BaseOrder> Orders;
 
+        #endregion
+
+        #region Constructors
 
         public ShipInfoDB()
         {
@@ -62,6 +67,8 @@ namespace Pulsar4X.ECSLib
                 Orders = new Queue<BaseOrder>(shipInfoDB.Orders);
         }
 
+        #endregion
+
         /// <summary>
         /// Returns true if this is a definition of a class.
         /// </summary>
@@ -78,6 +85,7 @@ namespace Pulsar4X.ECSLib
             return new ShipInfoDB(this);
         }
 
+        #region Orders functions
         /// <summary>
         /// Orders functions
         /// </summary>
@@ -115,5 +123,20 @@ namespace Pulsar4X.ECSLib
         {
             return Orders.Count;
         }
+
+        // Processes the next order on the queue.  If it is completed, return true.  If there is more work to do, return false.
+        public bool ProcessOrder()
+        {
+            BaseOrder nextOrder = CheckNextOrder();
+
+            if (nextOrder.processOrder())
+            {
+                RemoveNextOrder();
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
     }
 }
