@@ -52,7 +52,6 @@ namespace Pulsar4X.ECSLib
             var maintenance = new MaintenanceDB();
             var missileWeapons = new MissileWeaponsDB();
             var power = new PowerDB();
-            var propulsion = new PropulsionDB();
             var sensorProfile = new SensorProfileDB();
             var sensors = new SensorsDB();
             var shields = new ShieldsDB();
@@ -75,7 +74,7 @@ namespace Pulsar4X.ECSLib
                 maintenance,
                 missileWeapons,
                 power,
-                propulsion,
+                //propulsion,
                 sensorProfile,
                 sensors,
                 shields,

@@ -7,6 +7,7 @@ using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel.SystemView;
 using Pulsar4X.ViewModel;
 
+
 namespace Pulsar4X.CrossPlatformUI.Views
 {
     public class SystemMap_DrawableView : Drawable
@@ -132,6 +133,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             if (e.PropertyName == nameof(SystemMap_DrawableVM.SystemBodies))
                 SystemBodies_CollectionChanged();
             Invalidate();
+            //Application.Instance.AsyncInvoke(() => { Invalidate(); });            
+            
         }
 
         protected override void OnPaint(PaintEventArgs e)

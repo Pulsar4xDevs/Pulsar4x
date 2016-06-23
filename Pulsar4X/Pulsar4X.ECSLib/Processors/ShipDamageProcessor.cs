@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public static void OnTakingDamage(Entity ship)
+        public static void OnTakingDamage(Entity ship, int damageAmount)
         {
             //TODO do some damage to a component.
             ReCalcProcessor.ReCalcAbilities(ship);

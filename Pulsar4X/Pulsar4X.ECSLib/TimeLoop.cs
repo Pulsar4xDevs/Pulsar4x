@@ -1,18 +1,22 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
 namespace Pulsar4X.ECSLib
 {
-    class TimeLoop
+    public delegate void DateChangedEventHandler(DateTime newDate);
+
+    [JsonObject(MemberSerialization.OptIn)]
+    public class TimeLoop : IEquatable<TimeLoop>
     {
+        [JsonProperty]
+        private SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
+
         private Stopwatch _stopwatch = new Stopwatch();
         private Timer _timer = new Timer();
 
@@ -23,13 +27,18 @@ namespace Pulsar4X.ECSLib
             set
             {
                 _timeMultiplier = value;
-                _timer.Interval = _tickInterval.Milliseconds * value;
+                _timer.Interval = _tickInterval.TotalMilliseconds * value;
             }
         } 
         private float _timeMultiplier = 1f;
 
         private TimeSpan _tickInterval = TimeSpan.FromSeconds(1);
-        private TimeSpan _tickLength = TimeSpan.FromSeconds(1);
+        public TimeSpan TickFrequency { get { return _tickInterval; } set { _tickInterval = value;
+            _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
+        } }
+
+
+        public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(1);
 
         private bool _isProcessing = false;
         private bool _isOvertime = false;
@@ -39,24 +48,90 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public TimeSpan LastProcessingTime { get; private set; } = TimeSpan.Zero;
 
-        public TimeLoop(Game game)
+        /// <summary>
+        /// This invokes the DateChangedEvent.
+        /// </summary>
+        /// <param name="state"></param>
+        private void InvokeDateChange(object state)
         {
+            GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
+        }
+        [JsonProperty]
+        private DateTime _gameGlobalDateTime;
+        internal DateTime _targetDateTime;
+        public DateTime GameGlobalDateTime
+        {
+            get { return _gameGlobalDateTime; }
+            internal set
+            {
+                _gameGlobalDateTime = value;
+                if (_game.SyncContext != null)
+                    _game.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
+                else
+                    InvokeDateChange(value);//if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
+            }
+        }
+        /// <summary>
+        /// Fired when the game date is incremented. 
+        /// All systems are in sync at this event.
+        /// </summary>
+        public event DateChangedEventHandler GameGlobalDateChangedEvent;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game"></param>
+        internal TimeLoop(Game game)
+        {
+            
             _game = game;
-            _timer.Interval = _tickInterval.Milliseconds;
-            _timer.Enabled = true;
+            _timer.Interval = _tickInterval.TotalMilliseconds;
+            _timer.Enabled = false;
             _timer.Elapsed += Timer_Elapsed;
             
         }
 
+        #region Public Time Methods. UI interacts with time here
+
+        /// <summary>
+        /// PausesTimeloop
+        /// </summary>
         public void PauseTime()
         {
             _timer.Stop();
         }
-
+        /// <summary>
+        /// Stars the timeloop
+        /// </summary>
         public void StartTime()
         {
             _timer.Start();
         }
+
+        #endregion
+
+
+        /// <summary>
+        /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
+        /// this forces all systems to synch at this datetime.
+        /// </summary>
+        /// <param name="datetime"></param>
+        /// <param name="action"></param>
+        /// <param name="jumpPair"></param>
+        internal void AddSystemInteractionInterupt(DateTime datetime, PulseActionEnum action, SystemEntityJumpPair jumpPair)
+        {
+            if (!EntityDictionary.ContainsKey(datetime))
+                EntityDictionary.Add(datetime, new Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>());
+            if (!EntityDictionary[datetime].ContainsKey(action))
+                EntityDictionary[datetime].Add(action, new List<SystemEntityJumpPair>());
+            EntityDictionary[datetime][action].Add(jumpPair);
+        }
+
+        internal void AddHaltingInterupt(DateTime datetime)
+        {
+            throw new NotImplementedException();
+        }
+
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -70,7 +145,9 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        void DoProcessing()
+
+
+        private void DoProcessing()
         {
             _isProcessing = true;
             _timer.Stop();
@@ -78,123 +155,72 @@ namespace Pulsar4X.ECSLib
             _stopwatch.Start(); //start the processor loop stopwatch
             _isOvertime = false;
 
-            //do processors
-            Parallel.ForEach<StarSystem>(_game.Systems.Values, item => SystemProcessing(item));
-            //I think the above 'blocks' till all the tasks are done.
+            //check for global interupts
+            _targetDateTime = GameGlobalDateTime + Ticklength;
 
-            LastProcessingTime = _stopwatch.Elapsed;
+         
+            while (GameGlobalDateTime < _targetDateTime)
+            {
+                DateTime nextInterupt = ProcessNextInterupt(_targetDateTime);
+                //do system processors
+                Parallel.ForEach<StarSystem>(_game.Systems.Values, item => item.SystemSubpulses.ProcessSystem(nextInterupt));
+                //The above 'blocks' till all the tasks are done.
+
+                GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
+            }
+
+            LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
             _stopwatch.Reset();
+
             if (_isOvertime)
             {
-                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event.
+                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
             }
             _isProcessing = false;
         }
 
-        void SystemProcessing(object systemObj)
+        private DateTime ProcessNextInterupt(DateTime maxDateTime)
         {
-            //check validity of commands etc. here.
-
-            //do any system to system interaction here, ie ship jumping between systems.
-
-            StarSystem system = systemObj as StarSystem;
-            DateTime currentDateTime = system.Game.CurrentDateTime;
-            
-
-            TimeSpan systemElapsedTime = new TimeSpan();
-            //the system may need to run several times for a wanted tickLength
-            //keep processing the system till we've reached the wanted ticklength
-            while (systemElapsedTime < _tickLength)
+            DateTime processedTo;
+            DateTime nextInteruptDateTime;
+            if (EntityDictionary.Keys.Count != 0)
             {
-                
-                //calculate max time the system can run/time to next interupt
-                TimeSpan timeDelta = _tickLength - systemElapsedTime; //math.min(tickLenght - systemElapsedTime, system.NextTickLen)
-                ShipMovementProcessor.Process(system, timeDelta.Seconds);
-                int orbits = 0;
-                OrbitProcessor.UpdateSystemOrbits(system, _game, ref orbits);
-
-                //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                system.SystemSubpulses.ProcessNextDateTime(currentDateTime + systemElapsedTime, timeDelta);
-
-                systemElapsedTime += timeDelta;
-
-            }
-        }
-    }
-
-    /// <summary>
-    /// handles and processes entities for a specific datetime. 
-    /// TODO:  handle removal of entities from the system.
-    /// TODO:  handle removal of ability datablobs from an entity
-    /// TODO:  handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
-    /// </summary>
-    internal class SystemSubPulses
-    {
-        //TODO there may be a more efficent datatype for this. 
-        private SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<Delegate, List<Entity>>>();
-        private StarSystem _starSystem;
-        internal SystemSubPulses(StarSystem parentStarSystem)
-        {
-            _starSystem = parentStarSystem;
-            Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
-            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
-        }
-
-        /// <summary>
-        /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
-        /// </summary>
-        /// <param name="nextDateTime"></param>
-        /// <param name="action"></param>
-        /// <param name="entity"></param>
-        internal void AddEntityInterupt(DateTime nextDateTime, Delegate action, Entity entity)
-        {
-            if (!EntityDictionary.ContainsKey(nextDateTime))                 
-                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate,List<Entity>>());
-            if(!EntityDictionary[nextDateTime].ContainsKey(action))
-                EntityDictionary[nextDateTime].Add(action, new List<Entity>());
-            EntityDictionary[nextDateTime][action].Add(entity);
-        }
-
-        internal void AddSystemInterupt(DateTime nextDateTime, Delegate action)
-        {
-            if(!EntityDictionary.ContainsKey(nextDateTime))
-                EntityDictionary.Add(nextDateTime, new Dictionary<Delegate, List<Entity>>());
-            if(!EntityDictionary[nextDateTime].ContainsKey(action))
-                EntityDictionary[nextDateTime].Add(action, null); //a null entity list indicates a systemwide interupt. 
-        }
-
-        /// <summary>
-        /// process to next subpulse
-        /// </summary>
-        /// <param name="currentDateTime"></param>
-        /// <param name="maxSpan">maximum time delta</param>
-        /// <returns>datetime processed to</returns>
-        internal DateTime ProcessNextDateTime(DateTime currentDateTime, TimeSpan maxSpan)
-        {
-            DateTime processedToDateTime;
-            DateTime firstDateTime = EntityDictionary.Keys.Min();
-            if (firstDateTime <= currentDateTime + maxSpan)
-            {
-                foreach (KeyValuePair<Delegate, List<Entity>> delegateListPair in EntityDictionary[firstDateTime])
+                nextInteruptDateTime = EntityDictionary.Keys.Min();
+                if (nextInteruptDateTime <= maxDateTime)
                 {
-                    if (delegateListPair.Value == null) //if the list is null, it's a systemwide interupt
+                    foreach (var delegateListPair in EntityDictionary[nextInteruptDateTime])
                     {
-                        delegateListPair.Key.DynamicInvoke(_starSystem);
-                    }
-                    else
-                        foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                        foreach (var jumpPair in delegateListPair.Value) //foreach entity in the value list
                         {
-                            delegateListPair.Key.DynamicInvoke(entity);
+                            //delegateListPair.Key.DynamicInvoke(_game, jumpPair);
+                            PulseActionDictionary.DoAction(delegateListPair.Key, _game, jumpPair);
                         }
-                }
 
-                processedToDateTime = firstDateTime;
-                EntityDictionary.Remove(firstDateTime);
+                    }
+                    processedTo = nextInteruptDateTime;
+                }
+                else
+                    processedTo = maxDateTime;
             }
             else
-                processedToDateTime = currentDateTime + maxSpan;
+                processedTo = maxDateTime;
 
-            return processedToDateTime;
+            return processedTo;
+        }
+
+
+
+        public bool Equals(TimeLoop other)
+        {
+            bool equality = false;
+            if (GameGlobalDateTime.Equals(other.GameGlobalDateTime))
+            {
+                if (EntityDictionary.Count.Equals(other.EntityDictionary.Count))
+                    equality = true;
+            }
+            return equality;
         }
     }
+
+
 }
