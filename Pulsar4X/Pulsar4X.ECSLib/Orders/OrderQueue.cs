@@ -173,6 +173,8 @@ namespace Pulsar4X.ECSLib
 
         public void ClearOrders()
         {
+            if (_orderList.Count == 0)
+                return;
             BaseOrder order = _orderList.First<BaseOrder>();
             while (order != null)
             {
