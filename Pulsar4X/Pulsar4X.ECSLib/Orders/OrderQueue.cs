@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
         }
 
         // Creates a new order for a ship to move cargo from the origin to the target
-        public bool MoveCargoOrder(Entity ship, Entity origin, Entity target, string cargo, long amount)
+        public bool MoveCargoOrder(Entity ship, Entity origin, Entity target, Guid cargo, double amount)
         {
             throw new NotImplementedException();
         }
@@ -173,6 +173,8 @@ namespace Pulsar4X.ECSLib
 
         public void ClearOrders()
         {
+            if (_orderList.Count == 0)
+                return;
             BaseOrder order = _orderList.First<BaseOrder>();
             while (order != null)
             {
