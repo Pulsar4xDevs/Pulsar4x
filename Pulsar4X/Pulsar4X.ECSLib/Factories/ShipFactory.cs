@@ -27,7 +27,18 @@ namespace Pulsar4X.ECSLib
             PositionDB position = new PositionDB(pos, starsys.Guid);
             protoShip.SetDataBlob(position);
 
-            return new Entity(systemEntityManager, protoShip);
+            Entity shipEntity = new Entity(systemEntityManager, protoShip);
+
+            foreach (var componentType in shipEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
+            {
+                foreach (var componentInstance in componentType.Value)
+                {
+                    AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance);
+                }
+            }
+
+            ReCalcProcessor.ReCalcAbilities(shipEntity);
+            return shipEntity;
         }
 
         public static Entity CreateNewShipClass(Game game, Entity faction, string className = null)
@@ -42,7 +53,6 @@ namespace Pulsar4X.ECSLib
             // lets start by creating all the Datablobs that make up a ship class: TODO only need to add datablobs for compoents it has abilites for.
             var shipInfo = new ShipInfoDB();
             var armor = new ArmorDB();
-            var beamWeapons = new BeamWeaponsDB();
             var buildCost = new BuildCostDB();
             var cargo = new CargoDB();
             var crew = new CrewDB();
@@ -64,7 +74,6 @@ namespace Pulsar4X.ECSLib
             {
                 shipInfo,
                 armor,
-                beamWeapons,
                 buildCost,
                 cargo,
                 crew,
@@ -74,7 +83,6 @@ namespace Pulsar4X.ECSLib
                 maintenance,
                 missileWeapons,
                 power,
-                //propulsion,
                 sensorProfile,
                 sensors,
                 shields,

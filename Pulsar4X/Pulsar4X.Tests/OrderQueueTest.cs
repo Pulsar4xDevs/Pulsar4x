@@ -25,7 +25,10 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new NewGameSettings());
+            NewGameSettings settings = new NewGameSettings();
+            settings.MaxSystems = 10;
+            
+            _game = new Game(settings);
             StaticDataManager.LoadData("Pulsar4x", _game);
             _player = _game.AddPlayer("Test Player");
             _faction = DefaultStartFactory.DefaultHumans(_game, _player, "Test Faction");

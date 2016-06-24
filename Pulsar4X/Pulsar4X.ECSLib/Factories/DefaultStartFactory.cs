@@ -60,8 +60,10 @@ namespace Pulsar4X.ECSLib
         {
             var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
             Entity engine = DefaultEngineDesign(game, faction);
+            Entity laser = DefaultSimpleLaser(game, faction);
             ShipFactory.AddShipComponent(shipDesign, engine);
             ShipFactory.AddShipComponent(shipDesign, engine);
+            ShipFactory.AddShipComponent(shipDesign, laser);
             return shipDesign;
         }
 
@@ -75,6 +77,19 @@ namespace Pulsar4X.ECSLib
             engineDesign.Name = "DefaultEngine1";
             //engineDesignDB.ComponentDesignAbilities[1]
             return GenericComponentFactory.DesignToEntity(game, faction, engineDesign);
+        }
+
+        static Entity DefaultSimpleLaser(Game game, Entity faction)
+        {
+            ComponentDesign laserDesign;
+            ComponentTemplateSD laserSD = game.StaticData.Components[new Guid("8923f0e1-1143-4926-a0c8-66b6c7969425")];
+            laserDesign = GenericComponentFactory.StaticToDesign(laserSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            laserDesign.ComponentDesignAbilities[0].SetValueFromInput(10);
+            laserDesign.ComponentDesignAbilities[0].SetValueFromInput(5000);
+            laserDesign.ComponentDesignAbilities[0].SetValueFromInput(5);
+
+            return GenericComponentFactory.DesignToEntity(game, faction, laserDesign);
+
         }
     }
 

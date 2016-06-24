@@ -54,6 +54,7 @@ namespace Pulsar4X.ECSLib
             Collier = shipInfoDB.Collier;
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
+            Tonnage = shipInfoDB.Tonnage;
             IsMilitary = shipInfoDB.IsMilitary;
 
             if (shipInfoDB.Orders == null)
