@@ -25,7 +25,11 @@ namespace Pulsar4X.ECSLib
                     totalHTK = componentInstance.GetDataBlob<ComponentInstanceInfoDB>().HTKRemaining;
                 }
             }
-            shipInfo.Tonnage = totalTonnage;
+            if (shipInfo.Tonnage != totalTonnage)
+            {
+                shipInfo.Tonnage = totalTonnage;
+                ShipMovementProcessor.CalcMaxSpeed(shipEntity);
+            }
             shipInfo.InternalHTK = totalHTK;
         }
 
@@ -52,7 +56,7 @@ namespace Pulsar4X.ECSLib
             if (parentEntity.HasDataBlob<ComponentInstancesDB>())
             {
                 Entity design = instance.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
-                AttributeToAbilityMap.AddAttribute(parentEntity, design, instance);
+                AttributeToAbilityMap.AddAbility(parentEntity, design, instance);
                 
                 ComponentInstancesDB instancesDict = parentEntity.GetDataBlob<ComponentInstancesDB>();
 
@@ -64,6 +68,5 @@ namespace Pulsar4X.ECSLib
             }
             else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
         }
-
     }
 }

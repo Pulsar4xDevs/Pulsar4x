@@ -9,14 +9,14 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public TimeSpan CoolDown { get; internal set; }
         [JsonProperty]
-        public Entity Target { get; internal set; }
+        public Entity FireControl { get; internal set; }
 
         public WeaponStateDB() { }
 
         public WeaponStateDB(WeaponStateDB db)
         {
             CoolDown = db.CoolDown;
-            Target = db.Target;
+            FireControl = db.FireControl;
         }
 
         public override object Clone()

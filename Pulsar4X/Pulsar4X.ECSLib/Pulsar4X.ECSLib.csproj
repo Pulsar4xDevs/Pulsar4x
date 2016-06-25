@@ -162,10 +162,13 @@
     <Compile Include="DataBlobs\ComponentAttributeDBs\PassiveThermalSensorAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\PopulationSupportAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\PowerGeneratorAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\SimpleBeamWeaponAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\StandardShieldAtbDB.cs" />
     <Compile Include="DataBlobs\ColonyConstructionDB.cs" />
     <Compile Include="DataBlobs\ColonyLifeSupportDB.cs" />
-    <Compile Include="DataBlobs\ShipDBs\WeaponStateDB.cs" />
+    <Compile Include="DataBlobs\ComponentInstanceDBs\ComponentInstanceInfoDB.cs" />
+    <Compile Include="DataBlobs\ComponentInstanceDBs\FireControlAbilityDB.cs" />
+    <Compile Include="DataBlobs\ComponentInstanceDBs\WeaponStateDB.cs" />
     <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\MoveOrder.cs" />

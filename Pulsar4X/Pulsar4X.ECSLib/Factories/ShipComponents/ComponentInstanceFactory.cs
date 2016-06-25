@@ -19,8 +19,6 @@ namespace Pulsar4X.ECSLib
             Entity newInstance = new Entity(design.Manager, blobs);
             return newInstance;
         }
-
-
     }
 
 
@@ -35,10 +33,16 @@ namespace Pulsar4X.ECSLib
         {
             { typeof(EnginePowerAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!shipOrColonyEntity.HasDataBlob<PropulsionDB>()) shipOrColonyEntity.SetDataBlob<PropulsionDB>(new PropulsionDB()); }) },
             { typeof(BeamWeaponAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<BeamWeaponsDB>()) shipOrColonyEntity.SetDataBlob(new BeamWeaponsDB()); }) },
+            { typeof(SimpleBeamWeaponAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<BeamWeaponsDB>()) shipOrColonyEntity.SetDataBlob(new BeamWeaponsDB()); }) },
         };
 
-
-        internal static void AddAttribute(Entity shipOrColony, Entity componentDesign, Entity componentInstance)
+        /// <summary>
+        /// adds abilites to a ship or component instance
+        /// </summary>
+        /// <param name="shipOrColony"></param>
+        /// <param name="componentDesign"></param>
+        /// <param name="componentInstance"></param>
+        internal static void AddAbility(Entity shipOrColony, Entity componentDesign, Entity componentInstance)
         {
 
             //CurrentEntity = shipOrColony;
@@ -48,6 +52,7 @@ namespace Pulsar4X.ECSLib
                 if (TypeMap.ContainsKey(t))
                     TypeMap[t].DynamicInvoke(shipOrColony, componentInstance); // invoke appropriate delegate  
             }
+            componentInstance.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity = shipOrColony;
         }
     }
 }
