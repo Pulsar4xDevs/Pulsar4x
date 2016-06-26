@@ -84,31 +84,60 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             //get the offset from the camera, this is the distance from the top left of the viewport to the center of the viewport, accounting for zoom, pan etc.
             IMatrix cameraOffset = _camera.GetViewProjectionMatrix();
-            
+
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
-            
+
             //offset to the focal point
             g.TranslateTransform(focalOffset);
             //rotate
-
-            
 
             PointF rotatePoint = new PointF(_width / 2 + _focalPoint, _height / 2);
             rmatrix.RotateAt(_rotation, rotatePoint);
 
             g.MultiplyTransform(rmatrix);
 
-            RectangleF MyRect = new RectangleF(TopLeftX, TopLeftY, _width, _height);
-            g.DrawRectangle(Colors.White, MyRect);
+            /*RectangleF MyRect = new RectangleF(TopLeftX, TopLeftY, _width, _height);
+            g.DrawRectangle(Colors.White, MyRect);*/
 
+            PointF planetPos = new PointF((float)_bodyPositionDB.X - (rotatePoint.X / 400), (float)_bodyPositionDB.Y - (rotatePoint.Y / 400));
+            float hyp = (float)Math.Sqrt((planetPos.X * planetPos.X) + (planetPos.Y * planetPos.Y));
 
+            float rad = planetPos.X / hyp;
+            float rad2 = planetPos.Y / hyp;
+            //float rad3 = planetPos.X / planetPos.Y;
+            float rad4 = planetPos.Y / planetPos.X;
+            float value = (float)Math.Acos(rad) * 180.0f / (float)Math.PI;
+            float value2 = (float)Math.Asin(rad2) * 180.0f / (float)Math.PI;
+            float value3 = (float)Math.Atan2(planetPos.Y, planetPos.X) * 180.0f / (float)Math.PI;
+            //float value4 = (float)Math.Atan(rad4) * 180.0f / (float)Math.PI;
+
+            var myMat = Matrix.Create();
+            myMat.RotateAt(_rotation, (float)_bodyPositionDB.X, (float)_bodyPositionDB.Y);
+
+            //public float StartArcAngle { get { return (float)(Math.Atan2(_bodyPositionDB.Y, _bodyPositionDB.X) * 180 / Math.PI); } }
+
+            //Ok so the arcs are lagging or advancing past the planet by a set amount, and this corrects that by adding or subtracting a value.
+            //first StartArcAngle must be corrected for rotation, to normalize the actual angle the planet is at.
+            float ActualAngle = StartArcAngle - _rotation;
+            if (ActualAngle < 0)
+            { 
+                ActualAngle = ActualAngle + 360.0f;
+            }
+
+            //Second get the sin of that angle, since it will have the right sign and magnitude for the correction.
+            float AngleAdd = (float)Math.Sin(ActualAngle * (Math.PI / 180.0f));
+            //last figure out the length correction, it is related to eccentricity in some way, but the 53.5 is a close guess on my part. I'm not
+            //sure which number should get plugged in there, but once that is found planet orbits should work. I got the 53.5 by getting mercury's proper
+            //correction of 11, then working with eccentricity found that 53.5 * mercury's eccentricity is roughly the value I want. this is also correctish for
+            //mars, earth and venus, so I'm close to whatever the right answer is.
+            AngleAdd = AngleAdd  * (53.5f * (float)_orbitDB.Eccentricity);
 
             //draw the elipse (as a number of arcs each with a different pen, this gives the fading alpha channel effect) 
             int i = 0;
             foreach (var pen in _segmentPens)
             {
-                g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle - _rotation + i * SweepAngle, SweepAngle);
+                g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle - (AngleAdd) - _rotation + (i * SweepAngle), SweepAngle);
                 i++;
             }
             g.RestoreTransform();
@@ -117,13 +146,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
             if (drawCount == 0)
             {
                 g.SaveTransform();
-                String Entry = String.Format("Focal Offset:{0} {1} {2} {3}", focalOffset.X, focalOffset.Y, _orbitDB.LongitudeOfAscendingNode,_orbitDB.ArgumentOfPeriapsis);
+                String Entry = String.Format("Length {0} {1} {2} {3} {4} {5}", planetPos.X, planetPos.Y, hyp, _bodyPositionDB.X, _bodyPositionDB.Y,_rotation);
                 g.DrawText(lastFont, Colors.White, 10, 10, Entry);
 
-                Entry = String.Format("Rotate Point:{0} {1}", rotatePoint.X, rotatePoint.Y);
+                Entry = String.Format("Rad: {0} {1} {2} {3} {4} {5}", rad,rad2,rad4,StartArcAngle, ActualAngle, AngleAdd );
                 g.DrawText(lastFont, Colors.White, 10, 30, Entry);
 
-                Entry = String.Format("W/H/FP:{0} {1} {2}", _width, _height, _focalPoint);
+                Entry = String.Format("Values: {0} {1} {2} {3} {4} {5}", myMat.X0, myMat.Y0, myMat.Xx, myMat.Xy, myMat.Yx, myMat.Yy);
                 g.DrawText(lastFont, Colors.White, 10, 50, Entry);
 
                 g.RestoreTransform();
