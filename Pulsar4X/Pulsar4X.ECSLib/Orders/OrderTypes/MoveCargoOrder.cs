@@ -11,7 +11,8 @@ namespace Pulsar4X.ECSLib
     {
         // Owner is the ship in question
 
-        // A move order may have either a specific target entity or a location
+        // Order indicates where cargo is being moved from (origin) and to (target).  
+        // Either origin or target can be the owner
 
         [JsonProperty]
         public Entity Origin { get; internal set; }
@@ -46,7 +47,21 @@ namespace Pulsar4X.ECSLib
 
         public override bool isValid()
         {
-            throw new NotImplementedException();
+            if (Owner == Entity.InvalidEntity)
+                return false;
+            if (Target == Entity.InvalidEntity)
+                return false;
+            if (Origin == Entity.InvalidEntity)
+                return false;
+
+            if ((Owner != Target) && (Owner != Origin))  // Owner must be either target or origin
+                return false;
+
+            // @todo: more stringent checks?
+
+            return true;
+
+            //throw new NotImplementedException();
         }
 
         public override bool processOrder()
@@ -56,7 +71,10 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            throw new NotImplementedException();
+            MoveCargoOrder order = new MoveCargoOrder(Owner, Origin, Target, CargoType, Amount);
+            return order;
+
+            //throw new NotImplementedException();
         }
 
     }
