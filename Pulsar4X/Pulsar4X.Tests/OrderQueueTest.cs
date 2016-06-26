@@ -25,7 +25,10 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new NewGameSettings());
+            NewGameSettings settings = new NewGameSettings();
+            settings.MaxSystems = 10;
+            
+            _game = new Game(settings);
             StaticDataManager.LoadData("Pulsar4x", _game);
             _player = _game.AddPlayer("Test Player");
             _faction = DefaultStartFactory.DefaultHumans(_game, _player, "Test Faction");
@@ -67,18 +70,43 @@ namespace Pulsar4X.Tests
         public void testOrderQueue()
         {
             //@todo: more stringent tests
-            PositionDB position;
-            BaseOrder order;
-            Vector4 speed;
-            Vector4 newPosition = new Vector4(_earth.GetDataBlob<PositionDB>().Position);
 
-            newPosition.X += 0.2;
+            for (int i = -5; i < 0; i++)
+                for (int j = -5; j < 5; j++)
+                {
+                    checkMoveEntity(i * .1, j * .1);
+                }
 
-            _target.GetDataBlob<PositionDB>().Position = newPosition ;
 
-            // @todo: give the ship some move orders, see if its speed changes correctly
+            // Check a very large number of different positions
+
+            for (int i = -5; i < 5; i++)
+                for (int j = -5; j < 5; j++ )
+                {
+                    checkMovePosition(i *.1, j * .1);
+                }
+                    
+        }
+
+        private void checkMoveEntity(double x, double y)
+        {
+            PositionDB target;
+
+            _game.CurrentDateTime.AddSeconds(5.0);
+
+            _ship.GetDataBlob<ShipInfoDB>().ClearOrders();
+            _player.Orders.ClearOrders();
+
+            target = new PositionDB(_ship.GetDataBlob<PositionDB>());
+
+            target.X += x;
+            target.Y += y;
+
+            _target.GetDataBlob<PositionDB>().X = target.X;
+            _target.GetDataBlob<PositionDB>().Y = target.Y;
+
             _player.Orders.MoveOrder(_ship, _target);
-            order = _player.Orders.PeekNextOrder();
+            BaseOrder order = _player.Orders.PeekNextOrder();
 
             Assert.AreEqual(1, _player.Orders.NumOrders());
 
@@ -87,31 +115,9 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(0, _player.Orders.NumOrders());
             Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
 
-            // The ship should now have the order
             Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
 
             _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
-
-            // Check for ship speed
-            speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
-
-            Assert.AreEqual(100, speed.X);
-            Assert.AreEqual(0, speed.Y);
-
-            _ship.GetDataBlob<ShipInfoDB>().ClearOrders();
-            Assert.AreEqual(0, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
-
-            _game.CurrentDateTime.AddSeconds(5.0);
-
-            newPosition.X -= 0.1;
-            newPosition.Y += 0.4;
-
-            _player.Orders.MoveOrder(_ship, _starSystem, newPosition.X, newPosition.Y);
-            order = _player.Orders.PeekNextOrder();
-
-            Assert.AreEqual(1, _player.Orders.NumOrders());
-
-            _orderProcessor.Process(_game, _systems, 5);
 
             Assert.AreEqual(0, _player.Orders.NumOrders());
             Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
@@ -121,12 +127,60 @@ namespace Pulsar4X.Tests
             _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
 
             // Check speed 
-            speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
+            Vector4 speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
 
-            double length = Math.Sqrt(0.1 * 0.1 + 0.4 * 0.4);
+            double length = Math.Sqrt((x * x) + (y * y));
             double speedX, speedY;
-            speedX = (0.1 / length) * 100;
-            speedY = (0.4 / length) * 100;
+            speedX = (x / length) * 100;
+            speedY = (y / length) * 100;
+
+            // Allowing for very small discrepancies
+            Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
+            Assert.LessOrEqual(Math.Abs(speedY - speed.Y), 0.0001);
+        }
+
+        private void checkMovePosition(double x, double y)
+        {
+            PositionDB target;
+
+            _game.CurrentDateTime.AddSeconds(5.0);
+
+            _ship.GetDataBlob<ShipInfoDB>().ClearOrders();
+            _player.Orders.ClearOrders();
+
+            target = new PositionDB(_ship.GetDataBlob<PositionDB>());
+
+            target.X += x;
+            target.Y += y;
+
+            _player.Orders.MoveOrder(_ship, _starSystem, target.X, target.Y);
+            BaseOrder order = _player.Orders.PeekNextOrder();
+
+            Assert.AreEqual(1, _player.Orders.NumOrders());
+
+            _orderProcessor.Process(_game, _systems, 5);
+
+            Assert.AreEqual(0, _player.Orders.NumOrders());
+            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+
+            Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
+
+            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+
+            Assert.AreEqual(0, _player.Orders.NumOrders());
+            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+
+            Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
+
+            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+
+            // Check speed 
+            Vector4 speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
+
+            double length = Math.Sqrt((x * x) + (y * y));
+            double speedX, speedY;
+            speedX = (x / length) * 100;
+            speedY = (y / length) * 100;
 
             // Allowing for very small discrepancies
             Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);

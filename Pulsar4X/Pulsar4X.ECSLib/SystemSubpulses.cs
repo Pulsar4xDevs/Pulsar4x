@@ -53,6 +53,9 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// constructor for json
+        /// </summary>
         public SystemSubPulses() { }
 
         /// <summary>
@@ -130,26 +133,34 @@ namespace Pulsar4X.ECSLib
             //check validity of commands etc. here.
 
 
-      
-
-            //TimeSpan systemElapsedTime = new TimeSpan();
-            DateTime systemTime = SystemLocalDateTime;
             //the system may need to run several times for a wanted tickLength
             //keep processing the system till we've reached the wanted ticklength
-            while (systemTime < toDateTime)
+            while (SystemLocalDateTime < toDateTime)
             {
 
                 //calculate max time the system can run/time to next interupt
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                TimeSpan timeDelta = toDateTime - systemTime;
-                
-                systemTime = ProcessNextInterupt(timeDelta);
-                
-                ShipMovementProcessor.Process(_starSystem, timeDelta.Seconds);
+                TimeSpan timeDeltaMax = toDateTime - SystemLocalDateTime;
+                DateTime nextDate = GetNextInterupt(timeDeltaMax);
+                TimeSpan deltaActual = nextDate - SystemLocalDateTime;
 
+                ShipMovementProcessor.Process(_starSystem, deltaActual.Seconds); //process movement for any entity that can move (not orbit)
+
+                ProcessToNextInterupt(nextDate); 
                 
 
             }
+        }
+
+        private DateTime GetNextInterupt(TimeSpan maxSpan)
+        {
+            DateTime nextInteruptDateTime = SystemLocalDateTime + maxSpan;
+            if (EntityDictionary.Keys.Count != 0 && nextInteruptDateTime > EntityDictionary.Keys.Min())
+            {
+                nextInteruptDateTime = EntityDictionary.Keys.Min();
+            }
+
+            return nextInteruptDateTime;
         }
 
         /// <summary>
@@ -158,39 +169,29 @@ namespace Pulsar4X.ECSLib
         /// <param name="currentDateTime"></param>
         /// <param name="maxSpan">maximum time delta</param>
         /// <returns>datetime processed to</returns>
-        private DateTime ProcessNextInterupt(TimeSpan maxSpan)
+        private void ProcessToNextInterupt(DateTime nextInteruptDateTime)
         {
-            DateTime nextInteruptDateTime;
-            if (EntityDictionary.Keys.Count != 0)
+            if (EntityDictionary.ContainsKey(nextInteruptDateTime))
             {
-                nextInteruptDateTime = EntityDictionary.Keys.Min();
-                if (nextInteruptDateTime <= SystemLocalDateTime + maxSpan)
+                foreach (KeyValuePair<PulseActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
                 {
-                    foreach (KeyValuePair<PulseActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
+                    if (delegateListPair.Value.Count == 0)// == null) //if the list is empty, it's a systemwide interupt
                     {
-                        if (delegateListPair.Value.Count == 0)// == null) //if the list is empty, it's a systemwide interupt
-                        {
-                            //delegateListPair.Key.DynamicInvoke(_starSystem);
-                            PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem);
-                        }
-                        else
-                            foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
-                            {
-                                //delegateListPair.Key.DynamicInvoke(entity);
-                                PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem, entity);
-                            }
+                        //delegateListPair.Key.DynamicInvoke(_starSystem);
+                        PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem);
                     }
-
-                    SystemLocalDateTime = nextInteruptDateTime;
-                    EntityDictionary.Remove(nextInteruptDateTime);
+                    else
+                        foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
+                        {
+                            //delegateListPair.Key.DynamicInvoke(entity);
+                            PulseActionDictionary.DoAction(delegateListPair.Key, _starSystem, entity);
+                        }
                 }
-                else
-                    SystemLocalDateTime += maxSpan;
-            }
-            else
-                SystemLocalDateTime += maxSpan;
 
-            return SystemLocalDateTime;
+                EntityDictionary.Remove(nextInteruptDateTime);
+            }
+
+            SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent            
         }
 
 

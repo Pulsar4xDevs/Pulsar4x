@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
         {
             int totalEnginePower = 0;
 
-            List<KeyValuePair<Entity,List<ComponentInstance>>> engineEntities = ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
+            List<KeyValuePair<Entity,List<Entity>>> engineEntities = ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
             foreach (var engineDesign in engineEntities)
             {
                 foreach (var engineInstance in engineDesign.Value)

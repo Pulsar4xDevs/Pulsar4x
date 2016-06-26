@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid,int> rates = new Dictionary<Guid, int>();
 
-            List<KeyValuePair<Entity, List<ComponentInstance>>> mineEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<MineResourcesAtbDB>()).ToList();
+            List<KeyValuePair<Entity, List<Entity>>> mineEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<MineResourcesAtbDB>()).ToList();
             foreach (var mineComponentDesignList in mineEntities)
             {
                 foreach (var mineInstance in mineComponentDesignList.Value)

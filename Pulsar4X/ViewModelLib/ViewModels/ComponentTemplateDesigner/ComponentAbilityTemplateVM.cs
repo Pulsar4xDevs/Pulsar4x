@@ -300,6 +300,7 @@ namespace Pulsar4X.ViewModel
                 typeof(RefineResourcesAtbDB).ToString(),
                 typeof(ResearchPointsAtbDB).ToString(),
                 typeof(SensorSignatureAtbDB).ToString(),
+                typeof(SimpleBeamWeaponAtbDB).ToString(),
                 typeof(StandardShieldAtbDB).ToString()
             };
 
@@ -330,6 +331,7 @@ namespace Pulsar4X.ViewModel
             sd.AbilityFormula = AbilityFormula;
             sd.MinFormula = MinFormula;
             sd.MaxFormula = MaxFormula;
+            sd.StepFormula = StepFormula;
             if (GuidDict != null)
             {
                 Dictionary<object, string> guidict = new Dictionary<object, string>();

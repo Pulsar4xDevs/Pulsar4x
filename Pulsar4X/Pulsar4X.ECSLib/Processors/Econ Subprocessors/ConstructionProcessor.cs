@@ -125,7 +125,7 @@ namespace Pulsar4X.ECSLib
                 {ConstructionType.Ships, 0},
             };
 
-            List<KeyValuePair<Entity, List<ComponentInstance>>> factoryEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<ConstructionAtbDB>()).ToList();
+            List<KeyValuePair<Entity, List<Entity>>> factoryEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<ConstructionAtbDB>()).ToList();
             foreach (var factoryDesignList in factoryEntities)
             {
                 foreach (var factoryInstance in factoryDesignList.Value)

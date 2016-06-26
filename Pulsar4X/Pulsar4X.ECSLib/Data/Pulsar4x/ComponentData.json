@@ -375,8 +375,66 @@
               "Description": "Keeps colonists alive on hostile worlds",
               "GuiHint": "None",
               "GuidDictionary": {
-                "Entries": []
+                "Entries": [ ]
               }
+            }
+          ]
+        }
+      },
+      {
+        "Key": "8923f0e1-1143-4926-a0c8-66b6c7969425",
+        "Value": {
+          "Name": "LaserGun",
+          "Description": "Laser Gun",
+          "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
+          "SizeFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2) * 10",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "[Size]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Size]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Size]",
+          "CreditCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Range",
+              "Description": "MaxRange",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1000",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Damage",
+              "Description": "Damage Amount",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "ReloadRate",
+              "Description": "How long it takes to reload",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "dbargs",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1), Ability(2))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SimpleBeamWeaponAtbDB"
             }
           ]
         }

@@ -8,6 +8,8 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class ShipInfoDB : BaseDataBlob
     {
+
+        #region Properties
         /// <summary>
         /// The guid of the ship class, if this is a ship class then the Guid will be empty. 
         /// use IsClassDefinition() to determin if this is a ship class definmition
@@ -36,6 +38,9 @@ namespace Pulsar4X.ECSLib
         ///  Ship orders.  
         public Queue<BaseOrder> Orders;
 
+        #endregion
+
+        #region Constructors
 
         public ShipInfoDB()
         {
@@ -54,6 +59,7 @@ namespace Pulsar4X.ECSLib
             Collier = shipInfoDB.Collier;
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
+            Tonnage = shipInfoDB.Tonnage;
             IsMilitary = shipInfoDB.IsMilitary;
 
             if (shipInfoDB.Orders == null)
@@ -61,6 +67,8 @@ namespace Pulsar4X.ECSLib
             else
                 Orders = new Queue<BaseOrder>(shipInfoDB.Orders);
         }
+
+        #endregion
 
         /// <summary>
         /// Returns true if this is a definition of a class.
@@ -78,6 +86,7 @@ namespace Pulsar4X.ECSLib
             return new ShipInfoDB(this);
         }
 
+        #region Orders functions
         /// <summary>
         /// Orders functions
         /// </summary>
@@ -128,5 +137,7 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        #endregion
     }
 }

@@ -66,12 +66,6 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
-        // Creates a new order at a colony to mine something
-        public bool MiningOrder(Entity colony, string type, long amount)
-        {
-            throw new NotImplementedException();
-        }
-
         // Creates a new order at a colony to toggle a facility's function
         public bool ToggleFacility(Entity colony, string type)
         {
@@ -94,11 +88,11 @@ namespace Pulsar4X.ECSLib
         {
             MoveOrder moveOrder = new MoveOrder(ship, target);
 
-            
+
             _orderList.Add(moveOrder);
 
             return true;
-            
+
         }
 
         // Creates a new order for a ship to jump to another system through the given jump point
@@ -107,8 +101,14 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
-        // Creates a new order for a ship to attack the target Entity
-        public bool AttackOrder(Entity ship, Entity target)
+        // Creates a new order for a ship to attack the target with a beam weapon
+        public bool BeamAttackOrder(Entity ship, Entity target, Entity weaponSystem)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Creates a new order for a ship to attack the target with a missile weapon
+        public bool MissileAttackOrder(Entity ship, Entity target, Entity weaponSystem)
         {
             throw new NotImplementedException();
         }
@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
         }
 
         // Creates a new order for a ship to move cargo from the origin to the target
-        public bool MoveCargoOrder(Entity ship, Entity origin, Entity target, string cargo, long amount)
+        public bool MoveCargoOrder(Entity ship, Entity origin, Entity target, Guid cargo, double amount)
         {
             throw new NotImplementedException();
         }
@@ -173,6 +173,8 @@ namespace Pulsar4X.ECSLib
 
         public void ClearOrders()
         {
+            if (_orderList.Count == 0)
+                return;
             BaseOrder order = _orderList.First<BaseOrder>();
             while (order != null)
             {
