@@ -232,6 +232,7 @@
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
     <Compile Include="Orders\OrderQueue.cs" />
+    <Compile Include="Orders\OrderTypes\ResearchOrder.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Processors\ActionDelegateEnum.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
