@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout Width ="800">
+    <TableRow>
+      <TableCell>
+        <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
+          <Label>Ship List</Label>
+          <TextArea Height = "100">
+            
+          </TextArea>
+        </StackLayout>
+      </TableCell>
+      <TableCell>
+        <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
+          <Label>Orders Available</Label>
+          <TextArea Height ="100">
+
+          </TextArea>
+        </StackLayout>
+      </TableCell>
+      <TableCell>
+        <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
+          <Label>Order List</Label>
+          <TextArea Height="100">
+
+          </TextArea>
+        </StackLayout>      
+      </TableCell>
+    </TableRow>
+  </TableLayout>
+  
+</Panel>
