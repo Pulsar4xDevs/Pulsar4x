@@ -7,18 +7,18 @@ using System.ComponentModel;
 
 namespace Pulsar4X.CrossPlatformUI.Commands
 {
-    sealed class SystemMap : Command
+    sealed class ShipViewCMD : Command
     {
         private readonly GameVM _gameVM;
 
-        public SystemMap(GameVM gameVM)
+        public ShipViewCMD(GameVM gameVM)
         {
             _gameVM = gameVM;
-            ID = "SystemMap";
-            Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.SystemMap.ico");
-            MenuText = "System Map";
-            ToolBarText = "System Map";
-            Shortcut = Keys.F3;
+            ID = "ShipViewCMD";
+//            Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.SystemMap.ico");
+            MenuText = "Ship View";
+            ToolBarText = "Ship View";
+//            Shortcut = Keys.F3;
             _gameVM.PropertyChanged += _gameVM_PropertyChanged;
             Enabled = _gameVM.HasGame;
         }
@@ -35,7 +35,11 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         {
             base.OnExecuted(e);
             MainWindow mw = (MainWindow)Application.Instance.MainForm.Content;
-            mw.AddOrSelectTabPanel("System Map",new SystemView(_gameVM.StarSystemViewModel));
+
+            var viewmodel = new PlayerOptionsVM(_gameVM);
+            var playerOptions = new Views.PlayerOptionsDialog();
+            playerOptions.DataContext = viewmodel;
+            playerOptions.ShowModal(Application.Instance.MainForm);
         }
     }
 }
