@@ -8,25 +8,20 @@
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Ship List</Label>
-          <TextArea Height = "100">
-            
-          </TextArea>
+          
+          <ListBox Height = "100" x:Name="ShipList"></ListBox>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Orders Available</Label>
-          <TextArea Height ="100">
-
-          </TextArea>
+          <ListBox Height = "100" x:Name="OrdersPossible"></ListBox>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Order List</Label>
-          <TextArea Height="100">
-
-          </TextArea>
+          <ListBox Height = "100" x:Name="OrderList"></ListBox>
         </StackLayout>      
       </TableCell>
     </TableRow>

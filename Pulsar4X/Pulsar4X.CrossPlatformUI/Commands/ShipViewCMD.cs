@@ -34,8 +34,10 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         protected override void OnExecuted(EventArgs e)
         {
             base.OnExecuted(e);
+
+            ShipOrderVM orderVM = ShipOrderVM.Create(_gameVM);
             MainWindow mw = (MainWindow)Application.Instance.MainForm.Content;
-            mw.AddOrSelectTabPanel("Ship Order View", new Views.ShipView());
+            mw.AddOrSelectTabPanel("Ship Order View", new Views.ShipView(orderVM));
 //            mw.AddOrSelectTabPanel("Ship Orders View", new Views.ShipOrderView(designVM));
         }
     }
