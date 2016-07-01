@@ -52,11 +52,11 @@ namespace Pulsar4X.Tests
             engineDesign = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size = 25 power.
             //engineDesignDB.ComponentDesignAbilities[1]
-            _engineComponent = GenericComponentFactory.DesignToEntity(_game, _faction, engineDesign);
+            _engineComponent = GenericComponentFactory.DesignToDesignEntity(_game, _faction, engineDesign);
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
-            ShipFactory.AddShipComponent(_shipClass, _engineComponent);
-            ShipFactory.AddShipComponent(_shipClass, _engineComponent);
+            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
+            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
 
             Vector4 pos = new Vector4(0, 0, 0, 0);
             _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, pos, _starSystem, "Serial Peacemaker");
@@ -67,7 +67,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(50, propulsion.TotalEnginePower);
             Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
 
-            ShipFactory.AddShipComponent(_ship, _engineComponent);
+            EntityManipulation.AddComponentToEntity(_ship, _engineComponent);
             Assert.AreEqual(75, propulsion.TotalEnginePower);
             Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
 

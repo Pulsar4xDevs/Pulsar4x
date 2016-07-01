@@ -170,6 +170,7 @@
     <Compile Include="DataBlobs\ComponentInstanceDBs\FireControlAbilityDB.cs" />
     <Compile Include="DataBlobs\ComponentInstanceDBs\WeaponStateDB.cs" />
     <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
+    <Compile Include="Helpers\EntityManipulation.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\BeamAttackOrder.cs" />
     <Compile Include="Orders\OrderTypes\ConstructionOrder.cs" />

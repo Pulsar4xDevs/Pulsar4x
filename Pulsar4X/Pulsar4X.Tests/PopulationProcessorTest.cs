@@ -60,9 +60,9 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateSD infrastructureSD = _game.StaticData.Components[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
             ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            Entity infrastructureEntity = GenericComponentFactory.DesignToEntity(_game, _faction, infrastructureDesign);
+            Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, infrastructureDesign);
 
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
+            EntityManipulation.AddComponentToEntity(_colonyEntity, infrastructureEntity);
 
             ReCalcProcessor.ReCalcAbilities(_colonyEntity);
 
@@ -120,7 +120,7 @@ namespace Pulsar4X.Tests
             Guid infGUID = new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb");
             ComponentTemplateSD infrastructureSD = _game.StaticData.Components[infGUID];
             ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            Entity infrastructureEntity = GenericComponentFactory.DesignToEntity(_game, _faction, infrastructureDesign);
+            Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, infrastructureDesign);
 
             Dictionary<Entity, long> pop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
 
@@ -133,7 +133,7 @@ namespace Pulsar4X.Tests
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
+                    EntityManipulation.AddComponentToEntity(_colonyEntity, infrastructureEntity);
                 ReCalcProcessor.ReCalcAbilities(_colonyEntity);
 
 
@@ -170,7 +170,7 @@ namespace Pulsar4X.Tests
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
+                    EntityManipulation.AddComponentToEntity(_colonyEntity, infrastructureEntity);
                 ReCalcProcessor.ReCalcAbilities(_colonyEntity);
 
                 for (j = 0; j < basePop.Length; j++)

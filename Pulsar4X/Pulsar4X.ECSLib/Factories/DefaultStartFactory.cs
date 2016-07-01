@@ -16,20 +16,20 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD mineSD = game.StaticData.Components[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
             ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity mineEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, mineDesign);
+            Entity mineEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, mineDesign);
 
 
             ComponentTemplateSD RefinerySD = game.StaticData.Components[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
             ComponentDesign RefineryDesign = GenericComponentFactory.StaticToDesign(RefinerySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity RefineryEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, RefineryDesign);
+            Entity RefineryEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, RefineryDesign);
 
             ComponentTemplateSD labSD = game.StaticData.Components[new Guid("c203b7cf-8b41-4664-8291-d20dfe1119ec")];
             ComponentDesign labDesign = GenericComponentFactory.StaticToDesign(labSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity labEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, labDesign);
+            Entity labEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, labDesign);
 
             ComponentTemplateSD facSD = game.StaticData.Components[new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}")];
             ComponentDesign facDesign = GenericComponentFactory.StaticToDesign(facSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
-            Entity facEntity = GenericComponentFactory.DesignToEntity(game, factionEntity, facDesign);
+            Entity facEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, facDesign);
 
             Entity scientistEntity = CommanderFactory.CreateScientist(game.GlobalManager, factionEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists.Add(scientistEntity);
@@ -38,10 +38,10 @@ namespace Pulsar4X.ECSLib
             //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 
             TechProcessor.MakeResearchable(factionTech);
 
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(mineEntity, colonyEntity);
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(RefineryEntity, colonyEntity);
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(labEntity, colonyEntity);
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(facEntity, colonyEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, mineEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, RefineryEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, labEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, facEntity);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             
@@ -61,9 +61,9 @@ namespace Pulsar4X.ECSLib
             var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
             Entity engine = DefaultEngineDesign(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
-            ShipFactory.AddShipComponent(shipDesign, engine);
-            ShipFactory.AddShipComponent(shipDesign, engine);
-            ShipFactory.AddShipComponent(shipDesign, laser);
+            EntityManipulation.AddComponentToEntity(shipDesign, engine);
+            EntityManipulation.AddComponentToEntity(shipDesign, engine);
+            EntityManipulation.AddComponentToEntity(shipDesign, laser);
             return shipDesign;
         }
 
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
             engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size
             engineDesign.Name = "DefaultEngine1";
             //engineDesignDB.ComponentDesignAbilities[1]
-            return GenericComponentFactory.DesignToEntity(game, faction, engineDesign);
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);
         }
 
         static Entity DefaultSimpleLaser(Game game, Entity faction)
@@ -88,7 +88,7 @@ namespace Pulsar4X.ECSLib
             laserDesign.ComponentDesignAbilities[0].SetValueFromInput(5000);
             laserDesign.ComponentDesignAbilities[0].SetValueFromInput(5);
 
-            return GenericComponentFactory.DesignToEntity(game, faction, laserDesign);
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, laserDesign);
 
         }
     }
