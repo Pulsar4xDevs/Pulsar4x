@@ -140,6 +140,7 @@
     <Compile Include="ViewModels\PlanetVM.cs" />
     <Compile Include="ViewModels\RefineryAbilityVM.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
+    <Compile Include="ViewModels\ShipOrderVM.cs" />
     <Compile Include="ViewModels\SystemView\StarSystemVM.cs" />
     <Compile Include="ViewModels\SystemView\SystemMap_DrawableVM.cs" />
     <Compile Include="ViewModels\SystemView\RenderVM.cs" />

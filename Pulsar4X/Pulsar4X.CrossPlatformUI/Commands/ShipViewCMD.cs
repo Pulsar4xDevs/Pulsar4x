@@ -35,11 +35,8 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         {
             base.OnExecuted(e);
             MainWindow mw = (MainWindow)Application.Instance.MainForm.Content;
-
-            var viewmodel = new PlayerOptionsVM(_gameVM);
-            var playerOptions = new Views.PlayerOptionsDialog();
-            playerOptions.DataContext = viewmodel;
-            playerOptions.ShowModal(Application.Instance.MainForm);
+            mw.AddOrSelectTabPanel("Ship Order View", new Views.ShipView());
+//            mw.AddOrSelectTabPanel("Ship Orders View", new Views.ShipOrderView(designVM));
         }
     }
 }
