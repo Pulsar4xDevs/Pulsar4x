@@ -7,7 +7,7 @@
     {
         public int MaximumSpeed { get; set; }
         public Vector4 CurrentSpeed { get; set; }
-
+        public int TotalEnginePower { get; set; }
         public int FuelStorageCapicity { get; set; }
         public int CurrentFuelStored { get; set; }
 
@@ -19,6 +19,7 @@
         {
             MaximumSpeed = propulsionDB.MaximumSpeed;
             CurrentSpeed = propulsionDB.CurrentSpeed;
+            TotalEnginePower = propulsionDB.TotalEnginePower;
             FuelStorageCapicity = propulsionDB.FuelStorageCapicity;
             CurrentFuelStored = propulsionDB.CurrentFuelStored;
         }

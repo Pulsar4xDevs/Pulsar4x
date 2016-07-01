@@ -64,7 +64,13 @@ namespace Pulsar4X.ECSLib
             }
 
             //Note: TN aurora uses the TCS for max speed calcs. 
-            ship.GetDataBlob<PropulsionDB>().MaximumSpeed = (int)(totalEnginePower / ship.GetDataBlob<ShipInfoDB>().Tonnage) * 20;
+            ship.GetDataBlob<PropulsionDB>().TotalEnginePower = totalEnginePower;
+            ship.GetDataBlob<PropulsionDB>().MaximumSpeed = MaxSpeedCalc(totalEnginePower,  ship.GetDataBlob<ShipInfoDB>().Tonnage);
+        }
+
+        public static int MaxSpeedCalc(int power, float tonage)
+        {
+            return (int)(power / tonage) * 20;
         }
     }
 }

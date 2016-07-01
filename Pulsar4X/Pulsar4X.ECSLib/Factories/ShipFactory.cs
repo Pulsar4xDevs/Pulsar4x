@@ -130,8 +130,8 @@ namespace Pulsar4X.ECSLib
 
             ShipAndColonyInfoProcessor.AddComponentDesignToEntity(component, ship);
             
-            shipinfo.InternalHTK += componentInfo.HTK; 
-            shipinfo.Tonnage += componentInfo.SizeInTons;  
+            //shipinfo.InternalHTK += componentInfo.HTK; 
+            //shipinfo.Tonnage += componentInfo.SizeInTons;  
             ReCalcProcessor.ReCalcAbilities(ship);
 
             return ship;
