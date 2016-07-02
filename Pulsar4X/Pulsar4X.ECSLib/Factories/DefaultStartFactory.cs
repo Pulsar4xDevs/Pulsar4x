@@ -61,9 +61,11 @@ namespace Pulsar4X.ECSLib
             var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
             Entity engine = DefaultEngineDesign(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
+            Entity bfc = DefaultBFC(game, faction);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
+            EntityManipulation.AddComponentToEntity(shipDesign, bfc);
             return shipDesign;
         }
 
@@ -73,7 +75,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.Components[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesign = GenericComponentFactory.StaticToDesign(engineSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size
+            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(10); //size
             engineDesign.Name = "DefaultEngine1";
             //engineDesignDB.ComponentDesignAbilities[1]
             return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);
@@ -85,10 +87,23 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD laserSD = game.StaticData.Components[new Guid("8923f0e1-1143-4926-a0c8-66b6c7969425")];
             laserDesign = GenericComponentFactory.StaticToDesign(laserSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             laserDesign.ComponentDesignAbilities[0].SetValueFromInput(10);
-            laserDesign.ComponentDesignAbilities[0].SetValueFromInput(5000);
-            laserDesign.ComponentDesignAbilities[0].SetValueFromInput(5);
+            laserDesign.ComponentDesignAbilities[1].SetValueFromInput(5000);
+            laserDesign.ComponentDesignAbilities[2].SetValueFromInput(5);
 
             return GenericComponentFactory.DesignToDesignEntity(game, faction, laserDesign);
+
+        }
+
+        public static Entity DefaultBFC(Game game, Entity faction)
+        {
+            ComponentDesign fireControlDesign;
+            ComponentTemplateSD bfcSD = game.StaticData.Components[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
+            fireControlDesign = GenericComponentFactory.StaticToDesign(bfcSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            fireControlDesign.ComponentDesignAbilities[0].SetValueFromInput(10);
+            fireControlDesign.ComponentDesignAbilities[1].SetValueFromInput(5000);
+            fireControlDesign.ComponentDesignAbilities[2].SetValueFromInput(1);
+
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, fireControlDesign);
 
         }
     }
