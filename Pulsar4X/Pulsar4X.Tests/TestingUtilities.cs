@@ -11,7 +11,10 @@ namespace Pulsar4X.Tests
     {
         internal static Game CreateTestUniverse(int numSystems, DateTime testTime, bool generateDefaultHumans = false)
         {
-            var game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false });
+            var gamesettings = new NewGameSettings { GameName = "Unit Test Game", StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };
+            gamesettings.MaxSystems = 10;
+
+            var game = new Game(gamesettings );
 
             var smAuthToken = new AuthenticationToken(game.SpaceMaster);
             
