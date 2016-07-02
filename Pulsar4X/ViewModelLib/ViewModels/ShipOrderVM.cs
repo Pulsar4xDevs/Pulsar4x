@@ -10,6 +10,10 @@ namespace Pulsar4X.ViewModel
 {
     public class ShipOrderVM : IViewModel
     {
+        public List<Entity> ShipList;
+        public List<BaseOrder> OrdersPossible;
+        public List<BaseOrder> OrderList;
+
         public ShipOrderVM(Entity factionEntity)
         {
         }
