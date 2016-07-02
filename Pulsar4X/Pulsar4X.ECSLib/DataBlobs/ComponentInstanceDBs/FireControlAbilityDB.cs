@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    public class FireControlAbilityDB : BaseDataBlob
+    public class FireControlInstanceAbilityDB : BaseDataBlob
     {
         public Entity Target { get; internal set; }
 
@@ -14,9 +14,9 @@ namespace Pulsar4X.ECSLib
 
         public bool IsEngaging { get; internal set; } = false;
 
-        public FireControlAbilityDB() { }
+        public FireControlInstanceAbilityDB() { }
 
-        public FireControlAbilityDB(FireControlAbilityDB db)
+        public FireControlInstanceAbilityDB(FireControlInstanceAbilityDB db)
         {
             Target = db.Target;
             AssignedWeapons = new List<Entity>(db.AssignedWeapons);
@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new FireControlAbilityDB(this);
+            return new FireControlInstanceAbilityDB(this);
         }
     }
 }
