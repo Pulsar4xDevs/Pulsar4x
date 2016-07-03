@@ -29,7 +29,9 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new NewGameSettings());
+            var gameSettings = new NewGameSettings();
+            gameSettings.MaxSystems = 10;
+            _game = new Game(gameSettings);
             StaticDataManager.LoadData("Pulsar4x", _game);
             _entityManager = new EntityManager(_game);
             _faction = FactionFactory.CreateFaction(_game, "Terran");  // Terrian?

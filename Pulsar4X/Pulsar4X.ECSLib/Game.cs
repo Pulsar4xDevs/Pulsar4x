@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(newGameSettings));
             }
 
-            GalaxyGen = new GalaxyFactory(true);
+            GalaxyGen = new GalaxyFactory(true, newGameSettings.MasterSeed);
 
             Settings = newGameSettings;
             GameLoop.GameGlobalDateTime = newGameSettings.StartDateTime;

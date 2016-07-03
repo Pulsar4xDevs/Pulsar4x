@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public bool FinalFireOnly { get; internal set; }
 
-        public BeamFireControlAtbDB(double range, double trackingSpeed, bool finalFireOnly) : this((int)range, (int)trackingSpeed, finalFireOnly) { }
+        public BeamFireControlAtbDB(double range, double trackingSpeed) : this((int)range, (int)trackingSpeed) { }
 
         [JsonConstructor]
         public BeamFireControlAtbDB(int range = 0, int trackingSpeed = 0, bool finalFireOnly = false)

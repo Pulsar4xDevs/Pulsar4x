@@ -438,6 +438,101 @@
             }
           ]
         }
+      },
+      {
+        "Key": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
+        "Value": {
+          "Name": "BeamFireControl",
+          "Description": "",
+          "ID": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
+          "SizeFormula": "Ability(4)",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "[Size]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Size]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "Ability(5)",
+          "CreditCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": "ShipComponent, ShipCargo",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Range",
+              "Description": "in kkm",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "175",
+              "MinFormula": "10",
+              "StepFormula": "5",
+              "AbilityFormula": "20"
+            },
+            {
+              "Name": "Tracking Speed",
+              "Description": "in km/s",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "25000",
+              "MinFormula": "1250",
+              "StepFormula": "250",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Size vs Range",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "4",
+              "MinFormula": "0.25",
+              "StepFormula": "0.25",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Size vs TrackingSpeed",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "4",
+              "MinFormula": "0.25",
+              "StepFormula": "0.25",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Size",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "(Ability(0) + Ability(1) / 100) * Ability(2) *  Ability(3)"
+            },
+            {
+              "Name": "Research Cost",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "Ability(4)"
+            },
+            {
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": [ ]
+              },
+              "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.BeamFireControlAtbDB"
+            }
+          ]
+        }
       }
     ]
   }

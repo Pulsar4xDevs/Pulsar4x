@@ -20,7 +20,7 @@ namespace Pulsar4X.Tests
         private List<Entity> _planets;
         private List<StarSystem> _systems;
         private OrderProcessor _orderProcessor;
-
+        private PropulsionDB _shipPropulsionDB;
 
         [SetUp]
         public void Init()
@@ -39,6 +39,7 @@ namespace Pulsar4X.Tests
             _earth = _planets.Where<Entity>(planet => planet.GetDataBlob<NameDB>().GetName(_faction) == "Earth").First<Entity>();
 
             _ship = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>().First<Entity>();
+            _shipPropulsionDB = _ship.GetDataBlob<PropulsionDB>();
             _target = _ship.Clone(_starSystem.SystemManager);
 
             _orderProcessor = new OrderProcessor();
@@ -127,12 +128,12 @@ namespace Pulsar4X.Tests
             _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
 
             // Check speed 
-            Vector4 speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
+            Vector4 speed = _shipPropulsionDB.CurrentSpeed;
 
             double length = Math.Sqrt((x * x) + (y * y));
             double speedX, speedY;
-            speedX = (x / length) * 100;
-            speedY = (y / length) * 100;
+            speedX = (x / length) * _shipPropulsionDB.MaximumSpeed;
+            speedY = (y / length) * _shipPropulsionDB.MaximumSpeed;
 
             // Allowing for very small discrepancies
             Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
@@ -179,8 +180,8 @@ namespace Pulsar4X.Tests
 
             double length = Math.Sqrt((x * x) + (y * y));
             double speedX, speedY;
-            speedX = (x / length) * 100;
-            speedY = (y / length) * 100;
+            speedX = (x / length) * _shipPropulsionDB.MaximumSpeed;
+            speedY = (y / length) * _shipPropulsionDB.MaximumSpeed;
 
             // Allowing for very small discrepancies
             Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);

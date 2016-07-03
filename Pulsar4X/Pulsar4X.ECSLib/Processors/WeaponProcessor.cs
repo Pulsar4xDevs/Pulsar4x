@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         {
 
             WeaponStateDB stateInfo = beamWeapon.GetDataBlob<WeaponStateDB>();
-            FireControlAbilityDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlAbilityDB>();
+            FireControlInstanceAbilityDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceAbilityDB>();
             if (stateInfo.CoolDown <= TimeSpan.FromSeconds(0) && stateInfo.FireControl != null && fireControl.IsEngaging)
             {
                 //TODO chance to hit
@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
 
         public static void SetWeaponToFC(Entity fireControlInstance, Entity weaponInstance)
         {
-            if (fireControlInstance.HasDataBlob<FireControlAbilityDB>() && weaponInstance.HasDataBlob<WeaponStateDB>())
+            if (fireControlInstance.HasDataBlob<FireControlInstanceAbilityDB>() && weaponInstance.HasDataBlob<WeaponStateDB>())
                 weaponInstance.GetDataBlob<WeaponStateDB>().FireControl = fireControlInstance;
             else
                 throw new Exception("needs FireContInstanceAbilityDB on fireControlInstance, and WeaponStateDB on weaponInstance");
@@ -52,8 +52,8 @@ namespace Pulsar4X.ECSLib
 
         public static void SetTarget(Entity fireControlInstance, Entity target)
         {
-            if (fireControlInstance.HasDataBlob<FireControlAbilityDB>())
-                fireControlInstance.GetDataBlob<FireControlAbilityDB>().Target = target;
+            if (fireControlInstance.HasDataBlob<FireControlInstanceAbilityDB>())
+                fireControlInstance.GetDataBlob<FireControlInstanceAbilityDB>().Target = target;
             else
                 throw new Exception("No FireContInstanceAbilityDB on entity");
         }
