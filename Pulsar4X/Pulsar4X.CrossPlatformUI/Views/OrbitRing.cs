@@ -27,8 +27,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             set { _penColor = value;  UpdatePens(); OnPropertyChanged();}}
         private Color _penColor;
   
-        private float TopLeftX { get { return (float)_parentPositionDB.Position.X;}}//+ _width / 2; }}
-        private float TopLeftY { get { return (float)_parentPositionDB.Position.Y; }}//+ _height / 2; }}
+        private float TopLeftX { get { return (float)_parentPositionDB.Position.X * 200.0f;}}//+ _width / 2; }}
+        private float TopLeftY { get { return (float)_parentPositionDB.Position.Y * 200.0f; }}//+ _height / 2; }}
         private float _width;
         private float _height;
         private float _focalPoint;
@@ -53,8 +53,18 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             _orbitDB = entityWithOrbit.GetDataBlob<OrbitDB>();
             _parentPositionDB = _orbitDB.Parent.GetDataBlob<PositionDB>();
-            _bodyPositionDB = entityWithOrbit.GetDataBlob<PositionDB>();                        
+            _bodyPositionDB = entityWithOrbit.GetDataBlob<PositionDB>();
+
             _rotation = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis*2); //This is the LoP + AoP.
+
+            //Normalize for 0-360
+            while (_rotation < 0.0f)
+                _rotation = _rotation + 360.0f;
+
+            while (_rotation > 360.0f)
+                _rotation = _rotation - 360.0f;
+
+
             _width = 200 * (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
             _height = 200 * (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
             _focalPoint = (float)_orbitDB.Eccentricity * _width /2;
@@ -92,7 +102,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             g.TranslateTransform(focalOffset);
             //rotate
 
-            PointF rotatePoint = new PointF(_width / 2 + _focalPoint, _height / 2);
+            PointF rotatePoint = new PointF(((_width / 2) + _focalPoint + TopLeftX), ((_height / 2) + TopLeftY));
             rmatrix.RotateAt(_rotation, rotatePoint);
 
             g.MultiplyTransform(rmatrix);
@@ -100,20 +110,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             /*RectangleF MyRect = new RectangleF(TopLeftX, TopLeftY, _width, _height);
             g.DrawRectangle(Colors.White, MyRect);*/
 
-            PointF planetPos = new PointF((float)_bodyPositionDB.X - (rotatePoint.X / 400), (float)_bodyPositionDB.Y - (rotatePoint.Y / 400));
-            float hyp = (float)Math.Sqrt((planetPos.X * planetPos.X) + (planetPos.Y * planetPos.Y));
-
-            float rad = planetPos.X / hyp;
-            float rad2 = planetPos.Y / hyp;
-            //float rad3 = planetPos.X / planetPos.Y;
-            float rad4 = planetPos.Y / planetPos.X;
-            float value = (float)Math.Acos(rad) * 180.0f / (float)Math.PI;
-            float value2 = (float)Math.Asin(rad2) * 180.0f / (float)Math.PI;
-            float value3 = (float)Math.Atan2(planetPos.Y, planetPos.X) * 180.0f / (float)Math.PI;
-            //float value4 = (float)Math.Atan(rad4) * 180.0f / (float)Math.PI;
-
-            var myMat = Matrix.Create();
-            myMat.RotateAt(_rotation, (float)_bodyPositionDB.X, (float)_bodyPositionDB.Y);
 
             //public float StartArcAngle { get { return (float)(Math.Atan2(_bodyPositionDB.Y, _bodyPositionDB.X) * 180 / Math.PI); } }
 
@@ -143,19 +139,30 @@ namespace Pulsar4X.CrossPlatformUI.Views
             g.RestoreTransform();
 
             Font lastFont = new Font(FontFamilies.MonospaceFamilyName, 10.0f);
-            if (drawCount == 0)
+            if(drawCount == 2)
             {
                 g.SaveTransform();
-                String Entry = String.Format("Length {0} {1} {2} {3} {4} {5}", planetPos.X, planetPos.Y, hyp, _bodyPositionDB.X, _bodyPositionDB.Y,_rotation);
+                String Entry = String.Format("{0} {1} {2} {3} {4} {5}", _rotation, StartArcAngle, ActualAngle, AngleAdd, _bodyPositionDB.X, _bodyPositionDB.Y);
                 g.DrawText(lastFont, Colors.White, 10, 10, Entry);
 
-                Entry = String.Format("Rad: {0} {1} {2} {3} {4} {5}", rad,rad2,rad4,StartArcAngle, ActualAngle, AngleAdd );
+                Entry = String.Format("Values: {0} {1} {2} {3} {4} {5}", TopLeftX, TopLeftY, _width, _height,rotatePoint.X,rotatePoint.Y);
                 g.DrawText(lastFont, Colors.White, 10, 30, Entry);
 
-                Entry = String.Format("Values: {0} {1} {2} {3} {4} {5}", myMat.X0, myMat.Y0, myMat.Xx, myMat.Xy, myMat.Yx, myMat.Yy);
-                g.DrawText(lastFont, Colors.White, 10, 50, Entry);
 
                 g.RestoreTransform();
+            }
+            if (drawCount == 3)
+            {
+                g.SaveTransform();
+
+                String Entry = String.Format("{0} {1} {2} {3} {4} {5}", _rotation, StartArcAngle, ActualAngle, AngleAdd, _bodyPositionDB.X, _bodyPositionDB.Y);
+                g.DrawText(lastFont, Colors.White, 10, 50, Entry);
+
+                Entry = String.Format("Values: {0} {1} {2} {3} {4} {5}", TopLeftX, TopLeftY, _width, _height, rotatePoint.X, rotatePoint.Y);
+                g.DrawText(lastFont, Colors.White, 10, 70, Entry);
+
+
+               g.RestoreTransform();
             }
             drawCount++;
             if (drawCount == 5)
