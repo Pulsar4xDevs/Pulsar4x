@@ -1,6 +1,5 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
-using Pulsar4X.CrossPlatformUI.Views;
 using Pulsar4X.ViewModel;
 using System;
 using System.ComponentModel;
@@ -10,15 +9,14 @@ namespace Pulsar4X.CrossPlatformUI.Commands
     sealed class ShipViewCMD : Command
     {
         private readonly GameVM _gameVM;
-
         public ShipViewCMD(GameVM gameVM)
         {
-            _gameVM = gameVM;
             ID = "ShipViewCMD";
-//            Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.SystemMap.ico");
+            Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.ShipView.ico");
             MenuText = "Ship View";
             ToolBarText = "Ship View";
-//            Shortcut = Keys.F3;
+            //            Shortcut = Keys.F3;
+            _gameVM = gameVM;
             _gameVM.PropertyChanged += _gameVM_PropertyChanged;
             Enabled = _gameVM.HasGame;
         }
@@ -36,7 +34,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             base.OnExecuted(e);
 
             ShipOrderVM orderVM = ShipOrderVM.Create(_gameVM);
-            MainWindow mw = (MainWindow)Application.Instance.MainForm.Content;
+            Views.MainWindow mw = (Views.MainWindow)Application.Instance.MainForm.Content;
             mw.AddOrSelectTabPanel("Ship Order View", new Views.ShipView(orderVM));
 //            mw.AddOrSelectTabPanel("Ship Orders View", new Views.ShipOrderView(designVM));
         }
