@@ -12,7 +12,7 @@ namespace Pulsar4X.CrossPlatformUI.Commands
         public ShipViewCMD(GameVM gameVM)
         {
             ID = "ShipViewCMD";
-            Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.ShipView.ico");
+            //Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.ShipView.ico");
             MenuText = "Ship View";
             ToolBarText = "Ship View";
             //            Shortcut = Keys.F3;
