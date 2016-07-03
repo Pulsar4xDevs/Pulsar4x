@@ -102,6 +102,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             g.TranslateTransform(focalOffset);
             //rotate
 
+            //The RotatePoint must consider the parent position, or else it will rotate any moon about the sun and not about the planet it orbits, hence TopLeftX,TopLeftY in this 
+            //calculation.
             PointF rotatePoint = new PointF(((_width / 2) + _focalPoint + TopLeftX), ((_height / 2) + TopLeftY));
             rmatrix.RotateAt(_rotation, rotatePoint);
 
