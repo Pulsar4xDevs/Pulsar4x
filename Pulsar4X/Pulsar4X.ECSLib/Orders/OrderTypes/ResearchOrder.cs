@@ -14,6 +14,7 @@ namespace Pulsar4X.ECSLib
 
         public ResearchOrder()
         {
+            OrderType = orderType.RESEARCH;
         }
 
 

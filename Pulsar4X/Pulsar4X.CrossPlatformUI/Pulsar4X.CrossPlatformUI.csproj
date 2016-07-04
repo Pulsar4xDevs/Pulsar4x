@@ -112,7 +112,9 @@
   </ItemGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <EmbeddedResource Include="Views\ScientistUC.xeto">
       <SubType>Designer</SubType>
@@ -207,6 +209,9 @@
     <EmbeddedResource Include="Views\TimeControlView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ShipView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -219,6 +224,7 @@
     <Compile Include="Commands\Quit.cs" />
     <Compile Include="Commands\SaveGame.cs" />
     <Compile Include="Commands\ShipDesignViewCMD.cs" />
+    <Compile Include="Commands\ShipViewCMD.cs" />
     <Compile Include="Commands\SystemMap.cs" />
     <Compile Include="CustomControls\RenderCanvas.cs" />
     <Compile Include="GLUtilities\GLEffect.cs" />
@@ -314,6 +320,9 @@
       <DependentUpon>ShipDesignView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Lib\OpenGLRenderer.cs" />
+    <Compile Include="Views\ShipView.xeto.cs">
+      <DependentUpon>ShipView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\SystemMap_DrawableView.xeto.cs">
       <DependentUpon>SystemMap_DrawableView.xeto</DependentUpon>
     </Compile>

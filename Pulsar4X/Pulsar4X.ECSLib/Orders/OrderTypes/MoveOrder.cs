@@ -30,9 +30,10 @@ namespace Pulsar4X.ECSLib
             PositionTarget = null;
             OrbitRadius = 0;
             MaximumSpeed = 0;
+            OrderType = orderType.MOVETO;
         }
 
-        public MoveOrder(Entity ship, Entity target, long orbitRadius = 0)
+        public MoveOrder(Entity ship, Entity target, long orbitRadius = 0) : this()
         {
             DelayTime = 0;
             Owner = ship;
@@ -42,7 +43,7 @@ namespace Pulsar4X.ECSLib
             MaximumSpeed = ship.GetDataBlob<PropulsionDB>().MaximumSpeed;
         }
 
-        public MoveOrder(Entity ship, PositionDB target, long orbitRadius = 0)
+        public MoveOrder(Entity ship, PositionDB target, long orbitRadius = 0) : this()
         {
             DelayTime = 0;
             Owner = ship;
@@ -50,6 +51,7 @@ namespace Pulsar4X.ECSLib
             PositionTarget = new PositionDB(target);
             OrbitRadius = orbitRadius;
             MaximumSpeed = ship.GetDataBlob<PropulsionDB>().MaximumSpeed;
+ 
         }
 
         public override object Clone()
@@ -93,6 +95,8 @@ namespace Pulsar4X.ECSLib
         // Returns true if the destination has been reached.
         public override bool processOrder()
         {
+
+            double speedMultiplier = 1000.0;
             PositionDB currentPosition = Owner.GetDataBlob<PositionDB>();
             PositionDB targetPosition = null;
 
@@ -104,20 +108,27 @@ namespace Pulsar4X.ECSLib
             if (currentPosition == targetPosition) // We have reached the target
             {
                 Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0.0, 0.0, 0.0, 0.0);
+
                 return true;
             }
 
             // Set the speed of the ship
             // @todo - take into account Task Group speeds and limiting speed set by user
-            Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, Owner.GetDataBlob<PropulsionDB>().MaximumSpeed);
+            // Maximimum speed in m/s? 
+            Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, (Owner.GetDataBlob<PropulsionDB>().MaximumSpeed)*speedMultiplier); 
+
+            
 
             return false;
         }
 
-        private Vector4 getSpeed(PositionDB currentPosition, PositionDB targetPosition, int speedMagnitude)
+        private Vector4 getSpeed(PositionDB currentPosition, PositionDB targetPosition, double speedMagnitude)
         {
             Vector4 speed = new Vector4( 0, 0, 0, 0 );
             double length;
+            double maxSpeed;
+
+            Vector4 speedMagInKM;
 
             Vector4 direction = new Vector4(0, 0, 0, 0);
             direction.X = targetPosition.X - currentPosition.X;
@@ -125,15 +136,29 @@ namespace Pulsar4X.ECSLib
             direction.Z = targetPosition.Z - currentPosition.Z;
             direction.W = 0;
 
+
+
             length = direction.Length();
 
             direction.X = (direction.X / length);
             direction.Y = (direction.Y / length);
             direction.Z = (direction.Z / length);
 
-            speed.X = direction.X * speedMagnitude;
-            speed.Y = direction.Y * speedMagnitude;
-            speed.Z = direction.Z * speedMagnitude;
+            // If distance left is less than the speed in one second, slow down
+            if (length > speedMagnitude)
+                maxSpeed = speedMagnitude;
+            else
+                maxSpeed = length;
+
+
+
+            speedMagInKM.X = direction.X * maxSpeed;
+            speedMagInKM.Y = direction.Y * maxSpeed;
+            speedMagInKM.Z = direction.Z * maxSpeed;
+
+            speed.X = Distance.ToAU(speedMagInKM.X);
+            speed.Y = Distance.ToAU(speedMagInKM.Y);
+            speed.Z = Distance.ToAU(speedMagInKM.Z);
 
             return speed;
         }

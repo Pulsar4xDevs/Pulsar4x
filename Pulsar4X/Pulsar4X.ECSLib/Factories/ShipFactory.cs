@@ -57,16 +57,9 @@ namespace Pulsar4X.ECSLib
             var cargo = new CargoDB();
             var crew = new CrewDB();
             var damage = new DamageDB();
-            var hanger = new HangerDB();
-            var industry = new IndustryDB();
             var maintenance = new MaintenanceDB();
-            var missileWeapons = new MissileWeaponsDB();
-            var power = new PowerDB();
             var sensorProfile = new SensorProfileDB();
             var sensors = new SensorsDB();
-            var shields = new ShieldsDB();
-            var tractor = new TractorDB();
-            var troopTransport = new TroopTransportDB();
             var name = new NameDB(className);
             var componentInstancesDB = new ComponentInstancesDB();
             // now lets create a list of all these datablobs so we can create our new entity:
@@ -78,16 +71,9 @@ namespace Pulsar4X.ECSLib
                 cargo,
                 crew,
                 damage,
-                hanger,
-                industry,
                 maintenance,
-                missileWeapons,
-                power,
                 sensorProfile,
                 sensors,
-                shields,
-                tractor,
-                troopTransport,
                 name,
                 componentInstancesDB
             };
@@ -118,23 +104,6 @@ namespace Pulsar4X.ECSLib
             return shipClassEntity;
         }
 
-        public static Entity AddShipComponent(Entity ship, Entity component)
-        {
-            if(!ship.HasDataBlob<ShipInfoDB>())
-                throw new Exception("Entity is not a ship or does not contain a ShipInfoDB datablob");
-            ShipInfoDB shipinfo = ship.GetDataBlob<ShipInfoDB>();
 
-            if(!component.HasDataBlob<ComponentInfoDB>())
-                throw new Exception("Entity is not a ShipComponent or does not contain a ShipComponent datablob");
-            ComponentInfoDB componentInfo = component.GetDataBlob<ComponentInfoDB>();
-
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(component, ship);
-            
-            shipinfo.InternalHTK += componentInfo.HTK; 
-            shipinfo.Tonnage += componentInfo.SizeInTons;  
-            ReCalcProcessor.ReCalcAbilities(ship);
-
-            return ship;
-        }
     }
 }

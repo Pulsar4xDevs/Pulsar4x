@@ -22,6 +22,7 @@ namespace Pulsar4X.ECSLib
                 foreach (Entity shipEntity in system.SystemManager.GetAllEntitiesWithDataBlob<PropulsionDB>())
                 {
                     //TODO: do we need to check if the ship has an orbitDB?
+                    //TODO: if the ship will arrive at the destination in the next deltaSeconds, don't go past it.
                     shipEntity.GetDataBlob<PositionDB>().Position += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
                     //TODO: use fuel.
                 }
@@ -35,6 +36,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="deltaSeconds">amount of time in seconds</param>
         internal static void Process(StarSystem system, int deltaSeconds)
         {
+            OrderProcessor.ProcessSystem(system);
             foreach (Entity shipEntity in system.SystemManager.GetAllEntitiesWithDataBlob<PropulsionDB>())
             {
                 //TODO: do we need to check if the ship has an orbitDB?
@@ -64,7 +66,13 @@ namespace Pulsar4X.ECSLib
             }
 
             //Note: TN aurora uses the TCS for max speed calcs. 
-            ship.GetDataBlob<PropulsionDB>().MaximumSpeed = (int)(totalEnginePower / ship.GetDataBlob<ShipInfoDB>().Tonnage) * 20;
+            ship.GetDataBlob<PropulsionDB>().TotalEnginePower = totalEnginePower;
+            ship.GetDataBlob<PropulsionDB>().MaximumSpeed = MaxSpeedCalc(totalEnginePower,  ship.GetDataBlob<ShipInfoDB>().Tonnage);
+        }
+
+        public static int MaxSpeedCalc(int power, float tonage)
+        {
+            return (int)(power / tonage) * 20;
         }
     }
 }

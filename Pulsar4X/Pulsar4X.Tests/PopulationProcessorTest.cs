@@ -9,62 +9,51 @@ namespace Pulsar4X.Tests
     [TestFixture, Description("Population Growth Test")]
     public class PopulationProcessorTest
     {
-        private Game _game;
+        private TestGame _game;
         private EntityManager _entityManager;
-        private Entity _earthPlanet, _marsPlanet, _lunaPlanet;
-        private Entity _faction;
-        private Entity _colonyEntity;
-        private GalaxyFactory _galaxyFactory;
-        private StarSystemFactory _starSystemFactory;
-        private StarSystem _starSystem;
+
+
+
         private Dictionary<string, AtmosphericGasSD> _gasDictionary;
-        private List<Entity> _planetsList;
+        private List<Entity> _planetsList; 
         private List<Entity> _speciesList;
 
         [SetUp]
         public void Init()
         {
-            _game = new Game(new NewGameSettings());
-            StaticDataManager.LoadData("Pulsar4x", _game);  // TODO: Figure out correct directory
-            _entityManager = new EntityManager(_game);
-            _faction = FactionFactory.CreateFaction(_game, "Terran");  // Terrian?
+            _game = new TestGame();
+            StaticDataManager.LoadData("Pulsar4x", _game.Game);  // TODO: Figure out correct directory
+            _entityManager = _game.Game.GlobalManager;
+
 
 
             // Initialize gas dictionary - haven't found a good way to look up gases without doing this
             _gasDictionary = new Dictionary<string, AtmosphericGasSD>();
 
-            foreach (WeightedValue<AtmosphericGasSD> atmos in _game.StaticData.AtmosphericGases)
+            foreach (WeightedValue<AtmosphericGasSD> atmos in _game.Game.StaticData.AtmosphericGases)
             {
                 _gasDictionary.Add(atmos.Value.ChemicalSymbol, atmos.Value);
             }
 
-            // Set up planets
-            // @todo: add more planets
-            _earthPlanet = setEarthPlanet();
 
             _planetsList = new List<Entity>();
-            _planetsList.Add(_earthPlanet);
-
-
-            // Set up species
-            // @todo: add more species
-            Entity species = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
+            _planetsList.Add(_game.Earth);
 
             _speciesList = new List<Entity>();
-            _speciesList.Add(species);
-
+            _speciesList.Add(_game.HumanSpecies);
+            //_speciesList.Add(_game.GreyAlienSpecies);
 
             // Set up colonies
             // @todo: add more colonies, especially ones with multiple species in one colony
-            _colonyEntity = ColonyFactory.CreateColony(_faction, species, _earthPlanet);
 
-            ComponentTemplateSD infrastructureSD = _game.StaticData.Components[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
-            ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            Entity infrastructureEntity = GenericComponentFactory.DesignToEntity(_game, _faction, infrastructureDesign);
 
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
+            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.Components[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
+            ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>(), _game.Game.StaticData);
+            Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game.Game, _game.HumanFaction, infrastructureDesign);
 
-            ReCalcProcessor.ReCalcAbilities(_colonyEntity);
+            EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureEntity);
+
+            ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
         }
 
@@ -74,16 +63,7 @@ namespace Pulsar4X.Tests
             // @todo: hit all entities
             _game = null;
             _entityManager = null;
-            _faction = null;
-            _colonyEntity = null;
 
-
-            _earthPlanet = null;
-            _marsPlanet = null;
-            _lunaPlanet = null; ;
-            _galaxyFactory = null;
-            _starSystemFactory = null;
-            _starSystem = null; 
             _gasDictionary.Clear();
             _gasDictionary = null;
             _planetsList.Clear();
@@ -118,40 +98,40 @@ namespace Pulsar4X.Tests
             int i, j, k;
 
             Guid infGUID = new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb");
-            ComponentTemplateSD infrastructureSD = _game.StaticData.Components[infGUID];
-            ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            Entity infrastructureEntity = GenericComponentFactory.DesignToEntity(_game, _faction, infrastructureDesign);
+            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.Components[infGUID];
+            ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>(), _game.Game.StaticData);
+            Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game.Game, _game.HumanFaction, infrastructureDesign);
 
-            Dictionary<Entity, long> pop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
+            Dictionary<Entity, long> pop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
 
 
             // Single iteration growth test
             for (i = 0; i < infrastructureAmounts.Length; i++)
             {
                 // Create a new colony with this planet and species, add infrastructure item to it
-                _colonyEntity = ColonyFactory.CreateColony(_faction, species, planet);
+                _game.EarthColony = ColonyFactory.CreateColony(_game.HumanFaction, species, planet);
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
-                ReCalcProcessor.ReCalcAbilities(_colonyEntity);
+                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureEntity);
+                ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
 
                 for (j = 0; j < basePop.Length; j++)
                 {
 
                     // set up population and infrastructure for each test
-                    newPop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
+                    newPop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
 
                     foreach (KeyValuePair<Entity, long> kvp in newPop.ToArray())
                     {
                         newPop[kvp.Key] = basePop[j];
                     }
 
-                    //var infrastuctures = _colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances[infrastructureEntity].Where(inf => inf.DesignEntity.HasDataBlob<LifeSupportAbilityDB>());
+                    //var infrastuctures = _game.EarthColony.GetDataBlob<ComponentInstancesDB>().SpecificInstances[infrastructureEntity].Where(inf => inf.DesignEntity.HasDataBlob<LifeSupportAbilityDB>());
 
-                    returnedPop = calcGrowthIteration(_colonyEntity, newPop);
-                    PopulationProcessor.GrowPopulation(_colonyEntity);
+                    returnedPop = calcGrowthIteration(_game.EarthColony, newPop);
+                    PopulationProcessor.GrowPopulation(_game.EarthColony);
 
                     foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
                     {
@@ -166,17 +146,17 @@ namespace Pulsar4X.Tests
             for (i = 0; i < infrastructureAmounts.Length; i++)
             {
                 // Create a new colony with this planet and species, add infrastructure item to it
-                _colonyEntity = ColonyFactory.CreateColony(_faction, species, planet);
+                _game.EarthColony = ColonyFactory.CreateColony(_game.HumanFaction, species, planet);
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    ShipAndColonyInfoProcessor.AddComponentDesignToEntity(infrastructureEntity, _colonyEntity);
-                ReCalcProcessor.ReCalcAbilities(_colonyEntity);
+                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureEntity);
+                ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
                 for (j = 0; j < basePop.Length; j++)
                 {
                     // set up population and infrastructure for each test
-                    newPop = _colonyEntity.GetDataBlob<ColonyInfoDB>().Population;
+                    newPop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
 
                     foreach (KeyValuePair<Entity, long> kvp in newPop.ToArray())
                     {
@@ -185,8 +165,8 @@ namespace Pulsar4X.Tests
 
                     for(k = 0; k < 10; k++)
                     {
-                        newPop = calcGrowthIteration(_colonyEntity, newPop);
-                        PopulationProcessor.GrowPopulation(_colonyEntity);
+                        newPop = calcGrowthIteration(_game.EarthColony, newPop);
+                        PopulationProcessor.GrowPopulation(_game.EarthColony);
                     }
 
                     foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
