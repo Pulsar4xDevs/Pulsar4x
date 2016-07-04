@@ -30,9 +30,10 @@ namespace Pulsar4X.ECSLib
             PositionTarget = null;
             OrbitRadius = 0;
             MaximumSpeed = 0;
+            OrderType = orderType.MOVETO;
         }
 
-        public MoveOrder(Entity ship, Entity target, long orbitRadius = 0)
+        public MoveOrder(Entity ship, Entity target, long orbitRadius = 0) : this()
         {
             DelayTime = 0;
             Owner = ship;
@@ -42,7 +43,7 @@ namespace Pulsar4X.ECSLib
             MaximumSpeed = ship.GetDataBlob<PropulsionDB>().MaximumSpeed;
         }
 
-        public MoveOrder(Entity ship, PositionDB target, long orbitRadius = 0)
+        public MoveOrder(Entity ship, PositionDB target, long orbitRadius = 0) : this()
         {
             DelayTime = 0;
             Owner = ship;
@@ -50,6 +51,7 @@ namespace Pulsar4X.ECSLib
             PositionTarget = new PositionDB(target);
             OrbitRadius = orbitRadius;
             MaximumSpeed = ship.GetDataBlob<PropulsionDB>().MaximumSpeed;
+ 
         }
 
         public override object Clone()

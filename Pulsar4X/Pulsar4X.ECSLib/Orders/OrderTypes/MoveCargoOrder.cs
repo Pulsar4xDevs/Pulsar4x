@@ -34,9 +34,10 @@ namespace Pulsar4X.ECSLib
             Target = Entity.InvalidEntity;
             CargoType = Entity.InvalidEntity.Guid;
             Amount = 0;
+            OrderType = orderType.MOVECARGO;
         }
 
-        public MoveCargoOrder(Entity owner, Entity origin, Entity target, Guid cargoType, double amount)
+        public MoveCargoOrder(Entity owner, Entity origin, Entity target, Guid cargoType, double amount) : this()
         {
             Owner = owner;
             Origin = origin;

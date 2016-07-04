@@ -24,9 +24,10 @@ namespace Pulsar4X.ECSLib
         MineralsRequired = new Dictionary<Guid, int>();
         MaterialsRequired = new Dictionary<Guid, int>();
         ComponentsRequired = new Dictionary<Guid, int>();
+        OrderType = orderType.CONSTRUCTION;
     }
 
-    public ConstructionOrder(ConstructionType constructionType, Dictionary<Guid, int> minRequired, Dictionary<Guid, int> matRequired, Dictionary<Guid, int> compRequired)
+    public ConstructionOrder(ConstructionType constructionType, Dictionary<Guid, int> minRequired, Dictionary<Guid, int> matRequired, Dictionary<Guid, int> compRequired) : this()
     {
         ConstructionType = constructionType;
 

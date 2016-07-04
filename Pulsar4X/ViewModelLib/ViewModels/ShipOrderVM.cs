@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace Pulsar4X.ViewModel
 {
@@ -13,6 +14,7 @@ namespace Pulsar4X.ViewModel
         public DictionaryVM<StarSystem, string> StarSystems;
         public DictionaryVM<Entity, string> ShipList;
 
+        public DictionaryVM<Entity, string> TargetList;
 
         public DictionaryVM<BaseOrder, string> OrdersPossible;
         public DictionaryVM<BaseOrder, string> OrderList;
@@ -20,6 +22,9 @@ namespace Pulsar4X.ViewModel
         public Entity SelectedShip;
         public BaseOrder SelectedPossibleOrder;
         public BaseOrder SelectedOrder;
+        public Entity SelectedTarget;
+
+        public Boolean TargetShown;
 
         public StarSystem SelectedSystem;
 
@@ -31,6 +36,7 @@ namespace Pulsar4X.ViewModel
             _gameVM = game;
 
             ShipList = new DictionaryVM<Entity, string>();
+            TargetList = new DictionaryVM<Entity, string>();
             OrdersPossible = new DictionaryVM<BaseOrder, string>();
             OrderList = new DictionaryVM<BaseOrder, string>();
 
@@ -47,6 +53,8 @@ namespace Pulsar4X.ViewModel
             StarSystems.SelectedIndex = 0;
 
             SelectedSystem = StarSystems.SelectedKey;
+
+            TargetShown = false;
 
             RefreshShips();
 
@@ -98,6 +106,16 @@ namespace Pulsar4X.ViewModel
 
             SelectedShip = ShipList.SelectedKey;
 
+            TargetList.Clear();
+            foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
+            {
+                TargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
+            }
+
+            TargetList.SelectedIndex = 0;
+
+            SelectedTarget = TargetList.SelectedKey;
+
             RefreshOrders();
 
             return;
@@ -114,17 +132,72 @@ namespace Pulsar4X.ViewModel
 
             OrdersPossible.SelectedIndex = 0;
 
+            SelectedPossibleOrder = OrdersPossible.SelectedKey;
+
+            if (OrdersPossible.SelectedKey.OrderType == orderType.MOVETO)
+                TargetShown = true;
+            else
+                TargetShown = false;
+
             List<BaseOrder> orders = new List<BaseOrder>(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
 
             OrderList.Clear();
 
             foreach(BaseOrder order in orders)
             {
+                string orderDescription = "";
 
+                switch(order.OrderType)
+                {
+                    case orderType.MOVETO:
+                        MoveOrder moveOrder = (MoveOrder)order;
+                        orderDescription += "Move to ";
+                        orderDescription += moveOrder.Target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction);
+                        break;
+                    default:
+                        break;
+                }
+
+
+                OrderList.Add(order, orderDescription);
             }
+
+            OnPropertyChanged();
+
 
             return;
         }
+
+        public void OnAddOrder()
+        {
+            // Check if Ship, Target, and Order are set
+            if (SelectedShip == null  || SelectedTarget == null || SelectedPossibleOrder == null) 
+                return;
+            switch(SelectedPossibleOrder.OrderType)
+            {
+                case orderType.MOVETO:
+                    _gameVM.CurrentPlayer.Orders.MoveOrder(SelectedShip, SelectedTarget);
+                    break;
+                case orderType.INVALIDORDER:
+                    break;
+                default:
+                    break;
+            }
+
+            _gameVM.CurrentPlayer.ProcessOrders();
+
+            RefreshOrders();
+        }
+
+        private ICommand _addOrder;
+        public ICommand AddOrder
+        {
+            get
+            {
+                return _addOrder ?? (_addOrder = new CommandHandler(OnAddOrder, true));
+            }
+        }
+
 
     }
 }

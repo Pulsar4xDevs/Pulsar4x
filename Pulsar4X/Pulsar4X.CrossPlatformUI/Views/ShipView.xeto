@@ -4,7 +4,7 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
   <TableLayout Width ="800">
-    <TableRow>
+    <TableRow ScaleHeight="False">
       <TableCell>
         <StackLayout Orientation="Horizontal">
           <Label>Current System </Label>
@@ -12,7 +12,7 @@
         </StackLayout>
       </TableCell>
     </TableRow>
-    <TableRow>
+    <TableRow ScaleHeight="True">
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Ship List</Label>
@@ -27,10 +27,21 @@
         </StackLayout>
       </TableCell>
       <TableCell>
+        <StackLayout x:Name="TargetArea" Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
+          <Label>Target</Label>
+          <DropDown x:Name="TargetDropDown" Width="100"></DropDown>
+        </StackLayout>
+      </TableCell>
+      <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Order List</Label>
           <ListBox Height = "100" x:Name="OrderList" SelectedKey="SelectedOrder"></ListBox>
         </StackLayout>      
+      </TableCell>
+    </TableRow>
+    <TableRow ScaleHeight="False">
+      <TableCell>
+        <Button Text="Add Order" ID="AddOrder"></Button>
       </TableCell>
     </TableRow>
   </TableLayout>
