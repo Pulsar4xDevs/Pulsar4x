@@ -22,6 +22,7 @@ namespace Pulsar4X.CrossPlatformUI
         private static Command shipDesign;
         private static Command missileDesign;
         private static Command componentTemplateDesign;
+        private static Command shipView;
 
         public MainForm()
         {
@@ -47,6 +48,7 @@ namespace Pulsar4X.CrossPlatformUI
             shipDesign = new ShipDesignViewCMD(_gameVM);
             missileDesign = new MissileDesignCMD(_gameVM);
             componentTemplateDesign = new ComponentTemplateViewCMD(_gameVM);
+            shipView = new ShipViewCMD(_gameVM);
 			
 
             if (Platform.Supports<MenuBar>())
@@ -82,6 +84,7 @@ namespace Pulsar4X.CrossPlatformUI
                 ToolBar.Items.Add(shipDesign);
                 ToolBar.Items.Add(missileDesign);
                 ToolBar.Items.Add(componentTemplateDesign);
+                ToolBar.Items.Add(shipView);
             }
         }
 

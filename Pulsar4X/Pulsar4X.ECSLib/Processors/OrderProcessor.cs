@@ -7,18 +7,17 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    internal class OrderProcessor
+    static public class OrderProcessor
     {
-        [JsonProperty]
-        private DateTime _lastRun = DateTime.MinValue;
 
-        internal void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        static public void Process(Game game)
         {
+            Dictionary<Guid, StarSystem> systems = game.Systems;
             if (game.Settings.EnableMultiThreading ?? false)
             {
                 // Process the orderqueue
                 Parallel.ForEach(game.Players, player => player.ProcessOrders());
-                Parallel.ForEach(systems, system => ProcessSystem(system, game));
+                Parallel.ForEach(systems, system => ProcessSystem(system.Value));
             }
             else
             {
@@ -30,12 +29,12 @@ namespace Pulsar4X.ECSLib
                 foreach (var system in systems) //TODO thread this
                 {
 
-                    ProcessSystem(system, game);
+                    ProcessSystem(system.Value);
                 }
             }
         }
 
-        private void ProcessSystem(StarSystem system, Game game)
+        static public void ProcessSystem(StarSystem system)
         {
             foreach (Entity ship in system.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
             {
