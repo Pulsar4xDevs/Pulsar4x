@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
         {
             Vector4 speed = new Vector4( 0, 0, 0, 0 );
             double length;
-            double maxSpeed;
+
 
             Vector4 speedMagInKM;
 
@@ -144,17 +144,11 @@ namespace Pulsar4X.ECSLib
             direction.Y = (direction.Y / length);
             direction.Z = (direction.Z / length);
 
-            // If distance left is less than the speed in one second, slow down
-            if (length > speedMagnitude)
-                maxSpeed = speedMagnitude;
-            else
-                maxSpeed = length;
 
 
-
-            speedMagInKM.X = direction.X * maxSpeed;
-            speedMagInKM.Y = direction.Y * maxSpeed;
-            speedMagInKM.Z = direction.Z * maxSpeed;
+            speedMagInKM.X = direction.X * speedMagnitude;
+            speedMagInKM.Y = direction.Y * speedMagnitude;
+            speedMagInKM.Z = direction.Z * speedMagnitude;
 
             speed.X = Distance.ToAU(speedMagInKM.X);
             speed.Y = Distance.ToAU(speedMagInKM.Y);
