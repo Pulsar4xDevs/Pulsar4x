@@ -17,25 +17,35 @@
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Ship List</Label>
 
-          <DropDown x:Name="ShipList"></DropDown>
+          <DropDown x:Name="ShipList" ></DropDown>
         </StackLayout>
       </TableCell>
       <TableCell>
-        <StackLayout Orientation="Horizontal">
-          <Label>Ship Speed </Label>
+        <StackLayout Orientation="Vertical">
+          <StackLayout Orientation="Horizontal">
+          <Label>Ship Speed - </Label>
           <TextBox Text="{Binding ShipSpeed}"></TextBox>
           <Label> X: </Label>
-          <TextBox Text="{Binding XSpeed}" Width="50"></TextBox>
+          <TextBox Text="{Binding XSpeed}" Width="100"></TextBox>
           <Label> Y: </Label>
-          <TextBox Text="{Binding YSpeed}" Width="50"></TextBox>
+          <TextBox Text="{Binding YSpeed}" Width="100"></TextBox>
+          </StackLayout>
+          <StackLayout Orientation="Horizontal">
+            <Label> Ship Position -                              </Label>
+            <Label> X: </Label>
+            <TextBox Text="{Binding XPos}" Width="100"></TextBox>
+            <Label> Y: </Label>
+            <TextBox Text="{Binding YPos}" Width="100"></TextBox>
+          </StackLayout>
         </StackLayout>
+
       </TableCell>
     </TableRow>
     <TableRow ScaleHeight="True">
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Orders Available</Label>
-          <ListBox Height = "100" x:Name="OrdersPossible" SelectedKey="SelectedPossibleOrder"></ListBox>
+          <ListBox Height = "100" x:Name="OrdersPossible"></ListBox>
         </StackLayout>
       </TableCell>
       <TableCell>

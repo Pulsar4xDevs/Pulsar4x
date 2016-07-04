@@ -52,6 +52,22 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+        public string XPos
+        {
+            get
+            {
+                return SelectedShip.GetDataBlob<PositionDB>().X.ToString();
+            }
+        }
+
+        public string YPos
+        {
+            get
+            {
+                return SelectedShip.GetDataBlob<PositionDB>().Y.ToString();
+            }
+        }
+
         private GameVM _gameVM;
         public GameVM GameVM { get { return _gameVM; } }
 
@@ -83,7 +99,19 @@ namespace Pulsar4X.ViewModel
             RefreshShips();
 
             PropertyChanged += ShipOrderVM_PropertyChanged;
+            SelectedSystem.SystemSubpulses.SystemDateChangedEvent += UpdateInterface_SystemDateChangedEvent;
 
+        }
+
+
+        // Not 100% on events, but hopefully this will do
+        public void UpdateInterface_SystemDateChangedEvent(DateTime newDate)
+        {
+            OnPropertyChanged(nameof(ShipSpeed));
+            OnPropertyChanged(nameof(XSpeed));
+            OnPropertyChanged(nameof(YSpeed));
+            OnPropertyChanged(nameof(XPos));
+            OnPropertyChanged(nameof(YPos));
         }
 
         private void ShipOrderVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -137,6 +165,12 @@ namespace Pulsar4X.ViewModel
         private void Ship_SelectionChangedEvent(int oldSelection, int newSelection)
         {
             SelectedShip = ShipList.SelectedKey;
+
+            OnPropertyChanged(nameof(ShipSpeed));
+            OnPropertyChanged(nameof(XSpeed));
+            OnPropertyChanged(nameof(YSpeed));
+            OnPropertyChanged(nameof(XPos));
+            OnPropertyChanged(nameof(YPos));
 
             RefreshOrders();
         }
@@ -246,6 +280,9 @@ namespace Pulsar4X.ViewModel
             _gameVM.CurrentPlayer.ProcessOrders();
 
             RefreshOrders();
+            OnPropertyChanged(nameof(ShipSpeed));
+            OnPropertyChanged(nameof(XSpeed));
+            OnPropertyChanged(nameof(YSpeed));
         }
 
         private ICommand _addOrder;

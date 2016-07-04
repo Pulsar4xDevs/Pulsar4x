@@ -22,6 +22,7 @@ namespace Pulsar4X.ECSLib
                 foreach (Entity shipEntity in system.SystemManager.GetAllEntitiesWithDataBlob<PropulsionDB>())
                 {
                     //TODO: do we need to check if the ship has an orbitDB?
+                    //TODO: if the ship will arrive at the destination in the next deltaSeconds, don't go past it.
                     shipEntity.GetDataBlob<PositionDB>().Position += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
                     //TODO: use fuel.
                 }
