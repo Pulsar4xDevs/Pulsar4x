@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout Width ="800">
+    <TableRow ScaleHeight="False">
+      <TableCell>
+        <StackLayout Orientation="Horizontal">
+          <Label>Current System </Label>
+          <DropDown x:Name="Systems" Width="120"></DropDown>
+        </StackLayout>
+      </TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell>
+        <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
+          <Label>Ship List</Label>
+
+          <DropDown x:Name="ShipList" ></DropDown>
+        </StackLayout>
+      </TableCell>
+      <TableCell>
+        <StackLayout Orientation="Vertical">
+          <StackLayout Orientation="Horizontal">
+          <Label>Ship Speed - </Label>
+          <TextBox Text="{Binding ShipSpeed}"></TextBox>
+          <Label> X: </Label>
+          <TextBox Text="{Binding XSpeed}" Width="100"></TextBox>
+          <Label> Y: </Label>
+          <TextBox Text="{Binding YSpeed}" Width="100"></TextBox>
+          </StackLayout>
+          <StackLayout Orientation="Horizontal">
+            <Label> Ship Position -                              </Label>
+            <Label> X: </Label>
+            <TextBox Text="{Binding XPos}" Width="100"></TextBox>
+            <Label> Y: </Label>
+            <TextBox Text="{Binding YPos}" Width="100"></TextBox>
+          </StackLayout>
+        </StackLayout>
+
+      </TableCell>
+    </TableRow>
+    <TableRow ScaleHeight="True">
+      <TableCell>
+        <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
+          <Label>Orders Available</Label>
+          <ListBox Height = "100" x:Name="OrdersPossible"></ListBox>
+        </StackLayout>
+      </TableCell>
+      <TableCell>
+        <StackLayout x:Name="TargetArea" Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
+          <Label>Target</Label>
+          <DropDown x:Name="TargetDropDown" Width="100"></DropDown>
+        </StackLayout>
+      </TableCell>
+      <TableCell>
+        <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
+          <Label>Order List</Label>
+          <ListBox Height = "100" x:Name="OrderList" SelectedKey="SelectedOrder"></ListBox>
+        </StackLayout>      
+      </TableCell>
+    </TableRow>
+    <TableRow ScaleHeight="False">
+      <TableCell>
+        <Button Text="Add Order" ID="AddOrder"></Button>
+      </TableCell>
+    </TableRow>
+  </TableLayout>
+  
+</Panel>
