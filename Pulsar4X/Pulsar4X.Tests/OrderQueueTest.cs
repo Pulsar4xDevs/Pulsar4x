@@ -129,8 +129,10 @@ namespace Pulsar4X.Tests
 
             double length = Math.Sqrt((x * x) + (y * y));
             double speedX, speedY;
-            speedX = (x / length) * _shipPropulsionDB.MaximumSpeed;
-            speedY = (y / length) * _shipPropulsionDB.MaximumSpeed;
+
+            // multiplier to modify overly slow speeds
+            speedX = Distance.ToAU((x / length) * _shipPropulsionDB.MaximumSpeed) * 1000.0;
+            speedY = Distance.ToAU((y / length) * _shipPropulsionDB.MaximumSpeed) * 1000.0;
 
             // Allowing for very small discrepancies
             Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
@@ -177,8 +179,10 @@ namespace Pulsar4X.Tests
 
             double length = Math.Sqrt((x * x) + (y * y));
             double speedX, speedY;
-            speedX = (x / length) * _shipPropulsionDB.MaximumSpeed;
-            speedY = (y / length) * _shipPropulsionDB.MaximumSpeed;
+
+            // multiplier to modify overly slow speeds
+            speedX = Distance.ToAU((x / length) * _shipPropulsionDB.MaximumSpeed) * 1000.0;
+            speedY = Distance.ToAU((y / length) * _shipPropulsionDB.MaximumSpeed) * 1000.0;
 
             // Allowing for very small discrepancies
             Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
