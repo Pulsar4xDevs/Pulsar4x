@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
             {
                 // Process the orderqueue
                 Parallel.ForEach(game.Players, player => player.ProcessOrders());
-                Parallel.ForEach(systems, system => ProcessSystem(system.Value, game));
+                Parallel.ForEach(systems, system => ProcessSystem(system.Value));
             }
             else
             {
@@ -29,12 +29,12 @@ namespace Pulsar4X.ECSLib
                 foreach (var system in systems) //TODO thread this
                 {
 
-                    ProcessSystem(system.Value, game);
+                    ProcessSystem(system.Value);
                 }
             }
         }
 
-        static private void ProcessSystem(StarSystem system, Game game)
+        static public void ProcessSystem(StarSystem system)
         {
             foreach (Entity ship in system.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
             {
