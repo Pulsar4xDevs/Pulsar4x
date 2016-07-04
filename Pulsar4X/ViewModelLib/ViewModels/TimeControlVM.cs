@@ -65,9 +65,16 @@ namespace Pulsar4X.ViewModel
         private void PausePlay()
         {
             if (IsPaused)
+            {
                 _timeloop.StartTime();
-            else 
+                IsPaused = false;
+            }
+            else
+            {
                 _timeloop.PauseTime();
+                IsPaused = true;
+            }
+                
         }
 
         private void OnTimeDateChange(DateTime newDate)
