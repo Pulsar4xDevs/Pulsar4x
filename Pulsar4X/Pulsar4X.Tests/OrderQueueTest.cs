@@ -19,7 +19,6 @@ namespace Pulsar4X.Tests
         private Entity _earth;
         private List<Entity> _planets;
         private List<StarSystem> _systems;
-        private OrderProcessor _orderProcessor;
         private PropulsionDB _shipPropulsionDB;
 
         [SetUp]
@@ -41,8 +40,6 @@ namespace Pulsar4X.Tests
             _ship = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>().First<Entity>();
             _shipPropulsionDB = _ship.GetDataBlob<PropulsionDB>();
             _target = _ship.Clone(_starSystem.SystemManager);
-
-            _orderProcessor = new OrderProcessor();
 
             _systems = new List<StarSystem>();
 
@@ -111,7 +108,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(1, _player.Orders.NumOrders());
 
-            _orderProcessor.Process(_game, _systems, 5);
+            OrderProcessor.Process(_game);
 
             Assert.AreEqual(0, _player.Orders.NumOrders());
             Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
@@ -159,7 +156,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(1, _player.Orders.NumOrders());
 
-            _orderProcessor.Process(_game, _systems, 5);
+            OrderProcessor.Process(_game);
 
             Assert.AreEqual(0, _player.Orders.NumOrders());
             Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());

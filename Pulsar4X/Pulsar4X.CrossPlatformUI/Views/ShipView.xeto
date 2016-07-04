@@ -12,14 +12,26 @@
         </StackLayout>
       </TableCell>
     </TableRow>
-    <TableRow ScaleHeight="True">
+    <TableRow>
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Ship List</Label>
-          
+
           <DropDown x:Name="ShipList"></DropDown>
         </StackLayout>
       </TableCell>
+      <TableCell>
+        <StackLayout Orientation="Horizontal">
+          <Label>Ship Speed </Label>
+          <TextBox Text="{Binding ShipSpeed}"></TextBox>
+          <Label> X: </Label>
+          <TextBox Text="{Binding XSpeed}" Width="50"></TextBox>
+          <Label> Y: </Label>
+          <TextBox Text="{Binding YSpeed}" Width="50"></TextBox>
+        </StackLayout>
+      </TableCell>
+    </TableRow>
+    <TableRow ScaleHeight="True">
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Orders Available</Label>
