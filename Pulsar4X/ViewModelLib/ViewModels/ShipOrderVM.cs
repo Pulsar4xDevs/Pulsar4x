@@ -11,10 +11,10 @@ namespace Pulsar4X.ViewModel
 {
     public class ShipOrderVM : IViewModel
     {
-        public DictionaryVM<StarSystem, string> StarSystems;
-        public DictionaryVM<Entity, string> ShipList;
+        public DictionaryVM<StarSystem, string> StarSystems { get; set; } //these must be properties
+        public DictionaryVM<Entity, string> ShipList { get; set; } 
 
-        public DictionaryVM<Entity, string> TargetList;
+        public DictionaryVM<Entity, string> TargetList; //not fields!
 
         public DictionaryVM<BaseOrder, string> OrdersPossible;
         public DictionaryVM<BaseOrder, string> OrderList;
