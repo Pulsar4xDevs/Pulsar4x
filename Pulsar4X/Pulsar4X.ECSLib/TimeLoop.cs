@@ -163,8 +163,17 @@ namespace Pulsar4X.ECSLib
             {
                 DateTime nextInterupt = ProcessNextInterupt(_targetDateTime);
                 //do system processors
-                Parallel.ForEach<StarSystem>(_game.Systems.Values, item => item.SystemSubpulses.ProcessSystem(nextInterupt));
+
+                if (_game.Settings.EnableMultiThreading == true) //threaded
+                    Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.SystemSubpulses.ProcessSystem(nextInterupt));
                 //The above 'blocks' till all the tasks are done.
+                else //non threaded
+                {
+                    foreach (StarSystem starSys in _game.Systems.Values)
+                    {
+                        starSys.SystemSubpulses.ProcessSystem(nextInterupt);
+                    }
+                }
 
                 GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
             }
