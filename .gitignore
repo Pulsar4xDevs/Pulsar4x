@@ -46,3 +46,4 @@ _ReSharper.AuroraExtract
 *.usertasks
 Pulsar4X/Pulsar4X.Tests/Pulsar4X.Tests.csproj
 Pulsar4X/TestResults/Pulsar4X.TE.Tests.mdf
+Pulsar4X/TestResults/Pulsar4X.TE.Tests_log.ldf

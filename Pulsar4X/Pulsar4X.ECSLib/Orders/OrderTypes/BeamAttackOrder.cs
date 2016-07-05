@@ -23,10 +23,10 @@ namespace Pulsar4X.ECSLib
             Owner = Entity.InvalidEntity;
             Target = Entity.InvalidEntity;
             BeamWeapon = Entity.InvalidEntity;
-
+            OrderType = orderType.BEAMATTACK;
         }
 
-        public BeamAttackOrder(Entity ship, Entity target, Entity beamWeapon)
+        public BeamAttackOrder(Entity ship, Entity target, Entity beamWeapon) : this()
         {
             DelayTime = 0;
             Owner = ship;

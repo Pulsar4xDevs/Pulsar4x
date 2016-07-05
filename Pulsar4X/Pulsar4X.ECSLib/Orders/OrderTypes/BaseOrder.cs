@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 
 
 
+
 namespace Pulsar4X.ECSLib
 {
+    public enum orderType { INVALIDORDER, MOVETO, MOVECARGO, BEAMATTACK, RESEARCH, CONSTRUCTION };
+
     public abstract class BaseOrder
     {
         // Orders can be given a delay before being executed
         public long DelayTime { get; internal set; }
         public Entity Owner { get; internal set; }
+        public orderType OrderType { get; internal set; }
 
         abstract public bool isValid();
         abstract public bool processOrder();
