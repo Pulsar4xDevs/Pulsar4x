@@ -32,7 +32,7 @@ namespace Pulsar4X.ViewModel
         {
             get
             {
-                return SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length().ToString();
+                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString();
             }
         }
 
@@ -40,7 +40,7 @@ namespace Pulsar4X.ViewModel
         {
             get
             {
-                return SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X.ToString();
+                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString();
             }
         }
 
@@ -48,7 +48,7 @@ namespace Pulsar4X.ViewModel
         {
             get
             {
-                return SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y.ToString();
+                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString();
             }
         }
 

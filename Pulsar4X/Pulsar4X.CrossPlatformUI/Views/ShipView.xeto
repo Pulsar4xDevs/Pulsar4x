@@ -23,7 +23,7 @@
       <TableCell>
         <StackLayout Orientation="Vertical">
           <StackLayout Orientation="Horizontal">
-          <Label>Ship Speed - </Label>
+          <Label>Ship Speed (km/s)- </Label>
           <TextBox Text="{Binding ShipSpeed}"></TextBox>
           <Label> X: </Label>
           <TextBox Text="{Binding XSpeed}" Width="100"></TextBox>
@@ -31,7 +31,7 @@
           <TextBox Text="{Binding YSpeed}" Width="100"></TextBox>
           </StackLayout>
           <StackLayout Orientation="Horizontal">
-            <Label> Ship Position -                              </Label>
+            <Label> Ship Position -                                    </Label>
             <Label> X: </Label>
             <TextBox Text="{Binding XPos}" Width="100"></TextBox>
             <Label> Y: </Label>
@@ -62,9 +62,9 @@
       </TableCell>
     </TableRow>
     <TableRow ScaleHeight="False">
-      <TableCell>
-        <Button Text="Add Order" ID="AddOrder"></Button>
-      </TableCell>
+      <Button Text="Add Order" ID="AddOrder"></Button>
+      <Button Text="Remove Order" ID="RemoveOrder"></Button>
+      
     </TableRow>
     <TableRow></TableRow>
   </TableLayout>
