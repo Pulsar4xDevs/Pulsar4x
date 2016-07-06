@@ -174,8 +174,8 @@ namespace Pulsar4X.ECSLib
                     {
                         // Calculate an intercept
                         targetPosition = Target.GetDataBlob<PositionDB>();
-                        Vector4 targetPos = new Vector4(targetPosition.X, targetPosition.Y, targetPosition.Z, targetPosition.W);
-                        Vector4 currentPos = new Vector4(currentPosition.X, currentPosition.Y, currentPosition.Z, currentPosition.W);
+                        Vector4 targetPos = new Vector4(targetPosition.X, targetPosition.Y, targetPosition.Z, 0);
+                        Vector4 currentPos = new Vector4(currentPosition.X, currentPosition.Y, currentPosition.Z, 0);
                         targetPos = Find_collision_point(targetPos, Target.GetDataBlob<PropulsionDB>().CurrentSpeed, currentPos, AUSpeed);
                         targetPosition = new PositionDB(targetPos, targetPosition.SystemGuid);
                         Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
