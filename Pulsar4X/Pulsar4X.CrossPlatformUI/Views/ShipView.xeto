@@ -45,19 +45,19 @@
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Orders Available</Label>
-          <ListBox Height = "100" x:Name="OrdersPossible"></ListBox>
+          <ListBox Height = "100" x:Name="OrdersPossible" Datacontext="{Binding OrdersPossible"></ListBox>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout x:Name="TargetArea" Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Target</Label>
-          <DropDown x:Name="TargetDropDown" Width="100"></DropDown>
+          <DropDown x:Name="TargetDropDown" Datacontext="{Binding TargetList}" Width="100"></DropDown>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Order List</Label>
-          <ListBox Height = "100" x:Name="OrderList" SelectedKey="SelectedOrder"></ListBox>
+          <ListBox Height = "100" x:Name="OrderList" Datacontext="{Binding OrderList}" SelectedKey="SelectedOrder"></ListBox>
         </StackLayout>      
       </TableCell>
     </TableRow>
