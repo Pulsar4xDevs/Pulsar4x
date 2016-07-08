@@ -212,6 +212,9 @@
     <EmbeddedResource Include="Views\ShipView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\TreeHierachView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -331,6 +334,9 @@
     </Compile>
     <Compile Include="Views\TimeControlView.xeto.cs">
       <DependentUpon>TimeControlView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\TreeHierachView.xeto.cs">
+      <DependentUpon>TreeHierachView.xeto</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
