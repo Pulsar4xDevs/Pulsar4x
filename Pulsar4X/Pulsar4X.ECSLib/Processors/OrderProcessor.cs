@@ -38,12 +38,21 @@ namespace Pulsar4X.ECSLib
         {
             foreach (Entity ship in system.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
             {
-                if (ship.GetDataBlob<ShipInfoDB>().NumOrders() == 0)
-                    continue;
-                    
-                if (ship.GetDataBlob<ShipInfoDB>().CheckNextOrder().processOrder())
-                    ship.GetDataBlob<ShipInfoDB>().RemoveNextOrder();
+                ProcessShip(ship);
             }
+        }
+
+        static public void ProcessShip(Entity ship)
+        {
+            ShipInfoDB sInfo = ship.GetDataBlob<ShipInfoDB>();
+
+            if (sInfo.Orders.Count == 0)
+                return;
+
+            if (sInfo.Orders.Peek().processOrder())
+                sInfo.Orders.Dequeue();
+
+            return;
         }
     }
 }

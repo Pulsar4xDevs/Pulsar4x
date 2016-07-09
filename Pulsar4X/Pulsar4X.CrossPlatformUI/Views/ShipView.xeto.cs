@@ -13,8 +13,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected StackLayout TargetArea;
         protected DropDown TargetDropDown;
 
-        protected Button AddOrder;
-
         public ShipView()
         {
             XamlReader.Load(this);
@@ -38,17 +36,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public ShipView(ShipOrderVM viewModel) :this()
         {
             DataContext = viewModel;
-
-            //ShipList.DataContext = viewModel.ShipList;
-            //Systems.DataContext = viewModel.StarSystems;
-
-            TargetDropDown.DataContext = viewModel.TargetList;
-
-            OrdersPossible.DataContext = viewModel.OrdersPossible;
-
-            OrderList.DataContext = viewModel.OrderList;
-
-            AddOrder.Command = viewModel.AddOrder;
         }
     }
 }
