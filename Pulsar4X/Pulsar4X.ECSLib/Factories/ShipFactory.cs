@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib
 {
     public static class ShipFactory
     {
-        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, string shipName = null)
+        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Vector4 pos, StarSystem starsys, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
             ProtoEntity protoShip = classEntity.Clone();
@@ -24,8 +24,21 @@ namespace Pulsar4X.ECSLib
             var OwnedDB = new OwnedDB(ownerFaction);           
             protoShip.SetDataBlob(OwnedDB);
 
+            PositionDB position = new PositionDB(pos, starsys.Guid);
+            protoShip.SetDataBlob(position);
 
-            return new Entity(systemEntityManager, protoShip);
+            Entity shipEntity = new Entity(systemEntityManager, protoShip);
+
+            foreach (var componentType in shipEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
+            {
+                foreach (var componentInstance in componentType.Value)
+                {
+                    AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance);
+                }
+            }
+
+            ReCalcProcessor.ReCalcAbilities(shipEntity);
+            return shipEntity;
         }
 
         public static Entity CreateNewShipClass(Game game, Entity faction, string className = null)
@@ -40,22 +53,13 @@ namespace Pulsar4X.ECSLib
             // lets start by creating all the Datablobs that make up a ship class: TODO only need to add datablobs for compoents it has abilites for.
             var shipInfo = new ShipInfoDB();
             var armor = new ArmorDB();
-            var beamWeapons = new BeamWeaponsDB();
             var buildCost = new BuildCostDB();
             var cargo = new CargoDB();
             var crew = new CrewDB();
             var damage = new DamageDB();
-            var hanger = new HangerDB();
-            var industry = new IndustryDB();
             var maintenance = new MaintenanceDB();
-            var missileWeapons = new MissileWeaponsDB();
-            var power = new PowerDB();
-            var propulsion = new PropulsionDB();
             var sensorProfile = new SensorProfileDB();
             var sensors = new SensorsDB();
-            var shields = new ShieldsDB();
-            var tractor = new TractorDB();
-            var troopTransport = new TroopTransportDB();
             var name = new NameDB(className);
             var componentInstancesDB = new ComponentInstancesDB();
             // now lets create a list of all these datablobs so we can create our new entity:
@@ -63,22 +67,13 @@ namespace Pulsar4X.ECSLib
             {
                 shipInfo,
                 armor,
-                beamWeapons,
                 buildCost,
                 cargo,
                 crew,
                 damage,
-                hanger,
-                industry,
                 maintenance,
-                missileWeapons,
-                power,
-                propulsion,
                 sensorProfile,
                 sensors,
-                shields,
-                tractor,
-                troopTransport,
                 name,
                 componentInstancesDB
             };
@@ -109,23 +104,6 @@ namespace Pulsar4X.ECSLib
             return shipClassEntity;
         }
 
-        public static Entity AddShipComponent(Entity ship, Entity component)
-        {
-            if(!ship.HasDataBlob<ShipInfoDB>())
-                throw new Exception("Entity is not a ship or does not contain a ShipInfoDB datablob");
-            ShipInfoDB shipinfo = ship.GetDataBlob<ShipInfoDB>();
 
-            if(!component.HasDataBlob<ComponentInfoDB>())
-                throw new Exception("Entity is not a ShipComponent or does not contain a ShipComponent datablob");
-            ComponentInfoDB componentInfo = component.GetDataBlob<ComponentInfoDB>();
-
-            ShipAndColonyInfoProcessor.AddComponentDesignToEntity(component, ship);
-            
-            shipinfo.InternalHTK += componentInfo.HTK; 
-            shipinfo.Tonnage += componentInfo.SizeInTons;  
-            ReCalcProcessor.ReCalcAbilities(ship);
-
-            return ship;
-        }
     }
 }

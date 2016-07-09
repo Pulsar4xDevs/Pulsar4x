@@ -29,6 +29,9 @@ namespace Pulsar4X.ECSLib
         public int Seed { get; private set; }
         internal Random RNG { get; private set; }
 
+        [JsonProperty]
+        public SystemSubPulses SystemSubpulses { get; private set; } 
+
         [JsonConstructor]
         internal StarSystem()
         {
@@ -42,7 +45,7 @@ namespace Pulsar4X.ECSLib
             SystemManager = new EntityManager(game);
             Seed = seed;
             RNG = new Random(seed);
-
+            SystemSubpulses = new SystemSubPulses(this);
             game.Systems.Add(Guid, this);
         }
 

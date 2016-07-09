@@ -177,7 +177,7 @@ namespace Pulsar4X.ViewModel
         }
         public void Refresh(bool partialRefresh = false)
         {
-            List<Entity> labDesigns = _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Where(item => item.HasDataBlob<ResearchPointsAbilityDB>()).ToList();
+            List<Entity> labDesigns = _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Where(item => item.HasDataBlob<ResearchPointsAtbDB>()).ToList();
 
             _allLabs = new Dictionary<Guid, int>();
 

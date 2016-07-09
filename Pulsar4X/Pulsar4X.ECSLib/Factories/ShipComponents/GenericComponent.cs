@@ -103,7 +103,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="componentDesign"></param>
         /// <param name="factionTech"></param>
         /// <returns></returns>
-        public static Entity DesignToEntity(Game game, Entity factionEntity, ComponentDesign componentDesign)
+        public static Entity DesignToDesignEntity(Game game, Entity factionEntity, ComponentDesign componentDesign)
         {
             EntityManager globalEntityManager = game.GlobalManager;
             StaticDataStore staticData = game.StaticData;

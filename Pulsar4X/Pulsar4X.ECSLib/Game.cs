@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 
@@ -30,11 +29,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public DateTime CurrentDateTime
         {
-            get { return _currentDateTime; }
-            internal set { _currentDateTime = value; }
+            get { return GameLoop.GameGlobalDateTime; }
         }
-        [JsonProperty]
-        private DateTime _currentDateTime;
+
 
         /// <summary>
         /// List of StarSystems currently in the game.
@@ -48,12 +45,15 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public StaticDataStore StaticData { get; internal set; } = new StaticDataStore();
 
-        [CanBeNull]
-        [PublicAPI]
-        public PulseInterrupt CurrentInterrupt { get; private set; }
+
+        /// <summary>
+        /// this is used to marshal events to the UI thread. 
+        /// </summary>
+        internal SynchronizationContext SyncContext { get; private set; }
 
         [PublicAPI]
-        public SubpulseLimit NextSubpulse { get; private set; } = new SubpulseLimit();
+        [JsonProperty]
+        public TimeLoop GameLoop { get; set; }
 
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
@@ -89,7 +89,9 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
+            SyncContext = SynchronizationContext.Current;
             GlobalManager = new EntityManager(this);
+            GameLoop = new TimeLoop(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -99,10 +101,10 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(newGameSettings));
             }
 
-            GalaxyGen = new GalaxyFactory(true);
+            GalaxyGen = new GalaxyFactory(true, newGameSettings.MasterSeed);
 
             Settings = newGameSettings;
-            CurrentDateTime = newGameSettings.StartDateTime;
+            GameLoop.GameGlobalDateTime = newGameSettings.StartDateTime;
 
             // Load Static Data
             if (newGameSettings.DataSets != null)
@@ -175,87 +177,6 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Public API
-
-        /// <summary>
-        /// Time advancement code. Attempts to advance time by the number of seconds
-        /// passed to it.
-        /// Interrupts may prevent the entire requested timeframe from being advanced.
-        /// </summary>
-        /// <param name="deltaSeconds">Time Advance Requested</param>
-        /// <param name="progress">IProgress implementation to report progress.</param>
-        /// <returns>Total Time Advanced</returns>
-        /// <exception cref="OperationCanceledException">Thrown when a cancellation request is honored.</exception>
-        [PublicAPI]
-        public int AdvanceTime(int deltaSeconds, IProgress<double> progress = null)
-        {
-            return AdvanceTime(deltaSeconds, CancellationToken.None, progress);
-        }
-
-        /// <summary>
-        /// Time advancement code. Attempts to advance time by the number of seconds
-        /// passed to it.
-        /// 
-        /// Interrupts may prevent the entire requested timeframe from being advanced.
-        /// </summary>
-        /// <param name="deltaSeconds">Time Advance Requested</param>
-        /// <param name="cancellationToken">Cancellation token for this request.</param>
-        /// <param name="progress">IProgress implementation to report progress.</param>
-        /// <exception cref="OperationCanceledException">Thrown when a cancellation request is honored.</exception>
-        /// <returns>Total Time Advanced (in seconds)</returns>
-        [PublicAPI]
-        public int AdvanceTime(int deltaSeconds, CancellationToken cancellationToken, IProgress<double> progress = null)
-        {
-            int timeAdvanced = 0;
-
-            // Clamp deltaSeconds to a multiple of our MinimumTimestep.
-            deltaSeconds = deltaSeconds - deltaSeconds % GameConstants.MinimumTimestep;
-            if (deltaSeconds == 0)
-            {
-                deltaSeconds = GameConstants.MinimumTimestep;
-            }
-
-            // Clear any interrupt flag before starting the pulse.
-            CurrentInterrupt = null;
-            while ((CurrentInterrupt == null) && (deltaSeconds > 0))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                int subpulseTime = Math.Min(NextSubpulse.MaxSeconds, deltaSeconds);
-                // Set next subpulse to max value. If it needs to be shortened, it will
-                // be shortened in the pulse execution.
-                NextSubpulse.MaxSeconds = int.MaxValue;
-
-                // Update our date.
-                CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
-
-                // Execute all processors. Magic happens here.
-                RunProcessors(Systems.Values.ToList(), deltaSeconds);
-
-                // Update our remaining values.
-                deltaSeconds -= subpulseTime;
-                timeAdvanced += subpulseTime;
-                progress?.Report((double)timeAdvanced / deltaSeconds);
-            }
-
-            if (CurrentInterrupt != null)
-            {
-                // Gamelog?
-            }
-            return timeAdvanced;
-        }
-
-        /// <summary>
-        /// Runs all processors on the list of systems provided.
-        /// </summary>
-        /// <param name="systems">Systems to have processors run on them.</param>
-        /// <param name="deltaSeconds">Game-time to progress in the processors.</param>
-        [PublicAPI]
-        public void RunProcessors(List<StarSystem> systems, int deltaSeconds)
-        {
-            _orbitProcessor.Process(this, systems, deltaSeconds);
-            ShipMovementProcessor.Process(this, systems, deltaSeconds);
-            
-            _econProcessor.Process(this, systems, deltaSeconds);
-        }
 
         [PublicAPI]
         public Player AddPlayer(string playerName, string playerPassword = "")

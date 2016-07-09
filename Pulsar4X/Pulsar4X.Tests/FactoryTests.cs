@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Pulsar4X.Tests
 {
     [TestFixture]
-    [Description("Test for all exists factories")]
+    [Description("Test for all existing factories")]
     public class FactoryTests
     {
         private Game _game;
@@ -131,8 +131,8 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(shipClassNameDB.GetName(faction) == shipClassName);
 
             /////Ship/////
-
-            Entity ship = ShipFactory.CreateShip(shipClass, starSystem.SystemManager, faction, shipName);
+            Vector4 pos = new Vector4(0,0,0,0);
+            Entity ship = ShipFactory.CreateShip(shipClass, starSystem.SystemManager, faction, pos, starSystem, shipName);
             ShipInfoDB shipInfo = ship.GetDataBlob<ShipInfoDB>();
             NameDB shipNameDB = ship.GetDataBlob<NameDB>();
 

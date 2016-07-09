@@ -138,6 +138,7 @@
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
     <Compile Include="FactoryTests.cs" />
+    <Compile Include="OrderQueueTest.cs" />
     <Compile Include="PathfindingTests.cs" />
     <Compile Include="PopulationProcessorTest.cs" />
     <Compile Include="ProcessorTests.cs" />
@@ -146,6 +147,7 @@
     <Compile Include="SerializationManagerTests.cs" />
     <Compile Include="ShipComponentTests.cs" />
     <Compile Include="ShipTests.cs" />
+    <Compile Include="SpeciesProcessorTest.cs" />
     <Compile Include="StaticDataTests.cs" />
     <Compile Include="SystemGenTests.cs" />
     <Compile Include="TestingUtilities.cs" />

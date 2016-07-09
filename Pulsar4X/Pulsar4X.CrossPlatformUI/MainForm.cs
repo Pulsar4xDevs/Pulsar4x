@@ -5,6 +5,7 @@ using Eto.Forms;
 using Pulsar4X.CrossPlatformUI.Commands;
 using Pulsar4X.CrossPlatformUI.Views;
 using Pulsar4X.ViewModel;
+using System.Threading;
 using NewGame = Pulsar4X.CrossPlatformUI.Commands.NewGame;
 
 namespace Pulsar4X.CrossPlatformUI
@@ -21,6 +22,8 @@ namespace Pulsar4X.CrossPlatformUI
         private static Command shipDesign;
         private static Command missileDesign;
         private static Command componentTemplateDesign;
+        private static Command shipView;
+        private static Command sysInfoView;
 
         public MainForm()
         {
@@ -28,8 +31,9 @@ namespace Pulsar4X.CrossPlatformUI
             ClientSize = new Size(600, 400);
             Content = new MainWindow(_gameVM);
             CreateMenuToolBar();
-            Title = "Pulsar4X";
+            Title = "Pulsar4X";           
         }
+
 
         void CreateMenuToolBar()
         {
@@ -45,7 +49,8 @@ namespace Pulsar4X.CrossPlatformUI
             shipDesign = new ShipDesignViewCMD(_gameVM);
             missileDesign = new MissileDesignCMD(_gameVM);
             componentTemplateDesign = new ComponentTemplateViewCMD(_gameVM);
-			
+            shipView = new ShipViewCMD(_gameVM);
+            sysInfoView = new SystemInfoCMD(_gameVM);
 
             if (Platform.Supports<MenuBar>())
             {
@@ -80,6 +85,8 @@ namespace Pulsar4X.CrossPlatformUI
                 ToolBar.Items.Add(shipDesign);
                 ToolBar.Items.Add(missileDesign);
                 ToolBar.Items.Add(componentTemplateDesign);
+                ToolBar.Items.Add(shipView);
+                ToolBar.Items.Add(sysInfoView);
             }
         }
 

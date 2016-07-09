@@ -24,6 +24,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// OBSOLETE
         /// Function called by Game.RunProcessors to run this processor.
         /// </summary>
         internal int Process(Game game, List<StarSystem> systems, int deltaSeconds)
@@ -53,7 +54,13 @@ namespace Pulsar4X.ECSLib
             return orbitsProcessed;
         }
 
-        private static void UpdateSystemOrbits(StarSystem system, Game game, ref int orbitsProcessed)
+       /// <summary>
+       /// OBSOLETE
+       /// </summary>
+       /// <param name="system"></param>
+       /// <param name="game"></param>
+       /// <param name="orbitsProcessed"></param>
+        internal static void UpdateSystemOrbits(StarSystem system, Game game, ref int orbitsProcessed)
         {
             EntityManager currentManager = system.SystemManager;
 
@@ -72,7 +79,13 @@ namespace Pulsar4X.ECSLib
             // Call recursive function to update every orbit in this system.
             UpdateOrbit(root, rootPositionDB, game, ref orbitsProcessed);
         }
-
+        /// <summary>
+        /// OBSOLETE
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="parentPositionDB"></param>
+        /// <param name="game"></param>
+        /// <param name="orbitsProcessed"></param>
         private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, Game game, ref int orbitsProcessed)
         {
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
@@ -124,6 +137,60 @@ namespace Pulsar4X.ECSLib
                 UpdateOrbit(child, entityPosition, game, ref orbitsProcessed);
             }
         }
+
+        internal static void UpdateSystemOrbits(StarSystem starSystem)
+        {
+            EntityManager currentManager = starSystem.SystemManager;
+            TimeSpan orbitCycle = starSystem.Game.Settings.OrbitCycleTime;
+            DateTime toDate = starSystem.SystemSubpulses.SystemLocalDateTime + orbitCycle;
+            //starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, UpdateSystemOrbits);
+            starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.OrbitProcessor);
+            // Find the first orbital entity.
+            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(StarInfoTypeIndex);
+
+            if (!firstOrbital.IsValid)
+            {
+                // No orbitals in this manager.
+                return;
+            }
+
+            Entity root = firstOrbital.GetDataBlob<OrbitDB>(OrbitTypeIndex).Root;
+            var rootPositionDB = root.GetDataBlob<PositionDB>(PositionTypeIndex);
+
+            // Call recursive function to update every orbit in this system.
+            UpdateOrbit(root, rootPositionDB, toDate);
+        }
+
+        private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
+        {
+            var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
+            var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
+
+            
+            // Get our Parent-Relative coordinates.
+            try
+            {
+                Vector4 newPosition = GetPosition(entityOrbitDB, toDate);
+
+                // Get our Absolute coordinates.
+                entityPosition.Position = parentPositionDB.Position + newPosition;
+
+            }
+            catch (OrbitProcessorException e)
+            {
+                // TODO: Debug log this exception. Do NOT fail to the UI. There is NO data-corruption on this exception.
+                // In this event, we did NOT update our position.  
+                throw new Exception("Position Exception thrown in OrbitProcessor");
+            }
+
+            // Update our children.
+            foreach (Entity child in entityOrbitDB.Children)
+            {
+                // RECURSION!
+                UpdateOrbit(child, entityPosition, toDate);
+            }
+        }
+
 
         #region Orbit Position Calculations
 

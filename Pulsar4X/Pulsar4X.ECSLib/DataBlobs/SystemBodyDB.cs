@@ -106,6 +106,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public TimeSpan LengthOfDay { get; internal set; }
 
+        [PublicAPI]
+        [JsonProperty]
+        public double Gravity { get; internal set; }
+
+
         /// <summary>
         /// Stores the amount of the variopus minerials. the guid can be used to lookup the
         /// minerial definition (MineralSD) from the StaticDataStore.
@@ -130,6 +135,7 @@ namespace Pulsar4X.ECSLib
             AtmosphericDust = systemBodyDB.AtmosphericDust;
             SupportsPopulations = systemBodyDB.SupportsPopulations;
             LengthOfDay = systemBodyDB.LengthOfDay;
+            Gravity = systemBodyDB.Gravity;
             Minerals = new Dictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
         }
 

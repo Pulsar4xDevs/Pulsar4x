@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.ViewModel;
+using System.Threading;
 
 namespace Pulsar4X.Tests
 {

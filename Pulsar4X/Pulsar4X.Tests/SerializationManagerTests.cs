@@ -39,6 +39,8 @@ namespace Pulsar4X.Tests
             
             _game = TestingUtilities.CreateTestUniverse(numSystems, _testTime, generateSol);
 
+
+
             // lets create a good saveGame
             SerializationManager.Export(_game, File);
 
@@ -65,6 +67,46 @@ namespace Pulsar4X.Tests
 
             // <?TODO: Expand this out to cover many more DBs, entities, and cases.
         }
+
+        [Test]
+        public void CompareLoadedGameWithOrigional()
+        {
+            //create a new game
+            Game newGame = TestingUtilities.CreateTestUniverse(10, _testTime, true);
+
+            Entity ship = newGame.GlobalManager.GetFirstEntityWithDataBlob<TransitableDB>();
+            StarSystem firstSystem = newGame.Systems.First().Value;
+            DateTime jumpTime = newGame.CurrentDateTime + TimeSpan.FromMinutes(1);
+
+            //insert a jump so that we can compair timeloop dictionary
+            InterSystemJumpProcessor.SetJump(newGame, jumpTime,  firstSystem, jumpTime, ship);
+
+            // lets create a good saveGame
+            SerializationManager.Export(newGame, File);
+            //then load it:
+            Game loadedGame = SerializationManager.ImportGame(File);
+
+            //run some tests
+            ComparitiveTests(newGame, loadedGame );
+
+        }
+
+
+         void ComparitiveTests(Game origional, Game loadedGame)
+        {
+            
+            StarSystem firstOrigional = origional.Systems.First().Value;
+            StarSystem firstLoaded = loadedGame.Systems.First().Value;
+
+            Assert.AreEqual(firstOrigional.Guid, firstLoaded.Guid);
+            Assert.AreEqual(firstOrigional.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
+  
+            Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
+
+            Assert.AreEqual(firstOrigional.SystemSubpulses, firstLoaded.SystemSubpulses);
+
+        }
+
 
         [Test]
         public void EntityImportExport()
@@ -159,7 +201,10 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(importedSystem, system);
         }
 
-        [Test]
+        /// <summary>
+        /// apears to test two saves to confirm that they are the same
+        /// </summary>
+        [Test]        
         public void SaveGameConsistency()
         {
             const int maxTries = 10;
@@ -217,5 +262,9 @@ namespace Pulsar4X.Tests
             StarSystem sol  = starsysfac.CreateSol(_game);
             StaticDataManager.ExportStaticData(sol, "solsave.json");
         }
+
+
+
+
     }
 }

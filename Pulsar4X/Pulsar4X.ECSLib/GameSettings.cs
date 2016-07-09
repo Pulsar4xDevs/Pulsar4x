@@ -77,6 +77,8 @@ namespace Pulsar4X.ECSLib
 
         public VersionInfo Version => VersionInfo.PulsarVersionInfo;
 
+        public int MasterSeed = 12345678;
+
         #endregion
 
         #region Game Processing Settings
@@ -159,6 +161,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public string DefaultFactionName { get; set; } = "Terran Federation";
 
+         
         /// <summary>
         /// Defines if the default Sol Start will be used.
         /// Player faction can still be generated without generating Sol.
