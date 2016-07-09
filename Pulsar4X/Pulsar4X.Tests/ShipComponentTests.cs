@@ -25,6 +25,7 @@ namespace Pulsar4X.Tests
         {
             _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 1 });
             //Tech();
+            // @todo: change this so we can look up researched techs by name
             _faction = FactionFactory.CreateFaction(_game, "Terran");
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("b8ef73c7-2ef0-445e-8461-1e0508958a0e"),3);
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("08fa4c4b-0ddb-4b3a-9190-724d715694de"), 3);
@@ -79,7 +80,7 @@ namespace Pulsar4X.Tests
 
             design.ComponentDesignAbilities[0].SetValueFromInput(250);
 
-            Entity engineEntity = GenericComponentFactory.DesignToEntity(_game, _faction, design);
+            Entity engineEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, design);
 
             Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
 
@@ -96,9 +97,9 @@ namespace Pulsar4X.Tests
 
             ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             mineDesign.ComponentDesignAbilities[0].SetValue();
-            Entity mineEntity = GenericComponentFactory.DesignToEntity(_game, _faction, mineDesign);
+            Entity mineEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, mineDesign);
 
-            Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesDB>().ResourcesPerEconTick.Values.ElementAt(0));
+            Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesAtbDB>().ResourcesPerEconTick.Values.ElementAt(0));
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(mine.ID, mine);
@@ -187,7 +188,7 @@ namespace Pulsar4X.Tests
             enginePowerDBArgs4.Name = "Engine Power";
             enginePowerDBArgs4.Description = "Move Power for ship";
             enginePowerDBArgs4.GuiHint = GuiHint.None;
-            enginePowerDBArgs4.AbilityDataBlobType = typeof(EnginePowerAbilityDB).ToString();
+            enginePowerDBArgs4.AbilityDataBlobType = typeof(EnginePowerAtbDB).ToString();
             enginePowerDBArgs4.AbilityFormula = "DataBlobArgs(Ability(3))";
             component.ComponentAbilitySDs.Add(enginePowerDBArgs4);
 
@@ -209,7 +210,7 @@ namespace Pulsar4X.Tests
             fuelConsumptionArgsDB7.Name = "Fuel Consumption";
             fuelConsumptionArgsDB7.Description = "Size Mod";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
-            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelConsumptionAbilityDB).ToString();
+            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelConsumptionAtbDB).ToString();
             fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(Ability(6))";
             component.ComponentAbilitySDs.Add(fuelConsumptionArgsDB7);
 
@@ -234,7 +235,7 @@ namespace Pulsar4X.Tests
             sensorSigDBArgs10.Name = "Sensor Signature";
             sensorSigDBArgs10.Description = "";
             sensorSigDBArgs10.GuiHint = GuiHint.None;
-            sensorSigDBArgs10.AbilityDataBlobType = typeof(SensorSignatureDB).ToString();
+            sensorSigDBArgs10.AbilityDataBlobType = typeof(SensorSignatureAtbDB).ToString();
             sensorSigDBArgs10.AbilityFormula = "DataBlobArgs(Ability(9),0)";
             component.ComponentAbilitySDs.Add(sensorSigDBArgs10);
             
@@ -287,7 +288,7 @@ namespace Pulsar4X.Tests
                 {new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"),"10"}
 
             };
-            mineAbility.AbilityDataBlobType = typeof(MineResourcesDB).ToString();
+            mineAbility.AbilityDataBlobType = typeof(MineResourcesAtbDB).ToString();
             mineAbility.AbilityFormula = "DataBlobArgs([GuidDict])";
             component.ComponentAbilitySDs.Add(mineAbility);
             
@@ -326,7 +327,7 @@ namespace Pulsar4X.Tests
             researchPointsAbility.Name = "RP Amount Per EconTick";
             researchPointsAbility.Description = "";
             researchPointsAbility.GuiHint = GuiHint.None;
-            researchPointsAbility.AbilityDataBlobType = typeof(ResearchPointsAbilityDB).ToString();
+            researchPointsAbility.AbilityDataBlobType = typeof(ResearchPointsAtbDB).ToString();
             researchPointsAbility.AbilityFormula = "DataBlobArgs(20)";
             component.ComponentAbilitySDs.Add(researchPointsAbility);
 
@@ -366,7 +367,7 @@ namespace Pulsar4X.Tests
             refinePointsAbility.Name = "RP Amount Per EconTick";
             refinePointsAbility.Description = "";
             refinePointsAbility.GuiHint = GuiHint.None;
-            refinePointsAbility.AbilityDataBlobType = typeof(ResearchPointsAbilityDB).ToString();
+            refinePointsAbility.AbilityDataBlobType = typeof(ResearchPointsAtbDB).ToString();
             refinePointsAbility.AbilityFormula = "100";
             component.ComponentAbilitySDs.Add(refinePointsAbility);
 
@@ -379,7 +380,7 @@ namespace Pulsar4X.Tests
                 { new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),"0"},
                 { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}
             };
-            refineJobsAbility.AbilityDataBlobType = typeof(RefineResourcesDB).ToString();
+            refineJobsAbility.AbilityDataBlobType = typeof(RefineResourcesAtbDB).ToString();
             refineJobsAbility.AbilityFormula = "DataBlobArgs([GuidDict], Ability(0))";
             component.ComponentAbilitySDs.Add(refineJobsAbility);
             return component;
@@ -422,7 +423,7 @@ namespace Pulsar4X.Tests
             instalationConstructionAbility.Name = "Construction Points";
             instalationConstructionAbility.Description = "";
             instalationConstructionAbility.GuiHint = GuiHint.None;
-            instalationConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
+            instalationConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
             instalationConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(instalationConstructionAbility);
 
@@ -430,7 +431,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(shipComponentsConstructionAbility);
 
@@ -438,7 +439,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(fighterConstructionAbility);
 
@@ -446,7 +447,7 @@ namespace Pulsar4X.Tests
             shipComponentsConstructionAbility.Name = "Construction Points";
             shipComponentsConstructionAbility.Description = "";
             shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAbilityDB).ToString();
+            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
             shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(ammoConstructionAbility);
 

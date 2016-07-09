@@ -79,7 +79,7 @@
               "Description": "Move Power for ship",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(3))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
             },
             {
               "Name": "Fuel Consumption",
@@ -98,7 +98,7 @@
               "Description": "Size Mod",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(6))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelConsumptionAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelConsumptionAtbDB"
             },
             {
               "Name": "Thermal Signature Reduction",
@@ -120,7 +120,7 @@
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(9),0)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             },
             {
               "Name": "Explosion Chance",
@@ -132,7 +132,7 @@
               "Name": "Explosion Chance",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(11), Ability(3) * 0.05)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ExplosionChanceAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ExplosionChanceAtbDB"
             }
           ]
         }
@@ -216,7 +216,7 @@
                 ]
               },
               "AbilityFormula": "DataBlobArgs([GuidDict])",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.MineResourcesDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.MineResourcesAtbDB"
             }
           ]
         }
@@ -252,7 +252,7 @@
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(20)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             }
           ]
         }
@@ -291,7 +291,7 @@
                 "Entries": []
               },
               "AbilityFormula": "100",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             },
             {
               "Name": "RefineAbilitys",
@@ -301,7 +301,7 @@
                 "Entries": []
               },
               "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesAtbDB"
             }
           ]
         }
@@ -343,7 +343,7 @@
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAbilityDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAtbDB"
             }
           ]
         }
@@ -375,8 +375,161 @@
               "Description": "Keeps colonists alive on hostile worlds",
               "GuiHint": "None",
               "GuidDictionary": {
-                "Entries": []
+                "Entries": [ ]
               }
+            }
+          ]
+        }
+      },
+      {
+        "Key": "8923f0e1-1143-4926-a0c8-66b6c7969425",
+        "Value": {
+          "Name": "LaserGun",
+          "Description": "Laser Gun",
+          "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
+          "SizeFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2) * 10",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "[Size]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Size]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Size]",
+          "CreditCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Range",
+              "Description": "MaxRange",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1000",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Damage",
+              "Description": "Damage Amount",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "ReloadRate",
+              "Description": "How long it takes to reload",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "dbargs",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1), Ability(2))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SimpleBeamWeaponAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
+        "Value": {
+          "Name": "BeamFireControl",
+          "Description": "",
+          "ID": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
+          "SizeFormula": "Ability(4)",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "[Size]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Size]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "Ability(5)",
+          "CreditCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": "ShipComponent, ShipCargo",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Range",
+              "Description": "in kkm",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "175",
+              "MinFormula": "10",
+              "StepFormula": "5",
+              "AbilityFormula": "20"
+            },
+            {
+              "Name": "Tracking Speed",
+              "Description": "in km/s",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "25000",
+              "MinFormula": "1250",
+              "StepFormula": "250",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Size vs Range",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "4",
+              "MinFormula": "0.25",
+              "StepFormula": "0.25",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Size vs TrackingSpeed",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "4",
+              "MinFormula": "0.25",
+              "StepFormula": "0.25",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Size",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "(Ability(0) + Ability(1) / 100) * Ability(2) *  Ability(3)"
+            },
+            {
+              "Name": "Research Cost",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "Ability(4)"
+            },
+            {
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": [ ]
+              },
+              "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.BeamFireControlAtbDB"
             }
           ]
         }

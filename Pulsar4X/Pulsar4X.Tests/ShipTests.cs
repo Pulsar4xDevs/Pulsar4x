@@ -50,21 +50,29 @@ namespace Pulsar4X.Tests
 
             _engineSD = _game.StaticData.Components[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesign = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size
+            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size = 25 power.
             //engineDesignDB.ComponentDesignAbilities[1]
-            _engineComponent = GenericComponentFactory.DesignToEntity(_game, _faction, engineDesign);
+            _engineComponent = GenericComponentFactory.DesignToDesignEntity(_game, _faction, engineDesign);
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
-            ShipFactory.AddShipComponent(_shipClass, _engineComponent);
-            ShipFactory.AddShipComponent(_shipClass, _engineComponent);
+            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
+            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
 
-
-            _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, "Serial Peacemaker");
+            Vector4 pos = new Vector4(0, 0, 0, 0);
+            _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, pos, _starSystem, "Serial Peacemaker");
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
             Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
-            Assert.AreEqual(100, propulsion.MaximumSpeed);
+            Assert.AreEqual(50, propulsion.TotalEnginePower);
+            Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
+
+            EntityManipulation.AddComponentToEntity(_ship, _engineComponent);
+            Assert.AreEqual(75, propulsion.TotalEnginePower);
+            Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
+
+
+
         }
     }
 }

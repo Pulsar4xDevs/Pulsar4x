@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -7,6 +8,8 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class ShipInfoDB : BaseDataBlob
     {
+
+        #region Properties
         /// <summary>
         /// The guid of the ship class, if this is a ship class then the Guid will be empty. 
         /// use IsClassDefinition() to determin if this is a ship class definmition
@@ -32,8 +35,16 @@ namespace Pulsar4X.ECSLib
 
         public double TCS { get {return Tonnage * 0.02;} }
 
+        ///  Ship orders.  
+        public Queue<BaseOrder> Orders;
+
+        #endregion
+
+        #region Constructors
+
         public ShipInfoDB()
         {
+            Orders = new Queue<BaseOrder>();
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
@@ -48,8 +59,16 @@ namespace Pulsar4X.ECSLib
             Collier = shipInfoDB.Collier;
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
+            Tonnage = shipInfoDB.Tonnage;
             IsMilitary = shipInfoDB.IsMilitary;
+
+            if (shipInfoDB.Orders == null)
+                Orders = null;
+            else
+                Orders = new Queue<BaseOrder>(shipInfoDB.Orders);
         }
+
+        #endregion
 
         /// <summary>
         /// Returns true if this is a definition of a class.
@@ -62,10 +81,10 @@ namespace Pulsar4X.ECSLib
             return true;
         }
 
-
         public override object Clone()
         {
             return new ShipInfoDB(this);
         }
+
     }
 }

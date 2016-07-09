@@ -116,6 +116,33 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Returns the magnitude of the vector.
+        /// </summary>
+        /// 
+        public static double Magnitude(Vector4 vector)
+        {
+            return Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y) + (vector.Z * vector.Z) + (vector.W * vector.W));
+        }
+
+        /// <summary>
+        /// Returns the dot product of two vectors
+        /// </summary>
+
+        public static double Dot(Vector4 left, Vector4 right)
+        {
+            return left.X * right.X + left.Y * right.Y + left.Z * right.Z + left.W * right.W;
+        }
+        
+        /// <summary>
+        /// Returns the angle between two vectors
+        /// </summary>
+
+        public static double AngleBetween(Vector4 left, Vector4 right)
+        {
+            return Math.Acos(Dot(left, right) / (Magnitude(left) * Magnitude(right)));
+        }
+
+        /// <summary>
         /// Returns a value that indicates whether this instance and a specified object are equal. (Overrides ValueType.Equals(Object).)
         /// </summary>
         public override bool Equals(object obj)
@@ -162,7 +189,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double LengthSquared()
         {
-            return X * X + Y * Y + Z * Z + W * W;
+            return (X * X) + (Y * Y) + (Z * Z) + (W * W);
         }
 
         /// <summary>

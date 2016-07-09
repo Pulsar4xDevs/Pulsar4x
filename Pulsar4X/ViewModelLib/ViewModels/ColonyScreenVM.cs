@@ -50,7 +50,7 @@ namespace Pulsar4X.ViewModel
         public ColonyScreenVM(GameVM gameVM, Entity colonyEntity, StaticDataStore staticData)
         {
 
-            gameVM.DateChangedEvent += GameVM_DateChangedEvent;
+            gameVM.Game.GameLoop.GameGlobalDateChangedEvent += GameVM_DateChangedEvent;
             _colonyEntity = colonyEntity;
             _facilities = new ObservableCollection<FacilityVM>();
             ComponentInstancesDB instaces = colonyEntity.GetDataBlob<ComponentInstancesDB>();
@@ -88,7 +88,7 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        private void GameVM_DateChangedEvent(DateTime oldDate, DateTime newDate)
+        private void GameVM_DateChangedEvent(DateTime newDate)
         {
             Refresh();
         }
