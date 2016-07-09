@@ -4,6 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -17,22 +18,27 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public TreeHierachView()
         {
             XamlReader.Load(this);
+            DataContextChanged += TreeHierachView_DataContextChanged;
         }
-        public TreeHierachView(TreeHierarchyDB treeDB)
-        { }
 
-        void Init(EntityBlobPair ebPair)
+        private void TreeHierachView_DataContextChanged(object sender, EventArgs e)
         {
-            
-            List<TreeHierarchyDB> childBlobs = ebPair.Blob.ChildrenDBs;
+            if(DataContext is EntityBlobPair)
+                Init();
+        }
+
+        void Init()
+        {
+            EntityBlobPair ebpair = (EntityBlobPair)DataContext;
+            List<TreeHierarchyDB> childBlobs = ebpair.Blob.ChildrenDBs;
             List<EntityBlobPair> children = new List<EntityBlobPair>();
 
             TreeItemCollection treeItemCollection = new TreeItemCollection();
 
             TreeItem treeitemroot = new TreeItem();
-            treeitemroot.Text = ebPair.Entity.GetDataBlob<NameDB>().DefaultName;
+            treeitemroot.Text = ebpair.Entity.GetDataBlob<NameDB>().DefaultName;
 
-            NewTreeItem(treeitemroot, ebPair);
+            NewTreeItem(treeitemroot, ebpair);
                 
             
             treeItemCollection.Add(treeitemroot);
@@ -56,12 +62,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             }
 
             return treeitem;
-        }
-
-        struct EntityBlobPair
-        {
-            internal Entity Entity;
-            internal TreeHierarchyDB Blob;
         }
     }
 }

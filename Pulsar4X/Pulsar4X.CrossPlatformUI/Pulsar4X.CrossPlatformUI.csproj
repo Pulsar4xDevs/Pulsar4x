@@ -215,6 +215,9 @@
     <EmbeddedResource Include="Views\TreeHierachView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\SystemInfoView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -228,6 +231,7 @@
     <Compile Include="Commands\SaveGame.cs" />
     <Compile Include="Commands\ShipDesignViewCMD.cs" />
     <Compile Include="Commands\ShipViewCMD.cs" />
+    <Compile Include="Commands\SystemInfoCMD.cs" />
     <Compile Include="Commands\SystemMap.cs" />
     <Compile Include="CustomControls\RenderCanvas.cs" />
     <Compile Include="GLUtilities\GLEffect.cs" />
@@ -325,6 +329,9 @@
     <Compile Include="Lib\OpenGLRenderer.cs" />
     <Compile Include="Views\ShipView.xeto.cs">
       <DependentUpon>ShipView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SystemInfoView.xeto.cs">
+      <DependentUpon>SystemInfoView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\SystemMap_DrawableView.xeto.cs">
       <DependentUpon>SystemMap_DrawableView.xeto</DependentUpon>
