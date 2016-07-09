@@ -24,7 +24,8 @@ namespace Pulsar4X.ViewModel
         public SystemInfoVM(GameVM gameVM)
         {
             _gameVM = gameVM;
-            foreach (var item in _gameVM.Game.GetSystems(_gameVM.CurrentAuthToken))
+            List<StarSystem> starSystems = _gameVM.Game.GetSystems(_gameVM.CurrentAuthToken);
+            foreach (var item in starSystems)
             {
                 StarSystems.Add(item, item.NameDB.DefaultName);
             }
