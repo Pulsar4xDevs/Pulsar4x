@@ -100,6 +100,10 @@ namespace Pulsar4X.ECSLib
             double speedMultiplier = 1000.0;
             PositionDB currentPosition = Owner.GetDataBlob<PositionDB>();
             PositionDB targetPosition = null;
+            double AUSpeed, kmSpeed;
+
+            kmSpeed = Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * 1000;
+            AUSpeed = Distance.ToAU(kmSpeed);
 
             if(PositionTarget != null)
             {
@@ -114,7 +118,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, (Owner.GetDataBlob<PropulsionDB>().MaximumSpeed) * speedMultiplier);
+                    Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
                     return false;
                 }
             }
@@ -144,7 +148,7 @@ namespace Pulsar4X.ECSLib
                     {
                         // just head straight towards the target position
                         targetPosition = Target.GetDataBlob<PositionDB>();
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, (Owner.GetDataBlob<PropulsionDB>().MaximumSpeed) * speedMultiplier);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
                     }
                     else
                     {
@@ -152,24 +156,29 @@ namespace Pulsar4X.ECSLib
                         // for now, just head straight towards the target position
                         
                         targetPosition = Target.GetDataBlob<PositionDB>();
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, (Owner.GetDataBlob<PropulsionDB>().MaximumSpeed) * speedMultiplier);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
                         return false;
                     }
                 }
 
                 else if (Target.HasDataBlob<PropulsionDB>())
                 {
-                    if (Target.GetDataBlob<PropulsionDB>().MaximumSpeed > Owner.GetDataBlob<PropulsionDB>().MaximumSpeed)
+                    if (Target.GetDataBlob<PropulsionDB>().MaximumSpeed >= Owner.GetDataBlob<PropulsionDB>().MaximumSpeed)
                         // Target is faster than our ship, and cannot intercept
                     {
                         // Just head in a straight line
                         targetPosition = Target.GetDataBlob<PositionDB>();
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, (Owner.GetDataBlob<PropulsionDB>().MaximumSpeed) * speedMultiplier);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
                     }
                     else
                     {
                         // Calculate an intercept
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = calculateIntercept(currentPosition, Target, Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * speedMultiplier);
+                        targetPosition = Target.GetDataBlob<PositionDB>();
+                        Vector4 targetPos = new Vector4(targetPosition.X, targetPosition.Y, targetPosition.Z, 0);
+                        Vector4 currentPos = new Vector4(currentPosition.X, currentPosition.Y, currentPosition.Z, 0);
+                        targetPos = Find_collision_point(targetPos, Target.GetDataBlob<PropulsionDB>().CurrentSpeed, currentPos, AUSpeed);
+                        targetPosition = new PositionDB(targetPos, targetPosition.SystemGuid);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
                     }
 
                 }
@@ -216,6 +225,51 @@ namespace Pulsar4X.ECSLib
             return speed;
         }
 
+        private Vector4 Find_collision_point(Vector4 target_pos, Vector4 target_vel, Vector4 interceptor_pos, double interceptor_speed)
+        {
+            double k = Vector4.Magnitude(target_vel) / interceptor_speed;
+            double distance_to_target = Vector4.Magnitude(interceptor_pos - target_pos);
+
+            Vector4 b_hat = target_vel;
+            Vector4 c_hat = interceptor_pos - target_pos;
+
+            var CAB = Vector4.AngleBetween(b_hat, c_hat);
+            var ABC = Math.Asin(Math.Sin(CAB) * k);
+            var ACB = (Math.PI) - (CAB + ABC);
+
+            var j = distance_to_target / Math.Sin(ACB);
+            var a = j * Math.Sin(CAB);
+            var b = j * Math.Sin(ABC);
+
+
+            var time_to_collision = b / Vector4.Magnitude(target_vel);
+            var collision_pos = target_pos + (target_vel * time_to_collision);
+
+            return interceptor_pos - collision_pos;
+        }
+
+        private double distanceBetweenPositions(PositionDB origin, PositionDB target)
+        {
+            Vector4 delta = new Vector4();
+
+            delta.X = origin.X - target.X;
+            delta.Y = origin.Y - target.Y;
+            delta.Z = origin.Z - target.Z;
+
+            return delta.Length();
+        }
+
+        private void setPositionToTarget(Entity ship, PositionDB target)
+        {
+            Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0.0, 0.0, 0.0, 0.0);
+            Owner.GetDataBlob<PositionDB>().X = target.X;
+            Owner.GetDataBlob<PositionDB>().Y = target.Y;
+            Owner.GetDataBlob<PositionDB>().Z = target.Z;
+
+            return;
+        }
+
+        /*
         private Vector4 calculateIntercept(PositionDB currentPosition, Entity target, double speedMagnitude)
         {
             // Given: ux, uy, vmag (projectile speed), Ax, Ay, Bx, By
@@ -292,25 +346,6 @@ namespace Pulsar4X.ECSLib
             return result;
         }
 
-        private double distanceBetweenPositions(PositionDB origin, PositionDB target)
-        {
-            Vector4 delta = new Vector4();
-
-            delta.X = origin.X - target.X;
-            delta.Y = origin.Y - target.Y;
-            delta.Z = origin.Z - target.Z;
-
-            return delta.Length();
-        }
-
-        private void setPositionToTarget(Entity ship, PositionDB target)
-        {
-            Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0.0, 0.0, 0.0, 0.0);
-            Owner.GetDataBlob<PositionDB>().X = target.X;
-            Owner.GetDataBlob<PositionDB>().Y = target.Y;
-            Owner.GetDataBlob<PositionDB>().Z = target.Z;
-
-            return;
-        }
+*/
     }
 }
