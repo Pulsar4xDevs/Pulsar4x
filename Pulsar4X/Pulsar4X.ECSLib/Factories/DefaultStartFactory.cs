@@ -61,6 +61,19 @@ namespace Pulsar4X.ECSLib
             sol.SystemManager.SetDataBlob(ship2.ID, new TransitableDB());
 
 
+
+
+            //Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
+            //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB
+
+            Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
+            ship2.SetDataBlob(earth.GetDataBlob<OrbitDB>());//second ship reference earth OrbitDB
+
+            //Entity ship3 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Contiual Pacifier");
+            //ship3.SetDataBlob((OrbitDB)earth.GetDataBlob<OrbitDB>().Clone());//second ship clone earth OrbitDB
+
+
+            //sol.SystemManager.SetDataBlob(ship.ID, new TransitableDB());
             return factionEntity;
         }
 
