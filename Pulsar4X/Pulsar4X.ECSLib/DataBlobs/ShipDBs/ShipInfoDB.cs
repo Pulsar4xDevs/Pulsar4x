@@ -86,58 +86,5 @@ namespace Pulsar4X.ECSLib
             return new ShipInfoDB(this);
         }
 
-        #region Orders functions
-        /// <summary>
-        /// Orders functions
-        /// </summary>
-
-        public BaseOrder CheckNextOrder()
-        {
-            if (Orders == null)
-                return null;
-            if (Orders.ToArray().Length == 0)
-                return null;
-            BaseOrder nextOrder = Orders.Peek();
-            return nextOrder;
-        }
-
-        public void AddOrder(BaseOrder order)
-        {
-            Orders.Enqueue(order);
-            return;
-        }
-
-        public void RemoveNextOrder()
-        {
-            Orders.Dequeue();
-            return;
-        }
-
-        public void ClearOrders()
-        {
-            while (Orders.Count > 0)
-                Orders.Dequeue();
-            return;
-        }
-
-        public int NumOrders()
-        {
-            return Orders.Count;
-        }
-
-        // Processes the next order on the queue.  If it is completed, return true.  If there is more work to do, return false.
-        public bool ProcessOrder()
-        {
-            BaseOrder nextOrder = CheckNextOrder();
-
-            if (nextOrder.processOrder())
-            {
-                RemoveNextOrder();
-                return true;
-            }
-            return false;
-        }
-
-        #endregion
     }
 }
