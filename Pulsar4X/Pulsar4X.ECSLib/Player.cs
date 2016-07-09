@@ -254,7 +254,7 @@ namespace Pulsar4X.ECSLib
                 if (nextOrder != null)
                 {
                     Entity owner = nextOrder.Owner;
-                    owner.GetDataBlob<ShipInfoDB>().AddOrder(nextOrder);
+                    owner.GetDataBlob<ShipInfoDB>().Orders.Enqueue(nextOrder);
 
                 }
                 else

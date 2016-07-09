@@ -92,7 +92,7 @@ namespace Pulsar4X.Tests
 
             _game.CurrentDateTime.AddSeconds(5.0);
 
-            _ship.GetDataBlob<ShipInfoDB>().ClearOrders();
+            _ship.GetDataBlob<ShipInfoDB>().Orders.Clear();
             _player.Orders.ClearOrders();
 
             target = new PositionDB(_ship.GetDataBlob<PositionDB>());
@@ -111,18 +111,18 @@ namespace Pulsar4X.Tests
             OrderProcessor.Process(_game);
 
             Assert.AreEqual(0, _player.Orders.NumOrders());
-            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().Orders.Count);
 
             Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
 
-            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+            OrderProcessor.ProcessShip(_ship);
 
             Assert.AreEqual(0, _player.Orders.NumOrders());
-            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().Orders.Count);
 
             Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
 
-            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+            OrderProcessor.ProcessShip(_ship);
 
             // Check speed 
             Vector4 speed = _shipPropulsionDB.CurrentSpeed;
@@ -145,7 +145,7 @@ namespace Pulsar4X.Tests
 
             _game.CurrentDateTime.AddSeconds(5.0);
 
-            _ship.GetDataBlob<ShipInfoDB>().ClearOrders();
+            _ship.GetDataBlob<ShipInfoDB>().Orders.Clear();
             _player.Orders.ClearOrders();
 
             target = new PositionDB(_ship.GetDataBlob<PositionDB>());
@@ -161,18 +161,18 @@ namespace Pulsar4X.Tests
             OrderProcessor.Process(_game);
 
             Assert.AreEqual(0, _player.Orders.NumOrders());
-            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().Orders.Count);
 
             Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
 
-            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+            OrderProcessor.ProcessShip(_ship);
 
             Assert.AreEqual(0, _player.Orders.NumOrders());
-            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().NumOrders());
+            Assert.AreEqual(1, _ship.GetDataBlob<ShipInfoDB>().Orders.Count);
 
             Assert.Contains(order, _ship.GetDataBlob<ShipInfoDB>().Orders);
 
-            _ship.GetDataBlob<ShipInfoDB>().ProcessOrder();
+            OrderProcessor.ProcessShip(_ship);
 
             // Check speed 
             Vector4 speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;

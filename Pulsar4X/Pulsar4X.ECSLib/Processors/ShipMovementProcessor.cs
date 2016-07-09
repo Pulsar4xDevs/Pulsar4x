@@ -72,6 +72,9 @@ namespace Pulsar4X.ECSLib
 
         public static int MaxSpeedCalc(int power, float tonage)
         {
+            // From Aurora4x wiki:  Speed = (Total Engine Power / Total Class Size in HS) * 1000 km/s
+            // 1 HS = 50 tons
+
             return (int)(power / tonage) * 20;
         }
     }
