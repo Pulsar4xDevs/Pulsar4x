@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Panel
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -45,19 +45,20 @@
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Orders Available</Label>
-          <ListBox Height = "100" x:Name="OrdersPossible" DataContext="{Binding OrdersPossible}" SelectedKey="{Binding SelectedPossibleOrder}" ></ListBox>
+          <ListBox Height = "100" x:Name="OrdersPossible" DataContext="{Binding OrdersPossible}"></ListBox>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout x:Name="TargetArea" Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Target</Label>
-          <DropDown x:Name="TargetDropDown" DataContext="{Binding TargetList}" SelectedKey="{Binding SelectedTarget}" Width="100"></DropDown>
+          <DropDown x:Name="TargetDropDown" DataContext="{Binding TargetList}" Width="100"></DropDown>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Order List</Label>
-          <ListBox Height = "100" x:Name="OrderList" DataContext="{Binding OrderList}" SelectedKey="{Binding SelectedOrder}" ></ListBox>
+          <ListBox Height = "100" x:Name="OrderList" DataContext="{Binding OrderList}" ></ListBox>
+
         </StackLayout>      
       </TableCell>
     </TableRow>

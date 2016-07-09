@@ -36,17 +36,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public ShipView(ShipOrderVM viewModel) :this()
         {
             DataContext = viewModel;
-
-            //ShipList.DataContext = viewModel.ShipList;
-            //Systems.DataContext = viewModel.StarSystems;
-
-            //TargetDropDown.DataContext = viewModel.TargetList;
-
-            //OrdersPossible.DataContext = viewModel.OrdersPossible;
-
-            //OrderList.DataContext = viewModel.OrderList;
-
-
         }
     }
 }
