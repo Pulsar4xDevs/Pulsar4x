@@ -8,7 +8,7 @@
       <TableCell>
         <StackLayout Orientation="Horizontal">
           <Label>Current System </Label>
-          <DropDown x:Name="Systems" Width="120" DataContext="{Binding StarSystems}"></DropDown>
+          <DropDown x:Name="Systems" Width="120" DataContext="{Binding StarSystems}" SelectedKey="{Binding SelectedSystem}"></DropDown>
         </StackLayout>
       </TableCell>
     </TableRow>
@@ -17,13 +17,13 @@
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Ship List</Label>
 
-          <DropDown x:Name="ShipList" DataContext="{Binding ShipList}" ></DropDown>
+          <DropDown x:Name="ShipList" DataContext="{Binding ShipList}" SelectedKey="{Binding SelectedShip}"></DropDown>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout Orientation="Vertical">
           <StackLayout Orientation="Horizontal">
-          <Label>Ship Speed - </Label>
+          <Label>Ship Speed (km/s)- </Label>
           <TextBox Text="{Binding ShipSpeed}"></TextBox>
           <Label> X: </Label>
           <TextBox Text="{Binding XSpeed}" Width="100"></TextBox>
@@ -31,7 +31,7 @@
           <TextBox Text="{Binding YSpeed}" Width="100"></TextBox>
           </StackLayout>
           <StackLayout Orientation="Horizontal">
-            <Label> Ship Position -                              </Label>
+            <Label> Ship Position -                                    </Label>
             <Label> X: </Label>
             <TextBox Text="{Binding XPos}" Width="100"></TextBox>
             <Label> Y: </Label>
@@ -45,26 +45,26 @@
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Orders Available</Label>
-          <ListBox Height = "100" x:Name="OrdersPossible"></ListBox>
+          <ListBox Height = "100" x:Name="OrdersPossible" DataContext="{Binding OrdersPossible}" SelectedKey="{Binding SelectedPossibleOrder}" ></ListBox>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout x:Name="TargetArea" Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
           <Label>Target</Label>
-          <DropDown x:Name="TargetDropDown" Width="100"></DropDown>
+          <DropDown x:Name="TargetDropDown" DataContext="{Binding TargetList}" SelectedKey="{Binding SelectedTarget}" Width="100"></DropDown>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Order List</Label>
-          <ListBox Height = "100" x:Name="OrderList" SelectedKey="SelectedOrder"></ListBox>
+          <ListBox Height = "100" x:Name="OrderList" DataContext="{Binding OrderList}" SelectedKey="{Binding SelectedOrder}" ></ListBox>
         </StackLayout>      
       </TableCell>
     </TableRow>
     <TableRow ScaleHeight="False">
-      <TableCell>
-        <Button Text="Add Order" ID="AddOrder"></Button>
-      </TableCell>
+      <Button Text="Add Order" Command="{Binding AddOrder}"></Button>
+      <Button Text="Remove Order" Command="{Binding RemoveOrder}"></Button>
+      
     </TableRow>
     <TableRow></TableRow>
   </TableLayout>
