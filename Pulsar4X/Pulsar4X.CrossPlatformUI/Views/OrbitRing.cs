@@ -78,7 +78,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             for (int i = 0; i < Segments; i++)
             {                    
                 Color penColor = new Color(_penColor.R, _penColor.G, _penColor.B, i / (float)Segments);
-                newPens.Add(new Pen(penColor, 1));
+                newPens.Add(new Pen(penColor, 1.0f));
             }
             _segmentPens = newPens;        
         }
@@ -135,8 +135,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             int i = 0;
             foreach (var pen in _segmentPens)
             {
+                float OriginalThickness = pen.Thickness;
+                pen.Thickness = pen.Thickness * (1.0f / _camera.ZoomFactor());
                 g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle - (AngleAdd) - _rotation + (i * SweepAngle), SweepAngle);
                 i++;
+
+                pen.Thickness = OriginalThickness;
             }
             g.RestoreTransform();
 

@@ -253,6 +253,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             foreach (var pathData in _pathDataList)
             {
+                //get zoom level here and adjust thickness
+                float OriginalThickness = pathData.PenData.Thickness;
+                pathData.PenData.Thickness = pathData.PenData.Thickness * (1.0f / _camera.ZoomFactor());
                 UpdatePen(pathData.PenData, pathData.EtoPen);
 
                 g.SaveTransform();
@@ -264,6 +267,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
                 g.DrawPath(pathData.EtoPen, pathData.EtoPath);
                 g.RestoreTransform();
+                //restore the original thickness
+                pathData.PenData.Thickness = OriginalThickness;
+                UpdatePen(pathData.PenData, pathData.EtoPen);
             }
             foreach (var item in _textData)
             {
