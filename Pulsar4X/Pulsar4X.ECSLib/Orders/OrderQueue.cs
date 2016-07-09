@@ -183,6 +183,11 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public void RemoveOrder(BaseOrder order)
+        {
+            _orderList.Remove(order);
+        }
+
         public int NumOrders()
         {
             return _orderList.Count;

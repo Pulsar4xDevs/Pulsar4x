@@ -50,6 +50,18 @@ namespace Pulsar4X.ECSLib
             Entity shipClass = DefaultShipDesign(game, factionEntity);
             Vector4 position = earth.GetDataBlob<PositionDB>().Position;
 
+            Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Parallel Trustbreaker");
+
+            // Strange bug - seems to update the ship orbit once, then never again
+            // TODO: Fix to allow normal orbiting.
+            //ship.SetDataBlob<OrbitDB>(new OrbitDB(earth.GetDataBlob<OrbitDB>()));
+
+            sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());
+            sol.SystemManager.SetDataBlob(ship2.ID, new TransitableDB());
+
+
+
 
             //Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB
