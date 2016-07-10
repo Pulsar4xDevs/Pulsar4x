@@ -38,6 +38,9 @@ namespace Pulsar4X.ECSLib
         {
             DelayTime = 0;
             Owner = ship;
+
+            // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
+            Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
             Target = target;
             PositionTarget = null;
             OrbitRadius = orbitRadius;
@@ -48,6 +51,9 @@ namespace Pulsar4X.ECSLib
         {
             DelayTime = 0;
             Owner = ship;
+
+            // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
+            Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
             Target = Entity.InvalidEntity;
             PositionTarget = new PositionDB(target);
             OrbitRadius = orbitRadius;
@@ -60,6 +66,9 @@ namespace Pulsar4X.ECSLib
             MoveOrder order = new MoveOrder();
             order.DelayTime = DelayTime;
             order.Owner = Owner;
+
+            // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
+            order.Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
             order.Target = Target;
             order.PositionTarget = PositionTarget;
             order.OrbitRadius = OrbitRadius;
@@ -98,6 +107,7 @@ namespace Pulsar4X.ECSLib
         {
 
             double speedMultiplier = 1000.0;
+            double minimumDistance = 1000.0;
             PositionDB currentPosition = Owner.GetDataBlob<PositionDB>();
             PositionDB targetPosition = null;
             double AUSpeed, kmSpeed;
@@ -111,9 +121,10 @@ namespace Pulsar4X.ECSLib
                 targetPosition = PositionTarget;
 
                 // Assume that 1000 is extremely close, 
-                if(Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= 1000.0)
+                if(Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
                 {
                     setPositionToTarget(Owner, targetPosition);
+                    Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0, 0, 0, 0);
                     return true;
                 }
                 else
@@ -204,17 +215,17 @@ namespace Pulsar4X.ECSLib
 
 
 
-            length = direction.Length();
+            length = direction.Length(); // Distance between targets in AU
 
             direction.X = (direction.X / length);
             direction.Y = (direction.Y / length);
             direction.Z = (direction.Z / length);
 
-
-
             speedMagInKM.X = direction.X * speedMagnitude;
             speedMagInKM.Y = direction.Y * speedMagnitude;
             speedMagInKM.Z = direction.Z * speedMagnitude;
+
+
 
             speed.X = Distance.ToAU(speedMagInKM.X);
             speed.Y = Distance.ToAU(speedMagInKM.Y);

@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
                 DateTime nextDate = GetNextInterupt(timeDeltaMax);
                 TimeSpan deltaActual = nextDate - SystemLocalDateTime;
 
-                ShipMovementProcessor.Process(_starSystem, deltaActual.Seconds); //process movement for any entity that can move (not orbit)
+                ShipMovementProcessor.Process(_starSystem, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
 
                 ProcessToNextInterupt(nextDate); 
                 
