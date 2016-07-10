@@ -40,6 +40,7 @@ namespace Pulsar4X.ECSLib
             Owner = ship;
 
             // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
+            Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
             Target = target;
             PositionTarget = null;
             OrbitRadius = orbitRadius;
@@ -52,6 +53,7 @@ namespace Pulsar4X.ECSLib
             Owner = ship;
 
             // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
+            Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
             Target = Entity.InvalidEntity;
             PositionTarget = new PositionDB(target);
             OrbitRadius = orbitRadius;
@@ -66,6 +68,7 @@ namespace Pulsar4X.ECSLib
             order.Owner = Owner;
 
             // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
+            order.Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
             order.Target = Target;
             order.PositionTarget = PositionTarget;
             order.OrbitRadius = OrbitRadius;
