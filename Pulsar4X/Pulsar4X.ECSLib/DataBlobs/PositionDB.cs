@@ -153,7 +153,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="newParent"></param>
         internal override void SetParent(Entity newParent)
         {
-            if (!newParent.HasDataBlob<PositionDB>())
+            if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
             Vector4 currentAbsolute = this.AbsolutePosition;
             Vector4 newRalitive = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
