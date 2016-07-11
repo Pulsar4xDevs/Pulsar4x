@@ -24,18 +24,18 @@
         <StackLayout Orientation="Vertical">
           <StackLayout Orientation="Horizontal">
           <Label>Ship Speed (km/s)- </Label>
-          <TextBox Text="{Binding ShipSpeed}"></TextBox>
+          <TextBox Text="{Binding ShipSpeed}" Enabled="False"></TextBox>
           <Label> X: </Label>
-          <TextBox Text="{Binding XSpeed}" Width="100"></TextBox>
+          <TextBox Text="{Binding XSpeed}" Enabled="False" Width="100"></TextBox>
           <Label> Y: </Label>
-          <TextBox Text="{Binding YSpeed}" Width="100"></TextBox>
+          <TextBox Text="{Binding YSpeed}" Enabled="False" Width="100"></TextBox>
           </StackLayout>
           <StackLayout Orientation="Horizontal">
             <Label> Ship Position -                                    </Label>
             <Label> X: </Label>
-            <TextBox Text="{Binding XPos}" Width="100"></TextBox>
+            <TextBox Text="{Binding XPos}" Enabled="False" Width="100"></TextBox>
             <Label> Y: </Label>
-            <TextBox Text="{Binding YPos}" Width="100"></TextBox>
+            <TextBox Text="{Binding YPos}" Enabled="False" Width="100"></TextBox>
           </StackLayout>
         </StackLayout>
 
@@ -49,9 +49,13 @@
         </StackLayout>
       </TableCell>
       <TableCell>
-        <StackLayout x:Name="TargetArea" Orientation="Vertical" HorizontalContentAlignment="Stretch" Width="200">
+        <StackLayout x:Name="TargetArea" Visible="{Binding TargetShown}" Orientation="Vertical" Width="{Binding TargetAreaWidth}">
           <Label>Target</Label>
           <DropDown x:Name="TargetDropDown" DataContext="{Binding TargetList}" Width="100"></DropDown>
+          <StackLayout Orientation="Horizontal">
+            <Label>Distance to Target in km: </Label>
+            <TextBox Text="{Binding TargetDistance}" Enabled="False"></TextBox>
+          </StackLayout>
         </StackLayout>
       </TableCell>
       <TableCell>

@@ -92,7 +92,8 @@ namespace Pulsar4X.ViewModel
         public BaseOrder SelectedOrder { get { return _orderList.SelectedKey; } }
         public Entity SelectedTarget { get { return _targetList.SelectedKey; } }
 
-        public Boolean TargetShown;
+        public Boolean TargetShown { get; internal set; }
+        public int TargetAreaWidth { get; internal set; }
 
         
 
@@ -102,7 +103,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString();
+                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString("N2");
             }
         }
 
@@ -112,7 +113,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString();
+                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString("N2");
             }
         }
 
@@ -122,7 +123,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString();
+                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString("N2");
             }
         }
 
@@ -132,7 +133,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return SelectedShip.GetDataBlob<PositionDB>().X.ToString();
+                return SelectedShip.GetDataBlob<PositionDB>().X.ToString("N5");
             }
         }
 
@@ -142,7 +143,21 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return SelectedShip.GetDataBlob<PositionDB>().Y.ToString();
+                return SelectedShip.GetDataBlob<PositionDB>().Y.ToString("N5");
+            }
+        }
+
+        public string TargetDistance
+        {
+            get
+            {
+                if (SelectedShip == null)
+                    return "N/A";
+                if (SelectedTarget == null)
+                    return "N/A";
+
+                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().Position - SelectedTarget.GetDataBlob<PositionDB>().Position;
+                return Distance.ToKm(delta.Length()).ToString("N2") ;
             }
         }
 
@@ -165,6 +180,7 @@ namespace Pulsar4X.ViewModel
             _starSystems.SelectedIndex = 0;
 
             TargetShown = false;
+            TargetAreaWidth = 2;
 
             RefreshShips(0, 0);
 
@@ -173,6 +189,8 @@ namespace Pulsar4X.ViewModel
 
             _starSystems.SelectionChangedEvent += RefreshShips;
             _shipList.SelectionChangedEvent += RefreshOrders;
+            _ordersPossible.SelectionChangedEvent += RefreshTarget;
+            _targetList.SelectionChangedEvent += RefreshTargetDistance;
 
             OnPropertyChanged(nameof(StarSystems));
             OnPropertyChanged(nameof(SelectedSystem));
@@ -187,6 +205,7 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(YSpeed));
             OnPropertyChanged(nameof(XPos));
             OnPropertyChanged(nameof(YPos));
+            OnPropertyChanged(nameof(TargetDistance));
         }
 
         public static ShipOrderVM Create(GameVM game)
@@ -228,13 +247,7 @@ namespace Pulsar4X.ViewModel
 
             _shipList.SelectedIndex = 0;
 
-            _targetList.Clear();
-            foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
-            {
-                _targetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
-            }
-
-            _targetList.SelectedIndex = 0;
+            RefreshTarget(0, 0);
 
             OnPropertyChanged(nameof(ShipList));
             OnPropertyChanged(nameof(TargetList));
@@ -243,6 +256,37 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(SelectedTarget));
 
             return;
+        }
+
+        public void RefreshTarget(int a, int b)
+        {
+            _targetList.Clear();
+            foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
+            {
+                _targetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
+            }
+
+            _targetList.SelectedIndex = 0;
+
+            if (SelectedPossibleOrder == null)
+                TargetShown = false;
+            else if (SelectedPossibleOrder.OrderType == orderType.MOVETO)
+                TargetShown = true;
+            else
+                TargetShown = false;
+
+            if (TargetShown)
+                TargetAreaWidth = 200;
+            else
+                TargetAreaWidth = 2;
+
+            OnPropertyChanged(nameof(TargetShown));
+            OnPropertyChanged(nameof(TargetAreaWidth));
+        }
+
+        public void RefreshTargetDistance(int a, int b)
+        {
+            OnPropertyChanged(nameof(TargetDistance));
         }
 
         public void RefreshOrders(int a, int b)
@@ -257,10 +301,7 @@ namespace Pulsar4X.ViewModel
 
             _ordersPossible.SelectedIndex = 0;
 
-            if (OrdersPossible.SelectedKey.OrderType == orderType.MOVETO)
-                TargetShown = true;
-            else
-                TargetShown = false;
+
 
             List<BaseOrder> orders = new List<BaseOrder>(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
 
@@ -288,6 +329,13 @@ namespace Pulsar4X.ViewModel
 
             OnPropertyChanged(nameof(SelectedOrder));
             OnPropertyChanged(nameof(SelectedPossibleOrder));
+
+            OnPropertyChanged(nameof(ShipSpeed));
+            OnPropertyChanged(nameof(XSpeed));
+            OnPropertyChanged(nameof(YSpeed));
+            OnPropertyChanged(nameof(XPos));
+            OnPropertyChanged(nameof(YPos));
+
 
             return;
         }
