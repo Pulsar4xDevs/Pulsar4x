@@ -156,7 +156,7 @@ namespace Pulsar4X.ViewModel
                 if (SelectedTarget == null)
                     return "N/A";
 
-                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().Position - SelectedTarget.GetDataBlob<PositionDB>().Position;
+                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition - SelectedTarget.GetDataBlob<PositionDB>().AbsolutePosition;
                 return Distance.ToKm(delta.Length()).ToString("N2") ;
             }
         }

@@ -177,7 +177,7 @@ namespace Pulsar4X.ViewModel
 
         public void Refresh(bool partialRefresh = false)
         {
-            _position = Entity.GetDataBlob<PositionDB>().Position;   
+            _position = Entity.GetDataBlob<PositionDB>().AbsolutePosition;   
             
         }
 
