@@ -7,15 +7,17 @@ using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
-    class OrbitRing : INotifyPropertyChanged
+    class OrbitRing : INotifyPropertyChanged, IconBase
     {
+        public float Scale { get; set; } = 1;
+
         public PercentValue OrbitPercent { private get { return _orbitPercent; }
             set { _orbitPercent = value; OnPropertyChanged(nameof(SweepAngle)); } }
         private PercentValue _orbitPercent = new PercentValue();
 
         public byte Segments { private get { return _segments; } //TODO we could adjust the Segments and OrbitPercent by the size of the orbit and the zoom level to get a level of detail effect.
             set { _segments = value; UpdatePens(); OnPropertyChanged(nameof(SweepAngle)); }}
-        private byte _segments = 255;
+        private byte _segments = 128;
 
         public float StartArcAngle { get { return (float)(Math.Atan2(_bodyPositionDB.Y, _bodyPositionDB.X) * 180 / Math.PI); }}
 

@@ -315,7 +315,7 @@
     <Compile Include="Views\NewSpeciesView.xeto.cs">
       <DependentUpon>NewSpeciesView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\OrbitRing.cs" />
+    <Compile Include="Views\IconShapes\OrbitRing.cs" />
     <Compile Include="Views\PlayerOptionsDialog.xeto.cs">
       <DependentUpon>PlayerOptionsDialog.xeto</DependentUpon>
     </Compile>
