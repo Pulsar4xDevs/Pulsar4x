@@ -35,9 +35,9 @@ namespace Pulsar4X.ECSLib
         private Vector4 _position;
 
         /// <summary>
-        /// Get or Set the position ralitive to the parent Entity's abolutePositon
+        /// Get or Set the position relative to the parent Entity's abolutePositon
         /// </summary>
-        public Vector4 RalitivePosition
+        public Vector4 RelativePosition
         {
             get { return _position; }
             internal set { _position = value; }
@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib
         private PositionDB() : this(Guid.Empty) { }
 
         /// <summary>
-        /// changes the positions ralitive to
+        /// changes the positions relative to
         /// </summary>
         /// <param name="newParent"></param>
         internal override void SetParent(Entity newParent)
@@ -156,9 +156,9 @@ namespace Pulsar4X.ECSLib
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
             Vector4 currentAbsolute = this.AbsolutePosition;
-            Vector4 newRalitive = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
+            Vector4 newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
             base.SetParent(newParent);
-            _position = newRalitive;
+            _position = newRelative;
         }
 
         /// <summary>
