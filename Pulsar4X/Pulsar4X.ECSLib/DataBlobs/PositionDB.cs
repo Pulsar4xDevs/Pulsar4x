@@ -14,9 +14,13 @@ namespace Pulsar4X.ECSLib
             {
                 if (Parent == null)
                     return _position;
+                else if (Parent == OwningEntity)
+                    throw new Exception("Infinite loop triggered");
                 else
                 {
                     PositionDB parentpos = (PositionDB)ParentDB;
+                    if(parentpos == this)
+                        throw new Exception("Infinite loop triggered");
                     return parentpos.AbsolutePosition + _position;
                 }
             }
@@ -156,7 +160,15 @@ namespace Pulsar4X.ECSLib
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
             Vector4 currentAbsolute = this.AbsolutePosition;
-            Vector4 newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
+            Vector4 newRelative;
+            if (newParent == null)
+            {
+                newRelative = currentAbsolute;
+            }
+            else
+            {
+                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
+            }
             base.SetParent(newParent);
             _position = newRelative;
         }

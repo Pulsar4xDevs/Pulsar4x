@@ -83,10 +83,16 @@ namespace Pulsar4X.ECSLib
                         if (distanceToTarget < distanceToNewTarget) // moving would overtake target, just go directly to target
                         {
                             shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0, 0, 0, 0);
+                            if (order.Target != null && order.Target.HasDataBlob<SystemBodyDB>())
+                                shipEntity.GetDataBlob<PositionDB>().SetParent(order.Target);
                             if (order.Target != null)
                             {
-                                if(order.Target.HasDataBlob<SystemBodyDB>())  // Set position to the target body
-                                    shipEntity.SetDataBlob<PositionDB>(order.Target.GetDataBlob<PositionDB>());
+                                if (order.Target.HasDataBlob<SystemBodyDB>())  // Set position to the target body
+                                {
+                                    shipEntity.GetDataBlob<PositionDB>().SetParent(order.Target);
+                                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
+                                }
+                                    
                                 else
                                     shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
                             }

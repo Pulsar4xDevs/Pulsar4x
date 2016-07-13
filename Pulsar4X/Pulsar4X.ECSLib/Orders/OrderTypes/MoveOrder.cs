@@ -115,6 +115,8 @@ namespace Pulsar4X.ECSLib
             kmSpeed = Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * 1000;
             AUSpeed = Distance.ToAU(kmSpeed);
 
+            currentPosition.SetParent(null);
+
             if(PositionTarget != null)
             {
                 // just head straight towards the target position
@@ -140,13 +142,11 @@ namespace Pulsar4X.ECSLib
                 targetPosition = Target.GetDataBlob<PositionDB>();
                 
                 // Assume that 1000 is extremely close, 
-                if (Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= 1000.0)
+                if (Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
                 {
                     setPositionToTarget(Owner, targetPosition);
 
-                    // Enter the orbit of the target
-                    if (Target.HasDataBlob<OrbitDB>())
-                        Owner.SetDataBlob<OrbitDB>(Target.GetDataBlob<OrbitDB>());
+                    currentPosition.SetParent(Target);
 
                     return true;
                 }
