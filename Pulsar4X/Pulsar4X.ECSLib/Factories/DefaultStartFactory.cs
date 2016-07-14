@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
 
             Entity shipClass = DefaultShipDesign(game, factionEntity);
-            Vector4 position = earth.GetDataBlob<PositionDB>().Position;
+            Vector4 position = earth.GetDataBlob<PositionDB>().AbsolutePosition;
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
