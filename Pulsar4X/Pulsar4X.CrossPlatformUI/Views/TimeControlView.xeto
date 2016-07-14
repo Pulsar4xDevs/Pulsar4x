@@ -11,6 +11,7 @@
       <Label Text="Tick Multiplier" />
       <NumericUpDown Value ="{Binding TickMultiplier}"/>
       <Button Command="{Binding PausePlayCMD}"  Text="||>" />
+      <Button Command="{Binding TimeStepCMD}" Text="Step" />
       <TableCell></TableCell>
     </TableRow>
     <TableRow >

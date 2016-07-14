@@ -74,6 +74,15 @@ namespace Pulsar4X.ViewModel
                 
         }
 
+        public ICommand TimeStepCMD { get { return new RelayCommand<object>(obj => TimeStep()); } }
+
+        private void TimeStep()
+        {
+            if (_timeloop == null)
+                return;
+            _timeloop.TimeStep();
+        }
+
         private void OnTimeDateChange(DateTime newDate)
         {                        
             OnPropertyChanged(nameof(CurrentGameDate));
