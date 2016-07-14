@@ -64,6 +64,8 @@ namespace Pulsar4X.ViewModel
 
         private void PausePlay()
         {
+            if (_timeloop == null)
+                return;
             if (IsPaused)
             {
                 _timeloop.StartTime();
@@ -75,6 +77,15 @@ namespace Pulsar4X.ViewModel
                 IsPaused = true;
             }
                 
+        }
+
+        public ICommand TimeStepCMD { get { return new RelayCommand<object>(obj => TimeStep()); } }
+
+        private void TimeStep()
+        {
+            if (_timeloop == null)
+                return;
+            _timeloop.TimeStep();
         }
 
         private void OnTimeDateChange(DateTime newDate)

@@ -94,18 +94,28 @@ namespace Pulsar4X.ECSLib
         #region Public Time Methods. UI interacts with time here
 
         /// <summary>
-        /// PausesTimeloop
+        /// Pauses the timeloop
         /// </summary>
         public void PauseTime()
         {
             _timer.Stop();
         }
         /// <summary>
-        /// Stars the timeloop
+        /// Starts the timeloop
         /// </summary>
         public void StartTime()
         {
             _timer.Start();
+        }
+
+
+        /// <summary>
+        /// Takes a single step in time
+        /// </summary>
+        public void TimeStep()
+        {
+            DoProcessing();
+            _timer.Stop();
         }
 
         #endregion
