@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Pulsar4X.ECSLib;
 using System.Windows.Input;
-using System.Threading;
-using System.ComponentModel;
 
 namespace Pulsar4X.ViewModel
 {
@@ -64,6 +59,8 @@ namespace Pulsar4X.ViewModel
 
         private void PausePlay()
         {
+            if (_timeloop == null)
+                return;
             if (IsPaused)
             {
                 _timeloop.StartTime();

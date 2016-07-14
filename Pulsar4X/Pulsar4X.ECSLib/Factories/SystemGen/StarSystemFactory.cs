@@ -266,7 +266,7 @@ namespace Pulsar4X.ECSLib
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetEccentricity = i / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
-                planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
+                planetPositionDB.AbsolutePosition = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
@@ -300,7 +300,7 @@ namespace Pulsar4X.ECSLib
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetLoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
-                planetPositionDB.Position = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
+                planetPositionDB.AbsolutePosition = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
                 Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);

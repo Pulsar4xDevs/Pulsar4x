@@ -71,8 +71,8 @@ namespace Pulsar4X.ViewModel.SystemView
         /// </summary>
         private void updatePosition()
         {
-            PosX = (float)PositionBlob.Position.X;
-            PosY = (float)PositionBlob.Position.Y;
+            PosX = (float)PositionBlob.AbsolutePosition.X;
+            PosY = (float)PositionBlob.AbsolutePosition.Y;
         }
 
 
@@ -405,8 +405,8 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
             {
-                PosX = (float)ParentPositionDB.Position.X ;
-                PosY = (float)ParentPositionDB.Position.Y ;
+                PosX = (float)ParentPositionDB.AbsolutePosition.X ;
+                PosY = (float)ParentPositionDB.AbsolutePosition.Y ;
             }
         }
 
@@ -512,8 +512,8 @@ namespace Pulsar4X.ViewModel.SystemView
         {
             if (OrbitDB.Parent != null && OrbitDB.Parent.HasDataBlob<OrbitDB>())
             {
-                PosX = (float)PositionDB.Position.X - _width * 0.5f + _focalPoint;
-                PosY = (float)PositionDB.Position.Y - _width * 0.5f;
+                PosX = (float)PositionDB.AbsolutePosition.X - _width * 0.5f + _focalPoint;
+                PosY = (float)PositionDB.AbsolutePosition.Y - _width * 0.5f;
             }
         }
 
