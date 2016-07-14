@@ -68,7 +68,7 @@ namespace Pulsar4X.ViewModel.SystemView
 
         public ECSLib.Vector4 Position
         {
-            get { return _positionDB.Position; }
+            get { return _positionDB.AbsolutePosition; }
         }
 
         public Color4 ItemColour { get; private set; } //maybe use something more generic and move to view

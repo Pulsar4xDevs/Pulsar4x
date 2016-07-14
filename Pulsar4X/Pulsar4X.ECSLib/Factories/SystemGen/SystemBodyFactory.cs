@@ -461,7 +461,7 @@ namespace Pulsar4X.ECSLib
             // Finalize Orbit
             var positionDB = body.GetDataBlob<PositionDB>();
             positionDB.SystemGuid = system.Guid;
-            positionDB.Position = OrbitProcessor.GetPosition(body.GetDataBlob<OrbitDB>(), currentDateTime);
+            positionDB.AbsolutePosition = OrbitProcessor.GetPosition(body.GetDataBlob<OrbitDB>(), currentDateTime);
 
             GenerateMoons(system, body, currentDateTime);
 

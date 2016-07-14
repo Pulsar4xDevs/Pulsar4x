@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
                 {
                     //TODO: do we need to check if the ship has an orbitDB?
                     //TODO: if the ship will arrive at the destination in the next deltaSeconds, don't go past it.
-                    shipEntity.GetDataBlob<PositionDB>().Position += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
+                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
                     //TODO: use fuel.
                 }
             }
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
                         // Check to see if we will overtake the target
 
                         MoveOrder order = (MoveOrder)orders.Peek();
-                        Vector4 shipPos = shipEntity.GetDataBlob<PositionDB>().Position;
+                        Vector4 shipPos = shipEntity.GetDataBlob<PositionDB>().AbsolutePosition;
                         Vector4 targetPos;
                         Vector4 newPos;
                         Vector4 deltaVec;
@@ -67,9 +67,9 @@ namespace Pulsar4X.ECSLib
                         double currentSpeedLength = currentSpeed.Length();
 
                         if (order.PositionTarget == null)
-                            targetPos = order.Target.GetDataBlob<PositionDB>().Position;
+                            targetPos = order.Target.GetDataBlob<PositionDB>().AbsolutePosition;
                         else
-                            targetPos = order.PositionTarget.Position;
+                            targetPos = order.PositionTarget.AbsolutePosition;
 
                         deltaVec = shipPos - targetPos;
 
@@ -83,17 +83,23 @@ namespace Pulsar4X.ECSLib
                         if (distanceToTarget < distanceToNewTarget) // moving would overtake target, just go directly to target
                         {
                             shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0, 0, 0, 0);
+                            if (order.Target != null && order.Target.HasDataBlob<SystemBodyDB>())
+                                shipEntity.GetDataBlob<PositionDB>().SetParent(order.Target);
                             if (order.Target != null)
                             {
-                                if(order.Target.HasDataBlob<SystemBodyDB>())  // Set position to the target body
-                                    shipEntity.SetDataBlob<PositionDB>(order.Target.GetDataBlob<PositionDB>());
+                                if (order.Target.HasDataBlob<SystemBodyDB>())  // Set position to the target body
+                                {
+                                    shipEntity.GetDataBlob<PositionDB>().SetParent(order.Target);
+                                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
+                                }
+                                    
                                 else
-                                    shipEntity.GetDataBlob<PositionDB>().Position = targetPos;
+                                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
                             }
                                 
                             else // We arrived, get rid of the order
                             {
-                                shipEntity.GetDataBlob<PositionDB>().Position = targetPos;
+                                shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
                                 shipEntity.GetDataBlob<ShipInfoDB>().Orders.Dequeue();
                             }
                                 
@@ -102,7 +108,7 @@ namespace Pulsar4X.ECSLib
 
                 }
 
-                shipEntity.GetDataBlob<PositionDB>().Position += (shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
+                shipEntity.GetDataBlob<PositionDB>().AbsolutePosition += (shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
                 //TODO: use fuel.
             }
             

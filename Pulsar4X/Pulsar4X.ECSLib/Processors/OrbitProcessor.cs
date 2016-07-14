@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
                 Vector4 newPosition = GetPosition(entityOrbitDB, game.CurrentDateTime);
 
                 // Get our Absolute coordinates.
-                entityPosition.Position = parentPositionDB.Position + newPosition;
+                entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
 
                 Interlocked.Increment(ref orbitsProcessed);
             }
@@ -173,7 +173,7 @@ namespace Pulsar4X.ECSLib
                 Vector4 newPosition = GetPosition(entityOrbitDB, toDate);
 
                 // Get our Absolute coordinates.
-                entityPosition.Position = parentPositionDB.Position + newPosition;
+                entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
 
             }
             catch (OrbitProcessorException e)

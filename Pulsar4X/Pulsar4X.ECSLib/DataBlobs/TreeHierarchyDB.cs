@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib
             _children = new List<Entity>();
         }
 
-        internal void SetParent(Entity parent)
+        internal virtual void SetParent(Entity parent)
         {
             ParentDB?.RemoveChild(OwningEntity);
             Parent = parent;
