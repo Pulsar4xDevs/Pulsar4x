@@ -206,6 +206,7 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(XPos));
             OnPropertyChanged(nameof(YPos));
             OnPropertyChanged(nameof(TargetDistance));
+            RefreshOrderList(0, 0);
         }
 
         public static ShipOrderVM Create(GameVM game)
@@ -260,13 +261,15 @@ namespace Pulsar4X.ViewModel
 
         public void RefreshTarget(int a, int b)
         {
+            int targetIndex = _targetList.SelectedIndex;
+
             _targetList.Clear();
             foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
             {
                 _targetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
             }
 
-            _targetList.SelectedIndex = 0;
+            _targetList.SelectedIndex = targetIndex;
 
             if (SelectedPossibleOrder == null)
                 TargetShown = false;
@@ -301,17 +304,34 @@ namespace Pulsar4X.ViewModel
 
             _ordersPossible.SelectedIndex = 0;
 
+            RefreshOrderList(0, 0);
 
 
+
+            OnPropertyChanged(nameof(SelectedOrder));
+            OnPropertyChanged(nameof(SelectedPossibleOrder));
+
+            OnPropertyChanged(nameof(ShipSpeed));
+            OnPropertyChanged(nameof(XSpeed));
+            OnPropertyChanged(nameof(YSpeed));
+            OnPropertyChanged(nameof(XPos));
+            OnPropertyChanged(nameof(YPos));
+
+
+            return;
+        }
+
+        public void RefreshOrderList(int a, int b)
+        {
             List<BaseOrder> orders = new List<BaseOrder>(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
 
             _orderList.Clear();
 
-            foreach(BaseOrder order in orders)
+            foreach (BaseOrder order in orders)
             {
                 string orderDescription = "";
 
-                switch(order.OrderType)
+                switch (order.OrderType)
                 {
                     case orderType.MOVETO:
                         MoveOrder moveOrder = (MoveOrder)order;
@@ -326,18 +346,6 @@ namespace Pulsar4X.ViewModel
 
             OnPropertyChanged(nameof(OrderList));
             OnPropertyChanged(nameof(OrdersPossible));
-
-            OnPropertyChanged(nameof(SelectedOrder));
-            OnPropertyChanged(nameof(SelectedPossibleOrder));
-
-            OnPropertyChanged(nameof(ShipSpeed));
-            OnPropertyChanged(nameof(XSpeed));
-            OnPropertyChanged(nameof(YSpeed));
-            OnPropertyChanged(nameof(XPos));
-            OnPropertyChanged(nameof(YPos));
-
-
-            return;
         }
 
         public void OnAddOrder()
