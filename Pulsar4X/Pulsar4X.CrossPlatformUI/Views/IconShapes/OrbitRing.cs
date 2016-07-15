@@ -23,21 +23,21 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public float SweepAngle { get { return (360f * OrbitPercent.Percent) / Segments; } }
 
-        private List<Pen> _segmentPens;// = new List<Pen>();
+        private List<Pen> _segmentPens = new List<Pen>();
 
         public Color PenColor { get { return _penColor; }
             set { _penColor = value;  UpdatePens(); OnPropertyChanged();}}
         private Color _penColor;
   
-        private float TopLeftX { get { return (float)_parentPositionDB.Position.X * 200.0f;}}//+ _width / 2; }}
-        private float TopLeftY { get { return (float)_parentPositionDB.Position.Y * 200.0f; }}//+ _height / 2; }}
+        private float TopLeftX { get { return (float)_parentPositionDB.Position.X * _camera.ZoomLevel; }}//+ _width / 2; }}
+        private float TopLeftY { get { return (float)_parentPositionDB.Position.Y * _camera.ZoomLevel; }}//+ _height / 2; }}
         private float _width;
         private float _height;
         private float _focalPoint;
         //this should be the angle from the orbital reference direction, to the Argument of Periapsis, as seen from above, this sets the angle for the ecentricity.
         //ie an elipse is created from a rectangle (position, width and height), then rotated so that the ecentricity is at the right angle. 
         private float _rotation; 
-        private Camera2D _camera;
+        private Camera2dv2 _camera;
 
         private OrbitDB _orbitDB; 
 
@@ -49,7 +49,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private Entity myEntity;
 
-        public OrbitRing(Entity entityWithOrbit, Camera2D camera)
+        public OrbitRing(Entity entityWithOrbit, Camera2dv2 camera)
         {
             _camera = camera;
 
@@ -138,7 +138,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var pen in _segmentPens)
             {
                 float OriginalThickness = pen.Thickness;
-                pen.Thickness = pen.Thickness * (1.0f / _camera.ZoomFactor());
+                //pen.Thickness = pen.Thickness * (1.0f / _camera.ZoomLevel);
                 g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle - (AngleAdd) - _rotation + (i * SweepAngle), SweepAngle);
                 i++;
 

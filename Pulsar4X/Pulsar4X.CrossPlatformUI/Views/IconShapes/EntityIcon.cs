@@ -7,7 +7,7 @@ using Pulsar4X.ECSLib;
 using Eto.Drawing;
 using Eto.Forms;
 
-namespace Pulsar4X.CrossPlatformUI
+namespace Pulsar4X.CrossPlatformUI.Views
 {
     internal class Camera2dv2
     {
@@ -59,7 +59,24 @@ namespace Pulsar4X.CrossPlatformUI
     {
         List<IconBase> Icons { get; } = new List<IconBase>();
 
-        //sets the distance between icons. 
+        public IconCollection()
+        {
+            
+
+        }
+
+        public void Init(List<Entity> entities, Camera2dv2 camera)
+        {
+            Icons.Clear();
+            foreach (var item in entities)
+            {
+                if (item.HasDataBlob<OrbitDB>() && item.GetDataBlob<OrbitDB>().Parent != null)
+                {
+                    Icons.Add(new OrbitRing(item, camera));
+                }
+                Icons.Add(new EntityIcon(item, camera));
+            }
+        }
 
         public void DrawMe(Graphics g)
         {
@@ -78,6 +95,42 @@ namespace Pulsar4X.CrossPlatformUI
         void DrawMe(Graphics g);        
     }
 
+    internal class TextIcon : IconBase
+    {
+
+        public float Scale { get; set; } = 8;
+        Font font { get; set; }
+        Color color { get; set; }
+        private float Zoom { get { return _camera.ZoomLevel; } }
+        private Size ViewSize { get { return _camera._viewPort.Size; } }
+        private PositionDB _starSysPosition;
+        private Camera2dv2 _camera;
+        private string _name;
+
+        public TextIcon(Entity entity, Camera2dv2 camera)
+        {
+            _camera = camera;
+            _starSysPosition = entity.GetDataBlob<PositionDB>();
+            _name = entity.GetDataBlob<NameDB>().DefaultName;
+            font = new Font(FontFamilies.Fantasy, Scale);
+            color = new Color(Colors.Black);
+        }
+
+        public void DrawMe(Graphics g)
+        {
+
+            g.SaveTransform();
+            //g.MultiplyTransform(PositionTransform());
+            IMatrix cameraOffset = _camera.GetViewProjectionMatrix();
+            //apply the camera offset
+            g.MultiplyTransform(cameraOffset);
+
+            g.DrawText(font, color, (float)_starSysPosition.X, (float)_starSysPosition.Y, _name);
+
+            g.RestoreTransform();
+        }
+    }
+
     internal class EntityIcon : IconBase
     {
         public float Scale { get; set; } = 1;
@@ -87,7 +140,7 @@ namespace Pulsar4X.CrossPlatformUI
         private PositionDB _starSysPosition; 
         private Camera2dv2 _camera;
 
-        EntityIcon(Camera2dv2 camera, Entity entity)
+        public EntityIcon(Entity entity, Camera2dv2 camera)
         {
             _camera = camera;
             _starSysPosition = entity.GetDataBlob<PositionDB>();
@@ -101,6 +154,7 @@ namespace Pulsar4X.CrossPlatformUI
 
             return positionMatrix;
         }
+
 
         void HasPropulsionDB(PropulsionDB db)
         {
