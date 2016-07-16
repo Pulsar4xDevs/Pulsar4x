@@ -14,7 +14,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         SystemMap_DrawableVM _viewModel;
 
         
-        private Camera2D _camera;
+
         private bool IsMouseDown;
         public Point LastLoc;
         private PointF LastOffset;
@@ -25,7 +25,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public SystemMap_DrawableView()
         {
             XamlReader.Load(this);
-            _camera = new Camera2D(this);
             _camera2 = new Camera2dv2(this);
             this.MouseDown += SystemMap_DrawableView_MouseDown;
             this.MouseUp += SystemMap_DrawableView_MouseUp;
@@ -42,10 +41,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             
             if (IsMouseDown == true)
             {
+                _camera2.WorldOffset(e.Location - LastLoc);
 
-                //_camera.ViewOffset(LastOffset - e.Location);
-                //_camera.CenterOn(e);
-                _camera.WorldOffset(e.Location - LastLoc);
                 LastOffset = e.Location;
                 Invalidate();
             }
@@ -56,12 +53,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             if ((int)e.Delta.Height == 1)
             {
-                _camera.ZoomIn(Size);
+                _camera2.ZoomIn();
                 Invalidate();
             }
             else if ((int)e.Delta.Height == -1)
             {
-                _camera.ZoomOut(Size);
+                _camera2.ZoomOut();
                 Invalidate();
             }
         }

@@ -27,7 +27,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public Color PenColor { get { return _penColor; }
             set { _penColor = value;  UpdatePens(); OnPropertyChanged();}}
-        private Color _penColor;
+        private Color _penColor = Colors.Wheat;
   
         private float TopLeftX { get { return (float)_parentPositionDB.Position.X * _camera.ZoomLevel; }}//+ _width / 2; }}
         private float TopLeftY { get { return (float)_parentPositionDB.Position.Y * _camera.ZoomLevel; }}//+ _height / 2; }}
@@ -67,11 +67,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 _rotation = _rotation - 360.0f;
 
 
-            _width = 200 * (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
-            _height = 200 * (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
+            _width = _camera.ZoomLevel * (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
+            _height = _camera.ZoomLevel * (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
             _focalPoint = (float)_orbitDB.Eccentricity * _width /2;
 
             myEntity = entityWithOrbit;
+            UpdatePens();
         }
 
         private void UpdatePens()
@@ -95,7 +96,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
             //get the offset from the camera, this is the distance from the top left of the viewport to the center of the viewport, accounting for zoom, pan etc.
-            IMatrix cameraOffset = _camera.GetViewProjectionMatrix();
+            IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF((float)TopLeftX, (float)TopLeftY));
 
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
@@ -137,12 +138,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
             int i = 0;
             foreach (var pen in _segmentPens)
             {
-                float OriginalThickness = pen.Thickness;
+                //float OriginalThickness = pen.Thickness;
                 //pen.Thickness = pen.Thickness * (1.0f / _camera.ZoomLevel);
                 g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle - (AngleAdd) - _rotation + (i * SweepAngle), SweepAngle);
                 i++;
 
-                pen.Thickness = OriginalThickness;
+                //pen.Thickness = OriginalThickness;
             }
             g.RestoreTransform();
 

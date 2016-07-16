@@ -293,7 +293,8 @@
     <Compile Include="Views\ComponentTemplateDesigner\TechList.xeto.cs">
       <DependentUpon>TechList.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\IconShapes\EntityIcon.cs" />
+    <Compile Include="Views\SystemView\Camera.cs" />
+    <Compile Include="Views\SystemView\EntityIcon.cs" />
     <Compile Include="Views\JobAbilityView.xeto.cs">
       <DependentUpon>JobAbilityView.xeto</DependentUpon>
     </Compile>
@@ -315,7 +316,8 @@
     <Compile Include="Views\NewSpeciesView.xeto.cs">
       <DependentUpon>NewSpeciesView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\IconShapes\OrbitRing.cs" />
+    <Compile Include="Views\SystemView\IconCollection.cs" />
+    <Compile Include="Views\SystemView\OrbitRing.cs" />
     <Compile Include="Views\PlayerOptionsDialog.xeto.cs">
       <DependentUpon>PlayerOptionsDialog.xeto</DependentUpon>
     </Compile>
@@ -344,6 +346,7 @@
     <Compile Include="Views\SystemView.xeto.cs">
       <DependentUpon>SystemView.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\SystemView\TextIcon.cs" />
     <Compile Include="Views\TimeControlView.xeto.cs">
       <DependentUpon>TimeControlView.xeto</DependentUpon>
     </Compile>
