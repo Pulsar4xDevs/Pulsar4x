@@ -32,9 +32,63 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 {
                     HasPosition((PositionDB)item);
                 }
+                if (item is StarInfoDB)
+                {
+                    HasStarInfo((StarInfoDB)item);
+                }
+                if (item is SystemBodyDB)
+                {
+                    HasSysBodyInfo((SystemBodyDB)item);
+                }
             }
         }
 
+        void HasStarInfo(StarInfoDB db)
+        {
+            //TODO: change pen colour depending on star temp and lum?
+            double temp = db.Temperature;
+            double lum = db.Luminosity;
+
+            Pen starPen = new Pen(Colors.DarkOrange);
+
+            float width = 12;
+            float height = 12;
+            float hw = width * 0.5f;
+            float hh = height * 0.5f;
+
+            GraphicsPath starPath = new GraphicsPath();
+
+            PointF start = new PointF(0, -height);
+            PointF c1 = new PointF(-width, 0);
+            PointF c2 = new PointF(-hw, -hh);
+            PointF end = new PointF(-hw, -hh);
+            starPath.AddBezier(start, c1, c2, end);
+
+            start = new PointF(-width, 0);
+            c1 = new PointF(0, height);
+            c2 = new PointF(-hw, hh);
+            end = new PointF(-hw, hh);
+            starPath.AddBezier(start, c1, c2, end);
+
+            start = new PointF(0, height);
+            c1 = new PointF(width, 0);
+            c2 = new PointF(hw, hh);
+            end = new PointF(hw, hh);
+            starPath.AddBezier(start, c1, c2, end);
+
+            start = new PointF(width, 0);
+            c1 = new PointF(0, -height);
+            c2 = new PointF(hw, -hh);
+            end = new PointF(hw, -hh);
+            starPath.AddBezier(start, c1, c2, end);
+
+            PenPathPair starPathPair = new PenPathPair() { Pen = starPen, Path = starPath };
+            _shapes.Add(starPathPair);
+        }
+
+        void HasSysBodyInfo(SystemBodyDB db)
+        {
+        }
 
         void HasPosition(PositionDB db)
         {
@@ -47,10 +101,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         void HasPropulsionDB(PropulsionDB db)
         {
 
-            int maxFuel = db.FuelStorageCapicity / 100;
+            int maxFuel = db.FuelStorageCapicity / 10;
 
-            int maxSpeed = db.MaximumSpeed / 100;
-            int totalEP = db.TotalEnginePower / 100;
+            int maxSpeed = db.MaximumSpeed / 10;
+            int totalEP = db.TotalEnginePower / 10;
             PointF currentSpeed = new PointF((float)db.CurrentSpeed.X, (float)db.CurrentSpeed.Y);
 
             Pen tankPen = new Pen(Colors.Aquamarine);
@@ -67,8 +121,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             
             Pen thrustPen = new Pen(Colors.OrangeRed);
             GraphicsPath thrustPath = new GraphicsPath();
-            thrustPath.AddLine(-totalEP * 0.5f, maxFuel + maxSpeed, 0, currentSpeed.Length / 100);
-            thrustPath.AddLine(0, currentSpeed.Length / 100, totalEP * 0.5f, maxFuel + maxSpeed);
+            thrustPath.AddLine(-totalEP * 0.5f, maxFuel + maxSpeed, 0, currentSpeed.Length / 10);
+            thrustPath.AddLine(0, currentSpeed.Length / 10, totalEP * 0.5f, maxFuel + maxSpeed);
             _shapes.Add(new PenPathPair() { Pen = thrustPen, Path = thrustPath });                      
         }
 
