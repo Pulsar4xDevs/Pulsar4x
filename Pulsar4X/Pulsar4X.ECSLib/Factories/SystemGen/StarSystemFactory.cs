@@ -104,7 +104,7 @@ namespace Pulsar4X.ECSLib
             double earthLoAN = -11.26064;
             double earthLoP = 102.94719;
             double earthMeanLongd = 100.46435;
-            OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, earthSemiMajAxis, earthEccentricity, earthInclination, earthLoAN, earthLoP, earthMeanLongd, GalaxyGen.Settings.J2000);
+            OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, earthMVDB.Mass, earthSemiMajAxis, earthEccentricity, earthInclination, earthLoAN, earthLoP, earthMeanLongd, GalaxyGen.Settings.J2000);
             earthBodyDB.Tectonics = TectonicActivity.EarthLike;
             PositionDB earthPositionDB = new PositionDB(OrbitProcessor.GetPosition(earthOrbitDB, game.CurrentDateTime), sol.Guid);
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
