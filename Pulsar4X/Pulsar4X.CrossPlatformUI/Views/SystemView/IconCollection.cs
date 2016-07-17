@@ -10,8 +10,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public IconCollection()
         {
-
-
         }
 
         public void Init(List<Entity> entities, Camera2dv2 camera)

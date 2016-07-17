@@ -51,35 +51,35 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             Pen starPen = new Pen(Colors.DarkOrange);
 
-            float width = 12;
-            float height = 12;
-            float hw = width * 0.5f;
-            float hh = height * 0.5f;
+            float width = 8;
+            float height = 8;
+            float hw = width * 0.25f;
+            float hh = height * 0.25f;
 
             GraphicsPath starPath = new GraphicsPath();
 
             PointF start = new PointF(0, -height);
-            PointF c1 = new PointF(-width, 0);
+            PointF end = new PointF(-width, 0);
+            PointF c1 = new PointF(-hw, -hh);
             PointF c2 = new PointF(-hw, -hh);
-            PointF end = new PointF(-hw, -hh);
             starPath.AddBezier(start, c1, c2, end);
 
             start = new PointF(-width, 0);
-            c1 = new PointF(0, height);
+            end = new PointF(0, height);
+            c1 = new PointF(-hw, hh);
             c2 = new PointF(-hw, hh);
-            end = new PointF(-hw, hh);
             starPath.AddBezier(start, c1, c2, end);
 
             start = new PointF(0, height);
-            c1 = new PointF(width, 0);
+            end = new PointF(width, 0);
+            c1 = new PointF(hw, hh);
             c2 = new PointF(hw, hh);
-            end = new PointF(hw, hh);
             starPath.AddBezier(start, c1, c2, end);
 
             start = new PointF(width, 0);
-            c1 = new PointF(0, -height);
+            end = new PointF(0, -height);
+            c1 = new PointF(hw, -hh);
             c2 = new PointF(hw, -hh);
-            end = new PointF(hw, -hh);
             starPath.AddBezier(start, c1, c2, end);
 
             PenPathPair starPathPair = new PenPathPair() { Pen = starPen, Path = starPath };

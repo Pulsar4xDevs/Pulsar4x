@@ -10,15 +10,16 @@ namespace Pulsar4X.ViewModel.SystemView
         
 
         public List<Entity> IconableEntitys { get; } = new List<Entity>();
+        public SystemSubPulses SystemSubpulse { get; private set; }
 
-        public void Initialise(GameVM gameVM, StarSystem starSys, List<float> scale_data)
+        public void Initialise(GameVM gameVM, StarSystem starSys)
         {
-
 
             IconableEntitys.Clear();
             IconableEntitys.AddRange(starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(gameVM.CurrentAuthToken));
-       
-        }        
+            SystemSubpulse = starSys.SystemSubpulses;
+        }
+
     }
 
 

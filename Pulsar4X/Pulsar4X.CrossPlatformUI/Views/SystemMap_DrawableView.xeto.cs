@@ -72,8 +72,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             _viewModel = viewModel;
             viewModel.PropertyChanged += ViewModel_PropertyChanged;
-
+            viewModel.SystemSubpulse.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
             IconEntitys_CollectionChanged();
+        }
+
+        private void SystemSubpulse_SystemDateChangedEvent(DateTime newDate)
+        {
+            Invalidate();
         }
 
         private void SystemMap_DrawableView_MouseDown(object sender, MouseEventArgs e)
