@@ -266,7 +266,8 @@ namespace Pulsar4X.ViewModel
             _targetList.Clear();
             foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
             {
-                _targetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
+                if(target != SelectedShip)
+                    _targetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
             }
 
             _targetList.SelectedIndex = targetIndex;
