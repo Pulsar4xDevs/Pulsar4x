@@ -13,7 +13,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public PercentValue OrbitPercent { private get { return _orbitPercent; }
             set { _orbitPercent = value; OnPropertyChanged(nameof(SweepAngle)); } }
-        private PercentValue _orbitPercent = new PercentValue();
+        private PercentValue _orbitPercent = new PercentValue() {Percent = 1};
 
         public byte Segments { private get { return _segments; } //TODO we could adjust the Segments and OrbitPercent by the size of the orbit and the zoom level to get a level of detail effect.
             set { _segments = value; UpdatePens(); OnPropertyChanged(nameof(SweepAngle)); }}
@@ -67,8 +67,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 _rotation = _rotation - 360.0f;
 
 
-            _width = _camera.ZoomLevel * (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
-            _height = _camera.ZoomLevel * (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
+            _width =  (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
+            _height = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
             _focalPoint = (float)_orbitDB.Eccentricity * _width /2;
 
             myEntity = entityWithOrbit;
@@ -92,22 +92,26 @@ namespace Pulsar4X.CrossPlatformUI.Views
             var rmatrix = Matrix.Create();
 
             //the distance between the top left of the bounding rectangle, and one of the elipse's focal points
-            PointF focalOffset = new PointF(-_width / 2 - _focalPoint, -_height / 2);
+            float focalpoint = _focalPoint * _camera.ZoomLevel;
+            float halfWid = _width * 0.5f * _camera.ZoomLevel;
+            float halfHei = _height * 0.5f * _camera.ZoomLevel;
+            //PointF focalOffset = new PointF(-_width / 2 - _focalPoint, -_height / 2);
+            PointF focalOffset = new PointF(-halfWid - focalpoint, -halfHei);
+            //offset to the focal point
+            g.TranslateTransform(focalOffset);
 
-
-            //get the offset from the camera, this is the distance from the top left of the viewport to the center of the viewport, accounting for zoom, pan etc.
+            //get the offset from the camera, accounting for zoom, pan etc.
             IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF((float)TopLeftX, (float)TopLeftY));
 
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
 
-            //offset to the focal point
-            g.TranslateTransform(focalOffset);
+
             //rotate
 
             //The RotatePoint must consider the parent position, or else it will rotate any moon about the sun and not about the planet it orbits, hence TopLeftX,TopLeftY in this 
             //calculation.
-            PointF rotatePoint = new PointF(((_width / 2) + _focalPoint + TopLeftX), ((_height / 2) + TopLeftY));
+            PointF rotatePoint = new PointF(((halfWid) + focalpoint + TopLeftX), ((halfHei) + TopLeftY));
             rmatrix.RotateAt(_rotation, rotatePoint);
 
             g.MultiplyTransform(rmatrix);
@@ -140,7 +144,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 //float OriginalThickness = pen.Thickness;
                 //pen.Thickness = pen.Thickness * (1.0f / _camera.ZoomLevel);
-                g.DrawArc(pen, TopLeftX, TopLeftY, _width, _height, StartArcAngle - (AngleAdd) - _rotation + (i * SweepAngle), SweepAngle);
+                g.DrawArc(pen, TopLeftX, TopLeftY, _width * _camera.ZoomLevel, _height * _camera.ZoomLevel, StartArcAngle - (AngleAdd) - _rotation + (i * SweepAngle), SweepAngle);
                 i++;
 
                 //pen.Thickness = OriginalThickness;

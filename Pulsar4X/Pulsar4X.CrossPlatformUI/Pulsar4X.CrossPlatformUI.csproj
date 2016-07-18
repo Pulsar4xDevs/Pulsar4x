@@ -253,7 +253,6 @@
     <Compile Include="Views\AbilitySelectionList.xeto.cs">
       <DependentUpon>AbilitySelectionList.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Lib\Camera2D.cs" />
     <Compile Include="Views\ChainedSlidersControl.xeto.cs">
       <DependentUpon>ChainedSlidersControl.xeto</DependentUpon>
     </Compile>
