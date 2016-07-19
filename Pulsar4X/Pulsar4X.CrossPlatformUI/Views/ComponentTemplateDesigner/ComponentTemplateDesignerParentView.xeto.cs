@@ -27,22 +27,25 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
             _viewModel = viewModel;
             DataContext = viewModel;
 
-            foreach (var item in viewModel.ComponentAbilitySDs)
-            {
-                AbilityTemplates.Items.Add(new ComponentTemplateAbilityPropertiesView(item));
-            }
             viewModel.ComponentAbilitySDs.CollectionChanged += ComponentAbilitySDs_CollectionChanged;
+
+            RefreshAbilityList();
         }
 
 
         private void ComponentAbilitySDs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            RefreshAbilityList();
+        }
+
+        private void RefreshAbilityList()
         {
             AbilityTemplates.SuspendLayout();
             AbilityTemplates.Items.Clear();
             foreach (var item in _viewModel.ComponentAbilitySDs)
             {
                 AbilityTemplates.Items.Add(new ComponentTemplateAbilityPropertiesView(item));
-            }            
+            }
             //padding to fix a bug with eto scrollable not scrolling down far enough. 
             //can be removed when the next version of eto.forms comes out as of this writing we're using 2.2 (it's fixed in the dev version of eto.forms)
             PaddingPnl.Height = AbilityTemplates.Items.Count * 42;

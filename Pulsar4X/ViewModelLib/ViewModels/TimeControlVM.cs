@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using Pulsar4X.ECSLib;
 using System.Windows.Input;
-using System.Threading;
-using System.ComponentModel;
 
 namespace Pulsar4X.ViewModel
 {
@@ -64,6 +59,8 @@ namespace Pulsar4X.ViewModel
 
         private void PausePlay()
         {
+            if (_timeloop == null)
+                return;
             if (IsPaused)
             {
                 _timeloop.StartTime();
@@ -75,6 +72,15 @@ namespace Pulsar4X.ViewModel
                 IsPaused = true;
             }
                 
+        }
+
+        public ICommand TimeStepCMD { get { return new RelayCommand<object>(obj => TimeStep()); } }
+
+        private void TimeStep()
+        {
+            if (_timeloop == null)
+                return;
+            _timeloop.TimeStep();
         }
 
         private void OnTimeDateChange(DateTime newDate)

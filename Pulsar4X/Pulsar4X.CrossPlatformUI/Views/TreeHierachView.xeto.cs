@@ -31,7 +31,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             EntityBlobPair ebpair = (EntityBlobPair)DataContext;
             List<TreeHierarchyDB> childBlobs = ebpair.Blob.ChildrenDBs;
-            List<EntityBlobPair> children = new List<EntityBlobPair>();
 
             TreeItemCollection treeItemCollection = new TreeItemCollection();
 
@@ -45,23 +44,18 @@ namespace Pulsar4X.CrossPlatformUI.Views
             TreeViewcontrol.DataStore = treeItemCollection;
         }
 
-        private TreeItem NewTreeItem(TreeItem parentTreeItem, EntityBlobPair ebPair)
-        {
-            TreeItem treeitem = new TreeItem();
-
-            parentTreeItem.Text = ebPair.Entity.GetDataBlob<NameDB>().DefaultName;
+        private void NewTreeItem(TreeItem parentTreeItem, EntityBlobPair ebPair)
+        {                       
             List<TreeHierarchyDB> childBlobs = ebPair.Blob.ChildrenDBs;
-            List<EntityBlobPair> children = new List<EntityBlobPair>();
-            
+                      
             foreach (var item in childBlobs)
             {
-                
-                var itemPair = new EntityBlobPair { Entity = item.Parent, Blob = item };
-                children.Add(itemPair);
-                parentTreeItem.Children.Add(NewTreeItem(treeitem, itemPair));
-            }
-
-            return treeitem;
+                TreeItem treeitem = new TreeItem();              
+                var itemPair = new EntityBlobPair { Entity = item.OwningEntity, Blob = item };
+                treeitem.Text = itemPair.Entity.GetDataBlob<NameDB>().DefaultName;
+                parentTreeItem.Children.Add(treeitem);
+                NewTreeItem(treeitem, itemPair);
+            }            
         }
     }
 }

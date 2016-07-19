@@ -562,7 +562,7 @@ namespace Pulsar4X.ViewModel
                 throw new ArgumentNullException("positionDB");
             }
 
-            Position = positionDB.Position;
+            Position = positionDB.AbsolutePosition;
             if (Name == "Earth")
             {
             }
