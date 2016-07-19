@@ -29,8 +29,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             set { _penColor = value;  UpdatePens(); OnPropertyChanged();}}
         private Color _penColor = Colors.Wheat;
   
-        private float TopLeftX { get { return (float)_parentPositionDB.Position.X * _camera.ZoomLevel; }}//+ _width / 2; }}
-        private float TopLeftY { get { return (float)_parentPositionDB.Position.Y * _camera.ZoomLevel; }}//+ _height / 2; }}
+        private float TopLeftX { get { return (float)_parentPositionDB.AbsolutePosition.X * _camera.ZoomLevel; }}//+ _width / 2; }}
+        private float TopLeftY { get { return (float)_parentPositionDB.AbsolutePosition.Y * _camera.ZoomLevel; }}//+ _height / 2; }}
         private float _width;
         private float _height;
         private float _focalPoint;
