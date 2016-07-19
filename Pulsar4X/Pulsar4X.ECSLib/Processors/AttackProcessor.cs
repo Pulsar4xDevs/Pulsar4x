@@ -6,7 +6,16 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.Processors
 {
-    class AttackProcessor
+    static public class AttackProcessor
     {
+        static void Process (Game game, List<StarSystem> systems)
+        {
+
+        }
+
+        static void ProcessSystem(StarSystem system)
+        {
+
+        }
     }
 }
