@@ -13,6 +13,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         public float Scale { get; set; } = 1;
         List<PenPathPair> _shapes = new List<PenPathPair>();
+        private Entity _entity;
         private float Zoom { get { return _camera.ZoomLevel; } }
         private Size ViewSize { get { return _camera._viewPort.Size; } }
         private PositionDB _starSysPosition; 
@@ -21,8 +22,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private double _radius = 0;
         private double _minRad = 4;
 
+
         public EntityIcon(Entity entity, Camera2dv2 camera)
         {
+            _entity = entity;
             _camera = camera;
             _starSysPosition = entity.GetDataBlob<PositionDB>();
             foreach (var item in entity.DataBlobs)
@@ -144,11 +147,24 @@ namespace Pulsar4X.CrossPlatformUI.Views
             PenPathPair engine = new PenPathPair() { Pen = tankPen, Path = tankPath };
             _shapes.Add(engine);
             
+
+                                              
+        }
+
+        public PenPathPair Thrust(PropulsionDB db)
+        {
+            int maxFuel = db.FuelStorageCapicity / 10;
+
+            int maxSpeed = db.MaximumSpeed / 10;
+            int totalEP = db.TotalEnginePower / 25;
+            PointF currentSpeed = new PointF((float)db.CurrentSpeed.X, (float)db.CurrentSpeed.Y);
+            float currentSpeedLen = currentSpeed.Length / 10;
+
             Pen thrustPen = new Pen(Colors.OrangeRed);
             GraphicsPath thrustPath = new GraphicsPath();
             thrustPath.AddLine(-totalEP * 0.5f, maxFuel + maxSpeed, 0, maxFuel + maxSpeed + currentSpeedLen);
             thrustPath.AddLine(0, maxFuel + maxSpeed + currentSpeedLen, totalEP * 0.5f, maxFuel + maxSpeed);
-            _shapes.Add(new PenPathPair() { Pen = thrustPen, Path = thrustPath });                      
+            return new PenPathPair() { Pen = thrustPen, Path = thrustPath };
         }
 
         public void DrawMe(Graphics g)
@@ -171,10 +187,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawPath(item.Pen, item.Path);
             }
 
+            if (_entity.HasDataBlob<PropulsionDB>()) //this seems a little hacky way to get this specific thing to redraw each update.
+            {
+                PenPathPair ppp = Thrust(_entity.GetDataBlob<PropulsionDB>());
+                g.DrawPath(ppp.Pen, ppp.Path);
+            }
             g.RestoreTransform();
         }
 
-        struct PenPathPair
+        internal struct PenPathPair
         {
             internal Pen Pen;
             internal GraphicsPath Path;
