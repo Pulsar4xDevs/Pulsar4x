@@ -18,19 +18,26 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private PositionDB _starSysPosition; 
         private Camera2dv2 _camera;
 
+        private double _radius = 0;
+        private double _minRad = 4;
+
         public EntityIcon(Entity entity, Camera2dv2 camera)
         {
             _camera = camera;
             _starSysPosition = entity.GetDataBlob<PositionDB>();
             foreach (var item in entity.DataBlobs)
             {
+                if (item is MassVolumeDB)
+                {
+                    HasMassVol((MassVolumeDB)item);
+                }
                 if (item is PropulsionDB)
                 {
                     HasPropulsionDB((PropulsionDB)item);
                 }
                 if (item is PositionDB)
                 {
-                    HasPosition((PositionDB)item);
+                    //HasPosition((PositionDB)item);
                 }
                 if (item is StarInfoDB)
                 {
@@ -41,6 +48,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
                     HasSysBodyInfo((SystemBodyDB)item);
                 }
             }
+        }
+
+        void HasMassVol(MassVolumeDB db)
+        {
+            _radius = db.Radius;
+            
         }
 
         void HasStarInfo(StarInfoDB db)
@@ -86,8 +99,19 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _shapes.Add(starPathPair);
         }
 
+
+
         void HasSysBodyInfo(SystemBodyDB db)
         {
+            BodyType type = db.Type;
+            float temp = db.BaseTemperature;
+            
+        }
+
+        void HasAtmo(AtmosphereDB db)
+        {
+            short hydro = db.HydrosphereExtent;
+            float albedo = db.Albedo;
         }
 
         void HasPosition(PositionDB db)
@@ -104,8 +128,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             int maxFuel = db.FuelStorageCapicity / 10;
 
             int maxSpeed = db.MaximumSpeed / 10;
-            int totalEP = db.TotalEnginePower / 10;
+            int totalEP = db.TotalEnginePower / 25;
             PointF currentSpeed = new PointF((float)db.CurrentSpeed.X, (float)db.CurrentSpeed.Y);
+            float currentSpeedLen = currentSpeed.Length / 10;
 
             Pen tankPen = new Pen(Colors.Aquamarine);
             GraphicsPath tankPath = new GraphicsPath();
@@ -121,8 +146,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             
             Pen thrustPen = new Pen(Colors.OrangeRed);
             GraphicsPath thrustPath = new GraphicsPath();
-            thrustPath.AddLine(-totalEP * 0.5f, maxFuel + maxSpeed, 0, currentSpeed.Length / 10);
-            thrustPath.AddLine(0, currentSpeed.Length / 10, totalEP * 0.5f, maxFuel + maxSpeed);
+            thrustPath.AddLine(-totalEP * 0.5f, maxFuel + maxSpeed, 0, maxFuel + maxSpeed + currentSpeedLen);
+            thrustPath.AddLine(0, maxFuel + maxSpeed + currentSpeedLen, totalEP * 0.5f, maxFuel + maxSpeed);
             _shapes.Add(new PenPathPair() { Pen = thrustPen, Path = thrustPath });                      
         }
 
@@ -135,6 +160,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF((float)_starSysPosition.X, (float)_starSysPosition.Y));
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
+
+            if (_radius * Zoom < _minRad)
+                g.ScaleTransform(Scale);
+            else
+                g.ScaleTransform(Scale * Zoom);
 
             foreach (var item in _shapes)
             {
