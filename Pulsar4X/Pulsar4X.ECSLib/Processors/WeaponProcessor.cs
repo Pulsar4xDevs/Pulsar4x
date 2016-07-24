@@ -16,14 +16,24 @@ namespace Pulsar4X.ECSLib
 
             WeaponStateDB stateInfo = beamWeapon.GetDataBlob<WeaponStateDB>();
             FireControlInstanceAbilityDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceAbilityDB>();
+
+            // only fire if the beam weapon is finished with its cooldown
             if (stateInfo.CoolDown <= TimeSpan.FromSeconds(0) && stateInfo.FireControl != null && fireControl.IsEngaging)
             {
                 //TODO chance to hit
-                int damageAmount = 10;//TODO damageAmount calc
+                //int damageAmount = 10;//TODO damageAmount calc
+                int damageAmount = beamWeapon.GetDataBlob<BeamWeaponAtbDB>().BaseDamage; // TODO: Better damage calculation
+
                 double range = fireControl.Target.GetDataBlob<PositionDB>().GetDistanceTo(beamWeapon.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>());
-                ShipDamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
-                stateInfo.CoolDown = TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
-                starSys.SystemSubpulses.AddEntityInterupt(starSys.SystemSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, beamWeapon);
+
+                // only fire if target is in range
+                if (range <= Math.Min(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
+                {
+                    ShipDamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
+                    stateInfo.CoolDown = TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
+                    starSys.SystemSubpulses.AddEntityInterupt(starSys.SystemSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, beamWeapon);
+                }
+
                 
             }            
         }
@@ -54,9 +64,9 @@ namespace Pulsar4X.ECSLib
                         fireControlEntities.Add(state.FireControl);
 
                     numBeamWeapons++;
-                    totalDamage += bwAtb.DamageAtMaxRange; // How is damage at any range calculated?
-                    if (bwAtb.DamageAtMaxRange > maxDamage)
-                        maxDamage = bwAtb.DamageAtMaxRange;
+                    totalDamage += bwAtb.BaseDamage; // How is damage at any range calculated?
+                    if (bwAtb.BaseDamage > maxDamage)
+                        maxDamage = bwAtb.BaseDamage;
                     if (bwAtb.MaxRange > maxRange)
                         if (fcAtb.Range > bwAtb.MaxRange)
                             maxRange = bwAtb.MaxRange;
