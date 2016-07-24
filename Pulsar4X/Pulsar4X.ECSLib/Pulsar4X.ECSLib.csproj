@@ -236,7 +236,6 @@
     <Compile Include="Orders\OrderTypes\ResearchOrder.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Processors\ActionDelegateEnum.cs" />
-    <Compile Include="Processors\AttackProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\MineProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />

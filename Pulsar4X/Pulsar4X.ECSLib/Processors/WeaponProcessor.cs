@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    static class WeaponProcessor
+    public static class WeaponProcessor
     {
 
 
-        static void FireBeamWeapons(StarSystem starSys, Entity beamWeapon)
+        public static void FireBeamWeapons(StarSystem starSys, Entity beamWeapon)
         {
 
             WeaponStateDB stateInfo = beamWeapon.GetDataBlob<WeaponStateDB>();
@@ -26,6 +26,57 @@ namespace Pulsar4X.ECSLib
                 starSys.SystemSubpulses.AddEntityInterupt(starSys.SystemSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, beamWeapon);
                 
             }            
+        }
+
+        public static void RecalcBeamWeapons(Entity ship)
+        {
+            List<KeyValuePair<Entity, List<Entity>>> beamWeaponEntities = ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>()).ToList();
+            List<Entity>fireControlEntities = new List<Entity>();
+
+            BeamWeaponsDB bwDB;
+
+            int numFireControls = 0 ;
+            int numBeamWeapons = 0;
+            int totalDamage = 0;
+            int maxDamage = 0;
+            int maxRange = 0;
+            int maxTrackingSpeed = 0;
+
+            foreach (KeyValuePair<Entity, List<Entity>> beamWeaponTemplate in beamWeaponEntities)
+            {
+                foreach(Entity beamWeapon in beamWeaponTemplate.Value)
+                {
+                    WeaponStateDB state = beamWeapon.GetDataBlob<WeaponStateDB>();
+                    BeamWeaponAtbDB bwAtb = beamWeapon.GetDataBlob<BeamWeaponAtbDB>();
+                    BeamFireControlAtbDB fcAtb = state.FireControl.GetDataBlob<BeamFireControlAtbDB>();
+
+                    if (!fireControlEntities.Contains(state.FireControl)) ;
+                        fireControlEntities.Add(state.FireControl);
+
+                    numBeamWeapons++;
+                    totalDamage += bwAtb.DamageAtMaxRange; // How is damage at any range calculated?
+                    if (bwAtb.DamageAtMaxRange > maxDamage)
+                        maxDamage = bwAtb.DamageAtMaxRange;
+                    if (bwAtb.MaxRange > maxRange)
+                        if (fcAtb.Range > bwAtb.MaxRange)
+                            maxRange = bwAtb.MaxRange;
+                        else if(fcAtb.Range > maxRange)
+                            maxRange = fcAtb.Range;
+
+                    if (fcAtb.TrackingSpeed > maxTrackingSpeed)
+                        maxTrackingSpeed = fcAtb.TrackingSpeed;
+                }
+            }
+            numFireControls = fireControlEntities.Count;
+
+            bwDB = ship.GetDataBlob<BeamWeaponsDB>();
+
+            bwDB.NumFireControls = numFireControls;
+            bwDB.NumBeamWeapons = numBeamWeapons;
+            bwDB.TotalDamage = totalDamage;
+            bwDB.MaxDamage = maxDamage;
+            bwDB.MaxRange = maxRange;
+            bwDB.MaxTrackingSpeed = maxTrackingSpeed;
         }
     }
 
