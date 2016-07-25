@@ -41,6 +41,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SetViewModel(int oldindex, int newindex)
         {
+            if (newindex == -1) //if newindex is not a valid selection
+                return;
+       
             _designVM.SetComponent(_designVM.ComponentTypes.GetValue(newindex));  //(Guid)ComponentSelection.SelectedValue);
             AbilitysLayout.Items.Clear();
             AbilitysLayout.SuspendLayout();
@@ -60,9 +63,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 Name.Text = _designVM.Design.Name;
 
                 ComponentStats.Text = _designVM.StatsText;
-                AbilityStats.Text = _designVM.AbilityStatsText;  
+                AbilityStats.Text = _designVM.AbilityStatsText;
             }
             AbilitysLayout.ResumeLayout();
+            
         }
     }
 }
