@@ -13,6 +13,7 @@ namespace Pulsar4X.ECSLib
         EconProcessor,
         OrbitProcessor,
         OrderProcessor,
+        BalisticMoveProcessor,
         MoveOnlyProcessor, 
         SomeOtherProcessor
     }
@@ -35,6 +36,7 @@ namespace Pulsar4X.ECSLib
             { PulseActionEnum.EconProcessor, new Action<StarSystem>(processor => { EconProcessor.ProcessSystem(_currentSystem);}) },
             { PulseActionEnum.OrbitProcessor, new Action<StarSystem>(processor => { OrbitProcessor.UpdateSystemOrbits(_currentSystem);}) },
             { PulseActionEnum.OrderProcessor, new Action<StarSystem>(processor => { OrderProcessor.Process(_game);}) },
+            { PulseActionEnum.BalisticMoveProcessor, new Action<StarSystem>(processor => { NewtonBalisticProcessor.Process(_currentSystem);}) },
             { PulseActionEnum.MoveOnlyProcessor, new Action<StarSystem>(processor => { DoNothing();}) }, //movement always runs on a subpulse prior to this. 
             //{ SystemActionEnum.SomeOtherProcessor, new Action<StarSystem>(processor => { Something.SomeOtherProcess(_currentSystem, _currentEntity);}) },
         };

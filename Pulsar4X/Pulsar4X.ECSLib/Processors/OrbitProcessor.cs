@@ -208,6 +208,21 @@ namespace Pulsar4X.ECSLib
             return GetPosition(orbit, GetTrueAnomaly(orbit, time));
         }
 
+        /// <summary>
+        /// Calculates the root ralitive cartesian coordinate of an orbit for a given time.
+        /// </summary>
+        /// <param name="orbit">OrbitDB to calculate position from.</param>
+        /// <param name="time">Time position desired from.</param>
+        public static Vector4 GetAbsolutePosition(OrbitDB orbit, DateTime time)
+        {
+            if (orbit.IsStationary)
+            {
+                return new Vector4(0, 0, 0, 0);
+            }
+            Vector4 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition;
+            return rootPos + GetPosition(orbit, GetTrueAnomaly(orbit, time));
+        }
+
         public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
         {
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
