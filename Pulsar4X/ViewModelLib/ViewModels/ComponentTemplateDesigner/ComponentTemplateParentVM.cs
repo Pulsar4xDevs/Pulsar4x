@@ -80,16 +80,19 @@ namespace Pulsar4X.ViewModel
 
         private void Components_SelectionChangedEvent(int oldSelection, int newSelection)
         {
+            if (newSelection == -1) //if newindex is not a valid selection
+                return;
 
             SelectedComponent.SetDesignSD(Components.GetKey());// = mainTemplateVM;
             ComponentAbilitySDs.Clear();
             var tmp = new List<ComponentAbilityTemplateVM>();
             foreach (var item in Components.GetKey().ComponentAbilitySDs)
             {
-                var vm = new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData);               
+                var vm = new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData);
                 tmp.Add(vm);
             }
             ComponentAbilitySDs.AddRange(tmp);
+            
         }
 
         public void StartNewComponent()

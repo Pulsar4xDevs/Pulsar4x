@@ -249,7 +249,6 @@
     <Compile Include="Views\AbilitySelectionList.xeto.cs">
       <DependentUpon>AbilitySelectionList.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Lib\Camera2D.cs" />
     <Compile Include="Views\ChainedSlidersControl.xeto.cs">
       <DependentUpon>ChainedSlidersControl.xeto</DependentUpon>
     </Compile>
@@ -289,6 +288,8 @@
     <Compile Include="Views\ComponentTemplateDesigner\TechList.xeto.cs">
       <DependentUpon>TechList.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\SystemView\Camera.cs" />
+    <Compile Include="Views\SystemView\EntityIcon.cs" />
     <Compile Include="Views\JobAbilityView.xeto.cs">
       <DependentUpon>JobAbilityView.xeto</DependentUpon>
     </Compile>
@@ -310,7 +311,8 @@
     <Compile Include="Views\NewSpeciesView.xeto.cs">
       <DependentUpon>NewSpeciesView.xeto</DependentUpon>
     </Compile>
-    <Compile Include="Views\OrbitRing.cs" />
+    <Compile Include="Views\SystemView\IconCollection.cs" />
+    <Compile Include="Views\SystemView\OrbitRing.cs" />
     <Compile Include="Views\PlayerOptionsDialog.xeto.cs">
       <DependentUpon>PlayerOptionsDialog.xeto</DependentUpon>
     </Compile>
@@ -339,6 +341,7 @@
     <Compile Include="Views\SystemView.xeto.cs">
       <DependentUpon>SystemView.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\SystemView\TextIcon.cs" />
     <Compile Include="Views\TimeControlView.xeto.cs">
       <DependentUpon>TimeControlView.xeto</DependentUpon>
     </Compile>
@@ -395,6 +398,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties Views_2NewGame_1jeto__JSONSchema="" />
