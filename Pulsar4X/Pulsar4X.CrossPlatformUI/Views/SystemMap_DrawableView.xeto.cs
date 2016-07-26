@@ -6,6 +6,7 @@ using Eto.Serialization.Xaml;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ViewModel.SystemView;
 using Pulsar4X.ViewModel;
+using System.Diagnostics;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -13,7 +14,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         SystemMap_DrawableVM _viewModel;
 
-        
+        Stopwatch stopwatch = new Stopwatch();
+        TimeSpan lastDrawTime = new TimeSpan();
 
         private bool IsMouseDown;
         public Point LastLoc;
@@ -101,12 +103,20 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         protected override void OnPaint(PaintEventArgs e)
         {
+            
+            stopwatch.Start();
             e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
 
             _iconCollection.DrawMe(e.Graphics);
 
-            }
+            lastDrawTime = TimeSpan.FromMilliseconds(stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            Font font = new Font(FontFamilies.Fantasy, 8);
+            Color color = new Color(Colors.Black);
+            PointF loc = new PointF(0, 0);
+            e.Graphics.DrawText(font, color, loc, lastDrawTime.ToString());
         }
+    }
     
 
 }
