@@ -36,6 +36,7 @@ namespace Pulsar4X.ECSLib
             Vector4 offset = velocity * timeToCollision.TotalSeconds;
             targetPos -=  Distance.ToAU(offset);
             position.AbsolutePosition = targetPos;
+            position.SystemGuid = starSys.Guid;
             balisticTraj.CurrentSpeed = velocity;
 
             var planetDBs = new List<BaseDataBlob>

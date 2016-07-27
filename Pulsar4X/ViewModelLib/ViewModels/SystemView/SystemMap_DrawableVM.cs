@@ -18,6 +18,7 @@ namespace Pulsar4X.ViewModel.SystemView
             IconableEntitys.Clear();
             IconableEntitys.AddRange(starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(gameVM.CurrentAuthToken));
             SystemSubpulse = starSys.SystemSubpulses;
+            starSys.SystemManager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>(gameVM.CurrentAuthToken);
         }
 
     }

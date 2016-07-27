@@ -572,7 +572,8 @@ namespace Pulsar4X.ViewModel
         {
             if (orbitDB == null)
             {
-                throw new ArgumentNullException("orbitDB");
+                return;
+                //throw new ArgumentNullException("orbitDB");
             }
 
             //Children.Clear();
