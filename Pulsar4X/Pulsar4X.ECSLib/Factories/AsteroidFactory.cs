@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate)
         {
             //todo rand these a bit.
-            double radius = Distance.ToAU(500.0);
+            double radius = Distance.ToAU(0.5);
             double mass = 1.5e+12; //about 1.5 billion tonne
             Vector4 velocity = new Vector4(8, 7, 0, 0);
 

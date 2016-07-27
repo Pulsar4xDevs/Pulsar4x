@@ -72,7 +72,7 @@ namespace Pulsar4X.ECSLib
 
             //sol.SystemManager.SetDataBlob(ship.ID, new TransitableDB());
 
-            AsteroidFactory.CreateAsteroid(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
+            Entity rock = AsteroidFactory.CreateAsteroid(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
 
             return factionEntity;
         }
