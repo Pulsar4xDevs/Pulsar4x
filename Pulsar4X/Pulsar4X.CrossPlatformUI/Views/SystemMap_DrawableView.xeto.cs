@@ -15,10 +15,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
         SystemMap_DrawableVM _viewModel;
 
         Stopwatch stopwatch = new Stopwatch();
-        TimeSpan lastDrawTime = new TimeSpan();
 
-        private bool IsMouseDown;
-        public Point LastLoc;
+        private bool IsMouseDown = false;
+        public Point LastLoc = new Point(-1, -1);
         private PointF LastOffset;
 
         private IconCollection _iconCollection = new IconCollection();
@@ -32,10 +31,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             this.MouseUp += SystemMap_DrawableView_MouseUp;
             this.MouseWheel += SystemMap_DrawableView_MouseWheel;
             this.MouseMove += SystemMap_DrawableView_MouseMove;
-
-            IsMouseDown = false;
-            LastLoc.X = -1;
-            LastLoc.Y = -1;
         }
 
         private void SystemMap_DrawableView_MouseMove(object sender, MouseEventArgs e)
@@ -109,12 +104,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             _iconCollection.DrawMe(e.Graphics);
 
-            lastDrawTime = TimeSpan.FromMilliseconds(stopwatch.ElapsedMilliseconds);
+            string lastDrawTime = stopwatch.ElapsedMilliseconds.ToString();
             stopwatch.Reset();
             Font font = new Font(FontFamilies.Fantasy, 8);
             Color color = new Color(Colors.Black);
             PointF loc = new PointF(0, 0);
-            e.Graphics.DrawText(font, color, loc, lastDrawTime.ToString());
+            e.Graphics.DrawText(font, color, loc, lastDrawTime);
         }
     }
     

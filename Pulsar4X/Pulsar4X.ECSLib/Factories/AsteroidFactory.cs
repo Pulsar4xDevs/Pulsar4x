@@ -32,8 +32,9 @@ namespace Pulsar4X.ECSLib
             planetInfo.Type = BodyType.Asteroid;
 
             Vector4 targetPos = OrbitProcessor.GetAbsolutePosition(target.GetDataBlob<OrbitDB>(), collisionDate);
-            TimeSpan timeToCollision = starSys.Game.CurrentDateTime - collisionDate;
-            targetPos -= velocity * timeToCollision.Seconds;
+            TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
+            Vector4 offset = velocity * timeToCollision.TotalSeconds;
+            targetPos -=  Distance.ToAU(offset);
             position.AbsolutePosition = targetPos;
             balisticTraj.CurrentSpeed = velocity;
 
