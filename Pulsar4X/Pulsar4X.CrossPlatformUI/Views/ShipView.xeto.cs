@@ -8,10 +8,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected DropDown Systems;
         protected DropDown ShipList;
-        protected ListBox OrdersPossible;
-        protected ListBox OrderList;
-        protected StackLayout TargetArea;
-        protected DropDown TargetDropDown;
+        protected ShipMoveView shipMoveView;
+
 
         public ShipView()
         {
@@ -22,20 +20,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
             ShipList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
             ShipList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
-            TargetDropDown.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            TargetDropDown.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
-            OrdersPossible.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            OrdersPossible.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
-
-            OrderList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            OrderList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
         }
 
         public ShipView(ShipOrderVM viewModel) :this()
         {
             DataContext = viewModel;
+            shipMoveView = new ShipMoveView(viewModel);
         }
     }
 }

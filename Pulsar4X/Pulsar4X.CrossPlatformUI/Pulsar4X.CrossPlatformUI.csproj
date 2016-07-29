@@ -218,6 +218,9 @@
     <EmbeddedResource Include="Views\SystemInfoView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ShipMoveView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -327,6 +330,9 @@
       <DependentUpon>ShipDesignView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Lib\OpenGLRenderer.cs" />
+    <Compile Include="Views\ShipMoveView.xeto.cs">
+      <DependentUpon>ShipMoveView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ShipView.xeto.cs">
       <DependentUpon>ShipView.xeto</DependentUpon>
     </Compile>
