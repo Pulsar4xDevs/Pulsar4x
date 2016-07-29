@@ -25,7 +25,7 @@
       <TableCell>
         <StackLayout Orientation="Vertical" Width ="200">
           <Label>Order List</Label>
-          <ListBox Height = "100" x:Name="OrderList" DataContext="{Binding OrderList}" ></ListBox>
+          <ListBox Height = "100" Width="150" x:Name="OrderList" DataContext="{Binding OrderList}" ></ListBox>
 
         </StackLayout>
       </TableCell>

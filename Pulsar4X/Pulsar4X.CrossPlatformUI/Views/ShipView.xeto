@@ -1,52 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Panel
-  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns="http://schema.picoe.ca/eto.forms"
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
 >
-  <TableLayout Width ="1000">
-    <TableRow ScaleHeight="False">
-      <TableCell>
-        <StackLayout Orientation="Horizontal">
-          <Label>Current System </Label>
-          <DropDown x:Name="Systems" Width="120" DataContext="{Binding StarSystems}" SelectedKey="{Binding SelectedSystem}"></DropDown>
-        </StackLayout>
-      </TableCell>
-    </TableRow>
-    <TableRow>
-      <TableCell  Width="100">
-        <StackLayout Orientation="Vertical">
-          <Label>Ship List</Label>
+  <StackLayout Orientation="Vertical">
+    <StackLayout Orientation="Horizontal">
+      <Label>Current System </Label>
+      <DropDown x:Name="Systems" Width="150" DataContext="{Binding StarSystems}" SelectedKey="{Binding SelectedSystem}"></DropDown>
+    </StackLayout>
 
-          <DropDown x:Name="ShipList" DataContext="{Binding ShipList}" SelectedKey="{Binding SelectedShip}" Width="80"></DropDown>
-        </StackLayout>
-      </TableCell>
-      <TableCell  Width="300">
-        <StackLayout Orientation="Vertical">
-          <StackLayout Orientation="Horizontal">
+    <StackLayout Orientation="Horizontal">
+      <StackLayout Orientation="Vertical">
+        <Label>Ship List</Label>
+
+        <DropDown x:Name="ShipList" DataContext="{Binding ShipList}" SelectedKey="{Binding SelectedShip}" Width="120"></DropDown>
+      </StackLayout>
+      <TableLayout>
+        <TableRow>
           <Label>Ship Speed (km/s)- </Label>
-          <TextBox Text="{Binding ShipSpeed}" Enabled="False"></TextBox>
           <Label> X: </Label>
-          <TextBox Text="{Binding XSpeed}" Enabled="False" Width="50"></TextBox>
+          <TextBox Text="{Binding XSpeed}" Enabled="False" Width="80"></TextBox>
           <Label> Y: </Label>
-          <TextBox Text="{Binding YSpeed}" Enabled="False" Width="50"></TextBox>
-          </StackLayout>
-          <StackLayout Orientation="Horizontal">
-            <Label> Ship Position -                                    </Label>
-            <Label> X: </Label>
-            <TextBox Text="{Binding XPos}" Enabled="False" Width="50"></TextBox>
-            <Label> Y: </Label>
-            <TextBox Text="{Binding YPos}" Enabled="False" Width="50"></TextBox>
-          </StackLayout>
-        </StackLayout>
+          <TextBox Text="{Binding YSpeed}" Enabled="False" Width="80"></TextBox>
+          <Label> Total Speed: </Label>
+          <TextBox Text="{Binding ShipSpeed}" Enabled="False"></TextBox>
+        </TableRow>
+        <TableRow>
+          <Label> Ship Position -  </Label>
+          <Label> X: </Label>
+          <TextBox Text="{Binding XPos}" Enabled="False" Width="80"></TextBox>
+          <Label> Y: </Label>
+          <TextBox Text="{Binding YPos}" Enabled="False" Width="80"></TextBox>
+        </TableRow>
+      </TableLayout>
+    </StackLayout>
+    <c:ShipMoveView />
+  </StackLayout>
 
-      </TableCell>
-    </TableRow>
-    <TableRow ScaleHeight="True">
-      <TableCell Width="400">
-        <c:ShipMoveView />
-      </TableCell>
-    </TableRow>
-  </TableLayout>
-  
 </Panel>

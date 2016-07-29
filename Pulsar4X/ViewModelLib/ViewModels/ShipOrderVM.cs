@@ -324,6 +324,8 @@ namespace Pulsar4X.ViewModel
 
         public void RefreshOrderList(int a, int b)
         {
+            if (SelectedShip == null)
+                return;
             List<BaseOrder> orders = new List<BaseOrder>(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
 
             _orderList.Clear();
