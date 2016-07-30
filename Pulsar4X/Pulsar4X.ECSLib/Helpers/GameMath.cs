@@ -55,7 +55,10 @@ namespace Pulsar4X.ECSLib
         {
             return km / GameConstants.Units.KmPerAu;
         }
-
+        public static Vector4 ToAU(Vector4 km)
+        {
+            return km / GameConstants.Units.KmPerAu;
+        }
         public static double ToKm(double au)
         {
             return au * GameConstants.Units.KmPerAu;

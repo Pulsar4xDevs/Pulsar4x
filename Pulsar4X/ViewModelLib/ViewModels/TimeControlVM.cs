@@ -34,6 +34,13 @@ namespace Pulsar4X.ViewModel
 
         public string LastTickLen { get { return _timeloop?.LastProcessingTime.TotalMilliseconds.ToString(); } }
 
+        private TimeSpan _lastFrameLen;
+        public TimeSpan LastFrameLen
+        {
+            get { return _lastFrameLen; }
+            set { _lastFrameLen = value; OnPropertyChanged(); }
+        }
+
         public TimeControlVM()
         {
 

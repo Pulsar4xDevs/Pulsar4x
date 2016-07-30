@@ -261,6 +261,10 @@ namespace Pulsar4X.ViewModel
 
         public void RefreshTarget(int a, int b)
         {
+
+            if (_starSystems.SelectedIndex == -1) //if b is not a valid selection
+                return;
+
             int targetIndex = _moveTargetList.SelectedIndex;
 
             _moveTargetList.Clear();

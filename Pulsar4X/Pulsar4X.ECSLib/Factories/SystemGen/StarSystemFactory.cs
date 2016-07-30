@@ -136,7 +136,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius(0.64174E24, Distance.ToAU(3396.2));
             NameDB marsNameDB = new NameDB("Mars");
             double marsSemiMajAxis = Distance.ToAU(227.92E6);
-            double marsEccentricity = 0.0935;
+            double marsEccentricity = 0.0934; //wiki says .0934
             double marsInclination = 1.85;
             double marsLoAN = 49.57854;
             double marsAoP = 336.04084;

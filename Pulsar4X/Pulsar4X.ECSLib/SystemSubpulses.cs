@@ -74,6 +74,7 @@ namespace Pulsar4X.ECSLib
             //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, OrbitProcessor.UpdateSystemOrbits);
             AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
             AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, PulseActionEnum.OrbitProcessor);
+            AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, PulseActionEnum.BalisticMoveProcessor);
         }
 
 

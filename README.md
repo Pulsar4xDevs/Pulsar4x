@@ -40,5 +40,7 @@ open the sln, run using linux 64 config.
 Note! there are a number of nuget packages that VS should automaticaly get the first time you attempt to build. 
 the IDE will have a number of errors, build the solution anyway, VS will get the packages for you.
 
+You *can* also run the gtk2 project in visual studio, this will help with debugging linux side of things as visual studio debugger apears to be superior to monodevelop. there currently apear to be some null refference exceptions that get hit when running from the GTK2 project that don't happen in the wpf. 
+
 ##Working with the code:
 I need to flesh this section out a bit more, but for now, read the pages in the wiki, or ask me on IRC.
