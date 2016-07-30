@@ -8,10 +8,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected DropDown Systems;
         protected DropDown ShipList;
-        protected ListBox OrdersPossible;
-        protected ListBox OrderList;
-        protected StackLayout TargetArea;
-        protected DropDown TargetDropDown;
+        protected ShipMoveView shipMoveView;
+        protected ShipFireControlView shipFCView;
+        protected ShipAttackView shipAttackView;
+
+        protected TabControl shipview_tabs;
+
 
         public ShipView()
         {
@@ -22,20 +24,32 @@ namespace Pulsar4X.CrossPlatformUI.Views
             ShipList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
             ShipList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
-            TargetDropDown.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            TargetDropDown.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
-            OrdersPossible.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            OrdersPossible.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
-
-            OrderList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            OrderList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
         }
 
         public ShipView(ShipOrderVM viewModel) :this()
         {
             DataContext = viewModel;
+            shipMoveView = new ShipMoveView(viewModel);
+            shipFCView = new ShipFireControlView(viewModel);
+            shipAttackView = new ShipAttackView(viewModel);
+
+            TabPage tpMove = new TabPage();
+            tpMove.Content = shipMoveView;
+            tpMove.Text = "Move Orders";
+            shipview_tabs.Pages.Add(tpMove);
+
+            TabPage tpFC = new TabPage();
+            tpFC.Content = shipFCView;
+            tpFC.Text = "Fire Control Configuration";
+            shipview_tabs.Pages.Add(tpFC);
+
+            TabPage tpAttack = new TabPage();
+            tpAttack.Content = shipAttackView;
+            tpAttack.Text = "Attack Orders";
+            shipview_tabs.Pages.Add(tpAttack);
+
         }
     }
 }

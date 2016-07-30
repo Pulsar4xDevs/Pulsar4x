@@ -218,6 +218,15 @@
     <EmbeddedResource Include="Views\SystemInfoView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ShipMoveView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ShipAttackView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ShipFireControlView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -325,10 +334,19 @@
     <Compile Include="Views\ScientistUC.xeto.cs">
       <DependentUpon>ScientistUC.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\ShipAttackView.xeto.cs">
+      <DependentUpon>ShipAttackView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ShipDesignView.xeto.cs">
       <DependentUpon>ShipDesignView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Lib\OpenGLRenderer.cs" />
+    <Compile Include="Views\ShipFireControlView.xeto.cs">
+      <DependentUpon>ShipFireControlView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ShipMoveView.xeto.cs">
+      <DependentUpon>ShipMoveView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ShipView.xeto.cs">
       <DependentUpon>ShipView.xeto</DependentUpon>
     </Compile>

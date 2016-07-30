@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <StackLayout Orientation="Horizontal">
+    <StackLayout Orientation="Vertical">
+      <Label Text="Fire Controls" Width="160"/>
+      <TextBox x:Name="fireControls" Height="100" Width="150"/>
+    </StackLayout>
+    <StackLayout Orientation="Vertical">
+      <Label Text="Targets" Width="160"/>
+      <TextBox x:Name="attackTargets" Height="100" Width="150"/>
+      <Button Text="Select Target" Command="{Binding SelectTarget}" Width="150"/>
+      <Button Text="Clear Target" Command="{Binding ClearTarget}" Width="150"/>
+    </StackLayout>
+
+  </StackLayout>
+  
+</Panel>

@@ -42,55 +42,55 @@ namespace Pulsar4X.ViewModel
             } 
         }
 
-        private DictionaryVM<Entity, string> _targetList = new DictionaryVM<Entity, string>();
-        public DictionaryVM<Entity, string> TargetList 
+        private DictionaryVM<Entity, string> _moveTargetList = new DictionaryVM<Entity, string>();
+        public DictionaryVM<Entity, string> MoveTargetList 
         { 
             get 
             { 
-                return _targetList; 
+                return _moveTargetList; 
             } 
             set 
             {
-                _targetList = value;
-                _targetList.SelectedIndex = 0;
-                OnPropertyChanged(nameof(SelectedTarget));
+                _moveTargetList = value;
+                _moveTargetList.SelectedIndex = 0;
+                OnPropertyChanged(nameof(SelectedMoveTarget));
             } 
         } //not fields!
 
-        private DictionaryVM<BaseOrder, string> _ordersPossible = new DictionaryVM<BaseOrder, string>();
-        public DictionaryVM<BaseOrder, string> OrdersPossible 
+        private DictionaryVM<BaseOrder, string> _moveOrdersPossible = new DictionaryVM<BaseOrder, string>();
+        public DictionaryVM<BaseOrder, string> MoveOrdersPossible 
         { 
             get
             { 
-                return _ordersPossible; 
+                return _moveOrdersPossible; 
             } 
             set
-            { 
-                _ordersPossible = value; 
-                _ordersPossible.SelectedIndex = 0;
-                OnPropertyChanged(nameof(SelectedPossibleOrder));
+            {
+                _moveOrdersPossible = value;
+                _moveOrdersPossible.SelectedIndex = 0;
+                OnPropertyChanged(nameof(SelectedPossibleMoveOrder));
             }
         }
-        private DictionaryVM<BaseOrder, string> _orderList = new DictionaryVM<BaseOrder, string>();
-        public DictionaryVM<BaseOrder, string> OrderList 
+        private DictionaryVM<BaseOrder, string> _moveOrderList = new DictionaryVM<BaseOrder, string>();
+        public DictionaryVM<BaseOrder, string> MoveOrderList 
         {
             get
             { 
-                return _orderList;
+                return _moveOrderList;
             }
             set
-            { 
-                _orderList = value;
-                _orderList.SelectedIndex = 0;
-                OnPropertyChanged(nameof(SelectedOrder));
+            {
+                _moveOrderList = value;
+                _moveOrderList.SelectedIndex = 0;
+                OnPropertyChanged(nameof(SelectedMoveOrder));
             }
         }
 
         public StarSystem SelectedSystem { get { return _starSystems.SelectedKey; }}
         public Entity SelectedShip { get { return _shipList.SelectedKey; }}
-        public BaseOrder SelectedPossibleOrder { get { return _ordersPossible.SelectedKey; } }
-        public BaseOrder SelectedOrder { get { return _orderList.SelectedKey; } }
-        public Entity SelectedTarget { get { return _targetList.SelectedKey; } }
+        public BaseOrder SelectedPossibleMoveOrder { get { return _moveOrdersPossible.SelectedKey; } }
+        public BaseOrder SelectedMoveOrder { get { return _moveOrderList.SelectedKey; } }
+        public Entity SelectedMoveTarget { get { return _moveTargetList.SelectedKey; } }
 
         public Boolean TargetShown { get; internal set; }
         public int TargetAreaWidth { get; internal set; }
@@ -147,16 +147,16 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        public string TargetDistance
+        public string MoveTargetDistance
         {
             get
             {
                 if (SelectedShip == null)
                     return "N/A";
-                if (SelectedTarget == null)
+                if (SelectedMoveTarget == null)
                     return "N/A";
 
-                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition - SelectedTarget.GetDataBlob<PositionDB>().AbsolutePosition;
+                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition - SelectedMoveTarget.GetDataBlob<PositionDB>().AbsolutePosition;
                 return Distance.ToKm(delta.Length()).ToString("N2") ;
             }
         }
@@ -189,8 +189,8 @@ namespace Pulsar4X.ViewModel
 
             _starSystems.SelectionChangedEvent += RefreshShips;
             _shipList.SelectionChangedEvent += RefreshOrders;
-            _ordersPossible.SelectionChangedEvent += RefreshTarget;
-            _targetList.SelectionChangedEvent += RefreshTargetDistance;
+            _moveOrdersPossible.SelectionChangedEvent += RefreshTarget;
+            _moveTargetList.SelectionChangedEvent += RefreshTargetDistance;
 
             OnPropertyChanged(nameof(StarSystems));
             OnPropertyChanged(nameof(SelectedSystem));
@@ -205,7 +205,7 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(YSpeed));
             OnPropertyChanged(nameof(XPos));
             OnPropertyChanged(nameof(YPos));
-            OnPropertyChanged(nameof(TargetDistance));
+            OnPropertyChanged(nameof(MoveTargetDistance));
             RefreshOrderList(0, 0);
         }
 
@@ -251,32 +251,34 @@ namespace Pulsar4X.ViewModel
             RefreshTarget(0, 0);
 
             OnPropertyChanged(nameof(ShipList));
-            OnPropertyChanged(nameof(TargetList));
+            OnPropertyChanged(nameof(MoveTargetList));
 
             OnPropertyChanged(nameof(SelectedShip));
-            OnPropertyChanged(nameof(SelectedTarget));
+            OnPropertyChanged(nameof(SelectedMoveTarget));
 
             return;
         }
 
         public void RefreshTarget(int a, int b)
         {
+
             if (_starSystems.SelectedIndex == -1) //if b is not a valid selection
                 return;
 
-            int targetIndex = _targetList.SelectedIndex;
+            int targetIndex = _moveTargetList.SelectedIndex;
 
-            _targetList.Clear();
+            _moveTargetList.Clear();
             foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
             {
-                _targetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
+                if(target != SelectedShip)
+                    _moveTargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
             }
 
-            _targetList.SelectedIndex = targetIndex;
+            _moveTargetList.SelectedIndex = targetIndex;
 
-            if (SelectedPossibleOrder == null)
+            if (SelectedPossibleMoveOrder == null)
                 TargetShown = false;
-            else if (SelectedPossibleOrder.OrderType == orderType.MOVETO)
+            else if (SelectedPossibleMoveOrder.OrderType == orderType.MOVETO)
                 TargetShown = true;
             else
                 TargetShown = false;
@@ -292,7 +294,7 @@ namespace Pulsar4X.ViewModel
 
         public void RefreshTargetDistance(int a, int b)
         {
-            OnPropertyChanged(nameof(TargetDistance));
+            OnPropertyChanged(nameof(MoveTargetDistance));
         }
 
         public void RefreshOrders(int a, int b)
@@ -300,19 +302,19 @@ namespace Pulsar4X.ViewModel
             if (SelectedShip == null)
                 return;
 
-            _ordersPossible.Clear();
+            _moveOrdersPossible.Clear();
 
             if (SelectedShip.HasDataBlob<PropulsionDB>())
-                _ordersPossible.Add(new MoveOrder(), "Move to");
+                _moveOrdersPossible.Add(new MoveOrder(), "Move to");
 
-            _ordersPossible.SelectedIndex = 0;
+            _moveOrdersPossible.SelectedIndex = 0;
 
             RefreshOrderList(0, 0);
 
 
 
-            OnPropertyChanged(nameof(SelectedOrder));
-            OnPropertyChanged(nameof(SelectedPossibleOrder));
+            OnPropertyChanged(nameof(SelectedMoveOrder));
+            OnPropertyChanged(nameof(SelectedPossibleMoveOrder));
 
             OnPropertyChanged(nameof(ShipSpeed));
             OnPropertyChanged(nameof(XSpeed));
@@ -326,9 +328,11 @@ namespace Pulsar4X.ViewModel
 
         public void RefreshOrderList(int a, int b)
         {
+            if (SelectedShip == null)
+                return;
             List<BaseOrder> orders = new List<BaseOrder>(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
 
-            _orderList.Clear();
+            _moveOrderList.Clear();
 
             foreach (BaseOrder order in orders)
             {
@@ -344,22 +348,22 @@ namespace Pulsar4X.ViewModel
                     default:
                         break;
                 }
-                _orderList.Add(order, orderDescription);
+                _moveOrderList.Add(order, orderDescription);
             }
 
-            OnPropertyChanged(nameof(OrderList));
-            OnPropertyChanged(nameof(OrdersPossible));
+            OnPropertyChanged(nameof(MoveOrderList));
+            OnPropertyChanged(nameof(MoveOrdersPossible));
         }
 
         public void OnAddOrder()
         {
             // Check if Ship, Target, and Order are set
-            if (SelectedShip == null  || SelectedTarget == null || SelectedPossibleOrder == null) 
+            if (SelectedShip == null  || SelectedMoveTarget == null || SelectedPossibleMoveOrder == null) 
                 return;
-            switch(SelectedPossibleOrder.OrderType)
+            switch(SelectedPossibleMoveOrder.OrderType)
             {
                 case orderType.MOVETO:
-                    _gameVM.CurrentPlayer.Orders.MoveOrder(SelectedShip, SelectedTarget);
+                    _gameVM.CurrentPlayer.Orders.MoveOrder(SelectedShip, SelectedMoveTarget);
                     break;
                 case orderType.INVALIDORDER:
                     break;
@@ -389,7 +393,7 @@ namespace Pulsar4X.ViewModel
             for (int i = 0; i < totalOrders; i++)
             {
                 nextOrder = orderList.Dequeue();
-                if(nextOrder != SelectedOrder)
+                if(nextOrder != SelectedMoveOrder)
                     orderList.Enqueue(nextOrder);
             }
 

@@ -231,8 +231,6 @@ namespace Pulsar4X.ECSLib
             speed.Y = Distance.ToAU(speedMagInKM.Y);
             speed.Z = Distance.ToAU(speedMagInKM.Z);
 
-            // TODO: reduce speed if ship will overshoot target
-
             return speed;
         }
 
