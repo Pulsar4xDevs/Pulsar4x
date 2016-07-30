@@ -12,7 +12,7 @@
 
     <StackLayout Orientation="Horizontal">
       <StackLayout Orientation="Vertical">
-        <Label>Ship List</Label>
+        <Label Width="130">Ship List</Label>
 
         <DropDown x:Name="ShipList" DataContext="{Binding ShipList}" SelectedKey="{Binding SelectedShip}" Width="120"></DropDown>
       </StackLayout>
@@ -23,6 +23,7 @@
           <TextBox Text="{Binding XSpeed}" Enabled="False" Width="80"></TextBox>
           <Label> Y: </Label>
           <TextBox Text="{Binding YSpeed}" Enabled="False" Width="80"></TextBox>
+          <Label Width="10"></Label>
           <Label> Total Speed: </Label>
           <TextBox Text="{Binding ShipSpeed}" Enabled="False"></TextBox>
         </TableRow>
@@ -35,7 +36,7 @@
         </TableRow>
       </TableLayout>
     </StackLayout>
-    <c:ShipMoveView />
+    <TabControl x:Name="shipview_tabs"></TabControl>
   </StackLayout>
 
 </Panel>

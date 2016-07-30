@@ -9,6 +9,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected DropDown Systems;
         protected DropDown ShipList;
         protected ShipMoveView shipMoveView;
+        protected ShipFireControlView shipFCView;
+        protected ShipAttackView shipAttackView;
+
+        protected TabControl shipview_tabs;
 
 
         public ShipView()
@@ -28,6 +32,24 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             DataContext = viewModel;
             shipMoveView = new ShipMoveView(viewModel);
+            shipFCView = new ShipFireControlView(viewModel);
+            shipAttackView = new ShipAttackView(viewModel);
+
+            TabPage tpMove = new TabPage();
+            tpMove.Content = shipMoveView;
+            tpMove.Text = "Move Orders";
+            shipview_tabs.Pages.Add(tpMove);
+
+            TabPage tpFC = new TabPage();
+            tpFC.Content = shipFCView;
+            tpFC.Text = "Fire Control Configuration";
+            shipview_tabs.Pages.Add(tpFC);
+
+            TabPage tpAttack = new TabPage();
+            tpAttack.Content = shipAttackView;
+            tpAttack.Text = "Attack Orders";
+            shipview_tabs.Pages.Add(tpAttack);
+
         }
     }
 }

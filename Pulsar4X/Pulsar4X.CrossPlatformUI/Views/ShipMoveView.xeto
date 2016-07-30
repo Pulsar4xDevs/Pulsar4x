@@ -9,23 +9,23 @@
       <TableCell>
         <StackLayout Orientation="Vertical" HorizontalContentAlignment="Stretch" Width ="200">
           <Label>Orders Available</Label>
-          <ListBox Height = "100" x:Name="OrdersPossible" DataContext="{Binding OrdersPossible}"></ListBox>
+          <ListBox Height = "100" x:Name="OrdersPossible" DataContext="{Binding MoveOrdersPossible}"></ListBox>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout x:Name="TargetArea" Visible="{Binding TargetShown}" Orientation="Vertical" Width="{Binding TargetAreaWidth}">
           <Label>Target</Label>
-          <DropDown x:Name="TargetDropDown" DataContext="{Binding TargetList}" Width="100"></DropDown>
+          <DropDown x:Name="TargetDropDown" DataContext="{Binding MoveTargetList}" Width="100"></DropDown>
           <StackLayout Orientation="Horizontal">
             <Label>Distance to Target in km: </Label>
-            <TextBox Text="{Binding TargetDistance}" Enabled="False"></TextBox>
+            <TextBox Text="{Binding MoveTargetDistance}" Enabled="False"></TextBox>
           </StackLayout>
         </StackLayout>
       </TableCell>
       <TableCell>
         <StackLayout Orientation="Vertical" Width ="200">
           <Label>Order List</Label>
-          <ListBox Height = "100" Width="150" x:Name="OrderList" DataContext="{Binding OrderList}" ></ListBox>
+          <ListBox Height = "100" Width="150" x:Name="OrderList" DataContext="{Binding MoveOrderList}" ></ListBox>
 
         </StackLayout>
       </TableCell>
