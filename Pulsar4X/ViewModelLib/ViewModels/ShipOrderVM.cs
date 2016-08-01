@@ -432,18 +432,18 @@ namespace Pulsar4X.ViewModel
             if (!SelectedShip.HasDataBlob<BeamWeaponsDB>())
                 return;
 
-            FireControlList.Clear();
+            _fireControlList.Clear();
 
             List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
 
             foreach(KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {
                     if (kvp.Key.HasDataBlob<BeamFireControlAtbDB>())
-                        FireControlList.Add(new KeyValuePair<Entity, string>(kvp.Key, kvp.Key.GetDataBlob<NameDB>().DefaultName));
+                        _fireControlList.Add(new KeyValuePair<Entity, string>(kvp.Key, kvp.Key.GetDataBlob<NameDB>().DefaultName));
                 
             }
 
-            FireControlList.SelectedIndex = 0;
+            _fireControlList.SelectedIndex = 0;
 
             OnPropertyChanged(nameof(FireControlList));
 
