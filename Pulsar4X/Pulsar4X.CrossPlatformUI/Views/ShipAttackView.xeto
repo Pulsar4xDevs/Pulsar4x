@@ -14,6 +14,10 @@
       <Button Text="Select Target" Command="{Binding SelectTarget}" Width="150"/>
       <Button Text="Clear Target" Command="{Binding ClearTarget}" Width="150"/>
     </StackLayout>
+    <StackLayout Orientation="Vertical">
+      <Label Text="Selected Target" Width="160"/>
+      <TextArea x:Name="selectedTarget" Height="20" Width ="150"/>
+    </StackLayout>
 
   </StackLayout>
   

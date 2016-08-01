@@ -57,6 +57,21 @@ namespace Pulsar4X.ViewModel
             } 
         } //not fields!
 
+        private DictionaryVM<Entity, string> _attackTargetList = new DictionaryVM<Entity, string>();
+        public DictionaryVM<Entity, string> AttackTargetList
+        {
+            get
+            {
+                return _attackTargetList;
+            }
+            set
+            {
+                _attackTargetList = value;
+                _attackTargetList.SelectedIndex = 0;
+                OnPropertyChanged(nameof(SelectedAttackTarget));
+            }
+        } //not fields!
+
         private DictionaryVM<BaseOrder, string> _moveOrdersPossible = new DictionaryVM<BaseOrder, string>();
         public DictionaryVM<BaseOrder, string> MoveOrdersPossible 
         { 
@@ -86,11 +101,63 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+        private DictionaryVM<Entity, string> _fireControlList = new DictionaryVM<Entity, string>();
+        public DictionaryVM<Entity, string> FireControlList
+        {
+            get
+            {
+                return _fireControlList;
+            }
+            set
+            {
+                _fireControlList = value;
+                _fireControlList.SelectedIndex = 0;
+                OnPropertyChanged(nameof(SelectedFireControl));
+            }
+        }
+
+        private DictionaryVM<Entity, string> _attachedBeamList = new DictionaryVM<Entity, string>();
+        public DictionaryVM<Entity, string> AttachedBeamList
+        {
+            get
+            {
+                return _attachedBeamList;
+            }
+            set
+            {
+                _attachedBeamList = value;
+                _attachedBeamList.SelectedIndex = 0;
+                OnPropertyChanged(nameof(SelectedAttachedBeam));
+            }
+        }
+
+        private DictionaryVM<Entity, string> _freeBeamList = new DictionaryVM<Entity, string>();
+        public DictionaryVM<Entity, string> FreeBeamList
+        {
+            get
+            {
+                return _freeBeamList;
+            }
+            set
+            {
+                _freeBeamList = value;
+                _freeBeamList.SelectedIndex = 0;
+                OnPropertyChanged(nameof(SelectedFreeBeam));
+            }
+        }
+
+        private Entity _targetedEntity;
+
         public StarSystem SelectedSystem { get { return _starSystems.SelectedKey; }}
         public Entity SelectedShip { get { return _shipList.SelectedKey; }}
         public BaseOrder SelectedPossibleMoveOrder { get { return _moveOrdersPossible.SelectedKey; } }
         public BaseOrder SelectedMoveOrder { get { return _moveOrderList.SelectedKey; } }
         public Entity SelectedMoveTarget { get { return _moveTargetList.SelectedKey; } }
+        public Entity SelectedAttackTarget { get { return _attackTargetList.SelectedKey; } }
+        public Entity SelectedFireControl { get { return _fireControlList.SelectedKey; } }
+        public Entity SelectedAttachedBeam { get { return _attachedBeamList.SelectedKey; } }
+        public Entity SelectedFreeBeam { get { return _freeBeamList.SelectedKey; } }
+        public string TargetedEntity { get { return _targetedEntity.GetDataBlob<NameDB>().DefaultName; } }
 
         public Boolean TargetShown { get; internal set; }
         public int TargetAreaWidth { get; internal set; }
@@ -189,6 +256,7 @@ namespace Pulsar4X.ViewModel
 
             _starSystems.SelectionChangedEvent += RefreshShips;
             _shipList.SelectionChangedEvent += RefreshOrders;
+            _shipList.SelectionChangedEvent += RefreshFireControlList;
             _moveOrdersPossible.SelectionChangedEvent += RefreshTarget;
             _moveTargetList.SelectionChangedEvent += RefreshTargetDistance;
 
@@ -249,6 +317,7 @@ namespace Pulsar4X.ViewModel
             _shipList.SelectedIndex = 0;
 
             RefreshTarget(0, 0);
+            RefreshFireControlList(0, 0);
 
             OnPropertyChanged(nameof(ShipList));
             OnPropertyChanged(nameof(MoveTargetList));
@@ -355,6 +424,31 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(MoveOrdersPossible));
         }
 
+        public void RefreshFireControlList(int a, int b)
+        {
+            if (SelectedShip == null)
+                return;
+
+            if (!SelectedShip.HasDataBlob<BeamWeaponsDB>())
+                return;
+
+            FireControlList.Clear();
+
+            List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
+
+            foreach(KeyValuePair<Entity, List<Entity>> kvp in fcList)
+            {
+                    if (kvp.Key.HasDataBlob<BeamFireControlAtbDB>())
+                        FireControlList.Add(new KeyValuePair<Entity, string>(kvp.Key, kvp.Key.GetDataBlob<NameDB>().DefaultName));
+                
+            }
+
+            FireControlList.SelectedIndex = 0;
+
+            OnPropertyChanged(nameof(FireControlList));
+
+        }
+
         public void OnAddOrder()
         {
             // Check if Ship, Target, and Order are set
@@ -401,6 +495,16 @@ namespace Pulsar4X.ViewModel
             RefreshOrders(0,0);
         }
 
+        public void OnAddBeam()
+        {
+
+        }
+
+        public void OnRemoveBeam()
+        {
+
+        }
+
         private ICommand _addOrder;
         public ICommand AddOrder
         {
@@ -416,6 +520,24 @@ namespace Pulsar4X.ViewModel
             get
             {
                 return _removeOrder ?? (_removeOrder = new CommandHandler(OnRemoveOrder, true));
+            }
+        }
+
+        private ICommand _addBeam;
+        public ICommand AddBeam
+        {
+            get
+            {
+                return _addBeam ?? (_addBeam = new CommandHandler(OnAddBeam, true));
+            }
+        }
+
+        private ICommand _removeBeam;
+        public ICommand RemoveBeam
+        {
+            get
+            {
+                return _removeBeam ?? (_removeBeam = new CommandHandler(OnRemoveBeam, true));
             }
         }
 

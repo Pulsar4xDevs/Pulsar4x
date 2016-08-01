@@ -6,16 +6,16 @@
   <StackLayout Orientation="Horizontal">
     <StackLayout Orientation="Vertical">
       <Label Text="Fire Controls" Width="160"/>
-      <TextBox x:Name="fireControls" Height="100" Width="150"/>
+      <ListBox x:Name="FireControlsList" Height="100" Width="150" DataContext="FireControlList"/>
     </StackLayout>
     <StackLayout>
       <Label Text="Assigned Beam Weapons" Width ="160"/>
-      <TextBox x:Name="activeBeams" Height ="100" Width="150"/>
+      <ListBox x:Name="ActiveBeamsList" Height ="100" Width="150" DataContext="AttachedBeamList"/>
       <Button Text="Remove Beam" Command="{Binding RemoveBeam}" Width="150" Height="25"/>
     </StackLayout>
     <StackLayout Orientation="Vertical">
       <Label Text="Unassigned Beam Weapons"/>
-      <TextBox x:Name="freeBeams" Height ="100" Width="150"/>
+      <ListBox x:Name="FreeBeamsList" Height ="100" Width="150" DataContext="FreeBeamList"/>
       <Button Text="Add Beam" Command="{Binding AddBeam}" Width="150" Height="25"/>
     </StackLayout>
   </StackLayout>
