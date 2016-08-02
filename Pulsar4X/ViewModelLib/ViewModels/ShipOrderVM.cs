@@ -485,7 +485,11 @@ namespace Pulsar4X.ViewModel
                 foreach (Entity instance in kvp.Value)
                 {
                     if (!IsBeamInFireControlList(instance))
-                        _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + beamCount++);
+                    {
+                        beamCount++;
+                        _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + beamCount);
+                    }
+                        
                 }
             }
 
@@ -500,15 +504,12 @@ namespace Pulsar4X.ViewModel
 
             foreach (KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {
-                if (kvp.Key.HasDataBlob<BeamFireControlAtbDB>())
-                    foreach (Entity instance in kvp.Value)
-                    {
-                        // TODO: Each fire control needs a FireControlInstanceAbilityDB - check default start
-                        if (kvp.Key.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons.Contains(beam))
-                            return true;
-                    }
-
-
+                foreach (Entity instance in kvp.Value)
+                {
+                    // TODO: Each fire control needs a FireControlInstanceAbilityDB - check default start
+                    if (SelectedFireControl.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons.Contains(beam))
+                        return true;
+                }
             }
 
             return false;
