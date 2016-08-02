@@ -336,16 +336,23 @@ namespace Pulsar4X.ViewModel
             if (_starSystems.SelectedIndex == -1) //if b is not a valid selection
                 return;
 
-            int targetIndex = _moveTargetList.SelectedIndex;
+            int moveTargetIndex = _moveTargetList.SelectedIndex;
+            int attackTargetIndex = _attackTargetList.SelectedIndex;
 
-            _moveTargetList.Clear();
             foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
             {
                 if(target != SelectedShip)
+                {
                     _moveTargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
+                    if (target.HasDataBlob<ShipInfoDB>() || target.HasDataBlob<ColonyInfoDB>())
+                        _attackTargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
+
+                }
+                    
             }
 
-            _moveTargetList.SelectedIndex = targetIndex;
+            _moveTargetList.SelectedIndex = moveTargetIndex;
+            _attackTargetList.SelectedIndex = attackTargetIndex;
 
             if (SelectedPossibleMoveOrder == null)
                 TargetShown = false;
