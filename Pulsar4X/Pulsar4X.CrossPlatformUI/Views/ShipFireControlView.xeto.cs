@@ -6,21 +6,21 @@ namespace Pulsar4X.CrossPlatformUI.Views
 {
     public class ShipFireControlView : Panel
     {
-        protected ListBox FireControlsList;
-        protected ListBox ActiveBeamsList;
-        protected ListBox FreeBeamsList;
+        protected ListBox FireControlList;
+        protected ListBox ActiveBeamList;
+        protected ListBox FreeBeamList;
 
         public ShipFireControlView()
         {
             XamlReader.Load(this);
-            FireControlsList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            FireControlsList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
+            FireControlList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            FireControlList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
-            ActiveBeamsList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            ActiveBeamsList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
+            ActiveBeamList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            ActiveBeamList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
 
-            FreeBeamsList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
-            FreeBeamsList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
+            FreeBeamList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
+            FreeBeamList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
         }
 
         public ShipFireControlView(ShipOrderVM viewModel) : this()

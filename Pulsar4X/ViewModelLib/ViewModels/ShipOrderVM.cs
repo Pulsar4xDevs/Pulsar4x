@@ -259,6 +259,7 @@ namespace Pulsar4X.ViewModel
             _shipList.SelectionChangedEvent += RefreshFireControlList;
             _moveOrdersPossible.SelectionChangedEvent += RefreshTarget;
             _moveTargetList.SelectionChangedEvent += RefreshTargetDistance;
+            _fireControlList.SelectionChangedEvent += RefreshBeamWeaponsList;
 
             OnPropertyChanged(nameof(StarSystems));
             OnPropertyChanged(nameof(SelectedSystem));
@@ -275,6 +276,7 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(YPos));
             OnPropertyChanged(nameof(MoveTargetDistance));
             RefreshOrderList(0, 0);
+            RefreshFireControlList(0, 0);
         }
 
         public static ShipOrderVM Create(GameVM game)
@@ -305,8 +307,9 @@ namespace Pulsar4X.ViewModel
         // Updates the list of ships to give orders to and targets when the system changes
         public void RefreshShips(int a, int b)
         {
-            if (SelectedSystem == null)
+            if (SelectedSystem == null || _starSystems.SelectedIndex == -1)
                 return;
+
             _shipList.Clear();
             foreach(Entity ship in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>(_gameVM.CurrentAuthToken))
             {
@@ -317,7 +320,6 @@ namespace Pulsar4X.ViewModel
             _shipList.SelectedIndex = 0;
 
             RefreshTarget(0, 0);
-            RefreshFireControlList(0, 0);
 
             OnPropertyChanged(nameof(ShipList));
             OnPropertyChanged(nameof(MoveTargetList));
@@ -438,16 +440,80 @@ namespace Pulsar4X.ViewModel
 
             foreach(KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {
-                    if (kvp.Key.HasDataBlob<BeamFireControlAtbDB>())
-                        _fireControlList.Add(new KeyValuePair<Entity, string>(kvp.Key, kvp.Key.GetDataBlob<NameDB>().DefaultName));
+                int fcCount = 0;
+                if (kvp.Key.HasDataBlob<BeamFireControlAtbDB>())
+                foreach(Entity instance in kvp.Value)
+                {
+                    fcCount++;
+                    _fireControlList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + fcCount);
+                }
+                        
                 
             }
 
             _fireControlList.SelectedIndex = 0;
 
+            RefreshBeamWeaponsList(0, 0);
+
             OnPropertyChanged(nameof(FireControlList));
 
         }
+
+        public void RefreshBeamWeaponsList(int a, int b)
+        {
+            if (SelectedShip == null || _shipList.SelectedIndex == -1)
+                return;
+
+            _attachedBeamList.Clear();
+            _freeBeamList.Clear();
+
+            if (_fireControlList.SelectedIndex != -1)
+            {
+                foreach (Entity beam in SelectedFireControl.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons)
+                {
+                    _attachedBeamList.Add(beam, beam.GetDataBlob<NameDB>().DefaultName);
+                }
+            }
+
+            List<KeyValuePair<Entity, List<Entity>>> beamList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>() || item.Key.HasDataBlob<SimpleBeamWeaponAtbDB>()).ToList());
+
+
+            // Get a list of all beam weapons not currently controlled by a fire control
+            foreach (KeyValuePair<Entity, List<Entity>> kvp in beamList)
+            {
+                int beamCount = 0;
+                foreach (Entity instance in kvp.Value)
+                {
+                    if (!IsBeamInFireControlList(instance))
+                        _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + beamCount++);
+                }
+            }
+
+            OnPropertyChanged(nameof(AttachedBeamList));
+            OnPropertyChanged(nameof(FreeBeamList));
+
+        }
+
+        private bool IsBeamInFireControlList(Entity beam)
+        {
+            List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
+
+            foreach (KeyValuePair<Entity, List<Entity>> kvp in fcList)
+            {
+                if (kvp.Key.HasDataBlob<BeamFireControlAtbDB>())
+                    foreach (Entity instance in kvp.Value)
+                    {
+                        // TODO: Each fire control needs a FireControlInstanceAbilityDB - check default start
+                        if (kvp.Key.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons.Contains(beam))
+                            return true;
+                    }
+
+
+            }
+
+            return false;
+        }
+
 
         public void OnAddOrder()
         {
