@@ -71,7 +71,8 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
             NameDB mercuryNameDB = new NameDB("Mercury");
             double mercurySemiMajAxis = 0.387098;
-            double mercuryEccentricity = 0.205630;
+            //double mercuryEccentricity = 0.205630;
+            double mercuryEccentricity = 0.9;
             double mercuryInclination = 0;
             double mercuryLoAN = 48.33167;
             double mercuryLoP = 77.45645;
