@@ -90,7 +90,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private float GetStartArcAngle()
         {
             //add the body posistion and the focal point
-            Vector4 offsetPoint = _focalOffsetPoint + _bodyPositionDB.AbsolutePosition;
+            //Vector4 offsetPoint = _focalOffsetPoint + _bodyPositionDB.RelativePosition;
+            Vector4 offsetPoint = _focalOffsetPoint + _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition;
             //find the angle to the offset point
             double angle = (Math.Atan2(offsetPoint.Y, offsetPoint.X) * 180 / Math.PI);
             //subtract the _orbitAngle, since this angle needs to be ralitive to the elipse, and the elipse gets rotated
