@@ -86,6 +86,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private void IconEntitys_CollectionChanged()
         {
             _iconCollection.Init(_viewModel.IconableEntitys, _camera2);
+            Invalidate();
 
         }
 

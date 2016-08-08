@@ -45,7 +45,13 @@ namespace Pulsar4X.ECSLib
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             
+
+
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
+
+            //test systems
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).Guid);
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).Guid);
 
             Entity shipClass = DefaultShipDesign(game, factionEntity);
             Vector4 position = earth.GetDataBlob<PositionDB>().AbsolutePosition;
