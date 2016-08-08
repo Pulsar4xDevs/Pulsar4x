@@ -144,8 +144,12 @@ namespace Pulsar4X.ECSLib
         }
 
         public PositionDB(PositionDB positionDB)
-            : this(positionDB.X, positionDB.Y, positionDB.Z, positionDB.SystemGuid)
+            : base(positionDB.Parent)
         {
+            this.X = positionDB.X;
+            this.Y = positionDB.Y;
+            this.Z = positionDB.Z;
+            this.SystemGuid = positionDB.SystemGuid;
         }
 
         [UsedImplicitly]

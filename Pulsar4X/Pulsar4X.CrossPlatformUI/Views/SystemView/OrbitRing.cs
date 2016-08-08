@@ -68,8 +68,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _focalDistance = (float)_orbitDB.Eccentricity * _orbitElipseWidth /2;
 
             //since the _focalPoint is only an X component we don't bother calculating the Y part of the matrix
-            double focalX = (_focalDistance * Math.Cos(_orbitAngle * Math.PI / 180)); // - 0 * sin(rotation) 
-            double focalY = (_focalDistance * Math.Sin(_orbitAngle * Math.PI / 180)); // + 0 * cos(rotation)
+            double focalX = (_focalDistance * Math.Cos(_orbitAngle * Math.PI / 180));//  - (0 * Math.Sin(_orbitAngle * Math.PI / 180));
+            double focalY = (_focalDistance * Math.Sin(_orbitAngle * Math.PI / 180));// + (0 * Math.Cos(_orbitAngle * Math.PI / 180));
             _focalOffsetPoint = new Vector4(focalX, focalY, 0, 0);
 
             myEntity = entityWithOrbit;
@@ -90,10 +90,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private float GetStartArcAngle()
         {
             //add the body posistion and the focal point
-            Vector4 offsetPoint = _focalOffsetPoint + _bodyPositionDB.RelativePosition;
+            Vector4 offsetPoint = _focalOffsetPoint + _bodyPositionDB.AbsolutePosition;
             //find the angle to the offset point
             double angle = (Math.Atan2(offsetPoint.Y, offsetPoint.X) * 180 / Math.PI);
-            //subtract the _rotation, since this angle needs to be ralitive to the elipse, and the elipse gets _rotated
+            //subtract the _orbitAngle, since this angle needs to be ralitive to the elipse, and the elipse gets rotated
             angle -= _orbitAngle;
             //and finaly, normalise it useing modulo arrithmatic.
             angle = angle % 360;
@@ -106,7 +106,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
 
             PointF boundingBoxTopLeft = new PointF((float)_parentPositionDB.AbsolutePosition.X * _camera.ZoomLevel, (float)_parentPositionDB.AbsolutePosition.Y * _camera.ZoomLevel);
-            PointF bodyPos = new PointF((float)_bodyPositionDB.RelativePosition.X * _camera.ZoomLevel, (float)_bodyPositionDB.RelativePosition.Y * _camera.ZoomLevel);
+            PointF bodyPos = new PointF((float)_bodyPositionDB.AbsolutePosition.X * _camera.ZoomLevel, (float)_bodyPositionDB.AbsolutePosition.Y * _camera.ZoomLevel);
             SizeF elipseSize = new SizeF(_orbitElipseWidth * _camera.ZoomLevel, _orbitElipseHeight * _camera.ZoomLevel);
             RectangleF elipseBoundingBox = new RectangleF(boundingBoxTopLeft, elipseSize);
             g.SaveTransform();
@@ -116,27 +116,29 @@ namespace Pulsar4X.CrossPlatformUI.Views
             float halfWid = _orbitElipseWidth * 0.5f * _camera.ZoomLevel;
             float halfHei = _orbitElipseHeight * 0.5f * _camera.ZoomLevel;
 
-            PointF focalOffset = new PointF(-halfWid - focalpoint, -halfHei);
+            PointF focalOffset = new PointF(-halfWid - focalpoint, -halfHei) ;
 
             //get the offset from the camera, accounting for zoom, pan etc.
-            IMatrix cameraOffset = _camera.GetViewProjectionMatrix(boundingBoxTopLeft);
+            IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF(0,0));
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
 
-            //debug line, draws from the parent star to the body. 
-            //g.DrawLine(Colors.DeepPink, 0, 0, bodyPos.X, bodyPos.Y); 
+            //debug line, draws from the parent body to the body. 
+            //if (myEntity.GetDataBlob<NameDB>().DefaultName == "Luna" || myEntity.GetDataBlob<NameDB>().DefaultName == "Earth")
+            //    g.DrawLine(Colors.DeepPink, boundingBoxTopLeft, bodyPos); 
 
             float startArcAngle = GetStartArcAngle();
 
             g.TranslateTransform(focalOffset);
 
             // this point is from the frame of reference of the elipse.
-            PointF rotatePoint = new PointF(halfWid + focalpoint, halfHei);
+            PointF rotatePoint = new PointF(halfWid + focalpoint, halfHei) + boundingBoxTopLeft;
             rmatrix.RotateAt(_orbitAngle, rotatePoint);           
             g.MultiplyTransform(rmatrix);
 
             //debug rectangle, draws the bounding box for the rotated elipse
-            //g.DrawRectangle(Colors.BlueViolet, elipseBoundingBox);
+            //if (myEntity.GetDataBlob<NameDB>().DefaultName == "Luna" || myEntity.GetDataBlob<NameDB>().DefaultName == "Earth")
+            //    g.DrawRectangle(Colors.BlueViolet, elipseBoundingBox);
 
             //draw the elipse (as a number of arcs each with a different pen, this gives the fading alpha channel effect) 
             int i = 0;
