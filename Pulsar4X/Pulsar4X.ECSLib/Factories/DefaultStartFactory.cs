@@ -47,11 +47,19 @@ namespace Pulsar4X.ECSLib
             
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
 
-            Entity shipClass = DefaultShipDesign(game, factionEntity);
+            // Todo: handle this in CreateShip
+            Entity shipClass1 = DefaultShipDesign(game, factionEntity);
+            Entity shipClass2 = DefaultShipDesign(game, factionEntity);
+
             Vector4 position = earth.GetDataBlob<PositionDB>().AbsolutePosition;
 
-            Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
-            Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
+
+            // Problem - the component instances, both the design and the instances themselves, are the same entities on each ship
+            // IE, the fire control on ship1 is the same entity as on ship2
+            // Both the design and instances should be unique
+
+            Entity ship1 = ShipFactory.CreateShip(shipClass1, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipClass2, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
 
             // Strange bug - seems to update the ship orbit once, then never again
             // TODO: Fix to allow normal orbiting.

@@ -146,8 +146,6 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        private Entity _targetedEntity;
-
         public StarSystem SelectedSystem { get { return _starSystems.SelectedKey; }}
         public Entity SelectedShip { get { return _shipList.SelectedKey; }}
         public BaseOrder SelectedPossibleMoveOrder { get { return _moveOrdersPossible.SelectedKey; } }
@@ -157,7 +155,16 @@ namespace Pulsar4X.ViewModel
         public Entity SelectedFireControl { get { return _fireControlList.SelectedKey; } }
         public Entity SelectedAttachedBeam { get { return _attachedBeamList.SelectedKey; } }
         public Entity SelectedFreeBeam { get { return _freeBeamList.SelectedKey; } }
-        public string TargetedEntity { get { return _targetedEntity.GetDataBlob<NameDB>().DefaultName; } }
+
+        private Entity _targetedEntity;
+        public string TargetedEntity {
+            get
+            { if (_targetedEntity == null)
+                    return "None";
+              else
+                    return _targetedEntity.GetDataBlob<NameDB>().DefaultName;
+            }
+        }
 
         public Boolean TargetShown { get; internal set; }
         public int TargetAreaWidth { get; internal set; }
@@ -260,6 +267,7 @@ namespace Pulsar4X.ViewModel
             _moveOrdersPossible.SelectionChangedEvent += RefreshTarget;
             _moveTargetList.SelectionChangedEvent += RefreshTargetDistance;
             _fireControlList.SelectionChangedEvent += RefreshBeamWeaponsList;
+            _fireControlList.SelectionChangedEvent += RefreshFCTarget;
 
             OnPropertyChanged(nameof(StarSystems));
             OnPropertyChanged(nameof(SelectedSystem));
@@ -319,7 +327,7 @@ namespace Pulsar4X.ViewModel
 
             _shipList.SelectedIndex = 0;
 
-            RefreshTarget(0, 0);
+            //RefreshTarget(0, 0);
 
             OnPropertyChanged(nameof(ShipList));
             OnPropertyChanged(nameof(MoveTargetList));
@@ -335,6 +343,9 @@ namespace Pulsar4X.ViewModel
 
             if (_starSystems.SelectedIndex == -1) //if b is not a valid selection
                 return;
+
+            _moveTargetList.Clear();
+            _attackTargetList.Clear();
 
             int moveTargetIndex = _moveTargetList.SelectedIndex;
             int attackTargetIndex = _attackTargetList.SelectedIndex;
@@ -373,6 +384,15 @@ namespace Pulsar4X.ViewModel
         public void RefreshTargetDistance(int a, int b)
         {
             OnPropertyChanged(nameof(MoveTargetDistance));
+        }
+
+        public void RefreshFCTarget(int a, int b)
+        {
+            if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
+                return; 
+
+            _targetedEntity = SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().Target;
+            OnPropertyChanged(TargetedEntity);
         }
 
         public void RefreshOrders(int a, int b)
@@ -439,10 +459,14 @@ namespace Pulsar4X.ViewModel
                 return;
 
             if (!SelectedShip.HasDataBlob<BeamWeaponsDB>())
+            {
+                _fireControlList.Clear();
                 return;
+            }
 
             _fireControlList.Clear();
 
+            // The component instances all seem to think that their parent entity is Ensuing Calm, regardless of SelectedShip
             List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
 
             foreach(KeyValuePair<Entity, List<Entity>> kvp in fcList)
@@ -476,11 +500,16 @@ namespace Pulsar4X.ViewModel
 
             if (_fireControlList.SelectedIndex != -1)
             {
-                foreach (Entity beam in SelectedFireControl.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons)
+                int beamCount = 0;
+                foreach (Entity beam in SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons)
                 {
-                    _attachedBeamList.Add(beam, beam.GetDataBlob<NameDB>().DefaultName);
+                    beamCount++;
+                    _attachedBeamList.Add(beam, beam.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity.GetDataBlob<NameDB>().DefaultName + " " + beamCount);
                 }
+
             }
+            else
+                _attachedBeamList.Clear();
 
             List<KeyValuePair<Entity, List<Entity>>> beamList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>() || item.Key.HasDataBlob<SimpleBeamWeaponAtbDB>()).ToList());
 
@@ -494,7 +523,7 @@ namespace Pulsar4X.ViewModel
                     if (!IsBeamInFireControlList(instance))
                     {
                         beamCount++;
-                        _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + beamCount);
+                        _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + " " + beamCount);
                     }
                         
                 }
@@ -507,14 +536,16 @@ namespace Pulsar4X.ViewModel
 
         private bool IsBeamInFireControlList(Entity beam)
         {
+            if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
+                return false;
+
             List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
 
             foreach (KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {
                 foreach (Entity instance in kvp.Value)
                 {
-                    // TODO: Each fire control needs a FireControlInstanceAbilityDB - check default start
-                    if (SelectedFireControl.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons.Contains(beam))
+                    if (SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons.Contains(beam))
                         return true;
                 }
             }
@@ -571,12 +602,30 @@ namespace Pulsar4X.ViewModel
 
         public void OnAddBeam()
         {
+            if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
+                return;
 
+            if (SelectedFreeBeam == null || _freeBeamList.SelectedIndex == -1)
+                return;
+
+            List<Entity> weaponList = SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons;
+            weaponList.Add(SelectedFreeBeam);
+
+            RefreshBeamWeaponsList(0, 0);
         }
 
         public void OnRemoveBeam()
         {
+            if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
+                return;
 
+            if (SelectedAttachedBeam == null || _attachedBeamList.SelectedIndex == -1)
+                return;
+
+            List<Entity> weaponList = SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons;
+            weaponList.Remove(SelectedAttachedBeam);
+
+            RefreshBeamWeaponsList(0, 0);
         }
 
         private ICommand _addOrder;

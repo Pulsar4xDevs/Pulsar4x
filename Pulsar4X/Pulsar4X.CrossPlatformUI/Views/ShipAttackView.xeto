@@ -16,7 +16,7 @@
     </StackLayout>
     <StackLayout Orientation="Vertical">
       <Label Text="Selected Target" Width="160"/>
-      <TextArea x:Name="SelectedTarget" Height="20" Width ="150"/>
+      <TextArea x:Name="SelectedTarget" DataContext="{Binding TargetedEntity}" Height="20" Width ="150" Enabled="False"/>
     </StackLayout>
 
   </StackLayout>

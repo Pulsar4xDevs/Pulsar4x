@@ -16,6 +16,15 @@ namespace Pulsar4X.ECSLib
             ComponentInstanceInfoDB info = new ComponentInstanceInfoDB(design);
             blobs.Add(info);
 
+            // Added because each component instance needs its own copy of this datablob
+
+            if (design.HasDataBlob<BeamFireControlAtbDB>())
+                blobs.Add(new FireControlInstanceAbilityDB());
+
+            if (design.HasDataBlob<BeamWeaponAtbDB>() || design.HasDataBlob<SimpleBeamWeaponAtbDB>())
+                blobs.Add(new WeaponStateDB());
+
+
             Entity newInstance = new Entity(design.Manager, blobs);
             return newInstance;
         }
