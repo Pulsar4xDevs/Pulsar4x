@@ -12,7 +12,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
         }
 
-        public void Init(List<Entity> entities, Camera2dv2 camera)
+        public void Init(IEnumerable<Entity> entities, Camera2dv2 camera)
         {
             Icons.Clear();
             foreach (var item in entities)

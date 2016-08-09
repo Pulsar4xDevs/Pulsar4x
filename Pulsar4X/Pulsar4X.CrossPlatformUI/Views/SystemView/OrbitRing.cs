@@ -19,8 +19,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             set { _segments = value; UpdatePens(); OnPropertyChanged(nameof(SweepAngle)); }}
         private byte _segments = 128;
 
-        public float StartArcAngle { get { return (float)(Math.Atan2(_bodyPositionDB.Y, _bodyPositionDB.X) * 180 / Math.PI); }}
-
         public float SweepAngle { get { return (360f * OrbitPercent.Percent) / Segments; } }
 
         private List<Pen> _segmentPens = new List<Pen>();
@@ -28,15 +26,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public Color PenColor { get { return _penColor; }
             set { _penColor = value;  UpdatePens(); OnPropertyChanged();}}
         private Color _penColor = Colors.Wheat;
-  
-        private float TopLeftX { get { return (float)_parentPositionDB.AbsolutePosition.X * _camera.ZoomLevel; }}//+ _width / 2; }}
-        private float TopLeftY { get { return (float)_parentPositionDB.AbsolutePosition.Y * _camera.ZoomLevel; }}//+ _height / 2; }}
-        private float _width;
-        private float _height;
-        private float _focalPoint;
+
+        private float _orbitElipseWidth;
+        private float _orbitElipseHeight;
+        private float _focalDistance; //the distance between an orbits apoaxis and a focal point
+        private Vector4 _focalOffsetPoint; //the focal point ralitive to the orbit. 
+
         //this should be the angle from the orbital reference direction, to the Argument of Periapsis, as seen from above, this sets the angle for the ecentricity.
         //ie an elipse is created from a rectangle (position, width and height), then rotated so that the ecentricity is at the right angle. 
-        private float _rotation; 
+        private float _orbitAngle; 
         private Camera2dv2 _camera;
 
         private OrbitDB _orbitDB; 
@@ -57,19 +55,22 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _parentPositionDB = _orbitDB.Parent.GetDataBlob<PositionDB>();
             _bodyPositionDB = entityWithOrbit.GetDataBlob<PositionDB>();
 
-            _rotation = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis*2); //This is the LoP + AoP.
+            _orbitAngle = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis*2); //This is the LoP + AoP.
 
             //Normalize for 0-360
-            while (_rotation < 0.0f)
-                _rotation = _rotation + 360.0f;
-
-            while (_rotation > 360.0f)
-                _rotation = _rotation - 360.0f;
+            _orbitAngle = _orbitAngle % 360;
+            if (_orbitAngle < 0)
+                _orbitAngle += 360;
 
 
-            _width =  (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
-            _height = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
-            _focalPoint = (float)_orbitDB.Eccentricity * _width /2;
+            _orbitElipseWidth =  (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
+            _orbitElipseHeight = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
+            _focalDistance = (float)_orbitDB.Eccentricity * _orbitElipseWidth /2;
+
+            //since the _focalPoint is only an X component we don't bother calculating the Y part of the matrix
+            double focalX = (_focalDistance * Math.Cos(_orbitAngle * Math.PI / 180));//  - (0 * Math.Sin(_orbitAngle * Math.PI / 180));
+            double focalY = (_focalDistance * Math.Sin(_orbitAngle * Math.PI / 180));// + (0 * Math.Cos(_orbitAngle * Math.PI / 180));
+            _focalOffsetPoint = new Vector4(focalX, focalY, 0, 0);
 
             myEntity = entityWithOrbit;
             UpdatePens();
@@ -86,100 +87,69 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _segmentPens = newPens;        
         }
 
+        private float GetStartArcAngle()
+        {
+            //add the body posistion and the focal point
+            //Vector4 offsetPoint = _focalOffsetPoint + _bodyPositionDB.RelativePosition;
+            Vector4 offsetPoint = _focalOffsetPoint + _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition;
+            //find the angle to the offset point
+            double angle = (Math.Atan2(offsetPoint.Y, offsetPoint.X) * 180 / Math.PI);
+            //subtract the _orbitAngle, since this angle needs to be ralitive to the elipse, and the elipse gets rotated
+            angle -= _orbitAngle;
+            //and finaly, normalise it useing modulo arrithmatic.
+            angle = angle % 360;
+            if (angle < 0)
+                angle += 360;
+            return (float)angle;
+        }
+
         public void DrawMe(Graphics g)
         {
+
+            PointF boundingBoxTopLeft = new PointF((float)_parentPositionDB.AbsolutePosition.X * _camera.ZoomLevel, (float)_parentPositionDB.AbsolutePosition.Y * _camera.ZoomLevel);
+            PointF bodyPos = new PointF((float)_bodyPositionDB.AbsolutePosition.X * _camera.ZoomLevel, (float)_bodyPositionDB.AbsolutePosition.Y * _camera.ZoomLevel);
+            SizeF elipseSize = new SizeF(_orbitElipseWidth * _camera.ZoomLevel, _orbitElipseHeight * _camera.ZoomLevel);
+            RectangleF elipseBoundingBox = new RectangleF(boundingBoxTopLeft, elipseSize);
             g.SaveTransform();
             var rmatrix = Matrix.Create();
+            //the distance between the left side of the bounding rectangle, and one of the elipse's focal points
+            float focalpoint = _focalDistance * _camera.ZoomLevel;
+            float halfWid = _orbitElipseWidth * 0.5f * _camera.ZoomLevel;
+            float halfHei = _orbitElipseHeight * 0.5f * _camera.ZoomLevel;
 
-            //the distance between the top left of the bounding rectangle, and one of the elipse's focal points
-            float focalpoint = _focalPoint * _camera.ZoomLevel;
-            float halfWid = _width * 0.5f * _camera.ZoomLevel;
-            float halfHei = _height * 0.5f * _camera.ZoomLevel;
-            //PointF focalOffset = new PointF(-_width / 2 - _focalPoint, -_height / 2);
-            PointF focalOffset = new PointF(-halfWid - focalpoint, -halfHei);
-            //offset to the focal point
-            g.TranslateTransform(focalOffset);
+            PointF focalOffset = new PointF(-halfWid - focalpoint, -halfHei) ;
 
             //get the offset from the camera, accounting for zoom, pan etc.
-            IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF((float)TopLeftX, (float)TopLeftY));
-
+            IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF(0,0));
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
 
+            //debug line, draws from the parent body to the body. 
+            //if (myEntity.GetDataBlob<NameDB>().DefaultName == "Luna" || myEntity.GetDataBlob<NameDB>().DefaultName == "Earth")
+            //    g.DrawLine(Colors.DeepPink, boundingBoxTopLeft, bodyPos); 
 
-            //rotate
+            float startArcAngle = GetStartArcAngle();
 
-            //The RotatePoint must consider the parent position, or else it will rotate any moon about the sun and not about the planet it orbits, hence TopLeftX,TopLeftY in this 
-            //calculation.
-            PointF rotatePoint = new PointF(((halfWid) + focalpoint + TopLeftX), ((halfHei) + TopLeftY));
-            rmatrix.RotateAt(_rotation, rotatePoint);
+            g.TranslateTransform(focalOffset);
 
+            // this point is from the frame of reference of the elipse.
+            PointF rotatePoint = new PointF(halfWid + focalpoint, halfHei) + boundingBoxTopLeft;
+            rmatrix.RotateAt(_orbitAngle, rotatePoint);           
             g.MultiplyTransform(rmatrix);
 
-            /*RectangleF MyRect = new RectangleF(TopLeftX, TopLeftY, _width, _height);
-            g.DrawRectangle(Colors.White, MyRect);*/
-
-
-            //public float StartArcAngle { get { return (float)(Math.Atan2(_bodyPositionDB.Y, _bodyPositionDB.X) * 180 / Math.PI); } }
-
-            //Ok so the arcs are lagging or advancing past the planet by a set amount, and this corrects that by adding or subtracting a value.
-            //first StartArcAngle must be corrected for rotation, to normalize the actual angle the planet is at.
-            float ActualAngle = StartArcAngle - _rotation;
-            if (ActualAngle < 0)
-            { 
-                ActualAngle = ActualAngle + 360.0f;
-            }
-
-            //Second get the sin of that angle, since it will have the right sign and magnitude for the correction.
-            float AngleAdd = (float)Math.Sin(ActualAngle * (Math.PI / 180.0f));
-            //last figure out the length correction, it is related to eccentricity in some way, but the 53.5 is a close guess on my part. I'm not
-            //sure which number should get plugged in there, but once that is found planet orbits should work. I got the 53.5 by getting mercury's proper
-            //correction of 11, then working with eccentricity found that 53.5 * mercury's eccentricity is roughly the value I want. this is also correctish for
-            //mars, earth and venus, so I'm close to whatever the right answer is.
-            AngleAdd = AngleAdd  * (53.5f * (float)_orbitDB.Eccentricity);
+            //debug rectangle, draws the bounding box for the rotated elipse
+            //if (myEntity.GetDataBlob<NameDB>().DefaultName == "Luna" || myEntity.GetDataBlob<NameDB>().DefaultName == "Earth")
+            //    g.DrawRectangle(Colors.BlueViolet, elipseBoundingBox);
 
             //draw the elipse (as a number of arcs each with a different pen, this gives the fading alpha channel effect) 
             int i = 0;
+                        
             foreach (var pen in _segmentPens)
             {
-                //float OriginalThickness = pen.Thickness;
-                //pen.Thickness = pen.Thickness * (1.0f / _camera.ZoomLevel);
-                g.DrawArc(pen, TopLeftX, TopLeftY, _width * _camera.ZoomLevel, _height * _camera.ZoomLevel, StartArcAngle - (AngleAdd) - _rotation + (i * SweepAngle), SweepAngle);
+                g.DrawArc(pen, elipseBoundingBox, startArcAngle + (i * SweepAngle), SweepAngle);
                 i++;
-
-                //pen.Thickness = OriginalThickness;
-            }
+            }            
             g.RestoreTransform();
-
-            Font lastFont = new Font(FontFamilies.MonospaceFamilyName, 10.0f);
-            if(drawCount == 2)
-            {
-                g.SaveTransform();
-                String Entry = String.Format("{0} {1} {2} {3} {4} {5}", _rotation, StartArcAngle, ActualAngle, AngleAdd, _bodyPositionDB.X, _bodyPositionDB.Y);
-                g.DrawText(lastFont, Colors.White, 10, 10, Entry);
-
-                Entry = String.Format("Values: {0} {1} {2} {3} {4} {5}", TopLeftX, TopLeftY, _width, _height,rotatePoint.X,rotatePoint.Y);
-                g.DrawText(lastFont, Colors.White, 10, 30, Entry);
-
-
-                g.RestoreTransform();
-            }
-            if (drawCount == 3)
-            {
-                g.SaveTransform();
-
-                String Entry = String.Format("{0} {1} {2} {3} {4} {5}", _rotation, StartArcAngle, ActualAngle, AngleAdd, _bodyPositionDB.X, _bodyPositionDB.Y);
-                g.DrawText(lastFont, Colors.White, 10, 50, Entry);
-
-                Entry = String.Format("Values: {0} {1} {2} {3} {4} {5}", TopLeftX, TopLeftY, _width, _height, rotatePoint.X, rotatePoint.Y);
-                g.DrawText(lastFont, Colors.White, 10, 70, Entry);
-
-
-               g.RestoreTransform();
-            }
-            drawCount++;
-            if (drawCount == 5)
-                drawCount = 0;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
