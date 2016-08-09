@@ -13,11 +13,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public PercentValue OrbitPercent { private get { return _orbitPercent; }
             set { _orbitPercent = value; OnPropertyChanged(nameof(SweepAngle)); } }
-        private PercentValue _orbitPercent = new PercentValue() {Percent = 1};
+        private PercentValue _orbitPercent = new PercentValue() {Percent = 0.75f};
 
         public byte Segments { private get { return _segments; } //TODO we could adjust the Segments and OrbitPercent by the size of the orbit and the zoom level to get a level of detail effect.
             set { _segments = value; UpdatePens(); OnPropertyChanged(nameof(SweepAngle)); }}
-        private byte _segments = 128;
+        private byte _segments = 64;
 
         public float SweepAngle { get { return (360f * OrbitPercent.Percent) / Segments; } }
 
@@ -29,7 +29,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private float _orbitElipseWidth;
         private float _orbitElipseHeight;
-        private float _focalDistance; //the distance between an orbits apoaxis and a focal point
+        private double _focalDistance; //the distance between an orbits focal point to the center
         private Vector4 _focalOffsetPoint; //the focal point ralitive to the orbit. 
 
         //this should be the angle from the orbital reference direction, to the Argument of Periapsis, as seen from above, this sets the angle for the ecentricity.
@@ -65,8 +65,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             _orbitElipseWidth =  (float)_orbitDB.SemiMajorAxis * 2 ; //Major Axis
             _orbitElipseHeight = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
-            _focalDistance = (float)_orbitDB.Eccentricity * _orbitElipseWidth /2;
-
+            _focalDistance = _orbitDB.Eccentricity * _orbitElipseWidth * 0.5f;
+            //_focalDistance = Math.Sqrt((_orbitElipseHeight * _orbitElipseHeight * 0.5) - (_orbitElipseWidth * _orbitElipseWidth * 0.5));
             //since the _focalPoint is only an X component we don't bother calculating the Y part of the matrix
             double focalX = (_focalDistance * Math.Cos(_orbitAngle * Math.PI / 180));//  - (0 * Math.Sin(_orbitAngle * Math.PI / 180));
             double focalY = (_focalDistance * Math.Sin(_orbitAngle * Math.PI / 180));// + (0 * Math.Cos(_orbitAngle * Math.PI / 180));
@@ -79,10 +79,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private void UpdatePens()
         {
             List<Pen> newPens = new List<Pen>();
-            for (int i = 0; i < Segments; i++)
+            for (int i = Segments; i > 0; i--)
             {                    
                 Color penColor = new Color(_penColor.R, _penColor.G, _penColor.B, i / (float)Segments);
-                newPens.Add(new Pen(penColor, 1.0f));
+                Pen newpen = new Pen(penColor, 1.0f);
+                //newpen.LineJoin = PenLineJoin.Bevel;
+                newpen.LineCap = PenLineCap.Butt;
+                newPens.Add(newpen);
             }
             _segmentPens = newPens;        
         }
@@ -112,8 +115,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
             RectangleF elipseBoundingBox = new RectangleF(boundingBoxTopLeft, elipseSize);
             g.SaveTransform();
             var rmatrix = Matrix.Create();
-            //the distance between the left side of the bounding rectangle, and one of the elipse's focal points
-            float focalpoint = _focalDistance * _camera.ZoomLevel;
+            //the distance between the center of the bounding rectangle, and one of the elipse's focal points
+            float focalpoint = (float)_focalDistance * _camera.ZoomLevel;
             float halfWid = _orbitElipseWidth * 0.5f * _camera.ZoomLevel;
             float halfHei = _orbitElipseHeight * 0.5f * _camera.ZoomLevel;
 
@@ -146,7 +149,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         
             foreach (var pen in _segmentPens)
             {
-                g.DrawArc(pen, elipseBoundingBox, startArcAngle + (i * SweepAngle), SweepAngle);
+                g.DrawArc(pen, elipseBoundingBox, startArcAngle - (i * SweepAngle), -SweepAngle);
                 i++;
             }            
             g.RestoreTransform();

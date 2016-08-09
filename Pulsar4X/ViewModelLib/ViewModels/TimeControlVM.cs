@@ -14,7 +14,7 @@ namespace Pulsar4X.ViewModel
 
         public int TickLength
         {
-            get { return _timeloop?.Ticklength.Seconds ?? 1; }
+            get { return (int)(_timeloop?.Ticklength.TotalSeconds ?? 3600); }
             set { _timeloop.Ticklength = TimeSpan.FromSeconds(value); OnPropertyChanged(); }
         }
 
@@ -25,7 +25,7 @@ namespace Pulsar4X.ViewModel
         }
         public double TickFreq
         {
-            get { return _timeloop?.TickFrequency.TotalMilliseconds ?? 5; }
+            get { return _timeloop?.TickFrequency.TotalMilliseconds ?? 250; }
             set { _timeloop.TickFrequency = TimeSpan.FromMilliseconds(value); OnPropertyChanged(); }
         }
 

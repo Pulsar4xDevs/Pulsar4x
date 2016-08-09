@@ -94,6 +94,7 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
             EntityManipulation.AddComponentToEntity(shipDesign, bfc);
+            shipDesign.GetDataBlob<PropulsionDB>().FuelStorageCapicity = 100;
             return shipDesign;
         }
 

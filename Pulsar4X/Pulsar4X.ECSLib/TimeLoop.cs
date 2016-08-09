@@ -32,13 +32,13 @@ namespace Pulsar4X.ECSLib
         } 
         private float _timeMultiplier = 1f;
 
-        private TimeSpan _tickInterval = TimeSpan.FromSeconds(1);
+        private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(250);
         public TimeSpan TickFrequency { get { return _tickInterval; } set { _tickInterval = value;
             _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
         } }
 
 
-        public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(1);
+        public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(3600);
 
         private bool _isProcessing = false;
         private bool _isOvertime = false;
