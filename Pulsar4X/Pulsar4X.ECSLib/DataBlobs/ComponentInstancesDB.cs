@@ -9,36 +9,29 @@ namespace Pulsar4X.ECSLib
 {
     public class ComponentInstancesDB : BaseDataBlob
     {
+        /// <summary>
+        /// Key is the component design entity
+        /// Value is a list of specific instances of that component design, that entity will hold info on damage, cooldown etc.
+        /// </summary>
         [JsonProperty]
         [PublicAPI]
         public Dictionary<Entity, List<Entity>> SpecificInstances { get; internal set; } = new Dictionary<Entity, List<Entity>>();
-
+        
         public ComponentInstancesDB() { }
 
-        //public ComponentInstancesDB(List<Entity> componentDesigns)
-        //{
-        //    foreach (var item in componentDesigns)
-        //    {
-        //        ComponentInstanceInfoDB instance = new ComponentInstanceInfoDB(item);
-        //        if (!SpecificInstances.ContainsKey(item))
-        //            SpecificInstances.Add(item, new List<Entity>() { instance });
-        //        else
-        //        {
-        //            SpecificInstances[item].Add(instance);
-        //        }
-        //    }
-        //}
 
         public ComponentInstancesDB(ComponentInstancesDB db)
         {
             SpecificInstances = new Dictionary<Entity, List<Entity>>(db.SpecificInstances);
         }
 
+        /// <summary>
+        /// this is a somewhat shallow clone. it does not clone the referenced component instance entities!!!
+        /// </summary>
+        /// <returns></returns>
         public override object Clone()
         {
             return new ComponentInstancesDB(this);
         }
     }
-
-
 }
