@@ -131,6 +131,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //if (myEntity.GetDataBlob<NameDB>().DefaultName == "Luna" || myEntity.GetDataBlob<NameDB>().DefaultName == "Earth")
             //    g.DrawLine(Colors.DeepPink, boundingBoxTopLeft, bodyPos); 
 
+
             float startArcAngle = GetStartArcAngle();
 
             g.TranslateTransform(focalOffset);
@@ -139,6 +140,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             PointF rotatePoint = new PointF(halfWid + focalpoint, halfHei) + boundingBoxTopLeft;
             rmatrix.RotateAt(_orbitAngle, rotatePoint);           
             g.MultiplyTransform(rmatrix);
+
+            if (myEntity.GetDataBlob<NameDB>().DefaultName == "Mercury")
+                g.DrawLine(Colors.DeepPink, (boundingBoxTopLeft + elipseSize) / 2, focalOffset - bodyPos );
+
 
             //debug rectangle, draws the bounding box for the rotated elipse
             //if (myEntity.GetDataBlob<NameDB>().DefaultName == "Luna" || myEntity.GetDataBlob<NameDB>().DefaultName == "Earth")

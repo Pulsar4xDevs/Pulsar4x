@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
     public abstract class BaseOrder
     {
         // Orders can be given a delay before being executed
-        public long DelayTime { get; internal set; }
+        public long DelayTime { get; internal set; } = 0;
         public Entity Owner { get; internal set; }
         public orderType OrderType { get; internal set; }
 
