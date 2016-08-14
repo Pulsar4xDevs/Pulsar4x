@@ -535,19 +535,8 @@ namespace Pulsar4X.ViewModel
                 int beamCount = 0;
                 foreach (Entity instance in kvp.Value)
                 {
-                    isBeamControlled = false;
-                    foreach (KeyValuePair<Entity, string> fckvp in _fireControlList)
-                    {
-                        if (IsBeamInFireControlList(instance))
-                        {
-                            isBeamControlled = true;
-                        }
-                        if(!isBeamControlled)
-                        {
-                            beamCount++;
-                            _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + " " + beamCount);
-                        }
-                    }
+                    if (instance.GetDataBlob<WeaponStateDB>().FireControl == null)
+                        _freeBeamList.Add(new KeyValuePair<Entity, string>(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + " " + ++beamCount));
 
                 }
             }
@@ -637,12 +626,16 @@ namespace Pulsar4X.ViewModel
             weaponList.Add(SelectedFreeBeam);
 
             // @todo: set the fire control for the beam
+            beam.GetDataBlob<WeaponStateDB>().FireControl = SelectedFireControl;
 
             RefreshBeamWeaponsList(0, 0);
         }
 
         public void OnRemoveBeam()
         {
+            Entity beam = SelectedAttachedBeam;
+
+
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
                 return;
 
@@ -653,6 +646,8 @@ namespace Pulsar4X.ViewModel
             weaponList.Remove(SelectedAttachedBeam);
 
             // @todo: unset the fire control for the beam
+
+            beam.GetDataBlob<WeaponStateDB>().FireControl = null;
 
             RefreshBeamWeaponsList(0, 0);
         }
