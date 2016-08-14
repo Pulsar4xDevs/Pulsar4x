@@ -55,8 +55,8 @@ namespace Pulsar4X.ECSLib
 
 
             // Todo: handle this in CreateShip
-            Entity shipClass1 = DefaultShipDesign(game, factionEntity);
-            Entity shipClass2 = DefaultShipDesign(game, factionEntity);
+            Entity shipClass = DefaultShipDesign(game, factionEntity);
+            Entity gunShipClass = GunShipDesign(game, factionEntity);
 
             Vector4 position = earth.GetDataBlob<PositionDB>().AbsolutePosition;
 
@@ -65,18 +65,13 @@ namespace Pulsar4X.ECSLib
             // IE, the fire control on ship1 is the same entity as on ship2
             // Both the design and instances should be unique
 
-            Entity ship1 = ShipFactory.CreateShip(shipClass1, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
-            Entity ship2 = ShipFactory.CreateShip(shipClass2, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
-
-            // Strange bug - seems to update the ship orbit once, then never again
-            // TODO: Fix to allow normal orbiting.
-            //ship.SetDataBlob<OrbitDB>(new OrbitDB(earth.GetDataBlob<OrbitDB>()));
+            Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
+            Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, position, sol, "Prevailing Stillness");
 
             sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());
             sol.SystemManager.SetDataBlob(ship2.ID, new TransitableDB());
-
-
-
+            sol.SystemManager.SetDataBlob(gunShip.ID, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB
@@ -102,6 +97,23 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
+            EntityManipulation.AddComponentToEntity(shipDesign, bfc);
+            return shipDesign;
+        }
+
+        public static Entity GunShipDesign(Game game, Entity faction)
+        {
+            var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
+            Entity engine = DefaultEngineDesign(game, faction);
+            Entity laser = DefaultSimpleLaser(game, faction);
+            Entity bfc = DefaultBFC(game, faction);
+            EntityManipulation.AddComponentToEntity(shipDesign, engine);
+            EntityManipulation.AddComponentToEntity(shipDesign, engine);
+            EntityManipulation.AddComponentToEntity(shipDesign, laser);
+            EntityManipulation.AddComponentToEntity(shipDesign, laser);
+            EntityManipulation.AddComponentToEntity(shipDesign, laser);
+            EntityManipulation.AddComponentToEntity(shipDesign, laser);
+            EntityManipulation.AddComponentToEntity(shipDesign, bfc);
             EntityManipulation.AddComponentToEntity(shipDesign, bfc);
             return shipDesign;
         }

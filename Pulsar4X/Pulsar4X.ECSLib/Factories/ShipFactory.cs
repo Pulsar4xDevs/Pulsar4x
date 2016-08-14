@@ -30,10 +30,19 @@ namespace Pulsar4X.ECSLib
 
             Entity shipEntity = new Entity(systemEntityManager, protoShip);
 
+            ComponentInstancesDB instancesDB = new ComponentInstancesDB(shipEntity.GetDataBlob<ComponentInstancesDB>());
+
             foreach (var componentType in shipEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
             {
+                int numComponents = componentType.Value.Count;
+                componentType.Value.Clear();
+
+                for(int i=0; i < numComponents;i++)
+                    EntityManipulation.AddComponentToEntity(shipEntity, componentType.Key);
+
                 foreach (var componentInstance in componentType.Value)
                 {
+                    // Set the parent/owning Entity to the shipEntity
                     AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance);
                 }
             }

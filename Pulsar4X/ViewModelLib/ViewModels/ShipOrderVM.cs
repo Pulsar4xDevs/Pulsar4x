@@ -513,19 +513,31 @@ namespace Pulsar4X.ViewModel
 
             List<KeyValuePair<Entity, List<Entity>>> beamList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>() || item.Key.HasDataBlob<SimpleBeamWeaponAtbDB>()).ToList());
 
+            bool isBeamControlled = false;
+            _freeBeamList.Clear();
 
             // Get a list of all beam weapons not currently controlled by a fire control
+            // @todo: make sure you check all fire controls - currently only lists
+            // beams not set to the current fire control
             foreach (KeyValuePair<Entity, List<Entity>> kvp in beamList)
             {
                 int beamCount = 0;
                 foreach (Entity instance in kvp.Value)
                 {
-                    if (!IsBeamInFireControlList(instance))
+                    isBeamControlled = false;
+                    foreach (KeyValuePair<Entity, string> fckvp in _fireControlList)
                     {
-                        beamCount++;
-                        _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + " " + beamCount);
+                        if (IsBeamInFireControlList(instance))
+                        {
+                            isBeamControlled = true;
+                        }
+                        if(!isBeamControlled)
+                        {
+                            beamCount++;
+                            _freeBeamList.Add(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + " " + beamCount);
+                        }
                     }
-                        
+
                 }
             }
 
@@ -602,6 +614,8 @@ namespace Pulsar4X.ViewModel
 
         public void OnAddBeam()
         {
+            Entity beam = SelectedFreeBeam;
+
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
                 return;
 
@@ -610,6 +624,8 @@ namespace Pulsar4X.ViewModel
 
             List<Entity> weaponList = SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons;
             weaponList.Add(SelectedFreeBeam);
+
+            // @todo: set the fire control for the beam
 
             RefreshBeamWeaponsList(0, 0);
         }
@@ -624,6 +640,8 @@ namespace Pulsar4X.ViewModel
 
             List<Entity> weaponList = SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons;
             weaponList.Remove(SelectedAttachedBeam);
+
+            // @todo: unset the fire control for the beam
 
             RefreshBeamWeaponsList(0, 0);
         }
