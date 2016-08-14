@@ -227,6 +227,7 @@
     <EmbeddedResource Include="Views\ShipFireControlView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\SysInfo1dMap.xeto" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
@@ -296,6 +297,9 @@
     </Compile>
     <Compile Include="Views\ComponentTemplateDesigner\TechList.xeto.cs">
       <DependentUpon>TechList.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SysInfo1dMap.xeto.cs">
+      <DependentUpon>SysInfo1dMap.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\SystemView\Camera.cs" />
     <Compile Include="Views\SystemView\EntityIcon.cs" />

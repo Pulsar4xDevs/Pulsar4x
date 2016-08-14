@@ -167,13 +167,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
             return new PenPathPair() { Pen = thrustPen, Path = thrustPath };
         }
 
-        public void DrawMe(Graphics g)
+        public void DrawMe(Graphics g, PointF? atPosition = null)
         {
+            if (atPosition == null)
+                atPosition = new PointF((float)_starSysPosition.X, (float)_starSysPosition.Y);
             //if(_camera.ViewCoordinate(_starSysPosition.Position) > _camera.ViewPortCenter)
 
             g.SaveTransform();
 
-            IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF((float)_starSysPosition.X, (float)_starSysPosition.Y));
+            IMatrix cameraOffset = _camera.GetViewProjectionMatrix((PointF)atPosition);
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
 
@@ -193,6 +195,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawPath(ppp.Pen, ppp.Path);
             }
             g.RestoreTransform();
+        }
+
+        public void DrawMe(Graphics g)
+        {
+            DrawMe(g, null);
         }
 
         internal struct PenPathPair
