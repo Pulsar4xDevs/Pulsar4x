@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using Pulsar4X.ECSLib;
 using Eto.Drawing;
+using System;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
     internal class IconCollection
     {
-        List<IconBase> Icons { get; } = new List<IconBase>();
-
+        public List<IconBase> Icons { get; } = new List<IconBase>();
+        public Dictionary<Guid, EntityIcon> IconDict { get; } = new Dictionary<Guid, EntityIcon> ();
         public IconCollection()
         {
         }
@@ -15,6 +16,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public void Init(IEnumerable<Entity> entities, Camera2dv2 camera)
         {
             Icons.Clear();
+            IconDict.Clear();
             foreach (var item in entities)
             {
                 if (item.HasDataBlob<OrbitDB>() && item.GetDataBlob<OrbitDB>().Parent != null)
@@ -26,7 +28,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 if (item.HasDataBlob<NameDB>())
                     Icons.Add(new TextIcon(item, camera));
 
-                Icons.Add(new EntityIcon(item, camera));
+                EntityIcon entIcon = new EntityIcon(item, camera);
+                Icons.Add(entIcon);
+                IconDict.Add(item.Guid, entIcon);
             }
         }
 

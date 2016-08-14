@@ -157,6 +157,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// changes the positions relative to
+        /// Can be null.
         /// </summary>
         /// <param name="newParent"></param>
         internal override void SetParent(Entity newParent)
