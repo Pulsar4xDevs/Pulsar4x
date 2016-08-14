@@ -17,7 +17,9 @@
     <TableRow >
 	    <Label Text="Tick Frequency" />
       <NumericUpDown Value ="{Binding TickFreq}" />
+      <Label Text="Date: " />
       <Label Text="{Binding CurrentGameDate}" />
+      <Label Text="LastProcessingTime: " />
       <Label Text="{Binding LastTickLen}" />
     </TableRow>
     <TableRow>      

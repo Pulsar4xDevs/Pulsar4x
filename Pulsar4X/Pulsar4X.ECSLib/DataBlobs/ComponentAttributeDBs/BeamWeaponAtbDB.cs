@@ -23,10 +23,10 @@ namespace Pulsar4X.ECSLib
         public int MaxRange { get; internal set; }
 
         /// <summary>
-        /// Damage of this weapon at MaxRange
+        /// Damage of this weapon at point blank range - drops off over longer distances
         /// </summary>
         [JsonProperty]
-        public int DamageAtMaxRange { get; internal set; }
+        public int BaseDamage { get; internal set; }
 
         /// <summary>
         /// AccuracyPenalty. ChanceToHit = (Speed/Range/other penalties) * AccuracyMultiplier
@@ -64,10 +64,10 @@ namespace Pulsar4X.ECSLib
         public BeamWeaponAtbDB(double maxRange, double damageAtMaxRange, double accuracyMultiplier, double powerRequired, double powerRechargeRate, double shotsPerVolley, BeamWeaponType weaponType) 
             : this((int) maxRange, (int) damageAtMaxRange, (float) accuracyMultiplier, (float) powerRequired, (float) powerRechargeRate, (int) shotsPerVolley, weaponType) { }
 
-        public BeamWeaponAtbDB(int maxRange, int damageAtMaxRange, float accuracyMultiplier, float powerRequired, float powerRechargeRate, int shotsPerVolley, BeamWeaponType weaponType)
+        public BeamWeaponAtbDB(int maxRange, int baseDamage, float accuracyMultiplier, float powerRequired, float powerRechargeRate, int shotsPerVolley, BeamWeaponType weaponType)
         {
             MaxRange = maxRange;
-            DamageAtMaxRange = damageAtMaxRange;
+            BaseDamage = baseDamage;
             AccuracyMultiplier = accuracyMultiplier;
             PowerRequired = powerRequired;
             PowerRechargeRate = powerRechargeRate;
@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new BeamWeaponAtbDB(MaxRange, DamageAtMaxRange, AccuracyMultiplier, PowerRequired, PowerRechargeRate, ShotsPerVolley, WeaponType);
+            return new BeamWeaponAtbDB(MaxRange, BaseDamage, AccuracyMultiplier, PowerRequired, PowerRechargeRate, ShotsPerVolley, WeaponType);
         }
     }
 }

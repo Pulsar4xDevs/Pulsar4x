@@ -61,18 +61,11 @@ namespace Pulsar4X.ViewModel.SystemView
 
         private void StarSystems_SelectionChangedEvent(int oldSelection, int newSelection)
         {
-            var scale_data = new List<float>();
-            var cam = new Camera(viewport_width, viewport_height);
-            cam.Position = new OpenTK.Vector3(0,0,
-                            //(float)ActiveSystem.ParentStar.Position.X,
-                            //(float)ActiveSystem.ParentStar.Position.Y,
-                            -1f
-                           );
 
             var selectedSystem = StarSystems.SelectedKey;
             if (selectedSystem != null)
             { 
-                SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey, scale_data);
+                SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey);
             }
         }
     }

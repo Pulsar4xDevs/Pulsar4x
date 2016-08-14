@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
             Owner = ship;
 
             // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
-            Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
+            Owner.GetDataBlob<PositionDB>().SetParent(null);
             Target = target;
             PositionTarget = null;
             OrbitRadius = orbitRadius;

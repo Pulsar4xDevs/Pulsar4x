@@ -8,6 +8,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Vector4 pos, StarSystem starsys, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
+            // @todo: make sure each component design and component instance is unique, not duplicated
             ProtoEntity protoShip = classEntity.Clone();
 
             ShipInfoDB shipInfoDB = protoShip.GetDataBlob<ShipInfoDB>();
@@ -29,10 +30,30 @@ namespace Pulsar4X.ECSLib
 
             Entity shipEntity = new Entity(systemEntityManager, protoShip);
 
+            //replace the ships references to the design's specific instances with shiny new specific instances
+            ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
+            var newSpecificInstances = new Dictionary<Entity, List<Entity>>();
+            foreach (var kvp in componentInstances.SpecificInstances)
+            {
+                newSpecificInstances.Add(kvp.Key, new List<Entity>());
+                for (int i = 0; i < kvp.Value.Count; i++)
+                {
+                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key));
+                }
+            }
+            componentInstances.SpecificInstances = newSpecificInstances;
+
             foreach (var componentType in shipEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
             {
+                int numComponents = componentType.Value.Count;
+                componentType.Value.Clear();
+
+                for(int i=0; i < numComponents;i++)
+                    EntityManipulation.AddComponentToEntity(shipEntity, componentType.Key);
+
                 foreach (var componentInstance in componentType.Value)
                 {
+                    // Set the parent/owning Entity to the shipEntity
                     AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance);
                 }
             }
