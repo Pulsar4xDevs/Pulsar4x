@@ -95,6 +95,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private string Salt { get; set; }
 
+        [JsonProperty]
+        public Dictionary<EventType, bool> HaltsOnEvent { get; } = new Dictionary<EventType, bool>();
         
         #endregion
 
@@ -114,6 +116,7 @@ namespace Pulsar4X.ECSLib
             Salt = info.GetString(nameof(Salt));
             FactionAccessRoles = (Dictionary<Entity, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<Entity, uint>));
             Orders = new OrderQueue();
+            HaltsOnEvent = (Dictionary<EventType, bool>)info.GetValue(nameof(HaltsOnEvent), typeof(Dictionary<EventType, bool>)); 
         }
 
         internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
@@ -130,6 +133,7 @@ namespace Pulsar4X.ECSLib
             Salt = GenerateSalt();
             PasswordHash = GeneratePasswordHash(password, Salt);
             Orders = new OrderQueue();
+
         }
 
         #endregion
