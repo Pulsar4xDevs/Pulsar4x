@@ -103,7 +103,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString("N2");
             }
         }
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString("N2");
             }
         }
 
@@ -123,7 +123,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString("N2");
             }
         }
 
@@ -167,7 +167,7 @@ namespace Pulsar4X.ViewModel
                     return "N/A";
 
                 Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition - SelectedMoveTarget.GetDataBlob<PositionDB>().AbsolutePosition;
-                return Distance.ToKm(delta.Length()).ToString("N2") ;
+                return Distance.AuToKm(delta.Length()).ToString("N2") ;
             }
         }
 

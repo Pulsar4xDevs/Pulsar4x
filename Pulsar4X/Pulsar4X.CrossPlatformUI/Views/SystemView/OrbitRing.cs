@@ -102,7 +102,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private float GetStartArcAngle()
         {
 
-            Vector4 pos = _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition; //adjust so moons get the right positions            
+            Vector4 pos = _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition; //adjust so moons get the right positions    
+            //do a rotational matrix so the normalised position is ralitive to the ellipse.       
             double normalX = (pos.X * Math.Cos(-_radianAngle)) - (pos.Y * Math.Sin(-_radianAngle));
             double normalY = (pos.X * Math.Sin(-_radianAngle)) + (pos.Y * Math.Cos(-_radianAngle));
             normalX += _focalDistance; //adjust for focal point
