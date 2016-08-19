@@ -244,6 +244,7 @@ namespace Pulsar4X.ECSLib
             info.AddValue(nameof(PasswordHash), PasswordHash);
             info.AddValue(nameof(Salt), Salt);
             info.AddValue(nameof(FactionAccessRoles), FactionAccessRoles);
+            info.AddValue(nameof(HaltsOnEvent), HaltsOnEvent);
         }
 
         public void ProcessOrders()
