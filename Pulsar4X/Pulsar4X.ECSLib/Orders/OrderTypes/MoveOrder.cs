@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
             Owner = ship;
 
             // The owners positions is sometimes set to that of another entity for orbiting purposes.  This resets that issue
-            Owner.SetDataBlob<PositionDB>(new PositionDB(Owner.GetDataBlob<PositionDB>()));
+            Owner.GetDataBlob<PositionDB>().SetParent(null);
             Target = target;
             PositionTarget = null;
             OrbitRadius = orbitRadius;
@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
             double AUSpeed, kmSpeed;
 
             kmSpeed = Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * 1000;
-            AUSpeed = Distance.ToAU(kmSpeed);
+            AUSpeed = Distance.KmToAU(kmSpeed);
 
             currentPosition.SetParent(null);
 
@@ -123,7 +123,7 @@ namespace Pulsar4X.ECSLib
                 targetPosition = PositionTarget;
 
                 // Assume that 1000 is extremely close, 
-                if(Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
+                if(Distance.AuToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
                 {
                     setPositionToTarget(Owner, targetPosition);
                     Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0, 0, 0, 0);
@@ -142,7 +142,7 @@ namespace Pulsar4X.ECSLib
                 targetPosition = Target.GetDataBlob<PositionDB>();
                 
                 // Assume that 1000 is extremely close, 
-                if (Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
+                if (Distance.AuToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
                 {
                     setPositionToTarget(Owner, targetPosition);
 
@@ -227,9 +227,9 @@ namespace Pulsar4X.ECSLib
 
 
 
-            speed.X = Distance.ToAU(speedMagInKM.X);
-            speed.Y = Distance.ToAU(speedMagInKM.Y);
-            speed.Z = Distance.ToAU(speedMagInKM.Z);
+            speed.X = Distance.KmToAU(speedMagInKM.X);
+            speed.Y = Distance.KmToAU(speedMagInKM.Y);
+            speed.Z = Distance.KmToAU(speedMagInKM.Z);
 
             return speed;
         }

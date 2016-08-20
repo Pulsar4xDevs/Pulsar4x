@@ -40,7 +40,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 }
                 if (item is PositionDB)
                 {
-                    //HasPosition((PositionDB)item);
+                    HasPosition((PositionDB)item);
                 }
                 if (item is StarInfoDB)
                 {
@@ -120,7 +120,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         void HasPosition(PositionDB db)
         {
             GraphicsPath path = new GraphicsPath();
-            path.AddEllipse(-2, -2, 2, 2);
+            path.AddEllipse(-2, -2, 4, 4);
             PenPathPair circle = new PenPathPair() { Pen = new Pen(Colors.Blue), Path = path };
             _shapes.Add(circle);
         }
@@ -128,7 +128,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         void HasPropulsionDB(PropulsionDB db)
         {
 
-            int maxFuel = db.FuelStorageCapicity / 10;
+            int maxFuel = db.FuelStorageCapicity / 20;
 
             int maxSpeed = db.MaximumSpeed / 10;
             int totalEP = db.TotalEnginePower / 25;
@@ -167,13 +167,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
             return new PenPathPair() { Pen = thrustPen, Path = thrustPath };
         }
 
-        public void DrawMe(Graphics g)
+        public void DrawMe(Graphics g, PointF? atPosition = null)
         {
+            if (atPosition == null)
+                atPosition = new PointF((float)_starSysPosition.X, (float)_starSysPosition.Y);
             //if(_camera.ViewCoordinate(_starSysPosition.Position) > _camera.ViewPortCenter)
 
             g.SaveTransform();
 
-            IMatrix cameraOffset = _camera.GetViewProjectionMatrix(new PointF((float)_starSysPosition.X, (float)_starSysPosition.Y));
+            IMatrix cameraOffset = _camera.GetViewProjectionMatrix((PointF)atPosition);
             //apply the camera offset
             g.MultiplyTransform(cameraOffset);
 
@@ -193,6 +195,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 g.DrawPath(ppp.Pen, ppp.Path);
             }
             g.RestoreTransform();
+        }
+
+        public void DrawMe(Graphics g)
+        {
+            DrawMe(g, null);
         }
 
         internal struct PenPathPair

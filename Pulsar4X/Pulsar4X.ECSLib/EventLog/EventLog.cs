@@ -32,6 +32,11 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authToken"></param>
+        /// <returns>all events for a given authToken</returns>
         public List<Event> GetAllEvents(AuthenticationToken authToken)
         {
             Player player = _game.GetPlayerForToken(authToken);
@@ -53,6 +58,11 @@ namespace Pulsar4X.ECSLib
             return retVal;
         }
 
+        /// <summary>
+        /// gets all events for this authTokens player, from last time this function was called for teh given authToken
+        /// </summary>
+        /// <param name="authToken"></param>
+        /// <returns></returns>
         public List<Event> GetNewEvents(AuthenticationToken authToken)
         {
             Player player = _game.GetPlayerForToken(authToken);
@@ -79,9 +89,20 @@ namespace Pulsar4X.ECSLib
             {
                 @event.ConcernedPlayers.Add(player.ID);
                 _newEvents[player].Add(@event);
+                if(player.HaltsOnEvent.ContainsKey(@event.EventType) && player.HaltsOnEvent[@event.EventType] == true)                 
+                    // will future events ever be needed? if so, check timedate here as well
+                    // and add a future halt interupt to the gameloop if it's a future event.
+                    _game.GameLoop.PauseTime(); //hit the pause button.
             }
         }
 
+
+        /// <summary>
+        /// whats this for? what's it doing? document ffs.
+        /// </summary>
+        /// <param name="event"></param>
+        /// <param name="player"></param>
+        /// <returns></returns>
         private bool IsPlayerConcerned([NotNull] Event @event, [NotNull] Player player)
         {
             if (@event == null)

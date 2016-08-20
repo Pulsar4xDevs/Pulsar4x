@@ -25,7 +25,7 @@ namespace Pulsar4X.ViewModel
                 _starSystems.SelectedIndex = 0;
                 RefreshShips(0, 0); 
             } 
-        } //these must be properties
+        }
 
         private DictionaryVM<Entity, string> _shipList = new DictionaryVM<Entity, string>();
         public DictionaryVM<Entity, string> ShipList 
@@ -55,7 +55,7 @@ namespace Pulsar4X.ViewModel
                 _moveTargetList.SelectedIndex = 0;
                 OnPropertyChanged(nameof(SelectedMoveTarget));
             } 
-        } //not fields!
+        } 
 
         private DictionaryVM<BaseOrder, string> _moveOrdersPossible = new DictionaryVM<BaseOrder, string>();
         public DictionaryVM<BaseOrder, string> MoveOrdersPossible 
@@ -103,7 +103,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString("N2");
             }
         }
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString("N2");
             }
         }
 
@@ -123,7 +123,7 @@ namespace Pulsar4X.ViewModel
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.ToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString("N2");
             }
         }
 
@@ -147,6 +147,16 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+        public string MaxSpeed
+        {
+            get
+            {
+                if (SelectedShip == null)
+                    return "";
+                return SelectedShip.GetDataBlob<PropulsionDB>().MaximumSpeed.ToString("N5");
+            }
+        }
+
         public string MoveTargetDistance
         {
             get
@@ -157,7 +167,7 @@ namespace Pulsar4X.ViewModel
                     return "N/A";
 
                 Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition - SelectedMoveTarget.GetDataBlob<PositionDB>().AbsolutePosition;
-                return Distance.ToKm(delta.Length()).ToString("N2") ;
+                return Distance.AuToKm(delta.Length()).ToString("N2") ;
             }
         }
 
@@ -205,6 +215,7 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(YSpeed));
             OnPropertyChanged(nameof(XPos));
             OnPropertyChanged(nameof(YPos));
+            OnPropertyChanged(nameof(MaxSpeed));
             OnPropertyChanged(nameof(MoveTargetDistance));
             RefreshOrderList(0, 0);
         }
@@ -321,7 +332,7 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(YSpeed));
             OnPropertyChanged(nameof(XPos));
             OnPropertyChanged(nameof(YPos));
-
+            OnPropertyChanged(nameof(MaxSpeed));
 
             return;
         }

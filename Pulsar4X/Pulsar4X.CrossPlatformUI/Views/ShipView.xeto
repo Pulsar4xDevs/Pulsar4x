@@ -33,6 +33,9 @@
           <TextBox Text="{Binding XPos}" Enabled="False" Width="80"></TextBox>
           <Label> Y: </Label>
           <TextBox Text="{Binding YPos}" Enabled="False" Width="80"></TextBox>
+          <Label Width="10"></Label>
+          <Label> Max Speed: </Label>
+          <TextBox Text="{Binding MaxSpeed}" Enabled="False" Width="80"></TextBox>
         </TableRow>
       </TableLayout>
     </StackLayout>

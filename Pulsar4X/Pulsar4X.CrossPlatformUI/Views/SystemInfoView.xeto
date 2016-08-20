@@ -17,7 +17,13 @@
       <TableRow>
         <c:TreeHierachView x:Name ="Entitiestree" DataContext="{Binding EBTreePair}"/>
       </TableRow>
+      <TableRow>
+       
+      </TableRow>
     </TableLayout>
     <TableRow/>
+    <TableRow>
+       <c:SysInfo1dMap />
+    </TableRow>
   </TableLayout>
 </Panel>

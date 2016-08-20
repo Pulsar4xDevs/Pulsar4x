@@ -68,10 +68,11 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
             SystemBodyDB mercuryBodyDB = new SystemBodyDB {Type = BodyType.Terrestrial, SupportsPopulations = true};
-            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
             NameDB mercuryNameDB = new NameDB("Mercury");
             double mercurySemiMajAxis = 0.387098;
-            double mercuryEccentricity = 0.205630;
+            //double mercuryEccentricity = 0.205630;
+            double mercuryEccentricity = 0.9;
             double mercuryInclination = 0;
             double mercuryLoAN = 48.33167;
             double mercuryLoP = 77.45645;
@@ -82,7 +83,7 @@ namespace Pulsar4X.ECSLib
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mercury);
 
             SystemBodyDB venusBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.ToAU(6051.8));
+            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
             NameDB venusNameDB = new NameDB("Venus");
             double venusSemiMajAxis = 0.72333199;
             double venusEccentricity = 0.00677323;
@@ -96,7 +97,7 @@ namespace Pulsar4X.ECSLib
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, venus);
 
             SystemBodyDB earthBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.ToAU(6378.1));
+            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.KmToAU(6378.1));
             NameDB earthNameDB = new NameDB("Earth");
             double earthSemiMajAxis = 1.00000011;
             double earthEccentricity = 0.01671022;
@@ -117,9 +118,9 @@ namespace Pulsar4X.ECSLib
             _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
 
             SystemBodyDB lunaBodyDB = new SystemBodyDB { Type = BodyType.Moon, SupportsPopulations = true };
-            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.ToAU(1738.14));
+            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.KmToAU(1738.14));
             NameDB lunaNameDB = new NameDB("Luna");
-            double lunaSemiMajAxis = Distance.ToAU(0.3844E6);
+            double lunaSemiMajAxis = Distance.KmToAU(0.3844E6);
             double lunaEccentricity = 0.0549;
             double lunaInclination = 5.1;
             // Next three values are unimportant. Luna's LoAN and AoP regress/progress by one revolution every 18.6/8.85 years respectively.
@@ -133,9 +134,9 @@ namespace Pulsar4X.ECSLib
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
 
             SystemBodyDB marsBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-            MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius(0.64174E24, Distance.ToAU(3396.2));
+            MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius(0.64174E24, Distance.KmToAU(3396.2));
             NameDB marsNameDB = new NameDB("Mars");
-            double marsSemiMajAxis = Distance.ToAU(227.92E6);
+            double marsSemiMajAxis = Distance.KmToAU(227.92E6);
             double marsEccentricity = 0.0934; //wiki says .0934
             double marsInclination = 1.85;
             double marsLoAN = 49.57854;
@@ -262,7 +263,7 @@ namespace Pulsar4X.ECSLib
                 NameDB planetNameDB = new NameDB("planet"+i);
 
                 SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetEccentricity = i / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
@@ -296,7 +297,7 @@ namespace Pulsar4X.ECSLib
             {
                 NameDB planetNameDB = new NameDB("planet"+i);
                 SystemBodyDB planetBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
-                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.ToAU(2439.7));
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetLoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);

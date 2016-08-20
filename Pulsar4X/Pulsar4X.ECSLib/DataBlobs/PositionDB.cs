@@ -5,6 +5,10 @@ namespace Pulsar4X.ECSLib
 {
     public class PositionDB : TreeHierarchyDB
     {
+
+        [JsonProperty]
+        public Guid SystemGuid;
+
         /// <summary>
         /// The Position as a Vec4, in AU.
         /// </summary>
@@ -82,8 +86,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public Vector4 PositionInKm
         {
-            get { return new Vector4(Distance.ToKm(AbsolutePosition.X), Distance.ToKm(AbsolutePosition.Y), Distance.ToKm(AbsolutePosition.Z), 0); }
-            set { AbsolutePosition = new Vector4(Distance.ToAU(value.X), Distance.ToAU(value.Y), Distance.ToAU(value.Z), 0); }
+            get { return new Vector4(Distance.AuToKm(AbsolutePosition.X), Distance.AuToKm(AbsolutePosition.Y), Distance.AuToKm(AbsolutePosition.Z), 0); }
+            set { AbsolutePosition = new Vector4(Distance.KmToAU(value.X), Distance.KmToAU(value.Y), Distance.KmToAU(value.Z), 0); }
         }
 
         /// <summary>
@@ -91,8 +95,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double XInKm
         {
-            get { return Distance.ToKm(AbsolutePosition.X); }
-            set { _position.X = Distance.ToAU(value); }
+            get { return Distance.AuToKm(AbsolutePosition.X); }
+            set { _position.X = Distance.KmToAU(value); }
         }
 
         /// <summary>
@@ -100,8 +104,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double YInKm
         {
-            get { return Distance.ToKm(AbsolutePosition.Y); }
-            set { _position.Y = Distance.ToAU(value); }
+            get { return Distance.AuToKm(AbsolutePosition.Y); }
+            set { _position.Y = Distance.KmToAU(value); }
         }
 
         /// <summary>
@@ -109,12 +113,14 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double ZInKm
         {
-            get { return Distance.ToKm(AbsolutePosition.Z); }
-            set { _position.Z = Distance.ToAU(value); }
+            get { return Distance.AuToKm(AbsolutePosition.Z); }
+            set { _position.Z = Distance.KmToAU(value); }
         }
-        
-        [JsonProperty]
-        public Guid SystemGuid;
+
+        public void AddMeters(Vector4 addVector)
+        {
+            _position += Distance.MToAU(addVector);
+        }
 
         #endregion
 
@@ -144,8 +150,12 @@ namespace Pulsar4X.ECSLib
         }
 
         public PositionDB(PositionDB positionDB)
-            : this(positionDB.X, positionDB.Y, positionDB.Z, positionDB.SystemGuid)
+            : base(positionDB.Parent)
         {
+            this.X = positionDB.X;
+            this.Y = positionDB.Y;
+            this.Z = positionDB.Z;
+            this.SystemGuid = positionDB.SystemGuid;
         }
 
         [UsedImplicitly]
@@ -153,6 +163,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// changes the positions relative to
+        /// Can be null.
         /// </summary>
         /// <param name="newParent"></param>
         internal override void SetParent(Entity newParent)

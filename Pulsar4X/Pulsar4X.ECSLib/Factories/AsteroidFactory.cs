@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate)
         {
             //todo rand these a bit.
-            double radius = Distance.ToAU(0.5);
+            double radius = Distance.KmToAU(0.5);
             double mass = 1.5e+12; //about 1.5 billion tonne
             Vector4 velocity = new Vector4(8, 7, 0, 0);
 
@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
             Vector4 targetPos = OrbitProcessor.GetAbsolutePosition(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
             Vector4 offset = velocity * timeToCollision.TotalSeconds;
-            targetPos -=  Distance.ToAU(offset);
+            targetPos -=  Distance.KmToAU(offset);
             position.AbsolutePosition = targetPos;
             position.SystemGuid = starSys.Guid;
             balisticTraj.CurrentSpeed = velocity;
