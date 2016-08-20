@@ -128,6 +128,107 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             float startArcAngle = GetStartArcAngle();
 
+            int SweepCorrection = -1;
+            float lowestDistance = 0;
+            int lowestSegment = -1;
+            float lowestX = 0;
+            float lowestY = 0;
+
+            for (int angle = 0; angle < _segments; angle++)//my segment and the ones drawn are different in number I think.
+            {
+                float myAngle = (angle * SweepAngle) * ((float)Math.PI / 180.0f);
+                /// <summary>
+                /// HalfWid and halfHei are the ellipse dimensions, x must have the focal point subtracted, and this number * the Cosine or Sine of the angle is
+                /// where x or y is respectively.
+                /// </summary>
+                float x = halfWid * (float)Math.Cos(myAngle) - focalpoint;
+                float y = halfHei * (float)Math.Sin(myAngle);
+
+                var myMatrix = Matrix.Create();
+                PointF rP = new Point(0, 0);
+                myMatrix.RotateAt(_rotation, rP);
+                PointF nP = new PointF(x, y);
+                PointF myPoint = myMatrix.TransformPoint(nP);
+
+                float pX = (float)(_bodyPositionDB.AbsolutePosition.X * _camera.ZoomLevel);
+                float pY = (float)(_bodyPositionDB.AbsolutePosition.Y * _camera.ZoomLevel);
+                float xDistance = (myPoint.X - pX);
+                float yDistance = (myPoint.Y - pY);
+
+                float distSq = (xDistance * xDistance) + (yDistance * yDistance);
+
+                if (lowestSegment == -1 || lowestDistance > distSq)
+                {
+                    lowestSegment = angle;
+                    lowestDistance = distSq;
+                    lowestX = myPoint.X;
+                    lowestY = myPoint.Y;
+                }
+
+                /*g.DrawLine(Colors.Yellow, nP, nP);
+                g.DrawLine(Colors.Green, myPoint, myPoint);
+
+                if(angle == 0)
+                {
+                    PointF lp1 = new PointF(myPoint.X-10, myPoint.Y-10);
+                    PointF lp2 = new PointF(myPoint.X + 10, myPoint.Y + 10);
+
+                    g.DrawLine(Colors.Black, lp1, lp2);
+
+                    PointF p1 = new PointF(nP.X - 10, nP.Y - 10);
+                    PointF p2 = new PointF(nP.X + 10, nP.Y + 10);
+
+                    g.DrawLine(Colors.Black, p1, p2);
+                }
+                if (angle == 1)
+                {
+                    PointF lp1 = new PointF(myPoint.X - 10, myPoint.Y - 10);
+                    PointF lp2 = new PointF(myPoint.X + 10, myPoint.Y + 10);
+
+                    g.DrawLine(Colors.White, lp1, lp2);
+
+                    PointF p1 = new PointF(nP.X - 10, nP.Y - 10);
+                    PointF p2 = new PointF(nP.X + 10, nP.Y + 10);
+
+                    g.DrawLine(Colors.White, p1, p2);
+                }
+                if (angle == 2)
+                {
+                    PointF lp1 = new PointF(myPoint.X - 10, myPoint.Y - 10);
+                    PointF lp2 = new PointF(myPoint.X + 10, myPoint.Y + 10);
+
+                    g.DrawLine(Colors.Green, lp1, lp2);
+
+                    PointF p1 = new PointF(nP.X - 10, nP.Y - 10);
+                    PointF p2 = new PointF(nP.X + 10, nP.Y + 10);
+
+                    g.DrawLine(Colors.Green, p1, p2);
+                }
+                if (angle == 3)
+                {
+                    PointF lp1 = new PointF(myPoint.X - 10, myPoint.Y - 10);
+                    PointF lp2 = new PointF(myPoint.X + 10, myPoint.Y + 10);
+
+                    g.DrawLine(Colors.Yellow, lp1, lp2);
+
+                    PointF p1 = new PointF(nP.X - 10, nP.Y - 10);
+                    PointF p2 = new PointF(nP.X + 10, nP.Y + 10);
+
+                    g.DrawLine(Colors.Yellow, p1, p2);
+                }*/
+            }
+
+            /*PointF lowP = new PointF(lowestX-10, lowestY-10);
+            PointF lowP2 = new PointF(lowestX + 10, lowestY + 10);
+            g.DrawLine(Colors.Red, lowP, lowP2);
+
+            String Entry = String.Format("{0} {1} {2} {3} {4} {5}", lowestDistance, lowestSegment, lowestX, lowestY, (_bodyPositionDB.AbsolutePosition.X * _camera.ZoomLevel),
+                                                                    (_bodyPositionDB.AbsolutePosition.Y * _camera.ZoomLevel));
+            PointF tDraw = new PointF(10,10);
+            Font NF = new Font(FontFamilies.Monospace, 10.0f);
+            g.DrawText(NF, Colors.White, tDraw, Entry);*/
+            SweepCorrection = lowestSegment;
+
             g.TranslateTransform(focalOffset);
 
             // this point is from the frame of reference of the elipse.
@@ -142,10 +243,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         
             foreach (var pen in _segmentPens)
             {
-                g.DrawArc(pen, elipseBoundingBox, startArcAngle + (i * SweepAngle), SweepAngle);
+                if(SweepCorrection != -1)
+                    g.DrawArc(pen, elipseBoundingBox, ((i+SweepCorrection) * SweepAngle), SweepAngle);
+                else
+                    g.DrawArc(pen, elipseBoundingBox, startArcAngle + (i * SweepAngle), SweepAngle);
                 i++;
             }            
             g.RestoreTransform();
+
+            drawCount++;
+            if (drawCount == 5)
+                drawCount = 0;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
