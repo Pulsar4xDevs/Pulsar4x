@@ -20,7 +20,6 @@ namespace Pulsar4X.ECSLib
         {
             _loadTime = game.CurrentDateTime;
             _game = game;
-            _events = new List<Event>();
             
             _newEvents.Add(SpaceMaster, new List<Event>());
             foreach (Player player in _game.Players)
