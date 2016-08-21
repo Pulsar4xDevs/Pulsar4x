@@ -9,17 +9,14 @@ namespace Pulsar4X.ECSLib
     {
         private readonly Game _game;
         private readonly DateTime _loadTime;
-        private readonly List<Event> _events;
-        private readonly Dictionary<Player, List<Event>> _newEvents;
+        private readonly List<Event> _events = new List<Event>();
+        private readonly Dictionary<Player, List<Event>> _newEvents = new Dictionary<Player, List<Event>>();
 
         private Player SpaceMaster => _game.SpaceMaster;
 
-        internal EventLog()
-        {
-            _newEvents = new Dictionary<Player, List<Event>>();
-        }
+        internal EventLog() { }
 
-        internal EventLog(Game game) : this()
+        internal EventLog(Game game) 
         {
             _loadTime = game.CurrentDateTime;
             _game = game;
@@ -30,6 +27,11 @@ namespace Pulsar4X.ECSLib
             {
                 _newEvents.Add(player, new List<Event>());
             }
+        }
+
+        internal void AddPlayer(Player player)
+        {
+            _newEvents.Add(player, new List<Event>());
         }
 
         /// <summary>
@@ -82,6 +84,7 @@ namespace Pulsar4X.ECSLib
 
         internal void AddEvent(Event @event)
         {
+            _events.Add(@event);
             @event.ConcernedPlayers.Add(_game.SpaceMaster.ID);
             _newEvents[SpaceMaster].Add(@event);
 

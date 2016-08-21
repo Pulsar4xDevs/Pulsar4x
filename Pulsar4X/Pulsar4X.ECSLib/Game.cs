@@ -92,6 +92,7 @@ namespace Pulsar4X.ECSLib
             SyncContext = SynchronizationContext.Current;
             GlobalManager = new EntityManager(this);
             GameLoop = new TimeLoop(this);
+            EventLog = new EventLog();
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -122,6 +123,7 @@ namespace Pulsar4X.ECSLib
             // Create SM
             SpaceMaster = new Player("Space Master", newGameSettings.SMPassword);
             Players = new List<Player>();
+            EventLog = new EventLog(this);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
 
             if (newGameSettings.CreatePlayerFaction ?? false)
@@ -140,6 +142,8 @@ namespace Pulsar4X.ECSLib
 
             // Temp: This will be reworked later.
             GenerateSystems(new AuthenticationToken(SpaceMaster, newGameSettings.SMPassword), newGameSettings.MaxSystems);
+
+            
 
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
@@ -183,6 +187,7 @@ namespace Pulsar4X.ECSLib
         {
             var player = new Player(playerName, playerPassword);
             Players.Add(player);
+            EventLog.AddPlayer(player);
             return player;
         }
 

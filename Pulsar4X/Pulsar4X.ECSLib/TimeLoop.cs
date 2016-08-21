@@ -54,6 +54,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="state"></param>
         private void InvokeDateChange(object state)
         {
+            Event logevent = new Event(GameGlobalDateTime, "Game Global Date Changed", null, null, null);
+            logevent.EventType = EventType.GlobalDateChange;
+            _game.EventLog.AddEvent(logevent);
+
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }
         [JsonProperty]

@@ -53,6 +53,11 @@ namespace Pulsar4X.ECSLib
             ConcernedPlayers = concernedPlayers;
         }
 
+        public string GetSystemName(Game game, AuthenticationToken auth)
+        {
+            return game.GetSystem(auth, SystemGuid).NameDB.DefaultName;
+        }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue(nameof(Time), Time);
