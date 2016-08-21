@@ -51,5 +51,6 @@ namespace Pulsar4X.ECSLib.Processors
             {
                 //delete the existing asteroid. how do I remove asteroids?
             }
+        }
     }
 }
