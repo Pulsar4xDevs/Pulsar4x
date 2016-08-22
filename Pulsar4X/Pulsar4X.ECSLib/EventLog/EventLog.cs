@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
 
         private Player SpaceMaster => _game.SpaceMaster;
 
-        internal EventLog() { }
+        //internal EventLog() { }
 
         internal EventLog(Game game) 
         {

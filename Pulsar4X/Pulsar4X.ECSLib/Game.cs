@@ -92,7 +92,7 @@ namespace Pulsar4X.ECSLib
             SyncContext = SynchronizationContext.Current;
             GlobalManager = new EntityManager(this);
             GameLoop = new TimeLoop(this);
-            EventLog = new EventLog();
+            EventLog = new EventLog(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()

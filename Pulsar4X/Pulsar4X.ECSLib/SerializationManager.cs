@@ -181,7 +181,7 @@ namespace Pulsar4X.ECSLib
         }
         public static EventLog ImportEventLog([NotNull] Game game, [NotNull] Stream inputStream)
         {
-            EventLog eventLog = new EventLog();
+            EventLog eventLog = new EventLog(game);
             eventLog = Import(game, inputStream, eventLog);
             game.EventLog = eventLog;
             return eventLog;
