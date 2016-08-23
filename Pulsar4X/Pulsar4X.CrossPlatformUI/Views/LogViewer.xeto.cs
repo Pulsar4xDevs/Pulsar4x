@@ -17,6 +17,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         //protected GridColumn GCentity;
         //protected GridColumn GCmsg;
         protected GridView GVevents;
+        protected GridView GVTypeActions;
         private LogViewerVM _vm;
         public LogViewer(LogViewerVM vm)
         {
@@ -24,7 +25,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _vm = vm;
             GVevents.DataStore = _vm.EventsDict;
 
-
+            GVTypeActions.DataStore = _vm.EventTypes;
 
             //GCdatetime.DataCell = new TextBoxCell { Binding = Binding.Property<Event, DateTime>(r => r.Time).Convert(r => r.ToString()) };
             ////GCsys.DataCell = new TextBoxCell { Binding = Binding.Property<Event, Event>(r => r).Convert(r => r.GetSystemName(_vm.Game, _vm.Auth)) };
@@ -33,7 +34,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //GCentity.DataCell = new TextBoxCell { Binding = Binding.Property<Event, Entity>(r => r.Entity).Convert(r=> r.ToString()) };
             //GCmsg.DataCell = new TextBoxCell { Binding = Binding.Property<Event, string>(r => r.Message) };
 
-
+            #region GVevents setup
             GVevents.Columns.Add(new GridColumn
             {
                 HeaderText = "Date Time",               
@@ -51,11 +52,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             });
             GVevents.Columns.Add(new GridColumn
             {
-                HeaderText = "Halts",
-                //DataCell = new CheckBoxCell { Binding = Binding.Property<Player, bool>(r => r.HaltsOnEvent[]) };
-            });
-            GVevents.Columns.Add(new GridColumn
-            {
                 HeaderText = "Entity",
                 //DataCell = new TextBoxCell { Binding = Binding.Property<Event, Entity>(r => r.Entity).Convert(r => r.ToString()) }
             });
@@ -64,10 +60,33 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 HeaderText = "Message",
                 DataCell = new TextBoxCell { Binding = Binding.Property<Event, string>(r => r.Message) }            
             });
+            #endregion
+
+            #region GVTypeAction setup
+            GVTypeActions.Columns.Add(new GridColumn
+            {
+                HeaderText = "Event Type",
+                DataCell = new TextBoxCell { Binding = Binding.Property<LogViewerVM.EventTypeBoolPair, EventType>(r => r.EventType).Convert(r => Enum.GetName(typeof(EventType), r)) }
+            });
+
+            GVTypeActions.Columns.Add(new GridColumn
+            {
+                HeaderText = "Halts",
+                DataCell = new CheckBoxCell { Binding = Binding.Property<LogViewerVM.EventTypeBoolPair, bool?>(r => r.IsHalting) },
+                Editable = true
+                
+            });
+            #endregion
 
             DataContextChanged += LogViewer_DataContextChanged;
             vm.PropertyChanged += Vm_PropertyChanged;
             vm.EventsDict.CollectionChanged += EventsDict_CollectionChanged;
+            vm.EventTypes.CollectionChanged += EventTypes_CollectionChanged;
+        }
+
+        private void EventTypes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
         }
 
         private void EventsDict_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

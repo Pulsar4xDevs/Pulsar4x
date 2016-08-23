@@ -3,14 +3,21 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-  <StackLayout>
-    <TableLayout>
+  <TabControl>
+    <TabPage>
+      <StackLayout>
+        <TableLayout>
       
-    </TableLayout>
+        </TableLayout>
+        <Scrollable>
+          <GridView x:Name="GVevents"   />             
+        </Scrollable>
+      </StackLayout>
+      </TabPage>
+  <TabPage>
     <Scrollable>
-      <GridView x:Name="GVevents" DataContext ="EventsDict"  >
-     
-      </GridView>
+      <GridView x:Name="GVTypeActions"  />
     </Scrollable>
-  </StackLayout>
+  </TabPage>
+  </TabControl>
 </Panel>

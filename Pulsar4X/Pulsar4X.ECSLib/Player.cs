@@ -134,6 +134,7 @@ namespace Pulsar4X.ECSLib
             PasswordHash = GeneratePasswordHash(password, Salt);
             Orders = new OrderQueue();
 
+
         }
 
         #endregion
