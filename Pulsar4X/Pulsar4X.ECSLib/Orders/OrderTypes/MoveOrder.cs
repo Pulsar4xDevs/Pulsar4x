@@ -91,10 +91,11 @@ namespace Pulsar4X.ECSLib
                 if (PositionTarget == null)  // Either a location or a target is necessary
                     return false;
             }
-            else
+            else if (!Target.HasDataBlob<PositionDB>())
+                return false;
                 // @todo: jump point, jump survey point
-                if (!Target.HasDataBlob<SystemBodyDB>() && !Target.HasDataBlob<ShipInfoDB>())
-                    return false;
+                //if (!Target.HasDataBlob<SystemBodyDB>() && !Target.HasDataBlob<ShipInfoDB>())
+                //return false;
 
             // @todo: further conditions
 
