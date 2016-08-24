@@ -107,13 +107,13 @@ namespace Pulsar4X.ECSLib
         public override bool processOrder()
         {
 
-            double speedMultiplier = 1000.0;
+            double speedMultiplier = 1.0;
             double minimumDistance = 1000.0;
             PositionDB currentPosition = Owner.GetDataBlob<PositionDB>();
             PositionDB targetPosition = null;
             double AUSpeed, kmSpeed;
 
-            kmSpeed = Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * 1000;
+            kmSpeed = Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * speedMultiplier;
             AUSpeed = Distance.KmToAU(kmSpeed);
 
             currentPosition.SetParent(null);

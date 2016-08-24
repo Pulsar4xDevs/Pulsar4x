@@ -24,7 +24,8 @@ namespace Pulsar4X.ECSLib
                 {
                     //TODO: do we need to check if the ship has an orbitDB?
                     //TODO: if the ship will arrive at the destination in the next deltaSeconds, don't go past it.
-                    shipEntity.GetDataBlob<PositionDB>().AddMeters(shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
+                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
+                    //shipEntity.GetDataBlob<PositionDB>().AddMeters(shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
                     //TODO: use fuel.
                 }
             }
@@ -75,7 +76,8 @@ namespace Pulsar4X.ECSLib
 
                         distanceToTarget = deltaVec.Length();  //in au
 
-                        newPos = shipPos + Distance.MToAU(currentSpeed * deltaSeconds);
+                        //newPos = shipPos + Distance.MToAU(currentSpeed * deltaSeconds);
+                        newPos = shipPos + (currentSpeed * deltaSeconds);
 
                         deltaVec = shipPos - newPos;
                         distanceToNewTarget = deltaVec.Length();
@@ -108,7 +110,8 @@ namespace Pulsar4X.ECSLib
 
                 }
 
-                shipEntity.GetDataBlob<PositionDB>().AddMeters(shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
+                //shipEntity.GetDataBlob<PositionDB>().AddMeters(shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
+                shipEntity.GetDataBlob<PositionDB>().AbsolutePosition += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
                 //TODO: use fuel.
             }
             
