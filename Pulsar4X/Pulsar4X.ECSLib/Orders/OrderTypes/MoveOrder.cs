@@ -107,7 +107,8 @@ namespace Pulsar4X.ECSLib
         public override bool processOrder()
         {
 
-            double speedMultiplier = 1.0;
+            double speedMultiplier = 1.0; //was this just for debugging? if so we should remove it, if not, then maybe move it to game settings?
+
             double minimumDistance = 1000.0;
             PositionDB currentPosition = Owner.GetDataBlob<PositionDB>();
             PositionDB targetPosition = null;

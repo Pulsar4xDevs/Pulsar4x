@@ -132,8 +132,8 @@ namespace Pulsar4X.Tests
             double speedX, speedY;
 
             // multiplier to modify overly slow speeds
-            speedX = Distance.KmToAU((x / length) * _shipPropulsionDB.MaximumSpeed) * 1000.0;
-            speedY = Distance.KmToAU((y / length) * _shipPropulsionDB.MaximumSpeed) * 1000.0;
+            speedX = Distance.KmToAU((x / length) * _shipPropulsionDB.MaximumSpeed);
+            speedY = Distance.KmToAU((y / length) * _shipPropulsionDB.MaximumSpeed);
 
             // Allowing for very small discrepancies
             Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
