@@ -49,6 +49,14 @@ namespace Pulsar4X.ECSLib
             return name;
         }
 
+        public string GetName(Entity requestingFaction, Game game, AuthenticationToken auth)
+        {
+     
+            if (game.GetPlayerForToken(auth).AccessRoles[requestingFaction] < AccessRole.Intelligence)
+                requestingFaction = Entity.InvalidEntity;
+            return GetName(requestingFaction);
+        }
+
         [PublicAPI]
         public void SetName(Entity requestingFaction, string specifiedName)
         {

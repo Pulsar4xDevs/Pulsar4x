@@ -13,6 +13,7 @@ namespace Pulsar4X.ECSLib
         [CanBeNull]
         public Entity Faction { get; internal set; }
         
+        [CanBeNull]
         public Guid SystemGuid { get; internal set; }
         
         [CanBeNull]
@@ -53,10 +54,6 @@ namespace Pulsar4X.ECSLib
             ConcernedPlayers = concernedPlayers;
         }
 
-        public string GetSystemName(Game game, AuthenticationToken auth)
-        {
-            return game.GetSystem(auth, SystemGuid).NameDB.DefaultName;
-        }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {

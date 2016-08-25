@@ -10,12 +10,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
 {
     public class LogViewer : Panel
     {
-        //protected GridColumn GCdatetime;
-        //protected GridColumn GCsys;
-        //protected GridColumn GCtype;
-        //protected GridColumn GChalts;
-        //protected GridColumn GCentity;
-        //protected GridColumn GCmsg;
         protected GridView GVevents;
         protected GridView GVTypeActions;
         private LogViewerVM _vm;
@@ -27,38 +21,31 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             GVTypeActions.DataStore = _vm.EventTypes;
 
-            //GCdatetime.DataCell = new TextBoxCell { Binding = Binding.Property<Event, DateTime>(r => r.Time).Convert(r => r.ToString()) };
-            ////GCsys.DataCell = new TextBoxCell { Binding = Binding.Property<Event, Event>(r => r).Convert(r => r.GetSystemName(_vm.Game, _vm.Auth)) };
-            //GCtype.DataCell = new TextBoxCell { Binding = Binding.Property<Event, EventType>(r => r.EventType).Convert(r => Enum.GetName(typeof(EventType), r)) };
-            ////GChalts.DataCell = new CheckBoxCell { Binding = Binding.Property<Event, bool>(r => r..ToString()) };
-            //GCentity.DataCell = new TextBoxCell { Binding = Binding.Property<Event, Entity>(r => r.Entity).Convert(r=> r.ToString()) };
-            //GCmsg.DataCell = new TextBoxCell { Binding = Binding.Property<Event, string>(r => r.Message) };
-
             #region GVevents setup
             GVevents.Columns.Add(new GridColumn
             {
                 HeaderText = "Date Time",               
-                DataCell = new TextBoxCell { Binding = Binding.Property<Event, DateTime>(r => r.Time).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<EventVM, DateTime>(r => r.Time).Convert(r => r.ToString()) }
             });
             GVevents.Columns.Add(new GridColumn
             {
                 HeaderText = "System",
-                //DataCell = new TextBoxCell { Binding = Binding.Property<Event, Event>(r => r).Convert(r => r.GetSystemName(_vm.Game, _vm.Auth)) };
+                DataCell = new TextBoxCell { Binding = Binding.Property<EventVM, string>(r => r.SystemName) }
             });
             GVevents.Columns.Add(new GridColumn
             {
                 HeaderText = "Event Type",
-                DataCell = new TextBoxCell { Binding = Binding.Property<Event, EventType>(r => r.EventType).Convert(r => Enum.GetName(typeof(EventType), r)) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<EventVM, string>(r => r.EventTypeSsring) }
             });
             GVevents.Columns.Add(new GridColumn
             {
                 HeaderText = "Entity",
-                //DataCell = new TextBoxCell { Binding = Binding.Property<Event, Entity>(r => r.Entity).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<EventVM, string>(r => r.EntityName) }
             });
             GVevents.Columns.Add(new GridColumn
             {
                 HeaderText = "Message",
-                DataCell = new TextBoxCell { Binding = Binding.Property<Event, string>(r => r.Message) }            
+                DataCell = new TextBoxCell { Binding = Binding.Property<EventVM, string>(r => r.Message) }            
             });
             #endregion
 
@@ -79,25 +66,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             #endregion
 
             DataContextChanged += LogViewer_DataContextChanged;
-            vm.PropertyChanged += Vm_PropertyChanged;
-            vm.EventsDict.CollectionChanged += EventsDict_CollectionChanged;
-            vm.EventTypes.CollectionChanged += EventTypes_CollectionChanged;
         }
 
-        private void EventTypes_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
 
-        private void EventsDict_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
-
-        private void Vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
 
         private void LogViewer_DataContextChanged(object sender, EventArgs e)
         {

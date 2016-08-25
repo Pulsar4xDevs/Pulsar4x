@@ -12,7 +12,8 @@ namespace Pulsar4X.ViewModel
     {
         private GameVM _gameVM;
 
-        public RangeEnabledObservableCollection<Event> EventsDict { get; } = new RangeEnabledObservableCollection<Event>();
+        public RangeEnabledObservableCollection<EventVM> EventsDict { get; } = new RangeEnabledObservableCollection<EventVM>();
+
         public RangeEnabledObservableCollection<EventTypeBoolPair> EventTypes { get; } = new RangeEnabledObservableCollection<EventTypeBoolPair>();
         public AuthenticationToken Auth { get { return _gameVM.CurrentAuthToken; } }
         public Game Game { get { return _gameVM.Game; } }
@@ -21,7 +22,11 @@ namespace Pulsar4X.ViewModel
         {
             _gameVM = gameVM;
             if (Game != null && Auth != null)
-                EventsDict.AddRange(Game.EventLog.GetAllEvents(Auth));
+                foreach (var item in Game.EventLog.GetAllEvents(Auth))
+                {
+                    EventsDict.Add(new EventVM(item, _gameVM.CurrentFaction, _gameVM));
+                }
+                
 
             foreach (var kvp in gameVM.CurrentPlayer.HaltsOnEvent)
             {
@@ -39,7 +44,10 @@ namespace Pulsar4X.ViewModel
 
         public void Refresh()
         {
-            EventsDict.AddRange(Game.EventLog.GetNewEvents(Auth));
+            foreach (var item in Game.EventLog.GetNewEvents(Auth))
+            {
+                EventsDict.Add(new EventVM(item, _gameVM.CurrentFaction, _gameVM));
+            }
         }
 
         public class EventTypeBoolPair : ViewModelBase
@@ -65,6 +73,40 @@ namespace Pulsar4X.ViewModel
                 EventType = eventType;
             }
 
+        }
+    }
+
+    //requred due to how events are currently stored ingame. ie they don't have a name string, and the name string will be different depending on 
+    //which faction is looking at it. ditto for system name. 
+    public class EventVM
+    {
+        private Event _evnt { get;  set; } 
+        private Entity _faction { get; set; }
+        private GameVM _gameVM;
+
+        public DateTime Time { get { return  _evnt.Time; } }
+
+        public string Message { get { return _evnt.Message; } }
+
+        public string Faction { get { return _evnt.Faction?.GetDataBlob<NameDB>()?.GetName(_faction) ?? "";  } }
+
+        public string SystemName { get
+            {
+                if (_evnt.SystemGuid != Guid.Empty)
+                    return _gameVM.Game.GetSystem(_gameVM.CurrentAuthToken, _evnt.SystemGuid).NameDB.GetName(_faction);
+                else
+                    return "";
+            }}
+
+        public string EntityName { get { return _evnt.Entity?.GetDataBlob<NameDB>()?.GetName(_faction) ?? ""; } }
+
+        public string EventTypeSsring { get { return Enum.GetName(typeof(EventType), _evnt.EventType); } }
+
+        public EventVM(Event evnt, Entity Faction, GameVM gameVM)
+        {
+            _evnt = evnt;
+            _faction = Faction;
+            _gameVM = gameVM;
         }
     }
 }
