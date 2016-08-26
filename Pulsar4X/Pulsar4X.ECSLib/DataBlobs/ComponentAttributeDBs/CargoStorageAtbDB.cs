@@ -12,29 +12,23 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int StorageCapacity { get; internal set; }
 
+        /// <summary>
+        /// Type of cargo this stores
+        /// </summary>
+        [JsonProperty]
         public Guid CargoTypeGuid { get; internal set; }
-        public CargoTypeSD CargoType { get; internal set; }
 
-        // JSON deserialization callback.
-        [OnDeserialized]
-        private void Deserialized(StreamingContext context)
-        {
-            // Star system resolver loads myStarSystem from mySystemGuid after the game is done loading.
-            var game = (Game)context.Context;
-            game.PostLoad += (sender, args) => {
-                if (!game.StaticData.CargoTypes.ContainsKey(CargoTypeGuid))
-                    CargoType = game.StaticData.CargoTypes[CargoTypeGuid];
-                else 
-                     throw new GuidNotFoundException(CargoTypeGuid); };
-        }
+        /// <summary>
+        /// Parser Constructor
+        /// </summary>
+        /// <param name="storageCapacity">will get cast to an int</param>
+        /// <param name="cargoType">cargo type ID as defined in StaticData CargoTypeSD</param>
+        public CargoStorageAtbDB(double storageCapacity, Guid cargoType) : this((int)storageCapacity, cargoType) { }
 
-        public CargoStorageAtbDB(double storageCapacity, CargoTypeSD cargoType) : this((int)storageCapacity, cargoType) { }
-
-        public CargoStorageAtbDB(int storageCapacity, CargoTypeSD cargoType)
+        public CargoStorageAtbDB(int storageCapacity, Guid cargoType)
         {
             StorageCapacity = storageCapacity;
-            CargoType = cargoType;
-            CargoTypeGuid = cargoType.ID;
+            CargoTypeGuid = cargoType;
         }
 
         [JsonConstructor]
