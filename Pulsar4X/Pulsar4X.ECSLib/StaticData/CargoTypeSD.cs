@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
     [StaticData(true, IDPropertyName = "ID")]
-    public struct MineralSD
+    public struct CargoTypeSD
     {
         public string Name;
         public string Description;
         public Guid ID;
-        public Guid CargoType;
-        public float Weight;
-
-        public Dictionary<BodyType, double> Abundance;
     }
 }
+
+

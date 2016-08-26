@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         public ushort RefineryPointCost;
         public ushort WealthCost;
         public ushort OutputAmount;
-        //public CargoType CargoType;
+        public Guid CargoType;
         public float Weight;
     }
 }

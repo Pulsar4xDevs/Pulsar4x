@@ -258,6 +258,7 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
+    <Compile Include="StaticData\CargoTypeSD.cs" />
     <Compile Include="StaticData\CommanderNameSD.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
     <Compile Include="DataBlobs\NameDB.cs" />
@@ -345,6 +346,7 @@
     <Content Include="Data\Pulsar4x\VersionInfo.vinfo">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Data\Pulsar4x\CargoTypeData.json" />
     <None Include="packages.config" />
     <Content Include="Data\Pulsar4x\AtmosphericData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

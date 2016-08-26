@@ -158,6 +158,37 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void TestCargoType()
+        {
+            Dictionary<Guid, CargoTypeSD> cargoTypes = new Dictionary<Guid, CargoTypeSD>();
+            CargoTypeSD cargoTypeGeneral = new CargoTypeSD()
+            {
+                ID = new Guid("16B4C4F0-7292-4F4D-8FEA-22103C70B288"),
+                Name = "General",
+                Description = "Storage for general cargo items"
+            };
+            cargoTypes.Add(cargoTypeGeneral.ID, cargoTypeGeneral);
+
+            CargoTypeSD cargoTypeFuel = new CargoTypeSD()
+            {
+                ID = new Guid("D8E8DA2D-8DC8-4A3F-B989-5F2E67C55E77"),
+                Name = "Fuel",
+                Description = "Storage for fuel"
+            };
+            cargoTypes.Add(cargoTypeFuel.ID, cargoTypeFuel);
+
+            CargoTypeSD cargoTypePopulation = new CargoTypeSD()
+            {
+                ID = new Guid("9E52A3AF-66AF-4935-982D-26F3FEE775B0"),
+                Name = "Cryogenic Storage",
+                Description = "Storage for frozen people"
+            };
+            cargoTypes.Add(cargoTypePopulation.ID, cargoTypePopulation);
+
+            StaticDataManager.ExportStaticData(cargoTypes, "CargoTypeDataExportTest.json");
+        }
+
+        [Test]
         public void TestRefinedMatsSave()
         {
             Dictionary<Guid, RefinedMaterialSD> mats = new Dictionary<Guid, RefinedMaterialSD>();

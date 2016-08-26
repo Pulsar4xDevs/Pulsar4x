@@ -61,6 +61,12 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, ComponentTemplateSD> Components = new Dictionary<Guid, ComponentTemplateSD>();
 
         /// <summary>
+        /// Dictionary to store CargoTypes
+        /// </summary>
+        [JsonIgnore]
+        public Dictionary<Guid, CargoTypeSD> CargoTypes = new Dictionary<Guid, CargoTypeSD>();
+
+        /// <summary>
         /// Settings used by system generation. 
         /// @todo make Galaxy gen use this instead of default data (DO NOT DELETE THE HARD CODED DATA THO, that should be a fall back).
         /// </summary>
@@ -109,6 +115,9 @@ namespace Pulsar4X.ECSLib
                     "Components", typeof(Dictionary<Guid, ComponentTemplateSD>)
                 },
                 {
+                    nameof(CargoTypeSD), typeof(Dictionary<Guid, CargoTypeSD>)
+                },
+                {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
                 },
                 {
@@ -145,6 +154,9 @@ namespace Pulsar4X.ECSLib
                     typeof(Dictionary<Guid, ComponentTemplateSD>), "Components"
                 },
                 {
+                    typeof(Dictionary<Guid, CargoTypeSD>), nameof(CargoTypeSD)
+                },
+                {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
                 },
                 {
@@ -177,6 +189,9 @@ namespace Pulsar4X.ECSLib
 
             if (Components.ContainsKey(id))
                 return Components[id];
+
+            if (CargoTypes.ContainsKey(id))
+                return CargoTypes[id];
 
             return null;
         }
@@ -284,6 +299,18 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (KeyValuePair<Guid, ComponentTemplateSD> component in components)
                     Components[component.Key] = component.Value;
+            }
+        }
+
+        /// <summary>
+        /// Stores Component Static Data. Will overwrite any existing Component with the same ID.
+        /// </summary>
+        internal void Store(Dictionary<Guid, CargoTypeSD> cargoTypes)
+        {
+            if (cargoTypes != null)
+            {
+                foreach (KeyValuePair<Guid, CargoTypeSD> typeKVP in cargoTypes)
+                    cargoTypes[typeKVP.Key] = typeKVP.Value;
             }
         }
 
