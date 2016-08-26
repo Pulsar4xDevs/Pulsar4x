@@ -88,10 +88,12 @@ namespace Pulsar4X.ECSLib
         {
             var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
             Entity engine = DefaultEngineDesign(game, faction);
+            Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
+            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
             EntityManipulation.AddComponentToEntity(shipDesign, bfc);
             shipDesign.GetDataBlob<PropulsionDB>().FuelStorageCapicity = 100;
@@ -108,6 +110,15 @@ namespace Pulsar4X.ECSLib
             engineDesign.Name = "DefaultEngine1";
             //engineDesignDB.ComponentDesignAbilities[1]
             return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);
+        }
+
+        public static Entity DefaultFuelTank(Game game, Entity faction)
+        {
+            ComponentDesign fuelTankDesign;
+            ComponentTemplateSD tankSD = game.StaticData.Components[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
+            fuelTankDesign = GenericComponentFactory.StaticToDesign(tankSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            fuelTankDesign.Name = "Tank1k";
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, fuelTankDesign);
         }
 
         public static Entity DefaultSimpleLaser(Game game, Entity faction)

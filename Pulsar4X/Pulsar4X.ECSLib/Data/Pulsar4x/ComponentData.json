@@ -575,6 +575,48 @@
             }
           ]
         }
+      },
+      {
+        "Key": "E7AC4187-58E4-458B-9AEA-C3E07FC993CB",
+        "Value": {
+          "Name": "Fuel Storage",
+          "Description": "Stores Fuel",
+          "ID": "E7AC4187-58E4-458B-9AEA-C3E07FC993CB",
+          "SizeFormula": "1000",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "1",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "10"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "10"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Storage Capacity",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "1000"
+            },
+            {
+              "Name": "DBargs",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+            }
+          ]
+        }
       }
 
     ]
