@@ -5,18 +5,13 @@
   >
   <TabControl>
     <TabPage>
-      <StackLayout>
-        <TableLayout>
-      
-        </TableLayout>
-        <Scrollable>
-          <GridView x:Name="GVevents"   />             
-        </Scrollable>
-      </StackLayout>
-      </TabPage>
-  <TabPage>
-    <Scrollable>
-      <GridView x:Name="GVTypeActions"  />
+      <Scrollable>
+        <GridView x:Name="GVevents"  DataStore="{Binding EventsDict}"  />             
+      </Scrollable>
+     </TabPage>
+  <TabPage >
+    <Scrollable >
+      <GridView x:Name="GVTypeActions" DataStore="{Binding EventTypes}" />
     </Scrollable>
   </TabPage>
   </TabControl>

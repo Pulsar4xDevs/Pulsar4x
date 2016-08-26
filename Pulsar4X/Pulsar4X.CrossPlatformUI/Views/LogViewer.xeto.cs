@@ -12,15 +12,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         protected GridView GVevents;
         protected GridView GVTypeActions;
-        private LogViewerVM _vm;
-        public LogViewer(LogViewerVM vm)
+        //private LogViewerVM _vm;
+        public LogViewer()
         {
             XamlReader.Load(this);
-            _vm = vm;
-            GVevents.DataStore = _vm.EventsDict;
-
-            GVTypeActions.DataStore = _vm.EventTypes;
-
             #region GVevents setup
             GVevents.Columns.Add(new GridColumn
             {
@@ -65,15 +60,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             });
             #endregion
 
-            DataContextChanged += LogViewer_DataContextChanged;
         }
 
-
-
-        private void LogViewer_DataContextChanged(object sender, EventArgs e)
-        {
-            if (DataContext is LogViewerVM)
-                _vm = (LogViewerVM)DataContext;
-        }
     }
 }

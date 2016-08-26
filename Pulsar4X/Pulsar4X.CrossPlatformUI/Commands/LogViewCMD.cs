@@ -35,8 +35,8 @@ namespace Pulsar4X.CrossPlatformUI.Commands
 
             LogViewerVM vm = new LogViewerVM(_gameVM);
             Views.MainWindow mw = (Views.MainWindow)Application.Instance.MainForm.Content;
-            Views.LogViewer logPannel = new Views.LogViewer(vm);
-            //logPannel.DataContext = vm;
+            Views.LogViewer logPannel = new Views.LogViewer();
+            logPannel.DataContext = vm;
             mw.AddOrSelectTabPanel("Event Log", logPannel);
 
         }
