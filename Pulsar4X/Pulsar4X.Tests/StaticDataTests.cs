@@ -330,7 +330,8 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(staticDataStore.Minerals);
             Assert.IsNotEmpty(staticDataStore.AtmosphericGases);
             Assert.IsNotEmpty(staticDataStore.CommanderNameThemes);
-            Assert.IsNotEmpty(staticDataStore.Minerals);
+            Assert.IsNotEmpty(staticDataStore.RefinedMaterials);
+            Assert.IsNotEmpty(staticDataStore.CargoTypes);
             Assert.IsNotEmpty(staticDataStore.Techs);
 
             // now lets re-load the same data, to test that duplicates don't occure as required:

@@ -533,7 +533,50 @@
             }
           ]
         }
+      },
+      {
+        "Key": "30cd60f8-1de3-4faa-acba-0933eb84c199",
+        "Value": {
+          "Name": "General Storage",
+          "Description": "Stores General Cargo",
+          "ID": "30cd60f8-1de3-4faa-acba-0933eb84c199",
+          "SizeFormula": "500000",
+          "HTKFormula": "[Size]",
+          "CrewReqFormula": "1000000",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Size]",
+          "MountType": "ShipCargo, PlanetInstallation",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Storage Capacity",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Construction Points",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+            }
+          ]
+        }
       }
+
     ]
   }
 }

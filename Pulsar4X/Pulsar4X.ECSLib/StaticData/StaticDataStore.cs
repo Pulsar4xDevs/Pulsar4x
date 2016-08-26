@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
                     "Components", typeof(Dictionary<Guid, ComponentTemplateSD>)
                 },
                 {
-                    nameof(CargoTypeSD), typeof(Dictionary<Guid, CargoTypeSD>)
+                    "CargoTypes", typeof(Dictionary<Guid, CargoTypeSD>)
                 },
                 {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
@@ -154,7 +154,7 @@ namespace Pulsar4X.ECSLib
                     typeof(Dictionary<Guid, ComponentTemplateSD>), "Components"
                 },
                 {
-                    typeof(Dictionary<Guid, CargoTypeSD>), nameof(CargoTypeSD)
+                    typeof(Dictionary<Guid, CargoTypeSD>), "CargoTypes"
                 },
                 {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
@@ -310,7 +310,7 @@ namespace Pulsar4X.ECSLib
             if (cargoTypes != null)
             {
                 foreach (KeyValuePair<Guid, CargoTypeSD> typeKVP in cargoTypes)
-                    cargoTypes[typeKVP.Key] = typeKVP.Value;
+                    CargoTypes[typeKVP.Key] = typeKVP.Value;
             }
         }
 
@@ -360,6 +360,7 @@ namespace Pulsar4X.ECSLib
                 _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
                 Minerals = new Dictionary<Guid, MineralSD>(Minerals),
                 RefinedMaterials = new Dictionary<Guid, RefinedMaterialSD>(RefinedMaterials),
+                CargoTypes = new Dictionary<Guid, CargoTypeSD>(CargoTypes),
                 SystemGenSettings = SystemGenSettings, // Todo: Make this cloneable
                 Techs = new Dictionary<Guid, TechSD>(Techs)
             };

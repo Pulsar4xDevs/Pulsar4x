@@ -107,6 +107,27 @@ namespace Pulsar4X.Tests
 
         }
 
+        [Test]
+        public void TestCargoComponentCreation()
+        {
+            ComponentTemplateSD cargo = GeneralCargo();
+
+            ComponentDesign cargoDesign = GenericComponentFactory.StaticToDesign(cargo, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            cargoDesign.ComponentDesignAbilities[0].SetValue();
+            Entity cargoEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, cargoDesign);
+
+            CargoStorageAtbDB attributeDB = cargoEntity.GetDataBlob<CargoStorageAtbDB>();
+
+            
+            CargoTypeSD cargotype = _game.StaticData.CargoTypes[attributeDB.CargoTypeGuid];
+
+            Assert.AreEqual(100, attributeDB.StorageCapacity);
+
+            Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
+            componentsDict.Add(cargo.ID, cargo);
+            StaticDataManager.ExportStaticData(componentsDict, "CargoComponentTest.json");
+
+        }
 
         public static ComponentTemplateSD EngineComponentSD()
         {
@@ -493,7 +514,7 @@ namespace Pulsar4X.Tests
             generalCargoCapacityAbility.Description = "";
             generalCargoCapacityAbility.GuiHint = GuiHint.None;
             generalCargoCapacityAbility.AbilityDataBlobType = typeof(CargoStorageAtbDB).ToString();
-            generalCargoCapacityAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
+            generalCargoCapacityAbility.AbilityFormula = "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'))";
             component.ComponentAbilitySDs.Add(generalCargoCapacityAbility);
 
             return component;
