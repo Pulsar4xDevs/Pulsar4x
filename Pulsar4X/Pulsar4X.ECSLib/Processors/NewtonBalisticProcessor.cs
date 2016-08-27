@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
             {
                 NewtonBalisticDB balisticDB = objectEntity.GetDataBlob<NewtonBalisticDB>();
                 PositionDB position = objectEntity.GetDataBlob<PositionDB>();
-                position.RelativePosition += Distance.ToAU(balisticDB.CurrentSpeed * orbitCycle.TotalSeconds);
+                position.RelativePosition += Distance.KmToAU(balisticDB.CurrentSpeed * orbitCycle.TotalSeconds);
             }
         }
     }

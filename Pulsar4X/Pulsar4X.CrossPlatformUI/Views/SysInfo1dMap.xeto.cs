@@ -51,9 +51,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         }
 
         private void Init()
-        {
-
-            
+        {            
             _iconCollection.Init(_vm.Entities.Keys, _cam);
         }
 

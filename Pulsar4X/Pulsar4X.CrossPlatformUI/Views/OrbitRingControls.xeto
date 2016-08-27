@@ -3,5 +3,25 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-	<Label Text="Some Content" />
+  <TableLayout>
+    <TableRow>
+      <Label Text="MinimumDrawSize" />
+      <NumericUpDown Increment="1" MaximumDecimalPlaces="0" MinValue="1" />
+      <TableCell></TableCell>
+    </TableRow>
+    <TableRow>
+      <Label Text="Arc Percent"/>
+      <Slider MinValue="0" MaxValue ="100" SnapToTick ="True" TickFrequency="10" />
+    </TableRow>
+    <TableRow>
+      <Label Text="Segments" />
+      <Slider MinValue="1" MaxValue="255" SnapToTick ="True" TickFrequency="1" />
+    </TableRow>
+    <TableRow>
+      <Label Text="RingColour" />
+      <ColorPicker/>
+    </TableRow>
+    <TableRow></TableRow>
+  </TableLayout>
+	
 </Panel>

@@ -51,15 +51,19 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public static class Distance
     {
-        public static double ToAU(double km)
+        public static Vector4 MToAU(Vector4 meters)
+        {
+            return meters * 0.001 / GameConstants.Units.KmPerAu;
+        }
+        public static double KmToAU(double km)
         {
             return km / GameConstants.Units.KmPerAu;
         }
-        public static Vector4 ToAU(Vector4 km)
+        public static Vector4 KmToAU(Vector4 km)
         {
             return km / GameConstants.Units.KmPerAu;
         }
-        public static double ToKm(double au)
+        public static double AuToKm(double au)
         {
             return au * GameConstants.Units.KmPerAu;
         }

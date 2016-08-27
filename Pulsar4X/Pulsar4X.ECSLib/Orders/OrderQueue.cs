@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         #region Properties
 
         List<BaseOrder> _orderList;
-        EntityManager _entityManager;
+        //EntityManager _entityManager;
 
         #endregion 
 
@@ -21,25 +21,25 @@ namespace Pulsar4X.ECSLib
         public OrderQueue()
         {
             _orderList = new List<BaseOrder>();
-            _entityManager = new EntityManager(new Game());
+            //_entityManager = new EntityManager(new Game());
         }
 
         public OrderQueue(Game game)
         {
             _orderList = new List<BaseOrder>();
-            _entityManager = new EntityManager(game);
+            //_entityManager = new EntityManager(game);
         }
 
         public OrderQueue(EntityManager em)
         {
             _orderList = new List<BaseOrder>();
-            _entityManager = em;
+            //_entityManager = em;
         }
 
         public OrderQueue(OrderQueue oq)
         {
             _orderList = _orderList.Select(item => (BaseOrder)item.Clone()).ToList();
-            _entityManager = oq._entityManager;
+            //_entityManager = oq._entityManager;
         }
 
         #endregion

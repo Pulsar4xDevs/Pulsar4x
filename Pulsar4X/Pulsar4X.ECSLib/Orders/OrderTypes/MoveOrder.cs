@@ -91,10 +91,11 @@ namespace Pulsar4X.ECSLib
                 if (PositionTarget == null)  // Either a location or a target is necessary
                     return false;
             }
-            else
+            else if (!Target.HasDataBlob<PositionDB>())
+                return false;
                 // @todo: jump point, jump survey point
-                if (!Target.HasDataBlob<SystemBodyDB>() && !Target.HasDataBlob<ShipInfoDB>())
-                    return false;
+                //if (!Target.HasDataBlob<SystemBodyDB>() && !Target.HasDataBlob<ShipInfoDB>())
+                //return false;
 
             // @todo: further conditions
 
@@ -106,14 +107,15 @@ namespace Pulsar4X.ECSLib
         public override bool processOrder()
         {
 
-            double speedMultiplier = 1000.0;
+            double speedMultiplier = 1.0; //was this just for debugging? if so we should remove it, if not, then maybe move it to game settings?
+
             double minimumDistance = 1000.0;
             PositionDB currentPosition = Owner.GetDataBlob<PositionDB>();
             PositionDB targetPosition = null;
             double AUSpeed, kmSpeed;
 
-            kmSpeed = Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * 1000;
-            AUSpeed = Distance.ToAU(kmSpeed);
+            kmSpeed = Owner.GetDataBlob<PropulsionDB>().MaximumSpeed * speedMultiplier;
+            AUSpeed = Distance.KmToAU(kmSpeed);
 
             currentPosition.SetParent(null);
 
@@ -123,7 +125,7 @@ namespace Pulsar4X.ECSLib
                 targetPosition = PositionTarget;
 
                 // Assume that 1000 is extremely close, 
-                if(Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
+                if(Distance.AuToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
                 {
                     setPositionToTarget(Owner, targetPosition);
                     Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0, 0, 0, 0);
@@ -142,7 +144,7 @@ namespace Pulsar4X.ECSLib
                 targetPosition = Target.GetDataBlob<PositionDB>();
                 
                 // Assume that 1000 is extremely close, 
-                if (Distance.ToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
+                if (Distance.AuToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
                 {
                     setPositionToTarget(Owner, targetPosition);
 
@@ -227,9 +229,9 @@ namespace Pulsar4X.ECSLib
 
 
 
-            speed.X = Distance.ToAU(speedMagInKM.X);
-            speed.Y = Distance.ToAU(speedMagInKM.Y);
-            speed.Z = Distance.ToAU(speedMagInKM.Z);
+            speed.X = Distance.KmToAU(speedMagInKM.X);
+            speed.Y = Distance.KmToAU(speedMagInKM.Y);
+            speed.Z = Distance.KmToAU(speedMagInKM.Z);
 
             return speed;
         }

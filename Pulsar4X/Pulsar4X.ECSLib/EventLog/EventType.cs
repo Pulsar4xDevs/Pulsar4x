@@ -5,6 +5,9 @@ namespace Pulsar4X.ECSLib
     {
         NoEventType,
 
+        SystemDateChange,
+        GlobalDateChange,
+
         #region Shipyard Events
 
         ShipConstructionBegan,
@@ -384,4 +387,5 @@ namespace Pulsar4X.ECSLib
 
         #endregion
     }
+
 }

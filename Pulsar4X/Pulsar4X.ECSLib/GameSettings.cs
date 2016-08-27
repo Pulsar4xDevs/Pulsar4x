@@ -79,6 +79,12 @@ namespace Pulsar4X.ECSLib
 
         public int MasterSeed = 12345678;
 
+        public Dictionary<EventType, bool> DefaultHaltOnEvents { get; set; } = new Dictionary<EventType, bool>()
+        {
+            { EventType.OrdersCompleted, true },
+            { EventType.FuelExhausted, true }
+        };
+
         #endregion
 
         #region Game Processing Settings

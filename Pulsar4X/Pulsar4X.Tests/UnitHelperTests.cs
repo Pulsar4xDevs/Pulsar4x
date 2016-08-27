@@ -37,11 +37,11 @@ namespace Pulsar4X.Tests
         {
             if (toAU)
             {
-                Assert.That(Distance.ToAU(from), Is.EqualTo(to).Within(1).Ulps);  // ulps mean units in the last place.
+                Assert.That(Distance.KmToAU(from), Is.EqualTo(to).Within(1).Ulps);  // ulps mean units in the last place.
             }
             else
             {
-                Assert.That(Distance.ToKm(from), Is.EqualTo(to).Within(1).Ulps);
+                Assert.That(Distance.AuToKm(from), Is.EqualTo(to).Within(1).Ulps);
             }
         }
 
