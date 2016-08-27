@@ -262,14 +262,14 @@ namespace Pulsar4X.ECSLib
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = Distance.ToKm(orbit.SemiMajorAxis) * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+            double radius = Distance.AuToKm(orbit.SemiMajorAxis) * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
 
             // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
             trueAnomaly += Angle.ToRadians(orbit.ArgumentOfPeriapsis);
             double inclination = Angle.ToRadians(orbit.Inclination);
 
             // Convert KM to AU
-            radius = Distance.ToAU(radius);
+            radius = Distance.KmToAU(radius);
 
             //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
             double lofAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);

@@ -205,7 +205,7 @@ namespace Pulsar4X.ECSLib
             GravitationalParameter = GameConstants.Science.GravitationalConstant * (_parentMass + _myMass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
 
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
-            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.ToKm(SemiMajorAxis), 3) / (GravitationalParameter));
+            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.AuToKm(SemiMajorAxis), 3) / (GravitationalParameter));
             if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 OrbitalPeriod = TimeSpan.MaxValue;
@@ -216,7 +216,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            MeanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(Distance.ToKm(SemiMajorAxis), 3)); // Calculated in radians.
+            MeanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(Distance.AuToKm(SemiMajorAxis), 3)); // Calculated in radians.
             MeanMotion = Angle.ToDegrees(MeanMotion); // Stored in degrees.
 
             Apoapsis = (1 + Eccentricity) * SemiMajorAxis;

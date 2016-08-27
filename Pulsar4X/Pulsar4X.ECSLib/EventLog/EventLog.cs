@@ -9,21 +9,17 @@ namespace Pulsar4X.ECSLib
     {
         private readonly Game _game;
         private readonly DateTime _loadTime;
-        private readonly List<Event> _events;
-        private readonly Dictionary<Player, List<Event>> _newEvents;
+        private readonly List<Event> _events = new List<Event>();
+        private readonly Dictionary<Player, List<Event>> _newEvents = new Dictionary<Player, List<Event>>();
 
         private Player SpaceMaster => _game.SpaceMaster;
 
-        internal EventLog()
-        {
-            _newEvents = new Dictionary<Player, List<Event>>();
-        }
+        //internal EventLog() { }
 
-        internal EventLog(Game game) : this()
+        internal EventLog(Game game) 
         {
             _loadTime = game.CurrentDateTime;
             _game = game;
-            _events = new List<Event>();
             
             _newEvents.Add(SpaceMaster, new List<Event>());
             foreach (Player player in _game.Players)
@@ -32,6 +28,16 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        internal void AddPlayer(Player player)
+        {
+            _newEvents.Add(player, new List<Event>());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authToken"></param>
+        /// <returns>all events for a given authToken</returns>
         public List<Event> GetAllEvents(AuthenticationToken authToken)
         {
             Player player = _game.GetPlayerForToken(authToken);
@@ -53,6 +59,11 @@ namespace Pulsar4X.ECSLib
             return retVal;
         }
 
+        /// <summary>
+        /// gets all events for this authTokens player, from last time this function was called for teh given authToken
+        /// </summary>
+        /// <param name="authToken"></param>
+        /// <returns></returns>
         public List<Event> GetNewEvents(AuthenticationToken authToken)
         {
             Player player = _game.GetPlayerForToken(authToken);
@@ -72,6 +83,7 @@ namespace Pulsar4X.ECSLib
 
         internal void AddEvent(Event @event)
         {
+            _events.Add(@event);
             @event.ConcernedPlayers.Add(_game.SpaceMaster.ID);
             _newEvents[SpaceMaster].Add(@event);
 
@@ -79,9 +91,20 @@ namespace Pulsar4X.ECSLib
             {
                 @event.ConcernedPlayers.Add(player.ID);
                 _newEvents[player].Add(@event);
+                if(player.HaltsOnEvent.ContainsKey(@event.EventType) && player.HaltsOnEvent[@event.EventType] == true)                 
+                    // will future events ever be needed? if so, check timedate here as well
+                    // and add a future halt interupt to the gameloop if it's a future event.
+                    _game.GameLoop.PauseTime(); //hit the pause button.
             }
         }
 
+
+        /// <summary>
+        /// whats this for? what's it doing? document ffs.
+        /// </summary>
+        /// <param name="event"></param>
+        /// <param name="player"></param>
+        /// <returns></returns>
         private bool IsPlayerConcerned([NotNull] Event @event, [NotNull] Player player)
         {
             if (@event == null)

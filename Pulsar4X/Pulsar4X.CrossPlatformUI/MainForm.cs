@@ -24,6 +24,7 @@ namespace Pulsar4X.CrossPlatformUI
         private static Command componentTemplateDesign;
         private static Command shipView;
         private static Command sysInfoView;
+        private static Command logView;
 
         public MainForm()
         {
@@ -51,6 +52,7 @@ namespace Pulsar4X.CrossPlatformUI
             componentTemplateDesign = new ComponentTemplateViewCMD(_gameVM);
             shipView = new ShipViewCMD(_gameVM);
             sysInfoView = new SystemInfoCMD(_gameVM);
+            logView = new LogViewCMD(_gameVM);
 
             if (Platform.Supports<MenuBar>())
             {
@@ -87,6 +89,7 @@ namespace Pulsar4X.CrossPlatformUI
                 ToolBar.Items.Add(componentTemplateDesign);
                 ToolBar.Items.Add(shipView);
                 ToolBar.Items.Add(sysInfoView);
+                ToolBar.Items.Add(logView);
             }
         }
 

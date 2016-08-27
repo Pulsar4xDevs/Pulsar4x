@@ -13,11 +13,11 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public List<Player> Players;
+        public List<Player> Players = new List<Player>();
         
         [PublicAPI]
         [JsonProperty]
-        public Player SpaceMaster;
+        public Player SpaceMaster = new Player("Space Master", "");
 
         [PublicAPI]
         [JsonProperty]
@@ -92,6 +92,7 @@ namespace Pulsar4X.ECSLib
             SyncContext = SynchronizationContext.Current;
             GlobalManager = new EntityManager(this);
             GameLoop = new TimeLoop(this);
+            EventLog = new EventLog(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -118,15 +119,21 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataManager.LoadData("Pulsar4x", this);
             }
-            
+
             // Create SM
-            SpaceMaster = new Player("Space Master", newGameSettings.SMPassword);
-            Players = new List<Player>();
+
+
+            SpaceMaster.ChangePassword(new AuthenticationToken(SpaceMaster, ""), newGameSettings.SMPassword);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
 
             if (newGameSettings.CreatePlayerFaction ?? false)
             {
                 Player defaultPlayer = AddPlayer(newGameSettings.DefaultPlayerName, newGameSettings.DefaultPlayerPassword);
+
+                foreach (var kvp in newGameSettings.DefaultHaltOnEvents)
+                {
+                    defaultPlayer.HaltsOnEvent.Add(kvp.Key, kvp.Value);
+                }
 
                 if (newGameSettings.DefaultSolStart ?? false)
                 {
@@ -140,6 +147,8 @@ namespace Pulsar4X.ECSLib
 
             // Temp: This will be reworked later.
             GenerateSystems(new AuthenticationToken(SpaceMaster, newGameSettings.SMPassword), newGameSettings.MaxSystems);
+
+            
 
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
@@ -183,6 +192,7 @@ namespace Pulsar4X.ECSLib
         {
             var player = new Player(playerName, playerPassword);
             Players.Add(player);
+            EventLog.AddPlayer(player);
             return player;
         }
 

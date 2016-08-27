@@ -35,8 +35,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double RadiusInKM
         {
-            get { return Distance.ToKm(Radius); }
-            internal set { Radius = Distance.ToAU(value); }
+            get { return Distance.AuToKm(Radius); }
+            internal set { Radius = Distance.KmToAU(value); }
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>Volume in Km^3</returns>
         public static double CalculateVolume(double radius)
         {
-            return (4.0 / 3.0) * Math.PI * Math.Pow(Distance.ToKm(radius), 3);
+            return (4.0 / 3.0) * Math.PI * Math.Pow(Distance.AuToKm(radius), 3);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
         {
             double radius = Math.Pow((3 * mass) / (4 * Math.PI * (density / 1000)), 0.3333333333); // density / 1000 changes it from g/cm2 to Kg/cm3, needed because mass in is KG. 
             // 0.3333333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.3333333333
-            return Distance.ToAU(radius / 1000 / 100);     // convert from cm to AU.
+            return Distance.KmToAU(radius / 1000 / 100);     // convert from cm to AU.
         }
     }
 }
