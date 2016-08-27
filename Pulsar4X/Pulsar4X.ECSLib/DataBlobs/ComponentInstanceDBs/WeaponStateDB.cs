@@ -16,6 +16,8 @@ namespace Pulsar4X.ECSLib
             {
                 return _fireControl;
             }
+
+            // Needs to be accessible from outside ECSLib, so no internal set
             set
             {
                 if (value == null)
