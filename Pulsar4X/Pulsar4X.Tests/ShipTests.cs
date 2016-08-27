@@ -63,7 +63,8 @@ namespace Pulsar4X.Tests
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
-            Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
+            //Change in component cloning makes the next line's assumption untrue
+            //Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
             Assert.AreEqual(50, propulsion.TotalEnginePower);
             Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
 
