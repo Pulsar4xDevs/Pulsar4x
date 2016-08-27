@@ -24,32 +24,7 @@ namespace Pulsar4X.ECSLib
         // @todo: check to see if the instances are simply copied over, or duplicated
         public ComponentInstancesDB(ComponentInstancesDB db)
         {
-            //SpecificInstances = new Dictionary<Entity, List<Entity>>(db.SpecificInstances);
-            if (SpecificInstances == null)
-                SpecificInstances = new Dictionary<Entity, List<Entity>>();
-
-            SpecificInstances.Clear();
-
-            List<Entity> instanceList = new List<Entity>();
-            Entity newKey;
-            Entity newEntity;
-
-            foreach (KeyValuePair<Entity, List<Entity>> kvp in db.SpecificInstances)
-            {
-                instanceList = new List<Entity>();
-
-                newKey = kvp.Key.Clone(kvp.Key.Manager);
-
-                foreach(Entity entity in kvp.Value)
-                {
-                    newEntity = entity.Clone(entity.Manager);
-                    newEntity.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity = newKey;
-                    instanceList.Add(newEntity);
-                    
-                }
-
-                SpecificInstances.Add(newKey, instanceList);
-            }
+            SpecificInstances = new Dictionary<Entity, List<Entity>>(db.SpecificInstances);
         }
 
         /// <summary>
