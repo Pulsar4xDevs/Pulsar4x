@@ -53,11 +53,6 @@ namespace Pulsar4X.ECSLib.Processors
                 NewtonBalisticDB nDB = Asteroid.GetDataBlob<NewtonBalisticDB>();
                 PositionDB pDB = Asteroid.GetDataBlob<PositionDB>();
 
-                /// doesn't work yet
-                //Entity myTarget;
-                //if (!game.Systems.TryGetValue(nDB.TargetGuid, out myTarget))
-                //    throw new GuidNotFoundException(nDB.TargetGuid);
-
                 StarSystem mySystem;
                 if (!game.Systems.TryGetValue(pDB.SystemGuid, out mySystem))
                     throw new GuidNotFoundException(pDB.SystemGuid);

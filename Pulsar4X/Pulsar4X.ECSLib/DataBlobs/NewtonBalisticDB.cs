@@ -17,6 +17,14 @@ namespace Pulsar4X.ECSLib
         public Guid TargetGuid;
         public DateTime CollisionDate;
 
+        /// <summary>
+        /// necessary for serializer
+        /// </summary>
+        public NewtonBalisticDB()
+        {
+
+        }
+
         public NewtonBalisticDB(Guid TgtGuid,DateTime cDate)
         {
             TargetGuid = TgtGuid;

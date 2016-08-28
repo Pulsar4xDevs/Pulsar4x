@@ -11,12 +11,6 @@ namespace Pulsar4X.ECSLib
     public class AsteroidDamageDB : BaseDataBlob
     {
         /// <summary>
-        /// I need these? cargo culting ahead.
-        /// </summary>
-        private int _importantNumber;
-        private ICloneable _cloneableObj;
-
-        /// <summary>
         /// Asteroids are damageable and need to store their health value.
         /// </summary>
         [JsonProperty]
@@ -44,10 +38,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="clone"></param>
         public AsteroidDamageDB(AsteroidDamageDB clone)
         {
-            _importantNumber = clone._importantNumber;
-            _cloneableObj = (ICloneable)_cloneableObj.Clone();
-
-            _health = 100;
+            _health = clone._health;
         }
 
         // Datablobs must implement the IClonable interface.
