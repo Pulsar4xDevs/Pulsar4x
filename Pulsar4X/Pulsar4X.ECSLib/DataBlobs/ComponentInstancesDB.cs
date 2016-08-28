@@ -20,6 +20,8 @@ namespace Pulsar4X.ECSLib
         public ComponentInstancesDB() { }
 
 
+
+        // @todo: check to see if the instances are simply copied over, or duplicated
         public ComponentInstancesDB(ComponentInstancesDB db)
         {
             SpecificInstances = new Dictionary<Entity, List<Entity>>(db.SpecificInstances);

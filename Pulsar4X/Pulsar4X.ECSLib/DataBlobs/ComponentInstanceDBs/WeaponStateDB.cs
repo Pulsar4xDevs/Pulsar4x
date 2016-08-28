@@ -9,9 +9,30 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public TimeSpan CoolDown { get; internal set; }
         [JsonProperty]
-        public Entity FireControl { get; internal set; }
+        private Entity _fireControl;
+        public Entity FireControl
+        {
+            get
+            {
+                return _fireControl;
+            }
 
-        public WeaponStateDB() { }
+            // Needs to be accessible from outside ECSLib, so no internal set
+            set
+            {
+                if (value == null)
+                    _fireControl = null;
+                else if (value.HasDataBlob<FireControlInstanceAbilityDB>())
+                    _fireControl = value;
+                else
+                    _fireControl = null;
+            }
+        }
+
+        public WeaponStateDB()
+        {
+            FireControl = null;
+        }
 
         public WeaponStateDB(WeaponStateDB db)
         {
