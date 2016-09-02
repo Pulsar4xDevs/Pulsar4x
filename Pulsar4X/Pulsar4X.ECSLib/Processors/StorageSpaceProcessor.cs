@@ -175,7 +175,7 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid, int> totalSpace = parentEntity.GetDataBlob<CargoDB>().CargoCapicity;
 
-            List<KeyValuePair<Entity, List<Entity>>> StorageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
+            List<KeyValuePair<Entity, List<Entity>>> StorageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
             foreach (var kvp in StorageComponents)
             {
                 Entity componentDesign = kvp.Key;

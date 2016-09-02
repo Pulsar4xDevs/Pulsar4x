@@ -65,6 +65,7 @@ namespace Pulsar4X.ECSLib
         internal static Dictionary<Type, Delegate> TypeMap = new Dictionary<Type, Delegate>
         {
             { typeof(EnginePowerAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!shipOrColonyEntity.HasDataBlob<PropulsionDB>()) shipOrColonyEntity.SetDataBlob<PropulsionDB>(new PropulsionDB()); }) },
+            { typeof(CargoStorageAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity)=> { if (!shipOrColonyEntity.HasDataBlob<CargoDB>()) shipOrColonyEntity.SetDataBlob(new CargoDB()); }) },
             { typeof(BeamWeaponAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<BeamWeaponsDB>()) shipOrColonyEntity.SetDataBlob(new BeamWeaponsDB()); }) },
             { typeof(SimpleBeamWeaponAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<BeamWeaponsDB>()) shipOrColonyEntity.SetDataBlob(new BeamWeaponsDB()); }) },
             { typeof(BeamFireControlAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<FireControlInstanceAbilityDB>()) shipOrColonyEntity.SetDataBlob(new FireControlInstanceAbilityDB()); }) },

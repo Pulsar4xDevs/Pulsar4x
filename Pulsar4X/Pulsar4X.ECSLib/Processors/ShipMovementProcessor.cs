@@ -170,7 +170,7 @@ namespace Pulsar4X.ECSLib
         public static void CalcMaxSpeed(Entity ship)
         {
             int totalEnginePower = 0;
-
+            Dictionary<Guid, double> totalFuelUsage = new Dictionary<Guid, double>();
             List<KeyValuePair<Entity,List<Entity>>> engineEntities = ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
             foreach (var engineDesign in engineEntities)
             {
@@ -178,12 +178,19 @@ namespace Pulsar4X.ECSLib
                 {
                     //todo check if it's damaged
                     totalEnginePower += engineDesign.Key.GetDataBlob<EnginePowerAtbDB>().EnginePower;
+                    foreach (var kvp in engineDesign.Key.GetDataBlob<ResourceConsumptionAtbDB>().MaxUsage)
+                    {
+                        totalFuelUsage.SafeValueAdd(kvp.Key, kvp.Value);
+                    }
+                    
                 }
             }
 
             //Note: TN aurora uses the TCS for max speed calcs. 
-            ship.GetDataBlob<PropulsionDB>().TotalEnginePower = totalEnginePower;
-            ship.GetDataBlob<PropulsionDB>().MaximumSpeed = MaxSpeedCalc(totalEnginePower,  ship.GetDataBlob<ShipInfoDB>().Tonnage);
+            PropulsionDB propulsionDB = ship.GetDataBlob<PropulsionDB>();
+            propulsionDB.TotalEnginePower = totalEnginePower;
+            propulsionDB.FuelUsePerMeter = totalFuelUsage;
+            propulsionDB.MaximumSpeed = MaxSpeedCalc(totalEnginePower,  ship.GetDataBlob<ShipInfoDB>().Tonnage);
         }
 
         public static int MaxSpeedCalc(int power, float tonage)
