@@ -18,6 +18,13 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid CargoTypeGuid { get; internal set; }
 
+        //public CargoTypeSD CargoType { get; private set; }
+
+        /// <summary>
+        /// JSON constructor
+        /// </summary>
+        public CargoStorageAtbDB() { }
+
         /// <summary>
         /// Parser Constructor
         /// </summary>
@@ -31,7 +38,6 @@ namespace Pulsar4X.ECSLib
             CargoTypeGuid = cargoType;
         }
 
-        [JsonConstructor]
         public CargoStorageAtbDB(CargoStorageAtbDB db)
         {
             StorageCapacity = db.StorageCapacity;

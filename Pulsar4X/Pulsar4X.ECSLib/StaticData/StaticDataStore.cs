@@ -196,6 +196,14 @@ namespace Pulsar4X.ECSLib
             return null;
         }
 
+        public Dictionary<Guid, Guid> StorageTypeMap = new Dictionary<Guid, Guid>();
+        internal void SetStorageTypeMap()
+        {
+            foreach (var item in Minerals)          
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);                       
+            foreach (var item in RefinedMaterials)
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
+        }
 
         #endregion
 
@@ -260,7 +268,7 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var mineral in minerals)
                 {
-                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.
+                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.               
                 }
             }
         }
@@ -303,7 +311,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Stores Component Static Data. Will overwrite any existing Component with the same ID.
+        /// Stores cargoType Static Data. Will overwrite any existing Component with the same ID.
         /// </summary>
         internal void Store(Dictionary<Guid, CargoTypeSD> cargoTypes)
         {

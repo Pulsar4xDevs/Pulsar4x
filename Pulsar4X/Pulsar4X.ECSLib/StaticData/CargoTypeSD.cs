@@ -9,6 +9,13 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public Guid ID;
     }
+
+    public interface ICargoable
+    {
+        Guid ID { get; }
+        Guid CargoTypeID { get;  }
+        float Mass { get;  }
+    }
 }
 
 

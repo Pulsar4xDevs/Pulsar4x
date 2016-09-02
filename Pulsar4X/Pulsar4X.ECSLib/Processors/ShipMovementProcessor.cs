@@ -41,7 +41,10 @@ namespace Pulsar4X.ECSLib
             OrderProcessor.ProcessSystem(system);
             foreach (Entity shipEntity in system.SystemManager.GetAllEntitiesWithDataBlob<PropulsionDB>())
             {
-                //TODO: do we need to check if the ship has an orbitDB?
+                PositionDB positionDB = shipEntity.GetDataBlob<PositionDB>();
+                PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
+
+            
                 Queue < BaseOrder > orders = shipEntity.GetDataBlob<ShipInfoDB>().Orders;
 
                 if(orders.Count > 0)
@@ -53,19 +56,25 @@ namespace Pulsar4X.ECSLib
                         // Check to see if we will overtake the target
 
                         MoveOrder order = (MoveOrder)orders.Peek();
-                        Vector4 shipPos = shipEntity.GetDataBlob<PositionDB>().AbsolutePosition;
+                        Vector4 shipPos = positionDB.AbsolutePosition;
                         Vector4 targetPos;
-                        Vector4 newPos;
-                        Vector4 deltaVec;
                         Vector4 currentSpeed = shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed;
+                        Vector4 nextTPos = shipPos + (currentSpeed * deltaSeconds);
+                        Vector4 newPos = nextTPos;
+                        Vector4 deltaVec;                       
                         double distanceToTarget;
-                        double distanceToNewTarget;
+                        double distanceToNextTPos;
 
                         double speedDelta;
                         double distanceDelta;
                         double newDistanceDelta;
 
                         double currentSpeedLength = currentSpeed.Length();
+
+                        CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();
+                       
+                        Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerMeter;
+                        int maxMeters = CalcMaxFuelDistance(shipEntity);
 
                         if (order.PositionTarget == null)
                             targetPos = order.Target.GetDataBlob<PositionDB>().AbsolutePosition;
@@ -76,47 +85,83 @@ namespace Pulsar4X.ECSLib
 
                         distanceToTarget = deltaVec.Length();  //in au
 
-                        //newPos = shipPos + Distance.MToAU(currentSpeed * deltaSeconds);
-                        newPos = shipPos + (currentSpeed * deltaSeconds);
 
-                        deltaVec = shipPos - newPos;
-                        distanceToNewTarget = deltaVec.Length();
+                        deltaVec = shipPos - nextTPos;
+                        
+                        distanceToNextTPos = Math.Max(GameConstants.Units.MetersPerAu * maxMeters, deltaVec.Length());
 
-                        if (distanceToTarget < distanceToNewTarget) // moving would overtake target, just go directly to target
+
+
+                        if (distanceToTarget < distanceToNextTPos) // moving would overtake target, just go directly to target
                         {
-                            shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0, 0, 0, 0);
+                            propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);
+                            newPos = targetPos;
                             if (order.Target != null && order.Target.HasDataBlob<SystemBodyDB>())
-                                shipEntity.GetDataBlob<PositionDB>().SetParent(order.Target);
+                                positionDB.SetParent(order.Target);
                             if (order.Target != null)
                             {
                                 if (order.Target.HasDataBlob<SystemBodyDB>())  // Set position to the target body
                                 {
-                                    shipEntity.GetDataBlob<PositionDB>().SetParent(order.Target);
-                                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
+                                    positionDB.SetParent(order.Target);
+
                                 }
-                                    
-                                else
-                                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
                             }
                                 
                             else // We arrived, get rid of the order
                             {
-                                shipEntity.GetDataBlob<PositionDB>().AbsolutePosition = targetPos;
+
                                 shipEntity.GetDataBlob<ShipInfoDB>().Orders.Dequeue();
                             }
                                 
                         }
+                        positionDB.AbsolutePosition = newPos;
+                        int metersMoved = (int)(newPos.Length() / GameConstants.Units.MetersPerAu);
+                        Dictionary<Guid, int> fuelAmounts = new Dictionary<Guid, int>();
+                        foreach (var item in propulsionDB.FuelUsePerMeter)
+                        {
+                            fuelAmounts.Add(item.Key, (int)item.Value * metersMoved);
+                        }
+                        StorageSpaceProcessor.RemoveResources(storedResources, fuelAmounts);
+                        
                     }
-
+                    
                 }
-
-                //shipEntity.GetDataBlob<PositionDB>().AddMeters(shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
-                shipEntity.GetDataBlob<PositionDB>().AbsolutePosition += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
+                
                 //TODO: use fuel.
             }
             
         }
 
+        public static int CalcMaxFuelDistance(Entity shipEntity)
+        {
+            CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();
+            PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
+            StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
+            ICargoable resource = (ICargoable)staticData.FindDataObjectUsingID(propulsionDB.FuelUsePerMeter.Keys.First());
+            int meters = (int)(storedResources.MinsAndMatsByCargoType[resource.CargoTypeID][resource.ID] / propulsionDB.FuelUsePerMeter[resource.ID]); 
+            foreach (var usageKVP in propulsionDB.FuelUsePerMeter)
+            {
+                resource = (ICargoable)staticData.FindDataObjectUsingID(usageKVP.Key);
+                if (meters > (storedResources.MinsAndMatsByCargoType[resource.CargoTypeID][usageKVP.Key] / usageKVP.Value))
+                    meters = (int)(storedResources.MinsAndMatsByCargoType[resource.CargoTypeID][usageKVP.Key] / usageKVP.Value);
+            }
+            return meters;
+        }
+
+        public static void CalcFuelUsePerMeter(Entity entity)
+        {
+
+            Dictionary<Guid, double> fuelUse = new Dictionary<Guid, double>();
+            foreach (var engineKVP in entity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(i => i.Key.HasDataBlob<EnginePowerAtbDB>()))
+            {
+                foreach (var item in engineKVP.Key.GetDataBlob<ResourceConsumptionAtbDB>().MaxUsage)
+                {
+                    fuelUse.SafeValueAdd(item.Key, item.Value * engineKVP.Value.Count); //todo only count non damaged enabled engines
+                }               
+            }
+
+            entity.GetDataBlob<PropulsionDB>().FuelUsePerMeter = fuelUse;
+        }
 
         /// <summary>
         /// recalculates a shipsMaxSpeed.

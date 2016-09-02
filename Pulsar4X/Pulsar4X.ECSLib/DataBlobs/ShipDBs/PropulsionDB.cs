@@ -1,4 +1,7 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System;
+using System.Collections.Generic;
+
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Contains info on the ships engines and fuel reserves.
@@ -8,8 +11,9 @@
         public int MaximumSpeed { get; set; }
         public Vector4 CurrentSpeed { get; set; }
         public int TotalEnginePower { get; set; }
-        public int FuelStorageCapicity { get; set; }
+        //public int FuelStorageCapicity { get; set; }
         public int CurrentFuelStored { get; set; }
+        public Dictionary<Guid, double> FuelUsePerMeter { get; internal set; } = new Dictionary<Guid, double>();
 
         public PropulsionDB()
         {
@@ -20,7 +24,7 @@
             MaximumSpeed = propulsionDB.MaximumSpeed;
             CurrentSpeed = propulsionDB.CurrentSpeed;
             TotalEnginePower = propulsionDB.TotalEnginePower;
-            FuelStorageCapicity = propulsionDB.FuelStorageCapicity;
+            //FuelStorageCapicity = propulsionDB.FuelStorageCapicity;
             CurrentFuelStored = propulsionDB.CurrentFuelStored;
         }
 

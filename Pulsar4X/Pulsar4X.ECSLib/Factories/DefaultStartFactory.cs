@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
-
+            StorageSpaceProcessor.AddItemToCargo(ship1.GetDataBlob<CargoDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 1000); 
             // Strange bug - seems to update the ship orbit once, then never again
             // TODO: Fix to allow normal orbiting.
             //ship.SetDataBlob<OrbitDB>(new OrbitDB(earth.GetDataBlob<OrbitDB>()));
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
             EntityManipulation.AddComponentToEntity(shipDesign, bfc);
-            shipDesign.GetDataBlob<PropulsionDB>().FuelStorageCapicity = 100;
+            //shipDesign.GetDataBlob<PropulsionDB>().FuelStorageCapicity = 100;
             return shipDesign;
         }
 

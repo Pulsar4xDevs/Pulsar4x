@@ -229,10 +229,10 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAbilitySD fuelConsumptionArgsDB7 = new ComponentTemplateAbilitySD();
             fuelConsumptionArgsDB7.Name = "Fuel Consumption";
-            fuelConsumptionArgsDB7.Description = "Size Mod";
+            fuelConsumptionArgsDB7.Description = "";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
-            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelConsumptionAtbDB).ToString();
-            fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(Ability(6))";
+            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(ResourceConsumptionAtbDB).ToString();
+            fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(GuidString('33e6ac88-0235-4917-a7ff-35c8886aad3a'), Ability(6), 1)";
             component.ComponentAbilitySDs.Add(fuelConsumptionArgsDB7);
 
             ComponentTemplateAbilitySD thermalReduction8 = new ComponentTemplateAbilitySD();

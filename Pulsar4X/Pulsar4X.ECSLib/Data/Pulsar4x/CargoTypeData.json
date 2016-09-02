@@ -19,6 +19,14 @@
         }
       },
       {
+        "Key": "44A3373D-E57E-47AD-90ED-1AA378B59694",
+        "Value": {
+          "Name": "Battery",
+          "Description": "Storage for ElectricalEnergy",
+          "ID": "44A3373D-E57E-47AD-90ED-1AA378B59694"
+        }
+      },
+      {
         "Key": "9e52a3af-66af-4935-982d-26f3fee775b0",
         "Value": {
           "Name": "Cryogenic Storage",
