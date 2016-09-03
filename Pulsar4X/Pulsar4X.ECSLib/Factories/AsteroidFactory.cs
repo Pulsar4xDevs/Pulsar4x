@@ -15,18 +15,24 @@ namespace Pulsar4X.ECSLib
         /// <param name="target"></param>
         /// <param name="collisionDate"></param>
         /// <returns></returns>
-        public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate)
+        public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
         {
             //todo rand these a bit.
             double radius = Distance.KmToAU(0.5);
-            double mass = 1.5e+12; //about 1.5 billion tonne
+
+            double mass;
+            if (asteroidMass == -1.0)
+                mass = 1.5e+12; //about 1.5 billion tonne
+            else
+                mass = asteroidMass;
             Vector4 velocity = new Vector4(8, 7, 0, 0);
 
             var position = new PositionDB(0, 0, 0, Guid.Empty);
             var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);
             var planetInfo = new SystemBodyDB();
-            var balisticTraj = new NewtonBalisticDB();
+            var balisticTraj = new NewtonBalisticDB(target.Guid,collisionDate);
             var name = new NameDB("Ellie");
+            var AsteroidDmg = new AsteroidDamageDB();
 
             planetInfo.SupportsPopulations = false;
             planetInfo.Type = BodyType.Asteroid;
@@ -45,7 +51,8 @@ namespace Pulsar4X.ECSLib
                 massVolume,
                 planetInfo,
                 name,
-                balisticTraj
+                balisticTraj,
+                AsteroidDmg
             };
 
             Entity newELE = new Entity(starSys.SystemManager, planetDBs);
