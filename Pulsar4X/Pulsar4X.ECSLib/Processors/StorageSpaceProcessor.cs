@@ -16,10 +16,10 @@ namespace Pulsar4X.ECSLib
             int remainingWeightCapacity = RemainingCapacity(toCargo, item.CargoTypeID);
             int remainingNumCapacity = (int)(remainingWeightCapacity / item.Mass);
             float amountWeight = amount * item.Mass;
-            if (remainingNumCapacity >= amount)
-                AddToCargo(toCargo, item, amount);
+            if (remainingNumCapacity >= amount)               
+                toCargo.AddValue(itemID, amount);
             else
-                AddToCargo(toCargo, item, remainingNumCapacity);
+                toCargo.AddValue(itemID, remainingNumCapacity);
         }
 
         /// <summary>
@@ -33,10 +33,10 @@ namespace Pulsar4X.ECSLib
             int remainingWeightCapacity = RemainingCapacity(toCargo, item.CargoTypeID);
             int remainingNumCapacity = (int)(remainingWeightCapacity / item.Mass);
             float amountWeight = amount * item.Mass;
-            if (remainingNumCapacity >= amount)            
-                AddToCargo(toCargo, item, amount);  
+            if (remainingNumCapacity >= amount)
+                toCargo.AddValue(item.ID, amount);
             else
-                AddToCargo(toCargo, item, remainingNumCapacity);
+                toCargo.AddValue(item.ID, remainingNumCapacity);
         }
 
         /// <summary>
@@ -76,13 +76,19 @@ namespace Pulsar4X.ECSLib
             float amountWeight = amount * itemWeight;
             if (remainingNumCapacity >= amount)
             {
-                AddToCargo(toCargo, item, amount);
-                fromCargo.MinsAndMatsByCargoType[cargoTypeID][itemID] -= amount;
+                //AddToCargo(toCargo, item, amount);
+                //fromCargo.MinsAndMatsByCargoType[cargoTypeID][itemID] -= amount;
+                int amountRemoved = fromCargo.SubtractValue(itemID, amount);
+                toCargo.AddValue(itemID, amountRemoved);
+                
+                
             }
             else
             {
-                AddToCargo(toCargo, item, remainingNumCapacity);
-                fromCargo.MinsAndMatsByCargoType[cargoTypeID][itemID] -= remainingNumCapacity;
+                //AddToCargo(toCargo, item, remainingNumCapacity);
+                //fromCargo.MinsAndMatsByCargoType[cargoTypeID][itemID] -= remainingNumCapacity;
+                int amountRemoved = fromCargo.SubtractValue(itemID, remainingNumCapacity);
+                toCargo.AddValue(itemID, amountRemoved);
             }
         }
 
@@ -94,9 +100,8 @@ namespace Pulsar4X.ECSLib
         internal static void RemoveResources(CargoDB fromCargo, Dictionary<Guid, int> amounts)
         {
             foreach (var item in amounts)
-            {
-                var cargoType = fromCargo.GetCargoTypeIDForID(item.Key);
-                    fromCargo.MinsAndMatsByCargoType[cargoType][item.Key] -= item.Value;
+            {               
+                  fromCargo.SubtractValue(item.Key, item.Value);
             }
         }
 
@@ -120,14 +125,7 @@ namespace Pulsar4X.ECSLib
                 if (fromCargo.StoredEntities[cargoTypeID].Remove(entityItem))
                     AddToCargo(toCargo, entityItem, cargotypedb);         
             }
-        }
-
-        private static void AddToCargo(CargoDB toCargo, ICargoable item, int amount)
-        {
-            if (!toCargo.MinsAndMatsByCargoType.ContainsKey(item.CargoTypeID))
-                toCargo.MinsAndMatsByCargoType.Add(item.CargoTypeID, new Dictionary<Guid, int>());
-            toCargo.MinsAndMatsByCargoType[item.CargoTypeID].SafeValueAdd(item.ID, amount);
-        }
+        }      
 
         private static void AddToCargo(CargoDB toCargo, Entity entityItem, ICargoable cargotypedb)
         {

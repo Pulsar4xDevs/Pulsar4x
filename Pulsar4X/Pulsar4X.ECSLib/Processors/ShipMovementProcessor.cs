@@ -60,19 +60,21 @@ namespace Pulsar4X.ECSLib
                         Vector4 targetPos;
                         Vector4 currentSpeed = shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed;
                         Vector4 nextTPos = shipPos + (currentSpeed * deltaSeconds);
-                        Vector4 newPos = nextTPos;
-                        Vector4 deltaVec;                       
+                        Vector4 newPos = shipPos;
+                        Vector4 deltaVecToTarget;
+                        Vector4 deltaVecToNextT;
+
                         double distanceToTarget;
                         double distanceToNextTPos;
 
                         double speedDelta;
                         double distanceDelta;
                         double newDistanceDelta;
+                        double fuelMaxDistanceAU;
 
                         double currentSpeedLength = currentSpeed.Length();
 
-                        CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();
-                       
+                        CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();                       
                         Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerMeter;
                         int maxMeters = CalcMaxFuelDistance(shipEntity);
 
@@ -81,19 +83,33 @@ namespace Pulsar4X.ECSLib
                         else
                             targetPos = order.PositionTarget.AbsolutePosition;
 
-                        deltaVec = shipPos - targetPos;
+                        deltaVecToTarget = shipPos - targetPos;
 
-                        distanceToTarget = deltaVec.Length();  //in au
-
-
-                        deltaVec = shipPos - nextTPos;
-                        
-                        distanceToNextTPos = Math.Max(GameConstants.Units.MetersPerAu * maxMeters, deltaVec.Length());
+                        distanceToTarget = deltaVecToTarget.Length();  //in au
 
 
+                        deltaVecToNextT = shipPos - nextTPos;
+                        fuelMaxDistanceAU = GameConstants.Units.MetersPerAu * maxMeters;
 
-                        if (distanceToTarget < distanceToNextTPos) // moving would overtake target, just go directly to target
+
+                        distanceToNextTPos = deltaVecToNextT.Length();
+                        if (fuelMaxDistanceAU < distanceToNextTPos)
                         {
+                            newDistanceDelta = fuelMaxDistanceAU;
+                            double percent = fuelMaxDistanceAU / distanceToNextTPos;
+                            newPos = nextTPos + deltaVecToNextT * percent;
+                            Event usedAllFuel = new Event(system.SystemSubpulses.SystemLocalDateTime, "Used all Fuel", shipEntity.GetDataBlob<OwnedDB>().ObjectOwner, shipEntity);
+                            usedAllFuel.EventType = EventType.FuelExhausted;
+                            system.Game.EventLog.AddEvent(usedAllFuel);
+                        }
+                        else
+                            newDistanceDelta = distanceToNextTPos;
+
+
+
+                        if (distanceToTarget < newDistanceDelta) // moving would overtake target, just go directly to target
+                        {
+                            newDistanceDelta = distanceToTarget;
                             propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);
                             newPos = targetPos;
                             if (order.Target != null && order.Target.HasDataBlob<SystemBodyDB>())
@@ -115,7 +131,7 @@ namespace Pulsar4X.ECSLib
                                 
                         }
                         positionDB.AbsolutePosition = newPos;
-                        int metersMoved = (int)(newPos.Length() / GameConstants.Units.MetersPerAu);
+                        int metersMoved = (int)(newDistanceDelta * GameConstants.Units.MetersPerAu);
                         Dictionary<Guid, int> fuelAmounts = new Dictionary<Guid, int>();
                         foreach (var item in propulsionDB.FuelUsePerMeter)
                         {
@@ -138,12 +154,12 @@ namespace Pulsar4X.ECSLib
             PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
             StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
             ICargoable resource = (ICargoable)staticData.FindDataObjectUsingID(propulsionDB.FuelUsePerMeter.Keys.First());
-            int meters = (int)(storedResources.MinsAndMatsByCargoType[resource.CargoTypeID][resource.ID] / propulsionDB.FuelUsePerMeter[resource.ID]); 
+            int meters = (int)(storedResources.GetAmountOf(resource.ID) / propulsionDB.FuelUsePerMeter[resource.ID]); 
             foreach (var usageKVP in propulsionDB.FuelUsePerMeter)
             {
                 resource = (ICargoable)staticData.FindDataObjectUsingID(usageKVP.Key);
-                if (meters > (storedResources.MinsAndMatsByCargoType[resource.CargoTypeID][usageKVP.Key] / usageKVP.Value))
-                    meters = (int)(storedResources.MinsAndMatsByCargoType[resource.CargoTypeID][usageKVP.Key] / usageKVP.Value);
+                if (meters > (storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value))
+                    meters = (int)(storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value);
             }
             return meters;
         }

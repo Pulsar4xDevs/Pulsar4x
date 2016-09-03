@@ -203,6 +203,8 @@ namespace Pulsar4X.ECSLib
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);                       
             foreach (var item in RefinedMaterials)
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
+            foreach (var item in Components)
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
         }
 
         #endregion
@@ -356,6 +358,7 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataManager.LoadData(dataSet, (Game)context.Context);
             }
+            SetStorageTypeMap();
         }
 
         internal StaticDataStore Clone()

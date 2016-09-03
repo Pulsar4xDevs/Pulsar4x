@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
                 newSpecificInstances.Add(kvp.Key, new List<Entity>());
                 for (int i = 0; i < kvp.Value.Count; i++)
                 {
-                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key));
+                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction));
                 }
             }
             componentInstances.SpecificInstances = newSpecificInstances;
