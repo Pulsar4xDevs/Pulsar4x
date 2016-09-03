@@ -11,9 +11,7 @@ namespace Pulsar4X.ECSLib
         public int MaximumSpeed { get; set; }
         public Vector4 CurrentSpeed { get; set; }
         public int TotalEnginePower { get; set; }
-        //public int FuelStorageCapicity { get; set; }
-        public int CurrentFuelStored { get; set; }
-        public Dictionary<Guid, double> FuelUsePerMeter { get; internal set; } = new Dictionary<Guid, double>();
+        public Dictionary<Guid, double> FuelUsePerKM { get; internal set; } = new Dictionary<Guid, double>();
 
         public PropulsionDB()
         {
@@ -24,8 +22,7 @@ namespace Pulsar4X.ECSLib
             MaximumSpeed = propulsionDB.MaximumSpeed;
             CurrentSpeed = propulsionDB.CurrentSpeed;
             TotalEnginePower = propulsionDB.TotalEnginePower;
-            //FuelStorageCapicity = propulsionDB.FuelStorageCapicity;
-            CurrentFuelStored = propulsionDB.CurrentFuelStored;
+            FuelUsePerKM = new Dictionary<Guid, double>(propulsionDB.FuelUsePerKM);
         }
 
         public override object Clone()

@@ -75,8 +75,8 @@ namespace Pulsar4X.ECSLib
                         double currentSpeedLength = currentSpeed.Length();
 
                         CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();                       
-                        Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerMeter;
-                        int maxMeters = CalcMaxFuelDistance(shipEntity);
+                        Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerKM;
+                        int maxKMeters = CalcMaxFuelDistance(shipEntity);
 
                         if (order.PositionTarget == null)
                             targetPos = order.Target.GetDataBlob<PositionDB>().AbsolutePosition;
@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
 
 
                         deltaVecToNextT = shipPos - nextTPos;
-                        fuelMaxDistanceAU = GameConstants.Units.MetersPerAu * maxMeters;
+                        fuelMaxDistanceAU = GameConstants.Units.KmPerAu * maxKMeters;
 
 
                         distanceToNextTPos = deltaVecToNextT.Length();
@@ -131,11 +131,11 @@ namespace Pulsar4X.ECSLib
                                 
                         }
                         positionDB.AbsolutePosition = newPos;
-                        int metersMoved = (int)(newDistanceDelta * GameConstants.Units.MetersPerAu);
+                        int kMetersMoved = (int)(newDistanceDelta * GameConstants.Units.KmPerAu);
                         Dictionary<Guid, int> fuelAmounts = new Dictionary<Guid, int>();
-                        foreach (var item in propulsionDB.FuelUsePerMeter)
+                        foreach (var item in propulsionDB.FuelUsePerKM)
                         {
-                            fuelAmounts.Add(item.Key, (int)item.Value * metersMoved);
+                            fuelAmounts.Add(item.Key, (int)item.Value * kMetersMoved);
                         }
                         StorageSpaceProcessor.RemoveResources(storedResources, fuelAmounts);
                         
@@ -153,15 +153,15 @@ namespace Pulsar4X.ECSLib
             CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();
             PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
             StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
-            ICargoable resource = (ICargoable)staticData.FindDataObjectUsingID(propulsionDB.FuelUsePerMeter.Keys.First());
-            int meters = (int)(storedResources.GetAmountOf(resource.ID) / propulsionDB.FuelUsePerMeter[resource.ID]); 
-            foreach (var usageKVP in propulsionDB.FuelUsePerMeter)
+            ICargoable resource = (ICargoable)staticData.FindDataObjectUsingID(propulsionDB.FuelUsePerKM.Keys.First());
+            int kmeters = (int)(storedResources.GetAmountOf(resource.ID) / propulsionDB.FuelUsePerKM[resource.ID]); 
+            foreach (var usageKVP in propulsionDB.FuelUsePerKM)
             {
                 resource = (ICargoable)staticData.FindDataObjectUsingID(usageKVP.Key);
-                if (meters > (storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value))
-                    meters = (int)(storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value);
+                if (kmeters > (storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value))
+                    kmeters = (int)(storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value);
             }
-            return meters;
+            return kmeters;
         }
 
         public static void CalcFuelUsePerMeter(Entity entity)
@@ -176,7 +176,7 @@ namespace Pulsar4X.ECSLib
                 }               
             }
 
-            entity.GetDataBlob<PropulsionDB>().FuelUsePerMeter = fuelUse;
+            entity.GetDataBlob<PropulsionDB>().FuelUsePerKM = fuelUse;
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace Pulsar4X.ECSLib
             //Note: TN aurora uses the TCS for max speed calcs. 
             PropulsionDB propulsionDB = ship.GetDataBlob<PropulsionDB>();
             propulsionDB.TotalEnginePower = totalEnginePower;
-            propulsionDB.FuelUsePerMeter = totalFuelUsage;
+            propulsionDB.FuelUsePerKM = totalFuelUsage;
             propulsionDB.MaximumSpeed = MaxSpeedCalc(totalEnginePower,  ship.GetDataBlob<ShipInfoDB>().Tonnage);
         }
 
