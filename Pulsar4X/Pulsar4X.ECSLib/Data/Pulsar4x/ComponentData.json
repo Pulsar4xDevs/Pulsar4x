@@ -23,7 +23,7 @@
           "CreditCostFormula": "[Size]",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
-          "CargoTypeID": "00000000-0000-0000-0000-000000000000",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "Engine Size",
@@ -151,7 +151,7 @@
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipCargo, PlanetInstallation",
-          "CargoTypeID": "00000000-0000-0000-0000-000000000000",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "MiningAmount",
@@ -591,7 +591,7 @@
           "CreditCostFormula": "[Size]",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
-          "CargoTypeID": "00000000-0000-0000-0000-000000000000",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "Tank Size",
