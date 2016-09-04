@@ -67,6 +67,12 @@ namespace Pulsar4X.ECSLib
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
+            StorageSpaceProcessor.AddItemToCargo(ship1.GetDataBlob<CargoDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
+            StorageSpaceProcessor.AddItemToCargo(ship2.GetDataBlob<CargoDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
+            // Strange bug - seems to update the ship orbit once, then never again
+            // TODO: Fix to allow normal orbiting.
+            //ship.SetDataBlob<OrbitDB>(new OrbitDB(earth.GetDataBlob<OrbitDB>()));
+
             Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, position, sol, "Prevailing Stillness");
 
             sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());
@@ -92,13 +98,15 @@ namespace Pulsar4X.ECSLib
         {
             var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
             Entity engine = DefaultEngineDesign(game, faction);
+            Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
+            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
+            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
             EntityManipulation.AddComponentToEntity(shipDesign, bfc);
-            shipDesign.GetDataBlob<PropulsionDB>().FuelStorageCapicity = 100;
             return shipDesign;
         }
 
@@ -129,6 +137,16 @@ namespace Pulsar4X.ECSLib
             engineDesign.Name = "DefaultEngine1";
             //engineDesignDB.ComponentDesignAbilities[1]
             return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);
+        }
+
+        public static Entity DefaultFuelTank(Game game, Entity faction)
+        {
+            ComponentDesign fuelTankDesign;
+            ComponentTemplateSD tankSD = game.StaticData.Components[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
+            fuelTankDesign = GenericComponentFactory.StaticToDesign(tankSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            fuelTankDesign.ComponentDesignAbilities[0].SetValueFromInput(1000000);
+            fuelTankDesign.Name = "Tank1000k";
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, fuelTankDesign);
         }
 
         public static Entity DefaultSimpleLaser(Game game, Entity faction)

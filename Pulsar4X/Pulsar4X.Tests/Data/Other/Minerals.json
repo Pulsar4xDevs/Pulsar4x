@@ -8,7 +8,7 @@
           "Name": "Sorium2",
           "Description": "Gas used to convert into fuel.",
           "ID": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
-          "CargoType": "General",
+          "CargoType": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Weight": 1.0,
           "Abundance": {
             "List": [

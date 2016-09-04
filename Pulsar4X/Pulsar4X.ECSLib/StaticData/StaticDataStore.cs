@@ -61,6 +61,12 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, ComponentTemplateSD> Components = new Dictionary<Guid, ComponentTemplateSD>();
 
         /// <summary>
+        /// Dictionary to store CargoTypes
+        /// </summary>
+        [JsonIgnore]
+        public Dictionary<Guid, CargoTypeSD> CargoTypes = new Dictionary<Guid, CargoTypeSD>();
+
+        /// <summary>
         /// Settings used by system generation. 
         /// @todo make Galaxy gen use this instead of default data (DO NOT DELETE THE HARD CODED DATA THO, that should be a fall back).
         /// </summary>
@@ -109,6 +115,9 @@ namespace Pulsar4X.ECSLib
                     "Components", typeof(Dictionary<Guid, ComponentTemplateSD>)
                 },
                 {
+                    "CargoTypes", typeof(Dictionary<Guid, CargoTypeSD>)
+                },
+                {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
                 },
                 {
@@ -145,6 +154,9 @@ namespace Pulsar4X.ECSLib
                     typeof(Dictionary<Guid, ComponentTemplateSD>), "Components"
                 },
                 {
+                    typeof(Dictionary<Guid, CargoTypeSD>), "CargoTypes"
+                },
+                {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
                 },
                 {
@@ -178,9 +190,22 @@ namespace Pulsar4X.ECSLib
             if (Components.ContainsKey(id))
                 return Components[id];
 
+            if (CargoTypes.ContainsKey(id))
+                return CargoTypes[id];
+
             return null;
         }
 
+        public Dictionary<Guid, Guid> StorageTypeMap = new Dictionary<Guid, Guid>();
+        internal void SetStorageTypeMap()
+        {
+            foreach (var item in Minerals)          
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);                       
+            foreach (var item in RefinedMaterials)
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
+            foreach (var item in Components)
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
+        }
 
         #endregion
 
@@ -245,7 +270,7 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var mineral in minerals)
                 {
-                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.
+                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.               
                 }
             }
         }
@@ -287,6 +312,18 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// Stores cargoType Static Data. Will overwrite any existing Component with the same ID.
+        /// </summary>
+        internal void Store(Dictionary<Guid, CargoTypeSD> cargoTypes)
+        {
+            if (cargoTypes != null)
+            {
+                foreach (KeyValuePair<Guid, CargoTypeSD> typeKVP in cargoTypes)
+                    CargoTypes[typeKVP.Key] = typeKVP.Value;
+            }
+        }
+
         internal void Store(SystemGenSettingsSD settings)
         {
             SystemGenSettings = settings;
@@ -321,6 +358,7 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataManager.LoadData(dataSet, (Game)context.Context);
             }
+            SetStorageTypeMap();
         }
 
         internal StaticDataStore Clone()
@@ -333,6 +371,7 @@ namespace Pulsar4X.ECSLib
                 _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
                 Minerals = new Dictionary<Guid, MineralSD>(Minerals),
                 RefinedMaterials = new Dictionary<Guid, RefinedMaterialSD>(RefinedMaterials),
+                CargoTypes = new Dictionary<Guid, CargoTypeSD>(CargoTypes),
                 SystemGenSettings = SystemGenSettings, // Todo: Make this cloneable
                 Techs = new Dictionary<Guid, TechSD>(Techs)
             };

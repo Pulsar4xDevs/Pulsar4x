@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
     public class EntityManager : ISerializable
     {
         [CanBeNull]
-        private readonly Game _game;
+        internal readonly Game Game;
         private readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
 
         internal EntityManager(Game game)
         {
-            _game = game;
+            Game = game;
 
             for (int i = 0; i < InternalDataBlobTypes.Keys.Count; i++)
             {
@@ -95,17 +95,17 @@ namespace Pulsar4X.ECSLib
             }
 
             // Setup the global dictionary.
-            if (_game != null)
+            if (Game != null)
             {
-                _game.GuidDictionaryLock.EnterWriteLock();
+                Game.GuidDictionaryLock.EnterWriteLock();
                 try
                 {
-                    _game.GlobalGuidDictionary.Add(entity.Guid, this);
+                    Game.GlobalGuidDictionary.Add(entity.Guid, this);
                     _localEntityDictionary.Add(entity.Guid, entity);
                 }
                 finally
                 {
-                    _game.GuidDictionaryLock.ExitWriteLock();
+                    Game.GuidDictionaryLock.ExitWriteLock();
                 }
             }
             else
@@ -157,17 +157,17 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            if (_game != null)
+            if (Game != null)
             {
-                _game.GuidDictionaryLock.EnterWriteLock();
+                Game.GuidDictionaryLock.EnterWriteLock();
                 try
                 {
                     _localEntityDictionary.Remove(entity.Guid);
-                    _game.GlobalGuidDictionary.Remove(entity.Guid);
+                    Game.GlobalGuidDictionary.Remove(entity.Guid);
                 }
                 finally
                 {
-                    _game.GuidDictionaryLock.ExitWriteLock();
+                    Game.GuidDictionaryLock.ExitWriteLock();
                 }
             }
             else
@@ -254,7 +254,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -299,7 +299,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -357,7 +357,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -431,7 +431,7 @@ namespace Pulsar4X.ECSLib
         {
             Entity entity = GetFirstEntityWithDataBlob(typeIndex);
 
-            if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+            if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
             {
                 return entity;
             }
@@ -489,18 +489,18 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool FindEntityByGuid(Guid entityGuid, out Entity entity)
         {
-            if (_game == null)
+            if (Game == null)
             {
                 // This is a "fake" manager not connected to other managers.
                 // This manager can only perform local Guid lookups.
                 return _localEntityDictionary.TryGetValue(entityGuid, out entity);
             }
-            _game.GuidDictionaryLock.EnterReadLock();
+            Game.GuidDictionaryLock.EnterReadLock();
             try
             {
                 EntityManager manager;
 
-                if (!_game.GlobalGuidDictionary.TryGetValue(entityGuid, out manager))
+                if (!Game.GlobalGuidDictionary.TryGetValue(entityGuid, out manager))
                 {
                     entity = Entity.InvalidEntity;
                     return false;
@@ -516,7 +516,7 @@ namespace Pulsar4X.ECSLib
             }
             finally
             {
-                _game.GuidDictionaryLock.ExitReadLock();
+                Game.GuidDictionaryLock.ExitReadLock();
             }
         }
 
@@ -560,9 +560,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool TryGetEntityByGuid(Guid entityGuid, out Entity entity)
         {
-            if (_game != null)
+            if (Game != null)
             {
-                _game.GuidDictionaryLock.EnterReadLock();
+                Game.GuidDictionaryLock.EnterReadLock();
                 try
                 {
                     if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
@@ -574,7 +574,7 @@ namespace Pulsar4X.ECSLib
                 }
                 finally
                 {
-                    _game.GuidDictionaryLock.ExitReadLock();
+                    Game.GuidDictionaryLock.ExitReadLock();
                 }
             }
             // This is a "fake" manager that does not link to other managers.
@@ -653,7 +653,7 @@ namespace Pulsar4X.ECSLib
         [OnSerialized]
         private void OnSerialized(StreamingContext context)
         {
-            if (_game == null)
+            if (Game == null)
             {
                 throw new InvalidOperationException("Fake managers cannot be serialized.");
             }
@@ -665,7 +665,7 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            if (_game == null)
+            if (Game == null)
             {
                 throw new InvalidOperationException("Fake managers cannot be deserialized.");
             }
