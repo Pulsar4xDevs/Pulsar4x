@@ -107,6 +107,27 @@ namespace Pulsar4X.Tests
 
         }
 
+        [Test]
+        public void TestCargoComponentCreation()
+        {
+            ComponentTemplateSD cargo = GeneralCargo();
+
+            ComponentDesign cargoDesign = GenericComponentFactory.StaticToDesign(cargo, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            cargoDesign.ComponentDesignAbilities[0].SetValue();
+            Entity cargoEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, cargoDesign);
+
+            CargoStorageAtbDB attributeDB = cargoEntity.GetDataBlob<CargoStorageAtbDB>();
+
+            
+            CargoTypeSD cargotype = _game.StaticData.CargoTypes[attributeDB.CargoTypeGuid];
+
+            Assert.AreEqual(100, attributeDB.StorageCapacity);
+
+            Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
+            componentsDict.Add(cargo.ID, cargo);
+            StaticDataManager.ExportStaticData(componentsDict, "CargoComponentTest.json");
+
+        }
 
         public static ComponentTemplateSD EngineComponentSD()
         {
@@ -208,10 +229,10 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAbilitySD fuelConsumptionArgsDB7 = new ComponentTemplateAbilitySD();
             fuelConsumptionArgsDB7.Name = "Fuel Consumption";
-            fuelConsumptionArgsDB7.Description = "Size Mod";
+            fuelConsumptionArgsDB7.Description = "";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
-            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(FuelConsumptionAtbDB).ToString();
-            fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(Ability(6))";
+            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(ResourceConsumptionAtbDB).ToString();
+            fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(GuidString('33e6ac88-0235-4917-a7ff-35c8886aad3a'), Ability(6), 1)";
             component.ComponentAbilitySDs.Add(fuelConsumptionArgsDB7);
 
             ComponentTemplateAbilitySD thermalReduction8 = new ComponentTemplateAbilitySD();
@@ -436,23 +457,68 @@ namespace Pulsar4X.Tests
             component.ComponentAbilitySDs.Add(shipComponentsConstructionAbility);
 
             ComponentTemplateAbilitySD fighterConstructionAbility = new ComponentTemplateAbilitySD();
-            shipComponentsConstructionAbility.Name = "Construction Points";
-            shipComponentsConstructionAbility.Description = "";
-            shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
-            shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
+            fighterConstructionAbility.Name = "Construction Points";
+            fighterConstructionAbility.Description = "";
+            fighterConstructionAbility.GuiHint = GuiHint.None;
+            fighterConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
+            fighterConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(fighterConstructionAbility);
 
             ComponentTemplateAbilitySD ammoConstructionAbility = new ComponentTemplateAbilitySD();
-            shipComponentsConstructionAbility.Name = "Construction Points";
-            shipComponentsConstructionAbility.Description = "";
-            shipComponentsConstructionAbility.GuiHint = GuiHint.None;
-            shipComponentsConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
-            shipComponentsConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
+            ammoConstructionAbility.Name = "Construction Points";
+            ammoConstructionAbility.Description = "";
+            ammoConstructionAbility.GuiHint = GuiHint.None;
+            ammoConstructionAbility.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
+            ammoConstructionAbility.AbilityFormula = "DataBlobArgs(Ability(0))";
             component.ComponentAbilitySDs.Add(ammoConstructionAbility);
 
 
             return component;
         }
+
+        public static ComponentTemplateSD GeneralCargo()
+        {
+            ComponentTemplateSD component = new ComponentTemplateSD();
+            component.Name = "General Storage";
+            component.Description = "Stores General Cargo";
+            component.ID = new Guid("{30CD60F8-1DE3-4FAA-ACBA-0933EB84C199}");
+
+            component.SizeFormula = "500000";
+
+            component.HTKFormula = "[Size]";
+
+            component.CrewReqFormula = "1000000";
+
+            component.ResearchCostFormula = "0";
+
+            component.BuildPointCostFormula = "[Size]";
+
+            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"},
+            {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
+
+            component.CreditCostFormula = "120";
+
+            component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
+
+            component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
+
+            ComponentTemplateAbilitySD genralCargoAbility = new ComponentTemplateAbilitySD();
+            genralCargoAbility.Name = "Storage Capacity";
+            genralCargoAbility.Description = "";
+            genralCargoAbility.GuiHint = GuiHint.None;
+            genralCargoAbility.AbilityFormula = "100";
+            component.ComponentAbilitySDs.Add(genralCargoAbility);
+
+            ComponentTemplateAbilitySD generalCargoCapacityAbility = new ComponentTemplateAbilitySD();
+            generalCargoCapacityAbility.Name = "Construction Points";
+            generalCargoCapacityAbility.Description = "";
+            generalCargoCapacityAbility.GuiHint = GuiHint.None;
+            generalCargoCapacityAbility.AbilityDataBlobType = typeof(CargoStorageAtbDB).ToString();
+            generalCargoCapacityAbility.AbilityFormula = "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'))";
+            component.ComponentAbilitySDs.Add(generalCargoCapacityAbility);
+
+            return component;
+        }
+
     }
 }

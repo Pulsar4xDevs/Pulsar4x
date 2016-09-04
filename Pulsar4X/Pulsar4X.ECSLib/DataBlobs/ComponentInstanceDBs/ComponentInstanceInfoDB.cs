@@ -17,10 +17,12 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public bool IsEnabled { get; internal set; }
         [JsonProperty]
+        public PercentValue ComponentLoadPercent { get; internal set; }        
+        [JsonProperty]
         public int HTKRemaining { get; internal set; }
         [JsonProperty]
-        [Obsolete]
-        public object StateInfo { get; internal set; }
+        public int HTKMax { get; private set; }
+
 
         public ComponentInstanceInfoDB() { }
 
@@ -38,6 +40,7 @@ namespace Pulsar4X.ECSLib
                 DesignEntity = designEntity;
                 IsEnabled = isEnabled;
                 HTKRemaining = componentInfo.HTK;
+                HTKMax = componentInfo.HTK;
             }
             else
                 throw new Exception("designEntity Must contain a ComponentInfoDB");
@@ -48,13 +51,18 @@ namespace Pulsar4X.ECSLib
         {
             DesignEntity = instance.DesignEntity;
             IsEnabled = instance.IsEnabled;
+            ComponentLoadPercent = instance.ComponentLoadPercent;
             HTKRemaining = instance.HTKRemaining;
-            StateInfo = instance.StateInfo;
+            HTKMax = instance.HTKMax;
+
         }
 
         public override object Clone()
         {
             return new ComponentInstanceInfoDB(this);
         }
+
+        public float HealthPercent()
+        { return HTKRemaining / HTKMax; }
     }
 }

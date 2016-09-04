@@ -128,7 +128,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         void HasPropulsionDB(PropulsionDB db)
         {
 
-            int maxFuel = db.FuelStorageCapicity / 20;
+            int maxFuel = 100;//db.FuelStorageCapicity / 20;
 
             int maxSpeed = db.MaximumSpeed / 10;
             int totalEP = db.TotalEnginePower / 25;
@@ -153,7 +153,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public PenPathPair Thrust(PropulsionDB db)
         {
-            int maxFuel = db.FuelStorageCapicity / 10;
+            //int maxFuel = db.FuelStorageCapicity / 10;
 
             int maxSpeed = db.MaximumSpeed / 10;
             int totalEP = db.TotalEnginePower / 25;
@@ -162,8 +162,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             Pen thrustPen = new Pen(Colors.OrangeRed);
             GraphicsPath thrustPath = new GraphicsPath();
-            thrustPath.AddLine(-totalEP * 0.5f, maxFuel + maxSpeed, 0, maxFuel + maxSpeed + currentSpeedLen);
-            thrustPath.AddLine(0, maxFuel + maxSpeed + currentSpeedLen, totalEP * 0.5f, maxFuel + maxSpeed);
+            thrustPath.AddLine(-totalEP * 0.5f, maxSpeed, 0, maxSpeed + currentSpeedLen);
+            thrustPath.AddLine(0, maxSpeed + currentSpeedLen, totalEP * 0.5f,  maxSpeed);
             return new PenPathPair() { Pen = thrustPen, Path = thrustPath };
         }
 
