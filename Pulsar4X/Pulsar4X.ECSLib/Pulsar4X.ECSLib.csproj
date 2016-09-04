@@ -144,7 +144,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataBlobs\AsteroidDamageDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\BeamFireControlAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\BeamWeaponAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CargoStorageAtbDB.cs" />
@@ -239,7 +238,7 @@
     <Compile Include="Orders\OrderTypes\ResearchOrder.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Processors\ActionDelegateEnum.cs" />
-    <Compile Include="Processors\AsteroidDamageProcessor.cs" />
+    <Compile Include="Processors\DamageProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\MineProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />
