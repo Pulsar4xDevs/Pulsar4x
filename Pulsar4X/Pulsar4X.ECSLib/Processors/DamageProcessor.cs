@@ -1,49 +1,59 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
-namespace Pulsar4X.ECSLib.Processors
+namespace Pulsar4X.ECSLib
 {
-    static public class AsteroidDamageProcessor
+    internal static class DamageProcessor
     {
+        public static void Initialize()
+        {
+        }
 
-        /// <summary>
-        /// Check through the asteroids, if one has been damaged a certain amount either delete it or spawn new asteroids
-        /// </summary>
-        /// <param name="game"></param>
-        /// <param name="starSystem"></param>
         static public void Process(Game game, StarSystem starSystem)
         {
+            /// <summary>
+            /// Handle asteroids
+            /// </summary>
             foreach (Entity objectEntity in starSystem.SystemManager.GetAllEntitiesWithDataBlob<AsteroidDamageDB>())
             {
                 //if damage exceeds certain amount spawn new asteroids of lesser mass up to a certain point.
                 //these are commented out as they do not exist.
                 AsteroidDamageDB AstDmgDB = objectEntity.GetDataBlob<AsteroidDamageDB>();
-                if(AstDmgDB.Health <= 0)
-                   SpawnSubAsteroids(game,objectEntity);
+                if (AstDmgDB.Health <= 0)
+                    SpawnSubAsteroids(game, objectEntity);
             }
         }
-
         /// <summary>
-        /// WeaponProcessor must call this if an asteroid is targetted to damage the asteroid.
+        /// This will work for missiles, ships, asteroids, and populations at some point.
         /// </summary>
-        /// <param name="Asteroid">The asteroid being shot.</param>
-        /// <param name="Damage">for how much damage, to be determined how exactly this works.</param>
-        static public void OnTakingDamage(Entity Asteroid, int Damage)
+        /// <param name="DamageableEntity"></param>
+        /// <param name="damageAmount"></param>
+        public static void OnTakingDamage(Entity DamageableEntity, int damageAmount)
         {
-            AsteroidDamageDB AstDmgDB = Asteroid.GetDataBlob<AsteroidDamageDB>();
-            AstDmgDB.Health = AstDmgDB.Health - Damage;
+            if(DamageableEntity.HasDataBlob<AsteroidDamageDB>())
+            {
+                AsteroidDamageDB AstDmgDB = DamageableEntity.GetDataBlob<AsteroidDamageDB>();
+                AstDmgDB.Health = AstDmgDB.Health - damageAmount;
+            }
+            else if(DamageableEntity.HasDataBlob<ShipInfoDB>())
+            {
+                //TODO do some damage to a component.
+                ReCalcProcessor.ReCalcAbilities(DamageableEntity);
+            }
+
         }
 
-        internal static void SpawnSubAsteroids(Game game,Entity Asteroid)
+
+        internal static void SpawnSubAsteroids(Game game, Entity Asteroid)
         {
             MassVolumeDB ADB = Asteroid.GetDataBlob<MassVolumeDB>();
 
             //const double massDefault = 1.5e+12; //150 B tonnes?
-            const double massThreshold  = 1.5e+9; //150 M tonnes?
+            const double massThreshold = 1.5e+9; //150 M tonnes?
             if (ADB.Mass > massThreshold)
             {
                 //spawn new asteroids. call the asteroid factory?
@@ -58,14 +68,14 @@ namespace Pulsar4X.ECSLib.Processors
                     throw new GuidNotFoundException(pDB.SystemGuid);
 
                 Entity myTarget;
-                if(!mySystem.SystemManager.FindEntityByGuid(nDB.TargetGuid, out myTarget))
+                if (!mySystem.SystemManager.FindEntityByGuid(nDB.TargetGuid, out myTarget))
                     throw new GuidNotFoundException(nDB.TargetGuid);
 
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
                 //I need the target entity, the collisionDate, and the starSystem. I may have starsystem from guid.
                 //Ok so this should create the asteroid without having to add the new asteroids to a list. as that is done in the factory.
-                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid(mySystem,myTarget,nDB.CollisionDate,newMass);
-                Entity newAsteroid2 = AsteroidFactory.CreateAsteroid(mySystem,myTarget,nDB.CollisionDate,newMass);
+                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid(mySystem, myTarget, nDB.CollisionDate, newMass);
+                Entity newAsteroid2 = AsteroidFactory.CreateAsteroid(mySystem, myTarget, nDB.CollisionDate, newMass);
 
                 mySystem.SystemManager.RemoveEntity(Asteroid);
 
