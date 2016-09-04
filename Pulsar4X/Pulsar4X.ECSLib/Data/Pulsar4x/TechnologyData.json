@@ -39,7 +39,7 @@
           "Description": "",
           "ID": "08fa4c4b-0ddb-4b3a-9190-724d715694de",
           "MaxLevel": 7,
-          "DataFormula": "0.5 - [Level] * 0.1",
+          "DataFormula": "0.9 - [Level] * 0.1",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []
@@ -54,7 +54,7 @@
           "Description": "",
           "ID": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
           "MaxLevel": 12,
-          "DataFormula": "1 - [Level] * 0.1",
+          "DataFormula": "1 + [Level] * 0.1",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []

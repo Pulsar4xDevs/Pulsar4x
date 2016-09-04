@@ -197,8 +197,7 @@ namespace Pulsar4X.ECSLib
                     foreach (var kvp in engineDesign.Key.GetDataBlob<ResourceConsumptionAtbDB>().MaxUsage)
                     {
                         totalFuelUsage.SafeValueAdd(kvp.Key, kvp.Value);
-                    }
-                    
+                    }                    
                 }
             }
 

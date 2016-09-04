@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
             ICargoable item = (ICargoable)toCargo.OwningEntity.Manager.Game.StaticData.FindDataObjectUsingID(itemID);
             int remainingWeightCapacity = RemainingCapacity(toCargo, item.CargoTypeID);
             int remainingNumCapacity = (int)(remainingWeightCapacity / item.Mass);
-            float amountWeight = amount * item.Mass;
+            float amountWeight = amount / item.Mass;
             if (remainingNumCapacity >= amount)               
                 toCargo.AddValue(itemID, amount);
             else

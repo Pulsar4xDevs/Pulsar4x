@@ -83,16 +83,16 @@
               "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
             },
             {
-              "Name": "Fuel Consumption",
+              "Name": "Fuel Consumption From Tech",
               "Description": "From Tech",
-              "GuiHint": "None",
+              "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)"
             },
             {
-              "Name": "Fuel Consumption",
+              "Name": "Total Fuel Consumption per Km",
               "Description": "Fuel Consumption Calc",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(3) - Ability(3) * [Size] * 0.002 * Ability(5)"
+              "AbilityFormula": "(Ability(3) - Ability(3) * [Size] * 0.02 * Ability(5)) * 0.1"
             },
             {
               "Name": "Fuel Consumption",
@@ -567,48 +567,74 @@
         }
       },
       {
-        "Key": "E7AC4187-58E4-458B-9AEA-C3E07FC993CB",
+        "Key": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
         "Value": {
           "Name": "Fuel Storage",
           "Description": "Stores Fuel",
-          "ID": "E7AC4187-58E4-458B-9AEA-C3E07FC993CB",
-          "SizeFormula": "1000",
+          "ID": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
+          "SizeFormula": "Ability(0)",
           "HTKFormula": "[Size]",
           "CrewReqFormula": "1",
           "MineralCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "10"
+                "Value": "[Size]"
               },
               {
                 "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "10"
+                "Value": "[Size]"
               }
             ]
           },
           "ResearchCostFormula": "0",
-          "CreditCostFormula": "120",
+          "CreditCostFormula": "[Size]",
           "BuildPointCostFormula": "[Size]",
-          "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
+          "CargoTypeID": "00000000-0000-0000-0000-000000000000",
           "ComponentAbilitySDs": [
             {
-              "Name": "Storage Capacity",
+              "Name": "Tank Size",
               "Description": "",
-              "GuiHint": "None",
-              "AbilityFormula": "1000"
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "50000"
+            },
+            {
+              "Name": "Size Efficency",
+              "Description": "The amount of tonnage taken up by the tank and pumps.",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "Ability(0) * 0.01"
+            },                      {
+              "Name": "Total Fuel Stored",
+              "Description": "The amount of fuel this can store.",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "Ability(0) - Ability(1)"
             },
             {
               "Name": "DBargs",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(0), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'))",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "DataBlobArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
         }
       }
-
     ]
   }
 }

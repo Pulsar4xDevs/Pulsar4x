@@ -9,7 +9,7 @@
           "Description": "Fuel for SpaceShips",
           "ID": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
-          "Mass": 1.0,
+          "Mass": 0.01,
           "RawMineralCosts": {
             "List": [
               {
