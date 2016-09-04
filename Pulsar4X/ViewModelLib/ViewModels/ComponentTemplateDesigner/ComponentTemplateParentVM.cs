@@ -69,7 +69,7 @@ namespace Pulsar4X.ViewModel
             _gameVM = gameVM;
             FormulaEditor = new FormulaEditorVM(this, _staticData);
             
-            foreach (var item in _staticData.Components.Values)
+            foreach (var item in _staticData.ComponentTemplates.Values)
             {
                 Components.Add(item, item.Name);
             }
@@ -143,19 +143,19 @@ namespace Pulsar4X.ViewModel
                 sd.ComponentAbilitySDs.Add(item.CreateSD());
             }
 
-            if (_staticData.Components.Keys.Contains(sd.ID))
+            if (_staticData.ComponentTemplates.Keys.Contains(sd.ID))
             {
-                _staticData.Components[sd.ID] = sd;
+                _staticData.ComponentTemplates[sd.ID] = sd;
             }
             else
             {
-                _staticData.Components.Add(sd.ID, sd);
+                _staticData.ComponentTemplates.Add(sd.ID, sd);
             }
         }
 
         public void ExportToFile()
         {
-            StaticDataManager.ExportStaticData(_staticData.Components, "NewComponentData.json");
+            StaticDataManager.ExportStaticData(_staticData.ComponentTemplates, "NewComponentData.json");
         }
 
 

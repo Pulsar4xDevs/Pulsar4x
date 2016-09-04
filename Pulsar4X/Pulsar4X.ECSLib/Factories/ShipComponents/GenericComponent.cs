@@ -129,11 +129,11 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in componentDesign.MineralCostValues)
             {
 
-                if (staticData.RefinedMaterials.ContainsKey(kvp.Key))
+                if (staticData.ProcessedMaterials.ContainsKey(kvp.Key))
                 {
                     materalCosts.Add(kvp.Key, kvp.Value);
                 }
-                else if (staticData.Components.ContainsKey(kvp.Key))
+                else if (staticData.ComponentTemplates.ContainsKey(kvp.Key))
                 {
                     componentCosts.Add(kvp.Key, kvp.Value);
                 }
@@ -147,7 +147,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.BuildCostValue , mineralCosts,materalCosts,componentCosts , tech.ID, componentDesign.CrewReqValue);
             componentInfo.ComponentMountType = componentDesign.ComponentMountType;
-            CargoTypeDB cargoType = new CargoTypeDB(componentDesign.CargoTypeID);
+            CargoAbleTypeDB cargoType = new CargoAbleTypeDB(componentDesign.CargoTypeID);
 
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);

@@ -191,9 +191,9 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestRefinedMatsSave()
         {
-            Dictionary<Guid, RefinedMaterialSD> mats = new Dictionary<Guid, RefinedMaterialSD>();
+            Dictionary<Guid, ProcessedMaterialSD> mats = new Dictionary<Guid, ProcessedMaterialSD>();
 
-            RefinedMaterialSD soriumFuel = new RefinedMaterialSD();
+            ProcessedMaterialSD soriumFuel = new ProcessedMaterialSD();
             soriumFuel.Name = "Sorium Fuel";
             soriumFuel.Description = "Fuel for SpaceShips";
             soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
@@ -205,7 +205,7 @@ namespace Pulsar4X.Tests
             soriumFuel.OutputAmount = 1;
             mats.Add(soriumFuel.ID, soriumFuel);
 
-            RefinedMaterialSD DepleatedDuranuim = new RefinedMaterialSD();
+            ProcessedMaterialSD DepleatedDuranuim = new ProcessedMaterialSD();
             DepleatedDuranuim.Name = "Depleated Duranuim";
             DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset refinarys";
             DepleatedDuranuim.ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB");
@@ -324,13 +324,13 @@ namespace Pulsar4X.Tests
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
             int techNum = staticDataStore.Techs.Count;
-            int constructableObjectsNum = staticDataStore.RefinedMaterials.Count;
+            int constructableObjectsNum = staticDataStore.ProcessedMaterials.Count;
 
             // check that data was loaded:
             Assert.IsNotEmpty(staticDataStore.Minerals);
             Assert.IsNotEmpty(staticDataStore.AtmosphericGases);
             Assert.IsNotEmpty(staticDataStore.CommanderNameThemes);
-            Assert.IsNotEmpty(staticDataStore.RefinedMaterials);
+            Assert.IsNotEmpty(staticDataStore.ProcessedMaterials);
             Assert.IsNotEmpty(staticDataStore.CargoTypes);
             Assert.IsNotEmpty(staticDataStore.Techs);
 
@@ -340,7 +340,7 @@ namespace Pulsar4X.Tests
             // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
             Assert.AreEqual(techNum, staticDataStore.Techs.Count);
-            Assert.AreEqual(constructableObjectsNum, staticDataStore.RefinedMaterials.Count);
+            Assert.AreEqual(constructableObjectsNum, staticDataStore.ProcessedMaterials.Count);
 
             // now lets test some malformed data folders.
             StaticDataLoadException ex = Assert.Throws<StaticDataLoadException>(

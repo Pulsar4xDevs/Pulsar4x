@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Contains info on a ships cargo capicity.
     /// </summary>
-    public class CargoDB : BaseDataBlob
+    public class CargoStorageDB : BaseDataBlob
     {
         [JsonProperty]
         public Dictionary<Guid, int> CargoCapicity { get; private set; } = new Dictionary<Guid, int>();
@@ -33,16 +33,16 @@ namespace Pulsar4X.ECSLib
             _itemToTypeMap = game.StaticData.StorageTypeMap;           
         }
 
-        public CargoDB()
+        public CargoStorageDB()
         {
         }
 
-        public CargoDB(StaticDataStore staticDataStore)
+        public CargoStorageDB(StaticDataStore staticDataStore)
         {
             _itemToTypeMap = staticDataStore.StorageTypeMap;
         }
 
-        public CargoDB(CargoDB cargoDB)
+        public CargoStorageDB(CargoStorageDB cargoDB)
         {
             CargoCapicity = new Dictionary<Guid, int>(cargoDB.CargoCapicity);
             MinsAndMatsByCargoType = new Dictionary<Guid, Dictionary<Guid, int>>(cargoDB.MinsAndMatsByCargoType);
@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new CargoDB(this);
+            return new CargoStorageDB(this);
         }
 
     }

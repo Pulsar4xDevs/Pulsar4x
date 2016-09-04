@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal static void AddItemToCargo(CargoDB toCargo, Guid itemID, int amount)
+        internal static void AddItemToCargo(CargoStorageDB toCargo, Guid itemID, int amount)
         {
             ICargoable item = (ICargoable)toCargo.OwningEntity.Manager.Game.StaticData.FindDataObjectUsingID(itemID);
             int remainingWeightCapacity = RemainingCapacity(toCargo, item.CargoTypeID);
@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="toCargo"></param>
         /// <param name="item"></param>
         /// <param name="amount"></param>
-        internal static void AddItemToCargo(CargoDB toCargo, ICargoable item, int amount)
+        internal static void AddItemToCargo(CargoStorageDB toCargo, ICargoable item, int amount)
         {
             int remainingWeightCapacity = RemainingCapacity(toCargo, item.CargoTypeID);
             int remainingNumCapacity = (int)(remainingWeightCapacity / item.Mass);
@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         /// <param name="cargoTypeDB"></param>
         /// <param name=""></param>
-        internal static void AddItemToCargo(CargoDB toCargo, Entity entity, ICargoable cargoTypeDB)
+        internal static void AddItemToCargo(CargoStorageDB toCargo, Entity entity, ICargoable cargoTypeDB)
         {
             float amountWeight = cargoTypeDB.Mass;
             int remainingWeightCapacity = RemainingCapacity(toCargo, cargoTypeDB.CargoTypeID);
@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="toCargo"></param>
         /// <param name="item"></param>
         /// <param name="amount"></param>
-        internal static void TransferCargo(CargoDB fromCargo, CargoDB toCargo, ICargoable item, int amount)
+        internal static void TransferCargo(CargoStorageDB fromCargo, CargoStorageDB toCargo, ICargoable item, int amount)
         {
             Guid cargoTypeID = item.CargoTypeID;
             float itemWeight = item.Mass;
@@ -97,7 +97,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="fromCargo"></param>
         /// <param name="amounts">must be mins or mats</param>
-        internal static void RemoveResources(CargoDB fromCargo, Dictionary<Guid, int> amounts)
+        internal static void RemoveResources(CargoStorageDB fromCargo, Dictionary<Guid, int> amounts)
         {
             foreach (var item in amounts)
             {               
@@ -111,9 +111,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="fromCargo"></param>
         /// <param name="toCargo"></param>
         /// <param name="entityItem"></param>
-        internal static void TransferEntity(CargoDB fromCargo, CargoDB toCargo, Entity entityItem)
+        internal static void TransferEntity(CargoStorageDB fromCargo, CargoStorageDB toCargo, Entity entityItem)
         {
-            CargoTypeDB cargotypedb = entityItem.GetDataBlob<CargoTypeDB>();
+            CargoAbleTypeDB cargotypedb = entityItem.GetDataBlob<CargoAbleTypeDB>();
             Guid cargoTypeID = cargotypedb.CargoTypeID;
             float itemWeight = cargotypedb.Mass;
             Guid itemID = cargotypedb.ID;
@@ -127,14 +127,14 @@ namespace Pulsar4X.ECSLib
             }
         }      
 
-        private static void AddToCargo(CargoDB toCargo, Entity entityItem, ICargoable cargotypedb)
+        private static void AddToCargo(CargoStorageDB toCargo, Entity entityItem, ICargoable cargotypedb)
         {
             if (!toCargo.StoredEntities.ContainsKey(cargotypedb.CargoTypeID))
                 toCargo.StoredEntities.Add(cargotypedb.CargoTypeID, new List<Entity>());
             toCargo.StoredEntities[cargotypedb.CargoTypeID].Add(entityItem);
         }
 
-        internal static int RemainingCapacity(CargoDB cargo, Guid typeID )
+        internal static int RemainingCapacity(CargoStorageDB cargo, Guid typeID )
         {
             int capacity = cargo.CargoCapicity[typeID];
             int storedWeight = 0;
@@ -171,7 +171,7 @@ namespace Pulsar4X.ECSLib
         internal static void ReCalcCapacity(Entity parentEntity)
         {
 
-            Dictionary<Guid, int> totalSpace = parentEntity.GetDataBlob<CargoDB>().CargoCapicity;
+            Dictionary<Guid, int> totalSpace = parentEntity.GetDataBlob<CargoStorageDB>().CargoCapicity;
 
             List<KeyValuePair<Entity, List<Entity>>> StorageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
             foreach (var kvp in StorageComponents)

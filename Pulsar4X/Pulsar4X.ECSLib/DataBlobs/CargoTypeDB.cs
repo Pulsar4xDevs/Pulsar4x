@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
     /// Contains info on how an entitiy can be stored.
     /// NOTE an entity with this datablob must also have a MassVolumeDB
     /// </summary>
-    public class CargoTypeDB : BaseDataBlob , ICargoable
+    public class CargoAbleTypeDB : BaseDataBlob , ICargoable
     {
         [JsonProperty]
 
@@ -23,23 +23,23 @@ namespace Pulsar4X.ECSLib
             get { return (float)this.OwningEntity.GetDataBlob<MassVolumeDB>().Mass; } 
         }
 
-        public CargoTypeDB()
+        public CargoAbleTypeDB()
         {
         }
 
-        public CargoTypeDB(Guid cargoTypeID)
+        public CargoAbleTypeDB(Guid cargoTypeID)
         {
             CargoTypeID = cargoTypeID;
         }
 
-        public CargoTypeDB(CargoTypeDB cargoTypeDB)
+        public CargoAbleTypeDB(CargoAbleTypeDB cargoTypeDB)
         {
             CargoTypeID = cargoTypeDB.CargoTypeID;
         }
 
         public override object Clone()
         {
-            return new CargoTypeDB(this);
+            return new CargoAbleTypeDB(this);
         }
     }
 }

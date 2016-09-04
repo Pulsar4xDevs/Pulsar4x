@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
             var shipInfo = new ShipInfoDB();
             var armor = new ArmorDB();
             var buildCost = new BuildCostDB();
-            var cargotype = new CargoTypeDB();
+            var cargotype = new CargoAbleTypeDB();
             var crew = new CrewDB();
             var damage = new DamageDB();
             var maintenance = new MaintenanceDB();

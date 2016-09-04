@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
 
                         double currentSpeedLength = currentSpeed.Length();
 
-                        CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();                       
+                        CargoStorageDB storedResources = shipEntity.GetDataBlob<CargoStorageDB>();                       
                         Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerKM;
                         int maxKMeters = CalcMaxFuelDistance(shipEntity);
 
@@ -150,7 +150,7 @@ namespace Pulsar4X.ECSLib
 
         public static int CalcMaxFuelDistance(Entity shipEntity)
         {
-            CargoDB storedResources = shipEntity.GetDataBlob<CargoDB>();
+            CargoStorageDB storedResources = shipEntity.GetDataBlob<CargoStorageDB>();
             PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
             StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
             ICargoable resource = (ICargoable)staticData.FindDataObjectUsingID(propulsionDB.FuelUsePerKM.Keys.First());

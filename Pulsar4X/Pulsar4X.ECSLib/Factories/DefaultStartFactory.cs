@@ -14,20 +14,20 @@ namespace Pulsar4X.ECSLib
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
 
-            ComponentTemplateSD mineSD = game.StaticData.Components[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
+            ComponentTemplateSD mineSD = game.StaticData.ComponentTemplates[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
             ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity mineEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, mineDesign);
 
 
-            ComponentTemplateSD RefinerySD = game.StaticData.Components[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
+            ComponentTemplateSD RefinerySD = game.StaticData.ComponentTemplates[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
             ComponentDesign RefineryDesign = GenericComponentFactory.StaticToDesign(RefinerySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity RefineryEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, RefineryDesign);
 
-            ComponentTemplateSD labSD = game.StaticData.Components[new Guid("c203b7cf-8b41-4664-8291-d20dfe1119ec")];
+            ComponentTemplateSD labSD = game.StaticData.ComponentTemplates[new Guid("c203b7cf-8b41-4664-8291-d20dfe1119ec")];
             ComponentDesign labDesign = GenericComponentFactory.StaticToDesign(labSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity labEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, labDesign);
 
-            ComponentTemplateSD facSD = game.StaticData.Components[new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}")];
+            ComponentTemplateSD facSD = game.StaticData.ComponentTemplates[new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}")];
             ComponentDesign facDesign = GenericComponentFactory.StaticToDesign(facSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity facEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, facDesign);
 
@@ -67,14 +67,14 @@ namespace Pulsar4X.ECSLib
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
-            StorageSpaceProcessor.AddItemToCargo(ship1.GetDataBlob<CargoDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
-            StorageSpaceProcessor.AddItemToCargo(ship2.GetDataBlob<CargoDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
+            StorageSpaceProcessor.AddItemToCargo(ship1.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
+            StorageSpaceProcessor.AddItemToCargo(ship2.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
             // Strange bug - seems to update the ship orbit once, then never again
             // TODO: Fix to allow normal orbiting.
             //ship.SetDataBlob<OrbitDB>(new OrbitDB(earth.GetDataBlob<OrbitDB>()));
 
             Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, position, sol, "Prevailing Stillness");
-            StorageSpaceProcessor.AddItemToCargo(gunShipClass.GetDataBlob<CargoDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
+            StorageSpaceProcessor.AddItemToCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
 
             sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());
             sol.SystemManager.SetDataBlob(ship2.ID, new TransitableDB());
@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
 
         public static Entity GunShipDesign(Game game, Entity faction)
         {
-            var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
+            var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Sanctum Adroit GunShip");
             Entity engine = DefaultEngineDesign(game, faction);
             Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
@@ -136,7 +136,7 @@ namespace Pulsar4X.ECSLib
         {
             ComponentDesign engineDesign;
 
-            ComponentTemplateSD engineSD = game.StaticData.Components[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
+            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesign = GenericComponentFactory.StaticToDesign(engineSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             engineDesign.ComponentDesignAbilities[0].SetValueFromInput(10); //size
             engineDesign.Name = "DefaultEngine1";
@@ -147,7 +147,7 @@ namespace Pulsar4X.ECSLib
         public static Entity DefaultFuelTank(Game game, Entity faction)
         {
             ComponentDesign fuelTankDesign;
-            ComponentTemplateSD tankSD = game.StaticData.Components[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
+            ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
             fuelTankDesign = GenericComponentFactory.StaticToDesign(tankSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             fuelTankDesign.ComponentDesignAbilities[0].SetValueFromInput(1000000);
             fuelTankDesign.Name = "Tank1000k";
@@ -157,7 +157,7 @@ namespace Pulsar4X.ECSLib
         public static Entity DefaultSimpleLaser(Game game, Entity faction)
         {
             ComponentDesign laserDesign;
-            ComponentTemplateSD laserSD = game.StaticData.Components[new Guid("8923f0e1-1143-4926-a0c8-66b6c7969425")];
+            ComponentTemplateSD laserSD = game.StaticData.ComponentTemplates[new Guid("8923f0e1-1143-4926-a0c8-66b6c7969425")];
             laserDesign = GenericComponentFactory.StaticToDesign(laserSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             laserDesign.ComponentDesignAbilities[0].SetValueFromInput(10);
             laserDesign.ComponentDesignAbilities[1].SetValueFromInput(5000);
@@ -170,7 +170,7 @@ namespace Pulsar4X.ECSLib
         public static Entity DefaultBFC(Game game, Entity faction)
         {
             ComponentDesign fireControlDesign;
-            ComponentTemplateSD bfcSD = game.StaticData.Components[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
+            ComponentTemplateSD bfcSD = game.StaticData.ComponentTemplates[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
             fireControlDesign = GenericComponentFactory.StaticToDesign(bfcSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             fireControlDesign.ComponentDesignAbilities[0].SetValueFromInput(10);
             fireControlDesign.ComponentDesignAbilities[1].SetValueFromInput(5000);

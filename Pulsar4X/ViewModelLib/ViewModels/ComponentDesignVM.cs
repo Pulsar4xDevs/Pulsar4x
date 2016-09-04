@@ -32,7 +32,7 @@ namespace Pulsar4X.ViewModel
             _factionTech = gameVM.CurrentFaction.GetDataBlob<FactionTechDB>();
 
 
-            foreach (var componentSD in gameVM.Game.StaticData.Components.Values)
+            foreach (var componentSD in gameVM.Game.StaticData.ComponentTemplates.Values)
             {
                 ComponentTypes.Add(componentSD.Name, componentSD.ID);
             }
@@ -46,7 +46,7 @@ namespace Pulsar4X.ViewModel
 
         public void SetComponent(Guid componentGuid)
         {
-            ComponentTemplateSD componentSD = _staticData.Components[componentGuid];
+            ComponentTemplateSD componentSD = _staticData.ComponentTemplates[componentGuid];
 
             Design = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
 

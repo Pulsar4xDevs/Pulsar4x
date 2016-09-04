@@ -277,7 +277,7 @@ namespace Pulsar4X.ViewModel
 
         private Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
-        private Dictionary<Guid, RefinedMaterialSD> _materialsDictionary;
+        private Dictionary<Guid, ProcessedMaterialSD> _materialsDictionary;
 
 
         private readonly ObservableDictionary<Guid, RefinedMatInfoVM> _materialStockpile = new ObservableDictionary<Guid, RefinedMatInfoVM>();
@@ -289,7 +289,7 @@ namespace Pulsar4X.ViewModel
 
         public RefinedMatsStockpileVM(StaticDataStore staticData, Entity colonyEntity)
         {
-            _materialsDictionary = staticData.RefinedMaterials;
+            _materialsDictionary = staticData.ProcessedMaterials;
             _colonyEntity = colonyEntity;
             Initialise();
         }
@@ -299,7 +299,7 @@ namespace Pulsar4X.ViewModel
             var mats = _colonyEntity.GetDataBlob<ColonyInfoDB>().RefinedStockpile;            
             foreach (var kvp in mats)
             {
-                RefinedMaterialSD mat = _materialsDictionary[kvp.Key];
+                ProcessedMaterialSD mat = _materialsDictionary[kvp.Key];
                 if(!_materialStockpile.ContainsKey(kvp.Key))
                     _materialStockpile.Add(kvp.Key, new RefinedMatInfoVM(kvp.Key, mat.Name, ColonyInfo));
                 OnPropertyChanged();
