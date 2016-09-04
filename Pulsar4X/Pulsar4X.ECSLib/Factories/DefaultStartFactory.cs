@@ -74,6 +74,7 @@ namespace Pulsar4X.ECSLib
             //ship.SetDataBlob<OrbitDB>(new OrbitDB(earth.GetDataBlob<OrbitDB>()));
 
             Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, position, sol, "Prevailing Stillness");
+            StorageSpaceProcessor.AddItemToCargo(gunShipClass.GetDataBlob<CargoDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
 
             sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());
             sol.SystemManager.SetDataBlob(ship2.ID, new TransitableDB());
@@ -114,10 +115,14 @@ namespace Pulsar4X.ECSLib
         {
             var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Ob'enn dropship");
             Entity engine = DefaultEngineDesign(game, faction);
+            Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
+            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
+            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
+            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
