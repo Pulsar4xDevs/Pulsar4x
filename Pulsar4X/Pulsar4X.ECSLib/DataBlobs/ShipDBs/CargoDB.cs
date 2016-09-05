@@ -5,11 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    /*
-     * mins and mats <guid type, int amount>
-     * components guid type, int amount/ each int is a specific instance with its own guid.
-     
-         */
+
     /// <summary>
     /// Contains info on a ships cargo capicity.
     /// </summary>
@@ -111,6 +107,30 @@ namespace Pulsar4X.ECSLib
                 }
             }
             return returnValue;
+        }
+
+        /// <summary>
+        /// a list of entities stored of a given cargotype
+        /// </summary>
+        /// <param name="typeID">cargo type guid</param>
+        /// <returns>new list of Entites or an empty list</returns>
+        public List<Entity> GetEntiesOfCargoType(Guid typeID)
+        {            
+            if (StoredEntities.ContainsKey(typeID))
+                return new List<Entity>(StoredEntities[typeID]); 
+            return new List<Entity>();
+        }
+
+        /// <summary>
+        /// a Dictionary of resources stored of a given cargotype
+        /// </summary>
+        /// <param name="typeID">cargo type guid</param>
+        /// <returns>new dictionary of resources or an empty dictionary</returns>
+        public Dictionary<Guid, int> GetResourcesOfCargoType(Guid typeID)
+        {          
+            if (MinsAndMatsByCargoType.ContainsKey(typeID))
+                return new Dictionary<Guid, int>(MinsAndMatsByCargoType[typeID]);
+            return new Dictionary<Guid, int>(); 
         }
 
         /// <summary>

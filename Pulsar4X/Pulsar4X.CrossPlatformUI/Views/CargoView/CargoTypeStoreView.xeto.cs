@@ -5,25 +5,22 @@ using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
 
-namespace Pulsar4X.CrossPlatformUI.Views
+namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 {
-    public class CargoStorageView : Panel
+    public class CargoTypeStoreView : Panel
     {
+        protected Expander Expanderer;
+        protected Label ExpanderHeader;
         protected GridView CargoGrid;
-
-        public CargoStorageView()
+        public CargoTypeStoreView()
         {
             XamlReader.Load(this);
-
+            Expanderer.Header = new Label {DataContext = "HeaderText" };
+            
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Item",
                 DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, string>(r => r.ItemName) }
-            });
-            CargoGrid.Columns.Add(new GridColumn
-            {
-                HeaderText = "Cargo Type",
-                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, string>(r => r.CargoTypeName) }
             });
             CargoGrid.Columns.Add(new GridColumn
             {
@@ -44,19 +41,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 HeaderText = "Total Weight",
                 DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, float>(r => r.TotalWeight).Convert(r => r.ToString()) }
-            });
-
-            DataContextChanged += CargoStorageView_DataContextChanged;
-
-        }
-
-        public void SetDataContextFrom(ShipOrderVM shipOdersVM)
-        {
-            DataContext = new CargoStorageVM(shipOdersVM.GameVM, shipOdersVM.SelectedShip);
-        }
-        private void CargoStorageView_DataContextChanged(object sender, EventArgs e)
-        {
-
+            }); 
         }
     }
 }

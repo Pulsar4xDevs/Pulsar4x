@@ -3,6 +3,7 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
   xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
+  xmlns:c2="clr-namespace:Pulsar4X.CrossPlatformUI.Views.CargoView;assembly=Pulsar4X.CrossPlatformUI"
   >
   <TableLayout>
     <TableRow>
@@ -31,7 +32,7 @@
           <Label Text="Mineral Stockpile" />
         </TableRow>
         <TableRow>
-          <c:CargoStorageView x:Name="CargoView"   />
+          <c2:CargoStorageView x:Name="CargoView"   />
         </TableRow>
       </TableLayout>
     </TableRow>

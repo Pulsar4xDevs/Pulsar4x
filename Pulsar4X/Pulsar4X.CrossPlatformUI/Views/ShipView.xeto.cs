@@ -11,7 +11,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected ShipMoveView shipMoveView;
         protected ShipFireControlView shipFCView;
         protected ShipAttackView shipAttackView;
-        protected CargoStorageView cargoView;
+        protected CargoView.CargoStorageView cargoView;
         protected TabControl shipview_tabs;
 
 
@@ -23,9 +23,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             
             ShipList.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
             ShipList.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
-
-
-
         }
 
         public ShipView(ShipOrderVM viewModel) :this()
@@ -34,7 +31,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             shipMoveView = new ShipMoveView(viewModel);
             shipFCView = new ShipFireControlView(viewModel);
             shipAttackView = new ShipAttackView(viewModel);
-            cargoView = new CargoStorageView();
+            cargoView = new CargoView.CargoStorageView();
             cargoView.SetDataContextFrom(viewModel);
 
             TabPage tpMove = new TabPage();

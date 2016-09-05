@@ -14,7 +14,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected GridView FacDataGrid { get; set; }
         protected GridView PopDataGrid { get; set; }
         protected GridView MineralDeposits { get; set; }
-        protected CargoStorageView CargoView { get; set; }
+        protected CargoView.CargoStorageView CargoView { get; set; }
         protected JobAbilityView RefineryAbilityView { get; set; }
         protected GridView RefinedMats { get; set; }
         protected JobAbilityView ConstructionAbilityView { get; set; }
@@ -96,8 +96,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             MineralDeposits.DataStore = _colonyScreenVM.PlanetMineralDepositVM.MineralDeposits.Values;
             gameVM.SelectedColonyScreenVM.PlanetMineralDepositVM.PropertyChanged += PlanetMineralDepositVM_PropertyChanged;
 
-
-            CargoView.DataContext = new CargoStorageVM(gameVM, _colonyScreenVM._colonyEntity);
+            CargoStorageVM cargoVM = new CargoStorageVM(gameVM);
+            cargoVM.Initialise(_colonyScreenVM._colonyEntity);
+            CargoView.DataContext = cargoVM;
+            
             //gameVM.SelectedColonyScreenVM.RawMineralStockpileVM.PropertyChanged += RawMineralStockpileVM_PropertyChanged;
             //RefineryAbilityView = new JobAbilityView(colonyScreenVM.RefineryAbilityVM);
             RefineryAbilityView.SetViewModel(_colonyScreenVM.RefineryAbilityVM);
