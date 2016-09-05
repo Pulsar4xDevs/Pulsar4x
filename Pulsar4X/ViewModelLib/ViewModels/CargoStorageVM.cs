@@ -58,32 +58,17 @@ namespace Pulsar4X.ViewModel
                 if (cargoableitem is MineralSD)
                 {
                     MineralSD mineral = (MineralSD)cargoableitem;
-                    CargoItemVM cargoItem = new CargoItemVM()
-                    {
-                        ItemName = mineral.Name,
-                        ItemTypeName = "Raw Mineral",
-                        Amount = itemKVP.Value,
-                        ItemWeight = cargoableitem.Mass,
-                        TotalWeight = cargoableitem.Mass * itemKVP.Value
-                    };
+                    CargoItemVM cargoItem = new CargoItemVM(_gameVM, storageDB, mineral);
+
                     TypeStore.Add(cargoItem);
                 }
                 else if (cargoableitem is ProcessedMaterialSD)
                 {
                     ProcessedMaterialSD material = (ProcessedMaterialSD)cargoableitem;
-                    CargoItemVM cargoItem = new CargoItemVM()
-                    {
-                        ItemName = material.Name,
-                        ItemTypeName = "Procesesd Material",                  
-                        Amount = itemKVP.Value,
-                        ItemWeight = cargoableitem.Mass,
-                        TotalWeight = cargoableitem.Mass * itemKVP.Value
-                    };
+                    CargoItemVM cargoItem = new CargoItemVM(_gameVM, storageDB, material);
                     TypeStore.Add(cargoItem);
-                }
-                
+                }  
             }
-
 
             foreach (var entityObj in storageDB.GetEntiesOfCargoType(storageType))
             {
@@ -91,27 +76,58 @@ namespace Pulsar4X.ViewModel
 
                 if (cargoableitem is MineralSD)
                 {
-                    CargoItemVM cargoItem = new CargoItemVM()
-                    {
-                        ItemName = entityObj.GetDataBlob<NameDB>().GetName(entityObj.GetDataBlob<OwnedDB>().ObjectOwner),
-                        ItemTypeName = entityObj.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity.GetDataBlob<NameDB>().GetName(entityObj.GetDataBlob<OwnedDB>().ObjectOwner),
-                        //Amount = entityObj.Value,
-                        ItemWeight = cargoableitem.Mass,
-                        //TotalWeight = cargoitem.Mass * entityObj.Value
-                    };
+                    CargoItemVM cargoItem = new CargoItemVM(_gameVM, storageDB, entityObj);
+
                     TypeStore.Add(cargoItem);
                 }
             }
             HeaderText = cargoType.Name + ": " + NetWeight.ToString() + " of " + MaxWeight.ToString() + " used, " + RemainingWeight.ToString() + " remaining";
         }
     }
-    public class CargoItemVM
+    public class CargoItemVM : ViewModelBase
     {
+        CargoStorageDB _storageDB;
         public string ItemName { get; set; }
         public string ItemTypeName { get; set; }
-        public int Amount { get; set; }
-        public float ItemWeight { get; set; }
-        public float TotalWeight { get; set; }       
+        public int Amount { get; set; } = 0;
+        public float ItemWeight { get; set; } = 0;
+        public float TotalWeight { get { return (ItemWeight * Amount); } } 
+
+        private CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, ICargoable item)
+        {
+            _storageDB = storageDB;
+            ItemWeight = item.Mass;
+            gameVM.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;                    
+        }
+
+        private void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
+        {
+            OnPropertyChanged(nameof(Amount));
+        }
+
+        public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, MineralSD item):this(gameVM, storageDB, (ICargoable)item)
+        {
+            ItemName = "Raw Mineral";
+            Amount = _storageDB.MinsAndMatsByCargoType[item.CargoTypeID][item.ID];
+            
+        }
+
+        public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, ProcessedMaterialSD item) : this(gameVM, storageDB, (ICargoable)item)
+        {
+            ItemName = "Processed Material";
+            Amount = _storageDB.MinsAndMatsByCargoType[item.CargoTypeID][item.ID];
+            
+        }
+        public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, Entity item) 
+        {
+            _storageDB = storageDB;
+            ItemName = item.GetDataBlob<NameDB>().GetName(item.GetDataBlob<OwnedDB>().ObjectOwner);
+            ItemTypeName = item.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity.GetDataBlob<NameDB>().GetName(item.GetDataBlob<OwnedDB>().ObjectOwner);
+            Amount = 1;
+            ItemWeight = (float)item.GetDataBlob<MassVolumeDB>().Mass;
+            gameVM.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
+
+        }
     }
 
 }

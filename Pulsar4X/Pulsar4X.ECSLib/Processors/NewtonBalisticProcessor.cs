@@ -13,16 +13,15 @@ namespace Pulsar4X.ECSLib
         /// process balistic movement for a single system
         /// currently is not affected by gravity. 
         /// </summary>
-        /// <param name="starSystem">the system to process</param>
-        internal static void Process(StarSystem starSystem)
+        /// <param name="manager">the system to process</param>
+        internal static void Process(EntityManager manager)
         {
-            EntityManager currentManager = starSystem.SystemManager;
-            TimeSpan orbitCycle = starSystem.Game.Settings.OrbitCycleTime;
-            DateTime toDate = starSystem.SystemSubpulses.SystemLocalDateTime + orbitCycle;
+            TimeSpan orbitCycle = manager.Game.Settings.OrbitCycleTime;
+            DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + orbitCycle;
 
-            starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.BalisticMoveProcessor);
+            manager.ManagerSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.BalisticMoveProcessor);
 
-            foreach (Entity objectEntity in starSystem.SystemManager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>())
+            foreach (Entity objectEntity in manager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>())
             {
                 NewtonBalisticDB balisticDB = objectEntity.GetDataBlob<NewtonBalisticDB>();
                 PositionDB position = objectEntity.GetDataBlob<PositionDB>();

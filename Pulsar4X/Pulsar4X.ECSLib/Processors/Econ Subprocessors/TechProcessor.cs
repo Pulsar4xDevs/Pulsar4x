@@ -10,9 +10,9 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public static class TechProcessor
     {
-        internal static void ProcessSystem(StarSystem system, Game game)
+        internal static void ProcessSystem(EntityManager manager, Game game)
         {
-            foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             {
                 DoResearch(colonyEntity, game);
             }

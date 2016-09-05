@@ -25,16 +25,18 @@ namespace Pulsar4X.ECSLib
 
         internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
+        public ManagerSubPulse ManagerSubpulses { get; private set; }
+
         #region Constructors
 
         internal EntityManager(Game game)
         {
-            Game = game;
-
+            Game = game;            
             for (int i = 0; i < InternalDataBlobTypes.Keys.Count; i++)
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
+            ManagerSubpulses = new ManagerSubPulse(this);
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()
