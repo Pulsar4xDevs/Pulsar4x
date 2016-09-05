@@ -67,17 +67,28 @@ namespace Pulsar4X.ECSLib
     internal ManagerSubPulse(EntityManager entityManager)
     {
         _entityManager = entityManager;
-        _systemLocalDateTime = entityManager.Game.CurrentDateTime;
+        _systemLocalDateTime = _entityManager.Game.CurrentDateTime;
 
-        //can add either by creating and passing an Action
-        //Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
-        //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
-        //or can add it by passing the method
-        //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, OrbitProcessor.UpdateSystemOrbits);
-        AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
-        AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.OrbitCycleTime, PulseActionEnum.OrbitProcessor);
-        AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.OrbitCycleTime, PulseActionEnum.BalisticMoveProcessor);
-    }
+            _entityManager.Game.PostLoad += Game_PostLoad;
+        }
+
+        private void Game_PostLoad(object sender, EventArgs e)
+        {
+            Initalise();
+        }
+
+        private void Initalise()//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
+        {            
+            //can add either by creating and passing an Action
+            //Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
+            //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
+            //or can add it by passing the method
+            //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, OrbitProcessor.UpdateSystemOrbits);
+
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.OrbitCycleTime, PulseActionEnum.OrbitProcessor);
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.OrbitCycleTime, PulseActionEnum.BalisticMoveProcessor);
+        }
 
 
     /// <summary>

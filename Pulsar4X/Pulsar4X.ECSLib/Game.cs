@@ -39,7 +39,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal Dictionary<Guid, StarSystem> Systems { get; private set; } = new Dictionary<Guid, StarSystem>();
 
-        [JsonProperty] public readonly EntityManager GlobalManager;
+        [JsonProperty]
+        public readonly EntityManager GlobalManager;
 
         [PublicAPI]
         [JsonProperty]
