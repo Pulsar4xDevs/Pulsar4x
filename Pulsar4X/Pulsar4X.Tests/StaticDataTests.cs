@@ -158,23 +158,54 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void TestCargoType()
+        {
+            Dictionary<Guid, CargoTypeSD> cargoTypes = new Dictionary<Guid, CargoTypeSD>();
+            CargoTypeSD cargoTypeGeneral = new CargoTypeSD()
+            {
+                ID = new Guid("16B4C4F0-7292-4F4D-8FEA-22103C70B288"),
+                Name = "General",
+                Description = "Storage for general cargo items"
+            };
+            cargoTypes.Add(cargoTypeGeneral.ID, cargoTypeGeneral);
+
+            CargoTypeSD cargoTypeFuel = new CargoTypeSD()
+            {
+                ID = new Guid("D8E8DA2D-8DC8-4A3F-B989-5F2E67C55E77"),
+                Name = "Fuel",
+                Description = "Storage for fuel"
+            };
+            cargoTypes.Add(cargoTypeFuel.ID, cargoTypeFuel);
+
+            CargoTypeSD cargoTypePopulation = new CargoTypeSD()
+            {
+                ID = new Guid("9E52A3AF-66AF-4935-982D-26F3FEE775B0"),
+                Name = "Cryogenic Storage",
+                Description = "Storage for frozen people"
+            };
+            cargoTypes.Add(cargoTypePopulation.ID, cargoTypePopulation);
+
+            StaticDataManager.ExportStaticData(cargoTypes, "CargoTypeDataExportTest.json");
+        }
+
+        [Test]
         public void TestRefinedMatsSave()
         {
-            Dictionary<Guid, RefinedMaterialSD> mats = new Dictionary<Guid, RefinedMaterialSD>();
+            Dictionary<Guid, ProcessedMaterialSD> mats = new Dictionary<Guid, ProcessedMaterialSD>();
 
-            RefinedMaterialSD soriumFuel = new RefinedMaterialSD();
+            ProcessedMaterialSD soriumFuel = new ProcessedMaterialSD();
             soriumFuel.Name = "Sorium Fuel";
             soriumFuel.Description = "Fuel for SpaceShips";
             soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
             soriumFuel.RawMineralCosts = new Dictionary<Guid, int>();
             soriumFuel.RawMineralCosts.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
-            soriumFuel.Weight = 1;
+            soriumFuel.Mass = 1;
             //soriumFuel.CargoType = CargoType.Fuel;
             soriumFuel.RefineryPointCost = 10;
             soriumFuel.OutputAmount = 1;
             mats.Add(soriumFuel.ID, soriumFuel);
 
-            RefinedMaterialSD DepleatedDuranuim = new RefinedMaterialSD();
+            ProcessedMaterialSD DepleatedDuranuim = new ProcessedMaterialSD();
             DepleatedDuranuim.Name = "Depleated Duranuim";
             DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset refinarys";
             DepleatedDuranuim.ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB");
@@ -182,7 +213,7 @@ namespace Pulsar4X.Tests
             DepleatedDuranuim.RawMineralCosts.Add(new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), 5);
             DepleatedDuranuim.RefinedMateraialsCosts = new Dictionary<Guid, int>();
             DepleatedDuranuim.RefinedMateraialsCosts.Add(new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"), 1);
-            DepleatedDuranuim.Weight = 1;
+            DepleatedDuranuim.Mass = 1;
             //DepleatedDuranuim.CargoType = CargoType.General;
             DepleatedDuranuim.RefineryPointCost = 20;
             DepleatedDuranuim.OutputAmount = 6;
@@ -293,13 +324,14 @@ namespace Pulsar4X.Tests
             // store counts for later:
             int mineralsNum = staticDataStore.Minerals.Count;
             int techNum = staticDataStore.Techs.Count;
-            int constructableObjectsNum = staticDataStore.RefinedMaterials.Count;
+            int constructableObjectsNum = staticDataStore.ProcessedMaterials.Count;
 
             // check that data was loaded:
             Assert.IsNotEmpty(staticDataStore.Minerals);
             Assert.IsNotEmpty(staticDataStore.AtmosphericGases);
             Assert.IsNotEmpty(staticDataStore.CommanderNameThemes);
-            Assert.IsNotEmpty(staticDataStore.Minerals);
+            Assert.IsNotEmpty(staticDataStore.ProcessedMaterials);
+            Assert.IsNotEmpty(staticDataStore.CargoTypes);
             Assert.IsNotEmpty(staticDataStore.Techs);
 
             // now lets re-load the same data, to test that duplicates don't occure as required:
@@ -308,7 +340,7 @@ namespace Pulsar4X.Tests
             // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
             Assert.AreEqual(techNum, staticDataStore.Techs.Count);
-            Assert.AreEqual(constructableObjectsNum, staticDataStore.RefinedMaterials.Count);
+            Assert.AreEqual(constructableObjectsNum, staticDataStore.ProcessedMaterials.Count);
 
             // now lets test some malformed data folders.
             StaticDataLoadException ex = Assert.Throws<StaticDataLoadException>(

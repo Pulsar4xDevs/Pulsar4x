@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
                 newSpecificInstances.Add(kvp.Key, new List<Entity>());
                 for (int i = 0; i < kvp.Value.Count; i++)
                 {
-                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key));
+                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction));
                 }
             }
             componentInstances.SpecificInstances = newSpecificInstances;
@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
             var shipInfo = new ShipInfoDB();
             var armor = new ArmorDB();
             var buildCost = new BuildCostDB();
-            var cargo = new CargoDB();
+            var cargotype = new CargoAbleTypeDB();
             var crew = new CrewDB();
             var damage = new DamageDB();
             var maintenance = new MaintenanceDB();
@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
                 shipInfo,
                 armor,
                 buildCost,
-                cargo,
+                cargotype,
                 crew,
                 damage,
                 maintenance,

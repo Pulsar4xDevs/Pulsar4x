@@ -231,6 +231,12 @@
     <EmbeddedResource Include="Views\LogViewer.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\CargoView\CargoTypeStoreView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\CargoView\CargoStorageView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\LogViewCMD.cs" />
@@ -262,6 +268,12 @@
     <Compile Include="Pulsar4XApplication.cs" />
     <Compile Include="Views\AbilitySelectionList.xeto.cs">
       <DependentUpon>AbilitySelectionList.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CargoView\CargoStorageView.xeto.cs">
+      <DependentUpon>CargoStorageView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CargoView\CargoTypeStoreView.xeto.cs">
+      <DependentUpon>CargoTypeStoreView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ChainedSlidersControl.xeto.cs">
       <DependentUpon>ChainedSlidersControl.xeto</DependentUpon>

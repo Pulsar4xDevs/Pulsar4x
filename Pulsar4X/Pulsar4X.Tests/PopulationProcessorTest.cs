@@ -47,7 +47,7 @@ namespace Pulsar4X.Tests
             // @todo: add more colonies, especially ones with multiple species in one colony
 
 
-            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.Components[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
+            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.ComponentTemplates[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
             ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>(), _game.Game.StaticData);
             Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game.Game, _game.HumanFaction, infrastructureDesign);
 
@@ -98,7 +98,7 @@ namespace Pulsar4X.Tests
             int i, j, k;
 
             Guid infGUID = new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb");
-            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.Components[infGUID];
+            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.ComponentTemplates[infGUID];
             ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>(), _game.Game.StaticData);
             Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game.Game, _game.HumanFaction, infrastructureDesign);
 

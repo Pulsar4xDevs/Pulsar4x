@@ -89,8 +89,9 @@ namespace Pulsar4X.ECSLib
                 {
                     newStore.LoadedDataSets.Add(dataVInfo);
                 }
-
+                newStore.SetStorageTypeMap();
                 game.StaticData = newStore;
+
             }
             catch (Exception e)
             {

@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
                 if (RefineryPoints > 0)
                 {
                     var job = refiningDB.JobBatchList[jobIndex];
-                    RefinedMaterialSD material = game.StaticData.RefinedMaterials[job.ItemGuid];
+                    ProcessedMaterialSD material = game.StaticData.ProcessedMaterials[job.ItemGuid];
                     Dictionary<Guid, int> mineralCosts = material.RawMineralCosts;
                     Dictionary<Guid, int> materialCosts = material.RefinedMateraialsCosts;
 
@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
             lock (refiningDB.JobBatchList) //prevent threaded race conditions
             {
                 //check if the job materialguid is valid, then add it if so.
-                if (staticData.RefinedMaterials.ContainsKey(job.ItemGuid))
+                if (staticData.ProcessedMaterials.ContainsKey(job.ItemGuid))
                 {
                     refiningDB.JobBatchList.Add(job);
                 }
