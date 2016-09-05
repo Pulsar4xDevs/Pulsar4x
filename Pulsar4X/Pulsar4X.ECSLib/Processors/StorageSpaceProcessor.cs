@@ -134,8 +134,10 @@ namespace Pulsar4X.ECSLib
             toCargo.StoredEntities[cargotypedb.CargoTypeID].Add(entityItem);
         }
 
+
+
         internal static int RemainingCapacity(CargoStorageDB cargo, Guid typeID )
-        {
+        {           
             int capacity = cargo.CargoCapicity[typeID];
             int storedWeight = 0;
 

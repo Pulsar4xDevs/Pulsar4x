@@ -26,11 +26,15 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
         private Dictionary<Guid, Guid> _itemToTypeMap;
 
+        [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
+        private StaticDataStore _staticData;
+
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {            
             var game = (Game)context.Context;
-            _itemToTypeMap = game.StaticData.StorageTypeMap;           
+            _itemToTypeMap = game.StaticData.StorageTypeMap;
+            _staticData = game.StaticData; 
         }
 
         public CargoStorageDB()
@@ -106,9 +110,22 @@ namespace Pulsar4X.ECSLib
                     returnValue = MinsAndMatsByCargoType[cargoTypeID][itemID];
                 }
             }
-
-
             return returnValue;
+        }
+
+        /// <summary>
+        /// gives the cargoType of a given itemID
+        /// </summary>
+        /// <param name="itemID"></param>
+        /// <returns></returns>
+        public CargoTypeSD CargoType(Guid itemID)
+        {
+            return _staticData.CargoTypes[_itemToTypeMap[itemID]];
+        }
+
+        public Guid CargoTypeID(Guid itemID)
+        {
+            return _itemToTypeMap[itemID];
         }
 
         public override object Clone()
