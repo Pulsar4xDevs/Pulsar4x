@@ -10,12 +10,13 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
     public class CargoTypeStoreView : Panel
     {
         protected Expander Expanderer;
-        protected Label ExpanderHeader;
+        protected Label ExpanderHeader = new Label();
         protected GridView CargoGrid;
         public CargoTypeStoreView()
         {
             XamlReader.Load(this);
-            Expanderer.Header = new Label {DataContext = "HeaderText" };
+            ExpanderHeader.TextBinding.BindDataContext((CargoStorageByTypeVM m) => m.HeaderText);
+            Expanderer.Header = ExpanderHeader;
             
             CargoGrid.Columns.Add(new GridColumn
             {
