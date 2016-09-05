@@ -10,7 +10,7 @@ namespace Pulsar4X.ViewModel
 {
     public class ColonyScreenVM : IViewModel
     {
-        private Entity _colonyEntity;
+        public Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
         private Entity FactionEntity { get { return _colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner; } }
 

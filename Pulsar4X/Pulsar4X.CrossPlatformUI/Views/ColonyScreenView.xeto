@@ -31,7 +31,7 @@
           <Label Text="Mineral Stockpile" />
         </TableRow>
         <TableRow>
-          <GridView ID="MineralStockpile"  />
+          <c:CargoStorageView x:Name="CargoView"   />
         </TableRow>
       </TableLayout>
     </TableRow>

@@ -37,11 +37,17 @@ namespace Pulsar4X.ECSLib
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
             //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 
             TechProcessor.MakeResearchable(factionTech);
+            Entity fuelTank = DefaultFuelTank(game, factionEntity);
+            Entity cargoInstalation = DefaultCargoInstalation(game, factionEntity);
 
             EntityManipulation.AddComponentToEntity(colonyEntity, mineEntity);
             EntityManipulation.AddComponentToEntity(colonyEntity, RefineryEntity);
             EntityManipulation.AddComponentToEntity(colonyEntity, labEntity);
             EntityManipulation.AddComponentToEntity(colonyEntity, facEntity);
+           
+            EntityManipulation.AddComponentToEntity(colonyEntity, fuelTank);
+            
+            EntityManipulation.AddComponentToEntity(colonyEntity, cargoInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             
@@ -178,6 +184,16 @@ namespace Pulsar4X.ECSLib
 
             return GenericComponentFactory.DesignToDesignEntity(game, faction, fireControlDesign);
 
+        }
+
+        public static Entity DefaultCargoInstalation(Game game, Entity faction)
+        {
+            ComponentDesign cargoInstalation;
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            cargoInstalation = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            cargoInstalation.ComponentDesignAbilities[0].SetValueFromInput(1000000);
+            cargoInstalation.Name = "CargoInstalation1";
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, cargoInstalation);
         }
     }
 

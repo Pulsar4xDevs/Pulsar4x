@@ -353,6 +353,9 @@
     <Content Include="Data\Pulsar4x\CargoTypeData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\Pulsar4x\InstallationData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <Content Include="Data\Pulsar4x\AtmosphericData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

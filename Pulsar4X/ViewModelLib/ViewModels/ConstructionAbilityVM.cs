@@ -13,7 +13,7 @@ namespace Pulsar4X.ViewModel
             ItemDictionary = new DictionaryVM<string, Guid>(DisplayMode.Key);
             foreach (var kvp in FactionInfo.ComponentDesigns)
             {
-                ItemDictionary.Add(kvp.Value.GetDataBlob<NameDB>().DefaultName, kvp.Key);
+                //ItemDictionary.Add(kvp.Value.GetDataBlob<NameDB>().DefaultName, kvp.Key);
             }
             //NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
             NewJobSelectedIndex = 0;
