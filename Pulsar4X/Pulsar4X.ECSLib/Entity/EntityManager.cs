@@ -632,7 +632,7 @@ namespace Pulsar4X.ECSLib
         public EntityManager(SerializationInfo info, StreamingContext context) : this((Game)context.Context)
         {
             var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
-
+            ManagerSubpulses = (ManagerSubPulse)info.GetValue("ManagerSubpulses", typeof(ManagerSubPulse));
             foreach (ProtoEntity protoEntity in entities)
             {
                 Entity entity;
@@ -661,6 +661,7 @@ namespace Pulsar4X.ECSLib
                                                 select entity.Clone()).ToList();
 
             info.AddValue("Entities", storedEntities);
+            info.AddValue("ManagerSubpulses", ManagerSubpulses);
         }
 
         /// <summary>
