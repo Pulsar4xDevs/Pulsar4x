@@ -34,12 +34,12 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// process PropulsionDB movement for a single system
         /// </summary>
-        /// <param name="system">the system to process</param>
+        /// <param name="manager">the system to process</param>
         /// <param name="deltaSeconds">amount of time in seconds</param>
-        internal static void Process(StarSystem system, int deltaSeconds)
+        internal static void Process(EntityManager manager, int deltaSeconds)
         {
-            OrderProcessor.ProcessSystem(system);
-            foreach (Entity shipEntity in system.SystemManager.GetAllEntitiesWithDataBlob<PropulsionDB>())
+            OrderProcessor.ProcessSystem(manager);
+            foreach (Entity shipEntity in manager.GetAllEntitiesWithDataBlob<PropulsionDB>())
             {
                 PositionDB positionDB = shipEntity.GetDataBlob<PositionDB>();
                 PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
@@ -98,9 +98,9 @@ namespace Pulsar4X.ECSLib
                             newDistanceDelta = fuelMaxDistanceAU;
                             double percent = fuelMaxDistanceAU / distanceToNextTPos;
                             newPos = nextTPos + deltaVecToNextT * percent;
-                            Event usedAllFuel = new Event(system.SystemSubpulses.SystemLocalDateTime, "Used all Fuel", shipEntity.GetDataBlob<OwnedDB>().ObjectOwner, shipEntity);
+                            Event usedAllFuel = new Event(manager.ManagerSubpulses.SystemLocalDateTime, "Used all Fuel", shipEntity.GetDataBlob<OwnedDB>().ObjectOwner, shipEntity);
                             usedAllFuel.EventType = EventType.FuelExhausted;
-                            system.Game.EventLog.AddEvent(usedAllFuel);
+                            manager.Game.EventLog.AddEvent(usedAllFuel);
                         }
                         else
                             newDistanceDelta = distanceToNextTPos;

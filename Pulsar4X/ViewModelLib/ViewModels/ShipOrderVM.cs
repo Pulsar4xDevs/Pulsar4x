@@ -269,7 +269,7 @@ namespace Pulsar4X.ViewModel
             RefreshShips(0, 0);
 
             //PropertyChanged += ShipOrderVM_PropertyChanged;
-            SelectedSystem.SystemSubpulses.SystemDateChangedEvent += UpdateInterface_SystemDateChangedEvent;
+            SelectedSystem.SystemManager.ManagerSubpulses.SystemDateChangedEvent += UpdateInterface_SystemDateChangedEvent;
 
             _starSystems.SelectionChangedEvent += RefreshShips;
             _shipList.SelectionChangedEvent += RefreshOrders;

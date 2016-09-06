@@ -176,6 +176,7 @@
     <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
     <Compile Include="Helpers\CargoDictionary.cs" />
     <Compile Include="Helpers\EntityManipulation.cs" />
+    <Compile Include="ManagerSubPulse.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\BeamAttackOrder.cs" />
     <Compile Include="Orders\OrderTypes\ConstructionOrder.cs" />
@@ -318,7 +319,6 @@
     <Compile Include="StaticData\MineralSD.cs" />
     <Compile Include="StaticData\SystemGenSettingsSD.cs" />
     <Compile Include="StaticData\TechSD.cs" />
-    <Compile Include="SystemSubpulses.cs" />
     <Compile Include="TimeLoop.cs" />
   </ItemGroup>
   <ItemGroup>

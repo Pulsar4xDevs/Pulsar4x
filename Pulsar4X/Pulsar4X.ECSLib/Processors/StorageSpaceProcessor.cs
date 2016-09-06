@@ -134,19 +134,24 @@ namespace Pulsar4X.ECSLib
             toCargo.StoredEntities[cargotypedb.CargoTypeID].Add(entityItem);
         }
 
+       
 
 
-        internal static int RemainingCapacity(CargoStorageDB cargo, Guid typeID )
+        public static int RemainingCapacity(CargoStorageDB cargo, Guid typeID )
         {           
             int capacity = cargo.CargoCapicity[typeID];
-            int storedWeight = 0;
-
-            if (cargo.MinsAndMatsByCargoType.ContainsKey(typeID))            
-                storedWeight = StoredWeight(cargo.MinsAndMatsByCargoType, typeID);           
-            else if (cargo.StoredEntities.ContainsKey(typeID))
-                storedWeight = StoredWeight(cargo.StoredEntities, typeID);
-
+            int storedWeight = NetWeight(cargo, typeID);
             return capacity - storedWeight;
+        }
+
+        public static int NetWeight(CargoStorageDB cargo, Guid typeID)
+        {
+            int net = 0;
+            if (cargo.MinsAndMatsByCargoType.ContainsKey(typeID))
+                net = StoredWeight(cargo.MinsAndMatsByCargoType, typeID);
+            else if (cargo.StoredEntities.ContainsKey(typeID))
+                net = StoredWeight(cargo.StoredEntities, typeID);
+            return net;
         }
 
         private static int StoredWeight(Dictionary<Guid, Dictionary<Guid, int>> dict, Guid TypeID)

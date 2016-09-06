@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -25,16 +26,31 @@ namespace Pulsar4X.ECSLib
 
         internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
+        [JsonProperty]
+        public ManagerSubPulse ManagerSubpulses { get; private set; }
+
+        /// <summary>
+        /// Static reference to an invalid manager.
+        /// </summary>
+        [NotNull]
+        [PublicAPI]
+        public static readonly EntityManager InvalidManager = new EntityManager();
+
+
+
         #region Constructors
+        private EntityManager()
+        {
+        }
 
         internal EntityManager(Game game)
         {
-            Game = game;
-
+            Game = game;            
             for (int i = 0; i < InternalDataBlobTypes.Keys.Count; i++)
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
+            ManagerSubpulses = new ManagerSubPulse(this);
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()
@@ -616,7 +632,7 @@ namespace Pulsar4X.ECSLib
         public EntityManager(SerializationInfo info, StreamingContext context) : this((Game)context.Context)
         {
             var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
-
+            ManagerSubpulses = (ManagerSubPulse)info.GetValue("ManagerSubpulses", typeof(ManagerSubPulse));
             foreach (ProtoEntity protoEntity in entities)
             {
                 Entity entity;
@@ -635,6 +651,7 @@ namespace Pulsar4X.ECSLib
                     Entity.Create(this, protoEntity);
                 }
             }
+            
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -644,6 +661,7 @@ namespace Pulsar4X.ECSLib
                                                 select entity.Clone()).ToList();
 
             info.AddValue("Entities", storedEntities);
+            info.AddValue("ManagerSubpulses", ManagerSubpulses);
         }
 
         /// <summary>

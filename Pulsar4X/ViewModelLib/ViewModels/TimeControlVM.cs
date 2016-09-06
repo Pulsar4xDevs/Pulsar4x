@@ -29,7 +29,7 @@ namespace Pulsar4X.ViewModel
             set { _timeloop.TickFrequency = TimeSpan.FromMilliseconds(value); OnPropertyChanged(); }
         }
 
-        private SystemSubPulses SystemSubPulse { get { return _gameVM?.StarSystemViewModel?.StarSystems.SelectedKey.SystemSubpulses; } }
+        private ManagerSubPulse SystemSubPulse { get { return _gameVM?.StarSystemViewModel?.StarSystems.SelectedKey.SystemManager.ManagerSubpulses; } }
         public string CurrentGameDate { get { return _timeloop?.GameGlobalDateTime.ToString(); } }
 
         public string LastTickLen { get { return _timeloop?.LastProcessingTime.TotalMilliseconds.ToString(); } }
