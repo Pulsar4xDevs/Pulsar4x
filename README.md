@@ -18,6 +18,9 @@ Xamarin Studio does work under windows, and the process is the same as for VS201
 under linux you will need:
 MonoDevelop
 Mono-Complete
+under mac you will need:
+Xamarin Studio
+???
 
 
 Instructions:
@@ -30,8 +33,9 @@ Instructions:
   
  b. If you're running Linux: Our linux dev has disapeared into the either, there are a number of bugs that I will hopefully eventualy get around to fixing... unless somone else comes along and wants to try doing linux dev.
 till then: install monodev and mono-complete. 
-open the sln, run using linux 64 config. 
- c. If you're running Mac: welcome to the team! we don't currently have a mac specialist, feel free to take on the challenge!  
+open the sln, run using linux 64 config.   
+ c. If you're running Mac: welcome to the team! we don't currently have a mac specialist, feel free to take on the challenge!
+you'll need xamarin studio to compile it for mac, there is a dedicated mac project, but that is missing the OpenTK lib. as I dont' have access to mac I'm unable to test or fix this. you can however run the gtk project, which has some bugs I'm hoping will get fixed when a new version of eto.forms comes out.
 
 4. a. if you're running Windows Set Pulsar4x.CrossPlatform.WPF project as the startup project. you should be able to build and/or run from there.   
  b. Linux: See 3b
