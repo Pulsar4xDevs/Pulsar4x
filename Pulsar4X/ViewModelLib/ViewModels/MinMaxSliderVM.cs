@@ -20,7 +20,7 @@ namespace Pulsar4X.ViewModel
             get { return _maxValue; }
             set { _maxValue = value; OnPropertyChanged(nameof(SliderMaxValue)); OnPropertyChanged(); }
         }
-        private double _maxValue = 100;
+        private double _maxValue = 1;
 
         /// <summary>
         /// Min value of slider
@@ -33,13 +33,15 @@ namespace Pulsar4X.ViewModel
         private double _minValue = 0;
 
         public double StepValue { get; set; } = 0.0001;
-        public double Value { get {return _value_;} set { _value_ = value; OnPropertyChanged(nameof(SliderValue)); OnValueChanged(); OnPropertyChanged(); } }
-        protected double _value_;
-
+        public double Value { get {return _value_;}
+            set { _value_ = value; OnPropertyChanged(nameof(SliderValue)); OnValueChanged(); OnPropertyChanged(); } }
+        protected double _value_ = 0.5;
+        
         public int SliderMaxValue { get { return (int)(MaxValue * 10000); }}
         public int SliderMinValue { get { return (int)(MinValue * 10000); }}
         public int SliderStepValue { get { return (int)(StepValue * 10000);}}
-        public int SliderValue { get { return (int)(Value * 10000); } set { Value = value * 0.0001f; }}
+        public int SliderValue { get { return (int)(Value * 10000); }
+            set { Value = value * 0.0001f; }}
 
         /// <summary>
         /// Gets / Sets whether the step/tick is enabled TODO use a 'bool?' and have off, slider, everything? 
@@ -65,6 +67,13 @@ namespace Pulsar4X.ViewModel
             get { return !_isLocked; }
         }
 
+        //#region eto.forms bug workaround, remove once https://github.com/picoe/Eto/issues/563 and another bug I've not created an issue for yet  has been resolved
+        //public double PreLoadedValue { get; set; } = 50;
+        //public void SetValueFromPreLoadedValue()
+        //{
+        //    Value = PreLoadedValue;
+        //}
+        //#endregion
 
         private double _oldValue;
         public event ValuePropertyChangedEventHandler ValueChanged;

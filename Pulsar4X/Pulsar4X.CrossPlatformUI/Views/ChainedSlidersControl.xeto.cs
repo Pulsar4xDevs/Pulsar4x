@@ -20,7 +20,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             foreach (var item in chainedSliders.Sliders)
             {
-                SlidersStack.Items.Add(new MinMaxSlider(item));
+                MinMaxSlider mms = new MinMaxSlider() { DataContext = item };
+                SlidersStack.Items.Add(mms);
             }
         }
     }

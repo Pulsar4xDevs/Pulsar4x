@@ -12,21 +12,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public MinMaxSlider()
         {
-            XamlReader.Load(this);
-            DataContext = this;
-            
+            XamlReader.Load(this);           
             NumericUpDown.DecimalPlaces = 4;
+            DataContextChanged += MinMaxSlider_DataContextChanged;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="viewModelObject"></param>
-        public MinMaxSlider(MinMaxSliderVM minMaxSliderVM)
-            : this()
+        private void MinMaxSlider_DataContextChanged(object sender, System.EventArgs e)
         {
-            DataContext = minMaxSliderVM;
-
+            if (DataContext is MinMaxSliderVM)
+            { }
         }
     }
 }

@@ -1,10 +1,10 @@
-﻿<Properties StartupItem="Pulsar4X.CrossPlatformUI.Wpf\Pulsar4X.CrossPlatformUI.Wpf.csproj">
+﻿<Properties StartupItem="Pulsar4X.CrossPlatformUI.Gtk2\Pulsar4X.CrossPlatformUI.Gtk2.csproj">
   <DisabledProjects>
     <String>ModdingTools.JsonDataEditor/ModdingTools.JsonDataEditor.csproj</String>
     <String>ModdingTools.JsonDataEditor2/ModdingTools.JsonDataEditor2.csproj</String>
     <String>Pulsar4X.WPFUI/Pulsar4X.WPFUI.csproj</String>
     <String>Pulsar4X.CrossPlatformUI.Mac\Pulsar4X.CrossPlatformUI.Mac.csproj</String>
-    <String>Pulsar4X.CrossPlatformUI.Gtk2\Pulsar4X.CrossPlatformUI.Gtk2.csproj</String>
+    <String>Pulsar4X.CrossPlatformUI.Wpf\Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
   </DisabledProjects>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI\Views\ComponentsListView.xeto">
