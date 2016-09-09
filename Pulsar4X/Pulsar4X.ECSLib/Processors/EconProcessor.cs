@@ -10,51 +10,51 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private DateTime _lastRun = DateTime.MinValue;
 
-        internal void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        //internal void Process(Game game, List<StarSystem> systems, int deltaSeconds)
+        //{
+        //    if (game.CurrentDateTime - _lastRun < game.Settings.EconomyCycleTime)
+        //    {
+        //        return;
+        //    }
+
+        //    _lastRun = game.CurrentDateTime;
+
+        //    if (game.Settings.EnableMultiThreading ?? false)
+        //    {
+        //        Parallel.ForEach(systems, system => ProcessSystem(system));
+        //    }
+        //    else
+        //    {
+        //        foreach (var system in systems) //TODO thread this
+        //        {
+        //            ProcessSystem(system);
+        //        }
+        //    }
+        //}
+
+        internal static void ProcessSystem(EntityManager manager)
         {
-            if (game.CurrentDateTime - _lastRun < game.Settings.EconomyCycleTime)
-            {
-                return;
-            }
-
-            _lastRun = game.CurrentDateTime;
-
-            if (game.Settings.EnableMultiThreading ?? false)
-            {
-                Parallel.ForEach(systems, system => ProcessSystem(system));
-            }
-            else
-            {
-                foreach (var system in systems) //TODO thread this
-                {
-                    ProcessSystem(system);
-                }
-            }
-        }
-
-        internal static void ProcessSystem(StarSystem starSystem)
-        {
-            Game game = starSystem.Game;
+            Game game = manager.Game;
             //Action<StarSystem> economyMethod = ProcessSystem;
             //system.SystemSubpulses.AddSystemInterupt(system.Game.CurrentDateTime + system.Game.Settings.EconomyCycleTime, economyMethod);
-            starSystem.SystemSubpulses.AddSystemInterupt(starSystem.Game.CurrentDateTime + starSystem.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
+            manager.ManagerSubpulses.AddSystemInterupt(manager.Game.CurrentDateTime + manager.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
 
 
-            TechProcessor.ProcessSystem(starSystem, game);
+            TechProcessor.ProcessSystem(manager, game);
 
-            foreach (Entity colonyEntity in starSystem.SystemManager.GetAllEntitiesWithDataBlob<ColonyMinesDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyMinesDB>())
             {
                 MineProcessor.MineResources(colonyEntity);
             }
-            foreach (Entity colonyEntity in starSystem.SystemManager.GetAllEntitiesWithDataBlob<ColonyRefiningDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyRefiningDB>())
             {
                 RefiningProcessor.RefineMaterials(colonyEntity, game);
             }
-            foreach (Entity colonyEntity in starSystem.SystemManager.GetAllEntitiesWithDataBlob<ColonyConstructionDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyConstructionDB>())
             {
                 ConstructionProcessor.ConstructStuff(colonyEntity, game);
             }
-            foreach (Entity colonyEntity in starSystem.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             {
                 PopulationProcessor.GrowPopulation(colonyEntity);
             }

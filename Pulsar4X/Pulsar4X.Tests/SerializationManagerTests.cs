@@ -103,7 +103,7 @@ namespace Pulsar4X.Tests
   
             Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
 
-            Assert.AreEqual(firstOrigional.SystemSubpulses, firstLoaded.SystemSubpulses);
+            Assert.AreEqual(firstOrigional.SystemManager.ManagerSubpulses, firstLoaded.SystemManager.ManagerSubpulses);
 
         }
 

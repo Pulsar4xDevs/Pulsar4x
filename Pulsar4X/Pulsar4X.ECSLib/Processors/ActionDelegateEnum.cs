@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         [ThreadStatic]
         private static Entity _currentEntity;
         [ThreadStatic]
-        private static StarSystem _currentSystem;
+        private static EntityManager _currentManager;
         [ThreadStatic]
         private static Game _game;
         [ThreadStatic]
@@ -33,26 +33,26 @@ namespace Pulsar4X.ECSLib
         {
             { PulseActionEnum.JumpOutProcessor, new Action<StarSystem>(processor => { InterSystemJumpProcessor.JumpOut(_game, _jumpPair) ;}) },
             { PulseActionEnum.JumpInProcessor, new Action<StarSystem>(processor => { InterSystemJumpProcessor.JumpIn(_game, _jumpPair) ;}) },
-            { PulseActionEnum.EconProcessor, new Action<StarSystem>(processor => { EconProcessor.ProcessSystem(_currentSystem);}) },
-            { PulseActionEnum.OrbitProcessor, new Action<StarSystem>(processor => { OrbitProcessor.UpdateSystemOrbits(_currentSystem);}) },
-            { PulseActionEnum.OrderProcessor, new Action<StarSystem>(processor => { OrderProcessor.Process(_game);}) },
-            { PulseActionEnum.BalisticMoveProcessor, new Action<StarSystem>(processor => { NewtonBalisticProcessor.Process(_currentSystem);}) },
+            { PulseActionEnum.EconProcessor, new Action<StarSystem>(processor => { EconProcessor.ProcessSystem(_currentManager);}) },
+            { PulseActionEnum.OrbitProcessor, new Action<StarSystem>(processor => { OrbitProcessor.UpdateSystemOrbits(_currentManager);}) },
+            { PulseActionEnum.OrderProcessor, new Action<StarSystem>(processor => { OrderProcessor.ProcessSystem(_currentManager);}) },
+            { PulseActionEnum.BalisticMoveProcessor, new Action<StarSystem>(processor => { NewtonBalisticProcessor.Process(_currentManager);}) },
             { PulseActionEnum.MoveOnlyProcessor, new Action<StarSystem>(processor => { DoNothing();}) }, //movement always runs on a subpulse prior to this. 
             //{ SystemActionEnum.SomeOtherProcessor, new Action<StarSystem>(processor => { Something.SomeOtherProcess(_currentSystem, _currentEntity);}) },
         };
-        internal static void DoAction(PulseActionEnum action, StarSystem starSystem, Entity entity)
+        internal static void DoAction(PulseActionEnum action, EntityManager manager, Entity entity)
         {
-            _currentSystem = starSystem;
+            _currentManager = manager;
             _currentEntity = entity;
                 
             EnumProcessorMap[action].DynamicInvoke(entity);
 
         }
-        internal static void DoAction(PulseActionEnum action, StarSystem starSystem)
+        internal static void DoAction(PulseActionEnum action, EntityManager manager)
         {
 
-            _currentSystem = starSystem;
-            EnumProcessorMap[action].DynamicInvoke(starSystem);
+            _currentManager = manager;
+            EnumProcessorMap[action].DynamicInvoke(manager);
 
         }
 

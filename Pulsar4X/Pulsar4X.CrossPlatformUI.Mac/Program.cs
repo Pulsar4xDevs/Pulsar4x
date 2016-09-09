@@ -9,7 +9,7 @@ namespace Pulsar4X.CrossPlatformUI.Mac
         public static void Main(string[] args)
         {
 			var platform = new Eto.Mac.Platform ();
-			platform.Add<GLSurface.IHandler>(() => new MacGLSurfaceHandler());
+			//platform.Add<GLSurface.IHandler>(() => new MacGLSurfaceHandler());
 			new Application(platform).Run(new MainForm());
         }
     }

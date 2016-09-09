@@ -138,15 +138,15 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal static void UpdateSystemOrbits(StarSystem starSystem)
+        internal static void UpdateSystemOrbits(EntityManager manager)
         {
-            EntityManager currentManager = starSystem.SystemManager;
-            TimeSpan orbitCycle = starSystem.Game.Settings.OrbitCycleTime;
-            DateTime toDate = starSystem.SystemSubpulses.SystemLocalDateTime + orbitCycle;
+       
+            TimeSpan orbitCycle = manager.Game.Settings.OrbitCycleTime;
+            DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + orbitCycle;
             //starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, UpdateSystemOrbits);
-            starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.OrbitProcessor);
+            manager.ManagerSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.OrbitProcessor);
             // Find the first orbital entity.
-            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(StarInfoTypeIndex);
+            Entity firstOrbital = manager.GetFirstEntityWithDataBlob(StarInfoTypeIndex);
 
             if (!firstOrbital.IsValid)
             {
