@@ -1,5 +1,62 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="FullSignature">
+  <Comment CommentText="These classes are related to loading &quot;StaticData&quot; static data are json files which tell the engine about different items in the game, ie they define components, minerals, etc. static data does not change throughout the game.  ">
+    <Position X="14.052" Y="0.639" Height="0.858" Width="7.726" />
+  </Comment>
+  <Comment CommentText="These are the StaticData structs, json files get deserialised to these classes">
+    <Position X="16.902" Y="3.302" Height="0.75" Width="3.856" />
+  </Comment>
+  <Comment CommentText="The EntityManager stores entities and handles lookups by datablob type. &#xD;&#xA;Each StarSystem has one of these.">
+    <Position X="4.955" Y="0.5" Height="0.75" Width="2.503" />
+  </Comment>
+  <Comment CommentText="The Game class Holds top level game data. ie, collection of StarSystems, Players, Etc. it also stores the GlobalEntityManager ">
+    <Position X="0.697" Y="0.5" Height="0.978" Width="1.7" />
+  </Comment>
+  <Comment CommentText="TimeLoop handles cycling the game turns if running in continious mode, and handles synching starsystem time if a ship jumps between them&#xD;&#xA;For more info see: https://github.com/Pulsar4xDevs/Pulsar4x/wiki/GameLoop-and-Interupts.">
+    <Position X="2.651" Y="0.533" Height="1.505" Width="2.035" />
+  </Comment>
+  <Comment CommentText="Entity is a collection of DataBlobs. Different Datablobs make up what an entity is. see the wiki for more info">
+    <Position X="7.795" Y="0.5" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="ManagerSubPulse is simular to the TimeLoop, but handles ticks for an individual Manager(typicaly a StarSystem)">
+    <Position X="9.697" Y="0.5" Height="0.906" Width="1.7" />
+  </Comment>
+  <Comment CommentText="These are DataBlobs, they are anemic classes that store data relevent to whatever process they're written for">
+    <Position X="1.893" Y="11.49" Height="0.75" Width="37.337" />
+  </Comment>
+  <Comment CommentText="Datablobs here are typicaly related to Stars and or Planet entities">
+    <Position X="1.491" Y="16.75" Height="0.75" Width="3.844" />
+  </Comment>
+  <Comment CommentText="These &quot;Attribute&quot; datablobs are for component and installation designs.&#xD;&#xA;">
+    <Position X="15.998" Y="26.153" Height="0.379" Width="5.569" />
+  </Comment>
+  <Comment CommentText="A component Instance will have some of these datablobs, they track the state of a component">
+    <Position X="20.508" Y="20.189" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="ComponentDesigns will have ComponentInfo and ComponentInstancesDB as well as a number of AttributeDB">
+    <Position X="17.756" Y="17.233" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Colony and Ship entities are very simular. they share a lot of datablobs depending on what component entiteis they have installed">
+    <Position X="8.778" Y="18.25" Height="0.51" Width="4.359" />
+  </Comment>
+  <Comment CommentText="These are datablobs that were created before they were needed. they're unused right now but will likely be used at some point in the future. ">
+    <Position X="25.134" Y="26.291" Height="0.403" Width="14.062" />
+  </Comment>
+  <Comment CommentText="Some datablobs are used by many different types of entity">
+    <Position X="11.278" Y="15.097" Height="0.403" Width="4.192" />
+  </Comment>
+  <Comment CommentText="Processor classes&#xD;&#xA;these classes do all the heavy lifting, they manipulate the datablobs in an entity. ">
+    <Position X="25.236" Y="1.525" Height="0.75" Width="9.81" />
+  </Comment>
+  <Comment CommentText="Factories:&#xD;&#xA;These classes help create specific entites by creating an entity with a specific set of datablob types">
+    <Position X="24.5" Y="7" Height="0.75" Width="8.564" />
+  </Comment>
+  <Comment CommentText="Here Be Dragons">
+    <Position X="55" Y="14.75" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Unsorted Classes. many of these are small classes for random stuff, helpers, utilities, and a bunch of mess that resharper seems to have left behind, others I just have yet to move to the correct spot on this chart.">
+    <Position X="50.75" Y="1.5" Height="0.75" Width="5.857" />
+  </Comment>
   <Class Name="Pulsar4X.ECSLib.AsteroidDamageDB" Collapsed="true">
     <Position X="4.5" Y="20" Width="1.5" />
     <TypeIdentifier>
@@ -9,6 +66,20 @@
   </Class>
   <Class Name="Pulsar4X.ECSLib.AtmosphereDB" Collapsed="true">
     <Position X="2.5" Y="20" Width="1.5" />
+    <InheritanceLine Type="Pulsar4X.ECSLib.BaseDataBlob" ManuallyRouted="true">
+      <Path>
+        <Point X="30.25" Y="18.259" />
+        <Point X="30.25" Y="18.689" />
+        <Point X="18.956" Y="18.689" Type="JumpStart" />
+        <Point X="18.79" Y="18.689" Type="JumpEnd" />
+        <Point X="11.333" Y="18.689" Type="JumpStart" />
+        <Point X="11.167" Y="18.689" Type="JumpEnd" />
+        <Point X="2.378" Y="18.689" />
+        <Point X="2.378" Y="19.808" />
+        <Point X="3.25" Y="19.808" />
+        <Point X="3.25" Y="20" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAgAAAAIAAKABAAIAAAAAgAAAAQAAACAAAAgEAABA=</HashCode>
       <FileName>DataBlobs\AtmosphereDB.cs</FileName>
@@ -129,7 +200,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.BeamWeaponAtbDB" Collapsed="true">
-    <Position X="20" Y="29" Width="1.5" />
+    <Position X="28.5" Y="29" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAAAAAAAAAIACAAAAAAAAAAAIgAAAIAAAQAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\BeamWeaponAtbDB.cs</FileName>
@@ -157,7 +228,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ComponentInfoDB" Collapsed="true">
-    <Position X="16.5" Y="19" Width="1.5" />
+    <Position X="16.75" Y="19" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAAAAAAAAAAgAAAAJABAAAgAGgAAFA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\ComponentInfoDB.cs</FileName>
@@ -185,7 +256,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.EnginePowerAtbDB" Collapsed="true">
-    <Position X="17.75" Y="30" Width="1.5" />
+    <Position X="20" Y="30.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\EnginePowerAtbDB.cs</FileName>
@@ -199,14 +270,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.FailureRateMitigationAtbDB" Collapsed="true">
-    <Position X="11.75" Y="29" Width="1.5" />
+    <Position X="28.5" Y="32" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\FailureRateMitigationAtbDB.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.JumpDriveAtbDB" Collapsed="true">
-    <Position X="19.75" Y="32" Width="1.5" />
+    <Position X="20" Y="30" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAIAAAQAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\JumpDriveAtbDB.cs</FileName>
@@ -234,7 +305,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.MissileLauncherAtbDB" Collapsed="true">
-    <Position X="20" Y="30" Width="1.5" />
+    <Position X="28.5" Y="30" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAIAAAAAIAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\MissileLauncherAtbDB.cs</FileName>
@@ -290,21 +361,21 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ResearchPointsAtbDB" Collapsed="true">
-    <Position X="19.75" Y="31" Width="1.5" />
+    <Position X="20" Y="29" Width="1.5" />
     <TypeIdentifier>
       <HashCode>CAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\ResearchPointsAtbDB.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ResourceConsumptionAtbDB" Collapsed="true">
-    <Position X="17.75" Y="32" Width="1.5" />
+    <Position X="17.75" Y="29.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAABAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\ResourcelConsumptionAtbDB.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.SensorSignatureAtbDB" Collapsed="true">
-    <Position X="17.75" Y="31" Width="1.5" />
+    <Position X="28.25" Y="31" Width="1.5" />
     <TypeIdentifier>
       <HashCode>BAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentAttributeDBs\SensorSignatureAtbDB.cs</FileName>
@@ -325,28 +396,28 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ComponentInstanceInfoDB" Collapsed="true">
-    <Position X="18.5" Y="21" Width="1.5" />
+    <Position X="19" Y="19" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAwAAAAAAAAAAAAAAAEAAAAAAAAAAEAAAAAAAAAQQRA=</HashCode>
       <FileName>DataBlobs\ComponentInstanceDBs\ComponentInstanceInfoDB.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.FireControlInstanceAbilityDB" Collapsed="true">
-    <Position X="18.5" Y="22" Width="1.5" />
+    <Position X="19" Y="19.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QAAAEAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentInstanceDBs\FireControlAbilityDB.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.WeaponStateDB" Collapsed="true">
-    <Position X="18.75" Y="23" Width="1.5" />
+    <Position X="19" Y="20.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAEAAAAAAAAABAAAAAAIAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ComponentInstanceDBs\WeaponStateDB.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ComponentInstancesDB" Collapsed="true">
-    <Position X="16.5" Y="20" Width="2" />
+    <Position X="16.75" Y="19.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIABA=</HashCode>
       <FileName>DataBlobs\ComponentInstancesDB.cs</FileName>
@@ -423,7 +494,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.NameDB" Collapsed="true">
-    <Position X="1.75" Y="17" Width="1.5" />
+    <Position X="12" Y="15.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAQAAABBA=</HashCode>
       <FileName>DataBlobs\NameDB.cs</FileName>
@@ -431,6 +502,18 @@
   </Class>
   <Class Name="Pulsar4X.ECSLib.NewtonBalisticDB" Collapsed="true">
     <Position X="4.5" Y="21" Width="1.5" />
+    <InheritanceLine Type="Pulsar4X.ECSLib.BaseDataBlob" ManuallyRouted="true">
+      <Path>
+        <Point X="30.25" Y="18.259" />
+        <Point X="30.25" Y="18.637" />
+        <Point X="18.956" Y="18.637" Type="JumpStart" />
+        <Point X="18.79" Y="18.637" Type="JumpEnd" />
+        <Point X="4.372" Y="18.637" />
+        <Point X="4.372" Y="20.808" />
+        <Point X="5.25" Y="20.808" />
+        <Point X="5.25" Y="21" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAACAAAAIAAEAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\NewtonBalisticDB.cs</FileName>
@@ -444,7 +527,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.OwnedDB" Collapsed="true">
-    <Position X="15.25" Y="17" Width="1.5" />
+    <Position X="14" Y="16" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAQAAAAAABA=</HashCode>
       <FileName>DataBlobs\OwnedDB.cs</FileName>
@@ -459,6 +542,20 @@
   </Class>
   <Class Name="Pulsar4X.ECSLib.RuinsDB" Collapsed="true">
     <Position X="2.5" Y="21" Width="1.5" />
+    <InheritanceLine Type="Pulsar4X.ECSLib.BaseDataBlob" ManuallyRouted="true">
+      <Path>
+        <Point X="30.25" Y="18.259" />
+        <Point X="30.25" Y="18.677" />
+        <Point X="18.956" Y="18.677" Type="JumpStart" />
+        <Point X="18.79" Y="18.677" Type="JumpEnd" />
+        <Point X="11.333" Y="18.677" Type="JumpStart" />
+        <Point X="11.167" Y="18.677" Type="JumpEnd" />
+        <Point X="2.378" Y="18.677" />
+        <Point X="2.378" Y="20.808" />
+        <Point X="3.25" Y="20.808" />
+        <Point X="3.25" Y="21" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAACAAAgAAAAAAAAAEAAAAgAAAAABA=</HashCode>
       <FileName>DataBlobs\RuinsDB.cs</FileName>
@@ -472,7 +569,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ArmorDefDB" Collapsed="true">
-    <Position X="46.75" Y="2.5" Width="1.5" />
+    <Position X="37.5" Y="28.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAQAAAAAAAAAAAA=</HashCode>
       <FileName>DataBlobs\ShipDBs\ArmorDB.cs</FileName>
@@ -521,7 +618,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.HangerDB" Collapsed="true">
-    <Position X="29.5" Y="19" Width="1.5" />
+    <Position X="33" Y="27" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAABA=</HashCode>
       <FileName>DataBlobs\ShipDBs\HangerDB.cs</FileName>
@@ -605,7 +702,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.SpeciesDB" Collapsed="true">
-    <Position X="20.25" Y="19" Width="1.5" />
+    <Position X="21" Y="19" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAACAIgCIAARAAEAACAAAAAAAAgABA=</HashCode>
       <FileName>DataBlobs\SpeciesDB.cs</FileName>
@@ -654,7 +751,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.Entity">
-    <Position X="7.75" Y="3.75" Width="1.5" />
+    <Position X="7.75" Y="5" Width="1.5" />
     <NestedTypes>
       <Class Name="Pulsar4X.ECSLib.Entity.EntityConverter" Collapsed="true">
         <TypeIdentifier>
@@ -664,8 +761,8 @@
     </NestedTypes>
     <InheritanceLine Type="Pulsar4X.ECSLib.ProtoEntity" ManuallyRouted="true" FixedToPoint="true">
       <Path>
-        <Point X="8.5" Y="3.941" />
-        <Point X="8.5" Y="3.75" />
+        <Point X="8.5" Y="4.974" />
+        <Point X="8.5" Y="5" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
@@ -696,7 +793,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ProtoEntity">
-    <Position X="7.75" Y="0.5" Width="1.5" />
+    <Position X="7.75" Y="1.75" Width="1.5" />
     <NestedTypes>
       <Class Name="Pulsar4X.ECSLib.ProtoEntity.ProtoEntityConverter" Collapsed="true">
         <TypeIdentifier>
@@ -710,7 +807,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.Event" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="52" Y="6.5" Width="1.5" />
+    <Position X="41.5" Y="10.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAgAAAAAAAAAAQAAAAAkAAAAAAAAQAAAIAAAAQA=</HashCode>
       <FileName>EventLog\Event.cs</FileName>
@@ -718,7 +815,7 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="Pulsar4X.ECSLib.EventLog" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="53.75" Y="6.5" Width="1.5" />
+    <Position X="41.5" Y="9.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AEAEAAAAQAAAAABAAAAAAAAgAAAAAAAAYAgAACAABAQ=</HashCode>
       <FileName>EventLog\EventLog.cs</FileName>
@@ -733,7 +830,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ColonyFactory" Collapsed="true">
-    <Position X="43.25" Y="5.5" Width="1.5" />
+    <Position X="28.75" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
       <FileName>Factories\ColonyFactory.cs</FileName>
@@ -754,35 +851,35 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.FactionFactory" Collapsed="true">
-    <Position X="55.5" Y="6.5" Width="1.5" />
+    <Position X="32.25" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAEAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Factories\FactionFactory.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ComponentDesign" Collapsed="true">
-    <Position X="48.5" Y="5.5" Width="1.5" />
+    <Position X="24.75" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>BAAIkAAAACAgBAAABAZYAAUAgAAAACQAECEEAAAEECA=</HashCode>
       <FileName>Factories\ShipComponents\ComponentDesign.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ComponentDesignAbility" Collapsed="true">
-    <Position X="50.25" Y="5.5" Width="1.5" />
+    <Position X="26.5" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>gBAABAAAAAAgAggDAAEAgAUAABAABAAEAAggCAAAIQA=</HashCode>
       <FileName>Factories\ShipComponents\ComponentDesignAbility.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ComponentInstanceFactory" Collapsed="true">
-    <Position X="52" Y="5.5" Width="1.5" />
+    <Position X="26.25" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Factories\ShipComponents\ComponentInstanceFactory.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.GenericComponentFactory" Collapsed="true">
-    <Position X="43.25" Y="7.5" Width="1.5" />
+    <Position X="24.5" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAEAAAAA=</HashCode>
       <FileName>Factories\ShipComponents\GenericComponent.cs</FileName>
@@ -803,7 +900,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.SpeciesFactory" Collapsed="true">
-    <Position X="59" Y="11.5" Width="1.5" />
+    <Position X="30.5" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AABIAAAAAAAAAAAAAAAAAAAAACAAAAABAAIAAAAAAAA=</HashCode>
       <FileName>Factories\SpeciesFactory.cs</FileName>
@@ -824,14 +921,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.JPSurveyFactory" Collapsed="true">
-    <Position X="43.25" Y="8.5" Width="1.5" />
+    <Position X="30.5" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAABAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAA=</HashCode>
       <FileName>Factories\SystemGen\JPSurveyFactory.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.StarFactory" Collapsed="true">
-    <Position X="62.5" Y="11.5" Width="1.5" />
+    <Position X="28.75" Y="8.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAIAAACAAAAAAAAAACAAAAAAAgAAAAAAAA=</HashCode>
       <FileName>Factories\SystemGen\StarFactory.cs</FileName>
@@ -859,7 +956,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.Game">
-    <Position X="0.75" Y="1" Width="1.75" />
+    <Position X="0.75" Y="2.25" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAQAAAQAAAAGAAAYAwAIAAIAgQAwAgAEwIgAAADAAIg=</HashCode>
       <FileName>Game.cs</FileName>
@@ -1057,7 +1154,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.PulseInterrupt" Collapsed="true">
-    <Position X="45" Y="10.5" Width="1.5" />
+    <Position X="40.5" Y="5.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAIAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Helpers\Pulse.cs</FileName>
@@ -1071,7 +1168,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ManagerSubPulse" BaseTypeListCollapsed="true">
-    <Position X="9.5" Y="1.75" Width="1.5" />
+    <Position X="9.75" Y="1.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAEgAAAAAhShAABAAgAAAAAQAAAQAACAIABAAA=</HashCode>
       <FileName>ManagerSubPulse.cs</FileName>
@@ -1143,35 +1240,35 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="Pulsar4X.ECSLib.PulseActionDictionary" Collapsed="true">
-    <Position X="43.25" Y="10.5" Width="1.5" />
+    <Position X="40.5" Y="5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AIAAAAACABAAAAAAAAAAAAAAgCAIAAAAAAAAAAAAAAQ=</HashCode>
       <FileName>Processors\ActionDelegateEnum.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.AtmosphereProcessor" Collapsed="true">
-    <Position X="48.5" Y="4.5" Width="1.5" />
+    <Position X="30.75" Y="4" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAIAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Processors\AtmosphereProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.DamageProcessor" Collapsed="true">
-    <Position X="57.25" Y="5.5" Width="1.5" />
+    <Position X="29" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAQAAAgAEAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Processors\DamageProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ConstructionProcessor" Collapsed="true">
-    <Position X="53.75" Y="5.5" Width="1.5" />
+    <Position X="30.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAgAAAAIAAAAAAAAAAAEAIAAAAAAAABAAAAAAAgA=</HashCode>
       <FileName>Processors\Econ Subprocessors\ConstructionProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.MineProcessor" Collapsed="true">
-    <Position X="53.75" Y="8.5" Width="1.5" />
+    <Position X="27.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAA=</HashCode>
       <FileName>Processors\Econ Subprocessors\MineProcessor.cs</FileName>
@@ -1185,7 +1282,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.RefiningProcessor" Collapsed="true">
-    <Position X="43.25" Y="11.5" Width="1.5" />
+    <Position X="27.25" Y="4" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEABAAAAAAAAA=</HashCode>
       <FileName>Processors\Econ Subprocessors\RefiningProcessor.cs</FileName>
@@ -1214,7 +1311,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.EconProcessor" Collapsed="true">
-    <Position X="45" Y="6.5" Width="1.5" />
+    <Position X="27" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Processors\EconProcessor.cs</FileName>
@@ -1235,14 +1332,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.OrbitProcessor" Collapsed="true">
-    <Position X="50.25" Y="9.5" Width="1.5" />
+    <Position X="25.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AACAACAACCAAEAAAAhAAAAAAAABQAAAAAIAAAAQAAAA=</HashCode>
       <FileName>Processors\OrbitProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.OrderProcessor" Collapsed="true">
-    <Position X="52" Y="9.5" Width="1.5" />
+    <Position X="32.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAAAIAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Processors\OrderProcessor.cs</FileName>
@@ -1284,14 +1381,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.ShipMovementProcessor" Collapsed="true">
-    <Position X="57.25" Y="11.5" Width="1.5" />
+    <Position X="32.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAIAAAAAQAAAgAgAAAAAAAAAAAAAAAIAAQAAAA=</HashCode>
       <FileName>Processors\ShipMovementProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.SpeciesProcessor" Collapsed="true">
-    <Position X="60.75" Y="11.5" Width="1.5" />
+    <Position X="30.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAgAAAAAAAAgAACAAAgAAAAAAAAAAAAAAQIAAAAAAA=</HashCode>
       <FileName>Processors\SpeciesProcessor.cs</FileName>
@@ -1305,14 +1402,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.WeaponProcessor" Collapsed="true">
-    <Position X="45" Y="13.5" Width="1.5" />
+    <Position X="28.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>gAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAA=</HashCode>
       <FileName>Processors\WeaponProcessor.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.FireControlProcessor" Collapsed="true">
-    <Position X="57.25" Y="6.5" Width="1.5" />
+    <Position X="29" Y="4" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAI=</HashCode>
       <FileName>Processors\WeaponProcessor.cs</FileName>
@@ -1760,7 +1857,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.SerializationManager" Collapsed="true">
-    <Position X="50.25" Y="11.5" Width="1.5" />
+    <Position X="41.5" Y="12" Width="1.5" />
     <TypeIdentifier>
       <HashCode>CAKEQQQEAgBAAAAAIQAAFFCAggAAAAACAAAAQACMQCA=</HashCode>
       <FileName>SerializationManager.cs</FileName>
@@ -1802,7 +1899,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Pulsar4X.ECSLib.TimeLoop" BaseTypeListCollapsed="true">
-    <Position X="2.75" Y="1.75" Width="1.75" />
+    <Position X="2.75" Y="2.25" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAEgKBKAkEIDSgAAAAAAAIACQJAAAAgBAAAAAEBQ=</HashCode>
       <FileName>TimeLoop.cs</FileName>
@@ -1839,49 +1936,49 @@
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.AtmosphericGasSD" Collapsed="true">
-    <Position X="17" Y="5" Width="1.5" />
+    <Position X="17" Y="5.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAgAAAAAgAAACAQEAAAAAIAAAAAAAEAAiAA=</HashCode>
       <FileName>StaticData\AtmosphericGasSD.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.CargoTypeSD" Collapsed="true">
-    <Position X="18.75" Y="3.5" Width="1.5" />
+    <Position X="18.75" Y="4.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAggAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>StaticData\CargoTypeSD.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.CommanderNameSD" Collapsed="true">
-    <Position X="17" Y="6.5" Width="1.5" />
+    <Position X="17" Y="7.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAIAAACAAAAAAA=</HashCode>
       <FileName>StaticData\CommanderNameSD.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.CommanderNameThemeSD" Collapsed="true">
-    <Position X="17" Y="5.75" Width="1.5" />
+    <Position X="17" Y="6.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAgABAAAACAAAAAIAAAAAAAAAAAAA=</HashCode>
       <FileName>StaticData\CommanderNameThemeSD.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.ComponentTemplateSD" Collapsed="true">
-    <Position X="18.75" Y="5" Width="1.5" />
+    <Position X="18.75" Y="5.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>LCAACAAAAAAggAAAAAAQAAQAAAAAACAAAACEAAAAEAA=</HashCode>
       <FileName>StaticData\ComponentSD.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.ComponentTemplateAbilitySD" Collapsed="true">
-    <Position X="18.75" Y="5.75" Width="2.25" />
+    <Position X="18.75" Y="6.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AgAAAAAAAAAgAgAAAAAAAAQAACAAAAAAAAEACAAAIQA=</HashCode>
       <FileName>StaticData\ComponentSD.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.MineralSD" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="17" Y="3.5" Width="1.5" />
+    <Position X="17" Y="4.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAggAAAAAAAAAQAABAAAAAAAAAAAACAEAA=</HashCode>
       <FileName>StaticData\MineralSD.cs</FileName>
@@ -1896,7 +1993,7 @@
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.ProcessedMaterialSD" Collapsed="true" BaseTypeListCollapsed="true">
-    <Position X="17" Y="4.25" Width="1.5" />
+    <Position X="17" Y="5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAggAAAAABAAAQAAQAAAAIAAAAAAACREAA=</HashCode>
       <FileName>StaticData\RefinedMaterialSD.cs</FileName>
@@ -1904,14 +2001,14 @@
     <Lollipop Position="0.2" Collapsed="true" />
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.SystemGenSettingsSD" Collapsed="true">
-    <Position X="17" Y="7.25" Width="1.5" />
+    <Position X="17" Y="8" Width="1.5" />
     <TypeIdentifier>
       <HashCode>JApCGECwAAACAAGABEQAALiUcIApIoAABDAGQKAKhUg=</HashCode>
       <FileName>StaticData\SystemGenSettingsSD.cs</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="Pulsar4X.ECSLib.TechSD" Collapsed="true">
-    <Position X="18.75" Y="4.25" Width="1.5" />
+    <Position X="18.75" Y="5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAQAAAggAAQAAAAAAQAAAIAAAAAAAAAAAAACEA=</HashCode>
       <FileName>StaticData\TechSD.cs</FileName>
@@ -1925,7 +2022,7 @@
     </TypeIdentifier>
   </Struct>
   <Interface Name="Pulsar4X.ECSLib.ICargoable" Collapsed="true">
-    <Position X="43.25" Y="16" Width="1.5" />
+    <Position X="41" Y="14.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAACAEAA=</HashCode>
       <FileName>StaticData\CargoTypeSD.cs</FileName>
@@ -2079,7 +2176,7 @@
     </TypeIdentifier>
   </Enum>
   <Delegate Name="Pulsar4X.ECSLib.DateChangedEventHandler" Collapsed="true">
-    <Position X="43.25" Y="18.75" Width="1.5" />
+    <Position X="41.25" Y="13.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>TimeLoop.cs</FileName>
