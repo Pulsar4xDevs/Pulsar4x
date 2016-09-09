@@ -174,6 +174,22 @@ namespace Pulsar4X.ECSLib
             return (int)Math.Round(storedWeight, MidpointRounding.AwayFromZero);
         }
 
+        public static bool HasReqiredItems(CargoStorageDB stockpile, Dictionary<Guid, int> costs)
+        {
+            if (costs == null)
+                return true;
+            else
+            {
+                foreach (var costitem in costs)
+                {
+                    if (costitem.Value <= stockpile.GetAmountOf(costitem.Key))
+                        return false;
+                }
+            }
+            return true;
+        }
+
+
 
         internal static void ReCalcCapacity(Entity parentEntity)
         {

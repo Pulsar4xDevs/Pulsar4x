@@ -9,9 +9,10 @@ namespace Pulsar4X.ECSLib
     {
         internal static void ConstructStuff(Entity colony, Game game)
         {
-            Dictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            Dictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
-            Dictionary<Guid, int> componentStockpile = colony.GetDataBlob<ColonyInfoDB>().ComponentStockpile;
+            CargoStorageDB stockpile = colony.GetDataBlob<CargoStorageDB>();
+            //Dictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            //Dictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
+            //Dictionary<Guid, int> componentStockpile = colony.GetDataBlob<ColonyInfoDB>().ComponentStockpile;
 
             var colonyConstruction = colony.GetDataBlob<ColonyConstructionDB>();
             var factionInfo = colony.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
@@ -34,9 +35,9 @@ namespace Pulsar4X.ECSLib
                 {
                     //gather availible resorces for this job.
                     
-                    ConsumeResources(mineralStockpile, batchJob.MineralsRequired);
-                    ConsumeResources(materialStockpile, batchJob.MaterialsRequired);
-                    ConsumeResources(componentStockpile, batchJob.ComponentsRequired);
+                    ConsumeResources(stockpile, batchJob.MineralsRequired);
+                    ConsumeResources(stockpile, batchJob.MaterialsRequired);
+                    ConsumeResources(stockpile, batchJob.ComponentsRequired);
 
                     int useableResourcePoints = designInfo.MinerialCosts.Sum(item => item.Value) - batchJob.MineralsRequired.Sum(item => item.Value);
                     useableResourcePoints += designInfo.MaterialCosts.Sum(item => item.Value) - batchJob.MaterialsRequired.Sum(item => item.Value);
@@ -91,17 +92,17 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void ConsumeResources(IDictionary<Guid, int> stockpile, IDictionary<Guid, int> toUse)
+        /// <summary>
+        /// consumes resources in the stockpile, and updates the dictionary.
+        /// </summary>
+        /// <param name="stockpile"></param>
+        /// <param name="toUse"></param>
+        private static void ConsumeResources(CargoStorageDB stockpile, IDictionary<Guid, int> toUse)
         {   
-        
             foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
-            {
-                if (stockpile.ContainsKey(kvp.Key))
-                {
-                    int amountUsedThisTick = Math.Min(kvp.Value, toUse[kvp.Key]);
-                    toUse[kvp.Key] -= amountUsedThisTick;
-                    stockpile[kvp.Key] -= amountUsedThisTick;
-                }
+            {             
+                int amountUsedThisTick = stockpile.SubtractValue(kvp.Key, kvp.Value);
+                toUse[kvp.Key] -= amountUsedThisTick;                      
             }         
         }
 
