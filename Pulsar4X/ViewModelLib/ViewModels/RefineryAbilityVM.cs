@@ -122,7 +122,7 @@ namespace Pulsar4X.ViewModel
         public RefineryAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {
             ItemDictionary = new DictionaryVM<string, Guid>(DisplayMode.Key);
-            foreach (var kvp in _staticData_.RefinedMaterials)
+            foreach (var kvp in _staticData_.ProcessedMaterials)
             {
                 ItemDictionary.Add(kvp.Value.Name, kvp.Key);
             }
@@ -134,7 +134,7 @@ namespace Pulsar4X.ViewModel
 
         public override void OnNewBatchJob()
         {
-            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.RefinedMaterials[NewJobSelectedItem].RefineryPointCost, NewJobRepeat);
+            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.ProcessedMaterials[NewJobSelectedItem].RefineryPointCost, NewJobRepeat);
             RefiningProcessor.AddJob(_staticData_, _colonyEntity_, newjob);
             Refresh();
         }

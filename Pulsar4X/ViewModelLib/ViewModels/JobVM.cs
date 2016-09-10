@@ -21,7 +21,7 @@ namespace Pulsar4X.ViewModel
             get
             {
                 if (_job is RefineingJob)
-                    return _staticData.RefinedMaterials[_job.ItemGuid].Name;
+                    return _staticData.ProcessedMaterials[_job.ItemGuid].Name;
                 else if (_job is ConstructionJob)
                     return _colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<NameDB>().DefaultName;
                 else
@@ -52,7 +52,7 @@ namespace Pulsar4X.ViewModel
             _parentJobAbility = parentJobAbilityVM;
 
             if (_job is RefineingJob)
-                _jobTotalPoints = _staticData.RefinedMaterials[_job.ItemGuid].RefineryPointCost;
+                _jobTotalPoints = _staticData.ProcessedMaterials[_job.ItemGuid].RefineryPointCost;
             else if (_job is ConstructionJob)
                 _jobTotalPoints = _colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<ComponentInfoDB>().BuildPointCost;
 

@@ -68,36 +68,73 @@ namespace Pulsar4X.ECSLib
 
     public static class DictionaryExtension
     {
+        /// <summary>
+        /// Adds an int value to a dictionary, adding the key if the key does not exsist.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="dict"></param>
+        /// <param name="key"></param>
+        /// <param name="toReplace"></param>
         [PublicAPI]
-        public static void SafeValueAdd<TKey>(this Dictionary<TKey, int> jDict, TKey key, int toAdd)
+        public static void SafeValueReplace<TKey>(this Dictionary<TKey, int> dict, TKey key, int toReplace)
         {
-            if(!jDict.ContainsKey(key))
-                jDict.Add(key, toAdd);
+            if (!dict.ContainsKey(key))
+                dict.Add(key, toReplace);
             else
             {
-                jDict[key] += toAdd;
+                dict[key] = toReplace;
             }
         }
 
+        /// <summary>
+        /// Adds an int value to a dictionary, adding the key if the key does not exsist.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="dict"></param>
+        /// <param name="key"></param>
+        /// <param name="toAdd"></param>
         [PublicAPI]
-        public static void SafeValueAdd<TKey>(this Dictionary<TKey, float> jDict, TKey key, float toAdd)
+        public static void SafeValueAdd<TKey>(this Dictionary<TKey, int> dict, TKey key, int toAdd)
         {
-            if (!jDict.ContainsKey(key))
-                jDict.Add(key, toAdd);
+            if(!dict.ContainsKey(key))
+                dict.Add(key, toAdd);
             else
             {
-                jDict[key] += toAdd;
+                dict[key] += toAdd;
             }
         }
-
+        /// <summary>
+        /// Adds a float value to a dictionary, adding the key if the key does not exsist.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="dict"></param>
+        /// <param name="key"></param>
+        /// <param name="toAdd"></param>
         [PublicAPI]
-        public static void SafeValueAdd<TKey>(this Dictionary<TKey, double> jDict, TKey key, double toAdd)
+        public static void SafeValueAdd<TKey>(this Dictionary<TKey, float> dict, TKey key, float toAdd)
         {
-            if (!jDict.ContainsKey(key))
-                jDict.Add(key, toAdd);
+            if (!dict.ContainsKey(key))
+                dict.Add(key, toAdd);
             else
             {
-                jDict[key] += toAdd;
+                dict[key] += toAdd;
+            }
+        }
+        /// <summary>
+        /// Adds a double value to a dictionary, adding the key if the key does not exsist.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="dict"></param>
+        /// <param name="key"></param>
+        /// <param name="toAdd"></param>
+        [PublicAPI]
+        public static void SafeValueAdd<TKey>(this Dictionary<TKey, double> dict, TKey key, double toAdd)
+        {
+            if (!dict.ContainsKey(key))
+                dict.Add(key, toAdd);
+            else
+            {
+                dict[key] += toAdd;
             }
         }
     }

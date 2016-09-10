@@ -1,5 +1,5 @@
 {
-  "Type": "RefinedMaterials",
+  "Type": "ProcessedMaterials",
   "Data": {
     "List": [
       {
@@ -8,6 +8,8 @@
           "Name": "Sorium Fuel",
           "Description": "Fuel for SpaceShips",
           "ID": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+          "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
+          "Mass": 0.01,
           "RawMineralCosts": {
             "List": [
               {
@@ -22,11 +24,34 @@
         }
       },
       {
+        "Key": "50AA0079-71A0-477A-8082-8D31212BFBA7",
+        "Value": {
+          "Name": "Electrical Energy",
+          "Description": "Electrical Energy",
+          "ID": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+          "CargoTypeID": "44A3373D-E57E-47AD-90ED-1AA378B59694",
+          "Mass": 0.0,
+          "RawMineralCosts": {
+            "List": [
+              {
+                "Key": "50AA0079-71A0-477A-8082-8D31212BFBA7",
+                "Value": 1
+              }
+            ]
+          },
+          "RefineryPointCost": 10,
+          "WealthCost": 0,
+          "OutputAmount": 100
+        }
+      },
+      {
         "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
         "Value": {
           "Name": "Depleated Duranuim",
-          "Description": "A mix of Duranium and refined fuel to teset Refinerys",
+          "Description": "A mix of Duranium and refined fuel to test Refinerys",
           "ID": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "Mass": 1.0,
           "RawMineralCosts": {
             "List": [
               {

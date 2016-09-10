@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public new ReadOnlyCollection<BaseDataBlob> DataBlobs => IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>());
 
-        private static readonly EntityManager InvalidManager = new EntityManager(null);
+        private static readonly EntityManager InvalidManager = EntityManager.InvalidManager;
 
         /// <summary>
         /// Static entity reference to an invalid entity.

@@ -14,7 +14,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected GridView FacDataGrid { get; set; }
         protected GridView PopDataGrid { get; set; }
         protected GridView MineralDeposits { get; set; }
-        protected GridView MineralStockpile { get; set; }
+        protected CargoView.CargoStorageView CargoView { get; set; }
         protected JobAbilityView RefineryAbilityView { get; set; }
         protected GridView RefinedMats { get; set; }
         protected JobAbilityView ConstructionAbilityView { get; set; }
@@ -57,14 +57,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
             });
 
-            MineralStockpile.Columns.Add(new GridColumn
-            {
-                DataCell = new TextBoxCell { Binding = Binding.Property<RawMineralInfoVM, string>(r => r.Mineral) }
-            });
-            MineralStockpile.Columns.Add(new GridColumn
-            {
-                DataCell = new TextBoxCell { Binding = Binding.Property<RawMineralInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
-            });
+
 
 
             RefinedMats.Columns.Add(new GridColumn
@@ -103,8 +96,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             MineralDeposits.DataStore = _colonyScreenVM.PlanetMineralDepositVM.MineralDeposits.Values;
             gameVM.SelectedColonyScreenVM.PlanetMineralDepositVM.PropertyChanged += PlanetMineralDepositVM_PropertyChanged;
 
-            MineralStockpile.DataStore = _colonyScreenVM.RawMineralStockpileVM.MineralStockpile.Values;
-            gameVM.SelectedColonyScreenVM.RawMineralStockpileVM.PropertyChanged += RawMineralStockpileVM_PropertyChanged;
+            CargoStorageVM cargoVM = new CargoStorageVM(gameVM);
+            cargoVM.Initialise(_colonyScreenVM._colonyEntity);
+            CargoView.DataContext = cargoVM;
+            
+            //gameVM.SelectedColonyScreenVM.RawMineralStockpileVM.PropertyChanged += RawMineralStockpileVM_PropertyChanged;
             //RefineryAbilityView = new JobAbilityView(colonyScreenVM.RefineryAbilityVM);
             RefineryAbilityView.SetViewModel(_colonyScreenVM.RefineryAbilityVM);
             
@@ -128,11 +124,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private void RefinedMatsStockpileVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             RefinedMats.DataStore = _colonyScreenVM.RefinedMatsStockpileVM.MaterialStockpile.Values;
-        }
-
-        private void RawMineralStockpileVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            MineralStockpile.DataStore = _colonyScreenVM.RawMineralStockpileVM.MineralStockpile.Values;
         }
 
         private void PlanetMineralDepositVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

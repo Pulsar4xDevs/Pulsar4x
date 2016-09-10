@@ -52,13 +52,19 @@ namespace Pulsar4X.ECSLib
         /// Dictionary which stores all the Recipes.
         /// </summary>
         [JsonIgnore]
-        public Dictionary<Guid, RefinedMaterialSD> RefinedMaterials = new Dictionary<Guid, RefinedMaterialSD>();
+        public Dictionary<Guid, ProcessedMaterialSD> ProcessedMaterials = new Dictionary<Guid, ProcessedMaterialSD>();
 
         /// <summary>
         /// Dictionary which stores all Components.
         /// </summary>
         [JsonIgnore]
-        public Dictionary<Guid, ComponentTemplateSD> Components = new Dictionary<Guid, ComponentTemplateSD>();
+        public Dictionary<Guid, ComponentTemplateSD> ComponentTemplates = new Dictionary<Guid, ComponentTemplateSD>();
+
+        /// <summary>
+        /// Dictionary to store CargoTypes
+        /// </summary>
+        [JsonIgnore]
+        public Dictionary<Guid, CargoTypeSD> CargoTypes = new Dictionary<Guid, CargoTypeSD>();
 
         /// <summary>
         /// Settings used by system generation. 
@@ -103,10 +109,13 @@ namespace Pulsar4X.ECSLib
                     "Techs", typeof(Dictionary<Guid, TechSD>)
                 },
                 {
-                    "RefinedMaterials", typeof(Dictionary<Guid, RefinedMaterialSD>)
+                    "ProcessedMaterials", typeof(Dictionary<Guid, ProcessedMaterialSD>)
                 },
                 {
-                    "Components", typeof(Dictionary<Guid, ComponentTemplateSD>)
+                    "ComponentTemplates", typeof(Dictionary<Guid, ComponentTemplateSD>)
+                },
+                {
+                    "CargoTypes", typeof(Dictionary<Guid, CargoTypeSD>)
                 },
                 {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
@@ -139,10 +148,13 @@ namespace Pulsar4X.ECSLib
                     typeof(Dictionary<Guid, TechSD>), "Techs"
                 },
                 {
-                    typeof(Dictionary<Guid, RefinedMaterialSD>), "RefinedMaterials"
+                    typeof(Dictionary<Guid, ProcessedMaterialSD>), "RefinedMaterials"
                 },
                 {
                     typeof(Dictionary<Guid, ComponentTemplateSD>), "Components"
+                },
+                {
+                    typeof(Dictionary<Guid, CargoTypeSD>), "CargoTypes"
                 },
                 {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
@@ -172,15 +184,28 @@ namespace Pulsar4X.ECSLib
             if (Techs.ContainsKey(id))
                 return Techs[id];
 
-            if (RefinedMaterials.ContainsKey(id))
-                return RefinedMaterials[id];
+            if (ProcessedMaterials.ContainsKey(id))
+                return ProcessedMaterials[id];
 
-            if (Components.ContainsKey(id))
-                return Components[id];
+            if (ComponentTemplates.ContainsKey(id))
+                return ComponentTemplates[id];
+
+            if (CargoTypes.ContainsKey(id))
+                return CargoTypes[id];
 
             return null;
         }
 
+        public Dictionary<Guid, Guid> StorageTypeMap = new Dictionary<Guid, Guid>();
+        internal void SetStorageTypeMap()
+        {
+            foreach (var item in Minerals)          
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);                       
+            foreach (var item in ProcessedMaterials)
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
+            foreach (var item in ComponentTemplates)
+                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
+        }
 
         #endregion
 
@@ -245,7 +270,7 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var mineral in minerals)
                 {
-                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.
+                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.               
                 }
             }
         }
@@ -266,12 +291,12 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores ConstructableObj Static Data. Will overwrite any existing ConstructableObjs with the same ID.
         /// </summary>
-        internal void Store(Dictionary<Guid, RefinedMaterialSD> recipes)
+        internal void Store(Dictionary<Guid, ProcessedMaterialSD> recipes)
         {
             if (recipes != null)
             {
-                foreach (KeyValuePair<Guid, RefinedMaterialSD> recipe in recipes)
-                    RefinedMaterials[recipe.Key] = recipe.Value;
+                foreach (KeyValuePair<Guid, ProcessedMaterialSD> recipe in recipes)
+                    ProcessedMaterials[recipe.Key] = recipe.Value;
             }
         }
 
@@ -283,7 +308,19 @@ namespace Pulsar4X.ECSLib
             if (components != null)
             {
                 foreach (KeyValuePair<Guid, ComponentTemplateSD> component in components)
-                    Components[component.Key] = component.Value;
+                    ComponentTemplates[component.Key] = component.Value;
+            }
+        }
+
+        /// <summary>
+        /// Stores cargoType Static Data. Will overwrite any existing Component with the same ID.
+        /// </summary>
+        internal void Store(Dictionary<Guid, CargoTypeSD> cargoTypes)
+        {
+            if (cargoTypes != null)
+            {
+                foreach (KeyValuePair<Guid, CargoTypeSD> typeKVP in cargoTypes)
+                    CargoTypes[typeKVP.Key] = typeKVP.Value;
             }
         }
 
@@ -321,6 +358,7 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataManager.LoadData(dataSet, (Game)context.Context);
             }
+            SetStorageTypeMap();
         }
 
         internal StaticDataStore Clone()
@@ -329,10 +367,11 @@ namespace Pulsar4X.ECSLib
             {
                 AtmosphericGases = new WeightedList<AtmosphericGasSD>(AtmosphericGases),
                 CommanderNameThemes = new List<CommanderNameThemeSD>(CommanderNameThemes),
-                Components = new Dictionary<Guid, ComponentTemplateSD>(Components),
+                ComponentTemplates = new Dictionary<Guid, ComponentTemplateSD>(ComponentTemplates),
                 _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
                 Minerals = new Dictionary<Guid, MineralSD>(Minerals),
-                RefinedMaterials = new Dictionary<Guid, RefinedMaterialSD>(RefinedMaterials),
+                ProcessedMaterials = new Dictionary<Guid, ProcessedMaterialSD>(ProcessedMaterials),
+                CargoTypes = new Dictionary<Guid, CargoTypeSD>(CargoTypes),
                 SystemGenSettings = SystemGenSettings, // Todo: Make this cloneable
                 Techs = new Dictionary<Guid, TechSD>(Techs)
             };

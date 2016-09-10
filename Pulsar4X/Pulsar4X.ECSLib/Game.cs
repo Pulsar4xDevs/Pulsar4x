@@ -39,7 +39,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal Dictionary<Guid, StarSystem> Systems { get; private set; } = new Dictionary<Guid, StarSystem>();
 
-        [JsonProperty] public readonly EntityManager GlobalManager;
+        [JsonProperty]
+        public readonly EntityManager GlobalManager;
 
         [PublicAPI]
         [JsonProperty]
@@ -89,10 +90,10 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
-            SyncContext = SynchronizationContext.Current;
-            GlobalManager = new EntityManager(this);
-            GameLoop = new TimeLoop(this);
+            SyncContext = SynchronizationContext.Current;        
+            GameLoop = new TimeLoop(this);            
             EventLog = new EventLog(this);
+            GlobalManager = new EntityManager(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -119,7 +120,6 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataManager.LoadData("Pulsar4x", this);
             }
-
             // Create SM
 
 

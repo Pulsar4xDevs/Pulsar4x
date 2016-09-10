@@ -105,7 +105,7 @@ namespace Pulsar4X.Tests
                 typeof(ArmorDB),
                 typeof(BeamWeaponsDB),
                 typeof(BuildCostDB),
-                typeof(CargoDB),
+                typeof(CargoStorageDB),
                 typeof(CrewDB),
                 typeof(DamageDB),
                 typeof(HangerDB),

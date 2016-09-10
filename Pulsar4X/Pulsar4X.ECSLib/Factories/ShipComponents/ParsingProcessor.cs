@@ -354,6 +354,19 @@ namespace Pulsar4X.ECSLib
                     args.Result = _factionTechDB.ResearchedTechs[techGuid];
                 else args.Result = 0;
             }
+            //currently not used, but an future experiment to pass the CargoTypeSD as a parameter
+            if (name == "CargoType")
+            {
+                Guid typeGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+                CargoTypeSD typeSD = _staticDataStore.CargoTypes[typeGuid];
+                args.Result = typeSD;
+            }
+            //used for datablob args for when a guid is required as a parameter
+            if (name == "GuidString")
+            {
+                Guid typeGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+                args.Result = typeGuid;
+            }
 
             //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
             //The datablob will be the one defined in designAbility.DataBlobType

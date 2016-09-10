@@ -177,15 +177,15 @@ namespace Pulsar4X.ECSLib
             {
                 DateTime nextInterupt = ProcessNextInterupt(_targetDateTime);
                 //do system processors
-
+              
                 if (_game.Settings.EnableMultiThreading == true) //threaded
-                    Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.SystemSubpulses.ProcessSystem(nextInterupt));
+                    Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt));
                 //The above 'blocks' till all the tasks are done.
                 else //non threaded
                 {
                     foreach (StarSystem starSys in _game.Systems.Values)
                     {
-                        starSys.SystemSubpulses.ProcessSystem(nextInterupt);
+                        starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt);
                     }
                 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Pulsar4X.ECSLib
     public class EntityManager : ISerializable
     {
         [CanBeNull]
-        private readonly Game _game;
+        internal readonly Game Game;
         private readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
@@ -25,16 +26,31 @@ namespace Pulsar4X.ECSLib
 
         internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
+        [JsonProperty]
+        public ManagerSubPulse ManagerSubpulses { get; private set; }
+
+        /// <summary>
+        /// Static reference to an invalid manager.
+        /// </summary>
+        [NotNull]
+        [PublicAPI]
+        public static readonly EntityManager InvalidManager = new EntityManager();
+
+
+
         #region Constructors
+        private EntityManager()
+        {
+        }
 
         internal EntityManager(Game game)
         {
-            _game = game;
-
+            Game = game;            
             for (int i = 0; i < InternalDataBlobTypes.Keys.Count; i++)
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
+            ManagerSubpulses = new ManagerSubPulse(this);
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()
@@ -95,17 +111,17 @@ namespace Pulsar4X.ECSLib
             }
 
             // Setup the global dictionary.
-            if (_game != null)
+            if (Game != null)
             {
-                _game.GuidDictionaryLock.EnterWriteLock();
+                Game.GuidDictionaryLock.EnterWriteLock();
                 try
                 {
-                    _game.GlobalGuidDictionary.Add(entity.Guid, this);
+                    Game.GlobalGuidDictionary.Add(entity.Guid, this);
                     _localEntityDictionary.Add(entity.Guid, entity);
                 }
                 finally
                 {
-                    _game.GuidDictionaryLock.ExitWriteLock();
+                    Game.GuidDictionaryLock.ExitWriteLock();
                 }
             }
             else
@@ -157,17 +173,17 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            if (_game != null)
+            if (Game != null)
             {
-                _game.GuidDictionaryLock.EnterWriteLock();
+                Game.GuidDictionaryLock.EnterWriteLock();
                 try
                 {
                     _localEntityDictionary.Remove(entity.Guid);
-                    _game.GlobalGuidDictionary.Remove(entity.Guid);
+                    Game.GlobalGuidDictionary.Remove(entity.Guid);
                 }
                 finally
                 {
-                    _game.GuidDictionaryLock.ExitWriteLock();
+                    Game.GuidDictionaryLock.ExitWriteLock();
                 }
             }
             else
@@ -254,7 +270,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -299,7 +315,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -357,7 +373,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -431,7 +447,7 @@ namespace Pulsar4X.ECSLib
         {
             Entity entity = GetFirstEntityWithDataBlob(typeIndex);
 
-            if (EntityAccessControl.IsAuthorized(_game, authToken, entity))
+            if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
             {
                 return entity;
             }
@@ -489,18 +505,18 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool FindEntityByGuid(Guid entityGuid, out Entity entity)
         {
-            if (_game == null)
+            if (Game == null)
             {
                 // This is a "fake" manager not connected to other managers.
                 // This manager can only perform local Guid lookups.
                 return _localEntityDictionary.TryGetValue(entityGuid, out entity);
             }
-            _game.GuidDictionaryLock.EnterReadLock();
+            Game.GuidDictionaryLock.EnterReadLock();
             try
             {
                 EntityManager manager;
 
-                if (!_game.GlobalGuidDictionary.TryGetValue(entityGuid, out manager))
+                if (!Game.GlobalGuidDictionary.TryGetValue(entityGuid, out manager))
                 {
                     entity = Entity.InvalidEntity;
                     return false;
@@ -516,7 +532,7 @@ namespace Pulsar4X.ECSLib
             }
             finally
             {
-                _game.GuidDictionaryLock.ExitReadLock();
+                Game.GuidDictionaryLock.ExitReadLock();
             }
         }
 
@@ -560,9 +576,9 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool TryGetEntityByGuid(Guid entityGuid, out Entity entity)
         {
-            if (_game != null)
+            if (Game != null)
             {
-                _game.GuidDictionaryLock.EnterReadLock();
+                Game.GuidDictionaryLock.EnterReadLock();
                 try
                 {
                     if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
@@ -574,7 +590,7 @@ namespace Pulsar4X.ECSLib
                 }
                 finally
                 {
-                    _game.GuidDictionaryLock.ExitReadLock();
+                    Game.GuidDictionaryLock.ExitReadLock();
                 }
             }
             // This is a "fake" manager that does not link to other managers.
@@ -616,7 +632,7 @@ namespace Pulsar4X.ECSLib
         public EntityManager(SerializationInfo info, StreamingContext context) : this((Game)context.Context)
         {
             var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
-
+            ManagerSubpulses = (ManagerSubPulse)info.GetValue("ManagerSubpulses", typeof(ManagerSubPulse));
             foreach (ProtoEntity protoEntity in entities)
             {
                 Entity entity;
@@ -635,6 +651,7 @@ namespace Pulsar4X.ECSLib
                     Entity.Create(this, protoEntity);
                 }
             }
+            
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -644,6 +661,7 @@ namespace Pulsar4X.ECSLib
                                                 select entity.Clone()).ToList();
 
             info.AddValue("Entities", storedEntities);
+            info.AddValue("ManagerSubpulses", ManagerSubpulses);
         }
 
         /// <summary>
@@ -653,7 +671,7 @@ namespace Pulsar4X.ECSLib
         [OnSerialized]
         private void OnSerialized(StreamingContext context)
         {
-            if (_game == null)
+            if (Game == null)
             {
                 throw new InvalidOperationException("Fake managers cannot be serialized.");
             }
@@ -665,7 +683,7 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            if (_game == null)
+            if (Game == null)
             {
                 throw new InvalidOperationException("Fake managers cannot be deserialized.");
             }

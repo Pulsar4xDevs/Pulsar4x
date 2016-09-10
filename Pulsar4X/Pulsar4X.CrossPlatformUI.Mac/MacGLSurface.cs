@@ -16,6 +16,7 @@ GLWidget.Initialized
 GLWidget.ShuttingDown 
 */
 ////////////////////////////////////////////////////////////////////////////////
+/*
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Platform;
@@ -455,3 +456,4 @@ namespace Pulsar4X.CrossPlatformUI.Mac
 		static extern IntPtr glXChooseVisual(IntPtr display, int screen, int[] attr);
 	}
 }
+*/

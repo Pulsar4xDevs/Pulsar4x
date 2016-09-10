@@ -1,5 +1,5 @@
 {
-  "Type": "Components",
+  "Type": "ComponentTemplates",
   "Data": {
     "Entries": [
       {
@@ -23,6 +23,7 @@
           "CreditCostFormula": "[Size]",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "Engine Size",
@@ -41,19 +42,19 @@
                 "Entries": [
                   {
                     "Key": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
-                    "Value": "Conventional Engine Technology"
+                    "Value": ""
                   },
                   {
                     "Key": "c827d369-3f16-43ef-b112-7d5bcafb74c7",
-                    "Value": "Nuclear Thermal Engine Technology"
+                    "Value": ""
                   },
                   {
                     "Key": "db6818f3-99e9-46c1-b903-f3af978c38b2",
-                    "Value": "Nuclear Pulse Engine Technology"
+                    "Value": ""
                   },
                   {
                     "Key": "f3f10e56-9345-40cc-af42-342e7240355d",
-                    "Value": "Ion Drive Technology"
+                    "Value": ""
                   }
                 ]
               },
@@ -61,7 +62,7 @@
             },
             {
               "Name": "Engine Consumption vs Power",
-              "Description": "More Powerful engines are less efficent for a given size",
+              "Description": "More Powerfull engines are less efficent for a given size",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')",
               "MinFormula": "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')",
@@ -82,23 +83,23 @@
               "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
             },
             {
-              "Name": "Fuel Consumption",
+              "Name": "Fuel Consumption From Tech",
               "Description": "From Tech",
-              "GuiHint": "None",
+              "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)"
             },
             {
-              "Name": "Fuel Consumption",
+              "Name": "Total Fuel Consumption per Km",
               "Description": "Fuel Consumption Calc",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(3) - Ability(3) * [Size] * 0.002 * Ability(5)"
+              "AbilityFormula": "(Ability(3) - Ability(3) * [Size] * 0.02 * Ability(5)) * 0.1"
             },
             {
               "Name": "Fuel Consumption",
-              "Description": "Size Mod",
+              "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(6))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.FuelConsumptionAtbDB"
+              "AbilityFormula": "DataBlobArgs(GuidString('33e6ac88-0235-4917-a7ff-35c8886aad3a'), Ability(6), 1)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResourceConsumptionAtbDB"
             },
             {
               "Name": "Thermal Signature Reduction",
@@ -121,262 +122,6 @@
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability(9),0)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
-            },
-            {
-              "Name": "Explosion Chance",
-              "Description": "Chance this component will explode if hit.",
-              "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(2) * 10"
-            },
-            {
-              "Name": "Explosion Chance",
-              "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(11), Ability(3) * 0.05)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ExplosionChanceAtbDB"
-            }
-          ]
-        }
-      },
-      {
-        "Key": "f7084155-04c3-49e8-bf43-c7ef4befa550",
-        "Value": {
-          "Name": "Mine",
-          "Description": "Mines Resources",
-          "ID": "f7084155-04c3-49e8-bf43-c7ef4befa550",
-          "SizeFormula": "25000",
-          "HTKFormula": "[Size]",
-          "CrewReqFormula": "50000",
-          "MineralCostFormula": {
-            "Entries": [
-              {
-                "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
-                "Value": "60"
-              },
-              {
-                "Key": "2ae2a928-3e14-45d5-befc-5bd6ed16ec0a",
-                "Value": "60"
-              }
-            ]
-          },
-          "ResearchCostFormula": "0",
-          "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
-          "MountType": "ShipCargo, PlanetInstallation",
-          "ComponentAbilitySDs": [
-            {
-              "Name": "MiningAmount",
-              "Description": "",
-              "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": [
-                  {
-                    "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "b12acce2-7c7d-4acf-ad41-1c08093fcad8",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "a03863a3-a364-45ff-8c7b-a4f7486bd710",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "14a83fc3-04fd-4ea3-82f4-290995c4418e",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "29b3797d-f9d7-4e73-a593-2b05bf4ef012",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "5fdfb85c-fad2-4a48-8a75-04eb65dc9741",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "2ae2a928-3e14-45d5-befc-5bd6ed16ec0a",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "6a38b268-041f-4103-9d23-c13c1041cecd",
-                    "Value": "10"
-                  },
-                  {
-                    "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
-                    "Value": "10"
-                  }
-                ]
-              },
-              "AbilityFormula": "DataBlobArgs([GuidDict])",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.MineResourcesAtbDB"
-            }
-          ]
-        }
-      },
-      {
-        "Key": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
-        "Value": {
-          "Name": "ResearchLab",
-          "Description": "Creates Research Points",
-          "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
-          "SizeFormula": "500000",
-          "HTKFormula": "[Size]",
-          "CrewReqFormula": "1000000",
-          "MineralCostFormula": {
-            "Entries": [
-              {
-                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "60"
-              },
-              {
-                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "60"
-              }
-            ]
-          },
-          "ResearchCostFormula": "0",
-          "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
-          "MountType": "ShipCargo, PlanetInstallation",
-          "ComponentAbilitySDs": [
-            {
-              "Name": "RP Amount Per EconTick",
-              "Description": "",
-              "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(20)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
-            }
-          ]
-        }
-      },
-      {
-        "Key": "90592586-0bd6-4885-8526-7181e08556b5",
-        "Value": {
-          "Name": "Refinery",
-          "Description": "Refines Sorium into fuel",
-          "ID": "90592586-0bd6-4885-8526-7181e08556b5",
-          "SizeFormula": "500000",
-          "HTKFormula": "[Size]",
-          "CrewReqFormula": "1000000",
-          "MineralCostFormula": {
-            "Entries": [
-              {
-                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "60"
-              },
-              {
-                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "60"
-              }
-            ]
-          },
-          "ResearchCostFormula": "0",
-          "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
-          "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
-          "ComponentAbilitySDs": [
-            {
-              "Name": "Fuel Processed Per EconTick",
-              "Description": "",
-              "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AbilityFormula": "100",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
-            },
-            {
-              "Name": "RefineAbilitys",
-              "Description": "",
-              "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesAtbDB"
-            }
-          ]
-        }
-      },
-      {
-        "Key": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
-        "Value": {
-          "Name": "Factory",
-          "Description": "Constructs Facilities, Fighters Ammo and Components",
-          "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
-          "SizeFormula": "500000",
-          "HTKFormula": "[Size]",
-          "CrewReqFormula": "1000000",
-          "MineralCostFormula": {
-            "Entries": [
-              {
-                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "60"
-              },
-              {
-                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "60"
-              }
-            ]
-          },
-          "ResearchCostFormula": "0",
-          "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
-          "MountType": "ShipCargo, PlanetInstallation",
-          "ComponentAbilitySDs": [
-            {
-              "Name": "Construction Points",
-              "Description": "",
-              "GuiHint": "None",
-              "AbilityFormula": "100"
-            },
-            {
-              "Name": "Construction Points",
-              "Description": "",
-              "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAtbDB"
-            }
-          ]
-        }
-      },
-      {
-        "Key": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
-        "Value": {
-          "Name": "Infrastructure",
-          "Description": "Component and buildings needed to keep colonists alive on hostile worlds",
-          "ID": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
-          "SizeFormula": "1",
-          "HTKFormula": "1",
-          "CrewReqFormula": "0",
-          "MineralCostFormula": {
-            "Entries": [
-              {
-                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "10"
-              }
-            ]
-          },
-          "ResearchCostFormula": "0",
-          "CreditCostFormula": "0",
-          "BuildPointCostFormula": "100",
-          "MountType": "ShipCargo, PlanetInstallation",
-          "ComponentAbilitySDs": [
-            {
-              "Name": "Support Colonists",
-              "Description": "Keeps colonists alive on hostile worlds",
-              "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": [ ]
-              }
             }
           ]
         }
@@ -533,7 +278,7 @@
             }
           ]
         }
-      }
+      },
     ]
   }
 }

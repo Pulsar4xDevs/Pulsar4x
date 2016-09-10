@@ -145,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataBlobs\AsteroidDamageDB.cs" />
+    <Compile Include="DataBlobs\CargoTypeDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\BeamFireControlAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\BeamWeaponAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CargoStorageAtbDB.cs" />
@@ -173,7 +174,9 @@
     <Compile Include="DataBlobs\NewtonBalisticDB.cs" />
     <Compile Include="Factories\AsteroidFactory.cs" />
     <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
+    <Compile Include="Helpers\CargoDictionary.cs" />
     <Compile Include="Helpers\EntityManipulation.cs" />
+    <Compile Include="ManagerSubPulse.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\BeamAttackOrder.cs" />
     <Compile Include="Orders\OrderTypes\ConstructionOrder.cs" />
@@ -182,8 +185,7 @@
     <Compile Include="Factories\ShipComponents\ComponentDesign.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\ConstructionAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\EnginePowerAtbDB.cs" />
-    <Compile Include="DataBlobs\ComponentAttributeDBs\FuelStorageAtbDB.cs" />
-    <Compile Include="DataBlobs\ComponentAttributeDBs\FuelConsumptionAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\ResourcelConsumptionAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\MineResourcesAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\MissileLauncherAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\RefineResourcesAtbDB.cs" />
@@ -239,7 +241,7 @@
     <Compile Include="Orders\OrderTypes\ResearchOrder.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Processors\ActionDelegateEnum.cs" />
-    <Compile Include="Processors\AsteroidDamageProcessor.cs" />
+    <Compile Include="Processors\DamageProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\ConstructionProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\MineProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />
@@ -251,14 +253,17 @@
     <Compile Include="Processors\NewtonBalisticProcessor.cs" />
     <Compile Include="Processors\OrderProcessor.cs" />
     <Compile Include="Processors\ReCalcProcessor.cs" />
+    <Compile Include="Processors\ResourceConsumptionProcesor.cs" />
     <Compile Include="Processors\ShipDamageProcessor.cs" />
     <Compile Include="Processors\ShipMovementProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\TechProcessor.cs" />
     <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
+    <Compile Include="Processors\StorageSpaceProcessor.cs" />
     <Compile Include="Processors\WeaponProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
+    <Compile Include="StaticData\CargoTypeSD.cs" />
     <Compile Include="StaticData\CommanderNameSD.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
     <Compile Include="DataBlobs\NameDB.cs" />
@@ -314,7 +319,6 @@
     <Compile Include="StaticData\MineralSD.cs" />
     <Compile Include="StaticData\SystemGenSettingsSD.cs" />
     <Compile Include="StaticData\TechSD.cs" />
-    <Compile Include="SystemSubpulses.cs" />
     <Compile Include="TimeLoop.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -344,6 +348,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\Pulsar4x\VersionInfo.vinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\CargoTypeData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\InstallationData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
