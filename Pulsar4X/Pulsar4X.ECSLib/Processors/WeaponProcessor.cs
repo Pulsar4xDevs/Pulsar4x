@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
                     BeamWeaponAtbDB bwAtb = beamWeapon.GetDataBlob<BeamWeaponAtbDB>();
                     BeamFireControlAtbDB fcAtb = state.FireControl.GetDataBlob<BeamFireControlAtbDB>();
 
-                    if (!fireControlEntities.Contains(state.FireControl)) ;
+                    if (!fireControlEntities.Contains(state.FireControl)) ; //This semi-colon is probably bad
                         fireControlEntities.Add(state.FireControl);
 
                     numBeamWeapons++;
