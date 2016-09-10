@@ -9,6 +9,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 {
     public class CargoTypeStoreView : Panel
     {
+        private CargoStorageByTypeVM _vm;
         protected Expander Expanderer;
         protected Label ExpanderHeader = new Label();
         protected GridView CargoGrid;
@@ -31,7 +32,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Amount",
-                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, int>(r => r.Amount).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { ID = "AmountCell", Binding = Binding.Property<CargoItemVM, int>(r => r.Amount).Convert(r => r.ToString()) }
             });
             CargoGrid.Columns.Add(new GridColumn
             {
@@ -42,7 +43,24 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             {
                 HeaderText = "Total Weight",
                 DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, float>(r => r.TotalWeight).Convert(r => r.ToString()) }
-            }); 
+            });
+            DataContextChanged += CargoTypeStoreView_DataContextChanged;
+        }
+
+        private void CargoTypeStoreView_DataContextChanged(object sender, EventArgs e)
+        {
+            if (DataContext is CargoStorageByTypeVM)
+            {
+                CargoStorageByTypeVM vm = (CargoStorageByTypeVM)DataContext;
+                _vm = vm;
+                _vm.PropertyChanged += Vm_PropertyChanged;
+            }
+        }
+
+        private void Vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(_vm.TypeStore)) 
+                CargoGrid.ReloadData(new Range<int>(0, _vm.TypeStore.Count -1));              
         }
     }
 }

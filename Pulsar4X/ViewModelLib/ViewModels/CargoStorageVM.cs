@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.ViewModel
 {
@@ -30,7 +32,7 @@ namespace Pulsar4X.ViewModel
         }
 
     }
-    public class CargoStorageByTypeVM : ViewModelBase
+    public class CargoStorageByTypeVM : INotifyPropertyChanged
     {
         private CargoStorageDB _storageDB;
         private StaticDataStore _dataStore;
@@ -97,12 +99,19 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(MaxWeight));
             OnPropertyChanged(nameof(NetWeight));
             OnPropertyChanged(nameof(RemainingWeight));
+            OnPropertyChanged(nameof(TypeStore));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
 
 
-    public class CargoItemVM : ViewModelBase
+    public class CargoItemVM : INotifyPropertyChanged
     {
         CargoStorageDB _storageDB;
         Guid _itemID;
@@ -144,6 +153,13 @@ namespace Pulsar4X.ViewModel
             ItemWeight = (float)item.GetDataBlob<MassVolumeDB>().Mass;
             _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
 
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 

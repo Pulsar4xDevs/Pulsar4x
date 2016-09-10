@@ -109,6 +109,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private void PlanetMineralDepositVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             MineralDeposits.DataStore = _colonyScreenVM.PlanetMineralDepositVM.MineralDeposits.Values;
+            
         }
+        
     }
 }
