@@ -11,7 +11,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 {
     internal class EntityIcon : IconBase
     {
-        public float Scale { get; set; } = 1;
+        public float Scale { get; set; } = 2;
         List<PenPathPair> _shapes = new List<PenPathPair>();
         private Entity _entity;
         private float Zoom { get { return _camera.ZoomLevel; } }
@@ -32,34 +32,38 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 if (item is MassVolumeDB)
                 {
-                    HasMassVol((MassVolumeDB)item);
+                    SetIconFor((MassVolumeDB)item);
                 }
                 if (item is PropulsionDB)
                 {
-                    HasPropulsionDB((PropulsionDB)item);
+                    SetIconFor((PropulsionDB)item);
                 }
                 if (item is PositionDB)
                 {
-                    HasPosition((PositionDB)item);
+                    SetIconFor((PositionDB)item);
                 }
                 if (item is StarInfoDB)
                 {
-                    HasStarInfo((StarInfoDB)item);
+                    SetIconFor((StarInfoDB)item);
                 }
                 if (item is SystemBodyDB)
                 {
-                    HasSysBodyInfo((SystemBodyDB)item);
+                    SetIconFor((SystemBodyDB)item);
+                }
+                if (item is CargoStorageDB)
+                {
+                    SetIconFor((CargoStorageDB)item);
                 }
             }
         }
 
-        void HasMassVol(MassVolumeDB db)
+        void SetIconFor(MassVolumeDB db)
         {
             _radius = db.Radius;
             
         }
 
-        void HasStarInfo(StarInfoDB db)
+        void SetIconFor(StarInfoDB db)
         {
             //TODO: change pen colour depending on star temp and lum?
             double temp = db.Temperature;
@@ -104,20 +108,20 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
 
-        void HasSysBodyInfo(SystemBodyDB db)
+        void SetIconFor(SystemBodyDB db)
         {
             BodyType type = db.Type;
             float temp = db.BaseTemperature;
             
         }
 
-        void HasAtmo(AtmosphereDB db)
+        void SetIconFor(AtmosphereDB db)
         {
             short hydro = db.HydrosphereExtent;
             float albedo = db.Albedo;
         }
 
-        void HasPosition(PositionDB db)
+        void SetIconFor(PositionDB db)
         {
             GraphicsPath path = new GraphicsPath();
             path.AddEllipse(-2, -2, 4, 4);
@@ -125,30 +129,41 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _shapes.Add(circle);
         }
 
-        void HasPropulsionDB(PropulsionDB db)
+        void SetIconFor(PropulsionDB db)
         {
-
-            int maxFuel = 100;//db.FuelStorageCapicity / 20;
 
             int maxSpeed = db.MaximumSpeed / 10;
             int totalEP = db.TotalEnginePower / 25;
             PointF currentSpeed = new PointF((float)db.CurrentSpeed.X, (float)db.CurrentSpeed.Y);
             float currentSpeedLen = currentSpeed.Length / 10;
 
-            Pen tankPen = new Pen(Colors.Aquamarine);
-            GraphicsPath tankPath = new GraphicsPath();
-            tankPath.AddEllipse(-maxFuel * 0.5f, 0, maxFuel, maxFuel);
-            PenPathPair fueltank = new PenPathPair() { Pen = tankPen, Path = tankPath };
-            _shapes.Add(fueltank);
-
             Pen enginePen = new Pen(Colors.DarkGray);
             GraphicsPath enginePath = new GraphicsPath();
-            enginePath.AddRectangle(-totalEP * 0.5f, maxFuel, totalEP, maxSpeed);
-            PenPathPair engine = new PenPathPair() { Pen = tankPen, Path = tankPath };
+            enginePath.AddRectangle(-totalEP * 0.5f, 0, totalEP, maxSpeed);
+            PenPathPair engine = new PenPathPair() { Pen = enginePen, Path = enginePath };
             _shapes.Add(engine);
-            
+                                               
+        }
 
-                                              
+        void SetIconFor(CargoStorageDB cargodb)
+        {
+            int stackHeight = 0;
+            float red = 128 / 255;
+            float green = 128 / 255;
+            float blue = 128 / 255;
+            Color colour = new Color(128 /255, 128/255, 128/255);
+            foreach (var item in cargodb.CargoCapicity)
+            {
+                int height = item.Value;
+                int width = item.Value;
+                Pen containerPen = new Pen(new Color(red, green, blue));
+                green += 20 / 255;
+                GraphicsPath containerPath = new GraphicsPath();
+                containerPath.AddRectangle(width / 2, stackHeight, width, height);
+                PenPathPair container = new PenPathPair() { Pen = containerPen, Path = containerPath };
+                _shapes.Add(container);
+                stackHeight += height;
+            }
         }
 
         public PenPathPair Thrust(PropulsionDB db)

@@ -150,21 +150,27 @@
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "ComponentAbilitySDs": [
             {
-              "Name": "Fuel Processed Per EconTick",
+              "Name": "Refinary Points",
               "Description": "",
               "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AbilityFormula": "100",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
+              "AbilityFormula": "100"
             },
             {
               "Name": "RefineAbilitys",
               "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
-                "Entries": []
+                "Entries": 
+                [
+                  {
+                    "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+                    "Value": 1
+                  },
+                  {
+                    "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
+                    "Value": 1
+                  }
+                ]
               },
               "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesAtbDB"

@@ -76,10 +76,10 @@ namespace Pulsar4X.ECSLib
 
     private void Game_PostLoad(object sender, EventArgs e)
     {
-        Initalise();
+        //Initalise();
     }
 
-    private void Initalise()//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
+    internal void Initalise()//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
     {
             
         //can add either by creating and passing an Action

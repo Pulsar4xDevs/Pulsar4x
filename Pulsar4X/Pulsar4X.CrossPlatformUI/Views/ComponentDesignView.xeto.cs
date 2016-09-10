@@ -41,9 +41,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SetViewModel(int oldindex, int newindex)
         {
-            if (newindex == -1) //if newindex is not a valid selection
-                return;
-       
+            
             _designVM.SetComponent(_designVM.ComponentTypes.GetValue(newindex));  //(Guid)ComponentSelection.SelectedValue);
             AbilitysLayout.Items.Clear();
             AbilitysLayout.SuspendLayout();
@@ -56,7 +54,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         AbilitysLayout.Items.Add(asl);
                         break;
                     case GuiHint.GuiSelectionMaxMin:
-                        MinMaxSlider mms = new MinMaxSlider(componentAbilityVM.MinMaxSlider);
+                        MinMaxSlider mms = new MinMaxSlider() {};
+                        mms.DataContext = componentAbilityVM.MinMaxSlider;
                         AbilitysLayout.Items.Add(mms);
                         break;
                 }

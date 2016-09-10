@@ -152,6 +152,10 @@ namespace Pulsar4X.ECSLib
 
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
+            foreach(StarSystem starSys in this.Systems.Values)
+            {
+                starSys.SystemManager.ManagerSubpulses.Initalise();
+            }
         }
 
         #endregion

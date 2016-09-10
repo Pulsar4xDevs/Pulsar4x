@@ -16,7 +16,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected GridView MineralDeposits { get; set; }
         protected CargoView.CargoStorageView CargoView { get; set; }
         protected JobAbilityView RefineryAbilityView { get; set; }
-        protected GridView RefinedMats { get; set; }
         protected JobAbilityView ConstructionAbilityView { get; set; }
         protected ResearchAbilityView ResearchAbilityView { get; set; }
 
@@ -58,17 +57,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             });
 
 
-
-
-            RefinedMats.Columns.Add(new GridColumn
-            {
-                DataCell = new TextBoxCell { Binding = Binding.Property<RefinedMatInfoVM, string>(r => r.Material) }
-            });
-            RefinedMats.Columns.Add(new GridColumn
-            {
-                DataCell = new TextBoxCell { Binding = Binding.Property<RefinedMatInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
-            });
-
         }
 
         public ColonyScreenView(GameVM gameVM) :this()
@@ -104,15 +92,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //RefineryAbilityView = new JobAbilityView(colonyScreenVM.RefineryAbilityVM);
             RefineryAbilityView.SetViewModel(_colonyScreenVM.RefineryAbilityVM);
             
-            RefinedMats.DataStore = _colonyScreenVM.RefinedMatsStockpileVM.MaterialStockpile.Values;
-            gameVM.SelectedColonyScreenVM.RefinedMatsStockpileVM.PropertyChanged += RefinedMatsStockpileVM_PropertyChanged;
-
 
             ConstructionAbilityView.SetViewModel(_colonyScreenVM.ConstructionAbilityVM);
             //ResearchAbilityView = new ResearchAbilityView(colonyScreenVM.ColonyResearchVM);
             ResearchAbilityView.SetViewModel(_colonyScreenVM.ColonyResearchVM);
-
-
 
         }
 
@@ -121,14 +104,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             PopDataGrid.DataStore = _colonyScreenVM.Species.Cast<object>();
         }
 
-        private void RefinedMatsStockpileVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            RefinedMats.DataStore = _colonyScreenVM.RefinedMatsStockpileVM.MaterialStockpile.Values;
-        }
-
         private void PlanetMineralDepositVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             MineralDeposits.DataStore = _colonyScreenVM.PlanetMineralDepositVM.MineralDeposits.Values;
+            
         }
+        
     }
 }

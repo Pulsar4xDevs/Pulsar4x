@@ -29,7 +29,7 @@
       </TableLayout>
       <TableLayout>
         <TableRow>
-          <Label Text="Mineral Stockpile" />
+          <Label Text="Cargo Stockpile" />
         </TableRow>
         <TableRow>
           <c2:CargoStorageView x:Name="CargoView"   />
@@ -38,14 +38,6 @@
     </TableRow>
     <TableRow>
       <c:JobAbilityView x:Name="RefineryAbilityView" />
-      <TableLayout>
-        <TableRow>
-          <Label Text="Refined Materials Stockpile" />
-        </TableRow>
-        <TableRow>
-          <GridView ID="RefinedMats"  />
-        </TableRow>
-      </TableLayout>
       <c:JobAbilityView x:Name="ConstructionAbilityView" />
       <c:ResearchAbilityView x:Name="ResearchAbilityView" />
     </TableRow>

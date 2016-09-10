@@ -173,7 +173,7 @@ namespace Pulsar4X.ViewModel
                         MinMaxSlider.MaxValue = MaxValue;
                         MinMaxSlider.MinValue = MinValue;
                         MinMaxSlider.StepValue = StepValue;
-                        MinMaxSlider.Value = Value;
+                        MinMaxSlider.Value = Value; //.PreLoadedValue = Value; //hack due to eto bug. MinMaxSlider.Value = Value; 
                         MinMaxSlider.PropertyChanged += MinMaxSlider_PropertyChanged;
 
                     }

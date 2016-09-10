@@ -44,6 +44,10 @@ namespace Pulsar4X.ViewModel
         private List<KeyValuePair<TKey, TValue>> _index = new List<KeyValuePair<TKey, TValue>>(); 
         private Dictionary<KeyValuePair<TKey,TValue>,int> _reverseIndex = new Dictionary<KeyValuePair<TKey, TValue>, int>(); 
         public ObservableCollection<string> DisplayList { get; set; }
+        /// <summary>
+        /// if SelectedIndex value is passed as -1, the value will be changed to 0
+        /// </summary>
+        public bool AllowsNullSelection = false;
         private int _selectedIndex;
         public int SelectedIndex
         {
@@ -51,6 +55,8 @@ namespace Pulsar4X.ViewModel
             set
             {
                 int old = _selectedIndex;
+                if(value == -1 && !AllowsNullSelection)
+                    value = 0;
                 _selectedIndex = value;
                 SelectionChangedEvent?.Invoke(old, _selectedIndex);
                 OnPropertyChanged();
