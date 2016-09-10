@@ -182,7 +182,7 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var costitem in costs)
                 {
-                    if (costitem.Value <= stockpile.GetAmountOf(costitem.Key))
+                    if (costitem.Value >= stockpile.GetAmountOf(costitem.Key))
                         return false;
                 }
             }

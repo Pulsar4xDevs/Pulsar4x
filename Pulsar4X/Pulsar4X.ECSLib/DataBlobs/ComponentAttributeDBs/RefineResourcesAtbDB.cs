@@ -20,18 +20,18 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// this is for the parser, it takes a dictionary but turns it into a list of keys, ignoring the values.
         /// </summary>
-        /// <param name="refinableMatsList"></param>
+        /// <param name="refinableMatsList">a list of guid that this is capable of refining</param>
         /// <param name="RefineryPoints"></param>
-        public RefineResourcesAtbDB(Dictionary<Guid, double> refinableMatsList, double RefineryPoints)
+        public RefineResourcesAtbDB(Dictionary<Guid, double> refinableMatsList, double refineryPoints)
         {
             RefinableMatsList = refinableMatsList.Keys.ToList();
-            RefineryPoints = (int)RefineryPoints;
+            RefineryPoints = (int)refineryPoints;
         }
 
-        public RefineResourcesAtbDB(List<Guid> refinableMatsList, int RefineryPoints)
+        public RefineResourcesAtbDB(List<Guid> refinableMatsList, int refineryPoints)
         {
             RefinableMatsList = refinableMatsList;
-            RefineryPoints = RefineryPoints;
+            RefineryPoints = refineryPoints;
         }
 
         public RefineResourcesAtbDB(RefineResourcesAtbDB db)

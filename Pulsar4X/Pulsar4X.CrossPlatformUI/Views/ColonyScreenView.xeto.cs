@@ -57,8 +57,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             });
 
 
-
-
         }
 
         public ColonyScreenView(GameVM gameVM) :this()

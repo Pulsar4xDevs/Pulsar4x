@@ -25,7 +25,8 @@ namespace Pulsar4X.ECSLib
                     var job = refiningDB.JobBatchList[jobIndex];
                     ProcessedMaterialSD material = game.StaticData.ProcessedMaterials[job.ItemGuid];
                     Dictionary<Guid, int> costs = new Dictionary<Guid, int>(material.RawMineralCosts);
-                    costs.Concat(new Dictionary<Guid, int>(material.RefinedMateraialsCosts));
+                    if(material.RefinedMateraialsCosts != null)
+                        costs.Concat(new Dictionary<Guid, int>(material.RefinedMateraialsCosts));
                     while (job.NumberCompleted < job.NumberOrdered && job.PointsLeft > 0)
                     {
                         if (job.PointsLeft == material.RefineryPointCost)
