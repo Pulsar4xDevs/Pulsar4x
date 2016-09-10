@@ -509,7 +509,7 @@ namespace Pulsar4X.ViewModel
             _attachedBeamList.Clear();
             _freeBeamList.Clear();
 
-            if (_fireControlList.SelectedIndex != -1)
+            if (_fireControlList.Count > 0 && _fireControlList.SelectedIndex != -1)
             {
                 int beamCount = 0;
                 foreach (Entity beam in SelectedFireControl.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons)
