@@ -39,7 +39,7 @@ namespace Pulsar4X.ViewModel
         private Guid _typeID;
         private GameVM _gameVM;
         public string TypeName { get; set; }
-        public int MaxWeight { get { return _storageDB?.CargoCapicity[_typeID] ?? 0; } }
+        public long MaxWeight { get { return _storageDB?.CargoCapicity[_typeID] ?? 0; } }
         public float NetWeight { get { return StorageSpaceProcessor.NetWeight(_storageDB, _typeID); } }
         public float RemainingWeight { get { return StorageSpaceProcessor.RemainingCapacity(_storageDB, _typeID); } }
         private string _typeName;
@@ -59,7 +59,7 @@ namespace Pulsar4X.ViewModel
 
             CargoTypeSD cargoType = _dataStore.CargoTypes[storageType];
             TypeName = cargoType.Name;
-            foreach (var itemKVP in storageDB.GetResourcesOfCargoType(storageType))
+            foreach (var itemKVP in StorageSpaceProcessor.GetResourcesOfCargoType(storageDB, storageType))
             {
                 ICargoable cargoableitem = (ICargoable)_dataStore.FindDataObjectUsingID(itemKVP.Key);
                 
@@ -78,7 +78,7 @@ namespace Pulsar4X.ViewModel
                 }  
             }
 
-            foreach (var entityObj in storageDB.GetEntiesOfCargoType(storageType))
+            foreach (var entityObj in StorageSpaceProcessor.GetEntiesOfCargoType(storageDB, storageType))
             {
                 ICargoable cargoableitem = entityObj.GetDataBlob<CargoAbleTypeDB>();
 
@@ -117,7 +117,7 @@ namespace Pulsar4X.ViewModel
         Guid _itemID;
         public string ItemName { get; set; }
         public string ItemTypeName { get; set; }
-        public int Amount { get { return _storageDB.GetAmountOf(_itemID); } }
+        public long Amount { get { return StorageSpaceProcessor.GetAmountOf(_storageDB, _itemID); } }
         public float ItemWeight { get; set; } = 0;
         public float TotalWeight { get { return (ItemWeight * Amount); } } 
 

@@ -86,6 +86,16 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public static void SafeValueReplace<TKey>(this Dictionary<TKey, long> dict, TKey key, long toReplace)
+        {
+            if (!dict.ContainsKey(key))
+                dict.Add(key, toReplace);
+            else
+            {
+                dict[key] = toReplace;
+            }
+        }
+
         /// <summary>
         /// Adds an int value to a dictionary, adding the key if the key does not exsist.
         /// </summary>
@@ -103,6 +113,25 @@ namespace Pulsar4X.ECSLib
                 dict[key] += toAdd;
             }
         }
+
+        /// <summary>
+        /// Adds an long value to a dictionary, adding the key if the key does not exsist.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <param name="dict"></param>
+        /// <param name="key"></param>
+        /// <param name="toAdd"></param>
+        [PublicAPI]
+        public static void SafeValueAdd<TKey>(this Dictionary<TKey, long> dict, TKey key, long toAdd)
+        {
+            if (!dict.ContainsKey(key))
+                dict.Add(key, toAdd);
+            else
+            {
+                dict[key] += toAdd;
+            }
+        }
+
         /// <summary>
         /// Adds a float value to a dictionary, adding the key if the key does not exsist.
         /// </summary>
