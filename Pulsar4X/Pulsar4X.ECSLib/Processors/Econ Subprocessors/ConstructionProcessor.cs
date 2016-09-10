@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
         {   
             foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
             {             
-                int amountUsedThisTick = stockpile.SubtractValue(kvp.Key, kvp.Value);
+                int amountUsedThisTick = (int)StorageSpaceProcessor.SubtractValue(stockpile, kvp.Key, kvp.Value);
                 toUse[kvp.Key] -= amountUsedThisTick;                      
             }         
         }

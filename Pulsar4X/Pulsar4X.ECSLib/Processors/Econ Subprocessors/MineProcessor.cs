@@ -11,18 +11,18 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyDB>().Minerals;
             //Dictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            CargoStorageDB Stockpile = colonyEntity.GetDataBlob<CargoStorageDB>();
+            CargoStorageDB stockpile = colonyEntity.GetDataBlob<CargoStorageDB>();
             float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
             {                
                 double accessability = planetMinerals[kvp.Key].Accessibility;
                 double actualRate = kvp.Value * mineBonuses * accessability;
                 int mineralsMined = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
-                int capacity = StorageSpaceProcessor.RemainingCapacity(Stockpile, Stockpile.CargoTypeID(kvp.Key));
+                long capacity = StorageSpaceProcessor.RemainingCapacity(stockpile, stockpile.CargoTypeID(kvp.Key));
                 if (capacity > 0)
                 {
                     //colonyMineralStockpile.SafeValueAdd<Guid>(kvp.Key, mineralsMined);
-                    Stockpile.AddValue(kvp.Key, mineralsMined);
+                    StorageSpaceProcessor.AddValue(stockpile, kvp.Key, mineralsMined);
                     MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
                     int newAmount = mineralDeposit.Amount -= mineralsMined;
 

@@ -32,7 +32,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Amount",
-                DataCell = new TextBoxCell { ID = "AmountCell", Binding = Binding.Property<CargoItemVM, int>(r => r.Amount).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { ID = "AmountCell", Binding = Binding.Property<CargoItemVM, long>(r => r.Amount).Convert(r => r.ToString()) }
             });
             CargoGrid.Columns.Add(new GridColumn
             {

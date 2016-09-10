@@ -103,7 +103,10 @@ namespace Pulsar4X.ECSLib
                             manager.Game.EventLog.AddEvent(usedAllFuel);
                         }
                         else
+                        {
                             newDistanceDelta = distanceToNextTPos;
+                            newPos = nextTPos;
+                        }
 
 
 
@@ -154,12 +157,12 @@ namespace Pulsar4X.ECSLib
             PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
             StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
             ICargoable resource = (ICargoable)staticData.FindDataObjectUsingID(propulsionDB.FuelUsePerKM.Keys.First());
-            int kmeters = (int)(storedResources.GetAmountOf(resource.ID) / propulsionDB.FuelUsePerKM[resource.ID]); 
+            int kmeters = (int)(StorageSpaceProcessor.GetAmountOf(storedResources, resource.ID) / propulsionDB.FuelUsePerKM[resource.ID]); 
             foreach (var usageKVP in propulsionDB.FuelUsePerKM)
             {
                 resource = (ICargoable)staticData.FindDataObjectUsingID(usageKVP.Key);
-                if (kmeters > (storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value))
-                    kmeters = (int)(storedResources.GetAmountOf(usageKVP.Key) / usageKVP.Value);
+                if (kmeters > (StorageSpaceProcessor.GetAmountOf(storedResources, usageKVP.Key) / usageKVP.Value))
+                    kmeters = (int)(StorageSpaceProcessor.GetAmountOf(storedResources, usageKVP.Key) / usageKVP.Value);
             }
             return kmeters;
         }
