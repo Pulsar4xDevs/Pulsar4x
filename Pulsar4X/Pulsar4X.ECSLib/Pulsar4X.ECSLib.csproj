@@ -280,7 +280,7 @@
     <Compile Include="DataBlobs\RuinsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\BeamWeaponsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\BuildCostDB.cs" />
-    <Compile Include="DataBlobs\ShipDBs\CargoDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\CargoStorageDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\CrewDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\DamageDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\HangerDB.cs" />

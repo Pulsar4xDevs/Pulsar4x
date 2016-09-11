@@ -34,11 +34,17 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="typeID">cargo type guid</param>
         /// <returns>new list of Entites or an empty list</returns>
-        public static List<Entity> GetEntiesOfCargoType(CargoStorageDB fromCargo, Guid typeID)
+        public static List<Entity> GetEntitesOfCargoType(CargoStorageDB fromCargo, Guid typeID)
         {
+            List<Entity> entityList = new List<Entity>();
             if (fromCargo.StoredEntities.ContainsKey(typeID))
-                return new List<Entity>(fromCargo.StoredEntities[typeID]);
-            return new List<Entity>();
+            {
+                foreach (var kvp in fromCargo.StoredEntities[typeID])
+                {
+                    entityList.AddRange(kvp.Value); 
+                }
+            }
+            return entityList;
         }
 
         /// <summary>
@@ -213,9 +219,14 @@ namespace Pulsar4X.ECSLib
 
         private static void AddToCargo(CargoStorageDB toCargo, Entity entityItem, ICargoable cargotypedb)
         {
+            if (!entityItem.HasDataBlob<ComponentInstanceInfoDB>())
+                new Exception("entityItem does not contain ComponentInstanceInfoDB, it must be an componentInstance type entity");
+            Entity design = entityItem.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
             if (!toCargo.StoredEntities.ContainsKey(cargotypedb.CargoTypeID))
-                toCargo.StoredEntities.Add(cargotypedb.CargoTypeID, new List<Entity>());
-            toCargo.StoredEntities[cargotypedb.CargoTypeID].Add(entityItem);
+                toCargo.StoredEntities.Add(cargotypedb.CargoTypeID, new Dictionary<Entity, List<Entity>>());
+            if (!toCargo.StoredEntities[cargotypedb.CargoTypeID].ContainsKey(design))
+                toCargo.StoredEntities[cargotypedb.CargoTypeID].Add(design, new List<Entity>());
+            toCargo.StoredEntities[cargotypedb.CargoTypeID][design].Add(entityItem);
         }
 
        
@@ -248,12 +259,16 @@ namespace Pulsar4X.ECSLib
             return storedWeight;
         }
 
-        private static long StoredWeight(Dictionary<Guid, List<Entity>> dict, Guid TypeID)
+        private static long StoredWeight(Dictionary<Guid, Dictionary<Entity, List<Entity>>> dict, Guid TypeID)
         {
             double storedWeight = 0;
-            foreach (var item in dict[TypeID])
-            {                
-                storedWeight += item.GetDataBlob<MassVolumeDB>().Mass; 
+            foreach (var itemType in dict[TypeID])
+            {
+                foreach (var designInstanceKVP in itemType.Value)
+                {
+                    storedWeight += designInstanceKVP.GetDataBlob<MassVolumeDB>().Mass;
+                }             
+                
             }
             return (int)Math.Round(storedWeight, MidpointRounding.AwayFromZero);
         }
