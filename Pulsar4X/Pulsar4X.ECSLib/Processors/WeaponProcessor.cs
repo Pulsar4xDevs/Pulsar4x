@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
                 // only fire if target is in range
                 if (range <= Math.Min(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
                 {
-                    ShipDamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
+                    DamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
                     stateInfo.CoolDown = TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
                     starSys.SystemManager.ManagerSubpulses.AddEntityInterupt(starSys.SystemManager.ManagerSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, beamWeapon);
                 }

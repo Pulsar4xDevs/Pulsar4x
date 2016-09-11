@@ -15,18 +15,9 @@ namespace Pulsar4X.ECSLib
 
         static public void Process(Game game, StarSystem starSystem)
         {
-            /// <summary>
-            /// Handle asteroids
-            /// </summary>
-            foreach (Entity objectEntity in starSystem.SystemManager.GetAllEntitiesWithDataBlob<AsteroidDamageDB>())
-            {
-                //if damage exceeds certain amount spawn new asteroids of lesser mass up to a certain point.
-                //these are commented out as they do not exist.
-                AsteroidDamageDB AstDmgDB = objectEntity.GetDataBlob<AsteroidDamageDB>();
-                if (AstDmgDB.Health <= 0)
-                    SpawnSubAsteroids(game, objectEntity);
-            }
+
         }
+
         /// <summary>
         /// This will work for missiles, ships, asteroids, and populations at some point.
         /// </summary>
@@ -38,6 +29,9 @@ namespace Pulsar4X.ECSLib
             {
                 AsteroidDamageDB AstDmgDB = DamageableEntity.GetDataBlob<AsteroidDamageDB>();
                 AstDmgDB.Health = AstDmgDB.Health - damageAmount;
+
+                if (AstDmgDB.Health <= 0)
+                    SpawnSubAsteroids(DamageableEntity);
             }
             else if(DamageableEntity.HasDataBlob<ShipInfoDB>())
             {
@@ -48,8 +42,9 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal static void SpawnSubAsteroids(Game game, Entity Asteroid)
+        internal static void SpawnSubAsteroids(Entity Asteroid)
         {
+            Game game = Asteroid.Manager.Game;
             MassVolumeDB ADB = Asteroid.GetDataBlob<MassVolumeDB>();
 
             //const double massDefault = 1.5e+12; //150 B tonnes?
