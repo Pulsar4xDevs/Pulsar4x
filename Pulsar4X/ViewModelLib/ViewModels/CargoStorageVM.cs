@@ -78,7 +78,7 @@ namespace Pulsar4X.ViewModel
                 }  
             }
 
-            foreach (var entityObj in StorageSpaceProcessor.GetEntiesOfCargoType(storageDB, storageType))
+            foreach (var entityObj in StorageSpaceProcessor.GetEntitesOfCargoType(storageDB, storageType))
             {
                 ICargoable cargoableitem = entityObj.GetDataBlob<CargoAbleTypeDB>();
 
