@@ -269,8 +269,8 @@ namespace Pulsar4X.Tests
 
             resultPlanet = setAtmosphere(atmosphereDB);
 
-            resultPlanet.GetDataBlob<SystemBodyDB>().BaseTemperature = 14.0f;
-            resultPlanet.GetDataBlob<SystemBodyDB>().Gravity = 1.0;
+            resultPlanet.GetDataBlob<SystemBodyInfoDB>().BaseTemperature = 14.0f;
+            resultPlanet.GetDataBlob<SystemBodyInfoDB>().Gravity = 1.0;
             
 
             return resultPlanet;
@@ -279,7 +279,7 @@ namespace Pulsar4X.Tests
         // Sets an entity to earth normal aside from the atmosphere
         private Entity setAtmosphere(AtmosphereDB atmosDB)
         {
-            SystemBodyDB earthBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
             NameDB earthNameDB = new NameDB("Earth");
             earthBodyDB.Gravity = 1.0;
             earthBodyDB.BaseTemperature = 20.0f;

@@ -273,7 +273,7 @@
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
     <Compile Include="DataBlobs\StarInfoDB.cs" />
-    <Compile Include="DataBlobs\SystemBodyDB.cs" />
+    <Compile Include="DataBlobs\SystemBodyInfoDB.cs" />
     <Compile Include="DataBlobs\ColonyInfoDB.cs" />
     <Compile Include="DataBlobs\PositionDB.cs" />
     <Compile Include="DataBlobs\RuinsDB.cs" />

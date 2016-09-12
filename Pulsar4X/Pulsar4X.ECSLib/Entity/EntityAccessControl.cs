@@ -93,7 +93,7 @@ namespace Pulsar4X.ECSLib
         private static bool IsSystemBodyAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
         {
             if (entityMask[EntityManager.GetTypeIndex<StarInfoDB>()] ||
-                entityMask[EntityManager.GetTypeIndex<SystemBodyDB>()] ||
+                entityMask[EntityManager.GetTypeIndex<SystemBodyInfoDB>()] ||
                 entityMask[EntityManager.GetTypeIndex<JPSurveyableDB>()] ||
                 entityMask[EntityManager.GetTypeIndex<TransitableDB>()])
             {

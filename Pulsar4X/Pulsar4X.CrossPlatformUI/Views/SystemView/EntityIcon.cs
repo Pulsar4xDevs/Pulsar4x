@@ -46,9 +46,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 {
                     SetIconFor((StarInfoDB)item);
                 }
-                if (item is SystemBodyDB)
+                if (item is SystemBodyInfoDB)
                 {
-                    SetIconFor((SystemBodyDB)item);
+                    SetIconFor((SystemBodyInfoDB)item);
                 }
                 if (item is CargoStorageDB)
                 {
@@ -108,9 +108,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
 
 
-        void SetIconFor(SystemBodyDB db)
+        void SetIconFor(SystemBodyInfoDB db)
         {
-            BodyType type = db.Type;
+            BodyType type = db.BodyType;
             float temp = db.BaseTemperature;
             
         }

@@ -74,7 +74,7 @@ namespace Pulsar4X.ViewModel
                 planetGuid = bodyGuid;
             else if (_gameVM.Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
             {
-                if (bodyEntity.HasDataBlob<SystemBodyDB>())
+                if (bodyEntity.HasDataBlob<SystemBodyInfoDB>())
                 {
                     planetGuid = bodyEntity.Guid;
                 }
@@ -132,7 +132,7 @@ namespace Pulsar4X.ViewModel
             }
             _parentStar = parentstarVM;
             ID = _parentStar.Entity.Guid;
-            foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(gameVM.CurrentAuthToken))
+            foreach (var planet in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(gameVM.CurrentAuthToken))
             {
                 PlanetVM planetVM = PlanetVM.Create(_gameVM, planet, parentstarVM);
                 if (!_planets.Contains(planetVM))

@@ -29,14 +29,14 @@ namespace Pulsar4X.ECSLib
 
             var position = new PositionDB(0, 0, 0, Guid.Empty);
             var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);
-            var planetInfo = new SystemBodyDB();
+            var planetInfo = new SystemBodyInfoDB();
             var balisticTraj = new NewtonBalisticDB(target.Guid,collisionDate);
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
-            planetInfo.Type = BodyType.Asteroid;
+            planetInfo.BodyType = BodyType.Asteroid;
 
             Vector4 targetPos = OrbitProcessor.GetAbsolutePosition(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;

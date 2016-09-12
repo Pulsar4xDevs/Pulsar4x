@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
 
         private static bool ColonyGravityIsHabitible(Entity planet, SpeciesDB species)
         {
-            SystemBodyDB sysBody = planet.GetDataBlob<SystemBodyDB>();
+            SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             double planetGravity = sysBody.Gravity;
             double maxGravity = species.MaximumGravityConstraint;
             double minGravity = species.MinimumGravityConstraint;
@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
             double cost = 1.0;
             double O2Pressure = 0.0;
             double totalPressure = 0.0;
-            SystemBodyDB sysBody = planet.GetDataBlob<SystemBodyDB>();
+            SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
 
             Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
@@ -104,7 +104,7 @@ namespace Pulsar4X.ECSLib
 
         private static double ColonyTemperatureCost(Entity planet, SpeciesDB species)
         {
-            SystemBodyDB sysBody = planet.GetDataBlob<SystemBodyDB>();
+            SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             double cost;
             double idealTemp = species.BaseTemperature;
             double planetTemp = sysBody.BaseTemperature;  // @todo: find correct temperature after terraforming

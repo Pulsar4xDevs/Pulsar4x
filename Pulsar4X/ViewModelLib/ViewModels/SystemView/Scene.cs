@@ -36,7 +36,7 @@ namespace Pulsar4X.ViewModel.SystemView
             {
                 SystemBodies.Add(new SystemObjectRenderInfo(item));
             }
-            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(authToken))
+            foreach (var item in starSys.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(authToken))
             {
                 SystemBodies.Add(new SystemObjectRenderInfo(item));
             }
@@ -106,8 +106,8 @@ namespace Pulsar4X.ViewModel.SystemView
 
             if (systemObjectEntity.HasDataBlob<StarInfoDB>())//is a star
                 StarSetup(systemObjectEntity.GetDataBlob<StarInfoDB>());
-            else if (systemObjectEntity.HasDataBlob<SystemBodyDB>())//is an object other than a star
-                Planetetup(systemObjectEntity.GetDataBlob<SystemBodyDB>());
+            else if (systemObjectEntity.HasDataBlob<SystemBodyInfoDB>())//is an object other than a star
+                Planetetup(systemObjectEntity.GetDataBlob<SystemBodyInfoDB>());
         }
 
         private void StarSetup(StarInfoDB starInfo)
@@ -133,10 +133,10 @@ namespace Pulsar4X.ViewModel.SystemView
             ItemColour = new Color4(temp, 100 - temp, 0, 0);//stab in the dark.
 
         }
-        private void Planetetup(SystemBodyDB sysBodyInfo)
+        private void Planetetup(SystemBodyInfoDB sysBodyInfo)
         {
             //maybe look at proceduraly genning textures? also look at diferentiating an icon (zoomed out) and a textue (zoomed right in)
-            switch (sysBodyInfo.Type)
+            switch (sysBodyInfo.BodyType)
             {
                 case BodyType.Asteroid:
                     {

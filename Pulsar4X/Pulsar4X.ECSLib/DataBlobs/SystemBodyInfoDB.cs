@@ -39,11 +39,11 @@ namespace Pulsar4X.ECSLib
         public double Accessibility { get; internal set; }
     }
 
-    public class SystemBodyDB : BaseDataBlob
+    public class SystemBodyInfoDB : BaseDataBlob
     {
         [PublicAPI]
         [JsonProperty]
-        public BodyType Type { get; internal set; }
+        public BodyType BodyType { get; internal set; }
 
         /// <summary>
         /// Plate techtonics. Ammount of activity depends on age vs mass.
@@ -119,14 +119,14 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Guid, MineralDepositInfo> Minerals { get; internal set; }
 
-        public SystemBodyDB()
+        public SystemBodyInfoDB()
         {
             Minerals = new Dictionary<Guid, MineralDepositInfo>();
         }
 
-        public SystemBodyDB(SystemBodyDB systemBodyDB)
+        public SystemBodyInfoDB(SystemBodyInfoDB systemBodyDB)
         {
-            Type = systemBodyDB.Type;
+            BodyType = systemBodyDB.BodyType;
             Tectonics = systemBodyDB.Tectonics;
             AxialTilt = systemBodyDB.AxialTilt;
             MagneticField = systemBodyDB.MagneticField;
@@ -141,7 +141,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new SystemBodyDB(this);
+            return new SystemBodyInfoDB(this);
         }
     }
 }

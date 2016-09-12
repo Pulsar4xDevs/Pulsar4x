@@ -58,10 +58,10 @@ namespace Pulsar4X.Tests
             _highGravPlanet = setEarthPlanet();
 
 
-            _coldPlanet.GetDataBlob<SystemBodyDB>().BaseTemperature = -20.0f;
-            _hotPlanet.GetDataBlob<SystemBodyDB>().BaseTemperature = 120.0f;
-            _lowGravPlanet.GetDataBlob<SystemBodyDB>().Gravity = 0.05;
-            _highGravPlanet.GetDataBlob<SystemBodyDB>().Gravity = 5.0;
+            _coldPlanet.GetDataBlob<SystemBodyInfoDB>().BaseTemperature = -20.0f;
+            _hotPlanet.GetDataBlob<SystemBodyInfoDB>().BaseTemperature = 120.0f;
+            _lowGravPlanet.GetDataBlob<SystemBodyInfoDB>().Gravity = 0.05;
+            _highGravPlanet.GetDataBlob<SystemBodyInfoDB>().Gravity = 5.0;
 
             _faction = FactionFactory.CreateFaction(_game, "Terran");
 
@@ -128,7 +128,7 @@ namespace Pulsar4X.Tests
             // test a large number of different inputs
 
             // set _earthPlanet to have earth gravity (1.0)
-            _earthPlanet.GetDataBlob<SystemBodyDB>().Gravity = 1.0;
+            _earthPlanet.GetDataBlob<SystemBodyInfoDB>().Gravity = 1.0;
 
             // test for humans on a planet with low gravity
             Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -149,7 +149,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void testColonyToxicityCost()
         {
-            SystemBodyDB earthBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
             NameDB earthNameDB = new NameDB("Earth");
             double expectedCost;
             string gasSym;
@@ -364,7 +364,7 @@ namespace Pulsar4X.Tests
                 // Check a wide variety of temperatures
                 for (float temp = -200; temp < 500; temp++)
                 {
-                    tempPlanet.GetDataBlob<SystemBodyDB>().BaseTemperature = temp;
+                    tempPlanet.GetDataBlob<SystemBodyInfoDB>().BaseTemperature = temp;
                     expected = Math.Abs((idealTemp + 273.15) - (temp + 273.15)) / tempRange;
                     expected = Math.Max(1.0, expected);
                     Assert.AreEqual(expected, SpeciesProcessor.ColonyCost(tempPlanet, spec.GetDataBlob<SpeciesDB>()));
@@ -446,7 +446,7 @@ namespace Pulsar4X.Tests
         // Sets an entity to earth normal aside from the atmosphere
         private Entity setAtmosphere(AtmosphereDB atmosDB)
         {
-            SystemBodyDB earthBodyDB = new SystemBodyDB { Type = BodyType.Terrestrial, SupportsPopulations = true };
+            SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
             NameDB earthNameDB = new NameDB("Earth");
             earthBodyDB.Gravity = 1.0;
             earthBodyDB.BaseTemperature = 20.0f;

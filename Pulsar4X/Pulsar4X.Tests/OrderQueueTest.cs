@@ -33,7 +33,7 @@ namespace Pulsar4X.Tests
             _faction = DefaultStartFactory.DefaultHumans(_game, _player, "Test Faction");
 
             _starSystem = _game.Systems.First<KeyValuePair<Guid, StarSystem>>().Value;
-            _planets = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>();
+            _planets = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
 
             _earth = _planets.Where<Entity>(planet => planet.GetDataBlob<NameDB>().GetName(_faction) == "Earth").First<Entity>();
 

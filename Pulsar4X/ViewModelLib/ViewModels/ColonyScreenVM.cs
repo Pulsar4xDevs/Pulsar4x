@@ -108,7 +108,7 @@ namespace Pulsar4X.ViewModel
     public class PlanetMineralDepositVM : IViewModel
     {
         private Entity _planetEntity;
-        private SystemBodyDB systemBodyInfo { get { return _planetEntity.GetDataBlob<SystemBodyDB>(); } }
+        private SystemBodyInfoDB systemBodyInfo { get { return _planetEntity.GetDataBlob<SystemBodyInfoDB>(); } }
         private StaticDataStore _staticData;
         private readonly ObservableDictionary<Guid, PlanetMineralInfoVM> _mineralDeposits = new ObservableDictionary<Guid, PlanetMineralInfoVM>();
         public ObservableDictionary<Guid, PlanetMineralInfoVM> MineralDeposits { get { return _mineralDeposits; } }

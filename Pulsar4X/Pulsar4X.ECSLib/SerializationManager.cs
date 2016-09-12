@@ -270,7 +270,7 @@ namespace Pulsar4X.ECSLib
         private static void SerializeBodyToXML(XmlDocument xmlDoc, XmlNode systemNode, Entity systemBody, OrbitDB orbit)
         {
             // get the datablobs:
-            var systemBodyDB = systemBody.GetDataBlob<SystemBodyDB>();
+            var systemBodyDB = systemBody.GetDataBlob<SystemBodyInfoDB>();
             var starIfnoDB = systemBody.GetDataBlob<StarInfoDB>();
             var positionDB = systemBody.GetDataBlob<PositionDB>();
             var massVolumeDB = systemBody.GetDataBlob<MassVolumeDB>();
@@ -406,7 +406,7 @@ namespace Pulsar4X.ECSLib
             if (systemBodyDB != null)
             {
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Type", "NS");
-                varNode.InnerText = systemBodyDB.Type.ToString();
+                varNode.InnerText = systemBodyDB.BodyType.ToString();
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "AxialTilt", "NS");

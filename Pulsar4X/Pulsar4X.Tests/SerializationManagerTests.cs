@@ -125,7 +125,7 @@ namespace Pulsar4X.Tests
 
             // Export/Reinport all system bodies in that system.
 
-            foreach (Entity entity in system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken))
+            foreach (Entity entity in system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken))
             {
                 string jsonString = SerializationManager.Export(_game, entity);
 
@@ -182,7 +182,7 @@ namespace Pulsar4X.Tests
         private void ImportExportSystem(StarSystem system)
         {
             string jsonString = SerializationManager.Export(_game, system);
-            int entityCount = system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken).Count;
+            int entityCount = system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count;
             _game = TestingUtilities.CreateTestUniverse(0);
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
@@ -190,7 +190,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(system.Guid, importedSystem.Guid);
 
             // See that the entities were imported.
-            Assert.AreEqual(entityCount, importedSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyDB>(_smAuthToken).Count);
+            Assert.AreEqual(entityCount, importedSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count);
 
             // Ensure the system was added to the game's system list.
             List<StarSystem> systems = _game.GetSystems(_smAuthToken);

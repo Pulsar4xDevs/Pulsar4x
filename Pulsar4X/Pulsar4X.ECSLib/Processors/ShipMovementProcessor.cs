@@ -115,11 +115,11 @@ namespace Pulsar4X.ECSLib
                             newDistanceDelta = distanceToTarget;
                             propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);
                             newPos = targetPos;
-                            if (order.Target != null && order.Target.HasDataBlob<SystemBodyDB>())
+                            if (order.Target != null && order.Target.HasDataBlob<SystemBodyInfoDB>())
                                 positionDB.SetParent(order.Target);
                             if (order.Target != null)
                             {
-                                if (order.Target.HasDataBlob<SystemBodyDB>())  // Set position to the target body
+                                if (order.Target.HasDataBlob<SystemBodyInfoDB>())  // Set position to the target body
                                 {
                                     positionDB.SetParent(order.Target);
 
@@ -142,13 +142,9 @@ namespace Pulsar4X.ECSLib
                         }
                         StorageSpaceProcessor.RemoveResources(storedResources, fuelAmounts);
                         
-                    }
-                    
-                }
-                
-                //TODO: use fuel.
-            }
-            
+                    }                   
+                }               
+            }           
         }
 
         public static int CalcMaxFuelDistance(Entity shipEntity)

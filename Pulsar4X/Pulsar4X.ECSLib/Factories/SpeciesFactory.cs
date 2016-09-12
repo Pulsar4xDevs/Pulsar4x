@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
                 rnd = new Random();
 
             MassVolumeDB masvolinfo = planetEntity.GetDataBlob<MassVolumeDB>();
-            SystemBodyDB sysbodyinfo = planetEntity.GetDataBlob<SystemBodyDB>();
+            SystemBodyInfoDB sysbodyinfo = planetEntity.GetDataBlob<SystemBodyInfoDB>();
             AtmosphereDB atmoinfo = planetEntity.GetDataBlob<AtmosphereDB>();
 
 

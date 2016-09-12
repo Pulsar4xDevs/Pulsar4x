@@ -531,7 +531,7 @@ namespace Pulsar4X.ViewModel
             PositionDB positionDB = _entity.GetDataBlob<PositionDB>();
             UpdateProperties(positionDB);
 
-            SystemBodyDB systemBodyDB = _entity.GetDataBlob<SystemBodyDB>();
+            SystemBodyInfoDB systemBodyDB = _entity.GetDataBlob<SystemBodyInfoDB>();
             UpdateProperties(systemBodyDB, partialRefresh);
 
             NameDB nameDB = _entity.GetDataBlob<NameDB>();
@@ -637,7 +637,7 @@ namespace Pulsar4X.ViewModel
             SurfaceGravity = massVolumeDB.SurfaceGravity;
         }
 
-        private void UpdateProperties([NotNull] SystemBodyDB systemBodyDB, bool partialRefresh)
+        private void UpdateProperties([NotNull] SystemBodyInfoDB systemBodyDB, bool partialRefresh)
         {
             if (systemBodyDB == null)
             {
@@ -647,7 +647,7 @@ namespace Pulsar4X.ViewModel
             if (!partialRefresh)
             {
                 // Full Refresh. Update unchanging variables.
-                PlanetType = systemBodyDB.Type.ToString();
+                PlanetType = systemBodyDB.BodyType.ToString();
                 AxialTilt = systemBodyDB.AxialTilt;
                 BaseTemperature = systemBodyDB.BaseTemperature;
                 LengthOfDay = systemBodyDB.LengthOfDay;

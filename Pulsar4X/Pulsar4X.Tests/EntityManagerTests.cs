@@ -143,7 +143,7 @@ namespace Pulsar4X.Tests
             typeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
             Assert.Catch(typeof(InvalidCastException), () =>
             {
-                testEntity.GetDataBlob<SystemBodyDB>(typeIndex);
+                testEntity.GetDataBlob<SystemBodyInfoDB>(typeIndex);
             });
         }
 

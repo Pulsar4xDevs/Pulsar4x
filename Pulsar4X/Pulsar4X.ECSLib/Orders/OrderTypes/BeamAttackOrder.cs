@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
             }
             else
                 // @todo: jump point, jump survey point
-                if (!Target.HasDataBlob<SystemBodyDB>() && !Target.HasDataBlob<ShipInfoDB>())
+                if (!Target.HasDataBlob<SystemBodyInfoDB>() && !Target.HasDataBlob<ShipInfoDB>())
                     return false;
 
             // @todo: further conditions

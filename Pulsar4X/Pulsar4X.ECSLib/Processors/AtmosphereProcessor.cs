@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
             ///< @todo Write full atmo processor.
         }
 
-        public static void UpdateAtmosphere(AtmosphereDB atmoDB, SystemBodyDB bodyDB)
+        public static void UpdateAtmosphere(AtmosphereDB atmoDB, SystemBodyInfoDB bodyDB)
         {
             if (atmoDB.Exists)
             {
@@ -38,9 +38,9 @@ namespace Pulsar4X.ECSLib
                     }
                 }
 
-                if (bodyDB.Type == BodyType.GasDwarf
-                    || bodyDB.Type == BodyType.GasGiant
-                    || bodyDB.Type == BodyType.IceGiant)
+                if (bodyDB.BodyType == BodyType.GasDwarf
+                    || bodyDB.BodyType == BodyType.GasGiant
+                    || bodyDB.BodyType == BodyType.IceGiant)
                 {
                     // special gas giant stuff, needed because we do not apply greenhouse factor to them:
                     atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - atmoDB.Albedo);

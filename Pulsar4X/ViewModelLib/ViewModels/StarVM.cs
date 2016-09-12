@@ -192,7 +192,7 @@ namespace Pulsar4X.ViewModel
             {
                 if(childOrbit.HasDataBlob<StarInfoDB>())
                     _childStars.Add(_system.GetStar(childOrbit.Guid));
-                else if(childOrbit.HasDataBlob<SystemBodyDB>())
+                else if(childOrbit.HasDataBlob<SystemBodyInfoDB>())
                     _childPlanets.Add(_system.GetPlanet(childOrbit.Guid));
             }
         }
