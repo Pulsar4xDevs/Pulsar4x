@@ -9,7 +9,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
     
     public class CargoStorageView : Scrollable
     {
-        StackLayout CargoTypes;
+        protected StackLayout CargoTypes;
         public CargoStorageView()
         {
             XamlReader.Load(this);

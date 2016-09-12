@@ -28,7 +28,13 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentListView
                     ComponentSpecificDesignView component = new ComponentSpecificDesignView() { DataContext = item };
                     ComponentDesignsStack.Items.Add(component);
                 }
+                vm.Designs.CollectionChanged += Designs_CollectionChanged;
             }
+        }
+
+        private void Designs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            ComponentsByDesignView_DataContextChanged(null, null);
         }
     }
 }

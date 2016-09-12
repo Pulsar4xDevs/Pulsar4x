@@ -4,18 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
+using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ViewModel
 {
-    public class ComponentDesignsListVM
+    public class ComponentDesignsListVM : ViewModelBase
     {
         private Entity _parentEntity;
-        public List<ComponentSpecificDesignVM> Designs { get; } = new List<ComponentSpecificDesignVM>();
+        public ObservableCollection<ComponentSpecificDesignVM> Designs { get; } = new ObservableCollection<ComponentSpecificDesignVM>();
 
         public ComponentDesignsListVM(Entity entity)
         {
-            if (entity.HasDataBlob<ComponentInstancesDB>())
-                _parentEntity = entity;
+            RefreshAll(entity);
+        }
+
+        public void RefreshAll(Entity newEntity)
+        {
+            Designs.Clear();
+            if (newEntity.HasDataBlob<ComponentInstancesDB>())
+                _parentEntity = newEntity;
             foreach (var kvp in _parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
             {
                 Designs.Add(new ComponentSpecificDesignVM(kvp.Key, kvp.Value));
