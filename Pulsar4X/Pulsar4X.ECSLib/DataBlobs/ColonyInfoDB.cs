@@ -12,18 +12,6 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Entity, long> Population { get; internal set; } = new Dictionary<Entity, long>();
 
-        /// <summary>
-        /// Raw Mined minerals. Mines push here, Refinery pulls from here, Construction pulls from here.
-        /// </summary>
-        //[JsonProperty]
-        //public Dictionary<Guid, int> MineralStockpile { get; internal set; } = new Dictionary<Guid, int>();
-
-        /// <summary>
-        ///refined Fuel, or refined minerals if the modder so desires.
-        /// Refinery pushes here, Construction pulls from here.
-        /// </summary>
-        //[JsonProperty]
-        //public Dictionary<Guid, int> RefinedStockpile { get; internal set; } = new Dictionary<Guid, int>();
 
         /// <summary>
         /// constructed parts stockpile.
@@ -65,8 +53,6 @@ namespace Pulsar4X.ECSLib
             Population = popCount;
             PlanetEntity = planet;
             
-            //MineralStockpile =  new Dictionary<Guid, int>();
-            //RefinedStockpile = new Dictionary<Guid, int>();
             ComponentStockpile = new Dictionary<Guid, int>();
             OrdinanceStockpile = new Dictionary<Guid, float>();
             FighterStockpile = new List<Entity>();
@@ -83,8 +69,6 @@ namespace Pulsar4X.ECSLib
         {
             Population = new Dictionary<Entity, long>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
-            //MineralStockpile = new Dictionary<Guid, int>(colonyInfoDB.MineralStockpile);
-            //RefinedStockpile = new Dictionary<Guid, int>(colonyInfoDB.RefinedStockpile);
             ComponentStockpile = new Dictionary<Guid, int>(colonyInfoDB.ComponentStockpile);
             OrdinanceStockpile = new Dictionary<Guid, float>(colonyInfoDB.OrdinanceStockpile);
             FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);            

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <StackLayout Orientation="Horizontal">
+    <Label Text="Health: " />
+    <Label Text="{Binding HealthPercent}"/>
+    <Label Text=" "/>
+    <Label Text="Enabled: " />
+    <Label Text="{Binding IsEnabled}" />
+  </StackLayout>
+</Panel>
