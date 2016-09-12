@@ -366,7 +366,7 @@ namespace Pulsar4X.ViewModel
                 if(target != SelectedShip)
                 {
                     _moveTargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
-                    if (target.HasDataBlob<ShipInfoDB>() || target.HasDataBlob<ColonyInfoDB>())
+                    if (target.HasDataBlob<SensorProfileDB>())
                         _attackTargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
 
                 }
@@ -501,7 +501,7 @@ namespace Pulsar4X.ViewModel
 
             RefreshBeamWeaponsList(0, 0);
 
-            OnPropertyChanged(nameof(FireControlList));
+//            OnPropertyChanged(nameof(FireControlList));
 
         }
 
