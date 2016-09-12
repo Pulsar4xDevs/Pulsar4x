@@ -237,6 +237,13 @@
     <EmbeddedResource Include="Views\CargoView\CargoStorageView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ComponentListView\ComponentSpecificDesignView.xeto" />
+    <EmbeddedResource Include="Views\ComponentListView\ComponentSpecificInstanceView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ComponentListView\ComponentDesignsListView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\LogViewCMD.cs" />
@@ -280,6 +287,15 @@
     </Compile>
     <Compile Include="Views\ColonyScreenView.xeto.cs">
       <DependentUpon>ColonyScreenView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentListView\ComponentDesignsListView.xeto.cs">
+      <DependentUpon>ComponentDesignsListView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentListView\ComponentSpecificDesignView.xeto.cs">
+      <DependentUpon>ComponentSpecificDesignView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ComponentListView\ComponentSpecificInstanceView.xeto.cs">
+      <DependentUpon>ComponentSpecificInstanceView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ComponentTemplateDesigner\ComponentTemplateAbilityPropertiesView.xeto.cs">
       <DependentUpon>ComponentTemplateAbilityPropertiesView.xeto</DependentUpon>
