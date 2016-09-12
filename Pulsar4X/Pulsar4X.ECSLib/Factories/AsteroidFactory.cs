@@ -33,6 +33,7 @@ namespace Pulsar4X.ECSLib
             var balisticTraj = new NewtonBalisticDB(target.Guid,collisionDate);
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
+            var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
             planetInfo.Type = BodyType.Asteroid;
@@ -52,7 +53,8 @@ namespace Pulsar4X.ECSLib
                 planetInfo,
                 name,
                 balisticTraj,
-                AsteroidDmg
+                AsteroidDmg,
+                sensorPfil
             };
 
             Entity newELE = new Entity(starSys.SystemManager, planetDBs);
