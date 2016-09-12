@@ -366,7 +366,7 @@ namespace Pulsar4X.ViewModel
                 if(target != SelectedShip)
                 {
                     _moveTargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
-                    if (target.HasDataBlob<ShipInfoDB>() || target.HasDataBlob<ColonyInfoDB>())
+                    if (target.HasDataBlob<SensorProfileDB>())
                         _attackTargetList.Add(target, target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
 
                 }
@@ -466,6 +466,8 @@ namespace Pulsar4X.ViewModel
 
         public void RefreshFireControlList(int a, int b)
         {
+            _fireControlList.Clear();
+
             if (SelectedShip == null)
                 return;
 
@@ -475,7 +477,7 @@ namespace Pulsar4X.ViewModel
                 return;
             }
 
-            _fireControlList.Clear();
+
 
             // The component instances all seem to think that their parent entity is Ensuing Calm, regardless of SelectedShip
             List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
@@ -495,19 +497,21 @@ namespace Pulsar4X.ViewModel
 
             _fireControlList.SelectedIndex = 0;
 
+            
+
             RefreshBeamWeaponsList(0, 0);
 
-            OnPropertyChanged(nameof(FireControlList));
+//            OnPropertyChanged(nameof(FireControlList));
 
         }
 
         public void RefreshBeamWeaponsList(int a, int b)
         {
-            if (SelectedShip == null || _shipList.SelectedIndex == -1)
-                return;
-
             _attachedBeamList.Clear();
             _freeBeamList.Clear();
+
+            if (SelectedShip == null || _shipList.SelectedIndex == -1)
+                return;
 
             if (_fireControlList.Count > 0 && _fireControlList.SelectedIndex != -1)
             {
@@ -652,6 +656,33 @@ namespace Pulsar4X.ViewModel
             RefreshBeamWeaponsList(0, 0);
         }
 
+        public void OnAddTarget()
+        {
+            Entity fc = SelectedFireControl;
+            Entity target = SelectedAttackTarget;
+
+            if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
+                return;
+
+            if (SelectedAttackTarget == null || _attackTargetList.SelectedIndex == -1)
+                return;
+
+            fc.GetDataBlob<FireControlInstanceAbilityDB>().Target = target;
+            // Get the currently selected ship and fire control and the currently selected list of targets
+            // Add the currently selected target to the selected ship's target
+            // Update GUI
+
+            RefreshFireControlList(0, 0);
+        }
+
+        public void OnRemoveTarget()
+        {
+            // Get the currently selected ship fire control
+            // Clear its selected target
+            // Update GUI
+
+        }
+
         private ICommand _addOrder;
         public ICommand AddOrder
         {
@@ -685,6 +716,24 @@ namespace Pulsar4X.ViewModel
             get
             {
                 return _removeBeam ?? (_removeBeam = new CommandHandler(OnRemoveBeam, true));
+            }
+        }
+
+        private ICommand _addTarget;
+        public ICommand AddTarget
+        {
+            get
+            {
+                return _addTarget ?? (_addTarget = new CommandHandler(OnAddTarget, true));
+            }
+        }
+
+        private ICommand _removeTarget;
+        public ICommand RemoveTarget
+        {
+            get
+            {
+                return _removeTarget ?? (_removeTarget = new CommandHandler(OnRemoveTarget, true));
             }
         }
 

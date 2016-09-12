@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
 {
     public class FireControlInstanceAbilityDB : BaseDataBlob
     {
-        public Entity Target { get; internal set; }
+        public Entity Target { get; set; }
 
         public List<Entity> AssignedWeapons { get; internal set; } = new List<Entity>();
 
