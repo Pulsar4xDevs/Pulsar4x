@@ -11,16 +11,22 @@ namespace Pulsar4X.ECSLib
     public class CargoAbleTypeDB : BaseDataBlob , ICargoable
     {
         [JsonProperty]
-
         public Guid CargoTypeID { get; internal set; }
 
         [JsonIgnore]
         public Guid ID {
             get { return this.OwningEntity.Guid; }
         }
-        
+
+        [JsonIgnore]
         public float Mass {
             get { return (float)this.OwningEntity.GetDataBlob<MassVolumeDB>().Mass; } 
+        }
+
+        [JsonIgnore]
+        public string Name
+        {
+            get { return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.GetDataBlob<OwnedDB>()?.ObjectOwner) ?? "Unknown Object"; }
         }
 
         public CargoAbleTypeDB()

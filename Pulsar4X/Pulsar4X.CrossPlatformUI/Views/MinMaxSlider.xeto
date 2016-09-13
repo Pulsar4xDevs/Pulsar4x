@@ -13,7 +13,7 @@
        Value="{Binding SliderValue}"
        MinValue="{Binding SliderMinValue}"
        MaxValue="{Binding SliderMaxValue}"
-       TickFrequency="{Binding SliderStepValue}"     
+  
        SnapToTick="{Binding StrictStepValue}"  
        Enabled="{Binding IsUnLocked}"
       />

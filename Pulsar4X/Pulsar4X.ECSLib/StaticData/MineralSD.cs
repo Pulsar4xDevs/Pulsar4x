@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     [StaticData(true, IDPropertyName = "ID")]
     public struct MineralSD : ICargoable
     {
-        public string Name;
+        public string Name { get; set; }
         public string Description;
         public Guid ID { get; set; }
         public Guid CargoTypeID { get; set; }

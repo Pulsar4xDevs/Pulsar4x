@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Collections.Specialized;
+using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ViewModel
 {
@@ -14,7 +16,8 @@ namespace Pulsar4X.ViewModel
         private CargoStorageDB _storageDB;
         private StaticDataStore _dataStore;
         private GameVM _gameVM;
-        public  RangeEnabledObservableCollection<CargoStorageByTypeVM> CargoStore { get; } = new RangeEnabledObservableCollection<CargoStorageByTypeVM>();
+
+        public  ObservableCollection<CargoStorageByTypeVM> CargoStore { get; } = new ObservableCollection<CargoStorageByTypeVM>();
         public CargoStorageVM(GameVM gameVM)
         {
             _gameVM = gameVM;
@@ -29,7 +32,22 @@ namespace Pulsar4X.ViewModel
                 storeType.Initalise(_storageDB, item.Key);
                 CargoStore.Add(storeType);
             }
+            _storageDB.CollectionChanged += _storageDB_CollectionChanged;
         }
+
+        private void _storageDB_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                if (sender == _storageDB.CargoCapicity) //cargoCapacity has got a new type. 
+                {
+                    CargoStorageByTypeVM storeType = new CargoStorageByTypeVM(_gameVM);
+                    storeType.Initalise(_storageDB, (Guid)e.NewItems[0]);
+                    CargoStore.Add(storeType);
+                }
+            }
+        }
+
 
     }
     public class CargoStorageByTypeVM : INotifyPropertyChanged
@@ -44,7 +62,7 @@ namespace Pulsar4X.ViewModel
         public float RemainingWeight { get { return StorageSpaceProcessor.RemainingCapacity(_storageDB, _typeID); } }
         private string _typeName;
         public string HeaderText { get { return _typeName; } set { _typeName = value; OnPropertyChanged(); } }
-        public RangeEnabledObservableCollection<CargoItemVM> TypeStore { get; } = new RangeEnabledObservableCollection<CargoItemVM>();
+        public ObservableCollection<CargoItemVM> TypeStore { get; } = new RangeEnabledObservableCollection<CargoItemVM>();
 
         public CargoStorageByTypeVM(GameVM gameVM)
         {
@@ -61,36 +79,37 @@ namespace Pulsar4X.ViewModel
             TypeName = cargoType.Name;
             foreach (var itemKVP in StorageSpaceProcessor.GetResourcesOfCargoType(storageDB, storageType))
             {
-                ICargoable cargoableitem = (ICargoable)_dataStore.FindDataObjectUsingID(itemKVP.Key);
-                
-                if (cargoableitem is MineralSD)
-                {
-                    MineralSD mineral = (MineralSD)cargoableitem;
-                    CargoItemVM cargoItem = new CargoItemVM(_gameVM, storageDB, mineral);
+                ICargoable cargoableitem = (ICargoable)_dataStore.FindDataObjectUsingID(itemKVP.Key);                
+                MineralSD mineral = (MineralSD)cargoableitem;
+                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, cargoableitem);
 
-                    TypeStore.Add(cargoItem);
-                }
-                else if (cargoableitem is ProcessedMaterialSD)
-                {
-                    ProcessedMaterialSD material = (ProcessedMaterialSD)cargoableitem;
-                    CargoItemVM cargoItem = new CargoItemVM(_gameVM, storageDB, material);
-                    TypeStore.Add(cargoItem);
-                }  
+                TypeStore.Add(cargoItem);
             }
 
             foreach (var entityObj in StorageSpaceProcessor.GetEntitesOfCargoType(storageDB, storageType))
             {
                 ICargoable cargoableitem = entityObj.GetDataBlob<CargoAbleTypeDB>();
-
-                if (cargoableitem is MineralSD)
-                {
-                    CargoItemVM cargoItem = new CargoItemVM(_gameVM, storageDB, entityObj);
-
-                    TypeStore.Add(cargoItem);
-                }
+                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, cargoableitem);
+                TypeStore.Add(cargoItem);
             }
             HeaderText = cargoType.Name + ": " + NetWeight.ToString() + " of " + MaxWeight.ToString() + " used, " + RemainingWeight.ToString() + " remaining";
             _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
+            _storageDB.CollectionChanged += _storageDB_CollectionChanged;
+        }
+
+        private void _storageDB_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+                OnItemAdded((ICargoable)e.NewItems[0]);
+        }
+
+        private void OnItemAdded(ICargoable newItem)
+        {
+            if (newItem.CargoTypeID == _typeID)
+            {
+                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, newItem);
+                TypeStore.Add(cargoItem);
+            }
         }
 
         private void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
@@ -101,6 +120,8 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(RemainingWeight));
             OnPropertyChanged(nameof(TypeStore));
         }
+
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -121,40 +142,30 @@ namespace Pulsar4X.ViewModel
         public float ItemWeight { get; set; } = 0;
         public float TotalWeight { get { return (ItemWeight * Amount); } } 
 
-        private CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, ICargoable item)
+        public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, ICargoable item)
         {
             _itemID = item.ID;
+            ItemName = item.Name;
             _storageDB = storageDB;
             ItemWeight = item.Mass;
-            _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;                    
+            _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
+            if (item is MineralSD)
+                ItemTypeName = "Raw Mineral";
+            else if (item is ProcessedMaterialSD)
+                ItemTypeName = "Raw Mineral";
+            else if (item is CargoAbleTypeDB)
+            {
+                CargoAbleTypeDB itemdb = (CargoAbleTypeDB)item;
+                Entity itemEntity = itemdb.OwningEntity;
+                ItemTypeName = itemEntity.GetDataBlob<ComponentInstanceInfoDB>()?.DesignEntity.GetDataBlob<NameDB>().GetName(itemEntity.GetDataBlob<OwnedDB>().ObjectOwner) ??
+                    "Unknown Construct Type";
+            }
         }
 
         private void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
         {
             OnPropertyChanged(nameof(Amount));
         }
-
-        public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, MineralSD item):this(gameVM, storageDB, (ICargoable)item)
-        {
-            ItemName = item.Name;
-            ItemTypeName = "Raw Mineral";   
-        }
-
-        public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, ProcessedMaterialSD item) : this(gameVM, storageDB, (ICargoable)item)
-        {
-            ItemName = item.Name;
-            ItemTypeName = "Processed Material";    
-        }
-        public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, Entity item) 
-        {
-            _storageDB = storageDB;
-            ItemName = item.GetDataBlob<NameDB>().GetName(item.GetDataBlob<OwnedDB>().ObjectOwner);
-            ItemTypeName = item.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity.GetDataBlob<NameDB>().GetName(item.GetDataBlob<OwnedDB>().ObjectOwner);
-            ItemWeight = (float)item.GetDataBlob<MassVolumeDB>().Mass;
-            _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
-
-        }
-
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

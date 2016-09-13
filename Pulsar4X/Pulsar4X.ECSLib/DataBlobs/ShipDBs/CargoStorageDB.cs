@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
@@ -9,7 +11,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Contains info on a ships cargo capicity.
     /// </summary>
-    public class CargoStorageDB : BaseDataBlob
+    public class CargoStorageDB : BaseDataBlob, INotifyCollectionChanged
     {
         [JsonProperty]
         public Dictionary<Guid, long> CargoCapicity { get; private set; } = new Dictionary<Guid, long>();
@@ -24,6 +26,8 @@ namespace Pulsar4X.ECSLib
 
         [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
         private StaticDataStore _staticData;
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
@@ -51,13 +55,10 @@ namespace Pulsar4X.ECSLib
         }
 
 
-
-
-
-
-
-
-
+        public void InvokeCollectionChange(object collection, NotifyCollectionChangedEventArgs e)
+        {
+            CollectionChanged?.Invoke(collection, e);
+        }
 
         /// <summary>
         /// gives the cargoType of a given itemID
@@ -78,6 +79,11 @@ namespace Pulsar4X.ECSLib
         {
             return new CargoStorageDB(this);
         }
+
+    }
+
+    public interface INotifyCargoChanged
+    {
 
     }
 }

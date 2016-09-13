@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<Scrollable
+<Panel
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-  <StackLayout x:Name="CargoTypes"/>
-</Scrollable>
+  <Scrollable>
+    <StackLayout x:Name="CargoTypes"/>
+  </Scrollable>
+</Panel>

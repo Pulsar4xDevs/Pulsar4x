@@ -4,8 +4,8 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
   <Expander Expanded="True" x:Name="Expanderer">    
-    <Scrollable>
+
       <GridView x:Name="CargoGrid" DataStore="{Binding TypeStore}" />
-    </Scrollable>
+
   </Expander>
 </Panel>

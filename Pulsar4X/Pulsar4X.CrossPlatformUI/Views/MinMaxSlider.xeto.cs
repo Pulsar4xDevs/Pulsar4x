@@ -20,7 +20,10 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private void MinMaxSlider_DataContextChanged(object sender, System.EventArgs e)
         {
             if (DataContext is MinMaxSliderVM)
-            { }
+            {
+                MinMaxSliderVM vm = (MinMaxSliderVM)DataContext;
+                vm.OnPropertyChanged(nameof(vm.Value)); //attempt to trigger propertychanged
+            }
         }
     }
 }

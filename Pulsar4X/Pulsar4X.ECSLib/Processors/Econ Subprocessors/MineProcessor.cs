@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
                 if (capacity > 0)
                 {
                     //colonyMineralStockpile.SafeValueAdd<Guid>(kvp.Key, mineralsMined);
-                    StorageSpaceProcessor.AddValue(stockpile, kvp.Key, mineralsMined);
+                    StorageSpaceProcessor.AddItemToCargo(stockpile, kvp.Key, mineralsMined);
                     MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
                     int newAmount = mineralDeposit.Amount -= mineralsMined;
 

@@ -54,6 +54,15 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
                 CargoStorageByTypeVM vm = (CargoStorageByTypeVM)DataContext;
                 _vm = vm;
                 _vm.PropertyChanged += Vm_PropertyChanged;
+                //_vm.TypeStore.CollectionChanged += TypeStore_CollectionChanged;
+            }
+        }
+
+        private void TypeStore_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                CargoGrid.DataStore = _vm.TypeStore;
             }
         }
 

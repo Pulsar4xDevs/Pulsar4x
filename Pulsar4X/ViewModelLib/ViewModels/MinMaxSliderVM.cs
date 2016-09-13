@@ -35,7 +35,7 @@ namespace Pulsar4X.ViewModel
         public double StepValue { get; set; } = 0.0001;
         public double Value { get {return _value_;}
             set { _value_ = value; OnPropertyChanged(nameof(SliderValue)); OnValueChanged(); OnPropertyChanged(); } }
-        protected double _value_ = 0.5;
+        protected double _value_ = 50;
         
         public int SliderMaxValue { get { return (int)(MaxValue * 10000); }}
         public int SliderMinValue { get { return (int)(MinValue * 10000); }}

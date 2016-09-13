@@ -28,8 +28,23 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
                     typesView.DataContext = item;
                     CargoTypes.Items.Add(typesView);
                 }
+                dc.CargoStore.CollectionChanged += CargoStore_CollectionChanged;
             }
         }
+
+        private void CargoStore_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    CargoTypeStoreView typesView = new CargoTypeStoreView();
+                    typesView.DataContext = item;
+                    CargoTypes.Items.Add(typesView);
+                }
+            }
+        }
+
         public void SetDataContextFrom(ShipOrderVM shipOrderVM)
         {
             CargoStorageVM vm = new CargoStorageVM(shipOrderVM.GameVM);
