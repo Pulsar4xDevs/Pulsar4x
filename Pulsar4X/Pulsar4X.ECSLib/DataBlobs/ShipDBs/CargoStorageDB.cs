@@ -59,6 +59,11 @@ namespace Pulsar4X.ECSLib
         {
             CollectionChanged?.Invoke(collection, e);
         }
+        internal void InvokeCollectionChange(object state)
+        {
+            PostStateForCollectionChange statec = (PostStateForCollectionChange)state;
+            CollectionChanged?.Invoke(statec.sender, statec.e);
+        }
 
         /// <summary>
         /// gives the cargoType of a given itemID

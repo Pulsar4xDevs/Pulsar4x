@@ -9,7 +9,6 @@ namespace Pulsar4X.ECSLib
 
     public static class StorageSpaceProcessor
     {
-
         /// <summary>
         /// returns the amount of items for a given item guid.
         /// </summary>
@@ -72,18 +71,16 @@ namespace Pulsar4X.ECSLib
             {
                 toCargo.MinsAndMatsByCargoType.Add(cargoTypeID, new Dictionary<Guid, long>());
                 if (toCargo.OwningEntity.Manager.Game.SyncContext != null)
-                {
-                    object[] stateArray = new object[] { toCargo, toCargo.MinsAndMatsByCargoType, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item) };
-                    toCargo.OwningEntity.Manager.Game.SyncContext.Post(MarshaledInvoke, stateArray);
+                {                   
+                    toCargo.OwningEntity.Manager.Game.SyncContext.Post(toCargo.InvokeCollectionChange, NewAddState(toCargo.MinsAndMatsByCargoType, item));
                 }
             }
             if (!toCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(item.ID))
             {
                 toCargo.MinsAndMatsByCargoType[cargoTypeID].Add(item.ID, value);
                 if (toCargo.OwningEntity.Manager.Game.SyncContext != null)
-                {
-                    object[] stateArray = new object[] { toCargo, toCargo.MinsAndMatsByCargoType[cargoTypeID], new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item) };
-                    toCargo.OwningEntity.Manager.Game.SyncContext.Post(MarshaledInvoke, stateArray);
+                {          
+                    toCargo.OwningEntity.Manager.Game.SyncContext.Post(toCargo.InvokeCollectionChange, NewAddState(toCargo.MinsAndMatsByCargoType[cargoTypeID], item));
                 }                
             }
             else
@@ -303,8 +300,6 @@ namespace Pulsar4X.ECSLib
             return true;
         }
 
-
-
         internal static void ReCalcCapacity(Entity parentEntity)
         {
             CargoStorageDB storageDB = parentEntity.GetDataBlob<CargoStorageDB>();
@@ -326,9 +321,13 @@ namespace Pulsar4X.ECSLib
                 {
                     totalSpace.Add(cargoTypeID, alowableSpace);
                     if (parentEntity.Manager.Game.SyncContext != null)
-                    {
-                        object[] stateArray = new object[] {storageDB, totalSpace, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, cargoTypeID) };
-                        parentEntity.Manager.Game.SyncContext.Post(MarshaledInvoke, stateArray);
+                    {                    
+                        var state = new PostStateForCollectionChange
+                        {
+                            sender = totalSpace,
+                            e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, cargoTypeID)
+                        };
+                        parentEntity.Manager.Game.SyncContext.Post(storageDB.InvokeCollectionChange, state);
                     }
 
 
@@ -342,12 +341,14 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void MarshaledInvoke(object state)
+        private static PostStateForCollectionChange NewAddState(object sender, object item )
         {
-            object[] stateArray = (object[])state;
-            CargoStorageDB storageDB = (CargoStorageDB)stateArray[0];
-            NotifyCollectionChangedEventArgs args = (NotifyCollectionChangedEventArgs)stateArray[2];
-            storageDB.InvokeCollectionChange(stateArray[1], args );
+            var state = new PostStateForCollectionChange
+            {
+                sender = sender,
+                e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item)
+            };
+            return state;
         }
     }
 }
