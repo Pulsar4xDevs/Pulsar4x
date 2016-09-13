@@ -26,7 +26,11 @@ namespace Pulsar4X.ECSLib
 
         [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
         private StaticDataStore _staticData;
-
+        
+        /// <summary>
+        /// should ONLY be subscribed to by viewmodels, 
+        /// is normaly invoked via the StorageSpaceProcesor(which will correctly marshal the event to the ui thread)
+        /// </summary>
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         [OnDeserialized]
@@ -54,11 +58,10 @@ namespace Pulsar4X.ECSLib
             ItemToTypeMap = cargoDB.ItemToTypeMap; //note that this is not 'new', the dictionary referenced here is static/global and should be the same dictionary throughout the game.
         }
 
-
-        public void InvokeCollectionChange(object collection, NotifyCollectionChangedEventArgs e)
-        {
-            CollectionChanged?.Invoke(collection, e);
-        }
+        /// <summary>
+        /// invokes CollectionChange
+        /// </summary>
+        /// <param name="state">this should be a PostStateForCollectionChange object</param>
         internal void InvokeCollectionChange(object state)
         {
             PostStateForCollectionChange statec = (PostStateForCollectionChange)state;

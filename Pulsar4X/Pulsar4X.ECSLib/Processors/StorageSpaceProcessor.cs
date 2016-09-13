@@ -69,19 +69,15 @@ namespace Pulsar4X.ECSLib
             Guid cargoTypeID = toCargo.ItemToTypeMap[item.ID];
             if (!toCargo.MinsAndMatsByCargoType.ContainsKey(cargoTypeID))
             {
-                toCargo.MinsAndMatsByCargoType.Add(cargoTypeID, new Dictionary<Guid, long>());
-                if (toCargo.OwningEntity.Manager.Game.SyncContext != null)
-                {                   
-                    toCargo.OwningEntity.Manager.Game.SyncContext.Post(toCargo.InvokeCollectionChange, NewAddState(toCargo.MinsAndMatsByCargoType, item));
-                }
+                toCargo.MinsAndMatsByCargoType.Add(cargoTypeID, new Dictionary<Guid, long>()); 
+                MarshalAdd(toCargo, toCargo.MinsAndMatsByCargoType, item);
+                
             }
             if (!toCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(item.ID))
             {
                 toCargo.MinsAndMatsByCargoType[cargoTypeID].Add(item.ID, value);
-                if (toCargo.OwningEntity.Manager.Game.SyncContext != null)
-                {          
-                    toCargo.OwningEntity.Manager.Game.SyncContext.Post(toCargo.InvokeCollectionChange, NewAddState(toCargo.MinsAndMatsByCargoType[cargoTypeID], item));
-                }                
+                MarshalAdd(toCargo, toCargo.MinsAndMatsByCargoType[cargoTypeID], item);                           
+                               
             }
             else
                 toCargo.MinsAndMatsByCargoType[cargoTypeID][item.ID] += value;
@@ -320,17 +316,7 @@ namespace Pulsar4X.ECSLib
                 if (!totalSpace.ContainsKey(cargoTypeID))
                 {
                     totalSpace.Add(cargoTypeID, alowableSpace);
-                    if (parentEntity.Manager.Game.SyncContext != null)
-                    {                    
-                        var state = new PostStateForCollectionChange
-                        {
-                            sender = totalSpace,
-                            e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, cargoTypeID)
-                        };
-                        parentEntity.Manager.Game.SyncContext.Post(storageDB.InvokeCollectionChange, state);
-                    }
-
-
+                    MarshalAdd(storageDB, totalSpace, cargoTypeID);                                        
                 }
                 else if (totalSpace[cargoTypeID] != alowableSpace)
                 {
@@ -341,14 +327,24 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static PostStateForCollectionChange NewAddState(object sender, object item )
+        /// <summary>
+        /// checks if the game has SyncContext, and makes a call to CargoStorageDB.InvokeCollectionChange *on the UI thread*
+        /// </summary>
+        /// <param name="storageDB"></param>
+        /// <param name="sender">this is the collection that is changing</param>
+        /// <param name="item">this is the item that has been added</param>
+        private static void MarshalAdd(CargoStorageDB storageDB, object sender, object item)
         {
-            var state = new PostStateForCollectionChange
+            if (storageDB.OwningEntity.Manager.Game.SyncContext != null)
             {
-                sender = sender,
-                e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item)
-            };
-            return state;
+                var state = new PostStateForCollectionChange
+                {
+                    sender = sender,
+                    e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item)
+                };
+                storageDB.OwningEntity.Manager.Game.SyncContext.Post(storageDB.InvokeCollectionChange, state);
+            }
         }
+
     }
 }
