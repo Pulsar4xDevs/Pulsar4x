@@ -12,7 +12,123 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    
+
+    public class ROODict<TKey, TValue> : INotifyCollectionChanged, ICloneable
+    {
+        [JsonProperty]
+        private Dictionary<TKey, TValue> _dict;
+
+        private readonly SynchronizationContext _context;
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+
+        public ROODict()
+        {
+            _context = AsyncOperationManager.SynchronizationContext;
+            _dict = new Dictionary<TKey, TValue>();
+        }
+
+        public ROODict(Dictionary<TKey, TValue> backingDict)
+        {
+            _context = AsyncOperationManager.SynchronizationContext;
+            _dict = backingDict;
+        }
+
+        #region Internal Modifications
+        internal void Add(TKey key, TValue value)
+        {
+            _dict.Add(key, value);
+            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey, TValue>(key, value));
+            if (CollectionChanged != null && _context != null)
+                _context.Post(s => CollectionChanged(this, args), null);
+        }
+
+        internal void Remove(TKey key)
+        {
+            _dict.Remove(key);
+            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, key);
+            if (CollectionChanged != null && _context != null)
+                _context.Post(s => CollectionChanged(this, args), null);
+        }
+
+
+        internal void Clear()
+        {
+            _dict.Clear();
+            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset);
+            if (CollectionChanged != null && _context != null)
+                _context.Post(s => CollectionChanged(this, args), null);
+        }
+
+
+        #endregion
+
+        public bool ContainsKey(TKey key)
+        {
+            return _dict.ContainsKey(key);
+        }
+
+        public ICollection<TKey> Keys
+        {
+            get { return _dict.Keys; }
+        }
+
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            return _dict.TryGetValue(key, out value);
+        }
+
+        public ICollection<TValue> Values
+        {
+            get { return _dict.Values; }
+        }
+
+        public TValue this[TKey key]
+        {
+            get { return _dict[key]; }
+            set { _dict[key] = value; }
+        }
+
+        public bool Contains(KeyValuePair<TKey, TValue> item)
+        {
+            return _dict.Contains(item);
+        }
+
+        public int Count
+        {
+            get { return _dict.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        {
+            return _dict.GetEnumerator();
+        }
+
+        public object Clone()
+        {
+            return new ReadOnlyObsDict<TKey, TValue>(_dict);
+        }
+
+    }
+
+
+
+
+    /// <summary>
+    /// Attempt at writing a custom dictionary type collection
+    /// that is public readonly, but internal modifications will fire a marshaled INotifyCollectonChanged event.
+    /// Problems:
+    /// Add throws an exception, because I can't have an internal Add (since it's requred for IDictionary<> Implimentation
+    /// Needs to implement IDictionary instead of? or as well as? IDictionary<> for serialsation.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public class ReadOnlyObsDict<TKey, TValue> : IDictionary<TKey, TValue> , INotifyCollectionChanged , ICloneable
     {
         [JsonProperty]
