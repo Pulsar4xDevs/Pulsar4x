@@ -32,24 +32,23 @@ namespace Pulsar4X.ViewModel
                 storeType.Initalise(_storageDB, item.Key);
                 CargoStore.Add(storeType);
             }
-            _storageDB.CollectionChanged += _storageDB_CollectionChanged;
+            _storageDB.CargoCapicity.CollectionChanged += _storageDB_CollectionChanged;
         }
 
-        private void _storageDB_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void _storageDB_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                if (sender == _storageDB.CargoCapicity) //cargoCapacity has got a new type. 
-                {
-                    CargoStorageByTypeVM storeType = new CargoStorageByTypeVM(_gameVM);
-                    storeType.Initalise(_storageDB, (Guid)e.NewItems[0]);
-                    CargoStore.Add(storeType);
-                }
+                CargoStorageByTypeVM storeType = new CargoStorageByTypeVM(_gameVM);
+                KeyValuePair<Guid, object> kvp = (KeyValuePair<Guid, object>)e.NewItems[0];
+                storeType.Initalise(_storageDB, kvp.Key);
+                CargoStore.Add(storeType);               
             }
         }
 
 
     }
+
     public class CargoStorageByTypeVM : INotifyPropertyChanged
     {
         private CargoStorageDB _storageDB;
@@ -70,46 +69,66 @@ namespace Pulsar4X.ViewModel
             _dataStore = _gameVM.Game.StaticData;
         }
 
-        public void Initalise(CargoStorageDB storageDB, Guid storageType)
+        public void Initalise(CargoStorageDB storageDB, Guid storageTypeID)
         {
             _storageDB = storageDB;
-            _typeID = storageType;
+            _typeID = storageTypeID;
 
-            CargoTypeSD cargoType = _dataStore.CargoTypes[storageType];
+            CargoTypeSD cargoType = _dataStore.CargoTypes[_typeID];
             TypeName = cargoType.Name;
-            foreach (var itemKVP in StorageSpaceProcessor.GetResourcesOfCargoType(storageDB, storageType))
-            {
-                ICargoable cargoableitem = (ICargoable)_dataStore.FindDataObjectUsingID(itemKVP.Key);                
-                MineralSD mineral = (MineralSD)cargoableitem;
-                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, cargoableitem);
-
+            foreach (var itemKVP in StorageSpaceProcessor.GetResourcesOfCargoType(storageDB, _typeID))
+            {                             
+                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, itemKVP.Key);
                 TypeStore.Add(cargoItem);
             }
 
-            foreach (var entityObj in StorageSpaceProcessor.GetEntitesOfCargoType(storageDB, storageType))
-            {
-                ICargoable cargoableitem = entityObj.GetDataBlob<CargoAbleTypeDB>();
-                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, cargoableitem);
-                TypeStore.Add(cargoItem);
-            }
+            //foreach (var entityObj in StorageSpaceProcessor.GetEntitesOfCargoType(storageDB, storageType))
+            //{
+            //    ICargoable cargoableitem = entityObj.GetDataBlob<CargoAbleTypeDB>();
+            //    CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, cargoableitem);
+            //    TypeStore.Add(cargoItem);
+            //}
             HeaderText = cargoType.Name + ": " + NetWeight.ToString() + " of " + MaxWeight.ToString() + " used, " + RemainingWeight.ToString() + " remaining";
             _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
-            _storageDB.CollectionChanged += _storageDB_CollectionChanged;
+            _storageDB.MinsAndMatsByCargoType[_typeID].CollectionChanged += _storageDB_CollectionChanged;
         }
 
         private void _storageDB_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
-                OnItemAdded((ICargoable)e.NewItems[0]);
+            {
+                foreach (var item in e.NewItems)
+                {
+                    OnItemAdded((KeyValuePair<ICargoable, long>)item);
+                }
+
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+
+                foreach (var item in e.OldItems)
+                {
+                    OnItemRemoved((KeyValuePair<ICargoable, long>)item);
+                }
+            }
         }
 
-        private void OnItemAdded(ICargoable newItem)
+        private void OnItemAdded(KeyValuePair<ICargoable, long> newItem)
         {
-            if (newItem.CargoTypeID == _typeID)
+            if (newItem.Key.CargoTypeID == _typeID)
             {
-                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, newItem);
+                CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, newItem.Key);
                 TypeStore.Add(cargoItem);
             }
+        }
+
+        private void OnItemRemoved(KeyValuePair<ICargoable, long> removedItem)
+        { //is there a better way to do this?
+            foreach (var item in TypeStore.ToArray())
+            {
+                if (item.ItemID == removedItem.Key.ID)
+                    TypeStore.Remove(item);
+            }    
         }
 
         private void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
@@ -130,21 +149,19 @@ namespace Pulsar4X.ViewModel
         }
     }
 
-
-
     public class CargoItemVM : INotifyPropertyChanged
     {
         CargoStorageDB _storageDB;
-        Guid _itemID;
+        internal Guid ItemID { get; private set; }
         public string ItemName { get; set; }
         public string ItemTypeName { get; set; }
-        public long Amount { get { return StorageSpaceProcessor.GetAmountOf(_storageDB, _itemID); } }
+        public long Amount { get { return StorageSpaceProcessor.GetAmountOf(_storageDB, ItemID); } }
         public float ItemWeight { get; set; } = 0;
         public float TotalWeight { get { return (ItemWeight * Amount); } } 
 
         public CargoItemVM(GameVM gameVM, CargoStorageDB storageDB, ICargoable item)
         {
-            _itemID = item.ID;
+            ItemID = item.ID;
             ItemName = item.Name;
             _storageDB = storageDB;
             ItemWeight = item.Mass;
@@ -152,13 +169,14 @@ namespace Pulsar4X.ViewModel
             if (item is MineralSD)
                 ItemTypeName = "Raw Mineral";
             else if (item is ProcessedMaterialSD)
-                ItemTypeName = "Raw Mineral";
+                ItemTypeName = "Processed Material";
             else if (item is CargoAbleTypeDB)
             {
                 CargoAbleTypeDB itemdb = (CargoAbleTypeDB)item;
                 Entity itemEntity = itemdb.OwningEntity;
-                ItemTypeName = itemEntity.GetDataBlob<ComponentInstanceInfoDB>()?.DesignEntity.GetDataBlob<NameDB>().GetName(itemEntity.GetDataBlob<OwnedDB>().ObjectOwner) ??
-                    "Unknown Construct Type";
+                ItemTypeName = itemEntity.GetDataBlob<ComponentInstanceInfoDB>()?.
+                    DesignEntity.GetDataBlob<NameDB>().GetName(itemEntity.GetDataBlob<OwnedDB>().
+                    ObjectOwner) ?? "Unknown Construct Type";
             }
         }
 

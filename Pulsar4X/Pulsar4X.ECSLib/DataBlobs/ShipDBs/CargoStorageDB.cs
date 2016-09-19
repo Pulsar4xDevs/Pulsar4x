@@ -11,15 +11,15 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Contains info on a ships cargo capicity.
     /// </summary>
-    public class CargoStorageDB : BaseDataBlob, INotifyCollectionChanged
+    public class CargoStorageDB : BaseDataBlob
     {
         [JsonProperty]
-        public Dictionary<Guid, long> CargoCapicity { get; private set; } = new Dictionary<Guid, long>();
+        public ReadOnlyObsDict<Guid, long> CargoCapicity { get; private set; } = new ReadOnlyObsDict<Guid, long>();
 
-        [JsonProperty]
+        //[JsonProperty]
         public Dictionary<Guid, Dictionary<Entity, List<Entity>>> StoredEntities { get; private set; } = new Dictionary<Guid, Dictionary<Entity, List<Entity>>>();
-        [JsonProperty]
-        public Dictionary<Guid, Dictionary<Guid, long>> MinsAndMatsByCargoType { get; private set;} = new Dictionary<Guid, Dictionary<Guid, long>>();
+        //[JsonProperty]
+        public ReadOnlyObsDict<Guid, ReadOnlyObsDict<ICargoable, long>> MinsAndMatsByCargoType { get; private set;} = new ReadOnlyObsDict<Guid, ReadOnlyObsDict<ICargoable, long>>();
 
         [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
         internal Dictionary<Guid, Guid> ItemToTypeMap;
@@ -27,11 +27,6 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
         private StaticDataStore _staticData;
         
-        /// <summary>
-        /// should ONLY be subscribed to by viewmodels, 
-        /// is normaly invoked via the StorageSpaceProcesor(which will correctly marshal the event to the ui thread)
-        /// </summary>
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
@@ -52,21 +47,13 @@ namespace Pulsar4X.ECSLib
 
         public CargoStorageDB(CargoStorageDB cargoDB)
         {
-            CargoCapicity = new Dictionary<Guid, long>(cargoDB.CargoCapicity);
-            MinsAndMatsByCargoType = new Dictionary<Guid, Dictionary<Guid, long>>(cargoDB.MinsAndMatsByCargoType);
+            CargoCapicity = new ReadOnlyObsDict<Guid, long>(cargoDB.CargoCapicity);
+            MinsAndMatsByCargoType = new ReadOnlyObsDict<Guid, ReadOnlyObsDict<ICargoable, long>>(cargoDB.MinsAndMatsByCargoType);
             StoredEntities = new Dictionary<Guid, Dictionary<Entity, List<Entity>>>(cargoDB.StoredEntities);
             ItemToTypeMap = cargoDB.ItemToTypeMap; //note that this is not 'new', the dictionary referenced here is static/global and should be the same dictionary throughout the game.
         }
 
-        /// <summary>
-        /// invokes CollectionChange
-        /// </summary>
-        /// <param name="state">this should be a PostStateForCollectionChange object</param>
-        internal void InvokeCollectionChange(object state)
-        {
-            PostStateForCollectionChange statec = (PostStateForCollectionChange)state;
-            CollectionChanged?.Invoke(statec.sender, statec.e);
-        }
+
 
         /// <summary>
         /// gives the cargoType of a given itemID
@@ -87,11 +74,6 @@ namespace Pulsar4X.ECSLib
         {
             return new CargoStorageDB(this);
         }
-
-    }
-
-    public interface INotifyCargoChanged
-    {
 
     }
 }

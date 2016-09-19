@@ -207,6 +207,17 @@ namespace Pulsar4X.ECSLib
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
         }
 
+
+        public ICargoable GetICargoable(Guid ID)
+        {
+            if (Minerals.ContainsKey(ID))
+                return Minerals[ID];
+            if (ProcessedMaterials.ContainsKey(ID))
+                return ProcessedMaterials[ID];
+            else
+                return null;
+        }
+
         #endregion
 
         #region Private functions

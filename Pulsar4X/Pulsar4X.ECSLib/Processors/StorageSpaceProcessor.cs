@@ -18,12 +18,13 @@ namespace Pulsar4X.ECSLib
         public static long GetAmountOf(CargoStorageDB fromCargo, Guid itemID)
         {
             Guid cargoTypeID = fromCargo.ItemToTypeMap[itemID];
+            ICargoable cargo = fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(itemID);
             long returnValue = 0;
             if (fromCargo.MinsAndMatsByCargoType.ContainsKey(cargoTypeID))
             {
-                if (fromCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(itemID))
+                if (fromCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(cargo))
                 {
-                    returnValue = fromCargo.MinsAndMatsByCargoType[cargoTypeID][itemID];
+                    returnValue = fromCargo.MinsAndMatsByCargoType[cargoTypeID][cargo];
                 }
             }
             return returnValue;
@@ -52,11 +53,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="typeID">cargo type guid</param>
         /// <returns>new dictionary of resources or an empty dictionary</returns>
-        public static Dictionary<Guid, long> GetResourcesOfCargoType(CargoStorageDB fromCargo, Guid typeID)
+        public static Dictionary<ICargoable, long> GetResourcesOfCargoType(CargoStorageDB fromCargo, Guid typeID)
         {
             if (fromCargo.MinsAndMatsByCargoType.ContainsKey(typeID))
-                return new Dictionary<Guid, long>(fromCargo.MinsAndMatsByCargoType[typeID]);
-            return new Dictionary<Guid, long>();
+                return new Dictionary<ICargoable, long>(fromCargo.MinsAndMatsByCargoType[typeID]);
+            return new Dictionary<ICargoable, long>();
         }
 
         /// <summary>
@@ -69,18 +70,14 @@ namespace Pulsar4X.ECSLib
             Guid cargoTypeID = toCargo.ItemToTypeMap[item.ID];
             if (!toCargo.MinsAndMatsByCargoType.ContainsKey(cargoTypeID))
             {
-                toCargo.MinsAndMatsByCargoType.Add(cargoTypeID, new Dictionary<Guid, long>()); 
-                MarshalAdd(toCargo, toCargo.MinsAndMatsByCargoType, item);
-                
+                toCargo.MinsAndMatsByCargoType.AddNotify(cargoTypeID, new ReadOnlyObsDict<ICargoable, long>());             
             }
-            if (!toCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(item.ID))
+            if (!toCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(item))
             {
-                toCargo.MinsAndMatsByCargoType[cargoTypeID].Add(item.ID, value);
-                MarshalAdd(toCargo, toCargo.MinsAndMatsByCargoType[cargoTypeID], item);                           
-                               
+                toCargo.MinsAndMatsByCargoType[cargoTypeID].AddNotify(item, value);                                                        
             }
             else
-                toCargo.MinsAndMatsByCargoType[cargoTypeID][item.ID] += value;
+                toCargo.MinsAndMatsByCargoType[cargoTypeID][item] += value;
         }
 
         internal static void AddItemToCargo(CargoStorageDB toCargo, Guid itemID, long amount)
@@ -132,25 +129,26 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Will remove the item from the dictionary if subtracting the value causes the dictionary value to be 0.
         /// </summary>
-        /// <param name="item">the guid of the item to subtract</param>
+        /// <param name="itemID">the guid of the item to subtract</param>
         /// <param name="value">the amount of the item to subtract</param>
         /// <returns>the amount succesfully taken from the dictionary(will not remove more than what the dictionary contains)</returns>
-        internal static long SubtractValue(CargoStorageDB fromCargo, Guid item, long value)
+        internal static long SubtractValue(CargoStorageDB fromCargo, Guid itemID, long value)
         {
-            Guid cargoTypeID = fromCargo.ItemToTypeMap[item];
+            Guid cargoTypeID = fromCargo.ItemToTypeMap[itemID];
+            ICargoable cargoItem = fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(itemID);
             long returnValue = 0;
             if (fromCargo.MinsAndMatsByCargoType.ContainsKey(cargoTypeID))
-                if (fromCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(item))
+                if (fromCargo.MinsAndMatsByCargoType[cargoTypeID].ContainsKey(cargoItem))
                 {
-                    if (fromCargo.MinsAndMatsByCargoType[cargoTypeID][item] >= value)
+                    if (fromCargo.MinsAndMatsByCargoType[cargoTypeID][cargoItem] >= value)
                     {
-                        fromCargo.MinsAndMatsByCargoType[cargoTypeID][item] -= value;
+                        fromCargo.MinsAndMatsByCargoType[cargoTypeID][cargoItem] -= value;
                         returnValue = value;
                     }
                     else
                     {
-                        returnValue = fromCargo.MinsAndMatsByCargoType[cargoTypeID][item];
-                        fromCargo.MinsAndMatsByCargoType[cargoTypeID].Remove(item);
+                        returnValue = fromCargo.MinsAndMatsByCargoType[cargoTypeID][cargoItem];
+                        fromCargo.MinsAndMatsByCargoType[cargoTypeID].Remove(cargoItem);
                     }
                 }
             return returnValue;
@@ -248,7 +246,7 @@ namespace Pulsar4X.ECSLib
         }
 
         public static long NetWeight(CargoStorageDB cargo, Guid typeID)
-        {
+        {            
             long net = 0;
             if (cargo.MinsAndMatsByCargoType.ContainsKey(typeID))
                 net = StoredWeight(cargo.MinsAndMatsByCargoType, typeID);
@@ -257,7 +255,7 @@ namespace Pulsar4X.ECSLib
             return net;
         }
 
-        private static long StoredWeight(Dictionary<Guid, Dictionary<Guid, long>> dict, Guid TypeID)
+        private static long StoredWeight(ReadOnlyObsDict<Guid, ReadOnlyObsDict<ICargoable, long>> dict, Guid TypeID)
         {
             long storedWeight = 0;
             foreach (var amount in dict[TypeID].Values)
@@ -299,7 +297,7 @@ namespace Pulsar4X.ECSLib
         internal static void ReCalcCapacity(Entity parentEntity)
         {
             CargoStorageDB storageDB = parentEntity.GetDataBlob<CargoStorageDB>();
-            Dictionary<Guid, long> totalSpace = storageDB.CargoCapicity;
+            ReadOnlyObsDict<Guid, long> totalSpace = storageDB.CargoCapicity;
 
             List<KeyValuePair<Entity, List<Entity>>> StorageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
             foreach (var kvp in StorageComponents)
@@ -315,36 +313,18 @@ namespace Pulsar4X.ECSLib
                 }
                 if (!totalSpace.ContainsKey(cargoTypeID))
                 {
-                    totalSpace.Add(cargoTypeID, alowableSpace);
-                    MarshalAdd(storageDB, totalSpace, cargoTypeID);                                        
+                    totalSpace.AddNotify(cargoTypeID, alowableSpace);
+                    if (!storageDB.MinsAndMatsByCargoType.ContainsKey(cargoTypeID))
+                        storageDB.MinsAndMatsByCargoType.AddNotify(cargoTypeID, new ReadOnlyObsDict<ICargoable, long>());                                              
                 }
                 else if (totalSpace[cargoTypeID] != alowableSpace)
                 {
                     totalSpace[cargoTypeID] = alowableSpace;
                     if (RemainingCapacity(storageDB, cargoTypeID) < 0)
-                    { }
+                    { //todo: we've lost cargo capacity, and we're carrying more than we have storage for, drop random cargo
+                    }
                 }
             }
         }
-
-        /// <summary>
-        /// checks if the game has SyncContext, and makes a call to CargoStorageDB.InvokeCollectionChange *on the UI thread*
-        /// </summary>
-        /// <param name="storageDB"></param>
-        /// <param name="sender">this is the collection that is changing</param>
-        /// <param name="item">this is the item that has been added</param>
-        private static void MarshalAdd(CargoStorageDB storageDB, object sender, object item)
-        {
-            if (storageDB.OwningEntity.Manager.Game.SyncContext != null)
-            {
-                var state = new PostStateForCollectionChange
-                {
-                    sender = sender,
-                    e = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item)
-                };
-                storageDB.OwningEntity.Manager.Game.SyncContext.Post(storageDB.InvokeCollectionChange, state);
-            }
-        }
-
     }
 }

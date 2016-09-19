@@ -1,54 +1,155 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
+using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoDictionary : Dictionary<Guid, int>
+    
+    public class ReadOnlyObsDict<TKey, TValue> : IDictionary<TKey, TValue> , INotifyCollectionChanged , ICloneable
     {
+        [JsonProperty]
+        IDictionary<TKey, TValue> _dict;
+        private readonly SynchronizationContext _context;
 
-        /// <summary>
-        /// Adds a value to the dictionary, if the item does not exsist, it will get added to the dictionary.
-        /// </summary>
-        /// <param name="item">the guid of the item to add</param>
-        /// <param name="value">the amount of the item to add</param>
-        internal void AddValue(Guid item, int value)
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        public ReadOnlyObsDict()
         {
-            if (!base.ContainsKey(item))
-                base.Add(item, value);
-            else
-                base[item] += value;
+            _context = AsyncOperationManager.SynchronizationContext;
+            _dict = new Dictionary<TKey, TValue>();
         }
 
-        /// <summary>
-        /// Will remove the item from the dictionary if subtracting the value causes the dictionary value to be 0.
-        /// </summary>
-        /// <param name="item">the guid of the item to subtract</param>
-        /// <param name="value">the amount of the item to subtract</param>
-        /// <returns>the amount succesfully taken from the dictionary(will not remove more than what the dictionary contains)</returns>
-        internal int SubtractValue(Guid item, int value)
+        public ReadOnlyObsDict(IDictionary<TKey, TValue> backingDict)
         {
-            int returnValue = 0;
-            if (base.ContainsKey(item))
+            _context = AsyncOperationManager.SynchronizationContext;
+            _dict = backingDict;
+        }
+
+
+        /// <summary>
+        /// DONOTUSE use AddNotify instead (internal)
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public void Add(TKey key, TValue value)
+        {
+            throw new InvalidOperationException();
+        }
+
+        internal void AddNotify(TKey key, TValue value)
+        {
+            if (_dict is ReadOnlyObsDict<TKey, TValue>)
             {
-                if (base[item] >= value)
-                {
-                    base[item] -= value;
-                    returnValue = value;
-                }
-                else
-                {
-                    returnValue = base[item];
-                    base.Remove(item);
-                }
+                ReadOnlyObsDict<TKey, TValue> dict = (ReadOnlyObsDict<TKey, TValue>)_dict;
+                dict.AddNotify(key, value);
             }
-            return returnValue; 
+            else
+                _dict.Add(key, value);
+            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey,TValue>(key, value));          
+            if (CollectionChanged != null && _context != null)
+                _context.Post(s => CollectionChanged(this, args), null);
         }
 
+        public bool ContainsKey(TKey key)
+        {
+            return _dict.ContainsKey(key);
+        }
 
+        public ICollection<TKey> Keys
+        {
+            get { return _dict.Keys; }
+        }
 
+        /// <summary>
+        /// Do Not Use (use RemoveNotify if internal)
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool Remove(TKey key)
+        {
+            throw new InvalidOperationException();
+        }
+        internal void RemoveNotify(TKey key)
+        {
+            _dict.Remove(key);
+            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, key);
+            if (CollectionChanged != null && _context != null)
+                _context.Post(s => CollectionChanged(this, args), null);
+        }
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            return _dict.TryGetValue(key, out value);
+        }
 
+        public ICollection<TValue> Values
+        {
+            get { return _dict.Values; }
+        }
+
+        public TValue this[TKey key]
+        {
+            get { return _dict[key]; }
+            set { _dict[key] = value; }
+        }
+
+        public void Add(KeyValuePair<TKey, TValue> item)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public void Clear()
+        {
+            throw new InvalidOperationException();
+        }
+
+        public bool Contains(KeyValuePair<TKey, TValue> item)
+        {
+            return _dict.Contains(item);
+        }
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+        {
+            _dict.CopyTo(array, arrayIndex);
+        }
+
+        public int Count
+        {
+            get { return _dict.Count; }
+        }
+
+        public bool IsReadOnly
+        {
+            get { return true; }
+        }
+
+        public bool Remove(KeyValuePair<TKey, TValue> item)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        {
+            return _dict.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator
+               System.Collections.IEnumerable.GetEnumerator()
+        {
+            return ((System.Collections.IEnumerable)_dict).GetEnumerator();
+        }
+
+        public object Clone()
+        {    
+            return new ReadOnlyObsDict<TKey, TValue>(_dict);
+        }
     }
+
 }
