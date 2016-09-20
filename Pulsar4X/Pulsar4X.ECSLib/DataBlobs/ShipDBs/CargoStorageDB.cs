@@ -14,12 +14,12 @@ namespace Pulsar4X.ECSLib
     public class CargoStorageDB : BaseDataBlob
     {
         [JsonProperty]
-        public ReadOnlyObsDict<Guid, long> CargoCapicity { get; private set; } = new ReadOnlyObsDict<Guid, long>();
+        public PrIwObsDict<Guid, long> CargoCapicity { get; private set; } = new PrIwObsDict<Guid, long>();
 
         //[JsonProperty]
         public Dictionary<Guid, Dictionary<Entity, List<Entity>>> StoredEntities { get; private set; } = new Dictionary<Guid, Dictionary<Entity, List<Entity>>>();
         //[JsonProperty]
-        public ReadOnlyObsDict<Guid, ReadOnlyObsDict<ICargoable, long>> MinsAndMatsByCargoType { get; private set;} = new ReadOnlyObsDict<Guid, ReadOnlyObsDict<ICargoable, long>>();
+        public PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>> MinsAndMatsByCargoType { get; private set;} = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>();
 
         [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
         internal Dictionary<Guid, Guid> ItemToTypeMap;
@@ -47,8 +47,8 @@ namespace Pulsar4X.ECSLib
 
         public CargoStorageDB(CargoStorageDB cargoDB)
         {
-            CargoCapicity = new ReadOnlyObsDict<Guid, long>(cargoDB.CargoCapicity);
-            MinsAndMatsByCargoType = new ReadOnlyObsDict<Guid, ReadOnlyObsDict<ICargoable, long>>(cargoDB.MinsAndMatsByCargoType);
+            CargoCapicity = new PrIwObsDict<Guid, long>(cargoDB.CargoCapicity);
+            MinsAndMatsByCargoType = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>(cargoDB.MinsAndMatsByCargoType);
             StoredEntities = new Dictionary<Guid, Dictionary<Entity, List<Entity>>>(cargoDB.StoredEntities);
             ItemToTypeMap = cargoDB.ItemToTypeMap; //note that this is not 'new', the dictionary referenced here is static/global and should be the same dictionary throughout the game.
         }

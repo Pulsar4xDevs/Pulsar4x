@@ -12,8 +12,16 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-
-    public class ROODict<TKey, TValue> : INotifyCollectionChanged, ICloneable
+    /// <summary>
+    /// Public Read, Interal Write Observible Dictionary
+    /// a custom dictionary which is :
+    /// Publicly Observible, with marshaled events.
+    /// Public ReadOnly.
+    /// Internal Writeable.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    public class PrIwObsDict<TKey, TValue> : INotifyCollectionChanged, ICloneable
     {
         [JsonProperty]
         private Dictionary<TKey, TValue> _dict;
@@ -23,16 +31,22 @@ namespace Pulsar4X.ECSLib
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
 
-        public ROODict()
+        public PrIwObsDict()
         {
             _context = AsyncOperationManager.SynchronizationContext;
             _dict = new Dictionary<TKey, TValue>();
         }
 
-        public ROODict(Dictionary<TKey, TValue> backingDict)
+        public PrIwObsDict(Dictionary<TKey, TValue> backingDict)
         {
             _context = AsyncOperationManager.SynchronizationContext;
             _dict = backingDict;
+        }
+
+        public PrIwObsDict(PrIwObsDict<TKey, TValue> backingDict)
+        {
+            _context = AsyncOperationManager.SynchronizationContext;
+            _dict = backingDict._dict;
         }
 
         #region Internal Modifications
@@ -61,6 +75,11 @@ namespace Pulsar4X.ECSLib
                 _context.Post(s => CollectionChanged(this, args), null);
         }
 
+        internal Dictionary<TKey, TValue> ToDictionary()
+        {
+            return _dict;
+        }
+
 
         #endregion
 
@@ -87,7 +106,7 @@ namespace Pulsar4X.ECSLib
         public TValue this[TKey key]
         {
             get { return _dict[key]; }
-            set { _dict[key] = value; }
+            internal set { _dict[key] = value; }
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
@@ -100,11 +119,6 @@ namespace Pulsar4X.ECSLib
             get { return _dict.Count; }
         }
 
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
-
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             return _dict.GetEnumerator();
@@ -112,160 +126,8 @@ namespace Pulsar4X.ECSLib
 
         public object Clone()
         {
-            return new ReadOnlyObsDict<TKey, TValue>(_dict);
+            return new PrIwObsDict<TKey, TValue>(_dict);
         }
 
     }
-
-
-
-
-    /// <summary>
-    /// Attempt at writing a custom dictionary type collection
-    /// that is public readonly, but internal modifications will fire a marshaled INotifyCollectonChanged event.
-    /// Problems:
-    /// Add throws an exception, because I can't have an internal Add (since it's requred for IDictionary<> Implimentation
-    /// Needs to implement IDictionary instead of? or as well as? IDictionary<> for serialsation.
-    /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    public class ReadOnlyObsDict<TKey, TValue> : IDictionary<TKey, TValue> , INotifyCollectionChanged , ICloneable
-    {
-        [JsonProperty]
-        IDictionary<TKey, TValue> _dict;
-        private readonly SynchronizationContext _context;
-
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-
-        public ReadOnlyObsDict()
-        {
-            _context = AsyncOperationManager.SynchronizationContext;
-            _dict = new Dictionary<TKey, TValue>();
-        }
-
-        public ReadOnlyObsDict(IDictionary<TKey, TValue> backingDict)
-        {
-            _context = AsyncOperationManager.SynchronizationContext;
-            _dict = backingDict;
-        }
-
-
-        /// <summary>
-        /// DONOTUSE use AddNotify instead (internal)
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void Add(TKey key, TValue value)
-        {
-            throw new InvalidOperationException();
-        }
-
-        internal void AddNotify(TKey key, TValue value)
-        {
-            if (_dict is ReadOnlyObsDict<TKey, TValue>)
-            {
-                ReadOnlyObsDict<TKey, TValue> dict = (ReadOnlyObsDict<TKey, TValue>)_dict;
-                dict.AddNotify(key, value);
-            }
-            else
-                _dict.Add(key, value);
-            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey,TValue>(key, value));          
-            if (CollectionChanged != null && _context != null)
-                _context.Post(s => CollectionChanged(this, args), null);
-        }
-
-        public bool ContainsKey(TKey key)
-        {
-            return _dict.ContainsKey(key);
-        }
-
-        public ICollection<TKey> Keys
-        {
-            get { return _dict.Keys; }
-        }
-
-        /// <summary>
-        /// Do Not Use (use RemoveNotify if internal)
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public bool Remove(TKey key)
-        {
-            throw new InvalidOperationException();
-        }
-        internal void RemoveNotify(TKey key)
-        {
-            _dict.Remove(key);
-            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, key);
-            if (CollectionChanged != null && _context != null)
-                _context.Post(s => CollectionChanged(this, args), null);
-        }
-        public bool TryGetValue(TKey key, out TValue value)
-        {
-            return _dict.TryGetValue(key, out value);
-        }
-
-        public ICollection<TValue> Values
-        {
-            get { return _dict.Values; }
-        }
-
-        public TValue this[TKey key]
-        {
-            get { return _dict[key]; }
-            set { _dict[key] = value; }
-        }
-
-        public void Add(KeyValuePair<TKey, TValue> item)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public void Clear()
-        {
-            throw new InvalidOperationException();
-        }
-
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            return _dict.Contains(item);
-        }
-
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-        {
-            _dict.CopyTo(array, arrayIndex);
-        }
-
-        public int Count
-        {
-            get { return _dict.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
-
-        public bool Remove(KeyValuePair<TKey, TValue> item)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
-        {
-            return _dict.GetEnumerator();
-        }
-
-        System.Collections.IEnumerator
-               System.Collections.IEnumerable.GetEnumerator()
-        {
-            return ((System.Collections.IEnumerable)_dict).GetEnumerator();
-        }
-
-        public object Clone()
-        {    
-            return new ReadOnlyObsDict<TKey, TValue>(_dict);
-        }
-    }
-
 }
