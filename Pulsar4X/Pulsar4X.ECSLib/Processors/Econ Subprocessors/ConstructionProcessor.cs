@@ -10,9 +10,6 @@ namespace Pulsar4X.ECSLib
         internal static void ConstructStuff(Entity colony, Game game)
         {
             CargoStorageDB stockpile = colony.GetDataBlob<CargoStorageDB>();
-            //Dictionary<Guid, int> mineralStockpile = colony.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            //Dictionary<Guid, int> materialStockpile = colony.GetDataBlob<ColonyInfoDB>().RefinedStockpile;
-            //Dictionary<Guid, int> componentStockpile = colony.GetDataBlob<ColonyInfoDB>().ComponentStockpile;
 
             var colonyConstruction = colony.GetDataBlob<ColonyConstructionDB>();
             var factionInfo = colony.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
@@ -57,13 +54,13 @@ namespace Pulsar4X.ECSLib
 
                     if (batchJob.PointsLeft == 0)
                     {
-                        BatchJobItemComplete(colony, batchJob,designInfo);
+                        BatchJobItemComplete(colony, stockpile, batchJob,designInfo);
                     }
                 }
             }
         }
 
-        private static void BatchJobItemComplete(Entity colonyEntity, ConstructionJob batchJob, ComponentInfoDB designInfo)
+        private static void BatchJobItemComplete(Entity colonyEntity, CargoStorageDB storage, ConstructionJob batchJob, ComponentInfoDB designInfo)
         {
             var colonyConstruction = colonyEntity.GetDataBlob<ColonyConstructionDB>();
             batchJob.NumberCompleted++;
@@ -71,16 +68,22 @@ namespace Pulsar4X.ECSLib
             batchJob.MineralsRequired = designInfo.MinerialCosts;
             batchJob.MineralsRequired = designInfo.MaterialCosts;
             batchJob.MineralsRequired = designInfo.ComponentCosts;
-            if (batchJob.ConstructionType == ConstructionType.Installations)
+            var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
+            Entity designEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
+            Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designEntity, colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner);
+            if (batchJob.InstallOn != null)
             {
-                var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
-                Entity facilityDesignEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
-                //var colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
-                //colonyInfo.Installations.SafeValueAdd(facilityDesignEntity,1);
-                EntityManipulation.AddComponentToEntity(colonyEntity, facilityDesignEntity);
-                ReCalcProcessor.ReCalcAbilities(colonyEntity);
-            }
+                if (batchJob.InstallOn == colonyEntity || StorageSpaceProcessor.HasEntity(storage, colonyEntity))
+                {
+                    EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
+                    ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
+                }
 
+            }
+            else
+            {
+                StorageSpaceProcessor.AddItemToCargo(storage, specificComponent);
+            }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {

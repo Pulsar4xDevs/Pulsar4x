@@ -58,14 +58,26 @@ namespace Pulsar4X.ECSLib
                 _context.Post(s => CollectionChanged(this, args), null);
         }
 
-        internal void Remove(TKey key)
-        {
-            _dict.Remove(key);
-            NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, key);
-            if (CollectionChanged != null && _context != null)
-                _context.Post(s => CollectionChanged(this, args), null);
-        }
+        //internal void Remove(TKey key)
+        //{
+        //    _dict.Remove(key);
+        //    NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, key);
+        //    if (CollectionChanged != null && _context != null)
+        //        _context.Post(s => CollectionChanged(this, args), null);
+        //}
 
+        internal bool Remove(TKey key)
+        {
+            bool isSuccess = false;
+            if(_dict.Remove(key))
+            {
+                isSuccess = true;
+                NotifyCollectionChangedEventArgs args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, key);
+                if (CollectionChanged != null && _context != null)
+                    _context.Post(s => CollectionChanged(this, args), null);
+            }
+            return isSuccess;
+        }
 
         internal void Clear()
         {

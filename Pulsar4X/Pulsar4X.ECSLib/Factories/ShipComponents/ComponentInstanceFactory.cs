@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
             OwnedDB owned = new OwnedDB(faction);
             blobs.Add(info);
             blobs.Add(owned);
-
+            blobs.Add(new DesignInfoDB(design));
             // Added because each component instance needs its own copy of this datablob
 
             if (design.HasDataBlob<BeamFireControlAtbDB>())

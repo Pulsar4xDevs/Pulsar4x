@@ -48,6 +48,28 @@ namespace Pulsar4X.ECSLib
             return entityList;
         }
 
+        public static bool HasEntity(CargoStorageDB cargo, Entity entity)
+        {
+            var designEntity = entity.GetDataBlob<DesignInfoDB>();
+            var cargoableDB = entity.GetDataBlob<CargoAbleTypeDB>();
+            if (cargo.StoredEntities.ContainsKey(cargoableDB.CargoTypeID))
+                if (cargo.StoredEntities[cargoableDB.CargoTypeID].ContainsKey(designEntity.DesignEntity))
+                    if (cargo.StoredEntities[cargoableDB.CargoTypeID][designEntity.DesignEntity].Contains(entity))
+                        return true;
+            return false;
+        }
+
+        //public static Entity GetEntity(CargoStorageDB cargo, Entity entity)
+        //{
+        //    var designEntity = entity.GetDataBlob<DesignInfoDB>();
+        //    var cargoableDB = entity.GetDataBlob<CargoAbleTypeDB>();
+        //    if (cargo.StoredEntities.ContainsKey(cargoableDB.CargoTypeID))
+        //        if (cargo.StoredEntities[cargoableDB.CargoTypeID].ContainsKey(designEntity.DesignEntity))
+        //            if (cargo.StoredEntities[cargoableDB.CargoTypeID][designEntity.DesignEntity].Contains(entity))
+        //                return cargo.StoredEntities[cargoableDB.CargoTypeID][designEntity.DesignEntity].Contains(entity);
+        //    return false;
+        //}
+
         /// <summary>
         /// a Dictionary of resources stored of a given cargotype
         /// </summary>
@@ -116,8 +138,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         /// <param name="cargoTypeDB"></param>
         /// <param name=""></param>
-        internal static void AddItemToCargo(CargoStorageDB toCargo, Entity entity, ICargoable cargoTypeDB)
+        internal static void AddItemToCargo(CargoStorageDB toCargo, Entity entity)
         {
+            ICargoable cargoTypeDB = entity.GetDataBlob<CargoAbleTypeDB>();
             float amountWeight = cargoTypeDB.Mass;
             long remainingWeightCapacity = RemainingCapacity(toCargo, cargoTypeDB.CargoTypeID);
             int remainingNumCapacity = (int)(remainingWeightCapacity / amountWeight);
@@ -229,7 +252,7 @@ namespace Pulsar4X.ECSLib
                 new Exception("entityItem does not contain ComponentInstanceInfoDB, it must be an componentInstance type entity");
             Entity design = entityItem.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
             if (!toCargo.StoredEntities.ContainsKey(cargotypedb.CargoTypeID))
-                toCargo.StoredEntities.Add(cargotypedb.CargoTypeID, new Dictionary<Entity, List<Entity>>());
+                toCargo.StoredEntities.Add(cargotypedb.CargoTypeID, new PrIwObsDict<Entity, List<Entity>>());
             if (!toCargo.StoredEntities[cargotypedb.CargoTypeID].ContainsKey(design))
                 toCargo.StoredEntities[cargotypedb.CargoTypeID].Add(design, new List<Entity>());
             toCargo.StoredEntities[cargotypedb.CargoTypeID][design].Add(entityItem);
@@ -265,7 +288,7 @@ namespace Pulsar4X.ECSLib
             return storedWeight;
         }
 
-        private static long StoredWeight(Dictionary<Guid, Dictionary<Entity, List<Entity>>> dict, Guid TypeID)
+        private static long StoredWeight(PrIwObsDict<Guid, PrIwObsDict<Entity, List<Entity>>> dict, Guid TypeID)
         {
             double storedWeight = 0;
             foreach (var itemType in dict[TypeID])

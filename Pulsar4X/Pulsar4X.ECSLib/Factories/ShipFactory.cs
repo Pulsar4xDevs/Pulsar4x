@@ -28,6 +28,8 @@ namespace Pulsar4X.ECSLib
             PositionDB position = new PositionDB(pos, starsys.Guid);
             protoShip.SetDataBlob(position);
 
+            protoShip.SetDataBlob(new DesignInfoDB(classEntity));
+
             Entity shipEntity = new Entity(systemEntityManager, protoShip);
 
             //replace the ships references to the design's specific instances with shiny new specific instances

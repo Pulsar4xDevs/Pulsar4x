@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
     {
         
         public ConstructionType ConstructionType { get; internal set; }
-
+        public Entity InstallOn { get; internal set; }
         public Dictionary<Guid, int> MineralsRequired { get; internal set; }
         public Dictionary<Guid, int> MaterialsRequired { get; internal set; }
         public Dictionary<Guid, int> ComponentsRequired { get; internal set; }

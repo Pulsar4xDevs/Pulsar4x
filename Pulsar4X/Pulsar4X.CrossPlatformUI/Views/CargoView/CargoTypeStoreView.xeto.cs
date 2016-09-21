@@ -54,7 +54,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
                 CargoStorageByTypeVM vm = (CargoStorageByTypeVM)DataContext;
                 _vm = vm;
                 _vm.PropertyChanged += Vm_PropertyChanged;
-                //_vm.TypeStore.CollectionChanged += TypeStore_CollectionChanged;
             }
         }
 

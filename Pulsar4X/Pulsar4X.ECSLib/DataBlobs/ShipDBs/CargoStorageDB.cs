@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         public PrIwObsDict<Guid, long> CargoCapicity { get; private set; } = new PrIwObsDict<Guid, long>();
 
         //[JsonProperty]
-        public Dictionary<Guid, Dictionary<Entity, List<Entity>>> StoredEntities { get; private set; } = new Dictionary<Guid, Dictionary<Entity, List<Entity>>>();
+        public PrIwObsDict<Guid, PrIwObsDict<Entity, List<Entity>>> StoredEntities { get; private set; } = new PrIwObsDict<Guid, PrIwObsDict<Entity, List<Entity>>>();
         //[JsonProperty]
         public PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>> MinsAndMatsByCargoType { get; private set;} = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>();
 
@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
         {
             CargoCapicity = new PrIwObsDict<Guid, long>(cargoDB.CargoCapicity);
             MinsAndMatsByCargoType = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>(cargoDB.MinsAndMatsByCargoType);
-            StoredEntities = new Dictionary<Guid, Dictionary<Entity, List<Entity>>>(cargoDB.StoredEntities);
+            StoredEntities = new PrIwObsDict<Guid, PrIwObsDict<Entity, List<Entity>>>(cargoDB.StoredEntities);
             ItemToTypeMap = cargoDB.ItemToTypeMap; //note that this is not 'new', the dictionary referenced here is static/global and should be the same dictionary throughout the game.
         }
 
