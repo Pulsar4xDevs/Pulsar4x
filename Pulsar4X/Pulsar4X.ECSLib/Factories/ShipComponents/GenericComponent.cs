@@ -154,6 +154,7 @@ namespace Pulsar4X.ECSLib
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);
             component.SetDataBlob(cargoType);
+            component.SetDataBlob(MassVolumeDB.NewFromMassAndRadius(componentDesign.SizeValue, componentDesign.SizeValue / 2));
             foreach (var designAbility in componentDesign.ComponentDesignAbilities)
             {
                 if (designAbility.DataBlobType != null)

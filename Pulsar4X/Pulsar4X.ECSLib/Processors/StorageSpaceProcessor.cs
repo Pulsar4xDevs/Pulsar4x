@@ -140,7 +140,8 @@ namespace Pulsar4X.ECSLib
         /// <param name=""></param>
         internal static void AddItemToCargo(CargoStorageDB toCargo, Entity entity)
         {
-            ICargoable cargoTypeDB = entity.GetDataBlob<CargoAbleTypeDB>();
+            Entity designEntity = entity.GetDataBlob<DesignInfoDB>().DesignEntity;
+            ICargoable cargoTypeDB = designEntity.GetDataBlob<CargoAbleTypeDB>();
             float amountWeight = cargoTypeDB.Mass;
             long remainingWeightCapacity = RemainingCapacity(toCargo, cargoTypeDB.CargoTypeID);
             int remainingNumCapacity = (int)(remainingWeightCapacity / amountWeight);
