@@ -47,6 +47,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public ComponentMountType ComponentMountType { get; internal set; }
 
+        public ConstructionType ConstructionType { get; internal set; }
 
         public ComponentInfoDB()
         {

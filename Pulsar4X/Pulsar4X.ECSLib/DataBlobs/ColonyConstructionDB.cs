@@ -45,15 +45,15 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, int> MaterialsRequired { get; internal set; }
         public Dictionary<Guid, int> ComponentsRequired { get; internal set; }
 
-        public ConstructionJob(Guid designGuid, ushort numberOrderd, int jobPoints, bool auto, 
+        public ConstructionJob(Guid designGuid, ConstructionType constructionType, ushort numberOrderd, int jobPoints, bool auto, 
             Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
             base(designGuid, numberOrderd, jobPoints, auto)
         {
+            ConstructionType = constructionType;
             MineralsRequired = new Dictionary<Guid, int>(mineralCost);
             MaterialsRequired = new Dictionary<Guid, int>(matCost);
             ComponentsRequired = new Dictionary<Guid, int>(componentCost);
         }
-
     }
 
     public class  ColonyConstructionDB : BaseDataBlob

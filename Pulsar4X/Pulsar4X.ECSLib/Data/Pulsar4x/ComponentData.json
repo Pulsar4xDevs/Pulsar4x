@@ -24,6 +24,7 @@
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
           "ComponentAbilitySDs": [
             {
               "Name": "Engine Size",
@@ -147,6 +148,8 @@
           "CreditCostFormula": "[Size]",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
           "ComponentAbilitySDs": [
             {
               "Name": "Range",
@@ -205,6 +208,8 @@
           "CreditCostFormula": "[Size]",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
           "ComponentAbilitySDs": [
             {
               "Name": "Range",

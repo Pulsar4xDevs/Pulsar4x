@@ -23,12 +23,13 @@ namespace Pulsar4X.ViewModel
 
         public override void OnNewBatchJob()
         {
-            int buildpointCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().BuildPointCost;
-            Dictionary<Guid, int> mineralCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().MinerialCosts;
-            Dictionary<Guid, int> materialCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().MaterialCosts;
-            Dictionary<Guid, int> componentCost = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>().ComponentCosts;
+            ComponentInfoDB componentInfo = FactionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>();
+            int buildpointCost = componentInfo.BuildPointCost;
+            Dictionary<Guid, int> mineralCost = componentInfo.MinerialCosts;
+            Dictionary<Guid, int> materialCost = componentInfo.MaterialCosts;
+            Dictionary<Guid, int> componentCost = componentInfo.ComponentCosts;
 
-            ConstructionJob newjob = new ConstructionJob(NewJobSelectedItem, NewJobBatchCount, buildpointCost, NewJobRepeat,
+            ConstructionJob newjob = new ConstructionJob(NewJobSelectedItem, componentInfo.ConstructionType, NewJobBatchCount, buildpointCost, NewJobRepeat,
                 mineralCost, materialCost, componentCost);
 
             ConstructionProcessor.AddJob(_colonyEntity_, newjob);

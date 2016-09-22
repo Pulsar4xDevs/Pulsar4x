@@ -144,7 +144,7 @@ namespace Pulsar4X.Tests
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(factory.ID, factory);
-            StaticDataManager.ExportStaticData(componentsDict, "CargoComponentTest.json");
+            StaticDataManager.ExportStaticData(componentsDict, "FactoryComponentTest.json");
 
         }
 
@@ -448,6 +448,8 @@ namespace Pulsar4X.Tests
 
             component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
 
+            component.ConstructionType = ConstructionType.Installations;
+
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
 
@@ -528,7 +530,7 @@ namespace Pulsar4X.Tests
             component.CreditCostFormula = "120";
 
             component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
-
+            component.ConstructionType = ConstructionType.Installations | ConstructionType.ShipComponents;
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
             ComponentTemplateAbilitySD genralCargoAbility = new ComponentTemplateAbilitySD();

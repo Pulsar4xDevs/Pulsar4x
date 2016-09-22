@@ -28,6 +28,7 @@
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
           "ComponentAbilitySDs": [
             {
               "Name": "MiningAmount",
@@ -113,6 +114,7 @@
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
           "ComponentAbilitySDs": [
             {
               "Name": "RP Amount Per EconTick",
@@ -150,6 +152,7 @@
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
           "ComponentAbilitySDs": [
             {
               "Name": "Refinary Points",
@@ -206,6 +209,7 @@
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
           "ComponentAbilitySDs": [
             {
               "Name": "Instalation Construction Points",
@@ -293,6 +297,7 @@
           "BuildPointCostFormula": "100",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
           "ComponentAbilitySDs": [
             {
               "Name": "Support Colonists",
@@ -350,6 +355,7 @@
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
           "ComponentAbilitySDs": [
             {
               "Name": "Warehouse Size",
@@ -419,6 +425,7 @@
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
           "ComponentAbilitySDs": [
             {
               "Name": "Tank Size",

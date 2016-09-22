@@ -281,7 +281,7 @@ namespace Pulsar4X.ECSLib
         private static long StoredWeight(PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>> dict, Guid TypeID)
         {
             long storedWeight = 0;
-            foreach (var amount in dict[TypeID].Values)
+            foreach (var amount in dict[TypeID].Values.ToArray())
             {
                 storedWeight += amount;
             }

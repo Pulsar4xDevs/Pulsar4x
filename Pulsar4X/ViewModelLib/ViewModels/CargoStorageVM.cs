@@ -108,7 +108,7 @@ namespace Pulsar4X.ViewModel
 
                 foreach (var item in e.OldItems)
                 {
-                    OnItemRemoved((KeyValuePair<ICargoable, long>)item);
+                    OnItemRemoved((ICargoable)item);
                 }
             }
         }
@@ -122,12 +122,15 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        private void OnItemRemoved(KeyValuePair<ICargoable, long> removedItem)
+        private void OnItemRemoved(ICargoable removedItem)
         { //is there a better way to do this?
             foreach (var item in TypeStore.ToArray())
             {
-                if (item.ItemID == removedItem.Key.ID)
+                if (item.ItemID == removedItem.ID)
+                {
                     TypeStore.Remove(item);
+                    break;
+                }
             }    
         }
 
