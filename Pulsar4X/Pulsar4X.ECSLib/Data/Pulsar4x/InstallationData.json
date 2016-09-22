@@ -112,6 +112,7 @@
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "RP Amount Per EconTick",
@@ -148,6 +149,7 @@
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "Refinary Points",
@@ -203,19 +205,68 @@
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
-              "Name": "Construction Points",
+              "Name": "Instalation Construction Points",
               "Description": "",
-              "GuiHint": "None",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Component Construction Points",
+              "Description": "",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Ship Construction Points",
+              "Description": "",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Fighter Construction Points",
+              "Description": "",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Ordnance Construction Points",
+              "Description": "",
+              "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "100"
             },
             {
               "Name": "Construction Points",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructInstationsAtbDB"
+              "GuidDictionary": {
+                "Entries": [
+                  {
+                    "Key": "Installations",
+                    "Value": "Ability(0)"
+                  },
+                  {
+                    "Key": "ShipComponents",
+                    "Value": "Ability(1)"
+                  },
+                  {
+                    "Key": "Ships",
+                    "Value": "Ability(2)"
+                  },
+                  {
+                    "Key": "Fighters",
+                    "Value": "Ability(3)"
+                  },
+                  {
+                    "Key": "Ordnance",
+                    "Value": "Ability(4)"
+                  }
+                ]
+              },
+              "AbilityFormula": "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.ConstructionType'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructionAtbDB"
             }
           ]
         }
@@ -241,6 +292,7 @@
           "CreditCostFormula": "0",
           "BuildPointCostFormula": "100",
           "MountType": "ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "Support Colonists",
@@ -297,6 +349,7 @@
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Size]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAbilitySDs": [
             {
               "Name": "Warehouse Size",

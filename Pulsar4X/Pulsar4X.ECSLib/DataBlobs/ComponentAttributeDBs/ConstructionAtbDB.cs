@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         public int OrdnanceConstructionPoints => GetConstructionPoints(ConstructionType.Ordnance);
 
         [JsonProperty]
-        internal IDictionary<ConstructionType, int> InternalConstructionPoints { get; set; } = new Dictionary<ConstructionType, int>();
+        internal Dictionary<ConstructionType, int> InternalConstructionPoints { get; set; } = new Dictionary<ConstructionType, int>();
 
         public ConstructionAtbDB(IDictionary<ConstructionType, double> constructionPoints) 
             : this(constructionPoints.ToDictionary(constructionPoint => constructionPoint.Key, constructionPoint => (int)constructionPoint.Value)) { }

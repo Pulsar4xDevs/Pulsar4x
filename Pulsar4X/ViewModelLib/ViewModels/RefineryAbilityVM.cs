@@ -30,9 +30,9 @@ namespace Pulsar4X.ViewModel
         public int JobSelectedIndex { get; set; }
 
 
-        public DictionaryVM<string, Guid> ItemDictionary { get; set; }
+        public DictionaryVM<Guid, string> ItemDictionary { get; set; }
         public int NewJobSelectedIndex { get; set; }
-        public Guid NewJobSelectedItem { get { return ItemDictionary.GetValue(NewJobSelectedIndex); } }// set; }
+        public Guid NewJobSelectedItem { get { return ItemDictionary.GetKey(NewJobSelectedIndex); } }// set; }
         public ushort NewJobBatchCount { get; set; }
         public bool NewJobRepeat { get; set; }
 
@@ -121,10 +121,10 @@ namespace Pulsar4X.ViewModel
     {
         public RefineryAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {
-            ItemDictionary = new DictionaryVM<string, Guid>(DisplayMode.Key);
+            ItemDictionary = new DictionaryVM<Guid, string>(DisplayMode.Value);
             foreach (var kvp in _staticData_.ProcessedMaterials)
             {
-                ItemDictionary.Add(kvp.Value.Name, kvp.Key);
+                ItemDictionary.Add(kvp.Key, kvp.Value.Name);
             }
             //NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
             NewJobSelectedIndex = 0;

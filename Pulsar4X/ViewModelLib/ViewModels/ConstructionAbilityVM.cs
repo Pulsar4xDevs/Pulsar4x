@@ -10,12 +10,12 @@ namespace Pulsar4X.ViewModel
 
         public ConstructionAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {
-            ItemDictionary = new DictionaryVM<string, Guid>(DisplayMode.Key);
+            ItemDictionary = new DictionaryVM<Guid, string>(DisplayMode.Value);
             foreach (var kvp in FactionInfo.ComponentDesigns)
             {
-                //ItemDictionary.Add(kvp.Value.GetDataBlob<NameDB>().DefaultName, kvp.Key);
+                ItemDictionary.Add(kvp.Key, kvp.Value.GetDataBlob<NameDB>().DefaultName);
             }
-            //NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
+            //NewJobSelectedItem = ItemDictionary.SelectedKey;
             NewJobSelectedIndex = 0;
             NewJobBatchCount = 1;
             NewJobRepeat = false;
