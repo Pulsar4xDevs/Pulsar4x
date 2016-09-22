@@ -54,10 +54,12 @@ namespace Pulsar4X.ECSLib
 
                 ComponentInstancesDB instancesDict = parentEntity.GetDataBlob<ComponentInstancesDB>();
 
-                if (!instancesDict.SpecificInstances.ContainsKey(design))
-                    instancesDict.SpecificInstances.Add(design, new List<Entity>() { instance });
-                else
-                    instancesDict.SpecificInstances[design].Add(instance);           
+            if (!instancesDict.SpecificInstances.ContainsKey(design))
+            {
+                instancesDict.SpecificInstances.Add(design, new PrIwObsList<Entity>(new List<Entity>() { instance}) );
+            }
+            else
+                instancesDict.SpecificInstances[design].Add(instance);           
         }
     }
 

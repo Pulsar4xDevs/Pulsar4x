@@ -40,7 +40,8 @@ namespace Pulsar4X.ECSLib
 
         public static void RecalcBeamWeapons(Entity ship)
         {
-            List<KeyValuePair<Entity, List<Entity>>> beamWeaponEntities = ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>()).ToList();
+            var instancesDB = ship.GetDataBlob<ComponentInstancesDB>();
+            List<KeyValuePair<Entity, PrIwObsList<Entity>>> beamWeaponEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>()).ToList();
             List<Entity>fireControlEntities = new List<Entity>();
 
             BeamWeaponsDB bwDB;
@@ -52,7 +53,7 @@ namespace Pulsar4X.ECSLib
             int maxRange = 0;
             int maxTrackingSpeed = 0;
 
-            foreach (KeyValuePair<Entity, List<Entity>> beamWeaponTemplate in beamWeaponEntities)
+            foreach (KeyValuePair<Entity, PrIwObsList<Entity>> beamWeaponTemplate in beamWeaponEntities)
             {
                 foreach(Entity beamWeapon in beamWeaponTemplate.Value)
                 {

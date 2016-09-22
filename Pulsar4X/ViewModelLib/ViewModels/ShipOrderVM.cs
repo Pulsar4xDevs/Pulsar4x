@@ -480,9 +480,10 @@ namespace Pulsar4X.ViewModel
 
 
             // The component instances all seem to think that their parent entity is Ensuing Calm, regardless of SelectedShip
-            List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
-
-            foreach(KeyValuePair<Entity, List<Entity>> kvp in fcList)
+            var instanceDB = SelectedShip.GetDataBlob<ComponentInstancesDB>();
+            List<KeyValuePair<Entity, List<Entity>>> fcList = EntityStoreHelpers.GetComponentsOfType<BeamFireControlAtbDB>(instanceDB.SpecificInstances);
+            //new List<KeyValuePair<Entity, List<Entity>>>(instanceDB.SpecificInstances.ToDictionary().Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
+            foreach (KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {
                 int fcCount = 0;
                 if (kvp.Key.HasDataBlob<BeamFireControlAtbDB>())
@@ -525,8 +526,10 @@ namespace Pulsar4X.ViewModel
             }
             else
                 _attachedBeamList.Clear();
-
-            List<KeyValuePair<Entity, List<Entity>>> beamList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>() || item.Key.HasDataBlob<SimpleBeamWeaponAtbDB>()).ToList());
+            var instancesDB = SelectedShip.GetDataBlob<ComponentInstancesDB>();
+            List<KeyValuePair<Entity, List<Entity>>> beamList = EntityStoreHelpers.GetComponentsOfType<BeamWeaponAtbDB>(instancesDB.SpecificInstances);
+            beamList.AddRange(EntityStoreHelpers.GetComponentsOfType<SimpleBeamWeaponAtbDB>(instancesDB.SpecificInstances));
+            //new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>() || item.Key.HasDataBlob<SimpleBeamWeaponAtbDB>()).ToList());
 
             bool isBeamControlled = false;
             _freeBeamList.Clear();
@@ -555,7 +558,9 @@ namespace Pulsar4X.ViewModel
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
                 return false;
 
-            List<KeyValuePair<Entity, List<Entity>>> fcList = new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
+            var instancesDB = SelectedShip.GetDataBlob<ComponentInstancesDB>();
+            List<KeyValuePair<Entity, List<Entity>>> fcList = EntityStoreHelpers.GetComponentsOfType<BeamFireControlAtbDB>(instancesDB.SpecificInstances);
+            //new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
 
             foreach (KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {

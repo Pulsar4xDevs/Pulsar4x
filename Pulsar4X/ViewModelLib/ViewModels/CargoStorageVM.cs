@@ -61,7 +61,8 @@ namespace Pulsar4X.ViewModel
         public float RemainingWeight { get { return StorageSpaceProcessor.RemainingCapacity(_storageDB, _typeID); } }
         private string _typeName;
         public string HeaderText { get { return _typeName; } set { _typeName = value; OnPropertyChanged(); } }
-        public ObservableCollection<CargoItemVM> TypeStore { get; } = new RangeEnabledObservableCollection<CargoItemVM>();
+        public ObservableCollection<CargoItemVM> TypeStore { get; } = new ObservableCollection<CargoItemVM>();
+        public ObservableCollection<ComponentSpecificDesignVM> DesignStore { get; } = new ObservableCollection<ComponentSpecificDesignVM>();
 
         public CargoStorageByTypeVM(GameVM gameVM)
         {
@@ -81,16 +82,30 @@ namespace Pulsar4X.ViewModel
                 CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, itemKVP.Key);
                 TypeStore.Add(cargoItem);
             }
-
-            //foreach (var entityObj in StorageSpaceProcessor.GetEntitesOfCargoType(storageDB, storageType))
-            //{
-            //    ICargoable cargoableitem = entityObj.GetDataBlob<CargoAbleTypeDB>();
-            //    CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, cargoableitem);
-            //    TypeStore.Add(cargoItem);
-            //}
+            if (_storageDB.StoredEntities.ContainsKey(_typeID))
+            {
+                foreach (var item in _storageDB.StoredEntities[_typeID])
+                {
+                    ComponentSpecificDesignVM design = new ComponentSpecificDesignVM(item.Key, item.Value);
+                    DesignStore.Add(design);
+                }
+                _storageDB.StoredEntities[_typeID].CollectionChanged += CargoStorageByTypeVM_CollectionChanged;
+            }
             HeaderText = cargoType.Name + ": " + NetWeight.ToString() + " of " + MaxWeight.ToString() + " used, " + RemainingWeight.ToString() + " remaining";
             _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
             _storageDB.MinsAndMatsByCargoType[_typeID].CollectionChanged += _storageDB_CollectionChanged;
+        }
+
+        private void CargoStorageByTypeVM_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    KeyValuePair<Entity, PrIwObsList<Entity>> kvp = (KeyValuePair<Entity, PrIwObsList<Entity>>)item;
+                    ComponentSpecificDesignVM design = new ComponentSpecificDesignVM(kvp.Key, kvp.Value);
+                }
+            }
         }
 
         private void _storageDB_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

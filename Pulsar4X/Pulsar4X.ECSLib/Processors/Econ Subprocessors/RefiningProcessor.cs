@@ -99,8 +99,8 @@ namespace Pulsar4X.ECSLib
         //    }
 
             Dictionary<Guid, int> rates = new Dictionary<Guid, int>();
-
-            List<KeyValuePair<Entity, List<Entity>>> refineingEntities = colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<RefineResourcesAtbDB>()).ToList();
+            ComponentInstancesDB instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
+            List<KeyValuePair<Entity, PrIwObsList<Entity>>> refineingEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<RefineResourcesAtbDB>()).ToList();
             foreach (var refiningComponentDesignList in refineingEntities)
             {
                 RefineResourcesAtbDB refineblob = refiningComponentDesignList.Key.GetDataBlob<RefineResourcesAtbDB>();

@@ -167,7 +167,8 @@ namespace Pulsar4X.ECSLib
         {
 
             Dictionary<Guid, double> fuelUse = new Dictionary<Guid, double>();
-            foreach (var engineKVP in entity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(i => i.Key.HasDataBlob<EnginePowerAtbDB>()))
+            var instancesDB = entity.GetDataBlob<ComponentInstancesDB>();
+            foreach (var engineKVP in instancesDB.SpecificInstances.GetInternalDictionary().Where(i => i.Key.HasDataBlob<EnginePowerAtbDB>()))
             {
                 foreach (var item in engineKVP.Key.GetDataBlob<ResourceConsumptionAtbDB>().MaxUsage)
                 {
@@ -186,7 +187,8 @@ namespace Pulsar4X.ECSLib
         {
             int totalEnginePower = 0;
             Dictionary<Guid, double> totalFuelUsage = new Dictionary<Guid, double>();
-            List<KeyValuePair<Entity,List<Entity>>> engineEntities = ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
+            var instancesDB = ship.GetDataBlob<ComponentInstancesDB>();
+            List<KeyValuePair<Entity,PrIwObsList<Entity>>> engineEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
             foreach (var engineDesign in engineEntities)
             {
                 foreach (var engineInstance in engineDesign.Value)
