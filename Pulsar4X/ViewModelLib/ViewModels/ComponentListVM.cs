@@ -52,7 +52,7 @@ namespace Pulsar4X.ViewModel
     {
         private Entity _designEntity;
         public ObservableCollection<ComponentSpecificInstanceVM> Instances { get; } = new ObservableCollection<ComponentSpecificInstanceVM>();
-
+        public Guid EntityID { get { return _designEntity.Guid; } } 
         private string _headerText = "";
         public string HeaderText { get { return _headerText; } set { _headerText = value; OnPropertyChanged(); } }
 

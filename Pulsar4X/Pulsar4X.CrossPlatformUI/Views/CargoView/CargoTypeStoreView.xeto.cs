@@ -4,6 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ViewModel;
+using System.Collections.Specialized;
 
 namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 {
@@ -13,6 +14,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
         protected Expander Expanderer;
         protected Label ExpanderHeader = new Label();
         protected GridView CargoGrid;
+        protected StackLayout ComponentsStack;
+
         public CargoTypeStoreView()
         {
             XamlReader.Load(this);
@@ -53,16 +56,58 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             {
                 CargoStorageByTypeVM vm = (CargoStorageByTypeVM)DataContext;
                 _vm = vm;
+                ResetDesignStore();
+                _vm.DesignStore.CollectionChanged += DesignStore_CollectionChanged;
                 _vm.PropertyChanged += Vm_PropertyChanged;
             }
         }
 
-        private void TypeStore_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void ResetDesignStore()
         {
-            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            foreach (var item in _vm.DesignStore)
             {
-                CargoGrid.DataStore = _vm.TypeStore;
+                ComponentsStack.Items.Add(new CargoTypeStoreView() { DataContext = item });
             }
+        }
+
+        private void DesignStore_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            ComponentsStack.Items.Clear();
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    ComponentsStack.Items.Add(new CargoTypeStoreView() { DataContext = item });
+                }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (ComponentSpecificDesignVM item in e.OldItems)
+                {
+                    foreach (var stackitem in ComponentsStack.Items)
+                    {
+                        if (stackitem.Control.DataContext == item)
+                        {
+                            ComponentsStack.Items.Remove(stackitem);
+                            break;
+                        }
+                    }
+
+                }
+            }
+            else
+            {
+                ResetDesignStore();
+            } 
+        }
+
+        private void TypeStore_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            CargoGrid.DataStore = _vm.TypeStore;
+            //if (e.Action == NotifyCollectionChangedAction.Add )
+            //{
+            //    CargoGrid.DataStore = _vm.TypeStore;
+            //}
         }
 
         private void Vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)

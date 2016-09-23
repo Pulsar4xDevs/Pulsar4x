@@ -215,7 +215,7 @@
               "Name": "Instalation Construction Points",
               "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "100"
+              "AbilityFormula": "500"
             },
             {
               "Name": "Component Construction Points",

@@ -33,6 +33,12 @@ namespace Pulsar4X.ViewModel
                 CargoStore.Add(storeType);
             }
             _storageDB.CargoCapicity.CollectionChanged += _storageDB_CollectionChanged;
+            _storageDB.StoredEntities.CollectionChanged += StoredEntities_CollectionChanged;
+        }
+
+        private void StoredEntities_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+
         }
 
         private void _storageDB_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -53,17 +59,17 @@ namespace Pulsar4X.ViewModel
     {
         private CargoStorageDB _storageDB;
         private StaticDataStore _dataStore;
-        private Guid _typeID;
+        public Guid TypeID { get; private set; }
         private GameVM _gameVM;
         public string TypeName { get; set; }
-        public long MaxWeight { get { return _storageDB?.CargoCapicity[_typeID] ?? 0; } }
-        public float NetWeight { get { return StorageSpaceProcessor.NetWeight(_storageDB, _typeID); } }
-        public float RemainingWeight { get { return StorageSpaceProcessor.RemainingCapacity(_storageDB, _typeID); } }
+        public long MaxWeight { get { return _storageDB?.CargoCapicity[TypeID] ?? 0; } }
+        public float NetWeight { get { return StorageSpaceProcessor.NetWeight(_storageDB, TypeID); } }
+        public float RemainingWeight { get { return StorageSpaceProcessor.RemainingCapacity(_storageDB, TypeID); } }
         private string _typeName;
         public string HeaderText { get { return _typeName; } set { _typeName = value; OnPropertyChanged(); } }
         public ObservableCollection<CargoItemVM> TypeStore { get; } = new ObservableCollection<CargoItemVM>();
         public ObservableCollection<ComponentSpecificDesignVM> DesignStore { get; } = new ObservableCollection<ComponentSpecificDesignVM>();
-
+        public bool HasComponents { get { if (DesignStore.Count > 0) return true; else return false; } }
         public CargoStorageByTypeVM(GameVM gameVM)
         {
             _gameVM = gameVM;
@@ -73,27 +79,49 @@ namespace Pulsar4X.ViewModel
         public void Initalise(CargoStorageDB storageDB, Guid storageTypeID)
         {
             _storageDB = storageDB;
-            _typeID = storageTypeID;
+            TypeID = storageTypeID;
 
-            CargoTypeSD cargoType = _dataStore.CargoTypes[_typeID];
+            CargoTypeSD cargoType = _dataStore.CargoTypes[TypeID];
             TypeName = cargoType.Name;
-            foreach (var itemKVP in StorageSpaceProcessor.GetResourcesOfCargoType(storageDB, _typeID))
+            foreach (var itemKVP in StorageSpaceProcessor.GetResourcesOfCargoType(storageDB, TypeID))
             {                             
                 CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, itemKVP.Key);
                 TypeStore.Add(cargoItem);
             }
-            if (_storageDB.StoredEntities.ContainsKey(_typeID))
+            if (_storageDB.StoredEntities.ContainsKey(TypeID))
             {
-                foreach (var item in _storageDB.StoredEntities[_typeID])
-                {
-                    ComponentSpecificDesignVM design = new ComponentSpecificDesignVM(item.Key, item.Value);
-                    DesignStore.Add(design);
-                }
-                _storageDB.StoredEntities[_typeID].CollectionChanged += CargoStorageByTypeVM_CollectionChanged;
+                InitEntities();
             }
+
             HeaderText = cargoType.Name + ": " + NetWeight.ToString() + " of " + MaxWeight.ToString() + " used, " + RemainingWeight.ToString() + " remaining";
             _storageDB.OwningEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
-            _storageDB.MinsAndMatsByCargoType[_typeID].CollectionChanged += _storageDB_CollectionChanged;
+            _storageDB.MinsAndMatsByCargoType[TypeID].CollectionChanged += _storageDB_CollectionChanged;
+            _storageDB.StoredEntities.CollectionChanged += StoredEntities_CollectionChanged;
+        }
+
+        private void InitEntities()
+        {
+            foreach (var item in _storageDB.StoredEntities[TypeID])
+            {
+                ComponentSpecificDesignVM design = new ComponentSpecificDesignVM(item.Key, item.Value);
+                DesignStore.Add(design);
+            }
+            _storageDB.StoredEntities[TypeID].CollectionChanged += CargoStorageByTypeVM_CollectionChanged;
+            OnPropertyChanged(nameof(HasComponents));
+        }
+
+        private void StoredEntities_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                foreach (KeyValuePair<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>> newitem in e.NewItems)
+                {        
+                    if (TypeID == newitem.Key)
+                    {
+                        InitEntities();
+                    }                   
+                }
+            }
         }
 
         private void CargoStorageByTypeVM_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -104,8 +132,27 @@ namespace Pulsar4X.ViewModel
                 {
                     KeyValuePair<Entity, PrIwObsList<Entity>> kvp = (KeyValuePair<Entity, PrIwObsList<Entity>>)item;
                     ComponentSpecificDesignVM design = new ComponentSpecificDesignVM(kvp.Key, kvp.Value);
+                    DesignStore.Add(design);
                 }
             }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    Entity key = (Entity)item;
+                    foreach (var vmitem in DesignStore.ToArray())
+                    {
+                        if (vmitem.EntityID == key.Guid)
+                        {
+                            DesignStore.Remove(vmitem);
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            OnPropertyChanged(nameof(HasComponents));
         }
 
         private void _storageDB_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -130,7 +177,7 @@ namespace Pulsar4X.ViewModel
 
         private void OnItemAdded(KeyValuePair<ICargoable, long> newItem)
         {
-            if (newItem.Key.CargoTypeID == _typeID)
+            if (newItem.Key.CargoTypeID == TypeID)
             {
                 CargoItemVM cargoItem = new CargoItemVM(_gameVM, _storageDB, newItem.Key);
                 TypeStore.Add(cargoItem);
@@ -155,7 +202,7 @@ namespace Pulsar4X.ViewModel
             OnPropertyChanged(nameof(MaxWeight));
             OnPropertyChanged(nameof(NetWeight));
             OnPropertyChanged(nameof(RemainingWeight));
-            OnPropertyChanged(nameof(TypeStore));
+            //OnPropertyChanged(nameof(TypeStore));
         }
 
 
