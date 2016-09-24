@@ -11,7 +11,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
 
         protected ComboBox ColonySelection { get; set; }
-        protected GridView FacDataGrid { get; set; }
+        //protected GridView FacDataGrid { get; set; }
+        protected GenericStackControl FacilitysView;
         protected GridView PopDataGrid { get; set; }
         protected GridView MineralDeposits { get; set; }
         protected CargoView.CargoStorageView CargoView { get; set; }
@@ -26,13 +27,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
         protected ColonyScreenView()
         {
             XamlReader.Load(this);
+            FacilitysView.ControlType = typeof(ComponentListView.ComponentSpecificDesignView);
             ColonySelection.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
             ColonySelection.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
 
-            FacDataGrid.Columns.Add(new GridColumn
-            {
-                DataCell = new TextBoxCell { Binding = Binding.Property<FacilityVM, string>(r => r.Name) }
-            });
+            //FacDataGrid.Columns.Add(new GridColumn
+            //{
+            //    DataCell = new TextBoxCell { Binding = Binding.Property<FacilityVM, string>(r => r.Name) }
+            //});
 
             PopDataGrid.Columns.Add(new GridColumn
             {
@@ -76,7 +78,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             _colonyScreenVM = gameVM.SelectedColonyScreenVM;
             DataContext = gameVM.SelectedColonyScreenVM;
 
-            FacDataGrid.DataStore = _colonyScreenVM.Facilities;
+            //FacDataGrid.DataStore = _colonyScreenVM.Facilities;
 
             PopDataGrid.DataStore = _colonyScreenVM.Species.Cast<object>();
             _colonyScreenVM.Species.CollectionChanged += Species_CollectionChanged;

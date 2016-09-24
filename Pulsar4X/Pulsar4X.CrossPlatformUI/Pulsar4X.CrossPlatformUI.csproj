@@ -244,6 +244,12 @@
     <EmbeddedResource Include="Views\ComponentListView\ComponentDesignsListView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\ComponentListView\ComponentsByAtbView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\GenericStackControl.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\LogViewCMD.cs" />
@@ -291,6 +297,9 @@
     <Compile Include="Views\ComponentListView\ComponentDesignsListView.xeto.cs">
       <DependentUpon>ComponentDesignsListView.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\ComponentListView\ComponentsByAtbView.xeto.cs">
+      <DependentUpon>ComponentsByAtbView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\ComponentListView\ComponentSpecificDesignView.xeto.cs">
       <DependentUpon>ComponentSpecificDesignView.xeto</DependentUpon>
     </Compile>
@@ -329,6 +338,9 @@
     </Compile>
     <Compile Include="Views\ComponentTemplateDesigner\TechList.xeto.cs">
       <DependentUpon>TechList.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GenericStackControl.xeto.cs">
+      <DependentUpon>GenericStackControl.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\LogViewer.xeto.cs">
       <DependentUpon>LogViewer.xeto</DependentUpon>

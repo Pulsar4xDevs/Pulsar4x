@@ -12,7 +12,9 @@
     <TableRow>
       <TableLayout>
         <TableRow><Label Text="Facilites"/></TableRow>
-        <TableRow><GridView ID="FacDataGrid" /></TableRow>      
+        <TableRow>
+          <c:GenericStackControl x:Name="FacilitysView" DataContext="{Binding FacilitesList}" />
+        </TableRow>      
       </TableLayout>
       <TableLayout>
         <TableRow><Label Text ="Population"/></TableRow>

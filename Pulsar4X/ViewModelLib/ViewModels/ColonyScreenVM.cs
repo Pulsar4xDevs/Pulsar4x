@@ -20,6 +20,8 @@ namespace Pulsar4X.ViewModel
             get { return _facilities; }
         }
 
+        public ObservableCollection<ComponentSpecificDesignVM> FacilitesList { get; } = new ObservableCollection<ComponentSpecificDesignVM>();
+
         private readonly ObservableDictionary<string, long> _species = new ObservableDictionary<string, long>();
         public ObservableDictionary<string, long> Species { get { return _species; } }
 
@@ -51,7 +53,8 @@ namespace Pulsar4X.ViewModel
             ComponentInstancesDB instaces = colonyEntity.GetDataBlob<ComponentInstancesDB>();
             foreach (var installation in instaces.SpecificInstances)
             {
-                Facilities.Add(new FacilityVM(installation.Key, instaces));
+                //Facilities.Add(new FacilityVM(installation.Key, instaces));
+                FacilitesList.Add(new ComponentSpecificDesignVM(installation.Key, installation.Value));
             }
 
 
