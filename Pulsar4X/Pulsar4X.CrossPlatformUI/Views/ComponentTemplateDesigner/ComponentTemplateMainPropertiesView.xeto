@@ -15,8 +15,10 @@
       <TextBox Text="{Binding ID}" />
     </TableRow>
     <TableRow>
-      <Label Text="SizeFormula" />
-      <TextBox ID="SizeFormulaTBx" Text="{Binding SizeFormula}" />
+      <Label Text="MassFormula" />
+      <TextBox ID="SizeFormulaTBx" Text="{Binding MassFormula}" />
+      <Label Text="VolumeFormula" />
+      <TextBox ID="VolumeFormulaTBx" Text="{Binding VolumeFormula}" />
       <Label Text="HTKFormula" />
       <TextBox ID="HTKTBx" Text="{Binding HTKFormula}" />
       <Label Text="CrewReqFormula" />

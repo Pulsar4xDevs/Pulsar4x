@@ -55,8 +55,10 @@ namespace Pulsar4X.ViewModel
                         return Name;                        
                     case FocusedControl.DescriptionControl:
                         return Description;
-                    case FocusedControl.SizeControl:
-                        return SizeFormula;
+                    case FocusedControl.MassControl:
+                        return MassFormula;
+                    case FocusedControl.VolumeControl:
+                        return VolumeFormula;
                     case FocusedControl.CrewReqControl:
                         return CrewReqFormula;
                     case FocusedControl.HTKControl:
@@ -81,8 +83,11 @@ namespace Pulsar4X.ViewModel
                     case FocusedControl.DescriptionControl:
                         Description = value;            
                         break;
-                    case FocusedControl.SizeControl:
-                        SizeFormula = value;              
+                    case FocusedControl.MassControl:
+                        MassFormula = value;              
+                        break;
+                    case FocusedControl.VolumeControl:
+                        VolumeFormula = value;
                         break;
                     case FocusedControl.CrewReqControl:
                         CrewReqFormula = value;             
@@ -127,12 +132,20 @@ namespace Pulsar4X.ViewModel
             set { _ID = Guid.Parse(value); OnPropertyChanged(); }
         }
 
-        private string _sizeFormula;
-        public string SizeFormula
+        private string _massFormula;
+        public string MassFormula
         {
-            get { return _sizeFormula; }
-            set { _sizeFormula = value; OnPropertyChanged(); }
+            get { return _massFormula; }
+            set { _massFormula = value; OnPropertyChanged(); }
         }
+
+        private string _volumeFormula;
+        public string VolumeFormula
+        {
+            get { return _volumeFormula; }
+            set { _volumeFormula = value; OnPropertyChanged(); }
+        }
+
         private string _hTKFormula;
         public string HTKFormula
         {
@@ -186,7 +199,7 @@ namespace Pulsar4X.ViewModel
         public ComponentTemplateMainPropertiesVM(ComponentTemplateParentVM parent, GameVM gameVM): base(parent)
         {
             _staticData = gameVM.Game.StaticData;
-            SubControlInFocus = FocusedControl.SizeControl;
+            SubControlInFocus = FocusedControl.MassControl;
             foreach (var item in Enum.GetValues(typeof(ComponentMountType)))
             {
                 if ((ComponentMountType)item != ComponentMountType.None)
@@ -225,7 +238,8 @@ namespace Pulsar4X.ViewModel
             Name = "";
             Description = "";
             _ID = Guid.NewGuid();
-            SizeFormula = "";
+            MassFormula = "";
+            VolumeFormula = "";
             HTKFormula = "";
             CrewReqFormula = "";
             MineralCostFormula.Clear();
@@ -249,7 +263,8 @@ namespace Pulsar4X.ViewModel
             Description = designSD.Description;
             _ID = designSD.ID;
 
-            SizeFormula = designSD.MassFormula;
+            MassFormula = designSD.MassFormula;
+            VolumeFormula = designSD.VolumeFormula;
             HTKFormula = designSD.HTKFormula;
             CrewReqFormula = designSD.CrewReqFormula;
             MineralCostFormula.Clear(); 

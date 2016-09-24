@@ -17,6 +17,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
         protected TextBox NameTBx { get; set; }
         protected TextBox DescriptionTBx { get; set; }
         protected TextBox SizeFormulaTBx { get; set; }
+        protected TextBox VolumeFormulaTBx { get; set; }
         protected TextBox HTKTBx { get; set; }
         protected TextBox CrewReqTBx { get; set; }
         protected TextBox ResearchCostTBx { get; set; }
@@ -31,7 +32,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 
             NameTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.NameControl;
             DescriptionTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.DescriptionControl;
-            SizeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.SizeControl;
+            SizeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.MassControl;
+            VolumeFormulaTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.VolumeControl;
             HTKTBx.GotFocus += (sender, e) => ((ComponentTemplateDesignerBaseVM)DataContext).SubControlInFocus = FocusedControl.HTKControl;
             CrewReqTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.CrewReqControl;
             ResearchCostTBx.GotFocus += (sender, e) => ((ComponentTemplateMainPropertiesVM)DataContext).SubControlInFocus = FocusedControl.ResearchCostControl;
