@@ -17,12 +17,16 @@ namespace Pulsar4X.ECSLib
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
             float totalTonnage = 0;
             int totalHTK = 0;
+            double totalVolume = 0;
             foreach (var componentDesign in componentInstances.SpecificInstances)
             {
-                totalTonnage = componentDesign.Key.GetDataBlob<ComponentInfoDB>().SizeInTons;
+                shipInfo.ShipComponentDictionary.Add(componentDesign.Key, totalVolume);
+                totalVolume = totalVolume + componentDesign.Key.GetDataBlob<MassVolumeDB>().Volume;
+
+                totalTonnage = componentDesign.Key.GetDataBlob<ComponentInfoDB>().SizeInTons;         //This seems wrong. += instead of = ?
                 foreach (var componentInstance in componentDesign.Value)
                 {
-                    totalHTK = componentInstance.GetDataBlob<ComponentInstanceInfoDB>().HTKRemaining;
+                    totalHTK = componentInstance.GetDataBlob<ComponentInstanceInfoDB>().HTKRemaining; //This seems wrong. += instead of = ?
                 }
             }
             if (shipInfo.Tonnage != totalTonnage)
@@ -31,6 +35,8 @@ namespace Pulsar4X.ECSLib
                 ShipMovementProcessor.CalcMaxSpeed(shipEntity);
             }
             shipInfo.InternalHTK = totalHTK;
+            MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
+            mvDB.Volume = totalVolume;
         }
     }
 }

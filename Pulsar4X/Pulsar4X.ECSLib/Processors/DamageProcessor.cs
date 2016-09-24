@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
                 //do shield damage
                 //do armor damage
                 //for components:
-                //roll a value against th total volume of the ship
+                //roll a value against the total volume of the ship
                 //find out which component that is. is the component intact or not intact?
                 //if not intact roll again
                 //if it is intact modify htk based on density of the component

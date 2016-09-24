@@ -20,6 +20,10 @@ namespace Pulsar4X.ECSLib
             blobs.Add(new DesignInfoDB(design));
             // Added because each component instance needs its own copy of this datablob
 
+            //Components have a mass and volume.
+            MassVolumeDB mvDB = new MassVolumeDB();
+            blobs.Add(mvDB);
+
             if (design.HasDataBlob<BeamFireControlAtbDB>())
                 blobs.Add(new FireControlInstanceAbilityDB());
 
