@@ -76,6 +76,21 @@ namespace Pulsar4X.ECSLib
             return mvDB;
         }
 
+        /// <summary>
+        /// Generates a new MassVolumeDB from mass and volume, calculating deinsity and radius.
+        /// </summary>
+        /// <param name="mass">Mass in Kg</param>
+        /// <param name="density">Density in Kg/cm^3</param>
+        /// <returns></returns>
+        internal static MassVolumeDB NewFromMassAndVolume(double mass, double volume)
+        {
+            var density = CalculateDensity(mass, volume);
+            var rad = CalculateRadius(mass, density);
+            var mvDB = new MassVolumeDB { Mass = mass, Volume = volume, Density = density, Radius = rad };
+
+            return mvDB;
+        }
+
         public MassVolumeDB(MassVolumeDB massVolumeDB)
         {
             Mass = massVolumeDB.Mass;

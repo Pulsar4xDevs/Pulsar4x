@@ -23,7 +23,8 @@ namespace Pulsar4X.ECSLib
             design.Name = component.Name;
             design.Description = component.Description;
 
-            design.SizeFormula = new ChainedExpression(component.SizeFormula, design, factionTech, staticData);
+            design.MassFormula = new ChainedExpression(component.MassFormula, design, factionTech, staticData);
+            design.VolumeFormula = new ChainedExpression(component.VolumeFormula, design, factionTech, staticData);
             design.CrewFormula = new ChainedExpression(component.CrewReqFormula, design, factionTech, staticData);
             design.HTKFormula = new ChainedExpression(component.HTKFormula, design, factionTech, staticData);
             design.ResearchCostFormula = new ChainedExpression(component.ResearchCostFormula, design, factionTech, staticData);
@@ -87,7 +88,7 @@ namespace Pulsar4X.ECSLib
                 design.ComponentDesignAbilities.Add(designAbility);
             }
 
-            design.SizeFormula.Evaluate();
+            design.MassFormula.Evaluate();
             design.SetCrew();
             design.SetHTK();
             design.SetResearchCost();
@@ -146,7 +147,7 @@ namespace Pulsar4X.ECSLib
                     throw new Exception("GUID object {" + kvp.Key + "} not found in materialCosting for " + componentDesign.Name + " This object needs to be either a mineral, material or component defined in the Data folder");
             }
 
-            ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.SizeValue, componentDesign.HTKValue, componentDesign.BuildCostValue , mineralCosts,materalCosts,componentCosts , tech.ID, componentDesign.CrewReqValue);
+            ComponentInfoDB componentInfo = new ComponentInfoDB(component.Guid, componentDesign.MassValue, componentDesign.HTKValue, componentDesign.BuildCostValue , mineralCosts,materalCosts,componentCosts , tech.ID, componentDesign.CrewReqValue);
             componentInfo.ComponentMountType = componentDesign.ComponentMountType;
             componentInfo.ConstructionType = componentDesign.ConstructionType;
             CargoAbleTypeDB cargoType = new CargoAbleTypeDB(componentDesign.CargoTypeID);
@@ -154,7 +155,7 @@ namespace Pulsar4X.ECSLib
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);
             component.SetDataBlob(cargoType);
-            component.SetDataBlob(MassVolumeDB.NewFromMassAndRadius(componentDesign.SizeValue, componentDesign.SizeValue / 2));
+            component.SetDataBlob(MassVolumeDB.NewFromMassAndVolume(componentDesign.MassValue, componentDesign.VolumeValue));
             foreach (var designAbility in componentDesign.ComponentDesignAbilities)
             {
                 if (designAbility.DataBlobType != null)

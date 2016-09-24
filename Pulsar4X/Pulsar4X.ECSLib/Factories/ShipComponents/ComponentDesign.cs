@@ -17,12 +17,20 @@ namespace Pulsar4X.ECSLib
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public int SizeValue { get { return SizeFormula.IntResult; } }
-        internal ChainedExpression SizeFormula { get; set; }
-        public void SetSize()
+        public int MassValue { get { return MassFormula.IntResult; } }
+        internal ChainedExpression MassFormula { get; set; }
+        public void SetMass()
         {
-            SizeFormula.Evaluate();
+            MassFormula.Evaluate();
         }
+
+        public int VolumeValue { get { return VolumeFormula.IntResult; } }
+        internal ChainedExpression VolumeFormula { get; set; }
+        public void SetVolume()
+        {
+            VolumeFormula.Evaluate();
+        }
+
 
         public int HTKValue { get { return HTKFormula.IntResult; } }
         internal ChainedExpression HTKFormula { get; set; }

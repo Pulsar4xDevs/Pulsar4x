@@ -210,8 +210,9 @@ namespace Pulsar4X.ECSLib
             _expression.EvaluateFunction += NCalcPulsarFunctions;
             _expression.EvaluateParameter += NCalcPulsarParameters;
 
-            _expression.Parameters["xSizex"] = new Expression("Size"); //unknown string will force it to look in the NCalcPulsarParameters or something
+            _expression.Parameters["xMassx"] = new Expression("Mass"); //unknown string will force it to look in the NCalcPulsarParameters or something
             //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
+            _expression.Parameters["xVolumex"] = new Expression("Volume");
             _expression.Parameters["xCrewx"] = new Expression("Crew");
             _expression.Parameters["xHTKx"] = new Expression("HTK");
             _expression.Parameters["xResearchCostx"] = new Expression("ResearchCost");
@@ -230,10 +231,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="args"></param>
         private void NCalcPulsarParameters(string name, ParameterArgs args)
         {
-            if (name == "Size")
+            if (name == "Mass")
             {
-                MakeThisDependant(_design.SizeFormula);
-                args.Result = _design.SizeValue;
+                MakeThisDependant(_design.MassFormula);
+                args.Result = _design.MassValue;
+            }
+            if (name == "Volume")
+            {
+                MakeThisDependant(_design.VolumeFormula);
+                args.Result = _design.VolumeFormula;
             }
             if (name == "Crew")
             {

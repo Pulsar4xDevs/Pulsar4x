@@ -10,8 +10,9 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public Guid ID;
 
-        public string SizeFormula;
-        public string HTKFormula;
+        public string MassFormula;
+        public string VolumeFormula;
+        public string HTKFormula;       
         public string CrewReqFormula;
         public Dictionary<Guid,string> MineralCostFormula;
         public string ResearchCostFormula;

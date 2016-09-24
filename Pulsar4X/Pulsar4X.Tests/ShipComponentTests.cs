@@ -155,19 +155,19 @@ namespace Pulsar4X.Tests
             component.Description = "Moves a ship";
             component.ID = new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6");
 
-            component.SizeFormula = "Ability(0)";
+            component.MassFormula = "Ability(0)";
+            component.VolumeFormula = "[Mass] / 2";
+            component.HTKFormula = "Max(1, [Mass] / 100)";
 
-            component.HTKFormula = "Max(1, [Size] / 100)";
+            component.CrewReqFormula = "[Mass]";
 
-            component.CrewReqFormula = "[Size]";
+            component.ResearchCostFormula = "[Mass] * 10";
 
-            component.ResearchCostFormula = "[Size] * 10";
+            component.BuildPointCostFormula = "[Mass]";
 
-            component.BuildPointCostFormula = "[Size]";
+            component.MineralCostFormula = new Dictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Mass] * 8" } };
 
-            component.MineralCostFormula = new Dictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Size] * 8" } };
-
-            component.CreditCostFormula = "[Size]";
+            component.CreditCostFormula = "[Mass]";
 
             component.MountType = ComponentMountType.ShipComponent | ComponentMountType.ShipCargo | ComponentMountType.Fighter;
 
@@ -221,7 +221,7 @@ namespace Pulsar4X.Tests
             enginePowerAbility3.Name = "Engine Power";
             enginePowerAbility3.Description = "Move Power for ship";
             enginePowerAbility3.GuiHint = GuiHint.GuiTextDisplay;
-            enginePowerAbility3.AbilityFormula = "Ability(1) * [Size] * Ability(2)";
+            enginePowerAbility3.AbilityFormula = "Ability(1) * [Mass] * Ability(2)";
             component.ComponentAbilitySDs.Add(enginePowerAbility3);
 
             ComponentTemplateAbilitySD enginePowerDBArgs4 = new ComponentTemplateAbilitySD();
@@ -243,7 +243,7 @@ namespace Pulsar4X.Tests
             fuelConsumptionFinalCalc6.Name = "Fuel Consumption";
             fuelConsumptionFinalCalc6.Description = "Fuel Consumption Calc";
             fuelConsumptionFinalCalc6.GuiHint = GuiHint.GuiTextDisplay;
-            fuelConsumptionFinalCalc6.AbilityFormula = "Ability(3) - Ability(3) * [Size] * 0.002 * Ability(5)";
+            fuelConsumptionFinalCalc6.AbilityFormula = "Ability(3) - Ability(3) * [Mass] * 0.002 * Ability(5)";
             component.ComponentAbilitySDs.Add(fuelConsumptionFinalCalc6);
 
             ComponentTemplateAbilitySD fuelConsumptionArgsDB7 = new ComponentTemplateAbilitySD();
@@ -289,15 +289,17 @@ namespace Pulsar4X.Tests
             component.Description = "Mines Resources";
             component.ID = new Guid("F7084155-04C3-49E8-BF43-C7EF4BEFA550");
 
-            component.SizeFormula = "25000";
+            component.MassFormula = "25000";
 
-            component.HTKFormula = "[Size]";
+            component.VolumeFormula = "[Mass] / 2";
+
+            component.HTKFormula = "[Mass]";
 
             component.CrewReqFormula = "50000";
 
             component.ResearchCostFormula = "0";
             
-            component.BuildPointCostFormula = "[Size]";
+            component.BuildPointCostFormula = "[Mass]";
 
             component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60"}, 
             {new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"), "60"}};
@@ -343,15 +345,17 @@ namespace Pulsar4X.Tests
             component.Description = "Creates Research Points";
             component.ID = new Guid("C203B7CF-8B41-4664-8291-D20DFE1119EC");
 
-            component.SizeFormula = "500000";
+            component.MassFormula = "500000";
 
-            component.HTKFormula = "[Size]";
+            component.VolumeFormula = "[Mass] / 2";
+
+            component.HTKFormula = "[Mass]";
 
             component.CrewReqFormula = "1000000";
 
             component.ResearchCostFormula = "0";
 
-            component.BuildPointCostFormula = "[Size]";
+            component.BuildPointCostFormula = "[Mass]";
 
             component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
@@ -382,15 +386,17 @@ namespace Pulsar4X.Tests
             component.Description = "Creates Research Points";
             component.ID = new Guid("{90592586-0BD6-4885-8526-7181E08556B5}");
 
-            component.SizeFormula = "500000";
+            component.MassFormula = "500000";
 
-            component.HTKFormula = "[Size]";
+            component.VolumeFormula = "[Mass] / 2";
+
+            component.HTKFormula = "[Mass]";
 
             component.CrewReqFormula = "1000000";
 
             component.ResearchCostFormula = "0";
 
-            component.BuildPointCostFormula = "[Size]";
+            component.BuildPointCostFormula = "[Mass]";
 
             component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
@@ -431,15 +437,17 @@ namespace Pulsar4X.Tests
             component.Description = "Constructs Facilities, Fighters Ammo and Components";
             component.ID = new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}");
 
-            component.SizeFormula = "500000";
+            component.MassFormula = "500000";
 
-            component.HTKFormula = "[Size]";
+            component.VolumeFormula = "[Mass] / 2";
+
+            component.HTKFormula = "[Mass]";
 
             component.CrewReqFormula = "1000000";
 
             component.ResearchCostFormula = "0";
 
-            component.BuildPointCostFormula = "[Size]";
+            component.BuildPointCostFormula = "[Mass]";
 
             component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
@@ -514,15 +522,17 @@ namespace Pulsar4X.Tests
             component.Description = "Stores General Cargo";
             component.ID = new Guid("{30CD60F8-1DE3-4FAA-ACBA-0933EB84C199}");
 
-            component.SizeFormula = "500000";
+            component.MassFormula = "500000";
 
-            component.HTKFormula = "[Size]";
+            component.VolumeFormula = "[Mass] / 100";
+
+            component.HTKFormula = "[Mass]";
 
             component.CrewReqFormula = "1000000";
 
             component.ResearchCostFormula = "0";
 
-            component.BuildPointCostFormula = "[Size]";
+            component.BuildPointCostFormula = "[Mass]";
 
             component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"},
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};

@@ -70,7 +70,7 @@ namespace Pulsar4X.ViewModel
                 if (Design != null)
                 {
                     text = Design.Name + Environment.NewLine;
-                    text += "Size: " + Design.SizeValue + Environment.NewLine;
+                    text += "Size: " + Design.MassValue + Environment.NewLine;
                     text += "HTK: " + Design.HTKValue + Environment.NewLine;
                     text += "Crew: " + Design.CrewReqValue + Environment.NewLine;
                     text += "ResearchCost: " + Design.ResearchCostValue + Environment.NewLine;

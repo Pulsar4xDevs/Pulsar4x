@@ -8,8 +8,9 @@
           "Name": "Mine",
           "Description": "Mines Resources",
           "ID": "f7084155-04c3-49e8-bf43-c7ef4befa550",
-          "SizeFormula": "25000",
-          "HTKFormula": "[Size]",
+          "MassFormula": "25000",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
           "CrewReqFormula": "50000",
           "MineralCostFormula": {
             "Entries": [
@@ -25,7 +26,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "Installations",
@@ -94,8 +95,9 @@
           "Name": "ResearchLab",
           "Description": "Creates Research Points",
           "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
-          "SizeFormula": "500000",
-          "HTKFormula": "[Size]",
+          "MassFormula": "500000",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
           "MineralCostFormula": {
             "Entries": [
@@ -111,7 +113,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "Installations",
@@ -132,8 +134,9 @@
           "Name": "Refinery",
           "Description": "Refines Sorium into fuel",
           "ID": "90592586-0bd6-4885-8526-7181e08556b5",
-          "SizeFormula": "500000",
-          "HTKFormula": "[Size]",
+          "MassFormula": "500000",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
           "MineralCostFormula": {
             "Entries": [
@@ -149,7 +152,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "Installations",
@@ -189,8 +192,9 @@
           "Name": "Factory",
           "Description": "Constructs Facilities, Fighters Ammo and Components",
           "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
-          "SizeFormula": "500000",
-          "HTKFormula": "[Size]",
+          "MassFormula": "500000",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
           "MineralCostFormula": {
             "Entries": [
@@ -206,7 +210,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "Installations",
@@ -281,7 +285,8 @@
           "Name": "Infrastructure",
           "Description": "Component and buildings needed to keep colonists alive on hostile worlds",
           "ID": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
-          "SizeFormula": "1000",
+          "MassFormula": "1000",
+          "VolumeFormula": "[Mass] / 2",
           "HTKFormula": "1000",
           "CrewReqFormula": "10",
           "MineralCostFormula": {
@@ -335,8 +340,9 @@
           "Name": "General Storage",
           "Description": "Stores General Cargo",
           "ID": "30cd60f8-1de3-4faa-acba-0933eb84c199",
-          "SizeFormula": "500000",
-          "HTKFormula": "[Size]",
+          "MassFormula": "500000",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
           "CrewReqFormula": "Ability(1)",
           "MineralCostFormula": {
             "Entries": [
@@ -352,7 +358,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Size]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "Installations",
@@ -405,24 +411,25 @@
           "Name": "Fuel Storage",
           "Description": "Stores Fuel",
           "ID": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
-          "SizeFormula": "Ability(0)",
-          "HTKFormula": "[Size]",
+          "MassFormula": "Ability(0)",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
           "CrewReqFormula": "Ability(1)",
           "MineralCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "[Size]"
+                "Value": "[Mass]"
               },
               {
                 "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "[Size]"
+                "Value": "[Mass]"
               }
             ]
           },
           "ResearchCostFormula": "0",
-          "CreditCostFormula": "[Size]",
-          "BuildPointCostFormula": "[Size]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "Installations",

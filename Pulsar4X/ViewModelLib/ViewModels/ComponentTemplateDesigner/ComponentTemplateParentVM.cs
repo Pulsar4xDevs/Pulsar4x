@@ -116,7 +116,7 @@ namespace Pulsar4X.ViewModel
             sd.Description = SelectedComponent.Description;
             sd.ID = Guid.Parse(SelectedComponent.ID);
 
-            sd.SizeFormula = SelectedComponent.SizeFormula;
+            sd.MassFormula = SelectedComponent.SizeFormula;
             sd.HTKFormula = SelectedComponent.HTKFormula;
             sd.CrewReqFormula = SelectedComponent.CrewReqFormula;
             sd.MineralCostFormula = new Dictionary<Guid, string>();

@@ -249,7 +249,7 @@ namespace Pulsar4X.ViewModel
             Description = designSD.Description;
             _ID = designSD.ID;
 
-            SizeFormula = designSD.SizeFormula;
+            SizeFormula = designSD.MassFormula;
             HTKFormula = designSD.HTKFormula;
             CrewReqFormula = designSD.CrewReqFormula;
             MineralCostFormula.Clear(); 

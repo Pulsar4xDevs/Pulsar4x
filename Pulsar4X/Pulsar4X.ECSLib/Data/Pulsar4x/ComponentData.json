@@ -8,20 +8,21 @@
           "Name": "Engine",
           "Description": "Moves a ship",
           "ID": "e76bd999-ecd7-4511-ad41-6d0c59ca97e6",
-          "SizeFormula": "Ability(0)",
-          "HTKFormula": "Max(1, [Size] / 100)",
-          "CrewReqFormula": "[Size]",
+          "MassFormula": "Ability(0)",
+          "VolumeFormula": "Ability(0) / 2",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {
             "Entries": [
               {
                 "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
-                "Value": "[Size] * 8"
+                "Value": "[Mass] * 8"
               }
             ]
           },
-          "ResearchCostFormula": "[Size] * 10",
-          "CreditCostFormula": "[Size]",
-          "BuildPointCostFormula": "[Size]",
+          "ResearchCostFormula": "[Mass] * 10",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "ShipComponents",
@@ -74,7 +75,7 @@
               "Name": "Engine Power",
               "Description": "Move Power for ship",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(1) * [Size] * Ability(2)"
+              "AbilityFormula": "Ability(1) * [Mass] * Ability(2)"
             },
             {
               "Name": "Engine Power",
@@ -93,7 +94,7 @@
               "Name": "Total Fuel Consumption per Km",
               "Description": "Fuel Consumption Calc",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "(Ability(3) - Ability(3) * [Size] * 0.02 * Ability(5)) * 0.1"
+              "AbilityFormula": "(Ability(3) - Ability(3) * [Mass] * 0.02 * Ability(5)) * 0.1"
             },
             {
               "Name": "Fuel Consumption",
@@ -133,20 +134,21 @@
           "Name": "LaserGun",
           "Description": "Laser Gun",
           "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
-          "SizeFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2) * 10",
-          "HTKFormula": "[Size]",
-          "CrewReqFormula": "[Size]",
+          "MassFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2) * 10",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "[Size]"
+                "Value": "[Mass]"
               }
             ]
           },
-          "ResearchCostFormula": "[Size]",
-          "CreditCostFormula": "[Size]",
-          "BuildPointCostFormula": "[Size]",
+          "ResearchCostFormula": "[Mass]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "ShipComponents",
@@ -193,20 +195,21 @@
           "Name": "BeamFireControl",
           "Description": "",
           "ID": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
-          "SizeFormula": "Ability(4)",
-          "HTKFormula": "[Size]",
-          "CrewReqFormula": "[Size]",
+          "MassFormula": "Ability(4)",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "[Size]"
+                "Value": "[Mass]"
               }
             ]
           },
           "ResearchCostFormula": "Ability(5)",
-          "CreditCostFormula": "[Size]",
-          "BuildPointCostFormula": "[Size]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ConstructionType": "ShipComponents",
