@@ -35,6 +35,14 @@ namespace Pulsar4X.ECSLib
             }
             else if(DamageableEntity.HasDataBlob<ShipInfoDB>())
             {
+                //do shield damage
+                //do armor damage
+                //for components:
+                //roll a value against th total volume of the ship
+                //find out which component that is. is the component intact or not intact?
+                //if not intact roll again
+                //if it is intact modify htk based on density of the component
+                //did the component get destroyed or not?
                 //TODO do some damage to a component.
                 ReCalcProcessor.ReCalcAbilities(DamageableEntity);
             }

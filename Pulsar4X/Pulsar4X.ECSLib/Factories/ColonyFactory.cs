@@ -29,7 +29,9 @@ namespace Pulsar4X.ECSLib
             blobs.Add(colonyRefining);
             ColonyConstructionDB colonyConstruction = new ColonyConstructionDB();
             blobs.Add(colonyConstruction);
-            
+
+            MassVolumeDB mvDB = new MassVolumeDB();
+            blobs.Add(mvDB);
 
             //installations get added to the componentInstancesDB
             ComponentInstancesDB installations = new ComponentInstancesDB();

@@ -85,6 +85,7 @@ namespace Pulsar4X.ECSLib
             var sensors = new SensorsDB();
             var name = new NameDB(className);
             var componentInstancesDB = new ComponentInstancesDB();
+            var massVolumeDB = new MassVolumeDB();
             // now lets create a list of all these datablobs so we can create our new entity:
             List<BaseDataBlob> shipDBList = new List<BaseDataBlob>()
             {
@@ -98,7 +99,8 @@ namespace Pulsar4X.ECSLib
                 sensorProfile,
                 sensors,
                 name,
-                componentInstancesDB
+                componentInstancesDB,
+                massVolumeDB
             };
 
             // now lets create the ship class:
