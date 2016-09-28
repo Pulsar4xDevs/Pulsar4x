@@ -19,14 +19,17 @@ namespace Pulsar4X.ECSLib
             int totalHTK = 0;
             double totalVolume = 0;
             foreach (var componentDesign in componentInstances.SpecificInstances)
-            {
-                shipInfo.ShipComponentDictionary.Add(componentDesign.Key, totalVolume);
-                totalVolume = totalVolume + componentDesign.Key.GetDataBlob<MassVolumeDB>().Volume;
-
-                totalTonnage = componentDesign.Key.GetDataBlob<ComponentInfoDB>().SizeInTons;         //This seems wrong. += instead of = ?
+            {                
+                var componentVolume = componentDesign.Key.GetDataBlob<MassVolumeDB>().Volume;
+                var componentTonnage = componentDesign.Key.GetDataBlob<ComponentInfoDB>().SizeInTons;
+                
                 foreach (var componentInstance in componentDesign.Value)
                 {
-                    totalHTK = componentInstance.GetDataBlob<ComponentInstanceInfoDB>().HTKRemaining; //This seems wrong. += instead of = ?
+                    totalHTK += componentInstance.GetDataBlob<ComponentInstanceInfoDB>().HTKRemaining; 
+                    totalVolume += componentVolume;
+                    totalTonnage += componentTonnage;
+                    if (!shipInfo.ShipComponentDictionary.ContainsKey(componentInstance))
+                        shipInfo.ShipComponentDictionary.Add(componentInstance, totalVolume);
                 }
             }
             if (shipInfo.Tonnage != totalTonnage)
