@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="damageAmount"></param>
         public static void OnTakingDamage(Entity DamageableEntity, int damageAmount)
         {
-            if(DamageableEntity.HasDataBlob<AsteroidDamageDB>())
+            if (DamageableEntity.HasDataBlob<AsteroidDamageDB>())
             {
                 AsteroidDamageDB AstDmgDB = DamageableEntity.GetDataBlob<AsteroidDamageDB>();
                 AstDmgDB.Health = AstDmgDB.Health - damageAmount;
@@ -33,23 +33,120 @@ namespace Pulsar4X.ECSLib
                 if (AstDmgDB.Health <= 0)
                     SpawnSubAsteroids(DamageableEntity);
             }
-            else if(DamageableEntity.HasDataBlob<ShipInfoDB>())
+            else if (DamageableEntity.HasDataBlob<ShipInfoDB>())
             {
                 //do shield damage
                 //do armor damage
-                //for components:
-                //roll a value against the total volume of the ship
-                //find out which component that is. is the component intact or not intact?
-                //if not intact roll again
-                //if it is intact modify htk based on density of the component
-                //did the component get destroyed or not?
-                //TODO do some damage to a component.
-                ReCalcProcessor.ReCalcAbilities(DamageableEntity);
+                //for components: 
+                Game game = DamageableEntity.Manager.Game;
+                PositionDB ShipPosition = DamageableEntity.GetDataBlob<PositionDB>();
+
+                StarSystem mySystem;
+                if (!game.Systems.TryGetValue(ShipPosition.SystemGuid, out mySystem))
+                    throw new GuidNotFoundException(ShipPosition.SystemGuid);
+
+                int damageAttempt = 0;
+                while (damageAmount > 0)
+                {
+                    ShipInfoDB siDB = DamageableEntity.GetDataBlob<ShipInfoDB>();
+
+                    int randValue = mySystem.RNG.Next((int)DamageableEntity.GetDataBlob<MassVolumeDB>().Volume);
+
+                    foreach (KeyValuePair<Entity, double> pair in siDB.ShipComponentDictionary)
+                    {
+                        if (pair.Value > randValue)
+                        {
+                            //check if this component is destroyed
+                            //if it isn't get density
+                            MassVolumeDB mvDB = pair.Key.GetDataBlob<MassVolumeDB>();
+
+                            double DensityThreshold = 1.0; //what should this be?
+                            double dmgPercent = DensityThreshold * mvDB.Density;
+
+                            int dmgDone = (int)(damageAmount * dmgPercent);
+
+                            ComponentInfoDB ciDB = pair.Key.GetDataBlob<ComponentInfoDB>();
+                            ComponentInstanceInfoDB ciiDB = pair.Key.GetDataBlob<ComponentInstanceInfoDB>();
+
+                            if (ciiDB.HTKRemaining > 0) //component is not destroyed yet
+                            {
+                                if (dmgDone >= ciiDB.HTKRemaining) //component is definitely wrecked
+                                {
+                                    damageAmount = damageAmount - ciiDB.HTKRemaining;
+                                    ciiDB.HTKRemaining = 0;
+                                }
+                                else
+                                {
+                                    ciiDB.HTKRemaining = ciiDB.HTKRemaining - damageAmount;
+                                    damageAmount = 0;
+
+                                }
+                            }
+                            else
+                            {
+                                damageAttempt++;
+                                if (damageAttempt == 20) // Aurora default, seems like an ok number to use for now.
+                                    break;
+                                /// <summary>
+                                /// Need to pick a new component to try and destroy.
+                                /// Should any damage get absorbed by the wreck?
+                                /// How many of these failures should I run into before declaring the ship destroyed?
+                                /// Should ship distruction happen differently?
+                                /// </summary>
+                                continue;
+                            }
+
+
+                            //compare this density to some density value to calculate how much to modify damage by
+                            //if damage is greater than the HTK then the component is destroyed. modify damageAmount and move onto the next component.
+                            //leave this loop if damage is zero.
+
+                            break;
+                        }
+                    }
+                    if (damageAttempt == 20) // need to copy this to fully break out of the loop;
+                        break;
+                }
+
+                if (damageAttempt == 20) // the ship is destroyed. how to mark it as such?
+                {
+                    SpawnWreck(DamageableEntity);
+                }
+                else
+                {
+                    ReCalcProcessor.ReCalcAbilities(DamageableEntity);
+                }                
             }
 
         }
 
+        /// <summary>
+        /// I want to delete the existing ship, and replace it with a wreck here that can be salvaged for materials and parts.
+        /// </summary>
+        /// <param name="DestroyedShip"></param>
+        internal static void SpawnWreck(Entity DestroyedShip)
+        {
+            //create the wreck here
 
+
+
+            //Destroy the ship.
+            Game game = DestroyedShip.Manager.Game;
+            PositionDB pDB = DestroyedShip.GetDataBlob<PositionDB>();
+
+            StarSystem mySystem;
+            if (!game.Systems.TryGetValue(pDB.SystemGuid, out mySystem))
+                throw new GuidNotFoundException(pDB.SystemGuid);
+
+            //Does anything else need to be done to delete a ship?
+
+            mySystem.SystemManager.RemoveEntity(DestroyedShip);
+        }
+
+        /// <summary>
+        /// This asteroid was destroyed, see if it is big enough for child asteroids to spawn, and if so spawn them.
+        /// </summary>
+        /// <param name="Asteroid"></param>
         internal static void SpawnSubAsteroids(Entity Asteroid)
         {
             Game game = Asteroid.Manager.Game;
