@@ -35,9 +35,6 @@ namespace Pulsar4X.ECSLib
 
         public double TCS { get {return Tonnage * 0.02;} }
 
-        // list of components and where in the ship they are.
-        public Dictionary<Entity, double> ShipComponentDictionary { get; set; }
-
         ///  Ship orders.  
         public Queue<BaseOrder> Orders;
 
@@ -48,7 +45,6 @@ namespace Pulsar4X.ECSLib
         public ShipInfoDB()
         {
             Orders = new Queue<BaseOrder>();
-            ShipComponentDictionary = new Dictionary<Entity, double>();
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
@@ -70,9 +66,6 @@ namespace Pulsar4X.ECSLib
                 Orders = null;
             else
                 Orders = new Queue<BaseOrder>(shipInfoDB.Orders);
-
-            //all ships should have components. no 0 mass ships hopefully.
-            ShipComponentDictionary = new Dictionary<Entity, double>();
         }
 
         #endregion

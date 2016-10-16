@@ -20,6 +20,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// This will work for missiles, ships, asteroids, and populations at some point.
+        /// Damage type may eventually be required.
         /// </summary>
         /// <param name="DamageableEntity"></param>
         /// <param name="damageAmount"></param>
@@ -45,14 +46,16 @@ namespace Pulsar4X.ECSLib
                 if (!game.Systems.TryGetValue(ShipPosition.SystemGuid, out mySystem))
                     throw new GuidNotFoundException(ShipPosition.SystemGuid);
 
+                ComponentInstancesDB ShipInst = DamageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are ship components in this context
+
                 int damageAttempt = 0;
                 while (damageAmount > 0)
                 {
-                    ShipInfoDB siDB = DamageableEntity.GetDataBlob<ShipInfoDB>();
+
 
                     int randValue = mySystem.RNG.Next((int)DamageableEntity.GetDataBlob<MassVolumeDB>().Volume);
 
-                    foreach (KeyValuePair<Entity, double> pair in siDB.ShipComponentDictionary)
+                    foreach (KeyValuePair<Entity, double> pair in ShipInst.ComponentDictionary)
                     {
                         if (pair.Value > randValue)
                         {
@@ -115,9 +118,89 @@ namespace Pulsar4X.ECSLib
                 else
                 {
                     ReCalcProcessor.ReCalcAbilities(DamageableEntity);
-                }                
+                }
             }
+            else if (DamageableEntity.HasDataBlob<ColonyInfoDB>())
+            {
+                //Think about how to unify this one and shipInfoDB if possible.
+                //do Terraforming/Infra/Pop damage
+                Game game = DamageableEntity.Manager.Game;
 
+                ColonyInfoDB ColIDB = DamageableEntity.GetDataBlob<ColonyInfoDB>();
+                SystemBodyInfoDB SysInfoDB = ColIDB.PlanetEntity.GetDataBlob<SystemBodyInfoDB>();
+
+                PositionDB ColonyPosition = ColIDB.PlanetEntity.GetDataBlob<PositionDB>();
+
+                StarSystem mySystem; //I need all of this to get to the rng.
+                if (!game.Systems.TryGetValue(ColonyPosition.SystemGuid, out mySystem))
+                    throw new GuidNotFoundException(ColonyPosition.SystemGuid);
+
+                //How should damage work here?
+                //quarter million dead per strength of nuclear attack? 1 radiation/1 dust per strength?
+                //Same chance to destroy components as ship destruction?
+
+                //I need damage type for these. Missiles/bombs(missile damage but no engine basically) will be the only thing that causes this damage.
+                //ColIDB.Population
+                //SysInfoDB.AtmosphericDust
+                //SysInfoDB.RadiationLevel
+
+
+                //Installation Damage section:
+                ComponentInstancesDB ColInst = DamageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are installations in this context
+                int damageAttempt = 0;
+                while (damageAmount > 0)
+                {
+                    int randValue = mySystem.RNG.Next((int)DamageableEntity.GetDataBlob<MassVolumeDB>().Volume);
+
+                    foreach (KeyValuePair<Entity, double> pair in ColInst.ComponentDictionary)
+                    {
+                        if (pair.Value > randValue) //This installation was targeted
+                        {
+
+                            //check if this Installation is destroyed
+                            //if it isn't get density
+                            MassVolumeDB mvDB = pair.Key.GetDataBlob<MassVolumeDB>();
+
+                            double DensityThreshold = 1.0; //what should this be?
+                            double dmgPercent = DensityThreshold * mvDB.Density;
+
+                            int dmgDone = (int)(damageAmount * dmgPercent);
+
+                            ComponentInfoDB ciDB = pair.Key.GetDataBlob<ComponentInfoDB>();
+                            ComponentInstanceInfoDB ciiDB = pair.Key.GetDataBlob<ComponentInstanceInfoDB>();
+
+                            if (ciiDB.HTKRemaining > 0) //Installation is not destroyed yet
+                            {
+                                if (dmgDone >= ciiDB.HTKRemaining) //Installation is definitely wrecked
+                                {
+                                    damageAmount = damageAmount - ciiDB.HTKRemaining;
+                                    ciiDB.HTKRemaining = 0;
+                                }
+                                else
+                                {
+                                    ciiDB.HTKRemaining = ciiDB.HTKRemaining - damageAmount;
+                                    damageAmount = 0;
+
+                                }
+                            }
+                            else
+                            {
+                                damageAttempt++;
+                                if (damageAttempt == 20) // The planet won't blow up because of this, but no more attempts to damage installations should be made here.
+                                    break;
+
+                                continue;
+
+                            }
+                        }
+                    }
+                    if (damageAttempt == 20) // need to copy this to fully break out of the loop;
+                        break;
+                }
+
+                //This will need to be updated to deal with colonies.
+                ReCalcProcessor.ReCalcAbilities(DamageableEntity);
+            }
         }
 
         /// <summary>

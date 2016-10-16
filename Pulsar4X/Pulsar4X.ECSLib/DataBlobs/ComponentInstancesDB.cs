@@ -16,8 +16,15 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         [PublicAPI]
         public PrIwObsDict<Entity, PrIwObsList<Entity>> SpecificInstances { get; internal set; } = new PrIwObsDict<Entity, PrIwObsList<Entity>>();
-        
-        public ComponentInstancesDB() { }
+
+
+        // list of components and where in the ship they are.
+        public Dictionary<Entity, double> ComponentDictionary { get; set; }
+
+        public ComponentInstancesDB()
+        {
+            ComponentDictionary = new Dictionary<Entity, double>();
+        }
 
 
 
@@ -25,6 +32,7 @@ namespace Pulsar4X.ECSLib
         public ComponentInstancesDB(ComponentInstancesDB db)
         {
             SpecificInstances = new PrIwObsDict<Entity, PrIwObsList<Entity>>(db.SpecificInstances);
+            ComponentDictionary = new Dictionary<Entity, double>(db.ComponentDictionary);
         }
 
         /// <summary>

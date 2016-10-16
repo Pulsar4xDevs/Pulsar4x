@@ -41,6 +41,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public List<Entity> Scientists { get; internal set; } = new List<Entity>();
 
+        /// <summary>
+        /// Installation list for damage calculations. Colony installations are considered components.
+        /// </summary>
+        public Dictionary<Entity, double> ColonyComponentDictionary { get; set; }
+
         public ColonyInfoDB() { }
     
         /// <summary>
@@ -57,6 +62,8 @@ namespace Pulsar4X.ECSLib
             OrdinanceStockpile = new Dictionary<Guid, float>();
             FighterStockpile = new List<Entity>();
             Scientists = new List<Entity>();
+
+            ColonyComponentDictionary = new Dictionary<Entity, double>();
         }
 
         public ColonyInfoDB(Entity species, long populationCount, Entity planet):this(
@@ -73,6 +80,7 @@ namespace Pulsar4X.ECSLib
             OrdinanceStockpile = new Dictionary<Guid, float>(colonyInfoDB.OrdinanceStockpile);
             FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);            
             Scientists = new List<Entity>(colonyInfoDB.Scientists);
+            ColonyComponentDictionary = new Dictionary<Entity, double>(colonyInfoDB.ColonyComponentDictionary);
         }
 
         public override object Clone()
