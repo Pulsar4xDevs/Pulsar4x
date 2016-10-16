@@ -28,8 +28,8 @@ namespace Pulsar4X.ECSLib
                     totalHTK += componentInstance.GetDataBlob<ComponentInstanceInfoDB>().HTKRemaining; 
                     totalVolume += componentVolume;
                     totalTonnage += componentTonnage;
-                    if (!shipInfo.ShipComponentDictionary.ContainsKey(componentInstance))
-                        shipInfo.ShipComponentDictionary.Add(componentInstance, totalVolume);
+                    if (!componentInstances.ComponentDictionary.ContainsKey(componentInstance))
+                        componentInstances.ComponentDictionary.Add(componentInstance, totalVolume);
                 }
             }
             if (shipInfo.Tonnage != totalTonnage)
