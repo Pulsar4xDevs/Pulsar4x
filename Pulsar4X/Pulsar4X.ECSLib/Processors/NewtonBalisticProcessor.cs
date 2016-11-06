@@ -26,6 +26,16 @@ namespace Pulsar4X.ECSLib
                 NewtonBalisticDB balisticDB = objectEntity.GetDataBlob<NewtonBalisticDB>();
                 PositionDB position = objectEntity.GetDataBlob<PositionDB>();
                 position.RelativePosition += Distance.KmToAU(balisticDB.CurrentSpeed * orbitCycle.TotalSeconds);
+
+                Entity myTarget = manager.GetLocalEntityByGuid(balisticDB.TargetGuid);
+                PositionDB targetPos = myTarget.GetDataBlob<PositionDB>();
+
+                if(targetPos.AbsolutePosition == position.AbsolutePosition)
+                {
+                    //do something in damage processor for asteroid hitting a planet?
+
+                }
+
             }
         }
     }
