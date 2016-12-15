@@ -15,12 +15,19 @@ Bugs can be reported on the [issue tracker.](https://github.com/Pulsar4xDevs/Pul
 
 To compile Pulsar4x we recommend [VisualStudio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). we're starting to use a bit of C#6, so 2013 is not recomended unless you know what you're doing.  
 Xamarin Studio does work under windows, and the process is the same as for VS2015.
+
 under linux you will need:
 MonoDevelop
 Mono-Complete
+and we recomended that you also install:
+Monodevelop-nunit (to run the unit tests)
+In monodevelop Tools -> Addin Manager -> Gallery 
+install Eto.Forms Support Addin (this adds some autocomplete to the eto.forms xaml, and shows a live preview of forms as you code them, and adds some Templates for the eto.forms stuff. 
+
 under mac you will need:
+
 Xamarin Studio
-???
+??? (probibly simular to the linux requirements as xamarin is a fork of monodevelop)
 
 
 Instructions:
@@ -31,14 +38,15 @@ Instructions:
 
 3. a. If you're running Windows: unload the GTK and Mac projects by right clicking them in the solution explorer (!Don't delete them!) (this should eventualy  be fixed but at the time of this writing they're WIP.)
   
- b. If you're running Linux: Our linux dev has disapeared into the either, there are a number of bugs that I will hopefully eventualy get around to fixing... unless somone else comes along and wants to try doing linux dev.
-till then: install monodev and mono-complete. 
-open the sln, run using linux 64 config.   
+ b. If you're running Linux: Our primary linux dev has disapeared into the either, but I've started attempting to dev on linux mint. wish me luck...  
+install monodev and mono-complete. (bare minimum)
+open the Pulsar4x.sln in monodevelop.  
+
  c. If you're running Mac: welcome to the team! we don't currently have a mac specialist, feel free to take on the challenge!
 you'll need xamarin studio to compile it for mac, there is a dedicated mac project, but that is missing the OpenTK lib. as I dont' have access to mac I'm unable to test or fix this. you can however run the gtk project, which has some bugs I'm hoping will get fixed when a new version of eto.forms comes out.
 
 4. a. if you're running Windows Set Pulsar4x.CrossPlatform.WPF project as the startup project. you should be able to build and/or run from there.   
- b. Linux: See 3b
+ b. Linux: Set Pulsar4x.CrossPlatform.Gtk2 as teh startup project. if you have problems building and running try unloading the WPF, Mac and Test projects.
  c. Mac:  See 3c
 
 Note! there are a number of nuget packages that VS should automaticaly get the first time you attempt to build. 
