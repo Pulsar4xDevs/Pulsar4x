@@ -8,6 +8,7 @@ A Fan work recreation of Aurora, a 4x space sim created by Steve Walmsley. Pulsa
 Main forum at: http://aurora2.pentarch.org/index.php/board,169.0.html
 
 IRC channel #Pulsar4x on Freenode.
+Gitter room at https://gitter.im/Pulsar4x/Lobby# (another chat system that uses your git account. messages are persistant and you can paste/drag and drop screenshots directly to the chat)  
 
 Bugs can be reported on the [issue tracker.](https://github.com/Pulsar4xDevs/Pulsar4x/issues)
 
