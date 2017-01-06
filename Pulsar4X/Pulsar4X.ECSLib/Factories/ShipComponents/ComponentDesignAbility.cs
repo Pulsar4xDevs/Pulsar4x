@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
                 input = MinValue;
             else if (input > MaxValue)
                 input = MaxValue;
-            Formula.ReplaceExpression(input.ToString(new System.Globalization.CultureInfo("en-US"))); //prevents it being reset to the default value on Evaluate;
+            Formula.ReplaceExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
             Formula.Evaluate();//force dependants to recalc.
         }
 
