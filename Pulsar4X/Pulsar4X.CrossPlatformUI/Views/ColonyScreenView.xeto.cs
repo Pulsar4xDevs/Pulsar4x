@@ -38,27 +38,30 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             PopDataGrid.Columns.Add(new GridColumn
             {
-                DataCell = new TextBoxCell { Binding = Binding.Property((KeyValuePair<string, long> r) => r.Key) }
+                DataCell = new TextBoxCell { Binding = Binding.Property((KeyValuePair<string, long> r) => r.Key) },
+                HeaderText = "Race"
             });
             PopDataGrid.Columns.Add(new GridColumn
             {
-                DataCell = new TextBoxCell { Binding = Binding.Property((KeyValuePair<string, long> r) => r.Value).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { Binding = Binding.Property((KeyValuePair<string, long> r) => r.Value).Convert(r => r.ToString("N0")) },
+                HeaderText = "Population"
             });
 
             MineralDeposits.Columns.Add(new GridColumn
             {
-                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, string>(r => r.Mineral) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, string>(r => r.Mineral) },
+                HeaderText = "Resource"
             });
             MineralDeposits.Columns.Add(new GridColumn
             {
-                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, double>(r => r.Accessability).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, double>(r => r.Accessability).Convert(r => r.ToString("F3")) },
+                HeaderText = "Access."
             });
             MineralDeposits.Columns.Add(new GridColumn
             {
-                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<PlanetMineralInfoVM, int>(r => r.Amount).Convert(r => r.ToString()) },
+                HeaderText = "Stock"
             });
-
-
         }
 
         public ColonyScreenView(GameVM gameVM) :this()
