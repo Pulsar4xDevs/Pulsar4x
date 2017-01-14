@@ -3,5 +3,7 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-  <StackLayout x:Name="Stack" />
+  <Scrollable>
+    <StackLayout x:Name="Stack" />
+  </Scrollable>
 </Panel>
