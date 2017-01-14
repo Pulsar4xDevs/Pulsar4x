@@ -7,7 +7,7 @@ using Pulsar4X.ViewModel;
 namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 {
     
-    public class CargoStorageView : Scrollable
+    public class CargoStorageView : Panel
     {
         protected StackLayout CargoTypes;
         public CargoStorageView()

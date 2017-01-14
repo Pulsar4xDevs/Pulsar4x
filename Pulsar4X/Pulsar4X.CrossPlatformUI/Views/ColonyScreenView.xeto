@@ -5,38 +5,28 @@
   xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
   xmlns:c2="clr-namespace:Pulsar4X.CrossPlatformUI.Views.CargoView;assembly=Pulsar4X.CrossPlatformUI"
   >
-  <TableLayout>
+  <TableLayout Padding="5,5,5,5" Spacing ="5,5">
     <TableRow>
       <ComboBox ID="ColonySelection"  />
     </TableRow>
-    <TableRow>
+    <TableRow ScaleHeight = "True">
       <TableLayout>
         <TableRow><Label Text="Facilites"/></TableRow>
-        <TableRow>
-          <c:GenericStackControl x:Name="FacilitysView" DataContext="{Binding FacilitesList}" />
-        </TableRow>      
+        <TableRow><c:GenericStackControl x:Name="FacilitysView" DataContext="{Binding FacilitesList}" /></TableRow>      
       </TableLayout>
       <TableLayout>
         <TableRow><Label Text ="Population"/></TableRow>
-        <TableRow> <GridView ID="PopDataGrid" /></TableRow>
-      </TableLayout>
-     
-      <TableLayout>
-        <TableRow> 
-          <Label Text="Mineral Deposits" /> 
-        </TableRow>
-        <TableRow>
-          <GridView ID="MineralDeposits"  />
-        </TableRow>
+        <TableRow><GridView ID="PopDataGrid" /></TableRow>
       </TableLayout>
       <TableLayout>
-        <TableRow>
-          <Label Text="Cargo Stockpile" />
-        </TableRow>
-        <TableRow>
-          <c2:CargoStorageView x:Name="CargoView"   />
-        </TableRow>
+        <TableRow><Label Text="Mineral Deposits"/></TableRow>
+        <TableRow><GridView ID="MineralDeposits"/></TableRow>
       </TableLayout>
+      <TableLayout>
+        <TableRow><Label Text="Cargo Stockpile"/></TableRow>
+        <TableRow><c2:CargoStorageView x:Name="CargoView"/></TableRow>
+      </TableLayout>
+      <TableLayout></TableLayout>
     </TableRow>
     <TableRow>
       <c:JobAbilityView x:Name="RefineryAbilityView" />
