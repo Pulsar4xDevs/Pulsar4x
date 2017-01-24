@@ -8,7 +8,7 @@
   <TableLayout>
     <TableRow ScaleHeight="False">
       <TableCell>
-        <c:TimeControlView  DataContext="{Binding TimeControl}" />
+        <c:TimeControlView  ID ="TimeControlV" DataContext="{Binding TimeControl}" Enabled ="False" />
         <!--
         <StackLayout Orientation="Horizontal" x:Name="adv_buttons" Padding="10,5,5,5" VerticalContentAlignment="Center">
           <Panel Padding="5,0,10,0">

@@ -4,21 +4,25 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
   >
 
-  <TableLayout >
+  <TableLayout Padding ="5,5,5,5" >
     <TableRow>
-	    <Label Text="Tick Length" />
-      <NumericUpDown Value ="{Binding TickLength}"/>
+	    <Label Text="Tick Length [s]" />
+      <NumericUpDown Value ="{Binding TickLength}" MinValue = "1"/>
+      <Label Text="  " Enabled ="False" />
       <Label Text="Tick Multiplier" />
-      <NumericUpDown Value ="{Binding TickMultiplier}"/>
+      <NumericUpDown Value ="{Binding TickMultiplier}" MinValue = "1"/>
+      <Label Text="  " Enabled ="False" />
       <Button Command="{Binding PausePlayCMD}"  Text="||>" />
       <Button Command="{Binding TimeStepCMD}" Text="Step" />
       <TableCell></TableCell>
     </TableRow>
     <TableRow >
 	    <Label Text="Tick Frequency" />
-      <NumericUpDown Value ="{Binding TickFreq}" />
+      <NumericUpDown Value ="{Binding TickFreq}" MinValue = "1" />
+      <Label Text="  " Enabled ="False" />
       <Label Text="Date: " />
       <Label Text="{Binding CurrentGameDate}" />
+      <Label Text="  " Enabled ="False" />
       <Label Text="LastProcessingTime: " />
       <Label Text="{Binding LastTickLen}" />
     </TableRow>
