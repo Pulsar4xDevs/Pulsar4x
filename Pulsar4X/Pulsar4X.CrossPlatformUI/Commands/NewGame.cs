@@ -27,11 +27,14 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             if (_gameVM.HasGame)
             {
                 // Check if we want to save the current game.
-                DialogResult result = MessageBox.Show("Would you like to save the current game?", MessageBoxButtons.YesNo, MessageBoxType.Question, MessageBoxDefaultButton.Yes);
+                DialogResult result = MessageBox.Show("Would you like to save the current game?", "Save game?", MessageBoxButtons.YesNoCancel, MessageBoxType.Question, MessageBoxDefaultButton.Yes);
                 if (result == DialogResult.Yes)
                 {
                     var saveGame = new SaveGame(_gameVM);
                     saveGame.Execute();
+                } else if(result == DialogResult.Cancel)
+                {
+                    return;
                 }
             }
 
