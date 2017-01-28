@@ -46,16 +46,21 @@ namespace Pulsar4X.CrossPlatformUI.Views
             LastLoc = (Point)e.Location;
         }
 
+        /// <summary>
+        /// Zoom in and out to the mouse position using the mousewheel
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SystemMap_DrawableView_MouseWheel(object sender, MouseEventArgs e)
         {
             if ((int)e.Delta.Height == 1)
             {
-                _camera2.ZoomIn();
+                _camera2.ZoomIn(e.Location);
                 Invalidate();
             }
             else if ((int)e.Delta.Height == -1)
             {
-                _camera2.ZoomOut();
+                _camera2.ZoomOut(e.Location);
                 Invalidate();
             }
         }
