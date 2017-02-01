@@ -11,6 +11,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public Size ViewPortCenter { get { return _viewPort.Size / 2; } }
         public float ZoomLevel { get; set; } = 200;
+        public float zoomSpeed { get; set;} = 1.25f;
 
         public Drawable _viewPort;
 
@@ -36,6 +37,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
             return viewCoord;
         }
 
+        /// <summary>
+        /// returns the viewCoordinate of a given world Coordinate 
+        /// </summary>
+        /// <param name="worldCoord"></param>
+        /// <returns></returns>
         public Point ViewCoordinate(Vector4 worldCoord)
         {
             PointF coord = new PointF((float)worldCoord.X, (float)worldCoord.Y);
@@ -44,6 +50,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         /// <summary>
         /// Offset the position of the camare i.e. Pan in world units.
+        /// <param name="offset">Pans the camera relative to offset</param>
         /// </summary>
         public void WorldOffset(PointF offset)
         {
@@ -54,22 +61,28 @@ namespace Pulsar4X.CrossPlatformUI.Views
         /// <summary>
         /// Zoom in and keep try to keep the given pixel under the mouse.
         /// </summary>
-        /// <param name="x">The X coordinate within the viewport</param>
-        /// <param name="y">The Y coordinate within the viewport</param>
-        public void ZoomIn()
+        /// <param name="zoomCoords">The coordinates of the panel to zoom in</param>
+        public void ZoomIn(PointF zoomCoords)
         {
             if (ZoomLevel < MAX_ZOOMLEVEL)
-                ZoomLevel *= 1.1f;
+            {
+                ZoomLevel *= zoomSpeed;
+                this.WorldOffset(zoomCoords  - ViewPortCenter - (zoomCoords - ViewPortCenter) * zoomSpeed);
+            }
         }
 
         /// <summary>
         /// Zoom out and keep try to keep the given pixel under the mouse.
         /// </summary>
-        /// <param name="size"></param>
-		public void ZoomOut()
+        /// <param name="zoomCoords">The coordinates of the panel to soom out from</param>
+		public void ZoomOut(PointF zoomCoords)
         {
             if (ZoomLevel > 0)
-                ZoomLevel *= 0.9f;
+            {
+                ZoomLevel /= zoomSpeed;
+                this.WorldOffset(zoomCoords - ViewPortCenter - (zoomCoords - ViewPortCenter) / zoomSpeed);
+            }
+
         }
 
         public IMatrix GetViewProjectionMatrix(PointF position)
