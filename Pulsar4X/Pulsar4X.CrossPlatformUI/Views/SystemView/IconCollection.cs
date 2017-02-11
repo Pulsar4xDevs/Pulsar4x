@@ -31,7 +31,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
         /// <param name="camera"></param>
         public void Init(IEnumerable<Entity> entities, Camera2dv2 camera)
         {
-            System.Diagnostics.Debug.WriteLine("Init called");
             IconDict.Clear();
             OrbitList.Clear();
             TextIconList.Clear();
