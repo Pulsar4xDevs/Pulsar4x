@@ -113,7 +113,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             string lastDrawTime = stopwatch.ElapsedMilliseconds.ToString();
             stopwatch.Reset();
             Font font = new Font(FontFamilies.Fantasy, 8);
-            Color color = new Color(Colors.Black);
+            Color color = new Color(Colors.White);
             PointF loc = new PointF(0, 0);
             e.Graphics.DrawText(font, color, loc, lastDrawTime);
         }

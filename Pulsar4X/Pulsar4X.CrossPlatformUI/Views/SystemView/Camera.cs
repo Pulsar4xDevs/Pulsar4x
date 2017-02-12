@@ -49,6 +49,50 @@ namespace Pulsar4X.CrossPlatformUI.Views
         }
 
         /// <summary>
+        /// returns the worldCoordinate of a given View Coordinate 
+        /// </summary>
+        /// <param name="viewCoordinate"></param>
+        /// <returns></returns>
+        public Point WorldCoordinate(PointF viewCoordinate)
+        {
+            Point worldCoord = (Point)((viewCoordinate - ViewPortCenter) / (ZoomLevel));
+            return worldCoord;
+        }
+
+        /// <summary>
+        /// returns the worldCoordinate of a given View Coordinate 
+        /// </summary>
+        /// <param name="viewCoordinate"></param>
+        /// <returns></returns>
+        public Point WorldCoordinate(Vector4 viewCoordinate)
+        {
+            PointF coord = new PointF((float) viewCoordinate.X, (float) viewCoordinate.Y);
+            return WorldCoordinate(coord);
+        }
+
+        /// <summary>
+        /// Returns the size of an object in view-Coordinates
+        /// </summary>
+        /// <param name="worldSize"></param>
+        /// <returns></returns>
+        public SizeF ViewSize(SizeF worldSize)
+        {
+            SizeF viewSize = worldSize * ZoomLevel;
+            return viewSize;
+        }
+
+        /// <summary>
+        /// Returns the size of an object in world-Coordinates
+        /// </summary>
+        /// <param name="viewSize"></param>
+        /// <returns></returns>
+        public SizeF WorldSize(SizeF viewSize)
+        {
+            SizeF WorldSize = viewSize / ZoomLevel;
+            return WorldSize;
+        }
+
+        /// <summary>
         /// Offset the position of the camare i.e. Pan in world units.
         /// <param name="offset">Pans the camera relative to offset</param>
         /// </summary>
@@ -85,12 +129,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         }
 
+        /// <summary>
+        /// Returns the translation matrix for a world position, relative to the camera position
+        /// </summary>
+        /// <param name="position">Position in World Units</param>
+        /// <returns></returns>
         public IMatrix GetViewProjectionMatrix(PointF position)
         {
             var transformMatrix = Matrix.Create();
-            transformMatrix.Translate(ViewCoordinate(_cameraWorldPosition));
-            position *= ZoomLevel;
-            transformMatrix.Translate(position);
+            transformMatrix.Translate(ViewCoordinate(_cameraWorldPosition + position));
             return transformMatrix;
         }
     }
