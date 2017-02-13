@@ -70,10 +70,29 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 item.ViewOffset = item.DefaultViewOffset;
             }
 
+            //Consolidate TextIcons that share the same position and name
+            TextIconList.Sort();
+            int ListLength = TextIconList.Count;
+            int TextIconQuantity = 1;
+            for (int i = 1; i < ListLength; i++)
+            {
+                if (TextIconList[i - 1].CompareTo(TextIconList[i]) == 0)
+                {
+                    TextIconQuantity++;
+                    TextIconList.RemoveAt(i);
+                    i--;
+                    ListLength--;
+                }
+                else if (TextIconQuantity > 1)
+                {
+                    TextIconList[i - 1].name += " x" + TextIconQuantity;
+                    TextIconQuantity = 1;
+                }
+            }
+
             //Placement happens bottom to top, left to right
             //Each newly placed Texticon is compared to only the Texticons that are placed above its position
             //Therefore a sorted list of the occupied Positions is maintained
-            TextIconList.Sort();
             occupiedPosition.Add(TextIconList[0].ViewDisplayRect);
             for (int i = 1; i < TextIconList.Count; i++)
             {
