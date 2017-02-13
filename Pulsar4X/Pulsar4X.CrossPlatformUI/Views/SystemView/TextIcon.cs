@@ -54,7 +54,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 if (this.worldPosition.X > compareIcon.worldPosition.X) return 1;
                 else if (this.worldPosition.X < compareIcon.worldPosition.X) return -1;
-                else return 0;
+                else return this.name.CompareTo(compareIcon.name);
             }
         }
 
