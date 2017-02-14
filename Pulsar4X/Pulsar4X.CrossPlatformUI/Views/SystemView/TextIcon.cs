@@ -20,7 +20,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         public PositionDB worldPosition { get; }
 
-        public string name { get; }
+        public string name { get; set; }
 
         private Camera2dv2 _camera;
 
@@ -42,7 +42,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         /// <summary>
         /// Default comparer, based on worldposition.
-        /// Sorts Bottom to top, left to right
+        /// Sorts Bottom to top, left to right, then alphabetically
         /// </summary>
         /// <param name="compareIcon"></param>
         /// <returns></returns>
@@ -54,7 +54,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             {
                 if (this.worldPosition.X > compareIcon.worldPosition.X) return 1;
                 else if (this.worldPosition.X < compareIcon.worldPosition.X) return -1;
-                else return 0;
+                else return -this.name.CompareTo(compareIcon.name);
             }
         }
 
