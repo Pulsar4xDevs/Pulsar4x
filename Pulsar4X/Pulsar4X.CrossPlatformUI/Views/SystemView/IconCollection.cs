@@ -12,6 +12,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public List<OrbitRing> OrbitList { get; } = new List<OrbitRing>();
         public List<TextIcon> TextIconList { get; } = new List<TextIcon>();
         public List<EntityIcon> EntityList { get; } = new List<EntityIcon>();
+        public ScaleIcon scale { get; set; }
 
 
         public Dictionary<Guid, EntityIcon> IconDict { get; } = new Dictionary<Guid, EntityIcon> ();
@@ -35,6 +36,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             OrbitList.Clear();
             TextIconList.Clear();
             EntityList.Clear();
+            scale = new ScaleIcon(camera);
 
             foreach (var item in entities)
             {
@@ -134,7 +136,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var item in TextIconList)
             {
                 item.DrawMe(g);
-            }            
+            }
+
+            scale.DrawMe(g); 
         }
     }
 
