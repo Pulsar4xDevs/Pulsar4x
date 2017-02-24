@@ -349,6 +349,7 @@
       <DependentUpon>SysInfo1dMap.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\SystemView\Camera.cs" />
+    <Compile Include="Views\SystemView\ScaleIcon.cs" />
     <Compile Include="Views\SystemView\EntityIcon.cs" />
     <Compile Include="Views\JobAbilityView.xeto.cs">
       <DependentUpon>JobAbilityView.xeto</DependentUpon>

@@ -10,6 +10,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public PointF WorldPosition { get { return _cameraWorldPosition; } }
 
         public Size ViewPortCenter { get { return _viewPort.Size / 2; } }
+        public Size ViewPortSize { get { return _viewPort.Size; } }
         public float ZoomLevel { get; set; } = 200;
         public float zoomSpeed { get; set;} = 1.25f;
 
@@ -79,6 +80,28 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             SizeF viewSize = worldSize * ZoomLevel;
             return viewSize;
+        }
+        
+        /// <summary>
+        /// Returns the Distance in view-Coordinates
+        /// </summary>
+        /// <param name="worldSize"></param>
+        /// <returns></returns>
+        public float ViewDistance(float dist)
+        {
+            float ViewDistance = dist * ZoomLevel;
+            return ViewDistance;
+        }
+
+        /// <summary>
+        /// Returns the Distance in World-Coordinates
+        /// </summary>
+        /// <param name="worldSize"></param>
+        /// <returns></returns>
+        public float WorldDistance(float dist)
+        {
+            float WorldDistance = dist / ZoomLevel;
+            return WorldDistance;
         }
 
         /// <summary>
