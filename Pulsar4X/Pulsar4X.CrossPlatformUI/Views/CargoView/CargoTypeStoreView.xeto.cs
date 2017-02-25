@@ -58,6 +58,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
                 _vm = vm;
                 ResetDesignStore();
                 _vm.DesignStore.CollectionChanged += DesignStore_CollectionChanged;
+                _vm.TypeStore.CollectionChanged += TypeStore_CollectionChanged;
                 _vm.PropertyChanged += Vm_PropertyChanged;
             }
         }
@@ -103,7 +104,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 
         private void TypeStore_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            CargoGrid.DataStore = _vm.TypeStore;
+            CargoGrid.Height = 52 + 24 * _vm.TypeStore.Count;
+            //CargoGrid.DataStore = _vm.TypeStore;
             //if (e.Action == NotifyCollectionChangedAction.Add )
             //{
             //    CargoGrid.DataStore = _vm.TypeStore;
