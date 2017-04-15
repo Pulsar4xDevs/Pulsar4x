@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Returns the length of this vector object. 
+        /// Returns the length(Magnatude) of this vector object. 
         /// </summary>
         public double Length()
         {

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
@@ -43,6 +44,9 @@ namespace Pulsar4X.ECSLib
             Seed = seed;
             RNG = new Random(seed);
             game.Systems.Add(Guid, this);
+
+            FactionSystemKenDB factionKnowledge = new FactionSystemKenDB();
+            Entity.Create(SystemManager, new List<BaseDataBlob>() { factionKnowledge });
         }
 
         [OnDeserialized]
