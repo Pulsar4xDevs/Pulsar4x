@@ -32,6 +32,8 @@ under mac you will need:
 Xamarin Studio
 ??? (probibly simular to the linux requirements as xamarin is a fork of monodevelop)
 
+Another IDE option is the cross platform Rider from jetbrains: https://www.jetbrains.com/rider/  
+I'm currently using this under linux and I'm finding it a good option, though a bit heavier than MonoDevelop, it's lighter and more responsive than Visual studio. Although in beta it apears to have all the bells and whistles, and currently a lot easier to setup than MD, and a far faster install than VS.
 
 Instructions:
 
