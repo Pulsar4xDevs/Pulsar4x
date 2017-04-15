@@ -6,8 +6,8 @@ namespace Pulsar4X.ECSLib
 {
     public class MessagePump
     {
-        Dictionary<Player, ConcurrentQueue<Message>> MessageOutQueue = new Dictionary<Player, ConcurrentQueue<Message>>();
-        Dictionary<Player, ConcurrentQueue<Order>> MessageInQueue = new Dictionary<Player, ConcurrentQueue<Order>>();
+        internal Dictionary<Player, ConcurrentQueue<Message>> MessageOutQueue = new Dictionary<Player, ConcurrentQueue<Message>>();
+        internal Dictionary<Player, ConcurrentQueue<Order>> MessageInQueue = new Dictionary<Player, ConcurrentQueue<Order>>();
         public MessagePump(Game game)
         {
             foreach(Player player in game.Players) {
@@ -50,9 +50,9 @@ namespace Pulsar4X.ECSLib
 
     public interface OrderableProcessor
     {
-        void processOrder(Game game, Order order);
+        void ProcessOrder(Game game, Order order);
     }
-
+/*
     internal static class OrderProcessor2
     {
         internal static void processOrder(Game game, Order order)
@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
         }
 
     }
-
+*/
     public class Order
     {
         public enum OrderType
@@ -78,7 +78,7 @@ namespace Pulsar4X.ECSLib
         {
             Order newOrder = new Order();
             newOrder.TypeOfOrder = OrderType.ObjectOrder;
-            newOrder.ProcessorName = new ShipMoveOrderProcessor();
+            newOrder.ProcessorName = new TranslationOrderProcessor();
             return newOrder;
 
 

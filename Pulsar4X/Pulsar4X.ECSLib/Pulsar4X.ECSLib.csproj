@@ -261,6 +261,7 @@
     <Compile Include="Processors\Econ Subprocessors\TechProcessor.cs" />
     <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
     <Compile Include="Processors\StorageSpaceProcessor.cs" />
+    <Compile Include="Processors\TranslationMoveProcessor.cs" />
     <Compile Include="Processors\WeaponProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="StaticDataManager.cs" />

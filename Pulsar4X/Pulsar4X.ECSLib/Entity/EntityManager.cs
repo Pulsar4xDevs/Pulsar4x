@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -28,6 +29,9 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { get; private set; }
+
+        [JsonProperty]
+        internal ConcurrentQueue<Order> OrderQueue = new ConcurrentQueue<Order>();
 
         /// <summary>
         /// Static reference to an invalid manager.

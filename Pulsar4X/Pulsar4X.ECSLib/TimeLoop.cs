@@ -204,6 +204,7 @@ namespace Pulsar4X.ECSLib
 
         private DateTime ProcessNextInterupt(DateTime maxDateTime)
         {
+            RouteMessages();//TODO can we do this while waiting for the _stopwatch to elapse?
             DateTime processedTo;
             DateTime nextInteruptDateTime;
             if (EntityDictionary.Keys.Count != 0)
@@ -231,7 +232,28 @@ namespace Pulsar4X.ECSLib
             return processedTo;
         }
 
-
+        /// <summary>
+        /// routes messages from the main MessagePump message queue to thier respective managers.
+        /// </summary>
+        private void RouteMessages()
+        {
+            foreach (var kvp in _game.MessagePump.MessageInQueue)
+            {
+                while (kvp.Value.Count > 0)
+                {
+                    Order nextOrder;
+                    if (kvp.Value.TryDequeue(out nextOrder))
+                    {
+                        //TODO check auth, can this faction order this entity?
+                        Entity entity;
+                        if (_game.GlobalManager.TryGetEntityByGuid(nextOrder.EntityForOrderReq, out entity))
+                        {
+                            entity.Manager.OrderQueue.Enqueue(nextOrder);
+                        }
+                    }
+                }
+            }
+        }
 
         public bool Equals(TimeLoop other)
         {

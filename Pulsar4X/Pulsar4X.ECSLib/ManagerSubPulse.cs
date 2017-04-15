@@ -188,6 +188,14 @@ namespace Pulsar4X.ECSLib
     /// <returns>datetime processed to</returns>
     private void ProcessToNextInterupt(DateTime nextInteruptDateTime)
     {
+
+        while (_entityManager.OrderQueue.Count > 0) //process all the orders in the manager's order queue.
+        {
+            Order nextOrder;
+            if(_entityManager.OrderQueue.TryDequeue(out nextOrder));// should I do anything if it's false? (ie threadlocked due to writing) ie wait?
+                nextOrder.ProcessorName.ProcessOrder(_entityManager.Game, nextOrder);
+        }
+
         if (EntityDictionary.ContainsKey(nextInteruptDateTime))
         {
             foreach (KeyValuePair<PulseActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])

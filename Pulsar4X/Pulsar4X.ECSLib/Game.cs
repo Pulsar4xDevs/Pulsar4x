@@ -56,6 +56,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public TimeLoop GameLoop { get; set; }
 
+        public MessagePump MessagePump { get; private set; }
+
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
 
@@ -94,6 +96,7 @@ namespace Pulsar4X.ECSLib
             GameLoop = new TimeLoop(this);            
             EventLog = new EventLog(this);
             GlobalManager = new EntityManager(this);
+            MessagePump = new MessagePump(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
