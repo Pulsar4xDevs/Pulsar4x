@@ -175,6 +175,7 @@
     <Compile Include="DataBlobs\ShipDBs\DesignInfoDB.cs" />
     <Compile Include="Factories\AsteroidFactory.cs" />
     <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
+    <Compile Include="GanttOrders.cs" />
     <Compile Include="Helpers\CargoDictionary.cs" />
     <Compile Include="Helpers\EntityManipulation.cs" />
     <Compile Include="Helpers\CollectionChangedHelpers.cs" />

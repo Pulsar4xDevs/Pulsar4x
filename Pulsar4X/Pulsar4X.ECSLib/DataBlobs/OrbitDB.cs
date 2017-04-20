@@ -103,6 +103,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private readonly double _myMass;
 
+        //radius in AU
+        public double SphereOfInfluince { get; private set; }
+
         #region Construction Interface
         /// <summary>
         /// Returns an orbit representing the defined parameters.
@@ -221,7 +224,11 @@ namespace Pulsar4X.ECSLib
 
             Apoapsis = (1 + Eccentricity) * SemiMajorAxis;
             Periapsis = (1 - Eccentricity) * SemiMajorAxis;
+
+            SphereOfInfluince = GMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
         }
+
+
 
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)

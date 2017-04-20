@@ -16,10 +16,16 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public PrIwObsDict<Guid, long> CargoCapicity { get; private set; } = new PrIwObsDict<Guid, long>();
 
-        //[JsonProperty]
+        [JsonProperty]
         public PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>> StoredEntities { get; private set; } = new PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>>();
-        //[JsonProperty]
+        [JsonProperty]
         public PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>> MinsAndMatsByCargoType { get; private set;} = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>();
+
+        /// <summary>
+        /// in tones per hour?
+        /// </summary>
+        [JsonProperty]
+        public int TransferRate { get; internal set; } = 10;
 
         [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
         internal Dictionary<Guid, Guid> ItemToTypeMap;
@@ -75,5 +81,56 @@ namespace Pulsar4X.ECSLib
             return new CargoStorageDB(this);
         }
 
+    }
+
+    public class CargoOrderableDB : BaseDataBlob
+    {
+        [JsonProperty]
+        public CargoOrder CurrentOrder { get; internal set; }
+        [JsonProperty]
+        public PercentValue PercentComplete { get; internal set; }
+        [JsonProperty]
+        public int AmountToMove { get; internal set; }
+        [JsonProperty]
+        public double PartAmount { get; internal set; }
+        [JsonProperty]
+        public int TransferRate { get; internal set; } //an average of the transfer rates of the two entites.
+        [JsonProperty]
+        public DateTime LastRunDate { get; internal set; }
+
+        //Normaly datablobs shouldn't be referenced in datablobs, but if we're not serialising them it should be ok?
+        //mostly this is just to clean up some logic and not require it to figure out which is which each time the logic is run.
+        //it could be removed from here if it is really a problem.
+        [JsonIgnore]
+        public CargoStorageDB CargoFrom { get; internal set; }
+        [JsonIgnore]
+        public CargoStorageDB CargoTo { get; internal set; }
+
+        public CargoOrderableDB()
+        {
+        }
+
+        public CargoOrderableDB(CargoOrderableDB db)
+        {
+            CurrentOrder = db.CurrentOrder;
+            PercentComplete = db.PercentComplete;
+            AmountToMove = db.AmountToMove;
+            PartAmount = db.PartAmount;
+            TransferRate = db.TransferRate;
+            CargoFrom = db.CargoFrom;
+            CargoTo = db.CargoTo;
+            LastRunDate = db.LastRunDate;
+        }
+
+        [OnDeserialized]
+        private void Deserialized(StreamingContext context)
+        {
+            StorageSpaceProcessor.SetToFrom(this); //this sets CargoTo and CargoFrom
+        }
+
+        public override object Clone()
+        {
+            return new CargoOrderableDB(this);
+        }
     }
 }

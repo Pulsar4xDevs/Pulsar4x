@@ -244,16 +244,13 @@ namespace Pulsar4X.ECSLib
                     Order nextOrder;
                     if (kvp.Value.TryDequeue(out nextOrder))
                     {
-                        //TODO check auth, can this faction order this entity?
-                        Entity entity;
-                        if (_game.GlobalManager.TryGetEntityByGuid(nextOrder.EntityForOrderReq, out entity))
-                        {
-                            entity.Manager.OrderQueue.Enqueue(nextOrder);
-                        }
+                        if(nextOrder.PreProcessing(_game))
+                            nextOrder.ThisEntity.Manager.OrderQueue.Enqueue(nextOrder);
                     }
                 }
             }
         }
+
 
         public bool Equals(TimeLoop other)
         {

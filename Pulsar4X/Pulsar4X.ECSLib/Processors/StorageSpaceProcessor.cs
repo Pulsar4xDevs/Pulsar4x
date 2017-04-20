@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 
 
@@ -318,6 +319,25 @@ namespace Pulsar4X.ECSLib
             return true;
         }
 
+        /// <summary>
+        /// this just sets the CargoTo and CargoFrom in the cargoOrderableDB
+        /// </summary>
+        /// <param name="cargoOrderableDB"></param>
+        internal static void SetToFrom(CargoOrderableDB cargoOrderableDB)
+        {
+            switch (cargoOrderableDB.CurrentOrder.CargoOrderType)
+            {
+                case CargoOrder.CargoOrderTypes.LoadCargo:
+                    cargoOrderableDB.CargoFrom = cargoOrderableDB.CurrentOrder.TargetEntity.GetDataBlob<CargoStorageDB>();
+                    cargoOrderableDB.CargoTo = cargoOrderableDB.CurrentOrder.ThisEntity.GetDataBlob<CargoStorageDB>();
+                    break;
+                case CargoOrder.CargoOrderTypes.UnloadCargo:
+                    cargoOrderableDB.CargoTo = cargoOrderableDB.CurrentOrder.TargetEntity.GetDataBlob<CargoStorageDB>();
+                    cargoOrderableDB.CargoFrom = cargoOrderableDB.CurrentOrder.ThisEntity.GetDataBlob<CargoStorageDB>();
+                    break;
+            }
+        }
+
         internal static void ReCalcCapacity(Entity parentEntity)
         {
             CargoStorageDB storageDB = parentEntity.GetDataBlob<CargoStorageDB>();
@@ -349,6 +369,129 @@ namespace Pulsar4X.ECSLib
                     }
                 }
             }
+        }
+    }
+
+    public class CargoOrderProcessor : IOrderableProcessor
+    {
+        public void FirstProcess(Order order)
+        {
+            Game game = order.ThisEntity.Manager.Game;
+            CargoOrderableDB cargoOrderableDB = order.ThisEntity.GetDataBlob<CargoOrderableDB>();
+            cargoOrderableDB.CurrentOrder = (CargoOrder)order;
+            cargoOrderableDB.LastRunDate = order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
+
+            StorageSpaceProcessor.SetToFrom(cargoOrderableDB);
+
+            SetNextInterupt(EstDateTime(order, cargoOrderableDB), order);
+        }
+
+        public void ProcessOrder(Order order)
+        {
+            CargoStorageDB cargoStorageDB = order.ThisEntity.GetDataBlob<CargoStorageDB>();
+            CargoOrderableDB cargoOrderableDB = order.ThisEntity.GetDataBlob<CargoOrderableDB>();
+            TimeSpan deltaTime = order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime - cargoOrderableDB.LastRunDate;
+
+
+            CargoStorageDB cargoFrom = cargoOrderableDB.CargoFrom;
+            CargoStorageDB cargoTo = cargoOrderableDB.CargoTo;
+
+            double tonsThisDeltaT = cargoStorageDB.TransferRate * (double)deltaTime.Seconds / 3600;
+            tonsThisDeltaT += cargoOrderableDB.PartAmount;
+            cargoOrderableDB.PartAmount = tonsThisDeltaT - Math.Floor(tonsThisDeltaT);
+            int amountThisMove = Math.Min((int)tonsThisDeltaT, 0);
+            cargoOrderableDB.AmountToMove -= amountThisMove;
+
+            StorageSpaceProcessor.TransferCargo(cargoFrom, cargoTo, cargoOrderableDB.CurrentOrder.CargoItem, amountThisMove);
+
+            if (cargoOrderableDB.AmountToMove == 0)
+            {
+                cargoOrderableDB.PercentComplete.Percent = 1.0f;
+                order.OrdersQueueReference.OnNodeFinished(order);
+            }
+            else
+            {
+                if (order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime >= order.EstTimeComplete)
+                {
+                    SetNextInterupt(EstDateTime(order, cargoOrderableDB), order);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Sets an Entity interupt at the datetime the cargo transfer should complete.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="estDateTime"></param>
+        /// <param name="order"></param>
+        private void SetNextInterupt(DateTime estDateTime, Order order )
+        {
+            order.EstTimeComplete = estDateTime;
+            order.ThisEntity.Manager.ManagerSubpulses.AddEntityInterupt(estDateTime, PulseActionEnum.OrderProcess, order.ThisEntity);
+        }
+
+        private DateTime EstDateTime(Order order, CargoOrderableDB cargoOrderableDB)
+        {
+            cargoOrderableDB.TransferRate = (int)(cargoOrderableDB.CargoFrom.TransferRate + cargoOrderableDB.CargoTo.TransferRate * 0.5);
+            TimeSpan timeToComplete = TimeSpan.FromHours((float)cargoOrderableDB.AmountToMove / cargoOrderableDB.TransferRate);
+            return order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime + timeToComplete;
+        }
+
+        public Order GetCurrentOrder(Order order)
+        {
+            return GetCurrentOrder((CargoOrder)order);
+        }
+
+        public Order GetCurrentOrder(CargoOrder order)
+        {
+            return order.ThisEntity.GetDataBlob<CargoOrderableDB>().CurrentOrder;
+        }
+
+
+        public PercentValue GetPercentComplete(Order order)
+        {
+            return GetPercentComplete((CargoOrder)order);
+        }
+
+        public PercentValue GetPercentComplete(CargoOrder order)
+        {
+            return order.ThisEntity.GetDataBlob<CargoOrderableDB>().PercentComplete;
+        }
+
+
+
+    }
+
+    public class CargoOrder : Order
+    {
+        public enum CargoOrderTypes
+        {
+            LoadCargo,
+            UnloadCargo,
+        }
+
+        public CargoOrderTypes CargoOrderType;
+
+        public Guid CargoItemGuid;
+        public ICargoable CargoItem;
+        public int Amount;
+
+        public CargoOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID, CargoOrderTypes orderType, Guid cargoItemID, int amount ) : base(processor, entityGuid, factionID)
+        {
+            CargoOrderType = orderType;
+            CargoItemGuid = cargoItemID;
+            Amount = amount;
+        }
+
+        public CargoOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID, Guid targetGuid) : base(processor, entityGuid, factionID, targetGuid)
+        {
+        }
+
+        internal new bool PreProcessing(Game game)
+        {
+            game.StaticData.GetICargoable(CargoItemGuid);
+            return base.PreProcessing(game);
         }
     }
 }

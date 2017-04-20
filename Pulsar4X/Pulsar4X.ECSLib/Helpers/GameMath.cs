@@ -120,6 +120,8 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+
+
     /// <summary>
     /// Weighted list used for selecting values with a random number generator.
     /// </summary>
@@ -441,6 +443,11 @@ namespace Pulsar4X.ECSLib
             speed.Z = Distance.KmToAU(speedMagInKM.Z);
 
             return speed;
+        }
+
+        public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
+        {
+            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
         }
     }
 

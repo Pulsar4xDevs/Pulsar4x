@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.GanttOrders;
 
 namespace Pulsar4X.ECSLib
 {
@@ -48,40 +49,86 @@ namespace Pulsar4X.ECSLib
 
     }
 
-    public interface OrderableProcessor
+    public interface IOrderableProcessor
     {
-        void ProcessOrder(Game game, Order order);
-    }
-/*
-    internal static class OrderProcessor2
-    {
-        internal static void processOrder(Game game, Order order)
-        {
-
-            order.ProcessorName.processOrder(game, order);
-        }
+        void ProcessOrder(Order order);
+        void FirstProcess(Order order);
+        // LastProcess(Order order);
+        Order GetCurrentOrder(Order order);
+        PercentValue GetPercentComplete(Order order);
 
     }
-*/
+
     public class Order
     {
-        public enum OrderType
+        //public enum OrderType
+        //{
+        //    DataRequest,
+        //    ObjectOrder
+        //}
+        //public OrderType TypeOfOrder;
+        public Guid EntityGuid { get; set; }
+        public Guid FactionID { get; set; }
+        public IOrderableProcessor Processor;
+        public Guid TargetEntityGuid { get; internal set; }
+        public Order StartAfter { get; set; }
+        internal Entity ThisEntity { get; private set; }
+        internal Entity FactionEntity { get; private set; }
+        internal Entity TargetEntity { get; private set; }
+        public DateTime EstTimeComplete { get; internal set; }
+
+
+        public bool IsTargetEntityDependant { get; internal set; }
+
+        internal GanttList OrdersQueueReference { get; set; }
+
+        public Order(IOrderableProcessor processor, Guid entityGuid, Guid factionID)
         {
-            DataRequest,
-            ObjectOrder
+            Processor = processor;
+            EntityGuid = entityGuid;
+            FactionID = factionID;
+            IsTargetEntityDependant = false;
         }
-        public OrderType TypeOfOrder;
-        public Guid EntityForOrderReq;
-        public OrderableProcessor ProcessorName; //or would a stringname be better?
 
-        public static Order newOrder()
+        public Order(IOrderableProcessor processor, Guid entityGuid, Guid factionID, Guid targetGuid)
         {
-            Order newOrder = new Order();
-            newOrder.TypeOfOrder = OrderType.ObjectOrder;
-            newOrder.ProcessorName = new TranslationOrderProcessor();
-            return newOrder;
+            Processor = processor;
+            EntityGuid = entityGuid;
+            FactionID = factionID;
+            TargetEntityGuid = targetGuid;
+            IsTargetEntityDependant = true;
+        }
 
 
+        /// <summary>
+        /// looks up entity guids, and checks validity.
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns></returns>
+        internal bool PreProcessing(Game game)
+        {
+            Entity entity;
+            if (!game.GlobalManager.TryGetEntityByGuid(EntityGuid, out entity))
+                return false;
+            ThisEntity = entity;
+            if (!ThisEntity.HasDataBlob<OrderableDB>())
+                return false;
+            OrdersQueueReference = ThisEntity.GetDataBlob<OrderableDB>().OrdersQueue;
+            Entity factionEntity;
+            if (!game.GlobalManager.FindEntityByGuid(FactionID, out factionEntity))
+                return false;
+            FactionEntity = factionEntity;
+            if (IsTargetEntityDependant)
+            {
+                Entity targetEntity;
+                if (!game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out targetEntity))
+                    return false;
+                TargetEntity = targetEntity;
+            }
+            if (entity.GetDataBlob<OwnedDB>().EntityOwner != FactionEntity)
+                return false;
+
+            return true;
         }
     }
 
