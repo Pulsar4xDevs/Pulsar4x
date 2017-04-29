@@ -29,13 +29,11 @@ install Eto.Forms Support Addin (this adds some autocomplete to the eto.forms xa
 
 under mac you will need:
 
-Xamarin Studio
-??? (probibly simular to the linux requirements as xamarin is a fork of monodevelop)
+mono + GTK + Xamarin Studio
+http://www.monodevelop.com/download/
 
-Another IDE option is the cross platform Rider from jetbrains: https://www.jetbrains.com/rider/  
-I'm currently using this under linux and I'm finding it a good option, though a bit heavier than MonoDevelop, it's lighter and more responsive than Visual studio. Although in beta it apears to have all the bells and whistles, and currently a lot easier to setup than MD, and a far faster install than VS.
 
-Instructions:
+## Instructions:
 
 1. Clone the Git Repo.
 
@@ -47,8 +45,7 @@ Instructions:
 install monodev and mono-complete. (bare minimum)
 open the Pulsar4x.sln in monodevelop.  
 
- c. If you're running Mac: welcome to the team! we don't currently have a mac specialist, feel free to take on the challenge!
-you'll need xamarin studio to compile it for mac, there is a dedicated mac project, but that is missing the OpenTK lib. as I dont' have access to mac I'm unable to test or fix this. you can however run the gtk project, which has some bugs I'm hoping will get fixed when a new version of eto.forms comes out.
+ c. If you're running Mac: you'll need xamarin studio to compile it for mac, there is a dedicated mac project, but that is missing the OpenTK lib. as I dont' have access to mac I'm unable to test or fix this. you can however run the gtk project, which has some bugs I'm hoping will get fixed when a new version of eto.forms comes out.
 
 4. a. if you're running Windows Set Pulsar4x.CrossPlatform.WPF project as the startup project. you should be able to build and/or run from there.   
  b. Linux: Set Pulsar4x.CrossPlatform.Gtk2 as teh startup project. if you have problems building and running try unloading the WPF, Mac and Test projects.
