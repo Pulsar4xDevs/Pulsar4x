@@ -2,16 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    [DebuggerDisplay("{" + nameof(DebugDisplay) + "}")]
     [JsonConverter(typeof(EntityConverter))]
     [PublicAPI]
     public sealed class Entity : ProtoEntity
     {
         // Index slot of this entity's datablobs in its EntityManager.
         internal int ID;
+
+        private string DebugDisplay => GetDataBlob<NameDB>()?.DefaultName ?? Guid.ToString();
 
         [NotNull]
         [JsonIgnore]
