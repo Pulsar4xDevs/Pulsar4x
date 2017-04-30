@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     {
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
         {
-            Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction, Vector4.Zero, starsys, shipName);
+            Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction, parent.GetDataBlob<PositionDB>()?.AbsolutePosition ?? Vector4.Zero, starsys, shipName);
 
             var orbitDB = new OrbitDB(parent);
             ship.SetDataBlob(orbitDB);
