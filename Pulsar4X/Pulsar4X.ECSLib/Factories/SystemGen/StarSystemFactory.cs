@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
             double lunaAoP = 318.0634;
             double lunaMeanAnomaly = 115.3654;
             OrbitDB lunaOrbitDB = OrbitDB.FromAsteroidFormat(earth, earthMVDB.Mass, lunaMVDB.Mass, lunaSemiMajAxis, lunaEccentricity, lunaInclination, lunaLoAN, lunaAoP, lunaMeanAnomaly, GalaxyGen.Settings.J2000);
-            PositionDB lunaPositionDB = new PositionDB(OrbitProcessor.GetPosition(lunaOrbitDB, game.CurrentDateTime), sol.Guid);
+            PositionDB lunaPositionDB = new PositionDB(OrbitProcessor.GetPosition(lunaOrbitDB, game.CurrentDateTime) + earthPositionDB.AbsolutePosition, sol.Guid);
             Entity luna = new Entity(sol.SystemManager, new List<BaseDataBlob> { lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
 
