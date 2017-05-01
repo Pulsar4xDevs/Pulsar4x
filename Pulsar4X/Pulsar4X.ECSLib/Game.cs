@@ -216,7 +216,14 @@ namespace Pulsar4X.ECSLib
                 // TODO: Implement vision access roles.
                 if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
                 {
-                    systems.AddRange(accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Select(systemGuid => Systems[systemGuid]));
+                    foreach (Guid systemGuid in accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems)
+                    {
+                        StarSystem system = Systems[systemGuid];
+                        if (!systems.Contains(system))
+                        {
+                            systems.Add(system);
+                        }
+                    }
                 }
             }
             return systems;
