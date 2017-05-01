@@ -26,15 +26,22 @@ and we recomended that you also install:
 Monodevelop-nunit (to run the unit tests)
 In monodevelop Tools -> Addin Manager -> Gallery 
 install Eto.Forms Support Addin (this adds some autocomplete to the eto.forms xaml, and shows a live preview of forms as you code them, and adds some Templates for the eto.forms stuff. 
+Note that the latest flatpack versions of monodevelop has issues due to running in a sandbox, currently I am unable to get the game to run/debug under the latest flatpack version of MD.
+installing via this script: https://github.com/cra0zy/monodevelop-run-installer
+is an option, and will run/debug, however versioncontrol is currently disabled due to a missing dependancy. 
+also note that eto.forms plugin for MD is not currently as feature complete as it is for VS. 
+
 
 ### Mac
 mono + GTK + Xamarin Studio
 http://www.monodevelop.com/download/
 
 
-
+### Cross Platforms:
 Another IDE option is the cross platform Rider from jetbrains: https://www.jetbrains.com/rider/  
 I'm currently using this under linux and I'm finding it a good option, though a bit heavier than MonoDevelop, it's lighter and more responsive than Visual studio. Although in beta it apears to have all the bells and whistles, and currently a lot easier to setup than MD, and a far faster install than VS.
+Currently only tested in linux (and mac?)
+There is currently no Eto.forms plugin for Rider. 
 
 ## Instructions:
 
