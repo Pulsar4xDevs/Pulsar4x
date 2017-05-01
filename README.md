@@ -19,7 +19,7 @@ Bugs can be reported on the [issue tracker.](https://github.com/Pulsar4xDevs/Pul
 To compile Pulsar4x we recommend [VisualStudio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). we're starting to use a bit of C#6, so 2013 is not recomended unless you know what you're doing.  
 Xamarin Studio does work under windows, and the process is the same as for VS2015.
 
-under linux you will need:
+### Linux
 MonoDevelop
 Mono-Complete
 and we recomended that you also install:
@@ -27,11 +27,14 @@ Monodevelop-nunit (to run the unit tests)
 In monodevelop Tools -> Addin Manager -> Gallery 
 install Eto.Forms Support Addin (this adds some autocomplete to the eto.forms xaml, and shows a live preview of forms as you code them, and adds some Templates for the eto.forms stuff. 
 
-under mac you will need:
-
+### Mac
 mono + GTK + Xamarin Studio
 http://www.monodevelop.com/download/
 
+
+
+Another IDE option is the cross platform Rider from jetbrains: https://www.jetbrains.com/rider/  
+I'm currently using this under linux and I'm finding it a good option, though a bit heavier than MonoDevelop, it's lighter and more responsive than Visual studio. Although in beta it apears to have all the bells and whistles, and currently a lot easier to setup than MD, and a far faster install than VS.
 
 ## Instructions:
 
