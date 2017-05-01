@@ -64,22 +64,16 @@ namespace Pulsar4X.ECSLib
             Entity shipClass = DefaultShipDesign(game, factionEntity);
             Entity gunShipClass = GunShipDesign(game, factionEntity);
 
-            Vector4 position = earth.GetDataBlob<PositionDB>().AbsolutePosition;
-
-
             // Problem - the component instances, both the design and the instances themselves, are the same entities on each ship
             // IE, the fire control on ship1 is the same entity as on ship2
             // Both the design and instances should be unique
 
-            Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
-            Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Ensuing Calm");
+            Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Ensuing Calm");
             StorageSpaceProcessor.AddItemToCargo(ship1.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 200000000000);
             StorageSpaceProcessor.AddItemToCargo(ship2.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 200000000000);
-            // Strange bug - seems to update the ship orbit once, then never again
-            // TODO: Fix to allow normal orbiting.
-            //ship.SetDataBlob<OrbitDB>(new OrbitDB(earth.GetDataBlob<OrbitDB>()));
 
-            Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, position, sol, "Prevailing Stillness");
+            Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, earth, sol, "Prevailing Stillness");
             StorageSpaceProcessor.AddItemToCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
 
             sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());

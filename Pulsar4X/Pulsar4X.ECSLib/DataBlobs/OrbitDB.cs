@@ -175,6 +175,12 @@ namespace Pulsar4X.ECSLib
             IsStationary = true;
         }
 
+        public OrbitDB(Entity parent)
+            : base(parent)
+        {
+            IsStationary = true;
+        }
+
         public OrbitDB(OrbitDB toCopy)
             : base (toCopy.Parent)
         {

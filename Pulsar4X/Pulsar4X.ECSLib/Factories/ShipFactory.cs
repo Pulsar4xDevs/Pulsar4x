@@ -5,6 +5,15 @@ namespace Pulsar4X.ECSLib
 {
     public static class ShipFactory
     {
+        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
+        {
+            Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction, parent.GetDataBlob<PositionDB>()?.AbsolutePosition ?? Vector4.Zero, starsys, shipName);
+
+            var orbitDB = new OrbitDB(parent);
+            ship.SetDataBlob(orbitDB);
+
+            return ship;
+        }
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Vector4 pos, StarSystem starsys, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
@@ -25,8 +34,11 @@ namespace Pulsar4X.ECSLib
             var OwnedDB = new OwnedDB(ownerFaction);           
             protoShip.SetDataBlob(OwnedDB);
 
+
+
             PositionDB position = new PositionDB(pos, starsys.Guid);
             protoShip.SetDataBlob(position);
+
 
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
