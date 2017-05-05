@@ -39,8 +39,17 @@ namespace Pulsar4X.ECSLib
         public double Accessibility { get; internal set; }
     }
 
+    /// <summary>
+    /// SystemBodyInfoDB defines an entity as having properties like planets/asteroids/coments.
+    /// </summary>
+    /// <remarks>
+    /// Specifically, Minerals, body info, atmosphere info, and gravity.
+    /// </remarks>
     public class SystemBodyInfoDB : BaseDataBlob
     {
+        /// <summary>
+        /// Type of body this is. <see cref="BodyType"/>
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
         public BodyType BodyType { get; internal set; }
@@ -77,35 +86,56 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public float BaseTemperature { get; internal set; }
-
-        // the following will be used for ground combat effects:
+        
         /// <summary>
-        /// Todo: Decide if we want RadiationLevel and AtmosphericDust game play features.
-        /// arnt these going to affect how many Infrastructure or colony cost?
+        /// Amount of radiation on this body. Affects ColonyCost.
         /// </summary>
         [PublicAPI]
         [JsonProperty]
         public float RadiationLevel { get; internal set; }
 
+        /// <summary>
+        /// Amount of atmosphic dust on this body. Affects ColonyCost.
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
         public float AtmosphericDust { get; internal set; }
 
         /// <summary>
-        /// Indicates if the system body supports populations and can be settled by Players/NPRs..
+        /// Indicates if the system body supports populations and can be settled by Players/NPRs.
         /// </summary>
+        /// <remarks>
+        /// TODO: Gameplay Review
+        /// See if we want to decide SupportsPopulations some other way.
+        /// Some species may be capable of habiting different types and different bodies.
+        /// Maybe this should be at the species level.
+        /// </remarks>
         [PublicAPI]
         [JsonProperty]
         public bool SupportsPopulations { get; internal set; }
         
+        /// <summary>
+        /// List of Colonies that reside on this body.
+        /// </summary>
+        /// <remarks>
+        /// TODO: Entity Review
+        /// We may want to remove this list and use PositionDB to link colonies to bodies.
+        /// NOTE: Not currently used?
+        /// </remarks>
         [PublicAPI]
         [JsonProperty]
         public List<Entity> Colonies { get; internal set; }
 
+        /// <summary>
+        /// Length of day for this body. Mostly fluff.
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
         public TimeSpan LengthOfDay { get; internal set; }
 
+        /// <summary>
+        /// Gravity on this body measured in m/s/s. Affects ColonyCost.
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
         public double Gravity { get; internal set; }

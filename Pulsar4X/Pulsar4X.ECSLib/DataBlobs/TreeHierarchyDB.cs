@@ -6,6 +6,17 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// Abstract base class for a DataBlob that acts within a tree hierarchy.
+    /// </summary>
+    /// <remarks>
+    /// An example of this is our 2-body OrbitDB's.
+    /// Earth's OrbitDB is a child of the Sun's OrbitDB in the tree hierarchy.
+    /// 
+    /// Another example would be a subordinate fleet is a child to a higher-level fleet in the fleet heirarchy
+    /// 
+    /// DataBlobs that derive from this type have functions to maintain the tree hierarchy as changes are made.
+    /// </remarks>
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
         [PublicAPI]
@@ -25,11 +36,20 @@ namespace Pulsar4X.ECSLib
         }
         protected Entity _owningEntity_;
 
+        /// <summary>
+        /// Parent node to this node.
+        /// </summary>
         [CanBeNull]
         [PublicAPI]
         [JsonProperty]
         public Entity Parent { get; private set; }
 
+        /// <summary>
+        /// Same type DataBlob of my parent node. 
+        /// </summary>
+        /// <example>
+        /// EarthOrbitDB.ParentDB == SunOrbitDB;
+        /// </example>
         [CanBeNull]
         [PublicAPI]
         public TreeHierarchyDB ParentDB
@@ -44,30 +64,54 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// Root node of this tree hierachy.
+        /// </summary>
+        /// <example>
+        /// LunaOrbitDB.Parent == Earth;
+        /// LunaOrbitDB.Root = Sun;
+        /// </example>
         [NotNull]
         [PublicAPI]
         public Entity Root => ParentDB?.Root ?? OwningEntity;
 
+        /// <summary>
+        /// Same type DataBlob of my root node. 
+        /// </summary>
         [NotNull]
         [PublicAPI]
         public TreeHierarchyDB RootDB => GetSameTypeDB(Root);
 
+        /// <summary>
+        /// All child nodes to this node.
+        /// </summary>
         [NotNull]
         [PublicAPI]
         public List<Entity> Children => _children;
         [JsonProperty]
         private readonly List<Entity> _children;
 
+        /// <summary>
+        /// All node nodeDB's to this node.
+        /// </summary>
         [NotNull]
         [PublicAPI]
         public List<TreeHierarchyDB> ChildrenDBs => Children.Select(GetSameTypeDB).ToList();
 
+        /// <summary>
+        /// Creates a new TreeHierarchyDB with the provided parent.
+        /// </summary>
+        /// <param name="parent"></param>
         protected TreeHierarchyDB(Entity parent)
         {
             Parent = parent;
             _children = new List<Entity>();
         }
 
+        /// <summary>
+        /// Sets the parent of this node to another node, adjusting hierarchy as needed.
+        /// </summary>
+        /// <param name="parent"></param>
         internal virtual void SetParent(Entity parent)
         {
             ParentDB?.RemoveChild(OwningEntity);

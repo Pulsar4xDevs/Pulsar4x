@@ -6,6 +6,15 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Attached to entities that are surveyed for the discovery of JumpPoints.
     /// </summary>
+    /// <remarks>
+    /// This is very inefficient implementation of jump points. 
+    /// Every system has 30 of these entities.
+    /// This clogs EntityManager space too.
+    /// Each of these entities individually stores every faction that scans it?
+    /// 
+    /// PERFORMANCE OPTIMIZE:
+    /// If we ever need to optimize memory usage, this may be something to look at.
+    /// </remarks>
     public class JPSurveyableDB : BaseDataBlob
     {
         [JsonProperty]
