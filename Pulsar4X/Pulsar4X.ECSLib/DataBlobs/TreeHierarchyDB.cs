@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            private readonly EntityManager _manager = new EntityManager(null);
+            private readonly EntityManager _manager = new EntityManager(new Game(), true);
 
             /// <summary>
             /// This test verifies the integrity of the TreeHierarchy datablob to maintain it's hierarchy during switches.
