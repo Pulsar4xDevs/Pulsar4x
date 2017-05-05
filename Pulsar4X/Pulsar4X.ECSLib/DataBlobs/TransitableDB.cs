@@ -16,6 +16,13 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Entity Destination { get; internal set; }
 
+        /// <summary>
+        /// Determination if this jump point has a "gate" on it.
+        /// </summary>
+        /// <remarks>
+        /// TODO: Gameplay Review
+        /// We might want to use a TransitType enum, to allow different types of FTL using the same type of DB
+        /// </remarks>
         [JsonProperty]
         public bool IsStabilized { get; internal set; }
 
