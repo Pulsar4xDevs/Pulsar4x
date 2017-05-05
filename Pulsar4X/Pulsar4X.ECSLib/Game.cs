@@ -61,9 +61,7 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         public EventLog EventLog { get; internal set; }
-
-        internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
-        internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
+        
         private PathfindingManager _pathfindingManager;
 
         [PublicAPI]
@@ -93,7 +91,7 @@ namespace Pulsar4X.ECSLib
             SyncContext = SynchronizationContext.Current;        
             GameLoop = new TimeLoop(this);            
             EventLog = new EventLog(this);
-            GlobalManager = new EntityManager(this);
+            GlobalManager = new EntityManager(this, true);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
