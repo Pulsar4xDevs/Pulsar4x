@@ -2,60 +2,90 @@
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// SpeciesDB defines an entity as being a Species.
+    /// </summary>
     public class SpeciesDB : BaseDataBlob
     {
+        /// <summary>
+        /// The ideal gravity for this species.
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The ideal gravity for the species
         public double BaseGravity { get; internal set; }
 
+        /// <summary>
+        /// The minimum gravity the species can tolerate
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The minimum gravity the species can tolerate
         public double MinimumGravityConstraint { get; internal set; }
 
+        /// <summary>
+        /// The maximum gravity the species can tolerate
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The maximum gravity the species can tolerate
         public double MaximumGravityConstraint { get; internal set; }
 
+        /// <summary>
+        /// The ideal atmospheric pressure for the species
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The ideal atmospheric pressure for the species
         public double BasePressure { get; internal set; }
 
+        /// <summary>
+        /// The minimum atmospheric pressure the species can tolerate
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The minimum atmospheric pressure the species can tolerate
         public double MinimumPressureConstraint { get; internal set; }
 
+        /// <summary>
+        /// The maximum atmospheric pressure the species can tolerate
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The maximum atmospheric pressure the species can tolerate
         public double MaximumPressureConstraint { get; internal set; }
 
+        /// <summary>
+        /// The ideal temperature for the species
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The ideal temperature for the species
         public double BaseTemperature { get; internal set; }
 
+        /// <summary>
+        /// The minimum temperature the species can tolerate
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The minimum temperature the species can tolerate
         public double MinimumTemperatureConstraint { get; internal set; }
 
+        /// <summary>
+        /// The maximum temperature the species can tolerate
+        /// </summary>
         [PublicAPI]
         [JsonProperty]
-        // The maximum temperature the species can tolerate
         public double MaximumTemperatureConstraint { get; internal set; }
 
+        /// <summary>
+        /// Range of temperatures this species can withstand?
+        /// </summary>
+        /// <remarks>
+        /// TODO: Gameplay Review
+        /// We should either have BaseTemperature + ToleranceRange, or Min/Max temps, but not both.
+        /// Min/Max works best with aurora mechanics.
+        /// </remarks>
         [PublicAPI]
         [JsonProperty]
         public double TemperatureToleranceRange { get; internal set; }
 
+        public SpeciesDB() { }
+
         public SpeciesDB(double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp)
         {
-            // set default values:
             BaseGravity = baseGravity;
             MinimumGravityConstraint = minGravity;
             MaximumGravityConstraint = maxGravity;
@@ -67,8 +97,6 @@ namespace Pulsar4X.ECSLib
             MaximumTemperatureConstraint = maxTemp;
 
         }
-
-        public SpeciesDB() { }
 
         public override object Clone()
         {
