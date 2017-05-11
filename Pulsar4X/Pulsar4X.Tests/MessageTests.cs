@@ -3,14 +3,13 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture, Description("MessagePump Tests")]
-    class MessagePumpTests
+    [TestFixture, Description("Message Tests")]
+    class MessageTests
     {
-        private static Game Game = new Game();
-        private static MessagePump MessagePump = new MessagePump(Game);
+        private static readonly MessagePump MessagePump = new MessagePump();
 
         [Test]
-        public void QueueOperationsTest()
+        public void MessagePumpQueueOperations()
         {
             Assert.AreEqual(MessagePump.IncomingMessageCount, 0);
             Assert.AreEqual(MessagePump.OutgoingMessageCount, 0);
@@ -34,6 +33,12 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(MessagePump.TryDequeueOutgoingMessage(out outString));
             Assert.AreEqual(outString, outgoingMessage);
             Assert.AreEqual(MessagePump.OutgoingMessageCount, 0);
+        }
+
+        [Test]
+        public void MessageDispatcher()
+        {
+            
         }
     }
 }

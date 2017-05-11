@@ -180,7 +180,11 @@
     <Compile Include="Helpers\CollectionChangedHelpers.cs" />
     <Compile Include="Helpers\ObserviableConcurrentDictionary.cs" />
     <Compile Include="ManagerSubPulse.cs" />
-    <Compile Include="MessagePump.cs" />
+    <Compile Include="MessagePump\MessageHandlers\IMessageHandler.cs" />
+    <Compile Include="MessagePump\IncomingMessageType.cs" />
+    <Compile Include="MessagePump\MessageDispatcher.cs" />
+    <Compile Include="MessagePump\MessagePump.cs" />
+    <Compile Include="MessagePump\OutgoingMessageType.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\BeamAttackOrder.cs" />
     <Compile Include="Orders\OrderTypes\ConstructionOrder.cs" />

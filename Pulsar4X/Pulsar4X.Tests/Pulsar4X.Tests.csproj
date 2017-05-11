@@ -138,7 +138,7 @@
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
     <Compile Include="FactoryTests.cs" />
-    <Compile Include="MessagePumpTests.cs" />
+    <Compile Include="MessageTests.cs" />
     <Compile Include="OrderQueueTest.cs" />
     <Compile Include="PathfindingTests.cs" />
     <Compile Include="PopulationProcessorTest.cs" />
