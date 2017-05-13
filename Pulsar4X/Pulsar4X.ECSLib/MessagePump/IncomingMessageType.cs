@@ -10,6 +10,8 @@ namespace Pulsar4X.ECSLib
         // Message Format:
         // "messageHeader;message"
 
+        Echo,
+
         /// <summary>
         /// Requests the game to exit.
         /// </summary>

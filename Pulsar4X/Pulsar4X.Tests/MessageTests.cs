@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
@@ -11,7 +12,6 @@ namespace Pulsar4X.Tests
         [Test]
         public void MessagePumpQueueOperations()
         {
-            
             string outString;
             Assert.IsFalse(MessagePump.TryPeekIncomingMessage(out outString));
             Assert.IsFalse(MessagePump.TryPeekOutgoingMessage(out outString));
@@ -37,9 +37,50 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void MessageManipulationOperations()
+        public void ValidHeaderManipulation()
         {
-            
+            var messageType = IncomingMessageType.Echo;
+            var authToken = new AuthenticationToken(Guid.NewGuid(), "hunter2");
+
+            string message = MessagePump.GetMessageHeader(messageType, authToken);
+
+            IncomingMessageType testMessageType;
+            AuthenticationToken testAuthToken;
+
+            MessagePump.TryDeconstructHeader(ref message, out testMessageType, out testAuthToken);
+            Assert.IsEmpty(message);
+            Assert.AreEqual(messageType, testMessageType);
+            Assert.AreEqual(authToken, testAuthToken);
+
+            var outgoingMT = OutgoingMessageType.Echo;
+            message = MessagePump.GetOutgoingMessageHeader(outgoingMT);
+
+            OutgoingMessageType testOutgoingMT;
+            Assert.IsTrue(MessagePump.TryGetOutgoingMessageType(ref message, out testOutgoingMT));
+            Assert.IsEmpty(message);
+            Assert.AreEqual(outgoingMT, testOutgoingMT);
+        }
+
+        [Test]
+        public void InvalidHeaderManipulation()
+        {
+            var messageType = (IncomingMessageType)(-1);
+            var authToken = new AuthenticationToken(Guid.NewGuid(), "hunter2");
+
+            string header = MessagePump.GetMessageHeader(messageType, authToken);
+
+            IncomingMessageType testMessageType;
+            AuthenticationToken testAuthToken;
+            Assert.IsFalse(MessagePump.TryDeconstructHeader(ref header, out testMessageType, out testAuthToken));
+
+            header = MessagePump.GetMessageHeader(IncomingMessageType.Echo, authToken);
+            header = header.Substring(0, header.Length - 2);
+
+            Assert.IsFalse(MessagePump.TryDeconstructHeader(ref header, out testMessageType, out testAuthToken));
+
+            var outgoingMT = (OutgoingMessageType)(-1);
+            header = MessagePump.GetOutgoingMessageHeader(outgoingMT);
+            Assert.IsFalse(MessagePump.TryGetOutgoingMessageType(ref header, out outgoingMT));
         }
 
 
