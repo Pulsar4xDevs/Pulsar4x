@@ -78,9 +78,22 @@ namespace Pulsar4X.ECSLib
             Password = password;
         }
 
-        public override string ToString()
+        public override string ToString() => $"{PlayerID:N}\n{Password}";
+
+        public override bool Equals(object obj)
         {
-            return $"{PlayerID:N}\n{Password}";
+            var other = obj as AuthenticationToken;
+            return other != null && Equals(other);
+        }
+
+        protected bool Equals(AuthenticationToken other) => PlayerID.Equals(other.PlayerID) && string.Equals(Password, other.Password);
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (PlayerID.GetHashCode() * 397) ^ (Password != null ? Password.GetHashCode() : 0);
+            }
         }
     }
 
