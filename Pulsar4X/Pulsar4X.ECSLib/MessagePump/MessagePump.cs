@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Pulsar4X.ECSLib
 {
@@ -10,17 +10,14 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class MessagePump
     {
-        public int IncomingMessageCount => _incomingMessages.Count;
-        public int OutgoingMessageCount => _outgoingMessages.Count;
-        
-        private readonly Queue<string> _incomingMessages = new Queue<string>();
-        private readonly Queue<string> _outgoingMessages = new Queue<string>();
+        private readonly ConcurrentQueue<string> _incomingMessages = new ConcurrentQueue<string>();
+        private readonly ConcurrentQueue<string> _outgoingMessages = new ConcurrentQueue<string>();
 
         private static readonly Regex _guidListRegex = new Regex("^(?:([\\w]+),?)*;");
         private static readonly Regex _guidRegex = new Regex("^(?:([\\w]+);)");
         private static readonly Regex _messageTypeRegex = new Regex("^(\\d+);");
         private static readonly Regex _authTokenRegex = new Regex("^(\\w+)\n(\\w+)\n");
-        
+
         #region Queue Management
 
         /// <summary>
@@ -29,54 +26,37 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public void EnqueueIncomingMessage(string message)
         {
-            lock (_incomingMessages)
-            {
-                _incomingMessages.Enqueue(message);
-            }
+            _incomingMessages.Enqueue(message);
         }
+
+        /// <summary>
+        /// Attempts to peek a message from the ECSLib's Incoming Message Queue. Does not remove the message from the queue.
+        /// </summary>
+        internal bool TryPeekIncomingMessage(out string message) => _incomingMessages.TryPeek(out message);
 
         /// <summary>
         /// Attempts to dequeue a message from the ECSLib's Incoming Message Queue.
         /// </summary>
-        internal bool TryDequeueIncomingMessage([CanBeNull]out string message)
-        {
-            message = null;
-            lock (_incomingMessages)
-            {
-                if (_incomingMessages.Count == 0)
-                    return false;
-                message = _incomingMessages.Dequeue();
-            }
-            return true;
-        }
+        internal bool TryDequeueIncomingMessage(out string message) => _incomingMessages.TryDequeue(out message);
 
         /// <summary>
         /// Enqueues a message to the ECSLib's Outgoing Message Queue.
         /// </summary>
         internal void EnqueueOutgoingMessage(string message)
         {
-            lock (_outgoingMessages)
-            {
-                _outgoingMessages.Enqueue(message);
-            }
+            _outgoingMessages.Enqueue(message);
         }
+
+        /// <summary>
+        /// Attempts to peek a message from the ECSLib's Outgoing Message Queue. Does not remove the message from the queue.
+        /// </summary>
+        public bool TryPeekOutgoingMessage(out string message) => _incomingMessages.TryPeek(out message);
 
         /// <summary>
         /// Attempts to dequeue a message from the ECSLib's Outgoing Message Queue.
         /// </summary>
         [PublicAPI]
-        public bool TryDequeueOutgoingMessage([CanBeNull]out string message)
-        {
-            message = null;
-            lock (_outgoingMessages)
-            {
-                if (_outgoingMessages.Count == 0)
-                    return false;
-                message = _outgoingMessages.Dequeue();
-            }
-            return true;
-        }
-
+        public bool TryDequeueOutgoingMessage(out string message) => _outgoingMessages.TryDequeue(out message);
         #endregion Queue Management
 
         #region Message Deconstruction
@@ -93,8 +73,10 @@ namespace Pulsar4X.ECSLib
             // Detect if the passed message has a CSV GuidList at the beginning
             Match match = _guidListRegex.Match(message);
             if (!match.Success)
+            {
                 return false;
-            
+            }
+
             foreach (Capture capture in match.Groups[1].Captures)
             {
                 guidList.Add(Guid.Parse(capture.Value));
@@ -115,7 +97,9 @@ namespace Pulsar4X.ECSLib
             guid = Guid.Empty;
             Match match = _guidRegex.Match(message);
             if (!match.Success)
+            {
                 return false;
+            }
 
             guid = Guid.Parse(match.Groups[1].Captures[0].Value);
 
@@ -127,15 +111,18 @@ namespace Pulsar4X.ECSLib
         /// Retrieves the IncomingMessageType from the provided message.
         /// Strips the IncomingMessageType from the message for further processing.
         /// </summary>
-        internal static IncomingMessageType GetIncomingMessageType(ref string message)
+        private static bool TryGetIncomingMessageType(ref string message, out IncomingMessageType messageType)
         {
-            IncomingMessageType messageType;
-
+            messageType = IncomingMessageType.Invalid;
             Match match = _messageTypeRegex.Match(message);
-            if (!match.Success || !Enum.TryParse(match.Groups[1].Captures[0].Value, out messageType) || messageType == IncomingMessageType.Invalid)
-                throw new ArgumentException($"Malformed Message. Failed to detect valid IncomingMessageType.\nMessage:\n{message}");
+            if (!match.Success || !Enum.TryParse(match.Groups[1].Captures[0].Value, out messageType))
+            {
+                return false;
+            }
 
-            return messageType;
+            // Strip the IncomingMessageType from the message.
+            message = message.Substring(match.Length);
+            return true;
         }
 
         /// <summary>
@@ -143,24 +130,45 @@ namespace Pulsar4X.ECSLib
         /// Strips the OutgoingMessageType from the message for further processing.
         /// </summary>
         [PublicAPI]
-        public static OutgoingMessageType GetOutgoingMessageType(ref string message)
+        public static bool TryGetOutgoingMessageType(ref string message, out OutgoingMessageType messageType)
         {
-            OutgoingMessageType messageType;
-
+            messageType = OutgoingMessageType.Invalid;
             Match match = _messageTypeRegex.Match(message);
-            if (!match.Success || !Enum.TryParse(match.Groups[1].Captures[0].Value, out messageType) || messageType == OutgoingMessageType.Invalid)
-                throw new ArgumentException($"Malformed Message. Failed to detect valid OutgoingMessageType.\nMessage:\n{message}");
+            if (!match.Success || !Enum.TryParse(match.Groups[1].Captures[0].Value, out messageType))
+            {
+                return false;
+            }
 
-            return messageType;
+            // Strip the OutgoingMessageType from the message.
+            message = message.Substring(match.Length);
+            return true;
         }
 
-        internal static AuthenticationToken GetAuthToken(ref string message)
+        private static bool TryGetAuthToken(ref string message, out AuthenticationToken authToken)
         {
+            authToken = null;
             Match match = _authTokenRegex.Match(message);
             if (!match.Success)
-                throw new ArgumentException($"Malformed Message. Failed to detect valid AuthenticationToken.\nMessage:\n{message}");
+            {
+                return false;
+            }
 
-            return new AuthenticationToken(match.Groups[1].Captures[0].Value);
+            authToken = new AuthenticationToken(match.Groups[1].Captures[0].Value);
+            return true;
+        }
+
+        internal static bool TryDeconstructHeader(ref string message, out IncomingMessageType messageType, out AuthenticationToken authToken)
+        {
+            string originalMessage = message;
+            messageType = IncomingMessageType.Invalid;
+            authToken = null;
+
+            if (TryGetIncomingMessageType(ref message, out messageType) && TryGetAuthToken(ref message, out authToken))
+                return true;
+
+            // Invalid Header. Reconstruct original message.
+            message = originalMessage;
+            return false;
         }
 
         #endregion Message Deconstruction
@@ -174,11 +182,9 @@ namespace Pulsar4X.ECSLib
         /// Use this function to construct your message headers so the UI doesn't have to worry about how the ECSLib expects the header to be formatted.
         /// </remarks>
         [PublicAPI]
-        public static string GetMessageHeader(IncomingMessageType messageType, AuthenticationToken authToken)
-        {
-            return $"{(int)messageType};{authToken}\n";
-        }
+        public static string GetMessageHeader(IncomingMessageType messageType, AuthenticationToken authToken) => $"{(int)messageType};{authToken}\n";
 
+        internal static string GetOutgoingMessageHeader(OutgoingMessageType messageType) => $"{(int)messageType};";
         #endregion Message Construction
 
     }

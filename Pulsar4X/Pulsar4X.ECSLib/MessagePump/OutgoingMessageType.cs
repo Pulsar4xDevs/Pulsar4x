@@ -7,6 +7,9 @@ namespace Pulsar4X.ECSLib
 
         Invalid = 0,
 
+        Echo,               // message format: "messageIn"
+        InvalidMsgRecieved, // message format: "messageIn"
+
         SubpulseComplete, // message format: "currentDateTime"
         PulseComplete, // message format: "currentDateTime"
 

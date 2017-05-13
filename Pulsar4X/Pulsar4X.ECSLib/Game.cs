@@ -97,7 +97,7 @@ namespace Pulsar4X.ECSLib
             EventLog = new EventLog(this);
             GlobalManager = new EntityManager(this, true);
             var tf = new TaskFactory(TaskCreationOptions.LongRunning, TaskContinuationOptions.LongRunning);
-            tf.StartNew(main);
+            tf.StartNew(Main);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -168,7 +168,7 @@ namespace Pulsar4X.ECSLib
 
         #region Internal Functions
 
-        private void main()
+        private void Main()
         {
             while (!ExitRequested)
             {

@@ -23,9 +23,15 @@ namespace Pulsar4X.ECSLib
         internal static void Dispatch(Game game, string message)
         {
             // Deconstruct the header.
-            IncomingMessageType messageType = MessagePump.GetIncomingMessageType(ref message);
-            AuthenticationToken authToken = MessagePump.GetAuthToken(ref message);
-            
+            IncomingMessageType messageType;
+            AuthenticationToken authToken;
+            if (!MessagePump.TryDeconstructHeader(ref message, out messageType, out authToken))
+            {
+                // Message header invalid, notifiy the client.
+                game.MessagePump.EnqueueOutgoingMessage($"{MessagePump.GetOutgoingMessageHeader(OutgoingMessageType.InvalidMsgRecieved)}{message}");
+                return;
+            }
+
             // MessageDispatcher utilizes a modified Chain of Responsibility pattern.
             // Only one handler will handle the message, based on the messageType, but we
             // send it to all of them. Those that can't handle it will simply ignore it.
@@ -36,13 +42,18 @@ namespace Pulsar4X.ECSLib
             {
                 // Using conditional short-circuiting, if the message is already handled it wont be passed to additonal handlers.
                 // ReSharper disable once AccessToModifiedClosure (I know, I want to)
-                Parallel.ForEach(_handlers, handler=> { messageHandled = messageHandled || handler.HandleMessage(game, messageType, authToken, message); });
+                Parallel.ForEach(_handlers, handler => { messageHandled = messageHandled || handler.HandleMessage(game, messageType, authToken, message); });
             }
-            foreach (IMessageHandler handler in _handlers)
+            else
             {
-                messageHandled = handler.HandleMessage(game, messageType, authToken, message);
-                if (messageHandled)
-                    break;
+                foreach (IMessageHandler handler in _handlers)
+                {
+                    messageHandled = handler.HandleMessage(game, messageType, authToken, message);
+                    if (messageHandled)
+                    {
+                        break;
+                    }
+                }
             }
 
             if (!messageHandled)
