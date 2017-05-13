@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Threading;
 
 namespace Pulsar4X.ECSLib
 {
@@ -15,6 +16,8 @@ namespace Pulsar4X.ECSLib
         private readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
+        private readonly Dictionary<Guid, EntityManager> _globalEntityDictionary;
+        private readonly ReaderWriterLockSlim _globalGuidDictionaryLock;
 
         private int _nextID;
 
@@ -35,17 +38,22 @@ namespace Pulsar4X.ECSLib
         [NotNull]
         [PublicAPI]
         public static readonly EntityManager InvalidManager = new EntityManager();
-
-
-
+        
         #region Constructors
-        private EntityManager()
+        private EntityManager() { }
+        internal EntityManager(Game game, bool isGlobalManager = false)
         {
-        }
-
-        internal EntityManager(Game game)
-        {
-            Game = game;            
+            Game = game;
+            if (isGlobalManager)
+            {
+                _globalEntityDictionary = new Dictionary<Guid,EntityManager>();
+                _globalGuidDictionaryLock = new ReaderWriterLockSlim();
+            }
+            else
+            {
+                _globalEntityDictionary = game.GlobalManager._globalEntityDictionary;
+                _globalGuidDictionaryLock = game.GlobalManager._globalGuidDictionaryLock;
+            }
             for (int i = 0; i < InternalDataBlobTypes.Keys.Count; i++)
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
@@ -113,15 +121,15 @@ namespace Pulsar4X.ECSLib
             // Setup the global dictionary.
             if (Game != null)
             {
-                Game.GuidDictionaryLock.EnterWriteLock();
+                _globalGuidDictionaryLock.EnterWriteLock();
                 try
                 {
-                    Game.GlobalGuidDictionary.Add(entity.Guid, this);
+                    _globalEntityDictionary.Add(entity.Guid, this);
                     _localEntityDictionary.Add(entity.Guid, entity);
                 }
                 finally
                 {
-                    Game.GuidDictionaryLock.ExitWriteLock();
+                    _globalGuidDictionaryLock.ExitWriteLock();
                 }
             }
             else
@@ -175,15 +183,15 @@ namespace Pulsar4X.ECSLib
 
             if (Game != null)
             {
-                Game.GuidDictionaryLock.EnterWriteLock();
+                _globalGuidDictionaryLock.EnterWriteLock();
                 try
                 {
                     _localEntityDictionary.Remove(entity.Guid);
-                    Game.GlobalGuidDictionary.Remove(entity.Guid);
+                    _globalEntityDictionary.Remove(entity.Guid);
                 }
                 finally
                 {
-                    Game.GuidDictionaryLock.ExitWriteLock();
+                    _globalGuidDictionaryLock.ExitWriteLock();
                 }
             }
             else
@@ -511,12 +519,12 @@ namespace Pulsar4X.ECSLib
                 // This manager can only perform local Guid lookups.
                 return _localEntityDictionary.TryGetValue(entityGuid, out entity);
             }
-            Game.GuidDictionaryLock.EnterReadLock();
+            _globalGuidDictionaryLock.EnterReadLock();
             try
             {
                 EntityManager manager;
 
-                if (!Game.GlobalGuidDictionary.TryGetValue(entityGuid, out manager))
+                if (!_globalEntityDictionary.TryGetValue(entityGuid, out manager))
                 {
                     entity = Entity.InvalidEntity;
                     return false;
@@ -532,7 +540,7 @@ namespace Pulsar4X.ECSLib
             }
             finally
             {
-                Game.GuidDictionaryLock.ExitReadLock();
+                _globalGuidDictionaryLock.ExitReadLock();
             }
         }
 
@@ -578,7 +586,7 @@ namespace Pulsar4X.ECSLib
         {
             if (Game != null)
             {
-                Game.GuidDictionaryLock.EnterReadLock();
+                _globalGuidDictionaryLock.EnterReadLock();
                 try
                 {
                     if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
@@ -590,7 +598,7 @@ namespace Pulsar4X.ECSLib
                 }
                 finally
                 {
-                    Game.GuidDictionaryLock.ExitReadLock();
+                    _globalGuidDictionaryLock.ExitReadLock();
                 }
             }
             // This is a "fake" manager that does not link to other managers.

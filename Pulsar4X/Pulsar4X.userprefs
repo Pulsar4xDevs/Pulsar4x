@@ -1,20 +1,21 @@
-﻿<Properties StartupItem="Pulsar4X.CrossPlatformUI.Gtk2\Pulsar4X.CrossPlatformUI.Gtk2.csproj">
+﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default" StartupItem="Pulsar4X.CrossPlatformUI/Pulsar4X.CrossPlatformUI.csproj">
+  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Pulsar4x/Pulsar4X/Pulsar4X.CrossPlatformUI/Views/SystemView/EntityIcon.cs" line="30" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
   <DisabledProjects>
     <String>ModdingTools.JsonDataEditor/ModdingTools.JsonDataEditor.csproj</String>
     <String>ModdingTools.JsonDataEditor2/ModdingTools.JsonDataEditor2.csproj</String>
     <String>Pulsar4X.WPFUI/Pulsar4X.WPFUI.csproj</String>
     <String>Pulsar4X.CrossPlatformUI.Mac\Pulsar4X.CrossPlatformUI.Mac.csproj</String>
     <String>Pulsar4X.CrossPlatformUI.Wpf\Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
+    <String>Pulsar4X.CrossPlatformUI.Mac/Pulsar4X.CrossPlatformUI.Mac.csproj</String>
+    <String>Pulsar4X.CrossPlatformUI.Wpf/Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
   </DisabledProjects>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI\Views\ComponentsListView.xeto">
-    <Files>
-      <File FileName="Pulsar4X.CrossPlatformUI\Views\JobAbilityView.xeto" Line="1" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI\Views\ComponentsListView.xeto" Line="1" Column="1" />
-    </Files>
-  </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.Pulsar4X.CrossPlatformUI.Gtk2 PreferredExecutionTarget="MonoDevelop.Default" />
 </Properties>

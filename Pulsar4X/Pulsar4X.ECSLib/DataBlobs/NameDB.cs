@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Pulsar4X.ECSLib
 {
+    [DebuggerDisplay("{" + nameof(DefaultName) + "}")]
     public class NameDB : BaseDataBlob
     {
 

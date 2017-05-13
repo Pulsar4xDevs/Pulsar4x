@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public List<Player> Players = new List<Player>();
-        
+
         [PublicAPI]
         [JsonProperty]
         public Player SpaceMaster = new Player("Space Master", "");
@@ -61,9 +61,7 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         public EventLog EventLog { get; internal set; }
-
-        internal readonly Dictionary<Guid, EntityManager> GlobalGuidDictionary = new Dictionary<Guid, EntityManager>();
-        internal readonly ReaderWriterLockSlim GuidDictionaryLock = new ReaderWriterLockSlim();
+        
         private PathfindingManager _pathfindingManager;
 
         [PublicAPI]
@@ -90,10 +88,10 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
-            SyncContext = SynchronizationContext.Current;        
-            GameLoop = new TimeLoop(this);            
+            SyncContext = SynchronizationContext.Current;
+            GameLoop = new TimeLoop(this);
             EventLog = new EventLog(this);
-            GlobalManager = new EntityManager(this);
+            GlobalManager = new EntityManager(this, true);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -148,11 +146,11 @@ namespace Pulsar4X.ECSLib
             // Temp: This will be reworked later.
             GenerateSystems(new AuthenticationToken(SpaceMaster, newGameSettings.SMPassword), newGameSettings.MaxSystems);
 
-            
+
 
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
-            foreach(StarSystem starSys in this.Systems.Values)
+            foreach (StarSystem starSys in this.Systems.Values)
             {
                 starSys.SystemManager.ManagerSubpulses.Initalise();
             }
@@ -216,7 +214,14 @@ namespace Pulsar4X.ECSLib
                 // TODO: Implement vision access roles.
                 if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
                 {
-                    systems.AddRange(accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Select(systemGuid => Systems[systemGuid]));
+                    foreach (Guid systemGuid in accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems)
+                    {
+                        StarSystem system = Systems[systemGuid];
+                        if (!systems.Contains(system))
+                        {
+                            systems.Add(system);
+                        }
+                    }
                 }
             }
             return systems;
@@ -238,16 +243,16 @@ namespace Pulsar4X.ECSLib
                 // TODO: Implement vision access roles.
                 if ((accessRole.Value & AccessRole.FullAccess) == AccessRole.FullAccess)
                 {
-                    foreach (Guid system in accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Where(system => system == systemGuid))
+                    if (accessRole.Key.GetDataBlob<FactionInfoDB>().KnownSystems.Contains(systemGuid))
                     {
-                        return Systems[system];
+                        return Systems[systemGuid];
                     }
                 }
             }
 
             return null;
         }
-        
+
         #endregion
 
         [CanBeNull]
@@ -258,12 +263,8 @@ namespace Pulsar4X.ECSLib
                 return SpaceMaster;
             }
 
-            foreach (Player player in Players.Where(player => player.ID == authToken?.PlayerID))
-            {
-                return player.IsTokenValid(authToken) ? player : null;
-            }
-
-            return null;
+            Player foundPlayer = Players.Find(player => player.ID == authToken?.PlayerID);
+            return foundPlayer?.IsTokenValid(authToken) != null ? foundPlayer : null;
         }
 
         [PublicAPI]

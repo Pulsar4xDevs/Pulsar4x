@@ -145,7 +145,8 @@ namespace Pulsar4X.ECSLib
 
         public PositionDB(Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition = Vector4.Zero;
+            Vector4? parentPos = (ParentDB as PositionDB)?.AbsolutePosition;
+            AbsolutePosition = parentPos ?? Vector4.Zero;
             SystemGuid = systemGuid;
         }
 

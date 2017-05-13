@@ -2,6 +2,9 @@
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// TeamsDB defines this entity has being a team of scientists/spies/etc, which can be given orders (ex: Survey Mars)
+    /// </summary>
     public class TeamsDB : BaseDataBlob
     {
         [JsonProperty]
@@ -9,6 +12,12 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private object _teamTask;
 
+        /// <summary>
+        /// Determines how many Labs this team can manage
+        /// </summary>
+        /// TODO: Pre-release
+        /// Ensure Property/Fields are consistant throughout all DB usage.
+        /// Example: TransitableDB uses TeamSize { public get; internal set;}
         [PublicAPI]
         public int TeamSize
         {
@@ -19,6 +28,8 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// not sure if this should be a blob, entity or guid. and maybe a queue as well. 
         /// </summary>
+        /// TODO: Communications Review
+        /// Detemine team orders system
         [PublicAPI]
         public object TeamTask
         {
@@ -26,12 +37,12 @@ namespace Pulsar4X.ECSLib
             internal set { _teamTask = value; }
         }
 
-        public TeamsDB() { } // need by json
+        public TeamsDB() { }
 
-        public TeamsDB(int maxTeamsize)
+        public TeamsDB(int teamSize = 0, object initialTask = null)
         {
-            TeamSize = 0;
-            TeamTask = null;
+            TeamSize = teamSize;
+            TeamTask = initialTask;
         }
 
         public TeamsDB(TeamsDB teamsdb)

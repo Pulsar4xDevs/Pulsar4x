@@ -5,7 +5,7 @@
   xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views.ComponentListView;assembly=Pulsar4X.CrossPlatformUI"
   >
   <Expander Expanded="True" x:Name="Expanderer">    
-    <StackLayout Orientation="Vertical">
+    <StackLayout Orientation="Vertical" HorizontalContentAlignment="stretch" VerticalContentAlignment="Stretch"> 
       <GridView x:Name="CargoGrid" DataStore="{Binding TypeStore}" />
       <StackLayout x:Name="ComponentsStack" Visible="{Binding HasComponents}" />       
     </StackLayout>
