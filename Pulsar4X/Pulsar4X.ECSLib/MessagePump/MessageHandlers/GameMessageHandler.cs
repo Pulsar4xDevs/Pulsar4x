@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System.Text;
+
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Handles simple game messages.
@@ -29,6 +31,17 @@
                     return true;
                 case IncomingMessageType.Echo:
                     game.MessagePump.EnqueueOutgoingMessage(OutgoingMessageType.Echo, message);
+                    return true;
+
+                // This message may be getting too complex for this handler.
+                case IncomingMessageType.GalaxyQuery:
+                    var systemGuids = new StringBuilder();
+                    foreach (StarSystem starSystem in game.GetSystems(authToken))
+                    {
+                        systemGuids.Append($"{starSystem.Guid:N},");
+                    }
+
+                    game.MessagePump.EnqueueOutgoingMessage(OutgoingMessageType.GalaxyResponse, systemGuids.ToString(0, systemGuids.Length - 1));
                     return true;
 
                 default: return false;

@@ -180,6 +180,7 @@
     <Compile Include="Helpers\CollectionChangedHelpers.cs" />
     <Compile Include="Helpers\ObserviableConcurrentDictionary.cs" />
     <Compile Include="ManagerSubPulse.cs" />
+    <Compile Include="MessagePump\MessageHandlers\GameMessageHandler.cs" />
     <Compile Include="MessagePump\MessageHandlers\IMessageHandler.cs" />
     <Compile Include="MessagePump\IncomingMessageType.cs" />
     <Compile Include="MessagePump\MessageDispatcher.cs" />
