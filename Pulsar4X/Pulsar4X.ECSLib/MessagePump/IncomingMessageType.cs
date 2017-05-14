@@ -17,9 +17,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         Exit, // message format ""
 
-        ExecutePulse, // message format: "pulseLengthMS"
-        StartRealTime, // message format: "realTimeMultiplier"
-        StopRealTime, // message format: ""
+        ExecutePulse,   // message format: "pulseLengthMS"
+        StartRealTime,  // message format: "realTimeMultiplier"
+        StopRealTime,   // message format: ""
 
         /// <summary>
         /// Requests a list of dataBlobs that have been edited.
