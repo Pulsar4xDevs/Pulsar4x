@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
         static MessageDispatcher()
         {
             // Build the list of IMessageHandlers
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(IMessageHandler)) && !type.IsAbstract))
+            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.GetInterfaces().Contains(typeof(IMessageHandler)) && !type.IsAbstract))
             {
                 var handler = (IMessageHandler)Activator.CreateInstance(type);
                 _handlers.Add(handler);
@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
             // Those that can will deal with it properly.
             bool messageHandled = false;
 
-            if (game.Settings.EnableMultiThreading == true)
+            if (game.Settings?.EnableMultiThreading == true)
             {
                 // Using conditional short-circuiting, if the message is already handled it wont be passed to additonal handlers.
                 // ReSharper disable once AccessToModifiedClosure (I know, I want to)
