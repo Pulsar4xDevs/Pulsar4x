@@ -25,7 +25,7 @@ namespace Pulsar4X.Tests
 
             // Verify Queue operations
             string incomingMessage = "TestIncomingMessage";
-            _messagePump.EnqueueIncomingMessage(incomingMessage);
+            _messagePump.EnqueueMessage(incomingMessage);
             string outgoingMessage = "TestOutgoingMessage";
             _messagePump.EnqueueOutgoingMessage(OutgoingMessageType.Invalid, outgoingMessage);
 
@@ -87,7 +87,7 @@ namespace Pulsar4X.Tests
             // Attempt to manually queue a message with a invalid IncomingMessageType.
             // NOTE: This is a valid situation the MessageDispatcher will have to deal with if VM sends a malformed message.
             string invalidMsg = $"-1;{authToken}";
-            _messagePump.EnqueueIncomingMessage(invalidMsg);
+            _messagePump.EnqueueMessage(invalidMsg);
             Assert.IsTrue(_messagePump.TryDequeueIncomingMessage(out message));
 
             IncomingMessageType messageTypeTest;
@@ -100,7 +100,7 @@ namespace Pulsar4X.Tests
             // Attempt to manually queue a message with an invalid authToken
             // NOTE: This is a valid situation the MessageDispatcher will have to deal with if VM sends a malformed message.
             invalidMsg = "1;\n";
-            _messagePump.EnqueueIncomingMessage(invalidMsg);
+            _messagePump.EnqueueMessage(invalidMsg);
             Assert.IsTrue(_messagePump.TryDequeueIncomingMessage(out message));
             Assert.IsFalse(MessagePump.TryDeconstructHeader(ref message, out messageTypeTest, out authTokenTest));
 

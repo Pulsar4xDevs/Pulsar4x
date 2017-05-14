@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         /// Enqueues a message to the ECSLib's Incoming Message Queue.
         /// </summary>
         [PublicAPI]
-        public void EnqueueIncomingMessage(string message) => _incomingMessages.Enqueue(message);
+        public void EnqueueMessage(string message) => _incomingMessages.Enqueue(message);
 
         /// <summary>
         /// Attempts to peek a message from the ECSLib's Incoming Message Queue. Does not remove the message from the queue.
