@@ -14,9 +14,25 @@
         public bool HandleMessage(Game game, IncomingMessageType messageType, AuthenticationToken authToken, string message)
         {
             if (messageType != IncomingMessageType.Exit)
+            {
                 return false;
+            }
 
             game.ExitRequested = true;
+            return true;
+        }
+    }
+
+    internal class EchoHandler : IMessageHandler
+    {
+        public bool HandleMessage(Game game, IncomingMessageType messageType, AuthenticationToken authToken, string message)
+        {
+            if (messageType != IncomingMessageType.Echo)
+            {
+                return false;
+            }
+
+            game.MessagePump.EnqueueOutgoingMessage(OutgoingMessageType.Echo, message);
             return true;
         }
     }

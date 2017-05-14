@@ -1,93 +1,118 @@
 ﻿using System;
+using System.ComponentModel;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture, Description("Message Tests")]
-    class MessageTests
+    [TestFixture][NUnit.Framework.Description("Message Tests")]
+    internal class MessageTests
     {
-        private static readonly MessagePump MessagePump = new MessagePump();
+        private static MessagePump _messagePump;
+        
 
         [Test]
         public void MessagePumpQueueOperations()
         {
+            _messagePump = new MessagePump();
             string outString;
-            Assert.IsFalse(MessagePump.TryPeekIncomingMessage(out outString));
-            Assert.IsFalse(MessagePump.TryPeekOutgoingMessage(out outString));
-            Assert.IsFalse(MessagePump.TryDequeueIncomingMessage(out outString));
-            Assert.IsFalse(MessagePump.TryDequeueOutgoingMessage(out outString));
 
+            // Attempt to read empty queues.
+            Assert.IsFalse(_messagePump.TryPeekIncomingMessage(out outString));
+            Assert.IsFalse(_messagePump.TryPeekOutgoingMessage(out outString));
+            Assert.IsFalse(_messagePump.TryDequeueIncomingMessage(out outString));
+            Assert.IsFalse(_messagePump.TryDequeueOutgoingMessage(out outString));
+
+            // Verify Queue operations
             string incomingMessage = "TestIncomingMessage";
-            MessagePump.EnqueueIncomingMessage(incomingMessage);
-
+            _messagePump.EnqueueIncomingMessage(incomingMessage);
             string outgoingMessage = "TestOutgoingMessage";
-            MessagePump.EnqueueOutgoingMessage(outgoingMessage);
+            _messagePump.EnqueueOutgoingMessage(OutgoingMessageType.Invalid, outgoingMessage);
 
-            Assert.IsTrue(MessagePump.TryDequeueIncomingMessage(out outString));
+            // Verify Dequeue operations
+            Assert.IsTrue(_messagePump.TryDequeueIncomingMessage(out outString));
             Assert.AreEqual(outString, incomingMessage);
-            
-            Assert.IsTrue(MessagePump.TryDequeueOutgoingMessage(out outString));
+            Assert.IsTrue(_messagePump.TryDequeueOutgoingMessage(out outString));
+            OutgoingMessageType outMessageTypeTest;
+            Assert.IsTrue(MessagePump.TryGetOutgoingMessageType(ref outString, out outMessageTypeTest));
+            Assert.AreEqual(outMessageTypeTest, OutgoingMessageType.Invalid);
             Assert.AreEqual(outString, outgoingMessage);
             
-            Assert.IsFalse(MessagePump.TryPeekIncomingMessage(out outString));
-            Assert.IsFalse(MessagePump.TryPeekOutgoingMessage(out outString));
-            Assert.IsFalse(MessagePump.TryDequeueIncomingMessage(out outString));
-            Assert.IsFalse(MessagePump.TryDequeueOutgoingMessage(out outString));
+            // Verify Queues are now empty.
+            Assert.IsFalse(_messagePump.TryPeekIncomingMessage(out outString));
+            Assert.IsFalse(_messagePump.TryPeekOutgoingMessage(out outString));
+            Assert.IsFalse(_messagePump.TryDequeueIncomingMessage(out outString));
+            Assert.IsFalse(_messagePump.TryDequeueOutgoingMessage(out outString));
         }
 
         [Test]
         public void ValidHeaderManipulation()
         {
+            _messagePump = new MessagePump();
+
+            // Retrieve a header for a message.
             var messageType = IncomingMessageType.Echo;
             var authToken = new AuthenticationToken(Guid.NewGuid(), "hunter2");
-
             string message = MessagePump.GetMessageHeader(messageType, authToken);
 
+            // Decode the header we retrieved above, ensure equality.
             IncomingMessageType testMessageType;
             AuthenticationToken testAuthToken;
-
             MessagePump.TryDeconstructHeader(ref message, out testMessageType, out testAuthToken);
             Assert.IsEmpty(message);
             Assert.AreEqual(messageType, testMessageType);
             Assert.AreEqual(authToken, testAuthToken);
+            
+            // Ensure outgoingMessages get proper headers, and are proeprly decoded.
+            _messagePump.EnqueueOutgoingMessage(OutgoingMessageType.Echo, "EchoTest");
+            OutgoingMessageType outMessageTypeTest;
 
-            var outgoingMT = OutgoingMessageType.Echo;
-            message = MessagePump.GetOutgoingMessageHeader(outgoingMT);
-
-            OutgoingMessageType testOutgoingMT;
-            Assert.IsTrue(MessagePump.TryGetOutgoingMessageType(ref message, out testOutgoingMT));
-            Assert.IsEmpty(message);
-            Assert.AreEqual(outgoingMT, testOutgoingMT);
+            Assert.True(_messagePump.TryPeekOutgoingMessage(out message));
+            Assert.IsTrue(MessagePump.TryGetOutgoingMessageType(ref message, out outMessageTypeTest));
+            Assert.AreEqual(message, "EchoTest");
+            Assert.AreEqual(OutgoingMessageType.Echo, outMessageTypeTest);
         }
 
         [Test]
         public void InvalidHeaderManipulation()
         {
+            _messagePump = new MessagePump();
+
+            // Attempt to get a header for a message with an invalid IncomingMessageType
             var messageType = (IncomingMessageType)(-1);
             var authToken = new AuthenticationToken(Guid.NewGuid(), "hunter2");
+            string message;
+            Assert.Throws<InvalidEnumArgumentException>(() => message = MessagePump.GetMessageHeader(messageType, authToken));
 
-            string header = MessagePump.GetMessageHeader(messageType, authToken);
+            // Attempt to manually queue a message with a invalid IncomingMessageType.
+            // NOTE: This is a valid situation the MessageDispatcher will have to deal with if VM sends a malformed message.
+            string invalidMsg = $"-1;{authToken}";
+            _messagePump.EnqueueIncomingMessage(invalidMsg);
+            Assert.IsTrue(_messagePump.TryDequeueIncomingMessage(out message));
 
-            IncomingMessageType testMessageType;
-            AuthenticationToken testAuthToken;
-            Assert.IsFalse(MessagePump.TryDeconstructHeader(ref header, out testMessageType, out testAuthToken));
+            IncomingMessageType messageTypeTest;
+            AuthenticationToken authTokenTest;
+            Assert.IsFalse(MessagePump.TryDeconstructHeader(ref message, out messageTypeTest, out authTokenTest));
 
-            header = MessagePump.GetMessageHeader(IncomingMessageType.Echo, authToken);
-            header = header.Substring(0, header.Length - 2);
+            // Attempt to get a header for a null authToken.
+            Assert.Throws<ArgumentNullException>(() => invalidMsg = MessagePump.GetMessageHeader(IncomingMessageType.Echo, null));
 
-            Assert.IsFalse(MessagePump.TryDeconstructHeader(ref header, out testMessageType, out testAuthToken));
+            // Attempt to manually queue a message with an invalid authToken
+            // NOTE: This is a valid situation the MessageDispatcher will have to deal with if VM sends a malformed message.
+            invalidMsg = "1;\n";
+            _messagePump.EnqueueIncomingMessage(invalidMsg);
+            Assert.IsTrue(_messagePump.TryDequeueIncomingMessage(out message));
+            Assert.IsFalse(MessagePump.TryDeconstructHeader(ref message, out messageTypeTest, out authTokenTest));
 
-            var outgoingMT = (OutgoingMessageType)(-1);
-            header = MessagePump.GetOutgoingMessageHeader(outgoingMT);
-            Assert.IsFalse(MessagePump.TryGetOutgoingMessageType(ref header, out outgoingMT));
-        }
+            // Attempt to queue a message with an invalid OutgoingMessageType.
+            Assert.Throws<InvalidEnumArgumentException>(() => _messagePump.EnqueueOutgoingMessage((OutgoingMessageType)(-1), "Invalid MessageType"));
+            Assert.False(_messagePump.TryPeekOutgoingMessage(out message));
 
-
-        [Test]
-        public void MessageDispatcher()
-        {
-            
+            // Attempt to get message type from a malformed OutgoingMessage
+            // NOTE: This is a valid situation the VM will have to deal with if the ECSLib sends a malformed message.
+            invalidMsg = "-1;";
+            OutgoingMessageType outMessageTypeTest;
+            Assert.False(MessagePump.TryGetOutgoingMessageType(ref invalidMsg, out outMessageTypeTest));
         }
     }
 }

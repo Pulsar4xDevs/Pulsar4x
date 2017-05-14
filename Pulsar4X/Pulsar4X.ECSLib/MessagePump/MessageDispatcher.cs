@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
             if (!MessagePump.TryDeconstructHeader(ref message, out messageType, out authToken))
             {
                 // Message header invalid, notifiy the client.
-                game.MessagePump.EnqueueOutgoingMessage($"{MessagePump.GetOutgoingMessageHeader(OutgoingMessageType.InvalidMsgRecieved)}{message}");
+                game.MessagePump.EnqueueOutgoingMessage(OutgoingMessageType.InvalidMsgRecieved, message);
                 return;
             }
 
@@ -57,7 +57,9 @@ namespace Pulsar4X.ECSLib
             }
 
             if (!messageHandled)
-                throw new Exception($"Unhandled message:\n{message}");
+            {
+                game.MessagePump.EnqueueOutgoingMessage(OutgoingMessageType.UnhandledMsgTypeRecieved, message);
+            }
         }
     }
 }
