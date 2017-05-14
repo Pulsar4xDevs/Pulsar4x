@@ -7,18 +7,20 @@ namespace Pulsar4X.ECSLib
 
         Invalid = 0,
 
-        Echo,               // message format: "messageIn"
-        InvalidMsgRecieved, // message format: "messageIn"
-        UnhandledMsgTypeRecieved,     // message format: "messageIn"
+        Echo,                       // message format: "messageIn"
+        InvalidMsgRecieved,         // message format: "messageIn"
+        UnhandledMsgTypeRecieved,   // message format: "messageIn"
 
-        SubpulseComplete, // message format: "currentDateTime"
-        PulseComplete, // message format: "currentDateTime"
+        SubpulseComplete,           // message format: "currentDateTime"
+        PulseComplete,              // message format: "currentDateTime"
 
-        RealTimeStarted, // message format: ""
-        RealTimeStopped, // message format: ""
+        RealTimeStarted,            // message format: ""
+        RealTimeStopped,            // message format: ""
 
 
-        EntityDataBlobs, // message format: "serializedEntity"
+        EntityDataBlobs,            // message format: "serializedEntity"
+
+        GalaxyResponse,             // message format: "starSystemGuid{,starSystemGuid...}"
 
     }
 }
