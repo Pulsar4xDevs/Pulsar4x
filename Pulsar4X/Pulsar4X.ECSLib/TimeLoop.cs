@@ -49,6 +49,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         internal bool AutoRun { get; set; }
 
+        internal int EntityDictionaryCount => _entityDictionary.Count;
+
         /// <summary>
         /// Multiplier applied to the Timer interval.
         /// </summary>
