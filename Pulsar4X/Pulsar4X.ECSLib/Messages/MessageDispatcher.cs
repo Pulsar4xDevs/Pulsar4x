@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
             // Deconstruct the header.
             IncomingMessageType messageType;
             AuthenticationToken authToken;
-            if (!MessagePump.TryDeconstructHeader(ref message, out messageType, out authToken))
+            if (!MessageFormatter.TryDeconstructHeader(ref message, out messageType, out authToken))
             {
                 // Message header invalid, notifiy the client.
                 game.MessagePump.EnqueueOutgoingMessage(OutgoingMessageType.InvalidMsgRecieved, message);

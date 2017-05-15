@@ -55,7 +55,7 @@ namespace Pulsar4X.ECSLib
             }
 
             message = MessageFormatter.GetOutgoingMessageHeader(messageType) + message; 
-            _outgoingMessages.Enqueue(message);
+            EnqueueOutgoingMessage(message);
         }
 
         internal void EnqueueOutgoingMessage(string message) => _outgoingMessages.Enqueue(message);
