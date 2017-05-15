@@ -174,16 +174,16 @@ namespace Pulsar4X.ECSLib
             {
                 Thread.Sleep(1);
 
-                // Attempt to dequeue a message.
-                string message;
-                if (MessagePump.TryDequeueIncomingMessage(out message))
-                {
-                    MessageDispatcher.Dispatch(this, message);
-                }
-
                 if (GameLoop.TimerElapsed)
                 {
                     GameLoop.DoProcessing();
+                }
+
+                // Clear the MessagePump.
+                string message;
+                while (MessagePump.TryDequeueIncomingMessage(out message))
+                {
+                    MessageDispatcher.Dispatch(this, message);
                 }
             }
         }
