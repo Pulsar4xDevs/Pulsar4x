@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Pulsar4X.ECSLib
@@ -122,6 +123,21 @@ namespace Pulsar4X.ECSLib
 
             message = message.Substring(match.Length);
             return true;
+        }
+
+        /// <summary>
+        /// Converts a list of Guids to a string formatted to be read by TryGetGuidList
+        /// </summary>
+        [PublicAPI]
+        public static string GuidListToString(IEnumerable<Guid> guidList)
+        {
+            var builder = new StringBuilder();
+            foreach (Guid guid in guidList)
+            {
+                builder.Append($"{guid:N},");
+            }
+            builder.Replace(",", ";", builder.Length - 1, 1);
+            return builder.ToString();
         }
 
         /// <summary>

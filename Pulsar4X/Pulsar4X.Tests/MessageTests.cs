@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
@@ -10,7 +11,6 @@ namespace Pulsar4X.Tests
     internal class MessageTests
     {
         private static MessagePump _messagePump;
-
 
         [Test]
         public void MessagePumpQueueOperations()
@@ -128,6 +128,66 @@ namespace Pulsar4X.Tests
             invalidMsg = "-1;";
             OutgoingMessageType outMessageTypeTest;
             Assert.False(MessagePump.TryGetOutgoingMessageType(ref invalidMsg, out outMessageTypeTest));
+        }
+
+        [Test]
+        public void GuidListConversion()
+        {
+            // Generate 10 random Guids
+            var guidList = new List<Guid>();
+            for (int i = 0; i < 10; i++)
+            {
+                guidList.Add(Guid.NewGuid());
+            }
+
+            // Convert GuidList to string.
+            string guidListString = MessagePump.GuidListToString(guidList);
+
+            // Convert string to new GuidList
+            List<Guid> retrievedGuids;
+            Assert.IsTrue(MessagePump.TryGetGuidList(ref guidListString, out retrievedGuids));
+
+            // Verify we got the same Guids back
+            for (int i = 0; i < 10; i++)
+            {
+                Guid originalGuid = guidList[i];
+                Guid parsedGuid = retrievedGuids[i];
+                Assert.AreEqual(originalGuid, parsedGuid);
+            }
+
+            // Verify the GuidList was removed from the string (which was the whole string)
+            Assert.IsEmpty(guidListString);
+
+            // Ensure TryGetGuidList returns false with a bad format.
+            foreach (Guid guid in guidList)
+            {
+                guidListString += $"{guid:B},";
+            }
+            guidListString.Substring(0, guidListString.Length - 1);
+            guidListString += ';';
+            Assert.IsFalse(MessagePump.TryGetGuidList(ref guidListString, out retrievedGuids));
+        }
+
+        [Test]
+        public void GuidConversion()
+        {
+            // Generate new Guid
+            Guid guid = Guid.NewGuid();
+            // Convert it to a MessagePump Guid formatted string
+            string guidString = $"{guid:N};";
+
+            // Parse the Guid from the string.
+            Guid parsedGuid;
+            Assert.IsTrue(MessagePump.TryGetGuid(ref guidString, out parsedGuid));
+
+            // Verify got the same Guid back.
+            Assert.AreEqual(guid, parsedGuid);
+            // Verify the Guid was removed from the string (which was the whole string)
+            Assert.IsEmpty(guidString);
+
+            // Ensure TryGetGuid returns false with a bad format.
+            guidString = $"{guid:B};";
+            Assert.IsFalse(MessagePump.TryGetGuid(ref guidString, out parsedGuid));
         }
     }
 }
