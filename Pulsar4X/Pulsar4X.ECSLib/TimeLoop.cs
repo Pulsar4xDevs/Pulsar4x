@@ -1,26 +1,57 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-using Timer = System.Timers.Timer;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public delegate void DateChangedEventHandler(DateTime newDate);
 
     [JsonObject(MemberSerialization.OptIn)]
-    public class TimeLoop : IEquatable<TimeLoop>
+    public class TimeLoop
     {
+        #region Fields
+        private readonly Game _game;
+
+        /// <summary>
+        /// Stopwatch to time how long DoProcessing takes to complete.
+        /// </summary>
+        private readonly Stopwatch _stopwatch = new Stopwatch();
+
+        /// <summary>
+        /// Timer used to execute DoProcessing
+        /// </summary>
+        private readonly Timer _timer = new Timer();
+
         [JsonProperty]
-        private SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
+        private SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> _entityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
 
-        private Stopwatch _stopwatch = new Stopwatch();
-        private Timer _timer = new Timer();
+        [JsonProperty]
+        private DateTime _gameGlobalDateTime;
 
-        //changes how often the tick happens
+        /// <summary>
+        /// Tracks if DoProcessing should recurse after finishing.
+        /// </summary>
+        private bool _isOvertime;
+
+        /// <summary>
+        /// Tracks if DoProcessing is currently running.
+        /// </summary>
+        private bool _isProcessing;
+
+        private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(250);
+        private float _timeMultiplier = 1f;
+
+        internal DateTime TargetDateTime;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Multiplier applied to the Timer interval.
+        /// </summary>
         public float TimeMultiplier
         {
             get { return _timeMultiplier; }
@@ -30,9 +61,10 @@ namespace Pulsar4X.ECSLib
                 _timer.Interval = _tickInterval.TotalMilliseconds * value;
             }
         }
-        private float _timeMultiplier = 1f;
 
-        private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(250);
+        /// <summary>
+        /// Timer interval (not including TimeMultiplier)
+        /// </summary>
         public TimeSpan TickFrequency
         {
             get { return _tickInterval; }
@@ -43,32 +75,19 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-
+        /// <summary>
+        /// Length of one tick. Currently set to 5 minutes.
+        /// </summary>
         public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(3600);
 
-        private bool _isProcessing = false;
-        private bool _isOvertime = false;
-        private Game _game;
         /// <summary>
         /// length of time it took to process the last DoProcess
         /// </summary>
         public TimeSpan LastProcessingTime { get; private set; } = TimeSpan.Zero;
 
         /// <summary>
-        /// This invokes the DateChangedEvent.
+        /// Current Date in-game
         /// </summary>
-        /// <param name="state"></param>
-        private void InvokeDateChange(object state)
-        {
-            var logevent = new Event(GameGlobalDateTime, "Game Global Date Changed", null, null, null);
-            logevent.EventType = EventType.GlobalDateChange;
-            _game.EventLog.AddEvent(logevent);
-
-            GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
-        }
-        [JsonProperty]
-        private DateTime _gameGlobalDateTime;
-        internal DateTime _targetDateTime;
         public DateTime GameGlobalDateTime
         {
             get { return _gameGlobalDateTime; }
@@ -81,85 +100,47 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    InvokeDateChange(value);//if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
+                    InvokeDateChange(value); //if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
                 }
             }
         }
+        #endregion
+
+        #region Events
         /// <summary>
-        /// Fired when the game date is incremented. 
+        /// Fired when the game date is incremented.
         /// All systems are in sync at this event.
         /// </summary>
         public event DateChangedEventHandler GameGlobalDateChangedEvent;
+        #endregion
 
+        #region Constructors
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game"></param>
         internal TimeLoop(Game game)
         {
-
             _game = game;
             _timer.Interval = _tickInterval.TotalMilliseconds;
             _timer.Enabled = false;
             _timer.Elapsed += Timer_Elapsed;
-
         }
-
-        #region Public Time Methods. UI interacts with time here
-
-        /// <summary>
-        /// Pauses the timeloop
-        /// </summary>
-        public void PauseTime()
-        {
-            _timer.Stop();
-        }
-        /// <summary>
-        /// Starts the timeloop
-        /// </summary>
-        public void StartTime()
-        {
-            _timer.Start();
-        }
-
-
-        /// <summary>
-        /// Takes a single step in time
-        /// </summary>
-        public void TimeStep()
-        {
-            DoProcessing();
-            _timer.Stop();
-        }
-
         #endregion
 
-
+        #region Private Methods
         /// <summary>
-        /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
-        /// this forces all systems to synch at this datetime.
+        /// This invokes the DateChangedEvent.
         /// </summary>
-        /// <param name="datetime"></param>
-        /// <param name="action"></param>
-        /// <param name="jumpPair"></param>
-        internal void AddSystemInteractionInterupt(DateTime datetime, PulseActionEnum action, SystemEntityJumpPair jumpPair)
+        /// <param name="state"></param>
+        private void InvokeDateChange(object state)
         {
-            if (!EntityDictionary.ContainsKey(datetime))
-            {
-                EntityDictionary.Add(datetime, new Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>());
-            }
-            if (!EntityDictionary[datetime].ContainsKey(action))
-            {
-                EntityDictionary[datetime].Add(action, new List<SystemEntityJumpPair>());
-            }
-            EntityDictionary[datetime][action].Add(jumpPair);
-        }
+            var logevent = new Event(GameGlobalDateTime, "Game Global Date Changed");
+            logevent.EventType = EventType.GlobalDateChange;
+            _game.EventLog.AddEvent(logevent);
 
-        internal void AddHaltingInterupt(DateTime datetime)
-        {
-            throw new NotImplementedException();
+            GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }
-
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -182,17 +163,17 @@ namespace Pulsar4X.ECSLib
             _isOvertime = false;
 
             //check for global interupts
-            _targetDateTime = GameGlobalDateTime + Ticklength;
+            TargetDateTime = GameGlobalDateTime + Ticklength;
 
 
-            while (GameGlobalDateTime < _targetDateTime)
+            while (GameGlobalDateTime < TargetDateTime)
             {
-                DateTime nextInterupt = ProcessNextInterupt(_targetDateTime);
+                DateTime nextInterupt = ProcessNextInterupt(TargetDateTime);
                 //do system processors
 
                 if (_game.Settings.EnableMultiThreading == true) //threaded
                 {
-                    Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt));
+                    Parallel.ForEach(_game.Systems.Values, starSys => starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt));
                 }
                 //The above 'blocks' till all the tasks are done.
                 else //non threaded
@@ -211,6 +192,7 @@ namespace Pulsar4X.ECSLib
 
             if (_isOvertime)
             {
+                // TODO: This will cause a StackOverflow on slow computers with large processing.
                 DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
             }
             _isProcessing = false;
@@ -220,19 +202,18 @@ namespace Pulsar4X.ECSLib
         {
             DateTime processedTo;
             DateTime nextInteruptDateTime;
-            if (EntityDictionary.Keys.Count != 0)
+            if (_entityDictionary.Keys.Count != 0)
             {
-                nextInteruptDateTime = EntityDictionary.Keys.Min();
+                nextInteruptDateTime = _entityDictionary.Keys.Min();
                 if (nextInteruptDateTime <= maxDateTime)
                 {
-                    foreach (KeyValuePair<PulseActionEnum, List<SystemEntityJumpPair>> delegateListPair in EntityDictionary[nextInteruptDateTime])
+                    foreach (KeyValuePair<PulseActionEnum, List<SystemEntityJumpPair>> delegateListPair in _entityDictionary[nextInteruptDateTime])
                     {
                         foreach (SystemEntityJumpPair jumpPair in delegateListPair.Value) //foreach entity in the value list
                         {
                             //delegateListPair.Key.DynamicInvoke(_game, jumpPair);
                             PulseActionDictionary.DoAction(delegateListPair.Key, _game, jumpPair);
                         }
-
                     }
                     processedTo = nextInteruptDateTime;
                 }
@@ -248,22 +229,57 @@ namespace Pulsar4X.ECSLib
 
             return processedTo;
         }
+        #endregion
 
 
-
-        public bool Equals(TimeLoop other)
+        /// <summary>
+        /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
+        /// this forces all systems to synch at this datetime.
+        /// </summary>
+        /// <param name="datetime"></param>
+        /// <param name="action"></param>
+        /// <param name="jumpPair"></param>
+        internal void AddSystemInteractionInterupt(DateTime datetime, PulseActionEnum action, SystemEntityJumpPair jumpPair)
         {
-            bool equality = false;
-            if (GameGlobalDateTime.Equals(other.GameGlobalDateTime))
+            if (!_entityDictionary.ContainsKey(datetime))
             {
-                if (EntityDictionary.Count.Equals(other.EntityDictionary.Count))
-                {
-                    equality = true;
-                }
+                _entityDictionary.Add(datetime, new Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>());
             }
-            return equality;
+            if (!_entityDictionary[datetime].ContainsKey(action))
+            {
+                _entityDictionary[datetime].Add(action, new List<SystemEntityJumpPair>());
+            }
+            _entityDictionary[datetime][action].Add(jumpPair);
         }
+
+        internal void AddHaltingInterupt(DateTime datetime) { throw new NotImplementedException(); }
+
+        #region Public Time Methods. UI interacts with time here
+        /// <summary>
+        /// Pauses the timeloop
+        /// </summary>
+        public void PauseTime()
+        {
+            _timer.Stop();
+        }
+
+        /// <summary>
+        /// Starts the timeloop
+        /// </summary>
+        public void StartTime()
+        {
+            _timer.Start();
+        }
+
+
+        /// <summary>
+        /// Takes a single step in time
+        /// </summary>
+        public void TimeStep()
+        {
+            DoProcessing();
+            _timer.Stop();
+        }
+        #endregion
     }
-
-
 }
