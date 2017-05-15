@@ -5,11 +5,12 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture][NUnit.Framework.Description("Message Tests")]
+    [TestFixture]
+    [NUnit.Framework.Description("Message Tests")]
     internal class MessageTests
     {
         private static MessagePump _messagePump;
-        
+
 
         [Test]
         public void MessagePumpQueueOperations()
@@ -37,12 +38,26 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(MessagePump.TryGetOutgoingMessageType(ref outString, out outMessageTypeTest));
             Assert.AreEqual(outMessageTypeTest, OutgoingMessageType.Invalid);
             Assert.AreEqual(outString, outgoingMessage);
-            
+
             // Verify Queues are now empty.
             Assert.IsFalse(_messagePump.TryPeekIncomingMessage(out outString));
             Assert.IsFalse(_messagePump.TryPeekOutgoingMessage(out outString));
             Assert.IsFalse(_messagePump.TryDequeueIncomingMessage(out outString));
             Assert.IsFalse(_messagePump.TryDequeueOutgoingMessage(out outString));
+
+            // Verify extended public enqueue.
+            var authToken = new AuthenticationToken(Guid.NewGuid(), "hunter2");
+            string message = "This is a test.";
+            _messagePump.EnqueueMessage(IncomingMessageType.Echo, authToken, message);
+            Assert.IsTrue(_messagePump.TryDequeueIncomingMessage(out outString));
+            IncomingMessageType incomingMessageTypeTest;
+            AuthenticationToken authTokenTest;
+
+            Assert.IsTrue(MessagePump.TryDeconstructHeader(ref outString, out incomingMessageTypeTest, out authTokenTest));
+            Assert.AreEqual(authToken, authTokenTest);
+            Assert.AreEqual(IncomingMessageType.Echo, incomingMessageTypeTest);
+            Assert.AreEqual(message, outString);
+
         }
 
         [Test]
@@ -62,7 +77,7 @@ namespace Pulsar4X.Tests
             Assert.IsEmpty(message);
             Assert.AreEqual(messageType, testMessageType);
             Assert.AreEqual(authToken, testAuthToken);
-            
+
             // Ensure outgoingMessages get proper headers, and are proeprly decoded.
             _messagePump.EnqueueOutgoingMessage(OutgoingMessageType.Echo, "EchoTest");
             OutgoingMessageType outMessageTypeTest;

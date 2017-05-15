@@ -23,9 +23,21 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Enqueues a message to the ECSLib's Incoming Message Queue.
+        /// This function requires setting header manually.
         /// </summary>
         [PublicAPI]
         public void EnqueueMessage(string message) => _incomingMessages.Enqueue(message);
+
+        /// <summary>
+        /// Enqueues a message to the ECSLib's Incoming Message Queue.
+        /// This function will automatically prepend the message header.
+        /// </summary>
+        [PublicAPI]
+        public void EnqueueMessage(IncomingMessageType messageType, AuthenticationToken authToken, string message)
+        {
+            message = GetMessageHeader(messageType, authToken) + message; 
+            EnqueueMessage(message);
+        }
 
         /// <summary>
         /// Attempts to peek a message from the ECSLib's Incoming Message Queue. Does not remove the message from the queue.
