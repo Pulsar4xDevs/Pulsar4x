@@ -176,10 +176,15 @@ namespace Pulsar4X.ECSLib
 
                 // Attempt to dequeue a message.
                 string message;
-                if (!MessagePump.TryDequeueIncomingMessage(out message))
-                    continue;
+                if (MessagePump.TryDequeueIncomingMessage(out message))
+                {
+                    MessageDispatcher.Dispatch(this, message);
+                }
 
-                MessageDispatcher.Dispatch(this, message);
+                if (GameLoop.TimerElapsed)
+                {
+                    GameLoop.DoProcessing();
+                }
             }
         }
 

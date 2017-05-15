@@ -32,16 +32,6 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private DateTime _gameGlobalDateTime;
 
-        /// <summary>
-        /// Tracks if DoProcessing should recurse after finishing.
-        /// </summary>
-        private bool _isOvertime;
-
-        /// <summary>
-        /// Tracks if DoProcessing is currently running.
-        /// </summary>
-        private bool _isProcessing;
-
         private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(250);
         private float _timeMultiplier = 1f;
 
@@ -49,6 +39,16 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Properties
+        /// <summary>
+        /// Sets to true when the interval timer has elapsed.
+        /// </summary>
+        internal bool TimerElapsed { get; private set; }
+
+        /// <summary>
+        /// Determines if the TimeLoop is automatically running.
+        /// </summary>
+        internal bool AutoRun { get; set; }
+
         /// <summary>
         /// Multiplier applied to the Timer interval.
         /// </summary>
@@ -123,9 +123,36 @@ namespace Pulsar4X.ECSLib
         {
             _game = game;
             _timer.Interval = _tickInterval.TotalMilliseconds;
-            _timer.Enabled = false;
-            _timer.Elapsed += Timer_Elapsed;
+            _timer.Elapsed += (sender, args) => TimerElapsed = true;
+            _timer.AutoReset = false;
         }
+        #endregion
+
+        #region Public Methods
+        /// <summary>
+        /// Pauses the timeloop
+        /// </summary>
+        [Obsolete("Use MessagePump messages instead.")]
+        public void PauseTime()
+        {
+            AutoRun = false;
+        }
+
+        /// <summary>
+        /// Starts the timeloop
+        /// </summary>
+        [Obsolete("Use MessagePump messages instead.")]
+        public void StartTime()
+        {
+            _timer.Start();
+            AutoRun = true;
+        }
+
+        /// <summary>
+        /// Takes a single step in time
+        /// </summary>
+        [Obsolete("Use MessagePump messages instead.")]
+        public void TimeStep() => DoProcessing();
         #endregion
 
         #region Private Methods
@@ -140,62 +167,6 @@ namespace Pulsar4X.ECSLib
             _game.EventLog.AddEvent(logevent);
 
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
-        }
-
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            if (!_isProcessing)
-            {
-                DoProcessing(); //run DoProcessing if we're not already processing
-            }
-            else
-            {
-                _isOvertime = true; //if we're processing, then processing it taking longer than the sim speed
-            }
-        }
-
-        private void DoProcessing()
-        {
-            _isProcessing = true;
-            _timer.Stop();
-            _timer.Start(); //reset timer
-            _stopwatch.Start(); //start the processor loop stopwatch
-            _isOvertime = false;
-
-            //check for global interupts
-            TargetDateTime = GameGlobalDateTime + Ticklength;
-
-
-            while (GameGlobalDateTime < TargetDateTime)
-            {
-                DateTime nextInterupt = ProcessNextInterupt(TargetDateTime);
-                //do system processors
-
-                if (_game.Settings.EnableMultiThreading == true) //threaded
-                {
-                    Parallel.ForEach(_game.Systems.Values, starSys => starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt));
-                }
-                //The above 'blocks' till all the tasks are done.
-                else //non threaded
-                {
-                    foreach (StarSystem starSys in _game.Systems.Values)
-                    {
-                        starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt);
-                    }
-                }
-
-                GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
-            }
-
-            LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
-            _stopwatch.Reset();
-
-            if (_isOvertime)
-            {
-                // TODO: This will cause a StackOverflow on slow computers with large processing.
-                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
-            }
-            _isProcessing = false;
         }
 
         private DateTime ProcessNextInterupt(DateTime maxDateTime)
@@ -231,14 +202,49 @@ namespace Pulsar4X.ECSLib
         }
         #endregion
 
+        internal void DoProcessing()
+        {
+            TimerElapsed = false;
+            if (AutoRun)
+            {
+                _timer.Start();
+            }
+
+            _stopwatch.Start(); //start the processor loop stopwatch
+
+            //check for global interupts
+            TargetDateTime = GameGlobalDateTime + Ticklength;
+
+            while (GameGlobalDateTime < TargetDateTime)
+            {
+                DateTime nextInterupt = ProcessNextInterupt(TargetDateTime);
+                //do system processors
+
+                if (_game.Settings.EnableMultiThreading == true) //threaded
+                {
+                    Parallel.ForEach(_game.Systems.Values, starSys => starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt));
+                }
+                //The above 'blocks' till all the tasks are done.
+                else //non threaded
+                {
+                    foreach (StarSystem starSys in _game.Systems.Values)
+                    {
+                        starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt);
+                    }
+                }
+
+                GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
+            }
+
+            LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
+            _stopwatch.Reset();
+        }
+
 
         /// <summary>
         /// Adds an interupt where systems are interacting (ie an entity jumping between systems)
         /// this forces all systems to synch at this datetime.
         /// </summary>
-        /// <param name="datetime"></param>
-        /// <param name="action"></param>
-        /// <param name="jumpPair"></param>
         internal void AddSystemInteractionInterupt(DateTime datetime, PulseActionEnum action, SystemEntityJumpPair jumpPair)
         {
             if (!_entityDictionary.ContainsKey(datetime))
@@ -253,33 +259,5 @@ namespace Pulsar4X.ECSLib
         }
 
         internal void AddHaltingInterupt(DateTime datetime) { throw new NotImplementedException(); }
-
-        #region Public Time Methods. UI interacts with time here
-        /// <summary>
-        /// Pauses the timeloop
-        /// </summary>
-        public void PauseTime()
-        {
-            _timer.Stop();
-        }
-
-        /// <summary>
-        /// Starts the timeloop
-        /// </summary>
-        public void StartTime()
-        {
-            _timer.Start();
-        }
-
-
-        /// <summary>
-        /// Takes a single step in time
-        /// </summary>
-        public void TimeStep()
-        {
-            DoProcessing();
-            _timer.Stop();
-        }
-        #endregion
     }
 }
