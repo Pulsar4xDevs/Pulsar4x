@@ -9,7 +9,7 @@ using Eto.Forms;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
-    internal class EntityIcon : IconBase
+    internal class EntityIcon : IIconBase
     {
         public float Scale { get; set; } = 2;
         List<PenPathPair> _shapes = new List<PenPathPair>();
