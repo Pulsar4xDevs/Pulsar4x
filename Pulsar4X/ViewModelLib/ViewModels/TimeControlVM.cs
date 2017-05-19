@@ -70,12 +70,12 @@ namespace Pulsar4X.ViewModel
                 return;
             if (IsPaused)
             {
-                _timeloop.StartTime();
+                _gameVM.Game.MessagePump.EnqueueMessage(IncomingMessageType.StartRealTime, _gameVM.CurrentAuthToken, "");
                 IsPaused = false;
             }
             else
             {
-                _timeloop.PauseTime();
+                _gameVM.Game.MessagePump.EnqueueMessage(IncomingMessageType.StopRealTime, _gameVM.CurrentAuthToken, "");
                 IsPaused = true;
             }
                 
@@ -87,7 +87,7 @@ namespace Pulsar4X.ViewModel
         {
             if (_timeloop == null)
                 return;
-            _timeloop.TimeStep();
+            _gameVM.Game.MessagePump.EnqueueMessage(IncomingMessageType.ExecutePulse, _gameVM.CurrentAuthToken, "");
         }
 
         private void OnTimeDateChange(DateTime newDate)
