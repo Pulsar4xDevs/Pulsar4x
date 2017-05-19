@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         private static readonly Regex _guidRegex = new Regex("^(?:([\\w]+);)");
         private static readonly Regex _guidListRegex = new Regex("^(?:([\\w]+),?)+;");
         private static readonly Regex _messageTypeRegex = new Regex("^(\\d+);");
-        private static readonly Regex _authTokenRegex = new Regex("^(\\w+\n\\w+)\n");
+        private static readonly Regex _authTokenRegex = new Regex("^(\\w+\n\\w*)\n");
 
         /// <summary>
         /// Retrieves a Guid from the message.
