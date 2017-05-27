@@ -5,14 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Pulsar4X.ECSLib.GanttOrders;
+
+
 
 namespace Pulsar4X.ECSLib
 {
-    static public class OrderProcessor
+    public static class OrderProcessor
     {
 
-        static public void Process(Game game)
+        public static void Process(Game game)
         {
             Dictionary<Guid, StarSystem> systems = game.Systems;
             if (game.Settings.EnableMultiThreading ?? false)
@@ -36,14 +37,50 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-
-        static public void ProcessGanttOrder(Entity entity)
+/*
+        public static void ProcessGanttOrder(Entity entity)
         {
             entity.GetDataBlob<OrderableDB>().OrdersQueue.ProcessCurrentNodes();
         }
+*/
+
+        internal static void ProcessActionList(EntityManager manager)
+        {
+            List<Entity> orderableEntities = manager.GetAllEntitiesWithDataBlob<OrderableDB>();
+            foreach (var orderableEntity in orderableEntities)
+            {
+                ProcessActionList(orderableEntity);
+            }          
+        }
+
+        internal static void ProcessActionList(Entity entity)
+        {
+            OrderableDB orderableDB = entity.GetDataBlob<OrderableDB>();
+            List<BaseAction> actionList = orderableDB.ActionQueue;
+            int mask = 1;
+
+            int i = 0;
+            while (i < actionList.Count())
+            {
+                var item = actionList[i];
 
 
-        static public void ProcessSystem(EntityManager manager)
+                if ((mask & item.Lanes) == 0) //bitwise and
+                {
+                    if (item.IsBlocking)
+                    {
+                        mask |= item.Lanes; //bitwise or
+                    }
+                    item.OrderableProcessor.ProcessOrder(item);
+                }                      
+                if(item.IsFinished)
+                    actionList.RemoveAt(i);
+                else 
+                    i++;
+            }            
+        }
+
+        public static void ProcessSystem(EntityManager manager)
         {
             foreach (Entity ship in manager.GetAllEntitiesWithDataBlob<ShipInfoDB>())
             {
@@ -51,7 +88,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        static public void ProcessShip(Entity ship)
+        public static void ProcessShip(Entity ship)
         {
             ShipInfoDB sInfo = ship.GetDataBlob<ShipInfoDB>();
 
@@ -64,7 +101,7 @@ namespace Pulsar4X.ECSLib
             return;
         }
 
-        static public void IsTargetClose(Game game, Entity thisEntity, Entity targetEntity, Order order, int reqiredDistance)
+        public static void IsTargetClose(Game game, Entity thisEntity, Entity targetEntity, BaseAction order, int reqiredDistance)
         {
             PositionDB thisPosition = thisEntity.GetDataBlob<PositionDB>();
             PositionDB targetPosition = targetEntity.GetDataBlob<PositionDB>();
@@ -96,17 +133,20 @@ namespace Pulsar4X.ECSLib
 
     public class OrderableDB : BaseDataBlob
     {
+        //[JsonProperty]
+        //public GanttOrders.GanttList OrdersQueue = new GanttList();
+        
         [JsonProperty]
-        public GanttOrders.GanttList OrdersQueue = new GanttList();
-
-
+        public List<BaseAction> ActionQueue { get; } = new List<BaseAction>();
+        
         public OrderableDB()
         {
         }
 
         public OrderableDB(OrderableDB db)
         {
-            OrdersQueue = new GanttOrders.GanttList(db.OrdersQueue);
+            //OrdersQueue = new GanttOrders.GanttList(db.OrdersQueue);
+            ActionQueue = new List<BaseAction>(db.ActionQueue);
         }
 
         public override object Clone()

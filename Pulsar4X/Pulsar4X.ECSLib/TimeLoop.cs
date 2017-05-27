@@ -241,7 +241,7 @@ namespace Pulsar4X.ECSLib
             {
                 while (kvp.Value.Count > 0)
                 {
-                    Order nextOrder;
+                    BaseAction nextOrder;
                     if (kvp.Value.TryDequeue(out nextOrder))
                     {
                         if(nextOrder.PreProcessing(_game))

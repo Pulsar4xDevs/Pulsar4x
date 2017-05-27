@@ -191,12 +191,12 @@ namespace Pulsar4X.ECSLib
 
         while (_entityManager.OrderQueue.Count > 0) //process all the orders in the manager's order queue.
         {
-            Order nextOrder;
+            BaseAction nextOrder;
             if(_entityManager.OrderQueue.TryDequeue(out nextOrder));// should I do anything if it's false? (ie threadlocked due to writing) ie wait?
             {
                 if (nextOrder.ThisEntity.HasDataBlob<OrderableDB>())
                 {
-                    nextOrder.ThisEntity.GetDataBlob<OrderableDB>().OrdersQueue.AddOrder(nextOrder); //pass it off to the entity.
+                    nextOrder.ThisEntity.GetDataBlob<OrderableDB>().ActionQueue.Add(nextOrder); //pass it off to the entity.
                 }
                 else
                 {

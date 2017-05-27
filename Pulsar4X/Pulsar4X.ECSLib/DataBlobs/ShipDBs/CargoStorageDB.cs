@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public PercentValue PercentComplete { get; internal set; }
         [JsonProperty]
-        public int AmountToMove { get; internal set; }
+        public int AmountToTransfer { get; internal set; }
         [JsonProperty]
         public double PartAmount { get; internal set; }
         [JsonProperty]
@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         {
             CurrentOrder = db.CurrentOrder;
             PercentComplete = db.PercentComplete;
-            AmountToMove = db.AmountToMove;
+            AmountToTransfer = db.AmountToTransfer;
             PartAmount = db.PartAmount;
             TransferRate = db.TransferRate;
             CargoFrom = db.CargoFrom;

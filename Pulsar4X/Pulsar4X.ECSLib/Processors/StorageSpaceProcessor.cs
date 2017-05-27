@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 
 
+
 namespace Pulsar4X.ECSLib
 {
 
@@ -374,7 +375,7 @@ namespace Pulsar4X.ECSLib
 
     public class CargoOrderProcessor : IOrderableProcessor
     {
-        public void FirstProcess(Order order)
+        public void FirstProcess(BaseAction order)
         {
             Game game = order.ThisEntity.Manager.Game;
             CargoOrderableDB cargoOrderableDB = order.ThisEntity.GetDataBlob<CargoOrderableDB>();
@@ -386,7 +387,7 @@ namespace Pulsar4X.ECSLib
             SetNextInterupt(EstDateTime(order, cargoOrderableDB), order);
         }
 
-        public void ProcessOrder(Order order)
+        public void ProcessOrder(BaseAction order)
         {
             CargoStorageDB cargoStorageDB = order.ThisEntity.GetDataBlob<CargoStorageDB>();
             CargoOrderableDB cargoOrderableDB = order.ThisEntity.GetDataBlob<CargoOrderableDB>();
@@ -400,14 +401,14 @@ namespace Pulsar4X.ECSLib
             tonsThisDeltaT += cargoOrderableDB.PartAmount;
             cargoOrderableDB.PartAmount = tonsThisDeltaT - Math.Floor(tonsThisDeltaT);
             int amountThisMove = Math.Min((int)tonsThisDeltaT, 0);
-            cargoOrderableDB.AmountToMove -= amountThisMove;
+            cargoOrderableDB.AmountToTransfer -= amountThisMove;
 
             StorageSpaceProcessor.TransferCargo(cargoFrom, cargoTo, cargoOrderableDB.CurrentOrder.CargoItem, amountThisMove);
 
-            if (cargoOrderableDB.AmountToMove == 0)
+            if (cargoOrderableDB.AmountToTransfer == 0)
             {
                 cargoOrderableDB.PercentComplete.Percent = 1.0f;
-                order.OrdersQueueReference.OnNodeFinished(order);
+                
             }
             else
             {
@@ -422,34 +423,33 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Sets an Entity interupt at the datetime the cargo transfer should complete.
         /// </summary>
-        /// <param name="entity"></param>
         /// <param name="estDateTime"></param>
         /// <param name="order"></param>
-        private void SetNextInterupt(DateTime estDateTime, Order order )
+        private void SetNextInterupt(DateTime estDateTime, BaseAction order )
         {
             order.EstTimeComplete = estDateTime;
             order.ThisEntity.Manager.ManagerSubpulses.AddEntityInterupt(estDateTime, PulseActionEnum.OrderProcess, order.ThisEntity);
         }
 
-        private DateTime EstDateTime(Order order, CargoOrderableDB cargoOrderableDB)
+        private DateTime EstDateTime(BaseAction order, CargoOrderableDB cargoOrderableDB)
         {
             cargoOrderableDB.TransferRate = (int)(cargoOrderableDB.CargoFrom.TransferRate + cargoOrderableDB.CargoTo.TransferRate * 0.5);
-            TimeSpan timeToComplete = TimeSpan.FromHours((float)cargoOrderableDB.AmountToMove / cargoOrderableDB.TransferRate);
+            TimeSpan timeToComplete = TimeSpan.FromHours((float)cargoOrderableDB.AmountToTransfer / cargoOrderableDB.TransferRate);
             return order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime + timeToComplete;
         }
 
-        public Order GetCurrentOrder(Order order)
+        public BaseAction GetCurrentOrder(BaseAction order)
         {
             return GetCurrentOrder((CargoOrder)order);
         }
 
-        public Order GetCurrentOrder(CargoOrder order)
+        public BaseAction GetCurrentOrder(CargoOrder order)
         {
             return order.ThisEntity.GetDataBlob<CargoOrderableDB>().CurrentOrder;
         }
 
 
-        public PercentValue GetPercentComplete(Order order)
+        public PercentValue GetPercentComplete(BaseAction order)
         {
             return GetPercentComplete((CargoOrder)order);
         }
@@ -463,7 +463,7 @@ namespace Pulsar4X.ECSLib
 
     }
 
-    public class CargoOrder : Order
+    public class CargoOrder : BaseAction
     {
         public enum CargoOrderTypes
         {
@@ -477,15 +477,12 @@ namespace Pulsar4X.ECSLib
         public ICargoable CargoItem;
         public int Amount;
 
-        public CargoOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID, CargoOrderTypes orderType, Guid cargoItemID, int amount ) : base(processor, entityGuid, factionID)
+        public CargoOrder(Guid entityGuid, Guid factionID, Guid targetGuid, CargoOrderTypes orderType, Guid cargoItemID, int amount ) : base(1, true, entityGuid, factionID, targetGuid)
         {
             CargoOrderType = orderType;
             CargoItemGuid = cargoItemID;
             Amount = amount;
-        }
-
-        public CargoOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID, Guid targetGuid) : base(processor, entityGuid, factionID, targetGuid)
-        {
+            OrderableProcessor = new CargoOrderProcessor();
         }
 
         internal new bool PreProcessing(Game game)

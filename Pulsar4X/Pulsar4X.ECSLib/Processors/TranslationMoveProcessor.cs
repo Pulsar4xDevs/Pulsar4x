@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class TranslationOrderProcessor : IOrderableProcessor
     {
-        public void ProcessOrder(Order order)
+        public void ProcessOrder(BaseAction order)
         {
             Entity orderableEntity = order.ThisEntity;
             EntityManager entityManager = orderableEntity.Manager;
@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        public void FirstProcess(Order order)
+        public void FirstProcess(BaseAction order)
         {
             Entity thisEntity = order.ThisEntity;
             TranslateOrderableDB translateOrderableDB = thisEntity.GetDataBlob<TranslateOrderableDB>();
@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
             propulsion.CurrentSpeed = GMath.GetVector(position.AbsolutePosition, targetPosition.AbsolutePosition, speed);
         }
 
-        private void SetOrbitTarget(Entity thisEntity, Entity targetEntity, Order order)
+        private void SetOrbitTarget(Entity thisEntity, Entity targetEntity, BaseAction order)
         {
             MassVolumeDB targetMassDB = targetEntity.GetDataBlob<MassVolumeDB>();
             MassVolumeDB thisMass = thisEntity.GetDataBlob<MassVolumeDB>();
@@ -102,16 +102,17 @@ namespace Pulsar4X.ECSLib
                                                                       aoP, meanLong, j2000);
                     thisEntity.GetDataBlob<TranslateOrderableDB>().HelmState = TranslateOrderableDB.HelmStatus.Orbiting;
 
-                    order.OrdersQueueReference.OnNodeFinished(order);
+                    order.IsFinished = true;
                 }
                 else
                 {
-                    //set a moveto order to get within soi
+                    //TODO: set a moveto order to get within soi
                 }
             }
             else
             {
                 //target not massy enough to orbit.
+                //TODO: MatchOrbit
             }
 
 
@@ -120,14 +121,14 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public Order GetCurrentOrder(Order order)
+        public BaseAction GetCurrentOrder(BaseAction order)
         {
             TranslateOrderableDB translateOrderableDB = order.ThisEntity.GetDataBlob<TranslateOrderableDB>();
             return translateOrderableDB.CurrentOrder = (TranslationOrder)order;
 
         }
 
-        public PercentValue GetPercentComplete(Order order)
+        public PercentValue GetPercentComplete(BaseAction order)
         {
             throw new NotImplementedException();
         }
@@ -155,75 +156,6 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-
-
-
-
-/*
-    internal class TranslationOrderableProcessor
-    {
-        internal static void Process(EntityManager manager, int deltaSeconds)
-        {
-            foreach (Entity entityWithHelm in manager.GetAllEntitiesWithDataBlob<TranslateOrderableDB> ())
-            {
-                ProcessSingleEntity(manager, entityWithHelm, deltaSeconds);
-            }
-        }
-
-        internal static void ProcessSingleEntity(EntityManager manager, Entity entityWithHelm, int deltaSeconds)
-        {
-            PositionDB positionDB = entityWithHelm.GetDataBlob<PositionDB>();
-            PropulsionDB propulsionDB = entityWithHelm.GetDataBlob<PropulsionDB>();
-            TranslateOrderableDB helm = entityWithHelm.GetDataBlob<TranslateOrderableDB>();
-            Vector4 absolutePos = positionDB.AbsolutePosition;
-
-            if(helm.HelmState == TranslateOrderableDB.HelmStatus.Orbiting || helm.HelmState == TranslateOrderableDB.HelmStatus.HoldingUnderPower) {
-                if(propulsionDB.CurrentSpeed.Length() != 0) { propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0); } //set speed to 0
-                //Do nothing we're waiting for another order system to finish.
-            }
-            else if(helm.HelmState == TranslateOrderableDB.HelmStatus.Underway) //we've not started moving to the next waypoint.
-            {
-
-                Vector4 waypoint = helm.waypointQueue.Peek().waypoint;
-                propulsionDB.CurrentSpeed = GMath.GetVector(absolutePos, waypoint, propulsionDB.MaximumSpeed);//Full steam ahead!
-                DateTime currentTime = manager.Game.CurrentDateTime;
-                DateTime estDT = currentTime.AddSeconds(ETA(propulsionDB.MaximumSpeed, absolutePos, waypoint));
-                manager.ManagerSubpulses.AddEntityInterupt(estDT, PulseActionEnum.MoveOnlyProcessor, entityWithHelm);
-                helm.EstTimeToWaypoint = estDT;
-
-            }
-            else if(helm.HelmState == TranslateOrderableDB.HelmStatus.Makingway)//we're on our way to the current waypoint
-            {
-                Vector4 waypoint = helm.waypointQueue.Peek().waypoint;
-                double distanceToTarget = (absolutePos - waypoint).Length();
-                if(absolutePos == waypoint) //we've reached our destination
-                {
-                    propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);  //set speed to 0
-                    helm.HelmState = TranslateOrderableDB.HelmStatus.HoldingUnderPower; //TODO decide which of these we're doing, get this info from helm state
-                    helm.HelmState = TranslateOrderableDB.HelmStatus.Orbiting;
-                }
-            }
-
-
-        }
-
-        /// <summary>
-        /// Estimated time to waypoint
-        /// </summary>
-        /// <returns>The time in seconds to arrive at the next waypoint.</returns>
-        /// <param name="atSpeed">At Speed.</param>
-        /// <param name="curPos">Current position.</param>
-        /// <param name="waypoint">Waypoint.</param>
-        private static double ETA(double atSpeed, Vector4 absolutePos, Vector4 waypoint)
-        {
-            double distanceToTarget = (absolutePos - waypoint).Length();
-            double time = distanceToTarget / atSpeed;
-            return time;
-        }
-    }
-
-*/
-
     /// <summary>
     /// Non newtonion translational movement.
     /// Warps space around the ship changing the position in a system without changing newtonion velocity (acceleration)
@@ -242,7 +174,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class  TranslationOrder : Order
+    public class  TranslationOrder : BaseAction
     {
         public enum HelmOrderTypeEnum
         {
@@ -255,13 +187,16 @@ namespace Pulsar4X.ECSLib
         public double TargetDistance { get; set; } //this is the distance we want to Match or orbit at.
 
 
-        public TranslationOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID) : base(processor, entityGuid, factionID)
+        public TranslationOrder(Guid entityGuid, Guid factionID) : base(1, true, entityGuid, factionID)
         {
+            OrderableProcessor = new TranslationOrderProcessor();
         }
 
-        public TranslationOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID, Guid targetGuid) : base(processor, entityGuid, factionID, targetGuid)
+        public TranslationOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID, Guid targetGuid) : base(1, true, entityGuid, factionID, targetGuid)
         {
+            OrderableProcessor = new TranslationOrderProcessor();
         }
+
     }
 
 }
