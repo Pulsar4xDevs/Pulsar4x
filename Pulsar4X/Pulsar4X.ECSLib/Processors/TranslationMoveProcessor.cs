@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
                         SetOrbitTarget(order.ThisEntity, order.TargetEntity, order);
                         break;
                     case TranslationOrder.HelmOrderTypeEnum.InterceptTarget:
-                        SetCurrentVector(orderableEntity, order.TargetEntity, (TranslationOrder)order);
+                        SetCurrentVector(orderableEntity, order.TargetEntity);
                         break;
                     case TranslationOrder.HelmOrderTypeEnum.MatchTarget:
                         //ReplaceQueue(orderableEntity, torder);
@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
             SetNextInterupt(thisEntity.Manager.Game, thisEntity, position.AbsolutePosition, targetPos, propulsion.MaximumSpeed);
         }
 
-        private void SetCurrentVector(Entity thisEntity, Entity targetEntity, TranslationOrder order)
+        private void SetCurrentVector(Entity thisEntity, Entity targetEntity)
         {
             var position = thisEntity.GetDataBlob<PositionDB>();
             var propulsion = thisEntity.GetDataBlob<PropulsionDB>();
@@ -114,11 +114,6 @@ namespace Pulsar4X.ECSLib
                 //target not massy enough to orbit.
                 //TODO: MatchOrbit
             }
-
-
-
-
-
         }
 
         public BaseAction GetCurrentOrder(BaseAction order)
@@ -198,5 +193,4 @@ namespace Pulsar4X.ECSLib
         }
 
     }
-
 }

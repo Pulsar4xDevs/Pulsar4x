@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
     {
         void ProcessOrder(BaseAction order);
         void FirstProcess(BaseAction order);
-        // LastProcess(Order order);
+        // LastProcess(BaseAction order);
         BaseAction GetCurrentOrder(BaseAction order);
         PercentValue GetPercentComplete(BaseAction order);
     }

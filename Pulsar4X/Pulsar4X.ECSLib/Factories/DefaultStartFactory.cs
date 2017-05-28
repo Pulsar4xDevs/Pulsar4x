@@ -108,6 +108,7 @@ namespace Pulsar4X.ECSLib
             Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
+            Entity smallCargo = SmallCargoBay(game, faction);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, engine);
             EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
@@ -116,6 +117,7 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
             EntityManipulation.AddComponentToEntity(shipDesign, laser);
             EntityManipulation.AddComponentToEntity(shipDesign, bfc);
+            EntityManipulation.AddComponentToEntity(shipDesign, smallCargo);
             return shipDesign;
         }
 
@@ -196,6 +198,16 @@ namespace Pulsar4X.ECSLib
             cargoInstalation.ComponentDesignAbilities[0].SetValueFromInput(1000000);
             cargoInstalation.Name = "CargoInstalation1";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, cargoInstalation);
+        }
+
+        public static Entity SmallCargoBay(Game game, Entity faction)
+        {
+            ComponentDesign smallCargo;
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            smallCargo = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            smallCargo.ComponentDesignAbilities[0].SetValueFromInput(150);
+            smallCargo.Name = "SmallCargoBay";
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, smallCargo);
         }
     }
 

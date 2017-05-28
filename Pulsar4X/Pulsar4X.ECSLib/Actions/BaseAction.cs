@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
         internal bool PreProcessing(Game game)
         {
             Entity entity;
-            if (!game.GlobalManager.TryGetEntityByGuid(EntityGuid, out entity))
+            if (!game.GlobalManager.FindEntityByGuid(EntityGuid, out entity))
                 return false;
             ThisEntity = entity;
             if (!ThisEntity.HasDataBlob<OrderableDB>())

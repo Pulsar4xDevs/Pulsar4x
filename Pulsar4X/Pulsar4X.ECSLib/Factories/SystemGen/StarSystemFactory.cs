@@ -236,6 +236,34 @@ namespace Pulsar4X.ECSLib
 
         #region TestSystems
 
+        public StarSystem CreateSinglePlanetSystem(Game game)
+        {
+            StarSystem system = new StarSystem(game, "TestSystem", -1);
+
+            Entity sun = _starFactory.CreateStar(system, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "_ecc");
+
+            MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
+
+            NameDB planetNameDB = new NameDB("planet");
+
+            double planetSemiMajAxis = 1.00000011;
+            double planetEccentricity = 0.01671022;
+            double planetInclination = 0;
+            double planetLoAN = -11.26064;
+            double planetLoP = 102.94719;
+            double planetMeanLongd = 100.46435;
+            
+            SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
+            MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+            PositionDB planetPositionDB = new PositionDB(system.Guid);
+            OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
+            planetPositionDB.AbsolutePosition = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
+            Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+            
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
+            return system;
+        }
+
         /// <summary>
         /// Creates an test system with planets of varying eccentricity.
         /// Adds to game.StarSystems

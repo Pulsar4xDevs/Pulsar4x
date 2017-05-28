@@ -37,12 +37,6 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-/*
-        public static void ProcessGanttOrder(Entity entity)
-        {
-            entity.GetDataBlob<OrderableDB>().OrdersQueue.ProcessCurrentNodes();
-        }
-*/
 
         internal static void ProcessActionList(EntityManager manager)
         {
@@ -101,57 +95,16 @@ namespace Pulsar4X.ECSLib
             return;
         }
 
-        public static void IsTargetClose(Game game, Entity thisEntity, Entity targetEntity, BaseAction order, int reqiredDistance)
+        public static bool IsTargetClose(Game game, Entity thisEntity, Entity targetEntity, BaseAction order, int reqiredDistance)
         {
             PositionDB thisPosition = thisEntity.GetDataBlob<PositionDB>();
             PositionDB targetPosition = targetEntity.GetDataBlob<PositionDB>();
 
-            if (thisPosition.GetDistanceTo(targetPosition) > reqiredDistance) //then we're too far away
+            if (thisPosition.GetDistanceTo(targetPosition) <= reqiredDistance) //then we're within range.
             {
-                OrderableDB thisOrderable = thisEntity.GetDataBlob<OrderableDB>();
-                TranslateOrderableDB thisTranslateOderable = thisEntity.GetDataBlob<TranslateOrderableDB>();
-                if (thisTranslateOderable.CurrentOrder.TargetEntityGuid == targetEntity.Guid) // it already has a move order there.
-                {
-                    //set this order to trigger after the translation order.
-                    //thisTranslateOderable.CurrentOrder.NextOrders.Add(order);
-                }
-                else
-                {
-                    //create new translation order.
-                    //TranslationOrder newTMove = new TranslationOrder(TranslationOrder.HelmOrderTypeEnum.InterceptTarget, thisEntity, targetEntity);
-                    //TranslationOrder newTHold = new TranslationOrder(TranslationOrder.HelmOrderTypeEnum.HoldAt, thisEntity, targetEntity);
-
-                    //newTMove.NextOrders.Add(newTHold);
-                    //newTMove.NextOrders.Add(order);
-                    //newTMove.Processor = new TranslationOrderProcessor();
-                    //newTMove.Processor.FirstProcess(game, newTMove);
-                    //newTHold.Processor.FirstProcess(game, newTHold);
-                }
+                return true;
             }
-        }
-    }
-
-    public class OrderableDB : BaseDataBlob
-    {
-        //[JsonProperty]
-        //public GanttOrders.GanttList OrdersQueue = new GanttList();
-        
-        [JsonProperty]
-        public List<BaseAction> ActionQueue { get; } = new List<BaseAction>();
-        
-        public OrderableDB()
-        {
-        }
-
-        public OrderableDB(OrderableDB db)
-        {
-            //OrdersQueue = new GanttOrders.GanttList(db.OrdersQueue);
-            ActionQueue = new List<BaseAction>(db.ActionQueue);
-        }
-
-        public override object Clone()
-        {
-            return new OrderableDB(this);
+            return false;
         }
     }
 }
