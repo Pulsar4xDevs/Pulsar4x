@@ -382,7 +382,7 @@ namespace Pulsar4X.ECSLib
             cargoStorageDB.LastRunDate = order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
 
             StorageSpaceProcessor.SetToFrom(cargoStorageDB);
-
+            cargoStorageDB.AmountToTransfer = cargoStorageDB.CurrentOrder.Amount;
             SetNextInterupt(EstDateTime(order, cargoStorageDB), order);
         }
 
@@ -427,7 +427,7 @@ namespace Pulsar4X.ECSLib
         private void SetNextInterupt(DateTime estDateTime, BaseAction order )
         {
             order.EstTimeComplete = estDateTime;
-            order.ThisEntity.Manager.ManagerSubpulses.AddEntityInterupt(estDateTime, PulseActionEnum.OrderProcess, order.ThisEntity);
+            order.ThisEntity.Manager.ManagerSubpulses.AddEntityInterupt(estDateTime, PulseActionEnum.OrderProcess, order.ThisEntity); 
         }
 
         private DateTime EstDateTime(BaseAction order, CargoStorageDB cargoStorageDB)

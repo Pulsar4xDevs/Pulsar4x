@@ -73,7 +73,16 @@ namespace Pulsar4X.Tests
             DateTime nextStep = _entityManager.ManagerSubpulses.EntityDictionary.ElementAt(0).Key;
             Assert.AreEqual(nextStep, eta, "check if eta is nextstep is correct");
 
-            long amount = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);
+
+            TimeSpan timeToTake = eta - _game.CurrentDateTime;
+            
+            Assert.Greater(timeToTake, TimeSpan.Zero, "should take more than 0 time to complete");
+
+            _game.GameLoop.Ticklength = timeToTake;
+            _game.GameLoop.TimeStep();
+            
+            long amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
+            Assert.AreEqual(100, 100, "ship has " + amountInShip.ToString() + " Duranium");
         }
     }
 }
