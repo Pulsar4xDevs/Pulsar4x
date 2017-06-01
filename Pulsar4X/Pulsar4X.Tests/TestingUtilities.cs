@@ -50,6 +50,51 @@ namespace Pulsar4X.Tests
         {
             return CreateTestUniverse(numSystems, DateTime.Now, generateDefaultHumans);
         }
+        
+        internal static void ColonyFacilitys(TestGame testGame, Entity colonyEntity)
+        {
+            Game game = testGame.Game;
+            Entity factionEntity = testGame.HumanFaction;
+            
+            ComponentTemplateSD mineSD = game.StaticData.ComponentTemplates[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
+            ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            Entity mineEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, mineDesign);
+
+
+            ComponentTemplateSD RefinerySD = game.StaticData.ComponentTemplates[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
+            ComponentDesign RefineryDesign = GenericComponentFactory.StaticToDesign(RefinerySD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            Entity RefineryEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, RefineryDesign);
+
+            ComponentTemplateSD labSD = game.StaticData.ComponentTemplates[new Guid("c203b7cf-8b41-4664-8291-d20dfe1119ec")];
+            ComponentDesign labDesign = GenericComponentFactory.StaticToDesign(labSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            Entity labEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, labDesign);
+
+            ComponentTemplateSD facSD = game.StaticData.ComponentTemplates[new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}")];
+            ComponentDesign facDesign = GenericComponentFactory.StaticToDesign(facSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
+            Entity facEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, facDesign);
+
+            
+
+            
+            Entity scientistEntity = CommanderFactory.CreateScientist(game.GlobalManager, factionEntity);
+            colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists.Add(scientistEntity);
+
+            FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
+            //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 
+            TechProcessor.MakeResearchable(factionTech);
+            Entity fuelTank = DefaultStartFactory.DefaultFuelTank(game, factionEntity);
+            Entity cargoInstalation = DefaultStartFactory.DefaultCargoInstalation(game, factionEntity);
+
+            EntityManipulation.AddComponentToEntity(colonyEntity, mineEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, RefineryEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, labEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, facEntity);
+           
+            EntityManipulation.AddComponentToEntity(colonyEntity, fuelTank);
+            
+            EntityManipulation.AddComponentToEntity(colonyEntity, cargoInstalation);
+            ReCalcProcessor.ReCalcAbilities(colonyEntity);
+        }
     }
 
     public class TestGame
@@ -115,6 +160,8 @@ namespace Pulsar4X.Tests
             DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, Sol.SystemManager, HumanFaction, position, Sol, "Serial Peacemaker");
             Sol.SystemManager.SetDataBlob(DefaultShip.ID, new TransitableDB());
         }
+
+        
 
 
     }

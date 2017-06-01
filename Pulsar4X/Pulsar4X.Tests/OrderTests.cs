@@ -10,79 +10,57 @@ namespace Pulsar4X.Tests
     [Description("Ship Entity Tests")]
     internal class OrderTests
     {
-        private Game _game;
-        private EntityManager _entityManager;
-        private Entity _faction;
-        private Entity _planet;
-        private Entity _colonyEntity;
-        private StarSystem _starSystem;
-        private Entity _shipClass;
-        private Entity _ship;
+        TestGame _testGame;
         private MineralSD _duraniumSD;
-        //private MineralSD _corundiumSD;
-        
-        StarSystemFactory _starSystemFactory;
 
         [SetUp]
         public void Init()
         {
-            _game = new Game(new NewGameSettings {GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 1});
-            _starSystemFactory = new StarSystemFactory(_game);
-            _starSystem = _starSystemFactory.CreateSinglePlanetSystem(_game);
-            _entityManager = _starSystem.SystemManager;
-            _faction = FactionFactory.CreateFaction(_game, "testFaction");
-            _planet = NameLookup.TryGetFirstEntityWithName(_entityManager, "planet");
-
-            Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(_faction, _game.GlobalManager);
-            _colonyEntity = ColonyFactory.CreateColony(_faction, speciesEntity, _planet);
-
-            _shipClass = DefaultStartFactory.DefaultShipDesign(_game, _faction);
-
-            Entity cargoInstalation = DefaultStartFactory.DefaultCargoInstalation(_game, _faction);
-
-
-            EntityManipulation.AddComponentToEntity(_colonyEntity, cargoInstalation);
-            ReCalcProcessor.ReCalcAbilities(_colonyEntity);
-            _colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
-
-            Vector4 position = _planet.GetDataBlob<PositionDB>().AbsolutePosition;
-            _ship = ShipFactory.CreateShip(_shipClass, _entityManager, _faction, position, _starSystem, "Serial Peacemaker");
+            _testGame = new TestGame(1);
+            _duraniumSD = NameLookup.TryGetMineralSD(_testGame.Game, "Duranium");
             OrderableDB orderable = new OrderableDB();
-            _entityManager.SetDataBlob(_ship.ID, orderable);
-
-            _duraniumSD = NameLookup.TryGetMineralSD(_game, "Duranium");
-            StorageSpaceProcessor.AddItemToCargo(_colonyEntity.GetDataBlob<CargoStorageDB>(), _duraniumSD, 10000);  
+            TestingUtilities.ColonyFacilitys(_testGame, _testGame.EarthColony);
+            _testGame.EarthColony.Manager.SetDataBlob(_testGame.DefaultShip.ID, orderable);
+            StorageSpaceProcessor.AddItemToCargo(_testGame.EarthColony.GetDataBlob<CargoStorageDB>(), _duraniumSD, 10000); 
         }
 
    
         [Test]
         public void TestCargoMove()
         {
-            CargoOrder cargoOrder = new CargoOrder(_ship.Guid, _faction.Guid, _colonyEntity.Guid, CargoOrder.CargoOrderTypes.LoadCargo, _duraniumSD.CargoTypeID, 100);
+            EntityManager entityManager = _testGame.EarthColony.Manager;
+            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, _testGame.EarthColony.Guid, CargoOrder.CargoOrderTypes.LoadCargo, _duraniumSD.CargoTypeID, 100);
 
-            CargoStorageDB cargoStorageDB = _ship.GetDataBlob<CargoStorageDB>();
+            CargoStorageDB cargoStorageDB = _testGame.DefaultShip.GetDataBlob<CargoStorageDB>();
             
             Entity entity;
-            Assert.True(_game.GlobalManager.FindEntityByGuid(_ship.Guid, out entity));       
-            cargoOrder.PreProcessing(_game);
-            _ship.GetDataBlob<OrderableDB>().ActionQueue.Add(cargoOrder);
+            Assert.True(_testGame.Game.GlobalManager.FindEntityByGuid(_testGame.DefaultShip.Guid, out entity));       
+            cargoOrder.PreProcessing(_testGame.Game);
+            _testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue.Add(cargoOrder);
             
             cargoOrder.OrderableProcessor.FirstProcess(cargoOrder);
 
             DateTime eta = cargoOrder.EstTimeComplete;
-            DateTime nextStep = _entityManager.ManagerSubpulses.EntityDictionary.ElementAt(0).Key;
-            Assert.AreEqual(nextStep, eta, "check if eta is nextstep is correct");
+            DateTime nextStep = entityManager.ManagerSubpulses.EntityDictionary.ElementAt(0).Key;
+            Assert.AreEqual(nextStep, eta, "check if eta & nextstep are equal");
 
 
-            TimeSpan timeToTake = eta - _game.CurrentDateTime;
+            TimeSpan timeToTake = eta - _testGame.Game.CurrentDateTime;
             
             Assert.Greater(timeToTake, TimeSpan.Zero, "should take more than 0 time to complete");
 
-            _game.GameLoop.Ticklength = timeToTake;
-            _game.GameLoop.TimeStep();
+            _testGame.Game.GameLoop.Ticklength = timeToTake;
+            _testGame.Game.GameLoop.TimeStep();
             
             long amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
             Assert.AreEqual(100, 100, "ship has " + amountInShip.ToString() + " Duranium");
+            
+            _testGame.Game.GameLoop.TimeStep();
+            
+            //check we don't have more than 100 
+            amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
+            Assert.AreEqual(100, 100, "ship has " + amountInShip.ToString() + " Duranium");
+            
         }
     }
 }
