@@ -18,7 +18,8 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>> StoredEntities { get; private set; } = new PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>>();
-        [JsonProperty]
+        
+        [JsonProperty] //TODO maybe change the ICargoable key to a GUID.
         public PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>> MinsAndMatsByCargoType { get; private set;} = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>();
 
         /// <summary>

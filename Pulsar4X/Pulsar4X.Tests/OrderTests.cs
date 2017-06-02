@@ -53,13 +53,13 @@ namespace Pulsar4X.Tests
             _testGame.Game.GameLoop.TimeStep();
             
             long amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
-            Assert.AreEqual(100, 100, "ship has " + amountInShip.ToString() + " Duranium");
+            Assert.AreEqual(100, amountInShip, "ship has " + amountInShip.ToString() + " Duranium");
             
             _testGame.Game.GameLoop.TimeStep();
             
             //check we don't have more than 100 
             amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
-            Assert.AreEqual(100, 100, "ship has " + amountInShip.ToString() + " Duranium");
+            Assert.AreEqual(100, amountInShip, "ship has " + amountInShip.ToString() + " Duranium");
             
         }
     }
