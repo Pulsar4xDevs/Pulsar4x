@@ -46,7 +46,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestCargoMove()
         {
-            _testGame.GameSettings.EnableMultiThreading = false;
+            //_testGame.GameSettings.EnableMultiThreading = false;
             EntityManager entityManager = _testGame.EarthColony.Manager;
             CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, _duraniumSD.ID, 100);
 
@@ -75,20 +75,16 @@ namespace Pulsar4X.Tests
             _testGame.Game.GameLoop.Ticklength = timeToTake;
             _testGame.Game.GameLoop.TimeStep();
             
+            Assert.AreEqual(_currentDateTime, eta);
             long amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
-            
+            long amountOnColony = StorageSpaceProcessor.GetAmountOf(_testGame.EarthColony.GetDataBlob<CargoStorageDB>(), _duraniumSD.ID); 
             long spaceRemaining = StorageSpaceProcessor.RemainingCapacity(cargoStorageDB, _duraniumSD.CargoTypeID);
             Assert.Greater(spaceAvailible, spaceRemaining);
             Assert.AreEqual(100, amountInShip, "ship has " + amountInShip.ToString() + " Duranium");
-            
-            
-            
-            _testGame.Game.GameLoop.TimeStep();
-            
-            //check we don't have more than 100 
-            amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
-            Assert.AreEqual(100, amountInShip, "ship has " + amountInShip.ToString() + " Duranium");
-            
+            Assert.AreEqual(9900, amountOnColony, "colony should have duranium removed");
+
+            Assert.AreEqual(0, _testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue.Count, "action should have been removed from queue");
+
         }
     }
 }

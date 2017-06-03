@@ -61,7 +61,6 @@ namespace Pulsar4X.ECSLib
             ItemToTypeMap = cargoDB.ItemToTypeMap; //note that this is not 'new', the dictionary referenced here is static and should be the same dictionary throughout the game.
         
             CurrentOrder = cargoDB.CurrentOrder;
-            PercentComplete = cargoDB.PercentComplete;
             AmountToTransfer = cargoDB.AmountToTransfer;
             PartAmount = cargoDB.PartAmount;
             OrderTransferRate = cargoDB.OrderTransferRate;
@@ -97,9 +96,7 @@ namespace Pulsar4X.ECSLib
         
         [JsonProperty]
         internal CargoAction CurrentAction { get; set; }
-        
-        [JsonProperty]
-        public PercentValue PercentComplete { get; internal set; }
+
         [JsonProperty]
         public int AmountToTransfer { get; internal set; }
         [JsonProperty]

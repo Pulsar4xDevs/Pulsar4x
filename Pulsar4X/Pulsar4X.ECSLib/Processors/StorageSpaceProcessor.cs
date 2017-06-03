@@ -367,7 +367,7 @@ namespace Pulsar4X.ECSLib
             CargoStorageDB cargoFrom = action.CargoFrom;
             CargoStorageDB cargoTo = action.CargoTo;
 
-            double tonsThisDeltaT = action.ThisStorage.TransferRate * deltaTime.TotalSeconds / 3600;
+            double tonsThisDeltaT = action.ThisStorage.OrderTransferRate * deltaTime.TotalSeconds / 3600;
             tonsThisDeltaT += action.ThisStorage.PartAmount;
             action.ThisStorage.PartAmount = tonsThisDeltaT - Math.Floor(tonsThisDeltaT);
             int amountThisMove = Math.Max((int)tonsThisDeltaT, 0);
@@ -377,8 +377,9 @@ namespace Pulsar4X.ECSLib
 
             if (action.ThisStorage.AmountToTransfer == 0)
             {
-                action.ThisStorage.PercentComplete.Percent = 1.0f;
-                
+                //action.ThisStorage.PercentComplete.Percent = 1.0f;
+                action.IsFinished = true;
+
             }
             else
             {
