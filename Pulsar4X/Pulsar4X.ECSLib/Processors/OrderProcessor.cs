@@ -56,16 +56,16 @@ namespace Pulsar4X.ECSLib
             }            
         }
 
-        internal static void ProcessActionList(EntityManager manager)
+        internal static void ProcessActionList(DateTime toDate, EntityManager manager)
         {
             List<Entity> orderableEntities = manager.GetAllEntitiesWithDataBlob<OrderableDB>();
             foreach (var orderableEntity in orderableEntities)
             {
-                ProcessActionList(orderableEntity);
+                ProcessActionList(toDate, orderableEntity);
             }          
         }
 
-        internal static void ProcessActionList(Entity entity)
+        internal static void ProcessActionList(DateTime toDate, Entity entity)
         {
             OrderableDB orderableDB = entity.GetDataBlob<OrderableDB>();
             List<BaseAction> actionList = orderableDB.ActionQueue;
@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
                     {
                         mask |= item.Lanes; //bitwise or
                     }
-                    item.OrderableProcessor.ProcessOrder(item);
+                    item.OrderableProcessor.ProcessOrder(toDate, item);
                 }                      
                 if(item.IsFinished)
                     actionList.RemoveAt(i);

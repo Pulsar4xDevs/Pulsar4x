@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class TranslationOrderProcessor : IOrderableProcessor
     {
-        public void ProcessOrder(BaseAction order)
+        public void ProcessOrder(DateTime toDate, BaseAction order)
         {
             Entity orderableEntity = order.ThisEntity;
             EntityManager entityManager = orderableEntity.Manager;

@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
 
     public interface IOrderableProcessor
     {
-        void ProcessOrder(BaseAction order);
+        void ProcessOrder(DateTime toDate, BaseAction order);
         //void FirstProcess(BaseAction order);
         // LastProcess(BaseAction order);
         //BaseAction GetCurrentOrder(BaseAction order);

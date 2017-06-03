@@ -40,11 +40,7 @@ namespace Pulsar4X.ECSLib
         {            
             var game = (Game)context.Context;
             ItemToTypeMap = game.StaticData.StorageTypeMap;
-            _staticData = game.StaticData;
-            
-            StorageSpaceProcessor.SetToFrom(this); //this sets CargoTo and CargoFrom
-            if (OrderTransferItemGuid != Guid.Empty)
-                OrderTransferItem = _staticData.GetICargoable(OrderTransferItemGuid);
+            _staticData = game.StaticData;            
         }
 
         public CargoStorageDB()
@@ -53,6 +49,7 @@ namespace Pulsar4X.ECSLib
 
         public CargoStorageDB(StaticDataStore staticDataStore)
         {
+            _staticData = staticDataStore;
             ItemToTypeMap = staticDataStore.StorageTypeMap;
         }
 
@@ -68,11 +65,9 @@ namespace Pulsar4X.ECSLib
             AmountToTransfer = cargoDB.AmountToTransfer;
             PartAmount = cargoDB.PartAmount;
             OrderTransferRate = cargoDB.OrderTransferRate;
-            CargoFrom = cargoDB.CargoFrom;
-            CargoTo = cargoDB.CargoTo;
             LastRunDate = cargoDB.LastRunDate;
-        
-        
+            _staticData = cargoDB._staticData;
+
         }
 
 
@@ -111,23 +106,22 @@ namespace Pulsar4X.ECSLib
         public double PartAmount { get; internal set; }
         [JsonProperty]
         public int OrderTransferRate { get; internal set; } //an average of the transfer rates of the two entites.
+
+        [JsonProperty] private Guid _orderTranferItemGuid;
         
-        [JsonProperty]
-        internal Guid OrderTransferItemGuid { get; set; }
-        
+        internal Guid OrderTransferItemGuid {
+            get { return _orderTranferItemGuid; }
+            set
+            {
+                _orderTranferItemGuid = value;  
+                OrderTransferItem = _staticData.GetICargoable(value);
+            }
+        }
+
         [JsonIgnore]
         internal ICargoable OrderTransferItem { get; set; }
-        
+
         [JsonProperty]
         public DateTime LastRunDate { get; internal set; }
-
-        //Normaly datablobs shouldn't be referenced in datablobs, 
-        //but we're not serialising, and this shouldn't be a time critical blob. 
-        //mostly this is just to clean up some logic and not require it to figure out which is which each time the logic is run.
-        [JsonIgnore]
-        public CargoStorageDB CargoFrom { get; internal set; }
-        [JsonIgnore]
-        public CargoStorageDB CargoTo { get; internal set; }
-
     }
 }

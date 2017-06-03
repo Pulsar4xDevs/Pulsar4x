@@ -197,13 +197,13 @@ namespace Pulsar4X.ECSLib
                 if (delegateListPair.Value.Count == 0)// == null) //if the list is empty, it's a systemwide interupt
                 {
                     //delegateListPair.Key.DynamicInvoke(_starSystem);
-                    PulseActionDictionary.DoAction(delegateListPair.Key, _entityManager);
+                    PulseActionDictionary.DoAction(nextInteruptDateTime, delegateListPair.Key, _entityManager);
                 }
                 else
                     foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
                     {
                         //delegateListPair.Key.DynamicInvoke(entity);
-                        PulseActionDictionary.DoAction(delegateListPair.Key, entity);
+                        PulseActionDictionary.DoAction(nextInteruptDateTime, delegateListPair.Key, entity);
                         //PulseActionDictionary.DoAction(delegateListPair.Key, _entityManager, entity);
                     }
             }

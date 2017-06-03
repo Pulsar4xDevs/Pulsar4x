@@ -31,13 +31,13 @@ namespace Pulsar4X.Tests
         {
             CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, 
                                                    _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, 
-                                                   _duraniumSD.CargoTypeID, 100);
+                                                   _duraniumSD.ID, 100);
             
             CargoAction action = cargoOrder.CreateAction(_testGame.Game, cargoOrder);
             Assert.NotNull(action.OrderableProcessor);
             
-            
-            _testGame.EarthColony.Manager.OrderQueue.Enqueue(cargoOrder);
+            //enqueue it to the manager for now since the messagepump is still wip. 
+            _testGame.EarthColony.Manager.OrderQueue.Enqueue(cargoOrder); 
             OrderProcessor.ProcessManagerOrders(_testGame.EarthColony.Manager);
             Assert.True(_testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue[0] is CargoAction);
 
@@ -48,33 +48,40 @@ namespace Pulsar4X.Tests
         {
             _testGame.GameSettings.EnableMultiThreading = false;
             EntityManager entityManager = _testGame.EarthColony.Manager;
-            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, _duraniumSD.CargoTypeID, 100);
+            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, _duraniumSD.ID, 100);
 
             CargoStorageDB cargoStorageDB = _testGame.DefaultShip.GetDataBlob<CargoStorageDB>();
             
             Entity entity;
             Assert.True(_testGame.Game.GlobalManager.FindEntityByGuid(_testGame.DefaultShip.Guid, out entity));       
-            //cargoOrder.PreProcessing(_testGame.Game);
-            //_testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue.Add(cargoOrder);
             
-            //cargoOrder.OrderableProcessor.FirstProcess(cargoOrder);
+            _testGame.EarthColony.Manager.OrderQueue.Enqueue(cargoOrder);             
 
-            //DateTime eta = cargoOrder.EstTimeComplete;
+            OrderProcessor.ProcessManagerOrders(_testGame.EarthColony.Manager);
+
+            CargoAction cargoAction = (CargoAction)_testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue[0];
+            DateTime eta = cargoAction.EstTimeComplete;
             DateTime nextStep = entityManager.ManagerSubpulses.EntityDictionary.ElementAt(0).Key;
-            //Assert.AreEqual(nextStep, eta, "check if eta & nextstep are equal");
+            Assert.AreEqual(nextStep, eta, "check if eta & nextstep are equal");
 
 
             
-            //TimeSpan timeToTake = eta - _currentDateTime;
+            TimeSpan timeToTake = eta - _currentDateTime;
                                     
             Assert.Greater(nextStep, _currentDateTime, "nextStep should be greater than current datetime");
-            
 
-            //_testGame.Game.GameLoop.Ticklength = timeToTake;
+            long spaceAvailible = StorageSpaceProcessor.RemainingCapacity(cargoStorageDB, _duraniumSD.CargoTypeID);
+
+            _testGame.Game.GameLoop.Ticklength = timeToTake;
             _testGame.Game.GameLoop.TimeStep();
             
             long amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   
+            
+            long spaceRemaining = StorageSpaceProcessor.RemainingCapacity(cargoStorageDB, _duraniumSD.CargoTypeID);
+            Assert.Greater(spaceAvailible, spaceRemaining);
             Assert.AreEqual(100, amountInShip, "ship has " + amountInShip.ToString() + " Duranium");
+            
+            
             
             _testGame.Game.GameLoop.TimeStep();
             

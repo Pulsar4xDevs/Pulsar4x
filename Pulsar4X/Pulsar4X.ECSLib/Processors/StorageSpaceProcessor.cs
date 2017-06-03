@@ -320,25 +320,6 @@ namespace Pulsar4X.ECSLib
             return true;
         }
 
-        /// <summary>
-        /// this just sets the CargoTo and CargoFrom in the cargoOrderableDB
-        /// </summary>
-        /// <param name="cargoOrderableDB"></param>
-        internal static void SetToFrom(CargoStorageDB cargoOrderableDB)
-        {
-            switch (cargoOrderableDB.CurrentOrder.CargoOrderType)
-            {
-                case CargoOrderTypes.LoadCargo:
-                    cargoOrderableDB.CargoFrom = cargoOrderableDB.CurrentAction.TargetEntity.GetDataBlob<CargoStorageDB>();
-                    cargoOrderableDB.CargoTo = cargoOrderableDB.CurrentAction.ThisEntity.GetDataBlob<CargoStorageDB>();
-                    break;
-                case CargoOrderTypes.UnloadCargo:
-                    cargoOrderableDB.CargoTo = cargoOrderableDB.CurrentAction.TargetEntity.GetDataBlob<CargoStorageDB>();
-                    cargoOrderableDB.CargoFrom = cargoOrderableDB.CurrentAction.ThisEntity.GetDataBlob<CargoStorageDB>();
-                    break;
-            }
-        }
-
         internal static void ReCalcCapacity(Entity parentEntity)
         {
             CargoStorageDB storageDB = parentEntity.GetDataBlob<CargoStorageDB>();
@@ -377,73 +358,53 @@ namespace Pulsar4X.ECSLib
     {
 
 
-        public void ProcessOrder(BaseAction order)
+        private void ProcessOrder(DateTime toDate, CargoAction action)
         {
-            CargoStorageDB cargoStorageDB = order.ThisEntity.GetDataBlob<CargoStorageDB>();
-            //CargoOrderableDB cargoOrderableDB = order.ThisEntity.GetDataBlob<CargoOrderableDB>();
-            TimeSpan deltaTime = order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime - cargoStorageDB.LastRunDate;
+            
+            TimeSpan deltaTime = toDate - action.ThisStorage.LastRunDate;
 
 
-            CargoStorageDB cargoFrom = cargoStorageDB.CargoFrom;
-            CargoStorageDB cargoTo = cargoStorageDB.CargoTo;
+            CargoStorageDB cargoFrom = action.CargoFrom;
+            CargoStorageDB cargoTo = action.CargoTo;
 
-            double tonsThisDeltaT = cargoStorageDB.TransferRate * (double)deltaTime.Seconds / 3600;
-            tonsThisDeltaT += cargoStorageDB.PartAmount;
-            cargoStorageDB.PartAmount = tonsThisDeltaT - Math.Floor(tonsThisDeltaT);
+            double tonsThisDeltaT = action.ThisStorage.TransferRate * deltaTime.TotalSeconds / 3600;
+            tonsThisDeltaT += action.ThisStorage.PartAmount;
+            action.ThisStorage.PartAmount = tonsThisDeltaT - Math.Floor(tonsThisDeltaT);
             int amountThisMove = Math.Max((int)tonsThisDeltaT, 0);
-            cargoStorageDB.AmountToTransfer -= amountThisMove;
+            action.ThisStorage.AmountToTransfer -= amountThisMove;
 
-            StorageSpaceProcessor.TransferCargo(cargoFrom, cargoTo, cargoStorageDB.OrderTransferItem, amountThisMove);
+            StorageSpaceProcessor.TransferCargo(cargoFrom, cargoTo, action.ThisStorage.OrderTransferItem, amountThisMove);
 
-            if (cargoStorageDB.AmountToTransfer == 0)
+            if (action.ThisStorage.AmountToTransfer == 0)
             {
-                cargoStorageDB.PercentComplete.Percent = 1.0f;
+                action.ThisStorage.PercentComplete.Percent = 1.0f;
                 
             }
             else
             {
-                if (order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime >= order.EstTimeComplete)
+                if (action.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime >= action.EstTimeComplete)
                 {
-                    OrderProcessor.SetNextInterupt(EstDateTime(order, cargoStorageDB), order);
+                    OrderProcessor.SetNextInterupt(EstDateTime(action, action.ThisStorage), action);
                 }
             }
         }
 
+        public void ProcessOrder(DateTime toDate, BaseAction action)
+        {
+            ProcessOrder(toDate, (CargoAction)action);
+        }
 
         /// <summary>
         /// Sets an Entity interupt at the datetime the cargo transfer should complete.
         /// </summary>
-        /// <param name="estDateTime"></param>
-        /// <param name="order"></param>
-
-
-        internal static DateTime EstDateTime(BaseAction order, CargoStorageDB cargoStorageDB)
+        /// <param name="action"></param>
+        /// <param name="cargoStorageDB"></param>
+        internal static DateTime EstDateTime(CargoAction action, CargoStorageDB cargoStorageDB)
         {
-            cargoStorageDB.OrderTransferRate = (int)(cargoStorageDB.CargoFrom.TransferRate + cargoStorageDB.CargoTo.TransferRate * 0.5);
+            cargoStorageDB.OrderTransferRate = (int)(action.CargoFrom.TransferRate + action.CargoTo.TransferRate * 0.5);
             TimeSpan timeToComplete = TimeSpan.FromHours((float)cargoStorageDB.AmountToTransfer / cargoStorageDB.OrderTransferRate);
-            return order.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime + timeToComplete;
+            return action.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime + timeToComplete;
         }
-/*
-        public BaseAction GetCurrentOrder(BaseAction order)
-        {
-            return GetCurrentOrder((CargoOrder)order);
-        }
-
-        public BaseAction GetCurrentOrder(CargoOrder order)
-        {
-            return order.ThisEntity.GetDataBlob<CargoStorageDB>().CurrentOrder;
-        }
-
-
-        public PercentValue GetPercentComplete(BaseAction order)
-        {
-            return GetPercentComplete((CargoOrder)order);
-        }
-
-        public PercentValue GetPercentComplete(CargoOrder order)
-        {
-            return order.ThisEntity.GetDataBlob<CargoStorageDB>().PercentComplete;
-        }*/
     }
      
     public enum CargoOrderTypes
@@ -458,7 +419,8 @@ namespace Pulsar4X.ECSLib
         public Guid CargoItemGuid;
         public int Amount;
 
-        public CargoOrder(Guid entityGuid, Guid factionGuid, Guid targetGuid, CargoOrderTypes orderType, Guid cargoItemID, int amount) : base(factionGuid, entityGuid, targetGuid)
+        public CargoOrder(Guid entityGuid, Guid factionGuid, Guid targetGuid, CargoOrderTypes orderType, Guid cargoItemID, int amount) 
+            : base(factionGuid, entityGuid, targetGuid)
         {
             CargoOrderType = orderType;
             CargoItemGuid = cargoItemID;
@@ -473,12 +435,11 @@ namespace Pulsar4X.ECSLib
         internal CargoAction CreateAction(Game game, CargoOrder cargoOrder)
         {
             OrderEntities orderEntities;
-            if (BaseOrder2.GetOrderEntities(game, cargoOrder, out orderEntities))
+            if (GetOrderEntities(game, cargoOrder, out orderEntities))
             {
-                return new CargoAction(this, orderEntities, cargoOrder.Amount);
-                            
+                return new CargoAction(this, orderEntities, cargoOrder.Amount);                         
             }
-            //TODO: log don't throw;
+            //TODO: log don't throw, it's possible an entity could be destroyed by the time this happens.
             throw new Exception("couldn't find all required entites to create cargoAction from cargoOrder");
         }
 
@@ -488,28 +449,41 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    //TODO this needs to be serailisable.
     internal class CargoAction : BaseAction
     {
+        internal CargoStorageDB CargoFrom { get; set; }
+        internal CargoStorageDB CargoTo { get; set; }
+        internal CargoStorageDB ThisStorage { get; set; }
         public CargoAction(CargoOrder order, OrderEntities orderEntities, int amount) : base(1, true, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
         {
+            //set the orderableProcessor for cargoAction. 
             OrderableProcessor = new CargoOrderProcessor();
             
+            //set local variables for cargoAction
 
-            CargoStorageDB cargoStorageDB = ThisEntity.GetDataBlob<CargoStorageDB>();
+            ThisStorage = ThisEntity.GetDataBlob<CargoStorageDB>();            
+            switch (order.CargoOrderType)
+            {
+                case CargoOrderTypes.LoadCargo:
+                    CargoFrom = this.TargetEntity.GetDataBlob<CargoStorageDB>();
+                    CargoTo = this.ThisEntity.GetDataBlob<CargoStorageDB>();
+                    break;
+                case CargoOrderTypes.UnloadCargo:
+                    CargoTo = this.TargetEntity.GetDataBlob<CargoStorageDB>();
+                    CargoFrom = this.ThisEntity.GetDataBlob<CargoStorageDB>();
+                    break;
+            }
             
-            //cargoStorageDB.CurrentOrder = (CargoOrder)order;
-            cargoStorageDB.CurrentAction = this;
-            cargoStorageDB.LastRunDate = ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
-
+            ThisStorage.CurrentOrder = order;
+            ThisStorage.CurrentAction = this;
+            ThisStorage.LastRunDate = ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
             
-            cargoStorageDB.AmountToTransfer = amount;
+            ThisStorage.AmountToTransfer = amount;
 
-            cargoStorageDB.OrderTransferItemGuid = order.CargoItemGuid;
-            cargoStorageDB.CurrentOrder = order;
-            StorageSpaceProcessor.SetToFrom(cargoStorageDB);
-            OrderProcessor.SetNextInterupt(CargoOrderProcessor.EstDateTime(this, cargoStorageDB), this);
+            ThisStorage.OrderTransferItemGuid = order.CargoItemGuid;
+            ThisStorage.CurrentOrder = order;           
+            OrderProcessor.SetNextInterupt(CargoOrderProcessor.EstDateTime(this, ThisStorage), this);
         }
-        
-
     }
 }
