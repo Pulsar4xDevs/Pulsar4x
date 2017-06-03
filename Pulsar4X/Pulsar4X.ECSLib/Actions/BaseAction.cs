@@ -2,9 +2,6 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-
-
-    
     public abstract class BaseOrder
     {
         public Guid EntityGuid { get; set; }
@@ -27,7 +24,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Creates and Action and appends it to the orderEntites OrderableDB.ActionQueue
+        /// Creates an Action 
         /// </summary>
         /// <param name="game"></param>
         /// <param name="order"></param>
@@ -79,6 +76,24 @@ namespace Pulsar4X.ECSLib
     public abstract class BaseAction
     {
         /// <summary>
+        /// bitmask
+        /// </summary>
+        internal int Lanes { get; set; } 
+
+        internal bool IsBlocking { get; set; }
+        internal bool IsFinished { get; set; }
+        internal DateTime LastRunTime { get; set; }
+
+        internal IActionableProcessor OrderableProcessor { get; set; }
+    
+        internal Entity ThisEntity { get; private set; }
+        internal Entity FactionEntity { get; private set; }
+        internal Entity TargetEntity { get; private set; }
+        public DateTime EstTimeComplete { get; internal set; }
+
+        public bool HasTargetEntity { get; internal set; }
+        
+        /// <summary>
         /// BaseAction constructor
         /// </summary>
         /// <param name="lanes">bitmask</param>
@@ -93,40 +108,16 @@ namespace Pulsar4X.ECSLib
 
             ThisEntity = entity;
             FactionEntity = faction;
-            IsTargetEntityDependant = false;
+            HasTargetEntity = false;
         }
 
         protected BaseAction(int lanes, bool isBlocking, Entity entity, Entity faction, Entity target) : 
             this (lanes, isBlocking, entity, faction)
         {
             TargetEntity = target;
-            IsTargetEntityDependant = true;
+            HasTargetEntity = true;
         }
-
-
-        /// <summary>
-        /// bitmask
-        /// </summary>
-        internal int Lanes { get; set; } 
-
-        internal bool IsBlocking { get; set; }
-        internal bool IsFinished { get; set; }
-        internal DateTime LastRunTime { get; set; }
-        internal bool HasRunOnceBefore { get; set; } = false;
-
-        internal IActionableProcessor OrderableProcessor { get; set; }
-    
-
-        internal Entity ThisEntity { get; private set; }
-        internal Entity FactionEntity { get; private set; }
-        internal Entity TargetEntity { get; private set; }
-        public DateTime EstTimeComplete { get; internal set; }
-
-
-        public bool IsTargetEntityDependant { get; internal set; }
-
-
-
+        
     }
 
    
