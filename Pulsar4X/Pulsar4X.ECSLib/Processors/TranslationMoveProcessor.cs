@@ -160,7 +160,6 @@ namespace Pulsar4X.ECSLib
     {
         internal static void Process(EntityManager manager, int deltaSeconds)
         {
-            OrderProcessor.ProcessSystem (manager);
             foreach (Entity shipEntity in manager.GetAllEntitiesWithDataBlob<PropulsionDB> ()) {
                 PositionDB positionDB = shipEntity.GetDataBlob<PositionDB> ();
                 PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB> ();

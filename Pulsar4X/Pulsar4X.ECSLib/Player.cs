@@ -110,9 +110,6 @@ namespace Pulsar4X.ECSLib
         public string Name { get; protected set; }
 
         [JsonProperty]
-        public OrderQueue Orders;
-
-        [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; }
         internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
@@ -142,7 +139,6 @@ namespace Pulsar4X.ECSLib
             PasswordHash = info.GetString(nameof(PasswordHash));
             Salt = info.GetString(nameof(Salt));
             FactionAccessRoles = (Dictionary<Entity, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<Entity, uint>));
-            Orders = new OrderQueue();
             HaltsOnEvent = (Dictionary<EventType, bool>)info.GetValue(nameof(HaltsOnEvent), typeof(Dictionary<EventType, bool>)); 
         }
 
@@ -159,9 +155,6 @@ namespace Pulsar4X.ECSLib
             FactionAccessRoles = factionAccessRoles;
             Salt = GenerateSalt();
             PasswordHash = GeneratePasswordHash(password, Salt);
-            Orders = new OrderQueue();
-
-
         }
 
         #endregion
@@ -275,30 +268,6 @@ namespace Pulsar4X.ECSLib
             info.AddValue(nameof(HaltsOnEvent), HaltsOnEvent);
         }
 
-        public void ProcessOrders()
-        {
-            int orders = Orders.Length();
-
-            while (orders > 0)
-            {
-                BaseOrder nextOrder = Orders.ProcessOrder();
-                // Process all the orders
-                //@todo - finish
-                if (nextOrder != null)
-                {
-                    Entity owner = nextOrder.Owner;
-                    owner.GetDataBlob<ShipInfoDB>().Orders.Enqueue(nextOrder);
-
-                }
-                else
-                    return;
-            }
-        }
-
-        public void ClearOrders()
-        {   
-            Orders.ClearOrders();
-        }
 
         #endregion
 

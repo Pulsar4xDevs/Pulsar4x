@@ -1,15 +1,22 @@
 using System;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+    [JsonObject(MemberSerialization.OptIn)]
     public abstract class BaseOrder
     {
+        [JsonProperty]
         public Guid EntityGuid { get; set; }
+        [JsonProperty]
         public Guid FactionGuiD { get; set; }
+        [JsonProperty]
         public Guid TargetEntityGuid { get; internal set; }
+        [JsonProperty]
         internal bool HasTargetEntity { get; } = false;
-       
-        
+
+        protected BaseOrder() { }
+
         protected BaseOrder(Guid faction, Guid orderEntity)
         {
             FactionGuiD = faction;
