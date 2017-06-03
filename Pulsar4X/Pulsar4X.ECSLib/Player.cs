@@ -52,10 +52,19 @@ namespace Pulsar4X.ECSLib
     
     public class AuthenticationToken
     {
-        public Guid PlayerID { get; set; }
-        public string Password { get; set; }
+        public Guid PlayerID { get; }
+        public string Password { get; }
 
-        public AuthenticationToken() { }
+        public static readonly AuthenticationToken Empty = new AuthenticationToken();
+
+        private AuthenticationToken() { }
+
+        public AuthenticationToken(string serializedToken)
+        {
+            string[] parts = serializedToken.Split('\n');
+            PlayerID = Guid.ParseExact(parts[0], "N");
+            Password = parts[1];
+        }
 
         public AuthenticationToken(Guid playerID, string password = "")
         {
@@ -67,6 +76,24 @@ namespace Pulsar4X.ECSLib
         {
             PlayerID = player.ID;
             Password = password;
+        }
+
+        public override string ToString() => $"{PlayerID:N}\n{Password}";
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as AuthenticationToken;
+            return other != null && Equals(other);
+        }
+
+        protected bool Equals(AuthenticationToken other) => PlayerID.Equals(other.PlayerID) && string.Equals(Password, other.Password);
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (PlayerID.GetHashCode() * 397) ^ (Password != null ? Password.GetHashCode() : 0);
+            }
         }
     }
 

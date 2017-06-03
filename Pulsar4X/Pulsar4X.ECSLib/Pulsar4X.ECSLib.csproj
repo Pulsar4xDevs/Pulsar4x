@@ -183,6 +183,13 @@
     <Compile Include="Helpers\NameLookup.cs" />
     <Compile Include="Helpers\ObserviableConcurrentDictionary.cs" />
     <Compile Include="ManagerSubPulse.cs" />
+    <Compile Include="Messages\MessageFormatter.cs" />
+    <Compile Include="Messages\MessageHandlers\GameMessageHandler.cs" />
+    <Compile Include="Messages\MessageHandlers\IMessageHandler.cs" />
+    <Compile Include="Messages\IncomingMessageType.cs" />
+    <Compile Include="Messages\MessageDispatcher.cs" />
+    <Compile Include="Messages\MessagePump.cs" />
+    <Compile Include="Messages\OutgoingMessageType.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\BeamAttackOrder.cs" />
     <Compile Include="Orders\OrderTypes\ConstructionOrder.cs" />

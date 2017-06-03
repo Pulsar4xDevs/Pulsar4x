@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
@@ -32,7 +32,6 @@ namespace Pulsar4X.ECSLib
             get { return GameLoop.GameGlobalDateTime; }
         }
 
-
         /// <summary>
         /// List of StarSystems currently in the game.
         /// </summary>
@@ -56,8 +55,6 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public TimeLoop GameLoop { get; set; }
 
-        public MessagePump MessagePump { get; private set; }
-
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
 
@@ -65,6 +62,7 @@ namespace Pulsar4X.ECSLib
         public EventLog EventLog { get; internal set; }
         
         private PathfindingManager _pathfindingManager;
+        
 
         [PublicAPI]
         [JsonProperty]
@@ -75,6 +73,10 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         private readonly EconProcessor _econProcessor = new EconProcessor();
+
+        public readonly MessagePump MessagePump = new MessagePump();
+
+        internal bool ExitRequested;
 
         #endregion
 
@@ -94,8 +96,8 @@ namespace Pulsar4X.ECSLib
             GameLoop = new TimeLoop(this);
             EventLog = new EventLog(this);
             GlobalManager = new EntityManager(this, true);
-            MessagePump = new MessagePump(this);
-
+            var tf = new TaskFactory(TaskCreationOptions.LongRunning, TaskContinuationOptions.LongRunning);
+            tf.StartNew(Main);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -165,6 +167,26 @@ namespace Pulsar4X.ECSLib
         #region Functions
 
         #region Internal Functions
+
+        private void Main()
+        {
+            while (!ExitRequested)
+            {
+                Thread.Sleep(1);
+
+                if (GameLoop.TimerElapsed)
+                {
+                    GameLoop.DoProcessing();
+                }
+
+                // Clear the MessagePump.
+                string message;
+                while (MessagePump.TryDequeueIncomingMessage(out message))
+                {
+                    MessageDispatcher.Dispatch(this, message);
+                }
+            }
+        }
 
         internal void PostGameLoad()
         {
@@ -256,7 +278,7 @@ namespace Pulsar4X.ECSLib
 
             return null;
         }
-        
+
         #endregion
 
         [CanBeNull]

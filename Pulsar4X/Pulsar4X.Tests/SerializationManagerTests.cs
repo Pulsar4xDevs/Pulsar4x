@@ -100,8 +100,9 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(firstOrigional.Guid, firstLoaded.Guid);
             Assert.AreEqual(firstOrigional.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
-  
-            Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
+
+            Assert.AreEqual(origional.GameLoop.GameGlobalDateTime, loadedGame.GameLoop.GameGlobalDateTime);
+            Assert.AreEqual(origional.GameLoop.EntityDictionaryCount, loadedGame.GameLoop.EntityDictionaryCount);
 
             Assert.AreEqual(firstOrigional.SystemManager.ManagerSubpulses, firstLoaded.SystemManager.ManagerSubpulses);
 
