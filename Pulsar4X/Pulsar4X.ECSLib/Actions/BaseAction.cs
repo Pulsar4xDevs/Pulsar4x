@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib
 
 
     
-    public abstract class BaseOrder2
+    public abstract class BaseOrder
     {
         public Guid EntityGuid { get; set; }
         public Guid FactionGuiD { get; set; }
@@ -13,14 +13,14 @@ namespace Pulsar4X.ECSLib
         internal bool HasTargetEntity { get; } = false;
        
         
-        protected BaseOrder2(Guid faction, Guid orderEntity)
+        protected BaseOrder(Guid faction, Guid orderEntity)
         {
             FactionGuiD = faction;
             EntityGuid = orderEntity;
         }
 
 
-        protected BaseOrder2(Guid faction, Guid orderEntity, Guid targetEntity) : this(faction, orderEntity)
+        protected BaseOrder(Guid faction, Guid orderEntity, Guid targetEntity) : this(faction, orderEntity)
         {
             TargetEntityGuid = targetEntity;
             HasTargetEntity = true;
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="game"></param>
         /// <param name="order"></param>
-        internal abstract BaseAction CreateAction(Game game, BaseOrder2 order);
+        internal abstract BaseAction CreateAction(Game game, BaseOrder order);
 
         /// <summary>
         /// returns true if the required entites are found and the orderedEntity is owned by the factionEntity
@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="order"></param>
         /// <param name="orderEntities"></param>
         /// <returns></returns>
-        internal static bool GetOrderEntities(Game game, BaseOrder2 order, out OrderEntities orderEntities)
+        internal static bool GetOrderEntities(Game game, BaseOrder order, out OrderEntities orderEntities)
         {
             orderEntities = new OrderEntities();
             if (!game.GlobalManager.FindEntityByGuid(order.EntityGuid, out orderEntities.ThisEntity))
@@ -60,12 +60,14 @@ namespace Pulsar4X.ECSLib
             
             return true;
         }
-
-
-
-
     }
-    
+
+
+    public interface IActionableProcessor
+    {
+        void ProcessOrder(DateTime toDate, BaseAction order);
+    }
+
     internal struct OrderEntities
     {
         internal Entity ThisEntity;
@@ -112,7 +114,7 @@ namespace Pulsar4X.ECSLib
         internal DateTime LastRunTime { get; set; }
         internal bool HasRunOnceBefore { get; set; } = false;
 
-        internal IOrderableProcessor OrderableProcessor { get; set; }
+        internal IActionableProcessor OrderableProcessor { get; set; }
     
 
         internal Entity ThisEntity { get; private set; }

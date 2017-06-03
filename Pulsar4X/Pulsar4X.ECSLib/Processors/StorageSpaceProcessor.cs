@@ -354,7 +354,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class CargoOrderProcessor : IOrderableProcessor
+    public class CargoOrderProcessor : IActionableProcessor
     {
 
 
@@ -413,7 +413,7 @@ namespace Pulsar4X.ECSLib
             LoadCargo,
             UnloadCargo,
     }
-    public class CargoOrder : BaseOrder2
+    public class CargoOrder : BaseOrder
     {       
         public CargoOrderTypes CargoOrderType;
 
@@ -444,7 +444,7 @@ namespace Pulsar4X.ECSLib
             throw new Exception("couldn't find all required entites to create cargoAction from cargoOrder");
         }
 
-        internal override BaseAction CreateAction(Game game, BaseOrder2 order)
+        internal override BaseAction CreateAction(Game game, BaseOrder order)
         {
             return CreateAction(game, (CargoOrder)order);
         }

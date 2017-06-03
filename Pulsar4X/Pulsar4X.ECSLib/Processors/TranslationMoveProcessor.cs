@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Handels the order from the messagePump.
     /// </summary>
-    public class TranslationOrderProcessor : IOrderableProcessor
+    public class TranslationOrderProcessor : IActionableProcessor
     {
         public void ProcessOrder(DateTime toDate, BaseAction order)
         {
@@ -189,7 +189,7 @@ namespace Pulsar4X.ECSLib
             OrderableProcessor = new TranslationOrderProcessor();
         }
 
-        public TranslationOrder(IOrderableProcessor processor, Entity entityGuid, Entity factionID, Entity targetGuid) : base(1, true, entityGuid, factionID, targetGuid)
+        public TranslationOrder(IActionableProcessor processor, Entity entityGuid, Entity factionID, Entity targetGuid) : base(1, true, entityGuid, factionID, targetGuid)
         {
             OrderableProcessor = new TranslationOrderProcessor();
         }

@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
         {            
             while (manager.OrderQueue.Count > 0) //process all the orders in the manager's order queue.
             {
-                BaseOrder2 nextOrder;
+                BaseOrder nextOrder;
                 if(manager.OrderQueue.TryDequeue(out nextOrder));// should I do anything if it's false? (ie threadlocked due to writing) ie wait?
                 {                    
                     BaseAction action = nextOrder.CreateAction(manager.Game, nextOrder);

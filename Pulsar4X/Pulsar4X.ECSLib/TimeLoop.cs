@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     public delegate void DateChangedEventHandler(DateTime newDate);
 
     [JsonObject(MemberSerialization.OptIn)]
-    public class TimeLoop : IEquatable<TimeLoop>
+    public class TimeLoop
     {
         #region Fields
         private readonly Game _game;
@@ -211,27 +211,7 @@ namespace Pulsar4X.ECSLib
             if (AutoRun)
             {
                 _timer.Start();
-            }
-        /// <summary>
-        /// routes messages from the main MessagePump message queue to thier respective managers.
-        /// </summary>
-        private void RouteMessages()
-        {
-            foreach (var kvp in _game.MessagePump.MessageInQueue)
-            {
-                while (kvp.Value.Count > 0)
-                {
-                    BaseOrder2 nextOrder;
-                    if (kvp.Value.TryDequeue(out nextOrder))
-                    {
-                        Entity entity;
-                        if(_game.GlobalManager.FindEntityByGuid(nextOrder.EntityGuid, out entity))
-                            entity.Manager.OrderQueue.Enqueue(nextOrder);
-                    }
-                }
-            }
-        }
-
+            }        
             _stopwatch.Start(); //start the processor loop stopwatch
 
             //check for global interupts
@@ -260,6 +240,26 @@ namespace Pulsar4X.ECSLib
 
             LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
             _stopwatch.Reset();
+        }
+
+        /// <summary>
+        /// routes messages from the main MessagePump message queue to thier respective managers.
+        /// </summary>
+        private void RouteMessages()
+        {
+            foreach (var kvp in _game.MessagePump.)
+            {
+                while (kvp.Value.Count > 0)
+                {
+                    BaseOrder nextOrder;
+                    if (kvp.Value.TryDequeue(out nextOrder))
+                    {
+                        Entity entity;
+                        if (_game.GlobalManager.FindEntityByGuid(nextOrder.EntityGuid, out entity))
+                            entity.Manager.OrderQueue.Enqueue(nextOrder);
+                    }
+                }
+            }
         }
 
 
