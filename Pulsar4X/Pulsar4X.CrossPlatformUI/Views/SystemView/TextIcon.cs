@@ -5,7 +5,7 @@ using System;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
-    internal class TextIcon : IconBase, IComparable<TextIcon>
+    internal class TextIcon : IIconBase, IComparable<TextIcon>
     {
         public float Scale { get; set; } = 8;
         public Font font { get; set; }

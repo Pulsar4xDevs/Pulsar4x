@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
-    class OrbitRing : INotifyPropertyChanged, IconBase
+    class OrbitRing : INotifyPropertyChanged, IIconBase
     {
         public float Scale { get; set; } = 1;
 

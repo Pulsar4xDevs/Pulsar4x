@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
+    [DebuggerDisplay("{NameDB.DefaultName} - {Guid.ToString()}")]
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem
     {
