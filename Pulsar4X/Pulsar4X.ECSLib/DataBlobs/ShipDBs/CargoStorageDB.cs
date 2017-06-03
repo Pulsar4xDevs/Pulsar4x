@@ -43,6 +43,8 @@ namespace Pulsar4X.ECSLib
             _staticData = game.StaticData;
             
             StorageSpaceProcessor.SetToFrom(this); //this sets CargoTo and CargoFrom
+            if (OrderTransferItemGuid != Guid.Empty)
+                OrderTransferItem = _staticData.GetICargoable(OrderTransferItemGuid);
         }
 
         public CargoStorageDB()
@@ -97,6 +99,10 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public CargoOrder CurrentOrder { get; internal set; }
+        
+        [JsonProperty]
+        internal CargoAction CurrentAction { get; set; }
+        
         [JsonProperty]
         public PercentValue PercentComplete { get; internal set; }
         [JsonProperty]
@@ -105,6 +111,13 @@ namespace Pulsar4X.ECSLib
         public double PartAmount { get; internal set; }
         [JsonProperty]
         public int OrderTransferRate { get; internal set; } //an average of the transfer rates of the two entites.
+        
+        [JsonProperty]
+        internal Guid OrderTransferItemGuid { get; set; }
+        
+        [JsonIgnore]
+        internal ICargoable OrderTransferItem { get; set; }
+        
         [JsonProperty]
         public DateTime LastRunDate { get; internal set; }
 

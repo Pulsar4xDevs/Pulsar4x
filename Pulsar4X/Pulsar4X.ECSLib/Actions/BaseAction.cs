@@ -1,10 +1,79 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
 
+
+    
+    public abstract class BaseOrder2
+    {
+        public Guid EntityGuid { get; set; }
+        public Guid FactionGuiD { get; set; }
+        public Guid TargetEntityGuid { get; internal set; }
+        internal bool HasTargetEntity { get; } = false;
+       
+        
+        protected BaseOrder2(Guid faction, Guid orderEntity)
+        {
+            FactionGuiD = faction;
+            EntityGuid = orderEntity;
+        }
+
+
+        protected BaseOrder2(Guid faction, Guid orderEntity, Guid targetEntity) : this(faction, orderEntity)
+        {
+            TargetEntityGuid = targetEntity;
+            HasTargetEntity = true;
+        }
+
+        /// <summary>
+        /// Creates and Action and appends it to the orderEntites OrderableDB.ActionQueue
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="order"></param>
+        internal abstract BaseAction CreateAction(Game game, BaseOrder2 order);
+
+        /// <summary>
+        /// returns true if the required entites are found and the orderedEntity is owned by the factionEntity
+        /// I realy dislike this style of function however, and I may rewrite it. (bool with out)
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="order"></param>
+        /// <param name="orderEntities"></param>
+        /// <returns></returns>
+        internal static bool GetOrderEntities(Game game, BaseOrder2 order, out OrderEntities orderEntities)
+        {
+            orderEntities = new OrderEntities();
+            if (!game.GlobalManager.FindEntityByGuid(order.EntityGuid, out orderEntities.ThisEntity))
+                return false;
+            if (!orderEntities.ThisEntity.HasDataBlob<OrderableDB>())
+                return false;
+            if (!game.GlobalManager.FindEntityByGuid(order.FactionGuiD, out orderEntities.FactionEntity))
+                return false;
+            if (order.HasTargetEntity)
+            {
+                if (!game.GlobalManager.FindEntityByGuid(order.TargetEntityGuid, out orderEntities.TargetEntity))
+                    return false;
+            }
+            if (orderEntities.ThisEntity.GetDataBlob<OwnedDB>().EntityOwner != orderEntities.FactionEntity)
+                return false;
+            
+            return true;
+        }
+
+
+
+
+    }
+    
+    internal struct OrderEntities
+    {
+        internal Entity ThisEntity;
+        internal Entity FactionEntity;
+        internal Entity TargetEntity;
+    }
+    
+    
     public abstract class BaseAction
     {
         /// <summary>
@@ -12,26 +81,27 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="lanes">bitmask</param>
         /// <param name="isBlocking">if true, will block on the lanes it's running on till complete</param>
-        /// <param name="entityGuid"></param>
-        /// <param name="factionID"></param>
-        protected BaseAction(int lanes, bool isBlocking, Guid entityGuid, Guid factionID)
+        /// <param name="entity"></param>
+        /// <param name="faction"></param>
+        protected BaseAction(int lanes, bool isBlocking, Entity entity, Entity faction)
         {
             Lanes = lanes;
             IsBlocking = isBlocking;
             IsFinished = false;
-            
-            EntityGuid = entityGuid;
-            FactionGuiD = factionID;
+
+            ThisEntity = entity;
+            FactionEntity = faction;
             IsTargetEntityDependant = false;
         }
 
-        protected BaseAction(int lanes, bool isBlocking, Guid entityGuid, Guid factionID, Guid targetGuid) : 
-            this (lanes, isBlocking, entityGuid, factionID)
+        protected BaseAction(int lanes, bool isBlocking, Entity entity, Entity faction, Entity target) : 
+            this (lanes, isBlocking, entity, faction)
         {
-            TargetEntityGuid = targetGuid;
+            TargetEntity = target;
             IsTargetEntityDependant = true;
         }
-        
+
+
         /// <summary>
         /// bitmask
         /// </summary>
@@ -44,9 +114,7 @@ namespace Pulsar4X.ECSLib
 
         internal IOrderableProcessor OrderableProcessor { get; set; }
     
-        public Guid EntityGuid { get; set; }
-        public Guid FactionGuiD { get; set; }
-        public Guid TargetEntityGuid { get; internal set; }
+
         internal Entity ThisEntity { get; private set; }
         internal Entity FactionEntity { get; private set; }
         internal Entity TargetEntity { get; private set; }
@@ -56,36 +124,7 @@ namespace Pulsar4X.ECSLib
         public bool IsTargetEntityDependant { get; internal set; }
 
 
-        /// <summary>
-        /// looks up entity guids, and checks validity.
-        /// </summary>
-        /// <param name="game"></param>
-        /// <returns></returns>
-        internal bool PreProcessing(Game game)
-        {
-            Entity entity;
-            if (!game.GlobalManager.FindEntityByGuid(EntityGuid, out entity))
-                return false;
-            ThisEntity = entity;
-            if (!ThisEntity.HasDataBlob<OrderableDB>())
-                return false;
 
-            Entity factionEntity;
-            if (!game.GlobalManager.FindEntityByGuid(FactionGuiD, out factionEntity))
-                return false;
-            FactionEntity = factionEntity;
-            if (IsTargetEntityDependant)
-            {
-                Entity targetEntity;
-                if (!game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out targetEntity))
-                    return false;
-                TargetEntity = targetEntity;
-            }
-            if (entity.GetDataBlob<OwnedDB>().EntityOwner != FactionEntity)
-                return false;
-
-            return true;
-        }
     }
 
    
@@ -97,7 +136,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class EnableComponent : BaseAction
     {
-        public EnableComponent(Guid entityGuid, Guid factionID) : base(3, false, entityGuid, factionID)
+        public EnableComponent(Entity orderEntity, Entity factionEntity) : base(3, false, orderEntity, factionEntity)
         {
         }
     }
@@ -109,7 +148,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class DisableComponent : BaseAction
     {
-        public DisableComponent(Guid entityGuid, Guid factionID) : base(3, false, entityGuid, factionID)
+        public DisableComponent(Entity orderEntity, Entity factionEntity) : base(3, false, orderEntity, factionEntity)
         {
         }
     }

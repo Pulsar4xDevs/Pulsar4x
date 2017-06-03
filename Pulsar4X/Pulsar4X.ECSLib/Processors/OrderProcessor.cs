@@ -37,6 +37,24 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        internal static void SetNextInterupt(DateTime estDateTime, BaseAction action )
+        {
+            action.EstTimeComplete = estDateTime;
+            action.ThisEntity.Manager.ManagerSubpulses.AddEntityInterupt(estDateTime, PulseActionEnum.OrderProcess, action.ThisEntity); 
+        }
+
+        internal static void ProcessManagerOrders(EntityManager manager)
+        {            
+            while (manager.OrderQueue.Count > 0) //process all the orders in the manager's order queue.
+            {
+                BaseOrder2 nextOrder;
+                if(manager.OrderQueue.TryDequeue(out nextOrder));// should I do anything if it's false? (ie threadlocked due to writing) ie wait?
+                {                    
+                    BaseAction action = nextOrder.CreateAction(manager.Game, nextOrder);
+                    action.ThisEntity.GetDataBlob<OrderableDB>().ActionQueue.Add(action);
+                }
+            }            
+        }
 
         internal static void ProcessActionList(EntityManager manager)
         {
@@ -59,7 +77,7 @@ namespace Pulsar4X.ECSLib
                 var item = actionList[i];
 
 
-                if ((mask & item.Lanes) == 0) //bitwise and
+                if ((mask & item.Lanes) == item.Lanes) //bitwise and
                 {
                     if (item.IsBlocking)
                     {

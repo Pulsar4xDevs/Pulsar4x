@@ -241,11 +241,12 @@ namespace Pulsar4X.ECSLib
             {
                 while (kvp.Value.Count > 0)
                 {
-                    BaseAction nextOrder;
+                    BaseOrder2 nextOrder;
                     if (kvp.Value.TryDequeue(out nextOrder))
                     {
-                        if(nextOrder.PreProcessing(_game))
-                            nextOrder.ThisEntity.Manager.OrderQueue.Enqueue(nextOrder);
+                        Entity entity;
+                        if(_game.GlobalManager.FindEntityByGuid(nextOrder.EntityGuid, out entity))
+                            entity.Manager.OrderQueue.Enqueue(nextOrder);
                     }
                 }
             }

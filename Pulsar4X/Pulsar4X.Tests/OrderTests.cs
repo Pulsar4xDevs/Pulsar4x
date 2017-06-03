@@ -12,6 +12,8 @@ namespace Pulsar4X.Tests
     {
         TestGame _testGame;
         private MineralSD _duraniumSD;
+        
+        private DateTime _currentDateTime {get { return _testGame.Game.CurrentDateTime; }}
 
         [SetUp]
         public void Init()
@@ -24,32 +26,51 @@ namespace Pulsar4X.Tests
             StorageSpaceProcessor.AddItemToCargo(_testGame.EarthColony.GetDataBlob<CargoStorageDB>(), _duraniumSD, 10000); 
         }
 
-   
+        [Test]
+        public void TestCargoOrder()
+        {
+            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, 
+                                                   _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, 
+                                                   _duraniumSD.CargoTypeID, 100);
+            
+            CargoAction action = cargoOrder.CreateAction(_testGame.Game, cargoOrder);
+            Assert.NotNull(action.OrderableProcessor);
+            
+            
+            _testGame.EarthColony.Manager.OrderQueue.Enqueue(cargoOrder);
+            OrderProcessor.ProcessManagerOrders(_testGame.EarthColony.Manager);
+            Assert.True(_testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue[0] is CargoAction);
+
+        }
+
         [Test]
         public void TestCargoMove()
         {
+            _testGame.GameSettings.EnableMultiThreading = false;
             EntityManager entityManager = _testGame.EarthColony.Manager;
-            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, _testGame.EarthColony.Guid, CargoOrder.CargoOrderTypes.LoadCargo, _duraniumSD.CargoTypeID, 100);
+            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, _duraniumSD.CargoTypeID, 100);
 
             CargoStorageDB cargoStorageDB = _testGame.DefaultShip.GetDataBlob<CargoStorageDB>();
             
             Entity entity;
             Assert.True(_testGame.Game.GlobalManager.FindEntityByGuid(_testGame.DefaultShip.Guid, out entity));       
-            cargoOrder.PreProcessing(_testGame.Game);
-            _testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue.Add(cargoOrder);
+            //cargoOrder.PreProcessing(_testGame.Game);
+            //_testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue.Add(cargoOrder);
             
-            cargoOrder.OrderableProcessor.FirstProcess(cargoOrder);
+            //cargoOrder.OrderableProcessor.FirstProcess(cargoOrder);
 
-            DateTime eta = cargoOrder.EstTimeComplete;
+            //DateTime eta = cargoOrder.EstTimeComplete;
             DateTime nextStep = entityManager.ManagerSubpulses.EntityDictionary.ElementAt(0).Key;
-            Assert.AreEqual(nextStep, eta, "check if eta & nextstep are equal");
+            //Assert.AreEqual(nextStep, eta, "check if eta & nextstep are equal");
 
 
-            TimeSpan timeToTake = eta - _testGame.Game.CurrentDateTime;
             
-            Assert.Greater(timeToTake, TimeSpan.Zero, "should take more than 0 time to complete");
+            //TimeSpan timeToTake = eta - _currentDateTime;
+                                    
+            Assert.Greater(nextStep, _currentDateTime, "nextStep should be greater than current datetime");
+            
 
-            _testGame.Game.GameLoop.Ticklength = timeToTake;
+            //_testGame.Game.GameLoop.Ticklength = timeToTake;
             _testGame.Game.GameLoop.TimeStep();
             
             long amountInShip = StorageSpaceProcessor.GetAmountOf(cargoStorageDB, _duraniumSD.ID);   

@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
 
         //public Queue<TranslationOrder> waypointQueue;
 
-        public TranslationOrder CurrentOrder { get; internal set; }
+        //public TranslationOrder CurrentOrder { get; internal set; }
 
         public DateTime EstTimeToWaypoint { get; internal set; }
 

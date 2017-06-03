@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
         {
             Entity thisEntity = order.ThisEntity;
             TranslateOrderableDB translateOrderableDB = thisEntity.GetDataBlob<TranslateOrderableDB>();
-            translateOrderableDB.CurrentOrder = (TranslationOrder)order;
+            //translateOrderableDB.CurrentOrder = (TranslationOrder)order;
             translateOrderableDB.LastRunDate = thisEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
 
             var position = thisEntity.GetDataBlob<PositionDB>();
@@ -119,7 +119,8 @@ namespace Pulsar4X.ECSLib
         public BaseAction GetCurrentOrder(BaseAction order)
         {
             TranslateOrderableDB translateOrderableDB = order.ThisEntity.GetDataBlob<TranslateOrderableDB>();
-            return translateOrderableDB.CurrentOrder = (TranslationOrder)order;
+            throw new NotImplementedException();
+            //return translateOrderableDB.CurrentOrder = (TranslationOrder)order;
 
         }
 
@@ -169,6 +170,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    
     public class  TranslationOrder : BaseAction
     {
         public enum HelmOrderTypeEnum
@@ -182,12 +184,12 @@ namespace Pulsar4X.ECSLib
         public double TargetDistance { get; set; } //this is the distance we want to Match or orbit at.
 
 
-        public TranslationOrder(Guid entityGuid, Guid factionID) : base(1, true, entityGuid, factionID)
+        public TranslationOrder(Entity entityGuid, Entity factionID) : base(1, true, entityGuid, factionID)
         {
             OrderableProcessor = new TranslationOrderProcessor();
         }
 
-        public TranslationOrder(IOrderableProcessor processor, Guid entityGuid, Guid factionID, Guid targetGuid) : base(1, true, entityGuid, factionID, targetGuid)
+        public TranslationOrder(IOrderableProcessor processor, Entity entityGuid, Entity factionID, Entity targetGuid) : base(1, true, entityGuid, factionID, targetGuid)
         {
             OrderableProcessor = new TranslationOrderProcessor();
         }

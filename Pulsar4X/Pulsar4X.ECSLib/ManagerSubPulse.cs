@@ -187,24 +187,8 @@ namespace Pulsar4X.ECSLib
     /// <returns>datetime processed to</returns>
     private void ProcessToNextInterupt(DateTime nextInteruptDateTime)
     {
-
-        while (_entityManager.OrderQueue.Count > 0) //process all the orders in the manager's order queue.
-        {
-            BaseAction nextOrder;
-            if(_entityManager.OrderQueue.TryDequeue(out nextOrder));// should I do anything if it's false? (ie threadlocked due to writing) ie wait?
-            {
-                if (nextOrder.ThisEntity.HasDataBlob<OrderableDB>())
-                {
-                    nextOrder.ThisEntity.GetDataBlob<OrderableDB>().ActionQueue.Add(nextOrder); //pass it off to the entity.
-                }
-                else
-                {
-                    int foo = 0;
-                    Event gameevent = new Event(_systemLocalDateTime, "This Entity is no longer Orderable", nextOrder.ThisEntity.GetDataBlob<OwnedDB>().EntityOwner, nextOrder.ThisEntity);
-                    _entityManager.Game.EventLog.AddEvent(gameevent);
-                }
-            }
-        }
+        
+        OrderProcessor.ProcessManagerOrders(_entityManager);
 
         if (EntityDictionary.ContainsKey(nextInteruptDateTime))
         {
