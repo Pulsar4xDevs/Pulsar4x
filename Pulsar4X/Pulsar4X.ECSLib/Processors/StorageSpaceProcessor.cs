@@ -421,8 +421,8 @@ namespace Pulsar4X.ECSLib
         public Guid CargoItemGuid;
         public int Amount;
 
-        public CargoOrder(Guid entityGuid, Guid factionGuid, Guid targetGuid, CargoOrderTypes orderType, Guid cargoItemID, int amount) 
-            : base(factionGuid, entityGuid, targetGuid)
+        public CargoOrder(Guid entity, Guid faction, Guid target, CargoOrderTypes orderType, Guid cargoItemID, int amount) 
+            : base(entity, faction, target)
         {
             CargoOrderType = orderType;
             CargoItemGuid = cargoItemID;
