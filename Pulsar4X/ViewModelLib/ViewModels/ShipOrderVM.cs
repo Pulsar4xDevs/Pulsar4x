@@ -412,8 +412,8 @@ namespace Pulsar4X.ViewModel
 
             _moveOrdersPossible.Clear();
 
-            if (SelectedShip.HasDataBlob<PropulsionDB>())
-                _moveOrdersPossible.Add(new TranslationOrder(), "Move to");
+            //if (SelectedShip.HasDataBlob<PropulsionDB>())
+                //_moveOrdersPossible.Add(new TranslationOrder(), "Move to");
 
             _moveOrdersPossible.SelectedIndex = 0;
 
@@ -438,26 +438,12 @@ namespace Pulsar4X.ViewModel
         {
             if (SelectedShip == null)
                 return;
-            List<BaseAction> orders = new List<BaseAction>(SelectedShip.GetDataBlob<OrderableDB>().ActionQueue);
+            List<BaseAction> actions = SelectedShip.GetDataBlob<OrderableDB>().ActionQueue;
+            
+            List<GenericActionVM> actionVMs = actions.Select(item => new GenericActionVM(item)).ToList();
 
-            _moveOrderList.Clear();
 
-            foreach (BaseOrder order in orders)
-            {
-                string orderDescription = "";
-
-                switch (order.OrderType)
-                {
-                    case orderType.MOVETO:
-                        MoveOrder moveOrder = (MoveOrder)order;
-                        orderDescription += "Move to ";
-                        orderDescription += moveOrder.Target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction);
-                        break;
-                    default:
-                        break;
-                }
-                _moveOrderList.Add(order, orderDescription);
-            }
+            
 
             OnPropertyChanged(nameof(MoveOrderList));
             OnPropertyChanged(nameof(MoveOrdersPossible));
@@ -579,6 +565,7 @@ namespace Pulsar4X.ViewModel
             // Check if Ship, Target, and Order are set
             if (SelectedShip == null  || SelectedMoveTarget == null || SelectedPossibleMoveOrder == null) 
                 return;
+            /*
             switch(SelectedPossibleMoveOrder.OrderType)
             {
                 case orderType.MOVETO:
@@ -588,9 +575,8 @@ namespace Pulsar4X.ViewModel
                     break;
                 default:
                     break;
-            }
+            }*/
 
-            _gameVM.CurrentPlayer.ProcessOrders();
 
             RefreshOrders(0,0);
             
@@ -741,6 +727,14 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+    }
+
+    public class GenericActionVM
+    {
+        public string Name => _action.Name;
+        public string Status => _action.Status;
+        private readonly BaseAction _action;
+        public GenericActionVM(BaseAction action) { _action = action; }
     }
 
     public class MoveOrderVM

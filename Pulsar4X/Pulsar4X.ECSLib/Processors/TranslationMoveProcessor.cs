@@ -174,8 +174,8 @@ namespace Pulsar4X.ECSLib
     {
         internal void ProcessAction(DateTime toDate, TranslationAction action)
         {
+            action.Status = "Intercepting Target";
             double deltaSeconds = (toDate - action.LastRunTime).TotalSeconds;
-
             throw new NotImplementedException();
         }
         
@@ -237,6 +237,8 @@ namespace Pulsar4X.ECSLib
         public TranslationAction(TranslationOrder order, OrderEntities orderEntities, double standoff) : 
             base(1, true, order, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
         {
+            Name = "Move to " + TargetEntity.GetDataBlob<NameDB>().DefaultName;
+            Status = "Waiting";
             OrderableProcessor = new TranslationActionProcessor();
             StandOffDistance = standoff;
             HelmOrderType = order.OrderType;

@@ -6,6 +6,7 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class BaseOrder
     {
+        
         [JsonProperty]
         public Guid EntityGuid { get; set; }
         [JsonProperty]
@@ -82,6 +83,8 @@ namespace Pulsar4X.ECSLib
     
     public abstract class BaseAction
     {
+        public string Name { get; set; }
+        public string Status { get; set; }
         /// <summary>
         /// bitmask
         /// </summary>

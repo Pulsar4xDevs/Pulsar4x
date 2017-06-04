@@ -364,7 +364,7 @@ namespace Pulsar4X.ECSLib
         
         private void ProcessAction(DateTime toDate, CargoAction action)
         {
-            
+            action.Status = "In Progress ";
             TimeSpan deltaTime = toDate - action.ThisStorage.LastRunDate;
 
 
@@ -462,7 +462,14 @@ namespace Pulsar4X.ECSLib
         {
             //set the orderableProcessor for cargoAction. 
             OrderableProcessor = new CargoOrderProcessor();
-            
+
+            if (order.CargoOrderType == CargoOrderTypes.LoadCargo)
+                Name = "Cargo Transfer: Load from ";
+            else
+                Name = "Cargo Transfer: Unload To ";                       
+            Name += TargetEntity.GetDataBlob<NameDB>().DefaultName;
+
+            Status = "Waiting";
             //set local variables for cargoAction
 
             ThisStorage = ThisEntity.GetDataBlob<CargoStorageDB>();            
@@ -483,8 +490,7 @@ namespace Pulsar4X.ECSLib
             
             ThisStorage.AmountToTransfer = amount;
 
-            ThisStorage.OrderTransferItemGuid = order.CargoItemGuid;
-            ThisStorage.CurrentOrder = order;           
+            ThisStorage.OrderTransferItemGuid = order.CargoItemGuid;      
             OrderProcessor.SetNextInterupt(CargoOrderProcessor.EstDateTime(this, ThisStorage), this);
         }
     }

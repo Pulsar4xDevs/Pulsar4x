@@ -63,7 +63,7 @@ namespace Pulsar4X.Tests
             _target = null;
 
         }
-
+/*
         [Test]
         public void testOrderQueue()
         {
@@ -186,10 +186,10 @@ namespace Pulsar4X.Tests
             speedY = Distance.KmToAU((y / length) * _shipPropulsionDB.MaximumSpeed) * 1000.0;
 
             // Allowing for very small discrepancies
-/*            Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
-            Assert.LessOrEqual(Math.Abs(speedY - speed.Y), 0.0001);*/
+          //  Assert.LessOrEqual(Math.Abs(speedX - speed.X), 0.0001);
+            //Assert.LessOrEqual(Math.Abs(speedY - speed.Y), 0.0001);
 
 
-        }
+        }*/
     }
 }
