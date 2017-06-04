@@ -64,13 +64,17 @@ namespace Pulsar4X.Tests
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
             //Change in component cloning makes the next line's assumption untrue
-            //Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
-            Assert.AreEqual(50, propulsion.TotalEnginePower);
-            //Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
+            Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
+            Assert.AreEqual(50, propulsion.TotalEnginePower, "Incorrect TotalEnginePower" );
+            float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            int expectedSpeed1 = PropulsionCalcs.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage1);
+            Assert.AreEqual(expectedSpeed1, propulsion.MaximumSpeed, "Incorrect Max Speed");
 
-            EntityManipulation.AddComponentToEntity(_ship, _engineComponent);
-            Assert.AreEqual(75, propulsion.TotalEnginePower);
-            //Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
+            EntityManipulation.AddComponentToEntity(_ship, _engineComponent); //add second engine
+            Assert.AreEqual(75, propulsion.TotalEnginePower, "Incorrect TotalEnginePower 2nd engine added" );
+            float tonnage2 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            int expectedSpeed2 = PropulsionCalcs.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage2);
+            Assert.AreEqual(expectedSpeed2, propulsion.MaximumSpeed, "Incorrect Max Speed 2nd engine");
 
 
 

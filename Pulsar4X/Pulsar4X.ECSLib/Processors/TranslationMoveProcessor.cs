@@ -1,10 +1,52 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 
 namespace Pulsar4X.ECSLib
 {
+
+    public static class PropulsionCalcs
+    {
+        /// <summary>
+        /// recalculates a shipsMaxSpeed.
+        /// </summary>
+        /// <param name="ship"></param>
+        public static void CalcMaxSpeed(Entity ship)
+        {
+            int totalEnginePower = 0;
+            Dictionary<Guid, double> totalFuelUsage = new Dictionary<Guid, double>();
+            var instancesDB = ship.GetDataBlob<ComponentInstancesDB>();
+            List<KeyValuePair<Entity,PrIwObsList<Entity>>> engineEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
+            foreach (var engineDesign in engineEntities)
+            {
+                foreach (var engineInstance in engineDesign.Value)
+                {
+                    //todo check if it's damaged
+                    totalEnginePower += engineDesign.Key.GetDataBlob<EnginePowerAtbDB>().EnginePower;
+                    foreach (var kvp in engineDesign.Key.GetDataBlob<ResourceConsumptionAtbDB>().MaxUsage)
+                    {
+                        totalFuelUsage.SafeValueAdd(kvp.Key, kvp.Value);
+                    }                    
+                }
+            }
+
+            //Note: TN aurora uses the TCS for max speed calcs. 
+            PropulsionDB propulsionDB = ship.GetDataBlob<PropulsionDB>();
+            propulsionDB.TotalEnginePower = totalEnginePower;
+            propulsionDB.FuelUsePerKM = totalFuelUsage;
+            propulsionDB.MaximumSpeed = MaxSpeedCalc(totalEnginePower,  ship.GetDataBlob<ShipInfoDB>().Tonnage);
+        }        
+        
+        public static int MaxSpeedCalc(int power, float tonage)
+        {
+            // From Aurora4x wiki:  Speed = (Total Engine Power / Total Class Size in HS) * 1000 km/s
+            // 1 HS = 50 tons
+
+            return (int)(power / tonage) * 20;
+        }
+    }
 
     /// <summary>
     /// Handels the order from the messagePump.
