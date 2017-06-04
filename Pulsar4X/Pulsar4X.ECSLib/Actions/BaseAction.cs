@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
 
     public interface IActionableProcessor
     {
-        void ProcessOrder(DateTime toDate, BaseAction order);
+        void ProcessAction(DateTime toDate, BaseAction action);
     }
 
     internal struct OrderEntities

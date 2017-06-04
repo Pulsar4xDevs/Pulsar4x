@@ -9,29 +9,30 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Handels the order from the messagePump.
     /// </summary>
-    public class TranslationOrderProcessor : IActionableProcessor
+    public class TranslationOrderProcessor 
     {
         public void ProcessOrder(DateTime toDate, BaseAction order)
         {
             Entity orderableEntity = order.ThisEntity;
             EntityManager entityManager = orderableEntity.Manager;
 
-            if (order is TranslationOrder)
+            if (order is TranslationAction)
             {
-                TranslationOrder torder = (TranslationOrder)order;
-
+                TranslationAction torder = (TranslationAction)order;
+                /*
                 switch (torder.HelmOrderType)
                 {
-                    case TranslationOrder.HelmOrderTypeEnum.OrbitTarget:
+                    case TranslationAction.HelmOrderTypeEnum.OrbitTarget:
                         SetOrbitTarget(order.ThisEntity, order.TargetEntity, order);
                         break;
-                    case TranslationOrder.HelmOrderTypeEnum.InterceptTarget:
+                    case TranslationAction.HelmOrderTypeEnum.InterceptTarget:
                         SetCurrentVector(orderableEntity, order.TargetEntity);
                         break;
-                    case TranslationOrder.HelmOrderTypeEnum.MatchTarget:
+                    case TranslationAction.HelmOrderTypeEnum.MatchTarget:
                         //ReplaceQueue(orderableEntity, torder);
                         break;
                 }
+                */
             }
             else throw new Exception("Bad Order Type, must be a TranslationOrder");
         }
@@ -169,29 +170,77 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    
-    public class  TranslationOrder : BaseAction
+    internal class TranslationActionProcessor : IActionableProcessor
     {
+        internal void ProcessAction(DateTime toDate, TranslationAction action)
+        {
+            double deltaSeconds = (toDate - action.LastRunTime).TotalSeconds;
+
+            throw new NotImplementedException();
+        }
+        
+        public void ProcessAction(DateTime toDate, BaseAction action)
+        {
+            ProcessAction(toDate, (TranslationAction)action);       
+        }
+    }
+
+    public class TranslationOrder : BaseOrder
+    {        
         public enum HelmOrderTypeEnum
+         {
+             InterceptTarget, //move to the target, other orders should initiate this first if they're not close enough.
+             MatchTarget, //close and orbit the targets parent if orbiting, else close and match the targets speed.
+             OrbitTarget, //orbit the target
+         }
+        public HelmOrderTypeEnum OrderType { get; set; }
+        public double StandOffDistance { get; set; }
+        
+        /// <summary>
+        /// Creation of a new order. 
+        /// </summary>
+        /// <param name="faction">The Faction this order is coming from</param>
+        /// <param name="entity">The entity this order is for</param>
+        /// <param name="target">The Target Entity</param>
+        /// <param name="orderType"></param>
+        /// <param name="standoff">How close to the target entity we should get</param>
+        public TranslationOrder(Guid faction, Guid entity, Guid target, HelmOrderTypeEnum orderType, double standoff)
+        : base(faction, entity, target)
         {
-            InterceptTarget, //move to the target, other orders should initiate this first if they're not close enough.
-            MatchTarget, //close and orbit the targets parent if orbiting, else close and match the targets speed.
-            OrbitTarget, //orbit the target
+            OrderType = orderType;
+            StandOffDistance = standoff;
         }
 
-        public HelmOrderTypeEnum HelmOrderType { get; set; }
-        public double TargetDistance { get; set; } //this is the distance we want to Match or orbit at.
-
-
-        public TranslationOrder(Entity entityGuid, Entity factionID) : base(1, true, entityGuid, factionID)
+        internal TranslationAction CreateAction(Game game, TranslationOrder order)
         {
-            OrderableProcessor = new TranslationOrderProcessor();
+            OrderEntities orderEntities;
+            if (GetOrderEntities(game, order, out orderEntities))
+            {
+                return new TranslationAction(this, orderEntities, order.StandOffDistance);                         
+            }
+            //TODO: log don't throw, it's possible an entity could be destroyed by the time this happens.
+            throw new Exception("couldn't find all required entites to create TranslationAction from TranslationOrder");
         }
 
-        public TranslationOrder(IActionableProcessor processor, Entity entityGuid, Entity factionID, Entity targetGuid) : base(1, true, entityGuid, factionID, targetGuid)
+        internal override BaseAction CreateAction(Game game, BaseOrder order)
         {
-            OrderableProcessor = new TranslationOrderProcessor();
+            return CreateAction(game, (TranslationOrder)order);
         }
-
+    }
+    
+    internal class  TranslationAction : BaseAction
+    {
+        internal TranslationOrder.HelmOrderTypeEnum HelmOrderType { get; set; }
+        internal double StandOffDistance { get; set; } //this is the distance we want to Match or orbit at.
+        internal PropulsionDB ThisPropulsionDB { get; set; }
+        
+        public TranslationAction(TranslationOrder order, OrderEntities orderEntities, double standoff) : 
+            base(1, true, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
+        {
+            OrderableProcessor = new TranslationActionProcessor();
+            StandOffDistance = standoff;
+            HelmOrderType = order.OrderType;
+            ThisPropulsionDB = ThisEntity.GetDataBlob<PropulsionDB>();
+        }
     }
 }

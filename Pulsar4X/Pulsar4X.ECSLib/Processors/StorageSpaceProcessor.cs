@@ -357,8 +357,12 @@ namespace Pulsar4X.ECSLib
     public class CargoOrderProcessor : IActionableProcessor
     {
 
-
-        private void ProcessOrder(DateTime toDate, CargoAction action)
+        public void ProcessAction(DateTime toDate, BaseAction action)
+        {
+            ProcessAction(toDate, (CargoAction)action);
+        }
+        
+        private void ProcessAction(DateTime toDate, CargoAction action)
         {
             
             TimeSpan deltaTime = toDate - action.ThisStorage.LastRunDate;
@@ -390,11 +394,6 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public void ProcessOrder(DateTime toDate, BaseAction action)
-        {
-            ProcessOrder(toDate, (CargoAction)action);
-        }
-
         /// <summary>
         /// Sets an Entity interupt at the datetime the cargo transfer should complete.
         /// </summary>
@@ -406,6 +405,8 @@ namespace Pulsar4X.ECSLib
             TimeSpan timeToComplete = TimeSpan.FromHours((float)cargoStorageDB.AmountToTransfer / cargoStorageDB.OrderTransferRate);
             return action.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime + timeToComplete;
         }
+
+        
     }
      
     public enum CargoOrderTypes
@@ -456,7 +457,8 @@ namespace Pulsar4X.ECSLib
         internal CargoStorageDB CargoFrom { get; set; }
         internal CargoStorageDB CargoTo { get; set; }
         internal CargoStorageDB ThisStorage { get; set; }
-        public CargoAction(CargoOrder order, OrderEntities orderEntities, int amount) : base(1, true, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
+        public CargoAction(CargoOrder order, OrderEntities orderEntities, int amount) : 
+            base(1, true, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
         {
             //set the orderableProcessor for cargoAction. 
             OrderableProcessor = new CargoOrderProcessor();
