@@ -235,7 +235,7 @@ namespace Pulsar4X.ECSLib
         internal PropulsionDB ThisPropulsionDB { get; set; }
         
         public TranslationAction(TranslationOrder order, OrderEntities orderEntities, double standoff) : 
-            base(1, true, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
+            base(1, true, order, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
         {
             OrderableProcessor = new TranslationActionProcessor();
             StandOffDistance = standoff;

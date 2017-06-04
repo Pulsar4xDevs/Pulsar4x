@@ -17,14 +17,14 @@ namespace Pulsar4X.ECSLib
 
         protected BaseOrder() { }
 
-        protected BaseOrder(Guid faction, Guid orderEntity)
+        protected BaseOrder(Guid orderEntity, Guid faction)
         {
             FactionGuiD = faction;
             EntityGuid = orderEntity;
         }
 
 
-        protected BaseOrder(Guid faction, Guid orderEntity, Guid targetEntity) : this(faction, orderEntity)
+        protected BaseOrder(Guid orderEntity, Guid faction, Guid targetEntity) : this(orderEntity, faction)
         {
             TargetEntityGuid = targetEntity;
             HasTargetEntity = true;
@@ -97,7 +97,8 @@ namespace Pulsar4X.ECSLib
         internal Entity FactionEntity { get; private set; }
         internal Entity TargetEntity { get; private set; }
         public DateTime EstTimeComplete { get; internal set; }
-
+        
+        public BaseOrder Order { get; private set; }
         public bool HasTargetEntity { get; internal set; }
         
         /// <summary>
@@ -107,19 +108,19 @@ namespace Pulsar4X.ECSLib
         /// <param name="isBlocking">if true, will block on the lanes it's running on till complete</param>
         /// <param name="entity"></param>
         /// <param name="faction"></param>
-        protected BaseAction(int lanes, bool isBlocking, Entity entity, Entity faction)
+        protected BaseAction(int lanes, bool isBlocking, BaseOrder order, Entity entity, Entity faction)
         {
             Lanes = lanes;
             IsBlocking = isBlocking;
             IsFinished = false;
-
+            Order = order;
             ThisEntity = entity;
             FactionEntity = faction;
             HasTargetEntity = false;
         }
 
-        protected BaseAction(int lanes, bool isBlocking, Entity entity, Entity faction, Entity target) : 
-            this (lanes, isBlocking, entity, faction)
+        protected BaseAction(int lanes, bool isBlocking, BaseOrder order, Entity entity, Entity faction, Entity target) : 
+            this (lanes, isBlocking, order, entity, faction)
         {
             TargetEntity = target;
             HasTargetEntity = true;
@@ -136,7 +137,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class EnableComponent : BaseAction
     {
-        public EnableComponent(Entity orderEntity, Entity factionEntity) : base(3, false, orderEntity, factionEntity)
+        public EnableComponent(BaseOrder order, Entity orderEntity, Entity factionEntity) : base(3, false, order, orderEntity, factionEntity)
         {
         }
     }
@@ -148,7 +149,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class DisableComponent : BaseAction
     {
-        public DisableComponent(Entity orderEntity, Entity factionEntity) : base(3, false, orderEntity, factionEntity)
+        public DisableComponent(BaseOrder order, Entity orderEntity, Entity factionEntity) : base(3, false, order, orderEntity, factionEntity)
         {
         }
     }

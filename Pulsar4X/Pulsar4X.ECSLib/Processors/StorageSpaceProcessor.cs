@@ -458,7 +458,7 @@ namespace Pulsar4X.ECSLib
         internal CargoStorageDB CargoTo { get; set; }
         internal CargoStorageDB ThisStorage { get; set; }
         public CargoAction(CargoOrder order, OrderEntities orderEntities, int amount) : 
-            base(1, true, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
+            base(1, true, order, orderEntities.ThisEntity, orderEntities.FactionEntity, orderEntities.TargetEntity)
         {
             //set the orderableProcessor for cargoAction. 
             OrderableProcessor = new CargoOrderProcessor();
@@ -478,7 +478,6 @@ namespace Pulsar4X.ECSLib
                     break;
             }
             
-            ThisStorage.CurrentOrder = order;
             ThisStorage.CurrentAction = this;
             ThisStorage.LastRunDate = ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
             

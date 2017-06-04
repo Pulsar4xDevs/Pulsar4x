@@ -72,8 +72,8 @@ namespace Pulsar4X.ViewModel
             }
         } //not fields!
 
-        private DictionaryVM<BaseOrder, string> _moveOrdersPossible = new DictionaryVM<BaseOrder, string>();
-        public DictionaryVM<BaseOrder, string> MoveOrdersPossible 
+        private DictionaryVM<TranslationOrder, string> _moveOrdersPossible = new DictionaryVM<TranslationOrder, string>();
+        public DictionaryVM<TranslationOrder, string> MoveOrdersPossible 
         { 
             get
             { 
@@ -86,8 +86,8 @@ namespace Pulsar4X.ViewModel
                 OnPropertyChanged(nameof(SelectedPossibleMoveOrder));
             }
         }
-        private DictionaryVM<BaseOrder, string> _moveOrderList = new DictionaryVM<BaseOrder, string>();
-        public DictionaryVM<BaseOrder, string> MoveOrderList 
+        private DictionaryVM<TranslationOrder, string> _moveOrderList = new DictionaryVM<TranslationOrder, string>();
+        public DictionaryVM<TranslationOrder, string> MoveOrderList 
         {
             get
             { 
@@ -148,8 +148,8 @@ namespace Pulsar4X.ViewModel
 
         public StarSystem SelectedSystem { get { return _starSystems.SelectedKey; }}
         public Entity SelectedShip { get { return _shipList.SelectedKey; }}
-        public BaseOrder SelectedPossibleMoveOrder { get { return _moveOrdersPossible.SelectedKey; } }
-        public BaseOrder SelectedMoveOrder { get { return _moveOrderList.SelectedKey; } }
+        public TranslationOrder SelectedPossibleMoveOrder { get { return _moveOrdersPossible.SelectedKey; } }
+        public TranslationOrder SelectedMoveOrder { get { return _moveOrderList.SelectedKey; } }
         public Entity SelectedMoveTarget { get { return _moveTargetList.SelectedKey; } }
         public Entity SelectedAttackTarget { get { return _attackTargetList.SelectedKey; } }
         public Entity SelectedFireControl { get { return _fireControlList.SelectedKey; } }
@@ -165,7 +165,8 @@ namespace Pulsar4X.ViewModel
                     return _targetedEntity.GetDataBlob<NameDB>().DefaultName;
             }
         }
-
+        
+        
         public Boolean TargetShown { get; internal set; }
         public int TargetAreaWidth { get; internal set; }
 
@@ -378,10 +379,8 @@ namespace Pulsar4X.ViewModel
 
             if (SelectedPossibleMoveOrder == null)
                 TargetShown = false;
-            else if (SelectedPossibleMoveOrder.OrderType == orderType.MOVETO)
+            else 
                 TargetShown = true;
-            else
-                TargetShown = false;
 
             if (TargetShown)
                 TargetAreaWidth = 200;
@@ -414,7 +413,7 @@ namespace Pulsar4X.ViewModel
             _moveOrdersPossible.Clear();
 
             if (SelectedShip.HasDataBlob<PropulsionDB>())
-                _moveOrdersPossible.Add(new MoveOrder(), "Move to");
+                _moveOrdersPossible.Add(new TranslationOrder(), "Move to");
 
             _moveOrdersPossible.SelectedIndex = 0;
 
@@ -439,7 +438,7 @@ namespace Pulsar4X.ViewModel
         {
             if (SelectedShip == null)
                 return;
-            List<BaseOrder> orders = new List<BaseOrder>(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
+            List<BaseAction> orders = new List<BaseAction>(SelectedShip.GetDataBlob<OrderableDB>().ActionQueue);
 
             _moveOrderList.Clear();
 
@@ -742,5 +741,35 @@ namespace Pulsar4X.ViewModel
             }
         }
 
+    }
+
+    public class MoveOrderVM
+    {
+        public Guid ThisFaction { get; set; }
+        
+        public Guid ThisEntity { get; set; }
+        public string ThisEntityName { get; set; }
+        
+        public Guid TargetEntity { get; set; }
+        public string TargeEntityName { get; set; }
+
+        public TranslationOrder.HelmOrderTypeEnum OrderType { get; set; }
+        
+        public double StandOff { get; set; }
+        
+        private ICommand _initiateOrder;
+
+        public ICommand InitiateOrder
+        {
+            get { return _initiateOrder ?? (_initiateOrder = new CommandHandler(OnInitiateTranslateOrder, true)); }
+        }
+
+        public void OnInitiateTranslateOrder()
+        {
+            //create new order
+            var newOrder = new TranslationOrder(ThisFaction, ThisEntity, TargetEntity, OrderType, StandOff);
+            //push it to the messagePump
+            //TODO send to messagepump. 
+        }
     }
 }

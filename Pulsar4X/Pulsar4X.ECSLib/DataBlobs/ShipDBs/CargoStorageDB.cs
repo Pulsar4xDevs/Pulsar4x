@@ -60,7 +60,6 @@ namespace Pulsar4X.ECSLib
             StoredEntities = new PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>>(cargoDB.StoredEntities);
             ItemToTypeMap = cargoDB.ItemToTypeMap; //note that this is not 'new', the dictionary referenced here is static and should be the same dictionary throughout the game.
         
-            CurrentOrder = cargoDB.CurrentOrder;
             AmountToTransfer = cargoDB.AmountToTransfer;
             PartAmount = cargoDB.PartAmount;
             OrderTransferRate = cargoDB.OrderTransferRate;
@@ -90,9 +89,6 @@ namespace Pulsar4X.ECSLib
         {
             return new CargoStorageDB(this);
         }
-
-        [JsonProperty]
-        public CargoOrder CurrentOrder { get; internal set; }
         
         [JsonProperty]
         internal CargoAction CurrentAction { get; set; }
