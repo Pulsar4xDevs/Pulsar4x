@@ -33,13 +33,14 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// a list of entities stored of a given cargotype
+        /// a list of entities stored of a given cargotype - does not remove entites. 
         /// </summary>
+        /// <param name="fromCargo"></param>
         /// <param name="typeID">cargo type guid</param>
         /// <returns>new list of Entites or an empty list</returns>
         public static List<Entity> GetEntitesOfCargoType(CargoStorageDB fromCargo, Guid typeID)
         {
-            List<Entity> entityList = new List<Entity>();
+            var entityList = new List<Entity>();
             if (fromCargo.StoredEntities.ContainsKey(typeID))
             {
                 foreach (var kvp in fromCargo.StoredEntities[typeID])
@@ -50,27 +51,38 @@ namespace Pulsar4X.ECSLib
             return entityList;
         }
 
-        public static bool HasEntity(CargoStorageDB cargo, Entity entity)
+        /// <summary>
+        /// checks if a given cargoDB has a specific entity.
+        /// </summary>
+        /// <param name="cargo"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool HasSpecificEntity(CargoStorageDB cargo, Entity entity)
         {
-            var designEntity = entity.GetDataBlob<DesignInfoDB>();
-            var cargoableDB = entity.GetDataBlob<CargoAbleTypeDB>();
-            if (cargo.StoredEntities.ContainsKey(cargoableDB.CargoTypeID))
-                if (cargo.StoredEntities[cargoableDB.CargoTypeID].ContainsKey(designEntity.DesignEntity))
-                    if (cargo.StoredEntities[cargoableDB.CargoTypeID][designEntity.DesignEntity].Contains(entity))
+            Entity designEntity = entity.GetDataBlob<DesignInfoDB>().DesignEntity;
+            Guid cargoType = entity.GetDataBlob<CargoAbleTypeDB>().CargoTypeID;
+            if (cargo.StoredEntities.ContainsKey(cargoType))
+                if (cargo.StoredEntities[cargoType].ContainsKey(designEntity))
+                    if (cargo.StoredEntities[cargoType][designEntity].Contains(entity))
                         return true;
             return false;
         }
 
-        //public static Entity GetEntity(CargoStorageDB cargo, Entity entity)
-        //{
-        //    var designEntity = entity.GetDataBlob<DesignInfoDB>();
-        //    var cargoableDB = entity.GetDataBlob<CargoAbleTypeDB>();
-        //    if (cargo.StoredEntities.ContainsKey(cargoableDB.CargoTypeID))
-        //        if (cargo.StoredEntities[cargoableDB.CargoTypeID].ContainsKey(designEntity.DesignEntity))
-        //            if (cargo.StoredEntities[cargoableDB.CargoTypeID][designEntity.DesignEntity].Contains(entity))
-        //                return cargo.StoredEntities[cargoableDB.CargoTypeID][designEntity.DesignEntity].Contains(entity);
-        //    return false;
-        //}
+        /// <summary>
+        /// Removes the given entity from a given cargo storage. 
+        /// </summary>
+        /// <param name="cargo"></param>
+        /// <param name="entity"></param>
+        /// <returns>true if successfull</returns>
+        public static bool RemoveSpecificEntity(CargoStorageDB cargo, Entity entity)
+        {
+            Entity designEntity = entity.GetDataBlob<DesignInfoDB>().DesignEntity;
+            Guid cargoType = entity.GetDataBlob<CargoAbleTypeDB>().CargoTypeID;
+            if (cargo.StoredEntities.ContainsKey(cargoType))
+                if (cargo.StoredEntities[cargoType].ContainsKey(designEntity))
+                    return cargo.StoredEntities[cargoType][designEntity].Remove(entity);
+            return false;
+        }
 
         /// <summary>
         /// a Dictionary of resources stored of a given cargotype
@@ -138,7 +150,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="toCargo"></param>
         /// <param name="entity"></param>
-        /// <param name="cargoTypeDB"></param>
         /// <param name=""></param>
         internal static void AddItemToCargo(CargoStorageDB toCargo, Entity entity)
         {
@@ -155,6 +166,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Will remove the item from the dictionary if subtracting the value causes the dictionary value to be 0.
         /// </summary>
+        /// <param name="fromCargo"></param>
         /// <param name="itemID">the guid of the item to subtract</param>
         /// <param name="value">the amount of the item to subtract</param>
         /// <returns>the amount succesfully taken from the dictionary(will not remove more than what the dictionary contains)</returns>
@@ -331,7 +343,7 @@ namespace Pulsar4X.ECSLib
                 Entity componentDesign = kvp.Key;
                 Guid cargoTypeID = componentDesign.GetDataBlob<CargoStorageAtbDB>().CargoTypeGuid;
                 long alowableSpace = 0;
-                foreach (var specificComponent in kvp.Value)
+                foreach (Entity specificComponent in kvp.Value)
                 {
                     var healthPercent = specificComponent.GetDataBlob<ComponentInstanceInfoDB>().HealthPercent();
                     if (healthPercent > 0.75)
@@ -405,8 +417,6 @@ namespace Pulsar4X.ECSLib
             TimeSpan timeToComplete = TimeSpan.FromHours((float)cargoStorageDB.AmountToTransfer / cargoStorageDB.OrderTransferRate);
             return action.ThisEntity.Manager.ManagerSubpulses.SystemLocalDateTime + timeToComplete;
         }
-
-        
     }
      
     public enum CargoOrderTypes

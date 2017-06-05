@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
             Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designEntity, colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner);
             if (batchJob.InstallOn != null)
             {
-                if (batchJob.InstallOn == colonyEntity || StorageSpaceProcessor.HasEntity(storage, colonyEntity))
+                if (batchJob.InstallOn == colonyEntity || StorageSpaceProcessor.HasSpecificEntity(storage, colonyEntity))
                 {
                     EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
                     ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
