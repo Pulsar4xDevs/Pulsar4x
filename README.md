@@ -49,8 +49,8 @@ There is currently no Eto.forms plugin for Rider.
 
 2. Open the solution file "Pulsar4X\Pulsar4X.sln".
 
-3. a. If you're running Windows: unload the GTK and Mac projects by right clicking them in the solution explorer (!Don't delete them!) (this should eventualy  be fixed but at the time of this writing they're WIP.)
-  
+3. a. If you're running Windows: unload the GTK and Mac projects by right clicking them in the solution explorer (!Don't delete them!) (this should eventualy  be fixed but at the time of this writing they're WIP.) Also make sure to remove the GTK and Mac references in the other projects (Pulsar4X.Tests/References/).
+ 
  b. If you're running Linux: Our primary linux dev has disapeared into the either, but I've started attempting to dev on linux mint. wish me luck...  
 install monodev and mono-complete. (bare minimum)
 open the Pulsar4x.sln in monodevelop.  
