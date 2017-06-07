@@ -8,18 +8,14 @@ namespace Pulsar4X.ECSLib
         {
             if (messageType == IncomingMessageType.EntityOrdersWrite)
             {
-                throw new NotImplementedException();
-                BaseOrder order; //= TODO deseralise to correct type from message
+                BaseOrder order = OrderSerializer.DeserializeOrder(message);
                 
                 Entity entity;
                 if (game.GlobalManager.FindEntityByGuid(order.EntityGuid, out entity))
-                    entity.Manager.OrderQueue.Enqueue(order);
-                
-                
+                    entity.Manager.OrderQueue.Enqueue(order);                   
                 return true;
             }
             return false;
-
         }
     }
 }

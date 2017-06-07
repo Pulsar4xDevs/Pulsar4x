@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -15,6 +16,8 @@ namespace Pulsar4X.Tests
         
         private DateTime _currentDateTime {get { return _testGame.Game.CurrentDateTime; }}
 
+        private BaseOrder _cargoOrder;
+        
         [SetUp]
         public void Init()
         {
@@ -24,20 +27,22 @@ namespace Pulsar4X.Tests
             TestingUtilities.ColonyFacilitys(_testGame, _testGame.EarthColony);
             _testGame.EarthColony.Manager.SetDataBlob(_testGame.DefaultShip.ID, orderable);
             StorageSpaceProcessor.AddItemToCargo(_testGame.EarthColony.GetDataBlob<CargoStorageDB>(), _duraniumSD, 10000); 
+            
+            _cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, 
+                                                   _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, 
+                                                   _duraniumSD.ID, 100);
         }
 
         [Test]
         public void TestCargoOrder()
         {
-            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, 
-                                                   _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, 
-                                                   _duraniumSD.ID, 100);
+           
             
-            CargoAction action = cargoOrder.CreateAction(_testGame.Game, cargoOrder);
+            BaseAction action = _cargoOrder.CreateAction(_testGame.Game, _cargoOrder);
             Assert.NotNull(action.OrderableProcessor);
             
             //enqueue it to the manager for now since the messagepump is still wip. 
-            _testGame.EarthColony.Manager.OrderQueue.Enqueue(cargoOrder); 
+            _testGame.EarthColony.Manager.OrderQueue.Enqueue(_cargoOrder); 
             OrderProcessor.ProcessManagerOrders(_testGame.EarthColony.Manager);
             Assert.True(_testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue[0] is CargoAction);
 
@@ -48,14 +53,13 @@ namespace Pulsar4X.Tests
         {
             //_testGame.GameSettings.EnableMultiThreading = false;
             EntityManager entityManager = _testGame.EarthColony.Manager;
-            CargoOrder cargoOrder = new CargoOrder(_testGame.DefaultShip.Guid, _testGame.HumanFaction.Guid, _testGame.EarthColony.Guid, CargoOrderTypes.LoadCargo, _duraniumSD.ID, 100);
 
             CargoStorageDB cargoStorageDB = _testGame.DefaultShip.GetDataBlob<CargoStorageDB>();
             
             Entity entity;
             Assert.True(_testGame.Game.GlobalManager.FindEntityByGuid(_testGame.DefaultShip.Guid, out entity));       
             
-            _testGame.EarthColony.Manager.OrderQueue.Enqueue(cargoOrder);             
+            _testGame.EarthColony.Manager.OrderQueue.Enqueue(_cargoOrder);             
 
             OrderProcessor.ProcessManagerOrders(_testGame.EarthColony.Manager);
 
@@ -85,6 +89,31 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(0, _testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue.Count, "action should have been removed from queue");
 
+        }
+
+        [Test]
+        public void TestOrderSeralisation()
+        {            
+            string seralisedOrder = OrderSerializer.SerlialiseOrder(_cargoOrder);
+            BaseOrder deserailisedOrder = OrderSerializer.DeserializeOrder(seralisedOrder);
+            Assert.True(deserailisedOrder is CargoOrder);
+        }
+
+        [Test]
+        public void TestOrderViaMessagePump()
+        {
+            string sOrder = OrderSerializer.SerlialiseOrder(_cargoOrder);
+            AuthenticationToken auth = new AuthenticationToken(_testGame.Game.SpaceMaster, "");
+            _testGame.Game.MessagePump.EnqueueMessage(IncomingMessageType.EntityOrdersWrite, auth, sOrder);
+
+            bool itemFound = false;
+            _testGame.Game.GameLoop.Ticklength = TimeSpan.FromSeconds(10);
+            _testGame.Game.GameLoop.TimeStep();
+            if (_testGame.EarthColony.Manager.OrderQueue.Count > 0 || _testGame.DefaultShip.GetDataBlob<OrderableDB>().ActionQueue.Count > 0)
+                itemFound = true;
+            
+            Assert.True(itemFound, "order or action is lost");
+            
         }
     }
 }

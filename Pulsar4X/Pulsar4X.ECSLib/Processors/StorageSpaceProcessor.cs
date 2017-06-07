@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-
+using Newtonsoft.Json;
 
 
 namespace Pulsar4X.ECSLib
@@ -426,9 +426,11 @@ namespace Pulsar4X.ECSLib
     }
     public class CargoOrder : BaseOrder
     {       
+        [JsonProperty]
         public CargoOrderTypes CargoOrderType;
-
+        [JsonProperty]
         public Guid CargoItemGuid;
+        [JsonProperty]
         public int Amount;
 
         public CargoOrder(Guid entity, Guid faction, Guid target, CargoOrderTypes orderType, Guid cargoItemID, int amount) 

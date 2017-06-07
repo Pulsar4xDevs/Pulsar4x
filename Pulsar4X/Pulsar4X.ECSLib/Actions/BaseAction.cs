@@ -5,8 +5,7 @@ namespace Pulsar4X.ECSLib
 {
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class BaseOrder
-    {
-        
+    {        
         [JsonProperty]
         public Guid EntityGuid { get; set; }
         [JsonProperty]
@@ -67,6 +66,20 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    public static class OrderSerializer
+    {
+        private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings {TypeNameHandling = TypeNameHandling.All};
+        
+        public static string SerlialiseOrder(BaseOrder order)
+        {
+            return JsonConvert.SerializeObject(order, Settings);
+        }
+
+        public static BaseOrder DeserializeOrder(string jsonString)
+        {
+             return JsonConvert.DeserializeObject<BaseOrder>(jsonString, Settings);
+        }
+    }
 
     public interface IActionableProcessor
     {
@@ -79,8 +92,7 @@ namespace Pulsar4X.ECSLib
         internal Entity FactionEntity;
         internal Entity TargetEntity;
     }
-    
-    
+
     public abstract class BaseAction
     {
         public string Name { get; set; }
@@ -103,12 +115,13 @@ namespace Pulsar4X.ECSLib
         
         public BaseOrder Order { get; private set; }
         public bool HasTargetEntity { get; internal set; }
-        
+
         /// <summary>
         /// BaseAction constructor
         /// </summary>
         /// <param name="lanes">bitmask</param>
         /// <param name="isBlocking">if true, will block on the lanes it's running on till complete</param>
+        /// <param name="order"></param>
         /// <param name="entity"></param>
         /// <param name="faction"></param>
         protected BaseAction(int lanes, bool isBlocking, BaseOrder order, Entity entity, Entity faction)
@@ -127,8 +140,7 @@ namespace Pulsar4X.ECSLib
         {
             TargetEntity = target;
             HasTargetEntity = true;
-        }
-        
+        }        
     }
 
    
