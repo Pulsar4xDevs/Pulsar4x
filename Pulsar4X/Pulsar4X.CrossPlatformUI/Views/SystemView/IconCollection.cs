@@ -12,7 +12,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public List<OrbitRing> OrbitList { get; } = new List<OrbitRing>();
         public List<TextIcon> TextIconList { get; } = new List<TextIcon>();
         public List<EntityIcon> EntityList { get; } = new List<EntityIcon>();
-        public ScaleIcon scale { get; set; }
+        public ScaleIcon Scale { get; set; }
 
 
         public Dictionary<Guid, EntityIcon> IconDict { get; } = new Dictionary<Guid, EntityIcon> ();
@@ -36,14 +36,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
             OrbitList.Clear();
             TextIconList.Clear();
             EntityList.Clear();
-            scale = new ScaleIcon(camera);
+            Scale = new ScaleIcon(camera);
 
             foreach (var item in entities)
             {
                 if (item.HasDataBlob<OrbitDB>() && item.GetDataBlob<OrbitDB>().Parent != null)
                 {
-                    OrbitRing ring = new OrbitRing(item, camera);
-                    OrbitList.Add(ring);
+                    if (!item.GetDataBlob<OrbitDB>().IsStationary)
+                    {
+                        OrbitRing ring = new OrbitRing(item, camera);
+                        OrbitList.Add(ring);
+                    }
                 }
                 if (item.HasDataBlob<NameDB>())
                 {
@@ -64,7 +67,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         /// </summary>
         public void TextIconsDistribute()
         {
-            List<Rectangle> occupiedPosition = new List<Rectangle>();
+            var occupiedPosition = new List<Rectangle>();
             IComparer<Rectangle> byViewPos = new ByViewPosition();
 
             foreach (var item in TextIconList)
@@ -74,21 +77,21 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             //Consolidate TextIcons that share the same position and name
             TextIconList.Sort();
-            int ListLength = TextIconList.Count;
-            int TextIconQuantity = 1;
-            for (int i = 1; i < ListLength; i++)
+            int listLength = TextIconList.Count;
+            int textIconQuantity = 1;
+            for (int i = 1; i < listLength; i++)
             {
                 if (TextIconList[i - 1].CompareTo(TextIconList[i]) == 0)
                 {
-                    TextIconQuantity++;
+                    textIconQuantity++;
                     TextIconList.RemoveAt(i);
                     i--;
-                    ListLength--;
+                    listLength--;
                 }
-                else if (TextIconQuantity > 1)
+                else if (textIconQuantity > 1)
                 {
-                    TextIconList[i - 1].name += " x" + TextIconQuantity;
-                    TextIconQuantity = 1;
+                    TextIconList[i - 1].name += " x" + textIconQuantity;
+                    textIconQuantity = 1;
                 }
             }
 
@@ -98,7 +101,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             occupiedPosition.Add(TextIconList[0].ViewDisplayRect);
             for (int i = 1; i < TextIconList.Count; i++)
             {
-                var lowestPosIndex = occupiedPosition.BinarySearch(TextIconList[i].ViewDisplayRect + new Point(0,(int)TextIconList[i].ViewNameSize.Height) , byViewPos);
+                int lowestPosIndex = occupiedPosition.BinarySearch(TextIconList[i].ViewDisplayRect + new Point(0,(int)TextIconList[i].ViewNameSize.Height) , byViewPos);
                 if (lowestPosIndex < 0) lowestPosIndex = ~lowestPosIndex;
                 
                 for (int j = lowestPosIndex; j < occupiedPosition.Count; j++)
@@ -109,9 +112,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
                     }
                 }
                 //Inserts the new label sorted
-                var InsertIndex = occupiedPosition.BinarySearch(TextIconList[i].ViewDisplayRect, byViewPos);
-                if (InsertIndex < 0) InsertIndex = ~InsertIndex;
-                occupiedPosition.Insert(InsertIndex, TextIconList[i].ViewDisplayRect);
+                int insertIndex = occupiedPosition.BinarySearch(TextIconList[i].ViewDisplayRect, byViewPos);
+                if (insertIndex < 0) insertIndex = ~insertIndex;
+                occupiedPosition.Insert(insertIndex, TextIconList[i].ViewDisplayRect);
             }
 
 
@@ -138,11 +141,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 item.DrawMe(g);
             }
 
-            scale.DrawMe(g); 
+            Scale.DrawMe(g); 
         }
     }
 
-    internal interface IconBase
+    internal interface IIconBase
     {
         //sets the size of the icons
         float Scale { get; set; }

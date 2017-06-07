@@ -8,7 +8,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     /// <summary>
     /// ScaleIcon class to draw a Scale and a Text in the SystemView
     /// </summary>
-    internal class ScaleIcon : IconBase
+    internal class ScaleIcon : IIconBase
     {
         public float Scale { get; set; } = 8;
         public Font font { get; set; }
