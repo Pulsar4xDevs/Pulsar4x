@@ -326,7 +326,6 @@
     <Compile Include="StaticData\SystemGenSettingsSD.cs" />
     <Compile Include="StaticData\TechSD.cs" />
     <Compile Include="TimeLoop.cs" />
-    <Compile Include="Processors\SensorsProcessor.cs" />
     <Compile Include="DataBlobs\FactionSystemKenDB.cs" />
   </ItemGroup>
   <ItemGroup>
