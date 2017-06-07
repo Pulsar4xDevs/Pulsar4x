@@ -145,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actions\BaseAction.cs" />
+    <Compile Include="Actions\BaseOrder.cs" />
     <Compile Include="DataBlobs\AsteroidDamageDB.cs" />
     <Compile Include="DataBlobs\CargoTypeDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\BeamFireControlAtbDB.cs" />
