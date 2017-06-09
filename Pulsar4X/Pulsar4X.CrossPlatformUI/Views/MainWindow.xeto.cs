@@ -40,6 +40,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
             DataContext = _gameVM;
             XamlReader.Load(this);
             _gameVM.PropertyChanged += _gameVM_PropertyChanged;
+            _gameVM.TimeControl.PropertyChanged += _timeControl_PropertyChanged;
         }
         #endregion
 
@@ -51,8 +52,23 @@ namespace Pulsar4X.CrossPlatformUI.Views {
         {
             if (e.PropertyName == "HasGame")
             {
-                TimeControlV.Enabled = _gameVM.HasGame;          
+                TimeControlV.Enabled = _gameVM.HasGame;
+                TimeControlV.btnPausePlay.isPaused = _gameVM.TimeControl.IsPaused;
             }
+        }
+
+        /// <summary>
+        /// Changes image of Pause/Play button when the game is paused or resumed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _timeControl_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsPaused")
+            {
+                TimeControlV.btnPausePlay.isPaused = _gameVM.TimeControl.IsPaused;
+            }
+
         }
         #endregion
 
