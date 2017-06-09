@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Panel 
   xmlns="http://schema.picoe.ca/eto.forms" 
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.CustomControls;assembly=Pulsar4X.CrossPlatformUI"
   >
 
   <TableLayout Padding ="5,5,5,5" >
@@ -12,7 +13,7 @@
       <Label Text="Tick Multiplier" />
       <NumericUpDown Value ="{Binding TickMultiplier}" MinValue = "1"/>
       <Label Text="  " Enabled ="False" />
-      <Button Command="{Binding PausePlayCMD}"  Text="||>" />
+      <c:PausePlayButton Command="{Binding PausePlayCMD}" x:Name="btnPausePlay"/>
       <Button Command="{Binding TimeStepCMD}" Text="Step" />
       <TableCell></TableCell>
     </TableRow>
