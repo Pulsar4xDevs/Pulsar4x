@@ -181,6 +181,10 @@
     <EmbeddedResource Include="Views\ComponentTemplateDesigner\EnumFormulaView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Icons\PausePlayButton\Pause.ico" />
+    <EmbeddedResource Include="Resources\Icons\PausePlayButton\PauseDisabled.ico" />
+    <EmbeddedResource Include="Resources\Icons\PausePlayButton\Play.ico" />
+    <EmbeddedResource Include="Resources\Icons\PausePlayButton\PlayDisabled.ico" />
     <Content Include="Resources\Shaders\Basic20_Fragment_Shader.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -266,6 +270,7 @@
     <Compile Include="Commands\ShipViewCMD.cs" />
     <Compile Include="Commands\SystemInfoCMD.cs" />
     <Compile Include="Commands\SystemMap.cs" />
+    <Compile Include="CustomControls\PausePlayButton.cs" />
     <Compile Include="CustomControls\RenderCanvas.cs" />
     <Compile Include="GLUtilities\GLEffect.cs" />
     <Compile Include="GLUtilities\GLEffectBasic21.cs" />
