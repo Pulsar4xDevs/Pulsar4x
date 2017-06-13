@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
             if (shipInfo.Tonnage != totalTonnage)
             {
                 shipInfo.Tonnage = totalTonnage;
-                //ShipMovementProcessor.CalcMaxSpeed(shipEntity);
+                PropulsionCalcs.CalcMaxSpeed(shipEntity); 
             }
             shipInfo.InternalHTK = totalHTK;
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
