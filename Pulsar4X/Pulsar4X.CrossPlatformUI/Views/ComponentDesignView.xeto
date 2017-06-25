@@ -3,7 +3,7 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-  <TableLayout>
+  <TableLayout Spacing ="2,2">
     <TableRow>
       <ComboBox ID="ComponentSelection" DataContext="{Binding ComponentTypes}" />
     </TableRow>

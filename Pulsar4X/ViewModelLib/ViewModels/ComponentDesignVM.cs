@@ -138,7 +138,7 @@ namespace Pulsar4X.ViewModel
 
         public GuiHint GuiHint { get { return _designAbility.GuiHint; }}
         
-        public MinMaxSliderVM MinMaxSlider { get; set; }
+        public MinMaxSliderVM minMaxSliderVM { get; set; }
         
 
 
@@ -163,18 +163,18 @@ namespace Pulsar4X.ViewModel
                     break;
                 case GuiHint.GuiSelectionMaxMin:
                     {
-                        MinMaxSlider = new MinMaxSliderVM();
+                        minMaxSliderVM = new MinMaxSliderVM();
 
                         designAbility.SetMax();
                         designAbility.SetMin();
                         designAbility.SetValue();
                         designAbility.SetStep();
-                        MinMaxSlider.Name = Name;
-                        MinMaxSlider.MaxValue = MaxValue;
-                        MinMaxSlider.MinValue = MinValue;
-                        MinMaxSlider.StepValue = StepValue;
-                        MinMaxSlider.Value = Value; //.PreLoadedValue = Value; //hack due to eto bug. MinMaxSlider.Value = Value; 
-                        MinMaxSlider.PropertyChanged += MinMaxSlider_PropertyChanged;
+                        minMaxSliderVM.Name = Name;
+                        minMaxSliderVM.MaxValue = MaxValue;
+                        minMaxSliderVM.MinValue = MinValue;
+                        minMaxSliderVM.StepValue = StepValue;
+                        minMaxSliderVM.Value = Value; //.PreLoadedValue = Value; //hack due to eto bug. MinMaxSlider.Value = Value; 
+                        minMaxSliderVM.PropertyChanged += MinMaxSlider_PropertyChanged;
 
                     }
                     break;
@@ -189,7 +189,7 @@ namespace Pulsar4X.ViewModel
 
         void MinMaxSlider_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            _designAbility.SetValueFromInput(MinMaxSlider.Value);
+            _designAbility.SetValueFromInput(minMaxSliderVM.Value);
             _parentDesignVM.Refresh();
         }
 

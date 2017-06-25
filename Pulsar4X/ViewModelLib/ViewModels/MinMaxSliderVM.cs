@@ -139,18 +139,18 @@ namespace Pulsar4X.ViewModel
         public double MaxValue { get { return _maxValue; } set
             {
                 _maxValue = value;
-                foreach (var slider in Sliders)
+                foreach (var slider in SliderVMs)
                 {
                     slider.MaxValue = value;
                 }
                 OnPropertyChanged(); }}
 
-        public List<ChainedSliderVM> Sliders { get; } = new List<ChainedSliderVM>();
+        public List<ChainedSliderVM> SliderVMs { get; } = new List<ChainedSliderVM>();
         
         public ChainedSliders(List<ChainedSliderVM> listOfSliders)
         {
-            Sliders.AddRange(listOfSliders);
-            foreach (var slider in Sliders)
+            SliderVMs.AddRange(listOfSliders);
+            foreach (var slider in SliderVMs)
             {
                 slider.MaxValue = MaxValue;
                 slider.ValueChanged += Slider_ValueChanged;
@@ -195,7 +195,7 @@ namespace Pulsar4X.ViewModel
             get
             {
                 double value = 0;
-                foreach (var slider in Sliders)
+                foreach (var slider in SliderVMs)
                 {
                     value += slider.Value;
                 }
@@ -217,9 +217,9 @@ namespace Pulsar4X.ViewModel
             }
         }
 
-        private List<ChainedSliderVM> UnlockedSliders { get { return Sliders.Where(T => !T.IsLocked).ToList(); } } 
+        private List<ChainedSliderVM> UnlockedSliders { get { return SliderVMs.Where(T => !T.IsLocked).ToList(); } } 
 
-        private List<ChainedSliderVM> LockedSliders { get { return Sliders.Where(T => T.IsLocked).ToList(); } }
+        private List<ChainedSliderVM> LockedSliders { get { return SliderVMs.Where(T => T.IsLocked).ToList(); } }
 
 
         public event PropertyChangedEventHandler PropertyChanged;
