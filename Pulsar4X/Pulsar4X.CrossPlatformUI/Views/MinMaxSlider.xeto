@@ -4,33 +4,25 @@
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
 
-  <TableLayout>
+  <TableLayout Padding="5,5" Spacing ="5,5">
     <TableRow>
-
       <Label Text="{Binding Name}" />
-
+      <Label Text="{Binding MinValue}"  />
       <Slider ID="Slider"
+       Width ="120"
        Value="{Binding SliderValue}"
        MinValue="{Binding SliderMinValue}"
        MaxValue="{Binding SliderMaxValue}"
-  
        SnapToTick="{Binding StrictStepValue}"  
        Enabled="{Binding IsUnLocked}"
       />
-    </TableRow>
-    <TableRow>
+      <Label Text="{Binding MaxValue}" />
       <CheckBox Visible="{Binding IsLockable}" Checked="{Binding IsLocked}"/>
-      <TableLayout>
-      <TableRow>
-      <Label Text="{Binding MinValue}"  />
       <NumericUpDown ID="NumericUpDown"  
         Value ="{Binding Value}"
         MaxValue ="{Binding MaxValue}"              
         MinValue ="{Binding MinValue}"
         Enabled="{Binding IsUnLocked}"/>
-      <Label Text="{Binding MaxValue}" />
-      </TableRow>
-      </TableLayout>
     </TableRow>
   </TableLayout>
 	

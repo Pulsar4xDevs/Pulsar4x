@@ -3,10 +3,10 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-  <TableLayout>
+  <TableLayout  Padding="5,5" Spacing ="5,5">
     <TableRow>
       <Label ID="AbilityName" Text="{Binding Name}" />
-      <ComboBox  ID="AbilitySelection"  DataContext="{Binding TechList}" />
+      <ComboBox  ID="AbilitySelection"  DataContext="{Binding TechList}"  Width="200"/>
     </TableRow>
     
   </TableLayout>

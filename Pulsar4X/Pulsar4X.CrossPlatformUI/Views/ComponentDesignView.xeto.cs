@@ -54,8 +54,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                         AbilitysLayout.Items.Add(asl);
                         break;
                     case GuiHint.GuiSelectionMaxMin:
-                        MinMaxSlider mms = new MinMaxSlider() {};
-                        mms.DataContext = componentAbilityVM.MinMaxSlider;
+                        MinMaxSlider mms = new MinMaxSlider(componentAbilityVM.minMaxSliderVM) {};
                         AbilitysLayout.Items.Add(mms);
                         break;
                 }
