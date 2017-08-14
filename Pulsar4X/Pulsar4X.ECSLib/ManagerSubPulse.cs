@@ -161,8 +161,8 @@ namespace Pulsar4X.ECSLib
             DateTime nextDate = GetNextInterupt(timeDeltaMax);
             TimeSpan deltaActual = nextDate - SystemLocalDateTime;
 
-            ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
-
+            //ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
+            _entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
             ProcessToNextInterupt(nextDate);
 
 

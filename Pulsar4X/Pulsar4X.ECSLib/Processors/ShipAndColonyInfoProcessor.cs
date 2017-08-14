@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// ship and colonyInfo processors
     /// </summary>
-    public static class ShipAndColonyInfoProcessor
+    public static class ShipAndColonyInfoProcessor 
     {
         public static void ReCalculateShipTonnaageAndHTK(Entity shipEntity)
         {
@@ -40,6 +40,15 @@ namespace Pulsar4X.ECSLib
             shipInfo.InternalHTK = totalHTK;
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
             mvDB.Volume = totalVolume;
+        }
+    }
+
+    public class TonnageAndHTKRecalc : IRecalcProcessor
+    {
+        public int ProcessPriority { get; set; } = 0;
+        public void RecalcEntity(Entity entity)
+        {
+            ShipAndColonyInfoProcessor.ReCalculateShipTonnaageAndHTK(entity);
         }
     }
 }
