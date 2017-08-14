@@ -325,7 +325,6 @@
     <Compile Include="ComponentFeatureSets\Construction\ConstructionAtbDB.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
     <Folder Include="ComponentFeatureSets\" />
     <Folder Include="ComponentFeatureSets\CargoStorage\" />
     <Folder Include="ComponentFeatureSets\MineResources\" />
