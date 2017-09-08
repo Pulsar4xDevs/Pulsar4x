@@ -10,6 +10,9 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class CargoStorageDB : BaseDataBlob, ICreateViewmodel
     {
+        /// <summary>
+        /// Key is CargoTypeID
+        /// </summary>
         [JsonProperty]
         internal Dictionary<Guid, CargoTypeStore> StoredCargos { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
 
@@ -49,24 +52,26 @@ namespace Pulsar4X.ECSLib
         internal long MaxCapacity { get; set; }
 
         [JsonProperty]
-        internal long FreeCapacity { get; set; }
+        internal long FreeCapacity { get; set; } 
 
-        [JsonProperty]
+        
         /// <summary>
         /// For Minerals etc: The key is the ICargoable.ID, and the value is the amount stored. 
         /// For Entites the key is the designs ICargoable.ID and the value is the number of that design stored.
         /// </summary>
         /// <value>The item and amount.</value>
+        [JsonProperty]
         internal Dictionary<Guid, long> ItemsAndAmounts { get;} = new Dictionary<Guid, long>();
     }
 
     internal class CargoTypeStoreEntites : CargoTypeStore
     {
-        [JsonProperty]
+        
         /// <summary>
         /// This stores the specific Entites. 
         /// </summary>
         /// <value>The specific entites.</value>
+        [JsonProperty]
         internal List<Entity> SpecificEntites { get; } = new List<Entity>();
     }
 }

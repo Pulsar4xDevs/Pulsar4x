@@ -6,9 +6,12 @@ namespace Pulsar4X.ECSLib
 {
     internal class MineResourcesProcessor : IHotloopProcessor
     {
-        
+        private StaticDataStore _staticDataStore;
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
+            if (MineProcessor.StaticDataStore == null)
+                MineProcessor.StaticDataStore = _staticDataStore;
+            
             MineProcessor.MineResources(entity);
         }
 
@@ -23,32 +26,49 @@ namespace Pulsar4X.ECSLib
 
     internal static class MineProcessor
     {
+        internal static StaticDataStore StaticDataStore;
         internal static void MineResources(Entity colonyEntity)
         {
             Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
-            //Dictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            
             CargoStorageDB stockpile = colonyEntity.GetDataBlob<CargoStorageDB>();
             float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
-            {                
+            {
+                ICargoable mineral = StaticDataStore.GetICargoable(kvp.Key);
                 double accessability = planetMinerals[kvp.Key].Accessibility;
                 double actualRate = kvp.Value * mineBonuses * accessability;
-                int mineralsMined = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
-                long capacity = StorageSpaceProcessor.RemainingCapacity(stockpile, stockpile.CargoTypeID(kvp.Key));
-                if (capacity > 0)
-                {
-                    //colonyMineralStockpile.SafeValueAdd<Guid>(kvp.Key, mineralsMined);
-                    StorageSpaceProcessor.AddItemToCargo(stockpile, kvp.Key, mineralsMined);
-                    MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
-                    int newAmount = mineralDeposit.Amount -= mineralsMined;
+                int amountMinableThisTick = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
+                
+                long freeCapacity = stockpile.StoredCargos[mineral.CargoTypeID].FreeCapacity;
 
-                    accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
-                    double newAccess = GMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
+                Guid cargoTypeID = mineral.CargoTypeID;
+                int itemMassPerUnit = mineral.Mass;
+                long weightMinableThisTick = itemMassPerUnit * amountMinableThisTick;
+                weightMinableThisTick = Math.Min(weightMinableThisTick, freeCapacity);  
+                
+                int actualAmountToMineThisTick = (int)(weightMinableThisTick / itemMassPerUnit);                                         //get the number of items from the mass transferable
+                long actualweightMinaedThisTick = actualAmountToMineThisTick * itemMassPerUnit;
+                
+                
+                if(!stockpile.StoredCargos.ContainsKey(cargoTypeID)) 
+                    stockpile.StoredCargos.Add(cargoTypeID, new CargoTypeStore());
+                else
+                    stockpile.StoredCargos[cargoTypeID].ItemsAndAmounts[mineral.ID] += actualAmountToMineThisTick;
+                
+                stockpile.StoredCargos[cargoTypeID].FreeCapacity -= actualweightMinaedThisTick;
+                
+      
+                MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
+                int newAmount = mineralDeposit.Amount -= actualAmountToMineThisTick;
 
-                    mineralDeposit.Amount = newAmount;
-                    mineralDeposit.Accessibility = newAccess;
-                }
+                accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
+                double newAccess = GMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
+
+                mineralDeposit.Amount = newAmount;
+                mineralDeposit.Accessibility = newAccess;
+                
             }
         }
 

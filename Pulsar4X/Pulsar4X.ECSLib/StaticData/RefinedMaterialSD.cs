@@ -16,6 +16,6 @@ namespace Pulsar4X.ECSLib
         public ushort WealthCost;
         public ushort OutputAmount;
         public Guid CargoTypeID { get; set; }
-        public float Mass { get; set; }
+        public int Mass { get; set; }
     }
 }

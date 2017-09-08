@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public Guid ID { get; set; }
         public Guid CargoTypeID { get; set; }
-        public float Mass { get; set; }
+        public int Mass { get; set; }
         public Dictionary<BodyType, double> Abundance;
     }
 }

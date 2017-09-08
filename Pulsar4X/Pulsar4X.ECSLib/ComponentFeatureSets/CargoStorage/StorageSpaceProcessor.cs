@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 
 namespace Pulsar4X.ECSLib
@@ -9,6 +10,7 @@ namespace Pulsar4X.ECSLib
 
     public static class StorageSpaceProcessor
     {
+        /*
         /// <summary>
         /// returns the amount of items for a given item guid.
         /// </summary>
@@ -317,35 +319,59 @@ namespace Pulsar4X.ECSLib
             }
             return true;
         }
+        */
+
+        private static void DropRandomCargo(CargoStorageDB storeageDB, long weightToLoose)
+        {
+            
+        }
+
 
         internal static void ReCalcCapacity(Entity parentEntity)
         {
-            CargoStorageDB storageDB = parentEntity.GetDataBlob<CargoStorageDB>();
-            PrIwObsDict<Guid, long> totalSpace = storageDB.MaxCapacities;
 
+            Dictionary<Guid, CargoTypeStore> storageDBStoredCargos = parentEntity.GetDataBlob<CargoStorageDB>().StoredCargos;
+
+            Dictionary<Guid, long> calculatedMaxStorage = new Dictionary<Guid, long>();
+            
             List<KeyValuePair<Entity, PrIwObsList<Entity>>> StorageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
-            foreach (var kvp in StorageComponents)
+            foreach (var kvp in StorageComponents) //first loop through the component types
             {
                 Entity componentDesign = kvp.Key;
                 Guid cargoTypeID = componentDesign.GetDataBlob<CargoStorageAtbDB>().CargoTypeGuid;
                 long alowableSpace = 0;
-                foreach (var specificComponent in kvp.Value)
-                {
+                foreach (var specificComponent in kvp.Value) //then loop through each specific component
+                {//checking the helth...
                     var healthPercent = specificComponent.GetDataBlob<ComponentInstanceInfoDB>().HealthPercent();
-                    if (healthPercent > 0.75)
+                    if (healthPercent > 0.75) //hardcoded health percent at 3/4, cargo is delecate? todo: streach goal make this modable
                         alowableSpace = componentDesign.GetDataBlob<CargoStorageAtbDB>().StorageCapacity;
                 }
-                if (!totalSpace.ContainsKey(cargoTypeID))
+                //then add the amount to our tempory dictionary
+                if (!calculatedMaxStorage.ContainsKey(cargoTypeID))
+                    calculatedMaxStorage.Add(cargoTypeID, alowableSpace);
+                else
+                    calculatedMaxStorage[cargoTypeID] += alowableSpace;    
+            }
+            
+            //now loop through our tempory dictionary and match it up with the real one. 
+            foreach (var kvp in calculatedMaxStorage)
+            {
+                Guid cargoTypeID = kvp.Key;
+                long alowableSpace = kvp.Value;
+                
+                if (!storageDBStoredCargos.ContainsKey(cargoTypeID))
                 {
-                    totalSpace.Add(cargoTypeID, alowableSpace);
-                    if (!storageDB.MinsAndMatsByCargoType.ContainsKey(cargoTypeID))
-                        storageDB.MinsAndMatsByCargoType.Add(cargoTypeID, new PrIwObsDict<ICargoable, long>());                                              
+                    var newStore = new CargoTypeStore();
+                    newStore.MaxCapacity = alowableSpace;
+                    storageDBStoredCargos.Add(cargoTypeID, newStore);                                        
                 }
-                else if (totalSpace[cargoTypeID] != alowableSpace)
+                else if (storageDBStoredCargos[cargoTypeID].MaxCapacity != alowableSpace)
                 {
-                    totalSpace[cargoTypeID] = alowableSpace;
-                    if (RemainingCapacity(storageDB, cargoTypeID) < 0)
-                    { //todo: we've lost cargo capacity, and we're carrying more than we have storage for, drop random cargo
+                    storageDBStoredCargos[cargoTypeID].MaxCapacity = alowableSpace;
+                    long overWeight = storageDBStoredCargos[cargoTypeID].FreeCapacity - alowableSpace;
+                    if (overWeight > 0)
+                    {    
+                        DropRandomCargo(parentEntity.GetDataBlob<CargoStorageDB>(),  overWeight);
                     }
                 }
             }
