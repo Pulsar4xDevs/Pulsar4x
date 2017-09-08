@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         Guid ID { get; }
         string Name { get; }
         Guid CargoTypeID { get;  }
-        float Mass { get;  }
+        int Mass { get;  }
     }
 }
 

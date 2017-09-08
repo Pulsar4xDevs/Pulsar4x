@@ -12,10 +12,10 @@ namespace Pulsar4X.ECSLib
         internal static Dictionary<Type, Delegate> TypeProcessorMap = new Dictionary<Type, Delegate>
             {
                 { typeof(ShipInfoDB), new Action<ShipInfoDB>(processor => {ShipAndColonyInfoProcessor.ReCalculateShipTonnaageAndHTK(CurrentEntity); }) },
-                { typeof(ColonyMinesDB), new Action<ColonyMinesDB>(processor => { MineProcessor.CalcMaxRate(CurrentEntity);}) },
+                { typeof(MiningDB), new Action<MiningDB>(processor => { MineProcessor.CalcMaxRate(CurrentEntity);}) },
                 { typeof(PropulsionDB), new Action<PropulsionDB>(processor => { ShipMovementProcessor.CalcMaxSpeed(CurrentEntity); }) },
-                { typeof(ColonyRefiningDB), new Action<ColonyRefiningDB>(processor => { RefiningProcessor.ReCalcRefiningRate(CurrentEntity); }) },
-                { typeof(ColonyConstructionDB), new Action<ColonyConstructionDB>(processor => { ConstructionProcessor.ReCalcConstructionRate(CurrentEntity); }) },
+                { typeof(RefiningDB), new Action<RefiningDB>(processor => { RefiningProcessor.ReCalcRefiningRate(CurrentEntity); }) },
+                { typeof(ConstructionDB), new Action<ConstructionDB>(processor => { ConstructionProcessor.ReCalcConstructionRate(CurrentEntity); }) },
                 { typeof(ColonyLifeSupportDB), new Action<ColonyLifeSupportDB>(processor => {PopulationProcessor.ReCalcMaxPopulation(CurrentEntity); }) },
                 { typeof(BeamWeaponsDB), new Action<BeamWeaponsDB>(processor => {WeaponProcessor.RecalcBeamWeapons(CurrentEntity); }) },
                 { typeof(CargoStorageDB), new Action<CargoStorageDB>(processor => {StorageSpaceProcessor.ReCalcCapacity(CurrentEntity); }) },

@@ -9,9 +9,9 @@ namespace Pulsar4X.ECSLib
         private readonly Dictionary<Type, IHotloopProcessor> _hotloopProcessors = new Dictionary<Type, IHotloopProcessor>();
         private readonly List<IRecalcProcessor> _recalcProcessors = new List<IRecalcProcessor>();
 
-        internal ProcessorManager()
+        internal ProcessorManager(Game game)
         {
-            CreateProcessors();
+            CreateProcessors(game);
         }
 
         internal void AddHotloopProcessor<T>(IHotloopProcessor processor) where T: BaseDataBlob
@@ -47,8 +47,12 @@ namespace Pulsar4X.ECSLib
 
 
 
-        private void CreateProcessors()
+        private void CreateProcessors(Game game)
         {
+            
+            AddHotloopProcessor<MiningDB>(new MineResourcesProcessor());
+            AddHotloopProcessor<RefiningDB>(new RefineResourcesProcessor(game.StaticData.ProcessedMaterials));
+            AddHotloopProcessor<ConstructionDB>(new ConstructEntitiesProcessor());
             AddHotloopProcessor<PropulsionDB>(new ShipMovement());
         }
     }

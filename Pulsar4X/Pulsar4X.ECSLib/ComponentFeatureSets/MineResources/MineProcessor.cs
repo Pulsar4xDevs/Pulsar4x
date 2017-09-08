@@ -4,11 +4,28 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    internal class MineResourcesProcessor : IHotloopProcessor
+    {
+        
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            MineProcessor.MineResources(entity);
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            foreach(var entity in manager.GetAllEntitiesWithDataBlob<MiningDB>()) 
+            {
+                ProcessEntity(entity, deltaSeconds);
+            }
+        }
+    }
+
     internal static class MineProcessor
     {
         internal static void MineResources(Entity colonyEntity)
         {
-            Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate;
+            Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
             //Dictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             CargoStorageDB stockpile = colonyEntity.GetDataBlob<CargoStorageDB>();
@@ -56,7 +73,7 @@ namespace Pulsar4X.ECSLib
                     }                    
                 }
             }
-            colonyEntity.GetDataBlob<ColonyMinesDB>().MineingRate = rates;
+            colonyEntity.GetDataBlob<MiningDB>().MineingRate = rates;
         }
     }
 }

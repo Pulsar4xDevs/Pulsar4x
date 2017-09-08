@@ -264,7 +264,7 @@ namespace Pulsar4X.ECSLib
 
         public static long RemainingCapacity(CargoStorageDB cargo, Guid typeID)
         {
-            long capacity = cargo.CargoCapicity[typeID];
+            long capacity = cargo.MaxCapacities[typeID];
             long storedWeight = NetWeight(cargo, typeID);
             return capacity - storedWeight;
         }
@@ -321,7 +321,7 @@ namespace Pulsar4X.ECSLib
         internal static void ReCalcCapacity(Entity parentEntity)
         {
             CargoStorageDB storageDB = parentEntity.GetDataBlob<CargoStorageDB>();
-            PrIwObsDict<Guid, long> totalSpace = storageDB.CargoCapicity;
+            PrIwObsDict<Guid, long> totalSpace = storageDB.MaxCapacities;
 
             List<KeyValuePair<Entity, PrIwObsList<Entity>>> StorageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
             foreach (var kvp in StorageComponents)

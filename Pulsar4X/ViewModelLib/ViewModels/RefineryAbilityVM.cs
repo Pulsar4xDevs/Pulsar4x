@@ -117,7 +117,7 @@ namespace Pulsar4X.ViewModel
         }
     }
 
-    public class RefineryAbilityVM : JobAbilityBaseVM<ColonyRefiningDB, RefineingJob>
+    public class RefineryAbilityVM : JobAbilityBaseVM<RefiningDB, RefineingJob>
     {
         public RefineryAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {

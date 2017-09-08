@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ViewModel
 {
-    public class ConstructionAbilityVM : JobAbilityBaseVM<ColonyConstructionDB, ConstructionJob>
+    public class ConstructionAbilityVM : JobAbilityBaseVM<ConstructionDB, ConstructionJob>
     {
         private FactionInfoDB FactionInfo { get { return _colonyEntity_.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>(); } }
 

@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -19,8 +18,8 @@ namespace Pulsar4X.ECSLib
         }
 
         [JsonIgnore]
-        public float Mass {
-            get { return (float)this.OwningEntity.GetDataBlob<MassVolumeDB>().Mass; } 
+        public int Mass {
+            get { return (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().Mass); } //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
         }
 
         [JsonIgnore]

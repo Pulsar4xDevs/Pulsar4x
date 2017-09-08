@@ -42,17 +42,17 @@ namespace Pulsar4X.ECSLib
 
             TechProcessor.ProcessSystem(manager, game);
 
-            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyMinesDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<MiningDB>())
             {
                 MineProcessor.MineResources(colonyEntity);
             }
-            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyRefiningDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<RefiningDB>())
             {
-                RefiningProcessor.RefineMaterials(colonyEntity, game);
+                RefiningProcessor.RefineMaterials(colonyEntity, game.StaticData.ProcessedMaterials);
             }
-            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyConstructionDB>())
+            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ConstructionDB>())
             {
-                ConstructionProcessor.ConstructStuff(colonyEntity, game);
+                ConstructionProcessor.ConstructStuff(colonyEntity);
             }
             foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
             {

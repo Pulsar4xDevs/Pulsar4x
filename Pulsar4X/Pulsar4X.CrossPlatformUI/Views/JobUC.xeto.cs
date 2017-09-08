@@ -32,14 +32,14 @@ namespace Pulsar4X.CrossPlatformUI.Views
         //}
 
 
-        public JobUC(JobVM<ColonyRefiningDB, RefineingJob> viewModel) : this()
+        public JobUC(JobVM<RefiningDB, RefineingJob> viewModel) : this()
         {
             DataContext = viewModel;
             //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;
             //Completed.Text = viewModel.Completed.ToString();
         }
 
-        public JobUC(JobVM<ColonyConstructionDB, ConstructionJob> viewModel) : this()
+        public JobUC(JobVM<ConstructionDB, ConstructionJob> viewModel) : this()
         {
             DataContext = viewModel;
             //PercentComplete.Value = (int)viewModel.ItemPercentRemaining;

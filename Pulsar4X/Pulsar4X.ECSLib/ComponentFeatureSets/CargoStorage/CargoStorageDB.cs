@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
@@ -11,63 +8,21 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Contains info on a ships cargo capicity.
     /// </summary>
-    public class CargoStorageDB : BaseDataBlob
+    public class CargoStorageDB : BaseDataBlob, ICreateViewmodel
     {
         [JsonProperty]
-        public PrIwObsDict<Guid, long> CargoCapicity { get; private set; } = new PrIwObsDict<Guid, long>();
+        internal Dictionary<Guid, CargoTypeStore> StoredCargos { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
 
-        //[JsonProperty]
-        public PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>> StoredEntities { get; private set; } = new PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>>();
-        //[JsonProperty]
-        public PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>> MinsAndMatsByCargoType { get; private set;} = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>();
-
-        [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
-        internal Dictionary<Guid, Guid> ItemToTypeMap;
-
-        [JsonIgnore] //don't store this in the savegame, we'll re-reference this OnDeserialised
-        private StaticDataStore _staticData;
-        
-
-        [OnDeserialized]
-        private void Deserialized(StreamingContext context)
-        {            
-            var game = (Game)context.Context;
-            ItemToTypeMap = game.StaticData.StorageTypeMap;
-            _staticData = game.StaticData; 
-        }
 
         public CargoStorageDB()
         {
         }
 
-        public CargoStorageDB(StaticDataStore staticDataStore)
-        {
-            ItemToTypeMap = staticDataStore.StorageTypeMap;
-        }
+
 
         public CargoStorageDB(CargoStorageDB cargoDB)
         {
-            CargoCapicity = new PrIwObsDict<Guid, long>(cargoDB.CargoCapicity);
-            MinsAndMatsByCargoType = new PrIwObsDict<Guid, PrIwObsDict<ICargoable, long>>(cargoDB.MinsAndMatsByCargoType);
-            StoredEntities = new PrIwObsDict<Guid, PrIwObsDict<Entity, PrIwObsList<Entity>>>(cargoDB.StoredEntities);
-            ItemToTypeMap = cargoDB.ItemToTypeMap; //note that this is not 'new', the dictionary referenced here is static and should be the same dictionary throughout the game.
-        }
-
-
-
-        /// <summary>
-        /// gives the cargoType of a given itemID
-        /// </summary>
-        /// <param name="itemID"></param>
-        /// <returns></returns>
-        public CargoTypeSD CargoType(Guid itemID)
-        {
-            return _staticData.CargoTypes[ItemToTypeMap[itemID]];
-        }
-
-        public Guid CargoTypeID(Guid itemID)
-        {
-            return ItemToTypeMap[itemID];
+            StoredCargos = new Dictionary<Guid, CargoTypeStore>(cargoDB.StoredCargos);
         }
 
         public override object Clone()
@@ -75,5 +30,43 @@ namespace Pulsar4X.ECSLib
             return new CargoStorageDB(this);
         }
 
+        IDBViewmodel ICreateViewmodel.CreateVM(Game game)
+        {
+            return new CargoStorageVM(game.StaticData);
+        }
+    }
+
+    internal class CargoTypeStore
+    {
+        //[JsonProperty]
+        /// <summary>
+        /// This is the CargoTypeSD.ID/ICargoable.CargoTypeID
+        /// </summary>
+        /// <value>The CargoType GUID.</value>
+        //internal Guid TypeGuid { get; set; } //irelevent since this is stored in a dictionary with this as a key. 
+
+        [JsonProperty]
+        internal long MaxCapacity { get; set; }
+
+        [JsonProperty]
+        internal long FreeCapacity { get; set; }
+
+        [JsonProperty]
+        /// <summary>
+        /// For Minerals etc: The key is the ICargoable.ID, and the value is the amount stored. 
+        /// For Entites the key is the designs ICargoable.ID and the value is the number of that design stored.
+        /// </summary>
+        /// <value>The item and amount.</value>
+        internal Dictionary<Guid, long> ItemsAndAmounts { get;} = new Dictionary<Guid, long>();
+    }
+
+    internal class CargoTypeStoreEntites : CargoTypeStore
+    {
+        [JsonProperty]
+        /// <summary>
+        /// This stores the specific Entites. 
+        /// </summary>
+        /// <value>The specific entites.</value>
+        internal List<Entity> SpecificEntites { get; } = new List<Entity>();
     }
 }

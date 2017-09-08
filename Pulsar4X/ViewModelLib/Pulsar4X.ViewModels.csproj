@@ -115,7 +115,6 @@
     <Compile Include="Helpers\ItemPair.cs" />
     <Compile Include="Helpers\RangeEnableObservibleCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModels\CargoStorageVM.cs" />
     <Compile Include="ViewModels\ComponentListVM.cs" />
     <Compile Include="ViewModels\LogViewerVM.cs" />
     <Compile Include="ViewModels\NewSpeciesVM.cs" />
@@ -155,6 +154,7 @@
     <Compile Include="ViewModels\SystemVM.cs" />
     <Compile Include="ViewModels\TimeControlVM.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
+    <Compile Include="ViewModels\Cargo\CargoStorageVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
@@ -172,5 +172,8 @@
   -->
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ViewModels\Cargo\" />
   </ItemGroup>
 </Project>

@@ -5,6 +5,29 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    public class RefineResourcesProcessor:IHotloopProcessor
+    {
+        Dictionary<Guid, ProcessedMaterialSD> ProcessedMaterials = new Dictionary<Guid, ProcessedMaterialSD>();
+
+        public RefineResourcesProcessor(Dictionary<Guid, ProcessedMaterialSD> processedMaterials)
+        {
+            ProcessedMaterials = processedMaterials;
+        }
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            RefiningProcessor.RefineMaterials(entity, ProcessedMaterials);
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            foreach(var entity in manager.GetAllEntitiesWithDataBlob<RefiningDB>()) 
+            {
+                ProcessEntity(entity, deltaSeconds);
+            }
+        }
+    }
+
     public static class RefiningProcessor
     {
 
@@ -12,10 +35,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// TODO: refineing rates should also limit the amount that can be refined for a specific mat each tick. 
         /// </summary>
-        internal static void RefineMaterials(Entity colony, Game game)
+        internal static void RefineMaterials(Entity colony, Dictionary<Guid, ProcessedMaterialSD> processedMaterials)
         {
             CargoStorageDB stockpiles = colony.GetDataBlob<CargoStorageDB>();
-            ColonyRefiningDB refiningDB = colony.GetDataBlob<ColonyRefiningDB>();
+            RefiningDB refiningDB = colony.GetDataBlob<RefiningDB>();
+  
             int RefineryPoints = refiningDB.PointsPerTick;
 
             for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
@@ -23,7 +47,7 @@ namespace Pulsar4X.ECSLib
                 if (RefineryPoints > 0)
                 {
                     var job = refiningDB.JobBatchList[jobIndex];
-                    ProcessedMaterialSD material = game.StaticData.ProcessedMaterials[job.ItemGuid];
+                    ProcessedMaterialSD material = processedMaterials[job.ItemGuid];
                     Dictionary<Guid, int> costs = new Dictionary<Guid, int>(material.RawMineralCosts);
                     if(material.RefinedMateraialsCosts != null)
                         costs.Concat(new Dictionary<Guid, int>(material.RefinedMateraialsCosts));
@@ -120,7 +144,7 @@ namespace Pulsar4X.ECSLib
                     maxPoints = p;
             }
 
-            var refining = colonyEntity.GetDataBlob<ColonyRefiningDB>();
+            var refining = colonyEntity.GetDataBlob<RefiningDB>();
             refining.RefiningRates = rates;
             refining.PointsPerTick = maxPoints;
         }
@@ -135,7 +159,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void AddJob(StaticDataStore staticData, Entity colonyEntity, RefineingJob job)
         {
-            ColonyRefiningDB refiningDB = colonyEntity.GetDataBlob<ColonyRefiningDB>();
+            RefiningDB refiningDB = colonyEntity.GetDataBlob<RefiningDB>();
             lock (refiningDB.JobBatchList) //prevent threaded race conditions
             {
                 //check if the job materialguid is valid, then add it if so.

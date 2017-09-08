@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
             get { return GameLoop.GameGlobalDateTime; }
         }
 
-        internal ProcessorManager ProcessorManager = new ProcessorManager();
+        internal ProcessorManager ProcessorManager; 
         
         /// <summary>
         /// List of StarSystems currently in the game.
@@ -93,6 +93,7 @@ namespace Pulsar4X.ECSLib
             GameLoop = new TimeLoop(this);
             EventLog = new EventLog(this);
             GlobalManager = new EntityManager(this, true);
+            ProcessorManager = new ProcessorManager(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()

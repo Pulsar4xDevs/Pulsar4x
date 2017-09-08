@@ -5,13 +5,30 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+
+    public class ConstructEntitiesProcessor : IHotloopProcessor
+    {
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            ConstructionProcessor.ConstructStuff(entity);
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            foreach(var entity in manager.GetAllEntitiesWithDataBlob<ConstructionDB>()) 
+            {
+                ProcessEntity(entity, deltaSeconds);
+            }
+        }
+    }
+
     public static class ConstructionProcessor
     {
-        internal static void ConstructStuff(Entity colony, Game game)
+        internal static void ConstructStuff(Entity colony)
         {
             CargoStorageDB stockpile = colony.GetDataBlob<CargoStorageDB>();
 
-            var colonyConstruction = colony.GetDataBlob<ColonyConstructionDB>();
+            var colonyConstruction = colony.GetDataBlob<ConstructionDB>();
             var factionInfo = colony.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
 
 
@@ -62,7 +79,7 @@ namespace Pulsar4X.ECSLib
 
         private static void BatchJobItemComplete(Entity colonyEntity, CargoStorageDB storage, ConstructionJob batchJob, ComponentInfoDB designInfo)
         {
-            var colonyConstruction = colonyEntity.GetDataBlob<ColonyConstructionDB>();
+            var colonyConstruction = colonyEntity.GetDataBlob<ConstructionDB>();
             batchJob.NumberCompleted++;
             batchJob.PointsLeft = designInfo.BuildPointCost;
             batchJob.MineralsRequired = designInfo.MinerialCosts;
@@ -143,14 +160,14 @@ namespace Pulsar4X.ECSLib
             }
 
 
-            colonyEntity.GetDataBlob<ColonyConstructionDB>().ConstructionRates = typeRates;
+            colonyEntity.GetDataBlob<ConstructionDB>().ConstructionRates = typeRates;
             int maxPoints = 0;
             foreach (int p in typeRates.Values)
             {
                 if (p > maxPoints)
                     maxPoints = p;
             }
-            colonyEntity.GetDataBlob<ColonyConstructionDB>().PointsPerTick = maxPoints;
+            colonyEntity.GetDataBlob<ConstructionDB>().PointsPerTick = maxPoints;
         }
 
 
@@ -164,7 +181,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void AddJob(Entity colonyEntity, ConstructionJob job)
         {
-            var constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
+            var constructingDB = colonyEntity.GetDataBlob<ConstructionDB>();
             var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
@@ -189,7 +206,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void ChangeJobPriority(Entity colonyEntity, ConstructionJob job, int delta)
         {
-            var constructingDB = colonyEntity.GetDataBlob<ColonyConstructionDB>();
+            var constructingDB = colonyEntity.GetDataBlob<ConstructionDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //first check that the job does still exsist in the list.

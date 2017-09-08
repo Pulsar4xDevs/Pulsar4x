@@ -305,10 +305,10 @@
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageAtbDB.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\StorageSpaceProcessor.cs" />
     <Compile Include="ComponentFeatureSets\MineResources\MineResourcesAtbDB.cs" />
-    <Compile Include="ComponentFeatureSets\MineResources\ColonyMineingDB.cs" />
+    <Compile Include="ComponentFeatureSets\MineResources\MineingDB.cs" />
     <Compile Include="ComponentFeatureSets\MineResources\MineProcessor.cs" />
     <Compile Include="ComponentFeatureSets\RefineResources\RefiningProcessor.cs" />
-    <Compile Include="ComponentFeatureSets\RefineResources\ColonyRefiningDB.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefiningDB.cs" />
     <Compile Include="ComponentFeatureSets\RefineResources\RefineResourcesAtbDB.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\EnginePowerAtbDB.cs" />
     <Compile Include="ComponentFeatureSets\SimpleBeamWeapon\BeamFireControlAtbDB.cs" />
@@ -319,10 +319,21 @@
     <Compile Include="ComponentFeatureSets\TranslationMove\ShipMovementProcessor.cs" />
     <Compile Include="ComponentFeatureSets\SimpleBeamWeapon\WeaponProcessor.cs" />
     <Compile Include="ComponentFeatureSets\Research\TechProcessor.cs" />
-    <Compile Include="ComponentFeatureSets\Research\ColonyResearchDB.cs" />
-    <Compile Include="ComponentFeatureSets\Construction\ColonyConstructionDB.cs" />
+    <Compile Include="ComponentFeatureSets\Research\ResearchPointsDB.cs" />
+    <Compile Include="ComponentFeatureSets\Construction\ConstructionDB.cs" />
     <Compile Include="ComponentFeatureSets\Research\FactionTechDB.cs" />
     <Compile Include="ComponentFeatureSets\Construction\ConstructionAtbDB.cs" />
+    <Compile Include="Orders\IGameCommand.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoTransferDB.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoTransferProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoOrdersVM.cs" />
+    <Compile Include="Entity\EntityVM.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoLoadOrderCommand.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageVM.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoItemVM.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeStoreVM.cs" />
+    <Compile Include="ViewModels\MainVM.cs" />
+    <Compile Include="ViewModels\NewGameOptionsVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
@@ -333,6 +344,7 @@
     <Folder Include="ComponentFeatureSets\SimpleBeamWeapon\" />
     <Folder Include="ComponentFeatureSets\Research\" />
     <Folder Include="ComponentFeatureSets\Construction\" />
+    <Folder Include="ViewModels\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
