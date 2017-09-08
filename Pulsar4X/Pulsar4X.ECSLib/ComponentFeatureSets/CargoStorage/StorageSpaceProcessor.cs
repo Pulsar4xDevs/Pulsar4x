@@ -321,9 +321,36 @@ namespace Pulsar4X.ECSLib
         }
         */
 
-        private static void DropRandomCargo(CargoStorageDB storeageDB, long weightToLoose)
+        /// <summary>
+        /// psudo randomly drops cargo. this could be made a bit better maybe... but should do for now. 
+        /// </summary>
+        /// <param name="typeStore"></param>
+        /// <param name="weightToLoose"></param>
+        private static void DropRandomCargo(CargoTypeStore typeStore, long weightToLoose)
         {
+            int n = typeStore.ItemsAndAmounts.Count();
+            int seed = n;
+            var prng = new Random(seed);
+            List<Guid> indexes = typeStore.ItemsAndAmounts.Keys.ToList();          
             
+            while (n > 1) {  
+                n--;  
+                int k = prng.Next(n + 1);  
+                Guid value = indexes[k];  
+                indexes[k] = indexes[n];  
+                indexes[n] = value;  
+            }
+
+            int i = 0;
+            while (weightToLoose > 0)
+            {
+                long amountStored = typeStore.ItemsAndAmounts[indexes[i]];
+                long removeAmount = Math.Min(amountStored, weightToLoose);
+                //TODO: create a new entity for the dropped cargo so it can be collected.
+                typeStore.ItemsAndAmounts[indexes[i]] -= removeAmount;
+                weightToLoose -= removeAmount;
+                i++;
+            }
         }
 
 
@@ -357,21 +384,26 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in calculatedMaxStorage)
             {
                 Guid cargoTypeID = kvp.Key;
-                long alowableSpace = kvp.Value;
+                long validMaxCapacity = kvp.Value;
+                CargoTypeStore typeStore = storageDBStoredCargos[kvp.Key];
                 
                 if (!storageDBStoredCargos.ContainsKey(cargoTypeID))
                 {
                     var newStore = new CargoTypeStore();
-                    newStore.MaxCapacity = alowableSpace;
+                    newStore.MaxCapacity = validMaxCapacity;
                     storageDBStoredCargos.Add(cargoTypeID, newStore);                                        
                 }
-                else if (storageDBStoredCargos[cargoTypeID].MaxCapacity != alowableSpace)
-                {
-                    storageDBStoredCargos[cargoTypeID].MaxCapacity = alowableSpace;
-                    long overWeight = storageDBStoredCargos[cargoTypeID].FreeCapacity - alowableSpace;
-                    if (overWeight > 0)
-                    {    
-                        DropRandomCargo(parentEntity.GetDataBlob<CargoStorageDB>(),  overWeight);
+                
+                else if (typeStore.MaxCapacity != validMaxCapacity)
+                {    
+                    long usedSpace = typeStore.MaxCapacity - typeStore.FreeCapacity;
+                    
+                    typeStore.MaxCapacity = validMaxCapacity;
+
+                    if (!(usedSpace <= validMaxCapacity))
+                    {
+                        long overweight = usedSpace - validMaxCapacity;
+                        DropRandomCargo(typeStore, overweight);
                     }
                 }
             }
