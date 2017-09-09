@@ -214,18 +214,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        /// <summary>
-        /// must be mins or mats
-        /// </summary>
-        /// <param name="fromCargo"></param>
-        /// <param name="amounts">must be mins or mats</param>
-        internal static void RemoveResources(CargoStorageDB fromCargo, Dictionary<Guid, int> amounts)
-        {
-            foreach (var item in amounts)
-            {
-                SubtractValue(fromCargo, item.Key, item.Value);
-            }
-        }
+
 
         /// <summary>
         /// checks the toCargo and transferes the item if there is enough space.
@@ -305,24 +294,68 @@ namespace Pulsar4X.ECSLib
             return (int)Math.Round(storedWeight, MidpointRounding.AwayFromZero);
         }
 
-        public static bool HasReqiredItems(CargoStorageDB stockpile, Dictionary<Guid, int> costs)
-        {
+
+        */
+
+        /// <summary>
+        /// checks if the storage contains all the items and amounts in a given dictionary. 
+        /// </summary>
+        /// <param name="stockpile"></param>
+        /// <param name="costs"></param>
+        /// <returns></returns>
+        public static bool HasReqiredItems(CargoStorageDB stockpile, Dictionary<ICargoable, int> costs)
+        {            
             if (costs == null)
                 return true;
             else
             {
                 foreach (var costitem in costs)
                 {
-                    if (costitem.Value >= GetAmountOf(stockpile, costitem.Key))
+                    if (costitem.Value >= stockpile.StoredCargos[costitem.Key.CargoTypeID].ItemsAndAmounts[costitem.Key.ID])
                         return false;
                 }
             }
             return true;
         }
-        */
+        
+        /// <summary>
+        /// must be mins or mats DOES NOT CHECK Availiblity
+        /// will throw normal dictionary exceptions.
+        /// </summary>
+        /// <param name="fromCargo"></param>
+        /// <param name="amounts">must be mins or mats</param>
+        internal static void RemoveResources(CargoStorageDB fromCargo, Dictionary<ICargoable, int> amounts)
+        {
+            
+            foreach (var kvp in amounts)
+            {
+                RemoveCargo(fromCargo, kvp.Key, kvp.Value);
+            }
+        }
+        
+        /// <summary>
+        /// Does not check if cargo or cargotype exsists. will throw normal dictionary exptions if you try.
+        /// just removes the amount from store and updates the free capacity
+        /// </summary>
+        /// <param name="storeDB"></param>
+        /// <param name="item"></param>
+        /// <param name="amount"></param>
+        internal static void RemoveCargo(CargoStorageDB storeDB, ICargoable item, long amount)
+        {
+            storeDB.StoredCargos[item.CargoTypeID].ItemsAndAmounts[item.ID] -= amount;
+            storeDB.StoredCargos[item.CargoTypeID].FreeCapacity += amount;
+        }
+
+
+        internal static void AddCargo(CargoStorageDB storeDB, ICargoable item, long amount)
+        {
+            storeDB.StoredCargos[item.CargoTypeID].ItemsAndAmounts[item.ID] += amount;
+            storeDB.StoredCargos[item.CargoTypeID].FreeCapacity -= amount;
+        }
 
         /// <summary>
         /// psudo randomly drops cargo. this could be made a bit better maybe... but should do for now. 
+        /// TODO: actualy this is compleatly broken. it's removing amount instead of weight.
         /// </summary>
         /// <param name="typeStore"></param>
         /// <param name="weightToLoose"></param>

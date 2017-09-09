@@ -3,7 +3,7 @@ using Eto.Forms;
 using Eto.Serialization.Xaml;
 
 using Pulsar4X.ECSLib;
-using Pulsar4X.ViewModel;
+//using Pulsar4X.ViewModel;
 
 namespace Pulsar4X.CrossPlatformUI.Views {
 	public class NewGame : Dialog {
@@ -20,12 +20,12 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 
 		#region ViewModels
 		private NewGameOptionsVM new_game_options;
-		private GameVM game;
+		private GameVM _gameVM;
 		#endregion
 
-		public NewGame(GameVM _game) {
+		public NewGame(GameVM gameVM) {
 			XamlReader.Load(this);
-			game = _game;
+			_gameVM = gameVM;
 			new_game_options = new NewGameOptionsVM();
 			DataContext = new_game_options;
 			BindControls();
@@ -73,7 +73,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		}
 
 		protected void OkButton_Click(object sender, EventArgs e) {
-			game.CreateGame(new_game_options);
+			_gameVM.CreateGame(new_game_options);
 			Close();
 		}
 		protected void CancelButton_Click(object sender, EventArgs e) {

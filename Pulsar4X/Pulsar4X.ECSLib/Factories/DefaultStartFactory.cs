@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Pulsar4X.ECSLib
 {
@@ -70,11 +71,13 @@ namespace Pulsar4X.ECSLib
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Ensuing Calm");
-            StorageSpaceProcessor.AddItemToCargo(ship1.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 200000000000);
-            StorageSpaceProcessor.AddItemToCargo(ship2.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 200000000000);
+            var fuel = NameLookup.TryGetMaterialSD(game, "SorumFuel");
+            StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+            StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+
 
             Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, earth, sol, "Prevailing Stillness");
-            StorageSpaceProcessor.AddItemToCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), new Guid("33e6ac88-0235-4917-a7ff-35c8886aad3a"), 2000000000);
+            StorageSpaceProcessor.AddCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
             sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());
             sol.SystemManager.SetDataBlob(ship2.ID, new TransitableDB());

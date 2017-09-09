@@ -1,7 +1,7 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.ECSLib/ViewModels/MainVM.cs">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ViewModels/MainVM.cs" Line="44" Column="13" />
+      <File FileName="Pulsar4X.ECSLib/ViewModels/MainVM.cs" Line="47" Column="10" />
       <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoStorageVM.cs" Line="6" Column="26" />
       <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="33" Column="11" />
       <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoStorageDB.cs" Line="20" Column="9" />

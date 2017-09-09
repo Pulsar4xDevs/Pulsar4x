@@ -2,7 +2,7 @@
 using Eto.Forms;
 using System;
 using System.Threading.Tasks;
-using Pulsar4X.ViewModel;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.CrossPlatformUI.Commands
 {

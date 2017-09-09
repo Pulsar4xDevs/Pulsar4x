@@ -1,28 +1,67 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.ECSLib
 {
-    public class MainVM
+    public class GameVM : ViewModelBase
     {
 
         Entity _currentFactionEntity;
-        Game Game { get; set; }
 
+        internal Game Game { get; set; }
+        public bool HasGame => Game != null;
+        
         public string CurrentFactionName { get; set; } = "";
         public string StatusText { get; set; } = "";
 
         public List<EntityVM> ViewedEntites { get; set; } = new List<EntityVM>(); 
 
-        public MainVM()
+        
+        ObservableCollection<SystemVM> _systems = new ObservableCollection<SystemVM>();
+        Dictionary<Guid, SystemVM> _systemDictionary = new Dictionary<Guid, SystemVM>();
+        
+        public GameVM()
         {
+            _systems = new ObservableCollection<SystemVM>();
+            _systemDictionary = new Dictionary<Guid, SystemVM>();
+        }
+        public void Refresh(bool partialRefresh = false)
+        {
+            foreach (var system in _systems)
+            {
+                system.Refresh();
+            }
         }
 
+        public SystemVM GetSystem(Guid bodyGuid)
+        {
+            Entity bodyEntity;
+            Guid rootGuid = new Guid();
+            if (_systemDictionary.ContainsKey(bodyGuid))
+                rootGuid = bodyGuid;
 
+            else if (Game.GlobalManager.FindEntityByGuid(bodyGuid, out bodyEntity))
+            {
+                if (bodyEntity.HasDataBlob<OrbitDB>())
+                {
+                    rootGuid = bodyEntity.GetDataBlob<OrbitDB>().ParentDB.Root.Guid;
+                }
+            }
+            else throw new GuidNotFoundException(bodyGuid);
 
-
+            if (!_systemDictionary.ContainsKey(rootGuid))
+            {
+                SystemVM systemVM = SystemVM.Create(this, rootGuid);
+                _systems.Add(systemVM);
+                _systemDictionary.Add(rootGuid, systemVM);
+            }
+            return _systemDictionary[rootGuid];
+        }
+        
         public void CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";

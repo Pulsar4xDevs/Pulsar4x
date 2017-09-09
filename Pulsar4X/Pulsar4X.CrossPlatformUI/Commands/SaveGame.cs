@@ -4,6 +4,8 @@ using Pulsar4X.ViewModel;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using Pulsar4X.ECSLib;
+using GameVM = Pulsar4X.ECSLib.GameVM;
 
 namespace Pulsar4X.CrossPlatformUI.Commands
 {
@@ -20,10 +22,10 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             ToolBarText = "Save Game";
             Shortcut = Keys.F6;
             Enabled = _gameVM.HasGame;
-            _gameVM.PropertyChanged += _gameVM_PropertyChanged;
+            _gameVM.PropertyChanged += GameVMPropertyChanged;
         }
 
-        private void _gameVM_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void GameVMPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "HasGame")
             {

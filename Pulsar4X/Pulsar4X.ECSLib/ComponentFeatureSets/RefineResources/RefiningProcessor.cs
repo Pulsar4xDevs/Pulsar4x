@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
@@ -39,7 +40,7 @@ namespace Pulsar4X.ECSLib
         {
             CargoStorageDB stockpiles = colony.GetDataBlob<CargoStorageDB>();
             RefiningDB refiningDB = colony.GetDataBlob<RefiningDB>();
-  
+            StaticDataStore staticData = colony.Manager.Game.StaticData;
             int RefineryPoints = refiningDB.PointsPerTick;
 
             for (int jobIndex = 0; jobIndex < refiningDB.JobBatchList.Count; jobIndex++)
@@ -48,17 +49,25 @@ namespace Pulsar4X.ECSLib
                 {
                     var job = refiningDB.JobBatchList[jobIndex];
                     ProcessedMaterialSD material = processedMaterials[job.ItemGuid];
-                    Dictionary<Guid, int> costs = new Dictionary<Guid, int>(material.RawMineralCosts);
+                    var costs = new Dictionary<Guid, int>(material.RawMineralCosts);
                     if(material.RefinedMateraialsCosts != null)
                         costs.Concat(new Dictionary<Guid, int>(material.RefinedMateraialsCosts));
+                    
+                    Dictionary<ICargoable, int> cargoablecosts = new Dictionary<ICargoable, int>();
+                    foreach (var kvp in material.RawMineralCosts)
+                    {
+                        ICargoable cargoItem = staticData.Minerals[kvp.Key];
+                        cargoablecosts.Add(cargoItem, kvp.Value);
+                    }
+                    
                     while (job.NumberCompleted < job.NumberOrdered && job.PointsLeft > 0)
                     {
                         if (job.PointsLeft == material.RefineryPointCost)
                         {
                             //consume all ingredients for this job on the first point use. 
-                            if (StorageSpaceProcessor.HasReqiredItems(stockpiles, costs))
+                            if (StorageSpaceProcessor.HasReqiredItems(stockpiles, cargoablecosts))
                             {
-                                StorageSpaceProcessor.RemoveResources(stockpiles, costs);
+                                StorageSpaceProcessor.RemoveResources(stockpiles, cargoablecosts);
                             }
                             else
                             {
@@ -75,7 +84,7 @@ namespace Pulsar4X.ECSLib
                         if (job.PointsLeft == 0)
                         {
                             job.NumberCompleted++; //complete job, 
-                            StorageSpaceProcessor.AddItemToCargo(stockpiles, material.ID, material.OutputAmount); //and add the product to the stockpile                        
+                            StorageSpaceProcessor.AddCargo(stockpiles, material, material.OutputAmount); //and add the product to the stockpile                        
                             job.PointsLeft = material.RefineryPointCost; //and reset the points left for the next job in the batch.
                         }
                         

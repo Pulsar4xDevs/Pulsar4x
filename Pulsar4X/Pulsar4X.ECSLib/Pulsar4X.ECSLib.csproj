@@ -144,6 +144,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComponentFeatureSets\Construction\JobVM.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefineryAbilityVM.cs" />
     <Compile Include="DataBlobs\AsteroidDamageDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CloakAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CommandAtbDB.cs" />
@@ -172,6 +174,7 @@
     <Compile Include="Helpers\CargoDictionary.cs" />
     <Compile Include="Helpers\EntityManipulation.cs" />
     <Compile Include="Helpers\CollectionChangedHelpers.cs" />
+    <Compile Include="Helpers\NameLookup.cs" />
     <Compile Include="Helpers\ObserviableConcurrentDictionary.cs" />
     <Compile Include="ManagerSubPulse.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
@@ -242,6 +245,12 @@
     <Compile Include="Processors\ResourceConsumptionProcesor.cs" />
     <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="StarSystem\PlanetVM.cs" />
+    <Compile Include="StarSystem\StarInfoDB.cs" />
+    <Compile Include="StarSystem\StarSystem.cs" />
+    <Compile Include="StarSystem\StarVM.cs" />
+    <Compile Include="StarSystem\SystemBodyInfoDB.cs" />
+    <Compile Include="StarSystem\SystemVM.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="StaticData\CargoTypeSD.cs" />
@@ -254,8 +263,6 @@
     <Compile Include="DataBlobs\FactionInfoDB.cs" />
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
-    <Compile Include="DataBlobs\StarInfoDB.cs" />
-    <Compile Include="DataBlobs\SystemBodyInfoDB.cs" />
     <Compile Include="DataBlobs\ColonyInfoDB.cs" />
     <Compile Include="DataBlobs\PositionDB.cs" />
     <Compile Include="DataBlobs\RuinsDB.cs" />
@@ -290,7 +297,6 @@
     <Compile Include="Processors\SpeciesProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializationManager.cs" />
-    <Compile Include="StarSystem.cs" />
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
     <Compile Include="StaticData\ComponentSD.cs" />
     <Compile Include="StaticData\PlayerSD.cs" />
@@ -332,8 +338,13 @@
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageVM.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoItemVM.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeStoreVM.cs" />
-    <Compile Include="ViewModels\MainVM.cs" />
+    <Compile Include="ViewModels\Commands.cs" />
+    <Compile Include="ViewModels\GameVM.cs" />
+    <Compile Include="ViewModels\JobAbilityBaseVM.cs" />
     <Compile Include="ViewModels\NewGameOptionsVM.cs" />
+    <Compile Include="ViewModels\RelayCommand.cs" />
+    <Compile Include="ViewModels\TimeControlVM.cs" />
+    <Compile Include="ViewModels\ViewModelBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

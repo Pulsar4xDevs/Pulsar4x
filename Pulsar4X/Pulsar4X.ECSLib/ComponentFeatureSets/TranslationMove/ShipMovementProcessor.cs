@@ -85,10 +85,10 @@ namespace Pulsar4X.ECSLib
                         double fuelMaxDistanceAU;
 
                         double currentSpeedLength = currentSpeed.Length();
-
+                        StaticDataStore staticData = manager.Game.StaticData;
                         CargoStorageDB storedResources = shipEntity.GetDataBlob<CargoStorageDB>();                       
                         Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerKM;
-                        int maxKMeters = CalcMaxFuelDistance(shipEntity);
+                        double maxKMeters = CalcMaxFuelDistance(shipEntity);
 
                         if (order.PositionTarget == null)
                             targetPos = order.Target.GetDataBlob<PositionDB>().AbsolutePosition;
@@ -147,32 +147,37 @@ namespace Pulsar4X.ECSLib
                         }
                         positionDB.AbsolutePosition = newPos;
                         int kMetersMoved = (int)(newDistanceDelta * GameConstants.Units.KmPerAu);
-                        Dictionary<Guid, int> fuelAmounts = new Dictionary<Guid, int>();
                         foreach (var item in propulsionDB.FuelUsePerKM)
                         {
-                            fuelAmounts.Add(item.Key, (int)item.Value * kMetersMoved);
-                        }
-                        StorageSpaceProcessor.RemoveResources(storedResources, fuelAmounts);
-                        
+                            var fuel = staticData.GetICargoable(item.Key);
+                            StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * kMetersMoved));
+                        }                        
                     }                   
                 }               
             }           
         }
 
-        public static int CalcMaxFuelDistance(Entity shipEntity)
+        public static double CalcMaxFuelDistance(Entity shipEntity)
         {
             CargoStorageDB storedResources = shipEntity.GetDataBlob<CargoStorageDB>();
             PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
             StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
-            ICargoable resource = (ICargoable)staticData.FindDataObjectUsingID(propulsionDB.FuelUsePerKM.Keys.First());
-            int kmeters = (int)(StorageSpaceProcessor.GetAmountOf(storedResources, resource.ID) / propulsionDB.FuelUsePerKM[resource.ID]); 
-            foreach (var usageKVP in propulsionDB.FuelUsePerKM)
+            ICargoable fuelResource;
+            double distance;
+            foreach (var fuelAndUsage in propulsionDB.FuelUsePerKM)
             {
-                resource = (ICargoable)staticData.FindDataObjectUsingID(usageKVP.Key);
-                if (kmeters > (StorageSpaceProcessor.GetAmountOf(storedResources, usageKVP.Key) / usageKVP.Value))
-                    kmeters = (int)(StorageSpaceProcessor.GetAmountOf(storedResources, usageKVP.Key) / usageKVP.Value);
+                fuelResource = staticData.GetICargoable(fuelAndUsage.Key);
+                var usePerKm = fuelAndUsage.Value;
+                if (storedResources.StoredCargos.ContainsKey(fuelResource.CargoTypeID))
+                {
+                    if (storedResources.StoredCargos[fuelResource.CargoTypeID].ItemsAndAmounts.ContainsKey(fuelResource.ID))
+                    {
+                        long fuelStored = storedResources.StoredCargos[fuelResource.CargoTypeID].ItemsAndAmounts[fuelResource.CargoTypeID];
+                        distance += fuelStored / fuelAndUsage.Value;
+                    }
+                }
             }
-            return kmeters;
+            return distance;
         }
 
         public static void CalcFuelUsePerMeter(Entity entity)

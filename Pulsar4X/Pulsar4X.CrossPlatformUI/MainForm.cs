@@ -4,15 +4,15 @@ using Eto.Drawing;
 using Eto.Forms;
 using Pulsar4X.CrossPlatformUI.Commands;
 using Pulsar4X.CrossPlatformUI.Views;
-using Pulsar4X.ViewModel;
 using System.Threading;
+using GameVM = Pulsar4X.ECSLib.GameVM;
 using NewGame = Pulsar4X.CrossPlatformUI.Commands.NewGame;
 
 namespace Pulsar4X.CrossPlatformUI
 {
     public class MainForm : Form
     {
-        private readonly GameVM _gameVM;
+        private readonly GameVM  _gameVM;
 
         private static Command savegame;
 

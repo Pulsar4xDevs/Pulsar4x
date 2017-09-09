@@ -1,9 +1,6 @@
-﻿using Eto.Drawing;
-using Eto.Forms;
+﻿using Eto.Forms;
 using Eto.Serialization.Xaml;
-
-using Pulsar4X.ViewModel;
-using System;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.CrossPlatformUI.Views {
     public class MainWindow : Panel {
@@ -35,11 +32,11 @@ namespace Pulsar4X.CrossPlatformUI.Views {
         /// <summary>
         /// Initializes a new instance of the MainWindow view
         /// </summary>
-        public MainWindow(GameVM game) {
-            _gameVM = game;
+        public MainWindow(GameVM gameVM) {
+            _gameVM = gameVM;
             DataContext = _gameVM;
             XamlReader.Load(this);
-            _gameVM.PropertyChanged += _gameVM_PropertyChanged;
+            _gameVM.PropertyChanged += GameVMPropertyChanged;
             _gameVM.TimeControl.PropertyChanged += _timeControl_PropertyChanged;
         }
         #endregion
@@ -48,7 +45,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
         /// <summary>
         /// Enables/Disables Timing control, when game has loaded/unloaded;
         /// </summary>
-        private void _gameVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void GameVMPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "HasGame")
             {

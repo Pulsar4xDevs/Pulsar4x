@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
 {
     public class NewGameOptionsVM
     {
-        private MainVM _gameVM;
+        private GameVM _gameVM;
 
         public string GmPassword { get; set; }
 
@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public static NewGameOptionsVM Create(MainVM gameVM)
+        public static NewGameOptionsVM Create(GameVM gameVM)
         {
             NewGameOptionsVM optionsVM = new NewGameOptionsVM();
             optionsVM._gameVM = gameVM;
