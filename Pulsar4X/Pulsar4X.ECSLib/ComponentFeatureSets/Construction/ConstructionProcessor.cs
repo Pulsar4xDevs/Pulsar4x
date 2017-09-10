@@ -116,11 +116,28 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="stockpile"></param>
         /// <param name="toUse"></param>
-        private static void ConsumeResources(CargoStorageDB stockpile, IDictionary<Guid, int> toUse)
+        private static void ConsumeResources(CargoStorageDB fromCargo, IDictionary<Guid, int> toUse)
         {   
             foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
             {             
-                int amountUsedThisTick = (int)StorageSpaceProcessor.SubtractValue(stockpile, kvp.Key, kvp.Value);
+                ICargoable cargoItem = fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
+                Guid cargoTypeID = cargoItem.CargoTypeID;
+                int amountUsedThisTick = 0;
+                if (fromCargo.StoredCargoTypes.ContainsKey(cargoTypeID))
+                {
+                    if (fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts.ContainsKey(cargoItem.ID))
+                    {
+                        if (fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts[cargoItem.ID] >= kvp.Value)
+                        {
+                            amountUsedThisTick = kvp.Value;
+                        }
+                        else
+                        {
+                            amountUsedThisTick = (int)fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts[cargoItem.ID];
+                        }
+                    }
+                }
+                StorageSpaceProcessor.RemoveCargo(fromCargo, cargoItem, amountUsedThisTick);            
                 toUse[kvp.Key] -= amountUsedThisTick;                      
             }         
         }

@@ -420,8 +420,8 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid, long> calculatedMaxStorage = new Dictionary<Guid, long>();
             
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> StorageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
-            foreach (var kvp in StorageComponents) //first loop through the component types
+            List<KeyValuePair<Entity, PrIwObsList<Entity>>> storageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
+            foreach (var kvp in storageComponents) //first loop through the component types
             {
                 Entity componentDesign = kvp.Key;
                 Guid cargoTypeID = componentDesign.GetDataBlob<CargoStorageAtbDB>().CargoTypeGuid;

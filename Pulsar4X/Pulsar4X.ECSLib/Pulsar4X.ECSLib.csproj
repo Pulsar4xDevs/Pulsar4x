@@ -339,6 +339,7 @@
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoItemVM.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeStoreVM.cs" />
     <Compile Include="ViewModels\Commands.cs" />
+    <Compile Include="ViewModels\DictionaryVM.cs" />
     <Compile Include="ViewModels\GameVM.cs" />
     <Compile Include="ViewModels\JobAbilityBaseVM.cs" />
     <Compile Include="ViewModels\NewGameOptionsVM.cs" />
