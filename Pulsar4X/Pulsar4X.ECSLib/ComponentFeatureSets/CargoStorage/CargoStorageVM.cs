@@ -10,9 +10,9 @@ namespace Pulsar4X.ECSLib
         CargoStorageDB _storageDatablob;
         StaticDataStore _staticData;
 
-        Dictionary<Guid, CargoTypeStoreVM> _cargoStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
-        public ObservableCollection<CargoTypeStoreVM> CargoStores { get; } = new ObservableCollection<CargoTypeStoreVM>();
-
+        Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
+        public ObservableCollection<CargoTypeStoreVM> CargoResourceStores { get; } = new ObservableCollection<CargoTypeStoreVM>();
+        
         internal CargoStorageVM(StaticDataStore staticData)
         {
             _staticData = staticData;
@@ -20,19 +20,19 @@ namespace Pulsar4X.ECSLib
 
         public void Update()
         {
-            foreach(var kvp in _storageDatablob.StoredCargos) {
-                if(!_cargoStoresDict.ContainsKey(kvp.Key)) {
+            foreach(var kvp in _storageDatablob.StoredCargoTypes) {
+                if(!_cargoResourceStoresDict.ContainsKey(kvp.Key)) {
                     var newCargoTypeStoreVM = new CargoTypeStoreVM(_staticData, kvp.Key, kvp.Value);
-                    _cargoStoresDict.Add(kvp.Key, newCargoTypeStoreVM);
-                    CargoStores.Add(newCargoTypeStoreVM);
+                    _cargoResourceStoresDict.Add(kvp.Key, newCargoTypeStoreVM);
+                    CargoResourceStores.Add(newCargoTypeStoreVM);
                 }
-                _cargoStoresDict[kvp.Key].Update();
+                _cargoResourceStoresDict[kvp.Key].Update();
             }
 
-            foreach(var key in _cargoStoresDict.Keys.ToArray()) {
-                if(!_storageDatablob.StoredCargos.ContainsKey(key)) {
-                    CargoStores.Remove(_cargoStoresDict[key]);
-                    _cargoStoresDict.Remove(key);
+            foreach(var key in _cargoResourceStoresDict.Keys.ToArray()) {
+                if(!_storageDatablob.StoredCargoTypes.ContainsKey(key)) {
+                    CargoResourceStores.Remove(_cargoResourceStoresDict[key]);
+                    _cargoResourceStoresDict.Remove(key);
                 }
             }
         }

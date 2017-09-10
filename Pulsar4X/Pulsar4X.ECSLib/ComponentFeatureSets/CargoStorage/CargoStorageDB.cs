@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -11,21 +12,19 @@ namespace Pulsar4X.ECSLib
     public class CargoStorageDB : BaseDataBlob, ICreateViewmodel
     {
         /// <summary>
-        /// Key is CargoTypeID
+        /// Key is CargoTypeID (as defined by the ICargoable.CargoTypeID)
         /// </summary>
         [JsonProperty]
-        internal Dictionary<Guid, CargoTypeStore> StoredCargos { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
+        internal Dictionary<Guid, CargoTypeStore> StoredCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
 
 
         public CargoStorageDB()
         {
         }
 
-
-
         public CargoStorageDB(CargoStorageDB cargoDB)
         {
-            StoredCargos = new Dictionary<Guid, CargoTypeStore>(cargoDB.StoredCargos);
+            StoredCargoTypes = new Dictionary<Guid, CargoTypeStore>(cargoDB.StoredCargoTypes);
         }
 
         public override object Clone()
@@ -39,6 +38,9 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    /// <summary>
+    /// Lists items of the same CargoType, and the number of those items.
+    /// </summary>
     internal class CargoTypeStore
     {
         //[JsonProperty]
@@ -48,30 +50,23 @@ namespace Pulsar4X.ECSLib
         /// <value>The CargoType GUID.</value>
         //internal Guid TypeGuid { get; set; } //irelevent since this is stored in a dictionary with this as a key. 
 
+        /// <summary>
+        /// The Maximum that this entity can store of this type.
+        /// </summary>
         [JsonProperty]
         internal long MaxCapacity { get; set; }
 
+        /// <summary>
+        /// The amount of free space remaining.
+        /// </summary>
         [JsonProperty]
         internal long FreeCapacity { get; set; } 
-
         
-        /// <summary>
-        /// For Minerals etc: The key is the ICargoable.ID, and the value is the amount stored. 
-        /// For Entites the key is the designs ICargoable.ID and the value is the number of that design stored.
-        /// </summary>
-        /// <value>The item and amount.</value>
         [JsonProperty]
         internal Dictionary<Guid, long> ItemsAndAmounts { get;} = new Dictionary<Guid, long>();
-    }
-
-    internal class CargoTypeStoreEntites : CargoTypeStore
-    {
-        
-        /// <summary>
-        /// This stores the specific Entites. 
-        /// </summary>
-        /// <value>The specific entites.</value>
+         
         [JsonProperty]
-        internal List<Entity> SpecificEntites { get; } = new List<Entity>();
+        internal Dictionary<Guid,List<Entity>> SpecificEntites { get; } = new Dictionary<Guid, List<Entity>>();
+        
     }
 }

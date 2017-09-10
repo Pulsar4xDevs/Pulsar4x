@@ -17,12 +17,12 @@ namespace Pulsar4X.ECSLib
                 
                 Guid cargoTypeID = datablob.ItemToTranfer.CargoTypeID;
                 int itemMassPerUnit = datablob.ItemToTranfer.Mass; 
-                if(!datablob.CargoToDB.StoredCargos.ContainsKey(cargoTypeID)) 
-                    datablob.CargoToDB.StoredCargos.Add(cargoTypeID, new CargoTypeStore());
+                if(!datablob.CargoToDB.StoredCargoTypes.ContainsKey(cargoTypeID)) 
+                    datablob.CargoToDB.StoredCargoTypes.Add(cargoTypeID, new CargoTypeStore());
 
-                var toCargoTypeStore = datablob.CargoToDB.StoredCargos[cargoTypeID];        //reference to the cargoType store we're pushing to.
+                var toCargoTypeStore = datablob.CargoToDB.StoredCargoTypes[cargoTypeID];        //reference to the cargoType store we're pushing to.
                 var toCargoItemAndAmount = toCargoTypeStore.ItemsAndAmounts;                //reference to dictionary holding the cargo we want to send too
-                var fromCargoTypeStore = datablob.CargoFromDB.StoredCargos[cargoTypeID];    //reference to the cargoType store we're pulling from.
+                var fromCargoTypeStore = datablob.CargoFromDB.StoredCargoTypes[cargoTypeID];    //reference to the cargoType store we're pulling from.
                 var fromCargoItemAndAmount = fromCargoTypeStore.ItemsAndAmounts;            //reference to dictionary we want to pull cargo from. 
 
                 datablob.TransferRate = 100;//todo set transfer rates on cargostorageDB and get either an average or a math.min. probibly an average. 

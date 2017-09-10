@@ -306,7 +306,7 @@
     <Compile Include="StaticData\SystemGenSettingsSD.cs" />
     <Compile Include="StaticData\TechSD.cs" />
     <Compile Include="TimeLoop.cs" />
-    <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeDB.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoAbleTypeDB.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageDB.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageAtbDB.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\StorageSpaceProcessor.cs" />

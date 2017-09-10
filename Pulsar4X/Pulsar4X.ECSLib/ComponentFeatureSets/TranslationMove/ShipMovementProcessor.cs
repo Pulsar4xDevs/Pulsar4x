@@ -168,11 +168,11 @@ namespace Pulsar4X.ECSLib
             {
                 fuelResource = staticData.GetICargoable(fuelAndUsage.Key);
                 var usePerKm = fuelAndUsage.Value;
-                if (storedResources.StoredCargos.ContainsKey(fuelResource.CargoTypeID))
+                if (storedResources.StoredCargoTypes.ContainsKey(fuelResource.CargoTypeID))
                 {
-                    if (storedResources.StoredCargos[fuelResource.CargoTypeID].ItemsAndAmounts.ContainsKey(fuelResource.ID))
+                    if (storedResources.StoredCargoTypes[fuelResource.CargoTypeID].ItemsAndAmounts.ContainsKey(fuelResource.ID))
                     {
-                        long fuelStored = storedResources.StoredCargos[fuelResource.CargoTypeID].ItemsAndAmounts[fuelResource.CargoTypeID];
+                        long fuelStored = storedResources.StoredCargoTypes[fuelResource.CargoTypeID].ItemsAndAmounts[fuelResource.CargoTypeID];
                         distance += fuelStored / fuelAndUsage.Value;
                     }
                 }

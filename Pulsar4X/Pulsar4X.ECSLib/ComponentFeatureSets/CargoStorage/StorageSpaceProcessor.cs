@@ -311,7 +311,7 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var costitem in costs)
                 {
-                    if (costitem.Value >= stockpile.StoredCargos[costitem.Key.CargoTypeID].ItemsAndAmounts[costitem.Key.ID])
+                    if (costitem.Value >= stockpile.StoredCargoTypes[costitem.Key.CargoTypeID].ItemsAndAmounts[costitem.Key.ID])
                         return false;
                 }
             }
@@ -342,15 +342,41 @@ namespace Pulsar4X.ECSLib
         /// <param name="amount"></param>
         internal static void RemoveCargo(CargoStorageDB storeDB, ICargoable item, long amount)
         {
-            storeDB.StoredCargos[item.CargoTypeID].ItemsAndAmounts[item.ID] -= amount;
-            storeDB.StoredCargos[item.CargoTypeID].FreeCapacity += amount;
+            if (item is CargoAbleTypeDB)
+            {
+                CargoAbleTypeDB cargoItem = (CargoAbleTypeDB)item;
+                if (cargoItem.MustBeSpecificCargo)
+                    storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites[cargoItem.ID].Remove(cargoItem.OwningEntity);
+            }
+            storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] -= amount;
+            //FreeCapacity is *MASS*
+            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacity += item.Mass * amount; 
         }
 
 
         internal static void AddCargo(CargoStorageDB storeDB, ICargoable item, long amount)
         {
-            storeDB.StoredCargos[item.CargoTypeID].ItemsAndAmounts[item.ID] += amount;
-            storeDB.StoredCargos[item.CargoTypeID].FreeCapacity -= amount;
+            if (item is CargoAbleTypeDB)
+            {
+                CargoAbleTypeDB cargoItem = (CargoAbleTypeDB)item;
+                if (cargoItem.MustBeSpecificCargo)
+                {
+                    if(!storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites.ContainsKey(cargoItem.ID))
+                        storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites.Add(cargoItem.ID, new List<Entity>());
+                    storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites[cargoItem.ID].Add(cargoItem.OwningEntity);
+                }
+            }
+            storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] += amount;
+            //FreeCapacity is *MASS*
+            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacity -= item.Mass * amount; 
+        }
+
+        internal static bool HasEntity(CargoStorageDB storeDB, CargoAbleTypeDB item)        
+        {
+            if(storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites.ContainsKey(item.ID))
+                if (storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites[item.ID].Contains(item.OwningEntity))
+                    return true;
+            return false;
         }
 
         /// <summary>
@@ -390,7 +416,7 @@ namespace Pulsar4X.ECSLib
         internal static void ReCalcCapacity(Entity parentEntity)
         {
 
-            Dictionary<Guid, CargoTypeStore> storageDBStoredCargos = parentEntity.GetDataBlob<CargoStorageDB>().StoredCargos;
+            Dictionary<Guid, CargoTypeStore> storageDBStoredCargos = parentEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes;
 
             Dictionary<Guid, long> calculatedMaxStorage = new Dictionary<Guid, long>();
             
