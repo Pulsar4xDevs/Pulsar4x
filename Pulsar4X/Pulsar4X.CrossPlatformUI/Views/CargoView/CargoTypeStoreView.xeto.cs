@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
-using Pulsar4X.ViewModel;
+using Pulsar4X.ECSLib;
 using System.Collections.Specialized;
 
 namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 {
     public class CargoTypeStoreView : Panel
     {
-        private CargoStorageByTypeVM _vm;
+        private CargoTypeStoreVM _vm;
         protected Expander Expanderer;
         protected Label ExpanderHeader = new Label();
         protected GridView CargoGrid;
@@ -19,7 +19,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
         public CargoTypeStoreView()
         {
             XamlReader.Load(this);
-            ExpanderHeader.TextBinding.BindDataContext((CargoStorageByTypeVM m) => m.HeaderText);
+            ExpanderHeader.TextBinding.BindDataContext((CargoTypeStoreVM m) => m.HeaderText);
             Expanderer.Header = ExpanderHeader;
             
             CargoGrid.Columns.Add(new GridColumn
@@ -30,45 +30,46 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Item Type",
-                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, string>(r => r.ItemTypeName) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, string>(r => r.ItemName) }
             });
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Amount",
-                DataCell = new TextBoxCell { ID = "AmountCell", Binding = Binding.Property<CargoItemVM, long>(r => r.Amount).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { ID = "AmountCell", Binding = Binding.Property<CargoItemVM, string>(r => r.NumberOfItems)}//.Convert(r => r.ToString()) }
             });
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Item Weight",
-                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, float>(r => r.ItemWeight).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, string>(r => r.ItemWeightPerUnit)}//.Convert(r => r.ToString()) }
             });
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Total Weight",
-                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, float>(r => r.TotalWeight).Convert(r => r.ToString()) }
+                DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, String>(r => r.TotalWeight)}//.Convert(r => r.ToString()) }
             });
             DataContextChanged += CargoTypeStoreView_DataContextChanged;
         }
 
         private void CargoTypeStoreView_DataContextChanged(object sender, EventArgs e)
         {
-            if (DataContext is CargoStorageByTypeVM)
+            if (DataContext is CargoTypeStoreVM)
             {
-                CargoStorageByTypeVM vm = (CargoStorageByTypeVM)DataContext;
+                CargoTypeStoreVM vm = (CargoTypeStoreVM)DataContext;
                 _vm = vm;
                 ResetDesignStore();
-                _vm.DesignStore.CollectionChanged += DesignStore_CollectionChanged;
-                _vm.TypeStore.CollectionChanged += TypeStore_CollectionChanged;
-                _vm.PropertyChanged += Vm_PropertyChanged;
+                vm.CargoItems.CollectionChanged += TypeStore_CollectionChanged;
+                //_vm.DesignStore.CollectionChanged += DesignStore_CollectionChanged;
+                //_vm.TypeStore.CollectionChanged += TypeStore_CollectionChanged;
+                //_vm.PropertyChanged += Vm_PropertyChanged;
             }
         }
 
         private void ResetDesignStore()
         {
-            foreach (var item in _vm.DesignStore)
-            {
-                ComponentsStack.Items.Add(new CargoTypeStoreView() { DataContext = item });
-            }
+            //foreach (var item in _vm.DesignStore)
+            //{
+            //    ComponentsStack.Items.Add(new CargoTypeStoreView() { DataContext = item });
+            //}
         }
 
         private void DesignStore_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -104,18 +105,18 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 
         private void TypeStore_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            CargoGrid.Height = 52 + 24 * _vm.TypeStore.Count;
-            //CargoGrid.DataStore = _vm.TypeStore;
-            //if (e.Action == NotifyCollectionChangedAction.Add )
-            //{
-            //    CargoGrid.DataStore = _vm.TypeStore;
-            //}
+            CargoGrid.Height = 52 + 24 * _vm.CargoItems.Count;
+            CargoGrid.DataStore = _vm.CargoItems;
+            if (e.Action == NotifyCollectionChangedAction.Add )
+            {
+                CargoGrid.DataStore = _vm.CargoItems;
+            }
         }
 
         private void Vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(_vm.TypeStore)) 
-                CargoGrid.ReloadData(new Range<int>(0, _vm.TypeStore.Count -1));              
+            if (e.PropertyName == nameof(_vm.CargoItems)) 
+                CargoGrid.ReloadData(new Range<int>(0, _vm.CargoItems.Count -1));              
         }
     }
 }

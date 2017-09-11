@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using Pulsar4X.ECSLib;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 
 namespace Pulsar4X.ECSLib
 {
-    public class NewGameOptionsVM
+    public class NewGameOptionsVM : IViewModel
     {
         private GameVM _gameVM;
 

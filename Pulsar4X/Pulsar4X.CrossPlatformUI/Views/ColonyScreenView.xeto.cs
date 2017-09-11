@@ -1,6 +1,6 @@
 ﻿using Eto.Forms;
 using Eto.Serialization.Xaml;
-using Pulsar4X.ViewModel;
+using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,9 +89,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
             MineralDeposits.DataStore = _colonyScreenVM.PlanetMineralDepositVM.MineralDeposits.Values;
             gameVM.SelectedColonyScreenVM.PlanetMineralDepositVM.PropertyChanged += PlanetMineralDepositVM_PropertyChanged;
 
-            CargoStorageVM cargoVM = new CargoStorageVM(gameVM);
-            cargoVM.Initialise(_colonyScreenVM._colonyEntity);
-            CargoView.DataContext = cargoVM;
+            //CargoStorageVM cargoVM = new CargoStorageVM(gameVM);
+            //cargoVM.Initialise(_colonyScreenVM._colonyEntity);
+            //CargoView.DataContext = cargoVM;
             
             //gameVM.SelectedColonyScreenVM.RawMineralStockpileVM.PropertyChanged += RawMineralStockpileVM_PropertyChanged;
             //RefineryAbilityView = new JobAbilityView(colonyScreenVM.RefineryAbilityVM);

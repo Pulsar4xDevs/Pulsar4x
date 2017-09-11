@@ -1,6 +1,5 @@
 ﻿using Eto.Drawing;
 using Eto.Forms;
-using Pulsar4X.ViewModel;
 using System;
 using System.ComponentModel;
 using System.Threading.Tasks;

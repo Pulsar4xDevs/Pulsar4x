@@ -4,8 +4,6 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ViewModel.SystemView;
-using Pulsar4X.ViewModel;
 using System.Diagnostics;
 
 namespace Pulsar4X.CrossPlatformUI.Views

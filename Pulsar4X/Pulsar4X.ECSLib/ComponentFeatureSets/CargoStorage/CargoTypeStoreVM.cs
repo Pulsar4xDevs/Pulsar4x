@@ -11,6 +11,8 @@ namespace Pulsar4X.ECSLib
         public string StorageTypeName { get; set; }
         public string StorageTypeDescription { get; set; }
 
+        public string HeaderText{get { return StorageTypeName; }} //set { _typeName = value; OnPropertyChanged(); } }
+
         CargoTypeStore _typeStore;
 
         Dictionary<Guid, CargoItemVM> _cargoItemsDict = new Dictionary<Guid, CargoItemVM>();

@@ -5,7 +5,7 @@ using System.Windows.Input;
 
 namespace Pulsar4X.ECSLib
 {
-    public class JobVM<TDataBlob, TJob> 
+    public class JobVM<TDataBlob, TJob> : IViewModel
         where TDataBlob : BaseDataBlob
     {
         private StaticDataStore _staticData;

@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib
             PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
             StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
             ICargoable fuelResource;
-            double distance;
+            double distance = 0;
             foreach (var fuelAndUsage in propulsionDB.FuelUsePerKM)
             {
                 fuelResource = staticData.GetICargoable(fuelAndUsage.Key);

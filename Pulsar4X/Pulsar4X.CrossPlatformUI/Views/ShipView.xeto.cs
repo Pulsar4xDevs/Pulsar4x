@@ -1,6 +1,6 @@
 ﻿using Eto.Forms;
 using Eto.Serialization.Xaml;
-using Pulsar4X.ViewModel;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -32,7 +32,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             shipFCView = new ShipFireControlView(viewModel);
             shipAttackView = new ShipAttackView(viewModel);
             cargoView = new CargoView.CargoStorageView();
-            cargoView.SetDataContextFrom(viewModel);
+            //cargoView.SetDataContextFrom(viewModel);
             componentsView.DataContext = new ComponentDesignsListVM(viewModel.SelectedShip);
 
             viewModel.ShipList.SelectionChangedEvent += ShipList_SelectionChangedEvent;

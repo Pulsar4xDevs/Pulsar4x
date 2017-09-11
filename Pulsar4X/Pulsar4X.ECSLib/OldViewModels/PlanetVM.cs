@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// This class is a view model for all planets, asteroids, comets, moons, etc.
     /// </summary>
-    public class PlanetVM 
+    public class PlanetVM : IViewModel
     {
         #region Properties
 
@@ -494,7 +494,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="GuidNotFoundException">Thrown when the supplied Guid is not found in the game.</exception>
         internal static PlanetVM Create(GameVM gameVM, Guid guid)
         {
-            if (!gameVM.HasGame)
+            if (gameVM.Game == null)
             {
                 throw new InvalidOperationException("Cannot create a PlanetVM without an initialized game.");
             }

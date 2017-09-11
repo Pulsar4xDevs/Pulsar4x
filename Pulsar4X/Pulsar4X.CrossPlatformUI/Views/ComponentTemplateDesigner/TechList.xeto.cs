@@ -4,7 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 
-using Pulsar4X.ViewModel;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.CrossPlatformUI.Views.ComponentTemplateDesigner
 {

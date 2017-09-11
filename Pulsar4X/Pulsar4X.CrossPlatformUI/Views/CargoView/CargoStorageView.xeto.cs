@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
-using Pulsar4X.ViewModel;
+using Pulsar4X.ECSLib;
 namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 {
     
@@ -22,13 +22,13 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             {
                 CargoTypes.Items.Clear();
                 CargoStorageVM dc = (CargoStorageVM)DataContext;
-                foreach (var item in dc.CargoStore)
+                foreach (var item in dc.CargoResourceStores)
                 {
                     CargoTypeStoreView typesView = new CargoTypeStoreView();
                     typesView.DataContext = item;
                     CargoTypes.Items.Add(typesView);
                 }
-                dc.CargoStore.CollectionChanged += CargoStore_CollectionChanged;
+                dc.CargoResourceStores.CollectionChanged += CargoStore_CollectionChanged;
             }
         }
 
@@ -47,9 +47,9 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
 
         public void SetDataContextFrom(ShipOrderVM shipOrderVM)
         {
-            CargoStorageVM vm = new CargoStorageVM(shipOrderVM.GameVM);
-            vm.Initialise(shipOrderVM.SelectedShip);
-            DataContext = vm;
+            //CargoStorageVM vm = new CargoStorageVM(shipOrderVM.GameVM);
+            //vm.Initialise(shipOrderVM.SelectedShip);
+            //DataContext = vm;
         }
     }
 }

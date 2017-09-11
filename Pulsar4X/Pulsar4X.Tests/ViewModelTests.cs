@@ -3,9 +3,8 @@ using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Pulsar4X.ViewModel;
 using System.Threading;
-using GameVM = Pulsar4X.ViewModel.GameVM;
+using GameVM = Pulsar4X.ECSLib.GameVM;
 
 namespace Pulsar4X.Tests
 {

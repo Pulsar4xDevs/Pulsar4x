@@ -147,6 +147,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         void SetIconFor(CargoStorageDB cargodb)
         {
+            /*
             int stackHeight = 0;
             float red = 128 / 255;
             float green = 128 / 255;
@@ -164,6 +165,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 _shapes.Add(container);
                 stackHeight += height;
             }
+            */
         }
 
         public PenPathPair Thrust(PropulsionDB db)

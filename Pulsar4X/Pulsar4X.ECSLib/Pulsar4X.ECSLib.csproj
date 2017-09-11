@@ -144,8 +144,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComponentFeatureSets\Construction\JobVM.cs" />
-    <Compile Include="ComponentFeatureSets\RefineResources\RefineryAbilityVM.cs" />
     <Compile Include="DataBlobs\AsteroidDamageDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CloakAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CommandAtbDB.cs" />
@@ -169,6 +167,9 @@
     <Compile Include="DataBlobs\ComponentInstanceDBs\WeaponStateDB.cs" />
     <Compile Include="DataBlobs\NewtonBalisticDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\DesignInfoDB.cs" />
+    <Compile Include="Faction\FactionInfoDB.cs" />
+    <Compile Include="Faction\OwnedDB.cs" />
+    <Compile Include="Faction\Player.cs" />
     <Compile Include="Factories\AsteroidFactory.cs" />
     <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
     <Compile Include="Helpers\CargoDictionary.cs" />
@@ -177,6 +178,45 @@
     <Compile Include="Helpers\NameLookup.cs" />
     <Compile Include="Helpers\ObserviableConcurrentDictionary.cs" />
     <Compile Include="ManagerSubPulse.cs" />
+    <Compile Include="OldViewModels\ColonyScreenVM.cs" />
+    <Compile Include="OldViewModels\ComponentDesignVM.cs" />
+    <Compile Include="OldViewModels\ComponentListVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\ComponentAbilityTemplateVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\ComponentTemplateMainPropertiesVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\ComponentTemplateParentVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\FormulaEditorVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\MineralFormulaVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\TechListVM.cs" />
+    <Compile Include="OldViewModels\ConstructionAbilityVM.cs" />
+    <Compile Include="OldViewModels\FactionVM.cs" />
+    <Compile Include="OldViewModels\GameVM.cs" />
+    <Compile Include="OldViewModels\Helpers\Commands.cs" />
+    <Compile Include="OldViewModels\Helpers\DictionaryVM.cs" />
+    <Compile Include="OldViewModels\Helpers\ItemPair.cs" />
+    <Compile Include="OldViewModels\Helpers\ObservableDictionary.cs" />
+    <Compile Include="OldViewModels\Helpers\RangeEnableObservibleCollection.cs" />
+    <Compile Include="OldViewModels\Helpers\RelayCommand.cs" />
+    <Compile Include="OldViewModels\IViewModel.cs" />
+    <Compile Include="OldViewModels\JobVM.cs" />
+    <Compile Include="OldViewModels\LogViewerVM.cs" />
+    <Compile Include="OldViewModels\MinMaxSliderVM.cs" />
+    <Compile Include="OldViewModels\MissileDesignVM.cs" />
+    <Compile Include="OldViewModels\NewGameOptionsVM.cs" />
+    <Compile Include="OldViewModels\NewSpeciesVM.cs" />
+    <Compile Include="OldViewModels\PlanetVM.cs" />
+    <Compile Include="OldViewModels\PlayerOptionsVM.cs" />
+    <Compile Include="OldViewModels\RefineryAbilityVM.cs" />
+    <Compile Include="OldViewModels\ResearchVM.cs" />
+    <Compile Include="OldViewModels\ShipDesignVM.cs" />
+    <Compile Include="OldViewModels\ShipOrderVM.cs" />
+    <Compile Include="OldViewModels\SpeciesVM.cs" />
+    <Compile Include="OldViewModels\StarVM.cs" />
+    <Compile Include="OldViewModels\SystemInfoVM.cs" />
+    <Compile Include="OldViewModels\SystemView\StarSystemVM.cs" />
+    <Compile Include="OldViewModels\SystemView\SystemMap_DrawableVM.cs" />
+    <Compile Include="OldViewModels\SystemVM.cs" />
+    <Compile Include="OldViewModels\TimeControlVM.cs" />
+    <Compile Include="OldViewModels\ViewModelBase.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
     <Compile Include="Orders\OrderTypes\BeamAttackOrder.cs" />
     <Compile Include="Orders\OrderTypes\ConstructionOrder.cs" />
@@ -193,7 +233,6 @@
     <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
     <Compile Include="DataBlobs\JPSurveyableDB.cs" />
-    <Compile Include="DataBlobs\OwnedDB.cs" />
     <Compile Include="DataBlobs\TransitableDB.cs" />
     <Compile Include="Entity\GuidNotFoundException.cs" />
     <Compile Include="Entity\ProtoEntity.cs" />
@@ -230,7 +269,6 @@
     <Compile Include="GameVersionInfo.cs" />
     <Compile Include="Orders\OrderQueue.cs" />
     <Compile Include="Orders\OrderTypes\ResearchOrder.cs" />
-    <Compile Include="Player.cs" />
     <Compile Include="Processors\ActionDelegateEnum.cs" />
     <Compile Include="Processors\DamageProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />
@@ -245,12 +283,9 @@
     <Compile Include="Processors\ResourceConsumptionProcesor.cs" />
     <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="StarSystem\PlanetVM.cs" />
     <Compile Include="StarSystem\StarInfoDB.cs" />
     <Compile Include="StarSystem\StarSystem.cs" />
-    <Compile Include="StarSystem\StarVM.cs" />
     <Compile Include="StarSystem\SystemBodyInfoDB.cs" />
-    <Compile Include="StarSystem\SystemVM.cs" />
     <Compile Include="StaticDataManager.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="StaticData\CargoTypeSD.cs" />
@@ -260,7 +295,6 @@
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
-    <Compile Include="DataBlobs\FactionInfoDB.cs" />
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
     <Compile Include="DataBlobs\ColonyInfoDB.cs" />
@@ -338,14 +372,6 @@
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageVM.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoItemVM.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeStoreVM.cs" />
-    <Compile Include="ViewModels\Commands.cs" />
-    <Compile Include="ViewModels\DictionaryVM.cs" />
-    <Compile Include="ViewModels\GameVM.cs" />
-    <Compile Include="ViewModels\JobAbilityBaseVM.cs" />
-    <Compile Include="ViewModels\NewGameOptionsVM.cs" />
-    <Compile Include="ViewModels\RelayCommand.cs" />
-    <Compile Include="ViewModels\TimeControlVM.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
@@ -356,7 +382,6 @@
     <Folder Include="ComponentFeatureSets\SimpleBeamWeapon\" />
     <Folder Include="ComponentFeatureSets\Research\" />
     <Folder Include="ComponentFeatureSets\Construction\" />
-    <Folder Include="ViewModels\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

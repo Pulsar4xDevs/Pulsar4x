@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.ECSLib
 {
-    public class StarVM 
+    public class StarVM : IViewModel
     {
         private GameVM _gameVM;
 
