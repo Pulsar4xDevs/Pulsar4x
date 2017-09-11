@@ -444,7 +444,7 @@ namespace Pulsar4X.ECSLib
             {
                 Guid cargoTypeID = kvp.Key;
                 long validMaxCapacity = kvp.Value;
-                CargoTypeStore typeStore = storageDBStoredCargos[kvp.Key];
+                
                 
                 if (!storageDBStoredCargos.ContainsKey(cargoTypeID))
                 {
@@ -453,16 +453,16 @@ namespace Pulsar4X.ECSLib
                     storageDBStoredCargos.Add(cargoTypeID, newStore);                                        
                 }
                 
-                else if (typeStore.MaxCapacity != validMaxCapacity)
+                else if (storageDBStoredCargos[cargoTypeID].MaxCapacity != validMaxCapacity)
                 {    
-                    long usedSpace = typeStore.MaxCapacity - typeStore.FreeCapacity;
+                    long usedSpace = storageDBStoredCargos[cargoTypeID].MaxCapacity - storageDBStoredCargos[cargoTypeID].FreeCapacity;
                     
-                    typeStore.MaxCapacity = validMaxCapacity;
+                    storageDBStoredCargos[cargoTypeID].MaxCapacity = validMaxCapacity;
 
                     if (!(usedSpace <= validMaxCapacity))
                     {
                         long overweight = usedSpace - validMaxCapacity;
-                        DropRandomCargo(typeStore, overweight);
+                        DropRandomCargo(storageDBStoredCargos[cargoTypeID], overweight);
                     }
                 }
             }

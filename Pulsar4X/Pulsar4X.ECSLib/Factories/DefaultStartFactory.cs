@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Ensuing Calm");
-            var fuel = NameLookup.TryGetMaterialSD(game, "SorumFuel");
+            var fuel = NameLookup.TryGetMaterialSD(game, "Sorium Fuel");
             StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
