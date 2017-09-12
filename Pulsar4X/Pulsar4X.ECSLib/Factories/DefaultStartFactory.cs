@@ -51,7 +51,8 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(colonyEntity, cargoInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
-            
+            var rawSorium = NameLookup.TryGetMineralSD(game, "Sorium");
+            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
 
 
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);

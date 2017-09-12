@@ -21,6 +21,7 @@ namespace Pulsar4X.ECSLib
 
         public TimeControlVM TimeControl { get; } = new TimeControlVM();
 
+        public Dictionary<Guid, EntityVM> ViewedEntites { get; } = new Dictionary<Guid, EntityVM>();
 
         public Player CurrentPlayer { get; private set; }
 

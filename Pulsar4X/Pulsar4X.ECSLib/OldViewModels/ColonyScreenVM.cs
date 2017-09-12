@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
         public Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
         private Entity FactionEntity { get { return _colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner; } }
-
+        public CargoStorageVM CargoStoreVM { get; set; }
         private ObservableCollection<FacilityVM> _facilities;
         public ObservableCollection<FacilityVM> Facilities
         {
@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
             UpdatePop();
 
 
-
+            CargoStoreVM = new CargoStorageVM(staticData, colonyEntity.GetDataBlob<CargoStorageDB>());
 
             PlanetMineralDepositVM = new PlanetMineralDepositVM(staticData, _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);
          

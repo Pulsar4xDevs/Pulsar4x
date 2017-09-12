@@ -24,7 +24,7 @@
       </TableLayout>
       <TableLayout>
         <TableRow><Label Text="Cargo Stockpile"/></TableRow>
-        <TableRow><c2:CargoStorageView x:Name="CargoView"/></TableRow>
+        <TableRow><c2:CargoStorageView x:Name="CargoView" DataContext="{Binding CargoStoreVM}"/></TableRow>
       </TableLayout>
       <TableLayout></TableLayout>
     </TableRow>
