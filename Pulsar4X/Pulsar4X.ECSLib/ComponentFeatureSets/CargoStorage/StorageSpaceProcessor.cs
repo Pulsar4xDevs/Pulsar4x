@@ -366,6 +366,11 @@ namespace Pulsar4X.ECSLib
                     storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites[cargoItem.ID].Add(cargoItem.OwningEntity);
                 }
             }
+            if(!storeDB.StoredCargoTypes.ContainsKey(item.CargoTypeID))
+                storeDB.StoredCargoTypes.Add(item.CargoTypeID, new CargoTypeStore());
+            else if(!storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.ContainsKey(item.ID))
+                storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.Add(item.ID, 0);
+            
             storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] += amount;
             //FreeCapacity is *MASS*
             storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacity -= item.Mass * amount; 
