@@ -4,15 +4,19 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    internal class MineResourcesProcessor : IHotloopProcessor
+    internal class MineResourcesProcessor : IHotloopProcessor, IRecalcProcessor
     {
-        private StaticDataStore _staticDataStore;
-        public void ProcessEntity(Entity entity, int deltaSeconds)
+        private Dictionary<Guid, MineralSD> _minerals;
+
+        internal MineResourcesProcessor(StaticDataStore staticData)
         {
-            if (MineProcessor.StaticDataStore == null)
-                MineProcessor.StaticDataStore = _staticDataStore;
-            
-            MineProcessor.MineResources(entity);
+            _minerals = staticData.Minerals;
+        }
+
+        
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {           
+            MineResources(entity);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
@@ -22,12 +26,8 @@ namespace Pulsar4X.ECSLib
                 ProcessEntity(entity, deltaSeconds);
             }
         }
-    }
-
-    internal static class MineProcessor
-    {
-        internal static StaticDataStore StaticDataStore;
-        internal static void MineResources(Entity colonyEntity)
+    
+        private void MineResources(Entity colonyEntity)
         {
             Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
@@ -36,29 +36,24 @@ namespace Pulsar4X.ECSLib
             float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
             {
-                ICargoable mineral = StaticDataStore.GetICargoable(kvp.Key);
+                ICargoable mineral = _minerals[kvp.Key];
+                Guid cargoTypeID = mineral.CargoTypeID;
+                int itemMassPerUnit = mineral.Mass;
+                
+                
                 double accessability = planetMinerals[kvp.Key].Accessibility;
                 double actualRate = kvp.Value * mineBonuses * accessability;
                 int amountMinableThisTick = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
                 
                 long freeCapacity = stockpile.StoredCargoTypes[mineral.CargoTypeID].FreeCapacity;
 
-                Guid cargoTypeID = mineral.CargoTypeID;
-                int itemMassPerUnit = mineral.Mass;
                 long weightMinableThisTick = itemMassPerUnit * amountMinableThisTick;
                 weightMinableThisTick = Math.Min(weightMinableThisTick, freeCapacity);  
                 
                 int actualAmountToMineThisTick = (int)(weightMinableThisTick / itemMassPerUnit);                                         //get the number of items from the mass transferable
                 long actualweightMinaedThisTick = actualAmountToMineThisTick * itemMassPerUnit;
-                
-                
-                if(!stockpile.StoredCargoTypes.ContainsKey(cargoTypeID)) 
-                    stockpile.StoredCargoTypes.Add(cargoTypeID, new CargoTypeStore());
-                else
-                    stockpile.StoredCargoTypes[cargoTypeID].ItemsAndAmounts[mineral.ID] += actualAmountToMineThisTick;
-                
-                stockpile.StoredCargoTypes[cargoTypeID].FreeCapacity -= actualweightMinaedThisTick;
-                
+
+                StorageSpaceProcessor.AddCargo(stockpile, mineral, actualAmountToMineThisTick);
       
                 MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
                 int newAmount = mineralDeposit.Amount -= actualAmountToMineThisTick;
@@ -94,6 +89,12 @@ namespace Pulsar4X.ECSLib
                 }
             }
             colonyEntity.GetDataBlob<MiningDB>().MineingRate = rates;
+        }
+
+        public byte ProcessPriority { get; set; } = 100;
+        public void RecalcEntity(Entity entity)
+        {
+            CalcMaxRate(entity);
         }
     }
 }

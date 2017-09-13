@@ -8,9 +8,10 @@ namespace Pulsar4X.ECSLib
      
         private readonly Dictionary<Type, IHotloopProcessor> _hotloopProcessors = new Dictionary<Type, IHotloopProcessor>();
         private readonly List<IRecalcProcessor> _recalcProcessors = new List<IRecalcProcessor>();
-
+        private StaticDataStore _staticData;
         internal ProcessorManager(Game game)
         {
+            _staticData = game.StaticData;
             CreateProcessors(game);
         }
 
@@ -50,8 +51,8 @@ namespace Pulsar4X.ECSLib
         private void CreateProcessors(Game game)
         {
             
-            AddHotloopProcessor<MiningDB>(new MineResourcesProcessor());
-            AddHotloopProcessor<RefiningDB>(new RefineResourcesProcessor(game.StaticData.ProcessedMaterials));
+            AddHotloopProcessor<MiningDB>(new MineResourcesProcessor(_staticData));
+            AddHotloopProcessor<RefiningDB>(new RefineResourcesProcessor(_staticData.ProcessedMaterials));
             AddHotloopProcessor<ConstructionDB>(new ConstructEntitiesProcessor());
             AddHotloopProcessor<PropulsionDB>(new ShipMovement());
         }
@@ -66,7 +67,7 @@ namespace Pulsar4X.ECSLib
 
     internal interface IRecalcProcessor
     {
-        int ProcessPriority { get; set; }
+        byte ProcessPriority { get; set; }
         void RecalcEntity(Entity entity);
     }
 }

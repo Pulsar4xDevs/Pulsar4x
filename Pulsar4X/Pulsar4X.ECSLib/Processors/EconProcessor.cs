@@ -38,13 +38,13 @@ namespace Pulsar4X.ECSLib
             //Action<StarSystem> economyMethod = ProcessSystem;
             //system.SystemSubpulses.AddSystemInterupt(system.Game.CurrentDateTime + system.Game.Settings.EconomyCycleTime, economyMethod);
             manager.ManagerSubpulses.AddSystemInterupt(manager.Game.CurrentDateTime + manager.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
-
+            
 
             TechProcessor.ProcessSystem(manager, game);
 
             foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<MiningDB>())
             {
-                MineProcessor.MineResources(colonyEntity);
+                game.ProcessorManager.Hotloop<MiningDB>(manager, 0);
             }
             foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<RefiningDB>())
             {

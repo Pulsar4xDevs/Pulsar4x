@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
 
     public class TonnageAndHTKRecalc : IRecalcProcessor
     {
-        public int ProcessPriority { get; set; } = 0;
+        public byte ProcessPriority { get; set; } = 0;
         public void RecalcEntity(Entity entity)
         {
             ShipAndColonyInfoProcessor.ReCalculateShipTonnaageAndHTK(entity);
