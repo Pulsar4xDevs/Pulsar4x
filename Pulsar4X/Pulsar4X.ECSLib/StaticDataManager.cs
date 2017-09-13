@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static void LoadData(string dataDir, Game game)
         {
-            StaticDataStore newStore = game.StaticData.Clone();
+            StaticDataStore newStore = game.StaticData;//.Clone();
             try
             {
                 string dataDirectory = Path.Combine(Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory), dataDir);
@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
                     newStore.LoadedDataSets.Add(dataVInfo);
                 }
                 newStore.SetStorageTypeMap();
-                game.StaticData = newStore;
+                //game.StaticData = newStore;
 
             }
             catch (Exception e)

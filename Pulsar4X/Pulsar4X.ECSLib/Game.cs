@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public StaticDataStore StaticData { get; internal set; } = new StaticDataStore();
+        public StaticDataStore StaticData { get; } = new StaticDataStore();
 
 
         /// <summary>
