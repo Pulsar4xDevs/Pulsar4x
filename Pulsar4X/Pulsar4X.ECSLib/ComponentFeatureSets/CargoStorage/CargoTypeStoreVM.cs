@@ -13,7 +13,8 @@ namespace Pulsar4X.ECSLib
         public string StorageTypeName { get; set; }
         public string StorageTypeDescription { get; set; }
 
-        public string HeaderText{get { return StorageTypeName; }} //set { _typeName = value; OnPropertyChanged(); } }
+        private string _headerText;
+        public string HeaderText{get { return _headerText; } set { _headerText = value; OnPropertyChanged(); } }
 
         CargoTypeStore _typeStore;
 
@@ -54,6 +55,8 @@ namespace Pulsar4X.ECSLib
                 FreeCapacity = _freeCapacity.ToString();
             }
 
+            HeaderText = StorageTypeName + " " + FreeCapacity + "/" + MaxCapacity + " Free";
+            
             foreach(var kvp in _typeStore.ItemsAndAmounts)
             {
                 if(!_cargoItemsDict.ContainsKey(kvp.Key))
