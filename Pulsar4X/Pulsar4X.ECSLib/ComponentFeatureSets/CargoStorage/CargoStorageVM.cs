@@ -22,7 +22,8 @@ namespace Pulsar4X.ECSLib
 
         public void Update()
         {
-            foreach(var kvp in _storageDatablob.StoredCargoTypes) {
+            foreach(var kvp in _storageDatablob.StoredCargoTypes) 
+            {
                 if(!_cargoResourceStoresDict.ContainsKey(kvp.Key)) {
                     var newCargoTypeStoreVM = new CargoTypeStoreVM(_staticData, kvp.Key, kvp.Value);
                     _cargoResourceStoresDict.Add(kvp.Key, newCargoTypeStoreVM);

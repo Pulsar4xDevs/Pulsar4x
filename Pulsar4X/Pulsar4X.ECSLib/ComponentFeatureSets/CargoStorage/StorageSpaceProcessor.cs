@@ -141,7 +141,7 @@ namespace Pulsar4X.ECSLib
             
             List<KeyValuePair<Entity, PrIwObsList<Entity>>> storageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
             foreach (var kvp in storageComponents) //first loop through the component types
-            {
+            {                
                 Entity componentDesign = kvp.Key;
                 Guid cargoTypeID = componentDesign.GetDataBlob<CargoStorageAtbDB>().CargoTypeGuid;
                 long alowableSpace = 0;
@@ -169,6 +169,7 @@ namespace Pulsar4X.ECSLib
                 {
                     var newStore = new CargoTypeStore();
                     newStore.MaxCapacity = validMaxCapacity;
+                    newStore.FreeCapacity = validMaxCapacity;
                     storageDBStoredCargos.Add(cargoTypeID, newStore);                                        
                 }
                 

@@ -296,7 +296,6 @@
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
-    <Compile Include="DataBlobs\OrbitDB.cs" />
     <Compile Include="DataBlobs\ColonyInfoDB.cs" />
     <Compile Include="DataBlobs\PositionDB.cs" />
     <Compile Include="DataBlobs\RuinsDB.cs" />
@@ -326,7 +325,6 @@
     <Compile Include="Factories\SpeciesFactory.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameSettings.cs" />
-    <Compile Include="Processors\OrbitProcessor.cs" />
     <Compile Include="Processors\RuinsProcessor.cs" />
     <Compile Include="Processors\SpeciesProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -372,6 +370,8 @@
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageVM.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoItemVM.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeStoreVM.cs" />
+    <Compile Include="ComponentFeatureSets\Orbit\OrbitDB.cs" />
+    <Compile Include="ComponentFeatureSets\Orbit\OrbitProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
@@ -382,6 +382,7 @@
     <Folder Include="ComponentFeatureSets\SimpleBeamWeapon\" />
     <Folder Include="ComponentFeatureSets\Research\" />
     <Folder Include="ComponentFeatureSets\Construction\" />
+    <Folder Include="ComponentFeatureSets\Orbit\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

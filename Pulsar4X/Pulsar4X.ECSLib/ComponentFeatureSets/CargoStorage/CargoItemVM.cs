@@ -1,7 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace Pulsar4X.ECSLib
 {
-    public class CargoItemVM
+    public class CargoItemVM : INotifyPropertyChanged
     {
 
         private ICargoable _cargoableItem;
@@ -12,12 +15,28 @@ namespace Pulsar4X.ECSLib
                 return _cargoableItem.ID;
             }
         }
-        private long _itemCount;
+        private long _itemCount = 0;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public string ItemName { get { return _cargoableItem.Name; } }
         public string ItemWeightPerUnit { get { return _cargoableItem.Mass.ToString(); } }
-        public string NumberOfItems { get; set; }
-        public string TotalWeight { get; set; }
+        private string _noOfItems;
+        public string NumberOfItems {
+            get { return _noOfItems; } set { _noOfItems = value; OnPropertyChanged(); }
+        }
+
+        private string _totalWeight;
+
+        public string TotalWeight
+        {
+            get { return _totalWeight; }
+            set
+            {
+                _totalWeight = value;
+                OnPropertyChanged();
+            }
+        }
 
 
         internal CargoItemVM(ICargoable cargoableItem)
@@ -37,11 +56,17 @@ namespace Pulsar4X.ECSLib
 
         internal void Update(long itemCount)
         {
+            
             if(_itemCount != itemCount) {
                 _itemCount = itemCount;
                 NumberOfItems = _itemCount.ToString();
                 setTotalWeight();
             }
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
     }

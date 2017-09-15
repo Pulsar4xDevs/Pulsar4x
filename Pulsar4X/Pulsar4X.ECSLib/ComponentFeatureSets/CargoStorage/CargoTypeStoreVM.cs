@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoTypeStoreVM
+    public class CargoTypeStoreVM : INotifyPropertyChanged
     {
         StaticDataStore _staticData;
         public string StorageTypeName { get; set; }
@@ -21,6 +23,9 @@ namespace Pulsar4X.ECSLib
         private long _maxCapacity;
         public string MaxCapacity { get; set; }
         private long _freeCapacity;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public string FreeCapacity { get; set; }
 
         internal CargoTypeStoreVM(StaticDataStore staticDataStore, Guid typeGuid, CargoTypeStore typeStore)
@@ -49,13 +54,15 @@ namespace Pulsar4X.ECSLib
                 FreeCapacity = _freeCapacity.ToString();
             }
 
-            foreach(var kvp in _typeStore.ItemsAndAmounts) {
-                if(!_cargoItemsDict.ContainsKey(kvp.Key)) {
-                    var newCargoItemVM = new CargoItemVM(_staticData.GetICargoable(kvp.Key));
-                    _cargoItemsDict.Add(kvp.Key, newCargoItemVM);
-                    CargoItems.Add(newCargoItemVM);
+            foreach(var kvp in _typeStore.ItemsAndAmounts)
+            {
+                if(!_cargoItemsDict.ContainsKey(kvp.Key))
+                { //if the key from the DB's dictionary is not in our dictionary here
+                    var newCargoItemVM = new CargoItemVM(_staticData.GetICargoable(kvp.Key)); //then create a new CargoItemVM
+                    _cargoItemsDict.Add(kvp.Key, newCargoItemVM); //add it to the dictionary
+                    CargoItems.Add(newCargoItemVM); //then add it to the observable collection
                 }
-                _cargoItemsDict[kvp.Key].Update(kvp.Value);
+                _cargoItemsDict[kvp.Key].Update(kvp.Value); //since the object in the observable collection is the same object as the one in the dictionary, update the object via the dictionary
             }
 
             foreach(var key in _cargoItemsDict.Keys.ToArray()) {
@@ -64,6 +71,12 @@ namespace Pulsar4X.ECSLib
                     _cargoItemsDict.Remove(key);
                 }
             }
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

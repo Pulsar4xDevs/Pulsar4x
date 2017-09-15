@@ -21,7 +21,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             XamlReader.Load(this);
             ExpanderHeader.TextBinding.BindDataContext((CargoTypeStoreVM m) => m.HeaderText);
             Expanderer.Header = ExpanderHeader;
-            
+
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Item",
@@ -45,9 +45,12 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
             CargoGrid.Columns.Add(new GridColumn
             {
                 HeaderText = "Total Weight",
+                AutoSize = true,
                 DataCell = new TextBoxCell { Binding = Binding.Property<CargoItemVM, String>(r => r.TotalWeight)}//.Convert(r => r.ToString()) }
             });
+
             DataContextChanged += CargoTypeStoreView_DataContextChanged;
+            
         }
 
         private void CargoTypeStoreView_DataContextChanged(object sender, EventArgs e)
@@ -57,6 +60,7 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
                 CargoTypeStoreVM vm = (CargoTypeStoreVM)DataContext;
                 _vm = vm;
                 ResetDesignStore();
+                CargoGrid.Height = 52 + 24 * _vm.CargoItems.Count;
                 vm.CargoItems.CollectionChanged += TypeStore_CollectionChanged;
                 //_vm.DesignStore.CollectionChanged += DesignStore_CollectionChanged;
                 //_vm.TypeStore.CollectionChanged += TypeStore_CollectionChanged;
@@ -106,17 +110,6 @@ namespace Pulsar4X.CrossPlatformUI.Views.CargoView
         private void TypeStore_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             CargoGrid.Height = 52 + 24 * _vm.CargoItems.Count;
-            CargoGrid.DataStore = _vm.CargoItems;
-            if (e.Action == NotifyCollectionChangedAction.Add )
-            {
-                CargoGrid.DataStore = _vm.CargoItems;
-            }
-        }
-
-        private void Vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(_vm.CargoItems)) 
-                CargoGrid.ReloadData(new Range<int>(0, _vm.CargoItems.Count -1));              
         }
     }
 }

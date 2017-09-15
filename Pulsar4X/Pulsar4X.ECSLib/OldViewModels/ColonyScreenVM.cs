@@ -100,6 +100,7 @@ namespace Pulsar4X.ECSLib
             RefineryAbilityVM.Refresh();
             ConstructionAbilityVM.Refresh();
             UpdatePop();
+            CargoStoreVM.Update();
             foreach (var facilityvm in Facilities)
             {
                 facilityvm.Refresh();

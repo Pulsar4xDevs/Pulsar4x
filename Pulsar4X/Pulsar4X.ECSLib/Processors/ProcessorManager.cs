@@ -50,11 +50,11 @@ namespace Pulsar4X.ECSLib
 
         private void CreateProcessors(Game game)
         {
-            
             AddHotloopProcessor<MiningDB>(new MineResourcesProcessor(_staticData));
             AddHotloopProcessor<RefiningDB>(new RefineResourcesProcessor(_staticData.ProcessedMaterials));
             AddHotloopProcessor<ConstructionDB>(new ConstructEntitiesProcessor());
             AddHotloopProcessor<PropulsionDB>(new ShipMovement());
+            AddHotloopProcessor<OrbitDB>(new OrbitProcessor());
         }
     }
 
