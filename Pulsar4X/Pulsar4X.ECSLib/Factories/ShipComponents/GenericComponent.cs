@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
                             if (factionTech.ResearchedTechs.ContainsKey(Guid.Parse(kvp.Key.ToString())))
                             {
                                 TechSD techSD = staticData.Techs[Guid.Parse(kvp.Key.ToString())];
-                                designAbility.GuidDictionary.Add(kvp.Key, new ChainedExpression(TechProcessor.DataFormula(factionTech, techSD).ToString(), designAbility, factionTech, staticData));                      
+                                designAbility.GuidDictionary.Add(kvp.Key, new ChainedExpression(ResearchProcessor.DataFormula(factionTech, techSD).ToString(), designAbility, factionTech, staticData));                      
                             }
                         }
                     }

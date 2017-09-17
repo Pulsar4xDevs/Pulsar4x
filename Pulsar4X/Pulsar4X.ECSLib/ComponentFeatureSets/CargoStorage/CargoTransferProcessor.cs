@@ -9,6 +9,12 @@ namespace Pulsar4X.ECSLib
         {
         }
 
+        public TimeSpan RunFrequency {
+            get {
+                return TimeSpan.FromHours(1);
+            }
+        }
+
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             CargoTransferDB datablob = entity.GetDataBlob<CargoTransferDB>();

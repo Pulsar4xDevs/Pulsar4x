@@ -1,19 +1,19 @@
 ﻿namespace Pulsar4X.ECSLib
 {
-    public class  ColonyResearchDB : BaseDataBlob
+    public class  EntityResearchDB : BaseDataBlob
     {
-        public ColonyResearchDB()
+        public EntityResearchDB()
         {
         }
 
-        public ColonyResearchDB(ColonyResearchDB db)
+        public EntityResearchDB(EntityResearchDB db)
         {
 
         }
 
         public override object Clone()
         {
-            return new ColonyResearchDB(this);
+            return new EntityResearchDB(this);
         }
     }
 }

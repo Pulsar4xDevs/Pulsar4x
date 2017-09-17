@@ -272,7 +272,6 @@
     <Compile Include="Processors\ActionDelegateEnum.cs" />
     <Compile Include="Processors\DamageProcessor.cs" />
     <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />
-    <Compile Include="Processors\EconProcessor.cs" />
     <Compile Include="Processors\AtmosphereProcessor.cs" />
     <Compile Include="Factories\ShipComponents\ParsingProcessor.cs" />
     <Compile Include="Processors\InterSystemJumpProcessor.cs" />
@@ -308,7 +307,6 @@
     <Compile Include="DataBlobs\ShipDBs\MaintenanceDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\MissileWeaponsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\PowerDB.cs" />
-    <Compile Include="DataBlobs\ShipDBs\PropulsionDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\SensorProfileDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\SensorsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ShieldsDB.cs" />
@@ -356,7 +354,7 @@
     <Compile Include="ComponentFeatureSets\Construction\ConstructionProcessor.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\ShipMovementProcessor.cs" />
     <Compile Include="ComponentFeatureSets\SimpleBeamWeapon\WeaponProcessor.cs" />
-    <Compile Include="ComponentFeatureSets\Research\TechProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\Research\ResearchProcessor.cs" />
     <Compile Include="ComponentFeatureSets\Research\ResearchPointsDB.cs" />
     <Compile Include="ComponentFeatureSets\Construction\ConstructionDB.cs" />
     <Compile Include="ComponentFeatureSets\Research\FactionTechDB.cs" />
@@ -372,6 +370,8 @@
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeStoreVM.cs" />
     <Compile Include="ComponentFeatureSets\Orbit\OrbitDB.cs" />
     <Compile Include="ComponentFeatureSets\Orbit\OrbitProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\PropulsionDB.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

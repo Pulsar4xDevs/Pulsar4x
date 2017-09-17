@@ -6,6 +6,12 @@ namespace Pulsar4X.ECSLib
 {
     internal class ShipMovement : IHotloopProcessor
     {
+        public TimeSpan RunFrequency {
+            get {
+                return TimeSpan.FromHours(1);
+            }
+        }
+
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {         
         }

@@ -8,39 +8,57 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// See also the Installation Processors for DoResearch
     /// </summary>
-    public static class TechProcessor
+    public class ResearchProcessor : IHotloopProcessor
     {
-        internal static void ProcessSystem(EntityManager manager, Game game)
+        public TimeSpan RunFrequency => TimeSpan.FromDays(1);
+
+        StaticDataStore _staticData;
+
+        internal ResearchProcessor(StaticDataStore staticData)
+        { 
+            _staticData = staticData; 
+        }
+
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            foreach (Entity colonyEntity in manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
+            DoResearch(entity);
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            List<Entity> entitysWithReserch = manager.GetAllEntitiesWithDataBlob<EntityResearchDB>();
+            foreach(var entity in entitysWithReserch)
             {
-                DoResearch(colonyEntity, game);
+                ProcessEntity(entity, deltaSeconds);
             }
         }
+
+
+
 
         /// <summary>
         /// adds research points to a scientists project.
         /// </summary>
-        /// <param name="colonyEntity"></param>
+        /// <param name="entity"></param>
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
-        internal static void DoResearch(Entity colonyEntity, Game game)
+        internal void DoResearch(Entity entity)
         {
-            var Faction = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner;
+            var Faction = entity.GetDataBlob<OwnedDB>().ObjectOwner;
             FactionAbilitiesDB factionAbilities = Faction.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = Faction.GetDataBlob<FactionTechDB>();
             Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
 
             //why am I doing this here instead of as a recalc.
-            foreach (var lab in colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Keys.Where(inst => inst.HasDataBlob<ResearchPointsAtbDB>()))
+            foreach (var lab in entity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Keys.Where(inst => inst.HasDataBlob<ResearchPointsAtbDB>()))
             {               
                 int points = lab.GetDataBlob<ResearchPointsAtbDB>().PointsPerEconTick;
                 labs.Add(lab, points);
             }
-            
-            int labsused = 0;
 
-            foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
+
+            foreach (var scientist in entity.GetDataBlob<ColonyInfoDB>().Scientists)
             {
                 var scientistDB = scientist.GetDataBlob<ScientistDB>();
 
@@ -51,7 +69,7 @@ namespace Pulsar4X.ECSLib
 
                 //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
                 Guid projectGuid = scientist.GetDataBlob<ScientistDB>().ProjectQueue[0];
-                TechSD project = game.StaticData.Techs[projectGuid];
+                TechSD project = _staticData.Techs[projectGuid];
                 int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
                 float bonus = scientist.GetDataBlob<ScientistDB>().Bonuses[project.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
@@ -214,6 +232,5 @@ namespace Pulsar4X.ECSLib
             int result = (int)expression.Evaluate();
             return result;
         }
-
     }
 }

@@ -8,6 +8,7 @@ namespace Pulsar4X.ECSLib
      
         private readonly Dictionary<Type, IHotloopProcessor> _hotloopProcessors = new Dictionary<Type, IHotloopProcessor>();
         private readonly List<IRecalcProcessor> _recalcProcessors = new List<IRecalcProcessor>();
+        private readonly Dictionary<PulseActionEnum, IHotloopProcessor> _hotloopProcessorsByEnum = new Dictionary<PulseActionEnum, IHotloopProcessor>();
         private StaticDataStore _staticData;
         internal ProcessorManager(Game game)
         {
@@ -31,11 +32,26 @@ namespace Pulsar4X.ECSLib
         internal void Hotloop<T>(EntityManager manager, int deltaSeconds) where T: BaseDataBlob
         {
             var type = typeof(T);
+            
+            _hotloopProcessors[type].ProcessManager(manager, deltaSeconds);
+            /*
             var entities = manager.GetAllEntitiesWithDataBlob<T>();
             foreach (var entity in entities)
             {               
                 _hotloopProcessors[type].ProcessEntity(entity, deltaSeconds);
-            }
+            }*/
+        }
+
+        internal IHotloopProcessor GetProcessor<T>() where T : BaseDataBlob
+        {
+            return _hotloopProcessors[typeof(T)];
+        }
+
+        internal void RunProcessOnEntity<T>(Entity entity, int deltaSeconds)
+            where T : BaseDataBlob
+        {
+            var type = typeof(T);
+            _hotloopProcessors[type].ProcessEntity(entity, deltaSeconds);
         }
 
         internal void RecalcEntity(Entity entity)
@@ -50,11 +66,13 @@ namespace Pulsar4X.ECSLib
 
         private void CreateProcessors(Game game)
         {
-            AddHotloopProcessor<MiningDB>(new MineResourcesProcessor(_staticData));
+            AddHotloopProcessor<EntityResearchDB>(new ResearchProcessor(game.StaticData));
+            AddHotloopProcessor<MiningDB>(new MineResourcesProcessor(_staticData));            
             AddHotloopProcessor<RefiningDB>(new RefineResourcesProcessor(_staticData.ProcessedMaterials));
             AddHotloopProcessor<ConstructionDB>(new ConstructEntitiesProcessor());
             AddHotloopProcessor<PropulsionDB>(new ShipMovement());
             AddHotloopProcessor<OrbitDB>(new OrbitProcessor());
+            AddHotloopProcessor<NewtonBalisticDB>(new NewtonBalisticProcessor());
         }
     }
 
@@ -63,6 +81,12 @@ namespace Pulsar4X.ECSLib
     {   
         void ProcessEntity(Entity entity, int deltaSeconds);
         void ProcessManager(EntityManager manager, int deltaSeconds);
+        TimeSpan RunFrequency { get; }
+    }
+
+    internal interface IInstanceProcessor
+    {
+        void ProcessEntity(Entity entity, int deltaSeconds);
     }
 
     internal interface IRecalcProcessor

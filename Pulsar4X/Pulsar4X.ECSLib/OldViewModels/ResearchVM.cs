@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
         {
             //RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.RefinedMaterials[NewJobSelectedItem].RefineryPointCost, NewJobRepeat);
             //RefiningProcessor.AddJob(_staticData_, _colonyEntity_, newjob);
-            TechProcessor.AssignProject(SelectedScientist.ScientistEntity, SelectedTech.ID);
+            ResearchProcessor.AssignProject(SelectedScientist.ScientistEntity, SelectedTech.ID);
             SelectedScientist.Refresh();
             //Refresh();
         }
@@ -223,7 +223,7 @@ namespace Pulsar4X.ECSLib
         public byte ScientistAssignedLabs
         {
             get { return ScientistEntity.GetDataBlob<ScientistDB>().AssignedLabs; } 
-            set {TechProcessor.AssignLabs(ScientistEntity, value); OnPropertyChanged();}
+            set {ResearchProcessor.AssignLabs(ScientistEntity, value); OnPropertyChanged();}
         }
         //public int ColonyFreeLabs { get}
 
@@ -280,7 +280,7 @@ namespace Pulsar4X.ECSLib
         public string TechName { get { return _techSD.Name; } }
         public int Level { get { return _factionTech.LevelforTech(_techSD) + 1; } }
 
-        public int PointCost { get { return TechProcessor.CostFormula(_factionTech, _techSD); } }
+        public int PointCost { get { return ResearchProcessor.CostFormula(_factionTech, _techSD); } }
         public int PointsCompleted { get { return _factionTech.ResearchableTechs[_techSD]; } set{OnPropertyChanged();} }
 
         public ResearchTechControlVM()

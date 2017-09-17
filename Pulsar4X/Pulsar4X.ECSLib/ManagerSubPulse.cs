@@ -13,11 +13,16 @@ namespace Pulsar4X.ECSLib
     /// TODO:  handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public class ManagerSubPulse : IEquatable<ManagerSubPulse>
+    public class ManagerSubPulse
     { 
-        //TODO there may be a more efficent datatype for this. 
-        [JsonProperty]
-        public SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<Entity>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<Entity>>>();
+        
+        private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
+        class ProcessSet
+        {   //TODO: need to figure out how to serialize/Deserialise this
+            //the Interface keys are references to the concreate classes in the _processManager
+            internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
+            internal Dictionary<IInstanceProcessor, List<Entity>> InstanceProcessors = new Dictionary<IInstanceProcessor, List<Entity>>();
+        }
 
         private ProcessorManager _processManager;
 
@@ -85,16 +90,15 @@ namespace Pulsar4X.ECSLib
 
         internal void Initalise()//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
         {
-                
-            //can add either by creating and passing an Action
-            //Action<StarSystem> economyMethod = EconProcessor.ProcessSystem;
-            //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.EconomyCycleTime, economyMethod);
-            //or can add it by passing the method
-            //AddSystemInterupt(_starSystem.Game.CurrentDateTime + _starSystem.Game.Settings.OrbitCycleTime, OrbitProcessor.UpdateSystemOrbits);
+            //we offset some of these to spread the load out a bit more. 
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime, _processManager.GetProcessor<OrbitDB>());
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime, _processManager.GetProcessor<NewtonBalisticDB>());
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime, _processManager.GetProcessor<EntityResearchDB>());
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(1), _processManager.GetProcessor<MiningDB>());
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(2), _processManager.GetProcessor<RefiningDB>());
+            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(3), _processManager.GetProcessor<ConstructionDB>());
 
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.EconomyCycleTime, PulseActionEnum.EconProcessor);
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.OrbitCycleTime, PulseActionEnum.OrbitProcessor);
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + _entityManager.Game.Settings.OrbitCycleTime, PulseActionEnum.BalisticMoveProcessor);
+
         }
 
 
@@ -104,13 +108,14 @@ namespace Pulsar4X.ECSLib
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
         /// <param name="entity"></param>
-        internal void AddEntityInterupt(DateTime nextDateTime, PulseActionEnum action, Entity entity)
+        internal void AddEntityInterupt(DateTime nextDateTime, IInstanceProcessor actionProcessor, Entity entity)
         {
-            if (!EntityDictionary.ContainsKey(nextDateTime))
-                EntityDictionary.Add(nextDateTime, new Dictionary<PulseActionEnum, List<Entity>>());
-            if (!EntityDictionary[nextDateTime].ContainsKey(action))
-                EntityDictionary[nextDateTime].Add(action, new List<Entity>());
-            EntityDictionary[nextDateTime][action].Add(entity);
+            if(!QueuedProcesses.ContainsKey(nextDateTime))
+                QueuedProcesses.Add(nextDateTime, new ProcessSet());
+            if(!QueuedProcesses[nextDateTime].InstanceProcessors.ContainsKey(actionProcessor))
+                QueuedProcesses[nextDateTime].InstanceProcessors.Add(actionProcessor, new List<Entity>());
+            if(!QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Contains(entity))
+                QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Add(entity);                
         }
 
 
@@ -119,12 +124,12 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
-        internal void AddSystemInterupt(DateTime nextDateTime, PulseActionEnum action)
+        internal void AddSystemInterupt(DateTime nextDateTime, IHotloopProcessor actionProcessor)
         {
-            if (!EntityDictionary.ContainsKey(nextDateTime))
-                EntityDictionary.Add(nextDateTime, new Dictionary<PulseActionEnum, List<Entity>>());
-            if (!EntityDictionary[nextDateTime].ContainsKey(action))
-                EntityDictionary[nextDateTime].Add(action, new List<Entity>());  //null);
+            if(!QueuedProcesses.ContainsKey(nextDateTime))
+                QueuedProcesses.Add(nextDateTime, new ProcessSet());
+            if(!QueuedProcesses[nextDateTime].SystemProcessors.Contains(actionProcessor))
+                QueuedProcesses[nextDateTime].SystemProcessors.Add(actionProcessor);               
         }
 
         /// <summary>
@@ -176,9 +181,9 @@ namespace Pulsar4X.ECSLib
         private DateTime GetNextInterupt(TimeSpan maxSpan)
         {
             DateTime nextInteruptDateTime = SystemLocalDateTime + maxSpan;
-            if (EntityDictionary.Keys.Count != 0 && nextInteruptDateTime > EntityDictionary.Keys.Min())
+            if (QueuedProcesses.Keys.Count != 0 && nextInteruptDateTime > QueuedProcesses.Keys.Min())
             {
-                nextInteruptDateTime = EntityDictionary.Keys.Min();
+                nextInteruptDateTime = QueuedProcesses.Keys.Min();
             }
 
             return nextInteruptDateTime;
@@ -192,40 +197,28 @@ namespace Pulsar4X.ECSLib
         /// <returns>datetime processed to</returns>
         private void ProcessToNextInterupt(DateTime nextInteruptDateTime)
         {
-            if (EntityDictionary.ContainsKey(nextInteruptDateTime))
+            TimeSpan span = (nextInteruptDateTime - _systemLocalDateTime);
+            int deltaSeconds = span.Seconds;
+            if (QueuedProcesses.ContainsKey(nextInteruptDateTime))
             {
-                foreach (KeyValuePair<PulseActionEnum, List<Entity>> delegateListPair in EntityDictionary[nextInteruptDateTime])
+
+                foreach(var systemProcess in QueuedProcesses[nextInteruptDateTime].SystemProcessors)
                 {
-                    if (delegateListPair.Value.Count == 0)// == null) //if the list is empty, it's a systemwide interupt
-                    {
-                        //delegateListPair.Key.DynamicInvoke(_starSystem);
-                        PulseActionDictionary.DoAction(delegateListPair.Key, _entityManager);
-                    }
-                    else
-                        foreach (Entity entity in delegateListPair.Value) //foreach entity in the value list
-                        {
-                            //delegateListPair.Key.DynamicInvoke(entity);
-                            PulseActionDictionary.DoAction(delegateListPair.Key, _entityManager, entity);
-                        }
+                    systemProcess.ProcessManager(_entityManager, deltaSeconds);
+                    AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess);
                 }
-
-                EntityDictionary.Remove(nextInteruptDateTime);
+                foreach(var instanceProcessSet in QueuedProcesses[nextInteruptDateTime].InstanceProcessors)
+                {
+                    foreach(var entity in instanceProcessSet.Value)
+                    {
+                        instanceProcessSet.Key.ProcessEntity(entity, deltaSeconds);
+                    }
+                }
+                QueuedProcesses.Remove(nextInteruptDateTime);
             }
-
             SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent            
         }
 
-
-        public bool Equals(ManagerSubPulse other)
-        {
-            bool equality = false;
-            if (SystemLocalDateTime.Equals(other.SystemLocalDateTime))
-            {
-                if (EntityDictionary.Count.Equals(other.EntityDictionary.Count))
-                    equality = true;
-            }
-            return equality;
-        }
     }
 }
 

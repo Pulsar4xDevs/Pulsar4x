@@ -9,44 +9,23 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoOrdersVM : INotifyPropertyChanged, IDBViewmodel
     {
-        public string CurrentEntityName
-        {
-            get
-            {
-                return _currentEntity.GetDataBlob<NameDB>().DefaultName;
-            }
-        }
-        public string LoadFromEntityName
-        {
-            get
-            {
-                return _currentEntity.GetDataBlob<NameDB>().DefaultName;
-            }
-        }
-
-        long cargoAmount;
-        public long CargoAmount
-        {
-            get
-            {
-                return cargoAmount;
-            }
-            set
-            {
-                if(value != cargoAmount) {
-                    cargoAmount = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-
         Entity _faction { get; set; }
         Entity _currentEntity { get; set; }
+
         Entity _loadFromEntity { get; set; }
+        public string CurrentEntityName { get; set; }
+
+        public string LoadFromEntityName { get; set; }
+
         List<Entity> _selectableEntites { get; set; }
-        List<ICargoable> _selectableCargos { get; set; }
-        ICargoable CargoItem { get; set; }
+
+        public CargoStorageVM LoadFromCargoVM { get; set; } 
+
+        List<ICargoable> _selectableCargos { get; set; } 
+
+        ICargoable SelectedCargoItem { get; set; }
+        long AmountToTransfer { get; set; }
+
 
         public CargoOrdersVM()
         {
@@ -65,8 +44,8 @@ namespace Pulsar4X.ECSLib
             newOrder.RequestingFactionGuid = _faction.Guid;
             newOrder.LoadCargoFromEntityGuid = _loadFromEntity.Guid;
             newOrder.TargetEntityGuid = _faction.Guid;
-            newOrder.ItemToTransfer = CargoItem.ID;
-            newOrder.TotalAmountToTransfer = CargoAmount;
+            newOrder.ItemToTransfer = SelectedCargoItem.ID;
+            newOrder.TotalAmountToTransfer = AmountToTransfer;
         }
 
 

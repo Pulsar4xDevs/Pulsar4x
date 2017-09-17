@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
                 {
                     DamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
                     stateInfo.CoolDown = TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
-                    starSys.SystemManager.ManagerSubpulses.AddEntityInterupt(starSys.SystemManager.ManagerSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, beamWeapon);
+                    //starSys.SystemManager.ManagerSubpulses.AddEntityInterupt(starSys.SystemManager.ManagerSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, beamWeapon);
                 }
 
                 
@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
                     BeamWeaponAtbDB bwAtb = beamWeapon.GetDataBlob<BeamWeaponAtbDB>();
                     BeamFireControlAtbDB fcAtb = state.FireControl.GetDataBlob<BeamFireControlAtbDB>();
 
-                    if (!fireControlEntities.Contains(state.FireControl)) ; //This semi-colon is probably bad
+                    if (!fireControlEntities.Contains(state.FireControl)) 
                         fireControlEntities.Add(state.FireControl);
 
                     numBeamWeapons++;

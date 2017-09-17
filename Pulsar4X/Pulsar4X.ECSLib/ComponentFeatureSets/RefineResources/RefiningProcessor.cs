@@ -15,6 +15,12 @@ namespace Pulsar4X.ECSLib
             ProcessedMaterials = processedMaterials;
         }
 
+        public TimeSpan RunFrequency {
+            get {
+                return TimeSpan.FromDays(1);
+            }
+        }
+
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             RefiningProcessor.RefineMaterials(entity, ProcessedMaterials);

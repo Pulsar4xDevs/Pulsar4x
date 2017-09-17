@@ -69,12 +69,6 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public GameSettings Settings { get; set; }
 
-        [JsonProperty]
-        private readonly OrbitProcessor _orbitProcessor = new OrbitProcessor();
-
-        [JsonProperty]
-        private readonly EconProcessor _econProcessor = new EconProcessor();
-
         #endregion
 
         #region Events

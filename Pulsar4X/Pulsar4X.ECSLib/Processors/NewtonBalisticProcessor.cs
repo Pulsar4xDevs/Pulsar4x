@@ -6,20 +6,28 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    internal static class NewtonBalisticProcessor
+    internal class NewtonBalisticProcessor : IHotloopProcessor
     {
+        public TimeSpan RunFrequency => TimeSpan.FromHours(1);
+
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            Process(manager, deltaSeconds);
+        }
 
         /// <summary>
         /// process balistic movement for a single system
         /// currently is not affected by gravity. 
         /// </summary>
         /// <param name="manager">the system to process</param>
-        internal static void Process(EntityManager manager)
+        internal static void Process(EntityManager manager, int deltaSeconds)
         {
-            TimeSpan orbitCycle = manager.Game.Settings.OrbitCycleTime;
-            DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + orbitCycle;
-
-            manager.ManagerSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.BalisticMoveProcessor);
 
             List<Entity> RemoveList = new List<Entity>();
             List<StarSystem> RemoveSystem = new List<StarSystem>();
@@ -28,7 +36,7 @@ namespace Pulsar4X.ECSLib
             {
                 NewtonBalisticDB balisticDB = objectEntity.GetDataBlob<NewtonBalisticDB>();
                 PositionDB position = objectEntity.GetDataBlob<PositionDB>();
-                position.RelativePosition += Distance.KmToAU(balisticDB.CurrentSpeed * orbitCycle.TotalSeconds);
+                position.RelativePosition += Distance.KmToAU(balisticDB.CurrentSpeed * deltaSeconds);
 
                 Entity myTarget = manager.GetLocalEntityByGuid(balisticDB.TargetGuid);
                 PositionDB targetPos = myTarget.GetDataBlob<PositionDB>();
@@ -63,5 +71,7 @@ namespace Pulsar4X.ECSLib
             RemoveList.Clear();
             RemoveSystem.Clear();
         }
+
+
     }
 }

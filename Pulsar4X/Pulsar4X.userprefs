@@ -1,13 +1,11 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI.Gtk2/Program.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.ECSLib/Processors/InterSystemJumpProcessor.cs">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/ColonyScreenVM.cs" Line="103" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoStorageVM.cs" Line="25" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTypeStoreVM.cs" Line="21" Column="112" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoItemVM.cs" Line="33" Column="38" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/CargoView/CargoTypeStoreView.xeto.cs" Line="23" Column="48" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/CargoView/CargoStorageView.xeto.cs" Line="30" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/Program.cs" Line="16" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/Research/ResearchProcessor.cs" Line="45" Column="48" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTransferProcessor.cs" Line="61" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Game.cs" Line="64" Column="56" />
+      <File FileName="Pulsar4X.ECSLib/Processors/ActionDelegateEnum.cs" Line="34" Column="114" />
+      <File FileName="Pulsar4X.ECSLib/Processors/InterSystemJumpProcessor.cs" Line="41" Column="6" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
@@ -34,5 +32,7 @@
     <String>Pulsar4X.CrossPlatformUI.Wpf\Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
     <String>Pulsar4X.CrossPlatformUI.Mac/Pulsar4X.CrossPlatformUI.Mac.csproj</String>
     <String>Pulsar4X.CrossPlatformUI.Wpf/Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
+    <String>ViewModelLib/Pulsar4X.ViewModels.csproj</String>
+    <String>Pulsar4X.Tests/Pulsar4X.Tests.csproj</String>
   </DisabledProjects>
 </Properties>

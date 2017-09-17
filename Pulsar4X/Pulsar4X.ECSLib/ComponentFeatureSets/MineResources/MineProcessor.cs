@@ -92,6 +92,13 @@ namespace Pulsar4X.ECSLib
         }
 
         public byte ProcessPriority { get; set; } = 100;
+
+        public TimeSpan RunFrequency {
+            get {
+                return TimeSpan.FromDays(1);
+            }
+        }
+
         public void RecalcEntity(Entity entity)
         {
             CalcMaxRate(entity);
