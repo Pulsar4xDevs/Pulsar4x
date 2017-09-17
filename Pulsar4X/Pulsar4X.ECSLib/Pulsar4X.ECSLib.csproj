@@ -372,6 +372,9 @@
     <Compile Include="ComponentFeatureSets\Orbit\OrbitProcessor.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\PropulsionDB.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveCommand.cs" />
+    <Compile Include="Orders\OrderHandler.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefineOrdersVM.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefiningVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

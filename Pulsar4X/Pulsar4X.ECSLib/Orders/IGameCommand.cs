@@ -30,9 +30,9 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Validates and actions the command. 
-        /// may eventualy need to return a responce instead of void. 
+        /// may eventualy need to return a responce instead of just bool. 
         /// </summary>
-        void ActionCommand(Game game);
+        bool ActionCommand(Game game);
 
 
     }

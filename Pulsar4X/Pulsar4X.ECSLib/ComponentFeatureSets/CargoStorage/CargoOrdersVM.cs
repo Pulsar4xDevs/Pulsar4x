@@ -9,6 +9,8 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoOrdersVM : INotifyPropertyChanged, IDBViewmodel
     {
+        OrderHandler _orderHandler;
+        
         Entity _faction { get; set; }
         Entity _currentEntity { get; set; }
 
@@ -27,9 +29,9 @@ namespace Pulsar4X.ECSLib
         long AmountToTransfer { get; set; }
 
 
-        public CargoOrdersVM()
+        public CargoOrdersVM(Game game)
         {
-
+            _orderHandler = game.OrderHandler;
         }
         public void initalize(Entity factionEntity, Entity entity)
         {
@@ -46,6 +48,7 @@ namespace Pulsar4X.ECSLib
             newOrder.TargetEntityGuid = _faction.Guid;
             newOrder.ItemToTransfer = SelectedCargoItem.ID;
             newOrder.TotalAmountToTransfer = AmountToTransfer;
+            _orderHandler.HandleOrder(newOrder);
         }
 
 

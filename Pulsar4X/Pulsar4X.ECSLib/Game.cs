@@ -47,6 +47,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public StaticDataStore StaticData { get; } = new StaticDataStore();
 
+        internal OrderHandler OrderHandler { get; set; }
+
 
         /// <summary>
         /// this is used to marshal events to the UI thread. 
@@ -88,6 +90,7 @@ namespace Pulsar4X.ECSLib
             EventLog = new EventLog(this);
             GlobalManager = new EntityManager(this, true);
             ProcessorManager = new ProcessorManager(this);
+            OrderHandler = new StandAloneOrderHandler(this);
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
