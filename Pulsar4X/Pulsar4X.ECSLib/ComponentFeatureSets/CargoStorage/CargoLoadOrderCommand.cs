@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
         /// This creates a CargoTranferDB from the command, which does all the work.
         /// the command is to create and enqueue a CargoTransferDB.
         /// </summary>
-        public void ActionCommand(Game game)
+        public bool ActionCommand(Game game)
         {
             if(IsCargoOrderValid(game.GlobalManager)) {
                 CargoTransferDB newTransferDB = new CargoTransferDB();
@@ -61,7 +61,9 @@ namespace Pulsar4X.ECSLib
                 newTransferDB.TotalAmountToTransfer = TotalAmountToTransfer;
                 newTransferDB.ItemToTranfer = (ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
                 targetEntity.Manager.SetDataBlob(targetEntity.ID, newTransferDB);
+                return true;
             }
+            return false;
         }
 
         private bool IsCargoOrderValid(EntityManager globalManager)
