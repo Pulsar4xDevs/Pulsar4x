@@ -1,10 +1,16 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" Line="26" Column="32" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="45" Column="40" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/GameVM.cs" Line="30" Column="39" />
+      <File FileName="Pulsar4X.ECSLib/Faction/OwnedDB.cs" Line="11" Column="18" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto" Line="13" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/MainForm.cs" Line="1" Column="1" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Windows" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Breakpoint enabled="false" file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Pulsar4x/Pulsar4X/Pulsar4X.CrossPlatformUI/Views/SystemView/EntityIcon.cs" line="30" column="1" />
@@ -13,6 +19,11 @@
       <Catchpoint exceptionName="System.ArgumentOutOfRangeException" includeSubclasses="True" />
       <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.CrossPlatformUI/Views/CargoView/CargoTypeStoreView.xeto.cs" relfile="Pulsar4X.CrossPlatformUI/Views/CargoView/CargoTypeStoreView.xeto.cs" line="80" column="1" />
       <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/StorageSpaceProcessor.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/StorageSpaceProcessor.cs" line="109" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" relfile="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" line="55" column="1" />
+      <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Faction/OwnedDB.cs" relfile="Pulsar4X.ECSLib/Faction/OwnedDB.cs" line="14" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Faction/OwnedDB.cs" relfile="Pulsar4X.ECSLib/Faction/OwnedDB.cs" line="37" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Faction/OwnedDB.cs" relfile="Pulsar4X.ECSLib/Faction/OwnedDB.cs" line="16" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>

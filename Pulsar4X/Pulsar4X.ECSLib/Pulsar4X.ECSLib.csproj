@@ -375,6 +375,7 @@
     <Compile Include="Orders\OrderHandler.cs" />
     <Compile Include="ComponentFeatureSets\RefineResources\RefineOrdersVM.cs" />
     <Compile Include="ComponentFeatureSets\RefineResources\RefiningVM.cs" />
+    <Compile Include="Faction\FactionOwnedEntitesDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

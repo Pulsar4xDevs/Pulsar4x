@@ -67,15 +67,15 @@ namespace Pulsar4X.ECSLib
                     
                     //calculate how many construction points each resource we've got stored for this job is worth
                     int pointsToUse = Math.Min(pointRates[conType], maxPoints);
-                    pointsToUse = Math.Min(pointsToUse, batchJob.PointsLeft);
+                    pointsToUse = Math.Min(pointsToUse, batchJob.ProductionPointsLeft);
                     pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
                     
                     //construct only enough for the amount of resources we have. 
-                    batchJob.PointsLeft -= pointsToUse;
+                    batchJob.ProductionPointsLeft -= pointsToUse;
                     pointRates[conType] -= pointsToUse;                    
                     maxPoints -= pointsToUse;
 
-                    if (batchJob.PointsLeft == 0)
+                    if (batchJob.ProductionPointsLeft == 0)
                     {
                         BatchJobItemComplete(colony, stockpile, batchJob,designInfo);
                     }
@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
         {
             var colonyConstruction = colonyEntity.GetDataBlob<ConstructionDB>();
             batchJob.NumberCompleted++;
-            batchJob.PointsLeft = designInfo.BuildPointCost;
+            batchJob.ProductionPointsLeft = designInfo.BuildPointCost;
             batchJob.MineralsRequired = designInfo.MinerialCosts;
             batchJob.MineralsRequired = designInfo.MaterialCosts;
             batchJob.MineralsRequired = designInfo.ComponentCosts;

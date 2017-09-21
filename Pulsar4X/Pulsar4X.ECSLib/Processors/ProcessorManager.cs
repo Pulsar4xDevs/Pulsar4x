@@ -34,12 +34,6 @@ namespace Pulsar4X.ECSLib
             var type = typeof(T);
             
             _hotloopProcessors[type].ProcessManager(manager, deltaSeconds);
-            /*
-            var entities = manager.GetAllEntitiesWithDataBlob<T>();
-            foreach (var entity in entities)
-            {               
-                _hotloopProcessors[type].ProcessEntity(entity, deltaSeconds);
-            }*/
         }
 
         internal IHotloopProcessor GetProcessor<T>() where T : BaseDataBlob

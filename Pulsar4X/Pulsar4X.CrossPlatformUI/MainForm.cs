@@ -25,6 +25,7 @@ namespace Pulsar4X.CrossPlatformUI
         private static Command shipView;
         private static Command sysInfoView;
         private static Command logView;
+        private static Command entView;
 
         public MainForm()
         {
@@ -45,6 +46,7 @@ namespace Pulsar4X.CrossPlatformUI
 
             savegame = new SaveGame(_gameVM);
             sysMap = new SystemMap(_gameVM);
+            entView = new EntityGenericViewCMD(_gameVM);
             colView = new ColonyView(_gameVM);
             componentDesign = new ComponentDesignViewCMD(_gameVM);
             shipDesign = new ShipDesignViewCMD(_gameVM);
@@ -83,6 +85,7 @@ namespace Pulsar4X.CrossPlatformUI
 
                 ToolBar.Items.Add(sysMap);
                 ToolBar.Items.Add(colView);
+                ToolBar.Items.Add(entView);
                 ToolBar.Items.Add(componentDesign);
                 ToolBar.Items.Add(shipDesign);
                 ToolBar.Items.Add(missileDesign);

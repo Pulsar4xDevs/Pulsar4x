@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class RefiningDB : BaseDataBlob
+    public class RefiningDB : BaseDataBlob, ICreateViewmodel
     {
         public int PointsPerTick { get; internal set; }
 
@@ -38,6 +38,11 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new RefiningDB(this);
+        }
+
+        public IDBViewmodel CreateVM(Game game)
+        {
+            return new RefiningVM(game.StaticData);
         }
     }
 }

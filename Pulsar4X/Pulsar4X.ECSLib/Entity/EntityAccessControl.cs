@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
                 if (entityMask[EntityManager.GetTypeIndex<ColonyInfoDB>()])
                 {
                     // Check if entity is a SensorContact
-                    if (entityOwnedDB.EntityOwner == entityOwnedDB.ObjectOwner)
+                    if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
                     {
                         // Entity is not a SensorContact
                         factions = FactionsWithAccess(authorizedPlayer, AccessRole.ColonyVision);
@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
                 else if (entityMask[EntityManager.GetTypeIndex<ShipInfoDB>()])
                 {
                     var entityShipInfoDB = entity.GetDataBlob<ShipInfoDB>();
-                    if (entityOwnedDB.EntityOwner == entityOwnedDB.ObjectOwner)
+                    if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
                     {
                         if (entityShipInfoDB.IsClassDefinition())
                         {
@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else if (entityMask[EntityManager.GetTypeIndex<FactionInfoDB>()])
                 {
-                    if (entityOwnedDB.EntityOwner == entityOwnedDB.ObjectOwner)
+                    if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
                     {
                         factions = FactionsWithAccess(authorizedPlayer, AccessRole.FullAccess);
                     }
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
 
                 foreach (Entity faction in factions)
                 {
-                    if (faction == entityOwnedDB.EntityOwner)
+                    if (faction == entityOwnedDB.OwnedByFaction)
                     {
                         return true;
                     }

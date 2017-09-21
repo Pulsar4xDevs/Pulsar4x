@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
         {
             if(globalManager.TryGetEntityByGuid(targetEntityGuid, out targetEntity)) {
                 if(globalManager.TryGetEntityByGuid(factionGuid, out factionEntity)) {
-                    if(factionEntity.GetDataBlob<OwnedDB>().EntityOwner == factionEntity) {
+                    if(factionEntity.GetDataBlob<OwnedDB>().OwnedByFaction == factionEntity) {
                         return true;
                     }
                 }

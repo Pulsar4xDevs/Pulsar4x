@@ -254,6 +254,9 @@
     <EmbeddedResource Include="Views\GenericStackControl.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\EntityGenericView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\LogViewCMD.cs" />
@@ -422,6 +425,10 @@
     <Compile Include="Views\TreeHierachView.xeto.cs">
       <DependentUpon>TreeHierachView.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\EntityGenericView.xeto.cs">
+      <DependentUpon>EntityGenericView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\EntityGenericViewCMD.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">

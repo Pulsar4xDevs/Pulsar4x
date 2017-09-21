@@ -17,11 +17,12 @@ namespace Pulsar4X.ECSLib
 
     public class JobBase
     {
+        internal Guid JobID = Guid.NewGuid();
         public Guid ItemGuid { get; private set; }
         //yes this can be public set just fine. no reason not to here...
         public ushort NumberOrdered { get; set; }
         public ushort NumberCompleted { get; internal set; }
-        public int PointsLeft { get; internal set; }
+        public int ProductionPointsLeft { get; internal set; }
         //again no reason this can't be public set
         public bool Auto { get; set; }
 
@@ -30,7 +31,7 @@ namespace Pulsar4X.ECSLib
             ItemGuid = guid;
             NumberOrdered = numberOrderd;
             NumberCompleted = 0;
-            PointsLeft = jobPoints;
+            ProductionPointsLeft = jobPoints;
             Auto = auto;
         }
     }

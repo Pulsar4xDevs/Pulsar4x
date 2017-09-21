@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
                 {
                     Entity arFaction = keyValuePair.Key;
                     AccessRole arRole = keyValuePair.Value;
-                    if (ownedDB.EntityOwner == arFaction)
+                    if (ownedDB.OwnedByFaction == arFaction)
                     {
                         if (@event.Entity.HasDataBlob<ShipInfoDB>() && (arRole & AccessRole.UnitVision) == AccessRole.UnitVision)
                         {
@@ -165,7 +165,7 @@ namespace Pulsar4X.ECSLib
                         }
 
                         List<Entity> ownedEntities = _game.Systems[knownSystem].SystemManager.GetAllEntitiesWithDataBlob<OwnedDB>();
-                        if (ownedEntities.Any(ownedEntity => ownedEntity.GetDataBlob<OwnedDB>().EntityOwner == arFaction))
+                        if (ownedEntities.Any(ownedEntity => ownedEntity.GetDataBlob<OwnedDB>().OwnedByFaction == arFaction))
                         {
                             return true;
                         }

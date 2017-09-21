@@ -34,8 +34,8 @@ namespace Pulsar4X.ECSLib
         public ushort BatchQuantity { get { return _job.NumberOrdered; } set { _job.NumberOrdered = value; OnPropertyChanged(); } } //note that we're directly changing the data here.
         public bool Repeat { get { return _job.Auto; } set { _job.Auto = value; OnPropertyChanged(); } } //note that we're directly changing the data here.
 
-        public int ItemBuildPointsRemaining { get { return _job.PointsLeft; } set { OnPropertyChanged(); } }
-        public double ItemPercentRemaining { get { return (double)_job.PointsLeft / _jobTotalPoints * 100; } set { OnPropertyChanged(); } }
+        public int ItemBuildPointsRemaining { get { return _job.ProductionPointsLeft; } set { OnPropertyChanged(); } }
+        public double ItemPercentRemaining { get { return (double)_job.ProductionPointsLeft / _jobTotalPoints * 100; } set { OnPropertyChanged(); } }
 
 
 

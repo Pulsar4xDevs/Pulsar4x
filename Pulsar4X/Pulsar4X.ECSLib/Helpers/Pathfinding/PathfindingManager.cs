@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
             Graph graph;
             if (source.HasDataBlob<OwnedDB>())
             {
-                graph = GetPathfindingGraph(source.GetDataBlob<OwnedDB>().EntityOwner);
+                graph = GetPathfindingGraph(source.GetDataBlob<OwnedDB>().OwnedByFaction);
             }
             else
             {
