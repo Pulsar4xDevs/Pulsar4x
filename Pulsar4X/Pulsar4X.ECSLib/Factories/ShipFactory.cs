@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
             var OwnedDB = new OwnedDB(ownerFaction);           
             protoShip.SetDataBlob(OwnedDB);
 
-
+            
 
             PositionDB position = new PositionDB(pos, starsys.Guid);
             protoShip.SetDataBlob(position);
@@ -43,6 +43,7 @@ namespace Pulsar4X.ECSLib
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
             Entity shipEntity = new Entity(systemEntityManager, protoShip);
+            FactionHelpers.SetOwnership(shipEntity, ownerFaction);
 
             //replace the ships references to the design's specific instances with shiny new specific instances
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();

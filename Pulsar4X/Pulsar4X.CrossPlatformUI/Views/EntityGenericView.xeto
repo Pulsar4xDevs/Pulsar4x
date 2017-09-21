@@ -5,7 +5,7 @@
   xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
 >
 <StackLayout>
-    <DropDown x:Name="SelectableEntites" DataContext="{Binding SelectableEntites}" SelectedKey="{Binding SelectedEntity}"></DropDown>
+    <ComboBox x:Name="selectableEntitesCB" DataContext="{Binding SelectableEntites}"></ComboBox>
 
     <TabControl x:Name="datablobVM_tabs"></TabControl>
     </StackLayout>

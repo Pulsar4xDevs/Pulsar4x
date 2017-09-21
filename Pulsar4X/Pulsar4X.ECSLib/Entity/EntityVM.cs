@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
         public EntityVM(GameVM gamevm) 
         {
             _game = gamevm.Game;
-            if(gamevm.CurrentFaction != null &! gamevm.CurrentFaction.IsValid)
+            if(gamevm.CurrentFaction != null && gamevm.CurrentFaction.IsValid)
                 Init(gamevm.CurrentFaction);
         }
 
@@ -51,6 +51,7 @@ namespace Pulsar4X.ECSLib
             }
             SelectableEntites.DisplayMode = DisplayMode.Value;
             SelectableEntites.SelectionChangedEvent += OnEntitySelected;
+            SelectableEntites.SelectedIndex = 0;
             //HasEntity = true;
         }
 

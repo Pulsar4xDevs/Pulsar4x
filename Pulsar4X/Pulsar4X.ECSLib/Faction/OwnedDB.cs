@@ -6,24 +6,7 @@ namespace Pulsar4X.ECSLib
     {
         
         [JsonProperty]
-        private Entity _entityFactionOwner = Entity.InvalidEntity;
-        internal Entity OwnedByFaction {
-            get {
-                return _entityFactionOwner;
-            }
-            set {
-                //TODO: think about moving this to a processor, however that will not guarentee that the factionownedentitiesDB gets populated.
-                Entity origionalFaction = _entityFactionOwner;
-                Entity newFactionOwner = value;
-                _entityFactionOwner = newFactionOwner;
-                if(newFactionOwner.IsValid && !newFactionOwner.GetDataBlob<FactionOwnedEntitesDB>().OwnedEntites.ContainsKey(this.OwningEntity.Guid))
-                    newFactionOwner.GetDataBlob<FactionOwnedEntitesDB>().OwnedEntites.Add(this.OwningEntity.Guid, this.OwningEntity);
-                if(origionalFaction.IsValid)
-                {
-                    origionalFaction.GetDataBlob<FactionOwnedEntitesDB>().OwnedEntites.Remove(this.OwningEntity.Guid);
-                }
-            }
-        }
+        internal Entity OwnedByFaction { get; set; }
         [JsonProperty] //TODO: Do we need two entries? maybe remove this. 
         public Entity ObjectOwner { get; internal set; } = Entity.InvalidEntity;
         

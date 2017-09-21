@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
 
         public IDBViewmodel CreateVM(Game game)
         {
-            return new RefiningVM(game.StaticData);
+            return new RefiningVM(game.StaticData, this);
         }
     }
 }

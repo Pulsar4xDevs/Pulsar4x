@@ -34,7 +34,10 @@ namespace Pulsar4X.CrossPlatformUI.Commands
 
                 EntityVM entityVM = new EntityVM(_gameVM);
                 Views.MainWindow mw = (Views.MainWindow)Application.Instance.MainForm.Content;
-                mw.AddOrSelectTabPanel("Entity View", new Views.EntityGenericView());                
+                var entityView = new Views.EntityGenericView();
+                entityView.DataContext = entityVM;
+                mw.AddOrSelectTabPanel("Entity View", entityView);       
+                
             }
         }
     }

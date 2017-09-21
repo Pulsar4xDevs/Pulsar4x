@@ -10,23 +10,29 @@ namespace Pulsar4X.CrossPlatformUI.Views
     public class EntityGenericView : Panel
     {
         EntityVM _vm;
+        protected ComboBox selectableEntitesCB;
         protected TabControl datablobVM_tabs;
 
         public EntityGenericView()
         {
             XamlReader.Load(this);
+
+            selectableEntitesCB.BindDataContext(c => c.DataStore, (DictionaryVM<Guid, string> m) => m.DisplayList);
+            selectableEntitesCB.SelectedIndexBinding.BindDataContext((DictionaryVM<Guid, string> m) => m.SelectedIndex);
+            
             DataContextChanged += OnDataContextChanged;
 
         }
 
         private void OnDataContextChanged(object sender, EventArgs e)
         {
-            if(sender is EntityVM)
+            if(DataContext is EntityVM)
             {
-                _vm = (EntityVM)sender;
+                _vm = (EntityVM)DataContext;
                 _vm.PropertyChanged += OnPropertyChanged;
                 if(_vm.HasEntity)
                 { }
+                selectableEntitesCB.DataContext = _vm.SelectableEntites;
             }
         }
 

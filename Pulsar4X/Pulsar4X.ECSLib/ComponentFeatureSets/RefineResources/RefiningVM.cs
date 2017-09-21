@@ -24,9 +24,10 @@ namespace Pulsar4X.ECSLib
         Dictionary<Guid, RefineJobVM> _currentJobsDict = new Dictionary<Guid, RefineJobVM>();
         ObservableCollection<RefineJobVM> CurrentJobs = new ObservableCollection<RefineJobVM>();
 
-        public RefiningVM(StaticDataStore staticData)
+        public RefiningVM(StaticDataStore staticData, RefiningDB refiningDB)
         {
             _staticData = staticData;
+            _refineDB = refiningDB;
         }
 
         public void Update()
