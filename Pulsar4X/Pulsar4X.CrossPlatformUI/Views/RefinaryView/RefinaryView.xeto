@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Panel
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <StackLayout x:Name>
+  <Scrollable >
+    <StackLayout x:Name="RefinaryJobs" />
+  </Scrollable>
+    <StackLayout Orientation="Horizontal">
+	  <ComboBox ID="ItemComboBox" SelectedIndex="{Binding NewJobSelectedIndex}"/> 
+	  <NumericUpDown ID="NewJobBatchAmount" Value="{Binding NewJobBatchCount}" />
+	  <CheckBox ID="NewJobIsRepeated" Checked="{Binding NewJobRepeat}"/>
+	  <Button ID="NewJobAdd" Text="Add" />
+	  </StackLayout>
+    </StackLayout>
+</Panel>

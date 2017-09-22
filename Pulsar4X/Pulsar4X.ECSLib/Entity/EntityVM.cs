@@ -18,8 +18,9 @@ namespace Pulsar4X.ECSLib
                 {
                     _hasEntity = value;
                     if(_hasEntity) Update();
-                    OnPropertyChanged();
+
                 }
+                OnPropertyChanged();
             }
         }
         public string Guid { get { return _entity.Guid.ToString(); } }

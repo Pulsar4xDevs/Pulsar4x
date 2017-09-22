@@ -241,6 +241,9 @@
     <EmbeddedResource Include="Views\CargoView\CargoStorageView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\RefinaryView\RefinaryView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\ComponentListView\ComponentSpecificDesignView.xeto" />
     <EmbeddedResource Include="Views\ComponentListView\ComponentSpecificInstanceView.xeto">
       <SubType>Designer</SubType>
@@ -295,6 +298,9 @@
     </Compile>
     <Compile Include="Views\CargoView\CargoTypeStoreView.xeto.cs">
       <DependentUpon>CargoTypeStoreView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Views\RefinaryView\RefinaryView.xeto.cs">
+      <DependentUpon>RefinaryView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Views\ChainedSlidersControl.xeto.cs">
       <DependentUpon>ChainedSlidersControl.xeto</DependentUpon>
@@ -477,6 +483,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Lib" />
+    <Folder Include="Views\RefinaryView\" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
