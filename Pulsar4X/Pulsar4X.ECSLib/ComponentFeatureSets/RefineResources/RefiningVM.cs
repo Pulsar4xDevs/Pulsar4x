@@ -8,8 +8,10 @@ namespace Pulsar4X.ECSLib
 {
     public class RefiningVM : ViewModelBase, IDBViewmodel
     {
+        Guid _factionGuid;
         RefiningDB _refineDB;
         StaticDataStore _staticData;
+        OrderHandler _orderHandler;
         int _pointsPerDay;
         public int PointsPerDay {
             get { return _pointsPerDay; }
@@ -44,14 +46,16 @@ namespace Pulsar4X.ECSLib
         private void OnNewBatchJob()
         {
             DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
-            var newBatchCommand = new RefineOrdersCommand(_refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
-
+            var newBatchCommand = new RefineOrdersCommand(_factionGuid, _refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
+            _orderHandler.HandleOrder(newBatchCommand);
         }
 
-        public RefiningVM(StaticDataStore staticData, RefiningDB refiningDB)
+        public RefiningVM(Game game, RefiningDB refiningDB)
         {
-            _staticData = staticData;
+            _staticData = game.StaticData;
             _refineDB = refiningDB;
+            _orderHandler = game.OrderHandler;
+            _factionGuid = refiningDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction.Guid;
             foreach (var kvp in _staticData.ProcessedMaterials)
             {
                 ItemDictionary.Add(kvp.Key, kvp.Value.Name);

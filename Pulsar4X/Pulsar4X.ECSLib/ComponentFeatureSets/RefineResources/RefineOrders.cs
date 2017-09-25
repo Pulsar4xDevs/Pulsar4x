@@ -21,8 +21,9 @@ namespace Pulsar4X.ECSLib
 
 
 
-        public RefineOrdersCommand(Guid thisEntity, DateTime systemDate, Guid materal, ushort quantity, bool repeatJob )
+        public RefineOrdersCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid materal, ushort quantity, bool repeatJob )
         {
+            RequestingFactionGuid = factionGuid;
             TargetEntityGuid = thisEntity;
             CreatedDate = systemDate;
             MaterialGuid = materal;

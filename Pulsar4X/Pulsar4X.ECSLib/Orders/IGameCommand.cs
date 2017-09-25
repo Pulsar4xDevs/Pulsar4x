@@ -41,9 +41,9 @@ namespace Pulsar4X.ECSLib
     {
         public static bool IsCommandValid(EntityManager globalManager, Guid factionGuid, Guid targetEntityGuid, out Entity factionEntity, out Entity targetEntity)
         {
-            if(globalManager.TryGetEntityByGuid(targetEntityGuid, out targetEntity)) {
-                if(globalManager.TryGetEntityByGuid(factionGuid, out factionEntity)) {
-                    if(factionEntity.GetDataBlob<OwnedDB>().OwnedByFaction == factionEntity) {
+            if(globalManager.FindEntityByGuid(targetEntityGuid, out targetEntity)) {
+                if(globalManager.FindEntityByGuid(factionGuid, out factionEntity)) {
+                    if(targetEntity.GetDataBlob<OwnedDB>().OwnedByFaction == factionEntity) {
                         return true;
                     }
                 }
