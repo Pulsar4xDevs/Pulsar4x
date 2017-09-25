@@ -1,13 +1,7 @@
 ﻿using System;
+
 namespace Pulsar4X.ECSLib
 {
-    public class RefineOrdersVM
-    {
-        public RefineOrdersVM()
-        {
-        }
-    }
-
     public class RefineOrdersCommand:IEntityCommand
     {
         public Guid RequestingFactionGuid { get; set; }
@@ -17,16 +11,29 @@ namespace Pulsar4X.ECSLib
         public DateTime ActionedOnDate { get; set; }
 
         public Guid MaterialGuid { get; set; }
-        public ushort numberOrderd { get; set; }
-        public bool repeatJob { get; set; } = false;
+        public ushort NumberOrderd { get; set; }
+        public bool RepeatJob { get; set; } = false;
 
         private Entity _targetentity;
         private Entity _factionEntity;
         private StaticDataStore _staticData;
         private RefineingJob _job;
 
+
+
+        public RefineOrdersCommand(Guid thisEntity, DateTime systemDate, Guid materal, ushort quantity, bool repeatJob )
+        {
+            TargetEntityGuid = thisEntity;
+            CreatedDate = systemDate;
+            MaterialGuid = materal;
+            NumberOrderd = quantity;
+            RepeatJob = repeatJob;
+        }
+
+
         public bool ActionCommand(Game game)
         {
+            _staticData = game.StaticData;
             if(IsRefineOrderValid(game.GlobalManager))
             {    
                 RefiningProcessor.AddJob(_staticData, _targetentity, _job);
@@ -42,7 +49,7 @@ namespace Pulsar4X.ECSLib
                 if(_staticData.ProcessedMaterials.ContainsKey(MaterialGuid))
                 {
                     int pointCost = _staticData.ProcessedMaterials[MaterialGuid].RefineryPointCost;
-                    _job = new RefineingJob(MaterialGuid, numberOrderd, pointCost, repeatJob);
+                    _job = new RefineingJob(MaterialGuid, NumberOrderd, pointCost, RepeatJob);
                     return true;
                 }
             }

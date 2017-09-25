@@ -3,15 +3,15 @@
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
   >
-  <StackLayout x:Name>
+  <StackLayout>
   <Scrollable >
     <StackLayout x:Name="RefinaryJobs" />
   </Scrollable>
     <StackLayout Orientation="Horizontal">
-	  <ComboBox ID="ItemComboBox" SelectedIndex="{Binding NewJobSelectedIndex}"/> 
+	  <ComboBox ID="ItemComboBox" DataContext="{Binding ItemDictionary}"/> 
 	  <NumericUpDown ID="NewJobBatchAmount" Value="{Binding NewJobBatchCount}" />
 	  <CheckBox ID="NewJobIsRepeated" Checked="{Binding NewJobRepeat}"/>
-	  <Button ID="NewJobAdd" Text="Add" />
+	  <Button ID="NewJobAdd" Command="{Binding AddNewJob}" Text="Add" />
 	  </StackLayout>
     </StackLayout>
 </Panel>

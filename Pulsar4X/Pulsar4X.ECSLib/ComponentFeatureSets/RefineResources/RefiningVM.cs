@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Input;
 
 namespace Pulsar4X.ECSLib
 {
@@ -22,12 +23,42 @@ namespace Pulsar4X.ECSLib
         }
 
         Dictionary<Guid, RefineJobVM> _currentJobsDict = new Dictionary<Guid, RefineJobVM>();
-        ObservableCollection<RefineJobVM> CurrentJobs = new ObservableCollection<RefineJobVM>();
+        public ObservableCollection<RefineJobVM> CurrentJobs { get; } = new ObservableCollection<RefineJobVM>();
+
+        //public ObservableCollection<object> NewJobSelectionItems { get; } = new ObservableCollection<object>();
+        public DictionaryVM<Guid, string> ItemDictionary { get; } = new DictionaryVM<Guid, string>(DisplayMode.Value);
+        public int NewJobSelectedIndex { get { return ItemDictionary.SelectedIndex; } }
+        public Guid NewJobSelectedItem { get { return ItemDictionary.GetKey(NewJobSelectedIndex); } }
+        public ushort NewJobBatchCount { get; set; }
+        public bool NewJobRepeat { get; set; }
+
+        private ICommand _addNewJob;
+        public ICommand AddNewJob
+        {
+            get
+            {
+                return _addNewJob ?? (_addNewJob = new CommandHandler(OnNewBatchJob, true));
+            }
+        }
+
+        private void OnNewBatchJob()
+        {
+            DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
+            var newBatchCommand = new RefineOrdersCommand(_refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
+
+        }
 
         public RefiningVM(StaticDataStore staticData, RefiningDB refiningDB)
         {
             _staticData = staticData;
             _refineDB = refiningDB;
+            foreach (var kvp in _staticData.ProcessedMaterials)
+            {
+                ItemDictionary.Add(kvp.Key, kvp.Value.Name);
+            }
+            ItemDictionary.SelectedIndex = 0;
+            NewJobBatchCount = 1;
+            NewJobRepeat = false;
         }
 
         public void Update()
@@ -72,26 +103,27 @@ namespace Pulsar4X.ECSLib
         RefineingJob _job;
         StaticDataStore _staticData;
         ProcessedMaterialSD _materail;
-        public string MaterialName { get; set; 
-        }
-        public bool RepeatJob => _job.Auto;
-        public int NumberComplete => _job.NumberCompleted;
-        public int NumberOrdered => _job.NumberOrdered;
+        public string Item { get; set; }
+        public bool Repeat => _job.Auto;
+        public int Completed => _job.NumberCompleted;
+        public int BatchQuantity => _job.NumberOrdered;
         public int ProductionPointsLeft => _job.ProductionPointsLeft;
-
+        public int ItemPercentRemaining { get; set; }
         internal RefineJobVM(StaticDataStore staticData, RefineingJob job)
         {
             _staticData = staticData;
             _job = job;
-            MaterialName = _staticData.ProcessedMaterials[_job.ItemGuid].Name;
+            Item = _staticData.ProcessedMaterials[_job.ItemGuid].Name;
         }
 
         internal void Update()
         {
-            OnPropertyChanged(nameof(RepeatJob));
-            OnPropertyChanged(nameof(NumberComplete));
-            OnPropertyChanged(nameof(NumberOrdered));
+            OnPropertyChanged(nameof(Repeat));
+            OnPropertyChanged(nameof(Completed));
+            OnPropertyChanged(nameof(BatchQuantity));
             OnPropertyChanged(nameof(ProductionPointsLeft));
+            ItemPercentRemaining = _job.NumberOrdered / _job.NumberCompleted * 100;
+            OnPropertyChanged(nameof(ItemPercentRemaining));
         }
     }
 }

@@ -1,13 +1,16 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI/Views/RefinaryView/RefinaryView.xeto.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/RefinaryView/RefinaryView.xeto" Line="17" Column="9" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/RefinaryView/RefinaryView.xeto.cs" Line="26" Column="20" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto" Line="10" Column="55" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" Line="31" Column="45" />
+      <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" line="49" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTypeStoreVM.cs" line="32" offsetX="618" offsetY="496" expression="_cargoTypeSD" liveUpdate="True" />

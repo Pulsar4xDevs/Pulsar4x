@@ -57,17 +57,20 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void SetViewForViewmodel(IDBViewmodel vm, TabPage tabPage)
         {
+
             if(vm is CargoStorageVM)
             {
                 CargoView.CargoStorageView view = new CargoView.CargoStorageView();
                 view.DataContext = vm;
                 tabPage.Content = view;
+                tabPage.Text = "Cargo";
             }
             else if (vm is RefiningVM)
             {
-                //refi view = new CargoView.CargoStorageView();
-                //view.DataContext = vm;
-                //tabPage.Content = view;
+                RefinaryView.RefinaryView view = new RefinaryView.RefinaryView();
+                view.DataContext = vm;
+                tabPage.Content = view;
+                tabPage.Text = "Refinary";
             }
 
 
