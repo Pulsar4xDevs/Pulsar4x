@@ -32,6 +32,7 @@ namespace Pulsar4X.ECSLib
         public DictionaryVM<Guid, string> SelectableEntites { get; } = new DictionaryVM<Guid, string>();
         private Dictionary<Guid, Entity> _selectableEntitys { get; } = new Dictionary<Guid, Entity>();
 
+
         public EntityVM(GameVM gamevm) 
         {
             _game = gamevm.Game;
@@ -61,6 +62,12 @@ namespace Pulsar4X.ECSLib
             Guid key = SelectableEntites.GetKey(newindex);
             _entity = _selectableEntitys[key];
             HasEntity = true;
+            _entity.Manager.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
+        }
+
+        private void OnSystemDateChange(DateTime newDate)
+        {
+            Update();
         }
 
         internal void Update()

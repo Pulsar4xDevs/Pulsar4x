@@ -48,6 +48,7 @@ namespace Pulsar4X.ECSLib
             DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
             var newBatchCommand = new RefineOrdersCommand(_factionGuid, _refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
             _orderHandler.HandleOrder(newBatchCommand);
+            Update();
         }
 
         public RefiningVM(Game game, RefiningDB refiningDB)
@@ -106,13 +107,12 @@ namespace Pulsar4X.ECSLib
     {
         RefineingJob _job;
         StaticDataStore _staticData;
-        ProcessedMaterialSD _materail;
         public string Item { get; set; }
         public bool Repeat => _job.Auto;
         public int Completed => _job.NumberCompleted;
         public int BatchQuantity => _job.NumberOrdered;
         public int ProductionPointsLeft => _job.ProductionPointsLeft;
-        public int ItemPercentRemaining { get; set; }
+        public float ItemPercentRemaining { get; set; }
         internal RefineJobVM(StaticDataStore staticData, RefineingJob job)
         {
             _staticData = staticData;
@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
             OnPropertyChanged(nameof(Completed));
             OnPropertyChanged(nameof(BatchQuantity));
             OnPropertyChanged(nameof(ProductionPointsLeft));
-            ItemPercentRemaining = _job.NumberOrdered / _job.NumberCompleted * 100;
+            ItemPercentRemaining = (float)_job.NumberCompleted / _job.NumberOrdered  * 100;
             OnPropertyChanged(nameof(ItemPercentRemaining));
         }
     }
