@@ -18,8 +18,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public JobUC()
         {
             XamlReader.Load(this);
-            IncPriority.CommandParameter = -1;
-            DecPriority.CommandParameter = 1;
+            IncPriority.CommandParameter = (short)-1;
+            DecPriority.CommandParameter = (short)1;
         }
 
         //public JobUC(JobVM<BaseDataBlob, object> viewModel) : this()

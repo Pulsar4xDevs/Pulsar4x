@@ -1,20 +1,22 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" Line="128" Column="61" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/RefinaryView/RefinaryView.xeto" Line="7" Column="32" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/RefinaryView/RefinaryView.xeto.cs" Line="27" Column="57" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/JobAbilityView.xeto" Line="12" Column="21" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/JobAbilityView.xeto.cs" Line="79" Column="55" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="82" Column="57" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/GameVM.cs" Line="24" Column="33" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/JobUC.xeto" Line="20" Column="21" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoStorageVM.cs" Line="8" Column="47" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="65" Column="164" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/ColonyScreenVM.cs" Line="62" Column="13" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" Line="121" Column="22" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningProcessor.cs" Line="216" Column="7" />
+      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="132" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="222" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefineOrders.cs" Line="80" Column="27" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTypeStoreVM.cs" line="32" offsetX="618" offsetY="496" expression="_cargoTypeSD" liveUpdate="True" />

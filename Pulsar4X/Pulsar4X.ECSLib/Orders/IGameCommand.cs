@@ -52,4 +52,21 @@ namespace Pulsar4X.ECSLib
             return false;
         }
     }
+
+    public class CommandReferences
+    {
+        internal Guid FactionGuid;
+        internal Guid EntityGuid;
+        internal OrderHandler Handler;
+        private ManagerSubPulse _subPulse;
+        internal DateTime GetSystemDatetime { get { return _subPulse.SystemLocalDateTime; } }
+
+        internal CommandReferences(Guid faction, Guid entity, OrderHandler handler, ManagerSubPulse subPulse)
+        {
+            FactionGuid = faction;
+            EntityGuid = entity;
+            Handler = handler;
+            _subPulse = subPulse;
+        }
+    }
 }

@@ -32,9 +32,9 @@ namespace Pulsar4X.ECSLib
             return new CargoStorageDB(this);
         }
 
-        IDBViewmodel ICreateViewmodel.CreateVM(Game game)
+        IDBViewmodel ICreateViewmodel.CreateVM(Game game, CommandReferences cmdRef)
         {
-            return new CargoStorageVM(game.StaticData, this);
+            return new CargoStorageVM(game.StaticData, cmdRef, this);
         }
     }
 

@@ -40,9 +40,9 @@ namespace Pulsar4X.ECSLib
             return new RefiningDB(this);
         }
 
-        public IDBViewmodel CreateVM(Game game)
+        public IDBViewmodel CreateVM(Game game, CommandReferences cmdRef)
         {
-            return new RefiningVM(game, this);
+            return new RefiningVM(game, cmdRef, this);
         }
     }
 }

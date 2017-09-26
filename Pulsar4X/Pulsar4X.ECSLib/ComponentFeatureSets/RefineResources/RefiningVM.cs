@@ -13,10 +13,12 @@ namespace Pulsar4X.ECSLib
         StaticDataStore _staticData;
         OrderHandler _orderHandler;
         int _pointsPerDay;
-        public int PointsPerDay {
+        public int PointsPerDay
+        {
             get { return _pointsPerDay; }
-            set {
-                if(_pointsPerDay != value)
+            set
+            {
+                if (_pointsPerDay != value)
                 {
                     _pointsPerDay = value;
                     OnPropertyChanged();
@@ -43,6 +45,8 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        private CommandReferences _cmdRef;
+
         private void OnNewBatchJob()
         {
             DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
@@ -51,12 +55,13 @@ namespace Pulsar4X.ECSLib
             Update();
         }
 
-        public RefiningVM(Game game, RefiningDB refiningDB)
+        public RefiningVM(Game game, CommandReferences cmdRef, RefiningDB refiningDB)
         {
             _staticData = game.StaticData;
             _refineDB = refiningDB;
             _orderHandler = game.OrderHandler;
             _factionGuid = refiningDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction.Guid;
+            _cmdRef = cmdRef;
             foreach (var kvp in _staticData.ProcessedMaterials)
             {
                 ItemDictionary.Add(kvp.Key, kvp.Value.Name);
@@ -70,33 +75,52 @@ namespace Pulsar4X.ECSLib
         {
             PointsPerDay = _refineDB.PointsPerTick;
 
+            /*
             foreach(var jobItem in _refineDB.JobBatchList)
             {
 
                 if(!_currentJobsDict.ContainsKey(jobItem.JobID))
                 {
-                    var newJobVM = new RefineJobVM(_staticData, jobItem);
+                    var newJobVM = new RefineJobVM(this, _staticData, jobItem, _cmdRef);
                     _currentJobsDict.Add(jobItem.JobID, newJobVM);
                     CurrentJobs.Add(newJobVM);
                 }
                 _currentJobsDict[jobItem.JobID].Update();
-            }
+            }*/
 
-            //a somewhat backwards way of finding any items in the viewmodel dictionary&list that are not in the datablob list. 
-            var keys = _currentJobsDict.Keys.ToList();
-            foreach(var job in _refineDB.JobBatchList)
+            for (int index = 0; index < _refineDB.JobBatchList.Count; index++)
             {
-                if(keys.Contains(job.JobID))
-                { keys.Remove(job.JobID); }
+                var jobItem = _refineDB.JobBatchList[index];
+                Guid jobID = jobItem.JobID;
 
-            }
-            if(keys.Count > 0)
-            {
-                foreach(var item in keys)
+                if (CurrentJobs.Count <= index)
                 {
-                    CurrentJobs.Remove(_currentJobsDict[item]);
-                    _currentJobsDict.Remove(item);
+                    var newJobVM = new RefineJobVM(this, _staticData, jobItem, _cmdRef);
+                    _currentJobsDict.Add(jobID, newJobVM);
+                    CurrentJobs.Insert(index, newJobVM);
                 }
+                if(CurrentJobs[index].JobID != jobID)
+                {
+                    var outOfOrderVM = CurrentJobs[index];
+                    CurrentJobs.Remove(outOfOrderVM);
+                    if (_refineDB.JobBatchList.Contains(outOfOrderVM.JobItem))
+                    {
+                        int newIndex = _refineDB.JobBatchList.IndexOf(outOfOrderVM.JobItem);
+                        CurrentJobs.Insert(newIndex, outOfOrderVM);
+                    }
+                    else
+                    {
+                        _currentJobsDict.Remove(jobID);
+                    }
+
+                    if (!_currentJobsDict.ContainsKey(jobID))
+                    {
+                        var newJobVM = new RefineJobVM(this, _staticData, jobItem, _cmdRef);
+                        _currentJobsDict.Add(jobID, newJobVM);
+                        CurrentJobs.Insert(index, newJobVM);
+                    }
+                }
+                CurrentJobs[index].Update();
             }
         }
     }
@@ -105,19 +129,32 @@ namespace Pulsar4X.ECSLib
 
     public class RefineJobVM : ViewModelBase
     {
-        RefineingJob _job;
+        internal RefineingJob JobItem { get; private set; }
         StaticDataStore _staticData;
+        internal Guid JobID { get { return JobItem.JobID; } }
+        public CommandReferences _cmdRef;
+        private IDBViewmodel _parent;
         public string Item { get; set; }
-        public bool Repeat => _job.Auto;
-        public int Completed => _job.NumberCompleted;
-        public int BatchQuantity => _job.NumberOrdered;
-        public int ProductionPointsLeft => _job.ProductionPointsLeft;
+        public bool Repeat => JobItem.Auto;
+        public int Completed => JobItem.NumberCompleted;
+        public int BatchQuantity => JobItem.NumberOrdered;
+        public int ProductionPointsLeft => JobItem.ProductionPointsLeft;
         public float ItemPercentRemaining { get; set; }
-        internal RefineJobVM(StaticDataStore staticData, RefineingJob job)
+        internal RefineJobVM(RefiningVM parentVM, StaticDataStore staticData, RefineingJob job, CommandReferences cmdRef)
         {
+            _parent = parentVM;
             _staticData = staticData;
-            _job = job;
-            Item = _staticData.ProcessedMaterials[_job.ItemGuid].Name;
+            JobItem = job;
+            Item = _staticData.ProcessedMaterials[JobItem.ItemGuid].Name;
+            _cmdRef = cmdRef;
+        }
+
+        public ICommand ChangePriorityCmd { get { return new RelayCommand<short>(param => ChangePriority(param)); } }
+        public void ChangePriority(short delta)
+        {
+            RePrioritizeCommand newCommand = new RePrioritizeCommand(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID, delta);
+            _cmdRef.Handler.HandleOrder(newCommand);
+            _parent.Update();
         }
 
         internal void Update()
@@ -126,7 +163,7 @@ namespace Pulsar4X.ECSLib
             OnPropertyChanged(nameof(Completed));
             OnPropertyChanged(nameof(BatchQuantity));
             OnPropertyChanged(nameof(ProductionPointsLeft));
-            ItemPercentRemaining = (float)_job.NumberCompleted / _job.NumberOrdered  * 100;
+            ItemPercentRemaining = (float)JobItem.NumberCompleted / JobItem.NumberOrdered  * 100;
             OnPropertyChanged(nameof(ItemPercentRemaining));
         }
     }

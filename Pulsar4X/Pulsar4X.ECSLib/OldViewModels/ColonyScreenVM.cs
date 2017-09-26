@@ -60,8 +60,8 @@ namespace Pulsar4X.ECSLib
 
             UpdatePop();
 
-
-            CargoStoreVM = new CargoStorageVM(staticData, colonyEntity.GetDataBlob<CargoStorageDB>());
+            CommandReferences cmdRef = new CommandReferences(FactionEntity.Guid, _colonyEntity.Guid, gameVM.Game.OrderHandler, _colonyEntity.Manager.ManagerSubpulses);
+            CargoStoreVM = new CargoStorageVM(staticData, cmdRef, colonyEntity.GetDataBlob<CargoStorageDB>());
 
             PlanetMineralDepositVM = new PlanetMineralDepositVM(staticData, _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);
          

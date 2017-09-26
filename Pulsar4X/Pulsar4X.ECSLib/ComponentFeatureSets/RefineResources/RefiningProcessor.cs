@@ -197,12 +197,35 @@ namespace Pulsar4X.ECSLib
         /// placing the item either at the top or bottom of the list.
         /// </param>
         //[PublicAPI]
-        //public static void ChangeJobPriority(Entity colonyEntity, JobBase job, int delta)
-        //{
-            
-        //    ColonyRefiningDB refiningDB = colonyEntity.GetDataBlob<ColonyRefiningDB>();
+        public static void ChangeJobPriority(Entity colonyEntity, Guid jobID, int delta)
+        {     
+            var jobBatchList = colonyEntity.GetDataBlob<RefiningDB>().JobBatchList;
+            lock (jobBatchList)
+            {
+                var job = jobBatchList.Find((obj) => obj.JobID == jobID);
 
-        //}
+                if (job != null)//.Contains(job))
+                {
+                    int currentIndex = jobBatchList.IndexOf(job);
+                    int newIndex = currentIndex + delta;
+                    if (newIndex <= 0)
+                    {
+                        jobBatchList.RemoveAt(currentIndex);
+                        jobBatchList.Insert(0, job);
+                    }
+                    else if (newIndex >= jobBatchList.Count - 1)
+                    {
+                        jobBatchList.RemoveAt(currentIndex);
+                        jobBatchList.Add(job);
+                    }
+                    else
+                    {
+                        jobBatchList.RemoveAt(currentIndex);
+                        jobBatchList.Insert(newIndex, job);
+                    }
+                }
+            }
+        }
     }
 
     public static class ListPriority<T> 

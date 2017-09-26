@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
 
         ICargoable SelectedCargoItem { get; set; }
         long AmountToTransfer { get; set; }
-
+        public CommandReferences CmdRef { get; set; }
 
         public CargoOrdersVM(Game game)
         {

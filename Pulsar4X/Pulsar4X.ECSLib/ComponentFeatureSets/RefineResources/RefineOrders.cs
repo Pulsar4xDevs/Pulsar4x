@@ -57,4 +57,50 @@ namespace Pulsar4X.ECSLib
             return false;
         }
     }
+
+    public class RePrioritizeCommand : IEntityCommand
+    {
+        public Guid RequestingFactionGuid { get; set; }
+
+        public Guid TargetEntityGuid { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime ActionedOnDate { get; set; }
+
+        public Guid JobID { get; set; }
+        public short Delta { get; set; }
+
+        private Entity _factionEntity;
+        private Entity _targetEntity;
+
+        public RePrioritizeCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID, short delta)
+        {
+            RequestingFactionGuid = factionGuid;
+            TargetEntityGuid = thisEntity;
+            CreatedDate = systemDate;
+            JobID = jobID;
+            Delta = delta;
+        }
+
+        public bool ActionCommand(Game game)
+        {
+            
+            if (IsOrderValid(game.GlobalManager))
+            {
+                RefiningProcessor.ChangeJobPriority(_targetEntity, JobID, Delta);
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsOrderValid(EntityManager globalManager)
+        {
+            if (CommandHelpers.IsCommandValid(globalManager, RequestingFactionGuid, TargetEntityGuid, out _factionEntity, out _targetEntity))
+            {
+               return true;
+
+            }
+            return false;
+        }
+
+    }
 }

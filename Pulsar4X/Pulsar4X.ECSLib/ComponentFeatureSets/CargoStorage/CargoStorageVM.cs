@@ -13,13 +13,13 @@ namespace Pulsar4X.ECSLib
         Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         public ObservableCollection<CargoTypeStoreVM> CargoResourceStores { get; } = new ObservableCollection<CargoTypeStoreVM>();
         
-        internal CargoStorageVM(StaticDataStore staticData, CargoStorageDB storeDB)
+        internal CargoStorageVM(StaticDataStore staticData, CommandReferences cmdRef, CargoStorageDB storeDB)
         {
             _staticData = staticData;
             _storageDatablob = storeDB;
             Update();
         }
-
+        public CommandReferences CmdRef { get; set; }
         public void Update()
         {
             foreach(var kvp in _storageDatablob.StoredCargoTypes) 

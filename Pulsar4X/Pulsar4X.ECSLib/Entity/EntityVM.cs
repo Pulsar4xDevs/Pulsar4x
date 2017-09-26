@@ -32,6 +32,7 @@ namespace Pulsar4X.ECSLib
         public DictionaryVM<Guid, string> SelectableEntites { get; } = new DictionaryVM<Guid, string>();
         private Dictionary<Guid, Entity> _selectableEntitys { get; } = new Dictionary<Guid, Entity>();
 
+        internal CommandReferences CmdRef { get; private set; }
 
         public EntityVM(GameVM gamevm) 
         {
@@ -61,8 +62,10 @@ namespace Pulsar4X.ECSLib
         {
             Guid key = SelectableEntites.GetKey(newindex);
             _entity = _selectableEntitys[key];
+            CmdRef = new CommandReferences(_entity.GetDataBlob<OwnedDB>().OwnedByFaction.Guid, _entity.Guid, _game.OrderHandler, _entity.Manager.ManagerSubpulses);
             HasEntity = true;
             _entity.Manager.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
+
         }
 
         private void OnSystemDateChange(DateTime newDate)
@@ -77,7 +80,8 @@ namespace Pulsar4X.ECSLib
             {
                 if(datablob is ICreateViewmodel &!_viewmodelDict.ContainsKey(datablob))
                 {
-                    var newvm = datablob.CreateVM(_game);
+                    var newvm = datablob.CreateVM(_game, CmdRef);
+
                     Viewmodels.Add(newvm);
                     _viewmodelDict.Add(datablob, newvm);
                 }
@@ -117,6 +121,6 @@ namespace Pulsar4X.ECSLib
 
     internal interface ICreateViewmodel
     {
-        IDBViewmodel CreateVM(Game game);
+        IDBViewmodel CreateVM(Game game, CommandReferences cmdRef);
     }
 }
