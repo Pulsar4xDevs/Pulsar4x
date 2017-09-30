@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
         internal OrderHandler(Game game)
         { _game = game; }
 
-        internal abstract void HandleOrder(IEntityCommand entityCommand);
+        internal abstract void HandleOrder(EntityCommand entityCommand);
     }
 
 
@@ -19,9 +19,13 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        internal override void HandleOrder(IEntityCommand entityCommand)
+        internal override void HandleOrder(EntityCommand entityCommand)
         {
-            entityCommand.ActionCommand(_game);
+            if (entityCommand.IsValidCommand(_game))
+            {
+                entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(entityCommand);
+                OrderableProcessor.ProcessOrderList(entityCommand.EntityCommanding.GetDataBlob<OrderableDB>());
+            }              
         }
     }
 
@@ -37,14 +41,14 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        internal override void HandleOrder(IEntityCommand entityCommand)
+        internal override void HandleOrder(EntityCommand entityCommand)
         {
             RXOrder(entityCommand);
         }
 
-        internal void RXOrder(IEntityCommand entityCommand)
+        internal void RXOrder(EntityCommand entityCommand)
         {
-            if(entityCommand.ActionCommand(_game) && HasClients)
+            if(entityCommand.IsValidCommand(_game) && HasClients)
             {
                 if(factionListners.ContainsKey(entityCommand.RequestingFactionGuid))
                 {
@@ -64,15 +68,15 @@ namespace Pulsar4X.ECSLib
         internal ClientOrderHandler(Game game) : base(game)
         {
         }
-        internal override void HandleOrder(IEntityCommand entityCommand)
+        internal override void HandleOrder(EntityCommand entityCommand)
         {
             TXOrder(entityCommand);
         }
-        internal void TXOrder(IEntityCommand entityCommand)
+        internal void TXOrder(EntityCommand entityCommand)
         {
             ServerConnection.SendOrder(entityCommand);
         }
-        internal void RXOrder(IEntityCommand entityCommand)
+        internal void RXOrder(EntityCommand entityCommand)
         {
             entityCommand.ActionCommand(_game);
         }
@@ -83,7 +87,7 @@ namespace Pulsar4X.ECSLib
 
     internal class RemoteConnection //flesh this out once I've got lidgren back in
     {
-        internal void SendOrder(IEntityCommand entityCommand)
+        internal void SendOrder(EntityCommand entityCommand)
         { }
 
 

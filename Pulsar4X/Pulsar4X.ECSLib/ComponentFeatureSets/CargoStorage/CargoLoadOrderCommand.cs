@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoLoadOrder:IEntityCommand
+    public class CargoLoadOrder:EntityCommand
     {
         /// <summary>
         /// This is the faction that has requested the command. 
@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         /// The Entity this command is targeted at
         /// </summary>
         /// <value>The entity GUID.</value>
-        public Guid TargetEntityGuid { get; set; }
+        public Guid EntityCommandingGuid { get; set; }
 
         /// <summary>
         /// Gets or sets the datetime this command was created by the player/client. 
@@ -36,8 +36,13 @@ namespace Pulsar4X.ECSLib
 
         public Guid ItemToTransfer { get; set; }
 
-        [JsonIgnore]
-        Entity targetEntity;
+        public int ActionLanes => 1;
+
+        public bool IsBlocking => true;
+        public bool IsRunning { get; private set; } = false;
+        private Entity _entityCommanding;
+        public Entity EntityCommanding { get { return _entityCommanding; } }
+
         [JsonIgnore]
         Entity factionEntity;
         [JsonIgnore]
@@ -49,31 +54,36 @@ namespace Pulsar4X.ECSLib
         /// This creates a CargoTranferDB from the command, which does all the work.
         /// the command is to create and enqueue a CargoTransferDB.
         /// </summary>
-        public bool ActionCommand(Game game)
+        public void ActionCommand(Game game)
         {
-            if(IsCargoOrderValid(game.GlobalManager)) {
-                CargoTransferDB newTransferDB = new CargoTransferDB();
-                newTransferDB.CargoToEntity = targetEntity;
-                newTransferDB.CargoToDB = targetEntity.GetDataBlob<CargoStorageDB>();
-                newTransferDB.CargoFromEntity = loadFromEntity;
-                newTransferDB.CargoFromDB = loadFromEntity.GetDataBlob<CargoStorageDB>();
+            CargoTransferDB newTransferDB = new CargoTransferDB();
+            newTransferDB.CargoToEntity = _entityCommanding;
+            newTransferDB.CargoToDB = _entityCommanding.GetDataBlob<CargoStorageDB>();
+            newTransferDB.CargoFromEntity = loadFromEntity;
+            newTransferDB.CargoFromDB = loadFromEntity.GetDataBlob<CargoStorageDB>();
 
-                newTransferDB.TotalAmountToTransfer = TotalAmountToTransfer;
-                newTransferDB.ItemToTranfer = (ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
-                targetEntity.Manager.SetDataBlob(targetEntity.ID, newTransferDB);
-                return true;
-            }
-            return false;
+            newTransferDB.TotalAmountToTransfer = TotalAmountToTransfer;
+            newTransferDB.ItemToTranfer = (ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
+            _entityCommanding.Manager.SetDataBlob(_entityCommanding.ID, newTransferDB);
+            IsRunning = true;
         }
 
-        private bool IsCargoOrderValid(EntityManager globalManager)
+
+        public bool IsValidCommand(Game game)
         {
-            if(CommandHelpers.IsCommandValid(globalManager, RequestingFactionGuid, TargetEntityGuid, out factionEntity, out targetEntity)) {
-                if(globalManager.TryGetEntityByGuid(LoadCargoFromEntityGuid, out loadFromEntity)) {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out factionEntity, out _entityCommanding))
+            {
+                if (game.GlobalManager.TryGetEntityByGuid(LoadCargoFromEntityGuid, out loadFromEntity))
+                {
                     return true;
                 }
             }
             return false;
+        }
+
+        public bool IsFinished()
+        {
+            throw new NotImplementedException();
         }
 
         public CargoLoadOrder()

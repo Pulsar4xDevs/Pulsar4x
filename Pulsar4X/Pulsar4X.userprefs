@@ -1,15 +1,8 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoStorageVM.cs" Line="8" Column="47" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="65" Column="164" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/ColonyScreenVM.cs" Line="62" Column="13" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" Line="121" Column="22" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningProcessor.cs" Line="216" Column="7" />
-      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="132" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="222" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefineOrders.cs" Line="80" Column="27" />
-      <File FileName="Pulsar4X Status" />
+      <File FileName="Pulsar4X.ECSLib/Orders/OrderableDB.cs" Line="54" Column="41" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" Line="99" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
@@ -21,6 +14,7 @@
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTypeStoreVM.cs" line="32" offsetX="618" offsetY="496" expression="_cargoTypeSD" liveUpdate="True" />
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" line="129" offsetX="820" offsetY="1973" expression="ItemPercentRemaining" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/Orders/OrderableDB.cs" line="54" offsetX="394" offsetY="848" expression="actionList" liveUpdate="False" />
   </MonoDevelop.Ide.DebuggingService.PinnedWatches>
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.Pulsar4X.CrossPlatformUI.Gtk2 PreferredExecutionTarget="MonoDevelop.Default" />

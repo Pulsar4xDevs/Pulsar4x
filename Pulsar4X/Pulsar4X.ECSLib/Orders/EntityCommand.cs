@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Pulsar4X.ECSLib
 {
-    public interface IEntityCommand
+    public interface EntityCommand
     {
         /// <summary>
         /// This is the faction that has requested the command. 
@@ -13,7 +13,9 @@ namespace Pulsar4X.ECSLib
         /// The Entity this command is targeted at
         /// </summary>
         /// <value>The entity GUID.</value>
-        Guid TargetEntityGuid { get; set; }
+        Guid EntityCommandingGuid { get; set; }
+
+        Entity EntityCommanding{ get; }
 
         /// <summary>
         /// Gets or sets the datetime this command was created by the player/client. 
@@ -29,12 +31,22 @@ namespace Pulsar4X.ECSLib
         DateTime ActionedOnDate{ get; set; }
 
         /// <summary>
-        /// Validates and actions the command. 
+        /// checks that the entities exsist and that the entity is owned by the faction.
         /// may eventualy need to return a responce instead of just bool. 
         /// </summary>
-        bool ActionCommand(Game game);
+        bool IsValidCommand(Game game);
+        /// <summary>
+        /// Actions the command.
+        /// </summary>
+        /// <param name="game">Game.</param>
+        void ActionCommand(Game game);
 
+        int ActionLanes { get;}
 
+        bool IsBlocking { get;}
+
+        bool IsRunning{ get;}
+        bool IsFinished(); 
     }
 
     public static class CommandHelpers

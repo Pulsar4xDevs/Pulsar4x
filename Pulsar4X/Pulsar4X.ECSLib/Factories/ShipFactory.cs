@@ -34,7 +34,8 @@ namespace Pulsar4X.ECSLib
             var OwnedDB = new OwnedDB(ownerFaction);           
             protoShip.SetDataBlob(OwnedDB);
 
-            
+            OrderableDB orderableDB = new OrderableDB();
+            protoShip.SetDataBlob(orderableDB);
 
             PositionDB position = new PositionDB(pos, starsys.Guid);
             protoShip.SetDataBlob(position);

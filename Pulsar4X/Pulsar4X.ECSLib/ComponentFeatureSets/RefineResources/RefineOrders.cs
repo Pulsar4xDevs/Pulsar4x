@@ -2,11 +2,11 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class RefineOrdersCommand:IEntityCommand
+    public class RefineOrdersCommand:EntityCommand
     {
         public Guid RequestingFactionGuid { get; set; }
 
-        public Guid TargetEntityGuid { get; set; }
+        public Guid EntityCommandingGuid { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ActionedOnDate { get; set; }
 
@@ -14,7 +14,16 @@ namespace Pulsar4X.ECSLib
         public ushort NumberOrderd { get; set; }
         public bool RepeatJob { get; set; } = false;
 
-        private Entity _targetentity;
+        public int ActionLanes => 1; //blocks movement
+
+        public bool IsRunning { get; private set; } = false;
+        public bool IsBlocking => true;
+
+
+        private Entity _entityCommanding;
+        public Entity EntityCommanding{get{return _entityCommanding;}}
+
+
         private Entity _factionEntity;
         private StaticDataStore _staticData;
         private RefineingJob _job;
@@ -24,7 +33,7 @@ namespace Pulsar4X.ECSLib
         public RefineOrdersCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid materal, ushort quantity, bool repeatJob )
         {
             RequestingFactionGuid = factionGuid;
-            TargetEntityGuid = thisEntity;
+            EntityCommandingGuid = thisEntity;
             CreatedDate = systemDate;
             MaterialGuid = materal;
             NumberOrderd = quantity;
@@ -32,22 +41,19 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public bool ActionCommand(Game game)
+        public void ActionCommand(Game game)
         {
-            _staticData = game.StaticData;
-            if(IsRefineOrderValid(game.GlobalManager))
-            {    
-                RefiningProcessor.AddJob(_staticData, _targetentity, _job);
-                return true;
-            }
-            return false;
+            RefiningProcessor.AddJob(_staticData, _entityCommanding, _job);
+            IsRunning = true;
         }
 
-        private bool IsRefineOrderValid(EntityManager globalManager)
-        {
-            if(CommandHelpers.IsCommandValid(globalManager, RequestingFactionGuid, TargetEntityGuid, out _factionEntity, out _targetentity))
+
+        public bool IsValidCommand(Game game)
+        {       
+            _staticData = game.StaticData;
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if(_staticData.ProcessedMaterials.ContainsKey(MaterialGuid))
+                if (_staticData.ProcessedMaterials.ContainsKey(MaterialGuid))
                 {
                     int pointCost = _staticData.ProcessedMaterials[MaterialGuid].RefineryPointCost;
                     _job = new RefineingJob(MaterialGuid, NumberOrderd, pointCost, RepeatJob);
@@ -56,50 +62,73 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        public bool IsFinished()
+        {
+            if (_job.Auto == false && _job.NumberCompleted == _job.NumberOrdered)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 
-    public class RePrioritizeCommand : IEntityCommand
+    public class RePrioritizeCommand : EntityCommand
     {
         public Guid RequestingFactionGuid { get; set; }
 
-        public Guid TargetEntityGuid { get; set; }
+        public Guid EntityCommandingGuid { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ActionedOnDate { get; set; }
 
         public Guid JobID { get; set; }
         public short Delta { get; set; }
 
+        public int ActionLanes => 0;
+
+        public bool IsBlocking => false;
+        public bool IsRunning { get; private set; } = false;
         private Entity _factionEntity;
-        private Entity _targetEntity;
+
+        private Entity _entityCommanding;
+        public Entity EntityCommanding { get { return _entityCommanding; } }
 
         public RePrioritizeCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID, short delta)
         {
             RequestingFactionGuid = factionGuid;
-            TargetEntityGuid = thisEntity;
+            EntityCommandingGuid = thisEntity;
             CreatedDate = systemDate;
             JobID = jobID;
             Delta = delta;
         }
 
-        public bool ActionCommand(Game game)
+        public void ActionCommand(Game game)
         {
-            
+            RefiningProcessor.ChangeJobPriority(_entityCommanding, JobID, Delta);
+            IsRunning = true;
+        }
+
+        private bool IsOrderValid(EntityManager globalManager)
+        {
+            if (CommandHelpers.IsCommandValid(globalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+               return true;
+            }
+            return false;
+        }
+
+        public bool IsValidCommand(Game game)
+        {
             if (IsOrderValid(game.GlobalManager))
             {
-                RefiningProcessor.ChangeJobPriority(_targetEntity, JobID, Delta);
                 return true;
             }
             return false;
         }
 
-        private bool IsOrderValid(EntityManager globalManager)
+        public bool IsFinished()
         {
-            if (CommandHelpers.IsCommandValid(globalManager, RequestingFactionGuid, TargetEntityGuid, out _factionEntity, out _targetEntity))
-            {
-               return true;
-
-            }
-            return false;
+            return IsRunning;//its run once, therefore it's finished.
         }
 
     }

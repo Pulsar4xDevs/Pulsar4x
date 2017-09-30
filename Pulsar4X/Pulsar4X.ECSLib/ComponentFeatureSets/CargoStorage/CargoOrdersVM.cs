@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
             newOrder.CreatedDate = currentDatetime;
             newOrder.RequestingFactionGuid = _faction.Guid;
             newOrder.LoadCargoFromEntityGuid = _loadFromEntity.Guid;
-            newOrder.TargetEntityGuid = _faction.Guid;
+            newOrder.EntityCommandingGuid = _faction.Guid;
             newOrder.ItemToTransfer = SelectedCargoItem.ID;
             newOrder.TotalAmountToTransfer = AmountToTransfer;
             _orderHandler.HandleOrder(newOrder);

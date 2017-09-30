@@ -359,7 +359,7 @@
     <Compile Include="ComponentFeatureSets\Construction\ConstructionDB.cs" />
     <Compile Include="ComponentFeatureSets\Research\FactionTechDB.cs" />
     <Compile Include="ComponentFeatureSets\Construction\ConstructionAtbDB.cs" />
-    <Compile Include="Orders\IGameCommand.cs" />
+    <Compile Include="Orders\EntityCommand.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoTransferDB.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoTransferProcessor.cs" />
     <Compile Include="ComponentFeatureSets\CargoStorage\CargoOrdersVM.cs" />
@@ -377,6 +377,8 @@
     <Compile Include="ComponentFeatureSets\RefineResources\RefiningVM.cs" />
     <Compile Include="Faction\FactionOwnedEntitesDB.cs" />
     <Compile Include="Faction\FactionHelpers.cs" />
+    <Compile Include="Orders\OrderableDB.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
