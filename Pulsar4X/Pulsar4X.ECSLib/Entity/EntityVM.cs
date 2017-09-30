@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
         public string EntityName { get; set; }
 
         Dictionary<ICreateViewmodel, IDBViewmodel> _viewmodelDict = new Dictionary<ICreateViewmodel, IDBViewmodel>();
-        public List<IDBViewmodel> Viewmodels = new List<IDBViewmodel>();
+        public ObservableCollection<IDBViewmodel> Viewmodels = new ObservableCollection<IDBViewmodel>();
 
         public DictionaryVM<Guid, string> SelectableEntites { get; } = new DictionaryVM<Guid, string>();
         private Dictionary<Guid, Entity> _selectableEntitys { get; } = new Dictionary<Guid, Entity>();
@@ -60,11 +60,14 @@ namespace Pulsar4X.ECSLib
 
         private void OnEntitySelected(int oldindex, int newindex)
         {
+            Viewmodels.Clear();
+            _viewmodelDict.Clear();
             Guid key = SelectableEntites.GetKey(newindex);
             _entity = _selectableEntitys[key];
             CmdRef = new CommandReferences(_entity.GetDataBlob<OwnedDB>().OwnedByFaction.Guid, _entity.Guid, _game.OrderHandler, _entity.Manager.ManagerSubpulses);
             HasEntity = true;
             _entity.Manager.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
+            Update();
 
         }
 
@@ -99,6 +102,7 @@ namespace Pulsar4X.ECSLib
             {
                 viewmodel.Update();
             }
+            OnPropertyChanged(nameof(HasEntity));
         }
     }
 

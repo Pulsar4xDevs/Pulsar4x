@@ -40,6 +40,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void OnEntitySelected()
         {
+            datablobVM_tabs.Pages.Clear();
             foreach(var item in _vm.Viewmodels)
             {
                 TabPage newTab = new TabPage();
@@ -71,6 +72,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 view.DataContext = vm;
                 tabPage.Content = view;
                 tabPage.Text = "Refinary";
+            }
+            else if (vm is TranslationMoveVM)
+            {
+                MoveOrderViews.TranslateMoveView view = new MoveOrderViews.TranslateMoveView();
+                view.DataContext = vm;
+                tabPage.Content = view;
+                tabPage.Text = "Helm";
             }
 
 

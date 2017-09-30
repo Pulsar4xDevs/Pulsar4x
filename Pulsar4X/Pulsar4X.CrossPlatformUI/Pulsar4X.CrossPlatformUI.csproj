@@ -178,6 +178,9 @@
     <EmbeddedResource Include="Views\ComponentTemplateDesigner\ItemDictionaryView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\MoveOrderViews\TranslateMoveView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\ComponentTemplateDesigner\EnumFormulaView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -434,6 +437,9 @@
     <Compile Include="Views\EntityGenericView.xeto.cs">
       <DependentUpon>EntityGenericView.xeto</DependentUpon>
     </Compile>
+    <Compile Include="Views\MoveOrderViews\TranslateMoveView.xeto.cs">
+      <DependentUpon>TranslateMoveView.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Commands\EntityGenericViewCMD.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -484,6 +490,7 @@
   <ItemGroup>
     <Folder Include="Lib" />
     <Folder Include="Views\RefinaryView\" />
+    <Folder Include="Views\MoveOrderViews\" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>

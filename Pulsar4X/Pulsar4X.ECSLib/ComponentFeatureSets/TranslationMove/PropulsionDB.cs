@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Contains info on the ships engines and fuel reserves.
     /// </summary>
-    public class PropulsionDB : BaseDataBlob
+    public class PropulsionDB : BaseDataBlob, ICreateViewmodel
     {
         public int MaximumSpeed { get; set; }
         public Vector4 CurrentSpeed { get; set; }
@@ -28,6 +28,11 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new PropulsionDB(this);
+        }
+
+        public IDBViewmodel CreateVM(Game game, CommandReferences cmdRef)
+        {
+            return new TranslationMoveVM();
         }
     }
 }
