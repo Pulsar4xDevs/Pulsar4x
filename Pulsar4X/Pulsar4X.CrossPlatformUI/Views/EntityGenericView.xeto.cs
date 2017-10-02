@@ -41,7 +41,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void OnEntitySelected(int oldindex, int newindex)
         {
-            datablobVM_tabs.Pages.Clear();
+            datablobVM_tabs.RemoveAll();
             foreach(var item in _vm.Viewmodels)
             {
                 TabPage newTab = new TabPage();
