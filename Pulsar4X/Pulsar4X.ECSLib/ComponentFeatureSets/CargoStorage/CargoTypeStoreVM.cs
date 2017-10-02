@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
 
             HeaderText = StorageTypeName + " " + FreeCapacity + "/" + MaxCapacity + " Free";
             
-            foreach(var kvp in _typeStore.ItemsAndAmounts)
+            foreach(var kvp in _typeStore.ItemsAndAmounts.ToArray())
             {
                 if(!_cargoItemsDict.ContainsKey(kvp.Key))
                 { //if the key from the DB's dictionary is not in our dictionary here

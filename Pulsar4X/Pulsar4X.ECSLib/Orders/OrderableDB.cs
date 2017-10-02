@@ -27,10 +27,15 @@ namespace Pulsar4X.ECSLib
     {
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
+        private Game _game;
+
+        public OrderableProcessor(Game game)
+        { _game = game; }
+
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             OrderableDB orderableDB = entity.GetDataBlob<OrderableDB>();
-            ProcessOrderList(orderableDB);
+            ProcessOrderList(_game, orderableDB.ActionList);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
@@ -43,11 +48,9 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal static void ProcessOrderList(OrderableDB orderableDB)
+        internal static void ProcessOrderList(Game game, List<EntityCommand> actionList)
         {
-
-
-            List<EntityCommand> actionList = orderableDB.ActionList;
+            //List<EntityCommand> actionList = orderableDB.ActionList;
             int mask = 1;
 
             int i = 0;
@@ -63,7 +66,7 @@ namespace Pulsar4X.ECSLib
                         mask |= item.ActionLanes; //bitwise or
                     }
                     if(!item.IsRunning)
-                        item.ActionCommand(orderableDB.OwningEntity.Manager.Game);
+                        item.ActionCommand(game);
                 }
                 if (item.IsFinished())
                     actionList.RemoveAt(i);

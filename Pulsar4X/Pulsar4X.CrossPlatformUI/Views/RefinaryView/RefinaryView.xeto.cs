@@ -22,9 +22,8 @@ namespace Pulsar4X.CrossPlatformUI.Views.RefinaryView
 
         private void RefinaryView_DataContextChanged(object sender, EventArgs e)
         {
-            if (DataContext is RefiningVM)
+            if (DataContext is RefiningVM dc)
             {
-                RefiningVM dc = (RefiningVM)DataContext;
                 dc.CurrentJobs.CollectionChanged += OnJobItemsChanged;
                 OnJobItemsChanged(null, null);
             }

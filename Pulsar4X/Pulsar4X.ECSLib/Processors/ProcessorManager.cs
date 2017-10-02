@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
             AddHotloopProcessor<PropulsionDB>(new ShipMovement());
             AddHotloopProcessor<OrbitDB>(new OrbitProcessor());
             AddHotloopProcessor<NewtonBalisticDB>(new NewtonBalisticProcessor());
-            AddHotloopProcessor<OrderableDB>(new OrderableProcessor());
+            AddHotloopProcessor<OrderableDB>(new OrderableProcessor(game));
         }
     }
 

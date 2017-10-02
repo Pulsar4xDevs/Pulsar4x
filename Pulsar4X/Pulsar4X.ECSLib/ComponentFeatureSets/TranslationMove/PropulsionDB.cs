@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
 
         public IDBViewmodel CreateVM(Game game, CommandReferences cmdRef)
         {
-            return new TranslationMoveVM();
+            return new TranslationMoveVM(game, cmdRef, this.OwningEntity);
         }
     }
 }

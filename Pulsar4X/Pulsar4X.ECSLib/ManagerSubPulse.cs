@@ -199,7 +199,7 @@ namespace Pulsar4X.ECSLib
         private void ProcessToNextInterupt(DateTime nextInteruptDateTime)
         {
             TimeSpan span = (nextInteruptDateTime - _systemLocalDateTime);
-            int deltaSeconds = span.Seconds;
+            int deltaSeconds = (int)span.TotalSeconds;
             if (QueuedProcesses.ContainsKey(nextInteruptDateTime))
             {
 

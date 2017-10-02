@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Pulsar4X.ECSLib
-{
+{    
     public class EntityVM : ViewModelBase
     {
         Game _game;
@@ -12,17 +12,15 @@ namespace Pulsar4X.ECSLib
         private bool _hasEntity = false;
         public bool HasEntity 
         {   get {return _hasEntity;}
-            set 
-            {
+            set {
                 if(_hasEntity != value)
                 {
                     _hasEntity = value;
-                    if(_hasEntity) Update();
-
+                    OnPropertyChanged();
                 }
-                OnPropertyChanged();
             }
         }
+
         public string Guid { get { return _entity.Guid.ToString(); } }
         public string EntityName { get; set; }
 

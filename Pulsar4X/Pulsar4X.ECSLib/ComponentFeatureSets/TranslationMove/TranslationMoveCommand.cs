@@ -143,6 +143,83 @@ namespace Pulsar4X.ECSLib
 
 
 
+    public class OrbitBodyCommand : EntityCommand
+    {
+        public Guid RequestingFactionGuid { get; set; }
+
+        public Guid EntityCommandingGuid { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime ActionedOnDate { get; set; }
+
+        public int ActionLanes => 1;
+
+        public bool IsBlocking => true;
+        public bool IsRunning { get; private set; } = false;
+        public Guid TargetEntityGuid { get; set; }
+        public Vector4 TargetPosition { get; set; }
+
+        private Entity _entityCommanding;
+        public Entity EntityCommanding { get { return _entityCommanding; } }
+
+        private Entity _targetEntity;
+
+        public double Range { get; set; }
+
+        internal List<EntityCommand> NestedCommands { get; } = new List<EntityCommand>();
+
+        [JsonIgnore]
+        Entity _factionEntity;
+        TranslateMoveDB _db;
+
+
+        public bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void ActionCommand(Game game)
+        {
+            if (!IsRunning)
+            {
+                double distance = PositionDB.GetDistanceBetween(_entityCommanding.GetDataBlob<PositionDB>(), _targetEntity.GetDataBlob<PositionDB>());
+                if (Math.Abs(Range - distance) <= 500) //distance within 500m 
+                {
+                    var newOrbit = ShipMovementProcessor.SetOrbitHere(_entityCommanding, _targetEntity, Range, _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime);
+                    _entityCommanding.SetDataBlob(newOrbit);
+
+                }
+                else //insert new translate move
+                {
+                    var cmd = new TranslateMoveCommand()
+                    {
+                        RequestingFactionGuid = this.RequestingFactionGuid,
+                        EntityCommandingGuid = this.EntityCommandingGuid,
+                        CreatedDate = this.CreatedDate,
+                        TargetEntityGuid = this.TargetEntityGuid,
+
+                    };
+                    NestedCommands.Insert(0, cmd);
+                    cmd.IsValidCommand(game);
+                    cmd.ActionCommand(game);
+                }
+                IsRunning = true;
+            }
+            OrderableProcessor.ProcessOrderList(game, NestedCommands);
+        }
+
+        public bool IsFinished()
+        {
+            if (_db != null)
+                return _db.IsAtTarget;
+            return false;
+        }
+    }
+
+
     public class OrbitTransferCommand : EntityCommand
     {
         public OrbitTransferCommand()

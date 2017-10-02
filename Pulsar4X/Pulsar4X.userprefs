@@ -1,27 +1,30 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/MoveOrderViews/TranslateMoveView.xeto" Line="10" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/MoveOrderViews/TranslateMoveView.xeto.cs" Line="5" Column="30" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveVM.cs" Line="32" Column="9" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/RefinaryView/RefinaryView.xeto" Line="14" Column="69" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="94" Column="59" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/PropulsionDB.cs" Line="16" Column="4" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="9" Column="6" />
       <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto" Line="1" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" Line="76" Column="45" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" Line="54" Column="10" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/Helpers/DictionaryVM.cs" Line="67" Column="51" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTypeStoreVM.cs" Line="57" Column="13" />
+      <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
-      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" relfile="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" line="62" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" line="186" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTypeStoreVM.cs" line="32" offsetX="618" offsetY="496" expression="_cargoTypeSD" liveUpdate="True" />
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" line="129" offsetX="820" offsetY="1973" expression="ItemPercentRemaining" liveUpdate="False" />
     <Watch file="Pulsar4X.ECSLib/Orders/OrderableDB.cs" line="54" offsetX="394" offsetY="848" expression="actionList" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/Orders/OrderableDB.cs" line="38" offsetX="734" offsetY="563" expression="orderableDB.ActionList" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
   </MonoDevelop.Ide.DebuggingService.PinnedWatches>
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.Pulsar4X.CrossPlatformUI.Gtk2 PreferredExecutionTarget="MonoDevelop.Default" />

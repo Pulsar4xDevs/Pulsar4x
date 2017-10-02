@@ -24,7 +24,8 @@ namespace Pulsar4X.ECSLib
             if (entityCommand.IsValidCommand(_game))
             {
                 entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(entityCommand);
-                OrderableProcessor.ProcessOrderList(entityCommand.EntityCommanding.GetDataBlob<OrderableDB>());
+                var commandList = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
+                OrderableProcessor.ProcessOrderList(_game, commandList);
             }              
         }
     }

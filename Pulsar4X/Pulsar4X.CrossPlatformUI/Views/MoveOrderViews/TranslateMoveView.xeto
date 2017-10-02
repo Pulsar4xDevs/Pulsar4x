@@ -6,4 +6,17 @@
   	<TableRow ScaleHeight="False">
   		<ComboBox ID="TargetSelection" DataContext="{Binding TargetList}" />
   	</TableRow>
+	<TableRow ScaleHeight="False">
+		<Button ID="OrbitBtn" Command="{Binding OrbitCommand}" Text="Orbit This"/>
+		<Label Text="Range"/>
+		<NumericUpDown ID="OrbitRange"/>
+		<Label Text="Ecentricity" />
+		<NumericUpDown ID="OrbitEcent" />  	
+  	</TableRow>
+		<TableRow ScaleHeight="False">
+		<Button ID="MatchOrbitBtn" Command="{Binding MoveCommand}" Text="Match This"/>
+		<Label Text="Range"/>
+		<NumericUpDown ID="MatchRange"/>	
+  	</TableRow>
+	<TableRow ScaleHeight="True"/>
 </TableLayout>

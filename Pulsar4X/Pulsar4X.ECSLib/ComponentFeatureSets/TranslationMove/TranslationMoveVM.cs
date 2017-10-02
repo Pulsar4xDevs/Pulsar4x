@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Windows.Input;
+
 namespace Pulsar4X.ECSLib
 {
     public class TranslationMoveVM : ViewModelBase, IDBViewmodel
@@ -8,18 +11,78 @@ namespace Pulsar4X.ECSLib
         PositionDB _posDB;
         PropulsionDB _propDB;
         public double Xpos { get {return _posDB.AbsolutePosition.X; }}
-        public double Ypos { get { return _posDB.AbsolutePosition.Y; } }
-        public double Speed { get { return _propDB.CurrentSpeed.Length(); } }
+        public double Ypos { get { return _posDB.AbsolutePosition.Y; }}
+        public double Speed { get { return _propDB.CurrentSpeed.Length(); }}
 
-        public DictionaryVM<Guid, string> TargetList { get; } = new DictionaryVM<Guid, string>();
+        Entity _selectedEntity { get { return _targetDict[TargetList.SelectedKey]; } }
+        private Dictionary<Guid, Entity> _targetDict = new Dictionary<Guid, Entity>();
+        public DictionaryVM<Guid, string> TargetList { get; } = new DictionaryVM<Guid, string>(DisplayMode.Value);
 
         CommandReferences _cmdRef;
 
-        public TranslationMoveVM()
+        public bool CanOrbitSelected { get; private set; } = false;
+        public bool CanMatchSelected { get; private set; } = false;
+
+        public TranslationMoveVM(Game game, CommandReferences cmdRef, Entity entity)
         {
+            _tMoveDB = entity.GetDataBlob<TranslateMoveDB>();
+            _posDB = entity.GetDataBlob<PositionDB>();
+            _propDB = entity.GetDataBlob<PropulsionDB>();
+            _cmdRef = cmdRef;
+            TargetList.SelectionChangedEvent += OnTargetSelectonChange;
+            foreach (var entityItem in entity.Manager.GetAllEntitiesWithDataBlob<PositionDB>())
+            {
+                if (entityItem.HasDataBlob<NameDB>())
+                {
+                    TargetList.Add(entityItem.Guid, entityItem.GetDataBlob<NameDB>().DefaultName);
+                    _targetDict.Add(entityItem.Guid, entityItem);
+                }
+            }
         }
 
-        private void NewMoveOrder()
+        private void OnTargetSelectonChange(int oldSelection, int newSelection)
+        {
+            if (_selectedEntity.HasDataBlob<MassVolumeDB>())
+            {
+                MassVolumeDB massdb = _selectedEntity.GetDataBlob<MassVolumeDB>();
+                if (massdb.Mass >= 1.5E15)
+                    CanOrbitSelected = true;
+                else
+                    CanOrbitSelected = false;
+            }
+            CanMatchSelected = _selectedEntity.HasDataBlob<OrbitDB>();
+        }
+
+        private ICommand _orbitCommand;
+        public ICommand OrbitCommand
+        {
+            get
+            {
+                return _orbitCommand ?? (_orbitCommand = new CommandHandler(OnOrbitCommand, true));
+            }
+        }
+
+        private ICommand _moveCommand;
+        public ICommand MoveCommand
+        {
+            get
+            {
+                return _moveCommand ?? (_moveCommand = new CommandHandler(OnMoveCommand, true));
+            }
+        }
+
+        private void OnOrbitCommand()
+        {
+            TranslateMoveCommand newmove = new TranslateMoveCommand()
+            {
+                RequestingFactionGuid = _cmdRef.EntityGuid,
+                EntityCommandingGuid = _cmdRef.EntityGuid,
+                CreatedDate = _cmdRef.GetSystemDatetime,
+                TargetEntityGuid = TargetList.SelectedKey,
+            };
+        }
+
+        private void OnMoveCommand()
         {
             TranslateMoveCommand newmove = new TranslateMoveCommand()
             {
@@ -35,6 +98,7 @@ namespace Pulsar4X.ECSLib
             OnPropertyChanged(nameof(Xpos));
             OnPropertyChanged(nameof(Ypos));
             OnPropertyChanged(nameof(Speed));
+
         }
     }
 }

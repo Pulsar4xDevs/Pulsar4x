@@ -163,6 +163,30 @@ namespace Pulsar4X.ECSLib
             }           
         }
 
+
+        /// <summary>
+        /// Sets the orbit here.
+        /// </summary>
+        /// <returns>The orbit here.</returns>
+        /// <param name="shipEntity">Ship entity.</param>
+        /// <param name="parentEntity">The Entity to orbit</param>
+        /// <param name="semiMajorAxsis"></param>
+        public static OrbitDB SetOrbitHere(Entity shipEntity, Entity parentEntity, double semiMajorAxsis, DateTime time)
+        {
+            PositionDB parentPosition = parentEntity.GetDataBlob<PositionDB>();
+            PositionDB myPosition = shipEntity.GetDataBlob<PositionDB>();
+            double parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
+            double myMass = shipEntity.GetDataBlob<MassVolumeDB>().Mass;
+            double distance = PositionDB.GetDistanceBetween(parentPosition, myPosition);
+            double linierEcentricity = semiMajorAxsis - distance;
+            double semiMinorAxsis =  Math.Sqrt(Math.Pow(semiMajorAxsis, 2) - Math.Pow(linierEcentricity, 2));
+            double ecentricity = linierEcentricity / semiMajorAxsis;
+            Vector4 ralitivePos = (myPosition.AbsolutePosition - parentPosition.AbsolutePosition);
+            double angle = Math.Tan(ralitivePos.X / ralitivePos.Y);
+            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajorAxsis, ecentricity, 0, 0, angle, 0, time);
+            return newOrbit;
+        }
+
         public static double CalcMaxFuelDistance(Entity shipEntity)
         {
             CargoStorageDB storedResources = shipEntity.GetDataBlob<CargoStorageDB>();

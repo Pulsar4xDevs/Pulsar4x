@@ -33,12 +33,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 if(_vm.HasEntity)
                 { }
                 selectableEntitesCB.DataContext = _vm.SelectableEntites;
+                _vm.SelectableEntites.SelectionChangedEvent += OnEntitySelected;
             }
         }
 
 
 
-        private void OnEntitySelected()
+        private void OnEntitySelected(int oldindex, int newindex)
         {
             datablobVM_tabs.Pages.Clear();
             foreach(var item in _vm.Viewmodels)
@@ -51,9 +52,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) 
         {
-            if(e.PropertyName == nameof(_vm.HasEntity) && _vm.HasEntity == true)
-                OnEntitySelected();
-               
         }
 
         private void SetViewForViewmodel(IDBViewmodel vm, TabPage tabPage)
