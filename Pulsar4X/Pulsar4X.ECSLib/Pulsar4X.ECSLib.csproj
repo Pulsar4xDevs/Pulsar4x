@@ -144,6 +144,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComponentFeatureSets\Orbit\OrbitBodyCommand.cs" />
     <Compile Include="DataBlobs\AsteroidDamageDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CloakAtbDB.cs" />
     <Compile Include="DataBlobs\ComponentAttributeDBs\CommandAtbDB.cs" />
@@ -379,6 +380,8 @@
     <Compile Include="Faction\FactionHelpers.cs" />
     <Compile Include="Orders\OrderableDB.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveVM.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
