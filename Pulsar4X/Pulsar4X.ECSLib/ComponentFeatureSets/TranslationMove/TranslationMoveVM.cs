@@ -84,8 +84,8 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = _cmdRef.EntityGuid,
                 CreatedDate = _cmdRef.GetSystemDatetime,
                 TargetEntityGuid = TargetList.SelectedKey,
-                Range = this.Range,
-                Perhelion = this.Perihelion,
+                ApihelionInKM = this.Range,
+                PerhelionInKM = this.Perihelion,
             };
             _cmdRef.Handler.HandleOrder(newmove);
         }
