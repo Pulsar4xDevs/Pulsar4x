@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         private Entity _targetEntity;
         private Entity _entityCommanding;
         public Entity EntityCommanding { get { return _entityCommanding; } }
-        
+        public double RangeInKM { get; set; }
         [JsonIgnore]
         Entity _factionEntity;
         TranslateMoveDB _db;
@@ -42,11 +42,15 @@ namespace Pulsar4X.ECSLib
 
         public void ActionCommand(Game game)
         {
-            _db = new TranslateMoveDB(_targetEntity.GetDataBlob<PositionDB>());
-            if (_entityCommanding.HasDataBlob<OrbitDB>())
-                _entityCommanding.RemoveDataBlob<OrbitDB>();
-            _entityCommanding.SetDataBlob(_db);
-            IsRunning = true;
+            if (!IsRunning)
+            {
+                _db = new TranslateMoveDB(_targetEntity.GetDataBlob<PositionDB>());
+                _db.MoveRangeInKM = RangeInKM;
+                if (_entityCommanding.HasDataBlob<OrbitDB>())
+                    _entityCommanding.RemoveDataBlob<OrbitDB>();
+                _entityCommanding.SetDataBlob(_db);
+                IsRunning = true;
+            }
         }
 
         public bool IsFinished()
@@ -61,7 +65,10 @@ namespace Pulsar4X.ECSLib
     public class TranslateMoveDB : BaseDataBlob
     {
         internal Vector4 TargetPosition {get { return _targetPosition.AbsolutePosition; }}
-        internal bool IsAtTarget = false;
+        internal double MoveRangeInKM;
+        internal bool IsAtTarget { 
+            get; 
+            set; }
         private PositionDB _targetPosition;
 
         public TranslateMoveDB()
@@ -92,7 +99,9 @@ namespace Pulsar4X.ECSLib
             var maxSpeed = propulsionDB.MaximumSpeed;
             var positionDB = entity.GetDataBlob<PositionDB>();
             var currentPosition = positionDB.AbsolutePosition;
-            var targetPos = moveDB.TargetPosition;
+            //targetPosition taking the range (how close we want to get) into account. 
+            var targetPos = moveDB.TargetPosition * (1 - (GameConstants.Units.KmPerAu * moveDB.MoveRangeInKM) / moveDB.TargetPosition.Length());
+
             var deltaVecToTarget = currentPosition - targetPos;
 
             
@@ -107,8 +116,7 @@ namespace Pulsar4X.ECSLib
             var nextTPos = currentPosition + (currentSpeed * deltaSeconds);
       
 
-            var distanceToTarget = deltaVecToTarget.Length();  //in au
-
+            var distanceToTargetAU = deltaVecToTarget.Length();  //in au
 
             var deltaVecToNextT = currentPosition - nextTPos;
             var fuelMaxDistanceAU = GameConstants.Units.KmPerAu * maxKMeters;
@@ -134,16 +142,13 @@ namespace Pulsar4X.ECSLib
 
 
 
-            if (distanceToTarget < newDistanceDelta) // moving would overtake target, just go directly to target
+            if (distanceToTargetAU < newDistanceDelta) // moving would overtake target, just go directly to target
             {
-                newDistanceDelta = distanceToTarget;
+                newDistanceDelta = distanceToTargetAU;
                 propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);
                 newPos = targetPos;
                 moveDB.IsAtTarget = true;
-                entity.RemoveDataBlob<TranslateMoveDB>();
-
-
-
+                //entity.RemoveDataBlob<TranslateMoveDB>();
             }
             positionDB.AbsolutePosition = newPos;
             int kMetersMoved = (int)(newDistanceDelta * GameConstants.Units.KmPerAu);
@@ -209,35 +214,38 @@ namespace Pulsar4X.ECSLib
 
         public void ActionCommand(Game game)
         {
-            if (!IsRunning)
-            {
-                var entPos = _entityCommanding.GetDataBlob<PositionDB>().PositionInKm;
-                var tarPos = _targetEntity.GetDataBlob<PositionDB>().PositionInKm;
-                double di = (entPos - tarPos).Length();
-                double distance = PositionDB.GetDistanceBetween(_entityCommanding.GetDataBlob<PositionDB>(), _targetEntity.GetDataBlob<PositionDB>());
-                if (Math.Abs(Range - distance) <= 500) //distance within 500m 
-                {
-                    DateTime datenow = _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime;
-                    var newOrbit = ShipMovementProcessor.CreateOrbitHereWithPerihelion(_entityCommanding, _targetEntity, Perhelion, datenow);
-                    _entityCommanding.SetDataBlob(newOrbit);
-                }
-                else //insert new translate move
-                {
-                    var cmd = new TranslateMoveCommand()
-                    {
-                        RequestingFactionGuid = this.RequestingFactionGuid,
-                        EntityCommandingGuid = this.EntityCommandingGuid,
-                        CreatedDate = this.CreatedDate,
-                        TargetEntityGuid = this.TargetEntityGuid,
-
-                    };
-                    NestedCommands.Insert(0, cmd);
-                    cmd.IsValidCommand(game);
-                    cmd.ActionCommand(game);
-                }
-                IsRunning = true;
-            }
             OrderableProcessor.ProcessOrderList(game, NestedCommands);
+            if (NestedCommands.Count == 0)
+            {
+                if (!IsRunning)
+                {
+                    var entPos = _entityCommanding.GetDataBlob<PositionDB>().PositionInKm;
+                    var tarPos = _targetEntity.GetDataBlob<PositionDB>().PositionInKm;
+                    double distanceAU = PositionDB.GetDistanceBetween(_entityCommanding.GetDataBlob<PositionDB>(), _targetEntity.GetDataBlob<PositionDB>());
+                    var rangeAU = Range / GameConstants.Units.MetersPerAu;
+                    if (Math.Abs(rangeAU - distanceAU) <= 500 / GameConstants.Units.MetersPerAu) //distance within 500m 
+                    {
+                        DateTime datenow = _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime;
+                        var newOrbit = ShipMovementProcessor.CreateOrbitHereWithPerihelion(_entityCommanding, _targetEntity, Perhelion, datenow);
+                        _entityCommanding.SetDataBlob(newOrbit);
+                        IsRunning = true;
+                    }
+                    else //insert new translate move
+                    {
+                        var cmd = new TranslateMoveCommand()
+                        {
+                            RequestingFactionGuid = this.RequestingFactionGuid,
+                            EntityCommandingGuid = this.EntityCommandingGuid,
+                            CreatedDate = this.CreatedDate,
+                            TargetEntityGuid = this.TargetEntityGuid,
+
+                        };
+                        NestedCommands.Insert(0, cmd);
+                        cmd.IsValidCommand(game);
+                        cmd.ActionCommand(game);
+                    } 
+                }
+            }
         }
 
         public bool IsFinished()

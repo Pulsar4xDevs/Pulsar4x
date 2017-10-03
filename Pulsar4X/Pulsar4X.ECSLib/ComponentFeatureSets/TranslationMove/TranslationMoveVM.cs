@@ -23,8 +23,8 @@ namespace Pulsar4X.ECSLib
         public bool CanOrbitSelected { get; private set; } = false;
         public bool CanMatchSelected { get; private set; } = false;
 
-        public double Range { get; set; }
-        public double Perihelion { get; set; }
+        public double Range { get; set; } = 20000;
+        public double Perihelion { get; set; } = 10000;
 
         public TranslationMoveVM(Game game, CommandReferences cmdRef, Entity entity)
         {
