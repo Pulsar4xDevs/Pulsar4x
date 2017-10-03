@@ -75,7 +75,7 @@
               "Name": "Engine Power",
               "Description": "Move Power for ship",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(1) * [Mass] * Ability(2)"
+              "AbilityFormula": "Ability(1) * [Mass] * Ability(2) / 20"
             },
             {
               "Name": "Engine Power",
@@ -94,7 +94,7 @@
               "Name": "Total Fuel Consumption per Km",
               "Description": "Fuel Consumption Calc",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "(Ability(3) - Ability(3) * [Mass] * 0.02 * Ability(5)) * 0.1"
+              "AbilityFormula": "Ability(3)"
             },
             {
               "Name": "Fuel Consumption",
@@ -134,7 +134,7 @@
           "Name": "LaserGun",
           "Description": "Laser Gun",
           "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
-          "MassFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2) * 10",
+          "MassFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2)",
           "VolumeFormula": "[Mass] / 2",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
@@ -284,6 +284,45 @@
               "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.BeamFireControlAtbDB"
             }
+          ]
+        }
+      },
+      {
+        "Key": "57614ddb-0756-44cf-857b-8a6578493792",
+        "Value": {
+          "Name": "TestWeight",
+          "Description": "",
+          "ID": "57614ddb-0756-44cf-857b-8a6578493792",
+          "MassFormula": "Ability(0)",
+          "VolumeFormula": "[Mass] / 2",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "[Mass]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Size",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "150"
+            },
           ]
         }
       }

@@ -165,21 +165,44 @@ namespace Pulsar4X.ECSLib
 
 
         /// <summary>
-        /// Sets the orbit here.
+        /// Creates orbit here using the current distance between the two entites as aphelion(furthest distance) and a given semiMajorAxis
         /// </summary>
-        /// <returns>The orbit here.</returns>
+        /// <returns>An OrbitDB. Does Not set DB to Entity.</returns>
         /// <param name="shipEntity">Ship entity.</param>
         /// <param name="parentEntity">The Entity to orbit</param>
-        /// <param name="semiMajorAxsis"></param>
-        public static OrbitDB SetOrbitHere(Entity shipEntity, Entity parentEntity, double semiMajorAxsis, DateTime time)
+        /// <param name="semiMajorAxsis">Largest Radius</param>
+        public static OrbitDB CreateOrbitHereWithSemiMajAxis(Entity shipEntity, Entity parentEntity, double semiMajorAxsis, DateTime time)
         {
             PositionDB parentPosition = parentEntity.GetDataBlob<PositionDB>();
             PositionDB myPosition = shipEntity.GetDataBlob<PositionDB>();
             double parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
             double myMass = shipEntity.GetDataBlob<MassVolumeDB>().Mass;
-            double distance = PositionDB.GetDistanceBetween(parentPosition, myPosition);
-            double linierEcentricity = semiMajorAxsis - distance;
+            double aphelion = PositionDB.GetDistanceBetween(parentPosition, myPosition);
+            double linierEcentricity = semiMajorAxsis - aphelion;
             double semiMinorAxsis =  Math.Sqrt(Math.Pow(semiMajorAxsis, 2) - Math.Pow(linierEcentricity, 2));
+            double ecentricity = linierEcentricity / semiMajorAxsis;
+            Vector4 ralitivePos = (myPosition.AbsolutePosition - parentPosition.AbsolutePosition);
+            double angle = Math.Tan(ralitivePos.X / ralitivePos.Y);
+            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajorAxsis, ecentricity, 0, 0, angle, 0, time);
+            return newOrbit;
+        }
+
+        /// <summary>
+        /// Creates orbit here using the current distance between the two entites as aphelion(furthest distance) and a given perihelion
+        /// </summary>
+        /// <returns>An OrbitDB. Does Not set DB to Entity.</returns>
+        /// <param name="shipEntity">Ship entity.</param>
+        /// <param name="parentEntity">The Entity to orbit</param>
+        /// <param name="perihelion">closest distance to the parent</param>
+        public static OrbitDB CreateOrbitHereWithPerihelion(Entity shipEntity, Entity parentEntity, double perihelion, DateTime time)
+        {
+            PositionDB parentPosition = parentEntity.GetDataBlob<PositionDB>();
+            PositionDB myPosition = shipEntity.GetDataBlob<PositionDB>();
+            double parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
+            double myMass = shipEntity.GetDataBlob<MassVolumeDB>().Mass;
+            double aphelion = PositionDB.GetDistanceBetween(parentPosition, myPosition);
+            double semiMajorAxsis = perihelion + aphelion / 2;
+            double linierEcentricity = semiMajorAxsis - aphelion;
             double ecentricity = linierEcentricity / semiMajorAxsis;
             Vector4 ralitivePos = (myPosition.AbsolutePosition - parentPosition.AbsolutePosition);
             double angle = Math.Tan(ralitivePos.X / ralitivePos.Y);
@@ -202,7 +225,7 @@ namespace Pulsar4X.ECSLib
                 {
                     if (storedResources.StoredCargoTypes[fuelResource.CargoTypeID].ItemsAndAmounts.ContainsKey(fuelResource.ID))
                     {
-                        long fuelStored = storedResources.StoredCargoTypes[fuelResource.CargoTypeID].ItemsAndAmounts[fuelResource.CargoTypeID];
+                        long fuelStored = storedResources.StoredCargoTypes[fuelResource.CargoTypeID].ItemsAndAmounts[fuelResource.ID];
                         distance += fuelStored / fuelAndUsage.Value;
                     }
                 }
@@ -253,15 +276,17 @@ namespace Pulsar4X.ECSLib
             PropulsionDB propulsionDB = ship.GetDataBlob<PropulsionDB>();
             propulsionDB.TotalEnginePower = totalEnginePower;
             propulsionDB.FuelUsePerKM = totalFuelUsage;
-            propulsionDB.MaximumSpeed = MaxSpeedCalc(totalEnginePower,  ship.GetDataBlob<ShipInfoDB>().Tonnage);
+            var mass = ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            var maxSpeed = MaxSpeedCalc(totalEnginePower, mass);
+            propulsionDB.MaximumSpeed = maxSpeed;
         }
 
-        public static int MaxSpeedCalc(int power, float tonage)
+        public static int MaxSpeedCalc(float power, float tonage)
         {
             // From Aurora4x wiki:  Speed = (Total Engine Power / Total Class Size in HS) * 1000 km/s
             // 1 HS = 50 tons
-
-            return (int)(power / tonage) * 20;
+            var hs = tonage / 50;
+            return (int)((power / hs) * 100);
         }
     }
 }

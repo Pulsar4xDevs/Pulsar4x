@@ -17,12 +17,13 @@ namespace Pulsar4X.ECSLib
 
         public bool IsBlocking => true;
         public bool IsRunning { get; private set; } = false;
+        
         public Guid TargetEntityGuid { get; set; }
-        public Vector4 TargetPosition { get; set; }
-
+        //public Vector4 TargetPosition { get; set; }
+        private Entity _targetEntity;
         private Entity _entityCommanding;
         public Entity EntityCommanding { get { return _entityCommanding; } }
-
+        
         [JsonIgnore]
         Entity _factionEntity;
         TranslateMoveDB _db;
@@ -31,14 +32,19 @@ namespace Pulsar4X.ECSLib
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                return true;
+                if (game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out _targetEntity))
+                {
+                    return true; 
+                }
             }
             return false;
         }
 
         public void ActionCommand(Game game)
         {
-           _db = new TranslateMoveDB() {TargetPosition = this.TargetPosition };
+            _db = new TranslateMoveDB(_targetEntity.GetDataBlob<PositionDB>());
+            if (_entityCommanding.HasDataBlob<OrbitDB>())
+                _entityCommanding.RemoveDataBlob<OrbitDB>();
             _entityCommanding.SetDataBlob(_db);
             IsRunning = true;
         }
@@ -54,9 +60,18 @@ namespace Pulsar4X.ECSLib
 
     public class TranslateMoveDB : BaseDataBlob
     {
-        internal Vector4 TargetPosition;
+        internal Vector4 TargetPosition {get { return _targetPosition.AbsolutePosition; }}
         internal bool IsAtTarget = false;
+        private PositionDB _targetPosition;
 
+        public TranslateMoveDB()
+        {            
+        }
+
+        public TranslateMoveDB(PositionDB targetPosition)
+        {
+            _targetPosition = targetPosition;
+        }
 
         public override object Clone()
         {
@@ -66,27 +81,30 @@ namespace Pulsar4X.ECSLib
 
     public class TranslateMoveProcessor : IHotloopProcessor
     {
-        public TimeSpan RunFrequency => TimeSpan.FromMinutes(30);
+        public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             var manager = entity.Manager;
             var moveDB = entity.GetDataBlob<TranslateMoveDB>();
             var propulsionDB = entity.GetDataBlob<PropulsionDB>();
-            var currentVector = propulsionDB.CurrentSpeed;
+            //var currentVector = propulsionDB.CurrentSpeed;
             var maxSpeed = propulsionDB.MaximumSpeed;
             var positionDB = entity.GetDataBlob<PositionDB>();
             var currentPosition = positionDB.AbsolutePosition;
             var targetPos = moveDB.TargetPosition;
             var deltaVecToTarget = currentPosition - targetPos;
-            var currentSpeed = currentVector.Length();
 
+            
+            var currentSpeed = GMath.GetVector(currentPosition, targetPos, maxSpeed);
+            propulsionDB.CurrentSpeed = currentSpeed;
+            
             StaticDataStore staticData = entity.Manager.Game.StaticData;
             CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
             Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerKM;
             double maxKMeters = ShipMovementProcessor.CalcMaxFuelDistance(entity);
 
-            var nextTPos = currentPosition + (currentVector * deltaSeconds);
+            var nextTPos = currentPosition + (currentSpeed * deltaSeconds);
       
 
             var distanceToTarget = deltaVecToTarget.Length();  //in au
@@ -121,6 +139,7 @@ namespace Pulsar4X.ECSLib
                 newDistanceDelta = distanceToTarget;
                 propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);
                 newPos = targetPos;
+                moveDB.IsAtTarget = true;
                 entity.RemoveDataBlob<TranslateMoveDB>();
 
 
@@ -137,7 +156,11 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            throw new NotImplementedException();
+            List<Entity> entitysWithTranslateMove = manager.GetAllEntitiesWithDataBlob<TranslateMoveDB>();
+            foreach (var entity in entitysWithTranslateMove)
+            {
+                ProcessEntity(entity, deltaSeconds);
+            }
         }
     }
 
@@ -164,19 +187,22 @@ namespace Pulsar4X.ECSLib
         private Entity _targetEntity;
 
         public double Range { get; set; }
-
+        public double Perhelion { get; set; }
         internal List<EntityCommand> NestedCommands { get; } = new List<EntityCommand>();
 
         [JsonIgnore]
         Entity _factionEntity;
-        TranslateMoveDB _db;
+       
 
 
         public bool IsValidCommand(Game game)
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                return true;
+                if (game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out _targetEntity))
+                {
+                    return true; 
+                }
             }
             return false;
         }
@@ -185,12 +211,15 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
+                var entPos = _entityCommanding.GetDataBlob<PositionDB>().PositionInKm;
+                var tarPos = _targetEntity.GetDataBlob<PositionDB>().PositionInKm;
+                double di = (entPos - tarPos).Length();
                 double distance = PositionDB.GetDistanceBetween(_entityCommanding.GetDataBlob<PositionDB>(), _targetEntity.GetDataBlob<PositionDB>());
                 if (Math.Abs(Range - distance) <= 500) //distance within 500m 
                 {
-                    var newOrbit = ShipMovementProcessor.SetOrbitHere(_entityCommanding, _targetEntity, Range, _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime);
+                    DateTime datenow = _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime;
+                    var newOrbit = ShipMovementProcessor.CreateOrbitHereWithPerihelion(_entityCommanding, _targetEntity, Perhelion, datenow);
                     _entityCommanding.SetDataBlob(newOrbit);
-
                 }
                 else //insert new translate move
                 {
@@ -213,8 +242,8 @@ namespace Pulsar4X.ECSLib
 
         public bool IsFinished()
         {
-            if (_db != null)
-                return _db.IsAtTarget;
+            if (_entityCommanding.HasDataBlob<OrbitDB>())
+                return true;
             return false;
         }
     }

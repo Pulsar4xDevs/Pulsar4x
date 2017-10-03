@@ -400,6 +400,54 @@ namespace Pulsar4X.ECSLib
         {
             return GetGravitationalAttraction(mass, 1, distance);
         }
+
+        /// <summary>
+        /// calculates a vector from two positions and a magnatude
+        /// </summary>
+        /// <returns>The vector.</returns>
+        /// <param name="currentPosition">Current position.</param>
+        /// <param name="targetPosition">Target position.</param>
+        /// <param name="speedMagnitude">Speed magnitude.</param>
+        public static Vector4 GetVector(Vector4 currentPosition, Vector4 targetPosition, double speedMagnitude)
+        {
+            Vector4 speed = new Vector4(0, 0, 0, 0);
+            double length;
+
+
+            Vector4 speedMagInKM = new Vector4(0, 0, 0, 0);
+
+            Vector4 direction = new Vector4(0, 0, 0, 0);
+            direction.X = targetPosition.X - currentPosition.X;
+            direction.Y = targetPosition.Y - currentPosition.Y;
+            direction.Z = targetPosition.Z - currentPosition.Z;
+            direction.W = 0;
+
+
+
+            length = direction.Length(); // Distance between targets in AU
+            if (length != 0)
+            {
+                direction.X = (direction.X / length);
+                direction.Y = (direction.Y / length);
+                direction.Z = (direction.Z / length);
+            
+                speedMagInKM.X = direction.X * speedMagnitude;
+                speedMagInKM.Y = direction.Y * speedMagnitude;
+                speedMagInKM.Z = direction.Z * speedMagnitude;
+            }
+
+
+            speed.X = Distance.KmToAU(speedMagInKM.X);
+            speed.Y = Distance.KmToAU(speedMagInKM.Y);
+            speed.Z = Distance.KmToAU(speedMagInKM.Z);
+
+            return speed;
+        }
+
+        public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
+        {
+            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
+        }
     }
 
     /// <summary>
@@ -415,6 +463,4 @@ namespace Pulsar4X.ECSLib
             Max = max;
         }
     }
-
-    
 }

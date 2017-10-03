@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
                 ParentDB?.RemoveChild(_owningEntity_);
                 _owningEntity_ = value;
 
-                if (OwningEntity != Entity.InvalidEntity)
+                if (OwningEntity != Entity.InvalidEntity && value != null)
                 {
                     ParentDB?.AddChild(value);
                 }

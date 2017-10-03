@@ -7,16 +7,16 @@
   		<ComboBox ID="TargetSelection" DataContext="{Binding TargetList}" />
   	</TableRow>
 	<TableRow ScaleHeight="False">
-		<Button ID="OrbitBtn" Command="{Binding OrbitCommand}" Text="Orbit This"/>
-		<Label Text="Range"/>
-		<NumericUpDown ID="OrbitRange"/>
-		<Label Text="Ecentricity" />
-		<NumericUpDown ID="OrbitEcent" />  	
+		<Button ID="OrbitBtn" Command="{Binding OrbitCommand}" Text="Orbit This" Enabled="{Binding CanOrbitSelected}"/>
+		<Label Text="Aphelion"/>
+		<NumericUpDown ID="Aphelion" Value="{Binding Range}"/>
+		<Label Text="Perihelion" />
+		<NumericUpDown ID="Perihelion" Value="{Binding Perihelion}"/>  	
   	</TableRow>
 		<TableRow ScaleHeight="False">
-		<Button ID="MatchOrbitBtn" Command="{Binding MoveCommand}" Text="Match This"/>
+		<Button ID="MatchOrbitBtn" Command="{Binding MoveCommand}" Text="Match This" Enabled="{Binding CanMatchSelected}"/>
 		<Label Text="Range"/>
-		<NumericUpDown ID="MatchRange"/>	
+		<NumericUpDown ID="MatchRange" Value="{Binding Range}"/>	
   	</TableRow>
 	<TableRow ScaleHeight="True"/>
 </TableLayout>

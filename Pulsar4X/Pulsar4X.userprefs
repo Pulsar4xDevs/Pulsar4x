@@ -1,14 +1,18 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.ECSLib/DataBlobs/PositionDB.cs">
     <Files>
-      <File FileName="Pulsar4X Status" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" Line="214" Column="52" />
+      <File FileName="Pulsar4X.ECSLib/Orders/OrderHandler.cs" Line="26" Column="18" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityVM.cs" Line="80" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/DataBlobs/PositionDB.cs" Line="192" Column="30" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
-      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" line="186" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" line="217" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" line="215" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>

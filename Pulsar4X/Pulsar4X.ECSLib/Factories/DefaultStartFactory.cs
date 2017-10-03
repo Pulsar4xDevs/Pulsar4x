@@ -106,14 +106,19 @@ namespace Pulsar4X.ECSLib
             Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
-            EntityManipulation.AddComponentToEntity(shipDesign, engine);
-            EntityManipulation.AddComponentToEntity(shipDesign, engine);
-            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
-            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
-            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
-            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
-            EntityManipulation.AddComponentToEntity(shipDesign, laser);
-            EntityManipulation.AddComponentToEntity(shipDesign, bfc);
+            Entity deadWeight = DeadWeight(game, faction, 170);
+            List<Entity> components = new List<Entity>()
+            {
+                engine,
+                engine,
+                fuelTank,
+                fuelTank,
+                laser,
+                bfc,
+                deadWeight
+            };
+
+            EntityManipulation.AddComponentToEntity(shipDesign, components);
             return shipDesign;
         }
 
@@ -124,17 +129,23 @@ namespace Pulsar4X.ECSLib
             Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
-            EntityManipulation.AddComponentToEntity(shipDesign, engine);
-            EntityManipulation.AddComponentToEntity(shipDesign, engine);
-            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
-            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
-            EntityManipulation.AddComponentToEntity(shipDesign, fuelTank);
-            EntityManipulation.AddComponentToEntity(shipDesign, laser);
-            EntityManipulation.AddComponentToEntity(shipDesign, laser);
-            EntityManipulation.AddComponentToEntity(shipDesign, laser);
-            EntityManipulation.AddComponentToEntity(shipDesign, laser);
-            EntityManipulation.AddComponentToEntity(shipDesign, bfc);
-            EntityManipulation.AddComponentToEntity(shipDesign, bfc);
+            Entity deadWeight = DeadWeight(game, faction, 50);
+            List<Entity> components = new List<Entity>()
+            {
+                engine,
+                engine,
+                fuelTank,
+                fuelTank,
+                laser,
+                laser,
+                laser,
+                laser,
+                bfc,
+                bfc,
+                deadWeight
+            };
+
+            EntityManipulation.AddComponentToEntity(shipDesign, components);
             return shipDesign;
         }
 
@@ -144,8 +155,8 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesign = GenericComponentFactory.StaticToDesign(engineSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(10); //size
-            engineDesign.Name = "DefaultEngine1";
+            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(125); //size
+            engineDesign.Name = "DefaultEngine-250";
             //engineDesignDB.ComponentDesignAbilities[1]
             return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);
         }
@@ -155,8 +166,8 @@ namespace Pulsar4X.ECSLib
             ComponentDesign fuelTankDesign;
             ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
             fuelTankDesign = GenericComponentFactory.StaticToDesign(tankSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            fuelTankDesign.ComponentDesignAbilities[0].SetValueFromInput(100000000);
-            fuelTankDesign.Name = "Tank1000k";
+            fuelTankDesign.ComponentDesignAbilities[0].SetValueFromInput(250);
+            fuelTankDesign.Name = "Tank-500";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, fuelTankDesign);
         }
 
@@ -194,6 +205,17 @@ namespace Pulsar4X.ECSLib
             cargoInstalation.ComponentDesignAbilities[0].SetValueFromInput(1000000);
             cargoInstalation.Name = "CargoInstalation1";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, cargoInstalation);
+        }
+
+        public static Entity DeadWeight(Game game, Entity faction, int weight)
+        {
+            ComponentDesign deadTestWeight;
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{57614ddb-0756-44cf-857b-8a6578493792}")];
+            deadTestWeight = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            deadTestWeight.ComponentDesignAbilities[0].SetValueFromInput(weight);
+            deadTestWeight.Name = "DeadWeight-150";
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, deadTestWeight);
+
         }
     }
 

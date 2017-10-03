@@ -23,6 +23,9 @@ namespace Pulsar4X.ECSLib
         public bool CanOrbitSelected { get; private set; } = false;
         public bool CanMatchSelected { get; private set; } = false;
 
+        public double Range { get; set; }
+        public double Perihelion { get; set; }
+
         public TranslationMoveVM(Game game, CommandReferences cmdRef, Entity entity)
         {
             _tMoveDB = entity.GetDataBlob<TranslateMoveDB>();
@@ -46,11 +49,13 @@ namespace Pulsar4X.ECSLib
             {
                 MassVolumeDB massdb = _selectedEntity.GetDataBlob<MassVolumeDB>();
                 if (massdb.Mass >= 1.5E15)
-                    CanOrbitSelected = true;
+                    CanOrbitSelected = true; 
                 else
                     CanOrbitSelected = false;
+                OnPropertyChanged(nameof(CanOrbitSelected));
             }
             CanMatchSelected = _selectedEntity.HasDataBlob<OrbitDB>();
+            OnPropertyChanged(nameof(CanMatchSelected));
         }
 
         private ICommand _orbitCommand;
@@ -73,24 +78,28 @@ namespace Pulsar4X.ECSLib
 
         private void OnOrbitCommand()
         {
-            TranslateMoveCommand newmove = new TranslateMoveCommand()
+            OrbitBodyCommand newmove = new OrbitBodyCommand()
             {
-                RequestingFactionGuid = _cmdRef.EntityGuid,
+                RequestingFactionGuid = _cmdRef.FactionGuid,
                 EntityCommandingGuid = _cmdRef.EntityGuid,
                 CreatedDate = _cmdRef.GetSystemDatetime,
                 TargetEntityGuid = TargetList.SelectedKey,
+                Range = this.Range,
+                Perhelion = this.Perihelion,
             };
+            _cmdRef.Handler.HandleOrder(newmove);
         }
 
         private void OnMoveCommand()
         {
             TranslateMoveCommand newmove = new TranslateMoveCommand()
             {
-                RequestingFactionGuid = _cmdRef.EntityGuid,
+                RequestingFactionGuid = _cmdRef.FactionGuid,
                 EntityCommandingGuid = _cmdRef.EntityGuid,
                 CreatedDate = _cmdRef.GetSystemDatetime,
                 TargetEntityGuid = TargetList.SelectedKey,
             };
+            _cmdRef.Handler.HandleOrder(newmove);
         }
 
         public void Update()

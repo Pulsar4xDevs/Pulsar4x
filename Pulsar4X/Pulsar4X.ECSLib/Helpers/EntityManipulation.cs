@@ -42,6 +42,40 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// This is for adding components and installations to ships and colonies.
+        /// batch add is faster than single add as it recalcs only once.  
+        /// </summary>
+        /// <param name="parentEntity">entity that contains an ComponentInstancesDB</param>        
+        /// <param name="componentEntitys">Can be either a design or instance entity</param>
+        internal static void AddComponentToEntity(Entity parentEntity, List<Entity> componentEntitys)
+        {
+            Entity instance;
+            foreach (var componentEntity in componentEntitys)
+            {
+                if (parentEntity.HasDataBlob<ComponentInstancesDB>())
+                {
+                    if (!componentEntity.HasDataBlob<ComponentInstanceInfoDB>())
+                    {
+                        if (componentEntity.HasDataBlob<ComponentInfoDB>())
+                        {
+                            Entity ownerFaction = Entity.InvalidEntity;
+                            if (parentEntity.HasDataBlob<OwnedDB>())
+                                ownerFaction = parentEntity.GetDataBlob<OwnedDB>().ObjectOwner;
+                            instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, ownerFaction);
+                        }
+                        else throw new Exception("componentEntity does not contain either a ComponentInfoDB or a ComponentInstanceInfoDB. Entity Not a ComponentDesign or ComponentInstance");
+                    }
+                    else
+                        instance = componentEntity;
+
+                    AddComponentInstanceToEntity(parentEntity, instance);
+                }
+                else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
+            }
+            ReCalcProcessor.ReCalcAbilities(parentEntity);
+        }
+
+        /// <summary>
         /// This is for adding and exsisting component or installation *instance* to ships and colonies. 
         /// </summary>
         /// <param name="instance">an exsisting componentInstance</param>

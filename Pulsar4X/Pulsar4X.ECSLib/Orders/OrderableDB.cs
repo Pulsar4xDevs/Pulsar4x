@@ -65,8 +65,7 @@ namespace Pulsar4X.ECSLib
                     {
                         mask |= item.ActionLanes; //bitwise or
                     }
-                    if(!item.IsRunning)
-                        item.ActionCommand(game);
+                    item.ActionCommand(game);
                 }
                 if (item.IsFinished())
                     actionList.RemoveAt(i);
