@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
 
         [NotNull]
         [PublicAPI]
-        public new ReadOnlyCollection<BaseDataBlob> DataBlobs => IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobs(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>());
+        public new ReadOnlyCollection<BaseDataBlob> DataBlobs => IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobsForEntity(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>());
 
         private static readonly EntityManager InvalidManager = EntityManager.InvalidManager;
 
@@ -310,7 +310,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(newManager));
             }
             // Store dataBlobs.
-            List<BaseDataBlob> dataBlobs = Manager.GetAllDataBlobs(ID);
+            List<BaseDataBlob> dataBlobs = Manager.GetAllDataBlobsForEntity(ID);
 
             // Remove myself from the old manager.
             Manager.RemoveEntity(this);

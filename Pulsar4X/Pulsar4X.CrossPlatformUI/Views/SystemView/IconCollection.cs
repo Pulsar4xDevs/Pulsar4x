@@ -9,12 +9,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         //Main dictionaries for storing Icons
         //The Guid represents the entity, the Icon is created for
-        public List<OrbitRing> OrbitList { get; } = new List<OrbitRing>();
-        public List<TextIcon> TextIconList { get; } = new List<TextIcon>();
-        public List<EntityIcon> EntityList { get; } = new List<EntityIcon>();
+        public Dictionary<Guid,OrbitRing> OrbitList { get; } = new Dictionary<Guid, OrbitRing>();
+        public Dictionary<Guid, TextIcon> TextIconList { get; } = new Dictionary<Guid, TextIcon>();
+        public Dictionary<Guid, EntityIcon> EntityList { get; } = new Dictionary<Guid, EntityIcon>();
         public ScaleIcon Scale { get; set; }
 
-
+        Camera2dv2 _camera;
         public Dictionary<Guid, EntityIcon> IconDict { get; } = new Dictionary<Guid, EntityIcon> ();
 
         /// <summary>
@@ -36,29 +36,65 @@ namespace Pulsar4X.CrossPlatformUI.Views
             OrbitList.Clear();
             TextIconList.Clear();
             EntityList.Clear();
-            Scale = new ScaleIcon(camera);
+            _camera = camera;
+            Scale = new ScaleIcon(_camera);
 
             foreach (var item in entities)
             {
-                if (item.HasDataBlob<OrbitDB>() && item.GetDataBlob<OrbitDB>().Parent != null)
+                AddNewIcon(item);
+            }
+        }
+
+        internal void AddNewIcon(Entity entity)
+        {
+            if (entity.HasDataBlob<OrbitDB>() && entity.GetDataBlob<OrbitDB>().Parent != null)
+            {
+                if (!entity.GetDataBlob<OrbitDB>().IsStationary)
                 {
-                    if (!item.GetDataBlob<OrbitDB>().IsStationary)
-                    {
-                        OrbitRing ring = new OrbitRing(item, camera);
-                        OrbitList.Add(ring);
-                    }
+                    OrbitRing ring = new OrbitRing(entity, _camera);
+                    OrbitList.Add(entity.Guid, ring);
                 }
-                if (item.HasDataBlob<NameDB>())
+            }
+            if (entity.HasDataBlob<NameDB>())
+            {
+                TextIconList.Add(entity.Guid, new TextIcon(entity, _camera));
+            }
+
+            EntityIcon entIcon = new EntityIcon(entity, _camera);
+            EntityList.Add(entity.Guid, entIcon);
+            IconDict.Add(entity.Guid, entIcon);
+        }
+
+        internal void RemoveIcon(Entity entity)
+        {
+            if (OrbitList.ContainsKey(entity.Guid))
+                OrbitList.Remove(entity.Guid);
+            if(TextIconList.ContainsKey(entity.Guid))
+                TextIconList.Remove(entity.Guid);
+            if (IconDict.ContainsKey(entity.Guid))
+                IconDict.Remove(entity.Guid);
+        }
+
+        internal void HandleChange(EntityChangeData changeData)
+        {
+            if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
+            {
+                if (changeData.Datablob is OrbitDB & !OrbitList.ContainsKey(changeData.Entity.Guid))
                 {
-                    TextIconList.Add(new TextIcon(item, camera));
+                    if (!((OrbitDB)changeData.Datablob).IsStationary)
+                        OrbitList.Add(changeData.Entity.Guid, new OrbitRing(changeData.Entity, _camera));
                 }
-
-
-                EntityIcon entIcon = new EntityIcon(item, camera);
-                EntityList.Add(entIcon);
-
-
-                IconDict.Add(item.Guid, entIcon);
+                if (changeData.Datablob is NameDB &! TextIconList.ContainsKey(changeData.Entity.Guid))
+                        TextIconList.Add(changeData.Entity.Guid, new TextIcon(changeData.Entity, _camera));
+                if (!IconDict.ContainsKey(changeData.Entity.Guid))
+                    IconDict.Add(changeData.Entity.Guid, new EntityIcon(changeData.Entity, _camera));
+            }
+            if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
+            {
+                if (changeData.Datablob is OrbitDB)
+                    OrbitList.Remove(changeData.Entity.Guid);
+                if (changeData.Datablob is NameDB)
+                    TextIconList.Remove(changeData.Entity.Guid);
             }
         }
 
@@ -69,28 +105,28 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             var occupiedPosition = new List<Rectangle>();
             IComparer<Rectangle> byViewPos = new ByViewPosition();
-
-            foreach (var item in TextIconList)
+            var textIconList = new List<TextIcon>(TextIconList.Values);
+            foreach (var item in TextIconList.Values)
             {
                 item.ViewOffset = item.DefaultViewOffset;
             }
 
             //Consolidate TextIcons that share the same position and name
-            TextIconList.Sort();
-            int listLength = TextIconList.Count;
+            textIconList.Sort();
+            int listLength = textIconList.Count;
             int textIconQuantity = 1;
             for (int i = 1; i < listLength; i++)
             {
-                if (TextIconList[i - 1].CompareTo(TextIconList[i]) == 0)
+                if (textIconList[i - 1].CompareTo(textIconList[i]) == 0)
                 {
                     textIconQuantity++;
-                    TextIconList.RemoveAt(i);
+                    textIconList.RemoveAt(i);
                     i--;
                     listLength--;
                 }
                 else if (textIconQuantity > 1)
                 {
-                    TextIconList[i - 1].name += " x" + textIconQuantity;
+                    textIconList[i - 1].name += " x" + textIconQuantity;
                     textIconQuantity = 1;
                 }
             }
@@ -98,23 +134,23 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //Placement happens bottom to top, left to right
             //Each newly placed Texticon is compared to only the Texticons that are placed above its position
             //Therefore a sorted list of the occupied Positions is maintained
-            occupiedPosition.Add(TextIconList[0].ViewDisplayRect);
+            occupiedPosition.Add(textIconList[0].ViewDisplayRect);
             for (int i = 1; i < TextIconList.Count; i++)
             {
-                int lowestPosIndex = occupiedPosition.BinarySearch(TextIconList[i].ViewDisplayRect + new Point(0,(int)TextIconList[i].ViewNameSize.Height) , byViewPos);
+                int lowestPosIndex = occupiedPosition.BinarySearch(textIconList[i].ViewDisplayRect + new Point(0,(int)textIconList[i].ViewNameSize.Height) , byViewPos);
                 if (lowestPosIndex < 0) lowestPosIndex = ~lowestPosIndex;
                 
                 for (int j = lowestPosIndex; j < occupiedPosition.Count; j++)
                 {
-                    if (TextIconList[i].ViewDisplayRect.Intersects(occupiedPosition[j]))
+                    if (textIconList[i].ViewDisplayRect.Intersects(occupiedPosition[j]))
                     {
-                        TextIconList[i].ViewOffset -= new PointF(0,  TextIconList[i].ViewDisplayRect.Bottom - occupiedPosition[j].Top);
+                        textIconList[i].ViewOffset -= new PointF(0,  textIconList[i].ViewDisplayRect.Bottom - occupiedPosition[j].Top);
                     }
                 }
                 //Inserts the new label sorted
-                int insertIndex = occupiedPosition.BinarySearch(TextIconList[i].ViewDisplayRect, byViewPos);
+                int insertIndex = occupiedPosition.BinarySearch(textIconList[i].ViewDisplayRect, byViewPos);
                 if (insertIndex < 0) insertIndex = ~insertIndex;
-                occupiedPosition.Insert(insertIndex, TextIconList[i].ViewDisplayRect);
+                occupiedPosition.Insert(insertIndex, textIconList[i].ViewDisplayRect);
             }
 
 
@@ -130,13 +166,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
         /// <param name="g"></param>
         public void DrawMe(Graphics g)
         {
-            foreach( var item in OrbitList)
+            foreach( var item in OrbitList.Values)
                 item.DrawMe(g);
-            foreach (var item in EntityList)
+            foreach (var item in EntityList.Values)
                 item.DrawMe(g);
 
             TextIconsDistribute();
-            foreach (var item in TextIconList)
+            foreach (var item in TextIconList.Values)
             {
                 item.DrawMe(g);
             }

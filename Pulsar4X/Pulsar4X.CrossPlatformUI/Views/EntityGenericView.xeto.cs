@@ -11,7 +11,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
     {
         EntityVM _vm;
         protected ComboBox selectableEntitesCB;
-        protected TabControl datablobVM_tabs;
+        protected TabControl tabCtrl_DBTabs;
 
         public EntityGenericView()
         {
@@ -41,12 +41,12 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void OnEntitySelected(int oldindex, int newindex)
         {
-            datablobVM_tabs.RemoveAll();
+            tabCtrl_DBTabs.RemoveAll();
             foreach(var item in _vm.Viewmodels)
             {
                 TabPage newTab = new TabPage();
                 SetViewForViewmodel(item, newTab);
-                datablobVM_tabs.Pages.Add(newTab);
+                tabCtrl_DBTabs.Pages.Add(newTab);
             }
         }
 
@@ -78,13 +78,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 tabPage.Content = view;
                 tabPage.Text = "Helm";
             }
-
-
-
         }
-
-
-        
     }
-
 }

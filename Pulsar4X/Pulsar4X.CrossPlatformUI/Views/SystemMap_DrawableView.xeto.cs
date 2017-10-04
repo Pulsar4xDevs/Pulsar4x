@@ -71,9 +71,11 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public void SetViewmodel(SystemMap_DrawableVM viewModel) 
         {
             _viewModel = viewModel;
-            viewModel.PropertyChanged += ViewModel_PropertyChanged;
+            _viewModel.IconableEntitys.CollectionChanged += IconableEntitys_CollectionChanged;
             viewModel.SystemSubpulse.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
-            IconEntitys_CollectionChanged();
+            //IconEntitys_CollectionChanged();
+            _iconCollection.Init(_viewModel.IconableEntitys, _camera2);
+            Invalidate();
         }
 
         private void SystemSubpulse_SystemDateChangedEvent(DateTime newDate)
@@ -86,24 +88,49 @@ namespace Pulsar4X.CrossPlatformUI.Views
             IsMouseDown = true;
         }
 
-        private void IconEntitys_CollectionChanged()
-        {
-            _iconCollection.Init(_viewModel.IconableEntitys, _camera2);
-            Invalidate();
 
+
+        void IconableEntitys_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+            {
+                foreach (Entity item in e.NewItems)
+                    _iconCollection.AddNewIcon(item);
+            }
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                foreach (Entity item in e.OldItems)
+                    _iconCollection.RemoveIcon(item);
+            }
+        }
+
+
+        void doUpdates()
+        {
+            var updates = _viewModel.GetUpdates();
+            foreach (var item in updates)
+            {
+                _iconCollection.HandleChange(item);
+            }
         }
 
         private void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            /*
+             * 
             if (e.PropertyName == nameof(SystemMap_DrawableVM.IconableEntitys))
                 IconEntitys_CollectionChanged();
             Invalidate();
+            */
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             
             stopwatch.Start();
+            if (_viewModel.UpdatesReady)
+                doUpdates();
             e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
 
             _iconCollection.DrawMe(e.Graphics);

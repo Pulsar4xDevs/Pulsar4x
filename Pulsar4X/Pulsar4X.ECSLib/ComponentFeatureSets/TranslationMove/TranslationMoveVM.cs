@@ -98,6 +98,7 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = _cmdRef.EntityGuid,
                 CreatedDate = _cmdRef.GetSystemDatetime,
                 TargetEntityGuid = TargetList.SelectedKey,
+                RangeInKM = Range,
             };
             _cmdRef.Handler.HandleOrder(newmove);
         }

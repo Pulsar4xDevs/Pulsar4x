@@ -7,6 +7,6 @@
 <StackLayout>
     <ComboBox x:Name="selectableEntitesCB" DataContext="{Binding SelectableEntites}"></ComboBox>
 
-    <TabControl x:Name="datablobVM_tabs"></TabControl>
+    <TabControl x:Name="tabCtrl_DBTabs"></TabControl>
     </StackLayout>
 </Panel>

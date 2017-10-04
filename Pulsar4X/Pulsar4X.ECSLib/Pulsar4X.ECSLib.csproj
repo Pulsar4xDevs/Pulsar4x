@@ -382,6 +382,7 @@
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveVM.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveProcessor.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveDB.cs" />
+    <Compile Include="Factories\SystemAsEntityFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

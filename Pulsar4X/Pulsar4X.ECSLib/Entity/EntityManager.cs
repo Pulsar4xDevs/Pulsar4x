@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
+using static Pulsar4X.ECSLib.EntityChangeData;
 
 namespace Pulsar4X.ECSLib
 {
@@ -137,7 +138,7 @@ namespace Pulsar4X.ECSLib
                 // This is a "fake" manager, that does not link to other managers.
                 _localEntityDictionary.Add(entity.Guid, entity);
             }
-
+            UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);
             return entityID;
         }
 
@@ -193,6 +194,7 @@ namespace Pulsar4X.ECSLib
                 {
                     _globalGuidDictionaryLock.ExitWriteLock();
                 }
+                UpdateListners(_entities[entityID], null, EntityChangeType.DBAdded);
             }
             else
             {
@@ -201,12 +203,12 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal List<BaseDataBlob> GetAllDataBlobs(int id)
+        internal List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)
         {
             var dataBlobs = new List<BaseDataBlob>();
             for (int i = 0; i < InternalDataBlobTypes.Count; i++)
             {
-                BaseDataBlob dataBlob = _dataBlobMap[i][id];
+                BaseDataBlob dataBlob = _dataBlobMap[i][entityID];
                 if (dataBlob != null)
                 {
                     dataBlobs.Add(dataBlob);
@@ -214,6 +216,39 @@ namespace Pulsar4X.ECSLib
             }
 
             return dataBlobs;
+        }
+
+        internal List<T> GetAllDataBlobsOfType<T>(int id) where T : BaseDataBlob
+        {
+            var dataBlobs = new List<T>();
+            foreach (var item in _dataBlobMap[id])
+            {
+                if (item != null)
+                {
+                    T datablob = (T)item;
+                    dataBlobs.Add(datablob);
+                }
+            }
+
+            /*
+            for (int i = 0; i < InternalDataBlobTypes.Count; i++)
+            {
+                if (_dataBlobMap[i].Count -1 >= id)
+                {
+                    T dataBlob = (T)_dataBlobMap[i][id];
+                    if (dataBlob != null)
+                    {
+                        dataBlobs.Add(dataBlob);
+                    }
+                }
+            }*/
+
+            return dataBlobs;
+        }
+
+        internal List<T> GetAllDataBlobsOfType<T>() where T : BaseDataBlob
+        {
+            return GetAllDataBlobsOfType<T>(GetTypeIndex<T>());
         }
 
         internal T GetDataBlob<T>(int entityID) where T : BaseDataBlob
@@ -230,10 +265,7 @@ namespace Pulsar4X.ECSLib
         {
             int typeIndex;
             TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
-
-            _dataBlobMap[typeIndex][entityID] = dataBlob;
-            EntityMasks[entityID][typeIndex] = true;
-            dataBlob.OwningEntity = _entities[entityID];
+            SetDataBlob(entityID, dataBlob, typeIndex);
         }
 
         internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, int typeIndex)
@@ -241,24 +273,43 @@ namespace Pulsar4X.ECSLib
             _dataBlobMap[typeIndex][entityID] = dataBlob;
             EntityMasks[entityID][typeIndex] = true;
             dataBlob.OwningEntity = _entities[entityID];
+            UpdateListners(_entities[entityID], dataBlob, EntityChangeType.DBAdded);
         }
 
         internal void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
-            _dataBlobMap[typeIndex][entityID].OwningEntity = null;
-            _dataBlobMap[typeIndex][entityID] = null;
-            EntityMasks[entityID][typeIndex] = false;
+            RemoveDataBlob(entityID, typeIndex);
         }
 
         internal void RemoveDataBlob(int entityID, int typeIndex)
         {
+            BaseDataBlob db = _dataBlobMap[typeIndex][entityID];
             _dataBlobMap[typeIndex][entityID].OwningEntity = null;
             _dataBlobMap[typeIndex][entityID] = null;
             EntityMasks[entityID][typeIndex] = false;
+            UpdateListners(_entities[entityID], db, EntityChangeType.DBRemoved);
         }
 
         #endregion
+
+        private void UpdateListners(Entity entity, BaseDataBlob db, EntityChangeType change)
+        {
+            var changeListners = GetAllDataBlobsOfType<EntityChangeListnerDB>();
+            if (changeListners.Count > 0)
+            {
+                var changeData = new EntityChangeData() {
+                    Entity = entity,
+                    Datablob = db,
+                    ChangeType = change
+                };
+                foreach (var item in changeListners)
+                {
+                    if(item.ListningToEntites.Contains(entity))
+                        item.ChangedEntites.Add(changeData);
+                }
+            }
+        }
 
         #region Public API Functions
 
