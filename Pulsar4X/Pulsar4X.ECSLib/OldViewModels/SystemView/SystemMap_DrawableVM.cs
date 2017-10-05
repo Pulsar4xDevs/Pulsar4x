@@ -60,7 +60,8 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public bool UpdatesReady { get { return _listnerDB.ChangedEntites.Count > 0; } }
+        public bool UpdatesReady { get { 
+                return _listnerDB.EntityChanges.Count > 0; } }
 
         public List<EntityChangeData> GetUpdates()
         {
@@ -69,11 +70,11 @@ namespace Pulsar4X.ECSLib
 
             var changes = new List<EntityChangeData>();
 
-            EntityChangedListnerProcessor.PostHandling(_listnerDB);
 
-            lock (_listnerDB.ChangedEntites)
+
+            lock (_listnerDB.EntityChanges)
             {
-                foreach (var change in _listnerDB.ChangedEntites)
+                foreach (var change in _listnerDB.EntityChanges)
                 {
                     switch( change.ChangeType)
                     {
@@ -100,9 +101,10 @@ namespace Pulsar4X.ECSLib
                                 changes.Add(change);
                             break;
                     }
-                    _listnerDB.ChangedEntites.Clear();
                 }
             }
+
+            EntityChangedListnerProcessor.PostHandling(_listnerDB);
             return changes;
         }
 

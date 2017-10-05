@@ -1,11 +1,12 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto.cs" Line="52" Column="9" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/MainWindow.xeto.cs" Line="87" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Commands/EntityGenericViewCMD.cs" Line="39" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/Helpers/DictionaryVM.cs" Line="61" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/EntityGenericView.xeto" Line="10" Column="39" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/IconCollection.cs" Line="97" Column="65" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/SystemView/SystemMap_DrawableVM.cs" Line="103" Column="22" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemMap_DrawableView.xeto.cs" Line="100" Column="8" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="298" Column="77" />
+      <File FileName="Pulsar4X.ECSLib/Factories/SystemAsEntityFactory.cs" Line="114" Column="30" />
+      <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />

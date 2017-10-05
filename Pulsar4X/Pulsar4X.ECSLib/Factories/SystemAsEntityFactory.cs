@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib
     public class EntityChangeListnerDB : BaseDataBlob
     {
 
-        public List<EntityChangeData> ChangedEntites { get; } = new List<EntityChangeData>();
+        public List<EntityChangeData> EntityChanges { get; } = new List<EntityChangeData>();
         internal HashSet<Entity> ListningToEntites { get; } = new HashSet<Entity>();
 
         public EntityChangeListnerDB() {
@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         internal static void PreHandling(EntityChangeListnerDB listnerDB)
         {
             {
-                foreach (var change in listnerDB.ChangedEntites)
+                foreach (var change in listnerDB.EntityChanges)
                 {
                     if (!listnerDB.ListningToEntites.Contains(change.Entity))
                     {
@@ -127,14 +127,14 @@ namespace Pulsar4X.ECSLib
         internal static void PostHandling(EntityChangeListnerDB listnerDB)
         {
             {
-                foreach (var change in listnerDB.ChangedEntites)
+                foreach (var change in listnerDB.EntityChanges)
                 {
                     if (change.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
                     {
                         listnerDB.ListningToEntites.Remove(change.Entity);
                     }
                 }
-                listnerDB.ChangedEntites.Clear();
+                listnerDB.EntityChanges.Clear();
             }
         }
     }
