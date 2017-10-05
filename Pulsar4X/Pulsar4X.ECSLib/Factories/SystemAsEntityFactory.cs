@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -22,55 +21,10 @@ namespace Pulsar4X.ECSLib
     }
 
 
-    public class WatchedEntityDB : BaseDataBlob
-    {
-        internal List<EntityChangeData> Changes = new List<EntityChangeData>();
-
-
-        public override object Clone()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-
-
-    public struct EntityChangeData
-    {
-        public enum EntityChangeType
-        {
-            EntityAdded,
-            EntityRemoved,
-            DBAdded,
-            DBRemoved,
-        }
-        public EntityChangeType ChangeType;
-        public Entity Entity;
-        public BaseDataBlob Datablob; //will be null if ChangeType is EntityAdded or EntityRemoved.
-    }
-
-
-
-    public class EntityChangeListnerDB : BaseDataBlob
-    {
-
-        public List<EntityChangeData> EntityChanges { get; } = new List<EntityChangeData>();
-        internal HashSet<Entity> ListningToEntites { get; } = new HashSet<Entity>();
-
-        public EntityChangeListnerDB() {
-        }
-
-        public EntityChangeListnerDB(EntityChangeListnerDB db)
-        { }
-
-        public override object Clone()
-        {
-            return new EntityChangeListnerDB(this);
-        }
-    }
-
-
-
+    /// <summary>
+    /// The idea of this is so that we can get to a system from a manager (or from an entity within a system)
+    /// currently not used, but may be usefull in the future when we do sensors etc. 
+    /// </summary>
     public class StarSystemDB : BaseDataBlob
     {
         internal StarSystem StarSystem { get;  set; }
@@ -89,53 +43,6 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new StarSystemDB(this);
-        }
-    }
-
-
-
-    internal static class EntityChangedListnerProcessor
-    {
-        internal static void SetListners(EntityManager manager, Entity listningEntity)
-        {
-            //int dbTypeID = EntityManager.GetTypeIndex<OwnedDB>();
-            var ownedDBs = manager.GetAllDataBlobsOfType<OwnedDB>();
-            var listnerDB = listningEntity.GetDataBlob<EntityChangeListnerDB>();
-
-            foreach (OwnedDB db in ownedDBs)
-            {
-                if (db.OwnedByFaction == listningEntity || db.OwnedByFaction == listningEntity.GetDataBlob<OwnedDB>().OwnedByFaction)
-                {
-                    listnerDB.ListningToEntites.Add(db.OwningEntity);
-                }
-            }
-        }
-
-        internal static void PreHandling(EntityChangeListnerDB listnerDB)
-        {
-            {
-                foreach (var change in listnerDB.EntityChanges)
-                {
-                    if (!listnerDB.ListningToEntites.Contains(change.Entity))
-                    {
-                        listnerDB.ListningToEntites.Add(change.Entity);
-                    }
-                }
-            }
-        }
-
-        internal static void PostHandling(EntityChangeListnerDB listnerDB)
-        {
-            {
-                foreach (var change in listnerDB.EntityChanges)
-                {
-                    if (change.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
-                    {
-                        listnerDB.ListningToEntites.Remove(change.Entity);
-                    }
-                }
-                listnerDB.EntityChanges.Clear();
-            }
         }
     }
 }

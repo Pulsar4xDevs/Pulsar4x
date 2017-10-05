@@ -383,6 +383,9 @@
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveProcessor.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveDB.cs" />
     <Compile Include="Factories\SystemAsEntityFactory.cs" />
+    <Compile Include="Entity\EntityChangeListnerDB.cs" />
+    <Compile Include="Entity\WatchedEntityDB.cs" />
+    <Compile Include="Entity\EntityChangedListnerProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
