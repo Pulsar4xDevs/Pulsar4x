@@ -210,7 +210,7 @@ namespace Pulsar4X.ECSLib
             double inclination = 0;
             double loAN = 0; //longditude of Acending Node
             double aoP = Math.Tan(ralitivePos.X / ralitivePos.Y); ; //arguemnt of Periapsis
-            double ecentricAnomaly = 0;
+            //double ecentricAnomaly = 0;
             double meanAnomaly = 0; //ecentricAnomaly - ecentricity * Math.Sin(ecentricAnomaly);
             OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajorAxsis, ecentricity, inclination, loAN, aoP, meanAnomaly, time);
             return newOrbit;

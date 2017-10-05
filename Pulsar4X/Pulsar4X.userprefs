@@ -1,9 +1,6 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/ShipMovementProcessor.cs" Line="188" Column="21" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/Orbit/OrbitBodyCommand.cs" Line="64" Column="62" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslateMoveProcessor.cs" Line="1" Column="1" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>

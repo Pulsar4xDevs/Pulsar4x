@@ -102,9 +102,8 @@ namespace Pulsar4X.ECSLib
                             break;
                     }
                 }
+                EntityChangedListnerProcessor.PostHandling(_listnerDB);
             }
-
-            EntityChangedListnerProcessor.PostHandling(_listnerDB);
             return changes;
         }
 

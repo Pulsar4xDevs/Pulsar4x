@@ -218,10 +218,10 @@ namespace Pulsar4X.ECSLib
             return dataBlobs;
         }
 
-        internal List<T> GetAllDataBlobsOfType<T>(int id) where T : BaseDataBlob
+        internal List<T> GetAllDataBlobsOfType<T>(int typeIndex) where T : BaseDataBlob
         {
             var dataBlobs = new List<T>();
-            foreach (var item in _dataBlobMap[id])
+            foreach (var item in _dataBlobMap[typeIndex])
             {
                 if (item != null)
                 {
