@@ -171,19 +171,20 @@ namespace Pulsar4X.ECSLib
         /// <param name="shipEntity">Ship entity.</param>
         /// <param name="parentEntity">The Entity to orbit</param>
         /// <param name="semiMajorAxsis">Largest Radius</param>
-        public static OrbitDB CreateOrbitHereWithSemiMajAxis(Entity shipEntity, Entity parentEntity, double semiMajorAxsis, DateTime time)
+        public static OrbitDB CreateOrbitHereWithSemiMajAxis(Entity shipEntity, Entity parentEntity, double semiMajAxsisKM, DateTime time)
         {
             PositionDB parentPosition = parentEntity.GetDataBlob<PositionDB>();
             PositionDB myPosition = shipEntity.GetDataBlob<PositionDB>();
             double parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
             double myMass = shipEntity.GetDataBlob<MassVolumeDB>().Mass;
-            double aphelion = PositionDB.GetDistanceBetween(parentPosition, myPosition);
-            double linierEcentricity = semiMajorAxsis - aphelion;
-            double semiMinorAxsis =  Math.Sqrt(Math.Pow(semiMajorAxsis, 2) - Math.Pow(linierEcentricity, 2));
-            double ecentricity = linierEcentricity / semiMajorAxsis;
+            double aphelionAU = PositionDB.GetDistanceBetween(parentPosition, myPosition);
+            double semiMajAxisAU = semiMajAxsisKM / GameConstants.Units.KmPerAu;
+            double linierEcentricity = aphelionAU - semiMajAxisAU;
+            double semiMinorAxsis =  Math.Sqrt(Math.Pow(semiMajAxisAU, 2) - Math.Pow(linierEcentricity, 2));
+            double ecentricity = linierEcentricity / semiMajAxisAU;
             Vector4 ralitivePos = (myPosition.AbsolutePosition - parentPosition.AbsolutePosition);
             double angle = Math.Tan(ralitivePos.X / ralitivePos.Y);
-            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajorAxsis, ecentricity, 0, 0, angle, 0, time);
+            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajAxisAU, ecentricity, 0, 0, angle, 0, time);
             return newOrbit;
         }
 
@@ -193,20 +194,25 @@ namespace Pulsar4X.ECSLib
         /// <returns>An OrbitDB. Does Not set DB to Entity.</returns>
         /// <param name="shipEntity">Ship entity.</param>
         /// <param name="parentEntity">The Entity to orbit</param>
-        /// <param name="perihelion">closest distance to the parent</param>
-        public static OrbitDB CreateOrbitHereWithPerihelion(Entity shipEntity, Entity parentEntity, double perihelion, DateTime time)
+        /// <param name="perihelionKM">closest distance to the parent in KM</param>
+        public static OrbitDB CreateOrbitHereWithPerihelion(Entity shipEntity, Entity parentEntity, double perihelionKM, DateTime time)
         {
             PositionDB parentPosition = parentEntity.GetDataBlob<PositionDB>();
             PositionDB myPosition = shipEntity.GetDataBlob<PositionDB>();
             double parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
             double myMass = shipEntity.GetDataBlob<MassVolumeDB>().Mass;
-            double aphelion = PositionDB.GetDistanceBetween(parentPosition, myPosition);
-            double semiMajorAxsis = perihelion + aphelion / 2;
-            double linierEcentricity = semiMajorAxsis - aphelion;
+            double aphelionAU = PositionDB.GetDistanceBetween(parentPosition, myPosition);
+            double perihelionAU = perihelionKM / GameConstants.Units.KmPerAu;
+            double semiMajorAxsis = (perihelionAU + aphelionAU) / 2 ;
+            double linierEcentricity = aphelionAU - semiMajorAxsis;
             double ecentricity = linierEcentricity / semiMajorAxsis;
             Vector4 ralitivePos = (myPosition.AbsolutePosition - parentPosition.AbsolutePosition);
-            double angle = Math.Tan(ralitivePos.X / ralitivePos.Y);
-            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajorAxsis, ecentricity, 0, 0, angle, 0, time);
+            double inclination = 0;
+            double loAN = 0; //longditude of Acending Node
+            double aoP = Math.Tan(ralitivePos.X / ralitivePos.Y); ; //arguemnt of Periapsis
+            double ecentricAnomaly = 0;
+            double meanAnomaly = 0; //ecentricAnomaly - ecentricity * Math.Sin(ecentricAnomaly);
+            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajorAxsis, ecentricity, inclination, loAN, aoP, meanAnomaly, time);
             return newOrbit;
         }
 
