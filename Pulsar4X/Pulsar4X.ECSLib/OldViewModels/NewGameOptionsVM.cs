@@ -36,8 +36,9 @@ namespace Pulsar4X.ECSLib
 
         public int PortNumber { get; set; } = 4888;
 
-        public NewGameOptionsVM()
+        public NewGameOptionsVM(GameVM gameVM)
         {
+            _gameVM = gameVM;
             CreatePlayerFaction = true;
             DefaultStart = true;
             FactionName = "United Earth Federation";
@@ -48,14 +49,15 @@ namespace Pulsar4X.ECSLib
             SelectedModList = new ObservableCollection<DataVersionInfo>();
         }
 
-
+        /*
         public static NewGameOptionsVM Create(GameVM gameVM)
         {
             NewGameOptionsVM optionsVM = new NewGameOptionsVM();
             optionsVM._gameVM = gameVM;
 
             return optionsVM;
-        }
+        }*/
+
 
         public void CreateGame()
         {
@@ -64,6 +66,7 @@ namespace Pulsar4X.ECSLib
             {
                 ServerOrderHandler handler = new ServerOrderHandler(_gameVM.Game, PortNumber);
                 _gameVM.NetMessages = handler.NetHost.Messages;
+                handler.NetHost.ServerStart();
 
             }
         }

@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Tests", "Pulsar4X.Tests\Pulsar4X.Tests.csproj", "{DBB8EAB5-4DBD-B54F-94C3-3B2EEA3C8B4E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E716FA06-ECDF-B446-96B4-B790AAB5713B} = {E716FA06-ECDF-B446-96B4-B790AAB5713B}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.ECSLib", "Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj", "{E716FA06-ECDF-B446-96B4-B790AAB5713B}"
 EndProject

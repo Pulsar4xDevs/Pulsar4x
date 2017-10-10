@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
             return _systemDictionary[rootGuid];
         }
 
-        public void CreateGame(NewGameOptionsVM options)
+        internal void CreateGame(NewGameOptionsVM options)
         {
             StatusText = "Creating Game...";
 

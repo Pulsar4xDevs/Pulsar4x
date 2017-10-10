@@ -25,7 +25,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		public NewGame(GameVM gameVM) {
 			XamlReader.Load(this);
 			_gameVM = gameVM;
-			new_game_options = new NewGameOptionsVM();
+			new_game_options = new NewGameOptionsVM(gameVM);
 			DataContext = new_game_options;
 			BindControls();
 		}
@@ -72,7 +72,7 @@ namespace Pulsar4X.CrossPlatformUI.Views {
 		}
 
 		protected void OkButton_Click(object sender, EventArgs e) {
-			_gameVM.CreateGame(new_game_options);
+            new_game_options.CreateGame();
 			Close();
 		}
 		protected void CancelButton_Click(object sender, EventArgs e) {
