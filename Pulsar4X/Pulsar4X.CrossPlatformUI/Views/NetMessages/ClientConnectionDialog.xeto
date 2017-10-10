@@ -2,7 +2,9 @@
 <Dialog
   xmlns="http://schema.picoe.ca/eto.forms" 
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  xmlns:c="clr-namespace:Pulsar4X.CrossPlatformUI.Views;assembly=Pulsar4X.CrossPlatformUI"
   >
+  <StackLayout>
   <TableLayout>
 	<TableRow>
   		<Label Text="Faction Name:"/>
@@ -16,8 +18,11 @@
 		<Label Text="Server Address:"/>
 		<TextBox Text="{Binding ServerAddress}"/>
 	</TableRow>
+  </TableLayout>
+	
 		<Button Text="Connect" Command="{Binding ConnectCMD}"/>
 		<Label Text="Status"/>
 		<Label Text="{Binding ConnectionStatus}"/>
-	</TableLayout>
+		<c:GenericStackControl x:Name="MessagesList" DataContext="{Binding NetMessages}" Height="300" Width="300"/>
+	</StackLayout>
 </Dialog>

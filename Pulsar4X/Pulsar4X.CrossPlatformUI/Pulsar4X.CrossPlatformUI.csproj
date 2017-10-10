@@ -116,9 +116,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-    <EmbeddedResource Include="Views\ClientConnectionDialog.xeto">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Views\ScientistUC.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -266,9 +263,15 @@
     <EmbeddedResource Include="Views\EntityGenericView.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Views\NetMessages\NetMessagesView.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NetMessages\ClientConnectionDialog.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\LogViewCMD.cs" />
+    <Compile Include="Commands\NetMessagesCMD.cs" />
     <Compile Include="Commands\PlayerOptionsCMD.cs" />
     <Compile Include="Commands\ColonyView.cs" />
     <Compile Include="Commands\ComponentDesignViewCMD.cs" />
@@ -296,9 +299,6 @@
     <Compile Include="MainForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pulsar4XApplication.cs" />
-    <Compile Include="Views\ClientConnectionDialog.xeto.cs">
-      <DependentUpon>ClientConnectionDialog.xeto</DependentUpon>
-    </Compile>
     <Compile Include="Views\AbilitySelectionList.xeto.cs">
       <DependentUpon>AbilitySelectionList.xeto</DependentUpon>
     </Compile>
@@ -448,6 +448,13 @@
     </Compile>
     <Compile Include="Commands\EntityGenericViewCMD.cs" />
     <Compile Include="Commands\ClientConnectCMD.cs" />
+    <Compile Include="Views\NetMessages\NetMessagesView.cs">
+      <DependentUpon>NetMessagesView.xeto</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\LogViewsCMD.cs" />
+    <Compile Include="Views\NetMessages\ClientConnectionDialog.xeto.cs">
+      <DependentUpon>ClientConnectionDialog.xeto</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
@@ -498,6 +505,7 @@
     <Folder Include="Lib" />
     <Folder Include="Views\RefinaryView\" />
     <Folder Include="Views\MoveOrderViews\" />
+    <Folder Include="Views\NetMessages\" />
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>

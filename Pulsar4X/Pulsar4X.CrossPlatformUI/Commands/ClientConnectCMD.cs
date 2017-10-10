@@ -35,9 +35,11 @@ namespace Pulsar4X.CrossPlatformUI.Commands
             }
 
             //Views.ClientConnection clientConnect = new Views.ClientConnection();
-            var vm = new ClientConnectionVM();
-            var clientConnect = new Views.ClientConnectionDialog();
+            var vm = new ClientConnectionVM(_gameVM);
+            var clientConnect = new Views.NetMessages.ClientConnectionDialog();
             clientConnect.DataContext = vm;
+
+
             clientConnect.ShowModal(Application.Instance.MainForm);
 
         }

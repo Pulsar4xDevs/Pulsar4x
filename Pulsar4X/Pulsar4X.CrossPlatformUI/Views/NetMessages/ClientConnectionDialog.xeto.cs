@@ -4,7 +4,7 @@ using Eto.Forms;
 using Eto.Drawing;
 using Eto.Serialization.Xaml;
 using Pulsar4X.ECSLib;
-namespace Pulsar4X.CrossPlatformUI.Views
+namespace Pulsar4X.CrossPlatformUI.Views.NetMessages
 {
     public class ClientConnectionDialog : Dialog
     {

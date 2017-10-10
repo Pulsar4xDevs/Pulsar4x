@@ -63,6 +63,7 @@ namespace Pulsar4X.ECSLib
             if (CreateServer)
             {
                 ServerOrderHandler handler = new ServerOrderHandler(_gameVM.Game, PortNumber);
+                _gameVM.NetMessages = handler.NetHost.Messages;
 
             }
         }

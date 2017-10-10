@@ -1,23 +1,36 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Networking/ClientConnectionVM.cs" Line="41" Column="10" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="63" Column="10" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="106" Column="50" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/ClientConnectionDialog.xeto" Line="17" Column="40" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Commands/ClientConnectCMD.cs" Line="40" Column="44" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="31" Column="23" />
+      <File FileName="Pulsar4X.ECSLib/Networking/ClientConnectionVM.cs" Line="30" Column="37" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/NetMessages/NetMessagesView.cs" Line="20" Column="13" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="21" Column="48" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="97" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/GenericStackControl.xeto" Line="1" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/NetMessages/ClientConnectionDialog.xeto" Line="26" Column="59" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/NetMessages/NetMessagesView.xeto" Line="7" Column="59" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/ColonyScreenView.xeto" Line="15" Column="72" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/ColonyScreenView.xeto.cs" Line="15" Column="52" />
       <File FileName="Pulsar4X Status" />
     </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>this.DataContext</Value>
+          <Value>e.Action</Value>
+          <Value>this.Stack.Items</Value>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Server.cs" relfile="Pulsar4X.ECSLib/Networking/Server.cs" line="60" column="1" />
-      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="67" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches>
+    <Watch file="Pulsar4X.CrossPlatformUI/Views/GenericStackControl.xeto.cs" line="23" offsetX="731" offsetY="678" expression="DataContext" liveUpdate="False" />
+  </MonoDevelop.Ide.DebuggingService.PinnedWatches>
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.Pulsar4X.CrossPlatformUI.Gtk2 PreferredExecutionTarget="MonoDevelop.Default" />
   <DisabledProjects>

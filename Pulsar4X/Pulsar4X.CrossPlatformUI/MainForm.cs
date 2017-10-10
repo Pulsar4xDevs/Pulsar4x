@@ -16,6 +16,7 @@ namespace Pulsar4X.CrossPlatformUI
 
         private static Command savegame;
 
+        private static Command netmessages;
         private static Command sysMap;
         private static Command colView;
         private static Command componentDesign;
@@ -44,7 +45,7 @@ namespace Pulsar4X.CrossPlatformUI
             var quit = new Quit(_gameVM);
             var playerOptions = new PlayerOptionsCMD(_gameVM);
             var connect = new ClientConnectCMD(_gameVM);
-
+            netmessages = new NetMessagesCMD(_gameVM);
             savegame = new SaveGame(_gameVM);
             sysMap = new SystemMap(_gameVM);
             entView = new EntityGenericViewCMD(_gameVM);
@@ -84,7 +85,7 @@ namespace Pulsar4X.CrossPlatformUI
             {
                 // create and set the toolbar
                 ToolBar = new ToolBar();
-
+                ToolBar.Items.Add(netmessages);
                 ToolBar.Items.Add(sysMap);
                 ToolBar.Items.Add(colView);
                 ToolBar.Items.Add(entView);

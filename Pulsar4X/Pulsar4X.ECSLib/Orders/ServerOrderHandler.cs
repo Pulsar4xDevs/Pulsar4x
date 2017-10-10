@@ -9,14 +9,14 @@ namespace Pulsar4X.ECSLib
     {
         bool HasClients = false;
 
-        NetworkHost _netHost;
+        internal NetworkHost NetHost;
 
         //Dictionary<Guid, List<RemoteConnection>> factionListners = new Dictionary<Guid, List<RemoteConnection>>();
 
         internal ServerOrderHandler(Game game, int portNum) : base(game)
         {
-            _netHost = new NetworkHost(portNum);
-            _netHost.ServerStart();
+            NetHost = new NetworkHost(portNum);
+            NetHost.ServerStart();
         }
 
         internal override void HandleOrder(EntityCommand entityCommand)

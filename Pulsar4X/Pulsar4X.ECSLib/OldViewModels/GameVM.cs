@@ -25,6 +25,8 @@ namespace Pulsar4X.ECSLib
 
         public Player CurrentPlayer { get; private set; }
 
+        public ObservableCollection<string> NetMessages { get; set; }
+
         public AuthenticationToken CurrentAuthToken { get; private set; }
 
         internal Entity CurrentFaction

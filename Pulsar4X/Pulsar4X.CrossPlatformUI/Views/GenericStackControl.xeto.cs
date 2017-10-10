@@ -20,15 +20,13 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         private void GenericStackControl_DataContextChanged(object sender, EventArgs e)
         {
-            Type dcType = DataContext.GetType();
-            if (DataContext is ICollection)
+            if (DataContext is ICollection collection)
             {                
                 Stack.Items.Clear();
-                AddControls((ICollection)DataContext);
-                if (DataContext is INotifyCollectionChanged)
+                AddControls(collection);
+                if (DataContext is INotifyCollectionChanged notifyChanged)
                 {
-                    var objcollection = (INotifyCollectionChanged)DataContext;
-                    objcollection.CollectionChanged += Collection_CollectionChanged;
+                    notifyChanged.CollectionChanged += Collection_CollectionChanged;
                 }
             }
         }
@@ -50,9 +48,17 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var item in collection)
             {
                 Control ctrl = (Control)Activator.CreateInstance(ControlType);
-                ctrl.DataContext = item;
+                if (ctrl is TextControl txtCtrl &&  item is string strItem)
+                {
+                    txtCtrl.Text = strItem;
+                }
+                else
+                {
+                    ctrl.DataContext = item;
+                }
                 Stack.Items.Add(ctrl);
             }
+ 
         }
 
         private void RemoveControls(ICollection collection)

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Threading;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
-//using Lidgren.Network;
 using Pulsar4X.Networking;
 
 namespace Pulsar4X.ECSLib
@@ -21,11 +20,15 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public ObservableCollection<string> NetMessages { get; set; }
+
         NetworkClient _netClient;
 
-        public ClientConnectionVM()
+        public ClientConnectionVM(GameVM gameVM)
         {
             _netClient = new NetworkClient(ServerAddress, PortNum);
+            NetMessages = _netClient.Messages;
+            gameVM.NetMessages = _netClient.Messages;
         }
 
         private ICommand _connectCMD;
