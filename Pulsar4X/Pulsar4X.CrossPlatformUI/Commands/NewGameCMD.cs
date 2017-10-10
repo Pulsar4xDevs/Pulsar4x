@@ -7,11 +7,11 @@ using GameVM = Pulsar4X.ECSLib.GameVM;
 
 namespace Pulsar4X.CrossPlatformUI.Commands
 {
-    class NewGame : Command
+    class NewGameCMD : Command
     {
         private readonly GameVM _gameVM;
 
-        public NewGame(GameVM gameVM)
+        public NewGameCMD(GameVM gameVM)
         {
             ID = "newgame";
             Image = Icon.FromResource("Pulsar4X.CrossPlatformUI.Resources.Icons.NewGame.ico");

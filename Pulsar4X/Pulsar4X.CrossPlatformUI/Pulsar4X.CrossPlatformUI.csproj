@@ -116,6 +116,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Views\ClientConnectionDialog.xeto">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Views\ScientistUC.xeto">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -272,7 +275,7 @@
     <Compile Include="Commands\ComponentTemplateViewCMD.cs" />
     <Compile Include="Commands\LoadGame.cs" />
     <Compile Include="Commands\MissileDesignCMD.cs" />
-    <Compile Include="Commands\NewGame.cs" />
+    <Compile Include="Commands\NewGameCMD.cs" />
     <Compile Include="Commands\Quit.cs" />
     <Compile Include="Commands\SaveGame.cs" />
     <Compile Include="Commands\ShipDesignViewCMD.cs" />
@@ -293,6 +296,9 @@
     <Compile Include="MainForm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pulsar4XApplication.cs" />
+    <Compile Include="Views\ClientConnectionDialog.xeto.cs">
+      <DependentUpon>ClientConnectionDialog.xeto</DependentUpon>
+    </Compile>
     <Compile Include="Views\AbilitySelectionList.xeto.cs">
       <DependentUpon>AbilitySelectionList.xeto</DependentUpon>
     </Compile>
@@ -441,6 +447,7 @@
       <DependentUpon>TranslateMoveView.xeto</DependentUpon>
     </Compile>
     <Compile Include="Commands\EntityGenericViewCMD.cs" />
+    <Compile Include="Commands\ClientConnectCMD.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">

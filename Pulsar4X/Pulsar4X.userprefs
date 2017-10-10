@@ -1,36 +1,26 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
+      <File FileName="Pulsar4X.ECSLib/Networking/ClientConnectionVM.cs" Line="41" Column="10" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="63" Column="10" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="106" Column="50" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/ClientConnectionDialog.xeto" Line="17" Column="40" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Commands/ClientConnectCMD.cs" Line="40" Column="44" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="31" Column="23" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Server.cs" relfile="Pulsar4X.ECSLib/Networking/Server.cs" line="60" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="67" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches>
-    <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoTypeStoreVM.cs" line="32" offsetX="618" offsetY="496" expression="_cargoTypeSD" liveUpdate="True" />
-    <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/RefineResources/RefiningVM.cs" line="129" offsetX="820" offsetY="1973" expression="ItemPercentRemaining" liveUpdate="False" />
-    <Watch file="Pulsar4X.ECSLib/Orders/OrderableDB.cs" line="54" offsetX="394" offsetY="848" expression="actionList" liveUpdate="False" />
-    <Watch file="Pulsar4X.ECSLib/Orders/OrderableDB.cs" line="38" offsetX="734" offsetY="563" expression="orderableDB.ActionList" liveUpdate="False" />
-    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
-    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
-    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
-    <Watch file="Pulsar4X.ECSLib/ManagerSubPulse.cs" line="220" offsetX="1130" offsetY="3424" expression="SystemLocalDateTime" liveUpdate="False" />
-  </MonoDevelop.Ide.DebuggingService.PinnedWatches>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.Pulsar4X.CrossPlatformUI.Gtk2 PreferredExecutionTarget="MonoDevelop.Default" />
   <DisabledProjects>
-    <String>ModdingTools.JsonDataEditor/ModdingTools.JsonDataEditor.csproj</String>
-    <String>ModdingTools.JsonDataEditor2/ModdingTools.JsonDataEditor2.csproj</String>
-    <String>Pulsar4X.WPFUI/Pulsar4X.WPFUI.csproj</String>
-    <String>Pulsar4X.CrossPlatformUI.Mac\Pulsar4X.CrossPlatformUI.Mac.csproj</String>
-    <String>Pulsar4X.CrossPlatformUI.Wpf\Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
-    <String>Pulsar4X.CrossPlatformUI.Mac/Pulsar4X.CrossPlatformUI.Mac.csproj</String>
-    <String>Pulsar4X.CrossPlatformUI.Wpf/Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
-    <String>ViewModelLib/Pulsar4X.ViewModels.csproj</String>
-    <String>Pulsar4X.Tests/Pulsar4X.Tests.csproj</String>
+    <String>Pulsar4X.Networking/Pulsar4X.Networking.csproj</String>
   </DisabledProjects>
 </Properties>

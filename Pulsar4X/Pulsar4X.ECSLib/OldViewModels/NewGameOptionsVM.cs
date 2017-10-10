@@ -1,7 +1,7 @@
 ﻿using Pulsar4X.ECSLib;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-
+using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.ECSLib
 {
@@ -19,6 +19,22 @@ namespace Pulsar4X.ECSLib
         public int NumberOfSystems { get; set; }
         public ObservableCollection<DataVersionInfo> AvailableModList { get; set; }
         public ObservableCollection<DataVersionInfo> SelectedModList { get; set; }
+
+        private bool _createServer = true;
+        public bool CreateServer
+        {
+            get
+            {
+                return _createServer;
+            }
+            set
+            {
+                _createServer = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int PortNumber { get; set; } = 4888;
 
         public NewGameOptionsVM()
         {
@@ -44,6 +60,11 @@ namespace Pulsar4X.ECSLib
         public void CreateGame()
         {
             _gameVM.CreateGame(this);
+            if (CreateServer)
+            {
+                ServerOrderHandler handler = new ServerOrderHandler(_gameVM.Game, PortNumber);
+
+            }
         }
 
 
@@ -52,6 +73,12 @@ namespace Pulsar4X.ECSLib
         public void Refresh(bool partialRefresh = false)
         {
             //throw new NotImplementedException();
+        }
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

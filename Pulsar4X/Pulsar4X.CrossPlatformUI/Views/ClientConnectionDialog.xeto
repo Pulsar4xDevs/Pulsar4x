@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog
+  xmlns="http://schema.picoe.ca/eto.forms" 
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+  >
+  <TableLayout>
+	<TableRow>
+  		<Label Text="Faction Name:"/>
+		<TextBox Text="{Binding FactionName}"/>
+	</TableRow>
+	<TableRow>
+		<Label Text="Faction Password:"/>
+		<PasswordBox Text="{Binding FactionPassword}"/>
+	</TableRow>
+	<TableRow>
+		<Label Text="Server Address:"/>
+		<TextBox Text="{Binding ServerAddress}"/>
+	</TableRow>
+		<Button Text="Connect" Command="{Binding ConnectCMD}"/>
+		<Label Text="Status"/>
+		<Label Text="{Binding ConnectionStatus}"/>
+	</TableLayout>
+</Dialog>

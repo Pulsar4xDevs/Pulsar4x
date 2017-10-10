@@ -6,7 +6,7 @@ using Pulsar4X.CrossPlatformUI.Commands;
 using Pulsar4X.CrossPlatformUI.Views;
 using System.Threading;
 using GameVM = Pulsar4X.ECSLib.GameVM;
-using NewGame = Pulsar4X.CrossPlatformUI.Commands.NewGame;
+using NewGameCMD = Pulsar4X.CrossPlatformUI.Commands.NewGameCMD;
 
 namespace Pulsar4X.CrossPlatformUI
 {
@@ -39,10 +39,11 @@ namespace Pulsar4X.CrossPlatformUI
 
         void CreateMenuToolBar()
         {
-            var newgame = new NewGame(_gameVM);
+            var newgame = new NewGameCMD(_gameVM);
             var loadgame = new LoadGame(_gameVM);
             var quit = new Quit(_gameVM);
             var playerOptions = new PlayerOptionsCMD(_gameVM);
+            var connect = new ClientConnectCMD(_gameVM);
 
             savegame = new SaveGame(_gameVM);
             sysMap = new SystemMap(_gameVM);
@@ -66,6 +67,7 @@ namespace Pulsar4X.CrossPlatformUI
                               new SeparatorMenuItem(),
                               savegame,
                               loadgame,
+                              connect,
                               new SeparatorMenuItem(),
                               playerOptions,
                               new SeparatorMenuItem(),

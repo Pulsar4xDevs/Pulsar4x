@@ -126,7 +126,6 @@ namespace Pulsar4X.ECSLib
             };
 
             Game = new Game(gameSettings);
-            
             // TODO: Select default player more reliably
             CurrentPlayer = Game.Players[0];
             CurrentAuthToken = new AuthenticationToken(CurrentPlayer, options.FactionPassword);

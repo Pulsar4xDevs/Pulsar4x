@@ -142,6 +142,9 @@
     <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb">
       <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Lidgren.Network">
+      <HintPath>..\Lidgren.Network.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComponentFeatureSets\Orbit\OrbitBodyCommand.cs" />
@@ -385,6 +388,11 @@
     <Compile Include="Factories\SystemAsEntityFactory.cs" />
     <Compile Include="Entity\EntityChangeListnerDB.cs" />
     <Compile Include="Entity\EntityChangedListnerProcessor.cs" />
+    <Compile Include="Orders\ServerOrderHandler.cs" />
+    <Compile Include="Networking\ClientConnectionVM.cs" />
+    <Compile Include="Networking\Base.cs" />
+    <Compile Include="Networking\Client.cs" />
+    <Compile Include="Networking\Server.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
@@ -396,6 +404,7 @@
     <Folder Include="ComponentFeatureSets\Research\" />
     <Folder Include="ComponentFeatureSets\Construction\" />
     <Folder Include="ComponentFeatureSets\Orbit\" />
+    <Folder Include="Networking\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

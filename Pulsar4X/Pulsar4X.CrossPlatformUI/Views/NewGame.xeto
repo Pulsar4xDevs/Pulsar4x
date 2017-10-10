@@ -57,7 +57,25 @@
           <PasswordBox x:Name="GmPassword"/>
         </TableCell>
       </TableRow>
-      <TableRow/>
+
+	  <TableRow>
+        <TableCell>
+          <Label Text="Create Server" />
+        </TableCell>
+        <TableCell>
+          <CheckBox Checked="{Binding CreateServer}"/>
+        </TableCell>
+      </TableRow>
+
+      <TableRow>
+        <TableCell>
+          <Label Text="Port #: " />
+        </TableCell>
+        <TableCell>
+          <TextBox Text="{Binding PortNumber}" Enabled="{Binding CreateServer}"/>
+        </TableCell>
+      </TableRow>
+
       <!-- Game Mods -->
       <TableRow>
         <TableCell>
@@ -94,5 +112,10 @@
       <Button x:Name="OkButton" Text="OK" Click="OkButton_Click"/>
       <Button x:Name="CancelButton" Text="Cancel" Click="CancelButton_Click"/>
     </StackLayout>
+		<StackLayout Orientation="Horizontal">
+			
+
+
+		</StackLayout>
 	</StackLayout>
 </Dialog>
