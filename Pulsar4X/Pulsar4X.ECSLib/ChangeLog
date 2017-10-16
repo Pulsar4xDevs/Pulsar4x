@@ -1,0 +1,21 @@
+2017-10-16  se5a  <jon.se5a@gmail.com>
+
+	* TimeLoop.cs:
+	* GameSettings.cs:
+	* Base.cs:
+	* Server.cs:
+	* Client.cs:
+	* Pulsar4X.ECSLib.csproj:
+	* SerializationManager.cs:
+	* GameVM.cs:
+	* FactionAuthDB.cs:
+	* FactionFactory.cs:
+	* ServerOrderHandler.cs:
+	* FactionAuthProcessor.cs:
+	* DefaultStartFactory.cs:
+	* ClientConnectionVM.cs:
+	* NewGameOptionsVM.cs:
+	* SensorEntityFactory.cs:
+	* SensorEntityProcessor.cs: More work on networking
+	implementation. 
+

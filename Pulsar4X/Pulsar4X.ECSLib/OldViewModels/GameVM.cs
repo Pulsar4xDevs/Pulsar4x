@@ -135,7 +135,9 @@ namespace Pulsar4X.ECSLib
             ReadOnlyDictionary<Entity, AccessRole> roles = CurrentPlayer.GetAccessRoles(CurrentAuthToken);
 
             CurrentFaction = roles.FirstOrDefault(role => (role.Value & AccessRole.Owner) != 0).Key;
-
+            var auth = new AuthDB();
+            CurrentFaction.SetDataBlob(auth);
+            AuthProcessor.StorePasswordAsHash(Game, CurrentFaction, options.FactionPassword);
 
             StatusText = "Game Created.";
 

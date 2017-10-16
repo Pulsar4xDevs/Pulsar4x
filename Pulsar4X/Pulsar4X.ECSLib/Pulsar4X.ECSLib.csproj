@@ -332,7 +332,6 @@
     <Compile Include="Entity\Entity.cs" />
     <Compile Include="Entity\EntityManager.cs" />
     <Compile Include="Factories\ColonyFactory.cs" />
-    <Compile Include="Factories\FactionFactory.cs" />
     <Compile Include="Factories\ShipFactory.cs" />
     <Compile Include="Factories\SpeciesFactory.cs" />
     <Compile Include="Game.cs" />
@@ -403,6 +402,11 @@
     <Compile Include="Networking\Base.cs" />
     <Compile Include="Networking\Client.cs" />
     <Compile Include="Networking\Server.cs" />
+    <Compile Include="Faction\FactionAuthDB.cs" />
+    <Compile Include="Faction\FactionAuthProcessor.cs" />
+    <Compile Include="Faction\FactionFactory.cs" />
+    <Compile Include="ComponentFeatureSets\SensorEntity\SensorEntityProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\SensorEntity\SensorEntityFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
@@ -415,6 +419,7 @@
     <Folder Include="ComponentFeatureSets\Construction\" />
     <Folder Include="ComponentFeatureSets\Orbit\" />
     <Folder Include="Networking\" />
+    <Folder Include="ComponentFeatureSets\SensorEntity\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

@@ -7,22 +7,28 @@
   <StackLayout>
   <TableLayout>
 	<TableRow>
-  		<Label Text="Faction Name:"/>
-		<TextBox Text="{Binding FactionName}"/>
-	</TableRow>
-	<TableRow>
-		<Label Text="Faction Password:"/>
-		<PasswordBox Text="{Binding FactionPassword}"/>
-	</TableRow>
-	<TableRow>
 		<Label Text="Server Address:"/>
 		<TextBox Text="{Binding ServerAddress}"/>
 	</TableRow>
   </TableLayout>
 	
-		<Button Text="Connect" Command="{Binding ConnectCMD}"/>
-		<Label Text="Status"/>
-		<Label Text="{Binding ConnectionStatus}"/>
+	<Button Text="Connect" Command="{Binding ConnectCMD}"/>
+	<Label Text="Status"/>
+	<Label Text="{Binding ConnectionStatus}"/>
+	<TableLayout>
+		<TableRow>
+  			<Label Text="Faction Name:"/>
+			<TextBox Text="{Binding FactionName}"/>
+		</TableRow>
+		<TableRow>
+			<Label Text="Faction Password:"/>
+			<PasswordBox Text="{Binding FactionPassword}"/>
+		</TableRow>
+		<TableRow>
+			<Button Text="Connect To Faction" Command="{Binding ConnectFactionCMD}"/>
+			<Button Text="Create New Faction" Command="{Binding CreateNewFactionCMD}"/>
+		</TableRow>
+	</TableLayout>
 		<c:GenericStackControl x:Name="MessagesList" DataContext="{Binding NetMessages}" Height="300" Width="300"/>
 	</StackLayout>
 </Dialog>

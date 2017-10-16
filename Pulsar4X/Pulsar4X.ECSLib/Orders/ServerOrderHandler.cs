@@ -15,8 +15,8 @@ namespace Pulsar4X.ECSLib
 
         internal ServerOrderHandler(Game game, int portNum) : base(game)
         {
-            NetHost = new NetworkHost(portNum);
-            NetHost.ServerStart();
+            NetHost = new NetworkHost(game, portNum);
+            //NetHost.NetHostStart();
         }
 
         internal override void HandleOrder(EntityCommand entityCommand)

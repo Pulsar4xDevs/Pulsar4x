@@ -1,20 +1,20 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Networking/ClientConnectionVM.cs" Line="14" Column="45" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="95" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="70" Column="45" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="35" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/NewGameOptionsVM.cs" Line="64" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/GameVM.cs" Line="124" Column="68" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/NewGame.xeto.cs" Line="28" Column="50" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="50" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="70" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="183" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Game.cs" Line="72" Column="28" />
+      <File FileName="Pulsar4X.ECSLib/SerializationManager.cs" Line="401" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Faction/FactionAuthProcessor.cs" Line="38" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="691" Column="1" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="67" column="1" />
+      <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>

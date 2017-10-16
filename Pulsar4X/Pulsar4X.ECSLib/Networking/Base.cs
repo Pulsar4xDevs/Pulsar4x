@@ -23,6 +23,7 @@ namespace Pulsar4X.Networking
         DataBlobData,
         DataBlobPropertyData,
         EntityCommand,
+        ConnectFactionData,
 
         TickInfo
     }
@@ -59,7 +60,7 @@ namespace Pulsar4X.Networking
         public Guid ID { get; set; }
     }
 
-    public class NetworkBase
+    public abstract class NetworkBase
     {
         public Game Game { get; set; }
         //protected GameVM _gameVM_ { get; set; }
@@ -195,6 +196,8 @@ namespace Pulsar4X.Networking
                     break;
             }
         }
+
+
 
         /// <summary>
         /// server only, server sends data back EntityData and SystemData meessages

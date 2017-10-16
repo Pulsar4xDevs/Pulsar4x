@@ -62,7 +62,6 @@ namespace Pulsar4X.ECSLib
         }
         [JsonProperty]
         private DateTime _gameGlobalDateTime;
-        internal DateTime _targetDateTime;
         public DateTime GameGlobalDateTime
         {
             get { return _gameGlobalDateTime; }
@@ -118,7 +117,16 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void TimeStep()
         {
-            DoProcessing();
+            DoProcessing(GameGlobalDateTime + Ticklength);
+            _timer.Stop();
+        }
+
+        /// <summary>
+        /// Takes a single step in time
+        /// </summary>
+        public void TimeStep(DateTime toDate)
+        {
+            DoProcessing(toDate);
             _timer.Stop();
         }
 
@@ -150,8 +158,9 @@ namespace Pulsar4X.ECSLib
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (!_isProcessing)
-            {               
-                DoProcessing(); //run DoProcessing if we're not already processing
+            {   
+
+                DoProcessing(GameGlobalDateTime + Ticklength); //run DoProcessing if we're not already processing
             }
             else
             {
@@ -161,7 +170,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        private void DoProcessing()
+        private void DoProcessing(DateTime targetDateTime)
         {
             _isProcessing = true;
             _timer.Stop();
@@ -170,12 +179,12 @@ namespace Pulsar4X.ECSLib
             _isOvertime = false;
 
             //check for global interupts
-            _targetDateTime = GameGlobalDateTime + Ticklength;
+            //_targetDateTime = GameGlobalDateTime + Ticklength;
 
          
-            while (GameGlobalDateTime < _targetDateTime)
+            while (GameGlobalDateTime < targetDateTime)
             {
-                DateTime nextInterupt = ProcessNextInterupt(_targetDateTime);
+                DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
                 //do system processors
               
                 if (_game.Settings.EnableMultiThreading == true) //threaded
@@ -197,7 +206,7 @@ namespace Pulsar4X.ECSLib
 
             if (_isOvertime)
             {
-                DoProcessing(); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
+                DoProcessing(GameGlobalDateTime + Ticklength); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
             }
             _isProcessing = false;
         }

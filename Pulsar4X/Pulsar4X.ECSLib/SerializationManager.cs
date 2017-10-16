@@ -95,6 +95,317 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+
+        /// <summary>
+        /// saves an entity to a given stream
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="outputStream"></param>
+        /// <param name="progress"></param>
+        /// <param name="compress"></param>
+        [PublicAPI]
+        public static void NetStreamEntity([NotNull] Entity entity, [NotNull] Stream outputStream, IProgress<double> progress = null, bool compress = false)
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException("entity");
+            }
+            JsonSerializer serializer = new JsonSerializer { 
+                NullValueHandling = NullValueHandling.Ignore, 
+                Formatting = compress ? Formatting.None : Formatting.Indented,
+                ContractResolver = new ForceUseISerializable() };
+
+
+            lock (SyncRoot)
+            {
+                Progress = progress;
+                ManagersProcessed = 0;
+                //entity.NumSystems = entity.StarSystems.Count;
+
+                // Wrap the outputStream in a BufferedStream.
+                // This will improves performance if the outputStream does not have an internal buffer. (E.G. NetworkStream)
+                using (BufferedStream outputBuffer = new BufferedStream(outputStream))
+                {
+                    using (MemoryStream intermediateStream = new MemoryStream())
+                    {
+                        using (StreamWriter streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                        {
+                            using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                            {
+                                writer.WriteStartObject(); // Start the Entity.
+                                writer.WritePropertyName("Guid"); // Write the Guid PropertyName
+                                serializer.Serialize(writer, entity.Guid); // Write the Entity's guid.
+                                var datablobs = entity.DataBlobs;
+                                foreach (BaseDataBlob dataBlob in datablobs)
+                                {
+                                    writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
+                                    serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
+                                }
+                                writer.WriteEndObject(); // End then Entity.
+                            }
+                        }
+
+                        // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
+                        intermediateStream.Position = 0;
+
+                        if (compress)
+                        {
+                            using (GZipStream compressionStream = new GZipStream(outputBuffer, CompressionLevel.Optimal))
+                            {
+                                intermediateStream.CopyTo(compressionStream);
+                            }
+                        }
+                        else
+                        {
+                            intermediateStream.CopyTo(outputBuffer);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// saves an entity to a given stream
+        /// </summary>
+        /// <param name="starSystem"></param>
+        /// <param name="outputStream"></param>
+        /// <param name="progress"></param>
+        /// <param name="compress"></param>
+        [PublicAPI]
+        public static void NetStreamStarSystem([NotNull] StarSystem starSystem, [NotNull] Stream outputStream, IProgress<double> progress = null, bool compress = false)
+        {
+            if (starSystem == null)
+            {
+                throw new ArgumentNullException("starSystem");
+            }
+
+
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = compress ? Formatting.None : Formatting.Indented,
+                ContractResolver = new ForceUseISerializable()
+            };
+
+
+            lock (SyncRoot)
+            {
+                Progress = progress;
+                ManagersProcessed = 0;
+                //entity.NumSystems = entity.StarSystems.Count;
+
+                // Wrap the outputStream in a BufferedStream.
+                // This will improves performance if the outputStream does not have an internal buffer. (E.G. NetworkStream)
+                using (BufferedStream outputBuffer = new BufferedStream(outputStream))
+                {
+                    using (MemoryStream intermediateStream = new MemoryStream())
+                    {
+                        using (StreamWriter streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                        {
+                            using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                            {
+                                writer.WriteStartObject(); // Start the Entity.
+                                writer.WritePropertyName("Guid"); // Write the Guid PropertyName
+                                serialiser.Serialize(writer, starSystem.Guid);
+                                writer.WritePropertyName("StarSystem");
+                                serialiser.Serialize(writer, starSystem);
+                                writer.WriteEndObject(); // End then Entity.
+                            }
+                        }
+
+                        // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
+                        intermediateStream.Position = 0;
+
+                        if (compress)
+                        {
+                            using (GZipStream compressionStream = new GZipStream(outputBuffer, CompressionLevel.Optimal))
+                            {
+                                intermediateStream.CopyTo(compressionStream);
+                            }
+                        }
+                        else
+                        {
+                            intermediateStream.CopyTo(outputBuffer);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void TXNetStreamGameSettings([NotNull] GameSettings settings, [NotNull] Stream outputStream, bool compress = false)
+        {
+
+
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = compress ? Formatting.None : Formatting.Indented,
+                ContractResolver = new ForceUseISerializable()
+            };
+
+            using (var intermediateStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                {
+                    using (var writer = new JsonTextWriter(streamWriter))
+                    {
+                        lock (SyncRoot)
+                        {
+                            serialiser.Serialize(writer, settings, typeof(GameSettings));
+                        }
+                    }
+                }
+                FinalizeOutput(outputStream, intermediateStream, compress);
+            }
+        }
+
+        public static GameSettings RXNetStreamGameSettings(Stream inputStream)
+        {
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                ContractResolver = new ForceUseISerializable()
+            };
+            GameSettings gameSettings;
+            // Use a BufferedStream to allow reading and seeking from any stream.
+            // Example: If inputStream is a NetworkStream, then we can only read once.
+            using (BufferedStream inputBuffer = new BufferedStream(inputStream))
+            {
+                // Check if our stream is compressed.
+                if (HasGZipHeader(inputBuffer))
+                {
+                    // File is compressed. Decompress using GZip.
+                    using (GZipStream compressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                    {
+                        // Decompress into a MemoryStream.
+                        using (MemoryStream intermediateStream = new MemoryStream())
+                        {
+                            // Decompress the file into an intermediate MemoryStream.
+                            compressionStream.CopyTo(intermediateStream);
+
+                            // Reset the position of the MemoryStream so it can be read from the beginning.
+                            intermediateStream.Position = 0;
+
+                            // Populate the game from the uncompressed MemoryStream.
+                            //PopulateEntity(entity, intermediateStream);
+                            gameSettings = populateGameSettings(intermediateStream);
+
+                        }
+                    }
+                }
+                else
+                {
+                    // Populate the game from the uncompressed inputStream.
+                    gameSettings = populateGameSettings(inputStream);
+                }
+            }
+            return gameSettings;
+        }
+
+        private static GameSettings populateGameSettings(Stream inputStream)
+        {
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                ContractResolver = new ForceUseISerializable()
+            };
+            using (StreamReader sr = new StreamReader(inputStream))
+            {
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    GameSettings settings = new GameSettings();
+                    serialiser.Populate(reader, settings);
+   
+                    return settings;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Imports from the provided stream into the provided game using the default serializer.
+        /// </summary>
+        [PublicAPI]
+        public static StarSystem ImportStarSystem(Game game, Stream inputStream, IProgress<double> progress = null)
+        {
+
+            StarSystem system;// = new Entity(manager, guid);
+            lock (SyncRoot)
+            {
+                Progress = progress;
+                ManagersProcessed = 0;
+                // Use a BufferedStream to allow reading and seeking from any stream.
+                // Example: If inputStream is a NetworkStream, then we can only read once.
+                using (BufferedStream inputBuffer = new BufferedStream(inputStream))
+                {
+                    // Check if our stream is compressed.
+                    if (HasGZipHeader(inputBuffer))
+                    {
+                        // File is compressed. Decompress using GZip.
+                        using (GZipStream compressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                        {
+                            // Decompress into a MemoryStream.
+                            using (MemoryStream intermediateStream = new MemoryStream())
+                            {
+                                // Decompress the file into an intermediate MemoryStream.
+                                compressionStream.CopyTo(intermediateStream);
+
+                                // Reset the position of the MemoryStream so it can be read from the beginning.
+                                intermediateStream.Position = 0;
+
+                                // Populate the game from the uncompressed MemoryStream.
+                                //PopulateEntity(entity, intermediateStream);
+                                system = PopulateStarSystem(intermediateStream, game);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Populate the game from the uncompressed inputStream.
+                        system = PopulateStarSystem(inputStream, game);
+                    }
+                }
+
+            }
+            return system;
+        }
+
+        private static StarSystem PopulateStarSystem(Stream inputStream, Game game)
+        {
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                ContractResolver = new ForceUseISerializable()
+            };
+            using (StreamReader sr = new StreamReader(inputStream))
+            {
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    reader.Read(); // PropertyName Guid
+                    reader.Read();
+                    reader.Read();
+                    Guid guid = serialiser.Deserialize<Guid>(reader); // Deserialize the Guid
+
+                    // Attempt a global Guid lookup of the Guid.
+                    StarSystem system;
+                    if (!game.Systems.ContainsKey(guid))
+                    {
+                        system = new StarSystem();
+                    }
+                    else
+                    {
+                        system = game.Systems[guid];
+                    }
+                    reader.Read();
+                    reader.Read();
+                    serialiser.Populate(reader, system);
+                    game.Systems.Add(guid, system);
+                    return system;
+                }
+            }
+        }
+
+
         public static Game ImportGameJson(string jsonString)
         {
             using (MemoryStream stream = GetMemoryStream(jsonString))
@@ -233,6 +544,8 @@ namespace Pulsar4X.ECSLib
             }
             return obj;
         }
+
+
 
         #region StarSystem Serialization/Deserialization
 

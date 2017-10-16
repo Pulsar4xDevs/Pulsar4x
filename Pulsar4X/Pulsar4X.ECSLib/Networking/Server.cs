@@ -10,29 +10,67 @@ namespace Pulsar4X.Networking
 {
     public class NetworkHost : NetworkBase
     {
-        private Dictionary<NetConnection, Guid> _connectedFactions { get; set; }
-        private Dictionary<Guid, List<NetConnection>> _factionConnections { get; set; }
+        private Dictionary<NetConnection, Guid> _connectedFactions { get; } = new Dictionary<NetConnection, Guid>();
+        private Dictionary<Guid, List<NetConnection>> _factionConnections { get; } = new Dictionary<Guid, List<NetConnection>>();
         public NetServer NetServerObject { get { return (NetServer)NetPeerObject; } }
 
+        private DateTime _currentDate;
 
 
-        public NetworkHost(int portNum)
+        public NetworkHost(Game game, int portNum)
         {
             PortNum = portNum;
+            Game = game;
+            NetHostStart();
         }
 
-        public void ServerStart()
+        /// <summary>
+        /// Adds the faction netcon link if it's not already there. 
+        /// </summary>
+        /// <param name="faction">Faction.</param>
+        /// <param name="netCon">Net con.</param>
+        private void AddFactionNetconLink(Entity faction, NetConnection netCon)
+        {
+            if (!_connectedFactions.ContainsKey(netCon))
+                _connectedFactions.Add(netCon, faction.Guid);
+            else
+                _connectedFactions[netCon] = faction.Guid;
+            if (!_factionConnections.ContainsKey(faction.Guid))
+            {
+                _factionConnections.Add(faction.Guid, new List<NetConnection>());
+            }
+            if (!_factionConnections[faction.Guid].Contains(netCon))
+                _factionConnections[faction.Guid].Add(netCon);
+                
+        }
+
+        /// <summary>
+        /// Removes the faction netcon link if it exsists.
+        /// (will check that the netcon is linked to a faction)
+        /// </summary>
+        /// <param name="netCon">Net con.</param>
+        private void RemoveFactionNetconLink(NetConnection netCon) 
+        {
+            if (_connectedFactions.ContainsKey(netCon))
+            {
+                Guid factionGuid = _connectedFactions[netCon];
+                _connectedFactions.Remove(netCon);
+                //if (_factionConnections.ContainsKey(factionGuid))
+                //{if (_factionConnections[factionGuid].Contains(netCon)) //these checks should be unnecisary. 
+                _factionConnections[factionGuid].Remove(netCon);
+            }
+        }
+
+        private void NetHostStart()
         {
             var config = new NetPeerConfiguration("Pulsar4X") { Port = PortNum };
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
 
             NetPeerObject = new NetServer(config);
             NetPeerObject.Start();
-            _connectedFactions = new Dictionary<NetConnection, Guid>();
-            _factionConnections = new Dictionary<Guid, List<NetConnection>>();
             //EntityDataSanitiser.Initialise(Game);
             StartListning();
-            SetSendMessages();
+            Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
         }
 
         private void OnTickEvent(DateTime currentTime, int delta)
@@ -54,6 +92,23 @@ namespace Pulsar4X.Networking
 
         }
 
+        void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
+        {
+            if (_connectedFactions.Count > 0)
+            {
+                TimeSpan deltaTime = newDate - _currentDate;
+                //Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta)));
+                //Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta);
+                IList<NetConnection> connections = _connectedFactions.Keys.ToList();
+                NetOutgoingMessage sendMsg = NetServerObject.CreateMessage();
+                sendMsg.Write((byte)DataMessageType.TickInfo);
+                sendMsg.Write(newDate.ToBinary());
+                sendMsg.Write(_currentDate.ToBinary());
+                NetServerObject.SendMessage(sendMsg, connections, NetDeliveryMethod.ReliableOrdered, 0);
+            }
+            _currentDate = newDate;
+        }
+
         protected override void HandleDiscoveryRequest(NetIncomingMessage message)
         {
 
@@ -63,7 +118,11 @@ namespace Pulsar4X.Networking
             response.Write(Game.CurrentDateTime.ToBinary());
 
             NetServerObject.SendDiscoveryResponse(response, message.SenderEndPoint);
+
         }
+
+
+
 
         protected override void HandleEntityData(NetIncomingMessage message)
         {
@@ -91,26 +150,23 @@ namespace Pulsar4X.Networking
 
         protected override void HandleFactionData(NetIncomingMessage message)
         {
-            /*
+            
             NetConnection sender = message.SenderConnection;
             string name = message.ReadString();
             string pass = message.ReadString();
             List<Entity> factions = Game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
 
+            //TODO send a message instead of crashing with an exception if we can't find the faction.
             Entity faction = factions.Find(item => item.GetDataBlob<NameDB>().DefaultName == name);
 
             if (AuthProcessor.Validate(faction, pass))
             {
-                if (_connectedFactions.ContainsKey(sender))
-                    _connectedFactions[sender] = faction.Guid;
-                else
-                    _connectedFactions.Add(sender, faction.Guid);
-                if (!_factionConnections.ContainsKey(faction.Guid))
-                    _factionConnections.Add(faction.Guid, new List<NetConnection>());
-                _factionConnections[faction.Guid].Add(sender);
-                SendFactionData(sender, faction);
+                AddFactionNetconLink(faction, sender);
+                SendGameSettings(sender, Game);
+                //TODO negotiate and get a delta between the server's data and the client's data, and only update teh client with changed data.
+                //(the client should be able to save/keep a cashe of it's own data so there's less to send when reconnecting to a server.)
+                SendFactionData(sender, faction); 
             }
-            */
         }
 
         protected override void ConnectionStatusChanged(NetIncomingMessage message)
@@ -120,19 +176,9 @@ namespace Pulsar4X.Networking
                 case NetConnectionStatus.Connected:
                     break;
                 case NetConnectionStatus.Disconnected:
-                    if (_connectedFactions.ContainsKey(message.SenderConnection))
-                    {
-                        Guid factionGuid = _connectedFactions[message.SenderConnection];
-                        _factionConnections[factionGuid].Remove(message.SenderConnection);
-                        _connectedFactions.Remove(message.SenderConnection);
-                    }
+                    RemoveFactionNetconLink(message.SenderConnection);
                     break;
             }
-        }
-
-        private void SetSendMessages()
-        {
-            //Game.TickStartEvent += OnTickEvent;
         }
 
         //private void SendFactionList(NetConnection recipient)
@@ -160,13 +206,34 @@ namespace Pulsar4X.Networking
         //    NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
         //}
 
+        private void SendGameSettings(NetConnection recipient, Game game)
+        {
+            var gamesettings = game.Settings;
+            var mStream = new MemoryStream();
+            SerializationManager.TXNetStreamGameSettings(game.Settings, mStream);
+
+            byte[] byteArray = mStream.ToArray();
+
+            int len = byteArray.Length;
+            NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
+            sendMsg.Write((byte)DataMessageType.GameData);
+            sendMsg.Write(len);
+            sendMsg.Write(byteArray);
+            NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+
+        }
 
 
         private void SendFactionData(NetConnection recipient, Entity factionEntity)
         {
-            /*
+
+            var ownedEntities = factionEntity.GetDataBlob<FactionOwnedEntitesDB>().OwnedEntites.Values.ToArray();
+
             var mStream = new MemoryStream();
-            SaveGame.ExportEntity(factionEntity, mStream);
+
+
+
+            SerializationManager.NetStreamEntity(factionEntity, mStream);
             byte[] entityByteArray = mStream.ToArray();
 
             int len = entityByteArray.Length;
@@ -179,7 +246,7 @@ namespace Pulsar4X.Networking
             foreach (var systemID in factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems)
             {
                 mStream = new MemoryStream();
-                SaveGame.ExportStarSystem(Misc.LookupStarSystem(Game.Systems, systemID), mStream);
+                SerializationManager.NetStreamStarSystem(Game.Systems[systemID], mStream);
                 byte[] byteArray = mStream.ToArray();
                 len = byteArray.Length;
                 NetOutgoingMessage sendMsgSystem = NetPeerObject.CreateMessage();
@@ -189,9 +256,7 @@ namespace Pulsar4X.Networking
                 sendMsgSystem.Write(byteArray);
                 NetServerObject.SendMessage(sendMsgSystem, recipient, NetDeliveryMethod.ReliableOrdered);
             }
-            */
+
         }
-
-
     }
 }

@@ -26,13 +26,14 @@ namespace Pulsar4X.Networking
         public Entity CurrentFaction { get; set; }
         //public event TickStartEventHandler NetTickEvent;
         public string ConnectedToGameName { get; private set; }
-        public DateTime ConnectedToDateTime { get; private set; }
+        public DateTime hostToDatetime { get; private set; }
         //private Dictionary<Guid, string> _factions; 
         public ObservableCollection<FactionItem> Factions { get; set; }
+        private GameVM _gameVM;
 
-        public NetworkClient(string hostAddress, int portNum)
+        public NetworkClient(string hostAddress, int portNum, GameVM gameVM)
         {
-   
+            _gameVM = gameVM;
             PortNum = portNum;
             HostAddress = hostAddress;
             IsConnectedToServer = false;
@@ -66,74 +67,83 @@ namespace Pulsar4X.Networking
         {
             ConnectedToGameName = message.ReadString();
             long ticks = message.ReadInt64();
-            ConnectedToDateTime = DateTime.FromBinary(ticks); //= new DateTime(ticks);
+            hostToDatetime = DateTime.FromBinary(ticks); //= new DateTime(ticks);
             Messages.Add("Found Server: " + message.SenderEndPoint + "Name Is: " + ConnectedToGameName);
         }
 
         protected override void HandleGameDataMessage(NetIncomingMessage message)
         {
-            ConnectedToGameName = message.ReadString();
-            ConnectedToDateTime = DateTime.FromBinary(message.ReadInt64());
+
+            int len = message.ReadInt32();
+            byte[] data = message.ReadBytes(len);
+            Game = new Game();
+            _gameVM.Game = Game;
+            var mStream = new MemoryStream(data);
+            Game.Settings = SerializationManager.RXNetStreamGameSettings(mStream);
+            mStream.Close();
         }
+
 
 
         protected override void HandleTickInfo(NetIncomingMessage message)
         {
-            /*
-            ConnectedToDateTime = DateTime.FromBinary(message.ReadInt64());
-            int delta = message.ReadInt32();
-            string messageStr = "TickEvent: DateTime: " + ConnectedToDateTime + "Delta : " + delta;
+            
+            hostToDatetime = DateTime.FromBinary(message.ReadInt64());
+            DateTime hostFromDatetime = DateTime.FromBinary(message.ReadInt64());
+            TimeSpan hostDelta = hostToDatetime - hostFromDatetime;
+            TimeSpan ourDelta = hostToDatetime - Game.GameLoop.GameGlobalDateTime;
+            if (ourDelta < TimeSpan.FromSeconds(0))
+                throw new Exception("Client has gotten ahead of host, this should not happen");
+            string messageStr = "TickEvent: DateTime: " + hostToDatetime + " HostDelta: " + hostDelta + " OurDelta: " + ourDelta;
+            Messages.Add(messageStr);
+            //Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => Messages.Add((messageStr))));
 
-            int datedifference = (int)(ConnectedToDateTime - Game.CurrentDateTime).TotalSeconds;
-            delta += datedifference - delta;
-            messageStr += " DateDifference: " + datedifference + " Total Delta: " + delta;
-            Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => Messages.Add((messageStr))));
-            Game.AdvanceTime(delta);
-            //if (NetTickEvent != null)
-            //{
-            //    NetTickEvent.Invoke(ConnectedToDateTime, delta);
-            //}
-            */
+            Game.GameLoop.TimeStep(hostToDatetime);
+
         }
 
         protected override void HandleFactionData(NetIncomingMessage message)
         {
-            /*
+            
             Guid entityID = new Guid(message.PeekBytes(16));
             HandleEntityData(message);
-            CurrentFaction = Game.GlobalManager.GetEntityByGuid(entityID);
-            */
+
+            Entity factionEntity;
+
+            if (Game.GlobalManager.TryGetEntityByGuid(entityID, out factionEntity))
+                CurrentFaction = factionEntity;
         }
 
         protected override void HandleSystemData(NetIncomingMessage message)
         {
-            /*
+            
             Guid systemID = new Guid(message.ReadBytes(16));
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
 
             var mStream = new MemoryStream(data);
-            StarSystem starSys = SaveGame.ImportStarSystem(Game, mStream);    
-            */
+            StarSystem starSys = SerializationManager.ImportStarSystem(Game, mStream);    
+
         }
 
         protected override void HandleEntityData(NetIncomingMessage message)
         {
-            /*
+            
             Guid entityID = new Guid(message.ReadBytes(16));
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
 
+            /*
             if (Game == null || Game.GameName != ConnectedToGameName) //TODO handle if connecting to a game when in the middle of a singleplayer game. (ie prompt save)
             {
                 Game = Game.NewGame(ConnectedToGameName, ConnectedToDateTime, 0, null, false);                
             }
-
-            var mStream = new MemoryStream(data);
-            SaveGame.ImportEntity(Game, Game.GlobalManager, mStream);
             */
-            
-         }
+            var mStream = new MemoryStream(data);
+
+            SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
+
+        }
 
         protected override void ConnectionStatusChanged(NetIncomingMessage message)
         {
@@ -150,11 +160,16 @@ namespace Pulsar4X.Networking
         }
 
 
-        public void SendFactionDataRequest(string faction, string password)
+        /// <summary>
+        /// Sends the faction data request. and sets up a link between this connection and a faction.
+        /// </summary>
+        /// <param name="factionName">Faction.</param>
+        /// <param name="password">Password.</param>
+        public void SendFactionDataRequest(string factionName, string password)
         {
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
             sendMsg.Write((byte)DataMessageType.FactionData);
-            sendMsg.Write(faction);
+            sendMsg.Write(factionName);
             sendMsg.Write(password);
             Encrypt(sendMsg);//sequence channel 31 is expected to be encrypted by the recever. see NetworkBase GotMessage()
             NetClientObject.SendMessage(sendMsg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered, SecureChannel);

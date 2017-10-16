@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
             public const double KelvinToDegreesC = -273.15;
         }
     }
-    
+    [Serializable]
     public class GameSettings
     {
         #region General Game Settings
@@ -89,9 +89,9 @@ namespace Pulsar4X.ECSLib
 
         #region Game Processing Settings
 
-        public TimeSpan OrbitCycleTime { get; set; } = TimeSpan.FromHours(1);
+        public TimeSpan OrbitCycleTime { get; set; } = TimeSpan.FromHours(1); //this is currently not used here, need to re-implement
 
-        public TimeSpan EconomyCycleTime { get; set; } = TimeSpan.FromDays(1);
+        public TimeSpan EconomyCycleTime { get; set; } = TimeSpan.FromDays(1); //this is currently not used here, need to re-implement
 
         public bool? EnableMultiThreading { get; set; } = true;
 
@@ -136,7 +136,8 @@ namespace Pulsar4X.ECSLib
 
         #endregion
     }
-    
+
+    [Serializable]
     public class NewGameSettings : GameSettings
     {
         [JsonIgnore]
