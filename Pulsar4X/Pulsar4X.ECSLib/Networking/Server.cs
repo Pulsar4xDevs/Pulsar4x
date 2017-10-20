@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 //using System.Windows.Threading;
 using Lidgren.Network;
 using Pulsar4X.ECSLib;
@@ -243,11 +244,15 @@ namespace Pulsar4X.Networking
             sendMsg.Write(len);
             sendMsg.Write(entityByteArray);
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+
             foreach (var systemID in factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems)
             {
+
                 mStream = new MemoryStream();
-                SerializationManager.NetStreamStarSystem(Game.Systems[systemID], mStream);
-                byte[] byteArray = mStream.ToArray();
+                //SerializationManager.NetStreamStarSystem(Game.Systems[systemID], mStream);
+                //string stringSystem = SerializationManager.Export(Game, Game.Systems[systemID]);
+                byte[] byteArray = Encoding.ASCII.GetBytes(SerializationManager.Export(Game, Game.Systems[systemID]));
+                //byte[] byteArray = mStream.ToArray();
                 len = byteArray.Length;
                 NetOutgoingMessage sendMsgSystem = NetPeerObject.CreateMessage();
                 sendMsgSystem.Write((byte)DataMessageType.SystemData);
@@ -255,8 +260,8 @@ namespace Pulsar4X.Networking
                 sendMsgSystem.Write(len);
                 sendMsgSystem.Write(byteArray);
                 NetServerObject.SendMessage(sendMsgSystem, recipient, NetDeliveryMethod.ReliableOrdered);
-            }
 
+            }
         }
     }
 }

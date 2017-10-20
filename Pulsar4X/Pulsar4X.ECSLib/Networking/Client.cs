@@ -120,9 +120,10 @@ namespace Pulsar4X.Networking
             Guid systemID = new Guid(message.ReadBytes(16));
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
-
+            //string data = message.ReadString();
             var mStream = new MemoryStream(data);
-            StarSystem starSys = SerializationManager.ImportStarSystem(Game, mStream);    
+            //SerializationManager.ImportSystem(Game, mStream);
+            StarSystem starSys = SerializationManager.ImportSystem(Game, mStream);    
 
         }
 

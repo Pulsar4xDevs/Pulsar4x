@@ -1,3 +1,12 @@
+2017-10-20  se5a  <jon.se5a@gmail.com>
+
+	* Client.cs:
+	* Server.cs:
+	* ProtoEntity.cs:
+	* SerializationManager.cs:
+	* FactionFactory.cs: Fixed crash where a datablob's type
+	couldn't be found (had the datablob class inside a factory)
+
 2017-10-16  se5a  <jon.se5a@gmail.com>
 
 	* TimeLoop.cs:

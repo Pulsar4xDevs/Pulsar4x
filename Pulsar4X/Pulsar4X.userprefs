@@ -1,15 +1,38 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.ECSLib/Entity/ProtoEntity.cs">
     <Files>
+      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="71" Column="1" />
       <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="50" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="70" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="183" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Game.cs" Line="72" Column="28" />
-      <File FileName="Pulsar4X.ECSLib/SerializationManager.cs" Line="401" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Commands/NewGameCMD.cs" Line="43" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/SerializationManager.cs" Line="842" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/StarSystem/StarSystem.cs" Line="63" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" Line="107" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="693" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="40" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/Program.cs" Line="16" Column="1" />
       <File FileName="Pulsar4X.ECSLib/Faction/FactionAuthProcessor.cs" Line="38" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="691" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Commands/ClientConnectCMD.cs" Line="43" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Faction/FactionFactory.cs" Line="116" Column="6" />
+      <File FileName="Pulsar4X.ECSLib/Faction/FactionInfoDB.cs" Line="1" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Faction/FactionOwnedEntitesDB.cs" Line="1" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Factories/DefaultStartFactory.cs" Line="1" Column="1" />
       <File FileName="Pulsar4X Status" />
     </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>reader.Value</Value>
+          <Value>reader.TokenType</Value>
+          <Value>val1</Value>
+          <Value>val2</Value>
+          <Value>val3</Value>
+          <Value>val4</Value>
+          <Value>val5</Value>
+          <Value>typestring</Value>
+          <Value>dataBlobType</Value>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
@@ -19,6 +42,10 @@
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
     <Watch file="Pulsar4X.CrossPlatformUI/Views/GenericStackControl.xeto.cs" line="23" offsetX="731" offsetY="678" expression="DataContext" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" line="108" offsetX="934" offsetY="1684" expression="reader.Value" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" line="116" offsetX="1035" offsetY="1760" expression="reader.TokenType" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" line="121" offsetX="706" offsetY="1872" expression="typestring" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" line="122" offsetX="594" offsetY="1888" expression="dataBlobType" liveUpdate="False" />
   </MonoDevelop.Ide.DebuggingService.PinnedWatches>
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.Pulsar4X.CrossPlatformUI.Gtk2 PreferredExecutionTarget="MonoDevelop.Default" />

@@ -105,17 +105,16 @@ namespace Pulsar4X.ECSLib
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
                 var protoEntity = new ProtoEntity();
-
                 //StarObject (Entity)
                 reader.Read(); // PropertyName Guid
                 reader.Read(); // Actual Guid
                 protoEntity.Guid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
-
                 // Deserialize the dataBlobs
                 reader.Read(); // PropertyName DATABLOB
                 while (reader.TokenType == JsonToken.PropertyName)
                 {
-                    Type dataBlobType = Type.GetType("Pulsar4X.ECSLib." + (string)reader.Value);
+                    var typestring = "Pulsar4X.ECSLib." + (string)reader.Value;
+                    Type dataBlobType = Type.GetType(typestring);
                     reader.Read(); // StartObject (dataBlob)
                     BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
                     protoEntity.SetDataBlob(dataBlob);

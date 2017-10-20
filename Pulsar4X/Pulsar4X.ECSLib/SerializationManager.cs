@@ -25,8 +25,20 @@ namespace Pulsar4X.ECSLib
         internal static IProgress<double> Progress { get; private set; }
         internal static int ManagersProcessed { get; set; }
         private static readonly object SyncRoot = new object();
-        private static readonly JsonSerializer PersistenceSerializer = new JsonSerializer { Context = new StreamingContext(StreamingContextStates.Persistence), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None };
-        private static readonly JsonSerializer RemoteSerializer = new JsonSerializer {Context = new StreamingContext(StreamingContextStates.Remoting), NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None, ContractResolver = new ForceUseISerializable(), PreserveReferencesHandling = PreserveReferencesHandling.None};
+        private static readonly JsonSerializer PersistenceSerializer = new JsonSerializer { 
+            Context = new StreamingContext(StreamingContextStates.Persistence), 
+            NullValueHandling = NullValueHandling.Ignore, 
+            Formatting = Formatting.Indented, 
+            ContractResolver = new ForceUseISerializable(), 
+            PreserveReferencesHandling = PreserveReferencesHandling.None 
+        };
+        private static readonly JsonSerializer RemoteSerializer = new JsonSerializer {
+            Context = new StreamingContext(StreamingContextStates.Remoting), 
+            NullValueHandling = NullValueHandling.Ignore, 
+            Formatting = Formatting.None, 
+            ContractResolver = new ForceUseISerializable(), 
+            PreserveReferencesHandling = PreserveReferencesHandling.None
+        };
 
         public static string Export([NotNull] Game game, bool compress = false) => Export<Game>(game, game, compress);
         public static string Export([NotNull] Game game, [NotNull] Entity entity, bool compress = false) => Export<ProtoEntity>(game, entity.Clone(), compress);
@@ -321,6 +333,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /*
 
         /// <summary>
         /// Imports from the provided stream into the provided game using the default serializer.
@@ -404,7 +417,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
-
+        */
 
         public static Game ImportGameJson(string jsonString)
         {
