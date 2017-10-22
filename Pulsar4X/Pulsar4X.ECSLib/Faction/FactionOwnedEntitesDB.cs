@@ -13,9 +13,14 @@ namespace Pulsar4X.ECSLib
         {
         }
 
+        FactionOwnedEntitesDB(FactionOwnedEntitesDB db)
+        {
+            OwnedEntites = new Dictionary<Guid, Entity>(db.OwnedEntites);
+        }
+
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new FactionOwnedEntitesDB(this);
         }
     }
 }

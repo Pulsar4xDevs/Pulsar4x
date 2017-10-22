@@ -1,35 +1,25 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.ECSLib/Entity/ProtoEntity.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="71" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="50" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Commands/NewGameCMD.cs" Line="43" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/SerializationManager.cs" Line="842" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/StarSystem/StarSystem.cs" Line="63" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" Line="107" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="693" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="40" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/Program.cs" Line="16" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Faction/FactionAuthProcessor.cs" Line="38" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Commands/ClientConnectCMD.cs" Line="43" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Faction/FactionFactory.cs" Line="116" Column="6" />
-      <File FileName="Pulsar4X.ECSLib/Faction/FactionInfoDB.cs" Line="1" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Faction/FactionOwnedEntitesDB.cs" Line="1" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Factories/DefaultStartFactory.cs" Line="1" Column="1" />
+      <File FileName="Pulsar4X.Tests/DataBlobTests.cs" Line="11" Column="13" />
+      <File FileName="Pulsar4X.ECSLib/StaticData/StaticDataStore.cs" Line="243" Column="22" />
+      <File FileName="Pulsar4X.Tests/OrderQueueTest.cs" Line="67" Column="15" />
       <File FileName="Pulsar4X Status" />
     </Files>
     <Pads>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>reader.Value</Value>
-          <Value>reader.TokenType</Value>
-          <Value>val1</Value>
-          <Value>val2</Value>
-          <Value>val3</Value>
-          <Value>val4</Value>
-          <Value>val5</Value>
-          <Value>typestring</Value>
-          <Value>dataBlobType</Value>
+      <Pad Id="MonoDevelop.UnitTesting.TestPad">
+        <State name="__root__">
+          <Node name="Pulsar4X" expanded="True">
+            <Node name="Pulsar4X.Tests" expanded="True">
+              <Node name="Pulsar4X" expanded="True">
+                <Node name="Tests" expanded="True">
+                  <Node name="OrderQueueTest" expanded="True">
+                    <Node name="testOrderQueue" selected="True" />
+                  </Node>
+                </Node>
+              </Node>
+            </Node>
+          </Node>
         </State>
       </Pad>
     </Pads>
@@ -52,6 +42,5 @@
   <DisabledProjects>
     <String>Pulsar4X.Networking/Pulsar4X.Networking.csproj</String>
     <String>ViewModelLib/Pulsar4X.ViewModels.csproj</String>
-    <String>Pulsar4X.Tests/Pulsar4X.Tests.csproj</String>
   </DisabledProjects>
 </Properties>

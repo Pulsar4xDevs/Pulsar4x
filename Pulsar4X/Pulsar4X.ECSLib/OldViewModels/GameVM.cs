@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
         private List<Guid> _visibleFactions;
 
         //faction data. for GM this will be compleate, for normal play this will be factions known to the faction, and the factionVM will only contain data that is known to the faction
-        private BindingList<FactionVM> _factions;
+        //private BindingList<FactionVM> _factions;
 
         public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
 

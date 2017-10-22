@@ -1,3 +1,12 @@
+2017-10-22  se5a  <jon.se5a@gmail.com>
+
+	* Client.cs:
+	* Server.cs:
+	* GameVM.cs:
+	* SerializationManager.cs:
+	* StarSystem.cs:
+	* FactionOwnedEntitesDB.cs: more network fixes. 
+
 2017-10-20  se5a  <jon.se5a@gmail.com>
 
 	* Client.cs:

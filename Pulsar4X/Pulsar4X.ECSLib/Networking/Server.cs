@@ -230,13 +230,16 @@ namespace Pulsar4X.Networking
 
             var ownedEntities = factionEntity.GetDataBlob<FactionOwnedEntitesDB>().OwnedEntites.Values.ToArray();
 
+
+            //Send faction entity
             var mStream = new MemoryStream();
 
+            SerializationManager.Export(Game, mStream, factionEntity );
 
-
-            SerializationManager.NetStreamEntity(factionEntity, mStream);
+            //SerializationManager.NetStreamEntity(factionEntity, mStream);
             byte[] entityByteArray = mStream.ToArray();
 
+            //byte[] entityByteArray = Encoding.UTF8.GetBytes(SerializationManager.Export(Game, factionEntity));
             int len = entityByteArray.Length;
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
             sendMsg.Write((byte)DataMessageType.FactionData);
@@ -244,15 +247,15 @@ namespace Pulsar4X.Networking
             sendMsg.Write(len);
             sendMsg.Write(entityByteArray);
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+            mStream.Close();
 
+            //send each of the StarSystems that the faction knows about. 
             foreach (var systemID in factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems)
             {
 
-                mStream = new MemoryStream();
-                //SerializationManager.NetStreamStarSystem(Game.Systems[systemID], mStream);
-                //string stringSystem = SerializationManager.Export(Game, Game.Systems[systemID]);
-                byte[] byteArray = Encoding.ASCII.GetBytes(SerializationManager.Export(Game, Game.Systems[systemID]));
-                //byte[] byteArray = mStream.ToArray();
+                mStream = new MemoryStream(); //do I need a new one here? or use the one I'm already using instead of closing it...
+                byte[] byteArray = mStream.ToArray();
+                //byte[] byteArray = Encoding.UTF8.GetBytes(SerializationManager.Export(Game, Game.Systems[systemID]));
                 len = byteArray.Length;
                 NetOutgoingMessage sendMsgSystem = NetPeerObject.CreateMessage();
                 sendMsgSystem.Write((byte)DataMessageType.SystemData);
@@ -260,7 +263,7 @@ namespace Pulsar4X.Networking
                 sendMsgSystem.Write(len);
                 sendMsgSystem.Write(byteArray);
                 NetServerObject.SendMessage(sendMsgSystem, recipient, NetDeliveryMethod.ReliableOrdered);
-
+                mStream.Close();
             }
         }
     }

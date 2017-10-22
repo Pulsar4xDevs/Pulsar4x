@@ -104,14 +104,19 @@ namespace Pulsar4X.Networking
 
         protected override void HandleFactionData(NetIncomingMessage message)
         {
-            
-            Guid entityID = new Guid(message.PeekBytes(16));
-            HandleEntityData(message);
 
-            Entity factionEntity;
 
-            if (Game.GlobalManager.TryGetEntityByGuid(entityID, out factionEntity))
-                CurrentFaction = factionEntity;
+            Guid entityID = new Guid(message.ReadBytes(16));
+            //HandleEntityData(message);
+
+            int len = message.ReadInt32();
+            byte[] data = message.ReadBytes(len);
+            var mStream = new MemoryStream(data);
+            Entity factionEntity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
+            //Guid entityID = factionEntity.Guid;
+            //if (Game.GlobalManager.TryGetEntityByGuid(entityID, out factionEntity))
+            CurrentFaction = factionEntity;
+            _gameVM.CurrentFaction = factionEntity;
         }
 
         protected override void HandleSystemData(NetIncomingMessage message)
@@ -142,7 +147,7 @@ namespace Pulsar4X.Networking
             */
             var mStream = new MemoryStream(data);
 
-            SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
+            SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager); //wait, global manager? do I need to serialise the manager ID first? no that can't be right, how does file saving/loading work then? poor commenting on the seralisation manager.
 
         }
 
@@ -185,8 +190,7 @@ namespace Pulsar4X.Networking
         }
 
         public void SendEntityCommand(EntityCommand cmd)
-        {
-            
+        {            
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
             sendMsg.Write((byte)DataMessageType.EntityCommand);
             //sendMsg.Write(cmd); //TODO: seralise cmd and write it to the message.
