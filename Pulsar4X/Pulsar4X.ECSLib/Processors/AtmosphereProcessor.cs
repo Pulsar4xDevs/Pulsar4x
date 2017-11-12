@@ -69,6 +69,7 @@ namespace Pulsar4X.ECSLib
 
             // update the descriptions:
             atmoDB.GenerateDescriptions();
+            SensorEntityProcessor.SetAtmoEmmisionSig(bodyDB.OwningEntity.GetDataBlob<SensorSigDB>(), atmoDB);
         }
     }
 }

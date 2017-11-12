@@ -719,6 +719,10 @@ namespace Pulsar4X.ECSLib
 
             // generate ruins:
             GenerateRuins(system, body);
+
+            var sensorsig = SensorEntityProcessor.PlanetEmmisionSig(bodyInfo, bodyMVDB);
+            body.SetDataBlob(sensorsig);
+
         }
 
         /// <summary>

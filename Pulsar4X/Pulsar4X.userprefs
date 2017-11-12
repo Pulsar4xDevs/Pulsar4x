@@ -1,28 +1,16 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.Tests/DataBlobTests.cs" Line="11" Column="13" />
-      <File FileName="Pulsar4X.ECSLib/StaticData/StaticDataStore.cs" Line="243" Column="22" />
-      <File FileName="Pulsar4X.Tests/OrderQueueTest.cs" Line="67" Column="15" />
+      <File FileName="Pulsar4X.ECSLib/Processors/FactionSystemInfoProcessor.cs" Line="19" Column="71" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorEntity/SensorEntityFactory.cs" Line="21" Column="10" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorEntity/SensorEntityProcessor.cs" Line="79" Column="13" />
+      <File FileName="Pulsar4X.ECSLib/Factories/SystemGen/StarFactory.cs" Line="41" Column="13" />
+      <File FileName="Pulsar4X.ECSLib/DataBlobs/ComponentAttributeDBs/ActiveSensorAtbDB.cs" Line="1" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Processors/ProcessorManager.cs" Line="97" Column="92" />
+      <File FileName="Pulsar4X.ECSLib/ManagerSubPulse.cs" Line="94" Column="60" />
+      <File FileName="Pulsar4X.ECSLib/DataBlobs/MassVolumeDB.cs" Line="36" Column="33" />
       <File FileName="Pulsar4X Status" />
     </Files>
-    <Pads>
-      <Pad Id="MonoDevelop.UnitTesting.TestPad">
-        <State name="__root__">
-          <Node name="Pulsar4X" expanded="True">
-            <Node name="Pulsar4X.Tests" expanded="True">
-              <Node name="Pulsar4X" expanded="True">
-                <Node name="Tests" expanded="True">
-                  <Node name="OrderQueueTest" expanded="True">
-                    <Node name="testOrderQueue" selected="True" />
-                  </Node>
-                </Node>
-              </Node>
-            </Node>
-          </Node>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
@@ -42,5 +30,6 @@
   <DisabledProjects>
     <String>Pulsar4X.Networking/Pulsar4X.Networking.csproj</String>
     <String>ViewModelLib/Pulsar4X.ViewModels.csproj</String>
+    <String>Pulsar4X.CrossPlatformUI.Wpf/Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
   </DisabledProjects>
 </Properties>

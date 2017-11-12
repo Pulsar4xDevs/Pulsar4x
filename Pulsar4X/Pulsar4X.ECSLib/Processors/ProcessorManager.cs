@@ -69,10 +69,13 @@ namespace Pulsar4X.ECSLib
             AddHotloopProcessor<NewtonBalisticDB>(new NewtonBalisticProcessor());
             AddHotloopProcessor<OrderableDB>(new OrderableProcessor(game));
             AddHotloopProcessor<TranslateMoveDB>(new TranslateMoveProcessor());
+            AddHotloopProcessor<SensorSigDB>(new SetReflectedEMProfile());
         }
     }
 
-
+    /// <summary>
+    /// Hotloop processor - this proccessor is fired at a specific regular time interval
+    /// </summary>
     internal interface IHotloopProcessor
     {   
         void ProcessEntity(Entity entity, int deltaSeconds);
@@ -80,11 +83,19 @@ namespace Pulsar4X.ECSLib
         TimeSpan RunFrequency { get; }
     }
 
+
+    /// <summary>
+    /// Instance processor. - This processor is fired at a specific timedate or on command. 
+    /// </summary>
     internal interface IInstanceProcessor
     {
         void ProcessEntity(Entity entity, int deltaSeconds);
     }
 
+
+    /// <summary>
+    /// Recalc processor. - this processor is called when something on the entity changes. 
+    /// </summary>
     internal interface IRecalcProcessor
     {
         byte ProcessPriority { get; set; }

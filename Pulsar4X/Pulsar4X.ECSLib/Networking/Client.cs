@@ -28,7 +28,7 @@ namespace Pulsar4X.Networking
         public string ConnectedToGameName { get; private set; }
         public DateTime hostToDatetime { get; private set; }
         //private Dictionary<Guid, string> _factions; 
-        public ObservableCollection<FactionItem> Factions { get; set; }
+        //public ObservableCollection<FactionItem> Factions { get; set; }
         private GameVM _gameVM;
 
         public NetworkClient(string hostAddress, int portNum, GameVM gameVM)
@@ -37,7 +37,7 @@ namespace Pulsar4X.Networking
             PortNum = portNum;
             HostAddress = hostAddress;
             IsConnectedToServer = false;
-            Factions = new ObservableCollection<FactionItem>();
+            //Factions = new ObservableCollection<FactionItem>();
 
             var config = new NetPeerConfiguration("Pulsar4X");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
@@ -62,6 +62,8 @@ namespace Pulsar4X.Networking
                 CheckEntityData();
             }
         }
+
+
 
         protected override void HandleDiscoveryResponse(NetIncomingMessage message)
         {
@@ -204,7 +206,7 @@ namespace Pulsar4X.Networking
         /// </summary>
         private void CheckEntityData()
         {
-            /*
+            
             int emptyEntities = 0;
             foreach (var entity in Game.GlobalManager.Entities)
             {
@@ -214,7 +216,7 @@ namespace Pulsar4X.Networking
                     SendEntityDataRequest(entity.Guid);
                 }
             }
-            foreach (var system in Game.Systems)
+            foreach (var system in Game.Systems.Values)
             {
                 foreach (var entity in system.SystemManager.Entities)
                 {
@@ -229,42 +231,14 @@ namespace Pulsar4X.Networking
             {
                 HasFullDataset = true;
             }
-            */
+
         }
-
-        //public void ReceveFactionList(DataMessage dataMessage)
-        //{
-        //    Factions.Clear();
-
-        //    foreach (var factionItem in (List<FactionItem>)dataMessage.DataObject)
-        //    {
-        //        Factions.Add(factionItem);
-        //    }
-        //}
-
-        //public void SendFactionListRequest()
-        //{
-        //    DataMessage dataMessage = new DataMessage();
-        //    dataMessage.DataMessageType = DataMessageType.FactionDictionary;
-
-        //    var binFormatter = new BinaryFormatter();
-        //    var mStream = new MemoryStream();
-        //    binFormatter.Serialize(mStream, dataMessage);
-
-
-        //    NetOutgoingMessage sendMsg = NetClientObject.CreateMessage();
-        //    sendMsg.Write(mStream.ToArray()); //send the stream as an byte array. 
-        //    NetClientObject.SendMessage(sendMsg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered);
-        //}
 
         public event PropertyChangedEventHandler PropertyChanged;
         [NotifyPropertyChangedInvocator]
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

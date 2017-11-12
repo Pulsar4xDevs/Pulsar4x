@@ -46,11 +46,11 @@ namespace Pulsar4X.Tests
         public void TestShipCreation()
         {
 
-            ComponentDesign engineDesign;
+            ComponentDesign engineDesign;// = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
 
             _engineSD = _game.StaticData.ComponentTemplates[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesign = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(5); //size = 25 power.
+            engineDesign.ComponentDesignAbilities[0].SetValueFromInput(125); //size = 250 power.
             //engineDesignDB.ComponentDesignAbilities[1]
             _engineComponent = GenericComponentFactory.DesignToDesignEntity(_game, _faction, engineDesign);
 
@@ -65,7 +65,7 @@ namespace Pulsar4X.Tests
 
             //Change in component cloning makes the next line's assumption untrue
             //Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
-            Assert.AreEqual(50, propulsion.TotalEnginePower);
+            Assert.AreEqual(500, propulsion.TotalEnginePower);
             Assert.AreEqual(ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, _ship.GetDataBlob<ShipInfoDB>().Tonnage), propulsion.MaximumSpeed);
 
             EntityManipulation.AddComponentToEntity(_ship, _engineComponent);

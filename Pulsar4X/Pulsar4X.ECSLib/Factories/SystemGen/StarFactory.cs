@@ -37,7 +37,9 @@ namespace Pulsar4X.ECSLib
             NameDB starNameDB = new NameDB(starName);
             OrbitDB starOrbitDB = new OrbitDB();
 
-            return new Entity(system.SystemManager, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB});
+            SensorSigDB emmisionSignature = SensorEntityProcessor.SetStarEmmisionSig(starInfoDB, starMassVolumeDB);
+
+            return new Entity(system.SystemManager, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB, emmisionSignature});
         }
 
         /// <summary>

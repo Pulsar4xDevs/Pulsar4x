@@ -1,3 +1,18 @@
+2017-11-13  se5a  <jon.se5a@gmail.com>
+
+	* ManagerSubPulse.cs:
+	* Client.cs:
+	* Pulsar4X.ECSLib.csproj:
+	* GameVM.cs:
+	* ProcessorManager.cs:
+	* AtmosphereProcessor.cs:
+	* StarFactory.cs:
+	* SystemBodyFactory.cs:
+	* FactionSystemInfoProcessor.cs:
+	* SensorEntityFactory.cs:
+	* SensorEntityProcessor.cs: some work on sensors and detection
+
+
 2017-10-22  se5a  <jon.se5a@gmail.com>
 
 	* Client.cs:

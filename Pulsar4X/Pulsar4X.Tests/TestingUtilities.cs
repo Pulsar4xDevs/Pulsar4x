@@ -104,7 +104,7 @@ namespace Pulsar4X.Tests
 
             StarSystemFactory starfac = new StarSystemFactory(Game);
             Sol = starfac.CreateSol(Game);
-            Earth = Sol.SystemManager.Entities[3]; //should be fourth entity created 
+            Earth = NameLookup.TryGetFirstEntityWithName(Sol.SystemManager, "Earth"); //Sol.SystemManager.Entities[3]; //should be fourth entity created 
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
 
             DefaultEngineDesign = DefaultStartFactory.DefaultEngineDesign(Game, HumanFaction);

@@ -407,6 +407,7 @@
     <Compile Include="Faction\FactionFactory.cs" />
     <Compile Include="ComponentFeatureSets\SensorEntity\SensorEntityProcessor.cs" />
     <Compile Include="ComponentFeatureSets\SensorEntity\SensorEntityFactory.cs" />
+    <Compile Include="Processors\FactionSystemInfoProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

@@ -35,8 +35,17 @@ namespace Pulsar4X.ECSLib
             set
             {
                 _currentFaction = value;
-                //TODO: factionDB.knownfactions need to be filled with... a blank copy of the actual faction that gets filled as the facion finds out more about it?
-                //excepting in the case of GM where the actual faction should be good. 
+                OnPropertyChanged();
+            }
+        }
+        private Entity _currentFaction;
+
+        internal void SetFactionData()
+        {
+            if (CurrentFaction == null)
+                throw new Exception("CurrentFaction is null");
+            else 
+            {
                 _visibleFactions = new List<Guid>();
                 foreach (var knownFaction in _currentFaction.GetDataBlob<FactionInfoDB>().KnownFactions)
                 {
@@ -57,13 +66,8 @@ namespace Pulsar4X.ECSLib
                     Colonys.Add(colonyEntity.Guid, colonyEntity.GetDataBlob<NameDB>().GetName(_currentFaction));
                 }
                 Colonys.SelectedIndex = 0;
-
-                OnPropertyChanged();
             }
         }
-        private Entity _currentFaction;
-
-
 
         public string StatusText { get { return _statusText; } set { _statusText = value; OnPropertyChanged(); } }
         private string _statusText;
@@ -135,6 +139,7 @@ namespace Pulsar4X.ECSLib
             ReadOnlyDictionary<Entity, AccessRole> roles = CurrentPlayer.GetAccessRoles(CurrentAuthToken);
 
             CurrentFaction = roles.FirstOrDefault(role => (role.Value & AccessRole.Owner) != 0).Key;
+            SetFactionData();
             var auth = new AuthDB();
             CurrentFaction.SetDataBlob(auth);
             AuthProcessor.StorePasswordAsHash(Game, CurrentFaction, options.FactionPassword);
