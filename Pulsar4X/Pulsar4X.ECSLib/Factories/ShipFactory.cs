@@ -71,6 +71,14 @@ namespace Pulsar4X.ECSLib
                 {
                     // Set the parent/owning Entity to the shipEntity
                     AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance);
+
+                    //TODO: do this somewhere else, recalcprocessor maybe?
+                    if (componentInstance.HasDataBlob<SensorReceverAtbDB>())
+                    {
+                        var sensor = componentInstance.GetDataBlob<SensorReceverAtbDB>();
+                        DateTime nextDatetime = shipEntity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(sensor.ScanTime);
+                        shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan(), componentInstance);
+                    }
                 }
             }
 
