@@ -1,94 +1,43 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
 
-
-    internal class SetReflectedEMProfile : IHotloopProcessor
+    class SensorInfo
     {
-        public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
-
-        public void ProcessEntity(Entity entity, int deltaSeconds)
-        {
-            SetEntityProfile(entity);
-        }
-
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
-        {
-            var entites = manager.GetAllEntitiesWithDataBlob<SensorSigDB>();
-            foreach (var entity in entites)
-            {
-                ProcessEntity(entity, deltaSeconds);
-            }
-        }
-
-        internal static void SetEntityProfile(Entity entity)
-        {
-            var position = entity.GetDataBlob<PositionDB>();
-            var sensorSig = entity.GetDataBlob<SensorSigDB>();
-
-            var emmiters = entity.Manager.GetAllEntitiesWithDataBlob<SensorSigDB>();
-            foreach (var emittingEntity in emmiters)
-            {
-                double distance = PositionDB.GetDistanceBetween(position, emittingEntity.GetDataBlob<PositionDB>());
-                var emmissionDB = emittingEntity.GetDataBlob<SensorSigDB>();
-
-                sensorSig.ReflectedEMSpectra = SensorEntityProcessor.AttenuatedForDistance(emmissionDB, distance);
-            }
-        }
+        internal Entity detectedEntity;
+        internal DateTime LastDetection;
     }
 
-
-
-    public class SensorEntityProcessor
+    public static class SensorProcessorTools
     {
-        public SensorEntityProcessor()
+
+
+        internal static void DetectEntites(SensorReceverAtbDB receverDB, SensorProfileDB sensorProfile, DateTime atDate)
         {
-        }
-
-
-        void Sensor(EntityManager manager)
-        {
-            int sensorStrength = 10;
-
-            List<SensorSigDB> emitters = new List<SensorSigDB>(manager.GetAllDataBlobsOfType<SensorSigDB>());
-
-
-            foreach (var item in emitters)
+            var knownContacts = receverDB.KnownSensorContacts;
+            if (IsDetected(receverDB, sensorProfile))
             {
-                int emmisionStr = 10;
-                if (emmisionStr >= sensorStrength)
-                { }
+                if (knownContacts.ContainsKey(sensorProfile.OwningEntity.Guid))
+                {
+                    knownContacts[sensorProfile.OwningEntity.Guid].LastDetection = atDate;
+                }
+                else
+                {
+                    knownContacts.Add(sensorProfile.OwningEntity.Guid, new SensorInfo()
+                    {
+                        detectedEntity = sensorProfile.OwningEntity,
+                        LastDetection = atDate
+                    });
+                }
             }
-
         }
 
 
-        void DetectEntites(Entity forEntity)
-        {
-            var receverDB = forEntity.GetDataBlob<SensorReceverDB>();
-            EntityManager manager = forEntity.Manager;
-
-            foreach (var sensorProfile in manager.GetAllDataBlobsOfType<SensorSigDB>())
-            {
-                if (IsDetected(receverDB, sensorProfile))
-                { }
-            }
-
- 
-        }
-
-        class SensorInfo
-        {
-            Entity detectedEntity;
-            DateTime LastDetection;
-
-        }
 
         //eventualy not a bool, return more info than a bool. (a percentage? or even more info than that?) 
-        bool IsDetected(SensorReceverDB recever, SensorSigDB target)
+        internal static bool IsDetected(SensorReceverAtbDB recever, SensorProfileDB target)
         {
             /*
              * Thoughts:
@@ -112,6 +61,8 @@ namespace Pulsar4X.ECSLib
              * how are multiple components on a ship going to work? they are entitys in and of themselfs, so they could have a SensorSigDB all of thier own.
              * that could help with getting intel on individual components of a target. 
              * 
+             * recever resolution should play into how much gets detected. 
+             * 
              * Note that each entity will(may) have multiple waveforms. 
              * 
              * Data that can be glened from this detection system:
@@ -123,6 +74,9 @@ namespace Pulsar4X.ECSLib
             var myPosition = recever.OwningEntity.GetDataBlob<PositionDB>();
             var targetPosition = target.OwningEntity.GetDataBlob<PositionDB>();
             double distance = PositionDB.GetDistanceBetween(myPosition, targetPosition);
+
+            var detectionResolution = recever.Resolution;
+
             var signalAtPosition = AttenuatedForDistance(target, distance);
 
             double receverSensitivityFreqMin = recever.RecevingWaveformCapabilty.WavelengthMin;
@@ -171,7 +125,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The for distance.</returns>
         /// <param name="emission">Emission.</param>
         /// <param name="distance">Distance.</param>
-        internal static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorSigDB emission, double distance)
+        internal static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorProfileDB emission, double distance)
         {
             var dict = new Dictionary<EMWaveForm, double>();
 
@@ -181,7 +135,8 @@ namespace Pulsar4X.ECSLib
             }
             foreach (var reflectedItem in emission.ReflectedEMSpectra)
             {
-                dict.Add(reflectedItem.Key, reflectedItem.Value / 4 * Math.PI * Math.Pow(distance, 2));                   
+                var reflectedSpectra = reflectedItem.Value / 4 * Math.PI * Math.Pow(distance, 2) * emission.TargetCrossSection;
+                dict.Add(reflectedItem.Key, reflectedSpectra);                   
             }
             return dict;
         }
@@ -194,7 +149,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The star emmision sig.</returns>
         /// <param name="starInfoDB">Star info db.</param>
         /// <param name="starMassVolumeDB">Star mass volume db.</param>
-        internal static SensorSigDB SetStarEmmisionSig(StarInfoDB starInfoDB, MassVolumeDB starMassVolumeDB)
+        internal static SensorProfileDB SetStarEmmisionSig(StarInfoDB starInfoDB, MassVolumeDB starMassVolumeDB)
         {
 
             var tempDegreesC = starInfoDB.Temperature;
@@ -208,7 +163,7 @@ namespace Pulsar4X.ECSLib
                 WavelengthMax = wavelength + 600
             };
 
-            var emisionSignature = new SensorSigDB() {
+            var emisionSignature = new SensorProfileDB() {
                 
             };
             emisionSignature.EmittedEMSpectra.Add(waveform, magnitude);// this will need adjusting...
@@ -222,7 +177,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The emmision sig.</returns>
         /// <param name="sysBodyInfoDB">Sys body info db.</param>
         /// <param name="massVolDB">Mass vol db.</param>
-        internal static SensorSigDB PlanetEmmisionSig(SystemBodyInfoDB sysBodyInfoDB, MassVolumeDB massVolDB)
+        internal static void PlanetEmmisionSig(SensorProfileDB profile, SystemBodyInfoDB sysBodyInfoDB, MassVolumeDB massVolDB, AtmosphereDB atmoDB)
         {
             var tempDegreesC = sysBodyInfoDB.BaseTemperature;
             var kelvin = tempDegreesC + 273.15;
@@ -235,90 +190,15 @@ namespace Pulsar4X.ECSLib
                 WavelengthMax = wavelength + 600
             };
 
-            var emisionSignature = new SensorSigDB();
-            emisionSignature.EmittedEMSpectra.Add(waveform, magnitude);// this will need adjusting...
-
-            return emisionSignature;
+            profile.EmittedEMSpectra.Add(waveform, magnitude);//TODO this may need adjusting to make good balanced detections.
+            profile.Reflectivity = atmoDB.Albedo;
         }
 
 
-        /// <summary>
-        /// Should be done at creation, and whenever the albedo changes. 
-        /// possibly a planets surface should be given an albedo as well. 
-        /// </summary>
-        /// <param name="sig">Sig.</param>
-        /// <param name="atmoDB">Atmo db.</param>
-        internal static void SetAtmoEmmisionSig(SensorSigDB sig, AtmosphereDB atmoDB)
-        {
-            sig.Reflectivity = atmoDB.Albedo;
-        }
+
     }
 
 
-    public class SensorSigDB : BaseDataBlob
-    {
-        internal double GravSig
-        {
-            get
-            {
-                if (OwningEntity.HasDataBlob<MassVolumeDB>())
-                    return OwningEntity.GetDataBlob<MassVolumeDB>().Mass;
-                else
-                    return 0;
-            }
-        }
-
-        private double? _targetCrossSection;
-        internal double TargetCrossSection
-        {
-            get
-            {
-                if (_targetCrossSection != null)
-                    return (double)_targetCrossSection;
-                else if (this.OwningEntity.HasDataBlob<MassVolumeDB>())
-                    return Math.PI * Math.Pow(this.OwningEntity.GetDataBlob<MassVolumeDB>().RadiusInKM, 2);
-                else return 1;
-
-            }
-        }
-
-        //TODO make this a bit more complex so it reflects different amounts at different wavelengths
-        //this will define how effective active sensors are, and will increase a ships detection when its closer to a star. 
-        //key is frequency, value is 0.0-1.0 for that freqency. for most entites this will create a wave type spectrum. 
-        //internal Dictionary<double, float> Reflectivity { get; private set; } = new Dictionary<double, float>();
-        internal double Reflectivity;
-
-        /// <summary>
-        /// This dictionary gets replaced frequently by SetReflectedEMSig()
-        /// </summary>
-        /// <value>The reflected EMS pectra.</value>
-        internal Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; set; } = new Dictionary<EMWaveForm, double>();
-
-        /// <summary>
-        /// Multiple Emissions make up the signature of the entity.
-        /// the volume of each emission can increase and decrease, ie by running engines for movement, or active sensors. 
-        /// </summary>
-        /// <key>defines the average and dropout wavelengths in nanometers</key>
-        /// <value>the volume or magnatude of the spectra</value>
-        internal Dictionary<EMWaveForm, double> EmittedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
-
-        public SensorSigDB() { }
-
-        public SensorSigDB(SensorSigDB db)
-        {
-            EmittedEMSpectra = new Dictionary<EMWaveForm, double>(db.EmittedEMSpectra);
-            ReflectedEMSpectra = new Dictionary<EMWaveForm, double>(db.ReflectedEMSpectra);
-            _targetCrossSection = db._targetCrossSection;
-        }
-
-        public override object Clone()
-        {
-            return new SensorSigDB(this);
-        }
-
-
-
-    } 
     /// <summary>
     /// EM waveform, think of this of this as a triange wave, the average is the peak, with min and max defining the minimuam and maximium wavelengths 
     ///     . ---Height (volume) is changable and defined in the SensorSigDB.EMSig value. increasing the hight doesn't make it more detecable by sensors outside the min and max range 
@@ -348,22 +228,6 @@ namespace Pulsar4X.ECSLib
         public double WavelengthMax;
     }
 
-
-    public class SensorReceverDB : BaseDataBlob
-    {
-        internal EMWaveForm RecevingWaveformCapabilty;
-        internal double MaxSensitivity;//sensitivity at ideal wavelength
-        internal double MinSensitivity;// sensitivity at worst detectable wavelengths
-        internal float Resolution; 
-
-
-
-        public override object Clone()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class SensorTransmitterDB : BaseDataBlob
     {
         public override object Clone()
@@ -375,8 +239,6 @@ namespace Pulsar4X.ECSLib
     public class FactionSensorInfoDB
     {
         Dictionary<Entity,EntityKnowledge> knownEntitys;
-
-
     }
 
     public struct EntityKnowledge

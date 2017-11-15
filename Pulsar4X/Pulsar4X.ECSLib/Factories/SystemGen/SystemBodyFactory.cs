@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
             var orbit = new OrbitDB();
             var atmo = new AtmosphereDB();
             var ruins = new RuinsDB();
-
+            var emEmtor = new SensorProfileDB();
             var planetDBs = new List<BaseDataBlob>
             {
                 position,
@@ -34,7 +34,8 @@ namespace Pulsar4X.ECSLib
                 name,
                 orbit,
                 atmo,
-                ruins
+                ruins,
+                emEmtor
             };
             ProtoEntity newPlanet = ProtoEntity.Create(planetDBs);
 
@@ -720,8 +721,10 @@ namespace Pulsar4X.ECSLib
             // generate ruins:
             GenerateRuins(system, body);
 
-            var sensorsig = SensorEntityProcessor.PlanetEmmisionSig(bodyInfo, bodyMVDB);
-            body.SetDataBlob(sensorsig);
+            var profile = body.GetDataBlob<SensorProfileDB>();
+            var atmo = body.GetDataBlob<AtmosphereDB>();
+            SensorProcessorTools.PlanetEmmisionSig(profile, bodyInfo, bodyMVDB, atmo);
+
 
         }
 

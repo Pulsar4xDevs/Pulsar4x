@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
             AddHotloopProcessor<NewtonBalisticDB>(new NewtonBalisticProcessor());
             AddHotloopProcessor<OrderableDB>(new OrderableProcessor(game));
             AddHotloopProcessor<TranslateMoveDB>(new TranslateMoveProcessor());
-            AddHotloopProcessor<SensorSigDB>(new SetReflectedEMProfile());
+            AddHotloopProcessor<SensorProfileDB>(new SetReflectedEMProfile());
         }
     }
 

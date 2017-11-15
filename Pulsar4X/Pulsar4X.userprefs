@@ -1,14 +1,6 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Processors/FactionSystemInfoProcessor.cs" Line="19" Column="71" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorEntity/SensorEntityFactory.cs" Line="21" Column="10" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorEntity/SensorEntityProcessor.cs" Line="79" Column="13" />
-      <File FileName="Pulsar4X.ECSLib/Factories/SystemGen/StarFactory.cs" Line="41" Column="13" />
-      <File FileName="Pulsar4X.ECSLib/DataBlobs/ComponentAttributeDBs/ActiveSensorAtbDB.cs" Line="1" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Processors/ProcessorManager.cs" Line="97" Column="92" />
-      <File FileName="Pulsar4X.ECSLib/ManagerSubPulse.cs" Line="94" Column="60" />
-      <File FileName="Pulsar4X.ECSLib/DataBlobs/MassVolumeDB.cs" Line="36" Column="33" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
@@ -31,5 +23,6 @@
     <String>Pulsar4X.Networking/Pulsar4X.Networking.csproj</String>
     <String>ViewModelLib/Pulsar4X.ViewModels.csproj</String>
     <String>Pulsar4X.CrossPlatformUI.Wpf/Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
+    <String>Pulsar4X.CrossPlatformUI.Mac/Pulsar4X.CrossPlatformUI.Mac.csproj</String>
   </DisabledProjects>
 </Properties>

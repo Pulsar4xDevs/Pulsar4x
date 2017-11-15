@@ -321,8 +321,6 @@
     <Compile Include="DataBlobs\ShipDBs\MaintenanceDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\MissileWeaponsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\PowerDB.cs" />
-    <Compile Include="DataBlobs\ShipDBs\SensorProfileDB.cs" />
-    <Compile Include="DataBlobs\ShipDBs\SensorsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ShieldsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ShipInfoDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\TractorDB.cs" />
@@ -405,9 +403,13 @@
     <Compile Include="Faction\FactionAuthDB.cs" />
     <Compile Include="Faction\FactionAuthProcessor.cs" />
     <Compile Include="Faction\FactionFactory.cs" />
-    <Compile Include="ComponentFeatureSets\SensorEntity\SensorEntityProcessor.cs" />
-    <Compile Include="ComponentFeatureSets\SensorEntity\SensorEntityFactory.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorProcessorTools.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorEntityFactory.cs" />
     <Compile Include="Processors\FactionSystemInfoProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorProfileDB.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SetReflectedEMProfile.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorReceverAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorScan.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />
@@ -420,7 +422,7 @@
     <Folder Include="ComponentFeatureSets\Construction\" />
     <Folder Include="ComponentFeatureSets\Orbit\" />
     <Folder Include="Networking\" />
-    <Folder Include="ComponentFeatureSets\SensorEntity\" />
+    <Folder Include="ComponentFeatureSets\SensorsAndDetection\" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

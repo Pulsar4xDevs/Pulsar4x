@@ -51,5 +51,17 @@ namespace Pulsar4X.ECSLib
             }
             throw new Exception(name + " not found");
         }
+
+        internal static ComponentTemplateSD TryGetTemplateSD(Game game, string name)
+        {
+            foreach (var kvp in game.StaticData.ComponentTemplates)
+            {
+                if (name == kvp.Value.Name)
+                {
+                    return kvp.Value;
+                }
+            }
+            throw new Exception(name + " not found");
+        }
     }
 }

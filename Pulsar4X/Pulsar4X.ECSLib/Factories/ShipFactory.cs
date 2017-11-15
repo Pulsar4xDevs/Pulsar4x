@@ -96,7 +96,6 @@ namespace Pulsar4X.ECSLib
             var damage = new DamageDB();
             var maintenance = new MaintenanceDB();
             var sensorProfile = new SensorProfileDB();
-            var sensors = new SensorsDB();
             var name = new NameDB(className);
             var componentInstancesDB = new ComponentInstancesDB();
             var massVolumeDB = new MassVolumeDB();
@@ -111,7 +110,6 @@ namespace Pulsar4X.ECSLib
                 damage,
                 maintenance,
                 sensorProfile,
-                sensors,
                 name,
                 componentInstancesDB,
                 massVolumeDB

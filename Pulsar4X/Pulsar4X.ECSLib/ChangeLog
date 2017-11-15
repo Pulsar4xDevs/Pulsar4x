@@ -1,3 +1,27 @@
+2017-11-15  se5a  <jon.se5a@gmail.com>
+
+	* ManagerSubPulse.cs:
+	* NameLookup.cs:
+	* Pulsar4X.ECSLib.csproj:
+	* ShipFactory.cs:
+	* SensorsDB.cs:
+	* ProcessorManager.cs:
+	* DefaultStartFactory.cs:
+	* ComponentData.json:
+	* AtmosphereProcessor.cs:
+	* StarFactory.cs:
+	* SystemBodyFactory.cs:
+	* SensorProfileDB.cs:
+	* SensorScan.cs:
+	* SensorEntityFactory.cs:
+	* SensorEntityProcessor.cs:
+	* SensorProfileDB.cs:
+	* SensorReceverAtbDB.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs:
+	* SetReflectedEMProfile.cs: More Sensor work, added Sensor
+	component template. 
+
 2017-11-13  se5a  <jon.se5a@gmail.com>
 
 	* ManagerSubPulse.cs:
