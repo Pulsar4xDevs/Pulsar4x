@@ -17,6 +17,12 @@ namespace Pulsar4X.ECSLib
         internal static void DetectEntites(SensorReceverAtbDB receverDB, SensorProfileDB sensorProfile, DateTime atDate)
         {
             var knownContacts = receverDB.KnownSensorContacts;
+
+            TimeSpan timeSinceLastCalc = atDate - sensorProfile.LastDatetimeOfReflectionSet;
+            double distanceInAUSinceLastCalc = PositionDB.GetDistanceBetween(sensorProfile.LastPositionOfReflectionSet, sensorProfile.OwningEntity.GetDataBlob<PositionDB>());
+            if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
+                SetReflectedEMProfile.SetEntityProfile(sensorProfile.OwningEntity, atDate);
+
             if (IsDetected(receverDB, sensorProfile))
             {
                 if (knownContacts.ContainsKey(sensorProfile.OwningEntity.Guid))
@@ -135,8 +141,14 @@ namespace Pulsar4X.ECSLib
             }
             foreach (var reflectedItem in emission.ReflectedEMSpectra)
             {
-                var reflectedSpectra = reflectedItem.Value / 4 * Math.PI * Math.Pow(distance, 2) * emission.TargetCrossSection;
-                dict.Add(reflectedItem.Key, reflectedSpectra);                   
+                if (dict.ContainsKey(reflectedItem.Key))
+                {
+                    var reflectedSpectra = reflectedItem.Value / 4 * Math.PI * Math.Pow(distance, 2) * emission.TargetCrossSection;
+                    dict.Add(reflectedItem.Key, reflectedSpectra);
+                }
+                else {
+                    //this shouldn't happen
+                }
             }
             return dict;
         }

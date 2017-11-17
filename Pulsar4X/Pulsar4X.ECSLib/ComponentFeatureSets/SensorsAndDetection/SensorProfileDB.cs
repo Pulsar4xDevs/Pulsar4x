@@ -41,6 +41,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <value>The reflected EMS pectra.</value>
         internal Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; set; } = new Dictionary<EMWaveForm, double>();
+        internal DateTime LastDatetimeOfReflectionSet = new DateTime();
+        internal Vector4 LastPositionOfReflectionSet = new Vector4();
+
 
         /// <summary>
         /// Multiple Emissions make up the signature of the entity.

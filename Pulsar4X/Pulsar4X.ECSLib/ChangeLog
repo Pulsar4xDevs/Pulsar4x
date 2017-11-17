@@ -1,3 +1,15 @@
+2017-11-17  se5a  <jon.se5a@gmail.com>
+
+	* ManagerSubPulse.cs:
+	* PositionDB.cs:
+	* ProcessorManager.cs:
+	* SensorProfileDB.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs:
+	* SetReflectedEMProfile.cs: Changes to the way reflectedEM sig
+	gets calculated. it now calculates it when a sensor is
+	looking, and if it's not been calculated recently.
+
 2017-11-16  se5a  <jon.se5a@gmail.com>
 
 	* ShipFactory.cs:

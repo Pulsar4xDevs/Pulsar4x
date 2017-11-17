@@ -12,10 +12,16 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateNewSensorContact(Entity fromEntity)
         {
             var posDB = (PositionDB)fromEntity.GetDataBlob<PositionDB>().Clone();
+
+                
             var datablobs = new List<BaseDataBlob>()
             {
                 posDB,
             };
+            if (fromEntity.HasDataBlob<OrbitDB>())
+            {
+                datablobs.Add((OrbitDB)fromEntity.GetDataBlob<OrbitDB>().Clone());
+            }
             return new Entity(fromEntity.Manager);
 
         }

@@ -97,7 +97,7 @@ namespace Pulsar4X.ECSLib
             AddSystemInterupt(_entityManager.Game.CurrentDateTime, _processManager.GetProcessor<EntityResearchDB>());
             AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(5), _processManager.GetProcessor<OrderableDB>());
             AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10), _processManager.GetProcessor<TranslateMoveDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10.1), _processManager.GetProcessor<SensorProfileDB>());
+            //AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10.1), _processManager.GetProcessor<SensorProfileDB>());
             AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(1), _processManager.GetProcessor<MiningDB>());
             AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(2), _processManager.GetProcessor<RefiningDB>());
             AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(3), _processManager.GetProcessor<ConstructionDB>());

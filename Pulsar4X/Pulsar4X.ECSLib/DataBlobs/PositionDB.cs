@@ -194,6 +194,11 @@ namespace Pulsar4X.ECSLib
             return (posA.AbsolutePosition - posB.AbsolutePosition).Length();
         }
 
+        public static double GetDistanceBetween(Vector4 posA, PositionDB posB)
+        {
+            return (posA - posB.AbsolutePosition).Length();
+        }
+
         /// <summary>
         /// Instance function for those who don't like static functions.
         /// </summary>
