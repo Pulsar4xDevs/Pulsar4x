@@ -40,29 +40,29 @@ namespace Pulsar4X.ECSLib
                 design.MineralCostFormulas.Add(kvp.Key, new ChainedExpression(kvp.Value, design, factionTech, staticData));
             }
 
-            design.ComponentDesignAbilities = new List<ComponentDesignAbility>();
+            design.ComponentDesignAttributes = new List<ComponentDesignAttribute>();
             foreach (var abilitySD in component.ComponentAbilitySDs)
             {
-                ComponentDesignAbility designAbility = new ComponentDesignAbility(design);
+                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(design);
 
-                designAbility.Name = abilitySD.Name;
-                designAbility.Description = abilitySD.Description;
-                designAbility.GuiHint = abilitySD.GuiHint;
+                designAttribute.Name = abilitySD.Name;
+                designAttribute.Description = abilitySD.Description;
+                designAttribute.GuiHint = abilitySD.GuiHint;
 
                 if(abilitySD.AbilityFormula !=  null)
-                    designAbility.Formula = new ChainedExpression(abilitySD.AbilityFormula, designAbility, factionTech, staticData);
+                    designAttribute.Formula = new ChainedExpression(abilitySD.AbilityFormula, designAttribute, factionTech, staticData);
 
                 if (abilitySD.GuidDictionary != null )
                 {
-                    designAbility.GuidDictionary = new Dictionary<object, ChainedExpression>();
-                    if (designAbility.GuiHint == GuiHint.GuiTechSelectionList)
+                    designAttribute.GuidDictionary = new Dictionary<object, ChainedExpression>();
+                    if (designAttribute.GuiHint == GuiHint.GuiTechSelectionList)
                     {
                         foreach (var kvp in abilitySD.GuidDictionary)
                         {
                             if (factionTech.ResearchedTechs.ContainsKey(Guid.Parse(kvp.Key.ToString())))
                             {
                                 TechSD techSD = staticData.Techs[Guid.Parse(kvp.Key.ToString())];
-                                designAbility.GuidDictionary.Add(kvp.Key, new ChainedExpression(ResearchProcessor.DataFormula(factionTech, techSD).ToString(), designAbility, factionTech, staticData));                      
+                                designAttribute.GuidDictionary.Add(kvp.Key, new ChainedExpression(ResearchProcessor.DataFormula(factionTech, techSD).ToString(), designAttribute, factionTech, staticData));                      
                             }
                         }
                     }
@@ -70,22 +70,22 @@ namespace Pulsar4X.ECSLib
                     {
                         foreach (var kvp in abilitySD.GuidDictionary)
                         {
-                            designAbility.GuidDictionary.Add(kvp.Key, new ChainedExpression(kvp.Value, designAbility, factionTech, staticData));
+                            designAttribute.GuidDictionary.Add(kvp.Key, new ChainedExpression(kvp.Value, designAttribute, factionTech, staticData));
                         }
                     }
                 }
-                if (designAbility.GuiHint == GuiHint.GuiSelectionMaxMin)
+                if (designAttribute.GuiHint == GuiHint.GuiSelectionMaxMin)
                 {
-                    designAbility.MaxValueFormula = new ChainedExpression(abilitySD.MaxFormula, designAbility, factionTech, staticData);
-                    designAbility.MinValueFormula = new ChainedExpression(abilitySD.MinFormula, designAbility, factionTech, staticData);
-                    designAbility.StepValueFormula = new ChainedExpression(abilitySD.StepFormula, designAbility, factionTech, staticData);
+                    designAttribute.MaxValueFormula = new ChainedExpression(abilitySD.MaxFormula, designAttribute, factionTech, staticData);
+                    designAttribute.MinValueFormula = new ChainedExpression(abilitySD.MinFormula, designAttribute, factionTech, staticData);
+                    designAttribute.StepValueFormula = new ChainedExpression(abilitySD.StepFormula, designAttribute, factionTech, staticData);
                 }
                 if (abilitySD.AbilityDataBlobType != null)
                 {
-                    designAbility.DataBlobType = Type.GetType(abilitySD.AbilityDataBlobType);        
+                    designAttribute.DataBlobType = Type.GetType(abilitySD.AbilityDataBlobType);        
                 }
                 
-                design.ComponentDesignAbilities.Add(designAbility);
+                design.ComponentDesignAttributes.Add(designAttribute);
             }
 
             design.MassFormula.Evaluate();
@@ -156,15 +156,15 @@ namespace Pulsar4X.ECSLib
             component.SetDataBlob(nameDB);
             component.SetDataBlob(cargoType);
             component.SetDataBlob(MassVolumeDB.NewFromMassAndVolume(componentDesign.MassValue, componentDesign.VolumeValue));
-            foreach (var designAbility in componentDesign.ComponentDesignAbilities)
+            foreach (var designAttribute in componentDesign.ComponentDesignAttributes)
             {
-                if (designAbility.DataBlobType != null)
+                if (designAttribute.DataBlobType != null)
                 {
-                    if (designAbility.DataBlobArgs == null)
-                        designAbility.SetValue();  //force recalc.
+                    if (designAttribute.DataBlobArgs == null)
+                        designAttribute.SetValue();  //force recalc.
                                  
-                    object[] constructorArgs = designAbility.DataBlobArgs;
-                    dynamic datablob = (BaseDataBlob)Activator.CreateInstance(designAbility.DataBlobType, constructorArgs);
+                    object[] constructorArgs = designAttribute.DataBlobArgs;
+                    dynamic datablob = (BaseDataBlob)Activator.CreateInstance(designAttribute.DataBlobType, constructorArgs);
                     component.SetDataBlob(datablob);
                 }
             }

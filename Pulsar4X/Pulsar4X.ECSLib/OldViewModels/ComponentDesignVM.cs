@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
             Design = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
 
             AbilityList = new List<ComponentAbilityDesignVM>();
-            foreach (var componentAbility in Design.ComponentDesignAbilities)
+            foreach (var componentAbility in Design.ComponentDesignAttributes)
             {
                 AbilityList.Add(new ComponentAbilityDesignVM(this, componentAbility, _staticData));
             }            
@@ -118,7 +118,7 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentAbilityDesignVM : IViewModel
     {
-        private ComponentDesignAbility _designAbility;
+        private ComponentDesignAttribute _designAbility;
         private StaticDataStore _staticData;
         private ComponentDesignVM _parentDesignVM;
         
@@ -142,7 +142,7 @@ namespace Pulsar4X.ECSLib
         
 
 
-        public ComponentAbilityDesignVM(ComponentDesignVM designVM, ComponentDesignAbility designAbility, StaticDataStore staticData)
+        public ComponentAbilityDesignVM(ComponentDesignVM designVM, ComponentDesignAttribute designAbility, StaticDataStore staticData)
         {
             _designAbility = designAbility;
             _staticData = staticData;

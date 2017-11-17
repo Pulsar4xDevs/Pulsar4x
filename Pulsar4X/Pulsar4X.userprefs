@@ -1,24 +1,36 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="24" Column="90" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SetReflectedEMProfile.cs" Line="30" Column="30" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="71" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/ManagerSubPulse.cs" Line="109" Column="22" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" Line="1" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Processors/ProcessorManager.cs" Line="53" Column="57" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="26" Column="13" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProfileDB.cs" Line="45" Column="26" />
-      <File FileName="Pulsar4X.ECSLib/DataBlobs/PositionDB.cs" Line="12" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/IconCollection.cs" Line="62" Column="13" />
+      <File FileName="Pulsar4X.ECSLib/Factories/ShipFactory.cs" Line="76" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Factories/ShipComponents/ComponentInstanceFactory.cs" Line="26" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Data/Pulsar4x/ComponentData.json" Line="103" Column="73" />
+      <File FileName="Pulsar4X.ECSLib/Factories/ShipComponents/ComponentDesignAttribute.cs" Line="6" Column="18" />
+      <File FileName="Pulsar4X.ECSLib/Factories/ShipComponents/ComponentDesign.cs" Line="93" Column="72" />
+      <File FileName="Pulsar4X.ECSLib/Factories/ShipComponents/GenericComponent.cs" Line="83" Column="1" />
+      <File FileName="Pulsar4X.Tests/FactoryTests.cs" Line="118" Column="24" />
       <File FileName="Pulsar4X Status" />
     </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>dict</Value>
+          <Value>emission</Value>
+          <Value>numberOfEmmitters</Value>
+          <Value>attenuated</Value>
+          <Value>ms</Value>
+          <Value>numEntites</Value>
+          <Value>componentInstance.DataBlobs</Value>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
       <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" line="23" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" line="23" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SetReflectedEMProfile.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SetReflectedEMProfile.cs" line="41" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>

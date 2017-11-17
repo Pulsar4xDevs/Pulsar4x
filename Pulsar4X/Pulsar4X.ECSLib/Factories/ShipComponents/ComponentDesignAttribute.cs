@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public class ComponentDesignAbility
+    public class ComponentDesignAttribute
     {
         public string Name;
         public string Description;
@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
         public Type DataBlobType;
         //public BaseDataBlob DataBlob;
         internal ComponentDesign ParentComponent; 
-        public ComponentDesignAbility(ComponentDesign parentComponent)
+        public ComponentDesignAttribute(ComponentDesign parentComponent)
         {
             ParentComponent = parentComponent;
         }

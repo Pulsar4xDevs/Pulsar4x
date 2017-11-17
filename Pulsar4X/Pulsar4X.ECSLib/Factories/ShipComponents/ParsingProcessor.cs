@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
         private StaticDataStore _staticDataStore;
         private FactionTechDB _factionTechDB;
         private ComponentDesign _design;
-        private ComponentDesignAbility _designAbility;
+        private ComponentDesignAttribute _designAbility;
         private Expression _expression;
         
         // ReSharper disable once NotAccessedField.Local (Used for debuging puroposes. though maybe it could be public and shown in the UI?)
@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="designAbility"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        internal ChainedExpression(string expressionString, ComponentDesignAbility designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        internal ChainedExpression(string expressionString, ComponentDesignAttribute designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
@@ -147,7 +147,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="designAbility"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        private ChainedExpression(Expression expression, ComponentDesignAbility designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        private ChainedExpression(Expression expression, ComponentDesignAttribute designAbility, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
@@ -296,7 +296,7 @@ namespace Pulsar4X.ECSLib
                 {
                     index = (int)args.Parameters[0].Evaluate();
                     
-                    ChainedExpression result = _design.ComponentDesignAbilities[index].Formula;
+                    ChainedExpression result = _design.ComponentDesignAttributes[index].Formula;
                     if(result.Result == null)
                         result.Evaluate();
                     MakeThisDependant(result); 
@@ -313,7 +313,7 @@ namespace Pulsar4X.ECSLib
                 {
                     index = (int)args.Parameters[0].Evaluate();
 
-                    ChainedExpression expression = _design.ComponentDesignAbilities[index].Formula;
+                    ChainedExpression expression = _design.ComponentDesignAttributes[index].Formula;
                     expression.SetResult = args.Parameters[1].Evaluate();
 
                 }

@@ -62,7 +62,7 @@ namespace Pulsar4X.Tests
 
             ComponentDesign design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
 
-            foreach (var ability in design.ComponentDesignAbilities)
+            foreach (var ability in design.ComponentDesignAttributes)
             {
                 if (ability.GuiHint == GuiHint.GuiTechSelectionList)
                 {
@@ -78,7 +78,7 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
-            design.ComponentDesignAbilities[0].SetValueFromInput(250);
+            design.ComponentDesignAttributes[0].SetValueFromInput(250);
 
             Entity engineEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, design);
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD mine = MineInstallation();
 
             ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            mineDesign.ComponentDesignAbilities[0].SetValue();
+            mineDesign.ComponentDesignAttributes[0].SetValue();
             Entity mineEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, mineDesign);
 
             Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesAtbDB>().ResourcesPerEconTick.Values.ElementAt(0));
@@ -113,7 +113,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD cargo = GeneralCargo();
 
             ComponentDesign cargoDesign = GenericComponentFactory.StaticToDesign(cargo, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            cargoDesign.ComponentDesignAbilities[0].SetValue();
+            cargoDesign.ComponentDesignAttributes[0].SetValue();
             Entity cargoEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, cargoDesign);
 
             CargoStorageAtbDB attributeDB = cargoEntity.GetDataBlob<CargoStorageAtbDB>();
@@ -135,7 +135,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD factory = Factory();
 
             ComponentDesign facDesign = GenericComponentFactory.StaticToDesign(factory, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            facDesign.ComponentDesignAbilities[0].SetValue();
+            facDesign.ComponentDesignAttributes[0].SetValue();
             Entity facDesignEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, facDesign);
 
             ConstructionAtbDB attributeDB = facDesignEntity.GetDataBlob<ConstructionAtbDB>();

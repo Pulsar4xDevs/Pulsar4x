@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
         public ComponentMountType ComponentMountType { get; internal set; }
         public ConstructionType ConstructionType { get; internal set; }
         public Guid CargoTypeID { get; internal set; }
-        public List<ComponentDesignAbility> ComponentDesignAbilities;
+        public List<ComponentDesignAttribute> ComponentDesignAttributes;
 
     }
 }

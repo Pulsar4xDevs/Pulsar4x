@@ -1,5 +1,16 @@
 2017-11-17  se5a  <jon.se5a@gmail.com>
 
+	* Pulsar4X.ECSLib.csproj:
+	* DefaultStartFactory.cs:
+	* ComponentDesignVM.cs:
+	* ComponentDesign.cs:
+	* GenericComponent.cs:
+	* ParsingProcessor.cs:
+	* ComponentDesignAttribute.cs: Rename refactor places where
+	Ability should be Attribute. 
+
+2017-11-17  se5a  <jon.se5a@gmail.com>
+
 	* ManagerSubPulse.cs:
 	* PositionDB.cs:
 	* ProcessorManager.cs:

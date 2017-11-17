@@ -252,7 +252,7 @@
     <Compile Include="Entity\ProtoEntity.cs" />
     <Compile Include="EventLog\EventLog.cs" />
     <Compile Include="EventLog\EventType.cs" />
-    <Compile Include="Factories\ShipComponents\ComponentDesignAbility.cs" />
+    <Compile Include="Factories\ShipComponents\ComponentDesignAttribute.cs" />
     <Compile Include="DataBlobs\ComponentInstancesDB.cs" />
     <Compile Include="Factories\SystemGen\JPFactory.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
