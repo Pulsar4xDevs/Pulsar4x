@@ -15,7 +15,8 @@ namespace Pulsar4X.ECSLib
             var receverDB = entity.GetDataBlob<SensorReceverAtbDB>();
             foreach (var sensorProfile in manager.GetAllDataBlobsOfType<SensorProfileDB>())
             {
-                SensorProcessorTools.DetectEntites(receverDB, sensorProfile, atDate);
+                if (sensorProfile.OwningEntity.HasDataBlob<PositionDB>())
+                    SensorProcessorTools.DetectEntites(receverDB, sensorProfile, atDate);
             }
 
 

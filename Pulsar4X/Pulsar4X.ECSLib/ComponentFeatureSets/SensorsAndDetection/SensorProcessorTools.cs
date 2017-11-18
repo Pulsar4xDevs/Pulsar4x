@@ -19,7 +19,8 @@ namespace Pulsar4X.ECSLib
             var knownContacts = receverDB.KnownSensorContacts;
 
             TimeSpan timeSinceLastCalc = atDate - sensorProfile.LastDatetimeOfReflectionSet;
-            double distanceInAUSinceLastCalc = PositionDB.GetDistanceBetween(sensorProfile.LastPositionOfReflectionSet, sensorProfile.OwningEntity.GetDataBlob<PositionDB>());
+            PositionDB positionOfSensorProfile = sensorProfile.OwningEntity.GetDataBlob<PositionDB>();//sensorProfile.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
+            double distanceInAUSinceLastCalc = PositionDB.GetDistanceBetween(sensorProfile.LastPositionOfReflectionSet, positionOfSensorProfile);
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
                 SetReflectedEMProfile.SetEntityProfile(sensorProfile.OwningEntity, atDate);
 
@@ -77,8 +78,12 @@ namespace Pulsar4X.ECSLib
              * compare angles of the detected intersection and the target signal to see if the shape is simular. 
              * if range is known acurately, this could affect the intel gathered. 
              */
-            var myPosition = recever.OwningEntity.GetDataBlob<PositionDB>();
-            var targetPosition = target.OwningEntity.GetDataBlob<PositionDB>();
+            var myPosition = recever.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
+            PositionDB targetPosition;
+            if( target.OwningEntity.HasDataBlob<PositionDB>()) 
+                targetPosition = target.OwningEntity.GetDataBlob<PositionDB>();
+            else 
+                targetPosition = target.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//target may be a componentDB. not a shipDB
             double distance = PositionDB.GetDistanceBetween(myPosition, targetPosition);
 
             var detectionResolution = recever.Resolution;

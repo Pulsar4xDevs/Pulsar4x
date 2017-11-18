@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
                         Entity ownerFaction = Entity.InvalidEntity;
                         if (parentEntity.HasDataBlob<OwnedDB>())
                             ownerFaction = parentEntity.GetDataBlob<OwnedDB>().ObjectOwner;
-                        instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, ownerFaction);
+                        instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, ownerFaction, parentEntity.Manager);
                     }
                     else throw new Exception("componentEntity does not contain either a ComponentInfoDB or a ComponentInstanceInfoDB. Entity Not a ComponentDesign or ComponentInstance");
                 }
@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
                             Entity ownerFaction = Entity.InvalidEntity;
                             if (parentEntity.HasDataBlob<OwnedDB>())
                                 ownerFaction = parentEntity.GetDataBlob<OwnedDB>().ObjectOwner;
-                            instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, ownerFaction);
+                            instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, ownerFaction, parentEntity.Manager);
                         }
                         else throw new Exception("componentEntity does not contain either a ComponentInfoDB or a ComponentInstanceInfoDB. Entity Not a ComponentDesign or ComponentInstance");
                     }

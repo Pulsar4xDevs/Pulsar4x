@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     public static class ComponentInstanceFactory
     {
 
-        internal static Entity NewInstanceFromDesignEntity(Entity design, Entity faction)
+        internal static Entity NewInstanceFromDesignEntity(Entity design, Entity faction, EntityManager manager)
         {
 
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
@@ -23,15 +23,16 @@ namespace Pulsar4X.ECSLib
             //Components have a mass and volume.
             MassVolumeDB mvDB = new MassVolumeDB();
             blobs.Add(mvDB);
-
+            //TODO: this seems ugly, consider using an Interface on the datablobs for this?
             if (design.HasDataBlob<BeamFireControlAtbDB>())
                 blobs.Add(new FireControlInstanceAbilityDB());
 
             if (design.HasDataBlob<BeamWeaponAtbDB>() || design.HasDataBlob<SimpleBeamWeaponAtbDB>())
                 blobs.Add(new WeaponStateDB());
+            if (design.HasDataBlob<SensorReceverAtbDB>())
+                blobs.Add((SensorReceverAtbDB)design.GetDataBlob<SensorReceverAtbDB>().Clone());
 
-
-            Entity newInstance = new Entity(design.Manager, blobs);
+            Entity newInstance = new Entity(manager, blobs);
             return newInstance;
         }
     }

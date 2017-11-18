@@ -93,7 +93,7 @@ namespace Pulsar4X.ECSLib
             batchJob.MineralsRequired = designInfo.ComponentCosts;
             var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
             Entity designEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
-            Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designEntity, colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner);
+            Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designEntity, colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner, colonyEntity.Manager);
             if (batchJob.InstallOn != null)
             {
                 if (batchJob.InstallOn == colonyEntity || StorageSpaceProcessor.HasEntity(storage, colonyEntity.GetDataBlob<CargoAbleTypeDB>()))

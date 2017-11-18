@@ -1,3 +1,14 @@
+2017-11-18  se5a  <jon.se5a@gmail.com>
+
+	* ShipFactory.cs:
+	* EntityManipulation.cs:
+	* ComponentInstanceFactory.cs:
+	* SensorScan.cs:
+	* ConstructionProcessor.cs:
+	* SensorProcessorTools.cs: Fixed a bug where componentInstance
+	entities were getting the design's manager (globalManager)
+	instead of the parent entity's manager. 
+
 2017-11-17  se5a  <jon.se5a@gmail.com>
 
 	* Pulsar4X.ECSLib.csproj:
