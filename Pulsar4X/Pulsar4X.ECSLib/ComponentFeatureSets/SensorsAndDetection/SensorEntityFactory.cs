@@ -9,21 +9,34 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        public static Entity CreateNewSensorContact(Entity fromEntity)
+        internal static Entity CreateNewSensorContact(Entity detectedEntity, SensorInfo sensorInfo)
         {
-            var posDB = (PositionDB)fromEntity.GetDataBlob<PositionDB>().Clone();
+            var posDB = (PositionDB)detectedEntity.GetDataBlob<PositionDB>().Clone();
 
                 
             var datablobs = new List<BaseDataBlob>()
             {
                 posDB,
             };
-            if (fromEntity.HasDataBlob<OrbitDB>())
+            if (detectedEntity.HasDataBlob<OrbitDB>())
             {
-                datablobs.Add((OrbitDB)fromEntity.GetDataBlob<OrbitDB>().Clone());
+                datablobs.Add((OrbitDB)detectedEntity.GetDataBlob<OrbitDB>().Clone());
             }
-            return new Entity(fromEntity.Manager);
+            if (detectedEntity.HasDataBlob<TranslateMoveDB>())
+            {
+                datablobs.Add((TranslateMoveDB)detectedEntity.GetDataBlob<TranslateMoveDB>().Clone());
+            }
 
+
+            return new Entity(detectedEntity.Manager);
+
+        }
+        internal static void UpdateSensorContact(Entity detectedEntity, SensorInfo sensorInfo)
+        {
+            foreach (var datablob in detectedEntity.DataBlobs)
+            {
+
+            }
         }
     }
 }

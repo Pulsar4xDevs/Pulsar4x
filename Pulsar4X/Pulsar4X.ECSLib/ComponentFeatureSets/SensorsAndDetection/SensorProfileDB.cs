@@ -5,6 +5,8 @@ namespace Pulsar4X.ECSLib
 {
     public class SensorProfileDB : BaseDataBlob
     {
+        //Currently Unused.
+        /*
         internal double GravSig
         {
             get
@@ -14,7 +16,7 @@ namespace Pulsar4X.ECSLib
                 else
                     return 0;
             }
-        }
+        }*/
 
         private double? _targetCrossSection;
         internal double TargetCrossSection
@@ -25,8 +27,7 @@ namespace Pulsar4X.ECSLib
                     return (double)_targetCrossSection;
                 else if (this.OwningEntity.HasDataBlob<MassVolumeDB>())
                     return Math.PI * Math.Pow(this.OwningEntity.GetDataBlob<MassVolumeDB>().RadiusInKM, 2);
-                else return 1;
-
+                else throw new Exception("Parent Entity does not have an MassVolumeDB");
             }
         }
 

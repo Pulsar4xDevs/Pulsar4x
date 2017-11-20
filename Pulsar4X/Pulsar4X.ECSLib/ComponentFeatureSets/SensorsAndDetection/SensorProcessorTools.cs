@@ -7,6 +7,8 @@ namespace Pulsar4X.ECSLib
     class SensorInfo
     {
         internal Entity detectedEntity;
+
+        internal Entity SensorEntity; //<- need to create this
         internal DateTime LastDetection;
     }
 
@@ -32,11 +34,14 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    knownContacts.Add(sensorProfile.OwningEntity.Guid, new SensorInfo()
+                    var sensorInfo = new SensorInfo()
                     {
                         detectedEntity = sensorProfile.OwningEntity,
                         LastDetection = atDate
-                    });
+                    };
+
+                    sensorInfo.SensorEntity = SensorEntityFactory.CreateNewSensorContact(sensorProfile.OwningEntity, sensorInfo);
+                    knownContacts.Add(sensorProfile.OwningEntity.Guid, sensorInfo);
                 }
             }
         }

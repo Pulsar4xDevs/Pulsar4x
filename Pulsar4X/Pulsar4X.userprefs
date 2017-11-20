@@ -1,19 +1,34 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="71" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProfileDB.cs" Line="8" Column="28" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorReceverAtbDB.cs" Line="21" Column="45" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="9" Column="40" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="30" Column="13" />
       <File FileName="Pulsar4X Status" />
     </Files>
     <Pads>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>sensorProfile.OwningEntity</Value>
-          <Value>systemEntityManager.name</Value>
-          <Value>_entityManager</Value>
-          <Value>_entityManager.name</Value>
-          <Value>componentInstance</Value>
-          <Value>recever.OwningEntity</Value>
-          <Value>receverDB</Value>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Pulsar4X" expanded="True">
+            <Node name="Pulsar4X.CrossPlatformUI" expanded="True">
+              <Node name="References" expanded="True">
+                <Node name="From Packages" expanded="True" />
+              </Node>
+              <Node name="Packages" expanded="True" />
+            </Node>
+            <Node name="Pulsar4X.CrossPlatformUI.Gtk2" expanded="True">
+              <Node name="References" expanded="True">
+                <Node name="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" selected="True" />
+              </Node>
+              <Node name="Packages" expanded="True" />
+            </Node>
+            <Node name="Pulsar4X.ECSLib" expanded="True">
+              <Node name="ComponentFeatureSets" expanded="True">
+                <Node name="SensorsAndDetection" expanded="True" />
+              </Node>
+            </Node>
+          </Node>
         </State>
       </Pad>
     </Pads>
