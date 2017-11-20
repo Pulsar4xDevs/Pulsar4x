@@ -1,0 +1,8 @@
+2017-11-20  se5a  <jon.se5a@gmail.com>
+
+	* Program.cs:
+	* Pulsar4X.CrossPlatformUI.Gtk2.csproj: Changed all projects
+	to Target .Net4.7 MD didn't seem to care that ECSLib was 4.6
+	but the others were 4.5, but VS wouldnt build it. removed the
+	unused openGL references since they were causing problems. 
+

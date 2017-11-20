@@ -115,7 +115,7 @@ namespace Pulsar4X.Tests
                 typeof(PowerDB),
                 typeof(PropulsionDB),
                 typeof(SensorProfileDB),
-                typeof(SensorsDB),
+                //typeof(SensorsDB),
                 typeof(ShieldsDB),
                 typeof(TractorDB),
                 typeof(TroopTransportDB),
