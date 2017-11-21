@@ -4,12 +4,13 @@ using System.Collections.Generic;
 namespace Pulsar4X.ECSLib
 {
 
-    class SensorInfo
+    public class SensorInfo
     {
         internal Entity detectedEntity;
 
         internal Entity SensorEntity; //<- need to create this
         internal DateTime LastDetection;
+        internal float HighestDetectionQuality;
     }
 
     public static class SensorProcessorTools
@@ -26,15 +27,21 @@ namespace Pulsar4X.ECSLib
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
                 SetReflectedEMProfile.SetEntityProfile(sensorProfile.OwningEntity, atDate);
 
-            if (IsDetected(receverDB, sensorProfile))
+            float detectionQuality = DetectonQuality(receverDB, sensorProfile);
+            SensorInfo sensorInfo;
+            if (detectionQuality > 0.0)
             {
                 if (knownContacts.ContainsKey(sensorProfile.OwningEntity.Guid))
                 {
-                    knownContacts[sensorProfile.OwningEntity.Guid].LastDetection = atDate;
+                    sensorInfo = knownContacts[sensorProfile.OwningEntity.Guid];
+                    sensorInfo.LastDetection = atDate;
+                    if (sensorInfo.HighestDetectionQuality < detectionQuality)
+                        sensorInfo.HighestDetectionQuality = detectionQuality;
+                        
                 }
                 else
                 {
-                    var sensorInfo = new SensorInfo()
+                    sensorInfo = new SensorInfo()
                     {
                         detectedEntity = sensorProfile.OwningEntity,
                         LastDetection = atDate
@@ -46,13 +53,10 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-
-
-        //eventualy not a bool, return more info than a bool. (a percentage? or even more info than that?) 
-        internal static bool IsDetected(SensorReceverAtbDB recever, SensorProfileDB target)
+        internal static float DetectonQuality(SensorReceverAtbDB recever, SensorProfileDB target)
         {
             /*
-             * Thoughts:
+             * Thoughts (spitballing):
              * 
              * What we need:
              * detect enough of a signal to get a position 
@@ -63,6 +67,8 @@ namespace Pulsar4X.ECSLib
              * detect enough of a signal to get intel if it's a ship
              * decide what "enough" for this is. maybe compare the detected waveform and the emited waveform and compare the angles to see if the triangle is simular. 
              * 
+             * it'd be nifty if we could include background noise in there too, ie so ships close to a sun would be hidden. 
+             * also have resoulution be required to pick out multiple ships close together instead of just one big signal. 
              * 
              * With range attenuation, we'll never get the full signal uneless we're right ontop of it. 
              * maybe if we get half the emited strength and its a simular triange (all same angles) we get "Full" intel?
@@ -80,7 +86,7 @@ namespace Pulsar4X.ECSLib
              * Data that can be glened from this detection system:
              * detectedStrength (altitide of the intersecting triangle)
              * detectedArea - the area of the detected intersection, could compare this to the target signal as well. 
-             * compare angles of the detected intersection and the target signal to see if the shape is simular. 
+             * compare angles of the detected intersection and the target signal to see if the shape is simular?
              * if range is known acurately, this could affect the intel gathered. 
              */
             var myPosition = recever.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
@@ -99,7 +105,7 @@ namespace Pulsar4X.ECSLib
             double receverSensitivityFreqAvg = recever.RecevingWaveformCapabilty.WavelengthAverage;
             double receverSensitivityFreqMax = recever.RecevingWaveformCapabilty.WavelengthMax;
             double receverSensitivityAltitiude = recever.MaxSensitivity - recever.MinSensitivity;
-
+            double totalDetectionStrength = 0;
             foreach (var waveSpectra in signalAtPosition)
             {
                 double signalWaveSpectraFreqMin = waveSpectra.Key.WavelengthMin;
@@ -115,24 +121,30 @@ namespace Pulsar4X.ECSLib
                        && receverSensitivityFreqMax < signalWaveSpectraFreqMin)
                     {
                         //we've got something we can detect
-                        var minDetectableWavelength = signalWaveSpectraFreqMin;
-                        var maxDetectableWavelenght = Math.Min(receverSensitivityFreqMax, signalWaveSpectraFreqMax);
+                        double minDetectableWavelength = signalWaveSpectraFreqMin;
+                        double maxDetectableWavelenght = Math.Min(receverSensitivityFreqMax, signalWaveSpectraFreqMax);
 
-                        double angleA = Math.Atan(receverSensitivityAltitiude / receverSensitivityFreqAvg - receverSensitivityFreqMin );
-                        double sideL = maxDetectableWavelenght - minDetectableWavelength;
-                        double angleB = Math.Atan(signalWaveSpectraAltitide / signalWaveSpectraFreqAvg - signalWaveSpectraFreqMax);
+                        //double detectedAngleA = Math.Atan(receverSensitivityAltitiude / receverSensitivityFreqAvg - receverSensitivityFreqMin );
+                        double detectedBaseSideLen = maxDetectableWavelenght - minDetectableWavelength;
+                        //double detectedAngleB = Math.Atan(signalWaveSpectraAltitide / signalWaveSpectraFreqAvg - signalWaveSpectraFreqMax);
 
-                        double detectedStrength = ((Math.Sin(angleA) * Math.Sin(angleB)) / (Math.Sin(angleA) + Math.Sin(angleB))) * sideL;
-                        double detectedArea = detectedStrength * sideL / 2;
+                        //double detectedStrength = ((Math.Sin(detectedAngleA) * Math.Sin(detectedAngleB)) / (Math.Sin(detectedAngleA) + Math.Sin(detectedAngleB))) * detectedBaseSideLen;
+                        //double detectedArea = detectedStrength * detectedBaseSideLen / 2;
 
-                        double signalAngleA = angleB;
-                        double signalAngleB = Math.Atan(signalWaveSpectraAltitide / signalWaveSpectraFreqAvg - signalWaveSpectraFreqMin);
-                        double signalAngleC = 180 - signalAngleA - signalAngleB;
-                        return true; //just return true for now, expand on the above later. 
+                        //double signalAngleA = angleB;
+                        //double signalAngleB = Math.Atan(signalWaveSpectraAltitide / signalWaveSpectraFreqAvg - signalWaveSpectraFreqMin);
+                        //double signalAngleC = 180 - signalAngleA - signalAngleB;
+
+                        double signalBaseSideLen = signalWaveSpectraFreqMax - signalWaveSpectraFreqMin;
+
+                        double detectedAmount = signalBaseSideLen - detectedBaseSideLen;
+
+                        totalDetectionStrength += detectedAmount;
+
                     }
                 }
             }
-            return false; //we didn't detect it at all. 
+            return (float)(totalDetectionStrength / signalAtPosition.Count * detectionResolution * 0.1f); //TODO: might have to tweak this to be sensible.  
         }
 
         /// <summary>

@@ -35,7 +35,45 @@ namespace Pulsar4X.ECSLib
         {
             foreach (var datablob in detectedEntity.DataBlobs)
             {
+                Type t = datablob.GetType();
 
+                //if(sensorInfo.SensorEntity.HasDataBlob<t>
+            }
+        }
+
+        internal static void CompareDatabob<T>(BaseDataBlob db, Entity sensorEntity) where T : BaseDataBlob
+        {
+            if (sensorEntity.HasDataBlob<T>())
+            { }
+        }
+    }
+
+    public interface ISensorMethods
+    {
+        void CompareDB(SensorInfo sensorInfo);
+    }
+
+    public class SomethingDB : BaseDataBlob, ISensorMethods
+    {
+        Random rnd = new Random();
+        int someIntData;
+        float someFloatData;
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void CompareDB(SensorInfo sensorInfo)
+        {
+            if (sensorInfo.HighestDetectionQuality > 0.25)
+            {
+                if (sensorInfo.detectedEntity.HasDataBlob<SomethingDB>())
+                {
+                    var detectedEntityDB = sensorInfo.detectedEntity.GetDataBlob<SomethingDB>();
+                    detectedEntityDB.someFloatData = this.someFloatData += (float)(-0.5 + (0.5 - -0.5) * rnd.NextDouble());
+                    detectedEntityDB.someIntData = this.someIntData += rnd.Next(-500, 500); 
+                }
             }
         }
     }

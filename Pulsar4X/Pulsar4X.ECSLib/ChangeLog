@@ -1,3 +1,11 @@
+2017-11-22  se5a  <jon.se5a@gmail.com>
+
+	* ProcessorManager.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs: more sensor stuff, mostly
+	scratchpad ideas
+	on how to maybe create sensor clones. 
+
 2017-11-20  se5a  <jon.se5a@gmail.com>
 
 	* Pulsar4X.ECSLib.csproj: Changed all projects to Target
