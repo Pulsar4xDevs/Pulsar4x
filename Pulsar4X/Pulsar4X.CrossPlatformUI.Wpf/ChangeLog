@@ -1,5 +1,9 @@
 2017-11-22  se5a  <jon.se5a@gmail.com>
 
+	* Pulsar4X.CrossPlatformUI.Wpf.csproj: fine. .net 4.6.1 then.
+
+2017-11-22  se5a  <jon.se5a@gmail.com>
+
 	* Pulsar4X.CrossPlatformUI.Wpf.csproj: changed projects to use
 	.net4.6.2 since .net7 is not already on win10 by default.
 	reduce the hastle of getting into the project. 

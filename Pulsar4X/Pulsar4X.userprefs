@@ -28,6 +28,5 @@
   <DisabledProjects>
     <String>Pulsar4X.Networking/Pulsar4X.Networking.csproj</String>
     <String>ViewModelLib/Pulsar4X.ViewModels.csproj</String>
-    <String>Pulsar4X.CrossPlatformUI.Wpf/Pulsar4X.CrossPlatformUI.Wpf.csproj</String>
   </DisabledProjects>
 </Properties>

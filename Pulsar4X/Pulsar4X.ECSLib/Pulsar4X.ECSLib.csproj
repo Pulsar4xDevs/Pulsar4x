@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pulsar4X.ECSLib</RootNamespace>
     <AssemblyName>Pulsar4X.ECSLib</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -113,6 +113,8 @@
     <WarningLevel>4</WarningLevel>
     <Optimize>false</Optimize>
     <LangVersion>6</LangVersion>
+    <RunWithWarnings>true</RunWithWarnings>
+    <AssemblyName></AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux|x64'">
     <OutputPath>bin\x64\Linux\</OutputPath>
