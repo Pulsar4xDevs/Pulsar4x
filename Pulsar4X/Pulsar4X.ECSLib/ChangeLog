@@ -1,5 +1,11 @@
 2017-12-04  se5a  <jon.se5a@gmail.com>
 
+	* Pulsar4X.ECSLib.csproj:
+	* EMWaveForm.cs:
+	* SensorProcessorTools.cs: Minor tidy ups
+
+2017-12-04  se5a  <jon.se5a@gmail.com>
+
 	* GameMath.cs:
 	* ShipOrderVM.cs:
 	* MoveOrder.cs:

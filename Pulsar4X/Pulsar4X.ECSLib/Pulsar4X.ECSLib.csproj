@@ -114,7 +114,6 @@
     <Optimize>false</Optimize>
     <LangVersion>6</LangVersion>
     <RunWithWarnings>true</RunWithWarnings>
-    <AssemblyName></AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux|x64'">
     <OutputPath>bin\x64\Linux\</OutputPath>
@@ -412,6 +411,7 @@
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SetReflectedEMProfile.cs" />
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorReceverAtbDB.cs" />
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorScan.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\EMWaveForm.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

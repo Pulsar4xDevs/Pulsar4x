@@ -133,24 +133,13 @@ namespace Pulsar4X.ECSLib
                         double minDetectableWavelength = Math.Min(receverSensitivityFreqMin, signalWaveSpectraFreqMin);
                         double maxDetectableWavelenght = Math.Min(receverSensitivityFreqMax, signalWaveSpectraFreqMax);
 
-                        //commented out code are calcs that could possibly be used in the future if we want to refine this. 
-
                         double detectedAngleA = Math.Atan(receverSensitivityAltitiude / (receverSensitivityFreqAvg - receverSensitivityFreqMin ));
                         double receverBaseLen = maxDetectableWavelenght - minDetectableWavelength;
                         double detectedAngleB = Math.Atan(signalWaveSpectraMagnatude_kW / (signalWaveSpectraFreqAvg - signalWaveSpectraFreqMax));
 
-                        //double detectedStrength = ((Math.Sin(detectedAngleA) * Math.Sin(detectedAngleB)) / (Math.Sin(detectedAngleA) + Math.Sin(detectedAngleB))) * receverBaseLen;
-                        //double detectedArea = detectedStrength * detectedBaseSideLen / 2;
-
-                        //double signalAngleA = angleB;
-                        //double signalAngleB = Math.Atan(signalWaveSpectraAltitide / signalWaveSpectraFreqAvg - signalWaveSpectraFreqMin);
-                        //double signalAngleC = 180 - signalAngleA - signalAngleB;
-
-                        //if the signal is to the left of the recever
                         bool doesIntersect;
                         double intersectPointX;
                         double intersectPointY;
-                        double offsetFromCenter;
                         double distortion;
 
                         if (signalWaveSpectraFreqAvg < receverSensitivityFreqAvg)  //RightsideDetection (recever's ideal wavelenght is higher than the signal wavelenght at it's loudest)
@@ -192,13 +181,6 @@ namespace Pulsar4X.ECSLib
 
                         quality = new PercentValue((float)(100 - distortion / signalWaveSpectraFreqMax));
                          
-
-                        //double signalBaseSideLen = signalWaveSpectraFreqMax - signalWaveSpectraFreqMin;
-
-                        //double detectedAmount = signalBaseSideLen - receverBaseLen;
-
-                        //totalDetectionStrength += detectedAmount;
-
                     }
                 }
             }
@@ -345,36 +327,6 @@ namespace Pulsar4X.ECSLib
 
 
 
-    }
-
-
-    /// <summary>
-    /// EM waveform, think of this of this as a triange wave, the average is the peak, with min and max defining the minimuam and maximium wavelengths 
-    ///     . ---Height (volume) is changable and defined in the SensorSigDB.EMSig value. increasing the hight doesn't make it more detecable by sensors outside the min and max range in KiloWatts
-    ///    ....
-    ///   .......
-    ///  ..........
-    ///..................
-    /// |   |       |
-    /// |   |       Max
-    /// |   Average
-    /// Min
-    ///  
-    /// </summary>
-    public struct EMWaveForm
-    {
-        /// <summary>
-        /// The wavelength average of this emmission in nm
-        /// </summary>
-        public double WavelengthAverage_nm;
-        /// <summary>
-        /// The min wavelength this will no longer emit at in nm
-        /// </summary>
-        public double WavelengthMin_nm;
-        /// <summary>
-        /// The max wavelength this will no longer emit at in nm
-        /// </summary>
-        public double WavelengthMax_nm;
     }
 
     public class SensorTransmitterDB : BaseDataBlob
