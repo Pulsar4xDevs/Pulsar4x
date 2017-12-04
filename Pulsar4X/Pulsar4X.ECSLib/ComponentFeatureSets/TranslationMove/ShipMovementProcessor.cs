@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
                 {
                     //TODO: do we need to check if the ship has an orbitDB?
                     //TODO: if the ship will arrive at the destination in the next deltaSeconds, don't go past it.
-                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition += shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds;
+                    shipEntity.GetDataBlob<PositionDB>().AbsolutePosition += shipEntity.GetDataBlob<PropulsionDB>().CurrentVector * deltaSeconds;
                     //shipEntity.GetDataBlob<PositionDB>().AddMeters(shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed * deltaSeconds);
                     //TODO: use fuel.
                 }
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
                         MoveOrder order = (MoveOrder)orders.Peek();
                         Vector4 shipPos = positionDB.AbsolutePosition;
                         Vector4 targetPos;
-                        Vector4 currentSpeed = shipEntity.GetDataBlob<PropulsionDB>().CurrentSpeed;
+                        Vector4 currentSpeed = shipEntity.GetDataBlob<PropulsionDB>().CurrentVector;
                         Vector4 nextTPos = shipPos + (currentSpeed * deltaSeconds);
                         Vector4 newPos = shipPos;
                         Vector4 deltaVecToTarget;
@@ -131,7 +131,7 @@ namespace Pulsar4X.ECSLib
                         if (distanceToTarget < newDistanceDelta) // moving would overtake target, just go directly to target
                         {
                             newDistanceDelta = distanceToTarget;
-                            propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);
+                            propulsionDB.CurrentVector = new Vector4(0, 0, 0, 0);
                             newPos = targetPos;
                             if (order.Target != null && order.Target.HasDataBlob<SystemBodyInfoDB>())
                                 positionDB.SetParent(order.Target);

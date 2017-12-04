@@ -65,12 +65,21 @@
             },
             {
               "Name": "Sensitivity At Ideal Wavelength",
-              "Description": "From Tech and size",
+              "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "Ability(0)"
+              "AbilityFormula":"10000 - (10 * Ability(0))"
+            },
+            {
+              "Name": "Detection Ability at Worst Wavelength",
+              "Description": "From Tech TODO: tech needs including",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "10000"
             },
             {
               "Name": "Resolution",
@@ -97,9 +106,9 @@
               "AbilityFormula": "3600"
             },            {
               "Name": "DatablobArguments",
-              "Description": "",
+              "Description": "(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(1), Ability(2), Ability(3), Ability(4), 1, Ability(5))",
+              "AbilityFormula": "DataBlobArgs(Ability(1), Ability(2), Ability(3), Ability(4), Ability(5), Ability(6))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
             }
           ]

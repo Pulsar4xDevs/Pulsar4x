@@ -128,12 +128,12 @@ namespace Pulsar4X.ECSLib
                 if(Distance.AuToKm(distanceBetweenPositions(currentPosition, targetPosition)) <= minimumDistance)
                 {
                     setPositionToTarget(Owner, targetPosition);
-                    Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0, 0, 0, 0);
+                    Owner.GetDataBlob<PropulsionDB>().CurrentVector = new Vector4(0, 0, 0, 0);
                     return true;
                 }
                 else
                 {
-                    Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
+                    Owner.GetDataBlob<PropulsionDB>().CurrentVector = getSpeed(currentPosition, targetPosition, kmSpeed);
                     return false;
                 }
             }
@@ -161,7 +161,7 @@ namespace Pulsar4X.ECSLib
                     {
                         // just head straight towards the target position
                         targetPosition = Target.GetDataBlob<PositionDB>();
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentVector = getSpeed(currentPosition, targetPosition, kmSpeed);
                     }
                     else
                     {
@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib
                         // for now, just head straight towards the target position
                         
                         targetPosition = Target.GetDataBlob<PositionDB>();
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentVector = getSpeed(currentPosition, targetPosition, kmSpeed);
                         return false;
                     }
                 }
@@ -181,7 +181,7 @@ namespace Pulsar4X.ECSLib
                     {
                         // Just head in a straight line
                         targetPosition = Target.GetDataBlob<PositionDB>();
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentVector = getSpeed(currentPosition, targetPosition, kmSpeed);
                     }
                     else
                     {
@@ -189,9 +189,9 @@ namespace Pulsar4X.ECSLib
                         targetPosition = Target.GetDataBlob<PositionDB>();
                         Vector4 targetPos = new Vector4(targetPosition.X, targetPosition.Y, targetPosition.Z, 0);
                         Vector4 currentPos = new Vector4(currentPosition.X, currentPosition.Y, currentPosition.Z, 0);
-                        targetPos = Find_collision_point(targetPos, Target.GetDataBlob<PropulsionDB>().CurrentSpeed, currentPos, AUSpeed);
+                        targetPos = Find_collision_point(targetPos, Target.GetDataBlob<PropulsionDB>().CurrentVector, currentPos, AUSpeed);
                         targetPosition = new PositionDB(targetPos, targetPosition.SystemGuid);
-                        Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = getSpeed(currentPosition, targetPosition, kmSpeed);
+                        Owner.GetDataBlob<PropulsionDB>().CurrentVector = getSpeed(currentPosition, targetPosition, kmSpeed);
                     }
 
                 }
@@ -272,7 +272,7 @@ namespace Pulsar4X.ECSLib
 
         private void setPositionToTarget(Entity ship, PositionDB target)
         {
-            Owner.GetDataBlob<PropulsionDB>().CurrentSpeed = new Vector4(0.0, 0.0, 0.0, 0.0);
+            Owner.GetDataBlob<PropulsionDB>().CurrentVector = new Vector4(0.0, 0.0, 0.0, 0.0);
             Owner.GetDataBlob<PositionDB>().X = target.X;
             Owner.GetDataBlob<PositionDB>().Y = target.Y;
             Owner.GetDataBlob<PositionDB>().Z = target.Z;

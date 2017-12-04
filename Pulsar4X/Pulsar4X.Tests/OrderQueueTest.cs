@@ -126,7 +126,7 @@ namespace Pulsar4X.Tests
             OrderProcessor.ProcessShip(_ship);
 
             // Check speed 
-            Vector4 speed = _shipPropulsionDB.CurrentSpeed;
+            Vector4 speed = _shipPropulsionDB.CurrentVector;
 
             double length = Math.Sqrt((x * x) + (y * y));
             double speedX, speedY;
@@ -176,7 +176,7 @@ namespace Pulsar4X.Tests
             OrderProcessor.ProcessShip(_ship);
 
             // Check speed 
-            Vector4 speed = _ship.GetDataBlob<PropulsionDB>().CurrentSpeed;
+            Vector4 speed = _ship.GetDataBlob<PropulsionDB>().CurrentVector;
 
             double length = Math.Sqrt((x * x) + (y * y));
             double speedX, speedY;

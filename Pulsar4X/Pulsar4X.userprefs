@@ -1,16 +1,45 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Processors/ProcessorManager.cs" Line="107" Column="6" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="75" Column="92" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="7" Column="12" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="40" Column="73" />
+      <File FileName="Pulsar4X.ECSLib/Helpers/GameMath.cs" Line="115" Column="6" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorReceverAtbDB.cs" Line="41" Column="93" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="46" Column="101" />
+      <File FileName="Pulsar4X.ECSLib/Data/Pulsar4x/ComponentData.json" Line="1" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="70" Column="51" />
+      <File FileName="Pulsar4X.ECSLib/Factories/ShipComponents/ComponentDesignAttribute.cs" Line="54" Column="29" />
+      <File FileName="Pulsar4X.ECSLib/Factories/DefaultStartFactory.cs" Line="224" Column="117" />
+      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/Program.cs" Line="16" Column="1" />
       <File FileName="Pulsar4X Status" />
     </Files>
+    <Pads>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State>
+          <Value>detectedMagnatude</Value>
+          <Value>quality</Value>
+          <Value>intersectPointY</Value>
+          <Value>recever.BestSensitivity_kW</Value>
+          <Value>recever.WorstSensitivity_kW</Value>
+          <Value>signalAtPosition</Value>
+          <Value>MinValue</Value>
+          <Value>bestSensitivity</Value>
+          <Value>worstSensitivity</Value>
+          <Value>receverSensitivityFreqAvg</Value>
+          <Value>signalWaveSpectraFreqAvg</Value>
+          <Value>detectedMagnatude</Value>
+          <Value>maxDetectableWavelenght</Value>
+          <Value>minDetectableWavelength</Value>
+        </State>
+      </Pad>
+    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" line="202" column="22" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" line="167" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorReceverAtbDB.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorReceverAtbDB.cs" line="42" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>
@@ -19,9 +48,10 @@
     <Watch file="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" line="116" offsetX="1035" offsetY="1760" expression="reader.TokenType" liveUpdate="False" />
     <Watch file="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" line="121" offsetX="706" offsetY="1872" expression="typestring" liveUpdate="False" />
     <Watch file="Pulsar4X.ECSLib/Entity/ProtoEntity.cs" line="122" offsetX="594" offsetY="1888" expression="dataBlobType" liveUpdate="False" />
-    <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" line="139" offsetX="722" offsetY="1712" expression="dict" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" line="139" offsetX="1133" offsetY="1629" expression="dict" liveUpdate="False" />
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SetReflectedEMProfile.cs" line="24" offsetX="450" offsetY="368" expression="ms" liveUpdate="False" />
     <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SetReflectedEMProfile.cs" line="25" offsetX="418" offsetY="384" expression="numEntites" liveUpdate="False" />
+    <Watch file="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" line="32" offsetX="652" offsetY="473" expression="detectionQuality" liveUpdate="False" />
   </MonoDevelop.Ide.DebuggingService.PinnedWatches>
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.Pulsar4X.CrossPlatformUI.Gtk2 PreferredExecutionTarget="MonoDevelop.Default" />

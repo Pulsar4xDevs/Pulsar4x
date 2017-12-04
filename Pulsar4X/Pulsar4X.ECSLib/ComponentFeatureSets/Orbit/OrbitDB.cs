@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Runtime.Serialization;
 
@@ -152,7 +152,7 @@ namespace Pulsar4X.ECSLib
         }
 
         internal OrbitDB(Entity parent, double parentMass, double myMass, double semiMajorAxis, double eccentricity, double inclination,
-                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch) 
+                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
             : base(parent)
         {
             SemiMajorAxis = semiMajorAxis;
@@ -182,7 +182,7 @@ namespace Pulsar4X.ECSLib
         }
 
         public OrbitDB(OrbitDB toCopy)
-            : base (toCopy.Parent)
+            : base(toCopy.Parent)
         {
             if (toCopy.IsStationary)
             {
@@ -239,5 +239,6 @@ namespace Pulsar4X.ECSLib
         {
             return new OrbitDB(this);
         }
+
     }
 }

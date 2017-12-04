@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static Pulsar4X.ECSLib.SensorProcessorTools;
 
 namespace Pulsar4X.ECSLib
 {
@@ -8,9 +9,11 @@ namespace Pulsar4X.ECSLib
     {
         internal Entity detectedEntity;
 
-        internal Entity SensorEntity; //<- need to create this
+        internal Entity SensorEntity; 
         internal DateTime LastDetection;
-        internal float HighestDetectionQuality;
+        internal sensorReturnValues LatestDetectionQuality;
+        internal sensorReturnValues HighestDetectionQuality;
+
     }
 
     public static class SensorProcessorTools
@@ -27,16 +30,20 @@ namespace Pulsar4X.ECSLib
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
                 SetReflectedEMProfile.SetEntityProfile(sensorProfile.OwningEntity, atDate);
 
-            float detectionQuality = DetectonQuality(receverDB, sensorProfile);
+            sensorReturnValues detectionValues = DetectonQuality(receverDB, sensorProfile);
             SensorInfo sensorInfo;
-            if (detectionQuality > 0.0)
+            if (detectionValues.detectedSignalStrength_kW > 0.0)
             {
                 if (knownContacts.ContainsKey(sensorProfile.OwningEntity.Guid))
                 {
                     sensorInfo = knownContacts[sensorProfile.OwningEntity.Guid];
+                    sensorInfo.LatestDetectionQuality = detectionValues;
                     sensorInfo.LastDetection = atDate;
-                    if (sensorInfo.HighestDetectionQuality < detectionQuality)
-                        sensorInfo.HighestDetectionQuality = detectionQuality;
+                    if (sensorInfo.HighestDetectionQuality.detectedSignalQuality < detectionValues.detectedSignalQuality)
+                        sensorInfo.HighestDetectionQuality.detectedSignalQuality = detectionValues.detectedSignalQuality;
+
+                    if (sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW < detectionValues.detectedSignalStrength_kW)
+                        sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW = detectionValues.detectedSignalStrength_kW;
                         
                 }
                 else
@@ -47,13 +54,14 @@ namespace Pulsar4X.ECSLib
                         LastDetection = atDate
                     };
 
-                    sensorInfo.SensorEntity = SensorEntityFactory.CreateNewSensorContact(sensorProfile.OwningEntity, sensorInfo);
+
                     knownContacts.Add(sensorProfile.OwningEntity.Guid, sensorInfo);
                 }
+                SensorEntityFactory.UpdateSensorContact(sensorInfo);
             }
         }
 
-        internal static float DetectonQuality(SensorReceverAtbDB recever, SensorProfileDB target)
+        internal static sensorReturnValues DetectonQuality(SensorReceverAtbDB recever, SensorProfileDB target)
         {
             /*
              * Thoughts (spitballing):
@@ -101,50 +109,157 @@ namespace Pulsar4X.ECSLib
 
             var signalAtPosition = AttenuatedForDistance(target, distance);
 
-            double receverSensitivityFreqMin = recever.RecevingWaveformCapabilty.WavelengthMin;
-            double receverSensitivityFreqAvg = recever.RecevingWaveformCapabilty.WavelengthAverage;
-            double receverSensitivityFreqMax = recever.RecevingWaveformCapabilty.WavelengthMax;
-            double receverSensitivityAltitiude = recever.MaxSensitivity - recever.MinSensitivity;
-            double totalDetectionStrength = 0;
+            double receverSensitivityFreqMin = recever.RecevingWaveformCapabilty.WavelengthMin_nm;
+            double receverSensitivityFreqAvg = recever.RecevingWaveformCapabilty.WavelengthAverage_nm;
+            double receverSensitivityFreqMax = recever.RecevingWaveformCapabilty.WavelengthMax_nm;
+            double receverSensitivityBest = recever.BestSensitivity_kW;
+            double receverSensitivityAltitiude = recever.BestSensitivity_kW - recever.WorstSensitivity_kW;
+            PercentValue quality = new PercentValue(0.0f);
+            double detectedMagnatude = 0;
             foreach (var waveSpectra in signalAtPosition)
             {
-                double signalWaveSpectraFreqMin = waveSpectra.Key.WavelengthMin;
-                double signalWaveSpectraFreqAvg = waveSpectra.Key.WavelengthAverage;
-                double signalWaveSpectraFreqMax = waveSpectra.Key.WavelengthMax;
-                double signalWaveSpectraAltitide = waveSpectra.Value;
+                double signalWaveSpectraFreqMin = waveSpectra.Key.WavelengthMin_nm;
+                double signalWaveSpectraFreqAvg = waveSpectra.Key.WavelengthAverage_nm;
+                double signalWaveSpectraFreqMax = waveSpectra.Key.WavelengthMax_nm;
+                double signalWaveSpectraMagnatude_kW = waveSpectra.Value;
 
 
 
-                if (signalWaveSpectraAltitide > recever.MinSensitivity) //check if the sensitivy is enough to pick anything up at any frequency. 
+                if (signalWaveSpectraMagnatude_kW > recever.BestSensitivity_kW) //check if the sensitivy is enough to pick anything up at any frequency. 
                 {
-                    if (receverSensitivityFreqMin < signalWaveSpectraFreqMin //may need to check I'm not missing edge cases here. 
-                       && receverSensitivityFreqMax < signalWaveSpectraFreqMin)
+                    if (Math.Max(receverSensitivityFreqMin, signalWaveSpectraFreqMin) < Math.Max(signalWaveSpectraFreqMin, signalWaveSpectraFreqMax))                      
                     {
                         //we've got something we can detect
-                        double minDetectableWavelength = signalWaveSpectraFreqMin;
+                        double minDetectableWavelength = Math.Min(receverSensitivityFreqMin, signalWaveSpectraFreqMin);
                         double maxDetectableWavelenght = Math.Min(receverSensitivityFreqMax, signalWaveSpectraFreqMax);
 
-                        //double detectedAngleA = Math.Atan(receverSensitivityAltitiude / receverSensitivityFreqAvg - receverSensitivityFreqMin );
-                        double detectedBaseSideLen = maxDetectableWavelenght - minDetectableWavelength;
-                        //double detectedAngleB = Math.Atan(signalWaveSpectraAltitide / signalWaveSpectraFreqAvg - signalWaveSpectraFreqMax);
+                        //commented out code are calcs that could possibly be used in the future if we want to refine this. 
 
-                        //double detectedStrength = ((Math.Sin(detectedAngleA) * Math.Sin(detectedAngleB)) / (Math.Sin(detectedAngleA) + Math.Sin(detectedAngleB))) * detectedBaseSideLen;
+                        double detectedAngleA = Math.Atan(receverSensitivityAltitiude / (receverSensitivityFreqAvg - receverSensitivityFreqMin ));
+                        double receverBaseLen = maxDetectableWavelenght - minDetectableWavelength;
+                        double detectedAngleB = Math.Atan(signalWaveSpectraMagnatude_kW / (signalWaveSpectraFreqAvg - signalWaveSpectraFreqMax));
+
+                        //double detectedStrength = ((Math.Sin(detectedAngleA) * Math.Sin(detectedAngleB)) / (Math.Sin(detectedAngleA) + Math.Sin(detectedAngleB))) * receverBaseLen;
                         //double detectedArea = detectedStrength * detectedBaseSideLen / 2;
 
                         //double signalAngleA = angleB;
                         //double signalAngleB = Math.Atan(signalWaveSpectraAltitide / signalWaveSpectraFreqAvg - signalWaveSpectraFreqMin);
                         //double signalAngleC = 180 - signalAngleA - signalAngleB;
 
-                        double signalBaseSideLen = signalWaveSpectraFreqMax - signalWaveSpectraFreqMin;
+                        //if the signal is to the left of the recever
+                        bool doesIntersect;
+                        double intersectPointX;
+                        double intersectPointY;
+                        double offsetFromCenter;
+                        double distortion;
 
-                        double detectedAmount = signalBaseSideLen - detectedBaseSideLen;
+                        if (signalWaveSpectraFreqAvg < receverSensitivityFreqAvg)  //RightsideDetection (recever's ideal wavelenght is higher than the signal wavelenght at it's loudest)
+                        {
+                            doesIntersect = Get_line_intersection(
+                                signalWaveSpectraFreqAvg, signalWaveSpectraMagnatude_kW,
+                                signalWaveSpectraFreqMin, 0,
 
-                        totalDetectionStrength += detectedAmount;
+                                receverSensitivityFreqAvg, recever.BestSensitivity_kW,
+                                receverSensitivityFreqMax, recever.WorstSensitivity_kW,
+
+                                out intersectPointX, out intersectPointY);
+                            //offsetFromCenter = intersectPointX - signalWaveSpectraFreqAvg; //was going to use this for distortion but decided to simplify. 
+                            distortion = receverSensitivityFreqAvg - signalWaveSpectraFreqAvg;
+
+                        }
+                        else                                                        //LeftSideDetection
+                        {
+                            doesIntersect = Get_line_intersection(
+                                signalWaveSpectraFreqAvg, signalWaveSpectraMagnatude_kW,
+                                signalWaveSpectraFreqMax, 0,
+
+                                receverSensitivityFreqAvg, recever.BestSensitivity_kW,
+                                receverSensitivityFreqMin, recever.WorstSensitivity_kW,
+
+                                out intersectPointX, out intersectPointY);
+                            //offsetFromCenter = intersectPointX - signalWaveSpectraFreqAvg;
+                            distortion = signalWaveSpectraFreqAvg - receverSensitivityFreqAvg;
+
+                        }
+
+                        if (doesIntersect) // then we're not detecting the peak of the signal
+                        {
+                            detectedMagnatude = intersectPointY - recever.BestSensitivity_kW;
+                            distortion *= 2; //pentalty to quality of signal 
+                        }
+                        else
+                            detectedMagnatude = signalWaveSpectraMagnatude_kW - recever.BestSensitivity_kW;
+
+                        quality = new PercentValue((float)(100 - distortion / signalWaveSpectraFreqMax));
+                         
+
+                        //double signalBaseSideLen = signalWaveSpectraFreqMax - signalWaveSpectraFreqMin;
+
+                        //double detectedAmount = signalBaseSideLen - receverBaseLen;
+
+                        //totalDetectionStrength += detectedAmount;
 
                     }
                 }
             }
-            return (float)(totalDetectionStrength / signalAtPosition.Count * detectionResolution * 0.1f); //TODO: might have to tweak this to be sensible.  
+
+
+
+            return new sensorReturnValues()
+            {
+                detectedSignalStrength_kW = detectedMagnatude,
+                detectedSignalQuality = quality 
+            };
+        }
+
+
+        /// <summary>
+        /// Gets the line intersection.
+        /// </summary>
+        /// <returns><c>true</c>, if line intersection was gotten, <c>false</c> otherwise.</returns>
+        /// <param name="p0_x">P0 x.</param>
+        /// <param name="p0_y">P0 y.</param>
+        /// <param name="p1_x">P1 x.</param>
+        /// <param name="p1_y">P1 y.</param>
+        /// <param name="p2_x">P2 x.</param>
+        /// <param name="p2_y">P2 y.</param>
+        /// <param name="p3_x">P3 x.</param>
+        /// <param name="p3_y">P3 y.</param>
+        /// <param name="i_x">the x position of the intersection</param>
+        /// <param name="i_y">the y position of the intersection</param>
+        internal static bool Get_line_intersection(double p0_x, double p0_y, double p1_x, double p1_y,
+            double p2_x, double p2_y, double p3_x, double p3_y, out double i_x, out double i_y)
+        {
+            double s1_x, s1_y, s2_x, s2_y;
+            s1_x = p1_x - p0_x; s1_y = p1_y - p0_y;
+            s2_x = p3_x - p2_x; s2_y = p3_y - p2_y;
+
+            double s, t;
+            s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+            t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
+
+            i_x = 0;
+            i_y = 0;
+
+            if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
+            {
+                // Collision detected
+
+                    i_x = p0_x + (t * s1_x);
+
+                    i_y = p0_y + (t * s1_y);
+
+                return true;
+            }
+
+            return false; // No collision
+        }
+
+
+        internal struct sensorReturnValues
+        {
+            internal double detectedSignalStrength_kW;
+            internal PercentValue detectedSignalQuality;
         }
 
         /// <summary>
@@ -189,18 +304,18 @@ namespace Pulsar4X.ECSLib
             var tempDegreesC = starInfoDB.Temperature;
             var kelvin = tempDegreesC + 273.15;
             var wavelength = 2.9 * Math.Pow(10, 6) / kelvin;
-            var magnitude = tempDegreesC / starMassVolumeDB.Volume; //maybe this should be lum / volume?
+            var magnitudeInKW = starInfoDB.Luminosity * 3.827e23; //tempDegreesC / starMassVolumeDB.Volume; //maybe this should be lum / volume?
             EMWaveForm waveform = new EMWaveForm()
             {
-                WavelengthAverage = wavelength,
-                WavelengthMin = wavelength - 300, //3k angstrom, semi arbitrary number pulled outa my ass from 10min of internet research. 
-                WavelengthMax = wavelength + 600
+                WavelengthAverage_nm = wavelength,
+                WavelengthMin_nm = wavelength - 300, //3k angstrom, semi arbitrary number pulled outa my ass from 10min of internet research. 
+                WavelengthMax_nm = wavelength + 600
             };
 
             var emisionSignature = new SensorProfileDB() {
                 
             };
-            emisionSignature.EmittedEMSpectra.Add(waveform, magnitude);// this will need adjusting...
+            emisionSignature.EmittedEMSpectra.Add(waveform, magnitudeInKW);// this will need adjusting...
 
             return emisionSignature;
         }
@@ -219,9 +334,9 @@ namespace Pulsar4X.ECSLib
             var magnitude = tempDegreesC / massVolDB.Volume;
             EMWaveForm waveform = new EMWaveForm()
             {
-                WavelengthAverage = wavelength,
-                WavelengthMin = wavelength - 400, //4k angstrom, semi arbitrary number pulled outa my ass from 0min of internet research. 
-                WavelengthMax = wavelength + 600
+                WavelengthAverage_nm = wavelength,
+                WavelengthMin_nm = wavelength - 400, //4k angstrom, semi arbitrary number pulled outa my ass from 0min of internet research. 
+                WavelengthMax_nm = wavelength + 600
             };
 
             profile.EmittedEMSpectra.Add(waveform, magnitude);//TODO this may need adjusting to make good balanced detections.
@@ -235,7 +350,7 @@ namespace Pulsar4X.ECSLib
 
     /// <summary>
     /// EM waveform, think of this of this as a triange wave, the average is the peak, with min and max defining the minimuam and maximium wavelengths 
-    ///     . ---Height (volume) is changable and defined in the SensorSigDB.EMSig value. increasing the hight doesn't make it more detecable by sensors outside the min and max range 
+    ///     . ---Height (volume) is changable and defined in the SensorSigDB.EMSig value. increasing the hight doesn't make it more detecable by sensors outside the min and max range in KiloWatts
     ///    ....
     ///   .......
     ///  ..........
@@ -251,15 +366,15 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The wavelength average of this emmission in nm
         /// </summary>
-        public double WavelengthAverage;
+        public double WavelengthAverage_nm;
         /// <summary>
         /// The min wavelength this will no longer emit at in nm
         /// </summary>
-        public double WavelengthMin;
+        public double WavelengthMin_nm;
         /// <summary>
         /// The max wavelength this will no longer emit at in nm
         /// </summary>
-        public double WavelengthMax;
+        public double WavelengthMax_nm;
     }
 
     public class SensorTransmitterDB : BaseDataBlob

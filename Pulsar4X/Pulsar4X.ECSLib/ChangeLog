@@ -1,3 +1,22 @@
+2017-12-04  se5a  <jon.se5a@gmail.com>
+
+	* GameMath.cs:
+	* ShipOrderVM.cs:
+	* MoveOrder.cs:
+	* ComponentData.json:
+	* DefaultStartFactory.cs:
+	* OrbitDB.cs:
+	* PropulsionDB.cs:
+	* ComponentDesignAttribute.cs:
+	* TranslateMoveDB.cs:
+	* TranslationMoveVM.cs:
+	* ShipMovementProcessor.cs:
+	* SensorReceverAtbDB.cs:
+	* TranslateMoveProcessor.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs: More sensor work. it's starting to
+	take shape now. need to start documenting it. 
+
 2017-11-22  se5a  <jon.se5a@gmail.com>
 
 	* Pulsar4X.ECSLib.csproj: fine. .net 4.6.1 then.

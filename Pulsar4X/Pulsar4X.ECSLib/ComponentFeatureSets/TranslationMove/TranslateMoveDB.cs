@@ -1,13 +1,19 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public class TranslateMoveDB : BaseDataBlob
     {
-        internal Vector4 TargetPosition { get { return _targetPosition.AbsolutePosition; } }
+        internal Vector4 TargetPosition { get { return TargetPositionDB.AbsolutePosition; } }
+        [JsonProperty]
+        internal Vector4 CurrentVector;
+        [JsonProperty]
         internal double MoveRangeInKM;
+        [JsonProperty]
         internal bool IsAtTarget { get; set; }
-        private PositionDB _targetPosition;
+        [JsonProperty]
+        internal PositionDB TargetPositionDB;
 
         public TranslateMoveDB()
         {
@@ -15,12 +21,13 @@ namespace Pulsar4X.ECSLib
 
         public TranslateMoveDB(PositionDB targetPosition)
         {
-            _targetPosition = targetPosition;
+            TargetPositionDB = targetPosition;
         }
 
         public TranslateMoveDB(TranslateMoveDB db)
         {
-            _targetPosition = db._targetPosition;
+            TargetPositionDB = db.TargetPositionDB;
+            CurrentVector = db.CurrentVector;
             MoveRangeInKM = db.MoveRangeInKM;
             IsAtTarget = db.IsAtTarget;
         }

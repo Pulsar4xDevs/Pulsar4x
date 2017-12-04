@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 namespace Pulsar4X.ECSLib
 {
     public class ComponentDesignAttribute
@@ -32,6 +32,8 @@ namespace Pulsar4X.ECSLib
 
         public void SetValueFromInput(double input)
         {
+
+            Debug.Assert(GuiHint != GuiHint.GuiTextDisplay || GuiHint != GuiHint.None, Name + " is not an editable value");
             SetMin();
             SetMax();
             if (input < MinValue)

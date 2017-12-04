@@ -1,3 +1,8 @@
+2017-12-04  se5a  <jon.se5a@gmail.com>
+
+	* OrderQueueTest.cs: More sensor work. it's starting to take
+	shape now. need to start documenting it. 
+
 2017-11-22  se5a  <jon.se5a@gmail.com>
 
 	* Pulsar4X.Tests.csproj: changed projects to use .net4.6.2

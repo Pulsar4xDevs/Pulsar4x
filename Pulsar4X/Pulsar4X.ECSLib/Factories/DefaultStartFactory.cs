@@ -218,12 +218,13 @@ namespace Pulsar4X.ECSLib
             ComponentDesign sensor;
             ComponentTemplateSD template = NameLookup.TryGetTemplateSD(game, "PassiveSensor");
             sensor = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            sensor.ComponentDesignAttributes[0].SetValueFromInput(50);
-            sensor.ComponentDesignAttributes[1].SetValueFromInput(600);
-            sensor.ComponentDesignAttributes[2].SetValueFromInput(250);
-
-            sensor.ComponentDesignAttributes[4].SetValueFromInput(10);
-            sensor.ComponentDesignAttributes[5].SetValueFromInput(3600);
+            sensor.ComponentDesignAttributes[0].SetValueFromInput(50);  //size
+            sensor.ComponentDesignAttributes[1].SetValueFromInput(600); //best wavelength
+            sensor.ComponentDesignAttributes[2].SetValueFromInput(250); //wavelength detection width 
+            //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
+                                                                        //[4] worst detection magnatude (not settable)
+            sensor.ComponentDesignAttributes[5].SetValueFromInput(1);   //resolution
+            sensor.ComponentDesignAttributes[6].SetValueFromInput(3600);//Scan Time
             sensor.Name = "PassiveSensor-S50";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, sensor);
 

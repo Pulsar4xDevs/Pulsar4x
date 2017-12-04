@@ -134,7 +134,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             int maxSpeed = db.MaximumSpeed / 10;
             int totalEP = db.TotalEnginePower / 25;
-            PointF currentSpeed = new PointF((float)db.CurrentSpeed.X, (float)db.CurrentSpeed.Y);
+            PointF currentSpeed = new PointF((float)db.CurrentVector.X, (float)db.CurrentVector.Y);
             float currentSpeedLen = currentSpeed.Length / 10;
 
             Pen enginePen = new Pen(Colors.DarkGray);
@@ -174,7 +174,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
             int maxSpeed = db.MaximumSpeed / 10;
             int totalEP = db.TotalEnginePower / 25;
-            PointF currentSpeed = new PointF((float)db.CurrentSpeed.X, (float)db.CurrentSpeed.Y);
+            PointF currentSpeed = new PointF((float)db.CurrentVector.X, (float)db.CurrentVector.Y);
             float currentSpeedLen = currentSpeed.Length / 10;
 
             Pen thrustPen = new Pen(Colors.OrangeRed);

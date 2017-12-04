@@ -23,8 +23,8 @@ namespace Pulsar4X.ECSLib
 
 
             var currentSpeed = GMath.GetVector(currentPosition, targetPos, maxSpeed);
-            propulsionDB.CurrentSpeed = currentSpeed;
-
+            propulsionDB.CurrentVector = currentSpeed;
+            moveDB.CurrentVector = currentSpeed;
             StaticDataStore staticData = entity.Manager.Game.StaticData;
             CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
             Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerKM;
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
             if (distanceToTargetAU < distanceToMove) // moving would overtake target, just go directly to target
             {
                 distanceToMove = distanceToTargetAU;
-                propulsionDB.CurrentSpeed = new Vector4(0, 0, 0, 0);
+                propulsionDB.CurrentVector = new Vector4(0, 0, 0, 0);
                 newPos = targetPos;
                 moveDB.IsAtTarget = true;
                 entity.RemoveDataBlob<TranslateMoveDB>();

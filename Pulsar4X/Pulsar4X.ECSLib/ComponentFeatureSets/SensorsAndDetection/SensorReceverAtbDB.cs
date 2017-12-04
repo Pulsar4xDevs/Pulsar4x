@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -9,9 +10,15 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal EMWaveForm RecevingWaveformCapabilty;
         [JsonProperty]
-        internal double MaxSensitivity;//sensitivity at ideal wavelength
+        /// <summary>
+        /// Sensitivity at the ideal wavelength, lower is better, 0 is (imposible) best. should not be negitive. 
+        /// </summary>
+        internal double BestSensitivity_kW;//sensitivity at ideal wavelength
         [JsonProperty]
-        internal double MinSensitivity;// sensitivity at worst detectable wavelengths
+        /// <summary>
+        /// The sensitivity at worst detectable wavelengths, lower is better, should be higher than BestSensitivity_kW
+        /// </summary>
+        internal double WorstSensitivity_kW;// sensitivity at worst detectable wavelengths
         [JsonProperty]
         internal float Resolution; //will give more details on the target. low res will detect *something* but not *what*
         [JsonProperty]
@@ -25,20 +32,26 @@ namespace Pulsar4X.ECSLib
         public SensorReceverAtbDB() { }
 
         //ParserConstrutor
-        public SensorReceverAtbDB(double peakWaveLength, double waveLengthWidth, double maxSensitivity, double minSensitivity, double resolution, double scanTime)
+        public SensorReceverAtbDB(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)
         {
-            RecevingWaveformCapabilty = new EMWaveForm() { WavelengthMin = peakWaveLength - waveLengthWidth, WavelengthAverage = peakWaveLength, WavelengthMax = peakWaveLength + waveLengthWidth };
-            MaxSensitivity = maxSensitivity;
-            MinSensitivity = minSensitivity;
+            //TODO: the below should not crash the game, just make the requested component invalid. 
+            Debug.Assert(bestSensitivity > 0, "Sensitivity is" + bestSensitivity + " *Must* be a positiveNumber");
+            Debug.Assert(bestSensitivity < worstSensitivity, "bestSensitivity " + bestSensitivity + " *Must* be < than worstSensitivity" + worstSensitivity +"(lower is better)");
+
+            RecevingWaveformCapabilty = new EMWaveForm() { WavelengthMin_nm = peakWaveLength - waveLengthWidth, WavelengthAverage_nm = peakWaveLength, WavelengthMax_nm = peakWaveLength + waveLengthWidth };
+            BestSensitivity_kW = bestSensitivity;
+            WorstSensitivity_kW = worstSensitivity;
             Resolution = (float)resolution;
             ScanTime = (int)scanTime;
+
+
         }
 
         public SensorReceverAtbDB(SensorReceverAtbDB db)
         {
             RecevingWaveformCapabilty = db.RecevingWaveformCapabilty;
-            MaxSensitivity = db.MaxSensitivity;
-            MinSensitivity = db.MinSensitivity;
+            BestSensitivity_kW = db.BestSensitivity_kW;
+            WorstSensitivity_kW = db.WorstSensitivity_kW;
             Resolution = db.Resolution;
             ScanTime = db.ScanTime;
         }

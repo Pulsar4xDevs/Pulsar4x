@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.24720.0
@@ -308,5 +308,8 @@ Global
 		Policies = $0
 		$0.ChangeLogPolicy = $1
 		$1.UpdateMode = ProjectRoot
+	EndGlobalSection
+	GlobalSection(AvalonStudioProperties) = preSolution
+		StartupItem = {30509646-A52E-4563-AE27-706882D7F8C3}
 	EndGlobalSection
 EndGlobal

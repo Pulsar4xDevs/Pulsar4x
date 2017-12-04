@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Length()).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVector.Length()).ToString("N2");
             }
         }
 
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.X).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVector.X).ToString("N2");
             }
         }
 
@@ -197,7 +197,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentSpeed.Y).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVector.Y).ToString("N2");
             }
         }
 

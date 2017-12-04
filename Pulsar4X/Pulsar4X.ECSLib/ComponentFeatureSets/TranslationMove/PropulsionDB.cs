@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     public class PropulsionDB : BaseDataBlob, ICreateViewmodel
     {
         public int MaximumSpeed { get; set; }
-        public Vector4 CurrentSpeed { get; set; }
+        public Vector4 CurrentVector { get; set; }
         public int TotalEnginePower { get; set; }
         public Dictionary<Guid, double> FuelUsePerKM { get; internal set; } = new Dictionary<Guid, double>();
 
@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
         public PropulsionDB(PropulsionDB propulsionDB)
         {
             MaximumSpeed = propulsionDB.MaximumSpeed;
-            CurrentSpeed = propulsionDB.CurrentSpeed;
+            CurrentVector = propulsionDB.CurrentVector;
             TotalEnginePower = propulsionDB.TotalEnginePower;
             FuelUsePerKM = new Dictionary<Guid, double>(propulsionDB.FuelUsePerKM);
         }
