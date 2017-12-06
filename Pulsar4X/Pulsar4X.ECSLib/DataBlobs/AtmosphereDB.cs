@@ -39,12 +39,13 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public float GreenhousePressure { get; internal set; }
 
-        /// <summary>
+        /// <summary> 
+        /// MOVED TO: SystemBodyInfoDB
         /// How much light the body reflects. Affects temp.
         /// a number from 0 to 1.
         /// </summary>
-        [JsonProperty]
-        public float Albedo { get; internal set; }
+        //[JsonProperty]
+        //public float Albedo { get; internal set; }
 
         /// <summary>
         /// Temperature of the planet AFTER greenhouse effects are taken into consideration. 
@@ -98,21 +99,21 @@ namespace Pulsar4X.ECSLib
         /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        internal AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, Dictionary<AtmosphericGasSD,float> composition)
+        internal AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float surfaceTemp, Dictionary<AtmosphericGasSD,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
             HydrosphereExtent = hydroExtent;
             GreenhouseFactor = greenhouseFactor;
             GreenhousePressure = greenhousePressue;
-            Albedo = albedo;
+            //Albedo = albedo;
             SurfaceTemperature = surfaceTemp;
             Composition = composition;
         }
 
         public AtmosphereDB(AtmosphereDB atmosphereDB)
             : this(atmosphereDB.Pressure, atmosphereDB.Hydrosphere, atmosphereDB.HydrosphereExtent, 
-            atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure, atmosphereDB.Albedo, 
+            atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure, 
             atmosphereDB.SurfaceTemperature, 
             new Dictionary<AtmosphericGasSD, float>(atmosphereDB.Composition)
             )

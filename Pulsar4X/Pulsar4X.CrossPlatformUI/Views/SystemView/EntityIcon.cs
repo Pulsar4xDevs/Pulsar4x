@@ -118,7 +118,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         void SetIconFor(AtmosphereDB db)
         {
             short hydro = db.HydrosphereExtent;
-            float albedo = db.Albedo;
+            //float albedo = db.Albedo;
         }
 
         void SetIconFor(PositionDB db)

@@ -1,3 +1,19 @@
+2017-12-06  se5a  <jon.se5a@gmail.com>
+
+	* SerializationManager.cs:
+	* AtmosphereDB.cs:
+	* PlanetVM.cs:
+	* SystemBodyInfoDB.cs:
+	* ComponentData.json:
+	* DefaultStartFactory.cs:
+	* AtmosphereProcessor.cs:
+	* StarSystemFactory.cs:
+	* SystemBodyFactory.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs:
+	* SetReflectedEMProfile.cs: Moved Albedo from Atmo to sysbody
+	& some other sensor related tweaks. 
+
 2017-12-04  se5a  <jon.se5a@gmail.com>
 
 	* Pulsar4X.ECSLib.csproj:

@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
                     || bodyDB.BodyType == BodyType.IceGiant)
                 {
                     // special gas giant stuff, needed because we do not apply greenhouse factor to them:
-                    atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - atmoDB.Albedo);
+                    atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - bodyDB.Albedo);
                     atmoDB.Pressure = 1;       // because thats the definition of the surface of these planets, when 
                     // atmosphereic pressure = the pressure of earths atmosphere at its surface (what we call 1 atm).
                 }
@@ -55,7 +55,7 @@ namespace Pulsar4X.ECSLib
 
                     // From Aurora: Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x Albedo
                     atmoDB.SurfaceTemperature = Temperature.ToKelvin(bodyDB.BaseTemperature);
-                    atmoDB.SurfaceTemperature += atmoDB.SurfaceTemperature * atmoDB.GreenhouseFactor * (float)Math.Pow(1 - atmoDB.Albedo, 0.25);   // We need to raise albedo to the power of 1/4, see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+                    atmoDB.SurfaceTemperature += atmoDB.SurfaceTemperature * atmoDB.GreenhouseFactor * (float)Math.Pow(1 - bodyDB.Albedo, 0.25);   // We need to raise albedo to the power of 1/4, see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
                     atmoDB.SurfaceTemperature = Temperature.ToCelsius(atmoDB.SurfaceTemperature);
                 }
             }
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
                 // simply apply albedo, see here: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
                 atmoDB.Pressure = 0;
                 atmoDB.SurfaceTemperature = Temperature.ToKelvin(bodyDB.BaseTemperature);
-                atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature * (float)Math.Pow(1 - atmoDB.Albedo, 0.25);   // We need to raise albedo to the power of 1/4
+                atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature * (float)Math.Pow(1 - bodyDB.Albedo, 0.25);   // We need to raise albedo to the power of 1/4
             }
 
             // update the descriptions:

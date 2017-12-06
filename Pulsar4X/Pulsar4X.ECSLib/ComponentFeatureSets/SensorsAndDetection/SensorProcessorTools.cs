@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using static Pulsar4X.ECSLib.SensorProcessorTools;
 
 namespace Pulsar4X.ECSLib
@@ -27,23 +28,25 @@ namespace Pulsar4X.ECSLib
             TimeSpan timeSinceLastCalc = atDate - sensorProfile.LastDatetimeOfReflectionSet;
             PositionDB positionOfSensorProfile = sensorProfile.OwningEntity.GetDataBlob<PositionDB>();//sensorProfile.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
             double distanceInAUSinceLastCalc = PositionDB.GetDistanceBetween(sensorProfile.LastPositionOfReflectionSet, positionOfSensorProfile);
+
+            //Only set the reflectedEMProfile of the target if it's not been done recently:
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
                 SetReflectedEMProfile.SetEntityProfile(sensorProfile.OwningEntity, atDate);
 
             sensorReturnValues detectionValues = DetectonQuality(receverDB, sensorProfile);
             SensorInfo sensorInfo;
-            if (detectionValues.detectedSignalStrength_kW > 0.0)
+            if (detectionValues.SignalStrength_kW > 0.0)
             {
                 if (knownContacts.ContainsKey(sensorProfile.OwningEntity.Guid))
                 {
                     sensorInfo = knownContacts[sensorProfile.OwningEntity.Guid];
                     sensorInfo.LatestDetectionQuality = detectionValues;
                     sensorInfo.LastDetection = atDate;
-                    if (sensorInfo.HighestDetectionQuality.detectedSignalQuality < detectionValues.detectedSignalQuality)
-                        sensorInfo.HighestDetectionQuality.detectedSignalQuality = detectionValues.detectedSignalQuality;
+                    if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)
+                        sensorInfo.HighestDetectionQuality.SignalQuality = detectionValues.SignalQuality;
 
-                    if (sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW < detectionValues.detectedSignalStrength_kW)
-                        sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW = detectionValues.detectedSignalStrength_kW;
+                    if (sensorInfo.HighestDetectionQuality.SignalStrength_kW < detectionValues.SignalStrength_kW)
+                        sensorInfo.HighestDetectionQuality.SignalStrength_kW = detectionValues.SignalStrength_kW;
                         
                 }
                 else
@@ -189,8 +192,8 @@ namespace Pulsar4X.ECSLib
 
             return new sensorReturnValues()
             {
-                detectedSignalStrength_kW = detectedMagnatude,
-                detectedSignalQuality = quality 
+                SignalStrength_kW = detectedMagnatude,
+                SignalQuality = quality 
             };
         }
 
@@ -240,8 +243,8 @@ namespace Pulsar4X.ECSLib
 
         internal struct sensorReturnValues
         {
-            internal double detectedSignalStrength_kW;
-            internal PercentValue detectedSignalQuality;
+            internal double SignalStrength_kW;
+            internal PercentValue SignalQuality;
         }
 
         /// <summary>
@@ -253,26 +256,31 @@ namespace Pulsar4X.ECSLib
         internal static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorProfileDB emission, double distance)
         {
             var dict = new Dictionary<EMWaveForm, double>();
-
             foreach (var emitedItem in emission.EmittedEMSpectra)
             {
-                dict.Add(emitedItem.Key, emitedItem.Value / 4 * Math.PI * Math.Pow(distance, 2));
+                var powerAtDistance = AttenuationCalc(emitedItem.Value, distance);
+                dict.Add(emitedItem.Key, powerAtDistance);
             }
             foreach (var reflectedItem in emission.ReflectedEMSpectra)
             {
-                if (dict.ContainsKey(reflectedItem.Key))
-                {
-                    var reflectedSpectra = reflectedItem.Value / 4 * Math.PI * Math.Pow(distance, 2) * emission.TargetCrossSection;
-                    dict.Add(reflectedItem.Key, reflectedSpectra);
-                }
-                else {
-                    //this shouldn't happen
-                }
+                var reflectedValue = AttenuationCalc(reflectedItem.Value, distance);              
+                dict.Add(reflectedItem.Key, reflectedValue);
+
             }
             return dict;
         }
 
-
+        /// <summary>
+        /// Power per unit of area.
+        /// note that this is *not* a decebel mesurment, decebels are mesured logrithmicaly. 
+        /// </summary>
+        /// <returns>The calculate.</returns>
+        /// <param name="sourceValue">Source value.</param>
+        /// <param name="distance">Distance.</param>
+        public static double AttenuationCalc(double sourceValue, double distance)
+        {
+            return sourceValue / 4 * Math.PI * Math.Pow(distance, 2);
+        }
 
         /// <summary>
         /// Probibly only needs to be done at star creation, unless we do funky stuff like change a stars temprature and stuff. 
@@ -308,7 +316,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The emmision sig.</returns>
         /// <param name="sysBodyInfoDB">Sys body info db.</param>
         /// <param name="massVolDB">Mass vol db.</param>
-        internal static void PlanetEmmisionSig(SensorProfileDB profile, SystemBodyInfoDB sysBodyInfoDB, MassVolumeDB massVolDB, AtmosphereDB atmoDB)
+        internal static void PlanetEmmisionSig(SensorProfileDB profile, SystemBodyInfoDB sysBodyInfoDB, MassVolumeDB massVolDB)
         {
             var tempDegreesC = sysBodyInfoDB.BaseTemperature;
             var kelvin = tempDegreesC + 273.15;
@@ -322,7 +330,7 @@ namespace Pulsar4X.ECSLib
             };
 
             profile.EmittedEMSpectra.Add(waveform, magnitude);//TODO this may need adjusting to make good balanced detections.
-            profile.Reflectivity = atmoDB.Albedo;
+            profile.Reflectivity = sysBodyInfoDB.Albedo;
         }
 
 

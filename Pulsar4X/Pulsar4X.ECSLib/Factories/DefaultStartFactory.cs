@@ -49,6 +49,7 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(colonyEntity, fuelTank);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, cargoInstalation);
+            EntityManipulation.AddComponentToEntity(colonyEntity, FacPassiveSensor(game, factionEntity));
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = NameLookup.TryGetMineralSD(game, "Sorium");
@@ -240,6 +241,24 @@ namespace Pulsar4X.ECSLib
             return GenericComponentFactory.DesignToDesignEntity(game, faction, deadTestWeight);
 
         }
+
+        public static Entity FacPassiveSensor(Game game, Entity faction)
+        {
+            ComponentDesign sensor;
+            ComponentTemplateSD template = NameLookup.TryGetTemplateSD(game, "PassiveSensor");
+            sensor = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            sensor.ComponentDesignAttributes[0].SetValueFromInput(500);  //size
+            sensor.ComponentDesignAttributes[1].SetValueFromInput(500); //best wavelength
+            sensor.ComponentDesignAttributes[2].SetValueFromInput(1000); //wavelength detection width 
+                                                                        //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
+                                                                        //[4] worst detection magnatude (not settable)
+            sensor.ComponentDesignAttributes[5].SetValueFromInput(5);   //resolution
+            sensor.ComponentDesignAttributes[6].SetValueFromInput(3600);//Scan Time
+            sensor.Name = "PassiveSensor-S500";
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, sensor);
+
+        }
+
     }
 
 }

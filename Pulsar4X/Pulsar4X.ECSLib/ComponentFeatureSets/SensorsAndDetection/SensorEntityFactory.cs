@@ -39,8 +39,8 @@ namespace Pulsar4X.ECSLib
         {
 
             //var quality = sensorInfo.HighestDetectionQuality.detectedSignalQuality.Percent; //quality shouldn't affect positioning. 
-            double signalBestMagnatude = sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW;
-            double signalNowMagnatude = sensorInfo.LatestDetectionQuality.detectedSignalStrength_kW;
+            double signalBestMagnatude = sensorInfo.HighestDetectionQuality.SignalStrength_kW;
+            double signalNowMagnatude = sensorInfo.LatestDetectionQuality.SignalStrength_kW;
             if (signalNowMagnatude > 0) 
             {
                 OrbitDB sensorEntityOrbit = GenericClone<OrbitDB>(detectedEntitesOrbit, sensorInfo);
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
         {
             //var quality = sensorInfo.HighestDetectionQuality.detectedSignalQuality.Percent; //quality shouldn't affect positioning. 
             //double signalBestMagnatude = sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW;
-            double signalNowMagnatude = sensorInfo.LatestDetectionQuality.detectedSignalStrength_kW;
+            double signalNowMagnatude = sensorInfo.LatestDetectionQuality.SignalStrength_kW;
             if (signalNowMagnatude > 0.0)
             {
                 var sensorEntityMove =  GenericClone<TranslateMoveDB>(detectedEntitiesMove, sensorInfo);

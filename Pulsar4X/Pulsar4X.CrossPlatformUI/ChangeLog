@@ -1,3 +1,8 @@
+2017-12-06  se5a  <jon.se5a@gmail.com>
+
+	* EntityIcon.cs: Moved Albedo from Atmo to sysbody
+	& some other sensor related tweaks. 
+
 2017-12-04  se5a  <jon.se5a@gmail.com>
 
 	* EntityIcon.cs: More sensor work. it's starting to take shape

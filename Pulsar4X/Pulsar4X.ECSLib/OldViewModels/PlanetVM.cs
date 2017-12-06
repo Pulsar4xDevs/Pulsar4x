@@ -670,7 +670,7 @@ namespace Pulsar4X.ECSLib
             AtmosphereInAtm = atmosphereDB.AtomsphereDescriptionAtm;
             AtmosphereInPercent = atmosphereDB.AtomsphereDescriptionInPercent;
             Pressure = atmosphereDB.Pressure;
-            Albedo = atmosphereDB.Albedo;
+            //Albedo = atmosphereDB.Albedo;
             SurfaceTemp = atmosphereDB.SurfaceTemperature;
             GreenhouseFactor = atmosphereDB.GreenhouseFactor;
             GreenhousePressure = atmosphereDB.GreenhousePressure;

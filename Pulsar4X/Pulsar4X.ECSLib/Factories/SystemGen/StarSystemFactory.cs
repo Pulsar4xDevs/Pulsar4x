@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
 
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
-            SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB {BodyType = BodyType.Terrestrial, SupportsPopulations = true};
+            SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.068f };
             MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
             NameDB mercuryNameDB = new NameDB("Mercury");
             double mercurySemiMajAxis = 0.387098;
@@ -78,10 +78,13 @@ namespace Pulsar4X.ECSLib
             double mercuryMeanLongd = 252.25084;
             OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, mercuryMVDB.Mass, mercurySemiMajAxis, mercuryEccentricity, mercuryInclination, mercuryLoAN, mercuryLoP, mercuryMeanLongd, GalaxyGen.Settings.J2000);
             PositionDB mercuryPositionDB = new PositionDB(OrbitProcessor.GetPosition(mercuryOrbitDB, game.CurrentDateTime), sol.Guid);
+            //AtmosphereDB mercuryAtmo = new AtmosphereDB();
+            SensorProfileDB sensorProfile = new SensorProfileDB();
             Entity mercury = new Entity(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mercury);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);
 
-            SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
+            SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.77f };
             MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
             NameDB venusNameDB = new NameDB("Venus");
             double venusSemiMajAxis = 0.72333199;
@@ -95,7 +98,7 @@ namespace Pulsar4X.ECSLib
             Entity venus = new Entity(sol.SystemManager, new List<BaseDataBlob> { venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, venus);
 
-            SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
+            SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.306f };
             MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.KmToAU(6378.1));
             NameDB earthNameDB = new NameDB("Earth");
             double earthSemiMajAxis = 1.00000011;
@@ -111,7 +114,7 @@ namespace Pulsar4X.ECSLib
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.78f);
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.12f);
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.01f);
-            AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+            AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
 
             Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> { earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
             _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
@@ -132,7 +135,7 @@ namespace Pulsar4X.ECSLib
             Entity luna = new Entity(sol.SystemManager, new List<BaseDataBlob> { lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
 
-            SystemBodyInfoDB marsBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
+            SystemBodyInfoDB marsBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo=0.25f };
             MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius(0.64174E24, Distance.KmToAU(3396.2));
             NameDB marsNameDB = new NameDB("Mars");
             double marsSemiMajAxis = Distance.KmToAU(227.92E6);
@@ -142,31 +145,17 @@ namespace Pulsar4X.ECSLib
             double marsAoP = 336.04084;
             double marsMeanLong = 355.45332;
             OrbitDB marsOrbitDB =OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, marsMVDB.Mass, marsSemiMajAxis, marsEccentricity, marsInclination, marsLoAN, marsAoP, marsMeanLong, GalaxyGen.Settings.J2000);
+            Dictionary<AtmosphericGasSD, float> marsAtmoGasses = new Dictionary<AtmosphericGasSD, float>();
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(12), 0.95f * 0.01f);   // C02% * Mars Atms
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.027f * 0.01f);   // N% * Mars Atms
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.007f * 0.01f);   // O% * Mars Atms
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.016f * 0.01f);  // Ar% * Mars Atms
             PositionDB marsPositionDB = new PositionDB(OrbitProcessor.GetPosition(marsOrbitDB, game.CurrentDateTime), sol.Guid);
             Entity mars = new Entity(sol.SystemManager, new List<BaseDataBlob> { marsPositionDB, marsBodyDB, marsMVDB, marsNameDB, marsOrbitDB} );
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mars);
-            /*
 
-            SystemBody Mars = new SystemBody(sun, SystemBody.PlanetType.Terrestrial);
-            Mars.Name = "Mars";
-            Mars.Orbit = Orbit.FromMajorPlanetFormat(0.64174E24, sun.Orbit.Mass, 1.52366231, 0.09341233, 1.85061, 49.57854, 336.04084, 355.45332, GalaxyGen.J2000);
-            Mars.Radius = Distance.ToAU(3396.2);
-            Mars.BaseTemperature = (float)CalculateBaseTemperatureOfBody(sun, Mars.Orbit.SemiMajorAxis);// 210.1f + (float)Constants.Units.KELVIN_TO_DEGREES_C;
-            Mars.Tectonics = SystemBody.TectonicActivity.Dead;
-            Mars.SurfaceGravity = 3.71f;
-            Mars.Atmosphere = new Atmosphere(Mars);
-            Mars.Atmosphere.Albedo = 0.250f;
-            Mars.Atmosphere.SurfaceTemperature = Mars.BaseTemperature;
-            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(12), 0.95f * 0.01f);  // C02% * Mars Atms
-            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(6), 0.027f * 0.01f);  // N% * Mars Atms
-            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(9), 0.007f * 0.01f);  // O% * Mars Atms
-            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(11), 0.016f * 0.01f);  // Ar% * Mars Atms
-            Mars.Atmosphere.UpdateState();
-            Mars.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
-            Mars.Position.System = Sol;
-            Mars.Position.X = x;
-            Mars.Position.Y = y;
-            sun.Planets.Add(Mars);
+
+            /*
 
             SystemBody Jupiter = new SystemBody(sun, SystemBody.PlanetType.GasGiant);
             Jupiter.Name = "Jupiter";

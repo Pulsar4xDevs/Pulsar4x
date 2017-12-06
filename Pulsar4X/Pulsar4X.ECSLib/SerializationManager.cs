@@ -617,9 +617,9 @@ namespace Pulsar4X.ECSLib
                 varNode.InnerText = atmosphereDB.Pressure.ToString("N2");
                 bodyNode.AppendChild(varNode);
 
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Albedo", "NS");
-                varNode.InnerText = atmosphereDB.Albedo.ToString("p1");
-                bodyNode.AppendChild(varNode);
+                //varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Albedo", "NS");
+                //varNode.InnerText = atmosphereDB.Albedo.ToString("p1");
+                //bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceTemperature", "NS");
                 varNode.InnerText = atmosphereDB.SurfaceTemperature.ToString("N1");

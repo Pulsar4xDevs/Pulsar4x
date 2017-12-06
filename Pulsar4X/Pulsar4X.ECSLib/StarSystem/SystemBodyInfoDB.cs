@@ -55,6 +55,13 @@ namespace Pulsar4X.ECSLib
         public BodyType BodyType { get; internal set; }
 
         /// <summary>
+        /// Gets or sets the albedo(Bond).
+        /// </summary>
+        /// <value>The albedo(Bond)</value>
+        [JsonProperty]
+        public PercentValue Albedo { get; internal set; } 
+
+        /// <summary>
         /// Plate techtonics. Ammount of activity depends on age vs mass.
         /// Influences magnitic field. maybe this should be in the processor?
         /// </summary>

@@ -723,7 +723,7 @@ namespace Pulsar4X.ECSLib
 
             var profile = body.GetDataBlob<SensorProfileDB>();
             var atmo = body.GetDataBlob<AtmosphereDB>();
-            SensorProcessorTools.PlanetEmmisionSig(profile, bodyInfo, bodyMVDB, atmo);
+            SensorProcessorTools.PlanetEmmisionSig(profile, bodyInfo, bodyMVDB);
 
 
         }
@@ -902,7 +902,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB orbit = body.GetDataBlob<OrbitDB>();
 
             // Set Albeado (all bodies have an albedo):
-            atmoDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.BodyType], system.RNG.NextDouble());
+            bodyDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.BodyType], system.RNG.NextDouble());
 
             // Atmo modifer is used to determine how thick the atmosphere should be, higher = thicker.
             double atmoModifer = _galaxyGen.Settings.AtmosphereGenerationModifier[bodyDB.BodyType] * (mvDB.Mass / GameConstants.Units.EarthMassInKG);
@@ -915,7 +915,7 @@ namespace Pulsar4X.ECSLib
                 double newATM = GenAtmosphereThickness(mvDB.Mass, bodyDB, orbit, atmoModifer, system.RNG.NextDouble());
 
                 // set an initial surface temp to the base temp, adjusted for albedo:
-                atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - atmoDB.Albedo);
+                atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - bodyDB.Albedo);
 
                 // now we will want to select gasses for the atmosphere:
                 SelectGases(newATM, atmoModifer, bodyDB, mvDB, atmoDB, system, staticData);
