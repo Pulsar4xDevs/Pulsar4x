@@ -412,6 +412,7 @@
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorReceverAtbDB.cs" />
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorScan.cs" />
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\EMWaveForm.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorInfoDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

@@ -1,24 +1,14 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityChangeListnerDB.cs" Line="36" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="236" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="141" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/SystemView/SystemMap_DrawableVM.cs" Line="127" Column="59" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityChangedListnerProcessor.cs" Line="33" Column="30" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/IconCollection.cs" Line="140" Column="127" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="289" Column="14" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorInfoDB.cs" Line="1" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" Line="36" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProfileDB.cs" Line="65" Column="9" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SetReflectedEMProfile.cs" Line="51" Column="76" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/EMWaveForm.cs" Line="20" Column="43" />
       <File FileName="Pulsar4X Status" />
     </Files>
-    <Pads>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>lowestPosIndex</Value>
-          <Value>occupiedPosition</Value>
-          <Value>textIconList</Value>
-          <Value>i</Value>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

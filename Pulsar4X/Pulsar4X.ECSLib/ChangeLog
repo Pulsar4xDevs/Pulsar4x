@@ -1,5 +1,17 @@
 2017-12-11  se5a  <jon.se5a@gmail.com>
 
+	* Pulsar4X.ECSLib.csproj:
+	* StarSystemFactory.cs:
+	* EMWaveForm.cs:
+	* SensorScan.cs:
+	* SensorInfoDB.cs:
+	* SensorProcessorTools.cs: fixed some planets not getting
+	detected. changed emwaveform to a class from a struct
+	because we're using it as keys in dictionarys, which messes up
+	equality compare. 
+
+2017-12-11  se5a  <jon.se5a@gmail.com>
+
 	* NameDB.cs:
 	* EntityManager.cs:
 	* FactionInfoDB.cs:

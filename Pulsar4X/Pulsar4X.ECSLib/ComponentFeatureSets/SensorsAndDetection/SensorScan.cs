@@ -15,8 +15,8 @@ namespace Pulsar4X.ECSLib
             DateTime atDate = manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds);
             var receverDB = entity.GetDataBlob<SensorReceverAtbDB>();
 
-
-            foreach (var detectableEntity in manager.GetAllEntitiesWithDataBlob<SensorProfileDB>())
+            var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
+            foreach (var detectableEntity in detectableEntitys)
             {
                 //Entity detectableEntity = sensorProfile.OwningEntity;
 

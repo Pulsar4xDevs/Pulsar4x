@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System.Collections.Generic;
+
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// EM waveform, think of this of this as a triange wave, the average is the peak, with min and max defining the minimuam and maximium wavelengths 
@@ -12,8 +14,12 @@
     /// |   Average
     /// Min
     ///  
+    /// 
+    /// because we're using this as a dictionary key in some places, it needs to be a class instead of a struct, 
+    /// or we could override the euality 
+    /// or  we could not use it as a key. 
     /// </summary>
-    public struct EMWaveForm
+    public class EMWaveForm 
     {
         /// <summary>
         /// The wavelength average of this emmission in nm
@@ -28,4 +34,14 @@
         /// </summary>
         public double WavelengthMax_nm;
     }
+
+    /*
+    public class EntityWaveforms
+    {
+        List<EMWaveForm> waveforms;
+        double Magnatude;
+        string EntityName;
+    }*/
+
+
 }
