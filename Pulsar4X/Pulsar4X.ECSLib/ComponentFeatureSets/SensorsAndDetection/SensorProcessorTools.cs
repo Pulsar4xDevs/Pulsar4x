@@ -6,40 +6,66 @@ using static Pulsar4X.ECSLib.SensorProcessorTools;
 namespace Pulsar4X.ECSLib
 {
 
-    public class SensorInfo
+    public class SensorInfoDB : BaseDataBlob
     {
-        internal Entity detectedEntity;
+        internal Entity Faction;
+        internal Entity DetectedEntity; //the actual entity that we've detected. 
 
-        internal Entity SensorEntity; 
-        internal DateTime LastDetection;
-        internal sensorReturnValues LatestDetectionQuality;
-        internal sensorReturnValues HighestDetectionQuality;
+        internal Entity SensorEntity; //this is a clone of the DetectedEntity, with inacuracies in some of the data, may have datablobs which are references to the actual entitey datablobs
+        internal DateTime LastDetection; //the datetime of teh last detection
+        internal sensorReturnValues LatestDetectionQuality; //maybe this should include a list of entites that detected it. 
+        internal sensorReturnValues HighestDetectionQuality; //this should maybe include the entity that detected it. 
 
+        //jsonconstructor
+        internal SensorInfoDB() { }
+
+        internal SensorInfoDB(Entity factionEntity)
+        {
+            Faction = factionEntity;
+        }
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+        internal SensorInfoDB(SensorInfoDB db)
+        {
+            Faction = db.Faction;
+            DetectedEntity = db.DetectedEntity;
+            SensorEntity = db.SensorEntity;
+            LastDetection = db.LastDetection;
+            LatestDetectionQuality = db.LatestDetectionQuality;
+            HighestDetectionQuality = db.HighestDetectionQuality;
+        }
     }
 
     public static class SensorProcessorTools
     {
 
 
-        internal static void DetectEntites(SensorReceverAtbDB receverDB, SensorProfileDB sensorProfile, DateTime atDate)
+        internal static void DetectEntites(SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
         {
-            var knownContacts = receverDB.KnownSensorContacts;
+            Entity receverFaction = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
+            var knownContacts = receverFaction.GetDataBlob<FactionInfoDB>().SensorEntites;
+
+            SensorProfileDB sensorProfile = detectableEntity.GetDataBlob<SensorProfileDB>();
 
             TimeSpan timeSinceLastCalc = atDate - sensorProfile.LastDatetimeOfReflectionSet;
-            PositionDB positionOfSensorProfile = sensorProfile.OwningEntity.GetDataBlob<PositionDB>();//sensorProfile.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
+            PositionDB positionOfSensorProfile = detectableEntity.GetDataBlob<PositionDB>();//sensorProfile.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
             double distanceInAUSinceLastCalc = PositionDB.GetDistanceBetween(sensorProfile.LastPositionOfReflectionSet, positionOfSensorProfile);
 
             //Only set the reflectedEMProfile of the target if it's not been done recently:
+            //TODO: is this still neccicary now that I've found and fixed the loop? (refelctions were getting bounced around)
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
-                SetReflectedEMProfile.SetEntityProfile(sensorProfile.OwningEntity, atDate);
+               SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
 
             sensorReturnValues detectionValues = DetectonQuality(receverDB, sensorProfile);
-            SensorInfo sensorInfo;
+            SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)
             {
-                if (knownContacts.ContainsKey(sensorProfile.OwningEntity.Guid))
+                if (knownContacts.ContainsKey(detectableEntity.Guid))
                 {
-                    sensorInfo = knownContacts[sensorProfile.OwningEntity.Guid];
+                    sensorInfo = knownContacts[detectableEntity.Guid].GetDataBlob<SensorInfoDB>();
                     sensorInfo.LatestDetectionQuality = detectionValues;
                     sensorInfo.LastDetection = atDate;
                     if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)
@@ -47,20 +73,20 @@ namespace Pulsar4X.ECSLib
 
                     if (sensorInfo.HighestDetectionQuality.SignalStrength_kW < detectionValues.SignalStrength_kW)
                         sensorInfo.HighestDetectionQuality.SignalStrength_kW = detectionValues.SignalStrength_kW;
-                        
+                    SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo);    
                 }
                 else
                 {
-                    sensorInfo = new SensorInfo()
+                    sensorInfo = new SensorInfoDB(receverFaction)
                     {
-                        detectedEntity = sensorProfile.OwningEntity,
+                        DetectedEntity = detectableEntity,
                         LastDetection = atDate
                     };
 
 
-                    knownContacts.Add(sensorProfile.OwningEntity.Guid, sensorInfo);
+                    knownContacts.Add(detectableEntity.Guid, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo));
                 }
-                SensorEntityFactory.UpdateSensorContact(sensorInfo);
+
             }
         }
 
@@ -333,6 +359,28 @@ namespace Pulsar4X.ECSLib
             profile.Reflectivity = sysBodyInfoDB.Albedo;
         }
 
+
+        /// <summary>
+        /// TODO: Refactor: each entity (or parent) should have thier own Random based off a seed. 
+        /// all random should be psudo random and threadsafe. or at least, we need to be aware of higher level randoms which can be called by any thread. ie avoid this.
+        /// some random should be able to be figured out by remote clients, and some not. 
+        /// </summary>
+        /// <returns>The sigmoid.</returns>
+        /// <param name="acurateNumber">Acurate number.</param>
+        /// <param name="acuracy">Acuracy.</param>
+        public static double RndSigmoid(double acurateNumber, PercentValue acuracy, Random rng)
+        {
+            double sigmoid = Math.Tanh(acuracy * 10);
+            double maxRand = Rnd(1, sigmoid, rng);
+            double result = Rnd(acurateNumber + (acurateNumber * maxRand), acurateNumber - (acurateNumber * maxRand), rng);
+            return result;
+        }
+
+        public static double Rnd(double max, double min, Random rng)
+        {
+            return rng.NextDouble() * (max - min) + max;
+        }
+                                                
 
 
     }

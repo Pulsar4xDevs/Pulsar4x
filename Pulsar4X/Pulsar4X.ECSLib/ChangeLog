@@ -1,3 +1,21 @@
+2017-12-11  se5a  <jon.se5a@gmail.com>
+
+	* NameDB.cs:
+	* EntityManager.cs:
+	* FactionInfoDB.cs:
+	* StarInfoDB.cs:
+	* SystemBodyInfoDB.cs:
+	* EntityChangeListnerDB.cs:
+	* StarSystemFactory.cs:
+	* StarSystemVM.cs:
+	* SystemMap_DrawableVM.cs:
+	* SensorScan.cs:
+	* SensorReceverAtbDB.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs: System Map now gets drawn from
+	sensor contacts. need to figure out why planets are not
+	getting seen by sensors though. Sun is seen fine at least. 
+
 2017-12-06  se5a  <jon.se5a@gmail.com>
 
 	* SerializationManager.cs:

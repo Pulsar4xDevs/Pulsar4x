@@ -1,11 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System;
 
 namespace Pulsar4X.ECSLib
 {
     [DebuggerDisplay("{" + nameof(DefaultName) + "}")]
-    public class NameDB : BaseDataBlob
+    public class NameDB : BaseDataBlob, ISensorCloneMethod
     {
 
         /// <summary>
@@ -45,15 +46,17 @@ namespace Pulsar4X.ECSLib
             if (!_names.TryGetValue(requestingFaction, out name))
             {
                 // Entry not found for the specific entity.
-                // Return the default name.
-                name = _names[Entity.InvalidEntity];
+                // Return guid instead. TODO: call an automatic naming function
+                name = OwningEntity.Guid.ToString();
+                SetName(requestingFaction, name);
+
             }
             return name;
         }
 
         public string GetName(Entity requestingFaction, Game game, AuthenticationToken auth)
         {
-     
+
             if (game.GetPlayerForToken(auth).AccessRoles[requestingFaction] < AccessRole.Intelligence)
                 requestingFaction = Entity.InvalidEntity;
             return GetName(requestingFaction);
@@ -70,6 +73,17 @@ namespace Pulsar4X.ECSLib
             {
                 _names.Add(requestingFaction, specifiedName);
             }
+        }
+
+        public BaseDataBlob Clone(SensorInfoDB sensorInfo)
+        {
+            return new NameDB(this, sensorInfo);
+        }
+
+        NameDB(NameDB db, SensorInfoDB sensorInfo)
+        {            
+            _names.Add(Entity.InvalidEntity, db.DefaultName);
+            _names.Add(sensorInfo.Faction, db.GetName(sensorInfo.Faction));
         }
     }
 }

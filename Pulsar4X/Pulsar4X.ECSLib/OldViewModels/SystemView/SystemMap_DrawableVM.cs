@@ -5,30 +5,52 @@ namespace Pulsar4X.ECSLib
 {
     public class SystemMap_DrawableVM : ViewModelBase
     {
-        
 
+        private Entity _viewingFaction;
         public ObservableCollection<Entity> IconableEntitys { get; } = new ObservableCollection<Entity>();
         private HashSet<Entity> _iconableEntites = new HashSet<Entity>();
 
         public ManagerSubPulse SystemSubpulse { get; private set; }
         private EntityChangeListnerDB _listnerDB;
-        public void Initialise(GameVM gameVM, StarSystem starSys)
+
+
+        public void InitializeForGM(GameVM gameVM, StarSystem starSys)
         {
             _listnerDB = new EntityChangeListnerDB();
             Entity ChangeListnerEntity = new Entity(starSys.SystemManager);
             ChangeListnerEntity.SetDataBlob(_listnerDB);
-            ChangeListnerEntity.SetDataBlob(new OwnedDB(gameVM.CurrentFaction));
+
+            foreach (var entityWithPosition in starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>())
+            {
+                AddIconableEntity(entityWithPosition);
+            }
+
+
+        }
+
+        public void Initialise(GameVM gameVM, StarSystem starSys, Entity viewingFaction)
+        {
+            _viewingFaction = viewingFaction;
+
+
+
+
+            _listnerDB = new EntityChangeListnerDB(viewingFaction);
+            Entity ChangeListnerEntity = new Entity(starSys.SystemManager);
+            ChangeListnerEntity.SetDataBlob(_listnerDB);
+            ChangeListnerEntity.SetDataBlob(new OwnedDB(viewingFaction));
+
             EntityChangedListnerProcessor.SetListners(starSys.SystemManager, ChangeListnerEntity);
 
             IconableEntitys.Clear();
             _iconableEntites.Clear();
 
             //add non owned entites that have position
-            foreach (var entity in starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>())
+            /*foreach (var entity in starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>())
             {
                 if (!entity.HasDataBlob<OwnedDB>())
                     AddIconableEntity(entity);
-            }
+            }*/
 
             foreach (var entity in _listnerDB.ListningToEntites)
             {
@@ -74,7 +96,7 @@ namespace Pulsar4X.ECSLib
 
             lock (_listnerDB.EntityChanges)
             {
-                foreach (var change in _listnerDB.EntityChanges)
+                foreach (var change in _listnerDB.EntityChanges.ToArray())
                 {
                     switch( change.ChangeType)
                     {

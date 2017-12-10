@@ -6,6 +6,7 @@ namespace Pulsar4X.ECSLib
 {
     public enum BodyType : byte
     {
+        Unknown,
         Terrestrial,    // Like Earth/Mars/Venus/etc.
         GasGiant,       // Like Jupiter/Saturn
         IceGiant,       // Like Uranus/Neptune
@@ -19,6 +20,7 @@ namespace Pulsar4X.ECSLib
 
     public enum TectonicActivity : byte
     {
+        Unknown,
         Dead,
         Minor,
         EarthLike,
@@ -45,7 +47,7 @@ namespace Pulsar4X.ECSLib
     /// <remarks>
     /// Specifically, Minerals, body info, atmosphere info, and gravity.
     /// </remarks>
-    public class SystemBodyInfoDB : BaseDataBlob
+    public class SystemBodyInfoDB : BaseDataBlob, ISensorCloneMethod
     {
         /// <summary>
         /// Type of body this is. <see cref="BodyType"/>
@@ -179,6 +181,36 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new SystemBodyInfoDB(this);
+        }
+
+        public BaseDataBlob Clone(SensorInfoDB sensorInfo)
+        {
+            return new SystemBodyInfoDB(this, sensorInfo);
+        }
+
+        private SystemBodyInfoDB(SystemBodyInfoDB systemBodyDB, SensorInfoDB sensorInfo)
+        {
+            Random rng = new Random();
+            float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
+
+            if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.20)
+                BodyType = systemBodyDB.BodyType;
+            else
+                BodyType = BodyType.Unknown;
+            if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.80)
+                Tectonics = systemBodyDB.Tectonics;
+            else
+                Tectonics = TectonicActivity.Unknown;
+            var tilt = SensorProcessorTools.RndSigmoid(systemBodyDB.AxialTilt, accuracy, rng);
+            AxialTilt = (float)tilt;
+            MagneticField = systemBodyDB.MagneticField;
+            BaseTemperature = systemBodyDB.BaseTemperature;
+            RadiationLevel = systemBodyDB.RadiationLevel;
+            AtmosphericDust = systemBodyDB.AtmosphericDust;
+            SupportsPopulations = systemBodyDB.SupportsPopulations;
+            LengthOfDay = systemBodyDB.LengthOfDay;
+            Gravity = systemBodyDB.Gravity;
+            //Minerals = new Dictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
         }
     }
 }

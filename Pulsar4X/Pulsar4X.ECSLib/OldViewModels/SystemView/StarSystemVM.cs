@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
             var selectedSystem = StarSystems.SelectedKey;
             if (selectedSystem != null)
             { 
-                SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey);
+                SelectedSystemVM.Initialise(_gameVM, StarSystems.SelectedKey, _gameVM.CurrentFaction);
             }
         }
     }

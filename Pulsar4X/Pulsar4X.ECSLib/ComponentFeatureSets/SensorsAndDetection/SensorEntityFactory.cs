@@ -7,35 +7,48 @@ namespace Pulsar4X.ECSLib
     {
 
 
-        internal static Entity UpdateSensorContact(SensorInfo sensorInfo)
+        internal static Entity UpdateSensorContact(Entity detectingFaction, SensorInfoDB sensorInfo)
         {
-            Entity detectedEntity = sensorInfo.detectedEntity;
+            Entity detectedEntity = sensorInfo.DetectedEntity;
 
             if (sensorInfo.SensorEntity == null)
             {
-                sensorInfo.SensorEntity = new Entity(detectedEntity.Manager);
-                sensorInfo.SensorEntity.SetDataBlob<PositionDB>(SetPositionClone(sensorInfo));
+                List<BaseDataBlob> datablobs = new List<BaseDataBlob>(){
+                sensorInfo,
+                SetPositionClone(sensorInfo),
+                new OwnedDB(detectingFaction),
+                };
+                sensorInfo.SensorEntity = new Entity(detectedEntity.Manager, datablobs);
+            }
+            foreach (var db in sensorInfo.DetectedEntity.DataBlobs)
+            {
+                if (db is ISensorCloneMethod)
+                {
+                    ISensorCloneMethod sensorcloneMethdDB = (ISensorCloneMethod)db;
+                    var cloned = sensorcloneMethdDB.Clone(sensorInfo);
+                    sensorInfo.SensorEntity.SetDataBlob(cloned);
+                }
             }
 
-            Entity sensorContact = sensorInfo.SensorEntity;
 
 
-            if (sensorInfo.detectedEntity.HasDataBlob<OrbitDB>())
+
+            if (sensorInfo.DetectedEntity.HasDataBlob<OrbitDB>())
             { SetOrbitClone(detectedEntity.GetDataBlob<OrbitDB>(), sensorInfo); }
 
-            return sensorContact;        
+            return sensorInfo.SensorEntity;        
         }
 
-        private static PositionDB SetPositionClone( SensorInfo sensorInfo)
+        private static PositionDB SetPositionClone( SensorInfoDB sensorInfo)
         {
-            PositionDB position = sensorInfo.detectedEntity.GetDataBlob<PositionDB>();
+            PositionDB position = sensorInfo.DetectedEntity.GetDataBlob<PositionDB>();
             PositionDB sensorEntityPosition = GenericClone<PositionDB>(position, sensorInfo);
             //tweak add some random noise depending on quality; 
             return sensorEntityPosition;
 
         }
 
-        private static void SetOrbitClone(OrbitDB detectedEntitesOrbit, SensorInfo sensorInfo)
+        private static void SetOrbitClone(OrbitDB detectedEntitesOrbit, SensorInfoDB sensorInfo)
         {
 
             //var quality = sensorInfo.HighestDetectionQuality.detectedSignalQuality.Percent; //quality shouldn't affect positioning. 
@@ -48,7 +61,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void SetTranslateClone(TranslateMoveDB detectedEntitiesMove, SensorInfo sensorInfo)
+        private static void SetTranslateClone(TranslateMoveDB detectedEntitiesMove, SensorInfoDB sensorInfo)
         {
             //var quality = sensorInfo.HighestDetectionQuality.detectedSignalQuality.Percent; //quality shouldn't affect positioning. 
             //double signalBestMagnatude = sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW;
@@ -68,34 +81,26 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        private static T GenericClone<T>(T datablob, SensorInfo sensorInfo) where T: BaseDataBlob
+
+        private static T GenericClone<T>(T datablob, SensorInfoDB sensorInfo) where T: BaseDataBlob
         {
 
             T sensorEntitesDB;
-            if (sensorInfo.detectedEntity.HasDataBlob<T>())
+            if (sensorInfo.DetectedEntity.HasDataBlob<T>())
             {
-                sensorEntitesDB = sensorInfo.detectedEntity.GetDataBlob<T>();
+                sensorEntitesDB = sensorInfo.DetectedEntity.GetDataBlob<T>();
 
             }
             else
             {
                 sensorEntitesDB = (T)datablob.Clone();
-                sensorInfo.detectedEntity.SetDataBlob(sensorEntitesDB);
+                sensorInfo.DetectedEntity.SetDataBlob(sensorEntitesDB);
             }
 
             return sensorEntitesDB;
 
         }
 
-        internal static void UpdateSensorContact(Entity detectedEntity, SensorInfo sensorInfo)
-        {
-            foreach (var datablob in detectedEntity.DataBlobs)
-            {
-                Type t = datablob.GetType();
-
-                //if(sensorInfo.SensorEntity.HasDataBlob<t>
-            }
-        }
 
         internal static void CompareDatabob<T>(BaseDataBlob db, Entity sensorEntity) where T : BaseDataBlob
         {
@@ -103,7 +108,17 @@ namespace Pulsar4X.ECSLib
             { }
         }
     }
+
+
+    public interface ISensorCloneMethod
+    {
+        BaseDataBlob Clone(SensorInfoDB sensorInfo);
+    }
+
 }
+
+
+
 
 /* basicaly an idea of how to maybe do an interface on the datablobs, currently trying to avoid doing this.  
 

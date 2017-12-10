@@ -146,12 +146,13 @@ namespace Pulsar4X.ECSLib
             double marsMeanLong = 355.45332;
             OrbitDB marsOrbitDB =OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, marsMVDB.Mass, marsSemiMajAxis, marsEccentricity, marsInclination, marsLoAN, marsAoP, marsMeanLong, GalaxyGen.Settings.J2000);
             Dictionary<AtmosphericGasSD, float> marsAtmoGasses = new Dictionary<AtmosphericGasSD, float>();
-            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(12), 0.95f * 0.01f);   // C02% * Mars Atms
-            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.027f * 0.01f);   // N% * Mars Atms
-            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.007f * 0.01f);   // O% * Mars Atms
-            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.016f * 0.01f);  // Ar% * Mars Atms
+            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(12), 0.95f * 0.01f);   // C02% * Mars Atms
+            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.027f * 0.01f);   // N% * Mars Atms
+            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.007f * 0.01f);   // O% * Mars Atms
+            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.016f * 0.01f);  // Ar% * Mars Atms
+            AtmosphereDB marsAtmo = new AtmosphereDB(0.087f, false, 0, 0, 0, -55, marsAtmoGasses);
             PositionDB marsPositionDB = new PositionDB(OrbitProcessor.GetPosition(marsOrbitDB, game.CurrentDateTime), sol.Guid);
-            Entity mars = new Entity(sol.SystemManager, new List<BaseDataBlob> { marsPositionDB, marsBodyDB, marsMVDB, marsNameDB, marsOrbitDB} );
+            Entity mars = new Entity(sol.SystemManager, new List<BaseDataBlob> { marsPositionDB, marsBodyDB, marsMVDB, marsNameDB, marsOrbitDB, marsAtmo } );
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mars);
 
 

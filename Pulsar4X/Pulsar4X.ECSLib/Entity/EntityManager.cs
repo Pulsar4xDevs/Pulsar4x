@@ -305,8 +305,7 @@ namespace Pulsar4X.ECSLib
                 };
                 foreach (var item in changeListners)
                 {
-                    if(item.ListningToEntites.Contains(entity))
-                        item.EntityChanges.Add(changeData);
+                    item.AddChange(changeData);
                 }
             }
         }

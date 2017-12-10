@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
         D,          // White Dwarfs
     }
 
-    public class StarInfoDB : BaseDataBlob
+    public class StarInfoDB : BaseDataBlob, ISensorCloneMethod
     {
         /// <summary>
         /// Age of this star. Fluff.
@@ -120,6 +120,27 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new StarInfoDB(this);
+        }
+
+        public BaseDataBlob Clone(SensorInfoDB sensorInfo)
+        {
+            return new StarInfoDB(this, sensorInfo);
+        }
+
+        StarInfoDB(StarInfoDB db, SensorInfoDB sensorInfo)
+        {
+            Random rng = new Random();
+            float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
+
+            Age = SensorProcessorTools.RndSigmoid(db.Age, accuracy, rng);
+            Temperature = SensorProcessorTools.RndSigmoid(db.Temperature, accuracy, rng);
+            Luminosity = SensorProcessorTools.RndSigmoid(db.Luminosity, accuracy, rng);
+            Class = db.Class;
+
+            SpectralType = db.SpectralType;
+            SpectralSubDivision = db.SpectralSubDivision;
+            LuminosityClass = db.LuminosityClass;
+
         }
     }
 }

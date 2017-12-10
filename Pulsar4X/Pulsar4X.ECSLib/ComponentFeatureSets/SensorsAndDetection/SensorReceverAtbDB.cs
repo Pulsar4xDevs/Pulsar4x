@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         internal int ScanTime; //the time it takes to complete a full 360 degree sweep. 
         //internal int Size; //basicly increases sensitivity at the cost of mass
         [JsonProperty]
-        internal Dictionary<Guid, SensorInfo> KnownSensorContacts = new Dictionary<Guid, SensorInfo>();
+        internal Dictionary<Guid, SensorInfoDB> KnownSensorContacts = new Dictionary<Guid, SensorInfoDB>();
 
 
         [JsonConstructor]
