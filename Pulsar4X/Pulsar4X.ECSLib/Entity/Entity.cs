@@ -294,6 +294,18 @@ namespace Pulsar4X.ECSLib
             return Guid.ToString();
         }
 
+        public override int GetValueCompareHash(int hash = 17)
+        {
+            foreach (var item in DataBlobs)
+            {
+                if (item is IGetValuesHash)
+                    hash = ((IGetValuesHash)item).GetValueCompareHash(hash);
+                else
+                    hash = Misc.ValueHash(item, hash);
+            }
+            return hash;
+        } 
+
         /// <summary>
         /// Used to transfer an entity between managers.
         /// </summary>
@@ -325,6 +337,7 @@ namespace Pulsar4X.ECSLib
                 SetDataBlob(dataBlob);
             }
         }
+
 
         /// <summary>
         /// EntityConverter is responsible for deserializing entities when they are encountered as references. 

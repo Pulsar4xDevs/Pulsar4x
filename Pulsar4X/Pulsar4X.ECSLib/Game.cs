@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public readonly EntityManager GlobalManager;
-
+        internal readonly Dictionary<Guid, EntityManager> GlobalManagerDictionary = new Dictionary<Guid, EntityManager>();
         [PublicAPI]
         [JsonProperty]
         public StaticDataStore StaticData { get; } = new StaticDataStore();

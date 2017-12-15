@@ -245,7 +245,6 @@
     <Compile Include="DataBlobs\ComponentAttributeDBs\ComponentInfoDB.cs" />
     <Compile Include="DataBlobs\ColonyBonusesDB.cs" />
     <Compile Include="DataBlobs\ExampleDB.cs" />
-    <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
     <Compile Include="DataBlobs\JPSurveyableDB.cs" />
     <Compile Include="DataBlobs\TransitableDB.cs" />
@@ -413,6 +412,8 @@
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorScan.cs" />
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\EMWaveForm.cs" />
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorInfoDB.cs" />
+    <Compile Include="Networking\NetMessageBase.cs" />
+    <Compile Include="Faction\FactionAbilitiesDB.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

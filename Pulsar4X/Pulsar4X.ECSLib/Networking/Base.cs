@@ -242,6 +242,19 @@ namespace Pulsar4X.Networking
         {
         }
 
+        internal void printEntityHashInfo(Entity entity)
+        {
+            var hash = entity.GetValueCompareHash();
+            Messages.Add("factionHash: " + hash.ToString());
+            foreach (var datablob in entity.DataBlobs)
+            {
+                if (datablob is IGetValuesHash)
+                    Messages.Add(datablob.GetType() + " ValueHash: " + ((IGetValuesHash)datablob).GetValueCompareHash().ToString());               
+                else
+                    Messages.Add(datablob.GetType() + " ObjectHash: " + datablob.GetHashCode() + "WARNING: does not impliment IGetValueHash - db hash will never compare unless entity does");
+            }
+        }
+
 
         /// <summary>
         /// use this for sending an non basic object type.

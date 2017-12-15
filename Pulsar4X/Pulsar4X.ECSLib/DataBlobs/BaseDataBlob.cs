@@ -13,5 +13,11 @@ namespace Pulsar4X.ECSLib
         public virtual Entity OwningEntity { get; internal set; } = Entity.InvalidEntity;
 
         public abstract object Clone();
+
+    }
+
+    public interface IGetValuesHash
+    {
+        int GetValueCompareHash(int hash = 17);
     }
 }

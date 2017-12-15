@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public class FactionTechDB : BaseDataBlob
+    public class FactionTechDB : BaseDataBlob, IGetValuesHash
     {
         /// <summary>
         /// dictionary of technolagy levels that have been fully researched.
@@ -84,6 +84,22 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new FactionTechDB(this);
+        }
+
+        public int GetValueCompareHash(int hash = 17)
+        {
+            hash = Misc.ValueHash(ResearchPoints, hash);
+            foreach (var item in ResearchedTechs)
+            {
+                hash = Misc.ValueHash(item.Key, hash);  
+                hash = Misc.ValueHash(item.Value, hash);
+            } 
+            foreach (var item in ResearchableTechs)
+            {
+                hash = Misc.ValueHash(item.Key, hash);
+                hash = Misc.ValueHash(item.Value, hash);
+            }
+            return hash;
         }
     }
 }

@@ -68,7 +68,12 @@ namespace Pulsar4X.Networking
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
 
             NetPeerObject = new NetServer(config);
-            NetPeerObject.Start();
+            try
+            {
+                NetPeerObject.Start();
+            }
+            catch (System.Net.Sockets.SocketException)
+            { }
             //EntityDataSanitiser.Initialise(Game);
             StartListning();
             Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
@@ -167,7 +172,9 @@ namespace Pulsar4X.Networking
                 //TODO negotiate and get a delta between the server's data and the client's data, and only update teh client with changed data.
                 //(the client should be able to save/keep a cashe of it's own data so there's less to send when reconnecting to a server.)
                 SendFactionData(sender, faction); 
+                printEntityHashInfo(faction);
             }
+
         }
 
         protected override void ConnectionStatusChanged(NetIncomingMessage message)
@@ -233,8 +240,9 @@ namespace Pulsar4X.Networking
 
             //Send faction entity
             var mStream = new MemoryStream();
-
-            SerializationManager.Export(Game, mStream, factionEntity );
+            ProtoEntity factionEntityClone = factionEntity.Clone();
+            factionEntityClone.RemoveDataBlob<AuthDB>();
+            SerializationManager.Export(Game, mStream, factionEntityClone );
 
             //SerializationManager.NetStreamEntity(factionEntity, mStream);
             byte[] entityByteArray = mStream.ToArray();
@@ -244,11 +252,13 @@ namespace Pulsar4X.Networking
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
             sendMsg.Write((byte)DataMessageType.FactionData);
             sendMsg.Write(factionEntity.Guid.ToByteArray());
+            sendMsg.Write(factionEntityClone.GetValueCompareHash());
             sendMsg.Write(len);
             sendMsg.Write(entityByteArray);
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
             mStream.Close();
 
+            /*
             //send each of the StarSystems that the faction knows about. 
             foreach (var systemID in factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems)
             {
@@ -265,6 +275,7 @@ namespace Pulsar4X.Networking
                 NetServerObject.SendMessage(sendMsgSystem, recipient, NetDeliveryMethod.ReliableOrdered);
                 mStream.Close();
             }
+            */
         }
     }
 }

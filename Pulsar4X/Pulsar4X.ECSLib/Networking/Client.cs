@@ -110,15 +110,18 @@ namespace Pulsar4X.Networking
 
             Guid entityID = new Guid(message.ReadBytes(16));
             //HandleEntityData(message);
-
+            int hash = message.ReadInt32();
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
             var mStream = new MemoryStream(data);
             Entity factionEntity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
+            Messages.Add("OrigionalfactionHash: " + hash.ToString());
+            printEntityHashInfo(factionEntity);
             //Guid entityID = factionEntity.Guid;
             //if (Game.GlobalManager.TryGetEntityByGuid(entityID, out factionEntity))
-            CurrentFaction = factionEntity;
-            _gameVM.CurrentFaction = factionEntity;
+            //CurrentFaction = factionEntity;
+            //_gameVM.CurrentFaction = factionEntity;
+
         }
 
         protected override void HandleSystemData(NetIncomingMessage message)

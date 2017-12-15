@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     [PublicAPI]
     [JsonConverter(typeof(ProtoEntityConverter))]
-    public class ProtoEntity
+    public class ProtoEntity: IGetValuesHash
     {
         [PublicAPI]
         public List<BaseDataBlob> DataBlobs { get; set; } = EntityManager.BlankDataBlobList();
@@ -93,6 +93,21 @@ namespace Pulsar4X.ECSLib
         {
             DataBlobs[typeIndex] = null;
             _protectedDataBlobMask_[typeIndex] = false;
+        }
+
+        public virtual int GetValueCompareHash(int hash = 17)
+        {
+            foreach (var item in DataBlobs)
+            {
+                if (item != null)
+                {
+                    if (item is IGetValuesHash)
+                        hash = ((IGetValuesHash)item).GetValueCompareHash(hash);
+                    else
+                        hash = Misc.ValueHash(item, hash);
+                }
+            }
+            return hash;
         }
 
         internal class ProtoEntityConverter : JsonConverter

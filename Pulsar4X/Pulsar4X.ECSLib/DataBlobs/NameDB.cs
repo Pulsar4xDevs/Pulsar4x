@@ -6,7 +6,7 @@ using System;
 namespace Pulsar4X.ECSLib
 {
     [DebuggerDisplay("{" + nameof(DefaultName) + "}")]
-    public class NameDB : BaseDataBlob, ISensorCloneMethod
+    public class NameDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
     {
 
         /// <summary>
@@ -78,6 +78,16 @@ namespace Pulsar4X.ECSLib
         public BaseDataBlob Clone(SensorInfoDB sensorInfo)
         {
             return new NameDB(this, sensorInfo);
+        }
+
+        public int GetValueCompareHash(int hash = 17)
+        {
+            foreach (var item in _names)
+            {
+                hash = Misc.ValueHash(item.Key.Guid, hash);
+                hash = Misc.ValueHash(item.Value, hash);
+            }
+            return hash;
         }
 
         NameDB(NameDB db, SensorInfoDB sensorInfo)

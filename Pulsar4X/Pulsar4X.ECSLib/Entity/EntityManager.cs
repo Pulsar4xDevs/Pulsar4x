@@ -13,6 +13,7 @@ namespace Pulsar4X.ECSLib
     public class EntityManager : ISerializable
     {
         [CanBeNull]
+        internal Guid ManagerGuid;
         internal readonly Game Game;
         private readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
@@ -45,6 +46,8 @@ namespace Pulsar4X.ECSLib
         internal EntityManager(Game game, bool isGlobalManager = false)
         {
             Game = game;
+            ManagerGuid = Guid.NewGuid();
+            game.GlobalManagerDictionary.Add(ManagerGuid, this);
             if (isGlobalManager)
             {
                 _globalEntityDictionary = new Dictionary<Guid,EntityManager>();

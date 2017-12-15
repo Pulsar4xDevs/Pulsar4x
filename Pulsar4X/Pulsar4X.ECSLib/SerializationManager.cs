@@ -42,6 +42,7 @@ namespace Pulsar4X.ECSLib
 
         public static string Export([NotNull] Game game, bool compress = false) => Export<Game>(game, game, compress);
         public static string Export([NotNull] Game game, [NotNull] Entity entity, bool compress = false) => Export<ProtoEntity>(game, entity.Clone(), compress);
+        public static string Export([NotNull] Game game, [NotNull] ProtoEntity entity, bool compress = false) => Export<ProtoEntity>(game, entity, compress);
         public static string Export([NotNull] Game game, [NotNull] StarSystem system, bool compress = false) => Export<StarSystem>(game, system, compress);
         public static string Export([NotNull] Game game, [NotNull] EventLog eventLog, bool compress = false) => Export<EventLog>(game, eventLog, compress);
         private static string Export<TObj>([NotNull] Game game, [NotNull] TObj obj, bool compress = false)
@@ -60,6 +61,7 @@ namespace Pulsar4X.ECSLib
 
         public static void Export([NotNull] Game game, [NotNull] string filePath, bool compress = false) => ExportFile(game, filePath, game, compress);
         public static void Export([NotNull] Game game, [NotNull] string filePath, [NotNull] Entity entity, bool compress = false) => ExportFile(game, filePath, entity.Clone(), compress);
+        public static void Export([NotNull] Game game, [NotNull] string filePath, [NotNull] ProtoEntity entity, bool compress = false) => ExportFile(game, filePath, entity, compress);
         public static void Export([NotNull] Game game, [NotNull] string filePath, [NotNull] StarSystem system, bool compress = false) => ExportFile(game, filePath, system, compress);
         public static void Export([NotNull] Game game, [NotNull] string filePath, [NotNull] EventLog eventLog, bool compress = false) => ExportFile(game, filePath, eventLog, compress);
         private static void ExportFile<TObj>([NotNull] Game game, [NotNull] string filePath, [NotNull] TObj obj, bool compress = false)
@@ -72,6 +74,7 @@ namespace Pulsar4X.ECSLib
 
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, bool compress = false) => ExportInternal(game, outputStream, game, compress);
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] Entity entity, bool compress = false) => ExportInternal(game, outputStream, entity.Clone(), compress);
+        public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] ProtoEntity entity, bool compress = false) => ExportInternal(game, outputStream, entity, compress);
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] StarSystem system, bool compress = false) => ExportInternal(game, outputStream, system, compress);
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] EventLog eventLog, bool compress = false) => ExportInternal(game, outputStream, eventLog, compress);
         private static void ExportInternal<TObj>([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] TObj obj, bool compress = false)
@@ -115,7 +118,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="outputStream"></param>
         /// <param name="progress"></param>
         /// <param name="compress"></param>
-        [PublicAPI]
+        [PublicAPI]//possibly obsolete
         public static void NetStreamEntity([NotNull] Entity entity, [NotNull] Stream outputStream, IProgress<double> progress = null, bool compress = false)
         {
             if (entity == null)

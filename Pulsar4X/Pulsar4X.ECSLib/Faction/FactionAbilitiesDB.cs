@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
@@ -47,7 +48,7 @@ namespace Pulsar4X.ECSLib
 
     }
 
-    public class FactionAbilitiesDB : BaseDataBlob
+    public class FactionAbilitiesDB : BaseDataBlob, IGetValuesHash
     {
         public int BasePlanetarySensorStrength { get; set; }
 
@@ -110,5 +111,21 @@ namespace Pulsar4X.ECSLib
         {
             return new FactionAbilitiesDB(this);
         }
+
+        public int GetValueCompareHash(int hash = 17)
+        {
+
+            foreach (var item in AbilityBonuses)
+            {
+                hash = Misc.ValueHash(item.Key, hash);
+                hash = Misc.ValueHash(item.Value, hash);
+            }
+
+            hash = Misc.ValueHash(BasePlanetarySensorStrength, hash);
+            hash = Misc.ValueHash(BaseGroundUnitStrengthBonus, hash);
+            hash = Misc.ValueHash(ColonyCostMultiplier, hash);
+            return hash;
+        }
+
     }
 }

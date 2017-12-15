@@ -1,3 +1,25 @@
+2017-12-16  se5a  <jon.se5a@gmail.com>
+
+	* Game.cs:
+	* Entity.cs:
+	* Base.cs:
+	* NameDB.cs:
+	* Server.cs:
+	* Client.cs:
+	* ProtoEntity.cs:
+	* Pulsar4X.ECSLib.csproj:
+	* MiscHelpers.cs:
+	* SerializationManager.cs:
+	* EntityManager.cs:
+	* FactionInfoDB.cs:
+	* FactionFactory.cs:
+	* BaseDataBlob.cs:
+	* NetMessageBase.cs:
+	* FactionAbilitiesDB.cs:
+	* FactionOwnedEntitesDB.cs:
+	* FactionTechDB.cs: Implements an Interface to calculate hash
+	values for entites and datablobs. 
+
 2017-12-11  se5a  <jon.se5a@gmail.com>
 
 	* Pulsar4X.ECSLib.csproj:

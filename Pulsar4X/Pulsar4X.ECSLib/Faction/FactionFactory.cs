@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+
     public static class FactionFactory
     {
         /*
@@ -45,7 +47,6 @@ namespace Pulsar4X.ECSLib
                 new FactionAbilitiesDB(), 
                 new FactionTechDB(game.StaticData.Techs.Values.ToList()), 
                 new FactionOwnedEntitesDB(), 
-
             };
             var factionEntity = new Entity(game.GlobalManager, blobs);
 
