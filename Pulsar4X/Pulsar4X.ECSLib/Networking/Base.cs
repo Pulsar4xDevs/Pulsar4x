@@ -11,7 +11,7 @@ using Pulsar4X.ECSLib;
 namespace Pulsar4X.Networking
 {
 
-
+    /*
     public enum DataMessageType : byte
     {
         StringMessage,
@@ -25,8 +25,10 @@ namespace Pulsar4X.Networking
         EntityCommand,
         ConnectFactionData,
 
-        TickInfo
-    }
+        TickInfo,
+        EntityHashData
+
+    }*/
 
     /*Messages look like:
      * 
@@ -174,8 +176,9 @@ namespace Pulsar4X.Networking
         protected virtual void ConnectionStatusChanged(NetIncomingMessage message)
         {
         }
-        protected void HandleIncomingDataMessage(NetConnection sender, NetIncomingMessage message)
-        {
+
+        protected abstract void HandleIncomingDataMessage(NetConnection sender, NetIncomingMessage message);
+        /*{
             DataMessageType messageType = (DataMessageType)message.ReadByte();
             switch (messageType)
             {
@@ -195,52 +198,9 @@ namespace Pulsar4X.Networking
                     HandleEntityData(message);
                     break;
             }
-        }
+        }*/
 
 
-
-        /// <summary>
-        /// server only, server sends data back EntityData and SystemData meessages
-        /// </summary>
-        /// <param name="message"></param>
-        protected virtual void HandleFactionData(NetIncomingMessage message)
-        {
-        }
-
-
-        /// <summary>
-        /// server reads this as a request. client reads this as data
-        /// </summary>
-        /// <param name="message"></param>
-        protected virtual void HandleSystemData(NetIncomingMessage message)
-        {
-        }
-
-        /// <summary>
-        /// server reads this as a request. client reads this as data
-        /// </summary>
-        /// <param name="message"></param>
-        protected virtual void HandleEntityData(NetIncomingMessage message)
-        {
-        }
-
-        /// <summary>
-        /// client read only: this happens when a server advances time
-        /// </summary>
-        /// <param name="message"></param>
-        protected virtual void HandleTickInfo(NetIncomingMessage message)
-        {
-        }
-
-
-
-        /// <summary>
-        /// client read only
-        /// </summary>
-        /// <param name="message"></param>
-        protected virtual void HandleGameDataMessage(NetIncomingMessage message)
-        {
-        }
 
         internal void printEntityHashInfo(Entity entity)
         {

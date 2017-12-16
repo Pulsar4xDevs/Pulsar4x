@@ -118,71 +118,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="outputStream"></param>
         /// <param name="progress"></param>
         /// <param name="compress"></param>
-        [PublicAPI]//possibly obsolete
-        public static void NetStreamEntity([NotNull] Entity entity, [NotNull] Stream outputStream, IProgress<double> progress = null, bool compress = false)
+
+        public static void Export([NotNull] GameSettings settings, [NotNull] Stream outputStream, bool compress = false)
         {
-            if (entity == null)
-            {
-                throw new ArgumentNullException("entity");
-            }
-            JsonSerializer serializer = new JsonSerializer { 
-                NullValueHandling = NullValueHandling.Ignore, 
-                Formatting = compress ? Formatting.None : Formatting.Indented,
-                ContractResolver = new ForceUseISerializable() };
-
-
-            lock (SyncRoot)
-            {
-                Progress = progress;
-                ManagersProcessed = 0;
-                //entity.NumSystems = entity.StarSystems.Count;
-
-                // Wrap the outputStream in a BufferedStream.
-                // This will improves performance if the outputStream does not have an internal buffer. (E.G. NetworkStream)
-                using (BufferedStream outputBuffer = new BufferedStream(outputStream))
-                {
-                    using (MemoryStream intermediateStream = new MemoryStream())
-                    {
-                        using (StreamWriter streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
-                        {
-                            using (JsonWriter writer = new JsonTextWriter(streamWriter))
-                            {
-                                writer.WriteStartObject(); // Start the Entity.
-                                writer.WritePropertyName("Guid"); // Write the Guid PropertyName
-                                serializer.Serialize(writer, entity.Guid); // Write the Entity's guid.
-                                var datablobs = entity.DataBlobs;
-                                foreach (BaseDataBlob dataBlob in datablobs)
-                                {
-                                    writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
-                                    serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
-                                }
-                                writer.WriteEndObject(); // End then Entity.
-                            }
-                        }
-
-                        // Reset the MemoryStream's position to 0. CopyTo copies from Position to the end.
-                        intermediateStream.Position = 0;
-
-                        if (compress)
-                        {
-                            using (GZipStream compressionStream = new GZipStream(outputBuffer, CompressionLevel.Optimal))
-                            {
-                                intermediateStream.CopyTo(compressionStream);
-                            }
-                        }
-                        else
-                        {
-                            intermediateStream.CopyTo(outputBuffer);
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void TXNetStreamGameSettings([NotNull] GameSettings settings, [NotNull] Stream outputStream, bool compress = false)
-        {
-
-
             JsonSerializer serialiser = new JsonSerializer
             {
                 NullValueHandling = NullValueHandling.Ignore,
@@ -206,7 +144,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public static GameSettings RXNetStreamGameSettings(Stream inputStream)
+        public static GameSettings ImportGameSettings(Stream inputStream)
         {
             JsonSerializer serialiser = new JsonSerializer
             {

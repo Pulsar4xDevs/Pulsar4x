@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
             } 
             foreach (var item in ResearchableTechs)
             {
-                hash = Misc.ValueHash(item.Key, hash);
+                hash = Misc.ValueHash(item.Key.ID, hash);
                 hash = Misc.ValueHash(item.Value, hash);
             }
             return hash;

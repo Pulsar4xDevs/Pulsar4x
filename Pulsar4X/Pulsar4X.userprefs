@@ -1,17 +1,16 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/Research/FactionTechDB.cs" Line="89" Column="54" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="85" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="192" Column="21" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="181" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/SerializationManager.cs" Line="19" Column="25" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoLoadOrderCommand.cs" Line="6" Column="46" />
+      <File FileName="Pulsar4X.ECSLib/Orders/EntityCommand.cs" Line="4" Column="22" />
+      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="370" Column="40" />
       <File FileName="Pulsar4X Status" />
     </Files>
-    <Pads>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>ResearchedTechs</Value>
-          <Value>ResearchPoints</Value>
-          <Value>ResearchableTechs</Value>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

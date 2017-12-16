@@ -1,5 +1,15 @@
 2017-12-16  se5a  <jon.se5a@gmail.com>
 
+	* FactionTechDB.cs: fix to techDB hash.
+
+
+	* Base.cs:
+	* Client.cs:
+	* Server.cs:
+	* SerializationManager.cs: Refactor netcode stuff. 
+
+2017-12-16  se5a  <jon.se5a@gmail.com>
+
 	* Game.cs:
 	* Entity.cs:
 	* Base.cs:
