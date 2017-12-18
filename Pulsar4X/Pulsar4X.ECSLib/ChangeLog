@@ -1,3 +1,9 @@
+2017-12-19  se5a  <jon.se5a@gmail.com>
+
+	* Client.cs:
+	* Server.cs: some minor changes. committing before I start
+	messing with finding a bug in the serialiser 
+
 2017-12-18  se5a  <jon.se5a@gmail.com>
 
 	* Game.cs:

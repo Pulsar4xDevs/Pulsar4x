@@ -145,6 +145,9 @@ namespace Pulsar4X.Networking
                 case ToServerMsgType.RequestEntityHash:
                     HandleRequestEntityHash(message);
                     break;
+                case ToServerMsgType.RequestDatablob:
+                    HandleRequestDatablob(message);
+                    break;
                 default:
                     throw new Exception("Unhandled ToServerMsgType: " + messageType);
             }
@@ -206,7 +209,28 @@ namespace Pulsar4X.Networking
             
         }
 
-        private
+
+
+        void HandleRequestDatablob(NetIncomingMessage message)
+        {
+            NetConnection sender = message.SenderConnection;
+            Guid entityGuid = new Guid(message.ReadBytes(16));
+            string datablobTypename = message.ReadString();
+            int datablobTypeIndex = message.ReadInt32();
+
+            Entity entity;
+            if (!this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                Messages.Add(sender.ToString() + "DatablobRequestFail: No Entity for Guid: " + entityGuid);
+            else
+            {
+                var datablob = entity.GetDataBlob<BaseDataBlob>(datablobTypeIndex);
+                Messages.Add("Requested Typename: " + datablobTypename);
+                Messages.Add("Type by Index(" + datablobTypeIndex +"): " + datablob.GetType());
+
+                SendDatablob(sender, entity, datablob);
+            }
+
+        }
 
 
         #endregion
@@ -341,6 +365,34 @@ namespace Pulsar4X.Networking
             sendMsg.Write(len);
             sendMsg.Write(systemByteArray);
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        void SendDatablob(NetConnection recipient, Entity entity, BaseDataBlob datablob)
+        {
+            //string typename = datablobtype.AssemblyQualifiedName;
+
+            var mStream = new MemoryStream();
+            //int typeIndex = EntityManager.DataBlobTypes[datablobtype];
+            //var datablob = entity.GetDataBlob<BaseDataBlob>(typeIndex);
+
+            byte[] systemByteArray = mStream.ToArray();
+            int len = systemByteArray.Length;
+
+            Messages.Add("GetType().ToSTring(): " + datablob.GetType().ToString());
+            Messages.Add("GetType().Name: " + datablob.GetType().Name);
+            Messages.Add("GetType().AssemblyQualifiedName: " + datablob.GetType().AssemblyQualifiedName);
+            Messages.Add("GetType().FullName: " + datablob.GetType().FullName);
+            //Messages.Add("pulsarTypeIndex: " + typeIndex);
+
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            msg.Write((byte)ToClientMsgType.SendDatablob);
+            msg.Write(entity.Guid.ToByteArray());
+            msg.Write(datablob.GetType().ToString());
+            msg.Write(systemByteArray);
+            NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
+
+
+
         }
 
         #endregion

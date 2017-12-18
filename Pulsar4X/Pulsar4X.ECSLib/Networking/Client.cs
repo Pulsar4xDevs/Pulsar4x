@@ -77,7 +77,7 @@ namespace Pulsar4X.Networking
         {
             if (CurrentFaction != null)
             {
-                CheckEntityData();
+                //CheckEntityData();
                 _gameVM.StarSystemViewModel = new StarSystemVM(_gameVM, Game, CurrentFaction);
                 _gameVM.StarSystemViewModel.Initialise();
             }
@@ -165,9 +165,11 @@ namespace Pulsar4X.Networking
             //TODO: datablobs have an int ID, can we use that? can we be sure that the server and client's datablob IDs are the same?
             NetOutgoingMessage msg = NetPeerObject.CreateMessage();
             msg.Write((byte)ToServerMsgType.RequestDatablob);
-            msg.Write(entityID.ToByteArray());
-            msg.Write(datablobType.ToString());
-            int dbTypeIndex = EntityManager.DataBlobTypes[datablobType];
+            msg.Write(entityID.ToByteArray());                          //EntityID
+            msg.Write(datablobType.ToString());                         //type.
+            msg.Write(EntityManager.DataBlobTypes[datablobType]);       //typeIndex
+
+            NetClientObject.SendMessage(msg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered);
         }
 
         public void SendEntityCommand(EntityCommand cmd)//may need to serialise it prior to this (as the actual class). can we serialise an interface?
@@ -191,9 +193,6 @@ namespace Pulsar4X.Networking
         }
 
         #endregion
-
-
-
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -269,9 +268,17 @@ namespace Pulsar4X.Networking
             int hash = message.ReadInt32();
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
+
             var mStream = new MemoryStream(data);
+
+            Entity checkEntity;
+            bool entityExsists = Game.GlobalManager.TryGetEntityByGuid(entityID, out checkEntity);
+
             Entity factionEntity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
             mStream.Close();
+
+            if (entityID != factionEntity.Guid)
+                Messages.Add("Warning! Guid does not match, Seraliser is changing the guid. fuck.");
 
             if (hash == factionEntity.GetValueCompareHash())
                 Messages.Add("Good news everybody! Faction Hash is a Match!");
@@ -288,6 +295,9 @@ namespace Pulsar4X.Networking
             {
                 SendSystemDataRequest(item);
             }
+
+            SendDatablobRequest(factionEntity.Guid, factionInfo.GetType());
+
             _gameVM.CurrentFaction = factionEntity;
         }
 
