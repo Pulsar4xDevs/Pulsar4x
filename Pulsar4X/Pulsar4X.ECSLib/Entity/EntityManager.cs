@@ -559,6 +559,42 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Checks if the global dictionary contains the requested entity guid.
+        /// </summary>
+        /// <returns><c>true</c>, if entity does exist globaly <c>false</c> otherwise.</returns>
+        /// <param name="entityGuid">Entity GUID.</param>
+        [PublicAPI]
+        public bool EntityExistsGlobaly(Guid entityGuid)
+        {
+            if (Game != null)
+            {
+                if (_localEntityDictionary.ContainsKey(entityGuid))
+                    return true;
+                else
+                    return false;
+            }
+            _globalGuidDictionaryLock.EnterReadLock();
+            if (_globalEntityDictionary.ContainsKey(entityGuid))
+                return true;
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Does the entity exsist localy.
+        /// </summary>
+        /// <returns><c>true</c>, if entity exsist localy <c>false</c> otherwise.</returns>
+        /// <param name="entityGuid">Entity GUID.</param>
+        [PublicAPI]
+        public bool EntityExistsLocaly(Guid entityGuid)
+        {
+            if (_localEntityDictionary.ContainsKey(entityGuid))
+                return true;
+            return false;
+               
+        }
+
+        /// <summary>
         /// Attempts to find the entity with the associated Guid. Checks globally.
         /// </summary>
         /// <returns>True if entityID is found.</returns>
