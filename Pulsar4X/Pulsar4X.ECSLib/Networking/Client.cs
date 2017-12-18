@@ -27,6 +27,13 @@ namespace Pulsar4X.Networking
     }
     public class NetworkClient : NetworkBase
     {
+        struct EntityHashData
+        {
+            internal Guid EntityID;
+            internal DateTime AtDatetime;
+            internal int EntityHash;
+            internal Dictionary<string, int> DatablobHashes;
+        }
 
         private NetClient NetClientObject { get { return (NetClient)NetPeerObject; } }
         public string HostAddress { get; set; }
@@ -34,7 +41,7 @@ namespace Pulsar4X.Networking
         public bool IsConnectedToServer { get { return _isConnectedToServer; } set { _isConnectedToServer = value; OnPropertyChanged(); } }
         private bool _hasFullDataset;
         public bool HasFullDataset { get { return _hasFullDataset; } private set { _hasFullDataset = value; OnPropertyChanged(); } }
-        public Entity CurrentFaction { get; set; }
+        public Entity CurrentFaction { get { return _gameVM.CurrentFaction; } }
         //public event TickStartEventHandler NetTickEvent;
         public string ConnectedToGameName { get; private set; }
         public DateTime hostToDatetime { get; private set; }
@@ -71,7 +78,10 @@ namespace Pulsar4X.Networking
             if (CurrentFaction != null)
             {
                 CheckEntityData();
+                _gameVM.StarSystemViewModel = new StarSystemVM(_gameVM, Game, CurrentFaction);
+                _gameVM.StarSystemViewModel.Initialise();
             }
+
         }
 
         #region NetMessages
@@ -83,9 +93,6 @@ namespace Pulsar4X.Networking
             hostToDatetime = DateTime.FromBinary(ticks); //= new DateTime(ticks);
             Messages.Add("Found Server: " + message.SenderEndPoint + "Name Is: " + ConnectedToGameName);
         }
-
-
-
 
         protected override void ConnectionStatusChanged(NetIncomingMessage message)
         {
@@ -145,6 +152,24 @@ namespace Pulsar4X.Networking
             NetClientObject.SendMessage(msg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered);
         }
 
+        public void SendSystemDataRequest(Guid systemID)
+        {
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            msg.Write((byte)ToServerMsgType.RequestSystemData);
+            msg.Write(systemID.ToByteArray());
+            NetClientObject.SendMessage(msg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        public void SendDatablobRequest(Guid entityID, Type datablobType)
+        {
+            //TODO: datablobs have an int ID, can we use that? can we be sure that the server and client's datablob IDs are the same?
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            msg.Write((byte)ToServerMsgType.RequestDatablob);
+            msg.Write(entityID.ToByteArray());
+            msg.Write(datablobType.ToString());
+            int dbTypeIndex = EntityManager.DataBlobTypes[datablobType];
+        }
+
         public void SendEntityCommand(EntityCommand cmd)//may need to serialise it prior to this (as the actual class). can we serialise an interface?
         {
             throw new NotImplementedException("Need to figure out how we're going to serialise the EntityCommand object");
@@ -178,6 +203,8 @@ namespace Pulsar4X.Networking
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        #region HandleIncomingDataMessages
+
         protected override void HandleIncomingDataMessage(NetConnection sender, NetIncomingMessage message)
         {
             ToClientMsgType messageType = (ToClientMsgType)message.ReadByte();
@@ -187,19 +214,27 @@ namespace Pulsar4X.Networking
                     HandleTickInfo(message);
                     break;
                 case ToClientMsgType.SendGameData:
-                    HandleGameSettingsMsg(message);
+                    HandleGameSettings(message);
                     break;
-
+                case ToClientMsgType.SendFactionEntity:
+                    HandleFactionData(message);
+                    break;
                 case ToClientMsgType.SendEntityHashData:
-                    HandleTickInfo(message);
+                    HandleEntityHashData(message);
+                    break;
+                case ToClientMsgType.SendEntity:
+                    HandleEntityData(message);
                     break;
                 case ToClientMsgType.SendSystemData:
                     HandleSystemData(message);
                     break;
+                case ToClientMsgType.SendDatablob:
+                    HandleDatablob(message);
+                    break;
+                default:
+                    throw new Exception("Unhandled ToClientMsgType: " + messageType);
             }
         }
-
-        #region HandleIncomingDataMessages
 
         void HandleTickInfo(NetIncomingMessage message)
         {
@@ -216,7 +251,7 @@ namespace Pulsar4X.Networking
 
         }
 
-        void HandleGameSettingsMsg(NetIncomingMessage message)
+        void HandleGameSettings(NetIncomingMessage message)
         {
 
             int len = message.ReadInt32();
@@ -228,23 +263,58 @@ namespace Pulsar4X.Networking
             mStream.Close();
         }
 
-
-        /* Just use HandleEntityData
         void HandleFactionData(NetIncomingMessage message)
         {
-
-
             Guid entityID = new Guid(message.ReadBytes(16));
             int hash = message.ReadInt32();
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
             var mStream = new MemoryStream(data);
-            Entity entity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
-            Messages.Add("OrigionalfactionHash: " + hash.ToString());
-            printEntityHashInfo(entity);
+            Entity factionEntity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
+            mStream.Close();
 
-        }*/
+            if (hash == factionEntity.GetValueCompareHash())
+                Messages.Add("Good news everybody! Faction Hash is a Match!");
+            else
+            {
+                Messages.Add("Warning! Unmatched Faction Hash");
+                Messages.Add("OrigionalfactionHash: " + hash.ToString());
+                printEntityHashInfo(factionEntity);
+            }
 
+
+            var factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
+            foreach (var item in factionInfo.KnownSystems)
+            {
+                SendSystemDataRequest(item);
+            }
+            _gameVM.CurrentFaction = factionEntity;
+        }
+
+        void HandleEntityHashData(NetIncomingMessage message)
+        {
+            //this is going to need a datetime. 
+            Guid entityID = new Guid(message.ReadBytes(16));
+            DateTime atDate = new DateTime(message.ReadInt64());
+            int entityHash = message.ReadInt32();
+            int count = message.ReadInt32();
+            Dictionary<string, int> hashDict = new Dictionary<string, int>();
+
+            for (int i = 0; i < count - 1; i++)
+            {
+                string key = message.ReadString();
+                int hash = message.ReadInt32();
+                hashDict.Add(key, hash);
+            }
+            EntityHashData hashData = new EntityHashData
+            {
+                EntityID = entityID,
+                AtDatetime = atDate,
+                EntityHash = entityHash,
+                DatablobHashes = hashDict
+            };
+            OnEntityHashDataReceved(hashData);
+        }
 
         void HandleEntityData(NetIncomingMessage message)
         {
@@ -255,25 +325,24 @@ namespace Pulsar4X.Networking
             byte[] data = message.ReadBytes(len);
             var mStream = new MemoryStream(data);
             Entity entity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
-            Messages.Add("OrigionalEntityHash: " + hash.ToString());
-            printEntityHashInfo(entity);
-
-        }
-
-        void HandleEntityHashData(NetIncomingMessage message)
-        {   
-            //this is going to need a datetime. 
-            int count = message.ReadInt32();
-            Dictionary<string, int> hashDict = new Dictionary<string, int>();
-            for (int i = 0; i < count - 1; i++)
+            mStream.Close();
+            if (hash == entity.GetValueCompareHash())
+                Messages.Add("Good news everybody! Entity Hash is a Match!");
+            else
             {
-                string key = message.ReadString();
-                int hash = message.ReadInt32();
-                hashDict.Add(key, hash);
+                
+                string name;
+                if (entity.HasDataBlob<NameDB>())
+                    name = entity.GetDataBlob<NameDB>().DefaultName;
+                else
+                    name = entity.Guid.ToString();
+                Messages.Add("Warning! Unmatched Entity Hash for: " + name);
+                Messages.Add("This is likely due to an incorrect IValueCompare implemenation on a datablob");
+                Messages.Add("OrigionalfactionHash: " + hash.ToString());
+                printEntityHashInfo(entity);
             }
+
         }
-
-
 
         void HandleSystemData(NetIncomingMessage message)
         {
@@ -281,18 +350,34 @@ namespace Pulsar4X.Networking
             Guid systemID = new Guid(message.ReadBytes(16));
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
-            //string data = message.ReadString();
             var mStream = new MemoryStream(data);
             StarSystem starSys = SerializationManager.ImportSystem(Game, mStream);
+            Messages.Add("Recevied StarSystem: " + starSys.NameDB.DefaultName);
+            mStream.Close();
 
+        }
+
+        void HandleDatablob(NetIncomingMessage message)
+        {
+            Guid entityID = new Guid(message.ReadBytes(16));
+            int hash = message.ReadInt32();
+            int len = message.ReadInt32();
+            byte[] data = message.ReadBytes(len);
+            var mStream = new MemoryStream(data);
+            throw new NotImplementedException();
+            //BaseDataBlob db = SerializationManager.ImportDatablob(Game, entityID, mStream); 
         }
 
         #endregion
 
         #region Other
 
+
+
+
+
         /// <summary>
-        /// checks for entitys which have a guid but contain no info, and requests that data. Obsolete?
+        /// checks for entitys which have a guid but contain no info, and requests that data. 
         /// </summary>
         private void CheckEntityData()
         {
@@ -322,6 +407,82 @@ namespace Pulsar4X.Networking
                 HasFullDataset = true;
             }
 
+        }
+
+        /*
+        void SynchGameWithHost(Game game, Entity faction)
+        {
+            //maybe this info should be pushed from the server. 
+            throw new NotImplementedException();
+            var managers = game.GlobalManagerDictionary.Keys;    //might need to change how managers and the serialiser works for this. 
+            //foreach manager in game
+                //foreach entity owned by faction in manager
+                    //check hash
+                        //check datablobhash
+        }
+        */
+
+        void SynchFactionWithHost(Game game, Entity faction)
+        {
+            
+
+            //TODO: subscribe to factionhash as a listner?, need to write some events. 
+            SendFactionHashRequest(faction.Guid);
+
+            int hostFactionHash = 0;
+            Dictionary<string, int> factiondbHashes = new Dictionary<string, int>();
+
+            int localFactionHash = faction.GetValueCompareHash();
+
+            if (hostFactionHash != localFactionHash)
+            {
+                foreach (IGetValuesHash db in faction.DataBlobs)
+                {
+                    string dbname = db.GetType().ToString();
+                    if(factiondbHashes.ContainsKey(dbname))
+                    {
+                        if (factiondbHashes[dbname] != db.GetValueCompareHash())
+                        { }
+                    }
+                }
+                //foreach system in known systems
+                //  foreach entity in system
+                        //check entityhash
+                            //check datablob hashes
+            }
+            throw new NotImplementedException();
+        }
+
+        void OnEntityHashDataReceved(EntityHashData hashData)
+        {
+            Entity entity;
+            if (!_gameVM.Game.GlobalManager.FindEntityByGuid(hashData.EntityID, out entity))
+            {
+                //not sure this should even happen... but just incase
+                SendEntityDataRequest(hashData.EntityID);
+            }
+            else 
+            {
+                if (entity.Manager.ManagerSubpulses.SystemLocalDateTime != hashData.AtDatetime)
+                { Messages.Add("Unmatched Date, can't compare hashes"); }
+                else
+                {
+                    if (entity.GetHashCode() != hashData.EntityHash)
+                    {
+                        foreach (var datablob in entity.DataBlobs)
+                        {
+                            if (!hashData.DatablobHashes.ContainsKey(datablob.GetType().ToString()))
+                                entity.RemoveDataBlob(EntityManager.DataBlobTypes[datablob.GetType()]);
+                            if (datablob.GetHashCode() != hashData.DatablobHashes[datablob.GetType().ToString()])
+                            {
+                                //SendDatablobRequest(hashData.EntityID, datablob.GetType());
+                                Messages.Add("Datablob hashes don't match: " + datablob.GetType());
+
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         #endregion

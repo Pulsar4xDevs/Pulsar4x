@@ -72,7 +72,7 @@ namespace Pulsar4X.ECSLib
         public string StatusText { get { return _statusText; } set { _statusText = value; OnPropertyChanged(); } }
         private string _statusText;
 
-        public StarSystemVM StarSystemViewModel {get; private set;}
+        public StarSystemVM StarSystemViewModel {get; set;}
 
         //factions that this client has full visability of. for GM this will be all factions.
         private List<Guid> _visibleFactions;
@@ -194,7 +194,7 @@ namespace Pulsar4X.ECSLib
         
 
         private Game _game;
-        private Player _currentPlayer;
+
 
         internal Game Game
         {

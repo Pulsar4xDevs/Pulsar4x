@@ -1,3 +1,17 @@
+2017-12-18  se5a  <jon.se5a@gmail.com>
+
+	* Game.cs:
+	* Client.cs:
+	* Server.cs:
+	* Pulsar4X.ECSLib.csproj:
+	* GameVM.cs:
+	* SerializationManager.cs:
+	* StarVM.cs:
+	* SystemVM.cs:
+	* StarSystemVM.cs:
+	* SystemInfoVM.cs: More work on network and hashing. hashing
+	might be a bit slow. 
+
 2017-12-16  se5a  <jon.se5a@gmail.com>
 
 	* FactionTechDB.cs: fix to techDB hash.

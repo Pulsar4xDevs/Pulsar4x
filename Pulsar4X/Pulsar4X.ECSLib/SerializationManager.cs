@@ -75,6 +75,7 @@ namespace Pulsar4X.ECSLib
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, bool compress = false) => ExportInternal(game, outputStream, game, compress);
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] Entity entity, bool compress = false) => ExportInternal(game, outputStream, entity.Clone(), compress);
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] ProtoEntity entity, bool compress = false) => ExportInternal(game, outputStream, entity, compress);
+        //public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] BaseDataBlob datablob, bool compress = false) => ExportInternal(game, outputStream, datablob, compress);
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] StarSystem system, bool compress = false) => ExportInternal(game, outputStream, system, compress);
         public static void Export([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] EventLog eventLog, bool compress = false) => ExportInternal(game, outputStream, eventLog, compress);
         private static void ExportInternal<TObj>([NotNull] Game game, [NotNull] Stream outputStream, [NotNull] TObj obj, bool compress = false)
@@ -284,6 +285,13 @@ namespace Pulsar4X.ECSLib
             game.PostGameLoad();
             return entity;
         }
+
+        public static BaseDataBlob ImportDatablob([NotNull] Game game, Entity entity, Stream inputStream)
+        {
+            throw new NotImplementedException("farrk, why does this have to be hard");
+            //var datablob = new BaseDataBlob();   
+        }
+
         public static StarSystem ImportSystem([NotNull] Game game, [NotNull] Stream inputStream)
         {
             var system = new StarSystem();

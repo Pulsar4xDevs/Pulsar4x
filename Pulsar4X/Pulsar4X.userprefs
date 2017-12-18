@@ -1,14 +1,17 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/Research/FactionTechDB.cs" Line="89" Column="54" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="85" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="192" Column="21" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="181" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/SerializationManager.cs" Line="19" Column="25" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoLoadOrderCommand.cs" Line="6" Column="46" />
-      <File FileName="Pulsar4X.ECSLib/Orders/EntityCommand.cs" Line="4" Column="22" />
-      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="370" Column="40" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="148" Column="10" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="86" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/SystemView/SystemMap_DrawableVM.cs" Line="65" Column="30" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/SystemView/StarSystemVM.cs" Line="26" Column="14" />
+      <File FileName="Pulsar4X.ECSLib/StarSystem/StarSystem.cs" Line="10" Column="18" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView.xeto.cs" Line="49" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Commands/SystemMap.cs" Line="12" Column="32" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/GameVM.cs" Line="17" Column="18" />
+      <File FileName="Pulsar4X.CrossPlatformUI.Gtk2/Program.cs" Line="16" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/GenericStackControl.xeto.cs" Line="59" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="111" Column="1" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
@@ -16,6 +19,10 @@
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="405" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="386" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="78" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="407" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>

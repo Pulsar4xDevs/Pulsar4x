@@ -225,11 +225,8 @@
     <Compile Include="OldViewModels\ShipDesignVM.cs" />
     <Compile Include="OldViewModels\ShipOrderVM.cs" />
     <Compile Include="OldViewModels\SpeciesVM.cs" />
-    <Compile Include="OldViewModels\StarVM.cs" />
-    <Compile Include="OldViewModels\SystemInfoVM.cs" />
     <Compile Include="OldViewModels\SystemView\StarSystemVM.cs" />
     <Compile Include="OldViewModels\SystemView\SystemMap_DrawableVM.cs" />
-    <Compile Include="OldViewModels\SystemVM.cs" />
     <Compile Include="OldViewModels\TimeControlVM.cs" />
     <Compile Include="OldViewModels\ViewModelBase.cs" />
     <Compile Include="Orders\OrderTypes\BaseOrder.cs" />
@@ -414,6 +411,9 @@
     <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorInfoDB.cs" />
     <Compile Include="Networking\NetMessageBase.cs" />
     <Compile Include="Faction\FactionAbilitiesDB.cs" />
+    <Compile Include="OldViewModels\SystemView\StarVM.cs" />
+    <Compile Include="OldViewModels\SystemView\SystemVM.cs" />
+    <Compile Include="OldViewModels\SystemView\SystemInfoVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

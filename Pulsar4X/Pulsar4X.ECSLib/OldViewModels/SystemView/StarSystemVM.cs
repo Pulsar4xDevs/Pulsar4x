@@ -13,8 +13,8 @@ namespace Pulsar4X.ECSLib
         public DictionaryVM<StarSystem, string> StarSystems { get; } = new DictionaryVM<StarSystem, string>();
         public SystemMap_DrawableVM SelectedSystemVM { get; } = new SystemMap_DrawableVM();
         private GameVM _gameVM;
-        private int viewport_width;
-        private int viewport_height;
+        //private int viewport_width;
+        //private int viewport_height;
 
         public StarSystemVM(GameVM gameVM, Game game, Entity factionEntity)
         {

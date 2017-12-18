@@ -16,7 +16,8 @@ namespace Pulsar4X.Networking
         SendEntity,
         SendEntityHashData,
         SendDatablob,
-        SendSystemData
+        SendSystemData,
+        SendFactionEntity
     }
 
     public class NetworkHost : NetworkBase
@@ -93,22 +94,7 @@ namespace Pulsar4X.Networking
 
 
 
-        void SendTickInfo(DateTime newDate)
-        {
-            if (_connectedFactions.Count > 0)
-            {
-                TimeSpan deltaTime = newDate - _currentDate;
-                //Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta)));
-                //Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta);
-                IList<NetConnection> connections = _connectedFactions.Keys.ToList();
-                NetOutgoingMessage sendMsg = NetServerObject.CreateMessage();
-                sendMsg.Write((byte)ToClientMsgType.TickInfo);
-                sendMsg.Write(newDate.ToBinary());
-                sendMsg.Write(_currentDate.ToBinary());
-                NetServerObject.SendMessage(sendMsg, connections, NetDeliveryMethod.ReliableOrdered, 0);
-            }
-            _currentDate = newDate;
-        }
+
 
 
         protected override void HandleDiscoveryRequest(NetIncomingMessage message)
@@ -136,11 +122,6 @@ namespace Pulsar4X.Networking
         }
 
 
-
-
-
-
-
         #region Handle Incoming Data Messages
 
         protected override void HandleIncomingDataMessage(NetConnection sender, NetIncomingMessage message)
@@ -164,6 +145,8 @@ namespace Pulsar4X.Networking
                 case ToServerMsgType.RequestEntityHash:
                     HandleRequestEntityHash(message);
                     break;
+                default:
+                    throw new Exception("Unhandled ToServerMsgType: " + messageType);
             }
         }
 
@@ -185,18 +168,30 @@ namespace Pulsar4X.Networking
                 //TODO negotiate and get a delta between the server's data and the client's data, and only update teh client with changed data.
                 //(the client should be able to save/keep a cashe of it's own data so there's less to send when reconnecting to a server.)
                 SendFactionData(sender, faction);
-                printEntityHashInfo(faction);
+                Messages.Add("Sent Faction " + name);
+                //printEntityHashInfo(faction);
             }
         }
 
         void HandleRequestSystemData(NetIncomingMessage message)
         {
-            throw new NotImplementedException();
+            NetConnection sender = message.SenderConnection;
+            Guid entityGuid = new Guid(message.ReadBytes(16));
+            StarSystem starSystem = Game.Systems[entityGuid];
+            SendSystemData(sender, starSystem);
+            string name = starSystem.NameDB.DefaultName;
+            Messages.Add("Sent System " + name);
         }
 
         void HandleRequestEntityData(NetIncomingMessage message)
         {
-            throw new NotImplementedException();
+            NetConnection sender = message.SenderConnection;
+            Guid entityGuid = new Guid(message.ReadBytes(16));
+            Entity entity;
+            if (this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                SendEntityData(sender, entity);
+            else
+                Messages.Add(sender.ToString() + "EntityDataRequestFail: No Entity for Guid: " + entityGuid);
         }
 
         void HandleRequestEntityHash(NetIncomingMessage message)
@@ -216,7 +211,24 @@ namespace Pulsar4X.Networking
 
         #endregion
 
-        #region SendMessages
+        #region SendMessages & data
+
+        void SendTickInfo(DateTime newDate)
+        {
+            if (_connectedFactions.Count > 0)
+            {
+                TimeSpan deltaTime = newDate - _currentDate;
+                //Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta)));
+                //Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta);
+                IList<NetConnection> connections = _connectedFactions.Keys.ToList();
+                NetOutgoingMessage sendMsg = NetServerObject.CreateMessage();
+                sendMsg.Write((byte)ToClientMsgType.TickInfo);
+                sendMsg.Write(newDate.ToBinary());
+                sendMsg.Write(_currentDate.ToBinary());
+                NetServerObject.SendMessage(sendMsg, connections, NetDeliveryMethod.ReliableOrdered, 0);
+            }
+            _currentDate = newDate;
+        }
 
         void SendGameSettings(NetConnection recipient, Game game)
         {
@@ -235,6 +247,27 @@ namespace Pulsar4X.Networking
 
         }
 
+        void SendFactionHash(NetConnection recipient, Entity factionEntity)
+        {
+            ProtoEntity factionEntityClone = factionEntity.Clone(); //clone it, then remove the AuthDB, we don't send it, so don't include the hash for it. 
+            factionEntityClone.RemoveDataBlob<AuthDB>();
+
+            MemoryStream mStream = new MemoryStream();
+            NetOutgoingMessage netMessage = NetPeerObject.CreateMessage();
+            netMessage.Write((byte)ToClientMsgType.SendEntityHashData);
+
+            List<BaseDataBlob> blobsWithValueHash = (List<BaseDataBlob>)factionEntityClone.DataBlobs.Where((arg) => arg is IGetValuesHash);
+            netMessage.Write(blobsWithValueHash.Count);
+
+
+            foreach (IGetValuesHash item in blobsWithValueHash)
+            {
+                netMessage.Write(item.GetType().ToString());
+                netMessage.Write(item.GetValueCompareHash());
+            }
+            NetServerObject.SendMessage(netMessage, recipient, NetDeliveryMethod.ReliableOrdered);
+        }
+
         void SendFactionData(NetConnection recipient, Entity factionEntity)
         {
 
@@ -249,7 +282,7 @@ namespace Pulsar4X.Networking
             byte[] entityByteArray = mStream.ToArray();
             int len = entityByteArray.Length;
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
-            sendMsg.Write((byte)ToClientMsgType.SendEntity); //receving it is the same as any normal entity.
+            sendMsg.Write((byte)ToClientMsgType.SendFactionEntity); 
             sendMsg.Write(factionEntity.Guid.ToByteArray());
             sendMsg.Write(factionEntityClone.GetValueCompareHash());
             sendMsg.Write(len);
@@ -260,20 +293,55 @@ namespace Pulsar4X.Networking
         }
 
         void SendEntityHashData(NetConnection recipient, Entity entity)
-        {
+        {   //TODO: check which thread is doing this, and at what time, this info should probilby be done by the managersubpulse thread at a specific time.
             MemoryStream mStream = new MemoryStream();
             NetOutgoingMessage netMessage = NetPeerObject.CreateMessage();
             netMessage.Write((byte)ToClientMsgType.SendEntityHashData);
-            netMessage.Write(entity.DataBlobs.Count);
-            foreach (IGetValuesHash item in entity.DataBlobs)
+            netMessage.Write(entity.Guid.ToByteArray());                                        //Entity Guid
+            netMessage.Write(entity.Manager.ManagerSubpulses.SystemLocalDateTime.ToBinary());   //Date
+            netMessage.Write(entity.GetHashCode());                                             //Entity Hash
+            netMessage.Write(entity.DataBlobs.Count);                                           //NumberOfDatablobs
+            foreach (IGetValuesHash item in entity.DataBlobs)                                   //
             {
-                netMessage.Write(item.GetType().ToString());
-                netMessage.Write(item.GetValueCompareHash());
+                netMessage.Write(item.GetType().ToString());                                    //Datablob Type Name
+                netMessage.Write(item.GetValueCompareHash());                                   //Datablob Hash
             }
             NetServerObject.SendMessage(netMessage, recipient, NetDeliveryMethod.ReliableOrdered);
         }
 
+        void SendEntityData(NetConnection recipient, Entity entity)
+        {
 
+            var mStream = new MemoryStream();
+            SerializationManager.Export(Game, mStream, entity);
+
+
+            byte[] entityByteArray = mStream.ToArray();
+            int len = entityByteArray.Length;
+            NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
+            sendMsg.Write((byte)ToClientMsgType.SendEntity); //receving it is the same as any normal entity.
+            sendMsg.Write(entity.Guid.ToByteArray());
+            sendMsg.Write(entity.GetValueCompareHash());
+            sendMsg.Write(len);
+            sendMsg.Write(entityByteArray);
+            NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+            mStream.Close();
+        }
+
+        void SendSystemData(NetConnection recipient, StarSystem starSystem)
+        {
+            var mStream = new MemoryStream();
+            SerializationManager.Export(Game, mStream, starSystem);
+            byte[] systemByteArray = mStream.ToArray();
+            int len = systemByteArray.Length;
+            NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
+            sendMsg.Write((byte)ToClientMsgType.SendSystemData);
+
+            sendMsg.Write(starSystem.Guid.ToByteArray());
+            sendMsg.Write(len);
+            sendMsg.Write(systemByteArray);
+            NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+        }
 
         #endregion
 
@@ -304,29 +372,6 @@ namespace Pulsar4X.Networking
         //    Messages.Add("TX Faction List to " + recipient.RemoteUniqueIdentifier);
         //    NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
         //}
-        /*
-               protected override void HandleEntityData(NetIncomingMessage message)
-               {
-
-                   //EntityData, (Byte[])Guid, (Byte[])memoryStream
-                   NetConnection recipient = message.SenderConnection;
-                   Guid entityID = new Guid(message.ReadBytes(16));
-                   Entity reqestedEntity = Game.GlobalManager.GetEntityByGuid(entityID);
-                   ProtoEntity sanitisedEntity = EntityDataSanitiser.SanitisedEntity(reqestedEntity, _connectedFactions[recipient]);
-                   //TODO check that this faction is allowed to access this entity's Data.
-                   var mStream = new MemoryStream();
-                   SaveGame.ExportEntity(sanitisedEntity, mStream);
-                   byte[] entityByteArray = mStream.ToArray();
-
-                   int len = entityByteArray.Length;
-                   NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
-                   sendMsg.Write((byte)DataMessageType.EntityData);
-                   sendMsg.Write(reqestedEntity.Guid.ToByteArray());
-                   sendMsg.Write(len);
-                   sendMsg.Write(entityByteArray);
-                   NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
-
-               }*/
         #endregion
     }
 }
