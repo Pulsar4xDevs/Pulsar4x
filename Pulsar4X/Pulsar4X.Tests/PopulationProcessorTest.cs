@@ -266,7 +266,7 @@ namespace Pulsar4X.Tests
             atmoGasses.Add(_gasDictionary["N"], 0.79f);
             atmoGasses.Add(_gasDictionary["O"], 0.20f);
             atmoGasses.Add(_gasDictionary["Ar"], 0.01f);
-            AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses);
+            AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
 
             resultPlanet = setAtmosphere(atmosphereDB);
 

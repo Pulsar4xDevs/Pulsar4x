@@ -188,7 +188,7 @@ namespace Pulsar4X.Tests
                 gasSym = kvp.Key;
                 atmoGasses.Clear();
                 atmoGasses.Add(_gasDictionary[gasSym], 0.1f);
-                weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
                 Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -201,7 +201,7 @@ namespace Pulsar4X.Tests
                 gasSym = kvp.Key;
                 atmoGasses.Clear();
                 atmoGasses.Add(_gasDictionary[gasSym], 0.1f);
-                weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
                 Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -214,7 +214,7 @@ namespace Pulsar4X.Tests
                 gasSym = kvp.Key;
                 atmoGasses.Clear();
                 atmoGasses.Add(_gasDictionary[gasSym], 0.1f);
-                weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
                 Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -234,7 +234,7 @@ namespace Pulsar4X.Tests
                     atmoGasses.Clear();
                     atmoGasses.Add(lowToxicGases[gasSym1], 0.1f);
                     atmoGasses.Add(lowToxicGases[gasSym2], 0.1f);
-                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
                     Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -255,7 +255,7 @@ namespace Pulsar4X.Tests
                     atmoGasses.Clear();
                     atmoGasses.Add(highToxicGases[gasSym1], 0.1f);
                     atmoGasses.Add(highToxicGases[gasSym2], 0.1f);
-                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
                     Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -277,7 +277,7 @@ namespace Pulsar4X.Tests
                     atmoGasses.Clear();
                     atmoGasses.Add(lowToxicGases[gasSym1], 0.1f);
                     atmoGasses.Add(highToxicGases[gasSym2], 0.1f);
-                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
                     Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -320,7 +320,7 @@ namespace Pulsar4X.Tests
 
                     
 
-                testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 testPlanet = setAtmosphere(testAtmosphereDB);
 
                 if (totalPressure > 4.0)
@@ -397,7 +397,7 @@ namespace Pulsar4X.Tests
                     atmoGasses.Add(_gasDictionary["N"], i * 0.1f);
                     atmoGasses.Add(_gasDictionary["O"], j * 0.1f);
 
-                    testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                    testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     testPlanet = setAtmosphere(testAtmosphereDB);
 
                     if (i + j == 0)
@@ -437,7 +437,7 @@ namespace Pulsar4X.Tests
             atmoGasses.Add(_gasDictionary["N"], 0.79f);
             atmoGasses.Add(_gasDictionary["O"], 0.20f);
             atmoGasses.Add(_gasDictionary["Ar"], 0.01f);
-            AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 0.3f, 57.2f, atmoGasses);
+            AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
             resultPlanet = setAtmosphere(atmosphereDB);
 
             return resultPlanet;

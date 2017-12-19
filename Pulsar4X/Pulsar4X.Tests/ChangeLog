@@ -1,3 +1,10 @@
+2017-12-20  se5a  <jon.se5a@gmail.com>
+
+	* SpeciesProcessorTest.cs:
+	* PopulationProcessorTest.cs: fixed previous Atmosphere
+	changes. (Albedo was moved to BodyDB in previous updates,
+	which didn't get fixed in tests)
+
 2017-12-04  se5a  <jon.se5a@gmail.com>
 
 	* OrderQueueTest.cs: More sensor work. it's starting to take
