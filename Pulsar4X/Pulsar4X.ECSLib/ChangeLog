@@ -1,3 +1,7 @@
+2017-12-20  se5a  <jon.se5a@gmail.com>
+
+	* SensorInfoDB.cs: Fixed JsonContructor not being public. 
+
 2017-12-19  se5a  <jon.se5a@gmail.com>
 
 	* EntityManager.cs: Gave EntityManger

@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         internal sensorReturnValues HighestDetectionQuality; //this should maybe include the entity that detected it. 
 
         //jsonconstructor
-        internal SensorInfoDB() { }
+        public SensorInfoDB() { }
 
         internal SensorInfoDB(Entity factionEntity)
         {
@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new SensorInfoDB(this);
         }
         internal SensorInfoDB(SensorInfoDB db)
         {
