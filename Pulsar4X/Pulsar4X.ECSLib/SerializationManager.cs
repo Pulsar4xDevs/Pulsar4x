@@ -282,18 +282,26 @@ namespace Pulsar4X.ECSLib
 
             var protoEntity = new ProtoEntity(); 
             protoEntity = Import(game, inputStream, protoEntity);
-            bool guidExists = manager.EntityExistsGlobaly(protoEntity.Guid);
-            Entity entity = Entity.Create(manager, protoEntity);
-            /*
-            Entity entity = Entity.InvalidEntity;
-            entity = Import(game, inputStream, entity);
-            bool guidExists = manager.EntityExistsGlobaly(entity.Guid);
-            */
+
+            //the block of code below is a somewhat hacky way of fixing a problem where an entity has a datablob that refers back to the entity. 
+            //eg a faction entitiy with a NameDB. in such cases the Import above creates an empty entity because of the NameDB's reference. 
+            //then Entity.Create below checks for an exsisting entity guid, finds it, then returns an entity with a new GUID. 
+            //this then gives us two entities, one with the correct guid but with no datablobs, and a second one with a new different guid and all the datablobs. 
+            //checking if the datablob count is 0 is a poor and not guarenteed way of seeing if the entity hasn't been created some other way previously.
+            //I'm wondering if we shouldn't throw an exception if we try to add an entity with the same guid, instead of just changing the guid. 
+            Entity entity;
+            if (manager.FindEntityByGuid(protoEntity.Guid, out entity) && entity.DataBlobs.Count == 0) 
+                manager.RemoveEntity(entity);
+
+
+
+
+            entity = Entity.Create(manager, protoEntity);
             game.PostGameLoad();
             return entity;
         }
 
-        public static BaseDataBlob ImportDatablob([NotNull] Game game, Entity entity, Stream inputStream)
+        public static BaseDataBlob ImportDatablob([NotNull] Game game, Entity entity, int typeIndex, Stream inputStream)
         {
             throw new NotImplementedException("farrk, why does this have to be hard");
             //var datablob = new BaseDataBlob();   
@@ -629,22 +637,17 @@ namespace Pulsar4X.ECSLib
 
         private static TObj PopulateObject<TObj>(Game game, Stream inputStream, TObj obj)
         {
-            //bool exists1 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
             using (var sr = new StreamReader(inputStream))
             {
                 using (var reader = new JsonTextReader(sr))
                 {
                     lock (SyncRoot)
                     {
-                        //bool exists2 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                         PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
                         if (typeof(TObj) == typeof(ProtoEntity))
                         {
-                            //bool exists3 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                             obj = PersistenceSerializer.Deserialize<TObj>(reader);
-                            dynamic something = obj;
-                            Guid guid = something.Guid;
-                            //bool exists4 = game.GlobalManager.EntityExistsGlobaly(guid); //why does the global manager know about this here. 
+                            //at this point in the code, if the entity has a datablob which references entities, those entites will be created in the manager. 
                         }
                         else
                         {

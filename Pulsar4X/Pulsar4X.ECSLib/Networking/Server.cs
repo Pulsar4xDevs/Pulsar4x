@@ -224,12 +224,17 @@ namespace Pulsar4X.Networking
             else
             {
                 var datablob = entity.GetDataBlob<BaseDataBlob>(datablobTypeIndex);
-                Messages.Add("Requested Typename: " + datablobTypename);
-                Messages.Add("Type by Index(" + datablobTypeIndex +"): " + datablob.GetType());
-
-                SendDatablob(sender, entity, datablob);
+                if (datablob.GetType().Name != datablobTypename)
+                {
+                    Messages.Add("Requested DatablobTypeIndex and TypeName do not match! this could indicate a data missmatch between server and client, possibly a version difference.");
+                    Messages.Add("Requested Typename: " + datablobTypename);
+                    Messages.Add("Type by Index(" + datablobTypeIndex + "): " + datablob.GetType().Name);
+                }
+                else
+                {
+                    SendDatablob(sender, entity, datablob);
+                }
             }
-
         }
 
 
@@ -378,20 +383,22 @@ namespace Pulsar4X.Networking
             byte[] systemByteArray = mStream.ToArray();
             int len = systemByteArray.Length;
 
-            Messages.Add("GetType().ToSTring(): " + datablob.GetType().ToString());
-            Messages.Add("GetType().Name: " + datablob.GetType().Name);
-            Messages.Add("GetType().AssemblyQualifiedName: " + datablob.GetType().AssemblyQualifiedName);
-            Messages.Add("GetType().FullName: " + datablob.GetType().FullName);
+            //Messages.Add("GetType().ToSTring(): " + datablob.GetType().ToString());
+            //Messages.Add("GetType().Name: " + datablob.GetType().Name);
+            //Messages.Add("GetType().AssemblyQualifiedName: " + datablob.GetType().AssemblyQualifiedName);
+            //Messages.Add("GetType().FullName: " + datablob.GetType().FullName);
             //Messages.Add("pulsarTypeIndex: " + typeIndex);
 
+            Messages.Add("Sending " + datablob.GetType().Name);
+
             NetOutgoingMessage msg = NetPeerObject.CreateMessage();
-            msg.Write((byte)ToClientMsgType.SendDatablob);
-            msg.Write(entity.Guid.ToByteArray());
-            msg.Write(datablob.GetType().ToString());
-            msg.Write(systemByteArray);
+            msg.Write((byte)ToClientMsgType.SendDatablob); //message type
+            msg.Write(entity.Guid.ToByteArray());           //entityGuid
+            msg.Write(datablob.GetType().Name);             //datablob name
+            msg.Write(EntityManager.DataBlobTypes[datablob.GetType()]);//datablob typeIndex
+            msg.Write(len);                                 //stream length
+            msg.Write(systemByteArray);                     //encoded data.
             NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
-
-
 
         }
 

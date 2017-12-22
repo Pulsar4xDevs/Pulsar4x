@@ -12,17 +12,6 @@ using System.Threading.Tasks;
 using Lidgren.Network;
 using Pulsar4X.ECSLib;
 
-namespace Pulsar4X.ECSLib
-{
-    /*
-    public static class Testing
-    {
-        public static Guid entityID;
-        public static EntityManager manager;
-
-    }*/
-}
-
 namespace Pulsar4X.Networking
 {
 
@@ -179,7 +168,7 @@ namespace Pulsar4X.Networking
             NetOutgoingMessage msg = NetPeerObject.CreateMessage();
             msg.Write((byte)ToServerMsgType.RequestDatablob);
             msg.Write(entityID.ToByteArray());                          //EntityID
-            msg.Write(datablobType.ToString());                         //type.
+            msg.Write(datablobType.Name);                               //type.
             msg.Write(EntityManager.DataBlobTypes[datablobType]);       //typeIndex
 
             NetClientObject.SendMessage(msg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered);
@@ -284,7 +273,6 @@ namespace Pulsar4X.Networking
 
             var mStream = new MemoryStream(data);
 
-            Entity checkEntity;
             bool entityExsists = Game.GlobalManager.EntityExistsGlobaly(entityID);
             //Testing.entityID = entityID;
             //Testing.manager = Game.GlobalManager;
@@ -390,13 +378,21 @@ namespace Pulsar4X.Networking
 
         void HandleDatablob(NetIncomingMessage message)
         {
-            Guid entityID = new Guid(message.ReadBytes(16));
-            int hash = message.ReadInt32();
+            Guid entityGuid = new Guid(message.ReadBytes(16));
+            string name = message.ReadString();
+            int typeIndex = message.ReadInt32();
+            //int hash = message.ReadInt32();
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
+
             var mStream = new MemoryStream(data);
-            throw new NotImplementedException();
-            //BaseDataBlob db = SerializationManager.ImportDatablob(Game, entityID, mStream); 
+            Entity entity;
+            if (!this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                Messages.Add("DatablobImportFail: No Entity for Guid: " + entityGuid);
+            else
+            {
+                BaseDataBlob db = SerializationManager.ImportDatablob(Game, entity, typeIndex, mStream);
+            }
         }
 
         #endregion

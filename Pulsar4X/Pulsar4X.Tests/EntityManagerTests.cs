@@ -64,7 +64,7 @@ namespace Pulsar4X.Tests
             Entity clonedEntity = SerializationManager.ImportEntity(game2, mStream, game2.GlobalManager);
             mStream.Close();
 
-            Assert.IsTrue(testEntity.GetValueCompareHash() == clonedEntity.GetValueCompareHash(), "ValueCompareHash should match");
+            Assert.IsTrue(testEntity.GetValueCompareHash() == clonedEntity.GetValueCompareHash(), "ValueCompareHash should match");//currently valueCompareHash does not check guid of the entity. I'm undecided wheather it should or not. 
             Entity clonedTest;
             Assert.IsTrue(game2.GlobalManager.FindEntityByGuid(testEntity.Guid, out clonedTest), "Game2 should have the test entity");
             Assert.IsTrue(testEntity.Guid == clonedEntity.Guid, "Guid's need to match, if we get to this assert, then we've got two entities in game2, one of them has the correct guid but no datablobs, the other has a new guid but is complete.");

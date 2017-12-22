@@ -51,7 +51,8 @@ namespace Pulsar4X.ECSLib
 
             //This is problematic, currently, if a datablob references it's own entity (ie namedb in faction entity) the entity will get a new guid. 
             //and (presumably) the db will point to an empty entity. 
-            while (Guid == Guid.Empty || manager.EntityExistsGlobaly(Guid)) //I guess a while here removes the infintisimal chance of creating a guid that already exsists. 
+            //TODO: should we throw an exception instead of just replacing the guid with a new one? I'm leaning towards yes. 
+            while (Guid == Guid.Empty || manager.EntityExistsGlobaly(Guid)) //using a while here removes the infintisimal chance of creating a guid that already exsists. 
             {
                 Guid = Guid.NewGuid();
             }

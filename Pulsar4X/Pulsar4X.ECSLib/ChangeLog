@@ -1,3 +1,13 @@
+2017-12-23  se5a  <jon.se5a@gmail.com>
+
+	* Entity.cs:
+	* SerializationManager.cs: Fixes self referencing entitiy
+	seralization.
+	It's a bit of a hack, but should work for now. 
+
+	* Client.cs:
+	* Server.cs: 
+
 2017-12-22  se5a  <jon.se5a@gmail.com>
 
 	* Entity.cs:
