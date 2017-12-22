@@ -1,3 +1,11 @@
+2017-12-22  se5a  <jon.se5a@gmail.com>
+
+	* NetworkTests.cs:
+	* OrderQueueTest.cs:
+	* EntityManagerTests.cs: Fixed some more tests, wrote a test
+	demonstrating a problem with the deserialisation when an
+	entity has a datablob that references the same entity. 
+
 2017-12-20  se5a  <jon.se5a@gmail.com>
 
 	* SpeciesProcessorTest.cs:

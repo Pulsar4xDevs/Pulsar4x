@@ -12,8 +12,21 @@ using System.Threading.Tasks;
 using Lidgren.Network;
 using Pulsar4X.ECSLib;
 
+namespace Pulsar4X.ECSLib
+{
+    /*
+    public static class Testing
+    {
+        public static Guid entityID;
+        public static EntityManager manager;
+
+    }*/
+}
+
 namespace Pulsar4X.Networking
 {
+
+    
     enum ToServerMsgType : byte
     {
         RequestSystemData,
@@ -272,13 +285,21 @@ namespace Pulsar4X.Networking
             var mStream = new MemoryStream(data);
 
             Entity checkEntity;
-            bool entityExsists = Game.GlobalManager.TryGetEntityByGuid(entityID, out checkEntity);
+            bool entityExsists = Game.GlobalManager.EntityExistsGlobaly(entityID);
+            //Testing.entityID = entityID;
+            //Testing.manager = Game.GlobalManager;
 
             Entity factionEntity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
             mStream.Close();
 
             if (entityID != factionEntity.Guid)
-                Messages.Add("Warning! Guid does not match, Seraliser is changing the guid. fuck.");
+            {
+                Entity otherFactionEntity;
+                Game.GlobalManager.FindEntityByGuid(entityID, out otherFactionEntity);
+                Messages.Add("Warning! Guid does not match, Seraliser is changing the guid. "); //so currently at this point, we have an empty entity with the origional GUID, and a complete entity with a new random GUID
+
+            }
+
 
             if (hash == factionEntity.GetValueCompareHash())
                 Messages.Add("Good news everybody! Faction Hash is a Match!");

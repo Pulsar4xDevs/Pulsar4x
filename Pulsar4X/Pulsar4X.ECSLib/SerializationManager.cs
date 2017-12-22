@@ -279,9 +279,16 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(manager));
             }
 
-            var protoEntity = new ProtoEntity();
+
+            var protoEntity = new ProtoEntity(); 
             protoEntity = Import(game, inputStream, protoEntity);
+            bool guidExists = manager.EntityExistsGlobaly(protoEntity.Guid);
             Entity entity = Entity.Create(manager, protoEntity);
+            /*
+            Entity entity = Entity.InvalidEntity;
+            entity = Import(game, inputStream, entity);
+            bool guidExists = manager.EntityExistsGlobaly(entity.Guid);
+            */
             game.PostGameLoad();
             return entity;
         }
@@ -622,16 +629,22 @@ namespace Pulsar4X.ECSLib
 
         private static TObj PopulateObject<TObj>(Game game, Stream inputStream, TObj obj)
         {
+            //bool exists1 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
             using (var sr = new StreamReader(inputStream))
             {
                 using (var reader = new JsonTextReader(sr))
                 {
                     lock (SyncRoot)
                     {
+                        //bool exists2 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                         PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
                         if (typeof(TObj) == typeof(ProtoEntity))
                         {
+                            //bool exists3 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                             obj = PersistenceSerializer.Deserialize<TObj>(reader);
+                            dynamic something = obj;
+                            Guid guid = something.Guid;
+                            //bool exists4 = game.GlobalManager.EntityExistsGlobaly(guid); //why does the global manager know about this here. 
                         }
                         else
                         {

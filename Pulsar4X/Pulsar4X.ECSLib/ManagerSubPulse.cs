@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
@@ -23,6 +24,7 @@ namespace Pulsar4X.ECSLib
             internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
             internal Dictionary<IInstanceProcessor, List<Entity>> InstanceProcessors = new Dictionary<IInstanceProcessor, List<Entity>>();
         }
+
 
         private ProcessorManager _processManager;
 
@@ -221,6 +223,19 @@ namespace Pulsar4X.ECSLib
                 QueuedProcesses.Remove(nextInteruptDateTime);
             }
             SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent            
+        
+        
+        
+        }
+
+
+        [System.Runtime.Serialization.OnDeserialized]
+        private void Deserialized(StreamingContext context)
+        {
+            // Star system resolver loads myStarSystem from mySystemGuid after the game is done loading.
+            var game = (Game)context.Context;
+            //TODO: currently don't have any way to find the EntityManager and add the reference to that back in here. this needs to be done to fix save/load. 
+            _processManager = game.ProcessorManager;
         }
 
     }

@@ -566,18 +566,18 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool EntityExistsGlobaly(Guid entityGuid)
         {
-            if (Game != null)
+            bool exsits;
+            if (Game == null)
             {
-                if (_localEntityDictionary.ContainsKey(entityGuid))
-                    return true;
-                else
-                    return false;
+                exsits = EntityExistsLocaly(entityGuid);
             }
-            _globalGuidDictionaryLock.EnterReadLock();
-            if (_globalEntityDictionary.ContainsKey(entityGuid))
-                return true;
             else
-                return false;
+            {
+                _globalGuidDictionaryLock.EnterReadLock();
+                exsits = _globalEntityDictionary.ContainsKey(entityGuid);
+                _globalGuidDictionaryLock.ExitReadLock();
+            }
+            return exsits;
         }
 
         /// <summary>

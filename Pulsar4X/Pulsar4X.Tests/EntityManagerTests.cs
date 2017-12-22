@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.IO;
 
 namespace Pulsar4X.Tests
 {
@@ -39,6 +40,37 @@ namespace Pulsar4X.Tests
             {
                 harbingerShipClass.Clone(_game.GlobalManager);
             }
+        }
+
+        [Test]
+        public void TestSelfReferencingEntity()
+        {
+            NameDB name = new NameDB();
+            Entity testEntity = Entity.Create(_game.GlobalManager);
+            name.SetName(testEntity, "TestName");
+            testEntity.SetDataBlob(name);
+
+            //serialise the test entity into a mem stream
+            var mStream = new MemoryStream();
+            SerializationManager.Export(_game, mStream, testEntity);
+
+
+            //create a second game, we're going to import this entity to here (this would be the case in a network game)
+            var settings = new NewGameSettings { GameName = "Test Game2", StartDateTime = DateTime.Now, MaxSystems = 1 };
+            Game game2 = new Game(settings);
+
+
+            //import the entity into the second game.
+            Entity clonedEntity = SerializationManager.ImportEntity(game2, mStream, game2.GlobalManager);
+            mStream.Close();
+
+            Assert.IsTrue(testEntity.GetValueCompareHash() == clonedEntity.GetValueCompareHash(), "ValueCompareHash should match");
+            Entity clonedTest;
+            Assert.IsTrue(game2.GlobalManager.FindEntityByGuid(testEntity.Guid, out clonedTest), "Game2 should have the test entity");
+            Assert.IsTrue(testEntity.Guid == clonedEntity.Guid, "Guid's need to match, if we get to this assert, then we've got two entities in game2, one of them has the correct guid but no datablobs, the other has a new guid but is complete.");
+            Assert.IsTrue(ReferenceEquals(clonedTest, clonedEntity),"These should be the same object" );
+            Assert.IsTrue(testEntity.DataBlobs.Count == clonedTest.DataBlobs.Count);
+            Assert.IsTrue(testEntity.DataBlobs.Count == clonedEntity.DataBlobs.Count); 
         }
 
 

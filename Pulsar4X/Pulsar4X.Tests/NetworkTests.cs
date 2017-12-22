@@ -22,15 +22,17 @@ namespace Pulsar4X.Tests
             _host.Game.OrderHandler = new ServerOrderHandler(_host.Game, 4888);
 
             _client = new Game();
-            _netClient = new Networking.NetworkClient("localhost", 4888, new GameVM());
-            _client.OrderHandler = new ClientOrderHandler(_client, _netClient); //ugly, refactor so GameVM isn't required and or network isnt needed to be created here?
+            _netClient = new Networking.NetworkClient("localhost", 4888, new GameVM());//ugly, refactor so GameVM isn't required and or network isnt needed to be created here?
+            _client.OrderHandler = new ClientOrderHandler(_client, _netClient); 
         }
 
-        [Test]
+        [Test] 
         public void TestFactionConnect()
         {
             _netClient.ClientConnect();
-            _netClient.SendFactionDataRequest("New Terran Utopian Empire", "");//name is hardcoded in TestGame.cs
+            //TODO: set up events so we can listen for updates. 
+            //_netClient.Messages.Contains(
+            //_netClient.SendFactionDataRequest("New Terran Utopian Empire", "");//name is hardcoded in TestGame.cs
         }
     }
 }

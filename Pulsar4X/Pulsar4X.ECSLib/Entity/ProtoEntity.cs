@@ -119,11 +119,13 @@ namespace Pulsar4X.ECSLib
 
             public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
             {
+                //bool exists1 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 var protoEntity = new ProtoEntity();
                 //StarObject (Entity)
                 reader.Read(); // PropertyName Guid
                 reader.Read(); // Actual Guid
                 protoEntity.Guid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
+                //bool exists2 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 // Deserialize the dataBlobs
                 reader.Read(); // PropertyName DATABLOB
                 while (reader.TokenType == JsonToken.PropertyName)
@@ -131,11 +133,14 @@ namespace Pulsar4X.ECSLib
                     var typestring = "Pulsar4X.ECSLib." + (string)reader.Value;
                     Type dataBlobType = Type.GetType(typestring);
                     reader.Read(); // StartObject (dataBlob)
+                    //bool exists3 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                     BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
+                    //bool exists4 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                     protoEntity.SetDataBlob(dataBlob);
                     reader.Read(); // PropertyName DATABLOB OR EndObject (Entity)
+                    //bool exists5 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 }
-
+                //bool exists6 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 return protoEntity;
             }
 

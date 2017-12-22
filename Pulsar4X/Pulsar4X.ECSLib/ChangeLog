@@ -1,3 +1,15 @@
+2017-12-22  se5a  <jon.se5a@gmail.com>
+
+	* Entity.cs:
+	* ManagerSubPulse.cs:
+	* Client.cs:
+	* ProtoEntity.cs:
+	* EntityManager.cs:
+	* SerializationManager.cs:
+	* ProcessorManager.cs: Fixed some more tests, wrote a test
+	demonstrating a problem with the deserialisation when an
+	entity has a datablob that references the same entity. 
+
 2017-12-20  se5a  <jon.se5a@gmail.com>
 
 	* SensorInfoDB.cs: Fixed JsonContructor not being public. 

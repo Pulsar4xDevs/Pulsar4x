@@ -35,7 +35,7 @@ namespace Pulsar4X.Tests
             _starSystem = _game.Systems.First<KeyValuePair<Guid, StarSystem>>().Value;
             _planets = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
 
-            _earth = _planets.Where<Entity>(planet => planet.GetDataBlob<NameDB>().GetName(_faction) == "Earth").First<Entity>();
+            _earth = _planets.Where<Entity>(planet => planet.GetDataBlob<NameDB>().DefaultName == "Earth").First<Entity>();
 
             _ship = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>().First<Entity>();
             _shipPropulsionDB = _ship.GetDataBlob<PropulsionDB>();
