@@ -131,7 +131,7 @@
                 "Value": "[Mass] * 8"
               }
             ]
-          },
+          }, 
           "ResearchCostFormula": "[Mass] * 10",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
@@ -187,7 +187,7 @@
               "Name": "Engine Power",
               "Description": "Move Power for ship",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(1) * [Mass] * Ability(2) / 20"
+              "AbilityFormula": "Ability(1) * [Mass] * Ability(2)"
             },
             {
               "Name": "Engine Power",

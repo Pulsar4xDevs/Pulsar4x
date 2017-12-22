@@ -70,10 +70,6 @@ namespace Pulsar4X.ECSLib
             Entity shipClass = DefaultShipDesign(game, factionEntity);
             Entity gunShipClass = GunShipDesign(game, factionEntity);
 
-            // Problem - the component instances, both the design and the instances themselves, are the same entities on each ship
-            // IE, the fire control on ship1 is the same entity as on ship2
-            // Both the design and instances should be unique
-
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Ensuing Calm");
             var fuel = NameLookup.TryGetMaterialSD(game, "Sorium Fuel");
@@ -111,17 +107,17 @@ namespace Pulsar4X.ECSLib
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
             Entity sensor = ShipPassiveSensor(game, faction);
-            Entity deadWeight = DeadWeight(game, faction, 120);
+            Entity deadWeight = DeadWeight(game, faction, 330);
             List<Entity> components = new List<Entity>()
             {
-                engine,     //250   
-                engine,     //250   500
-                fuelTank,   //250   750
-                fuelTank,   //250   1000
-                laser,      //10    1010
-                bfc,        //10    1020
-                sensor,     //50    1070
-                deadWeight  //120   1190
+                engine,     //50   
+                engine,     //50    100
+                fuelTank,   //250   350
+                fuelTank,   //250   600 60%
+                laser,      //10    610
+                bfc,        //10    620
+                sensor,     //50    670
+                deadWeight  //330   1000
             };
 
             EntityManipulation.AddComponentToEntity(shipDesign, components);
@@ -135,21 +131,22 @@ namespace Pulsar4X.ECSLib
             Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
-            //Entity deadWeight = DeadWeight(game, faction, 50);
+            Entity deadWeight = DeadWeight(game, faction, 290);
             Entity sensor = ShipPassiveSensor(game, faction);
             List<Entity> components = new List<Entity>()
             {
-                engine,     //250
-                engine,     //250
+                engine,     //50
+                engine,     //50
                 fuelTank,   //250
-                fuelTank,   //250
+                fuelTank,   //250 60%
                 laser,      //10
                 laser,      //10
                 laser,      //10
                 laser,      //10
                 bfc,        //10
                 bfc,        //10
-                sensor      //50
+                sensor,     //50
+                deadWeight, //290
             };
 
             EntityManipulation.AddComponentToEntity(shipDesign, components);
@@ -162,7 +159,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesign = GenericComponentFactory.StaticToDesign(engineSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            engineDesign.ComponentDesignAttributes[0].SetValueFromInput(125); //size
+            engineDesign.ComponentDesignAttributes[0].SetValueFromInput(50); //size 50 = 250 power
             engineDesign.Name = "DefaultEngine-250";
             //engineDesignDB.ComponentDesignAbilities[1]
             return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);

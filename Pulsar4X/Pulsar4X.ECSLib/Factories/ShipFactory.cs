@@ -29,6 +29,7 @@ namespace Pulsar4X.ECSLib
             } 
 
             NameDB nameDB = new NameDB(shipName);
+            nameDB.SetName(ownerFaction, shipName);
             protoShip.SetDataBlob(nameDB);
 
             var OwnedDB = new OwnedDB(ownerFaction);           
@@ -105,6 +106,7 @@ namespace Pulsar4X.ECSLib
             var maintenance = new MaintenanceDB();
             var sensorProfile = new SensorProfileDB();
             var name = new NameDB(className);
+            name.SetName(faction, className);
             var componentInstancesDB = new ComponentInstancesDB();
             var massVolumeDB = new MassVolumeDB();
             // now lets create a list of all these datablobs so we can create our new entity:

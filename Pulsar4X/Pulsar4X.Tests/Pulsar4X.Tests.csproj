@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pulsar4X.Tests</RootNamespace>
     <AssemblyName>Pulsar4X.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -116,10 +116,6 @@
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
       <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
       <Name>Pulsar4X.ECSLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ViewModelLib\Pulsar4X.ViewModels.csproj">
-      <Project>{37F5B88B-F1AA-410E-9FCB-4CA26A4DD887}</Project>
-      <Name>Pulsar4X.ViewModels</Name>
     </ProjectReference>
     <Reference Include="dotMemory.Unit">
       <HintPath>..\packages\JetBrains.DotMemoryUnit.2.1.20150828.125449\Lib\dotMemory.Unit.dll</HintPath>

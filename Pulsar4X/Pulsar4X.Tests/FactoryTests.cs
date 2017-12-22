@@ -25,21 +25,15 @@ namespace Pulsar4X.Tests
         {
             string factionName = "Terran";
 
-            var requiredDataBlobs = new List<Type>()
-            {
-                typeof(FactionInfoDB),
-                typeof(FactionAbilitiesDB),
-                typeof(NameDB),
-                typeof(FactionTechDB)
-            };
-
             Entity faction = FactionFactory.CreateFaction(_game, factionName);
             NameDB nameDB = faction.GetDataBlob<NameDB>();
-            //FactionDB factionDB = faction.GetDataBlob<FactionDB>();
+            Assert.IsTrue(nameDB.GetName(faction) == factionName);
+
             Entity factioncopy = faction.Clone(faction.Manager);
 
-            //Assert.IsTrue(HasAllRequiredDatablobs(faction, requiredDataBlobs));
-            Assert.IsTrue(nameDB.GetName(faction) == factionName);
+            Assert.IsTrue(faction.GetValueCompareHash() == factioncopy.GetValueCompareHash(), "Hashes don't match");
+            
+
         }
 
         [Test]

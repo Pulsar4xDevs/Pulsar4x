@@ -199,6 +199,7 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, Guid> StorageTypeMap = new Dictionary<Guid, Guid>();
         internal void SetStorageTypeMap()
         {
+            StorageTypeMap.Clear();
             foreach (var item in Minerals)          
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);                       
             foreach (var item in ProcessedMaterials)

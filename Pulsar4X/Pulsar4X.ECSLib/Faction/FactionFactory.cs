@@ -41,8 +41,10 @@ namespace Pulsar4X.ECSLib
 
         public static Entity CreateFaction(Game game, string factionName)
         {
+            var name = new NameDB(factionName);
+
             var blobs = new List<BaseDataBlob> { 
-                new NameDB(factionName), 
+                name, 
                 new FactionInfoDB(), 
                 new FactionAbilitiesDB(), 
                 new FactionTechDB(game.StaticData.Techs.Values.ToList()), 
@@ -52,7 +54,7 @@ namespace Pulsar4X.ECSLib
 
             // Add this faction to the SM's access list.
             game.SpaceMaster.SetAccess(factionEntity, AccessRole.SM);
-
+            name.SetName(factionEntity, factionName);
             return factionEntity;
         }
 
