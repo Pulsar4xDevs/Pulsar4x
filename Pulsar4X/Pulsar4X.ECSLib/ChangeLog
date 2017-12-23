@@ -1,5 +1,12 @@
 2017-12-23  se5a  <jon.se5a@gmail.com>
 
+	* Client.cs:
+	* Server.cs:
+	* SerializationManager.cs: individual datablobs can now be
+	sent from server to client. 
+
+2017-12-23  se5a  <jon.se5a@gmail.com>
+
 	* Entity.cs:
 	* SerializationManager.cs: Fixes self referencing entitiy
 	seralization.

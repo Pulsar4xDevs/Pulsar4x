@@ -220,7 +220,7 @@ namespace Pulsar4X.Networking
 
             Entity entity;
             if (!this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                Messages.Add(sender.ToString() + "DatablobRequestFail: No Entity for Guid: " + entityGuid);
+                Messages.Add(sender + "DatablobRequestFail: No Entity for Guid: " + entityGuid);
             else
             {
                 var datablob = entity.GetDataBlob<BaseDataBlob>(datablobTypeIndex);
@@ -379,7 +379,7 @@ namespace Pulsar4X.Networking
             var mStream = new MemoryStream();
             //int typeIndex = EntityManager.DataBlobTypes[datablobtype];
             //var datablob = entity.GetDataBlob<BaseDataBlob>(typeIndex);
-
+            SerializationManager.Export(Game, mStream, datablob);
             byte[] systemByteArray = mStream.ToArray();
             int len = systemByteArray.Length;
 

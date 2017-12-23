@@ -391,7 +391,15 @@ namespace Pulsar4X.Networking
                 Messages.Add("DatablobImportFail: No Entity for Guid: " + entityGuid);
             else
             {
-                BaseDataBlob db = SerializationManager.ImportDatablob(Game, entity, typeIndex, mStream);
+                string fullName = "Pulsar4X.ECSLib." + name; 
+                Type dbType = Type.GetType(fullName);
+                if (dbType == null)
+                    throw new Exception("DataBlob "+ fullName +" not found. " +
+                                        "Either the client game version does not match the server, " +
+                                        "or the datablob is not in the expected namespace. " +
+                                        "This section of code does not support datablobs not in the Pulsar4X.ECSLib namespace, " +
+                                        "either fix this code or ensure the datablob is in the appropriate namespace");
+                BaseDataBlob db = SerializationManager.ImportDatablob(Game, entity, dbType, mStream);
             }
         }
 
