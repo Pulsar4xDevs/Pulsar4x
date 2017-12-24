@@ -8,21 +8,22 @@ namespace Pulsar4X.ECSLib
 
         private Entity _viewingFaction;
         public ObservableCollection<Entity> IconableEntitys { get; } = new ObservableCollection<Entity>();
-        private HashSet<Entity> _iconableEntites = new HashSet<Entity>();
+        private HashSet<Entity> _iconableEntites = new HashSet<Entity>(); //doing this just allows quick observablellist.contains without a dictionary, since dictionarys are not observable
 
         public ManagerSubPulse SystemSubpulse { get; private set; }
-        private EntityChangeListnerDB _listnerDB;
+        private AEntityChangeListner _changeListner;
 
 
         public void InitializeForGM(GameVM gameVM, StarSystem starSys)
         {
-            _listnerDB = new EntityChangeListnerDB();
-            Entity ChangeListnerEntity = new Entity(starSys.SystemManager);
-            ChangeListnerEntity.SetDataBlob(_listnerDB);
+            _changeListner = new EntityChangeListnerSM(starSys.SystemManager);
+
+
 
             foreach (var entityWithPosition in starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>())
             {
                 AddIconableEntity(entityWithPosition);
+                _changeListner.ListningToEntites.Add(entityWithPosition);
             }
 
 
@@ -32,15 +33,12 @@ namespace Pulsar4X.ECSLib
         {
             _viewingFaction = viewingFaction;
 
+            var listnerblobs = new List<int>();
+            listnerblobs.Add(EntityManager.DataBlobTypes[typeof(OwnedDB)]);
+            listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
+            EntityChangeListner changeListner = new EntityChangeListner(starSys.SystemManager, viewingFaction, listnerblobs);
+            _changeListner = changeListner;
 
-
-
-            _listnerDB = new EntityChangeListnerDB(viewingFaction);
-            Entity ChangeListnerEntity = new Entity(starSys.SystemManager);
-            ChangeListnerEntity.SetDataBlob(_listnerDB);
-            ChangeListnerEntity.SetDataBlob(new OwnedDB(viewingFaction));
-
-            EntityChangedListnerProcessor.SetListners(starSys.SystemManager, ChangeListnerEntity);
 
             IconableEntitys.Clear();
             _iconableEntites.Clear();
@@ -52,12 +50,9 @@ namespace Pulsar4X.ECSLib
                     AddIconableEntity(entity);
             }*/
 
-            foreach (var entity in _listnerDB.ListningToEntites)
+            foreach (Entity entity in _changeListner.ListningToEntites)
             {
-                if (entity.HasDataBlob<PositionDB>())
-                {
-                    AddIconableEntity(entity);
-                }
+                AddIconableEntity(entity);
             }
             SystemSubpulse = starSys.SystemManager.ManagerSubpulses;
             starSys.SystemManager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>(gameVM.CurrentAuthToken);
@@ -82,56 +77,52 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public bool UpdatesReady { get { 
-                return _listnerDB.EntityChanges.Count > 0; } }
+        public bool UpdatesReady
+        {
+            get
+            {
+                return _changeListner.HasUpdates();
+            }
+        }
 
         public List<EntityChangeData> GetUpdates()
         {
-            
-            EntityChangedListnerProcessor.PreHandling(_listnerDB);
 
             var changes = new List<EntityChangeData>();
 
-
-
-            lock (_listnerDB.EntityChanges)
+            EntityChangeData change;
+            while (_changeListner.TryDequeue(out change))
             {
-                foreach (var change in _listnerDB.EntityChanges.ToArray())
+                
+                switch (change.ChangeType)
                 {
-                    switch( change.ChangeType)
-                    {
-                        case EntityChangeData.EntityChangeType.EntityAdded:
-                            if (change.Entity.HasDataBlob<PositionDB>())
-                            {
-                                AddIconableEntity(change.Entity);   
-                            }
-                            break;
-                        case EntityChangeData.EntityChangeType.EntityRemoved:
-                            RemoveIconableEntity(change.Entity);
-                            break;
+                    case EntityChangeData.EntityChangeType.EntityAdded:
+                        if (change.Entity.HasDataBlob<PositionDB>())
+                        {
+                            AddIconableEntity(change.Entity);
+                        }
+                        break;
+                    case EntityChangeData.EntityChangeType.EntityRemoved:
+                        RemoveIconableEntity(change.Entity);
+                        break;
 
-                        case EntityChangeData.EntityChangeType.DBAdded:
-                            if (change.Datablob is PositionDB)
-                                AddIconableEntity(change.Entity);
-                            else
-                                changes.Add(change);
-                            break;
-                        case EntityChangeData.EntityChangeType.DBRemoved:
-                            if (change.Datablob is PositionDB)
-                                RemoveIconableEntity(change.Entity);
-                            else
-                                changes.Add(change);
-                            break;
-                    }
+                    case EntityChangeData.EntityChangeType.DBAdded:
+                        if (change.Datablob is PositionDB)
+                            AddIconableEntity(change.Entity);
+                        else
+                            changes.Add(change);
+                        break;
+                    case EntityChangeData.EntityChangeType.DBRemoved:
+                        if (change.Datablob is PositionDB)
+                            RemoveIconableEntity(change.Entity);
+                        else
+                            changes.Add(change);
+                        break;
                 }
-                EntityChangedListnerProcessor.PostHandling(_listnerDB);
+
             }
+        
             return changes;
         }
-
     }
-
-
-
-
 }

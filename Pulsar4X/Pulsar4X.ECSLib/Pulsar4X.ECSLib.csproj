@@ -390,8 +390,7 @@
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveProcessor.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveDB.cs" />
     <Compile Include="Factories\SystemAsEntityFactory.cs" />
-    <Compile Include="Entity\EntityChangeListnerDB.cs" />
-    <Compile Include="Entity\EntityChangedListnerProcessor.cs" />
+    <Compile Include="Entity\EntityChangeListner.cs" />
     <Compile Include="Orders\ServerOrderHandler.cs" />
     <Compile Include="Networking\ClientConnectionVM.cs" />
     <Compile Include="Networking\Base.cs" />
@@ -414,6 +413,7 @@
     <Compile Include="OldViewModels\SystemView\StarVM.cs" />
     <Compile Include="OldViewModels\SystemView\SystemVM.cs" />
     <Compile Include="OldViewModels\SystemView\SystemInfoVM.cs" />
+    <Compile Include="Helpers\ConcurrentHashSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

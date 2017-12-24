@@ -103,6 +103,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         /// </summary>
         public void TextIconsDistribute()
         {
+            if (TextIconList.Count == 0)
+                return;
             var occupiedPosition = new List<Rectangle>();
             IComparer<Rectangle> byViewPos = new ByViewPosition();
             var textIconList = new List<TextIcon>(TextIconList.Values);

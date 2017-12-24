@@ -274,8 +274,6 @@ namespace Pulsar4X.Networking
             var mStream = new MemoryStream(data);
 
             bool entityExsists = Game.GlobalManager.EntityExistsGlobaly(entityID);
-            //Testing.entityID = entityID;
-            //Testing.manager = Game.GlobalManager;
 
             Entity factionEntity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
             mStream.Close();
@@ -284,7 +282,7 @@ namespace Pulsar4X.Networking
             {
                 Entity otherFactionEntity;
                 Game.GlobalManager.FindEntityByGuid(entityID, out otherFactionEntity);
-                Messages.Add("Warning! Guid does not match, Seraliser is changing the guid. "); //so currently at this point, we have an empty entity with the origional GUID, and a complete entity with a new random GUID
+                Messages.Add("Warning! Guid does not match, Something is changing the guid. "); 
 
             }
 
@@ -305,14 +303,11 @@ namespace Pulsar4X.Networking
                 SendSystemDataRequest(item);
             }
 
-            SendDatablobRequest(factionEntity.Guid, factionInfo.GetType());
-
             _gameVM.CurrentFaction = factionEntity;
         }
 
         void HandleEntityHashData(NetIncomingMessage message)
         {
-            //this is going to need a datetime. 
             Guid entityID = new Guid(message.ReadBytes(16));
             DateTime atDate = new DateTime(message.ReadInt64());
             int entityHash = message.ReadInt32();

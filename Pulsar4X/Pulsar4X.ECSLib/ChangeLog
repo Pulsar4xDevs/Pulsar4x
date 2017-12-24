@@ -1,3 +1,15 @@
+2017-12-24  se5a  <jon.se5a@gmail.com>
+
+	* Entity.cs:
+	* Client.cs:
+	* Pulsar4X.ECSLib.csproj:
+	* EntityManager.cs:
+	* ConcurrentHashSet.cs:
+	* EntityChangeListner.cs:
+	* SystemAsEntityFactory.cs:
+	* EntityChangedListnerProcessor.cs:
+	* SystemMap_DrawableVM.cs: refactored EntityChangeListner
+
 2017-12-23  se5a  <jon.se5a@gmail.com>
 
 	* Client.cs:

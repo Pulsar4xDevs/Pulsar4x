@@ -31,6 +31,8 @@ namespace Pulsar4X.ECSLib
 
         internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
+        internal List<AEntityChangeListner> EntityListners = new List<AEntityChangeListner>(); 
+
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { get; private set; }
 
@@ -89,7 +91,7 @@ namespace Pulsar4X.ECSLib
         /// Sets up the entity slot and assigns it to the entity while preserving 
         /// entity object references.
         /// </summary>
-        internal int SetupEntity(Entity entity)
+        internal void SetupEntity(Entity entity)
         {
             // Find an entity slot.
             int entityID;
@@ -141,8 +143,11 @@ namespace Pulsar4X.ECSLib
                 // This is a "fake" manager, that does not link to other managers.
                 _localEntityDictionary.Add(entity.Guid, entity);
             }
-            UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);
-            return entityID;
+
+            entity.ID = entityID;
+            UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);  
+
+            //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity. 
         }
 
         /// <summary>
@@ -298,15 +303,14 @@ namespace Pulsar4X.ECSLib
 
         private void UpdateListners(Entity entity, BaseDataBlob db, EntityChangeType change)
         {
-            var changeListners = GetAllDataBlobsOfType<EntityChangeListnerDB>();
-            if (changeListners.Count > 0)
+            if (EntityListners.Count > 0)
             {
                 var changeData = new EntityChangeData() {
                     Entity = entity,
                     Datablob = db,
                     ChangeType = change
                 };
-                foreach (var item in changeListners)
+                foreach (var item in EntityListners)
                 {
                     item.AddChange(changeData);
                 }

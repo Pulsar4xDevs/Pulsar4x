@@ -9,12 +9,12 @@ namespace Pulsar4X.ECSLib
             var sysdb = new StarSystemDB(starSys);
 
             var ownddb = new OwnedDB(factionEntity);
-            var changeListnerDB = new EntityChangeListnerDB();
+            //var changeListnerDB = new EntityChangeListner();
 
             List<BaseDataBlob> datablobs = new List<BaseDataBlob>() {
                 sysdb,
                 ownddb,
-                changeListnerDB
+                //changeListnerDB
             };
             return new Entity(sysMan, datablobs);
         }
