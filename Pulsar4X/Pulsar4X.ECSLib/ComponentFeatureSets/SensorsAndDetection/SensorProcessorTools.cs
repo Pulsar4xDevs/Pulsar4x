@@ -41,14 +41,9 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    sensorInfo = new SensorInfoDB(receverFaction)
-                    {
-                        DetectedEntity = detectableEntity,
-                        LastDetection = atDate
-                    };
+                    sensorInfo = new SensorInfoDB(receverFaction, detectableEntity, atDate);
 
-
-                    knownContacts.Add(detectableEntity.Guid, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo));
+                    //knownContacts.Add(detectableEntity.Guid, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo)); moved this line to the SensorInfoDB constructor
                 }
 
             }

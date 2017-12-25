@@ -27,28 +27,6 @@ namespace Pulsar4X.ECSLib
             else
             {
                 bool isvalid = changeData.Entity.IsValid;
-                /* for some reason, the entity is not considered valid at thit point. so this bit of code fails. */
-                /*
-                if (changeData.Entity.HasDataBlob<OwnedDB>() && changeData.Entity.GetDataBlob<OwnedDB>().OwnedByFaction == ListenForFaction)
-                {
-                    ListningToEntites.Add(changeData.Entity);
-                    EntityChanges.Add(changeData);
-                }*/
-                /*
-                foreach (var includeitem in IncludeDBTypeIndexFilter)
-                {
-                    if (changeData.Entity.HasDataBlob(includeitem))
-                    {
-                        foreach (var excludeitem in ExcludeDBTypeIndexFilter)
-                        {
-                            if (!changeData.Entity.HasDataBlob(excludeitem))
-                            {
-                                ListningToEntites.Add(changeData.Entity);
-                            }
-                        }
-                    }
-                }*/
-
 
                 ListningToEntites.Add(changeData.Entity);
                 EntityChanges.Enqueue(changeData);

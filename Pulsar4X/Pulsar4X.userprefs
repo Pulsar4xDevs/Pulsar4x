@@ -1,25 +1,14 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/Networking/Client.cs" Line="403" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Factories/ShipComponents/ParsingProcessor.cs" Line="1" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Factories/ShipComponents/GenericComponent.cs" Line="164" Column="40" />
-      <File FileName="Pulsar4X.ECSLib/SerializationManager.cs" Line="311" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="19" Column="63" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="86" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Base.cs" Line="232" Column="30" />
-      <File FileName="Pulsar4X.ECSLib/Faction/FactionInfoDB.cs" Line="55" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/DataBlobs/BaseDataBlob.cs" Line="13" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Helpers/JSONHelper.cs" Line="55" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/Orbit/OrbitDB.cs" Line="265" Column="45" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorInfoDB.cs" Line="16" Column="26" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="63" Column="9" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/IconCollection.cs" Line="78" Column="64" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="46" Column="181" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityChangeListner.cs" Line="225" Column="10" />
       <File FileName="Pulsar4X Status" />
     </Files>
-    <Pads>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>datablob</Value>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

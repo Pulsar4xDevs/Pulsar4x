@@ -33,8 +33,8 @@ namespace Pulsar4X.ECSLib
 
 
 
-            if (sensorInfo.DetectedEntity.HasDataBlob<OrbitDB>())
-            { SetOrbitClone(detectedEntity.GetDataBlob<OrbitDB>(), sensorInfo); }
+            //if (sensorInfo.DetectedEntity.HasDataBlob<OrbitDB>())
+            //{ SetOrbitClone(detectedEntity.GetDataBlob<OrbitDB>(), sensorInfo); }
 
             return sensorInfo.SensorEntity;        
         }
@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
             return sensorEntityPosition;
 
         }
-
+        /*
         private static void SetOrbitClone(OrbitDB detectedEntitesOrbit, SensorInfoDB sensorInfo)
         {
 
@@ -60,6 +60,7 @@ namespace Pulsar4X.ECSLib
                 //tweak add some random noise to the ecentricity etc of the sensorEntityOrbit depending on magnatude; 
             }
         }
+        */
 
         private static void SetTranslateClone(TranslateMoveDB detectedEntitiesMove, SensorInfoDB sensorInfo)
         {

@@ -16,9 +16,12 @@ namespace Pulsar4X.ECSLib
         //jsonconstructor
         public SensorInfoDB() { }
 
-        internal SensorInfoDB(Entity factionEntity)
+        internal SensorInfoDB(Entity factionEntity, Entity detectedEntity, DateTime atDate)
         {
             Faction = factionEntity;
+            DetectedEntity = detectedEntity;
+            LastDetection = atDate;
+            factionEntity.GetDataBlob<FactionInfoDB>().SensorEntites.Add(detectedEntity.Guid, SensorEntityFactory.UpdateSensorContact(factionEntity, this));
         }
 
         public override object Clone()

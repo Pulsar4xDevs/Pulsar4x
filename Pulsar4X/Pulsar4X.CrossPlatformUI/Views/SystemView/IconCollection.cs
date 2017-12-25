@@ -79,7 +79,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
             {
-                if (changeData.Datablob is OrbitDB & !OrbitList.ContainsKey(changeData.Entity.Guid))
+                if (changeData.Datablob is OrbitDB & !OrbitList.ContainsKey(changeData.Entity.Guid) && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
                 {
                     if (!((OrbitDB)changeData.Datablob).IsStationary)
                         OrbitList.Add(changeData.Entity.Guid, new OrbitRing(changeData.Entity, _camera));

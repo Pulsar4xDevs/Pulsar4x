@@ -1,3 +1,8 @@
+2017-12-26  se5a  <jon.se5a@gmail.com>
+
+	* IconCollection.cs: fixes to MD git extension screwing up
+	repository and doing a reset and messing everythign up. 
+
 2017-12-24  se5a  <jon.se5a@gmail.com>
 
 	* IconCollection.cs: refactored EntityChangeListner
