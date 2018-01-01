@@ -3,7 +3,7 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    public class MassVolumeDB : BaseDataBlob
+    public class MassVolumeDB : BaseDataBlob, ISensorCloneMethod
     {
 
         /// <summary>
@@ -161,5 +161,30 @@ namespace Pulsar4X.ECSLib
             // 0.3333333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.3333333333
             return Distance.KmToAU(radius / 1000 / 100);     // convert from cm to AU.
         }
+
+        public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
+        {
+            return new MassVolumeDB(this, sensorInfo);
+        }
+
+        MassVolumeDB(MassVolumeDB massVolumeDB, SensorInfoDB sensorInfo)
+        {
+            Update(massVolumeDB, sensorInfo);
+        }
+
+        public void SensorUpdate(SensorInfoDB sensorInfo)
+        {
+            Update(sensorInfo.DetectedEntity.GetDataBlob<MassVolumeDB>(), sensorInfo);
+        }
+
+        void Update(MassVolumeDB origionalDB, SensorInfoDB sensorInfo)
+        {
+            //TODO: add rand from sensorInfo. 
+            Mass = origionalDB.Mass;
+            Density = origionalDB.Density;
+            Radius = origionalDB.Radius;
+            Volume = origionalDB.Volume;
+        }
+
     }
 }

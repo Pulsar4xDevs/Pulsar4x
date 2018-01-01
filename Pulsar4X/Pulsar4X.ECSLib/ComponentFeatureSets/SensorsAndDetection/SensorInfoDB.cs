@@ -10,8 +10,8 @@ namespace Pulsar4X.ECSLib
 
         internal Entity SensorEntity; //this is a clone of the DetectedEntity, with inacuracies in some of the data, may have datablobs which are references to the actual entitey datablobs
         internal DateTime LastDetection; //the datetime of teh last detection
-        internal sensorReturnValues LatestDetectionQuality; //maybe this should include a list of entites that detected it. 
-        internal sensorReturnValues HighestDetectionQuality; //this should maybe include the entity that detected it. 
+        internal SensorReturnValues LatestDetectionQuality; //maybe this should include a list of entites that detected it. 
+        internal SensorReturnValues HighestDetectionQuality; //this should maybe include the entity that detected it. 
 
         //jsonconstructor
         public SensorInfoDB() { }

@@ -103,7 +103,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
                 foreach (Entity item in e.OldItems)
                     _iconCollection.RemoveIcon(item);
             }
-        }
+    }
 
 
         void doUpdates()

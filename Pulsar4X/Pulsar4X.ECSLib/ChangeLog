@@ -1,3 +1,23 @@
+2018-01-02  se5a  <jon.se5a@gmail.com>
+
+	* NameDB.cs:
+	* MiscHelpers.cs:
+	* StarInfoDB.cs:
+	* MassVolumeDB.cs:
+	* EntityChangeListner.cs:
+	* SystemBodyInfoDB.cs:
+	* OrbitDB.cs:
+	* SystemMap_DrawableVM.cs:
+	* SensorInfoDB.cs:
+	* TranslationMoveVM.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs: ISensorCloneMethod now has an
+	update method as well as clone.
+	sensor entity datablobs are now nolonger replaced with a new
+	datablob each update
+	Fixed some bugs with EntityListner, removed db was not getting
+	enqueud. 
+
 2017-12-26  se5a  <jon.se5a@gmail.com>
 
 	* EntityChangeListner.cs:

@@ -122,12 +122,23 @@ namespace Pulsar4X.ECSLib
             return new StarInfoDB(this);
         }
 
-        public BaseDataBlob Clone(SensorInfoDB sensorInfo)
+        public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
         {
             return new StarInfoDB(this, sensorInfo);
         }
 
         StarInfoDB(StarInfoDB db, SensorInfoDB sensorInfo)
+        {
+            Update(db, sensorInfo);
+
+        }
+
+        public void SensorUpdate(SensorInfoDB sensorInfo)
+        {
+            Update(sensorInfo.DetectedEntity.GetDataBlob<StarInfoDB>(), sensorInfo);
+        }
+
+        void Update(StarInfoDB db, SensorInfoDB sensorInfo)
         {
             Random rng = new Random();
             float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
@@ -140,7 +151,6 @@ namespace Pulsar4X.ECSLib
             SpectralType = db.SpectralType;
             SpectralSubDivision = db.SpectralSubDivision;
             LuminosityClass = db.LuminosityClass;
-
         }
     }
 }

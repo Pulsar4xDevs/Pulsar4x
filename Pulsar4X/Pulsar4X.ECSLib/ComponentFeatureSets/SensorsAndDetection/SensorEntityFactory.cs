@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -19,14 +20,29 @@ namespace Pulsar4X.ECSLib
                 new OwnedDB(detectingFaction),
                 };
                 sensorInfo.SensorEntity = new Entity(detectedEntity.Manager, datablobs);
-            }
-            foreach (var db in sensorInfo.DetectedEntity.DataBlobs)
-            {
-                if (db is ISensorCloneMethod)
+                foreach (var item in datablobs)
                 {
-                    ISensorCloneMethod sensorcloneMethdDB = (ISensorCloneMethod)db;
-                    var cloned = sensorcloneMethdDB.Clone(sensorInfo);
-                    sensorInfo.SensorEntity.SetDataBlob(cloned);
+                    sensorInfo.SensorEntity.SetDataBlob(item);
+                }
+            }
+
+            foreach (ISensorCloneMethod db in sensorInfo.DetectedEntity.DataBlobs.OfType<ISensorCloneMethod>())
+            {
+
+                int typeIndex1 = EntityManager.DataBlobTypes[db.GetType()];
+                int typeIndex;
+                EntityManager.TryGetTypeIndex(db.GetType(), out typeIndex);
+                if (!sensorInfo.SensorEntity.HasDataBlob(typeIndex)) //TODO: this is evaluating to false when it shouldnt. 
+                {
+                    var cloned = db.SensorClone(sensorInfo);
+                    sensorInfo.SensorEntity.SetDataBlob(cloned);  
+                }
+                else
+                {
+                    //TODO: Optimize, Networking: don't do this if there are not going to be any changes. (ie no new sensor data)
+                    db.SensorUpdate(sensorInfo);    
+                    //TODO: Networking: we need to send this DB to any listning network clients since it's a change that they wont(and shouldn't) know how to calculate on thier own. 
+                    //TODO: Networking: write an EntityChangeListner to handle serverside DB change notification. 
                 }
             }
 
@@ -113,44 +129,9 @@ namespace Pulsar4X.ECSLib
 
     public interface ISensorCloneMethod
     {
-        BaseDataBlob Clone(SensorInfoDB sensorInfo);
+        BaseDataBlob SensorClone(SensorInfoDB sensorInfo);
+        void SensorUpdate(SensorInfoDB sensorInfo);
     }
 
 }
 
-
-
-
-/* basicaly an idea of how to maybe do an interface on the datablobs, currently trying to avoid doing this.  
-
-    public interface ISensorMethods
-    {
-        void CompareDB(SensorInfo sensorInfo);
-    }
-
-    public class SomethingDB : BaseDataBlob, ISensorMethods
-    {
-        Random rnd = new Random();
-        int someIntData;
-        float someFloatData;
-
-        public override object Clone()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CompareDB(SensorInfo sensorInfo)
-        {
-            if (sensorInfo.HighestDetectionQuality > 0.25)
-            {
-                if (sensorInfo.detectedEntity.HasDataBlob<SomethingDB>())
-                {
-                    var detectedEntityDB = sensorInfo.detectedEntity.GetDataBlob<SomethingDB>();
-                    detectedEntityDB.someFloatData = this.someFloatData += (float)(-0.5 + (0.5 - -0.5) * rnd.NextDouble());
-                    detectedEntityDB.someIntData = this.someIntData += rnd.Next(-500, 500); 
-                }
-            }
-        }
-    }
-}
-*/

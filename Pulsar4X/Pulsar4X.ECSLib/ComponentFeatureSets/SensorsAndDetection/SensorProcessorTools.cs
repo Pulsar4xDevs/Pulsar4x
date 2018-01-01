@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
                SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
 
-            sensorReturnValues detectionValues = DetectonQuality(receverDB, sensorProfile);
+            SensorReturnValues detectionValues = DetectonQuality(receverDB, sensorProfile);
             SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)
             {
@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal static sensorReturnValues DetectonQuality(SensorReceverAtbDB recever, SensorProfileDB target)
+        internal static SensorReturnValues DetectonQuality(SensorReceverAtbDB recever, SensorProfileDB target)
         {
             /*
              * Thoughts (spitballing):
@@ -175,7 +175,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-            return new sensorReturnValues()
+            return new SensorReturnValues()
             {
                 SignalStrength_kW = detectedMagnatude,
                 SignalQuality = quality 
@@ -226,7 +226,7 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal struct sensorReturnValues
+        internal struct SensorReturnValues
         {
             internal double SignalStrength_kW;
             internal PercentValue SignalQuality;
@@ -339,10 +339,26 @@ namespace Pulsar4X.ECSLib
         {
             return rng.NextDouble() * (max - min) + max;
         }
-                                                
 
+        public static Entity NetCloneEntity(Entity origionalEntity, SensorInfoDB sensorInfo)
+        {
+            List<BaseDataBlob> cloneDBs = new List<BaseDataBlob>();
+            foreach (ISensorCloneMethod db in origionalEntity.DataBlobs)
+            {
+                cloneDBs.Add(db.SensorClone(sensorInfo));
+            }
+            throw new NotImplementedException();
+
+        }
+
+        public static void IconFromEntity(Entity origionalEntity, SensorInfoDB sensorInfo)
+        {
+            
+        }
 
     }
+
+
 
     public class SensorTransmitterDB : BaseDataBlob
     {
@@ -352,14 +368,4 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class FactionSensorInfoDB
-    {
-        Dictionary<Entity,EntityKnowledge> knownEntitys;
-    }
-
-    public struct EntityKnowledge
-    {
-        Entity entity;
-        List<BaseDataBlob> knownDatablobs;
-    }
 }

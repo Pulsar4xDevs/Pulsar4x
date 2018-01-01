@@ -240,7 +240,9 @@ namespace Pulsar4X.ECSLib
             return new OrbitDB(this);
         }
 
-        public BaseDataBlob Clone(SensorInfoDB sensorInfo)
+        #region ISensorCloneInterface
+
+        public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
         {
             if (this.Parent != null)
             {
@@ -262,23 +264,35 @@ namespace Pulsar4X.ECSLib
             return new OrbitDB(this, sensorInfo, null); //the root sun will not have an orbitDB parent. 
         }
 
+        public void SensorUpdate(SensorInfoDB sensorInfo)
+        {
+            UpdateFromSensorInfo(sensorInfo.DetectedEntity.GetDataBlob<OrbitDB>(), sensorInfo);
+        }
+
         OrbitDB(OrbitDB toCopy, SensorInfoDB sensorInfo, Entity parentEntity) : base(parentEntity)
+        {
+
+            Epoch = toCopy.Epoch; //I think this should stay the same
+
+            UpdateFromSensorInfo(toCopy, sensorInfo);
+
+        }
+
+        void UpdateFromSensorInfo(OrbitDB origionalDB, SensorInfoDB sensorInfo)
         {
             //var quality = sensorInfo.HighestDetectionQuality.detectedSignalQuality.Percent; //quality shouldn't affect positioning. 
             double signalBestMagnatude = sensorInfo.HighestDetectionQuality.SignalStrength_kW;
             double signalNowMagnatude = sensorInfo.LatestDetectionQuality.SignalStrength_kW;
-            if (signalNowMagnatude > 0)
-            {
+            OrbitDB actualDB = sensorInfo.DetectedEntity.GetDataBlob<OrbitDB>();
 
-            }
-            //some of this should have a bit of rand depending on the sensor strenght. 
-            SemiMajorAxis = toCopy.SemiMajorAxis;
-            Eccentricity = toCopy.Eccentricity;
-            Inclination = toCopy.Inclination;
-            LongitudeOfAscendingNode = toCopy.LongitudeOfAscendingNode;
-            ArgumentOfPeriapsis = toCopy.ArgumentOfPeriapsis;
-            MeanAnomaly = toCopy.MeanAnomaly;
-            Epoch = toCopy.Epoch;
+            SemiMajorAxis = actualDB.SemiMajorAxis;
+            Eccentricity = actualDB.Eccentricity;
+            Inclination = actualDB.Inclination;
+            LongitudeOfAscendingNode = actualDB.LongitudeOfAscendingNode;
+            ArgumentOfPeriapsis = actualDB.ArgumentOfPeriapsis;
+            MeanAnomaly = actualDB.MeanAnomaly;
         }
+
+        #endregion
     }
 }

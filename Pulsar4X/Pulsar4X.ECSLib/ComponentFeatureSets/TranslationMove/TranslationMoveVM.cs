@@ -33,9 +33,10 @@ namespace Pulsar4X.ECSLib
             _propDB = entity.GetDataBlob<PropulsionDB>();
             _cmdRef = cmdRef;
             TargetList.SelectionChangedEvent += OnTargetSelectonChange;
-            foreach (var entityItem in entity.Manager.GetAllEntitiesWithDataBlob<PositionDB>())
+            var ownedEntites = Misc.OwnedEntitysInManager(entity.GetDataBlob<OwnedDB>().OwnedByFaction, entity.Manager);
+            foreach (var entityItem in ownedEntites)//entity.Manager.GetAllEntitiesWithDataBlob<PositionDB>())
             {
-                if (entityItem.HasDataBlob<NameDB>())
+                if (entityItem.HasDataBlob<PositionDB>() && entityItem.HasDataBlob<NameDB>())
                 {
                     TargetList.Add(entityItem.Guid, entityItem.GetDataBlob<NameDB>().DefaultName);
                     _targetDict.Add(entityItem.Guid, entityItem);

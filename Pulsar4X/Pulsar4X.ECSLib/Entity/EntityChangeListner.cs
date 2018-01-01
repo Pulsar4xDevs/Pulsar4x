@@ -219,8 +219,8 @@ namespace Pulsar4X.ECSLib
                 if (IncludeDBTypeIndexFilter.Contains(EntityManager.DataBlobTypes[changeData.Datablob.GetType()]))
                 {
                     ListningToEntites.Remove(changeData.Entity);
-                    EntityChanges.Enqueue(changeData);
                 }
+                EntityChanges.Enqueue(changeData);
             }
         }
     }

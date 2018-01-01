@@ -13,12 +13,11 @@ namespace Pulsar4X.ECSLib
         public ManagerSubPulse SystemSubpulse { get; private set; }
         private AEntityChangeListner _changeListner;
 
+        //public Dictionary<IDrawIconMethod, List<AIconData<BaseDataBlob>>> IconsDictionary = new Dictionary<IDrawIconMethod, List<AIconData<BaseDataBlob>>>();
 
         public void InitializeForGM(GameVM gameVM, StarSystem starSys)
         {
             _changeListner = new EntityChangeListnerSM(starSys.SystemManager);
-
-
 
             foreach (var entityWithPosition in starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>())
             {
@@ -43,19 +42,13 @@ namespace Pulsar4X.ECSLib
             IconableEntitys.Clear();
             _iconableEntites.Clear();
 
-            //add non owned entites that have position
-            /*foreach (var entity in starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>())
-            {
-                if (!entity.HasDataBlob<OwnedDB>())
-                    AddIconableEntity(entity);
-            }*/
 
             foreach (Entity entity in _changeListner.ListningToEntites)
             {
                 AddIconableEntity(entity);
             }
             SystemSubpulse = starSys.SystemManager.ManagerSubpulses;
-            starSys.SystemManager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>(gameVM.CurrentAuthToken);
+            //starSys.SystemManager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>(gameVM.CurrentAuthToken);
 
             OnPropertyChanged(nameof(IconableEntitys));
         }
@@ -125,4 +118,19 @@ namespace Pulsar4X.ECSLib
             return changes;
         }
     }
+
+    public interface IDrawIconMethod
+    {
+        void UpdateData();
+        void DrawIcons();
+    }
+    public abstract class AIconData //where T: BaseDataBlob
+    {
+        protected PositionDB Position;
+        protected MassVolumeDB massVol;
+
+    }
+
+
+
 }

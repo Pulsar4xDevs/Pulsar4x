@@ -183,34 +183,45 @@ namespace Pulsar4X.ECSLib
             return new SystemBodyInfoDB(this);
         }
 
-        public BaseDataBlob Clone(SensorInfoDB sensorInfo)
+        public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
         {
             return new SystemBodyInfoDB(this, sensorInfo);
         }
 
-        private SystemBodyInfoDB(SystemBodyInfoDB systemBodyDB, SensorInfoDB sensorInfo)
+        public void SensorUpdate(SensorInfoDB sensorInfo)
         {
-            Random rng = new Random();
+            UpdateDatablob(sensorInfo.DetectedEntity.GetDataBlob<SystemBodyInfoDB>(), sensorInfo);
+        }
+
+        void UpdateDatablob(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)
+        {
+            Random rng = new Random(); //TODO: rand should be deterministic. 
             float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
 
             if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.20)
-                BodyType = systemBodyDB.BodyType;
+                BodyType = origionalDB.BodyType;
             else
                 BodyType = BodyType.Unknown;
             if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.80)
-                Tectonics = systemBodyDB.Tectonics;
+                Tectonics = origionalDB.Tectonics;
             else
                 Tectonics = TectonicActivity.Unknown;
-            var tilt = SensorProcessorTools.RndSigmoid(systemBodyDB.AxialTilt, accuracy, rng);
+            //TODO: more random to the rest of it.
+            var tilt = SensorProcessorTools.RndSigmoid(origionalDB.AxialTilt, accuracy, rng);
             AxialTilt = (float)tilt;
-            MagneticField = systemBodyDB.MagneticField;
-            BaseTemperature = systemBodyDB.BaseTemperature;
-            RadiationLevel = systemBodyDB.RadiationLevel;
-            AtmosphericDust = systemBodyDB.AtmosphericDust;
-            SupportsPopulations = systemBodyDB.SupportsPopulations;
-            LengthOfDay = systemBodyDB.LengthOfDay;
-            Gravity = systemBodyDB.Gravity;
+            MagneticField = origionalDB.MagneticField;
+            BaseTemperature = origionalDB.BaseTemperature;
+            RadiationLevel = origionalDB.RadiationLevel;
+            AtmosphericDust = origionalDB.AtmosphericDust;
+            SupportsPopulations = origionalDB.SupportsPopulations;
+            LengthOfDay = origionalDB.LengthOfDay;
+            Gravity = origionalDB.Gravity;
             //Minerals = new Dictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
+        }
+
+        SystemBodyInfoDB(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)
+        {
+            UpdateDatablob(origionalDB, sensorInfo);
         }
     }
 }

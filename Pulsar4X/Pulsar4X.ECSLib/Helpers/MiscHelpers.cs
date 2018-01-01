@@ -38,6 +38,25 @@ namespace Pulsar4X.ECSLib
             }            
             return hash;
         }
+
+        /// <summary>
+        /// A horribly inefficent way of getting all the entities owned by a specific faction in a manager. 
+        /// TODO: maybe do ownership at a higher (or lower? whichever way around) level, ie not a datablob on entities. 
+        /// </summary>
+        /// <returns>The entitys in manager.</returns>
+        /// <param name="factionOwner">Faction owner.</param>
+        /// <param name="manager">Manager.</param>
+        public static List<Entity> OwnedEntitysInManager(Entity factionOwner, EntityManager manager)
+        {
+            List<Entity> listOfOwnedEntites = new List<Entity>();
+            foreach (var db in manager.GetAllDataBlobsOfType<OwnedDB>())
+            {
+                if (db.OwnedByFaction == factionOwner)
+                    listOfOwnedEntites.Add(db.OwningEntity);
+            }
+            return listOfOwnedEntites;
+        }
+
     }
 
     public static class DictionaryExtension

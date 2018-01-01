@@ -2,6 +2,7 @@
 using Pulsar4X.ECSLib;
 using Eto.Drawing;
 using System;
+using System.Linq;
 
 namespace Pulsar4X.CrossPlatformUI.Views
 {
@@ -79,15 +80,15 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
             {
-                if (changeData.Datablob is OrbitDB & !OrbitList.ContainsKey(changeData.Entity.Guid) && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
+                if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
                 {
                     if (!((OrbitDB)changeData.Datablob).IsStationary)
-                        OrbitList.Add(changeData.Entity.Guid, new OrbitRing(changeData.Entity, _camera));
+                        OrbitList[changeData.Entity.Guid] = new OrbitRing(changeData.Entity, _camera);
                 }
-                if (changeData.Datablob is NameDB &! TextIconList.ContainsKey(changeData.Entity.Guid))
-                        TextIconList.Add(changeData.Entity.Guid, new TextIcon(changeData.Entity, _camera));
-                if (!IconDict.ContainsKey(changeData.Entity.Guid))
-                    IconDict.Add(changeData.Entity.Guid, new EntityIcon(changeData.Entity, _camera));
+                if (changeData.Datablob is NameDB) 
+                        TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);
+                
+                IconDict[changeData.Entity.Guid] = new EntityIcon(changeData.Entity, _camera);
             }
             if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
             {
@@ -137,22 +138,50 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //Each newly placed Texticon is compared to only the Texticons that are placed above its position
             //Therefore a sorted list of the occupied Positions is maintained
             occupiedPosition.Add(textIconList[0].ViewDisplayRect);
-            for (int i = 1; i < TextIconList.Count; i++)
+
+            /*
+            foreach (var textIcon in TextIconList.Values)
             {
-                int lowestPosIndex = occupiedPosition.BinarySearch(textIconList[i].ViewDisplayRect + new Point(0,(int)textIconList[i].ViewNameSize.Height) , byViewPos);
-                if (lowestPosIndex < 0) lowestPosIndex = ~lowestPosIndex;
-                
+                int lowestPosIndex = occupiedPosition.BinarySearch(textIcon.ViewDisplayRect + new Point(0, (int)textIcon.ViewNameSize.Height), byViewPos);
+                if (lowestPosIndex < 0) 
+                    lowestPosIndex = ~lowestPosIndex;
+
                 for (int j = lowestPosIndex; j < occupiedPosition.Count; j++)
                 {
-                    if (textIconList[i].ViewDisplayRect.Intersects(occupiedPosition[j]))
+                    if (textIcon.ViewDisplayRect.Intersects(occupiedPosition[j]))
                     {
-                        textIconList[i].ViewOffset -= new PointF(0,  textIconList[i].ViewDisplayRect.Bottom - occupiedPosition[j].Top);
+                        textIcon.ViewOffset -= new PointF(0, textIcon.ViewDisplayRect.Bottom - occupiedPosition[j].Top);
                     }
                 }
                 //Inserts the new label sorted
-                int insertIndex = occupiedPosition.BinarySearch(textIconList[i].ViewDisplayRect, byViewPos);
+                int insertIndex = occupiedPosition.BinarySearch(textIcon.ViewDisplayRect, byViewPos);
                 if (insertIndex < 0) insertIndex = ~insertIndex;
-                occupiedPosition.Insert(insertIndex, textIconList[i].ViewDisplayRect);
+                occupiedPosition.Insert(insertIndex, textIcon.ViewDisplayRect);
+            }*/
+
+
+            List<TextIcon> texiconsCopy = TextIconList.Values.ToList();
+            int numTextIcons = texiconsCopy.Count;
+
+            for (int i = 1; i < numTextIcons; i++)
+            {
+                var item = texiconsCopy[i];
+                int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + new Point(0,(int)item.ViewNameSize.Height) , byViewPos);
+                int lpi = lowestPosIndex;
+                if (lowestPosIndex < 0) 
+                    lpi = ~lowestPosIndex;
+                
+                for (int j = lpi; j < occupiedPosition.Count; j++)
+                {
+                    if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
+                    {
+                        item.ViewOffset -= new PointF(0,  item.ViewDisplayRect.Bottom - occupiedPosition[j].Top);
+                    }
+                }
+                //Inserts the new label sorted
+                int insertIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect, byViewPos);
+                if (insertIndex < 0) insertIndex = ~insertIndex;
+                occupiedPosition.Insert(insertIndex, item.ViewDisplayRect);
             }
 
 
@@ -173,7 +202,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var item in EntityList.Values)
                 item.DrawMe(g);
 
-            TextIconsDistribute();
+            //TextIconsDistribute();
             foreach (var item in TextIconList.Values)
             {
                 item.DrawMe(g);

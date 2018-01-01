@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public BaseDataBlob Clone(SensorInfoDB sensorInfo)
+        public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
         {
             return new NameDB(this, sensorInfo);
         }
@@ -88,6 +88,11 @@ namespace Pulsar4X.ECSLib
                 hash = Misc.ValueHash(item.Value, hash);
             }
             return hash;
+        }
+
+        public void SensorUpdate(SensorInfoDB sensorInfo)
+        {
+            //do nothing for this. 
         }
 
         NameDB(NameDB db, SensorInfoDB sensorInfo)
