@@ -1,35 +1,24 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="11" Column="51" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/SystemView/SystemMap_DrawableVM.cs" Line="94" Column="26" />
-      <File FileName="Pulsar4X.ECSLib/Orders/EntityCommand.cs" Line="1" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Orders/OrderableDB.cs" Line="51" Column="30" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveCommand.cs" Line="48" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorInfoDB.cs" Line="24" Column="115" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="10" Column="43" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" Line="31" Column="129" />
-      <File FileName="Pulsar4X.ECSLib/Entity/Entity.cs" Line="210" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityManager.cs" Line="315" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Entity/EntityChangeListner.cs" Line="229" Column="31" />
-      <File FileName="Pulsar4X.ECSLib/Helpers/ConcurrentHashSet.cs" Line="68" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/IconCollection.cs" Line="98" Column="54" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="55" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/OldViewModels/SystemView/SystemMap_DrawableVM.cs" Line="84" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="40" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" Line="27" Column="1" />
+      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="86" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/TextIcon.cs" Line="72" Column="13" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemMap_DrawableView.xeto" Line="1" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemMap_DrawableView.xeto.cs" Line="137" Column="13" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/EntityIcon.cs" Line="1" Column="1" />
+      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/IconCollection.cs" Line="120" Column="38" />
       <File FileName="Pulsar4X Status" />
     </Files>
-    <Pads>
-      <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State>
-          <Value>_changeListner.EntityChanges</Value>
-          <Value>_entityCommanding</Value>
-          <Value>changeData</Value>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" line="27" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>

@@ -1,5 +1,11 @@
 2018-01-02  se5a  <jon.se5a@gmail.com>
 
+	* SensorScan.cs:
+	* SensorEntityFactory.cs: fixes icons disapearing in map view.
+
+
+2018-01-02  se5a  <jon.se5a@gmail.com>
+
 	* NameDB.cs:
 	* MiscHelpers.cs:
 	* StarInfoDB.cs:

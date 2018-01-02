@@ -1,5 +1,9 @@
 2018-01-02  se5a  <jon.se5a@gmail.com>
 
+	* IconCollection.cs: fixes icons disapearing in map view. 
+
+2018-01-02  se5a  <jon.se5a@gmail.com>
+
 	* IconCollection.cs:
 	* SystemMap_DrawableView.xeto.cs: ISensorCloneMethod now has
 	an update method as well as clone.

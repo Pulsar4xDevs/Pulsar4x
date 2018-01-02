@@ -139,26 +139,6 @@ namespace Pulsar4X.CrossPlatformUI.Views
             //Therefore a sorted list of the occupied Positions is maintained
             occupiedPosition.Add(textIconList[0].ViewDisplayRect);
 
-            /*
-            foreach (var textIcon in TextIconList.Values)
-            {
-                int lowestPosIndex = occupiedPosition.BinarySearch(textIcon.ViewDisplayRect + new Point(0, (int)textIcon.ViewNameSize.Height), byViewPos);
-                if (lowestPosIndex < 0) 
-                    lowestPosIndex = ~lowestPosIndex;
-
-                for (int j = lowestPosIndex; j < occupiedPosition.Count; j++)
-                {
-                    if (textIcon.ViewDisplayRect.Intersects(occupiedPosition[j]))
-                    {
-                        textIcon.ViewOffset -= new PointF(0, textIcon.ViewDisplayRect.Bottom - occupiedPosition[j].Top);
-                    }
-                }
-                //Inserts the new label sorted
-                int insertIndex = occupiedPosition.BinarySearch(textIcon.ViewDisplayRect, byViewPos);
-                if (insertIndex < 0) insertIndex = ~insertIndex;
-                occupiedPosition.Insert(insertIndex, textIcon.ViewDisplayRect);
-            }*/
-
 
             List<TextIcon> texiconsCopy = TextIconList.Values.ToList();
             int numTextIcons = texiconsCopy.Count;
@@ -202,7 +182,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
             foreach (var item in EntityList.Values)
                 item.DrawMe(g);
 
-            //TextIconsDistribute();
+            TextIconsDistribute();
             foreach (var item in TextIconList.Values)
             {
                 item.DrawMe(g);

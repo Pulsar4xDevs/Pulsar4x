@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
 
                 if (detectableEntity.HasDataBlob<OwnedDB>())
                 {
-                    if (detectableEntity.GetDataBlob<OwnedDB>().OwnedByFaction == faction)
+                    if (detectableEntity.GetDataBlob<OwnedDB>().OwnedByFaction != faction)
                     {
                         SensorProcessorTools.DetectEntites(receverDB, detectableEntity, atDate);
                     }

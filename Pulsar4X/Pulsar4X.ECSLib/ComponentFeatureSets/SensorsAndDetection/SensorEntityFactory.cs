@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
                 int typeIndex1 = EntityManager.DataBlobTypes[db.GetType()];
                 int typeIndex;
                 EntityManager.TryGetTypeIndex(db.GetType(), out typeIndex);
-                if (!sensorInfo.SensorEntity.HasDataBlob(typeIndex)) //TODO: this is evaluating to false when it shouldnt. 
+                if (!sensorInfo.SensorEntity.HasDataBlob(typeIndex)) 
                 {
                     var cloned = db.SensorClone(sensorInfo);
                     sensorInfo.SensorEntity.SetDataBlob(cloned);  
