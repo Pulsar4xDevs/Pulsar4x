@@ -4,24 +4,17 @@ namespace Pulsar4X.ECSLib
 {
     public class RefineOrdersCommand:EntityCommand
     {
-        public Guid RequestingFactionGuid { get; set; }
-
-        public Guid EntityCommandingGuid { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime ActionedOnDate { get; set; }
 
         public Guid MaterialGuid { get; set; }
         public ushort NumberOrderd { get; set; }
         public bool RepeatJob { get; set; } = false;
 
-        public int ActionLanes => 1; //blocks movement
-
-        public bool IsRunning { get; private set; } = false;
-        public bool IsBlocking => true;
+        internal override int ActionLanes => 1; //blocks movement
+        internal override bool IsBlocking => true;
 
 
         private Entity _entityCommanding;
-        public Entity EntityCommanding{get{return _entityCommanding;}}
+        internal override Entity EntityCommanding{get{return _entityCommanding;}}
 
 
         private Entity _factionEntity;
@@ -41,14 +34,14 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public void ActionCommand(Game game)
+        internal override void ActionCommand(Game game)
         {
             RefiningProcessor.AddJob(_staticData, _entityCommanding, _job);
             IsRunning = true;
         }
 
 
-        public bool IsValidCommand(Game game)
+        internal override bool IsValidCommand(Game game)
         {       
             _staticData = game.StaticData;
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
@@ -63,7 +56,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        public bool IsFinished()
+        internal override bool IsFinished()
         {
             if (_job.Auto == false && _job.NumberCompleted == _job.NumberOrdered)
             {
@@ -75,23 +68,17 @@ namespace Pulsar4X.ECSLib
 
     public class RePrioritizeCommand : EntityCommand
     {
-        public Guid RequestingFactionGuid { get; set; }
-
-        public Guid EntityCommandingGuid { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime ActionedOnDate { get; set; }
-
         public Guid JobID { get; set; }
         public short Delta { get; set; }
 
-        public int ActionLanes => 0;
+        internal override int ActionLanes => 0;
 
-        public bool IsBlocking => false;
-        public bool IsRunning { get; private set; } = false;
+        internal override bool IsBlocking => false;
+
         private Entity _factionEntity;
 
         private Entity _entityCommanding;
-        public Entity EntityCommanding { get { return _entityCommanding; } }
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         public RePrioritizeCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID, short delta)
         {
@@ -102,7 +89,7 @@ namespace Pulsar4X.ECSLib
             Delta = delta;
         }
 
-        public void ActionCommand(Game game)
+        internal override void ActionCommand(Game game)
         {
             RefiningProcessor.ChangeJobPriority(_entityCommanding, JobID, Delta);
             IsRunning = true;
@@ -117,7 +104,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        public bool IsValidCommand(Game game)
+        internal override bool IsValidCommand(Game game)
         {
             if (IsOrderValid(game.GlobalManager))
             {
@@ -126,7 +113,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        public bool IsFinished()
+        internal override bool IsFinished()
         {
             return IsRunning;//its run once, therefore it's finished.
         }

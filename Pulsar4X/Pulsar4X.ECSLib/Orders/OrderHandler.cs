@@ -1,33 +1,33 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System;
+
+namespace Pulsar4X.ECSLib
 {
-    internal abstract class OrderHandler
+    internal interface OrderHandler
     {
-        internal Game _game;
+        Game Game { get; }
 
-        internal OrderHandler(Game game)
-        { 
-            _game = game;
-            _game.OrderHandler = this;
-        }
-
-        internal abstract void HandleOrder(EntityCommand entityCommand);
+        void HandleOrder(EntityCommand entityCommand);
     }
 
 
     internal class StandAloneOrderHandler:OrderHandler
     {
-        internal StandAloneOrderHandler(Game game) : base(game)
+        internal StandAloneOrderHandler(Game game)
         {
+            Game = game;
+            game.OrderHandler = this;
         }
 
-        internal override void HandleOrder(EntityCommand entityCommand)
+        public Game Game { get; private set; }
+
+        public void HandleOrder(EntityCommand entityCommand)
         {
-            if (entityCommand.IsValidCommand(_game))
+            if (entityCommand.IsValidCommand(Game))
             {
                 entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(entityCommand);
                 var commandList = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
-                OrderableProcessor.ProcessOrderList(_game, commandList);
-            }              
+                OrderableProcessor.ProcessOrderList(Game, commandList);
+            }
         }
     }
 

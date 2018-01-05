@@ -1,52 +1,58 @@
 ﻿using System;
+using Newtonsoft.Json;
+
 namespace Pulsar4X.ECSLib
 {
-    public interface EntityCommand
+    public abstract class EntityCommand
     {
+        internal Guid CmdID { get; set; } = Guid.NewGuid();
+
+        internal abstract int ActionLanes { get;  }
+        internal abstract bool IsBlocking { get; }
+
+        [JsonProperty]
         /// <summary>
         /// This is the faction that has requested the command. 
         /// </summary>
         /// <value>The requesting faction GUID.</value>
-        Guid RequestingFactionGuid { get; set; }
-
+        internal Guid RequestingFactionGuid { get; set; }
+        [JsonProperty]
         /// <summary>
         /// The Entity this command is targeted at
         /// </summary>
         /// <value>The entity GUID.</value>
-        Guid EntityCommandingGuid { get; set; }
+        internal Guid EntityCommandingGuid { get; set; }
 
-        Entity EntityCommanding{ get; }
-
+        [JsonProperty]
         /// <summary>
         /// Gets or sets the datetime this command was created by the player/client. 
         /// </summary>
         /// <value>The created date.</value>
-        DateTime CreatedDate{ get; set; }
+        internal DateTime CreatedDate{ get; set; }
 
+        [JsonProperty]
         /// <summary>
         /// Gets or sets the datetime this command was actioned/processed by the server. 
         /// this may be needed by the client to ensure it stays in synch with the server. 
         /// </summary>
         /// <value>The actioned on date.</value>
-        DateTime ActionedOnDate{ get; set; }
+        internal DateTime ActionedOnDate{ get; set; }
+
+        internal abstract Entity EntityCommanding { get; }
 
         /// <summary>
         /// checks that the entities exsist and that the entity is owned by the faction.
         /// may eventualy need to return a responce instead of just bool. 
         /// </summary>
-        bool IsValidCommand(Game game);
+        internal abstract bool IsValidCommand(Game game);
         /// <summary>
         /// Actions the command.
         /// </summary>
         /// <param name="game">Game.</param>
-        void ActionCommand(Game game);
+        internal abstract void ActionCommand(Game game);
 
-        int ActionLanes { get;}
-
-        bool IsBlocking { get;}
-
-        bool IsRunning{ get;}
-        bool IsFinished(); 
+        public bool IsRunning { get; protected set; } = false;
+        internal abstract bool IsFinished(); 
     }
 
     public static class CommandHelpers

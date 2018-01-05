@@ -19,11 +19,11 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _host = new TestGame(1);
-            _host.Game.OrderHandler = new ServerOrderHandler(_host.Game, 4888);
+            //_host.Game.OrderHandler = new ServerOrderHandler(_host.Game, 4888);
 
             _client = new Game();
             _netClient = new Networking.NetworkClient("localhost", 4888, new GameVM());//ugly, refactor so GameVM isn't required and or network isnt needed to be created here?
-            _client.OrderHandler = new ClientOrderHandler(_client, _netClient); 
+            //_client.OrderHandler = new ClientOrderHandler(_client, _netClient); 
         }
 
         [Test] 

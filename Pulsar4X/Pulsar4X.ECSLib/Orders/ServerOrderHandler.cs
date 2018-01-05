@@ -5,37 +5,33 @@ using Pulsar4X.Networking;
 
 namespace Pulsar4X.ECSLib
 {
+    /*
     internal class ServerOrderHandler : OrderHandler
     {
-        bool HasClients = false;
+
 
         internal NetworkHost NetHost;
-
-        //Dictionary<Guid, List<RemoteConnection>> factionListners = new Dictionary<Guid, List<RemoteConnection>>();
 
         internal ServerOrderHandler(Game game, int portNum) : base(game)
         {
             NetHost = new NetworkHost(game, portNum);
-            //NetHost.NetHostStart();
         }
 
         internal override void HandleOrder(EntityCommand entityCommand)
         {
-            RXOrder(entityCommand);
-        }
-
-        internal void RXOrder(EntityCommand entityCommand)
-        {
-            if (entityCommand.IsValidCommand(_game) && HasClients)
+            if (entityCommand.IsValidCommand(_game))
             {
-                /*
-                if (factionListners.ContainsKey(entityCommand.RequestingFactionGuid))
+                if (NetHost.FactionConnections.ContainsKey(entityCommand.RequestingFactionGuid))
                 {
-                    foreach (var item in factionListners[entityCommand.RequestingFactionGuid])
+                    foreach (var item in NetHost.FactionConnections[entityCommand.RequestingFactionGuid])
                     {
-                        item.SendOrder(entityCommand);
+                        NetHost.SendEntityCommandAck(item, entityCommand.CmdID, true);
                     }
-                }*/
+                }
+
+                entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(entityCommand);
+                var commandList = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
+                OrderableProcessor.ProcessOrderList(_game, commandList);
             }
         }
     }
@@ -54,19 +50,8 @@ namespace Pulsar4X.ECSLib
         {
 
             NetOutgoingMessage msg = _netClient.NetPeerObject.CreateMessage();
-            //msg.Data = entityCommand;
-            //_netClient..SendMessage(msg, NetDeliveryMethod.Unreliable);
-            TXOrder(entityCommand);
+            _netClient.SendEntityCommand(entityCommand);
         }
-        internal void TXOrder(EntityCommand entityCommand)
-        {
-            //ServerConnection.SendOrder(entityCommand);
-        }
-        internal void RXOrder(EntityCommand entityCommand)
-        {
-            entityCommand.ActionCommand(_game);
-        }
-
-
     }
+    */
 }

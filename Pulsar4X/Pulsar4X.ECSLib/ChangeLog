@@ -1,3 +1,20 @@
+2018-01-05  se5a  <jon.se5a@gmail.com>
+
+	* Client.cs:
+	* Server.cs:
+	* OrderHandler.cs:
+	* EntityCommand.cs:
+	* SerializationManager.cs:
+	* ServerOrderHandler.cs:
+	* EntityChangeListner.cs:
+	* NewGameOptionsVM.cs:
+	* OrbitBodyCommand.cs:
+	* RefineOrders.cs:
+	* CargoLoadOrderCommand.cs:
+	* ShipMovementProcessor.cs:
+	* TranslationMoveCommand.cs: Some work on networking
+	EntityOrders. 
+
 2018-01-02  se5a  <jon.se5a@gmail.com>
 
 	* SensorScan.cs:

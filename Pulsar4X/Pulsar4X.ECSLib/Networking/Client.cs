@@ -27,7 +27,7 @@ namespace Pulsar4X.Networking
         RequestDatablobHash,
         SendPlayerEntityCommand
     }
-    public class NetworkClient : NetworkBase
+    public class NetworkClient : NetworkBase, OrderHandler
     {
         struct EntityHashData
         {
@@ -36,6 +36,8 @@ namespace Pulsar4X.Networking
             internal int EntityHash;
             internal Dictionary<string, int> DatablobHashes;
         }
+
+        private Dictionary<Guid, EntityCommand> CommandsAwaitingServerAproval = new Dictionary<Guid, EntityCommand>();
 
         private NetClient NetClientObject { get { return (NetClient)NetPeerObject; } }
         public string HostAddress { get; set; }
@@ -47,9 +49,12 @@ namespace Pulsar4X.Networking
         //public event TickStartEventHandler NetTickEvent;
         public string ConnectedToGameName { get; private set; }
         public DateTime hostToDatetime { get; private set; }
+
         //private Dictionary<Guid, string> _factions; 
         //public ObservableCollection<FactionItem> Factions { get; set; }
         private GameVM _gameVM;
+
+        //public Game Game { get; set; }
 
         public NetworkClient(string hostAddress, int portNum, GameVM gameVM)
         {
@@ -174,20 +179,22 @@ namespace Pulsar4X.Networking
             NetClientObject.SendMessage(msg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered);
         }
 
-        public void SendEntityCommand(EntityCommand cmd)//may need to serialise it prior to this (as the actual class). can we serialise an interface?
+        public void SendEntityCommand(EntityCommand cmd)
         {
-            throw new NotImplementedException("Need to figure out how we're going to serialise the EntityCommand object");
+            Guid cmdID = Guid.NewGuid();
+            CommandsAwaitingServerAproval.Add(cmdID, cmd);
+
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
 
             var mStream = new MemoryStream();
 
-            //TODO: SerializationManager.???(cmd, mStream); or figure out exactly how we're going to serialise this, migth have to write a serialiser to handle interface.
+            SerializationManager.Export(Game, mStream, cmd); 
             byte[] byteArray = mStream.ToArray();
-
             int len = byteArray.Length;
 
             sendMsg.Write((byte)ToServerMsgType.SendPlayerEntityCommand);
-
+            sendMsg.Write(cmdID.ToByteArray());
+            sendMsg.Write(cmd.GetType().Name);
             sendMsg.Write(len);
             sendMsg.Write(byteArray);
 
@@ -398,6 +405,24 @@ namespace Pulsar4X.Networking
             }
         }
 
+        void HandleEntityCommandAproval(NetIncomingMessage message)
+        {
+            Guid cmdID = new Guid(message.ReadBytes(16));
+            bool valid = message.ReadBoolean();
+            EntityCommand cmd = CommandsAwaitingServerAproval[cmdID];
+            if (valid)
+            {
+                cmd.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(cmd);
+                var commandList = cmd.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
+                OrderableProcessor.ProcessOrderList(Game, commandList);
+            }
+            else
+            {
+                Messages.Add("Command not validated by server"); //TODO: maybe add messages from server saying why. 
+            }
+            CommandsAwaitingServerAproval.Remove(cmdID);
+        }
+
         #endregion
 
         #region Other
@@ -513,6 +538,12 @@ namespace Pulsar4X.Networking
                     }
                 }
             }
+        }
+
+        public void HandleOrder(EntityCommand entityCommand)
+        {
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            SendEntityCommand(entityCommand);
         }
 
         #endregion

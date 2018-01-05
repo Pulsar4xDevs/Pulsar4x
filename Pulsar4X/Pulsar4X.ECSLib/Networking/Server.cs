@@ -17,15 +17,19 @@ namespace Pulsar4X.Networking
         SendEntityHashData,
         SendDatablob,
         SendSystemData,
-        SendFactionEntity
+        SendFactionEntity,
+        SendEntityCommandAck
     }
 
-    public class NetworkHost : NetworkBase
+    public class NetworkHost : NetworkBase, OrderHandler
     {
 
         private Dictionary<NetConnection, Guid> _connectedFactions { get; } = new Dictionary<NetConnection, Guid>();
-        private Dictionary<Guid, List<NetConnection>> _factionConnections { get; } = new Dictionary<Guid, List<NetConnection>>();
+        internal Dictionary<Guid, List<NetConnection>> FactionConnections { get; } = new Dictionary<Guid, List<NetConnection>>();
+        internal Dictionary<Guid, NetEntityChangeListner> FactionEntityListners { get; } = new Dictionary<Guid, NetEntityChangeListner>();
         public NetServer NetServerObject { get { return (NetServer)NetPeerObject; } }
+
+        //public Game Game { get; set; }
 
         private DateTime _currentDate;
 
@@ -49,13 +53,14 @@ namespace Pulsar4X.Networking
                 _connectedFactions.Add(netCon, faction.Guid);
             else
                 _connectedFactions[netCon] = faction.Guid;
-            if (!_factionConnections.ContainsKey(faction.Guid))
+            if (!FactionConnections.ContainsKey(faction.Guid))
             {
-                _factionConnections.Add(faction.Guid, new List<NetConnection>());
+                FactionConnections.Add(faction.Guid, new List<NetConnection>());
             }
-            if (!_factionConnections[faction.Guid].Contains(netCon))
-                _factionConnections[faction.Guid].Add(netCon);
-
+            if (!FactionConnections[faction.Guid].Contains(netCon))
+                FactionConnections[faction.Guid].Add(netCon);
+            if (!FactionEntityListners.ContainsKey(faction.Guid))
+                FactionEntityListners[faction.Guid] = new NetEntityChangeListner(Game.GlobalManager, faction);
         }
 
         /// <summary>
@@ -69,10 +74,11 @@ namespace Pulsar4X.Networking
             {
                 Guid factionGuid = _connectedFactions[netCon];
                 _connectedFactions.Remove(netCon);
-                //if (_factionConnections.ContainsKey(factionGuid))
-                //{if (_factionConnections[factionGuid].Contains(netCon)) //these checks should be unnecisary. 
-                _factionConnections[factionGuid].Remove(netCon);
+                FactionConnections[factionGuid].Remove(netCon);
+                //if (_factionConnections[factionGuid].Count == 0) //don't remove, we'll keep the list of changes and can send that on reconnect. 
+                //    _factionEntityListners.Remove(factionGuid);
             }
+
         }
 
         private void NetHostStart()
@@ -209,8 +215,6 @@ namespace Pulsar4X.Networking
             
         }
 
-
-
         void HandleRequestDatablob(NetIncomingMessage message)
         {
             NetConnection sender = message.SenderConnection;
@@ -237,6 +241,25 @@ namespace Pulsar4X.Networking
             }
         }
 
+        void HandleEntityCommand(NetIncomingMessage message)
+        {
+            NetConnection sender = message.SenderConnection;
+
+            Guid cmdID = new Guid(message.ReadBytes(16));
+            string cmdTypeName = message.ReadString();
+            int len = message.ReadInt32();
+            byte[] data = message.ReadBytes(len);
+            var mStream = new MemoryStream(data);
+            string fullName = "Pulsar4X.ECSLib." + cmdTypeName;
+            Type cmdType = Type.GetType(fullName);
+            if (cmdType == null)
+                Messages.Add("Command Type: " + fullName + " not found. this could be caused by the client having a missmatched game version"); //TODO: send this back to the client.
+            else
+            {
+                EntityCommand cmd = SerializationManager.ImportEntityCommand(Game, cmdType, mStream);
+
+            }
+        }
 
         #endregion
 
@@ -400,6 +423,33 @@ namespace Pulsar4X.Networking
             msg.Write(systemByteArray);                     //encoded data.
             NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
 
+        }
+
+        internal void SendEntityCommandAck(NetConnection recipient, Guid cmdID, bool isValid)
+        {
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            msg.Write((byte)ToClientMsgType.SendEntityCommandAck);
+            msg.Write(cmdID.ToByteArray());
+            msg.Write(isValid);
+            NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        public void HandleOrder(EntityCommand entityCommand)
+        {
+            if (entityCommand.IsValidCommand(Game))
+            {
+                if (FactionConnections.ContainsKey(entityCommand.RequestingFactionGuid))
+                {
+                    foreach (var item in FactionConnections[entityCommand.RequestingFactionGuid])
+                    {
+                        SendEntityCommandAck(item, entityCommand.CmdID, true);
+                    }
+                }
+
+                entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(entityCommand);
+                var commandList = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
+                OrderableProcessor.ProcessOrderList(Game, commandList);
+            }
         }
 
         #endregion

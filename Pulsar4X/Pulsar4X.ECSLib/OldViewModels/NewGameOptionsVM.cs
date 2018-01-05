@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Pulsar4X.Networking;
 
 namespace Pulsar4X.ECSLib
 {
@@ -64,8 +65,10 @@ namespace Pulsar4X.ECSLib
             _gameVM.CreateGame(this);
             if (CreateServer)
             {
-                ServerOrderHandler handler = new ServerOrderHandler(_gameVM.Game, PortNumber);
-                _gameVM.NetMessages = handler.NetHost.Messages;
+                //ServerOrderHandler handler = new ServerOrderHandler(_gameVM.Game, PortNumber);
+                NetworkHost nethost = new NetworkHost(_gameVM.Game, PortNumber);
+                 
+                _gameVM.NetMessages = nethost.Messages;
                 //handler.NetHost.NetHostStart();
 
             }

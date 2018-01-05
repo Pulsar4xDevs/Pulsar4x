@@ -86,6 +86,23 @@ namespace Pulsar4X.ECSLib
         { }
     }
 
+
+
+    public class NetEntityChangeListner : EntityChangeListner
+    {
+        List<EntityChangeListner> ManagerListners = new List<EntityChangeListner>();
+        public NetEntityChangeListner(EntityManager manager, Entity faction) : base(manager, faction, new List<int>())
+        {
+            var knownSystems = faction.GetDataBlob<FactionInfoDB>().KnownSystems;
+            foreach (var starSysGuid in knownSystems)
+            {
+                StarSystem starSys = manager.Game.Systems[starSysGuid];
+                EntityManager starSysManager = starSys.SystemManager;
+                ManagerListners.Add(new EntityChangeListner(starSysManager, faction, new List<int>()));
+            }
+        }
+    }
+
     public class EntityChangeListner : AEntityChangeListner
     {
         internal List<int> IncludeDBTypeIndexFilter = new List<int>();
