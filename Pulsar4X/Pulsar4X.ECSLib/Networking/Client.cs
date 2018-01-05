@@ -239,6 +239,9 @@ namespace Pulsar4X.Networking
                 case ToClientMsgType.SendDatablob:
                     HandleDatablob(message);
                     break;
+                case ToClientMsgType.SendEntityCommandAck:
+                    HandleEntityCommandAproval(message);
+                    break;
                 default:
                     throw new Exception("Unhandled ToClientMsgType: " + messageType);
             }
@@ -268,6 +271,18 @@ namespace Pulsar4X.Networking
             _gameVM.Game = Game;
             var mStream = new MemoryStream(data);
             Game.Settings = SerializationManager.ImportGameSettings(mStream);
+            //TODO: #CleanCode: the below should probilby be in refactored to somewhere else. 
+            if (Game.Settings.DataSets != null)
+            {
+                foreach (string dataSet in Game.Settings.DataSets)
+                {
+                    StaticDataManager.LoadData(dataSet, Game);
+                }
+            }
+            if (Game.StaticData.LoadedDataSets.Count == 0)
+            {
+                StaticDataManager.LoadData("Pulsar4x", Game);
+            }
             mStream.Close();
         }
 

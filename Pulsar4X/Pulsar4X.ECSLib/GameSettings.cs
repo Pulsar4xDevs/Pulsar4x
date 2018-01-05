@@ -79,6 +79,8 @@ namespace Pulsar4X.ECSLib
 
         public int MasterSeed = 12345678;
 
+        public IEnumerable<string> DataSets { get; set; } = new List<string>();
+
         public Dictionary<EventType, bool> DefaultHaltOnEvents { get; set; } = new Dictionary<EventType, bool>()
         {
             { EventType.OrdersCompleted, true },
@@ -143,8 +145,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public string SMPassword { get; set; } = "";
 
-        [JsonIgnore]
-        public IEnumerable<string> DataSets { get; set; } = new List<string>();
+
 
         #region Player Generation
 

@@ -1,3 +1,10 @@
+2018-01-06  se5a  <jon.se5a@gmail.com>
+
+	* GameSettings.cs:
+	* Client.cs:
+	* Server.cs: Client now loads static data.
+	Some fixes to the EntityCommands.
+
 2018-01-05  se5a  <jon.se5a@gmail.com>
 
 	* Client.cs:

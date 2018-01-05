@@ -154,6 +154,9 @@ namespace Pulsar4X.Networking
                 case ToServerMsgType.RequestDatablob:
                     HandleRequestDatablob(message);
                     break;
+                case ToServerMsgType.SendPlayerEntityCommand:
+                    HandleEntityCommand(message);
+                    break;
                 default:
                     throw new Exception("Unhandled ToServerMsgType: " + messageType);
             }
