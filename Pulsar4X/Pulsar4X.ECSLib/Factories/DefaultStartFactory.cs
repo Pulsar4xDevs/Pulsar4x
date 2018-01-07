@@ -10,6 +10,7 @@ namespace Pulsar4X.ECSLib
         {
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem sol = starfac.CreateSol(game);
+            sol.SystemManager.ManagerSubpulses.Initalise(sol.SystemManager);
             Entity earth = sol.SystemManager.Entities[3]; //should be fourth entity created 
             Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);

@@ -204,10 +204,6 @@ namespace Pulsar4X.ECSLib
             LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
             _stopwatch.Reset();
 
-            if (_isOvertime)
-            {
-                DoProcessing(GameGlobalDateTime + Ticklength); //if running overtime, DoProcessing wont be triggered by the event, so trigger it here.
-            }
             _isProcessing = false;
         }
 

@@ -48,6 +48,7 @@ namespace Pulsar4X.ECSLib
             SystemDateChangedEvent?.Invoke(SystemLocalDateTime);
         }
 
+
         [JsonProperty]
         private DateTime _systemLocalDateTime;
         public DateTime SystemLocalDateTime
@@ -55,6 +56,8 @@ namespace Pulsar4X.ECSLib
             get { return _systemLocalDateTime; }
             private set
             {
+                if (value < _systemLocalDateTime)
+                    throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
                 _systemLocalDateTime = value;
                 if (_entityManager.Game.SyncContext != null)
                     _entityManager.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the main (UI) thread, so the event is invoked on that thread.
@@ -66,45 +69,24 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// constructor for json
         /// </summary>
-        public ManagerSubPulse() { }
-
-        /// <summary>
-        /// Constructor 
-        /// </summary>
-        /// <param name="entityManager"></param>
-        internal ManagerSubPulse(EntityManager entityManager)
+        public ManagerSubPulse() 
         {
-                
+
+        }
+
+
+
+
+        internal void Initalise(EntityManager entityManager)//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
+        {
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
-            if (entityManager.Game != null) //this is needed due to the TreeHirachy test... it's the only place that calls this with an empty game now. 
+            if (entityManager.Game != null) //this is needed due to the TreeHirachy test... it's the only place that calls this with an empty game now. TODO: check this is still needed since refactoring
             {
-                _systemLocalDateTime = _entityManager.Game.CurrentDateTime;
-                _entityManager.Game.PostLoad += Game_PostLoad;
+                _systemLocalDateTime = entityManager.Game.CurrentDateTime;
             }
 
-        }
-
-        private void Game_PostLoad(object sender, EventArgs e)
-        {
-            //Initalise();
-        }
-
-        internal void Initalise()//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
-        {
-            //we offset some of these to spread the load out a bit more. 
-            //TODO: move this stuff to the processorManager
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime, _processManager.GetProcessor<OrbitDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime, _processManager.GetProcessor<NewtonBalisticDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime, _processManager.GetProcessor<EntityResearchDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(5), _processManager.GetProcessor<OrderableDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10), _processManager.GetProcessor<TranslateMoveDB>());
-            //AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10.1), _processManager.GetProcessor<SensorProfileDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(1), _processManager.GetProcessor<MiningDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(2), _processManager.GetProcessor<RefiningDB>());
-            AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(3), _processManager.GetProcessor<ConstructionDB>());
-
-
+            _processManager.InitializeMangerSubpulse(entityManager);
         }
 
 
@@ -160,20 +142,19 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal void ProcessSystem(DateTime toDateTime)
+        internal void ProcessSystem(DateTime targetDateTime)
         {
-            //check validity of commands etc. here.
-
-
-            //the system may need to run several times for a wanted tickLength
-            //keep processing the system till we've reached the wanted ticklength
-            while (SystemLocalDateTime < toDateTime)
+            if(targetDateTime < SystemLocalDateTime)
+                throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
+            //the system may need to run several times for a target datetime
+            //keep processing the system till we've reached the wanted datetime
+            while (SystemLocalDateTime < targetDateTime)
             {
-
                 //calculate max time the system can run/time to next interupt
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                TimeSpan timeDeltaMax = toDateTime - SystemLocalDateTime;
+                TimeSpan timeDeltaMax = targetDateTime - SystemLocalDateTime;
                 DateTime nextDate = GetNextInterupt(timeDeltaMax);
+
                 TimeSpan deltaActual = nextDate - SystemLocalDateTime;
 
                 //ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
@@ -191,7 +172,8 @@ namespace Pulsar4X.ECSLib
             {
                 nextInteruptDateTime = QueuedProcesses.Keys.Min();
             }
-
+            if (nextInteruptDateTime < SystemLocalDateTime)
+                throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
             return nextInteruptDateTime;
         }
 
@@ -211,7 +193,7 @@ namespace Pulsar4X.ECSLib
                 foreach(var systemProcess in QueuedProcesses[nextInteruptDateTime].SystemProcessors)
                 {
                     systemProcess.ProcessManager(_entityManager, deltaSeconds);
-                    AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess);
+                    AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
                 foreach(var instanceProcessSet in QueuedProcesses[nextInteruptDateTime].InstanceProcessors)
                 {
@@ -220,7 +202,7 @@ namespace Pulsar4X.ECSLib
                         instanceProcessSet.Key.ProcessEntity(entity, deltaSeconds);
                     }
                 }
-                QueuedProcesses.Remove(nextInteruptDateTime);
+                QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }
             SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent            
         

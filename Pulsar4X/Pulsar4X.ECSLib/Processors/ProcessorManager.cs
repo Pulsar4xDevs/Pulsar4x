@@ -57,6 +57,21 @@ namespace Pulsar4X.ECSLib
         }
 
 
+        internal void InitializeMangerSubpulse(EntityManager _entityManager)
+        {
+            ManagerSubPulse managerSubPulse = _entityManager.ManagerSubpulses;
+
+            //we offset some of these to spread the load out a bit more. 
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<OrbitDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<NewtonBalisticDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<EntityResearchDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(5), GetProcessor<OrderableDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10), GetProcessor<TranslateMoveDB>());
+            //AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10.1), _processManager.GetProcessor<SensorProfileDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(1), GetProcessor<MiningDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(2), GetProcessor<RefiningDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(3), GetProcessor<ConstructionDB>());
+        }
 
         private void CreateProcessors(Game game)
         {

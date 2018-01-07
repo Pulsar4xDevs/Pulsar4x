@@ -85,7 +85,7 @@ namespace Pulsar4X.Networking
             if (CurrentFaction != null)
             {
                 //CheckEntityData();
-                _gameVM.StarSystemViewModel = new StarSystemVM(_gameVM, Game, CurrentFaction);
+                _gameVM.StarSystemViewModel = new StarSystemSelectionVM(_gameVM, Game, CurrentFaction);
                 _gameVM.StarSystemViewModel.Initialise();
             }
 
@@ -388,8 +388,10 @@ namespace Pulsar4X.Networking
             byte[] data = message.ReadBytes(len);
             var mStream = new MemoryStream(data);
             StarSystem starSys = SerializationManager.ImportSystem(Game, mStream);
-            Messages.Add("Recevied StarSystem: " + starSys.NameDB.DefaultName);
             mStream.Close();
+
+            Messages.Add("Recevied StarSystem: " + starSys.NameDB.DefaultName);
+            _gameVM.StarSystemViewModel.StarSystems.Add(starSys, starSys.NameDB.GetName(this.CurrentFaction));
 
         }
 

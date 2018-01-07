@@ -15,34 +15,46 @@ using System.Linq.Expressions;
 namespace Pulsar4X.CrossPlatformUI.Views {
 	public class SystemView : Panel {
 		protected Panel RenderCanvasLocation;
-		//protected RenderCanvas RenderCanvas;
-		private UITimer timDraw;
 
 		protected DropDown systems;
 
 		protected SystemVM CurrentSystem;
-
-
-		private bool mouse_held = false;
-		private bool continue_drag = false;
-		private Vector2 mouse_held_position;
-		private Vector2 mouse_released_position;
-		private const float mouse_move_threshold = 20f;
-		
-		
+        		
         protected SystemMap_DrawableView SysMapDrawable;
 
-		public SystemView(StarSystemVM viewmodel) {
+        private StarSystemSelectionVM _viewmodel;
+
+		public SystemView(StarSystemSelectionVM viewmodel) {
 			
-			DataContext = viewmodel;			
+			DataContext = viewmodel;
+            _viewmodel = viewmodel;
 			XamlReader.Load(this);
 
             systems.DataContext = viewmodel.StarSystems;
+
             systems.BindDataContext(c => c.DataStore, (DictionaryVM<object, string> m) => m.DisplayList);
             systems.SelectedIndexBinding.BindDataContext((DictionaryVM<object, string> m) => m.SelectedIndex);
             
-            SysMapDrawable.SetViewmodel(viewmodel.SelectedSystemVM);
-            
+
+            if (!viewmodel.Enable)
+                viewmodel.StarSystems.SelectionChangedEvent += StarSystems_SelectionChangedEvent;
+            else
+            {
+                SysMapDrawable.SetViewmodel(viewmodel.SelectedSystemVM);
+            }
         }
-	}
+
+        void StarSystems_SelectionChangedEvent(int oldSelection, int newSelection)
+        {
+            if (_viewmodel.Enable)
+            {
+                _viewmodel.StarSystems.SelectionChangedEvent -= StarSystems_SelectionChangedEvent;
+                SysMapDrawable.SetViewmodel(_viewmodel.SelectedSystemVM);
+            }
+            else
+            {
+                SysMapDrawable.SetViewmodel(null);
+            }
+        }
+    }
 }

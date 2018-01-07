@@ -8,15 +8,16 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.ECSLib
 {
-    public class StarSystemVM : ViewModelBase
+    public class StarSystemSelectionVM : ViewModelBase
     {
+        public bool Enable { get { return StarSystems.Count > 0; } }
         public DictionaryVM<StarSystem, string> StarSystems { get; } = new DictionaryVM<StarSystem, string>();
         public SystemMap_DrawableVM SelectedSystemVM { get; } = new SystemMap_DrawableVM();
         private GameVM _gameVM;
         //private int viewport_width;
         //private int viewport_height;
 
-        public StarSystemVM(GameVM gameVM, Game game, Entity factionEntity)
+        public StarSystemSelectionVM(GameVM gameVM, Game game, Entity factionEntity)
         {
             _gameVM = gameVM;
             foreach (var item in game.GetSystems(gameVM.CurrentAuthToken))
@@ -32,7 +33,8 @@ namespace Pulsar4X.ECSLib
 
         public void Initialise()
         {
-            StarSystems.SelectedIndex = 0;
+            if (Enable) 
+                StarSystems.SelectedIndex = 0;
         }
 
         private void StarSystems_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

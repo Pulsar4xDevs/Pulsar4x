@@ -72,7 +72,7 @@ namespace Pulsar4X.ECSLib
         public string StatusText { get { return _statusText; } set { _statusText = value; OnPropertyChanged(); } }
         private string _statusText;
 
-        public StarSystemVM StarSystemViewModel {get; set;}
+        public StarSystemSelectionVM StarSystemViewModel {get; set;}
 
         //factions that this client has full visability of. for GM this will be all factions.
         private List<Guid> _visibleFactions;
@@ -146,7 +146,7 @@ namespace Pulsar4X.ECSLib
 
             StatusText = "Game Created.";
 
-            StarSystemViewModel = new StarSystemVM(this, Game, CurrentFaction);
+            StarSystemViewModel = new StarSystemSelectionVM(this, Game, CurrentFaction);
             StarSystemViewModel.Initialise();
         }
 

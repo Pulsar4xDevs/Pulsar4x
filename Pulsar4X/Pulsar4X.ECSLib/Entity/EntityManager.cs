@@ -34,7 +34,9 @@ namespace Pulsar4X.ECSLib
         internal List<AEntityChangeListner> EntityListners = new List<AEntityChangeListner>(); 
 
         [JsonProperty]
-        public ManagerSubPulse ManagerSubpulses { get; private set; }
+        public ManagerSubPulse ManagerSubpulses { 
+            get; 
+            private set; }
 
         /// <summary>
         /// Static reference to an invalid manager.
@@ -64,7 +66,7 @@ namespace Pulsar4X.ECSLib
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
-            ManagerSubpulses = new ManagerSubPulse(this);
+            ManagerSubpulses = new ManagerSubPulse();
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()

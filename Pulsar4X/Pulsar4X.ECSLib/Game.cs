@@ -145,14 +145,17 @@ namespace Pulsar4X.ECSLib
             // Temp: This will be reworked later.
             GenerateSystems(new AuthenticationToken(SpaceMaster, newGameSettings.SMPassword), newGameSettings.MaxSystems);
 
-
+            GlobalManager.ManagerSubpulses.Initalise(GlobalManager);
+            foreach (StarSystem starSys in this.Systems.Values)
+            {
+                starSys.SystemManager.ManagerSubpulses.Initalise(starSys.SystemManager);
+            }
 
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
-            foreach (StarSystem starSys in this.Systems.Values)
-            {
-                starSys.SystemManager.ManagerSubpulses.Initalise();
-            }
+
+
+
         }
 
         #endregion

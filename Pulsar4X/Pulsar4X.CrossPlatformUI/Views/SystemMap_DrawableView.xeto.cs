@@ -127,20 +127,22 @@ namespace Pulsar4X.CrossPlatformUI.Views
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            
-            stopwatch.Start();
-            if (_viewModel.UpdatesReady)
-                doUpdates();
-            e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
+            if (_viewModel != null)
+            {
+                stopwatch.Start();
+                if (_viewModel.UpdatesReady)
+                    doUpdates();
+                e.Graphics.FillRectangle(Colors.DarkBlue, e.ClipRectangle);
 
-            _iconCollection.DrawMe(e.Graphics);
+                _iconCollection.DrawMe(e.Graphics);
 
-            string lastDrawTime = stopwatch.ElapsedMilliseconds.ToString();
-            stopwatch.Reset();
-            Font font = new Font(FontFamilies.Fantasy, 8);
-            Color color = new Color(Colors.White);
-            PointF loc = new PointF(0, 0);
-            e.Graphics.DrawText(font, color, loc, lastDrawTime);
+                string lastDrawTime = stopwatch.ElapsedMilliseconds.ToString();
+                stopwatch.Reset();
+                Font font = new Font(FontFamilies.Fantasy, 8);
+                Color color = new Color(Colors.White);
+                PointF loc = new PointF(0, 0);
+                e.Graphics.DrawText(font, color, loc, lastDrawTime);
+            }
         }
     }
     
