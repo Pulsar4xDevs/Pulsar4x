@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
     public class NewtonBalisticDB : BaseDataBlob
     {
-
+        [JsonProperty]
         public Vector4 CurrentSpeed { get; set; } = new Vector4();
-
-        /// <summary>
-        /// Should these have the _ in front or is that for private members?
-        /// </summary>
+        [JsonProperty]
         public Guid TargetGuid;
+        [JsonProperty]
         public DateTime CollisionDate;
 
         /// <summary>

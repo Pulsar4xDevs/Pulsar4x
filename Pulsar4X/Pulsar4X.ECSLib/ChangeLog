@@ -1,5 +1,13 @@
 2018-01-08  se5a  <jon.se5a@gmail.com>
 
+	* Client.cs:
+	* Server.cs:
+	* NewtonBalisticDB.cs:
+	* NewtonBalisticProcessor.cs: Client now starts with the
+	correct DateTime after getting GameSettings data from host. 
+
+2018-01-08  se5a  <jon.se5a@gmail.com>
+
 	* Game.cs:
 	* TimeLoop.cs:
 	* ManagerSubPulse.cs:

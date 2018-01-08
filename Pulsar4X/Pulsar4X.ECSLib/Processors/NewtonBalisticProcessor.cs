@@ -38,6 +38,8 @@ namespace Pulsar4X.ECSLib
                 PositionDB position = objectEntity.GetDataBlob<PositionDB>();
                 position.RelativePosition += Distance.KmToAU(balisticDB.CurrentSpeed * deltaSeconds);
 
+                /*TODO: rethink how this is done, unless this is the only place we're going to do collision, then it shouldnt be done here. 
+                 * ALso, this currently breaks down in a network situation because we're not sending the target entity (the client probilby shouldnt know that) 
                 Entity myTarget = manager.GetLocalEntityByGuid(balisticDB.TargetGuid);
                 PositionDB targetPos = myTarget.GetDataBlob<PositionDB>();
 
@@ -54,7 +56,7 @@ namespace Pulsar4X.ECSLib
                     RemoveSystem.Add(mySystem);
 
                     mySystem.SystemManager.RemoveEntity(objectEntity); //get rid of the asteroid
-                }
+                }*/
             }
 
             /// <summary>

@@ -48,7 +48,7 @@ namespace Pulsar4X.Networking
         public Entity CurrentFaction { get { return _gameVM.CurrentFaction; } }
         //public event TickStartEventHandler NetTickEvent;
         public string ConnectedToGameName { get; private set; }
-        public DateTime hostToDatetime { get; private set; }
+        //public DateTime hostToDatetime { get; private set; }
 
         //private Dictionary<Guid, string> _factions; 
         //public ObservableCollection<FactionItem> Factions { get; set; }
@@ -97,7 +97,7 @@ namespace Pulsar4X.Networking
         {
             ConnectedToGameName = message.ReadString();
             long ticks = message.ReadInt64();
-            hostToDatetime = DateTime.FromBinary(ticks); //= new DateTime(ticks);
+            DateTime hostToDatetime = DateTime.FromBinary(ticks); //= new DateTime(ticks);
             Messages.Add("Found Server: " + message.SenderEndPoint + "Name Is: " + ConnectedToGameName);
         }
 
@@ -250,7 +250,7 @@ namespace Pulsar4X.Networking
         void HandleTickInfo(NetIncomingMessage message)
         {
 
-            hostToDatetime = DateTime.FromBinary(message.ReadInt64());
+            DateTime hostToDatetime = DateTime.FromBinary(message.ReadInt64());
             DateTime hostFromDatetime = DateTime.FromBinary(message.ReadInt64());
             TimeSpan hostDelta = hostToDatetime - hostFromDatetime;
             TimeSpan ourDelta = hostToDatetime - Game.GameLoop.GameGlobalDateTime;
@@ -264,14 +264,19 @@ namespace Pulsar4X.Networking
 
         void HandleGameSettings(NetIncomingMessage message)
         {
-
+            DateTime hostDateTime = DateTime.FromBinary(message.ReadInt64());
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
+
+
             Game = new Game();
             _gameVM.Game = Game;
             var mStream = new MemoryStream(data);
             Game.Settings = SerializationManager.ImportGameSettings(mStream);
+            mStream.Close();
+            Game.GameLoop.GameGlobalDateTime = hostDateTime;
             //TODO: #CleanCode: the below should probilby be in refactored to somewhere else. 
+            //TODO: #Network: it should also maybe be able to request a dataset from the server if it hasn't got it localy. 
             if (Game.Settings.DataSets != null)
             {
                 foreach (string dataSet in Game.Settings.DataSets)
@@ -392,6 +397,7 @@ namespace Pulsar4X.Networking
 
             Messages.Add("Recevied StarSystem: " + starSys.NameDB.DefaultName);
             _gameVM.StarSystemViewModel.StarSystems.Add(starSys, starSys.NameDB.GetName(this.CurrentFaction));
+            starSys.SystemManager.ManagerSubpulses.Initalise(starSys.SystemManager);
 
         }
 

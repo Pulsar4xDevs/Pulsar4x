@@ -296,6 +296,7 @@ namespace Pulsar4X.Networking
             int len = byteArray.Length;
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
             sendMsg.Write((byte)ToClientMsgType.SendGameData);
+            sendMsg.Write(game.CurrentDateTime.ToBinary());
             sendMsg.Write(len);
             sendMsg.Write(byteArray);
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
