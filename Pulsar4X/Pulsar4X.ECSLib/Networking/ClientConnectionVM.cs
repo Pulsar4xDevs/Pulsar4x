@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
 {
     public class ClientConnectionVM : ViewModelBase
     {
-        public string FactionName { get; set; }
+        public string FactionName { get; set; } = "United Earth Federation";
         public string FactionPassword { get; set; }
 
         public string ServerAddress { get; set; } = "127.0.0.1";

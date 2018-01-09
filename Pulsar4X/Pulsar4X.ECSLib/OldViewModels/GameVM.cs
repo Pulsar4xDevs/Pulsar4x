@@ -72,7 +72,10 @@ namespace Pulsar4X.ECSLib
         public string StatusText { get { return _statusText; } set { _statusText = value; OnPropertyChanged(); } }
         private string _statusText;
 
-        public StarSystemSelectionVM StarSystemViewModel {get; set;}
+        public StarSystemSelectionVM StarSystemSelectionViewModel {
+            get; 
+            set;
+        }
 
         //factions that this client has full visability of. for GM this will be all factions.
         private List<Guid> _visibleFactions;
@@ -80,7 +83,7 @@ namespace Pulsar4X.ECSLib
         //faction data. for GM this will be compleate, for normal play this will be factions known to the faction, and the factionVM will only contain data that is known to the faction
         //private BindingList<FactionVM> _factions;
 
-        public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
+        //public ObservableCollection<SystemVM> StarSystems { get { return _systems; } }
 
         public DictionaryVM<Guid, string> Colonys { get; } = new DictionaryVM<Guid, string>(DisplayMode.Value);
 
@@ -146,8 +149,8 @@ namespace Pulsar4X.ECSLib
 
             StatusText = "Game Created.";
 
-            StarSystemViewModel = new StarSystemSelectionVM(this, Game, CurrentFaction);
-            StarSystemViewModel.Initialise();
+            StarSystemSelectionViewModel = new StarSystemSelectionVM(this, Game, CurrentFaction);
+            StarSystemSelectionViewModel.Initialise();
         }
 
         public void LoadGame(string pathToFile)

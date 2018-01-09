@@ -253,11 +253,11 @@ namespace Pulsar4X.ECSLib
             _gameVM = game;
 
             FactionInfoDB finfo = _gameVM.CurrentFaction.GetDataBlob<FactionInfoDB>();
-            foreach (SystemVM system in _gameVM.StarSystems)
+            foreach (StarSystem starSystem in _gameVM.StarSystemSelectionViewModel.StarSystems.Keys)
             {
-                if(finfo.KnownSystems.Contains(system.StarSystem.Guid))
+                if(finfo.KnownSystems.Contains(starSystem.Guid))
                 {
-                    _starSystems.Add(system.StarSystem, system.StarSystem.NameDB.GetName(_gameVM.CurrentFaction));
+                    _starSystems.Add(starSystem, starSystem.NameDB.GetName(_gameVM.CurrentFaction));
                 }
             }
 

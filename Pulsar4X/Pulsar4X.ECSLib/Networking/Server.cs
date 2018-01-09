@@ -11,14 +11,16 @@ namespace Pulsar4X.Networking
 {
     enum ToClientMsgType : byte
     {
-        TickInfo,
+        SendTickInfo,
+        SendStringMessage,
         SendGameData,
         SendEntity,
         SendEntityHashData,
         SendDatablob,
         SendSystemData,
         SendFactionEntity,
-        SendEntityCommandAck
+        SendEntityCommandAck,
+        SendEntityChangeData
     }
 
     public class NetworkHost : NetworkBase, OrderHandler
@@ -75,7 +77,7 @@ namespace Pulsar4X.Networking
                 Guid factionGuid = _connectedFactions[netCon];
                 _connectedFactions.Remove(netCon);
                 FactionConnections[factionGuid].Remove(netCon);
-                //if (_factionConnections[factionGuid].Count == 0) //don't remove, we'll keep the list of changes and can send that on reconnect. 
+                //if (_factionConnections[factionGuid].Count == 0) //don't remove, we'll keep the list of changes and TODO: can send that on reconnect. 
                 //    _factionEntityListners.Remove(factionGuid);
             }
 
@@ -97,11 +99,6 @@ namespace Pulsar4X.Networking
             StartListning();
             Game.GameLoop.GameGlobalDateChangedEvent += SendTickInfo;
         }
-
-
-
-
-
 
         protected override void HandleDiscoveryRequest(NetIncomingMessage message)
         {
@@ -170,18 +167,27 @@ namespace Pulsar4X.Networking
             string pass = message.ReadString();
             List<Entity> factions = Game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
 
-            //TODO send a message instead of crashing with an exception if we can't find the faction.
-            Entity faction = factions.Find(item => item.GetDataBlob<NameDB>().DefaultName == name);
-
-            if (AuthProcessor.Validate(faction, pass))
+            if (factions.Exists(item => item.GetDataBlob<NameDB>().DefaultName == name))
             {
-                AddFactionNetconLink(faction, sender);
-                SendGameSettings(sender, Game);
-                //TODO negotiate and get a delta between the server's data and the client's data, and only update teh client with changed data.
-                //(the client should be able to save/keep a cashe of it's own data so there's less to send when reconnecting to a server.)
-                SendFactionData(sender, faction);
-                Messages.Add("Sent Faction " + name);
-                //printEntityHashInfo(faction);
+                Entity faction = factions.Find(item => item.GetDataBlob<NameDB>().DefaultName == name);
+
+                if (AuthProcessor.Validate(faction, pass))
+                {
+                    AddFactionNetconLink(faction, sender);
+                    SendGameSettings(sender, Game);
+                    //TODO negotiate and get a delta between the server's data and the client's data, and only update the client with changed data.
+                    //(the client should be able to save/keep a cashe of it's own data so there's less to send when reconnecting to a server.)
+                    SendFactionData(sender, faction);
+                    Messages.Add("Sent Faction " + name);
+                }
+                else
+                {
+                    SendStringMessage(sender, "Server could not auth faction, check your password and try again"); //TODO: should probibly check the number of bad passwords and handle that properly
+                }
+            }
+            else
+            {
+                SendStringMessage(sender, "Server could not find faction with name: " + name);
             }
         }
 
@@ -272,17 +278,68 @@ namespace Pulsar4X.Networking
         {
             if (_connectedFactions.Count > 0)
             {
+                foreach (var kvp in FactionEntityListners)
+                {
+                    var recipients = FactionConnections[kvp.Key];
+                    NetOutgoingMessage sendentityChangeMsg = NetServerObject.CreateMessage();
+                    EntityChangeData changeData;
+                    while( kvp.Value.TryDequeue(out changeData))
+                    {
+                        SendEntityChangeData(recipients, changeData);
+                    }
+                }
+
+
                 TimeSpan deltaTime = newDate - _currentDate;
-                //Dispatcher.CurrentDispatcher.BeginInvoke(new Action(() => Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta)));
                 //Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta);
                 IList<NetConnection> connections = _connectedFactions.Keys.ToList();
                 NetOutgoingMessage sendMsg = NetServerObject.CreateMessage();
-                sendMsg.Write((byte)ToClientMsgType.TickInfo);
+                sendMsg.Write((byte)ToClientMsgType.SendTickInfo);
                 sendMsg.Write(newDate.ToBinary());
                 sendMsg.Write(_currentDate.ToBinary());
                 NetServerObject.SendMessage(sendMsg, connections, NetDeliveryMethod.ReliableOrdered, 0);
+
             }
             _currentDate = newDate;
+        }
+
+        void SendEntityChangeData(List<NetConnection> recipients, EntityChangeData changeData)
+        {
+            NetOutgoingMessage message = NetPeerObject.CreateMessage();
+            message.Write((byte)ToClientMsgType.SendEntityChangeData);
+            message.Write((byte)changeData.ChangeType);
+            switch (changeData.ChangeType)
+            {
+                case EntityChangeData.EntityChangeType.EntityAdded:
+                    {
+                        EntityDataMessage(message, changeData.Entity);
+                    }
+                    break;
+                case EntityChangeData.EntityChangeType.EntityRemoved:
+                    {
+                        message.Write(changeData.Entity.Guid.ToByteArray());
+                    }
+                    break;
+                case EntityChangeData.EntityChangeType.DBAdded:
+                    {
+                        DatablobDataMessage(message, changeData.Entity, changeData.Datablob);
+                    }
+                    break;
+                case EntityChangeData.EntityChangeType.DBRemoved:
+                    { 
+                        message.Write(changeData.Entity.Guid.ToByteArray());                        //entity guid. 
+                        message.Write(changeData.Datablob.GetType().Name);                          //datablob name
+                        message.Write(EntityManager.DataBlobTypes[changeData.Datablob.GetType()]);  //datablob typeIndex
+                    }
+                    break;
+                default:
+                    throw new Exception("Network classes need to handle EntityChangeType");
+            }
+            foreach (var recipient in recipients)
+            {
+                NetServerObject.SendMessage(message, recipient, NetDeliveryMethod.ReliableOrdered);
+            }
+
         }
 
         void SendGameSettings(NetConnection recipient, Game game)
@@ -367,21 +424,27 @@ namespace Pulsar4X.Networking
 
         void SendEntityData(NetConnection recipient, Entity entity)
         {
+            NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
+            sendMsg.Write((byte)ToClientMsgType.SendEntity); //receving it is the same as any normal entity.
+            EntityDataMessage(sendMsg, entity);
+            NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+
+        }
+
+        NetOutgoingMessage EntityDataMessage(NetOutgoingMessage msg, Entity entity)
+        {
+
 
             var mStream = new MemoryStream();
             SerializationManager.Export(Game, mStream, entity);
-
-
             byte[] entityByteArray = mStream.ToArray();
             int len = entityByteArray.Length;
-            NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
-            sendMsg.Write((byte)ToClientMsgType.SendEntity); //receving it is the same as any normal entity.
-            sendMsg.Write(entity.Guid.ToByteArray());
-            sendMsg.Write(entity.GetValueCompareHash());
-            sendMsg.Write(len);
-            sendMsg.Write(entityByteArray);
-            NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+            msg.Write(entity.Guid.ToByteArray());
+            msg.Write(entity.GetValueCompareHash());
+            msg.Write(len);
+            msg.Write(entityByteArray);
             mStream.Close();
+            return msg;
         }
 
         void SendSystemData(NetConnection recipient, StarSystem starSystem)
@@ -401,14 +464,19 @@ namespace Pulsar4X.Networking
 
         void SendDatablob(NetConnection recipient, Entity entity, BaseDataBlob datablob)
         {
-            //string typename = datablobtype.AssemblyQualifiedName;
+            Messages.Add("Sending " + datablob.GetType().Name);
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            msg.Write((byte)ToClientMsgType.SendDatablob);      //message type
+            NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
+
+        }
+
+        NetOutgoingMessage DatablobDataMessage(NetOutgoingMessage msg, Entity entity, BaseDataBlob datablob)
+        {
 
             var mStream = new MemoryStream();
             //int typeIndex = EntityManager.DataBlobTypes[datablobtype];
             //var datablob = entity.GetDataBlob<BaseDataBlob>(typeIndex);
-            SerializationManager.Export(Game, mStream, datablob);
-            byte[] systemByteArray = mStream.ToArray();
-            int len = systemByteArray.Length;
 
             //Messages.Add("GetType().ToSTring(): " + datablob.GetType().ToString());
             //Messages.Add("GetType().Name: " + datablob.GetType().Name);
@@ -416,20 +484,20 @@ namespace Pulsar4X.Networking
             //Messages.Add("GetType().FullName: " + datablob.GetType().FullName);
             //Messages.Add("pulsarTypeIndex: " + typeIndex);
 
-            Messages.Add("Sending " + datablob.GetType().Name);
+            SerializationManager.Export(Game, mStream, datablob);
+            byte[] systemByteArray = mStream.ToArray();
+            int len = systemByteArray.Length;
 
-            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
-            msg.Write((byte)ToClientMsgType.SendDatablob); //message type
-            msg.Write(entity.Guid.ToByteArray());           //entityGuid
-            msg.Write(datablob.GetType().Name);             //datablob name
+            msg.Write(entity.Guid.ToByteArray());                   //entityGuid
+            msg.Write(datablob.GetType().Name);                     //datablob name
             msg.Write(EntityManager.DataBlobTypes[datablob.GetType()]);//datablob typeIndex
-            msg.Write(len);                                 //stream length
-            msg.Write(systemByteArray);                     //encoded data.
-            NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
-
+            msg.Write(len);                                         //stream length
+            msg.Write(systemByteArray);                             //encoded data.
+            mStream.Close();
+            return msg;
         }
 
-        internal void SendEntityCommandAck(NetConnection recipient, Guid cmdID, bool isValid)
+        void SendEntityCommandAck(NetConnection recipient, Guid cmdID, bool isValid)
         {
             NetOutgoingMessage msg = NetPeerObject.CreateMessage();
             msg.Write((byte)ToClientMsgType.SendEntityCommandAck);
@@ -438,7 +506,15 @@ namespace Pulsar4X.Networking
             NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
         }
 
-        public void HandleOrder(EntityCommand entityCommand)
+        void SendStringMessage(NetConnection recipient, string message)
+        {
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            msg.Write((byte)ToClientMsgType.SendStringMessage);
+            msg.Write(message);
+            NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        public void HandleOrder(EntityCommand entityCommand) //public because it's an interface. 
         {
             if (entityCommand.IsValidCommand(Game))
             {
@@ -454,7 +530,7 @@ namespace Pulsar4X.Networking
                 var commandList = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
                 OrderableProcessor.ProcessOrderList(Game, commandList);
             }
-        }
+        } 
 
         #endregion
 

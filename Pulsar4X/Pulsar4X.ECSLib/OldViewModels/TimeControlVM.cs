@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
             get { return _timeloop?.TickFrequency.TotalMilliseconds ?? 250; }
             set { _timeloop.TickFrequency = TimeSpan.FromMilliseconds(value); OnPropertyChanged(); }
         }
-        private ManagerSubPulse SystemSubPulse { get { return _gameVM?.StarSystemViewModel?.StarSystems.SelectedKey.SystemManager.ManagerSubpulses; } }
+        private ManagerSubPulse SystemSubPulse { get { return _gameVM?.StarSystemSelectionViewModel?.StarSystems.SelectedKey.SystemManager.ManagerSubpulses; } }
         public string CurrentGameDate { get { return _timeloop?.GameGlobalDateTime.ToString(); } }
         public string LastTickLen { get { return _timeloop?.LastProcessingTime.TotalMilliseconds.ToString(); } }
         private TimeSpan _lastFrameLen;

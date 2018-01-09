@@ -46,9 +46,7 @@ namespace Pulsar4X.Networking
         private bool _hasFullDataset;
         public bool HasFullDataset { get { return _hasFullDataset; } private set { _hasFullDataset = value; OnPropertyChanged(); } }
         public Entity CurrentFaction { get { return _gameVM.CurrentFaction; } }
-        //public event TickStartEventHandler NetTickEvent;
         public string ConnectedToGameName { get; private set; }
-        //public DateTime hostToDatetime { get; private set; }
 
         //private Dictionary<Guid, string> _factions; 
         //public ObservableCollection<FactionItem> Factions { get; set; }
@@ -80,13 +78,13 @@ namespace Pulsar4X.Networking
         }
 
 
-        protected override void PostQueueHandling()
+        protected override void PostQueueHandling() //TODO: can maybe get rid of this
         {
             if (CurrentFaction != null)
             {
                 //CheckEntityData();
-                _gameVM.StarSystemViewModel = new StarSystemSelectionVM(_gameVM, Game, CurrentFaction);
-                _gameVM.StarSystemViewModel.Initialise();
+                //_gameVM.StarSystemSelectionViewModel = new StarSystemSelectionVM(_gameVM, Game, CurrentFaction);
+                //_gameVM.StarSystemSelectionViewModel.Initialise();
             }
 
         }
@@ -218,7 +216,7 @@ namespace Pulsar4X.Networking
             ToClientMsgType messageType = (ToClientMsgType)message.ReadByte();
             switch (messageType)
             {
-                case ToClientMsgType.TickInfo:
+                case ToClientMsgType.SendTickInfo:
                     HandleTickInfo(message);
                     break;
                 case ToClientMsgType.SendGameData:
@@ -242,9 +240,21 @@ namespace Pulsar4X.Networking
                 case ToClientMsgType.SendEntityCommandAck:
                     HandleEntityCommandAproval(message);
                     break;
+                case ToClientMsgType.SendStringMessage:
+                    HandleStringMessage(message);
+                    break;
+                case ToClientMsgType.SendEntityChangeData:
+                    HandleEntityChangeData(message);
+                    break;
                 default:
-                    throw new Exception("Unhandled ToClientMsgType: " + messageType);
+                    throw new Exception("Unhandled ToClientMsgType: " + messageType + " This is probliby caused by a game version difference");
             }
+        }
+
+        private void HandleStringMessage(NetIncomingMessage message)
+        {
+            string messageStr = message.ReadString();
+            Messages.Add(messageStr);
         }
 
         void HandleTickInfo(NetIncomingMessage message)
@@ -289,6 +299,7 @@ namespace Pulsar4X.Networking
                 StaticDataManager.LoadData("Pulsar4x", Game);
             }
             mStream.Close();
+
         }
 
         void HandleFactionData(NetIncomingMessage message)
@@ -331,6 +342,7 @@ namespace Pulsar4X.Networking
             }
 
             _gameVM.CurrentFaction = factionEntity;
+            _gameVM.StarSystemSelectionViewModel = new StarSystemSelectionVM(_gameVM, Game, factionEntity);
         }
 
         void HandleEntityHashData(NetIncomingMessage message)
@@ -396,7 +408,7 @@ namespace Pulsar4X.Networking
             mStream.Close();
 
             Messages.Add("Recevied StarSystem: " + starSys.NameDB.DefaultName);
-            _gameVM.StarSystemViewModel.StarSystems.Add(starSys, starSys.NameDB.GetName(this.CurrentFaction));
+            _gameVM.StarSystemSelectionViewModel.StarSystems.Add(starSys, starSys.NameDB.GetName(this.CurrentFaction));
             starSys.SystemManager.ManagerSubpulses.Initalise(starSys.SystemManager);
 
         }
@@ -444,6 +456,57 @@ namespace Pulsar4X.Networking
                 Messages.Add("Command not validated by server"); //TODO: maybe add messages from server saying why. 
             }
             CommandsAwaitingServerAproval.Remove(cmdID);
+        }
+
+        void HandleEntityChangeData(NetIncomingMessage message)
+        {
+            EntityChangeData.EntityChangeType changeType = (EntityChangeData.EntityChangeType)message.ReadByte();
+            switch (changeType)
+            {
+                case EntityChangeData.EntityChangeType.EntityAdded:
+                    {
+                        HandleEntityData(message);
+                    }
+                    break;
+                case EntityChangeData.EntityChangeType.EntityRemoved:
+                    {
+                        Guid entityID = new Guid(message.ReadBytes(16));
+                        Entity entity;
+                        if (!this.Game.GlobalManager.FindEntityByGuid(entityID, out entity))
+                            Messages.Add("Remove Entity Fail: No Entity for Guid: " + entityID);
+                        else
+                            entity.Manager.RemoveEntity(entity);
+                    }
+                    break;
+                case EntityChangeData.EntityChangeType.DBAdded:
+                    {
+                        HandleDatablob(message);
+                    }
+                    break;
+                case EntityChangeData.EntityChangeType.DBRemoved:
+                    {
+                        Guid entityID = new Guid(message.ReadBytes(16));    //entity guid. 
+                        string name = message.ReadString();                 //datablob name
+                        int typeIndex = message.ReadInt32();                //datablob typeIndex
+                        Entity entity;
+                        if (!this.Game.GlobalManager.FindEntityByGuid(entityID, out entity))
+                            Messages.Add("Remove " + name + " Datablob Fail: No Entity for Guid: " + entityID + " this is not critical and can be ignored.");
+                        else
+                        {
+                            if (entity.HasDataBlob(typeIndex))
+                            {
+                                entity.RemoveDataBlob(typeIndex);
+                                Messages.Add("Successfully removed " + name + " Datablob from entity " + entityID);
+                            }
+                            else
+                                Messages.Add("Remove " + name + " Datablob Fail: datablob not found in entity, this is not critical and can be ignored.");
+
+                        }
+                    }
+                    break;
+                default:
+                    throw new Exception("Network classes need to handle EntityChangeType, this is probibly caused by a game version missmatch");
+            }
         }
 
         #endregion
@@ -563,7 +626,7 @@ namespace Pulsar4X.Networking
             }
         }
 
-        public void HandleOrder(EntityCommand entityCommand)
+        public void HandleOrder(EntityCommand entityCommand) //TODO: maybe rename this since in the netclient and server 'HandleFoo' tends to represent handling a network message.  (this is from the OrderHandler interface)
         {
             NetOutgoingMessage msg = NetPeerObject.CreateMessage();
             SendEntityCommand(entityCommand);

@@ -1,3 +1,18 @@
+2018-01-10  se5a  <jon.se5a@gmail.com>
+
+	* Client.cs:
+	* Server.cs:
+	* GameVM.cs:
+	* ShipOrderVM.cs:
+	* EntityChangeListner.cs:
+	* TimeControlVM.cs:
+	* ClientConnectionVM.cs:
+	* StarSystemSelectionVM.cs: More ServerClient networking work.
+
+	hooked up entitychange listner messages in the server/client,
+	though they don't apear to be being sent, will have to chase
+	that down. 
+
 2018-01-08  se5a  <jon.se5a@gmail.com>
 
 	* Client.cs:
