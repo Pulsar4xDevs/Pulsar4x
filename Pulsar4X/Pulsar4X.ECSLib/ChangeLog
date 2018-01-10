@@ -1,5 +1,16 @@
 2018-01-10  se5a  <jon.se5a@gmail.com>
 
+	* Entity.cs:
+	* Server.cs:
+	* EntityManager.cs:
+	* EntityChangeListner.cs:
+	* SystemBodyInfoDB.cs:
+	* SensorEntityFactory.cs: Fixes to Entity and Manager to fix
+	some ChangeListner bugs. Some other minor network related
+	fixes. 
+
+2018-01-10  se5a  <jon.se5a@gmail.com>
+
 	* Client.cs:
 	* Server.cs:
 	* GameVM.cs:

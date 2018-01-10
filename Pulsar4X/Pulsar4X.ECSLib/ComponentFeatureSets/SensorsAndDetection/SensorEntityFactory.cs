@@ -14,12 +14,14 @@ namespace Pulsar4X.ECSLib
 
             if (sensorInfo.SensorEntity == null)
             {
+                 
+
                 List<BaseDataBlob> datablobs = new List<BaseDataBlob>(){
-                sensorInfo,
-                SetPositionClone(sensorInfo),
-                new OwnedDB(detectingFaction),
-                };
-                sensorInfo.SensorEntity = new Entity(detectedEntity.Manager, datablobs);
+                    new OwnedDB(detectingFaction),
+                    sensorInfo,
+                    SetPositionClone(sensorInfo),               
+                    };
+                sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager, datablobs); 
                 foreach (var item in datablobs)
                 {
                     sensorInfo.SensorEntity.SetDataBlob(item);

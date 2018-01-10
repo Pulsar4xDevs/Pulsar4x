@@ -93,7 +93,7 @@ namespace Pulsar4X.ECSLib
         /// Sets up the entity slot and assigns it to the entity while preserving 
         /// entity object references.
         /// </summary>
-        internal void SetupEntity(Entity entity)
+        internal void SetupEntity(Entity entity, IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             // Find an entity slot.
             int entityID;
@@ -147,6 +147,18 @@ namespace Pulsar4X.ECSLib
             }
 
             entity.ID = entityID;
+            entity.SetMask();
+
+            //the below chunk of code was moved from Entity constructor. this allows the entity to be fully populated and helps with entityChangeLisnters. 
+            if(dataBlobs != null)
+            foreach (BaseDataBlob dataBlob in dataBlobs)
+            {
+                if (dataBlob != null)
+                {
+                    SetDataBlob(entityID, dataBlob, false);
+                }
+            }
+
             UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);  
 
             //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity. 
@@ -271,19 +283,20 @@ namespace Pulsar4X.ECSLib
             return (T)_dataBlobMap[typeIndex][entityID];
         }
 
-        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob)
+        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, bool updateListners = true)
         {
             int typeIndex;
             TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
-            SetDataBlob(entityID, dataBlob, typeIndex);
+            SetDataBlob(entityID, dataBlob, typeIndex, updateListners);
         }
 
-        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, int typeIndex)
+        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, int typeIndex, bool updateListners = true)
         {
             _dataBlobMap[typeIndex][entityID] = dataBlob;
             EntityMasks[entityID][typeIndex] = true;
             dataBlob.OwningEntity = _entities[entityID];
-            UpdateListners(_entities[entityID], dataBlob, EntityChangeType.DBAdded);
+            if(updateListners)
+                UpdateListners(_entities[entityID], dataBlob, EntityChangeType.DBAdded);
         }
 
         internal void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob

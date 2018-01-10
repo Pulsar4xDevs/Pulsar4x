@@ -206,7 +206,7 @@ namespace Pulsar4X.ECSLib
                 Tectonics = origionalDB.Tectonics;
             else
                 Tectonics = TectonicActivity.Unknown;
-            //TODO: more random to the rest of it.
+            //TODO: #SensorClone, #TMI more random to the rest of it.
             var tilt = SensorProcessorTools.RndSigmoid(origionalDB.AxialTilt, accuracy, rng);
             AxialTilt = (float)tilt;
             MagneticField = origionalDB.MagneticField;
@@ -216,7 +216,7 @@ namespace Pulsar4X.ECSLib
             SupportsPopulations = origionalDB.SupportsPopulations;
             LengthOfDay = origionalDB.LengthOfDay;
             Gravity = origionalDB.Gravity;
-            //Minerals = new Dictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
+            Minerals = new Dictionary<Guid, MineralDepositInfo>(origionalDB.Minerals); //This really needs to be handled properly
         }
 
         SystemBodyInfoDB(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)

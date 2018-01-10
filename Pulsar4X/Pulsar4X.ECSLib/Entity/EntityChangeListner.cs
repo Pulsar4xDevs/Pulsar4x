@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
 
     public class NetEntityChangeListner : EntityChangeListner
     {
-        List<EntityChangeListner> ManagerListners = new List<EntityChangeListner>();
+        internal List<EntityChangeListner> ManagerListners = new List<EntityChangeListner>(); //TODO: shoudl we rewrite this so we just have one concurrent queue and put all the changes into that (from each of the managers) 
         public NetEntityChangeListner(EntityManager manager, Entity faction) : base(manager, faction, new List<int>())
         {
             var knownSystems = faction.GetDataBlob<FactionInfoDB>().KnownSystems;
@@ -170,14 +170,21 @@ namespace Pulsar4X.ECSLib
             bool include = false;
             foreach (var includeitem in IncludeDBTypeIndexFilter)
             {
-                if (!changeData.Entity.HasDataBlob(includeitem))
+                //debug
+                var someentity = changeData.Entity.Manager.GetFirstEntityWithDataBlob(includeitem);
+                var db = someentity.GetDataBlob<BaseDataBlob>(includeitem);
+                //end debug
+
+                if (changeData.Entity.HasDataBlob(includeitem))
                 {
-                    include = false;
-                    break;
+
+
+                    include = true;
                 }
                 else
                 {
-                    include = true;
+                    include = false;
+                    break;
                 }
             }
             if (include && changeData.Entity.GetDataBlob<OwnedDB>().OwnedByFaction == ListenForFaction)

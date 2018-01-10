@@ -95,7 +95,6 @@ namespace Pulsar4X.Networking
             }
             catch (System.Net.Sockets.SocketException)
             { }
-            //EntityDataSanitiser.Initialise(Game);
             StartListning();
             Game.GameLoop.GameGlobalDateChangedEvent += SendTickInfo;
         }
@@ -283,9 +282,16 @@ namespace Pulsar4X.Networking
                     var recipients = FactionConnections[kvp.Key];
                     NetOutgoingMessage sendentityChangeMsg = NetServerObject.CreateMessage();
                     EntityChangeData changeData;
-                    while( kvp.Value.TryDequeue(out changeData))
+                    while( kvp.Value.TryDequeue(out changeData)) //this is dequeuing from the global manager
                     {
                         SendEntityChangeData(recipients, changeData);
+                    }
+                    foreach (var managerListner in kvp.Value.ManagerListners) //loop through the system manager listners that the faction knows about. 
+                    {
+                        while (managerListner.TryDequeue(out changeData)) //this is dequeing from a system manager
+                        {
+                            SendEntityChangeData(recipients, changeData);
+                        }
                     }
                 }
 
@@ -339,6 +345,7 @@ namespace Pulsar4X.Networking
             {
                 NetServerObject.SendMessage(message, recipient, NetDeliveryMethod.ReliableOrdered);
             }
+            Messages.Add("Sent " + changeData.ChangeType + " changeData to " + recipients.Count + " netclient."); 
 
         }
 

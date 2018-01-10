@@ -57,10 +57,11 @@ namespace Pulsar4X.ECSLib
                 Guid = Guid.NewGuid();
             }
 
-            Manager.SetupEntity(this); 
+            Manager.SetupEntity(this, dataBlobs);
 
-
+            /* Moved this to Manager.SetupEntity
             _protectedDataBlobMask_ = Manager.EntityMasks[ID];
+
 
             if (dataBlobs == null)
             {
@@ -74,10 +75,19 @@ namespace Pulsar4X.ECSLib
                     SetDataBlob(dataBlob);
                 }
             }
-
+            */
         }
 
         internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(manager, protoEntity.Guid, protoEntity.DataBlobs) { }
+
+        /// <summary>
+        /// Sets the mask, called by the manager during SetupEntity.
+        /// </summary>
+        internal void SetMask()
+        {
+            _protectedDataBlobMask_ = Manager.EntityMasks[ID];
+        }
+
         #endregion
 
         #region Public API Functions
@@ -333,14 +343,16 @@ namespace Pulsar4X.ECSLib
             Manager.RemoveEntity(this);
 
             // Add myself the the new manager.
-            newManager.SetupEntity(this);
             Manager = newManager;
+            newManager.SetupEntity(this, dataBlobs);
+
+            /*
             _protectedDataBlobMask_ = Manager.EntityMasks[ID];
 
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
                 SetDataBlob(dataBlob);
-            }
+            }*/
         }
 
 
