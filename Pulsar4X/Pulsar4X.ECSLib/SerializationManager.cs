@@ -305,7 +305,7 @@ namespace Pulsar4X.ECSLib
 
         public static BaseDataBlob ImportDatablob([NotNull] Game game, Entity entity, Type type, Stream inputStream)
         {
-            dynamic datablob = (BaseDataBlob)Activator.CreateInstance(type);
+            BaseDataBlob datablob = (BaseDataBlob)Activator.CreateInstance(type);
             datablob = Import<BaseDataBlob>(game, inputStream, datablob);
             return datablob;
         }

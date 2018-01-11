@@ -272,18 +272,18 @@ namespace Pulsar4X.ECSLib
         OrbitDB(OrbitDB toCopy, SensorInfoDB sensorInfo, Entity parentEntity) : base(parentEntity)
         {
 
-            Epoch = toCopy.Epoch; //I think this should stay the same
-
+            Epoch = toCopy.Epoch; //This should stay the same
+            IsStationary = toCopy.IsStationary;
             UpdateFromSensorInfo(toCopy, sensorInfo);
 
         }
 
-        void UpdateFromSensorInfo(OrbitDB origionalDB, SensorInfoDB sensorInfo)
+        void UpdateFromSensorInfo(OrbitDB actualDB, SensorInfoDB sensorInfo)
         {
             //var quality = sensorInfo.HighestDetectionQuality.detectedSignalQuality.Percent; //quality shouldn't affect positioning. 
             double signalBestMagnatude = sensorInfo.HighestDetectionQuality.SignalStrength_kW;
             double signalNowMagnatude = sensorInfo.LatestDetectionQuality.SignalStrength_kW;
-            OrbitDB actualDB = sensorInfo.DetectedEntity.GetDataBlob<OrbitDB>();
+
 
             SemiMajorAxis = actualDB.SemiMajorAxis;
             Eccentricity = actualDB.Eccentricity;

@@ -339,23 +339,6 @@ namespace Pulsar4X.ECSLib
         {
             return rng.NextDouble() * (max - min) + max;
         }
-
-        public static Entity NetCloneEntity(Entity origionalEntity, SensorInfoDB sensorInfo)
-        {
-            List<BaseDataBlob> cloneDBs = new List<BaseDataBlob>();
-            foreach (ISensorCloneMethod db in origionalEntity.DataBlobs)
-            {
-                cloneDBs.Add(db.SensorClone(sensorInfo));
-            }
-            throw new NotImplementedException();
-
-        }
-
-        public static void IconFromEntity(Entity origionalEntity, SensorInfoDB sensorInfo)
-        {
-            
-        }
-
     }
 
 

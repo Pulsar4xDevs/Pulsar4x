@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
 
         public void Init(Entity faction)
         {
-            var possibleEntites = faction.GetDataBlob<FactionOwnedEntitesDB>().OwnedEntites.Values;
+            var possibleEntites = faction.GetDataBlob<OwnerDB>().OwnedEntities.Values;
             SelectableEntites.Clear();
             _selectableEntitys.Clear();
             foreach(var entity in possibleEntites)

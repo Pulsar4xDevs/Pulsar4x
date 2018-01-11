@@ -1,3 +1,23 @@
+2018-01-12  se5a  <jon.se5a@gmail.com>
+
+	* EntityVM.cs:
+	* OwnedDB.cs:
+	* Client.cs:
+	* Pulsar4X.ECSLib.csproj:
+	* SerializationManager.cs:
+	* ShipFactory.cs:
+	* FactionFactory.cs:
+	* ColonyFactory.cs:
+	* OwnershipDatabase.cs:
+	* EntityManipulation.cs:
+	* DefaultStartFactory.cs:
+	* FactionOwnedEntitesDB.cs:
+	* OrbitDB.cs:
+	* ComponentInstanceFactory.cs:
+	* ConstructionProcessor.cs:
+	* SensorEntityFactory.cs:
+	* SensorProcessorTools.cs: tweaked ownership
+
 2018-01-10  se5a  <jon.se5a@gmail.com>
 
 	* Entity.cs:

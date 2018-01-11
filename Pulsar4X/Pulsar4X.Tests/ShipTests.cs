@@ -55,6 +55,9 @@ namespace Pulsar4X.Tests
             _engineComponent = GenericComponentFactory.DesignToDesignEntity(_game, _faction, engineDesign);
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
+
+            Assert.True(_shipClass.GetDataBlob<OwnedDB>().OwnedByFaction == _faction);
+
             EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
             EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
 

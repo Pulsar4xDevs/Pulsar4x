@@ -383,8 +383,6 @@
     <Compile Include="Orders\OrderHandler.cs" />
     <Compile Include="ComponentFeatureSets\RefineResources\RefineOrders.cs" />
     <Compile Include="ComponentFeatureSets\RefineResources\RefiningVM.cs" />
-    <Compile Include="Faction\FactionOwnedEntitesDB.cs" />
-    <Compile Include="Faction\FactionHelpers.cs" />
     <Compile Include="Orders\OrderableDB.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveVM.cs" />
     <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveProcessor.cs" />
@@ -414,6 +412,7 @@
     <Compile Include="OldViewModels\SystemView\SystemVM.cs" />
     <Compile Include="OldViewModels\SystemView\SystemInfoVM.cs" />
     <Compile Include="Helpers\ConcurrentHashSet.cs" />
+    <Compile Include="Faction\OwnershipDatabase.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ComponentFeatureSets\" />

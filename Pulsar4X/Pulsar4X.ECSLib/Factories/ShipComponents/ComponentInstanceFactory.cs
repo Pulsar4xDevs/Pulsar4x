@@ -9,12 +9,12 @@ namespace Pulsar4X.ECSLib
     public static class ComponentInstanceFactory
     {
 
-        internal static Entity NewInstanceFromDesignEntity(Entity design, Entity faction, EntityManager manager)
+        internal static Entity NewInstanceFromDesignEntity(Entity design, Entity faction, OwnerDB ownerdb, EntityManager manager)
         {
 
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             ComponentInstanceInfoDB info = new ComponentInstanceInfoDB(design);
-            OwnedDB owned = new OwnedDB(faction);
+            OwnedDB owned = new OwnedDB(faction, ownerdb);
             blobs.Add(info);
             blobs.Add(owned);
             blobs.Add(new DesignInfoDB(design));

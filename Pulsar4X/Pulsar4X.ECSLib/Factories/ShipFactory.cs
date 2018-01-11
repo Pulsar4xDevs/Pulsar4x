@@ -45,7 +45,6 @@ namespace Pulsar4X.ECSLib
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
             Entity shipEntity = new Entity(systemEntityManager, protoShip);
-            FactionHelpers.SetOwnership(shipEntity, ownerFaction);
 
             //replace the ships references to the design's specific instances with shiny new specific instances
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
@@ -55,7 +54,8 @@ namespace Pulsar4X.ECSLib
                 newSpecificInstances.Add(kvp.Key, new PrIwObsList<Entity>());
                 for (int i = 0; i < kvp.Value.Count; i++)
                 {
-                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction, systemEntityManager));
+                    var ownerdb = ownerFaction.GetDataBlob<OwnerDB>();
+                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction, ownerdb, systemEntityManager));
                 }
             }
             componentInstances.SpecificInstances = newSpecificInstances;
@@ -109,6 +109,7 @@ namespace Pulsar4X.ECSLib
             name.SetName(faction, className);
             var componentInstancesDB = new ComponentInstancesDB();
             var massVolumeDB = new MassVolumeDB();
+            var ownedDB = new OwnedDB(faction);
             // now lets create a list of all these datablobs so we can create our new entity:
             List<BaseDataBlob> shipDBList = new List<BaseDataBlob>()
             {
@@ -122,7 +123,8 @@ namespace Pulsar4X.ECSLib
                 sensorProfile,
                 name,
                 componentInstancesDB,
-                massVolumeDB
+                massVolumeDB,
+                ownedDB
             };
 
             // now lets create the ship class:
