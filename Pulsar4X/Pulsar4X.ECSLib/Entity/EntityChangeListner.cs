@@ -107,8 +107,8 @@ namespace Pulsar4X.ECSLib
     {
         internal List<int> IncludeDBTypeIndexFilter = new List<int>();
 
-        internal Entity ListenForFaction;
-
+        internal Entity ListenForFaction { get; }
+        private OwnerDB _ownerDB;
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.EntityChangeListnerDB"/> class.
         /// </summary>
@@ -116,6 +116,7 @@ namespace Pulsar4X.ECSLib
         internal EntityChangeListner(EntityManager manager, Entity factionEntity, List<int> datablobFilter) : base(manager)
         {
             ListenForFaction = factionEntity;
+            _ownerDB = ListenForFaction.GetDataBlob<OwnerDB>();
             IncludeDBTypeIndexFilter = datablobFilter;
 
             if(!IncludeDBTypeIndexFilter.Contains(EntityManager.DataBlobTypes[typeof(OwnedDB)]))
@@ -187,9 +188,9 @@ namespace Pulsar4X.ECSLib
                     break;
                 }
             }
-            if (include && changeData.Entity.GetDataBlob<OwnedDB>().OwnedByFaction == ListenForFaction)
+            if (include && _ownerDB.OwnedEntities.ContainsKey(changeData.Entity.Guid)) //note: this will miss a lot of new entittes, since this code gets called before ownership is set on a new entity. it will get caught when a datablob is set though. 
             {
-                ListningToEntites.Add(changeData.Entity);
+                ListningToEntites.Add(changeData.Entity); 
                 EntityChanges.Enqueue(changeData);
             }
         }
@@ -227,10 +228,16 @@ namespace Pulsar4X.ECSLib
                             include = true;
                         }
                     }
-                    if (include && changeData.Entity.GetDataBlob<OwnedDB>().OwnedByFaction == ListenForFaction)
+                    if (include && _ownerDB.OwnedEntities.ContainsKey(changeData.Entity.Guid))
                     {
                         ListningToEntites.Add(changeData.Entity);
-                        EntityChanges.Enqueue(changeData);
+                        EntityChangeData addedChange = new EntityChangeData()
+                        {
+                            ChangeType = EntityChangeData.EntityChangeType.EntityAdded,
+                            Entity = changeData.Entity
+                        };
+                        EntityChanges.Enqueue(addedChange);
+                        //EntityChanges.Enqueue(changeData);
                     }
                 }
             }

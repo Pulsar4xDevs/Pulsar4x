@@ -32,9 +32,6 @@ namespace Pulsar4X.ECSLib
             nameDB.SetName(ownerFaction, shipName);
             protoShip.SetDataBlob(nameDB);
 
-            var OwnedDB = new OwnedDB(ownerFaction);           
-            protoShip.SetDataBlob(OwnedDB);
-
             OrderableDB orderableDB = new OrderableDB();
             protoShip.SetDataBlob(orderableDB);
 
@@ -45,6 +42,7 @@ namespace Pulsar4X.ECSLib
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
             Entity shipEntity = new Entity(systemEntityManager, protoShip);
+            new OwnedDB(ownerFaction, shipEntity);
 
             //replace the ships references to the design's specific instances with shiny new specific instances
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
@@ -109,7 +107,7 @@ namespace Pulsar4X.ECSLib
             name.SetName(faction, className);
             var componentInstancesDB = new ComponentInstancesDB();
             var massVolumeDB = new MassVolumeDB();
-            var ownedDB = new OwnedDB(faction);
+
             // now lets create a list of all these datablobs so we can create our new entity:
             List<BaseDataBlob> shipDBList = new List<BaseDataBlob>()
             {
@@ -124,12 +122,11 @@ namespace Pulsar4X.ECSLib
                 name,
                 componentInstancesDB,
                 massVolumeDB,
-                ownedDB
             };
 
             // now lets create the ship class:
             Entity shipClassEntity = new Entity(game.GlobalManager, shipDBList); 
-
+            new OwnedDB(faction, shipClassEntity);
             // also gets factionDB:
             FactionInfoDB factionDB = faction.GetDataBlob<FactionInfoDB>();
 

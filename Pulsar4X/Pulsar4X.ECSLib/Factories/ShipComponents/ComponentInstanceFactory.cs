@@ -14,9 +14,7 @@ namespace Pulsar4X.ECSLib
 
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             ComponentInstanceInfoDB info = new ComponentInstanceInfoDB(design);
-            OwnedDB owned = new OwnedDB(faction, ownerdb);
             blobs.Add(info);
-            blobs.Add(owned);
             blobs.Add(new DesignInfoDB(design));
             // Added because each component instance needs its own copy of this datablob
 
@@ -33,6 +31,7 @@ namespace Pulsar4X.ECSLib
                 blobs.Add((SensorReceverAtbDB)design.GetDataBlob<SensorReceverAtbDB>().Clone());
 
             Entity newInstance = new Entity(manager, blobs);
+            new OwnedDB(faction, newInstance); //the constructor of OwnedDB sets itself to the entity
             return newInstance;
         }
     }

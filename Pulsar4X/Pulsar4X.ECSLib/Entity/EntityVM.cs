@@ -46,9 +46,12 @@ namespace Pulsar4X.ECSLib
             _selectableEntitys.Clear();
             foreach(var entity in possibleEntites)
             {
-                string name = entity.GetDataBlob<NameDB>().DefaultName;
-                SelectableEntites.Add(entity.Guid, name);
-                _selectableEntitys.Add(entity.Guid, entity);
+                if (entity.HasDataBlob<NameDB>())
+                {
+                    string name = entity.GetDataBlob<NameDB>().DefaultName;
+                    SelectableEntites.Add(entity.Guid, name);
+                    _selectableEntitys.Add(entity.Guid, entity);
+                }
             }
             SelectableEntites.DisplayMode = DisplayMode.Value;
             SelectableEntites.SelectionChangedEvent += OnEntitySelected;

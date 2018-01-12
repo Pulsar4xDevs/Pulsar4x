@@ -16,12 +16,12 @@ namespace Pulsar4X.ECSLib
             {
                  
 
-                List<BaseDataBlob> datablobs = new List<BaseDataBlob>(){
-                    new OwnedDB(detectingFaction, detectingFaction.GetDataBlob<OwnerDB>()),
+                List<BaseDataBlob> datablobs = new List<BaseDataBlob>(){                    
                     sensorInfo,
                     SetPositionClone(sensorInfo),               
                     };
-                sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager, datablobs); 
+                sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager, datablobs);
+                new OwnedDB(detectingFaction, sensorInfo.SensorEntity);
             }
 
             foreach (ISensorCloneMethod db in sensorInfo.DetectedEntity.DataBlobs.OfType<ISensorCloneMethod>())
