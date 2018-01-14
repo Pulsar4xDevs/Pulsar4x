@@ -3,7 +3,7 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    public class PositionDB : TreeHierarchyDB
+    public class PositionDB : TreeHierarchyDB, IGetValuesHash
     {
 
         [JsonProperty]
@@ -246,6 +246,15 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new PositionDB(this);
+        }
+
+        public int GetValueCompareHash(int hash = 17)
+        {
+            hash = Misc.ValueHash(X, hash);
+            hash = Misc.ValueHash(Y, hash);
+            hash = Misc.ValueHash(Z, hash);
+            hash = Misc.ValueHash(SystemGuid, hash);
+            return hash;
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    public class OrbitDB : TreeHierarchyDB, ISensorCloneMethod
+    public class OrbitDB : TreeHierarchyDB, ISensorCloneMethod, IGetValuesHash
     {
         /// <summary>
         /// Semimajor Axis of orbit stored in AU.
@@ -291,6 +291,18 @@ namespace Pulsar4X.ECSLib
             LongitudeOfAscendingNode = actualDB.LongitudeOfAscendingNode;
             ArgumentOfPeriapsis = actualDB.ArgumentOfPeriapsis;
             MeanAnomaly = actualDB.MeanAnomaly;
+        }
+
+        public int GetValueCompareHash(int hash = 17)
+        {
+            hash = Misc.ValueHash(SemiMajorAxis, hash);
+            hash = Misc.ValueHash(Eccentricity, hash);
+            hash = Misc.ValueHash(Inclination, hash);
+            hash = Misc.ValueHash(LongitudeOfAscendingNode, hash);
+            hash = Misc.ValueHash(ArgumentOfPeriapsis, hash);
+            hash = Misc.ValueHash(MeanAnomaly, hash);
+
+            return hash;
         }
 
         #endregion

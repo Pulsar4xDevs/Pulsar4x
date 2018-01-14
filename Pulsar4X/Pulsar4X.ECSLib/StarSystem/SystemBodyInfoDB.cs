@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
     /// <remarks>
     /// Specifically, Minerals, body info, atmosphere info, and gravity.
     /// </remarks>
-    public class SystemBodyInfoDB : BaseDataBlob, ISensorCloneMethod
+    public class SystemBodyInfoDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
     {
         /// <summary>
         /// Type of body this is. <see cref="BodyType"/>
@@ -217,6 +217,22 @@ namespace Pulsar4X.ECSLib
             LengthOfDay = origionalDB.LengthOfDay;
             Gravity = origionalDB.Gravity;
             Minerals = new Dictionary<Guid, MineralDepositInfo>(origionalDB.Minerals); //This really needs to be handled properly
+        }
+
+        public int GetValueCompareHash(int hash = 17)
+        {
+            hash = Misc.ValueHash(BodyType, hash);
+            hash = Misc.ValueHash(Tectonics, hash);
+            hash = Misc.ValueHash(AxialTilt, hash);
+            hash = Misc.ValueHash(MagneticField, hash);
+            hash = Misc.ValueHash(BaseTemperature, hash);
+            hash = Misc.ValueHash(RadiationLevel, hash);
+            hash = Misc.ValueHash(AtmosphericDust, hash);
+            hash = Misc.ValueHash(SupportsPopulations, hash);
+            hash = Misc.ValueHash(LengthOfDay, hash);
+            hash = Misc.ValueHash(Gravity, hash);
+            hash = Misc.ValueHash(Minerals, hash);
+            return hash;
         }
 
         SystemBodyInfoDB(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)

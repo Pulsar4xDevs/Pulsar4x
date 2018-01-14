@@ -395,6 +395,24 @@ namespace Pulsar4X.Networking
                 printEntityHashInfo(entity);
             }
 
+            if (entity.HasDataBlob<OwnedDB>())
+            {
+                var owned = entity.GetDataBlob<OwnedDB>();
+                var owner = owned.OwnedByFaction.GetDataBlob<OwnerDB>();
+                if (!owner.OwnedEntities.ContainsKey(entity.Guid))
+                {
+                    Messages.Add("owned entity not being set to owner, setting now");
+                    owner.OwnedEntities[entity.Guid] = entity;
+                }
+                else if (owner.OwnedEntities[entity.Guid] != entity)
+                {
+                    Messages.Add("Error: Owner has entity, but does not match");
+                }
+                else 
+                {
+                    Messages.Add("ownership seems to have added ok");
+                }
+            }
         }
 
         void HandleSystemData(NetIncomingMessage message)

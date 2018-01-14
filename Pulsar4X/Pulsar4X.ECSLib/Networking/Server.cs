@@ -89,12 +89,9 @@ namespace Pulsar4X.Networking
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
 
             NetPeerObject = new NetServer(config);
-            try
-            {
-                NetPeerObject.Start();
-            }
-            catch (System.Net.Sockets.SocketException)
-            { }
+
+            NetPeerObject.Start();
+
             StartListning();
             Game.GameLoop.GameGlobalDateChangedEvent += SendTickInfo;
         }

@@ -205,7 +205,7 @@ namespace Pulsar4X.Networking
         internal void printEntityHashInfo(Entity entity)
         {
             var hash = entity.GetValueCompareHash();
-            Messages.Add("factionHash: " + hash.ToString());
+            Messages.Add("Entity Hash: " + hash.ToString());
             foreach (var datablob in entity.DataBlobs)
             {
                 if (datablob is IGetValuesHash)

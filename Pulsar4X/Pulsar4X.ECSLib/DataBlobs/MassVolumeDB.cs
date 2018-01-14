@@ -3,7 +3,7 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    public class MassVolumeDB : BaseDataBlob, ISensorCloneMethod
+    public class MassVolumeDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
     {
 
         /// <summary>
@@ -186,5 +186,13 @@ namespace Pulsar4X.ECSLib
             Volume = origionalDB.Volume;
         }
 
+        public int GetValueCompareHash(int hash = 17)
+        {
+            hash = Misc.ValueHash(Mass, hash);
+            hash = Misc.ValueHash(Density);
+            hash = Misc.ValueHash(Radius);
+            hash = Misc.ValueHash(Volume);
+            return hash;
+        }
     }
 }

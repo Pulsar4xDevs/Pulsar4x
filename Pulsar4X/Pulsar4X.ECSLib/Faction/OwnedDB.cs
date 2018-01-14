@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -61,23 +62,6 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        /*
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.OwnedDB"/> class.
-        /// Use this one if Faction entity is not yet properly initialised. 
-        /// </summary>
-        /// <param name="ownerFaction">Owner faction.</param>
-        /// <param name="ownerDB">Owner db.</param>
-        public OwnedDB(Entity ownerFaction, OwnerDB ownerDB) : this(ownerFaction, ownerFaction, ownerDB) { }
-
-        internal OwnedDB(Entity entityOwner, Entity objectOwner, OwnerDB ownerDB)
-        {
-            _factionOwner = entityOwner;
-            ownerDB.OwnedEntities[OwningEntity.Guid] = OwningEntity;
-
-            ObjectOwner = objectOwner;
-        }
-        */
         OwnedDB(OwnedDB db)
         {
             _factionOwner = db._factionOwner;
@@ -91,9 +75,16 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            Misc.ValueHash(_factionOwner.Guid, hash);
-            Misc.ValueHash(ObjectOwner.Guid, hash);
+            hash = Misc.ValueHash(_factionOwner.Guid, hash);
+            hash = Misc.ValueHash(ObjectOwner.Guid, hash);
             return hash; 
+        }
+
+        // JSON deserialization callback.
+        [OnDeserialized]
+        private void Deserialized(StreamingContext context)
+        {
+            _factionOwner.GetDataBlob<OwnerDB>().OwnedEntities[this.OwningEntity.Guid] = this.OwningEntity;
         }
     }
 

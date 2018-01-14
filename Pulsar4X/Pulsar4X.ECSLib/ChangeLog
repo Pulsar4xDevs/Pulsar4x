@@ -1,3 +1,17 @@
+2018-01-14  se5a  <jon.se5a@gmail.com>
+
+	* OwnedDB.cs:
+	* Base.cs:
+	* Client.cs:
+	* Server.cs:
+	* MiscHelpers.cs:
+	* PositionDB.cs:
+	* MassVolumeDB.cs:
+	* SystemBodyInfoDB.cs:
+	* OrbitDB.cs:
+	* SensorInfoDB.cs:
+	* TranslationMoveVM.cs: more implementation of IValueHash 
+
 2018-01-13  se5a  <jon.se5a@gmail.com>
 
 	* EntityVM.cs:

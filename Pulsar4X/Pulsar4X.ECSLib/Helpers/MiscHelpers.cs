@@ -48,11 +48,13 @@ namespace Pulsar4X.ECSLib
         /// <param name="manager">Manager.</param>
         public static List<Entity> OwnedEntitysInManager(Entity factionOwner, EntityManager manager)
         {
+            var owner = factionOwner.GetDataBlob<OwnerDB>();
             List<Entity> listOfOwnedEntites = new List<Entity>();
-            foreach (var db in manager.GetAllDataBlobsOfType<OwnedDB>())
+            foreach (var item in manager.GetAllEntitiesWithDataBlob<OwnedDB>())
             {
-                if (db.OwnedByFaction == factionOwner)
-                    listOfOwnedEntites.Add(db.OwningEntity);
+                if (owner.OwnedEntities.ContainsKey(item.Guid))
+                    listOfOwnedEntites.Add(item);
+                    
             }
             return listOfOwnedEntites;
         }
