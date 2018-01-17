@@ -84,7 +84,7 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
-            _factionOwner.GetDataBlob<OwnerDB>().OwnedEntities[this.OwningEntity.Guid] = this.OwningEntity;
+            //_factionOwner.GetDataBlob<OwnerDB>().OwnedEntities[this.OwningEntity.Guid] = this.OwningEntity;
         }
     }
 

@@ -197,6 +197,7 @@ namespace Pulsar4X.Networking
             sendMsg.Write(byteArray);
 
             NetClientObject.SendMessage(sendMsg, NetClientObject.ServerConnection, NetDeliveryMethod.ReliableOrdered);
+            Messages.Add("Sent Command " + cmd.CmdID);
         }
 
         #endregion
@@ -281,6 +282,7 @@ namespace Pulsar4X.Networking
 
             Game = new Game();
             _gameVM.Game = Game;
+            Game.OrderHandler = this;
             var mStream = new MemoryStream(data);
             Game.Settings = SerializationManager.ImportGameSettings(mStream);
             mStream.Close();
@@ -377,7 +379,16 @@ namespace Pulsar4X.Networking
             int len = message.ReadInt32();
             byte[] data = message.ReadBytes(len);
             var mStream = new MemoryStream(data);
-            Entity entity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager);
+            Entity entity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager); //I think we need to figure out which manager this is suposed to be going into.
+            //TODO: not sure that this is really the best way to do this...
+            if (entity.HasDataBlob<PositionDB>())
+            {
+                var pos = entity.GetDataBlob<PositionDB>();
+                var manager = Game.Systems[pos.SystemGuid].SystemManager;
+                entity.Transfer(manager);
+            }
+
+
             mStream.Close();
             if (hash == entity.GetValueCompareHash())
                 Messages.Add("Good news everybody! Entity Hash is a Match!");
@@ -413,6 +424,8 @@ namespace Pulsar4X.Networking
                     Messages.Add("ownership seems to have added ok");
                 }
             }
+
+
         }
 
         void HandleSystemData(NetIncomingMessage message)

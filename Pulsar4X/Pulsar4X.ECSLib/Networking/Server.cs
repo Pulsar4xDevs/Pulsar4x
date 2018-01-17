@@ -41,6 +41,7 @@ namespace Pulsar4X.Networking
         {
             PortNum = portNum;
             Game = game;
+            game.OrderHandler = this;
             NetHostStart();
         }
 
@@ -262,7 +263,7 @@ namespace Pulsar4X.Networking
             else
             {
                 EntityCommand cmd = SerializationManager.ImportEntityCommand(Game, cmdType, mStream);
-
+                Messages.Add("Reseved Command: " + cmdID);
             }
         }
 

@@ -312,8 +312,8 @@ namespace Pulsar4X.ECSLib
 
         public static EntityCommand ImportEntityCommand([NotNull] Game game, Type type, Stream inputStream)
         {
-            dynamic command = (BaseDataBlob)Activator.CreateInstance(type);
-            command = Import<BaseDataBlob>(game, inputStream, command);
+            EntityCommand command = (EntityCommand)Activator.CreateInstance(type);
+            command = Import<EntityCommand>(game, inputStream, command);
             return command;
         }
 

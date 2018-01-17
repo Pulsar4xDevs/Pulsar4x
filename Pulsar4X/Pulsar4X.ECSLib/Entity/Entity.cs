@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    [DebuggerDisplay("{" + nameof(DebugDisplay) + "}")]
+    //[DebuggerDisplay("{" + nameof(DebugDisplay) + "}")]
     [JsonConverter(typeof(EntityConverter))]
     [PublicAPI]
     public sealed class Entity : ProtoEntity
