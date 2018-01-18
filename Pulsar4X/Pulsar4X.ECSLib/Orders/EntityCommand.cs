@@ -5,6 +5,7 @@ namespace Pulsar4X.ECSLib
 {
     public abstract class EntityCommand
     {
+        [JsonProperty]
         internal Guid CmdID { get; set; } = Guid.NewGuid();
 
         internal abstract int ActionLanes { get;  }

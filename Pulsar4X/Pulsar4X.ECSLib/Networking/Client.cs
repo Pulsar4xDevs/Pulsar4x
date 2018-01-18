@@ -380,14 +380,34 @@ namespace Pulsar4X.Networking
             byte[] data = message.ReadBytes(len);
             var mStream = new MemoryStream(data);
             Entity entity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager); //I think we need to figure out which manager this is suposed to be going into.
-            //TODO: not sure that this is really the best way to do this...
+
+            //TODO: not sure that this is really the best way to do this, but basicaly this ensures that the entity goes into the correct manager.
             if (entity.HasDataBlob<PositionDB>())
             {
                 var pos = entity.GetDataBlob<PositionDB>();
                 var manager = Game.Systems[pos.SystemGuid].SystemManager;
                 entity.Transfer(manager);
             }
-
+            //this ensures that the ownership is properly set. I've tried a couple of other ways of doing this, but so far this seems to work the best.
+            //doing it in the datablob post deserialization caused it to attempt to set the ownership before the entity was valid, and added an entity with an empty guid to the owned data. 
+            if (entity.HasDataBlob<OwnedDB>())
+            {
+                var owned = entity.GetDataBlob<OwnedDB>();
+                var owner = owned.OwnedByFaction.GetDataBlob<OwnerDB>();
+                if (!owner.OwnedEntities.ContainsKey(entity.Guid))
+                {
+                    Messages.Add("owned entity not being set to owner, setting now");
+                    owner.OwnedEntities[entity.Guid] = entity;
+                }
+                else if (owner.OwnedEntities[entity.Guid] != entity)
+                {
+                    Messages.Add("Error: Owner has entity, but does not match");
+                }
+                else
+                {
+                    Messages.Add("ownership seems to have added ok");
+                }
+            }
 
             mStream.Close();
             if (hash == entity.GetValueCompareHash())
@@ -406,24 +426,7 @@ namespace Pulsar4X.Networking
                 printEntityHashInfo(entity);
             }
 
-            if (entity.HasDataBlob<OwnedDB>())
-            {
-                var owned = entity.GetDataBlob<OwnedDB>();
-                var owner = owned.OwnedByFaction.GetDataBlob<OwnerDB>();
-                if (!owner.OwnedEntities.ContainsKey(entity.Guid))
-                {
-                    Messages.Add("owned entity not being set to owner, setting now");
-                    owner.OwnedEntities[entity.Guid] = entity;
-                }
-                else if (owner.OwnedEntities[entity.Guid] != entity)
-                {
-                    Messages.Add("Error: Owner has entity, but does not match");
-                }
-                else 
-                {
-                    Messages.Add("ownership seems to have added ok");
-                }
-            }
+
 
 
         }
@@ -474,10 +477,12 @@ namespace Pulsar4X.Networking
         void HandleEntityCommandAproval(NetIncomingMessage message)
         {
             Guid cmdID = new Guid(message.ReadBytes(16));
-            bool valid = message.ReadBoolean();
+            bool isValid = message.ReadBoolean();
+            Messages.Add("Rx " + isValid + " ID " + cmdID);
             EntityCommand cmd = CommandsAwaitingServerAproval[cmdID];
-            if (valid)
+            if (isValid && cmd.IsValidCommand(Game))
             {
+                
                 cmd.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(cmd);
                 var commandList = cmd.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
                 OrderableProcessor.ProcessOrderList(Game, commandList);

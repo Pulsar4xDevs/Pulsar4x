@@ -1,3 +1,13 @@
+2018-01-18  se5a  <jon.se5a@gmail.com>
+
+	* Client.cs:
+	* Server.cs:
+	* EntityCommand.cs: Server now successfully receves
+	Orbitcommand, sends ack back to client and executes it. client
+	however is still having a few issues. though it gets the ack,
+	it the ordered entity doesn't move client side, even though
+	it's moving server side. 
+
 2018-01-17  se5a  <jon.se5a@gmail.com>
 
 	* Entity.cs:

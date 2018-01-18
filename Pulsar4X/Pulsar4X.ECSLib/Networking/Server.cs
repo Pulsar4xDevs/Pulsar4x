@@ -263,7 +263,9 @@ namespace Pulsar4X.Networking
             else
             {
                 EntityCommand cmd = SerializationManager.ImportEntityCommand(Game, cmdType, mStream);
+                cmd.CmdID = cmdID;
                 Messages.Add("Reseved Command: " + cmdID);
+                HandleOrder(cmd);
             }
         }
 
@@ -508,6 +510,7 @@ namespace Pulsar4X.Networking
             msg.Write((byte)ToClientMsgType.SendEntityCommandAck);
             msg.Write(cmdID.ToByteArray());
             msg.Write(isValid);
+            Messages.Add("Sending " + isValid + " Command ack ID: " + cmdID);
             NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
         }
 
