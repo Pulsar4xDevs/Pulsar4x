@@ -393,7 +393,7 @@ namespace Pulsar4X.Networking
             if (entity.HasDataBlob<OwnedDB>())
             {
                 var owned = entity.GetDataBlob<OwnedDB>();
-                var owner = owned.OwnedByFaction.GetDataBlob<OwnerDB>();
+                var owner = owned.OwnedByFaction.GetDataBlob<FactionOwnerDB>();
                 if (!owner.OwnedEntities.ContainsKey(entity.Guid))
                 {
                     Messages.Add("owned entity not being set to owner, setting now");

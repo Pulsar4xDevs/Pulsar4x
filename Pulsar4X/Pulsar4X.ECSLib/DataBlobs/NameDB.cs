@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
         NameDB(NameDB db, SensorInfoDB sensorInfo)
         {            
             _names.Add(Entity.InvalidEntity, db.DefaultName);
-            _names.Add(sensorInfo.Faction, db.GetName(sensorInfo.Faction));
+            _names[sensorInfo.Faction] = db.GetName(sensorInfo.Faction);
         }
     }
 }

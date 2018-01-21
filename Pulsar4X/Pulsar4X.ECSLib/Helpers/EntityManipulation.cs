@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
         internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity)
         {
             Entity ownerFaction = parentEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            OwnerDB ownerdb = ownerFaction.GetDataBlob<OwnerDB>();
+            FactionOwnerDB ownerdb = ownerFaction.GetDataBlob<FactionOwnerDB>();
             AddComponentToEntity(parentEntity, componentEntity, ownerFaction, ownerdb);
         }
 
@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="parentEntity">entity that contains an ComponentInstancesDB</param>        
         /// <param name="componentEntity">Can be either a design or instance entity</param>
-        internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity, Entity ownerFaction, OwnerDB ownerDB)
+        internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity, Entity ownerFaction, FactionOwnerDB ownerDB)
         {
             Entity instance;
             
@@ -41,7 +41,16 @@ namespace Pulsar4X.ECSLib
                 AddComponentInstanceToEntity(parentEntity, instance);
             }
             else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
-
+            ObjectOwnershipDB parentOwner;
+            if (!parentEntity.HasDataBlob<ObjectOwnershipDB>())
+            {
+                //StarSystem starSys = parentEntity.GetDataBlob<PositionDB>().SystemGuid
+                parentOwner = new ObjectOwnershipDB();
+                parentEntity.SetDataBlob(parentOwner);
+            }
+            else
+                parentOwner = parentEntity.GetDataBlob<ObjectOwnershipDB>();
+            parentOwner.SetOwned(instance);
             ReCalcProcessor.ReCalcAbilities(parentEntity);
         }
 
@@ -51,7 +60,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="parentEntity">entity that contains an ComponentInstancesDB</param>        
         /// <param name="componentEntitys">Can be either a design or instance entity</param>
-        internal static void AddComponentToEntity(Entity parentEntity, List<Entity> componentEntitys, Entity faction, OwnerDB owner)
+        internal static void AddComponentToEntity(Entity parentEntity, List<Entity> componentEntitys, Entity faction, FactionOwnerDB owner)
         {
             Entity instance;
             foreach (var componentEntity in componentEntitys)

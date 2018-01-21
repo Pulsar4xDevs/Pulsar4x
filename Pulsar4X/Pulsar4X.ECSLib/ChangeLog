@@ -1,3 +1,18 @@
+2018-01-22  se5a  <jon.se5a@gmail.com>
+
+	* EntityVM.cs:
+	* OwnedDB.cs:
+	* NameDB.cs:
+	* Client.cs:
+	* MiscHelpers.cs:
+	* ShipFactory.cs:
+	* FactionFactory.cs:
+	* EntityChangeListner.cs:
+	* EntityManipulation.cs:
+	* DefaultStartFactory.cs:
+	* ComponentInstanceFactory.cs:
+	* ConstructionProcessor.cs: WIP changes to ownership
+
 2018-01-18  se5a  <jon.se5a@gmail.com>
 
 	* Client.cs:

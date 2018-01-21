@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
                 newSpecificInstances.Add(kvp.Key, new PrIwObsList<Entity>());
                 for (int i = 0; i < kvp.Value.Count; i++)
                 {
-                    var ownerdb = ownerFaction.GetDataBlob<OwnerDB>();
+                    var ownerdb = ownerFaction.GetDataBlob<FactionOwnerDB>();
                     newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction, ownerdb, systemEntityManager));
                 }
             }

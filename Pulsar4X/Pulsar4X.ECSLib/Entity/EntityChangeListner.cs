@@ -108,7 +108,7 @@ namespace Pulsar4X.ECSLib
         internal List<int> IncludeDBTypeIndexFilter = new List<int>();
 
         internal Entity ListenForFaction { get; }
-        private OwnerDB _ownerDB;
+        private FactionOwnerDB _ownerDB;
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.EntityChangeListnerDB"/> class.
         /// </summary>
@@ -116,7 +116,7 @@ namespace Pulsar4X.ECSLib
         internal EntityChangeListner(EntityManager manager, Entity factionEntity, List<int> datablobFilter) : base(manager)
         {
             ListenForFaction = factionEntity;
-            _ownerDB = ListenForFaction.GetDataBlob<OwnerDB>();
+            _ownerDB = ListenForFaction.GetDataBlob<FactionOwnerDB>();
             IncludeDBTypeIndexFilter = datablobFilter;
 
             if(!IncludeDBTypeIndexFilter.Contains(EntityManager.DataBlobTypes[typeof(OwnedDB)]))

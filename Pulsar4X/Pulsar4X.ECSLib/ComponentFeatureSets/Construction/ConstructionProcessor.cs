@@ -94,7 +94,7 @@ namespace Pulsar4X.ECSLib
             var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
             Entity designEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
             Entity factionOwner = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            OwnerDB ownerdb = factionOwner.GetDataBlob<OwnerDB>();
+            FactionOwnerDB ownerdb = factionOwner.GetDataBlob<FactionOwnerDB>();
             Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designEntity, factionOwner, ownerdb, colonyEntity.Manager);
             if (batchJob.InstallOn != null)
             {
