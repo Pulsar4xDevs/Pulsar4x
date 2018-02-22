@@ -37,6 +37,7 @@ namespace Pulsar4X.ECSLib
 
         private static bool IsOwnedEntityAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
         {
+            
             if (entityMask[EntityManager.GetTypeIndex<OwnedDB>()])
             {
                 var entityOwnedDB = entity.GetDataBlob<OwnedDB>();
@@ -46,6 +47,7 @@ namespace Pulsar4X.ECSLib
                 {
                     factions = FactionsWithAccess(authorizedPlayer, AccessRole.SensorVision);
                 }
+                /*
                 if (entityMask[EntityManager.GetTypeIndex<ColonyInfoDB>()])
                 {
                     // Check if entity is a SensorContact
@@ -77,7 +79,7 @@ namespace Pulsar4X.ECSLib
                     {
                         factions = FactionsWithAccess(authorizedPlayer, AccessRole.FullAccess);
                     }
-                }
+                } */
 
                 foreach (Entity faction in factions)
                 {

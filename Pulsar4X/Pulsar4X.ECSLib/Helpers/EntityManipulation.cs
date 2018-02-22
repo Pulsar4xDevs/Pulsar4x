@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib
             }
             else
                 parentOwner = parentEntity.GetDataBlob<ObjectOwnershipDB>();
-            parentOwner.SetOwned(instance);
+            parentOwner.Children.Add(instance);
             ReCalcProcessor.ReCalcAbilities(parentEntity);
         }
 

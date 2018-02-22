@@ -1,16 +1,12 @@
 ﻿<Properties StartupConfiguration="{30509646-A52E-4563-AE27-706882D7F8C3}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X Status">
     <Files>
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorEntityFactory.cs" Line="55" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/OldViewModels/SystemView/SystemMap_DrawableVM.cs" Line="84" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorProcessorTools.cs" Line="40" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" Line="27" Column="1" />
-      <File FileName="Pulsar4X.ECSLib/Networking/Server.cs" Line="86" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/TextIcon.cs" Line="72" Column="13" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemMap_DrawableView.xeto" Line="1" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemMap_DrawableView.xeto.cs" Line="137" Column="13" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/EntityIcon.cs" Line="1" Column="1" />
-      <File FileName="Pulsar4X.CrossPlatformUI/Views/SystemView/IconCollection.cs" Line="120" Column="38" />
+      <File FileName="Pulsar4X.ECSLib/Entity/EntityAccessControl.cs" Line="92" Column="26" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslateMoveProcessor.cs" Line="52" Column="154" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/CargoStorage/CargoAbleTypeDB.cs" Line="54" Column="9" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/Research/ResearchProcessor.cs" Line="48" Column="71" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/ShipMovementProcessor.cs" Line="119" Column="170" />
+      <File FileName="Pulsar4X.ECSLib/ComponentFeatureSets/Construction/ConstructionProcessor.cs" Line="209" Column="67" />
       <File FileName="Pulsar4X Status" />
     </Files>
   </MonoDevelop.Ide.Workbench>
@@ -18,7 +14,8 @@
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Catchpoint exceptionName="System.Exception" includeSubclasses="True" />
-      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/SensorsAndDetection/SensorScan.cs" line="27" column="1" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/Networking/Client.cs" relfile="Pulsar4X.ECSLib/Networking/Client.cs" line="488" column="17" />
+      <Breakpoint file="/mnt/98448323-4372-4c8a-904a-30b587cc3685/Programing/Pulsar4x/Pulsar4X/Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveVM.cs" relfile="Pulsar4X.ECSLib/ComponentFeatureSets/TranslationMove/TranslationMoveVM.cs" line="50" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches>

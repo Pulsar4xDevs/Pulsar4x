@@ -1,3 +1,19 @@
+2018-02-23  se5a  <jon.se5a@gmail.com>
+
+	* JobVM.cs:
+	* EntityManager.cs:
+	* StarSystem.cs:
+	* ResearchVM.cs:
+	* EntityAccessControl.cs:
+	* EntityManipulation.cs:
+	* ColonyScreenVM.cs:
+	* ConstructionAbilityVM.cs:
+	* ResearchProcessor.cs:
+	* CargoAbleTypeDB.cs:
+	* ConstructionProcessor.cs:
+	* ShipMovementProcessor.cs:
+	* TranslateMoveProcessor.cs: Fixes to ownership tweak. 
+
 2018-01-22  se5a  <jon.se5a@gmail.com>
 
 	* EntityVM.cs:

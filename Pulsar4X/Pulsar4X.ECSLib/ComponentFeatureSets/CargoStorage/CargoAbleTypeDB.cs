@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public string Name
         {
-            get { return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.GetDataBlob<OwnedDB>()?.ObjectOwner) ?? "Unknown Object"; }
+            get { return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.GetDataBlob<OwnedDB>()?.OwnedByFaction) ?? "Unknown Object"; }
         }
         
         public CargoAbleTypeDB()

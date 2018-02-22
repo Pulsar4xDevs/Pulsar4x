@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
 {
     public class ConstructionAbilityVM : JobAbilityBaseVM<ConstructionDB, ConstructionJob>
     {
-        private FactionInfoDB FactionInfo { get { return _colonyEntity_.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>(); } }
+        private FactionInfoDB FactionInfo { get { return _colonyEntity_.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>(); } }
 
         public ConstructionAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {

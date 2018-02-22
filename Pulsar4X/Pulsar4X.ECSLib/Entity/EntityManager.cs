@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
     {
         [CanBeNull]
         internal Guid ManagerGuid;
-        internal readonly Game Game;
+        internal Game Game { get;  set; }
         private readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         public static readonly EntityManager InvalidManager = new EntityManager();
         
         #region Constructors
-        private EntityManager() { }
+        protected EntityManager() { }
         internal EntityManager(Game game, bool isGlobalManager = false)
         {
             Game = game;

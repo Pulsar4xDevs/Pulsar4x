@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
             CargoStorageDB stockpile = colony.GetDataBlob<CargoStorageDB>();
 
             var colonyConstruction = colony.GetDataBlob<ConstructionDB>();
-            var factionInfo = colony.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
+            var factionInfo = colony.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
 
 
             var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
@@ -206,7 +206,7 @@ namespace Pulsar4X.ECSLib
         public static void AddJob(Entity colonyEntity, ConstructionJob job)
         {
             var constructingDB = colonyEntity.GetDataBlob<ConstructionDB>();
-            var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().ObjectOwner.GetDataBlob<FactionInfoDB>();
+            var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //check that this faction does have the design on file. I *think* all this type of construction design will get stored in factionInfo.ComponentDesigns

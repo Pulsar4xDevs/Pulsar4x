@@ -7,9 +7,9 @@ namespace Pulsar4X.ECSLib
 {
     [DebuggerDisplay("{NameDB.DefaultName} - {Guid.ToString()}")]
     [JsonObject(MemberSerialization.OptIn)]
-    public class StarSystem
+    public class StarSystem : EntityManager
     {
-        public Game Game { get; private set; }
+
 
         [PublicAPI]
         [JsonProperty]
@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public EntityManager SystemManager { get; private set; }
+        public EntityManager SystemManager { get { return this; } }
 
         [PublicAPI]
         [JsonProperty]
@@ -36,12 +36,11 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        public StarSystem(Game game, string name, int seed)
+        public StarSystem(Game game, string name, int seed) : base(game, false)
         {
-            Game = game;
             Guid = Guid.NewGuid();
             NameDB = new NameDB(name);
-            SystemManager = new EntityManager(game);
+
             Seed = seed;
             RNG = new Random(seed);
             game.Systems.Add(Guid, this);
