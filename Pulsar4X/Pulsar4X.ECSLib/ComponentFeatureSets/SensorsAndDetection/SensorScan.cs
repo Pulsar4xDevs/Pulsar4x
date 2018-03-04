@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
         //that way, a ship can have multiple different sensors which run at different intervals. 
         //I'll need to get the parent ship... or maybe just the systemfactionInfo to store the detected ships though.
         //having the ships      what they detect could be usefull info to display though. 
-        public void ProcessEntity(Entity entity, int deltaSeconds)
+        internal override void ProcessEntity(Entity entity, int deltaSeconds)
         {
             EntityManager manager = entity.Manager;
             Entity faction = entity.GetDataBlob<OwnedDB>().OwnedByFaction;
@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-            manager.ManagerSubpulses.AddEntityInterupt(atDate + TimeSpan.FromSeconds(receverDB.ScanTime), this, entity);
+            manager.ManagerSubpulses.AddEntityInterupt(atDate + TimeSpan.FromSeconds(receverDB.ScanTime), this.TypeName, entity);
 
         }
     }

@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         [CanBeNull]
         internal Guid ManagerGuid;
         internal Game Game { get;  set; }
-        private readonly List<Entity> _entities = new List<Entity>();
+        protected readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
         private readonly Dictionary<Guid, EntityManager> _globalEntityDictionary;
@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { 
             get; 
-            private set; }
+            protected set; }
 
         /// <summary>
         /// Static reference to an invalid manager.
@@ -770,7 +770,7 @@ namespace Pulsar4X.ECSLib
             
         }
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             List<ProtoEntity> storedEntities = (from entity in _entities
                                                 where entity != null

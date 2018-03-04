@@ -181,6 +181,7 @@ namespace Pulsar4X.Tests
         }
         private void ImportExportSystem(StarSystem system)
         {
+            SerializationManager.Export(_game, "testSystemExport", system);
             string jsonString = SerializationManager.Export(_game, system);
             int entityCount = system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count;
             _game = TestingUtilities.CreateTestUniverse(0);

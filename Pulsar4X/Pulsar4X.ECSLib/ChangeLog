@@ -1,3 +1,15 @@
+2018-03-04  se5a  <jon.se5a@gmail.com>
+
+	* ManagerSubPulse.cs:
+	* Client.cs:
+	* Server.cs:
+	* EntityManager.cs:
+	* ShipFactory.cs:
+	* StarSystem.cs:
+	* ProcessorManager.cs:
+	* SensorScan.cs: some changes to InstanceProcessors to help
+	with serialization. 
+
 2018-02-23  se5a  <jon.se5a@gmail.com>
 
 	* JobVM.cs:

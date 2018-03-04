@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Reflection;
 
 namespace Pulsar4X.ECSLib
 {
@@ -16,13 +17,63 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public class ManagerSubPulse
     { 
-        
+        [JsonProperty]
         private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
-        class ProcessSet
+        class ProcessSet : ISerializable
         {   //TODO: need to figure out how to serialize/Deserialise this
             //the Interface keys are references to the concreate classes in the _processManager
+            [JsonIgnore] //this should get added on initialization. 
             internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
-            internal Dictionary<IInstanceProcessor, List<Entity>> InstanceProcessors = new Dictionary<IInstanceProcessor, List<Entity>>();
+            [JsonProperty] //this needs to get saved. the problem here is saving IInstance Processors, maybe this should be a Type. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly). 
+            internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>();
+
+            internal ProcessSet() { }
+
+            internal ProcessSet(SerializationInfo info, StreamingContext context)
+            {
+                Game game = (Game)context.Context;
+                Dictionary<string, List<Guid>> instanceProcessors = (Dictionary<string, List<Guid>>)info.GetValue(nameof(InstanceProcessors), typeof(Dictionary<string, List<Guid>>));
+                ProcessorManager processManager = game.ProcessorManager;
+                Entity entity;
+                foreach (var kvpItem in instanceProcessors)
+                {
+                    
+                    string typeName = kvpItem.Key;
+
+                    //IInstanceProcessor processor = processManager.GetInstanceProcessor(typeName);
+                    if (!InstanceProcessors.ContainsKey(typeName))
+                        InstanceProcessors.Add(typeName, new List<Entity>());
+                    
+                    foreach (var entityGuid in kvpItem.Value)
+                    {
+                        if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity)) //might be a better way to do this, can we get the manager from here and just search localy?
+                        {
+
+                            InstanceProcessors[typeName].Add(entity);
+                        }
+                        else
+                        {
+                            // Entity has not been deserialized.
+                            throw new Exception("Unfound Entity Exception, possibly this entity hasn't been deseralised yet?"); //I *think* we'll have the entitys all deseralised for this manager at this point...
+                        }
+                    }
+                }
+            }
+
+            public void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                Dictionary<string, List<Guid>> instanceProcessors = new Dictionary<string, List<Guid>>();
+                foreach (var kvpitem in InstanceProcessors)
+                {
+                    string typeName = kvpitem.Key;//.TypeName;
+                    instanceProcessors.Add(typeName, new List<Guid>());
+                    foreach (var entityItem in kvpitem.Value)
+                    {
+                        instanceProcessors[typeName].Add(entityItem.Guid);
+                    }
+                }
+                info.AddValue(nameof(InstanceProcessors), instanceProcessors);
+            }
         }
 
 
@@ -96,7 +147,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
         /// <param name="entity"></param>
-        internal void AddEntityInterupt(DateTime nextDateTime, IInstanceProcessor actionProcessor, Entity entity)
+        internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity entity)
         {
             if(!QueuedProcesses.ContainsKey(nextDateTime))
                 QueuedProcesses.Add(nextDateTime, new ProcessSet());
@@ -199,7 +250,8 @@ namespace Pulsar4X.ECSLib
                 {
                     foreach(var entity in instanceProcessSet.Value)
                     {
-                        instanceProcessSet.Key.ProcessEntity(entity, deltaSeconds);
+                        var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
+                        processor.ProcessEntity(entity, deltaSeconds);
                     }
                 }
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 

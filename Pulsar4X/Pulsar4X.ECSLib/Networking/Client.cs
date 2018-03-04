@@ -435,15 +435,33 @@ namespace Pulsar4X.Networking
         {
 
             Guid systemID = new Guid(message.ReadBytes(16));
-            int len = message.ReadInt32();
-            byte[] data = message.ReadBytes(len);
-            var mStream = new MemoryStream(data);
-            StarSystem starSys = SerializationManager.ImportSystem(Game, mStream);
-            mStream.Close();
+            //int len = message.ReadInt32();
+            //byte[] data = message.ReadBytes(len);
 
-            Messages.Add("Recevied StarSystem: " + starSys.NameDB.DefaultName);
-            _gameVM.StarSystemSelectionViewModel.StarSystems.Add(starSys, starSys.NameDB.GetName(this.CurrentFaction));
-            starSys.SystemManager.ManagerSubpulses.Initalise(starSys.SystemManager);
+            //var mStream = new MemoryStream(data);
+
+            //StarSystem starSys = SerializationManager.ImportSystem(Game, mStream);
+            //List<Entity> entites = 
+
+            //mStream.Close();
+
+            //Messages.Add("Recevied StarSystem: " + starSys.NameDB.DefaultName);
+            //_gameVM.StarSystemSelectionViewModel.StarSystems.Add(starSys, starSys.NameDB.GetName(this.CurrentFaction));
+            //starSys.SystemManager.ManagerSubpulses.Initalise(starSys.SystemManager);
+
+
+            if (Game.Systems.ContainsKey(systemID))
+            {
+                Messages.Add("system already exsists, and has " + Game.Systems[systemID].Entities.Count + " Entities");
+            }
+            else
+            {
+                StarSystem newStarsystem = new StarSystem(Game, "newSystem", 0);
+                newStarsystem.Game = Game;
+                newStarsystem.Guid = systemID;
+                Game.Systems[systemID] = newStarsystem;
+            }
+            
 
         }
 

@@ -2,6 +2,8 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -13,22 +15,22 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public Guid Guid { get; private set; }
+        public Guid Guid { get;  set; }
 
         [JsonProperty]
         internal int SystemIndex { get; set; }
 
         [PublicAPI]
         [JsonProperty]
-        public NameDB NameDB { get; private set; }
+        public NameDB NameDB { get;  set; }
 
         [PublicAPI]
-        [JsonProperty]
         public EntityManager SystemManager { get { return this; } }
 
         [PublicAPI]
         [JsonProperty]
-        public int Seed { get; private set; }
+        public int Seed { get;  set; }
+
         internal Random RNG { get; private set; }
 
         [JsonConstructor]
@@ -45,6 +47,23 @@ namespace Pulsar4X.ECSLib
             RNG = new Random(seed);
             game.Systems.Add(Guid, this);
         }
+
+
+        public StarSystem(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+
+            Guid = (Guid)info.GetValue("Guid", typeof(Guid));
+            Seed = (int)info.GetValue("Seed", typeof(int));
+        }
+
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Guid", Guid);
+            info.AddValue("Seed", Seed);
+            base.GetObjectData(info, context);
+        }
+
 
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)

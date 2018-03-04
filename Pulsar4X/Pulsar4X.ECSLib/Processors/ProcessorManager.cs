@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Pulsar4X.ECSLib
 {
+    //consdisder making this a singleton
     internal class ProcessorManager
     {
-        
+
         private readonly Dictionary<Type, IHotloopProcessor> _hotloopProcessors = new Dictionary<Type, IHotloopProcessor>();
         private readonly List<IRecalcProcessor> _recalcProcessors = new List<IRecalcProcessor>();
         private readonly Dictionary<PulseActionEnum, IHotloopProcessor> _hotloopProcessorsByEnum = new Dictionary<PulseActionEnum, IHotloopProcessor>();
+        private readonly Dictionary<string, IInstanceProcessor> _instanceProcessors = new Dictionary<string, IInstanceProcessor>();
         private StaticDataStore _staticData;
         internal ProcessorManager(Game game)
         {
@@ -56,6 +60,11 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        internal IInstanceProcessor GetInstanceProcessor(string typeName)
+        {
+            return _instanceProcessors[typeName];
+        }
+
 
         internal void InitializeMangerSubpulse(EntityManager _entityManager)
         {
@@ -87,8 +96,23 @@ namespace Pulsar4X.ECSLib
             //AddHotloopProcessor<SensorProfileDB>(new SetReflectedEMProfile());
 
 
+            var types = GetDerivedTypesFor(typeof(IInstanceProcessor));
+            foreach (var itemType in types)
+            {
+                IInstanceProcessor processor = (IInstanceProcessor)Activator.CreateInstance(itemType);
+                _instanceProcessors.Add(processor.TypeName, processor);
+            }
 
             ///AddRecalcProcessor
+        }
+
+        private static IEnumerable<Type> GetDerivedTypesFor(Type baseType)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            return assembly.GetTypes()
+                .Where(baseType.IsAssignableFrom)
+                .Where(t => baseType != t);
         }
     }
 
@@ -106,11 +130,16 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Instance processor. - This processor is fired at a specific timedate or on command. 
     /// </summary>
-    internal interface IInstanceProcessor
+    public abstract class IInstanceProcessor
     {
-        void ProcessEntity(Entity entity, int deltaSeconds);
+        internal string TypeName { get { return GetType().Name; } }
+        internal abstract void ProcessEntity(Entity entity, int deltaSeconds);
     }
 
+    internal abstract class AInstanceProcessor
+    {
+        
+    }
 
     /// <summary>
     /// Recalc processor. - this processor is called when something on the entity changes. 

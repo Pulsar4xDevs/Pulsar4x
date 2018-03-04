@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
                     {
                         var sensor = componentInstance.GetDataBlob<SensorReceverAtbDB>();
                         DateTime nextDatetime = shipEntity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(sensor.ScanTime);
-                        shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan(), componentInstance);
+                        shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan().TypeName, componentInstance);
                     }
                 }
             }

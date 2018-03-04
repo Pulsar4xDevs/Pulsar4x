@@ -456,17 +456,28 @@ namespace Pulsar4X.Networking
 
         void SendSystemData(NetConnection recipient, StarSystem starSystem)
         {
+            Entity faction = Game.GlobalManager.GetGlobalEntityByGuid(_connectedFactions[recipient]);
+            FactionOwnerDB factionOwner = faction.GetDataBlob<FactionOwnerDB>();
+            List<Entity> ownedEntitiesForSystem = factionOwner.GetOwnedForStarSystem(starSystem.Guid);
+
             var mStream = new MemoryStream();
-            SerializationManager.Export(Game, mStream, starSystem);
-            byte[] systemByteArray = mStream.ToArray();
-            int len = systemByteArray.Length;
+
+
+
+
+
+
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
             sendMsg.Write((byte)ToClientMsgType.SendSystemData);
 
             sendMsg.Write(starSystem.Guid.ToByteArray());
-            sendMsg.Write(len);
-            sendMsg.Write(systemByteArray);
+
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+
+            foreach (var entity in ownedEntitiesForSystem)
+            {
+                SendEntityData(recipient, entity);
+            }
         }
 
         void SendDatablob(NetConnection recipient, Entity entity, BaseDataBlob datablob)
