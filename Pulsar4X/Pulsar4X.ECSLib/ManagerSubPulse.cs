@@ -127,7 +127,6 @@ namespace Pulsar4X.ECSLib
 
 
 
-
         internal void Initalise(EntityManager entityManager)//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
         {
             _entityManager = entityManager;
@@ -140,6 +139,11 @@ namespace Pulsar4X.ECSLib
             _processManager.InitializeMangerSubpulse(entityManager);
         }
 
+        internal void Initalise(StreamingContext context, EntityManager entityManager)
+        {
+            _entityManager = entityManager;
+            _processManager = entityManager.Game.ProcessorManager;
+        }
 
         /// <summary>
         /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
@@ -261,17 +265,6 @@ namespace Pulsar4X.ECSLib
         
         
         }
-
-
-        [System.Runtime.Serialization.OnDeserialized]
-        private void Deserialized(StreamingContext context)
-        {
-            // Star system resolver loads myStarSystem from mySystemGuid after the game is done loading.
-            var game = (Game)context.Context;
-            //TODO: currently don't have any way to find the EntityManager and add the reference to that back in here. this needs to be done to fix save/load. 
-            _processManager = game.ProcessorManager;
-        }
-
     }
 }
 

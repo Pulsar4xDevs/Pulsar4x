@@ -456,10 +456,10 @@ namespace Pulsar4X.Networking
             }
             else
             {
-                StarSystem newStarsystem = new StarSystem(Game, "newSystem", 0);
+                StarSystem newStarsystem = new StarSystem(Game, "newSystem", 0, systemID);
                 newStarsystem.Game = Game;
-                newStarsystem.Guid = systemID;
-                Game.Systems[systemID] = newStarsystem;
+                //newStarsystem.Guid = systemID;
+                //Game.Systems[systemID] = newStarsystem;
             }
             
 

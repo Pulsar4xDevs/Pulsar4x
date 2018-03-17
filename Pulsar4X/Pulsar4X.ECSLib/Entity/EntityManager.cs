@@ -749,6 +749,7 @@ namespace Pulsar4X.ECSLib
         {
             var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
             ManagerSubpulses = (ManagerSubPulse)info.GetValue("ManagerSubpulses", typeof(ManagerSubPulse));
+            ManagerSubpulses.Initalise(context, this);
             foreach (ProtoEntity protoEntity in entities)
             {
                 Entity entity;

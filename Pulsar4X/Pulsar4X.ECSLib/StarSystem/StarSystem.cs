@@ -14,8 +14,13 @@ namespace Pulsar4X.ECSLib
 
 
         [PublicAPI]
-        [JsonProperty]
-        public Guid Guid { get;  set; }
+        public Guid Guid
+        {
+            get
+            {
+                return ManagerGuid;
+            }
+        }
 
         [JsonProperty]
         internal int SystemIndex { get; set; }
@@ -40,20 +45,28 @@ namespace Pulsar4X.ECSLib
 
         public StarSystem(Game game, string name, int seed) : base(game, false)
         {
-            Guid = Guid.NewGuid();
             NameDB = new NameDB(name);
 
             Seed = seed;
             RNG = new Random(seed);
             game.Systems.Add(Guid, this);
         }
+        internal StarSystem(Game game, string name, int seed, Guid systemID): base(game, false)
+        {
+            NameDB = new NameDB(name);
 
+            Seed = seed;
+            RNG = new Random(seed);
+            ManagerGuid = systemID;
+            game.Systems.Add(Guid, this);
+        }
 
         public StarSystem(SerializationInfo info, StreamingContext context) : base(info, context)
         {
 
-            Guid = (Guid)info.GetValue("Guid", typeof(Guid));
+            ManagerGuid = (Guid)info.GetValue("Guid", typeof(Guid));
             Seed = (int)info.GetValue("Seed", typeof(int));
+            NameDB = (NameDB)info.GetValue("Name", typeof(NameDB));
         }
 
 
@@ -61,6 +74,7 @@ namespace Pulsar4X.ECSLib
         {
             info.AddValue("Guid", Guid);
             info.AddValue("Seed", Seed);
+            info.AddValue("Name", NameDB);
             base.GetObjectData(info, context);
         }
 
