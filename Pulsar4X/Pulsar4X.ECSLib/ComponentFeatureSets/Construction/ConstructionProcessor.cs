@@ -14,6 +14,15 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(3);
+
+        public Type GetParameterType => typeof(ConstructionDB);
+
+        public void Init(Game game)
+        {
+            //unneeded.
+        }
+
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             ConstructionProcessor.ConstructStuff(entity);

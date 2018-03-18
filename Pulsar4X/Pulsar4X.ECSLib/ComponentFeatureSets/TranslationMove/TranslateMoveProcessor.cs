@@ -7,6 +7,15 @@ namespace Pulsar4X.ECSLib
     {
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
+        public TimeSpan FirstRunOffset => TimeSpan.FromMinutes(10);
+
+        public Type GetParameterType => typeof(TranslateMoveDB);
+
+        public void Init(Game game)
+        {
+            //nothing needed for this one. 
+        }
+
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             var manager = entity.Manager;

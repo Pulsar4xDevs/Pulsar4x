@@ -10,6 +10,14 @@ namespace Pulsar4X.ECSLib
     {
         public TimeSpan RunFrequency => TimeSpan.FromHours(1);
 
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(0);
+
+        public Type GetParameterType => typeof(NewtonBalisticDB);
+
+        public void Init(Game game)
+        {
+            //not needed
+        }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
@@ -34,6 +42,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (Entity objectEntity in manager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>())
             {
+                
                 NewtonBalisticDB balisticDB = objectEntity.GetDataBlob<NewtonBalisticDB>();
                 PositionDB position = objectEntity.GetDataBlob<PositionDB>();
                 position.RelativePosition += Distance.KmToAU(balisticDB.CurrentSpeed * deltaSeconds);
@@ -73,7 +82,5 @@ namespace Pulsar4X.ECSLib
             RemoveList.Clear();
             RemoveSystem.Clear();
         }
-
-
     }
 }

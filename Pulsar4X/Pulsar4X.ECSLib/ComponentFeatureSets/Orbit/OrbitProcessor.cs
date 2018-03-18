@@ -24,12 +24,15 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal OrbitProcessor()
+        public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
+
+        public Type GetParameterType => typeof(OrbitDB);
+
+
+        public void Init(Game game)
         {
-            
+            //nothing needed to do in this one. still need this function since it's required in the interface. 
         }
-
-
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {

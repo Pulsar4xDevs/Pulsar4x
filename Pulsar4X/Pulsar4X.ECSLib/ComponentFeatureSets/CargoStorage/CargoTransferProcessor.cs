@@ -5,14 +5,21 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoTransferProcessor : IHotloopProcessor
     {
-        public CargoTransferProcessor()
-        {
-        }
+
 
         public TimeSpan RunFrequency {
             get {
                 return TimeSpan.FromHours(1);
             }
+        }
+
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(0);
+
+        public Type GetParameterType => typeof(CargoTransferDB);
+
+        public void Init(Game game)
+        {
+            //unneeded
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)

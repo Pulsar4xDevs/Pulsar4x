@@ -143,6 +143,7 @@ namespace Pulsar4X.ECSLib
         {
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
+            _processManager.InitializeMangerSubpulse(entityManager);
         }
 
         /// <summary>
@@ -260,11 +261,31 @@ namespace Pulsar4X.ECSLib
                 }
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }
-            SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent            
-        
-        
-        
+            SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent                   
         }
+
+        public int GetTotalNumberOfProceses()
+        {
+            int i = 0;
+            foreach (var processSet in QueuedProcesses)
+            {
+                i += processSet.Value.InstanceProcessors.Count;
+                i += processSet.Value.SystemProcessors.Count;
+            }
+
+            return i;
+        }
+
+        public List<DateTime> GetInteruptDateTimes()
+        {
+            List<DateTime> dates = new List<DateTime>();
+            foreach (var item in QueuedProcesses)
+            {
+                dates.Add(item.Key);
+            }
+            return dates;
+        }
+
     }
 }
 

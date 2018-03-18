@@ -8,11 +8,17 @@ namespace Pulsar4X.ECSLib
     {
         private Dictionary<Guid, MineralSD> _minerals;
 
-        internal MineResourcesProcessor(StaticDataStore staticData)
-        {
-            _minerals = staticData.Minerals;
-        }
+        public TimeSpan RunFrequency => TimeSpan.FromDays(1);
 
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(1);
+
+        public Type GetParameterType => typeof(MiningDB);
+
+
+        public void Init(Game game)
+        {
+            _minerals = game.StaticData.Minerals;
+        }
         
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {           
@@ -93,15 +99,12 @@ namespace Pulsar4X.ECSLib
 
         public byte ProcessPriority { get; set; } = 100;
 
-        public TimeSpan RunFrequency {
-            get {
-                return TimeSpan.FromDays(1);
-            }
-        }
 
         public void RecalcEntity(Entity entity)
         {
             CalcMaxRate(entity);
         }
+
+
     }
 }

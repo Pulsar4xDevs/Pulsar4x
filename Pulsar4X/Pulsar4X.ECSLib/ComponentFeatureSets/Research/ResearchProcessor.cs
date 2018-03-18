@@ -12,13 +12,18 @@ namespace Pulsar4X.ECSLib
     {
         public TimeSpan RunFrequency => TimeSpan.FromDays(1);
 
-        StaticDataStore _staticData;
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(0.5);
 
-        internal ResearchProcessor(StaticDataStore staticData)
-        { 
-            _staticData = staticData; 
+        public Type GetParameterType => typeof(EntityResearchDB);
+
+        //StaticDataStore _staticData;
+
+        Dictionary<Guid, TechSD> Techs = new Dictionary<Guid, TechSD>();
+
+        public void Init(Game game)
+        {
+            Techs = game.StaticData.Techs;
         }
-
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
@@ -69,7 +74,7 @@ namespace Pulsar4X.ECSLib
 
                 //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
                 Guid projectGuid = scientist.GetDataBlob<ScientistDB>().ProjectQueue[0];
-                TechSD project = _staticData.Techs[projectGuid];
+                TechSD project = Techs[projectGuid];//_staticData.Techs[projectGuid];
                 int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
                 float bonus = scientist.GetDataBlob<ScientistDB>().Bonuses[project.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
@@ -232,5 +237,7 @@ namespace Pulsar4X.ECSLib
             int result = (int)expression.Evaluate();
             return result;
         }
+
+
     }
 }

@@ -10,15 +10,20 @@ namespace Pulsar4X.ECSLib
     {
         Dictionary<Guid, ProcessedMaterialSD> ProcessedMaterials = new Dictionary<Guid, ProcessedMaterialSD>();
 
-        public RefineResourcesProcessor(Dictionary<Guid, ProcessedMaterialSD> processedMaterials)
-        {
-            ProcessedMaterials = processedMaterials;
-        }
 
         public TimeSpan RunFrequency {
             get {
                 return TimeSpan.FromDays(1);
             }
+        }
+
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(1);
+
+        public Type GetParameterType => typeof(RefiningDB);
+
+        public void Init(Game game)
+        {
+            ProcessedMaterials = game.StaticData.ProcessedMaterials;
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)

@@ -12,6 +12,15 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(0);
+
+        public Type GetParameterType => typeof(PropulsionDB);
+
+        public void Init(Game game)
+        {
+            //unused
+        }
+
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {         
         }

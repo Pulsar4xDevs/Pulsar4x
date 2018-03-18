@@ -27,10 +27,16 @@ namespace Pulsar4X.ECSLib
     {
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
+        public TimeSpan FirstRunOffset => TimeSpan.FromMinutes(5);
+
+        public Type GetParameterType => typeof(OrderableDB);
+
         private Game _game;
 
-        public OrderableProcessor(Game game)
-        { _game = game; }
+        public void Init(Game game)
+        {
+            _game = game;
+        }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {

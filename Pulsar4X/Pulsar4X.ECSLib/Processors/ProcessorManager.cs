@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
 
         private readonly Dictionary<Type, IHotloopProcessor> _hotloopProcessors = new Dictionary<Type, IHotloopProcessor>();
         private readonly List<IRecalcProcessor> _recalcProcessors = new List<IRecalcProcessor>();
-        private readonly Dictionary<PulseActionEnum, IHotloopProcessor> _hotloopProcessorsByEnum = new Dictionary<PulseActionEnum, IHotloopProcessor>();
+        //private readonly Dictionary<PulseActionEnum, IHotloopProcessor> _hotloopProcessorsByEnum = new Dictionary<PulseActionEnum, IHotloopProcessor>();
         private readonly Dictionary<string, IInstanceProcessor> _instanceProcessors = new Dictionary<string, IInstanceProcessor>();
         private StaticDataStore _staticData;
         internal ProcessorManager(Game game)
@@ -70,6 +70,7 @@ namespace Pulsar4X.ECSLib
         {
             ManagerSubPulse managerSubPulse = _entityManager.ManagerSubpulses;
 
+            /*
             //we offset some of these to spread the load out a bit more. 
             managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<OrbitDB>());
             managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<NewtonBalisticDB>());
@@ -80,10 +81,17 @@ namespace Pulsar4X.ECSLib
             managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(1), GetProcessor<MiningDB>());
             managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(2), GetProcessor<RefiningDB>());
             managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(3), GetProcessor<ConstructionDB>());
+            */
+
+            foreach (var item in _hotloopProcessors)
+            {
+                managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + item.Value.FirstRunOffset, item.Value);
+            }
         }
 
         private void CreateProcessors(Game game)
         {
+            /*
             AddHotloopProcessor<EntityResearchDB>(new ResearchProcessor(game.StaticData));
             AddHotloopProcessor<MiningDB>(new MineResourcesProcessor(_staticData));
             AddHotloopProcessor<RefiningDB>(new RefineResourcesProcessor(_staticData.ProcessedMaterials));
@@ -94,10 +102,19 @@ namespace Pulsar4X.ECSLib
             AddHotloopProcessor<OrderableDB>(new OrderableProcessor(game));
             AddHotloopProcessor<TranslateMoveDB>(new TranslateMoveProcessor());
             //AddHotloopProcessor<SensorProfileDB>(new SetReflectedEMProfile());
+            */
 
+            var hotloopTypes = GetDerivedTypesFor(typeof(IHotloopProcessor));
+            foreach (var hotloopType in hotloopTypes)
+            {  
+                IHotloopProcessor processor = (IHotloopProcessor)Activator.CreateInstance(hotloopType);
+                processor.Init(game);
+                Type type = processor.GetParameterType;
+                _hotloopProcessors.Add(type, processor);
+            }
 
-            var types = GetDerivedTypesFor(typeof(IInstanceProcessor));
-            foreach (var itemType in types)
+            var instanceTypes = GetDerivedTypesFor(typeof(IInstanceProcessor));
+            foreach (var itemType in instanceTypes)
             {
                 IInstanceProcessor processor = (IInstanceProcessor)Activator.CreateInstance(itemType);
                 _instanceProcessors.Add(processor.TypeName, processor);
@@ -121,9 +138,12 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     internal interface IHotloopProcessor
     {
+        void Init(Game game);
         void ProcessEntity(Entity entity, int deltaSeconds);
         void ProcessManager(EntityManager manager, int deltaSeconds);
         TimeSpan RunFrequency { get; }
+        TimeSpan FirstRunOffset { get; }
+        Type GetParameterType { get; }
     }
 
 

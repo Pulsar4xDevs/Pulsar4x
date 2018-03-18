@@ -103,8 +103,8 @@ namespace Pulsar4X.Tests
   
             Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
 
-            Assert.AreEqual(firstOrigional.SystemManager.ManagerSubpulses, firstLoaded.SystemManager.ManagerSubpulses);
-
+            Assert.AreEqual(firstOrigional.SystemManager.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.SystemManager.ManagerSubpulses.GetTotalNumberOfProceses());
+            Assert.AreEqual(firstOrigional.SystemManager.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.SystemManager.ManagerSubpulses.GetInteruptDateTimes());
         }
 
 
