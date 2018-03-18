@@ -19,12 +19,13 @@ namespace Pulsar4X.ECSLib
     { 
         [JsonProperty]
         private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
+
         class ProcessSet : ISerializable
-        {   //TODO: need to figure out how to serialize/Deserialise this
-            //the Interface keys are references to the concreate classes in the _processManager
+        {   
+            
             [JsonIgnore] //this should get added on initialization. 
             internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
-            [JsonProperty] //this needs to get saved. the problem here is saving IInstance Processors, maybe this should be a Type. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly). 
+            [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly). 
             internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>();
 
             internal ProcessSet() { }
@@ -127,7 +128,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal void Initalise(EntityManager entityManager)//possibly this stuff should be done outside of the class, however it does give some good examples of how to add an interupt...
+        internal void Init(EntityManager entityManager)
         {
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
@@ -136,14 +137,37 @@ namespace Pulsar4X.ECSLib
                 _systemLocalDateTime = entityManager.Game.CurrentDateTime;
             }
 
-            _processManager.InitializeMangerSubpulse(entityManager);
+            InitHotloopProcessors();
         }
 
-        internal void Initalise(StreamingContext context, EntityManager entityManager)
+        internal void Init(StreamingContext context, EntityManager entityManager) //this one is used after loading a game. 
         {
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
-            _processManager.InitializeMangerSubpulse(entityManager);
+            InitHotloopProcessors();
+        }
+
+        private void InitHotloopProcessors()
+        {
+            /*
+            //we offset some of these to spread the load out a bit more. 
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<OrbitDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<NewtonBalisticDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime, GetProcessor<EntityResearchDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(5), GetProcessor<OrderableDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10), GetProcessor<TranslateMoveDB>());
+            //AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromMinutes(10.1), _processManager.GetProcessor<SensorProfileDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(1), GetProcessor<MiningDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(2), GetProcessor<RefiningDB>());
+            managerSubPulse.AddSystemInterupt(_entityManager.Game.CurrentDateTime + TimeSpan.FromHours(3), GetProcessor<ConstructionDB>());
+            */
+            
+            foreach (var item in _processManager._hotloopProcessors)
+            {
+                //the date time here is going to be inconsistant when a game is saved then loaded, vs running without a save/load. needs fixing. 
+                //also we may want to run many of these before the first turn, and still have this offset. 
+                AddSystemInterupt(SystemLocalDateTime + item.Value.FirstRunOffset, item.Value);
+            }
         }
 
         /// <summary>

@@ -15,14 +15,8 @@ namespace Pulsar4X.ECSLib
         private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
         private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
 
-        [JsonProperty]
-        private DateTime _lastRun = DateTime.MinValue;
 
-        public TimeSpan RunFrequency {
-            get {
-                return TimeSpan.FromHours(1);
-            }
-        }
+        public TimeSpan RunFrequency => TimeSpan.FromHours(1);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
 
