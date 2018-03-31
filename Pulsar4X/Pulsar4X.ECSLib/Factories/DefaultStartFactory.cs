@@ -10,8 +10,8 @@ namespace Pulsar4X.ECSLib
         {
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem sol = starfac.CreateSol(game);
-            sol.SystemManager.ManagerSubpulses.Init(sol.SystemManager);
-            Entity earth = sol.SystemManager.Entities[3]; //should be fourth entity created 
+            sol.ManagerSubpulses.Init(sol);
+            Entity earth = sol.Entities[3]; //should be fourth entity created 
             Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
@@ -71,19 +71,19 @@ namespace Pulsar4X.ECSLib
             Entity shipClass = DefaultShipDesign(game, factionEntity);
             Entity gunShipClass = GunShipDesign(game, factionEntity);
 
-            Entity ship1 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Serial Peacemaker");
-            Entity ship2 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, earth, sol, "Ensuing Calm");
+            Entity ship1 = ShipFactory.CreateShip(shipClass, sol, factionEntity, earth, sol, "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipClass, sol, factionEntity, earth, sol, "Ensuing Calm");
             var fuel = NameLookup.TryGetMaterialSD(game, "Sorium Fuel");
             StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
 
-            Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol.SystemManager, factionEntity, earth, sol, "Prevailing Stillness");
+            Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol, factionEntity, earth, sol, "Prevailing Stillness");
             StorageSpaceProcessor.AddCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
-            sol.SystemManager.SetDataBlob(ship1.ID, new TransitableDB());
-            sol.SystemManager.SetDataBlob(ship2.ID, new TransitableDB());
-            sol.SystemManager.SetDataBlob(gunShip.ID, new TransitableDB());
+            sol.SetDataBlob(ship1.ID, new TransitableDB());
+            sol.SetDataBlob(ship2.ID, new TransitableDB());
+            sol.SetDataBlob(gunShip.ID, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB

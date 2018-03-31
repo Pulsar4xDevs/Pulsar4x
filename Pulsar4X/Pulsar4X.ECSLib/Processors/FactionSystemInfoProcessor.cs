@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
 
         void CreateFactionInfo(StarSystem starSys, Entity faction)
         {
-            CreateFactionInfo(starSys.SystemManager, faction);
+            CreateFactionInfo(starSys, faction);
 
 
 

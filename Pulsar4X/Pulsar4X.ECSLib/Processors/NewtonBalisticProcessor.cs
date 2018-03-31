@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
             /// </summary>
             for(int removeIterator = 0; removeIterator < RemoveList.Count; removeIterator++)
             {
-                RemoveSystem[removeIterator].SystemManager.RemoveEntity(RemoveList[removeIterator]);
+                RemoveSystem[removeIterator].RemoveEntity(RemoveList[removeIterator]);
             }
 
             /// <summary>

@@ -69,7 +69,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void CompareLoadedGameWithOrigional()
+        public void CompareLoadedGameWithOrigional() //TODO do this after a few game ticks and check the comparitiveTests again. 
         {
             //create a new game
             Game newGame = TestingUtilities.CreateTestUniverse(10, _testTime, true);
@@ -103,8 +103,8 @@ namespace Pulsar4X.Tests
   
             Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
 
-            Assert.AreEqual(firstOrigional.SystemManager.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.SystemManager.ManagerSubpulses.GetTotalNumberOfProceses());
-            Assert.AreEqual(firstOrigional.SystemManager.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.SystemManager.ManagerSubpulses.GetInteruptDateTimes());
+            Assert.AreEqual(firstOrigional.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.ManagerSubpulses.GetTotalNumberOfProceses());
+            Assert.AreEqual(firstOrigional.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.ManagerSubpulses.GetInteruptDateTimes());
         }
 
 
@@ -125,7 +125,7 @@ namespace Pulsar4X.Tests
 
             // Export/Reinport all system bodies in that system.
 
-            foreach (Entity entity in system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken))
+            foreach (Entity entity in system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken))
             {
                 string jsonString = SerializationManager.Export(_game, entity);
 
@@ -137,21 +137,21 @@ namespace Pulsar4X.Tests
 
                 // Ensure the entity was destroyed.
                 Entity foundEntity;
-                Assert.IsFalse(system.SystemManager.FindEntityByGuid(clone.Guid, out foundEntity));
+                Assert.IsFalse(system.FindEntityByGuid(clone.Guid, out foundEntity));
 
                 // Import the entity back into the manager.
-                Entity importedEntity = SerializationManager.ImportEntityJson(_game, jsonString, system.SystemManager);
+                Entity importedEntity = SerializationManager.ImportEntityJson(_game, jsonString, system);
 
                 // Ensure the imported entity is valid
                 Assert.IsTrue(importedEntity.IsValid);
                 // Check to find the guid.
-                Assert.IsTrue(system.SystemManager.FindEntityByGuid(clone.Guid, out foundEntity));
+                Assert.IsTrue(system.FindEntityByGuid(clone.Guid, out foundEntity));
                 // Check the Guid imported correctly.
                 Assert.AreEqual(clone.Guid, importedEntity.Guid);
                 // Check the datablobs imported correctly.
                 Assert.AreEqual(clone.DataBlobs.Where(dataBlob => dataBlob != null).ToList().Count, importedEntity.DataBlobs.Count);
                 // Check the manager is the same.
-                Assert.AreEqual(system.SystemManager, importedEntity.Manager);
+                Assert.AreEqual(system, importedEntity.Manager);
             }
         }
 
@@ -181,9 +181,14 @@ namespace Pulsar4X.Tests
         }
         private void ImportExportSystem(StarSystem system)
         {
+
+            //TODO: need to be able to export a system that will only save systemBodies. 
+            //for a generated one, just saving the seed should suffice. 
+            //for a created one we'll have to do more. 
+            //also need to be able to export a players view of a system. but that would likely be a different function altogether. 
             SerializationManager.Export(_game, "testSystemExport", system);
             string jsonString = SerializationManager.Export(_game, system);
-            int entityCount = system.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count;
+            int entityCount = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count;
             _game = TestingUtilities.CreateTestUniverse(0);
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
@@ -191,7 +196,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(system.Guid, importedSystem.Guid);
 
             // See that the entities were imported.
-            Assert.AreEqual(entityCount, importedSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count);
+            Assert.AreEqual(entityCount, importedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count);
 
             // Ensure the system was added to the game's system list.
             List<StarSystem> systems = _game.GetSystems(_smAuthToken);

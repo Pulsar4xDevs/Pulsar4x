@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
                 sensorPfil
             };
 
-            Entity newELE = new Entity(starSys.SystemManager, planetDBs);
+            Entity newELE = new Entity(starSys, planetDBs);
             return newELE;
         }
     }

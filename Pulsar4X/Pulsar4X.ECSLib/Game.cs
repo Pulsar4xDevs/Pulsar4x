@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib
             GlobalManager.ManagerSubpulses.Init(GlobalManager);
             foreach (StarSystem starSys in this.Systems.Values)
             {
-                starSys.SystemManager.ManagerSubpulses.Init(starSys.SystemManager);
+                starSys.ManagerSubpulses.Init(starSys);
             }
 
             // Fire PostLoad event

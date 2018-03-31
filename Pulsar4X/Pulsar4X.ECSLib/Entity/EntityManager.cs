@@ -768,7 +768,6 @@ namespace Pulsar4X.ECSLib
                     Entity.Create(this, protoEntity);
                 }
             }
-            
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)

@@ -394,7 +394,7 @@ namespace Pulsar4X.ECSLib
             foreach (KeyValuePair<Guid, StarSystem> kvp in game.Systems)
             {
                 StarSystem system = kvp.Value;
-                var rootStar = system.SystemManager.GetFirstEntityWithDataBlob<OrbitDB>();
+                var rootStar = system.GetFirstEntityWithDataBlob<OrbitDB>();
 
                 // get root star:
                 var orbitDB = rootStar.GetDataBlob<OrbitDB>();
@@ -654,7 +654,7 @@ namespace Pulsar4X.ECSLib
                     lock (SyncRoot)
                     {
                         PersistenceSerializer.Context = new StreamingContext(PersistenceSerializer.Context.State, game);
-                        if (typeof(TObj) == typeof(ProtoEntity))
+                        if (typeof(TObj) == typeof(ProtoEntity) || typeof(TObj) == typeof(StarSystem))
                         {
                             obj = PersistenceSerializer.Deserialize<TObj>(reader);
                             //at this point in the code, if the entity has a datablob which references entities, those entites will be created in the manager. 

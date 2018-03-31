@@ -33,13 +33,13 @@ namespace Pulsar4X.Tests
             _faction = DefaultStartFactory.DefaultHumans(_game, _player, "Test Faction");
 
             _starSystem = _game.Systems.First<KeyValuePair<Guid, StarSystem>>().Value;
-            _planets = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
+            _planets = _starSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
 
             _earth = _planets.Where<Entity>(planet => planet.GetDataBlob<NameDB>().DefaultName == "Earth").First<Entity>();
 
-            _ship = _starSystem.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>().First<Entity>();
+            _ship = _starSystem.GetAllEntitiesWithDataBlob<ShipInfoDB>().First<Entity>();
             _shipPropulsionDB = _ship.GetDataBlob<PropulsionDB>();
-            _target = _ship.Clone(_starSystem.SystemManager);
+            _target = _ship.Clone(_starSystem);
 
             _systems = new List<StarSystem>();
 

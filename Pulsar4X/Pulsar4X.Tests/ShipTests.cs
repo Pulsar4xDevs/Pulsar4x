@@ -62,7 +62,7 @@ namespace Pulsar4X.Tests
             EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
 
             Vector4 pos = new Vector4(0, 0, 0, 0);
-            _ship = ShipFactory.CreateShip(_shipClass, _starSystem.SystemManager, _faction, pos, _starSystem, "Serial Peacemaker");
+            _ship = ShipFactory.CreateShip(_shipClass, _starSystem, _faction, pos, _starSystem, "Serial Peacemaker");
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 

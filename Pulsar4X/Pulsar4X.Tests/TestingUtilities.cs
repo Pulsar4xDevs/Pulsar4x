@@ -104,7 +104,7 @@ namespace Pulsar4X.Tests
 
             StarSystemFactory starfac = new StarSystemFactory(Game);
             Sol = starfac.CreateSol(Game);
-            Earth = NameLookup.TryGetFirstEntityWithName(Sol.SystemManager, "Earth"); //Sol.SystemManager.Entities[3]; //should be fourth entity created 
+            Earth = NameLookup.TryGetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created 
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
 
             DefaultEngineDesign = DefaultStartFactory.DefaultEngineDesign(Game, HumanFaction);
@@ -112,8 +112,8 @@ namespace Pulsar4X.Tests
             DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
 
             Vector4 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition;
-            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, Sol.SystemManager, HumanFaction, position, Sol, "Serial Peacemaker");
-            Sol.SystemManager.SetDataBlob(DefaultShip.ID, new TransitableDB());
+            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, Sol, HumanFaction, position, Sol, "Serial Peacemaker");
+            Sol.SetDataBlob(DefaultShip.ID, new TransitableDB());
         }
 
 

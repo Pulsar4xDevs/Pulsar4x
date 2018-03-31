@@ -341,7 +341,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void EntityTransfer()
         {
-            EntityManager manager2 = _game.GetSystems(_smAuthToken).First().SystemManager;
+            EntityManager manager2 = _game.GetSystems(_smAuthToken).First();
 
             PopulateEntityManager();
 

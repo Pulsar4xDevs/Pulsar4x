@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
 {
     [DebuggerDisplay("{NameDB.DefaultName} - {Guid.ToString()}")]
     [JsonObject(MemberSerialization.OptIn)]
-    public class StarSystem : EntityManager
+    public class StarSystem : EntityManager, ISerializable
     {
 
 
@@ -29,8 +29,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public NameDB NameDB { get;  set; }
 
-        [PublicAPI]
-        public EntityManager SystemManager { get { return this; } }
+        //[PublicAPI]
+        //public EntityManager SystemManager { get { return this; } }
 
         [PublicAPI]
         [JsonProperty]
@@ -70,8 +70,21 @@ namespace Pulsar4X.ECSLib
         }
 
 
+
+        public void ExportBodies(SerializationInfo info)
+        {
+            List<Entity> bodies = this.GetAllEntitiesWithDataBlob<StarInfoDB>();
+            bodies.AddRange(this.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>());
+
+            info.AddValue("Guid", Guid);
+            info.AddValue("Seed", Seed);
+            info.AddValue("Name", NameDB);
+            info.AddValue("Bodies", bodies);
+        }
+
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
+            
             info.AddValue("Guid", Guid);
             info.AddValue("Seed", Seed);
             info.AddValue("Name", NameDB);

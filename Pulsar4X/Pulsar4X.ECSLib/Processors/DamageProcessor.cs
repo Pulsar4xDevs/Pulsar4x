@@ -223,7 +223,7 @@ namespace Pulsar4X.ECSLib
 
             //Does anything else need to be done to delete a ship?
 
-            mySystem.SystemManager.RemoveEntity(DestroyedShip);
+            mySystem.RemoveEntity(DestroyedShip);
         }
 
         /// <summary>
@@ -251,7 +251,7 @@ namespace Pulsar4X.ECSLib
                     throw new GuidNotFoundException(pDB.SystemGuid);
 
                 Entity myTarget;
-                if (!mySystem.SystemManager.FindEntityByGuid(nDB.TargetGuid, out myTarget))
+                if (!mySystem.FindEntityByGuid(nDB.TargetGuid, out myTarget))
                     throw new GuidNotFoundException(nDB.TargetGuid);
 
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
@@ -260,7 +260,7 @@ namespace Pulsar4X.ECSLib
                 Entity newAsteroid1 = AsteroidFactory.CreateAsteroid(mySystem, myTarget, nDB.CollisionDate, newMass);
                 Entity newAsteroid2 = AsteroidFactory.CreateAsteroid(mySystem, myTarget, nDB.CollisionDate, newMass);
 
-                mySystem.SystemManager.RemoveEntity(Asteroid);
+                mySystem.RemoveEntity(Asteroid);
 
                 //Randomize the number of created asteroids?
             }
@@ -273,7 +273,7 @@ namespace Pulsar4X.ECSLib
                 if (!game.Systems.TryGetValue(pDB.SystemGuid, out mySystem))
                     throw new GuidNotFoundException(pDB.SystemGuid);
 
-                mySystem.SystemManager.RemoveEntity(Asteroid);
+                mySystem.RemoveEntity(Asteroid);
             }
         }
     }

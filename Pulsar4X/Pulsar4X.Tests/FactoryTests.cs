@@ -45,7 +45,7 @@ namespace Pulsar4X.Tests
             StarSystem sol = sysfac.CreateSol(_game);
             //Entity starSystem = Entity.Create(_game.GlobalManager);
             //Entity planet = Entity.Create(starSystem.Manager, new List<BaseDataBlob>());
-            List<Entity> solBodies = sol.SystemManager.GetAllEntitiesWithDataBlob<NameDB>(_smAuthToken);
+            List<Entity> solBodies = sol.GetAllEntitiesWithDataBlob<NameDB>(_smAuthToken);
             Entity planet = solBodies.Find(item => item.GetDataBlob<NameDB>().DefaultName == "Earth");
             Entity species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
             var requiredDataBlobs = new List<Type>()
@@ -126,7 +126,7 @@ namespace Pulsar4X.Tests
 
             /////Ship/////
             Vector4 pos = new Vector4(0,0,0,0);
-            Entity ship = ShipFactory.CreateShip(shipClass, starSystem.SystemManager, faction, pos, starSystem, shipName);
+            Entity ship = ShipFactory.CreateShip(shipClass, starSystem, faction, pos, starSystem, shipName);
             ShipInfoDB shipInfo = ship.GetDataBlob<ShipInfoDB>();
             NameDB shipNameDB = ship.GetDataBlob<NameDB>();
 

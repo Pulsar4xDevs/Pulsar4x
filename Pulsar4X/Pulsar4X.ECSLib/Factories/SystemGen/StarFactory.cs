@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
                 starName = system.NameDB.DefaultName;
             }
 
-            int starIndex = system.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>().Count;
+            int starIndex = system.GetAllEntitiesWithDataBlob<StarInfoDB>().Count;
 
             starName += " " + (char)('A' + starIndex) + " " + spectralType + subDivision + luminosityClass;
 
@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
 
             SensorProfileDB emmisionSignature = SensorProcessorTools.SetStarEmmisionSig(starInfoDB, starMassVolumeDB);
 
-            return new Entity(system.SystemManager, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB, emmisionSignature});
+            return new Entity(system, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB, emmisionSignature});
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
 
-                stars.Add(Entity.Create(system.SystemManager, baseDataBlobs));
+                stars.Add(Entity.Create(system, baseDataBlobs));
             }
 
             // The root star must be the most massive. Find it.

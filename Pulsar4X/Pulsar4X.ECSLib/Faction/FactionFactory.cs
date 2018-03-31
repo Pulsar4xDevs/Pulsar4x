@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
 
                 new FactionSystemInfoDB(starSystem),
             };
-            var systemFactionEntity = Entity.Create(starSystem.SystemManager, blobs);
+            var systemFactionEntity = Entity.Create(starSystem, blobs);
             new OwnedDB(faction, systemFactionEntity);
             return systemFactionEntity;
         }
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
             this.StarSystem = starSystem;
             //TODO move this to a processor and require sensors of some kind. 
             //will also need to figure out how much a faction knows about the body. 
-            foreach (var body in starSystem.SystemManager.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>())
+            foreach (var body in starSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>())
             {
                 KnownSystemBodies.Add(body);
             }

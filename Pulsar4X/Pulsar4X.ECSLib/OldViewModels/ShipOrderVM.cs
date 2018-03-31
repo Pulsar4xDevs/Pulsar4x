@@ -269,7 +269,7 @@ namespace Pulsar4X.ECSLib
             RefreshShips(0, 0);
 
             //PropertyChanged += ShipOrderVM_PropertyChanged;
-            SelectedSystem.SystemManager.ManagerSubpulses.SystemDateChangedEvent += UpdateInterface_SystemDateChangedEvent;
+            SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += UpdateInterface_SystemDateChangedEvent;
 
             _starSystems.SelectionChangedEvent += RefreshShips;
             _shipList.SelectionChangedEvent += RefreshOrders;
@@ -330,7 +330,7 @@ namespace Pulsar4X.ECSLib
                 return;
 
             _shipList.Clear();
-            foreach(Entity ship in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<ShipInfoDB>(_gameVM.CurrentAuthToken))
+            foreach(Entity ship in SelectedSystem.GetAllEntitiesWithDataBlob<ShipInfoDB>(_gameVM.CurrentAuthToken))
             {
                 if (ship.HasDataBlob<PropulsionDB>())
                     ShipList.Add(ship, ship.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
@@ -361,7 +361,7 @@ namespace Pulsar4X.ECSLib
             int moveTargetIndex = _moveTargetList.SelectedIndex;
             int attackTargetIndex = _attackTargetList.SelectedIndex;
 
-            foreach (Entity target in SelectedSystem.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
+            foreach (Entity target in SelectedSystem.GetAllEntitiesWithDataBlob<PositionDB>(_gameVM.CurrentAuthToken))
             {
                 if(target != SelectedShip)
                 {

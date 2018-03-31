@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
             var pathfindingGraph = new Graph();
             foreach (StarSystem starSystem in _game.Systems.Values)
             {
-                List<Entity> jumpPoints = starSystem.SystemManager.GetAllEntitiesWithDataBlob<TransitableDB>();
+                List<Entity> jumpPoints = starSystem.GetAllEntitiesWithDataBlob<TransitableDB>();
 
                 foreach (Entity jumpPoint in jumpPoints)
                 {

@@ -17,9 +17,9 @@ namespace Pulsar4X.ECSLib
 
         public void InitializeForGM(GameVM gameVM, StarSystem starSys)
         {
-            _changeListner = new EntityChangeListnerSM(starSys.SystemManager);
+            _changeListner = new EntityChangeListnerSM(starSys);
 
-            foreach (var entityWithPosition in starSys.SystemManager.GetAllEntitiesWithDataBlob<PositionDB>())
+            foreach (var entityWithPosition in starSys.GetAllEntitiesWithDataBlob<PositionDB>())
             {
                 AddIconableEntity(entityWithPosition);
                 _changeListner.ListningToEntites.Add(entityWithPosition);
@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(OwnedDB)]);
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            EntityChangeListner changeListner = new EntityChangeListner(starSys.SystemManager, viewingFaction, listnerblobs);
+            EntityChangeListner changeListner = new EntityChangeListner(starSys, viewingFaction, listnerblobs);
             _changeListner = changeListner;
 
 
@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
             {
                 AddIconableEntity(entity);
             }
-            SystemSubpulse = starSys.SystemManager.ManagerSubpulses;
+            SystemSubpulse = starSys.ManagerSubpulses;
             //starSys.SystemManager.GetAllEntitiesWithDataBlob<NewtonBalisticDB>(gameVM.CurrentAuthToken);
 
             OnPropertyChanged(nameof(IconableEntitys));

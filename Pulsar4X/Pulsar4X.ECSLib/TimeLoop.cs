@@ -188,13 +188,13 @@ namespace Pulsar4X.ECSLib
                 //do system processors
               
                 if (_game.Settings.EnableMultiThreading == true) //threaded
-                    Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt));
+                    Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
                 //The above 'blocks' till all the tasks are done.
                 else //non threaded
                 {
                     foreach (StarSystem starSys in _game.Systems.Values)
                     {
-                        starSys.SystemManager.ManagerSubpulses.ProcessSystem(nextInterupt);
+                        starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
                     }
                 }
 

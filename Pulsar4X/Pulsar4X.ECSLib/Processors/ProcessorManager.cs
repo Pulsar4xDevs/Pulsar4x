@@ -115,11 +115,41 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     internal interface IHotloopProcessor
     {
-        void Init(Game game); //this is used to init processors that need access to static data etc. 
+        /// <summary>
+        /// used to initialize processors that need access to static data etc, used to construct a derived class's concrete object. 
+        /// </summary>
+        /// <param name="game"></param>
+        void Init(Game game);
+
+        /// <summary>
+        /// used when a specific entity should be processed. 
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        /// <param name="deltaSeconds">Delta seconds.</param>
         void ProcessEntity(Entity entity, int deltaSeconds);
+
+        /// <summary>
+        /// used to process all entities that have the GetParameterType type of datablob in a specific manager. 
+        /// </summary>
+        /// <param name="manager">Manager.</param>
+        /// <param name="deltaSeconds">Delta seconds.</param>
         void ProcessManager(EntityManager manager, int deltaSeconds);
+
+        /// <summary>
+        /// How Often this processor should run. 
+        /// </summary>
+        /// <value>The run frequency.</value>
         TimeSpan RunFrequency { get; }
-        TimeSpan FirstRunOffset { get; }
+        /// <summary>
+        /// This is so that each processor can be offset a bit, so they are spaced apart a bit. 
+        /// In the case of short quick turns this should help prevent a lag spike as the game tries to process all economy etc on a single tick. 
+        /// </summary>
+        /// <value>The first run offset.</value>
+        TimeSpan FirstRunOffset { get; } 
+        /// <summary>
+        /// this should return the specific Datablob that a derived class is accociated with. 
+        /// </summary>
+        /// <value>The type of the get parameter.</value>
         Type GetParameterType { get; }
     }
 
@@ -135,11 +165,20 @@ namespace Pulsar4X.ECSLib
 
 
     /// <summary>
-    /// Recalc processor. - this processor is called when something on the entity changes. 
+    /// Recalc processor. - this processor is called when something on the entity changes.
+    /// ie if a ship gets damaged, or modified, etc. the max speed and other stuff may need to be recalculated.   
     /// </summary>
     internal interface IRecalcProcessor
     {
+        /// <summary>
+        /// This is used so that some recalc processors can be run before others
+        /// </summary>
+        /// <value>The process priority.</value>
         byte ProcessPriority { get; set; }
+        /// <summary>
+        /// function to recalculate an entity. 
+        /// </summary>
+        /// <param name="entity">Entity.</param>
         void RecalcEntity(Entity entity);
     }
 }

@@ -66,7 +66,7 @@ namespace Pulsar4X.ECSLib
             Entities.Clear();
             if (StarSystems.Count > 0)
             { 
-                foreach (var entity in StarSystems.SelectedKey.SystemManager.GetAllEntitiesWithDataBlob<OrbitDB>(_gameVM.CurrentAuthToken))
+                foreach (var entity in StarSystems.SelectedKey.GetAllEntitiesWithDataBlob<OrbitDB>(_gameVM.CurrentAuthToken))
                 {
                     string entityname = entity.Guid.ToString();
                     if (entity.HasDataBlob<NameDB>())

@@ -385,7 +385,7 @@ namespace Pulsar4X.Networking
             if (entity.HasDataBlob<PositionDB>())
             {
                 var pos = entity.GetDataBlob<PositionDB>();
-                var manager = Game.Systems[pos.SystemGuid].SystemManager;
+                var manager = Game.Systems[pos.SystemGuid];
                 entity.Transfer(manager);
             }
             //this ensures that the ownership is properly set. I've tried a couple of other ways of doing this, but so far this seems to work the best.
@@ -588,7 +588,7 @@ namespace Pulsar4X.Networking
             }
             foreach (var system in Game.Systems.Values)
             {
-                foreach (var entity in system.SystemManager.Entities)
+                foreach (var entity in system.Entities)
                 {
                     if (entity != null && entity.DataBlobs.Count == 0)
                     {

@@ -97,7 +97,7 @@ namespace Pulsar4X.ECSLib
             foreach (var starSysGuid in knownSystems)
             {
                 StarSystem starSys = manager.Game.Systems[starSysGuid];
-                EntityManager starSysManager = starSys.SystemManager;
+                EntityManager starSysManager = starSys;
                 ManagerListners.Add(new EntityChangeListner(starSysManager, faction, new List<int>()));
             }
         }

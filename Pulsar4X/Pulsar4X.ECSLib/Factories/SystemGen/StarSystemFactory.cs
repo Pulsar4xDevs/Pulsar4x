@@ -80,7 +80,7 @@ namespace Pulsar4X.ECSLib
             PositionDB mercuryPositionDB = new PositionDB(OrbitProcessor.GetPosition(mercuryOrbitDB, game.CurrentDateTime), sol.Guid);
             //AtmosphereDB mercuryAtmo = new AtmosphereDB();
             SensorProfileDB sensorProfile = new SensorProfileDB();
-            Entity mercury = new Entity(sol.SystemManager, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
+            Entity mercury = new Entity(sol, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mercury);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, GalaxyGen.Settings.J2000);
             PositionDB venusPositionDB = new PositionDB(OrbitProcessor.GetPosition(venusOrbitDB, game.CurrentDateTime), sol.Guid);
             sensorProfile = new SensorProfileDB();
-            Entity venus = new Entity(sol.SystemManager, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
+            Entity venus = new Entity(sol, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, venus);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, venusBodyDB, venusMVDB);
 
@@ -118,7 +118,7 @@ namespace Pulsar4X.ECSLib
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.01f);
             AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
             sensorProfile = new SensorProfileDB();
-            Entity earth = new Entity(sol.SystemManager, new List<BaseDataBlob> {sensorProfile, earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
+            Entity earth = new Entity(sol, new List<BaseDataBlob> {sensorProfile, earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
             _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, earthBodyDB, earthMVDB);
 
@@ -137,7 +137,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB lunaOrbitDB = OrbitDB.FromAsteroidFormat(earth, earthMVDB.Mass, lunaMVDB.Mass, lunaSemiMajAxis, lunaEccentricity, lunaInclination, lunaLoAN, lunaAoP, lunaMeanAnomaly, GalaxyGen.Settings.J2000);
             PositionDB lunaPositionDB = new PositionDB(OrbitProcessor.GetPosition(lunaOrbitDB, game.CurrentDateTime) + earthPositionDB.AbsolutePosition, sol.Guid);
             sensorProfile = new SensorProfileDB();
-            Entity luna = new Entity(sol.SystemManager, new List<BaseDataBlob> {sensorProfile, lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
+            Entity luna = new Entity(sol, new List<BaseDataBlob> {sensorProfile, lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, lunaBodyDB, lunaMVDB);
 
@@ -160,7 +160,7 @@ namespace Pulsar4X.ECSLib
             AtmosphereDB marsAtmo = new AtmosphereDB(0.087f, false, 0, 0, 0, -55, marsAtmoGasses);
             PositionDB marsPositionDB = new PositionDB(OrbitProcessor.GetPosition(marsOrbitDB, game.CurrentDateTime), sol.Guid);
             sensorProfile = new SensorProfileDB();
-            Entity mars = new Entity(sol.SystemManager, new List<BaseDataBlob> {sensorProfile, marsPositionDB, marsBodyDB, marsMVDB, marsNameDB, marsOrbitDB, marsAtmo } );
+            Entity mars = new Entity(sol, new List<BaseDataBlob> {sensorProfile, marsPositionDB, marsBodyDB, marsMVDB, marsNameDB, marsOrbitDB, marsAtmo } );
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mars);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, marsBodyDB, marsMVDB);
 
@@ -265,7 +265,7 @@ namespace Pulsar4X.ECSLib
                 planetEccentricity = i / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
                 planetPositionDB.AbsolutePosition = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
-                Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+                Entity planet = new Entity(system, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
             return system;
@@ -299,7 +299,7 @@ namespace Pulsar4X.ECSLib
                 planetLoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
                 planetPositionDB.AbsolutePosition = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
-                Entity planet = new Entity(system.SystemManager, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+                Entity planet = new Entity(system, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
             return system;

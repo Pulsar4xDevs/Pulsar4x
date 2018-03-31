@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     {
         public static Entity CreateJumpPoint(StarSystemFactory ssf, StarSystem system)
         {
-            var primaryStarInfoDB = system.SystemManager.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<OrbitDB>().Root.GetDataBlob<StarInfoDB>();
+            var primaryStarInfoDB = system.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<OrbitDB>().Root.GetDataBlob<StarInfoDB>();
 
             NameDB jpNameDB = new NameDB("Jump Point");
             PositionDB jpPositionDB = new PositionDB(0,0,0, system.Guid);
@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
 
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};
 
-            Entity jumpPoint = Entity.Create(system.SystemManager, dataBlobs);
+            Entity jumpPoint = Entity.Create(system, dataBlobs);
             return jumpPoint;
         }
 
@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static int GetNumJPForSystem(StarSystem system)
         {
-            Entity primaryStar = system.SystemManager.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<OrbitDB>().Root;
+            Entity primaryStar = system.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<OrbitDB>().Root;
             var starMVDB = primaryStar.GetDataBlob<MassVolumeDB>();
 
             int numJumpPoints = 0;

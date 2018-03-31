@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         }
         internal static void JumpIn(Game game, SystemEntityJumpPair jumpPair)
         {
-            jumpPair.JumpingEntity.Transfer(jumpPair.JumpSystem.SystemManager);
+            jumpPair.JumpingEntity.Transfer(jumpPair.JumpSystem);
         }
 
         public static void SetJump(Game game, DateTime exitTime, StarSystem entrySystem, DateTime entryTime, Entity jumpingEntity)
