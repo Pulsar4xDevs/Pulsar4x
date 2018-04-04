@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Pulsar4X.ECSLib
 {
     public enum orderType { INVALIDORDER, MOVETO, MOVECARGO, BEAMATTACK, RESEARCH, CONSTRUCTION };
-
+    [Obsolete]
     public abstract class BaseOrder 
     {
         // Orders can be given a delay before being executed

@@ -65,14 +65,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="deltaSeconds">amount of time in seconds</param>
         internal static void Process(EntityManager manager, int deltaSeconds)
         {
+            /*
             OrderProcessor.ProcessSystem(manager);
             foreach (Entity shipEntity in manager.GetAllEntitiesWithDataBlob<PropulsionDB>())
             {
                 PositionDB positionDB = shipEntity.GetDataBlob<PositionDB>();
                 PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
 
-            
-                Queue < BaseOrder > orders = shipEntity.GetDataBlob<ShipInfoDB>().Orders;
+
+                Queue<BaseOrder> orders = new Queue<BaseOrder>();//shipEntity.GetDataBlob<ShipInfoDB>().Orders;
 
                 if(orders.Count > 0)
                 {
@@ -82,7 +83,7 @@ namespace Pulsar4X.ECSLib
 
                         // Check to see if we will overtake the target
 
-                        MoveOrder order = (MoveOrder)orders.Peek();
+                        //MoveOrder order = (MoveOrder)orders.Peek();
                         Vector4 shipPos = positionDB.AbsolutePosition;
                         Vector4 targetPos;
                         Vector4 currentSpeed = shipEntity.GetDataBlob<PropulsionDB>().CurrentVector;
@@ -166,10 +167,11 @@ namespace Pulsar4X.ECSLib
                         {
                             var fuel = staticData.GetICargoable(item.Key);
                             StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * kMetersMoved));
-                        }                        
+                        } 
+
                     }                   
                 }               
-            }           
+            }           */
         }
 
 

@@ -413,8 +413,8 @@ namespace Pulsar4X.ECSLib
 
             _moveOrdersPossible.Clear();
 
-            if (SelectedShip.HasDataBlob<PropulsionDB>())
-                _moveOrdersPossible.Add(new MoveOrder(), "Move to");
+            //if (SelectedShip.HasDataBlob<PropulsionDB>())
+            //    _moveOrdersPossible.Add(new MoveOrder(), "Move to");
 
             _moveOrdersPossible.SelectedIndex = 0;
 
@@ -439,7 +439,7 @@ namespace Pulsar4X.ECSLib
         {
             if (SelectedShip == null)
                 return;
-            List<BaseOrder> orders = new List<BaseOrder>(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
+            List<BaseOrder> orders = new List<BaseOrder>();//(SelectedShip.GetDataBlob<ShipInfoDB>().Orders);
 
             _moveOrderList.Clear();
 
@@ -450,9 +450,9 @@ namespace Pulsar4X.ECSLib
                 switch (order.OrderType)
                 {
                     case orderType.MOVETO:
-                        MoveOrder moveOrder = (MoveOrder)order;
+                        //MoveOrder moveOrder = (MoveOrder)order;
                         orderDescription += "Move to ";
-                        orderDescription += moveOrder.Target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction);
+                        //orderDescription += moveOrder.Target.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction);
                         break;
                     default:
                         break;
@@ -583,7 +583,7 @@ namespace Pulsar4X.ECSLib
             switch(SelectedPossibleMoveOrder.OrderType)
             {
                 case orderType.MOVETO:
-                    _gameVM.CurrentPlayer.Orders.MoveOrder(SelectedShip, SelectedMoveTarget);
+                    //_gameVM.CurrentPlayer.Orders.MoveOrder(SelectedShip, SelectedMoveTarget);
                     break;
                 case orderType.INVALIDORDER:
                     break;
@@ -591,7 +591,7 @@ namespace Pulsar4X.ECSLib
                     break;
             }
 
-            _gameVM.CurrentPlayer.ProcessOrders();
+            //_gameVM.CurrentPlayer.ProcessOrders();
 
             RefreshOrders(0,0);
             
@@ -605,9 +605,9 @@ namespace Pulsar4X.ECSLib
                 return;
 
             BaseOrder nextOrder;
-            Queue<BaseOrder> orderList = SelectedShip.GetDataBlob<ShipInfoDB>().Orders;
+            //Queue<BaseOrder> orderList = SelectedShip.GetDataBlob<ShipInfoDB>().Orders;
 
-
+            /*
             int totalOrders = orderList.Count;
 
             for (int i = 0; i < totalOrders; i++)
@@ -616,7 +616,7 @@ namespace Pulsar4X.ECSLib
                 if(nextOrder != SelectedMoveOrder)
                     orderList.Enqueue(nextOrder);
             }
-
+*/
             
             RefreshOrders(0,0);
         }

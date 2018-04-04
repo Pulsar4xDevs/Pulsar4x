@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
         public double TCS { get {return Tonnage * 0.02;} }
 
         ///  Ship orders.  
-        public Queue<BaseOrder> Orders;
+        //public Queue<BaseOrder> Orders;
 
         #endregion
 
@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
 
         public ShipInfoDB()
         {
-            Orders = new Queue<BaseOrder>();
+            //Orders = new Queue<BaseOrder>();
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
@@ -61,11 +61,12 @@ namespace Pulsar4X.ECSLib
             InternalHTK = shipInfoDB.InternalHTK;
             Tonnage = shipInfoDB.Tonnage;
             IsMilitary = shipInfoDB.IsMilitary;
-
+            /*
             if (shipInfoDB.Orders == null)
                 Orders = null;
             else
-                Orders = new Queue<BaseOrder>(shipInfoDB.Orders);
+                Orders = new Queue<BaseOrder>(shipInfoDB.Orders); 
+                */
         }
 
         #endregion
