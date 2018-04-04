@@ -247,6 +247,9 @@ namespace Pulsar4X.Networking
                 case ToClientMsgType.SendEntityChangeData:
                     HandleEntityChangeData(message);
                     break;
+                case ToClientMsgType.SendEntityProcData:
+                    HandleEntityProcData(message);
+                    break;
                 default:
                     throw new Exception("Unhandled ToClientMsgType: " + messageType + " This is probliby caused by a game version difference");
             }
@@ -381,6 +384,8 @@ namespace Pulsar4X.Networking
             var mStream = new MemoryStream(data);
             Entity entity = SerializationManager.ImportEntity(Game, mStream, Game.GlobalManager); //I think we need to figure out which manager this is suposed to be going into.
 
+
+
             //TODO: not sure that this is really the best way to do this, but basicaly this ensures that the entity goes into the correct manager.
             if (entity.HasDataBlob<PositionDB>())
             {
@@ -410,6 +415,9 @@ namespace Pulsar4X.Networking
             }
 
             mStream.Close();
+
+
+
             if (hash == entity.GetValueCompareHash())
                 Messages.Add("Good news everybody! Entity Hash is a Match!");
             else
@@ -429,6 +437,26 @@ namespace Pulsar4X.Networking
 
 
 
+        }
+
+        void HandleEntityProcData(NetIncomingMessage message)
+        { 
+            //now add any InstanceProcessors this entity had into the ManagerSubpulses
+            Guid entityGuid = new Guid(message.ReadBytes(16));
+            Entity entity;
+            if (!this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                Messages.Add("ImportProcDataFail: No Entity for Guid: " + entityGuid);
+            else
+            {
+                int len = message.ReadInt32();
+                byte[] data = message.ReadBytes(len);
+                var mStream = new MemoryStream(data);
+                var procDict = SerializationManager.ImportInstanceProcessorDict(mStream);
+                mStream.Close();
+                entity.Manager.ManagerSubpulses.ImportProcDictForEntity(entity, procDict);
+                Messages.Add("ImportedProcData for: " + entityGuid);
+            }
+        
         }
 
         void HandleSystemData(NetIncomingMessage message)

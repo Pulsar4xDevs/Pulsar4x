@@ -20,7 +20,8 @@ namespace Pulsar4X.Networking
         SendSystemData,
         SendFactionEntity,
         SendEntityCommandAck,
-        SendEntityChangeData
+        SendEntityChangeData,
+        SendEntityProcData
     }
 
     public class NetworkHost : NetworkBase, OrderHandler
@@ -297,7 +298,7 @@ namespace Pulsar4X.Networking
 
 
                 TimeSpan deltaTime = newDate - _currentDate;
-                //Messages.Add("TickEvent: CurrentTime: " + currentTime + " Delta: " + delta);
+                Messages.Add("TickEvent: from: " + _currentDate + " to: " + newDate + " Delta: " + deltaTime);
                 IList<NetConnection> connections = _connectedFactions.Keys.ToList();
                 NetOutgoingMessage sendMsg = NetServerObject.CreateMessage();
                 sendMsg.Write((byte)ToClientMsgType.SendTickInfo);
@@ -435,13 +436,12 @@ namespace Pulsar4X.Networking
             sendMsg.Write((byte)ToClientMsgType.SendEntity); //receving it is the same as any normal entity.
             EntityDataMessage(sendMsg, entity);
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);
+            SendEntityProcData(recipient, entity);
 
         }
 
         NetOutgoingMessage EntityDataMessage(NetOutgoingMessage msg, Entity entity)
         {
-
-
             var mStream = new MemoryStream();
             SerializationManager.Export(Game, mStream, entity);
             byte[] entityByteArray = mStream.ToArray();
@@ -450,8 +450,26 @@ namespace Pulsar4X.Networking
             msg.Write(entity.GetValueCompareHash());
             msg.Write(len);
             msg.Write(entityByteArray);
+
             mStream.Close();
             return msg;
+        }
+
+        void SendEntityProcData(NetConnection recipient, Entity entity)
+        {
+            NetOutgoingMessage msg = NetPeerObject.CreateMessage();
+            msg.Write((byte)ToClientMsgType.SendEntityProcData); 
+            var procDict = entity.Manager.ManagerSubpulses.GetInstanceProcForEntity(entity);
+            var mStream = new MemoryStream();
+            SerializationManager.Export(procDict, mStream);
+            byte[] procdicByteArray = mStream.ToArray();
+            int len = procdicByteArray.Length;
+            msg.Write(entity.Guid.ToByteArray());
+            msg.Write(len);
+            msg.Write(procdicByteArray);
+            mStream.Close();
+
+            NetServerObject.SendMessage(msg, recipient, NetDeliveryMethod.ReliableOrdered);
         }
 
         void SendSystemData(NetConnection recipient, StarSystem starSystem)

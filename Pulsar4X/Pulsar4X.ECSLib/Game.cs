@@ -88,8 +88,8 @@ namespace Pulsar4X.ECSLib
             SyncContext = SynchronizationContext.Current;
             GameLoop = new TimeLoop(this);
             EventLog = new EventLog(this);
-            GlobalManager = new EntityManager(this, true);
             ProcessorManager = new ProcessorManager(this);
+            GlobalManager = new EntityManager(this, true);
             OrderHandler = new StandAloneOrderHandler(this);
         }
 
@@ -145,11 +145,12 @@ namespace Pulsar4X.ECSLib
             // Temp: This will be reworked later.
             GenerateSystems(new AuthenticationToken(SpaceMaster, newGameSettings.SMPassword), newGameSettings.MaxSystems);
 
+            /*
             GlobalManager.ManagerSubpulses.Init(GlobalManager);
             foreach (StarSystem starSys in this.Systems.Values)
             {
                 starSys.ManagerSubpulses.Init(starSys);
-            }
+            }*/
 
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };

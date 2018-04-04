@@ -147,6 +147,95 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public static void Export(Dictionary<DateTime, List<string>> procDict, Stream outputStream, bool compress = false)
+        { 
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = compress ? Formatting.None : Formatting.Indented,
+                ContractResolver = new ForceUseISerializable()
+            };
+
+            using (var intermediateStream = new MemoryStream())
+            {
+                using (var streamWriter = new StreamWriter(intermediateStream, Encoding.UTF8, 1024, true))
+                {
+                    using (var writer = new JsonTextWriter(streamWriter))
+                    {
+                        lock (SyncRoot)
+                        {
+                            serialiser.Serialize(writer, procDict, typeof(Dictionary<DateTime, List<string>>));
+                        }
+                    }
+                }
+                FinalizeOutput(outputStream, intermediateStream, compress);
+            }
+        }
+
+        public static Dictionary<DateTime, List<string>> ImportInstanceProcessorDict(Stream inputStream)
+        { 
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                ContractResolver = new ForceUseISerializable()
+            };
+            Dictionary<DateTime, List<string>> procDict;
+            // Use a BufferedStream to allow reading and seeking from any stream.
+            // Example: If inputStream is a NetworkStream, then we can only read once.
+            using (BufferedStream inputBuffer = new BufferedStream(inputStream))
+            {
+                // Check if our stream is compressed.
+                if (HasGZipHeader(inputBuffer))
+                {
+                    // File is compressed. Decompress using GZip.
+                    using (GZipStream compressionStream = new GZipStream(inputStream, CompressionMode.Decompress))
+                    {
+                        // Decompress into a MemoryStream.
+                        using (MemoryStream intermediateStream = new MemoryStream())
+                        {
+                            // Decompress the file into an intermediate MemoryStream.
+                            compressionStream.CopyTo(intermediateStream);
+
+                            // Reset the position of the MemoryStream so it can be read from the beginning.
+                            intermediateStream.Position = 0;
+
+                            // Populate the game from the uncompressed MemoryStream.
+                            //PopulateEntity(entity, intermediateStream);
+                            procDict = populateProcDict(intermediateStream);
+
+                        }
+                    }
+                }
+                else
+                {
+                    // Populate the game from the uncompressed inputStream.
+                    procDict = populateProcDict(inputStream);
+                }
+            }
+            return procDict;
+        }
+
+        private static Dictionary<DateTime, List<string>> populateProcDict(Stream inputStream)
+        {
+            
+            JsonSerializer serialiser = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                ContractResolver = new ForceUseISerializable()
+            };
+            using (StreamReader sr = new StreamReader(inputStream))
+            {
+                using (JsonReader reader = new JsonTextReader(sr))
+                {
+                    Dictionary<DateTime, List<string>> procDict = new Dictionary<DateTime, List<string>>();
+                    procDict = PersistenceSerializer.Deserialize<Dictionary<DateTime, List<string>>>(reader);
+                    //serialiser.Populate(reader, procDict);
+
+                    return procDict;
+                }
+            }
+        }
+
         public static GameSettings ImportGameSettings(Stream inputStream)
         {
             JsonSerializer serialiser = new JsonSerializer

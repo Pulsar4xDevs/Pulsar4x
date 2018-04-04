@@ -66,7 +66,7 @@ namespace Pulsar4X.ECSLib
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
-            ManagerSubpulses = new ManagerSubPulse();
+            ManagerSubpulses = new ManagerSubPulse(this, game.ProcessorManager);
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()
@@ -749,7 +749,7 @@ namespace Pulsar4X.ECSLib
         {
             var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
             ManagerSubpulses = (ManagerSubPulse)info.GetValue("ManagerSubpulses", typeof(ManagerSubPulse));
-            ManagerSubpulses.Init(context, this);
+            ManagerSubpulses.PostLoadInit(context, this);
             foreach (ProtoEntity protoEntity in entities)
             {
                 Entity entity;

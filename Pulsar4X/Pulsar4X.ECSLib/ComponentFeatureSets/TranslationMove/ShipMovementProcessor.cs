@@ -4,7 +4,7 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    internal class ShipMovement : IHotloopProcessor
+    internal class ShipMovement //: IHotloopProcessor
     {
         public TimeSpan RunFrequency {
             get {

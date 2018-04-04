@@ -20,13 +20,19 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
 
+        private ProcessorManager _processManager;
+
+        private EntityManager _entityManager;
+
         class ProcessSet : ISerializable
         {   
             
             [JsonIgnore] //this should get added on initialization. 
             internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
             [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly). 
-            internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>();
+            internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>(); 
+
+            //todo: need to get a list of InstanceProcessors that have entites owned by a specific faction. 
 
             internal ProcessSet() { }
 
@@ -75,12 +81,53 @@ namespace Pulsar4X.ECSLib
                 }
                 info.AddValue(nameof(InstanceProcessors), instanceProcessors);
             }
+
+
+            internal List<string> GetInstanceProcForEntity(Entity entity)
+            {
+                var procList = new List<String>();
+
+
+                foreach (var kvp in InstanceProcessors)
+                {
+                    if (kvp.Value.Contains(entity))
+                       procList.Add(kvp.Key);
+                }
+
+                return procList;
+            }
         }
 
 
-        private ProcessorManager _processManager;
+        internal Dictionary<DateTime, List<String>> GetInstanceProcForEntity(Entity entity)
+        {
+            var procDict = new Dictionary<DateTime, List<string>>();
+            foreach (var kvp in QueuedProcesses)
+            {
+                var procList = kvp.Value.GetInstanceProcForEntity(entity);
+                if (procList.Count > 0)
+                    procDict.Add(kvp.Key, procList);            
+            }
+            return procDict;
+        }
 
-        private EntityManager _entityManager;
+        internal void ImportProcDictForEntity(Entity entity, Dictionary<DateTime, List<string>> procDict)
+        {
+            foreach (var kvp in procDict)
+            {
+                if (!QueuedProcesses.ContainsKey(kvp.Key))
+                    QueuedProcesses.Add(kvp.Key, new ProcessSet());
+                foreach (var procName in kvp.Value)
+                {
+                    if (!QueuedProcesses[kvp.Key].InstanceProcessors.ContainsKey(procName))
+                        QueuedProcesses[kvp.Key].InstanceProcessors.Add(procName, new List<Entity>());
+                    if (!QueuedProcesses[kvp.Key].InstanceProcessors[procName].Contains(entity))
+                        QueuedProcesses[kvp.Key].InstanceProcessors[procName].Add(entity);
+                }
+
+            }
+        }
+
         /// <summary>
         /// Fires when the system date is updated, 
         /// Any entitys that have move (though not neccicarly orbits) will have updated
@@ -121,26 +168,17 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// constructor for json
         /// </summary>
-        public ManagerSubPulse() 
+        public ManagerSubPulse() { } 
+
+        internal ManagerSubPulse(EntityManager entityMan, ProcessorManager procMan) 
         {
-
-        }
-
-
-
-        internal void Init(EntityManager entityManager)
-        {
-            _entityManager = entityManager;
-            _processManager = entityManager.Game.ProcessorManager;
-            if (entityManager.Game != null) //this is needed due to the TreeHirachy test... it's the only place that calls this with an empty game now. TODO: check this is still needed since refactoring
-            {
-                _systemLocalDateTime = entityManager.Game.CurrentDateTime;
-            }
-
+            _systemLocalDateTime = entityMan.Game.CurrentDateTime;
+            _entityManager = entityMan;
+            _processManager = procMan;
             InitHotloopProcessors();
         }
 
-        internal void Init(StreamingContext context, EntityManager entityManager) //this one is used after loading a game. 
+        internal void PostLoadInit(StreamingContext context, EntityManager entityManager) //this one is used after loading a game. 
         {
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
@@ -238,7 +276,7 @@ namespace Pulsar4X.ECSLib
                 TimeSpan deltaActual = nextDate - SystemLocalDateTime;
 
                 //ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
-                _entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
+                //_entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
                 ProcessToNextInterupt(nextDate);
 
 
