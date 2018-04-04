@@ -10,9 +10,12 @@
 	    <Label Text="Tick Length [s]" />
       <NumericUpDown Value ="{Binding TickLength}" MinValue = "1"/>
       <Label Text="  " Enabled ="False" />
-      <Label Text="Tick Multiplier" />
-      <NumericUpDown Value ="{Binding TickMultiplier}" MinValue = "1"/>
+      <!--
+	  <Label Text="Tick Multiplier" />
+      <NumericUpDown Value ="{Binding TickMultiplier}" MinValue = "1"/> 
+		
       <Label Text="  " Enabled ="False" />
+			-->
       <c:PausePlayButton Command="{Binding PausePlayCMD}" x:Name="btnPausePlay"/>
       <Button Command="{Binding TimeStepCMD}" Text="Step" />
       <TableCell></TableCell>

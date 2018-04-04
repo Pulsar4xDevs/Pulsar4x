@@ -16,6 +16,14 @@ namespace Pulsar4X.ECSLib
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
 
+            var namedEntites = sol.GetAllEntitiesWithDataBlob<NameDB>();
+            foreach (var entity in namedEntites)
+            {
+                var nameDB = entity.GetDataBlob<NameDB>();
+                nameDB.SetName(factionEntity, nameDB.DefaultName);
+            }
+
+
             ComponentTemplateSD mineSD = game.StaticData.ComponentTemplates[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
             ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
             Entity mineEntity = GenericComponentFactory.DesignToDesignEntity(game, factionEntity, mineDesign);
