@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         Guid _factionGuid;
         RefiningDB _refineDB;
         StaticDataStore _staticData;
-        OrderHandler _orderHandler;
+        IOrderHandler _orderHandler;
         int _pointsPerDay;
         public int PointsPerDay
         {

@@ -27,7 +27,7 @@ namespace Pulsar4X.Networking
         RequestDatablobHash,
         SendPlayerEntityCommand
     }
-    public class NetworkClient : NetworkBase, OrderHandler
+    public class NetworkClient : NetworkBase, IOrderHandler
     {
         struct EntityHashData
         {

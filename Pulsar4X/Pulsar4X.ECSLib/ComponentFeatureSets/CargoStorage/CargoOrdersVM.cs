@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoOrdersVM : INotifyPropertyChanged, IDBViewmodel
     {
-        OrderHandler _orderHandler;
+        IOrderHandler _orderHandler;
         
         Entity _faction { get; set; }
         Entity _currentEntity { get; set; }

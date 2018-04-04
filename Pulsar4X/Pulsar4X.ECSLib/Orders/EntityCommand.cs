@@ -76,11 +76,11 @@ namespace Pulsar4X.ECSLib
     {
         internal Guid FactionGuid;
         internal Guid EntityGuid;
-        internal OrderHandler Handler;
+        internal IOrderHandler Handler;
         private ManagerSubPulse _subPulse;
         internal DateTime GetSystemDatetime { get { return _subPulse.SystemLocalDateTime; } }
 
-        internal CommandReferences(Guid faction, Guid entity, OrderHandler handler, ManagerSubPulse subPulse)
+        internal CommandReferences(Guid faction, Guid entity, IOrderHandler handler, ManagerSubPulse subPulse)
         {
             FactionGuid = faction;
             EntityGuid = entity;

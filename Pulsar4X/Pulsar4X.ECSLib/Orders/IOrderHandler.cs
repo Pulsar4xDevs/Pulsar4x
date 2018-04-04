@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    internal interface OrderHandler
+    internal interface IOrderHandler
     {
         Game Game { get; }
 
@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
     }
 
 
-    internal class StandAloneOrderHandler:OrderHandler
+    internal class StandAloneOrderHandler:IOrderHandler
     {
         internal StandAloneOrderHandler(Game game)
         {

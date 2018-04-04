@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public StaticDataStore StaticData { get; } = new StaticDataStore();
 
-        internal OrderHandler OrderHandler { get; set; }
+        internal IOrderHandler OrderHandler { get; set; }
 
 
         /// <summary>

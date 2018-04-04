@@ -24,7 +24,7 @@ namespace Pulsar4X.Networking
         SendEntityProcData
     }
 
-    public class NetworkHost : NetworkBase, OrderHandler
+    public class NetworkHost : NetworkBase, IOrderHandler
     {
 
         private Dictionary<NetConnection, Guid> _connectedFactions { get; } = new Dictionary<NetConnection, Guid>();
