@@ -329,7 +329,6 @@ namespace Pulsar4X.Tests
             // check that data was loaded:
             Assert.IsNotEmpty(staticDataStore.Minerals);
             Assert.IsNotEmpty(staticDataStore.AtmosphericGases);
-            Assert.IsNotEmpty(staticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(staticDataStore.ProcessedMaterials);
             Assert.IsNotEmpty(staticDataStore.CargoTypes);
             Assert.IsNotEmpty(staticDataStore.Techs);

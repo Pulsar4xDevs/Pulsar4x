@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+//this allows the test project to see internal functions of this project. 
+using System.Runtime.CompilerServices;
+[assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.ECSLib
 {

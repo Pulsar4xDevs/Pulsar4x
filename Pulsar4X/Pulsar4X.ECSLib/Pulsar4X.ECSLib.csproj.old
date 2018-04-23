@@ -1,0 +1,470 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pulsar4X.ECSLib</RootNamespace>
+    <AssemblyName>Pulsar4X.ECSLib</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28No Tests|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug %28No Tests\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows|AnyCPU'">
+    <OutputPath>bin\Windows\</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mac|AnyCPU'">
+    <OutputPath>bin\Mac\</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux|AnyCPU'">
+    <OutputPath>bin\Linux\</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>6</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28No Tests|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug %28No Tests\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows|x64'">
+    <OutputPath>bin\x64\Windows\</OutputPath>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Mac|x64'">
+    <OutputPath>bin\x64\Mac\</OutputPath>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+    <RunWithWarnings>true</RunWithWarnings>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Linux|x64'">
+    <OutputPath>bin\x64\Linux\</OutputPath>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <WarningLevel>4</WarningLevel>
+    <Optimize>false</Optimize>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f">
+      <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="NCalc, Version=1.4.1.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\NCalc-Edge.1.4.1.0\lib\NCalc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Lidgren.Network">
+      <HintPath>..\packages\Lidgren.Network.1.0.2\lib\net451\Lidgren.Network.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ComponentFeatureSets\Orbit\OrbitBodyCommand.cs" />
+    <Compile Include="DataBlobs\AsteroidDamageDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\CloakAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\CommandAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\DamageControlAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\ElectronicDACAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\ExplosionChanceAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\FailureRateMitigationAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\JumpDriveAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\JumpPointStabilizationAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\LifeSupportAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\MSPCapacityAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\MissileStorageAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\PassiveEMSensorAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\PassiveThermalSensorAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\PopulationSupportAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\PowerGeneratorAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\StandardShieldAtbDB.cs" />
+    <Compile Include="DataBlobs\ColonyLifeSupportDB.cs" />
+    <Compile Include="DataBlobs\ComponentInstanceDBs\ComponentInstanceInfoDB.cs" />
+    <Compile Include="DataBlobs\ComponentInstanceDBs\FireControlAbilityDB.cs" />
+    <Compile Include="DataBlobs\ComponentInstanceDBs\WeaponStateDB.cs" />
+    <Compile Include="DataBlobs\NewtonBalisticDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\DesignInfoDB.cs" />
+    <Compile Include="Faction\FactionInfoDB.cs" />
+    <Compile Include="Faction\OwnedDB.cs" />
+    <Compile Include="Faction\Player.cs" />
+    <Compile Include="Factories\AsteroidFactory.cs" />
+    <Compile Include="Factories\ShipComponents\ComponentInstanceFactory.cs" />
+    <Compile Include="Helpers\CargoDictionary.cs" />
+    <Compile Include="Helpers\EntityManipulation.cs" />
+    <Compile Include="Helpers\CollectionChangedHelpers.cs" />
+    <Compile Include="Helpers\NameLookup.cs" />
+    <Compile Include="Helpers\ObserviableConcurrentDictionary.cs" />
+    <Compile Include="OldViewModels\ColonyScreenVM.cs" />
+    <Compile Include="OldViewModels\ComponentDesignVM.cs" />
+    <Compile Include="OldViewModels\ComponentListVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\ComponentAbilityTemplateVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\ComponentTemplateMainPropertiesVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\ComponentTemplateParentVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\FormulaEditorVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\MineralFormulaVM.cs" />
+    <Compile Include="OldViewModels\ComponentTemplateDesigner\TechListVM.cs" />
+    <Compile Include="OldViewModels\ConstructionAbilityVM.cs" />
+    <Compile Include="OldViewModels\FactionVM.cs" />
+    <Compile Include="OldViewModels\GameVM.cs" />
+    <Compile Include="OldViewModels\Helpers\Commands.cs" />
+    <Compile Include="OldViewModels\Helpers\DictionaryVM.cs" />
+    <Compile Include="OldViewModels\Helpers\ItemPair.cs" />
+    <Compile Include="OldViewModels\Helpers\ObservableDictionary.cs" />
+    <Compile Include="OldViewModels\Helpers\RangeEnableObservibleCollection.cs" />
+    <Compile Include="OldViewModels\Helpers\RelayCommand.cs" />
+    <Compile Include="OldViewModels\IViewModel.cs" />
+    <Compile Include="OldViewModels\JobVM.cs" />
+    <Compile Include="OldViewModels\LogViewerVM.cs" />
+    <Compile Include="OldViewModels\MinMaxSliderVM.cs" />
+    <Compile Include="OldViewModels\MissileDesignVM.cs" />
+    <Compile Include="OldViewModels\NewGameOptionsVM.cs" />
+    <Compile Include="OldViewModels\NewSpeciesVM.cs" />
+    <Compile Include="OldViewModels\PlanetVM.cs" />
+    <Compile Include="OldViewModels\PlayerOptionsVM.cs" />
+    <Compile Include="OldViewModels\RefineryAbilityVM.cs" />
+    <Compile Include="OldViewModels\ResearchVM.cs" />
+    <Compile Include="OldViewModels\ShipDesignVM.cs" />
+    <Compile Include="OldViewModels\ShipOrderVM.cs" />
+    <Compile Include="OldViewModels\SpeciesVM.cs" />
+    <Compile Include="OldViewModels\SystemView\StarSystemSelectionVM.cs" />
+    <Compile Include="OldViewModels\SystemView\SystemMap_DrawableVM.cs" />
+    <Compile Include="OldViewModels\TimeControlVM.cs" />
+    <Compile Include="OldViewModels\ViewModelBase.cs" />
+    <Compile Include="Factories\ShipComponents\ComponentDesign.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\ResourcelConsumptionAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\MissileLauncherAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\SensorSignatureAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\ActiveSensorAtbDB.cs" />
+    <Compile Include="DataBlobs\ComponentAttributeDBs\ComponentInfoDB.cs" />
+    <Compile Include="DataBlobs\ColonyBonusesDB.cs" />
+    <Compile Include="DataBlobs\ExampleDB.cs" />
+    <Compile Include="DataBlobs\InstallationsDB.cs" />
+    <Compile Include="DataBlobs\JPSurveyableDB.cs" />
+    <Compile Include="DataBlobs\TransitableDB.cs" />
+    <Compile Include="Entity\GuidNotFoundException.cs" />
+    <Compile Include="Entity\ProtoEntity.cs" />
+    <Compile Include="EventLog\EventLog.cs" />
+    <Compile Include="EventLog\EventType.cs" />
+    <Compile Include="Factories\ShipComponents\ComponentDesignAttribute.cs" />
+    <Compile Include="DataBlobs\ComponentInstancesDB.cs" />
+    <Compile Include="Factories\SystemGen\JPFactory.cs" />
+    <Compile Include="Helpers\ComparableBitArray.cs" />
+    <Compile Include="Entity\EntityAccessControl.cs" />
+    <Compile Include="Helpers\GameMath.cs" />
+    <Compile Include="Helpers\JSONHelper.cs" />
+    <Compile Include="Helpers\MiscHelpers.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\EdgeToNeighbor.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\Graph.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\Node.cs" />
+    <Compile Include="Helpers\Pathfinding\Graph\NodeList.cs" />
+    <Compile Include="Helpers\Pathfinding\PathfindingManager.cs" />
+    <Compile Include="Helpers\Pulse.cs" />
+    <Compile Include="Helpers\Vector4.cs" />
+    <Compile Include="DataBlobs\ScientistDB.cs" />
+    <Compile Include="DataBlobs\CommanderDB.cs" />
+    <Compile Include="DataBlobs\TeamsDB.cs" />
+    <Compile Include="EventLog\Event.cs" />
+    <Compile Include="Factories\CommanderFactory.cs" />
+    <Compile Include="Factories\DefaultStartFactory.cs" />
+    <Compile Include="Factories\ShipComponents\GenericComponent.cs" />
+    <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
+    <Compile Include="Factories\SystemGen\JPSurveyFactory.cs" />
+    <Compile Include="Factories\SystemGen\StarFactory.cs" />
+    <Compile Include="Factories\SystemGen\SystemBodyFactory.cs" />
+    <Compile Include="Factories\SystemGen\StarSystemFactory.cs" />
+    <Compile Include="Factories\TechFactory.cs" />
+    <Compile Include="GameVersionInfo.cs" />
+    <Compile Include="Processors\ActionDelegateEnum.cs" />
+    <Compile Include="Processors\DamageProcessor.cs" />
+    <Compile Include="Processors\Econ Subprocessors\PopulationProcessor.cs" />
+    <Compile Include="Processors\AtmosphereProcessor.cs" />
+    <Compile Include="Factories\ShipComponents\ParsingProcessor.cs" />
+    <Compile Include="Processors\InterSystemJumpProcessor.cs" />
+    <Compile Include="Processors\NewtonBalisticProcessor.cs" />
+    <Compile Include="Processors\ReCalcProcessor.cs" />
+    <Compile Include="Processors\ResourceConsumptionProcesor.cs" />
+    <Compile Include="Processors\ShipAndColonyInfoProcessor.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="StarSystem\StarInfoDB.cs" />
+    <Compile Include="StarSystem\StarSystem.cs" />
+    <Compile Include="StarSystem\SystemBodyInfoDB.cs" />
+    <Compile Include="StaticDataManager.cs" />
+    <Compile Include="StaticData\AtmosphericGasSD.cs" />
+    <Compile Include="StaticData\CargoTypeSD.cs" />
+    <Compile Include="StaticData\CommanderNameSD.cs" />
+    <Compile Include="DataBlobs\MassVolumeDB.cs" />
+    <Compile Include="DataBlobs\NameDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
+    <Compile Include="DataBlobs\AtmosphereDB.cs" />
+    <Compile Include="DataBlobs\BaseDataBlob.cs" />
+    <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
+    <Compile Include="DataBlobs\ColonyInfoDB.cs" />
+    <Compile Include="DataBlobs\PositionDB.cs" />
+    <Compile Include="DataBlobs\RuinsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\BeamWeaponsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\BuildCostDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\CrewDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\DamageDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\HangerDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\IndustryDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\MaintenanceDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\MissileWeaponsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\PowerDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ShieldsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ShipInfoDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\TractorDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\TroopTransportDB.cs" />
+    <Compile Include="DataBlobs\SpeciesDB.cs" />
+    <Compile Include="DataBlobs\TreeHierarchyDB.cs" />
+    <Compile Include="Entity\Entity.cs" />
+    <Compile Include="Entity\EntityManager.cs" />
+    <Compile Include="Factories\ColonyFactory.cs" />
+    <Compile Include="Factories\ShipFactory.cs" />
+    <Compile Include="Factories\SpeciesFactory.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="GameSettings.cs" />
+    <Compile Include="Processors\RuinsProcessor.cs" />
+    <Compile Include="Processors\SpeciesProcessor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializationManager.cs" />
+    <Compile Include="StaticData\CommanderNameThemeSD.cs" />
+    <Compile Include="StaticData\ComponentSD.cs" />
+    <Compile Include="StaticData\PlayerSD.cs" />
+    <Compile Include="StaticData\RefinedMaterialSD.cs" />
+    <Compile Include="StaticData\StaticDataStore.cs" />
+    <Compile Include="StaticData\MineralSD.cs" />
+    <Compile Include="StaticData\SystemGenSettingsSD.cs" />
+    <Compile Include="StaticData\TechSD.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoAbleTypeDB.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageDB.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\StorageSpaceProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\MineResources\MineResourcesAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\MineResources\MineingDB.cs" />
+    <Compile Include="ComponentFeatureSets\MineResources\MineProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefiningProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefiningDB.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefineResourcesAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\EnginePowerAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\SimpleBeamWeapon\BeamFireControlAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\SimpleBeamWeapon\SimpleBeamWeaponAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\Research\ResearchPointsAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\SimpleBeamWeapon\BeamWeaponAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\Construction\ConstructionProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\ShipMovementProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\SimpleBeamWeapon\WeaponProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\Research\ResearchProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\Research\ResearchPointsDB.cs" />
+    <Compile Include="ComponentFeatureSets\Construction\ConstructionDB.cs" />
+    <Compile Include="ComponentFeatureSets\Research\FactionTechDB.cs" />
+    <Compile Include="ComponentFeatureSets\Construction\ConstructionAtbDB.cs" />
+    <Compile Include="Orders\EntityCommand.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoTransferDB.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoTransferProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoOrdersVM.cs" />
+    <Compile Include="Entity\EntityVM.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoLoadOrderCommand.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoStorageVM.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoItemVM.cs" />
+    <Compile Include="ComponentFeatureSets\CargoStorage\CargoTypeStoreVM.cs" />
+    <Compile Include="ComponentFeatureSets\Orbit\OrbitDB.cs" />
+    <Compile Include="ComponentFeatureSets\Orbit\OrbitProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\PropulsionDB.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveCommand.cs" />
+    <Compile Include="Orders\IOrderHandler.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefineOrders.cs" />
+    <Compile Include="ComponentFeatureSets\RefineResources\RefiningVM.cs" />
+    <Compile Include="Orders\OrderableDB.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslationMoveVM.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\TranslationMove\TranslateMoveDB.cs" />
+    <Compile Include="Factories\SystemAsEntityFactory.cs" />
+    <Compile Include="Entity\EntityChangeListner.cs" />
+    <Compile Include="Orders\ServerOrderHandler.cs" />
+    <Compile Include="Networking\ClientConnectionVM.cs" />
+    <Compile Include="Networking\Base.cs" />
+    <Compile Include="Networking\Client.cs" />
+    <Compile Include="Networking\Server.cs" />
+    <Compile Include="Faction\FactionAuthDB.cs" />
+    <Compile Include="Faction\FactionAuthProcessor.cs" />
+    <Compile Include="Faction\FactionFactory.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorProcessorTools.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorEntityFactory.cs" />
+    <Compile Include="Processors\FactionSystemInfoProcessor.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorProfileDB.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SetReflectedEMProfile.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorReceverAtbDB.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorScan.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\EMWaveForm.cs" />
+    <Compile Include="ComponentFeatureSets\SensorsAndDetection\SensorInfoDB.cs" />
+    <Compile Include="Networking\NetMessageBase.cs" />
+    <Compile Include="Faction\FactionAbilitiesDB.cs" />
+    <Compile Include="OldViewModels\SystemView\StarVM.cs" />
+    <Compile Include="OldViewModels\SystemView\SystemVM.cs" />
+    <Compile Include="OldViewModels\SystemView\SystemInfoVM.cs" />
+    <Compile Include="Helpers\ConcurrentHashSet.cs" />
+    <Compile Include="GameLoop\ManagerSubPulse.cs" />
+    <Compile Include="GameLoop\TimeLoop.cs" />
+    <Compile Include="GameLoop\ProcessorManager.cs" />
+    <Compile Include="Orders\BaseOrder.cs" />
+    <Compile Include="Orders\OrderableProcessor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ComponentFeatureSets\" />
+    <Folder Include="ComponentFeatureSets\CargoStorage\" />
+    <Folder Include="ComponentFeatureSets\MineResources\" />
+    <Folder Include="ComponentFeatureSets\RefineResources\" />
+    <Folder Include="ComponentFeatureSets\TranslationMove\" />
+    <Folder Include="ComponentFeatureSets\SimpleBeamWeapon\" />
+    <Folder Include="ComponentFeatureSets\Research\" />
+    <Folder Include="ComponentFeatureSets\Construction\" />
+    <Folder Include="ComponentFeatureSets\Orbit\" />
+    <Folder Include="Networking\" />
+    <Folder Include="ComponentFeatureSets\SensorsAndDetection\" />
+    <Folder Include="GameLoop\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\Pulsar4x\Commander Name Theme - The Creators.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\ComponentData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\Minerals.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\ReinfedMaterialsData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\SystemGenSettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\TechnologyData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\VersionInfo.vinfo">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\CargoTypeData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\Pulsar4x\InstallationData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="packages.config" />
+    <Content Include="Data\Pulsar4x\AtmosphericData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
