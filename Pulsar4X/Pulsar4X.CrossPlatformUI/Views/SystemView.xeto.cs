@@ -1,13 +1,6 @@
-﻿using Eto.Drawing;
-using Eto.Forms;
+﻿using Eto.Forms;
 using Eto.Serialization.Xaml;
-using OpenTK;
-using OpenTK.Graphics;
 using Pulsar4X.ECSLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 
 //#TODO Move the actual rendering stuff out into a partial and separate it from the VMs
 //I might also want to make windows render with DirectX so that it plays nicer with wpf, 

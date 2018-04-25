@@ -1,7 +1,6 @@
 ﻿using Eto;
 using Eto.Drawing;
 using Eto.Forms;
-using OpenTK.Graphics;
 using System;
 using System.Collections.Generic;
 
