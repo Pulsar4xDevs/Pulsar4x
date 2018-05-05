@@ -3,24 +3,42 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    //TODO: make these internal or use auth (tests currently use these)
     public static class NameLookup
     {
 
-        internal static Entity TryGetFirstEntityWithName(EntityManager manager, string name)
-        {          
-            List<Entity> list = manager.GetAllEntitiesWithDataBlob<NameDB>();
-            return TryGetFirstEntityWithName(list, name);
-        }
-
-        internal static Entity TryGetFirstEntityWithName(List<Entity> entitysWithNameDB, string name)
+        internal static bool TryGetFirstEntityWithName(EntityManager manager, string name, out Entity entity)
         {
-            foreach (var item in entitysWithNameDB)
+            List<Entity> list = manager.GetAllEntitiesWithDataBlob<NameDB>();
+            return TryGetFirstEntityWithName(list, name, out entity);
+        }
+        internal static bool TryGetFirstEntityWithName(List<Entity> entitiesWithNameDB, string name, out Entity entity)
+        { 
+            foreach (var item in entitiesWithNameDB)
             {
                 NameDB namedb = item.GetDataBlob<NameDB>();
                 if (namedb.DefaultName == name)
                 {
-                    
+                    entity = item;
+                    return true;
+                }
+            }
+            entity = null;
+            return false;
+        }
+
+        internal static Entity GetFirstEntityWithName(EntityManager manager, string name)
+        {          
+            List<Entity> list = manager.GetAllEntitiesWithDataBlob<NameDB>();
+            return GetFirstEntityWithName(list, name);
+        }
+
+        internal static Entity GetFirstEntityWithName(List<Entity> entitiesWithNameDB, string name)
+        {
+            foreach (var item in entitiesWithNameDB)
+            {
+                NameDB namedb = item.GetDataBlob<NameDB>();
+                if (namedb.DefaultName == name)
+                {
                     return item;
                 }
             }
@@ -28,7 +46,7 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal static MineralSD TryGetMineralSD(Game game, string name)
+        internal static MineralSD GetMineralSD(Game game, string name)
         {
             foreach (var kvp in game.StaticData.Minerals)
             {
@@ -40,7 +58,7 @@ namespace Pulsar4X.ECSLib
             throw new Exception(name + " not found");
         }
         
-        internal static ProcessedMaterialSD TryGetMaterialSD(Game game, string name)
+        internal static ProcessedMaterialSD GetMaterialSD(Game game, string name)
         {
             foreach (var kvp in game.StaticData.ProcessedMaterials)
             {
@@ -52,7 +70,7 @@ namespace Pulsar4X.ECSLib
             throw new Exception(name + " not found");
         }
 
-        internal static ComponentTemplateSD TryGetTemplateSD(Game game, string name)
+        internal static ComponentTemplateSD GetTemplateSD(Game game, string name)
         {
             foreach (var kvp in game.StaticData.ComponentTemplates)
             {

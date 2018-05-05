@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(colonyEntity, FacPassiveSensor(game, factionEntity));
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
-            var rawSorium = NameLookup.TryGetMineralSD(game, "Sorium");
+            var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
             StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
 
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, sol, factionEntity, earth, sol, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, sol, factionEntity, earth, sol, "Ensuing Calm");
-            var fuel = NameLookup.TryGetMaterialSD(game, "Sorium Fuel");
+            var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
@@ -223,7 +223,7 @@ namespace Pulsar4X.ECSLib
         public static Entity ShipPassiveSensor(Game game, Entity faction)
         {
             ComponentDesign sensor;
-            ComponentTemplateSD template = NameLookup.TryGetTemplateSD(game, "PassiveSensor");
+            ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             sensor.ComponentDesignAttributes[0].SetValueFromInput(50);  //size
             sensor.ComponentDesignAttributes[1].SetValueFromInput(600); //best wavelength
@@ -251,7 +251,7 @@ namespace Pulsar4X.ECSLib
         public static Entity FacPassiveSensor(Game game, Entity faction)
         {
             ComponentDesign sensor;
-            ComponentTemplateSD template = NameLookup.TryGetTemplateSD(game, "PassiveSensor");
+            ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             sensor.ComponentDesignAttributes[0].SetValueFromInput(500);  //size
             sensor.ComponentDesignAttributes[1].SetValueFromInput(500); //best wavelength
