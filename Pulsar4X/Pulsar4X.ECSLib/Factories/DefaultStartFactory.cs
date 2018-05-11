@@ -6,13 +6,14 @@ namespace Pulsar4X.ECSLib
 {
     public static class DefaultStartFactory
     {
-        public static Entity DefaultHumans(Game game, Player owner, string name)
+        public static Entity DefaultHumans(Game game, string name)
         {
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem sol = starfac.CreateSol(game);
             //sol.ManagerSubpulses.Init(sol);
             Entity earth = sol.Entities[3]; //should be fourth entity created 
-            Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
+            //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
+            Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
 
@@ -58,8 +59,12 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(colonyEntity, fuelTank);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, cargoInstalation);
-            EntityManipulation.AddComponentToEntity(colonyEntity, FacPassiveSensor(game, factionEntity));
+
+            Entity colonySensor = FacPassiveSensor(game, factionEntity);
+            EntityManipulation.AddComponentToEntity(colonyEntity, colonySensor);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
+
+
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
             StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
@@ -103,6 +108,14 @@ namespace Pulsar4X.ECSLib
             //sol.SystemManager.SetDataBlob(ship.ID, new TransitableDB());
 
             Entity rock = AsteroidFactory.CreateAsteroid(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
+
+            var entitiesWithSensors = sol.GetAllEntitiesWithDataBlob<SensorReceverAtbDB>();
+            foreach (var entityItem in entitiesWithSensors)
+            {
+                if(entityItem.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity != null) //don't do the designs, just the actual physical entity components. 
+                    game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, 0);
+            }
+
 
             return factionEntity;
         }
@@ -237,17 +250,6 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public static Entity DeadWeight(Game game, Entity faction, int weight)
-        {
-            ComponentDesign deadTestWeight;
-            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{57614ddb-0756-44cf-857b-8a6578493792}")];
-            deadTestWeight = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            deadTestWeight.ComponentDesignAttributes[0].SetValueFromInput(weight);
-            deadTestWeight.Name = "DeadWeight-" + weight;
-            return GenericComponentFactory.DesignToDesignEntity(game, faction, deadTestWeight);
-
-        }
-
         public static Entity FacPassiveSensor(Game game, Entity faction)
         {
             ComponentDesign sensor;
@@ -256,12 +258,22 @@ namespace Pulsar4X.ECSLib
             sensor.ComponentDesignAttributes[0].SetValueFromInput(500);  //size
             sensor.ComponentDesignAttributes[1].SetValueFromInput(500); //best wavelength
             sensor.ComponentDesignAttributes[2].SetValueFromInput(1000); //wavelength detection width 
-                                                                        //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
-                                                                        //[4] worst detection magnatude (not settable)
+                                                                         //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)                                                                        //[4] worst detection magnatude (not settable)
             sensor.ComponentDesignAttributes[5].SetValueFromInput(5);   //resolution
             sensor.ComponentDesignAttributes[6].SetValueFromInput(3600);//Scan Time
             sensor.Name = "PassiveSensor-S500";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, sensor);
+
+        }
+
+        public static Entity DeadWeight(Game game, Entity faction, int weight)
+        {
+            ComponentDesign deadTestWeight;
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{57614ddb-0756-44cf-857b-8a6578493792}")];
+            deadTestWeight = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            deadTestWeight.ComponentDesignAttributes[0].SetValueFromInput(weight);
+            deadTestWeight.Name = "DeadWeight-" + weight;
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, deadTestWeight);
 
         }
 

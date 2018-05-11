@@ -97,7 +97,16 @@ namespace Pulsar4X.ECSLib
 
         public bool? EnableMultiThreading { get; set; } = false;
 
+
+
         #endregion
+
+        #region Network Settings
+
+        public int portNumber { get; set; }
+
+        #endregion
+
 
         /// <summary>
         /// Enables orbital motion for Planets and Moons
@@ -144,8 +153,6 @@ namespace Pulsar4X.ECSLib
     {
         [JsonIgnore]
         public string SMPassword { get; set; } = "";
-
-
 
         #region Player Generation
 

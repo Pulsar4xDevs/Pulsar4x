@@ -58,8 +58,14 @@ namespace Pulsar4X.ECSLib
         public static void StorePasswordAsHash(Game game, Entity factionEntity, string password)
         {
             //Entity factionEntity = game.GlobalManager.GetEntityByGuid(factionGuid);
-            AuthDB authDB = factionEntity.GetDataBlob<AuthDB>();
-
+            AuthDB authDB;
+            if (factionEntity.HasDataBlob<AuthDB>())
+                authDB = factionEntity.GetDataBlob<AuthDB>();
+            else
+            {
+                authDB = new AuthDB();
+                factionEntity.SetDataBlob<AuthDB>(authDB);
+            }
             authDB.Hash = CreateHash(password);
         }
 

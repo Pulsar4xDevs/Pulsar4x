@@ -128,20 +128,19 @@ namespace Pulsar4X.ECSLib
 
             if (newGameSettings.CreatePlayerFaction ?? false)
             {
-                Player defaultPlayer = AddPlayer(newGameSettings.DefaultPlayerName, newGameSettings.DefaultPlayerPassword);
-
+                
                 foreach (var kvp in newGameSettings.DefaultHaltOnEvents)
                 {
-                    defaultPlayer.HaltsOnEvent.Add(kvp.Key, kvp.Value);
+                    //defaultPlayer.HaltsOnEvent.Add(kvp.Key, kvp.Value);
                 }
 
                 if (newGameSettings.DefaultSolStart ?? false)
                 {
-                    DefaultStartFactory.DefaultHumans(this, defaultPlayer, newGameSettings.DefaultFactionName);
+                    DefaultStartFactory.DefaultHumans(this, newGameSettings.DefaultFactionName);
                 }
                 else
                 {
-                    FactionFactory.CreatePlayerFaction(this, defaultPlayer, newGameSettings.DefaultFactionName);
+                    //FactionFactory.CreatePlayerFaction(this, defaultPlayer, newGameSettings.DefaultFactionName);
                 }
             }
 

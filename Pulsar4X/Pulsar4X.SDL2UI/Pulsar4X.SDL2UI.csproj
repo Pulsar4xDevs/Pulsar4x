@@ -36,13 +36,19 @@
     <Reference Include="SDL2-CS">
       <HintPath>Libs\SDL2-CS.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing">
+      <HintPath>..\..\..\..\..\..\..\usr\lib\mono\4.6.1-api\System.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="NewGameOptions.cs" />
+    <Compile Include="MapRendering\SystemMapRendering.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="MapRendering\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\PulsarLogo.png">

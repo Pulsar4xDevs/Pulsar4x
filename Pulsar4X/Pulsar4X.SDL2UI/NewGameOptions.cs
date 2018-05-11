@@ -4,6 +4,14 @@ using ImGuiNET;
 
 namespace Pulsar4X.SDL2UI
 {
+    static class Helper
+    {
+        public static byte[] ToByteArray(this string str)
+        {
+            return System.Text.Encoding.UTF8.GetBytes(str);
+        }
+    }
+
     public class NewGameOptions: PulsarGuiWindow
     {
         GlobalUIState _state;
@@ -12,17 +20,22 @@ namespace Pulsar4X.SDL2UI
         gameType selectedGameType = gameType.Standalone;
         byte[] netPortInputBuffer = new byte[8];
         string netPortString { get { return System.Text.Encoding.UTF8.GetString(netPortInputBuffer); } }
-        byte[] nameInputBuffer = new byte[16];
+
+        byte[] nameInputBuffer = System.Text.Encoding.UTF8.GetBytes("Test Game");
+
 
         internal NewGameOptions(GlobalUIState state)
-        { _state = state; }
+        { _state = state;
+        }
 
 
 
         ECSLib.NewGameSettings gameSettings = new ECSLib.NewGameSettings();
         internal override void Display()
         {
-            ImGui.InputText("Game Name", nameInputBuffer, 16);
+            ImGui.Begin("New Game Setup");
+            ImGui.InputText("Game Name", nameInputBuffer, (uint)nameInputBuffer.Length);
+
             if (ImGui.RadioButton("Host Network Game", ref gameTypeButtonGrp, 1))
                 selectedGameType = gameType.Nethost;
             if (ImGui.RadioButton("Start Standalone Game", ref gameTypeButtonGrp, 0))
@@ -30,18 +43,18 @@ namespace Pulsar4X.SDL2UI
             if (selectedGameType == gameType.Nethost)
                 ImGui.InputText("Network Port", netPortInputBuffer, 8);
             if (ImGui.Button("Create New Game!"))
-                DoNewGame(System.Text.Encoding.UTF8.GetString(nameInputBuffer));
+                CreateNewGame(System.Text.Encoding.UTF8.GetString(nameInputBuffer));
 
-
+            ImGui.End();
 
         }
 
-        void DoNewGame(string name)
+        void CreateNewGame(string name)
         {
             
-            var gameSettings = new Pulsar4X.ECSLib.NewGameSettings
+            gameSettings = new ECSLib.NewGameSettings
             {
-                GameName = "name",
+                GameName = name,
                 MaxSystems = 100,
                 SMPassword = "",
                 //DataSets = options.SelectedModList.Select(dvi => dvi.Directory),
@@ -50,13 +63,14 @@ namespace Pulsar4X.SDL2UI
                 DefaultPlayerPassword = "",
                 DefaultSolStart = true,
             };
+
             _state.Game = new ECSLib.Game(gameSettings);
+            ECSLib.UIStateVM uIStateVM = new ECSLib.UIStateVM(_state.Game);
 
-
+            ECSLib.Entity factionEntity = ECSLib.DefaultStartFactory.DefaultHumans(_state.Game, gameSettings.DefaultFactionName);
+            ECSLib.AuthProcessor.StorePasswordAsHash(_state.Game, factionEntity, gameSettings.DefaultPlayerPassword);
+            uIStateVM.FactionEntity = factionEntity;
+            
         }
-
     }
-
-
-
 }

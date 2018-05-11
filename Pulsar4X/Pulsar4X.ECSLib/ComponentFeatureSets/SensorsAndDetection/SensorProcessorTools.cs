@@ -86,6 +86,8 @@ namespace Pulsar4X.ECSLib
              * if range is known acurately, this could affect the intel gathered. 
              */
             var myPosition = recever.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
+            if (myPosition == null) //then it's probilby a colony
+                myPosition = recever.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
             PositionDB targetPosition;
             if( target.OwningEntity.HasDataBlob<PositionDB>()) 
                 targetPosition = target.OwningEntity.GetDataBlob<PositionDB>();
