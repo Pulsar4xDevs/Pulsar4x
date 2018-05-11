@@ -40,11 +40,19 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            SDL.SDL_RenderDrawLine(rendererPtr, 50, 50, 200, 200);
-            SDL.SDL_RenderDrawLine(rendererPtr, 200, 200, 200, 250);
-            SDL.SDL_RenderDrawLine(rendererPtr, 150, 50, 200, 200);
-            DrawPrimitivs.DrawEllipse(rendererPtr, 100, 100);
-            if (sysMap != null)
+            if (sysMap == null)
+            {
+                SDL.SDL_SetRenderDrawColor(rendererPtr, 255, 255, 255, 0);
+                SDL.SDL_RenderDrawLine(rendererPtr, 50, 50, 200, 200);
+                SDL.SDL_RenderDrawLine(rendererPtr, 200, 200, 200, 250);
+                SDL.SDL_RenderDrawLine(rendererPtr, 150, 50, 200, 200);
+                DrawPrimitivs.DrawEllipse(rendererPtr, 100, 100, 200, 300);
+
+                DrawPrimitivs.DrawArc(rendererPtr, 300, 300, 50, 50, 0, 1.5708);
+
+                DrawPrimitivs.DrawAlphaFadeArc(rendererPtr, 300, 400, 150, 100, 0, 4.71, 255, 0); 
+            }
+            else
             {
                 foreach (var entity in sysMap.IconableEntitys)
                 {
@@ -156,38 +164,102 @@ namespace Pulsar4X.SDL2UI
 
     public static class DrawPrimitivs
     {
-        public static void DrawEllipse(IntPtr renderer, int x, int y)
+        public static void DrawEllipse(IntPtr renderer, int posX, int posY, double xWidth, double yWidth)
         {
             byte _numberOfArcSegments = 255;
-            double _orbitElipseSemiMaj = 200;
-            double _orbitElipseSemiMinor = 100;
+
             double angle = (Math.PI * 2.0) / (_numberOfArcSegments);
 
-
-            int lastX = x + (int)Math.Round(_orbitElipseSemiMaj * Math.Sin(angle));
-            int lastY = y + (int)Math.Round(_orbitElipseSemiMinor * Math.Cos(angle));
+            int lastX = posX + (int)Math.Round(xWidth * Math.Sin(angle));
+            int lastY = posY + (int)Math.Round(yWidth * Math.Cos(angle));
             int drawX;
             int drawY;
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
-
-
-
-
-
-                drawX = x + (int)Math.Round(_orbitElipseSemiMaj * Math.Sin(angle * i));
-                drawY = y + (int)Math.Round(_orbitElipseSemiMinor * Math.Cos(angle * i));
-                SDL.SDL_RenderDrawPoint(renderer, drawX, drawY);
-                //SDL.SDL_RenderDrawLine(renderer, lastX, lastY, drawX, drawY);
+                drawX = posX + (int)Math.Round(xWidth * Math.Sin(angle * i));
+                drawY = posY + (int)Math.Round(yWidth * Math.Cos(angle * i));
+                //SDL.SDL_RenderDrawPoint(renderer, drawX, drawY);
+                SDL.SDL_RenderDrawLine(renderer, lastX, lastY, drawX, drawY);
                 lastX = drawX;
                 lastY = drawY;
             }
         }
 
-        public static void DrawArc(double startAngle, double endAngle)
+        public static void DrawArc(IntPtr renderer, int posX, int posY, double xWidth, double yWidth, double startAngleRadians, double arcAngleRadians)
         {
+            byte _numberOfArcSegments = 255;
+
+            double incrementAngle = (Math.PI * 2.0) / (_numberOfArcSegments);
+
+            int lastX = posX + (int)Math.Round(xWidth * Math.Sin(startAngleRadians));
+            int lastY = posY + (int)Math.Round(yWidth * Math.Cos(startAngleRadians));
+            int drawX;
+            int drawY;
+            int totalSegments = (int)(arcAngleRadians / incrementAngle);
+
+            /*
+            SDL.SDL_Point[] points = new SDL.SDL_Point[_numberOfArcSegments];
+
+            for (int i = 1; i < totalSegments; i++)
+            {
+                double nextAngle = startAngleRadians + incrementAngle * i;
+                drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
+                drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
+                points[i] = new SDL.SDL_Point() { x = drawX, y = drawY };
+            }
+*/
+            for (int i = 1; i < totalSegments; i++)
+            {
+                double nextAngle = startAngleRadians + incrementAngle * i;
+                drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
+                drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
+                //SDL.SDL_RenderDrawPoint(renderer, drawX, drawY);
+                SDL.SDL_RenderDrawLine(renderer, lastX, lastY, drawX, drawY);
+                //SDL.SDL_RenderDrawLines(renderer, points, _numberOfArcSegments);
+                lastX = drawX;
+                lastY = drawY;
+            }
+
+        }
 
 
+        public static void DrawAlphaFadeArc(IntPtr rendererPtr, int posX, int posY, double xWidth, double yWidth, double startAngleRadians, double arcAngleRadians, byte startAlpha, byte endAlpha)
+        {
+            byte r, g, b, a;
+            SDL.SDL_GetRenderDrawColor(rendererPtr, out r, out g, out b, out a);
+
+            SDL.SDL_BlendMode blendMode;
+            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
+
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            byte _numberOfArcSegments = 254;
+
+
+            byte alpha = endAlpha;
+
+            double incrementAngle = (Math.PI * 2.0) / (_numberOfArcSegments);
+
+            int lastX = posX + (int)Math.Round(xWidth * Math.Sin(startAngleRadians));
+            int lastY = posY + (int)Math.Round(yWidth * Math.Cos(startAngleRadians));
+            int drawX;
+            int drawY;
+            int totalSegments = (int)(arcAngleRadians / incrementAngle);
+            double alphaIncrement = (startAlpha - endAlpha) / totalSegments;
+            for (int i = 1; i < totalSegments; i++)
+            {
+                alpha += (byte)(alphaIncrement);
+                SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, alpha);
+
+                double nextAngle = startAngleRadians + incrementAngle * i;
+                drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
+                drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
+                SDL.SDL_RenderDrawLine(rendererPtr, lastX, lastY, drawX, drawY);
+                lastX = drawX;
+                lastY = drawY;
+            }
+
+            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was origionaly
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
 
         /// <summary>

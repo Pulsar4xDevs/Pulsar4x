@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
-            if (_state.IsGameLoaded)
+            //if (_state.IsGameLoaded)
                 _state.MapRendering.Display();
 
             // Render ImGui on top of the rest.
@@ -111,8 +111,12 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            
-            ImGui.SetNextWindowSize(new ImVec2(200, 100), ImGuiCond.FirstUseEver);
+            ImVec2 size = new ImVec2(200, 100);
+            ImVec2 pos = new ImVec2(_state.MainWinSize.x / 2 - size.x / 2, _state.MainWinSize.y / 2 - size.y / 2);
+
+            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+
             ImGui.Begin("Pulsar4X Main Menu",  ref IsActive, _flags);
 
             if (ImGui.Button("Start a New Game", buttonSize))
