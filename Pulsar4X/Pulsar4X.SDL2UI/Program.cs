@@ -4,6 +4,7 @@ using SDL2;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using System.Drawing;
+using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -53,10 +54,10 @@ namespace Pulsar4X.SDL2UI
         public unsafe override void ImGuiLayout()
         {
 
-            if (_state.MainMenu.IsActive)
-                _state.MainMenu.Display();
-            if (_state.NewGameOptions.IsActive)
-                _state.NewGameOptions.Display();
+            foreach (var item in _state.ActiveWindows.ToArray())
+            {
+                item.Display();
+            }
         }
 
 
@@ -88,9 +89,12 @@ namespace Pulsar4X.SDL2UI
 
         internal ImVec2 MainWinSize { get; set; }
 
+        internal List<PulsarGuiWindow> ActiveWindows = new List<PulsarGuiWindow>();
+
         internal GlobalUIState()
         {
             MainMenu = new MainMenuItems(this);
+            ActiveWindows.Add(MainMenu);
             NewGameOptions = new NewGameOptions(this);
         }
     }
@@ -122,6 +126,8 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Button("Start a New Game", buttonSize))
             {
                 _state.NewGameOptions.IsActive = true;
+                _state.ActiveWindows.Add(_state.NewGameOptions);
+                _state.ActiveWindows.Remove(this);
                 this.IsActive = false;
             }
             if (_state.IsGameLoaded)

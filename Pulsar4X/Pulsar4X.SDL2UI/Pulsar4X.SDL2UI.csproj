@@ -45,6 +45,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="NewGameOptions.cs" />
     <Compile Include="MapRendering\SystemMapRendering.cs" />
+    <Compile Include="MapRendering\DrawPrimitive.cs" />
+    <Compile Include="MapRendering\OrbitDrawData.cs" />
+    <Compile Include="TimeControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

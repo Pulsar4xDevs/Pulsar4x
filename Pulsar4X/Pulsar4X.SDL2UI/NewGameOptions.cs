@@ -65,6 +65,7 @@ namespace Pulsar4X.SDL2UI
             };
 
             _state.Game = new ECSLib.Game(gameSettings);
+            _state.ActiveWindows.Add(new TimeControl(_state));
             ECSLib.UIStateVM uIStateVM = new ECSLib.UIStateVM(_state.Game);
 
             ECSLib.Entity factionEntity = ECSLib.DefaultStartFactory.DefaultHumans(_state.Game, gameSettings.DefaultFactionName);
