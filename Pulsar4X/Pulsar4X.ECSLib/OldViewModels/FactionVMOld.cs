@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Pulsar4X.ECSLib
 {
-    public class FactionVM
+    public class FactionVMOld
     {
         private Entity _entity;
         
@@ -16,11 +16,11 @@ namespace Pulsar4X.ECSLib
 
         public List<SpeciesVM> Species;
 
-        public FactionVM()
+        public FactionVMOld()
         {
         }
 
-        private FactionVM(Entity factionEntity)
+        private FactionVMOld(Entity factionEntity)
         {
             _entity = factionEntity;
             Species = new List<SpeciesVM>();
@@ -30,11 +30,11 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public static FactionVM Create(Entity factionEntity)
+        public static FactionVMOld Create(Entity factionEntity)
         {
             if (!factionEntity.HasDataBlob<FactionInfoDB>())
                 throw new Exception("Entity is not a faction or does not have a FactionInfoDB");
-            return new FactionVM(factionEntity);
+            return new FactionVMOld(factionEntity);
         }
 
         #region IViewModel

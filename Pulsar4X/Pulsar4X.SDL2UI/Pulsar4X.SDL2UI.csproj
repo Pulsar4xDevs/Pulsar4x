@@ -45,13 +45,21 @@
     <Compile Include="Program.cs" />
     <Compile Include="NewGameOptions.cs" />
     <Compile Include="MapRendering\SystemMapRendering.cs" />
-    <Compile Include="MapRendering\DrawPrimitive.cs" />
-    <Compile Include="MapRendering\OrbitDrawData.cs" />
     <Compile Include="TimeControl.cs" />
+    <Compile Include="MapRendering\Matrix.cs" />
+    <Compile Include="GlobalUIState.cs" />
+    <Compile Include="MainMenuItems.cs" />
+    <Compile Include="MapRendering\Camera.cs" />
+    <Compile Include="MapRendering\Icons\TestDrawIconData.cs" />
+    <Compile Include="MapRendering\Icons\AtmoDrawData.cs" />
+    <Compile Include="MapRendering\Icons\DrawPrimitive.cs" />
+    <Compile Include="MapRendering\Icons\OrbitDrawData.cs" />
+    <Compile Include="MapRendering\Icons\StarDrawData.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="MapRendering\" />
+    <Folder Include="MapRendering\Icons\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\PulsarLogo.png">

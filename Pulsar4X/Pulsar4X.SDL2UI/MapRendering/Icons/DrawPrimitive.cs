@@ -93,8 +93,6 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was origionaly
             SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
-
-
     }
 
     public static class CreatePrimitiveShapes
@@ -129,17 +127,9 @@ namespace Pulsar4X.SDL2UI
 
             return points;
         }
-
-
     }
 
-    public class Camera
-    {
-        internal double ZoomLevel;
-        internal double x;
-        internal double y;
 
-    }
 
     public static class DrawShapes
     {
@@ -172,9 +162,51 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
+    /// <summary>
+    /// A Collection of Shapes which will make up an icon. 
+    /// </summary>
+    public class Icon : IDrawData
+    {
+        protected ECSLib.PositionDB _positionDB;
+        public double WorldXPosition { get { return _positionDB.X; } } //this will change every game tick
+        public double WorldYPosition { get { return _positionDB.Y; } } //this will change every game tick
+        public Shape[] Shapes; //these could change with entity changes. 
+        public bool ShapesScaleWithZoom; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings 
+
+        public Icon(ECSLib.PositionDB positionDB)
+        {
+            _positionDB = positionDB;
+        }
+
+        public virtual void Update()
+        {
+            
+        }
+
+        public virtual void Draw(IntPtr rendererPtr, Matrix matrix)
+        {
+            byte oR, oG, oB, oA;
+            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
+
+            foreach (var shape in Shapes)
+            {
+                SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
+
+                for (int i = 0; i < shape.Points.Length - 1; i++)
+                {
+                    SDL.SDL_RenderDrawLine(rendererPtr, shape.Points[i].x, shape.Points[i].y, shape.Points[i + 1].x, shape.Points[i + 1].y);
+                }
+            }
+            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
+        }
+
+    }
+    /// <summary>
+    /// A collection of points and a single color.
+    /// </summary>
     public struct Shape
     {
-        public SDL.SDL_Color Color;
-        public SDL.SDL_Point[] Points;
+        public SDL.SDL_Color Color;    //could change due to entity changes. 
+        public SDL.SDL_Point[] Points; //ralitive to the IconPosition. could change with entity changes. 
     }
 }

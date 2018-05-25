@@ -4,7 +4,6 @@ using SDL2;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using System.Drawing;
-using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -23,8 +22,8 @@ namespace Pulsar4X.SDL2UI
 
     public class PulsarMainWindow : ImGuiSDL2CSWindow
     {
-        private GlobalUIState _state = new GlobalUIState();
-        private TextInputBuffer[] _TextInputBuffers;
+        private GlobalUIState _state; // = new GlobalUIState(new Camera(this));
+
 
         private MemoryEditor _MemoryEditor = new MemoryEditor();
         private byte[] _MemoryEditorData;
@@ -37,7 +36,8 @@ namespace Pulsar4X.SDL2UI
         public PulsarMainWindow()
             : base("Pulsar4X")
         {
-            _state.MainWinSize = this.Size;
+            _state = new GlobalUIState(this);
+            //_state.MainWinSize = this.Size;
 
             // Create any managed resources and set up the main game window here.
             _MemoryEditorData = new byte[1024];
@@ -49,12 +49,69 @@ namespace Pulsar4X.SDL2UI
             backColor = new ImVec3(0 / 255f, 0 / 255f, 28 / 255f);
 
             _state.MapRendering = new SystemMapRendering(this, _state);
+            OnEvent = MyEventHandler;
+        }
+
+        private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
+        {
+            
+            if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
+                return false;
+
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1)
+            { 
+                _state.Camera.IsGrabbingMap = true;
+                _state.Camera.MouseFrameIncrementX = e.motion.x;
+                _state.Camera.MouseFrameIncrementY = e.motion.y;
+            }
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 1)
+            {
+                _state.Camera.IsGrabbingMap = false;
+
+            }
+                 
+
+
+           
+            /*
+            if (g_MousePressed[1])
+                SDL.SDL_ShowSimpleMessageBox(0, "Mouse", "Right button was pressed!", window.Handle);
+            if (g_MousePressed[2])
+                SDL.SDL_ShowSimpleMessageBox(0, "Mouse", "Middle button was pressed!", window.Handle);
+            */
+            if (_state.Camera.IsGrabbingMap)
+            {
+                int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;
+                int deltaY = _state.Camera.MouseFrameIncrementY - e.motion.y;
+                _state.Camera.WorldOffset(deltaX, deltaY);
+
+                _state.Camera.MouseFrameIncrementX = e.motion.x;
+                _state.Camera.MouseFrameIncrementY = e.motion.y;
+
+            }
+
+            int mouseX;
+            int mouseY;
+            SDL.SDL_GetMouseState(out mouseX, out mouseY);
+
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
+            {
+                if (e.wheel.y > 0)
+                {
+                    _state.Camera.ZoomIn(0, 0);//mouseX, mouseY);
+                }
+                else if (e.wheel.y < 0)
+                {
+                    _state.Camera.ZoomOut(0, 0);//mouseX, mouseY);
+                }
+            }
+            return true;
         }
 
         public unsafe override void ImGuiLayout()
         {
 
-            foreach (var item in _state.ActiveWindows.ToArray())
+            foreach (var item in _state.OpenWindows.ToArray())
             {
                 item.Display();
             }
@@ -66,79 +123,12 @@ namespace Pulsar4X.SDL2UI
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
-            //if (_state.IsGameLoaded)
-                _state.MapRendering.Display();
+            _state.MapRendering.Display();
 
             // Render ImGui on top of the rest.
             base.ImGuiRender();
         }
-    }
 
-
-
-    internal class GlobalUIState
-    {
-        internal ECSLib.Game Game;
-        internal ECSLib.UIStateVM UIStateVM;
-        internal bool IsGameLoaded {get {return Game != null;}}
-        internal ECSLib.Entity Faction { get { return UIStateVM.FactionEntity; } }
-
-        internal MainMenuItems MainMenu { get; }
-        internal NewGameOptions NewGameOptions { get; }
-        internal SystemMapRendering MapRendering { get; set; }
-
-        internal ImVec2 MainWinSize { get; set; }
-
-        internal List<PulsarGuiWindow> ActiveWindows = new List<PulsarGuiWindow>();
-
-        internal GlobalUIState()
-        {
-            MainMenu = new MainMenuItems(this);
-            ActiveWindows.Add(MainMenu);
-            NewGameOptions = new NewGameOptions(this);
-        }
-    }
-
-    public class MainMenuItems : PulsarGuiWindow
-    {
-
-        bool _saveGame = false;
-        GlobalUIState _state; 
-
-        ImVec2 buttonSize = new ImVec2(184, 24);
-        internal MainMenuItems(GlobalUIState state)
-        {
-            IsActive = true;
-            _state = state;
-            _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
-        }
-
-        internal override void Display()
-        {
-            ImVec2 size = new ImVec2(200, 100);
-            ImVec2 pos = new ImVec2(_state.MainWinSize.x / 2 - size.x / 2, _state.MainWinSize.y / 2 - size.y / 2);
-
-            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-
-            ImGui.Begin("Pulsar4X Main Menu",  ref IsActive, _flags);
-
-            if (ImGui.Button("Start a New Game", buttonSize))
-            {
-                _state.NewGameOptions.IsActive = true;
-                _state.ActiveWindows.Add(_state.NewGameOptions);
-                _state.ActiveWindows.Remove(this);
-                this.IsActive = false;
-            }
-            if (_state.IsGameLoaded)
-                if (ImGui.Button("Save Current Game", buttonSize))
-                    _saveGame = !_saveGame;    
-            ImGui.Button("Resume a Current Game", buttonSize);
-            ImGui.Button("Connect to a Network Game", buttonSize);
-            //if (_saveGame)
-
-            ImGui.End();
-        }
     }
 
     public abstract class PulsarGuiWindow
