@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -183,12 +184,35 @@ namespace Pulsar4X.SDL2UI
             
         }
 
-        public virtual void Draw(IntPtr rendererPtr, Matrix matrix)
+        public virtual void Draw(IntPtr rendererPtr, Camera camera)
         {
             byte oR, oG, oB, oA;
             SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-
+            SDL.SDL_BlendMode blendMode;
+            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            float zoomLevel = 1;
+            double posX = WorldXPosition; //* camera.ZoomLevel;
+            double posY = WorldYPosition;// * camera.ZoomLevel;
+            if (ShapesScaleWithZoom)
+                zoomLevel = camera.ZoomLevel;
+            List<Shape> transformedShapes = new List<Shape>();
             foreach (var shape in Shapes)
+            {
+                SDL.SDL_Point[] drawPoints = new SDL.SDL_Point[shape.Points.Length];//matrix.Transform(shape.Points);
+                for (int i = 0; i < shape.Points.Length; i++)
+                {
+                    var camerapoint = camera.CameraViewCoordinate();
+                    int x = (int)(posX + (shape.Points[i].x + camerapoint.x) * zoomLevel);
+                    int y = (int)(posY + (shape.Points[i].y + camerapoint.y) * zoomLevel);
+                    drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+                }
+                transformedShapes.Add(new Shape() { Points = drawPoints, Color = shape.Color });
+            }
+
+
+
+            foreach (var shape in transformedShapes)
             {
                 SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
 
@@ -198,6 +222,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
             SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
 
     }

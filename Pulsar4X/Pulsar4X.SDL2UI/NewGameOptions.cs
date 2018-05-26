@@ -79,8 +79,8 @@ namespace Pulsar4X.SDL2UI
 
             factionVM.CreateDefaultFaction(factionNameString, passString);
 
-            _state.MapRendering.SetSystem(factionVM.KnownSystems[0]);
-
+            //_state.MapRendering.SetSystem(factionVM.KnownSystems[0]);
+            _state.MapRendering.SetSystem(factionVM);
 
         }
     }

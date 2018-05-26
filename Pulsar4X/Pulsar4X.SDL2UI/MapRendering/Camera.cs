@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         public ImVec2 ViewPortCenter { get { return new ImVec2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); }}
 
         public ImVec2 ViewPortSize { get { return _viewPort.Size; } }
-        public float ZoomLevel { get; set; } = 1;
+        public float ZoomLevel { get; set; } = 200;
         public float zoomSpeed { get; set; } = 1.25f;
 
         public ImGuiSDL2CSWindow _viewPort;

@@ -18,6 +18,32 @@ namespace Pulsar4X.ECSLib
         {
             return radians * 180 / Math.PI;
         }
+
+        /// <summary>
+        /// returns a number between 0 and 2 * pi
+        /// </summary>
+        /// <returns>The radians.</returns>
+        /// <param name="radians">Radians.</param>
+        public static double NormaliseRadians(double radians)
+        { 
+            radians = radians % 2 * Math.PI;
+            while (radians < 0)
+                radians += 2 * Math.PI;
+            return radians;
+        }
+
+        /// <summary>
+        /// returns a number betwee 0 and 360
+        /// </summary>
+        /// <returns>The degrees.</returns>
+        /// <param name="degrees">Degrees.</param>
+        public static double NormaliseDegrees(double degrees)
+        {
+            degrees = degrees % 360;
+            while (degrees < 0)
+                degrees += 360;
+            return degrees;
+        }
     }
 
     /// <summary>

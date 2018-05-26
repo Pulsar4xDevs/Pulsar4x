@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
         public FactionInfoDB FactionInfo { get; private set; }
         FactionOwnerDB _factionOwner;
         public List<StarSystem> KnownSystems = new List<StarSystem>();
-        //public List<
+        public SystemMap_DrawableVM SystemMap = new SystemMap_DrawableVM();
         public FactionVM(Game game)
         {
             _game = game;
@@ -64,6 +64,10 @@ namespace Pulsar4X.ECSLib
             }
 
             _factionOwner = factionEntity.GetDataBlob<FactionOwnerDB>();
+            SystemMap.Initialise(null, _game.Systems[FactionInfo.KnownSystems[0]], factionEntity);
         }
+
+
+
     }
 }

@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
             ImVec2 pos = new ImVec2(0,0);
 
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
 
             ImGui.Begin("TimeControl", ref IsActive, _flags);
 

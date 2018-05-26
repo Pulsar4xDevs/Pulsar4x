@@ -49,22 +49,47 @@ namespace Pulsar4X.SDL2UI
 
 
             byte spikes = (byte)(starInfo.SpectralType + 4);
-            byte spikeDepth = 8;
+            byte spikeheight = 8;
+            byte spikeDepth = 4;
             double arc = (2 * Math.PI) / spikes;
             double startAngle = 1.5708 - arc / 2;
             List<SDL.SDL_Point> shapePoints = new List<SDL.SDL_Point>();
             for (int i = 0; i < spikes; i++)
             {
-                //need rotation transform to rotate it at i * arc; 
+                var a1 = arc * i;
+                int x1 = (int)(0 * Math.Cos(a1) - spikeheight * Math.Sin(a1));
+                int y1 = (int)(0 * Math.Sin(a1) + spikeheight * Math.Cos(a1));
+                var p1 = new SDL.SDL_Point() { x = x1, y = y1 };
 
-                shapePoints.AddRange(CreatePrimitiveShapes.CreateArc(32, 0, 32 - spikeDepth, 32 + spikeDepth, startAngle, arc, 32)); //32 segments is probilby way overkill maybe adjust this by the camera zoom level?
+                var a2 = a1 + arc * 0.5;
+                int x2 = (int)(0 * Math.Cos(a2) - spikeDepth * Math.Sin(a2));
+                int y2 = (int)(0 * Math.Sin(a2) + spikeDepth * Math.Cos(a2));
+                var p2 = new SDL.SDL_Point() { x = x2, y = y2 };
+
+                shapePoints.Add(p1);
+                shapePoints.Add(p2);
+
+                /*
+                 * this was an attempt at making slightly nicer looking stars using an elipsed curve instead of just straight lines. couldnt get it working though
+                 * the idea was make an arc, then rotate it.
+                List<SDL.SDL_Point> points = new List<SDL.SDL_Point>();
+                points.AddRange(CreatePrimitiveShapes.CreateArc(32, 0, 32 - spikeDepth, 32 + spikeDepth, startAngle, arc, 32)); //32 segments is probilby way overkill maybe adjust this by the camera zoom level?
+                //rotate it at i * arc; 
+                var a = arc * i;
+                for (int i2 = 0; i2 < points.Count; i2++)
+                {
+                    int x = (int)(points[i2].x * Math.Cos(a) - points[i2].y * Math.Sin(a));
+                    int y = (int)(points[i2].x * Math.Sin(a) + points[i2].y * Math.Cos(a));
+                    points[i2] = new SDL.SDL_Point() { x = x, y = y };
+                }
+                shapePoints.AddRange(points);
                 startAngle += arc;
+                */
             }
-
+            shapePoints.Add(shapePoints[0]); //ensure the last point is the same as the first, so it joins up. 
             List<Shape> shapes = new List<Shape>();
             shapes.Add(new Shape() { Color = _color, Points = shapePoints.ToArray() });
             Shapes = shapes.ToArray();
-
         }
     }
 }

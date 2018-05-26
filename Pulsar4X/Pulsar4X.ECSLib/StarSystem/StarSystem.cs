@@ -69,8 +69,6 @@ namespace Pulsar4X.ECSLib
             NameDB = (NameDB)info.GetValue("Name", typeof(NameDB));
         }
 
-
-
         public void ExportBodies(SerializationInfo info)
         {
             List<Entity> bodies = this.GetAllEntitiesWithDataBlob<StarInfoDB>();

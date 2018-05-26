@@ -45,7 +45,7 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        public void Draw(IntPtr rendererPtr, Matrix matrix)
+        public void Draw(IntPtr rendererPtr, Camera camera)
         {
             byte oR, oG, oB, oA;
             SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
