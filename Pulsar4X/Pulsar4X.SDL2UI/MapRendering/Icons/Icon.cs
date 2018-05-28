@@ -50,8 +50,7 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
             SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
             float zoomLevel = 1;
-            double posX = ViewScreenPos.x;
-            double posY = ViewScreenPos.y;
+
             if (ShapesScaleWithZoom)
                 zoomLevel = camera.ZoomLevel;
             List<Shape> transformedShapes = new List<Shape>();
@@ -61,8 +60,8 @@ namespace Pulsar4X.SDL2UI
                 for (int i = 0; i < shape.Points.Length; i++)
                 {
                     var camerapoint = camera.CameraViewCoordinate();
-                    int x = (int)(posX + (shape.Points[i].x + camerapoint.x) * zoomLevel);
-                    int y = (int)(posY + (shape.Points[i].y + camerapoint.y) * zoomLevel);
+                    int x = (int)(ViewScreenPos.x + (shape.Points[i].x + camerapoint.x) * zoomLevel);
+                    int y = (int)(ViewScreenPos.y + (shape.Points[i].y + camerapoint.y) * zoomLevel);
                     drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
                 }
                 transformedShapes.Add(new Shape() { Points = drawPoints, Color = shape.Color });
