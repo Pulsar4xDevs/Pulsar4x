@@ -54,7 +54,10 @@ namespace Pulsar4X.SDL2UI
 
         private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
         {
-            
+            int mouseX;
+            int mouseY;
+            SDL.SDL_GetMouseState(out mouseX, out mouseY);
+
             if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
 
@@ -71,14 +74,6 @@ namespace Pulsar4X.SDL2UI
             }
                  
 
-
-           
-            /*
-            if (g_MousePressed[1])
-                SDL.SDL_ShowSimpleMessageBox(0, "Mouse", "Right button was pressed!", window.Handle);
-            if (g_MousePressed[2])
-                SDL.SDL_ShowSimpleMessageBox(0, "Mouse", "Middle button was pressed!", window.Handle);
-            */
             if (_state.Camera.IsGrabbingMap)
             {
                 int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;
@@ -90,19 +85,16 @@ namespace Pulsar4X.SDL2UI
 
             }
 
-            int mouseX;
-            int mouseY;
-            SDL.SDL_GetMouseState(out mouseX, out mouseY);
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
             {
                 if (e.wheel.y > 0)
-                {
-                    _state.Camera.ZoomIn(0, 0);//mouseX, mouseY);
+                {   
+                    _state.Camera.ZoomIn(mouseX, mouseY);
                 }
                 else if (e.wheel.y < 0)
                 {
-                    _state.Camera.ZoomOut(0, 0);//mouseX, mouseY);
+                    _state.Camera.ZoomOut(mouseX, mouseY);
                 }
             }
             return true;

@@ -35,6 +35,24 @@ namespace Pulsar4X.SDL2UI
             Y[1] = Y[1] * Math.Cos(radians);
         }
 
+        public SDL.SDL_Point Transform(double itemx, double itemy)
+        {
+
+                SDL.SDL_Point newPoint = new SDL.SDL_Point();
+                //multiply a 2x2 matrix by a 2x1 matrix
+                double x;
+                x = X[0] * itemx;
+                x += X[1] * itemy;
+                newPoint.x = (int)x;
+                double y;
+                y = Y[0] * itemx;
+                y += Y[1] * itemy;
+                newPoint.y = (int)y;
+
+
+            return newPoint;
+        }
+
         public SDL.SDL_Point[] Transform(ICollection<SDL.SDL_Point> points)
         {
             SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];

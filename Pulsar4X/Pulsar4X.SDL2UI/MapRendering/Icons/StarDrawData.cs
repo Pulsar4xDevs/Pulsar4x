@@ -49,8 +49,8 @@ namespace Pulsar4X.SDL2UI
 
 
             byte spikes = (byte)(starInfo.SpectralType + 4);
-            byte spikeheight = 8;
-            byte spikeDepth = 4;
+            byte spikeheight = 16;
+            byte spikeDepth = 8;
             double arc = (2 * Math.PI) / spikes;
             double startAngle = 1.5708 - arc / 2;
             List<SDL.SDL_Point> shapePoints = new List<SDL.SDL_Point>();
@@ -89,7 +89,7 @@ namespace Pulsar4X.SDL2UI
             shapePoints.Add(shapePoints[0]); //ensure the last point is the same as the first, so it joins up. 
             List<Shape> shapes = new List<Shape>();
             shapes.Add(new Shape() { Color = _color, Points = shapePoints.ToArray() });
-            Shapes = shapes.ToArray();
+            Shapes.AddRange(shapes);
         }
     }
 }

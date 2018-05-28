@@ -16,10 +16,10 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr surfacePtr; 
         internal IntPtr rendererPtr;
         ImGuiSDL2CSWindow _window;
-
-        Dictionary<Guid, IDrawData> _entityIcons = new Dictionary<Guid, IDrawData>();
-        Dictionary<Guid, IDrawData> _orbitRings = new Dictionary<Guid, IDrawData>();
-        Dictionary<Guid, IDrawData> _nameIcons = new Dictionary<Guid, IDrawData>();
+        Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
+        Dictionary<Guid, Icon> _entityIcons = new Dictionary<Guid, Icon>();
+        Dictionary<Guid, Icon> _orbitRings = new Dictionary<Guid, Icon>();
+        Dictionary<Guid, Icon> _nameIcons = new Dictionary<Guid, Icon>();
         List<Vector4> _positions = new List<Vector4>();
         List<OrbitDB> _orbits = new List<OrbitDB>();
         SystemMap_DrawableVM _sysMap;
@@ -33,7 +33,10 @@ namespace Pulsar4X.SDL2UI
             windowPtr = window.Handle;
             surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
             rendererPtr = SDL.SDL_GetRenderer(windowPtr);
-            //_drawableIcons.Add(new TestDrawIconData(_camera));
+            foreach (var item in TestDrawIconData.GetTestIcons())
+            {
+                _testIcons.Add(Guid.NewGuid(), item);
+            }
         }
 
         internal void SetSystem(FactionVM factionVM)
@@ -56,9 +59,13 @@ namespace Pulsar4X.SDL2UI
                 {
                     _entityIcons.Add(entityItem.Guid, new StarDrawData(entityItem));
                 }
-                if (entityItem.HasDataBlob<AtmosphereDB>())
+                if (entityItem.HasDataBlob<SystemBodyInfoDB>())
                 {
-                    _entityIcons.Add(entityItem.Guid, new AtmoDrawData(entityItem));
+                    _entityIcons.Add(entityItem.Guid, new PlanetDrawData(entityItem));
+                }
+                if (entityItem.HasDataBlob<ShipInfoDB>())
+                {
+                    _entityIcons.Add(entityItem.Guid, new ShipIcon(entityItem));
                 }
 
             }
@@ -96,22 +103,35 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
+            Matrix matrix = new Matrix();//_camera.GetViewProjectionMatrix(); //new Matrix();
+                                         //matrix.Translate(camera.x, camera.y);
+                                         //matrix.Scale(camera.ZoomLevel);
+            matrix.Scale(_camera.ZoomLevel);
             if (_sysMap == null)
-                return;
-            if (_sysMap.UpdatesReady)
-                HandleChanges();
-            
-            Matrix matrix = _camera.GetViewProjectionMatrix(); //new Matrix();
-            //matrix.Translate(camera.x, camera.y);
-            //matrix.Scale(camera.ZoomLevel);
-
-            foreach (var icon in _orbitRings.Values)
             {
-                icon.Draw(rendererPtr, _camera);
+                foreach (var item in _testIcons.Values)
+                {
+                    item.ViewScreenPos = matrix.Transform(item.WorldPositionX, item.WorldPositionY);
+                    item.Draw(rendererPtr, _camera);
+                }
             }
-            foreach (var icon in _entityIcons.Values)
+            else
             {
-                icon.Draw(rendererPtr, _camera);
+                if (_sysMap.UpdatesReady)
+                    HandleChanges();
+
+
+
+                foreach (var icon in _orbitRings.Values)
+                {
+                    icon.ViewScreenPos = matrix.Transform(icon.WorldPositionX, icon.WorldPositionY);
+                    icon.Draw(rendererPtr, _camera);
+                }
+                foreach (var icon in _entityIcons.Values)
+                {
+                    icon.ViewScreenPos = matrix.Transform(icon.WorldPositionX, icon.WorldPositionY);
+                    icon.Draw(rendererPtr, _camera);
+                }
             }
         }
     }

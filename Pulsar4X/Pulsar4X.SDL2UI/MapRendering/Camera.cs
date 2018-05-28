@@ -65,11 +65,11 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewCoordinate"></param>
         /// <returns></returns>
-        public Point WorldCoordinate(Vector4 viewCoordinate)
+        public Vector4 WorldCoordinate(int viewCoordinateX, int viewCoordinateY)
         {
-            int x = (int)((viewCoordinate.X - ViewPortCenter.X) / ZoomLevel);
-            int y = (int)((viewCoordinate.Y - ViewPortCenter.Y) / ZoomLevel);
-            return new Point() { x = x, y = y };
+            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel);
+            double y = ((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel);
+            return new Vector4(x, y, 0, 0);
         }
 
 
@@ -87,23 +87,21 @@ namespace Pulsar4X.SDL2UI
         /// <summary>
         /// Returns the Distance in view-Coordinates
         /// </summary>
-        /// <param name="worldSize"></param>
+        /// <param name="dist"></param>
         /// <returns></returns>
         public float ViewDistance(float dist)
         {
-            float ViewDistance = dist * ZoomLevel;
-            return ViewDistance;
+            return dist * ZoomLevel;
         }
 
         /// <summary>
         /// Returns the Distance in World-Coordinates
         /// </summary>
-        /// <param name="worldSize"></param>
+        /// <param name="dist"></param>
         /// <returns></returns>
         public float WorldDistance(float dist)
         {
-            float WorldDistance = dist / ZoomLevel;
-            return WorldDistance;
+            return dist / ZoomLevel;
         }
 
         /// <summary>
@@ -122,68 +120,44 @@ namespace Pulsar4X.SDL2UI
         /// <param name="xOffset">Pans the camera horizontaly relative to offset</param>
         /// <param name="yOffset">Pans the camera verticaly relative to offset</param>
         /// </summary>
-        public void WorldOffset(float xOffset, float yOffset)
+        public void WorldOffset(double xOffset, double yOffset)
         {
-            _cameraWorldPosition.x -= ((xOffset * 1.0f / ZoomLevel));
-            _cameraWorldPosition.y -= ((yOffset * 1.0f / ZoomLevel));
+            _cameraWorldPosition.x -= (float)(xOffset * 1.0f / ZoomLevel);
+            _cameraWorldPosition.y -= (float)(yOffset * 1.0f / ZoomLevel);
         }
+
 
         /// <summary>
         /// Zoom in and keep try to keep the given pixel under the mouse.
         /// </summary>
         /// <param name="zoomCoords">The coordinates of the panel to zoom in</param>
-        public void ZoomIn(ImVec2 zoomCoords)
+        public void ZoomIn(int mouseX, int mouseY)
         {
+            var worldCoord = WorldCoordinate(mouseX, mouseY);
             if (ZoomLevel < MAX_ZOOMLEVEL)
             {
                 ZoomLevel *= zoomSpeed;
-                float xoffset = zoomCoords.x - ViewPortCenter.x - (zoomCoords.x - ViewPortCenter.x) * zoomSpeed;
-                float yoffset = zoomCoords.y - ViewPortCenter.y - (zoomCoords.y - ViewPortCenter.y) * zoomSpeed;
-                //this.WorldOffset(xoffset, yoffset);
+                double xOffset = mouseX - ViewPortCenter.x - (mouseX - ViewPortCenter.x) * zoomSpeed;
+                double yOffset = mouseY - ViewPortCenter.y - (mouseY - ViewPortCenter.y) * zoomSpeed;
+                WorldOffset(-xOffset, -yOffset);
             }
         }
-        /// <summary>
-        /// Zoom in and keep try to keep the given pixel under the mouse.
-        /// </summary>
-        /// <param name="zoomCoords">The coordinates of the panel to zoom in</param>
-        public void ZoomIn(int xZoomCoords, int yZoomCoords)
-        {
-            if (ZoomLevel < MAX_ZOOMLEVEL)
-            {
-                ZoomLevel *= zoomSpeed;
-                float xoffset = xZoomCoords - ViewPortCenter.x - (xZoomCoords - ViewPortCenter.x) * zoomSpeed;
-                float yoffset = yZoomCoords - ViewPortCenter.y - (yZoomCoords - ViewPortCenter.y) * zoomSpeed;
-                //this.WorldOffset(xoffset, yoffset);
-            }
-        }
+
 
         /// <summary>
         /// Zoom out and keep try to keep the given pixel under the mouse.
         /// </summary>
         /// <param name="zoomCoords">The coordinates of the panel to soom out from</param>
-        public void ZoomOut(ImVec2 zoomCoords)
+        public void ZoomOut(int mouseX, int mouseY)
         {
-            if (ZoomLevel > 0)
-            {
-                ZoomLevel /= zoomSpeed;
-                float xOffset = zoomCoords.x - ViewPortCenter.x - (zoomCoords.x - ViewPortCenter.x) / zoomSpeed;
-                float yOffset = zoomCoords.y - ViewPortCenter.y - (zoomCoords.y - ViewPortCenter.y) / zoomSpeed;
-                //this.WorldOffset(xOffset, yOffset);
-            }
-        }
+            var worldCoord = WorldCoordinate(mouseX, mouseY);
 
-        /// <summary>
-        /// Zoom out and keep try to keep the given pixel under the mouse.
-        /// </summary>
-        /// <param name="zoomCoords">The coordinates of the panel to soom out from</param>
-        public void ZoomOut(int xZoomCoords, int yZoomCoords)
-        {
             if (ZoomLevel > 0)
             {
                 ZoomLevel /= zoomSpeed;
-                float xOffset = xZoomCoords - ViewPortCenter.x - (xZoomCoords - ViewPortCenter.x) / zoomSpeed;
-                float yOffset = yZoomCoords - ViewPortCenter.y - (yZoomCoords - ViewPortCenter.y) / zoomSpeed;
-                //this.WorldOffset(xOffset, yOffset);
+                double xOffset = mouseX - ViewPortCenter.x - (mouseX - ViewPortCenter.x) / zoomSpeed;
+                double yOffset = mouseY - ViewPortCenter.y - (mouseY - ViewPortCenter.y) / zoomSpeed;
+                WorldOffset(-xOffset, -yOffset);
             }
         }
 

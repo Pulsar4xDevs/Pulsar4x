@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SDL2;
+using Point = SDL2.SDL.SDL_Point;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -98,34 +99,146 @@ namespace Pulsar4X.SDL2UI
 
     public static class CreatePrimitiveShapes
     {
+
+        public const double PI2 = Math.PI * 2;
+        public const double HalfCircle = Math.PI;
+        public const double QuarterCircle = Math.PI * 0.5;
+        public const double ThreeQuarterCircle = HalfCircle + QuarterCircle;
+
+
         /// <summary>
         /// Creates the arc.
         /// </summary>
         /// <returns>The arc.</returns>
         /// <param name="posX">Position x.</param>
         /// <param name="posY">Position y.</param>
-        /// <param name="xWidth">X width.</param>
-        /// <param name="yWidth">Y width.</param>
+        /// <param name="xRadius">X width.</param>
+        /// <param name="yRadius">Y width.</param>
         /// <param name="startAngleRadians">Start angle in radians.</param>
         /// <param name="arcAngleRadians">Arc angle in radians.</param>
         /// <param name="segments">Number of segments this arc will have, resolution. ie a full circle with 6 arcs will draw a hexigon.</param>
-        public static SDL.SDL_Point[] CreateArc(int posX, int posY, double xWidth, double yWidth, double startAngleRadians, double arcAngleRadians, int segments)
+        public static Point[] CreateArc(int posX, int posY, double xRadius, double yRadius, double startAngleRadians, double arcAngleRadians, int segments)
         {
-            SDL.SDL_Point[] points = new SDL.SDL_Point[segments];
+            Point[] points = new SDL.SDL_Point[segments + 1];
 
             double incrementAngle = arcAngleRadians / segments;
 
             int drawX;
             int drawY;
 
-            for (int i = 0; i < segments; i++)
+            for (int i = 0; i < segments + 1; i++)
             {
                 double nextAngle = startAngleRadians + incrementAngle * i;
-                drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
-                drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
+                drawX = posX + (int)Math.Round(xRadius * Math.Sin(nextAngle));
+                drawY = posY + (int)Math.Round(yRadius * Math.Cos(nextAngle));
                 points[i] = new SDL.SDL_Point() { x = drawX, y = drawY };
             }
 
+            return points;
+        }
+
+        public static Point[] RoundedCylinder(int minorRadius, int majorRadius, int offsetX, int offsetY)
+        {
+            List<Point> points = new List<Point>();
+            int x1 = (int)(minorRadius * 0.5);
+            int y1 = (int)(majorRadius * 0.5 - minorRadius * 0.5);
+
+            points.AddRange(CreateArc(offsetX, y1 + offsetY, x1, x1, ThreeQuarterCircle, HalfCircle, 16));
+            points.Add(new Point() { x = x1 + offsetX, y = y1 + offsetY });
+            points.Add(new Point() { x = x1 + offsetX, y = -y1 + offsetY });
+
+            points.AddRange(CreateArc(offsetX, -y1 + offsetY, x1, x1, QuarterCircle, HalfCircle, 16));
+            points.Add(new Point() { x = -x1 + offsetX, y = -y1 + offsetY });
+            points.Add(new Point() { x = -x1 + offsetX, y = y1 + offsetY });
+            return points.ToArray();
+        }
+
+        public enum PosFrom
+        {
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight,
+            Center
+        }
+        public static Point[] Rectangle(int posX, int posY, int width, int height, PosFrom positionFrom = PosFrom.TopLeft)
+        {
+
+            var points = new Point[4] ;
+            Point tl;
+            Point tr;
+            Point br;
+            Point bl;
+
+            switch (positionFrom)
+            {
+                case PosFrom.TopLeft:
+                    {
+                        tl.x = posX;
+                        tl.y = posY;
+                        tr.x = posX + width;
+                        tr.y = posY;
+                        br.x = posX + width;
+                        br.y = posY + height;
+                        bl.x = posX;
+                        bl.y = posY + height;
+                        points = new Point[] { tl, tr, br, bl };
+                    }
+                    break;
+                case PosFrom.TopRight:
+                    { 
+                        tr.x = posX;
+                        tr.y = posY;
+                        br.x = posX;
+                        br.y = posY + height;
+                        bl.x = posX - width;
+                        bl.y = posY + height;
+                        tl.x = posX - width;
+                        tl.y = posY;
+                        points = new Point[] { tr, br, bl, tl };
+                    }
+                    break;
+                case PosFrom.BottomRight:
+                    {
+                        br.x = posX;
+                        br.y = posY;
+                        bl.x = posX - width;
+                        bl.y = posY;
+                        tl.x = posX - width;
+                        tl.y = posY - height;
+                        tr.x = posX;
+                        tr.y = posY - height;
+                        points = new Point[] { br, bl, tl, tr };
+                    }
+                    break;
+                case PosFrom.BottomLeft:
+                    {
+
+                        bl.x = posX;
+                        bl.y = posY;
+                        tl.x = posX;
+                        tl.y = posY - height;
+                        tr.x = posX + width;
+                        tr.y = posY - height;
+                        br.x = posX + width;
+                        br.y = posY;
+                        points = new Point[] { bl, tl, tr, br };
+                    }
+                    break;
+                case PosFrom.Center:
+                    {
+                        tl.x = posX - (int)(width * 0.5);
+                        tl.y = posY - (int)(height * 0.5);
+                        tr.x = posX + (int)(width * 0.5);
+                        tr.y = posY - (int)(height * 0.5);
+                        br.x = posX + (int)(width * 0.5);
+                        br.y = posY + (int)(height * 0.5);
+                        bl.x = posX - (int)(width * 0.5);
+                        bl.y = posY + (int)(height * 0.5);
+                        points = new Point[] { tl, tr, br, bl, tl };
+                    }
+                    break;
+            }
             return points;
         }
     }
@@ -163,75 +276,4 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
-    /// <summary>
-    /// A Collection of Shapes which will make up an icon. 
-    /// </summary>
-    public class Icon : IDrawData
-    {
-        protected ECSLib.PositionDB _positionDB;
-        public double WorldXPosition { get { return _positionDB.X; } } //this will change every game tick
-        public double WorldYPosition { get { return _positionDB.Y; } } //this will change every game tick
-        public Shape[] Shapes; //these could change with entity changes. 
-        public bool ShapesScaleWithZoom; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings 
-
-        public Icon(ECSLib.PositionDB positionDB)
-        {
-            _positionDB = positionDB;
-        }
-
-        public virtual void Update()
-        {
-            
-        }
-
-        public virtual void Draw(IntPtr rendererPtr, Camera camera)
-        {
-            byte oR, oG, oB, oA;
-            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-            SDL.SDL_BlendMode blendMode;
-            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
-            float zoomLevel = 1;
-            double posX = WorldXPosition; //* camera.ZoomLevel;
-            double posY = WorldYPosition;// * camera.ZoomLevel;
-            if (ShapesScaleWithZoom)
-                zoomLevel = camera.ZoomLevel;
-            List<Shape> transformedShapes = new List<Shape>();
-            foreach (var shape in Shapes)
-            {
-                SDL.SDL_Point[] drawPoints = new SDL.SDL_Point[shape.Points.Length];//matrix.Transform(shape.Points);
-                for (int i = 0; i < shape.Points.Length; i++)
-                {
-                    var camerapoint = camera.CameraViewCoordinate();
-                    int x = (int)(posX + (shape.Points[i].x + camerapoint.x) * zoomLevel);
-                    int y = (int)(posY + (shape.Points[i].y + camerapoint.y) * zoomLevel);
-                    drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
-                }
-                transformedShapes.Add(new Shape() { Points = drawPoints, Color = shape.Color });
-            }
-
-
-
-            foreach (var shape in transformedShapes)
-            {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
-
-                for (int i = 0; i < shape.Points.Length - 1; i++)
-                {
-                    SDL.SDL_RenderDrawLine(rendererPtr, shape.Points[i].x, shape.Points[i].y, shape.Points[i + 1].x, shape.Points[i + 1].y);
-                }
-            }
-            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
-        }
-
-    }
-    /// <summary>
-    /// A collection of points and a single color.
-    /// </summary>
-    public struct Shape
-    {
-        public SDL.SDL_Color Color;    //could change due to entity changes. 
-        public SDL.SDL_Point[] Points; //ralitive to the IconPosition. could change with entity changes. 
-    }
 }

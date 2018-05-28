@@ -6,12 +6,6 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
-    public interface IDrawData
-    {
-        void Update();
-        void Draw(IntPtr rendererPtr, Camera camera);
-    }
-
 
     /// <summary>
     /// Orbit draw data.
@@ -81,6 +75,7 @@ namespace Pulsar4X.SDL2UI
 
         private void Setup()
         {
+            ShapesScaleWithZoom = true;
             _orbitElipseMajor = (float)_orbitDB.SemiMajorAxis * 2; //Major Axis
             _orbitElipseSemiMaj = _orbitElipseMajor * 0.5f;
             _orbitElipseMinor = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
@@ -141,10 +136,16 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
             SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
+            float zoomLevel = 1;
+            double posX = WorldPositionX; //* camera.ZoomLevel;
+            double posY = WorldPositionY;// * camera.ZoomLevel;
+            if (ShapesScaleWithZoom)
+                zoomLevel = camera.ZoomLevel;
+
             //do matrix transformations for camera position and zoom
             var camerapoint = camera.CameraViewCoordinate();
-            int xTranslate = (int)(_focalX + camerapoint.x * camera.ZoomLevel); 
-            int yTranslate = (int)(_focalY + camerapoint.y * camera.ZoomLevel);
+            int xTranslate = (int)(posX + _focalX + camerapoint.x * camera.ZoomLevel); 
+            int yTranslate = (int)(posY + _focalY + camerapoint.y * camera.ZoomLevel);
 
             var translatedPoints = new List<SDL.SDL_Point>();
             int index = (int)(_ellipseStartArcAngleRadians / _segmentArcSweepAngleRadians); //get the position in the point array we want to start drawing from
