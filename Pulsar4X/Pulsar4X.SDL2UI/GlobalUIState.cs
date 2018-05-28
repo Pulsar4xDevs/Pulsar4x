@@ -1,5 +1,7 @@
 ﻿using ImGuiNET;
 using ImGuiSDL2CS;
+using SDL2;
+using System;
 using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
@@ -11,6 +13,9 @@ namespace Pulsar4X.SDL2UI
         internal bool IsGameLoaded { get { return Game != null; } }
         internal ECSLib.Entity Faction { get { return FactionUIState.FactionEntity; } }
 
+        internal IntPtr surfacePtr;
+        internal IntPtr rendererPtr;
+
         internal MainMenuItems MainMenu { get; }
         internal NewGameOptions NewGameOptions { get; }
         internal SystemMapRendering MapRendering { get; set; }
@@ -21,14 +26,29 @@ namespace Pulsar4X.SDL2UI
         internal List<PulsarGuiWindow> OpenWindows = new List<PulsarGuiWindow>();
         //internal PulsarGuiWindow ActiveWindow { get; set; }
 
+        internal Dictionary<string, int> ImageDictionary = new Dictionary<string, int>();
+
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
             ViewPort = viewport;
+
+            var windowPtr = viewport.Handle;
+            surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
+            rendererPtr = SDL.SDL_GetRenderer(windowPtr);
+
+
             Camera = new Camera(viewport);
 
             MainMenu = new MainMenuItems(this);
             OpenWindows.Add(MainMenu);
             NewGameOptions = new NewGameOptions(this);
+
+            var logo = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
+            ImageDictionary.Add("Logo", SDL.SDL_CreateTextureFromSurface(rendererPtr, logo).ToInt32());
+
+            IntPtr playImg = SDL.SDL_LoadBMP("Resources/Play.bmp");
+            ImageDictionary.Add("PlayImg", SDL.SDL_CreateTextureFromSurface(rendererPtr, playImg).ToInt32());
+
         }
     }
 }

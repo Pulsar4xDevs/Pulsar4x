@@ -24,6 +24,7 @@ namespace Pulsar4X.SDL2UI
     {
         private GlobalUIState _state; // = new GlobalUIState(new Camera(this));
 
+        IntPtr _logoTexture;
 
         private MemoryEditor _MemoryEditor = new MemoryEditor();
         private byte[] _MemoryEditorData;
@@ -36,6 +37,7 @@ namespace Pulsar4X.SDL2UI
         public PulsarMainWindow()
             : base("Pulsar4X")
         {
+
             _state = new GlobalUIState(this);
             //_state.MainWinSize = this.Size;
 
@@ -49,6 +51,8 @@ namespace Pulsar4X.SDL2UI
             backColor = new ImVec3(0 / 255f, 0 / 255f, 28 / 255f);
 
             _state.MapRendering = new SystemMapRendering(this, _state);
+
+
             OnEvent = MyEventHandler;
         }
 
@@ -115,6 +119,8 @@ namespace Pulsar4X.SDL2UI
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
+            var imgSize = new SDL.SDL_Rect() { x = 0, y = 0, h = 98, w = 273 };
+            SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, _logoTexture, ref imgSize, ref imgSize);
             _state.MapRendering.Display();
 
             // Render ImGui on top of the rest.

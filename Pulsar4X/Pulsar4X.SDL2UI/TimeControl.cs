@@ -8,7 +8,7 @@ namespace Pulsar4X.SDL2UI
     {
         GlobalUIState _state;
         ECSLib.TimeLoop _timeloop {get { return _state.Game.GameLoop; } }
-        int _buttonTextureID;
+
         bool _isPaused = true;
         int _timeSpanValue = 1;
         int _timeSpanType = 2;
@@ -23,6 +23,12 @@ namespace Pulsar4X.SDL2UI
             "Months",
             "Years"
         };
+
+        bool _expanded;
+
+        ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.AllowOverlapMode;
+        float _freqTimeSpanValue = 0.5f;
+        int _freqSpanType = 0;
 
         internal TimeControl(GlobalUIState state)
         {
@@ -41,19 +47,36 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
 
             ImGui.Begin("TimeControl", ref IsActive, _flags);
+            ImGui.PushItemWidth(100);
 
-            if (ImGui.SliderInt("", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
+            if (ImGui.CollapsingHeader("", _xpanderFlags))
+                _expanded = true;
+            else
+                _expanded = false;
+            ImGui.SameLine();
+            if (ImGui.SliderInt("##spnSldr", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
                 AdjustTimeSpan();
             ImGui.SameLine();
-            if (ImGui.Combo("", ref _timeSpanType, _timespanTypeSelection))
+            if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection))
                 AdjustTimeSpan();
             ImGui.SameLine();
-            //if (ImGui.ImageButton(_buttonTextureID, new ImVec2(16,16), 
-            if (ImGui.Button(">"))
+            if (ImGui.ImageButton(_state.ImageDictionary["PlayImg"], new ImVec2(18, 18), new ImVec2(0, 0), new ImVec2(18, 18), 0, new ImVec4(0, 0, 0, 0.5f), new ImVec4(0, 0, 0, 0.5f)))
                 PausePlayPressed();
             ImGui.SameLine();
             if (ImGui.Button("||>"))
                 OneStepPressed();
+            if (_expanded)
+            {
+                ImGui.PushItemWidth(100);
+                if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), 1))
+                    AdjustFreqency();
+                ImGui.SameLine();
+                if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection))
+                    AdjustFreqency();
+            }
+
+
+
             ImGui.End();
 
         }
@@ -82,6 +105,33 @@ namespace Pulsar4X.SDL2UI
                     break;
                 case 6:
                     _timeloop.Ticklength = TimeSpan.FromDays(_timeSpanValue * 365);
+                    break;
+            }
+        }
+        void AdjustFreqency()
+        {
+            switch (_timeSpanType)
+            {
+                case 0:
+                    _timeloop.TickFrequency = TimeSpan.FromSeconds(_freqTimeSpanValue);
+                    break;
+                case 1:
+                    _timeloop.TickFrequency = TimeSpan.FromMinutes(_freqTimeSpanValue);
+                    break;
+                case 2:
+                    _timeloop.TickFrequency = TimeSpan.FromHours(_freqTimeSpanValue);
+                    break;
+                case 3:
+                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue);
+                    break;
+                case 4:
+                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue * 7);
+                    break;
+                case 5:
+                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue * 30);
+                    break;
+                case 6:
+                    _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue * 365);
                     break;
             }
         }
