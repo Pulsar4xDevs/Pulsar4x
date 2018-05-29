@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
-    internal class GlobalUIState
+    public class GlobalUIState
     {
         internal ECSLib.Game Game;
         internal ECSLib.FactionVM FactionUIState;
@@ -18,6 +18,7 @@ namespace Pulsar4X.SDL2UI
 
         internal MainMenuItems MainMenu { get; }
         internal NewGameOptions NewGameOptions { get; }
+        internal SettingsWindow SettingsWindow { get; }
         internal SystemMapRendering MapRendering { get; set; }
         internal Camera Camera;// = new Camera();
         internal ImGuiSDL2CSWindow ViewPort;
@@ -25,7 +26,7 @@ namespace Pulsar4X.SDL2UI
 
         internal List<PulsarGuiWindow> OpenWindows = new List<PulsarGuiWindow>();
         //internal PulsarGuiWindow ActiveWindow { get; set; }
-
+        internal UserOrbitSettings UserOrbitSettings = new UserOrbitSettings();
         internal Dictionary<string, int> ImageDictionary = new Dictionary<string, int>();
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
@@ -42,6 +43,8 @@ namespace Pulsar4X.SDL2UI
             MainMenu = new MainMenuItems(this);
             OpenWindows.Add(MainMenu);
             NewGameOptions = new NewGameOptions(this);
+            SettingsWindow = new SettingsWindow(this);
+            OpenWindows.Add(SettingsWindow);
 
             var logo = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
             ImageDictionary.Add("Logo", SDL.SDL_CreateTextureFromSurface(rendererPtr, logo).ToInt32());

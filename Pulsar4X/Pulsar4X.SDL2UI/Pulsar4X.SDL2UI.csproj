@@ -57,6 +57,8 @@
     <Compile Include="MapRendering\Icons\StarDrawData.cs" />
     <Compile Include="MapRendering\Icons\Icon.cs" />
     <Compile Include="MapRendering\Icons\ShipIcon.cs" />
+    <Compile Include="SettingsWindow.cs" />
+    <Compile Include="Helpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

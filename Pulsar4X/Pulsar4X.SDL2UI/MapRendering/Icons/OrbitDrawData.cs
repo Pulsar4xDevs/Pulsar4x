@@ -39,24 +39,25 @@ namespace Pulsar4X.SDL2UI
         #endregion
 
         #region Dynamic Properties
-        //focal point of the elipse this is the point the entity is orbiting around - this will change if the parent is inturn orbiting something.
-        //double _focalX;
-        //double _focalY;
-        //double _ctrPosX;
-        //double _ctrPosY;
+        //change each game update
         float _ellipseStartArcAngleRadians;
-        float _segmentArcSweepAngleRadians;
-        int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
+        float _segmentArcSweepRadians;
 
-        //user adjustable
-        float _ellipseSweepAngleRadians = 4.71239f;
-        byte _numberOfArcSegments = 180; //In the entire ellipse. this maybe needs adjusting for zoom level. 
-        SDL.SDL_Color Colour = new SDL.SDL_Color() { r = 0, g = 0, b = 100, a = 255 };
+
+        //user adjustable variables:
+        UserOrbitSettings _userSettings;
+        byte _numberOfArcSegments = 180;
+
+        //change after user makes adjustments:
+        int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
         byte _alphaChangeAmount;
+
+
         #endregion
 
-        internal OrbitDrawData(Entity entity): base(entity.GetDataBlob<PositionDB>())
+        internal OrbitDrawData(Entity entity, UserOrbitSettings settings): base(entity.GetDataBlob<PositionDB>())
         {
+            _userSettings = settings;
             _orbitDB = entity.GetDataBlob<OrbitDB>();
             _bodyPositionDB = entity.GetDataBlob<PositionDB>();
             if (_orbitDB.Parent == null)
@@ -107,22 +108,31 @@ namespace Pulsar4X.SDL2UI
                 angle += incrementAngle;
                 _points[i] = new PointD() { x = x, y = y };
             }
-
+            UpdateUserSettings();
             Update();
 
         }
 
 
+        /// <summary>
+        ///calculate anything that could have changed from the users input. 
+        /// </summary>
+        public void UpdateUserSettings()
+        {
+            //if this happens, we need to rebuild the whole set of points. 
+            if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
+            {
+                _numberOfArcSegments = _userSettings.NumberOfArcSegments;
+                Setup(); 
+            }
+            _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
+            _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
+            _alphaChangeAmount = (byte)((_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments);
+
+        }
 
         public override void Update()
         {
-            //update world position
-            /*
-            _focalX = _parentPositionDB.X;
-            _focalY = _parentPositionDB.Y;
-            _ctrPosX = _focalX - _focalDistance;
-            _ctrPosY = _focalY;
-            */
 
             //calculate the angle to the entity's position
             Vector4 pos = _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition; //adjust so moons get the right positions    
@@ -134,20 +144,12 @@ namespace Pulsar4X.SDL2UI
             _ellipseStartArcAngleRadians = (float)Angle.NormaliseRadians((Math.Atan2(normalY, normalX) * 180 / Math.PI));   
 
 
-            //calculate anything that could have changed fom the user. - we can probilby move this to another function and call it when the ui makes these changes. 
-            _segmentArcSweepAngleRadians = (float)Angle.NormaliseRadians((Math.PI * 2.0) / (_numberOfArcSegments));
-            _numberOfDrawSegments = (int)(_numberOfArcSegments / _ellipseSweepAngleRadians);
-            _alphaChangeAmount = (byte)(255 / _numberOfDrawSegments);
-
-
         }
-
-
 
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
-            //Update();
+            Update();
             byte oR, oG, oB, oA;
             SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
             SDL.SDL_BlendMode blendMode;
@@ -164,36 +166,34 @@ namespace Pulsar4X.SDL2UI
             Matrix matrix = new Matrix();
             matrix.Scale(camera.ZoomLevel);
 
-            var translatedPoints = new List<SDL.SDL_Point>();
+            var translatedPoints = new SDL.SDL_Point[_numberOfDrawSegments];
 
             //get the indexPosition in the point array we want to start drawing from - this should be where the planet is. 
-            int index = (int)(_ellipseStartArcAngleRadians / _segmentArcSweepAngleRadians); 
+            int index = (int)(_ellipseStartArcAngleRadians / _segmentArcSweepRadians); 
 
             var camerapoint = camera.CameraViewCoordinate();
-            
-            for (int i = 0; i < _numberOfArcSegments; i++)
-            {
-                if (index < _numberOfArcSegments)
+
+            for (int i = 0; i < _numberOfDrawSegments; i++)
+            {                   
+
+                if (index < _numberOfArcSegments - 1)
                     index++;
                 else
                     index = 0;
-                var translated = matrix.Transform(_points[index].x, _points[index].y);
+                
+                var translated = matrix.Transform(_points[index].x, _points[index].y); //add zoom. 
+                int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
+                int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
 
-                int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);// * zoomLevel);
-                int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);// * zoomLevel);
-                SDL.SDL_Point point = new SDL.SDL_Point() { x = x, y = y };
-                index++;
+                translatedPoints[i] = new SDL.SDL_Point() { x = x, y = y };
 
-                translatedPoints.Add(point);
             }
 
 
-
-
-            byte alpha = 255;
-            for (int i = 0; i < _numberOfArcSegments - 1; i++)
+            byte alpha = _userSettings.MaxAlpha;
+            for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, Colour.r, Colour.g, Colour.b, alpha);
+                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, alpha);
                 SDL.SDL_RenderDrawLine(rendererPtr, translatedPoints[i].x, translatedPoints[i].y, translatedPoints[i + 1].x, translatedPoints[i +1].y);
                 alpha -= _alphaChangeAmount; 
 

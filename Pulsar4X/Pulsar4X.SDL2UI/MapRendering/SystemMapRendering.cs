@@ -8,6 +8,19 @@ using ImGuiNET;
 
 namespace Pulsar4X.SDL2UI
 {
+    public class UserOrbitSettings
+    {
+        public float EllipseSweepRadians = 4.71239f;
+
+        //32 is a good low number, slightly ugly.  180 is a little overkill till you get really big orbits. 
+        public byte NumberOfArcSegments = 180; 
+
+        public byte Red = 0;
+        public byte Grn = 0;
+        public byte Blu = 255;
+        public byte MaxAlpha = 255;
+        public byte MinAlpha = 0; 
+    }
     internal class SystemMapRendering : PulsarGuiWindow
     {
         GlobalUIState _state;
@@ -18,12 +31,14 @@ namespace Pulsar4X.SDL2UI
         ImGuiSDL2CSWindow _window;
         Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, Icon> _entityIcons = new Dictionary<Guid, Icon>();
-        Dictionary<Guid, Icon> _orbitRings = new Dictionary<Guid, Icon>();
+        Dictionary<Guid, OrbitDrawData> _orbitRings = new Dictionary<Guid, OrbitDrawData>();
         Dictionary<Guid, Icon> _nameIcons = new Dictionary<Guid, Icon>();
         List<Vector4> _positions = new List<Vector4>();
         List<OrbitDB> _orbits = new List<OrbitDB>();
         SystemMap_DrawableVM _sysMap;
         Entity _faction;
+
+
 
         internal SystemMapRendering(ImGuiSDL2CSWindow window, GlobalUIState state)
         {
@@ -51,7 +66,7 @@ namespace Pulsar4X.SDL2UI
                     var orbitDB = entityItem.GetDataBlob<OrbitDB>();
                     if(!orbitDB.IsStationary)
                     {
-                        OrbitDrawData orbit = new OrbitDrawData(entityItem);
+                        OrbitDrawData orbit = new OrbitDrawData(entityItem, _state.UserOrbitSettings);
                         _orbitRings.Add(entityItem.Guid, orbit);
                     }
                 }
@@ -73,6 +88,14 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        public void UpdateUserOrbitSettings()
+        {
+            foreach (var item in _orbitRings.Values)
+            {
+                item.UpdateUserSettings();
+            }
+        }
+
         void HandleChanges()
         {
             var updates = _sysMap.GetUpdates();
@@ -83,7 +106,7 @@ namespace Pulsar4X.SDL2UI
                     if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
                     {
                         if (!((OrbitDB)changeData.Datablob).IsStationary)
-                            _orbitRings[changeData.Entity.Guid] = new OrbitDrawData(changeData.Entity);
+                            _orbitRings[changeData.Entity.Guid] = new OrbitDrawData(changeData.Entity, _state.UserOrbitSettings);
                     }
                     //if (changeData.Datablob is NameDB)
                         //TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);
