@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
     /// On Draw we translate the points both to correct for the position in world view, and for the viewscreen. 
     /// We start drawing segments from where the planet will be, and decrease the alpha channel for each segment. only drawing the number of segments required. 
     /// </summary>
-    public class OrbitDrawData : Icon
+    public class OrbitIcon : Icon
     {
         struct PointD
         {
@@ -50,12 +50,12 @@ namespace Pulsar4X.SDL2UI
 
         //change after user makes adjustments:
         int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
-        byte _alphaChangeAmount;
+        float _alphaChangeAmount;
 
 
         #endregion
 
-        internal OrbitDrawData(Entity entity, UserOrbitSettings settings): base(entity.GetDataBlob<PositionDB>())
+        internal OrbitIcon(Entity entity, UserOrbitSettings settings): base(entity.GetDataBlob<PositionDB>())
         {
             _userSettings = settings;
             _orbitDB = entity.GetDataBlob<OrbitDB>();
@@ -73,7 +73,7 @@ namespace Pulsar4X.SDL2UI
             Setup();
         }
 
-        internal OrbitDrawData(OrbitDB orbitDB, PositionDB positionDB, PositionDB parentPosDB): base(parentPosDB)
+        internal OrbitIcon(OrbitDB orbitDB, PositionDB positionDB, PositionDB parentPosDB): base(parentPosDB)
         {
             _orbitDB = orbitDB;
             _bodyPositionDB = positionDB;
@@ -93,18 +93,14 @@ namespace Pulsar4X.SDL2UI
             _focalDistance = (float)(_orbitDB.Eccentricity * _orbitEllipseMajor * 0.5f); //linear ecentricity
 
 
-
-
-            double x = 0;
-            double y = 0;
             _points = new PointD[_numberOfArcSegments + 1];
             double angle = _orbitAngleRadians;
             double incrementAngle = Math.PI * 2 / _numberOfArcSegments;
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
                 
-                x = _focalDistance + _orbitEllipseSemiMaj * Math.Sin(angle); //we add the focal distance so the focal point is "center"
-                y =  _orbitEllipseSemiMinor * Math.Cos(angle);
+                double x = _focalDistance + _orbitEllipseSemiMaj * Math.Sin(angle); //we add the focal distance so the focal point is "center"
+                double y =  _orbitEllipseSemiMinor * Math.Cos(angle);
                 angle += incrementAngle;
                 _points[i] = new PointD() { x = x, y = y };
             }
@@ -127,7 +123,7 @@ namespace Pulsar4X.SDL2UI
             }
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
-            _alphaChangeAmount = (byte)((_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments);
+            _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
 
         }
 
@@ -186,17 +182,14 @@ namespace Pulsar4X.SDL2UI
                 int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
 
                 translatedPoints[i] = new SDL.SDL_Point() { x = x, y = y };
-
             }
 
-
-            byte alpha = _userSettings.MaxAlpha;
+            float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, alpha);
+                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
                 SDL.SDL_RenderDrawLine(rendererPtr, translatedPoints[i].x, translatedPoints[i].y, translatedPoints[i + 1].x, translatedPoints[i +1].y);
                 alpha -= _alphaChangeAmount; 
-
             }
             SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
             SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);

@@ -13,9 +13,29 @@ namespace Pulsar4X.SDL2UI
         internal int MouseFrameIncrementX;
         internal int MouseFrameIncrementY;
 
-
-        private ImVec2 _cameraWorldPosition = new ImVec2(0, 0);
-        public ImVec2 WorldPosition { get { return _cameraWorldPosition; } }
+        bool IsPinnedToEntity;
+        PositionDB _entityPosDB;
+        Vector4 _camWorldPos = new Vector4();
+        public Vector4 CameraWorldPosition
+        {
+            get
+            {
+                if (IsPinnedToEntity && _entityPosDB != null)
+                    return _camWorldPos - _entityPosDB.AbsolutePosition;
+                else
+                    return _camWorldPos;
+            }
+            set
+            {
+                if (IsPinnedToEntity)
+                {
+                    IsPinnedToEntity = false;
+                }
+                _camWorldPos = value;
+            }
+        }
+                
+        //public ImVec2 WorldPosition { get { return _cameraWorldPosition; } }
 
         public ImVec2 ViewPortCenter { get { return new ImVec2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); }}
 
@@ -37,11 +57,28 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        public void PinToEntity(Entity entity)
+        {
+            if (entity.HasDataBlob<PositionDB>())
+            {
+                _entityPosDB = entity.GetDataBlob<PositionDB>();
+                _camWorldPos = new Vector4(); //zero on it. 
+                IsPinnedToEntity = true;
+            }
+        }
+        public void CenterOnEntity(Entity entity)
+        {
+            if (entity.HasDataBlob<PositionDB>())
+            {
+                _camWorldPos = entity.GetDataBlob<PositionDB>().AbsolutePosition;
+            }
+        }
+
         public Point CameraViewCoordinate()
         {
             Point point = new Point();
-            point.x = (int)(_cameraWorldPosition.x * (ZoomLevel) + ViewPortCenter.x);
-            point.y = (int)(_cameraWorldPosition.y * (ZoomLevel) + ViewPortCenter.y);
+            point.x = (int)(CameraWorldPosition.X * (ZoomLevel) + ViewPortCenter.x);
+            point.y = (int)(CameraWorldPosition.Y * (ZoomLevel) + ViewPortCenter.y);
             return point;
         }
         /// <summary>
@@ -122,8 +159,8 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void WorldOffset(double xOffset, double yOffset)
         {
-            _cameraWorldPosition.x -= (float)(xOffset * 1.0f / ZoomLevel);
-            _cameraWorldPosition.y -= (float)(yOffset * 1.0f / ZoomLevel);
+            _camWorldPos.X -= (float)(xOffset * 1.0f / ZoomLevel);
+            _camWorldPos.Y -= (float)(yOffset * 1.0f / ZoomLevel);
         }
 
 
@@ -169,8 +206,8 @@ namespace Pulsar4X.SDL2UI
         public Matrix GetViewProjectionMatrix(ImVec2 position)
         {
             var transformMatrix = new Matrix();
-            double x = _cameraWorldPosition.x + position.x;
-            double y = _cameraWorldPosition.y + position.y;
+            double x = CameraWorldPosition.X + position.x;
+            double y = CameraWorldPosition.Y + position.y;
             transformMatrix.Translate(x, y);  //ViewCoordinate(x, y));
             return transformMatrix;
         }
@@ -183,7 +220,7 @@ namespace Pulsar4X.SDL2UI
         {
             var transformMatrix = new Matrix();
 
-            transformMatrix.Translate(_cameraWorldPosition.x, _cameraWorldPosition.y);  //ViewCoordinate(x, y));
+            transformMatrix.Translate(CameraWorldPosition.X, CameraWorldPosition.Y);  //ViewCoordinate(x, y));
             return transformMatrix;
         }
     }

@@ -111,6 +111,10 @@ namespace Pulsar4X.SDL2UI
             {
                 item.Display();
             }
+            foreach (var item in _state.MapRendering._nameIcons.Values)
+            {
+                item.Draw(_state.rendererPtr, _state.Camera);
+            }
         }
 
 
@@ -121,7 +125,7 @@ namespace Pulsar4X.SDL2UI
 
             var imgSize = new SDL.SDL_Rect() { x = 0, y = 0, h = 98, w = 273 };
             SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, _logoTexture, ref imgSize, ref imgSize);
-            _state.MapRendering.Display();
+            _state.MapRendering.Draw();
 
             // Render ImGui on top of the rest.
             base.ImGuiRender();

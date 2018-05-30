@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         public byte MaxAlpha = 255;
         public byte MinAlpha = 0; 
     }
-    internal class SystemMapRendering : PulsarGuiWindow
+    internal class SystemMapRendering
     {
         GlobalUIState _state;
         Camera _camera;
@@ -31,8 +31,8 @@ namespace Pulsar4X.SDL2UI
         ImGuiSDL2CSWindow _window;
         Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, Icon> _entityIcons = new Dictionary<Guid, Icon>();
-        Dictionary<Guid, OrbitDrawData> _orbitRings = new Dictionary<Guid, OrbitDrawData>();
-        Dictionary<Guid, Icon> _nameIcons = new Dictionary<Guid, Icon>();
+        Dictionary<Guid, OrbitIcon> _orbitRings = new Dictionary<Guid, OrbitIcon>();
+        internal Dictionary<Guid, NameIcon> _nameIcons = new Dictionary<Guid, NameIcon>();
         List<Vector4> _positions = new List<Vector4>();
         List<OrbitDB> _orbits = new List<OrbitDB>();
         SystemMap_DrawableVM _sysMap;
@@ -66,7 +66,7 @@ namespace Pulsar4X.SDL2UI
                     var orbitDB = entityItem.GetDataBlob<OrbitDB>();
                     if(!orbitDB.IsStationary)
                     {
-                        OrbitDrawData orbit = new OrbitDrawData(entityItem, _state.UserOrbitSettings);
+                        OrbitIcon orbit = new OrbitIcon(entityItem, _state.UserOrbitSettings);
                         _orbitRings.Add(entityItem.Guid, orbit);
                     }
                 }
@@ -81,6 +81,10 @@ namespace Pulsar4X.SDL2UI
                 if (entityItem.HasDataBlob<ShipInfoDB>())
                 {
                     _entityIcons.Add(entityItem.Guid, new ShipIcon(entityItem));
+                }
+                if (entityItem.HasDataBlob<NameDB>())
+                {
+                    _nameIcons.Add(entityItem.Guid, new NameIcon(entityItem));
                 }
 
             }
@@ -106,7 +110,7 @@ namespace Pulsar4X.SDL2UI
                     if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
                     {
                         if (!((OrbitDB)changeData.Datablob).IsStationary)
-                            _orbitRings[changeData.Entity.Guid] = new OrbitDrawData(changeData.Entity, _state.UserOrbitSettings);
+                            _orbitRings[changeData.Entity.Guid] = new OrbitIcon(changeData.Entity, _state.UserOrbitSettings);
                     }
                     //if (changeData.Datablob is NameDB)
                         //TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);
@@ -124,11 +128,12 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        internal override void Display()
+        internal void Draw()
         {
-            Matrix matrix = new Matrix();//_camera.GetViewProjectionMatrix(); //new Matrix();
-                                         //matrix.Translate(camera.x, camera.y);
-                                         //matrix.Scale(camera.ZoomLevel);
+            Matrix matrix = new Matrix();
+
+
+
             matrix.Scale(_camera.ZoomLevel);
             if (_sysMap == null)
             {
@@ -154,6 +159,11 @@ namespace Pulsar4X.SDL2UI
                 {
                     icon.ViewScreenPos = matrix.Transform(icon.WorldPositionX, icon.WorldPositionY);
                     icon.Draw(rendererPtr, _camera);
+                }
+                foreach (var icon in _nameIcons.Values)
+                {
+                    icon.ViewScreenPos = matrix.Transform(icon.WorldPositionX, icon.WorldPositionY);
+                    //icon.Draw(rendererPtr, _camera); //cannot Begin here. 
                 }
             }
         }

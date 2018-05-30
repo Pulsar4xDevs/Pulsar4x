@@ -21,6 +21,7 @@ namespace Pulsar4X.SDL2UI
             _maxAlpha = _userOrbitSettings.MaxAlpha;
             _minAlpha = _userOrbitSettings.MinAlpha;
             _colour = Helpers.Color(_userOrbitSettings.Red, _userOrbitSettings.Grn, _userOrbitSettings.Blu);
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
         }
 
         internal override void Display()
