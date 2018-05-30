@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1)
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 &! ImGui.IO.WantCaptureMouse)
             { 
                 _state.Camera.IsGrabbingMap = true;
                 _state.Camera.MouseFrameIncrementX = e.motion.x;
