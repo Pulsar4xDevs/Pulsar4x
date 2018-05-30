@@ -48,11 +48,14 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.Begin("TimeControl", ref IsActive, _flags);
             ImGui.PushItemWidth(100);
-
+            ImGui.PushStyleColor(ImGuiCol.Header, new ImVec4(0, 0, 0, 0));
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, new ImVec4(0, 0, 0, 0));
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new ImVec4(0, 0, 0, 0));
             if (ImGui.CollapsingHeader("", _xpanderFlags))
                 _expanded = true;
             else
                 _expanded = false;
+            ImGui.PopStyleColor(3);
             ImGui.SameLine();
             if (ImGui.SliderInt("##spnSldr", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
                 AdjustTimeSpan();
