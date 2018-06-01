@@ -20,6 +20,8 @@ namespace Pulsar4X.SDL2UI
         internal NewGameOptions NewGameOptions { get; }
         internal SettingsWindow SettingsWindow { get; }
         internal SystemMapRendering MapRendering { get; set; }
+        internal DebugWindow Debug { get; set; }
+
         internal Camera Camera;// = new Camera();
         internal ImGuiSDL2CSWindow ViewPort;
         internal ImVec2 MainWinSize{get{return ViewPort.Size;}}
@@ -44,6 +46,7 @@ namespace Pulsar4X.SDL2UI
             OpenWindows.Add(MainMenu);
             NewGameOptions = new NewGameOptions(this);
             SettingsWindow = new SettingsWindow(this);
+            Debug = new DebugWindow(this);
             OpenWindows.Add(SettingsWindow);
 
             var logo = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");

@@ -34,6 +34,12 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.Begin("Settings", ref IsActive, _flags);
 
+            if (ImGui.Button("Show Debug Window"))
+            {
+                _state.OpenWindows.Add(_state.Debug);
+
+            }
+
 
             if (ImGui.CollapsingHeader("Map Settings", _xpanderFlags))
             {

@@ -81,6 +81,7 @@ namespace Pulsar4X.SDL2UI
 
             //_state.MapRendering.SetSystem(factionVM.KnownSystems[0]);
             _state.MapRendering.SetSystem(factionVM);
+            _state.Debug.SetGameEvents();
 
         }
     }

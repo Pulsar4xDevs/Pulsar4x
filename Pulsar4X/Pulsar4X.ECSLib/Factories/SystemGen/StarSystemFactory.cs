@@ -223,7 +223,64 @@ namespace Pulsar4X.ECSLib
             GameState.Instance.StarSystems.Add(Sol);
             GameState.Instance.StarSystemCurrentIndex++;
             */
-            
+
+
+            double planetSemiMajAxis = 0.387098;
+            double planetEccentricity = 0.205630;
+            double planetInclination = 0;
+            double planetLoAN = 0;//48.33167;
+            double planetLoP = 0;//77.45645;
+            double planetMeanLongd = 252.25084;
+
+            EMWaveForm waveform;
+
+            for (int i = 0; i < 8; i++)
+            {
+                NameDB planetNameDB = new NameDB("planetE" + i);
+
+                SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+                PositionDB planetPositionDB = new PositionDB(sol.Guid);
+                planetEccentricity = i * 2 / 16.0;
+                OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
+                planetPositionDB.AbsolutePosition = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
+
+                waveform = new EMWaveForm()
+                {
+                    WavelengthAverage_nm = 600,
+                    WavelengthMin_nm = 600 - 400, //4k angstrom, semi arbitrary number pulled outa my ass from 0min of internet research. 
+                    WavelengthMax_nm = 600 + 600
+                };
+
+                sensorProfile = new SensorProfileDB();
+                sensorProfile.EmittedEMSpectra.Add(waveform, 3.827e23);
+                Entity planet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+            }
+            /*
+            planetEccentricity = 0.9;
+            for (int i = 0; i < 13; i++)
+            {
+                NameDB planetNameDB = new NameDB("planetL" + i);
+                SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+                PositionDB planetPositionDB = new PositionDB(sol.Guid);
+                planetLoP = i * 15;
+                OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
+                planetPositionDB.AbsolutePosition = OrbitProcessor.GetPosition(planetOrbitDB, game.CurrentDateTime);
+
+                waveform = new EMWaveForm()
+                {
+                    WavelengthAverage_nm = 600,
+                    WavelengthMin_nm = 600 - 400, //4k angstrom, semi arbitrary number pulled outa my ass from 0min of internet research. 
+                    WavelengthMax_nm = 600 + 600
+                };
+
+                sensorProfile = new SensorProfileDB();
+                sensorProfile.EmittedEMSpectra.Add(waveform, 3.827e23);
+                Entity planet = new Entity(sol, new List<BaseDataBlob> {sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+            }
+
+            */
             JPSurveyFactory.GenerateJPSurveyPoints(sol);
 
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);

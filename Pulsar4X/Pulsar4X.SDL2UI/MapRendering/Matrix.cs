@@ -75,5 +75,29 @@ namespace Pulsar4X.SDL2UI
             }
             return newPoints;
         }
+
+
+        public PointD[] Transform(ICollection<PointD> points)
+        {
+            PointD[] newPoints = new PointD[points.Count];
+            int i = 0;
+            foreach (var item in points)
+            {
+                PointD newPoint = new PointD();
+                //multiply a 2x2 matrix by a 2x1 matrix
+                double x;
+                x = X[0] * item.x;
+                x += X[1] * item.y;
+                newPoint.x = x;
+                double y;
+                y = Y[0] * item.x;
+                y += Y[1] * item.y;
+                newPoint.y = y;
+
+                newPoints[i] = newPoint;
+                i++;
+            }
+            return newPoints;
+        }
     }
 }

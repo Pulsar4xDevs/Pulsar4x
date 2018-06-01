@@ -60,6 +60,7 @@
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="MapRendering\Icons\NameIcon.cs" />
+    <Compile Include="DebugWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

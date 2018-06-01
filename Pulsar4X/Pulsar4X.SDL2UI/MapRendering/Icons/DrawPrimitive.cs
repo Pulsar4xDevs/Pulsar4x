@@ -276,4 +276,18 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
+    public struct PointD
+    {
+        public double x;
+        public double y;
+    }
+
+    public interface IRectangle
+    {
+        int X { get; }
+        int Y { get; }
+        int Width  { get; }
+        int Height { get; }
+    }
+
 }
