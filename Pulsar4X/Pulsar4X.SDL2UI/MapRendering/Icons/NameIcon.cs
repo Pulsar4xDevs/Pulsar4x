@@ -9,21 +9,23 @@ namespace Pulsar4X.SDL2UI
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize;
         internal bool IsActive = true;
-
-        Entity _entity;
+        GlobalUIState _state;
         NameDB _nameDB;
         internal string NameString;
-
         public int Width { get; set; }
         public int Height{ get; set; }
         public int X { get { return ViewScreenPos.x; } }
         public int Y { get { return ViewScreenPos.y; } }
+        Guid _entityGuid;
 
-        public NameIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
+        public NameIcon(ref EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
-            _entity = entity;
-            _nameDB = entity.GetDataBlob<NameDB>();
+            _state = state;
+            _entityGuid = entityState.Entity.Guid;
+            _nameDB = entityState.Entity.GetDataBlob<NameDB>();
             NameString = _nameDB.DefaultName;
+            entityState.Name = NameString;
+            entityState.NameIcon = this;
         }
 
 
@@ -73,24 +75,29 @@ namespace Pulsar4X.SDL2UI
             ImVec2 pos = new ImVec2(x, y);
 
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new ImVec4(0, 0, 0, 0)); //make the background transperent. 
-
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            ImGui.Begin(NameString, ref IsActive, _flags);
-            ImGui.Text(NameString);
 
+            ImGui.Begin(NameString, ref IsActive, _flags);
+
+            ImGui.PushStyleColor(ImGuiCol.Button, new ImVec4(0, 0, 0, 0));
+            if (ImGui.Button(NameString)) //name.
+            {
+                _state.EntitySelected(_entityGuid);
+            }
+            ImGui.PopStyleColor();
             if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
             {
-                if (ImGui.SmallButton("Pin Camera"))
-                {
-                    camera.PinToEntity(_entity);
-                    ImGui.CloseCurrentPopup();
-                }
+                //if(_state.ContextMenu == null)
+                _state.ContextMenu = new EntityContextMenu(_state, _entityGuid);
+                _state.ContextMenu.Display();
 
                 ImGui.EndPopup();
             }
 
+
+
             ImGui.End();
-            ImGui.PopStyleColor(); //have to pop the color change. 
+            ImGui.PopStyleColor(); //have to pop the color change after pushing it. 
         }
 
     }

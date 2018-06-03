@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ImGuiNET;
+using ImGuiSDL2CS;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -36,6 +37,9 @@ namespace Pulsar4X.SDL2UI
             _state = state;
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
+
+
+
         }
 
         internal override void Display()
@@ -63,7 +67,8 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection))
                 AdjustTimeSpan();
             ImGui.SameLine();
-            if (ImGui.ImageButton(_state.ImageDictionary["PlayImg"], new ImVec2(18, 18), new ImVec2(0, 0), new ImVec2(18, 18), 0, new ImVec4(0, 0, 0, 0.5f), new ImVec4(0, 0, 0, 0.5f)))
+
+            if (ImGui.ImageButton(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), 0, new ImVec4(0, 0, 0, 0), new ImVec4(0, 0, 0, 0)))
                 PausePlayPressed();
             ImGui.SameLine();
             if (ImGui.Button("||>"))

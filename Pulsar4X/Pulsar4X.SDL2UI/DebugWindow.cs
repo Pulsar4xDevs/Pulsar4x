@@ -1,6 +1,7 @@
 ﻿using System;
 using ImGuiNET;
 using ImGuiSDL2CS;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -54,13 +55,27 @@ namespace Pulsar4X.SDL2UI
         {
             SetFrameRateArray();
             ImGui.Begin("debug");
-            //core game processing rate.
-            ImGui.PlotHistogram("##GRHistogram", _gameRates, _gameRateIndex, "", 0f, 2000f, new ImVec2(240, 100), 1);
+            if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
+            {
+                //core game processing rate.
+                ImGui.PlotHistogram("##GRHistogram", _gameRates, _gameRateIndex, "", 0f, 2000f, new ImVec2(240, 100), 1);
 
-            //current star system processing rate. 
+                //current star system processing rate. 
 
-            //ui framerate
-            ImGui.PlotHistogram("##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 2000f, new ImVec2(240, 100), 1);
+                //ui framerate
+                ImGui.PlotHistogram("##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 2000f, new ImVec2(240, 100), 1);
+            }
+            if (_state.LastClickedEntity.OrbitIcon != null)
+            {
+                if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name, ImGuiTreeNodeFlags.CollapsingHeader))
+                {
+                    string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
+                    string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
+                    ImGui.Text("StartAngleRadians: " + startRadian);
+                    ImGui.Text("StartAngleDegrees: " + startDegrees);
+                }
+            }   
+
             ImGui.End();
 
         }

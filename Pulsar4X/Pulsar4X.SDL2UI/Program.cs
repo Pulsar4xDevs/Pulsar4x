@@ -4,6 +4,7 @@ using SDL2;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using System.Drawing;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -22,7 +23,7 @@ namespace Pulsar4X.SDL2UI
 
     public class PulsarMainWindow : ImGuiSDL2CSWindow
     {
-        private GlobalUIState _state; // = new GlobalUIState(new Camera(this));
+        private GlobalUIState _state; 
 
         IntPtr _logoTexture;
 
@@ -40,7 +41,7 @@ namespace Pulsar4X.SDL2UI
 
             _state = new GlobalUIState(this);
             //_state.MainWinSize = this.Size;
-
+            //_state.ShowMetrixWindow = true;
             // Create any managed resources and set up the main game window here.
             _MemoryEditorData = new byte[1024];
             Random rnd = new Random();
@@ -74,7 +75,6 @@ namespace Pulsar4X.SDL2UI
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 1)
             {
                 _state.Camera.IsGrabbingMap = false;
-
             }
                  
 
@@ -106,7 +106,12 @@ namespace Pulsar4X.SDL2UI
 
         public unsafe override void ImGuiLayout()
         {
-
+            
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(), new ImVec4(255, 0, 0, 255));
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(), new ImVec4(255, 0, 0, 255));
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
+            //ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
             foreach (var item in _state.OpenWindows.ToArray())
             {
                 item.Display();
@@ -123,8 +128,12 @@ namespace Pulsar4X.SDL2UI
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
+            /*
             var imgSize = new SDL.SDL_Rect() { x = 0, y = 0, h = 98, w = 273 };
-            SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, _logoTexture, ref imgSize, ref imgSize);
+            var txtr = (IntPtr)_state.SDLImageDictionary["Logo"];
+            SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, txtr, ref imgSize, ref imgSize);
+            */
+
             _state.MapRendering.Draw();
 
             // Render ImGui on top of the rest.
@@ -138,5 +147,9 @@ namespace Pulsar4X.SDL2UI
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.Default;
         internal bool IsActive = false;
         internal abstract void Display();
+
+        internal virtual void Clicked(Entity entity)
+        { }
+
     }
 }

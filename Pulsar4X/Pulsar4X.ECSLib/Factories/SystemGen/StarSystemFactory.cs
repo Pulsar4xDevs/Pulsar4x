@@ -224,7 +224,7 @@ namespace Pulsar4X.ECSLib
             GameState.Instance.StarSystemCurrentIndex++;
             */
 
-
+            /*
             double planetSemiMajAxis = 0.387098;
             double planetEccentricity = 0.205630;
             double planetInclination = 0;
@@ -256,9 +256,9 @@ namespace Pulsar4X.ECSLib
                 sensorProfile.EmittedEMSpectra.Add(waveform, 3.827e23);
                 Entity planet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
-            /*
+
             planetEccentricity = 0.9;
-            for (int i = 0; i < 13; i++)
+            for (int i = 0; i < 8; i++)
             {
                 NameDB planetNameDB = new NameDB("planetL" + i);
                 SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
@@ -278,9 +278,9 @@ namespace Pulsar4X.ECSLib
                 sensorProfile = new SensorProfileDB();
                 sensorProfile.EmittedEMSpectra.Add(waveform, 3.827e23);
                 Entity planet = new Entity(sol, new List<BaseDataBlob> {sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
-            }
+            }*/
 
-            */
+
             JPSurveyFactory.GenerateJPSurveyPoints(sol);
 
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);

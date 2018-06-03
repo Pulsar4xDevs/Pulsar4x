@@ -3,6 +3,7 @@ using Pulsar4X.ECSLib;
 using SDL2;
 using ImGuiNET;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -13,11 +14,13 @@ namespace Pulsar4X.SDL2UI
     /// First, we set up all the static non changing variables from the entites datablobs.
     /// On Setup we create a list of points for the full ellipse, as if it was orbiting around 0,0 world coordinates. (focalPoint).
     /// as well as the orbitAngle (Longitude of the periapsis, which should be the Argument of Periapsis + Longdidtude of the Accending Node, in 2d orbits we just add these together and use the LoP)  
-    /// On Update we calculate the angle from the center of the ellipse to the planet position. TODO: (this *should* only be called when the game updates, but is currently called each frame) 
+    /// On Update we calculate the angle from the center of the ellipse to the orbiting entity. TODO: (this *should* only be called when the game updates, but is currently called each frame) 
     /// On Draw we translate the points to correct for the position in world view, and for the viewscreen and camera positions as well as zoom.
-    /// creating a tempory array of only the viewscreen point locations, which start from where the entity should be.  
+    /// We then find the index in the Point Array (created in Setup) that will be where the orbiting entity is, using the angle from the center of the ellipse to the orbiting entity. 
+    /// Using this index we create a tempory array of only the points which will be in the drawn portion of the ellipse (UserOrbitSettings.EllipseSweepRadians) which start from where the entity should be.  
     /// We start drawing segments from where the planet will be, and decrease the alpha channel for each segment.
-    /// On asjustments to settings from the user, we re-calculate needed info for that. 
+    /// On ajustments to settings from the user, we re-calculate needed info for that. (if the number of segments change, we have to recreate the point indiex so we run setup in that case) 
+    /// Currently we're not distingishing between clockwise and counter clockwise orbits, not sure if the engine even does counterclockwise, will have to check that and fix. 
     /// </summary>
     public class OrbitIcon : Icon
     {
@@ -26,7 +29,7 @@ namespace Pulsar4X.SDL2UI
         #region Static properties
         OrbitDB _orbitDB;
         PositionDB _bodyPositionDB;
-        PositionDB _parentPositionDB;
+
         float _orbitEllipseMajor;
         float _orbitEllipseSemiMaj;
         float _orbitEllipseMinor;
@@ -39,36 +42,35 @@ namespace Pulsar4X.SDL2UI
 
         #region Dynamic Properties
         //change each game update
-        float _ellipseStartArcAngleRadians;
-        float _segmentArcSweepRadians;
-
+        internal float _ellipseStartArcAngleRadians;
+        int _index;
 
         //user adjustable variables:
-        UserOrbitSettings _userSettings; 
-
+        UserOrbitSettings _userSettings;
 
         //change after user makes adjustments:
         byte _numberOfArcSegments = 180; //how many segments in a complete 360 degree ellipse. this is set in UserOrbitSettings, localy adjusted because the whole point array needs re-creating when it changes. 
         int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
+        float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         float _alphaChangeAmount;
 
 
         #endregion
 
-        internal OrbitIcon(Entity entity, UserOrbitSettings settings): base(entity.GetDataBlob<PositionDB>())
+        internal OrbitIcon(ref EntityState entityState, UserOrbitSettings settings): base(entityState.Entity.GetDataBlob<PositionDB>())
         {
+            entityState.OrbitIcon = this;
+ 
             _userSettings = settings;
-            _orbitDB = entity.GetDataBlob<OrbitDB>();
-            _bodyPositionDB = entity.GetDataBlob<PositionDB>();
-            if (_orbitDB.Parent == null)
+            _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
+            _bodyPositionDB = entityState.Entity.GetDataBlob<PositionDB>();
+            if (_orbitDB.Parent == null) //primary star
             {
                 _positionDB = _bodyPositionDB;
-                _parentPositionDB = _positionDB;
             }
-            else
+            else 
             {
-                _parentPositionDB = _orbitDB.Parent.GetDataBlob<PositionDB>();
-                _positionDB = _parentPositionDB;
+                _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position. 
             }
             Setup();
         }
@@ -77,13 +79,12 @@ namespace Pulsar4X.SDL2UI
         {
             _orbitDB = orbitDB;
             _bodyPositionDB = positionDB;
-            _parentPositionDB = parentPosDB;
+
             Setup();
         }
 
         private void Setup()
         {
-            //ShapesScaleWithZoom = true;
             _orbitEllipseSemiMaj = (float)_orbitDB.SemiMajorAxis;
             _orbitEllipseMajor = _orbitEllipseSemiMaj * 2; //Major Axis
             _orbitEllipseMinor = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
@@ -95,7 +96,8 @@ namespace Pulsar4X.SDL2UI
 
             _points = new PointD[_numberOfArcSegments + 1];
             double angle = 0;//_orbitAngleRadians;
-            double incrementAngle = Math.PI * 2 / _numberOfArcSegments;
+
+            UpdateUserSettings();
 
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
@@ -103,14 +105,13 @@ namespace Pulsar4X.SDL2UI
                 double x1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _focalDistance; //we add the focal distance so the focal point is "center"
                 double y1 = _orbitEllipseSemiMinor * Math.Cos(angle);
 
+                //rotates the points to allow for the LongditudeOfPeriapsis. 
                 double x2 = (x1 * Math.Cos(_orbitAngleRadians)) - (y1 * Math.Sin(_orbitAngleRadians));
                 double y2 = (x1 * Math.Sin(_orbitAngleRadians)) + (y1 * Math.Cos(_orbitAngleRadians));
-                angle += incrementAngle;
+                angle += _segmentArcSweepRadians;
                 _points[i] = new PointD() { x = x2, y = y2 };
             }
 
-
-            UpdateUserSettings();
             Update();
 
         }
@@ -137,53 +138,55 @@ namespace Pulsar4X.SDL2UI
         public override void Update()
         {
 
-    
             //adjust so moons get the right positions  
-            Vector4 pos = _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition;   
+            Vector4 pos = _bodyPositionDB.AbsolutePosition;// - _positionDB.AbsolutePosition;   
+            PointD pointD = new PointD() { x = pos.X, y = pos.Y };
+
+            /* this gets the index by attempting to find the angle between the body and the center of the ellipse. possibly faster, but math is hard. 
             //adjust for focal point
-            pos.X -= _focalDistance; 
-            //get the angle to the position.
-            _ellipseStartArcAngleRadians = (float)Math.Atan2(pos.Y, pos.X);   
+            pos.X += _focalDistance; 
 
+            //rotate to the LonditudeOfPeriapsis. 
+            double x2 = (pos.X * Math.Cos(-_orbitAngleRadians)) - (pos.Y * Math.Sin(-_orbitAngleRadians));
+            double y2 = (pos.X * Math.Sin(-_orbitAngleRadians)) + (pos.Y * Math.Cos(-_orbitAngleRadians));
 
-        }
+            _ellipseStartArcAngleRadians = (float)(Math.Atan2(y2, x2));  //Atan2 returns a value between -180 and 180; 
 
-        void debugUpdate() //an attempt at drawing some lines and points to help figuring out the bugs. 
-        { 
-            
-            //calculate the angle to the entity's position
-            Vector4 pos = _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition; //adjust so moons get the right positions    
+            //PointD pnt = _points.OrderBy(p => CalcDistance(p, new PointD() {x = pos.X, y = pos.Y })).First();
 
-            List<SDL.SDL_Point> points = new List<SDL.SDL_Point>();
-            SDL.SDL_Color colour;
-            /*
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X - 5), y = (int)(pos.Y) });
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X + 5), y = (int)(pos.Y) });
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X), y = (int)(pos.Y - 5) });
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X), y = (int)(pos.Y + 5) });
-            colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
-            Shapes.Add(new Shape() { Color = colour, Points = points.ToArray() });
+            //get the indexPosition in the point array we want to start drawing from: this should be the segment where the planet is. 
+            double unAdjustedIndex = (_ellipseStartArcAngleRadians / _segmentArcSweepRadians);
+            while (unAdjustedIndex < 0)
+            {
+                unAdjustedIndex += (2 * Math.PI);
+            }
+            _index = (int)unAdjustedIndex;
             */
 
-            pos.X -= _focalDistance; //adjust for focal point
 
-            //this doesn't work because world positions too small and doubles -> int loss. 
-            points = new List<SDL.SDL_Point>(); 
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X - 5), y = (int)(pos.Y) });
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X + 5), y = (int)(pos.Y) });
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X), y = (int)(pos.Y - 5) });
-            points.Add(new SDL.SDL_Point() { x = (int)(pos.X), y = (int)(pos.Y + 5) });
-            colour = new SDL.SDL_Color() { r = 255, g = 255, b = 0, a = 255 };
-            Shapes.Add(new Shape() { Color = colour, Points = points.ToArray() });
+            double minDist = CalcDistance(pointD, _points[_index]);
 
-            _ellipseStartArcAngleRadians = (float)Angle.NormaliseRadians(Math.Atan2(pos.Y, pos.X));    
-
- 
+            for (int i =0; i < _points.Count(); i++)
+            {
+                double dist = CalcDistance(pointD, _points[i]);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    _index = i;
+                }
+            }
         }
+
+        double CalcDistance(PointD p1, PointD p2)
+        {
+            return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) +(p1.y - p2.y) * (p1.y - p2.y));
+        }
+
+
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
-            //debugUpdate();
+
             Update();
             base.Draw(rendererPtr, camera);
             byte oR, oG, oB, oA;
@@ -197,14 +200,7 @@ namespace Pulsar4X.SDL2UI
             Matrix matrix = new Matrix();
             matrix.Scale(camera.ZoomLevel);
 
-            //get the indexPosition in the point array we want to start drawing from: this should be the segment where the planet is. 
-            double normIndex = (_ellipseStartArcAngleRadians / _segmentArcSweepRadians);
-            while (normIndex < 0)
-            {
-                normIndex += (2 * Math.PI);
-            }
-            int index = (int)normIndex;
-
+            int index = _index;
             var camerapoint = camera.CameraViewCoordinate();
             var translatedPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)

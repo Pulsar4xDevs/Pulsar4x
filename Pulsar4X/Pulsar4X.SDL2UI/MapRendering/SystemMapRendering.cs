@@ -38,6 +38,7 @@ namespace Pulsar4X.SDL2UI
         SystemMap_DrawableVM _sysMap;
         Entity _faction;
 
+        internal Dictionary<Guid, EntityState> IconEntityStates = new Dictionary<Guid, EntityState>();
 
 
         internal SystemMapRendering(ImGuiSDL2CSWindow window, GlobalUIState state)
@@ -61,12 +62,18 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var entityItem in _sysMap.IconableEntitys)
             {
+                var entityState = new EntityState() { Entity = entityItem, Name = "Unknown"  };
+
+                if (entityItem.HasDataBlob<NameDB>())
+                {
+                    _nameIcons.Add(entityItem.Guid, new NameIcon(ref entityState, _state));
+                }
                 if (entityItem.HasDataBlob<OrbitDB>())
                 {
                     var orbitDB = entityItem.GetDataBlob<OrbitDB>();
                     if(!orbitDB.IsStationary)
                     {
-                        OrbitIcon orbit = new OrbitIcon(entityItem, _state.UserOrbitSettings);
+                        OrbitIcon orbit = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
                         _orbitRings.Add(entityItem.Guid, orbit);
                     }
                 }
@@ -82,11 +89,8 @@ namespace Pulsar4X.SDL2UI
                 {
                     _entityIcons.Add(entityItem.Guid, new ShipIcon(entityItem));
                 }
-                if (entityItem.HasDataBlob<NameDB>())
-                {
-                    _nameIcons.Add(entityItem.Guid, new NameIcon(entityItem));
-                }
 
+                IconEntityStates.Add(entityItem.Guid, entityState);
             }
 
 
@@ -110,7 +114,16 @@ namespace Pulsar4X.SDL2UI
                     if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
                     {
                         if (!((OrbitDB)changeData.Datablob).IsStationary)
-                            _orbitRings[changeData.Entity.Guid] = new OrbitIcon(changeData.Entity, _state.UserOrbitSettings);
+                        {
+                            EntityState entityState;
+                            if (IconEntityStates.ContainsKey(changeData.Entity.Guid))
+                                entityState = IconEntityStates[changeData.Entity.Guid];
+                            else
+                                entityState = new EntityState() { Entity = changeData.Entity, Name = "Unknown" };
+                            
+                            _orbitRings[changeData.Entity.Guid] = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
+                        
+                        }
                     }
                     //if (changeData.Datablob is NameDB)
                         //TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);

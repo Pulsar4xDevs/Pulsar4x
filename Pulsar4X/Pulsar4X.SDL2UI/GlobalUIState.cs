@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using ImGuiSDL2CS;
+using Pulsar4X.ECSLib;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace Pulsar4X.SDL2UI
         internal ECSLib.FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
         internal ECSLib.Entity Faction { get { return FactionUIState.FactionEntity; } }
-
+        internal bool ShowMetrixWindow;
         internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;
 
@@ -20,6 +21,8 @@ namespace Pulsar4X.SDL2UI
         internal NewGameOptions NewGameOptions { get; }
         internal SettingsWindow SettingsWindow { get; }
         internal SystemMapRendering MapRendering { get; set; }
+        internal EntityContextMenu ContextMenu { get; set; }
+        internal IOrderWindow ActiveOrderWidow { get; set; }
         internal DebugWindow Debug { get; set; }
 
         internal Camera Camera;// = new Camera();
@@ -27,9 +30,12 @@ namespace Pulsar4X.SDL2UI
         internal ImVec2 MainWinSize{get{return ViewPort.Size;}}
 
         internal List<PulsarGuiWindow> OpenWindows = new List<PulsarGuiWindow>();
-        //internal PulsarGuiWindow ActiveWindow { get; set; }
+        internal PulsarGuiWindow ActiveWindow { get; set; }
         internal UserOrbitSettings UserOrbitSettings = new UserOrbitSettings();
-        internal Dictionary<string, int> ImageDictionary = new Dictionary<string, int>();
+        internal Dictionary<string, int> SDLImageDictionary = new Dictionary<string, int>();
+        internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
+
+        internal EntityState LastClickedEntity;
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
@@ -46,15 +52,33 @@ namespace Pulsar4X.SDL2UI
             OpenWindows.Add(MainMenu);
             NewGameOptions = new NewGameOptions(this);
             SettingsWindow = new SettingsWindow(this);
+            //ContextMenu = new EntityContextMenu(this);
             Debug = new DebugWindow(this);
+
             OpenWindows.Add(SettingsWindow);
 
-            var logo = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
-            ImageDictionary.Add("Logo", SDL.SDL_CreateTextureFromSurface(rendererPtr, logo).ToInt32());
+            IntPtr logoPtr = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
+            SDLImageDictionary.Add("Logo", SDL.SDL_CreateTextureFromSurface(rendererPtr, logoPtr).ToInt32());
 
-            IntPtr playImg = SDL.SDL_LoadBMP("Resources/Play.bmp");
-            ImageDictionary.Add("PlayImg", SDL.SDL_CreateTextureFromSurface(rendererPtr, playImg).ToInt32());
+            IntPtr playImgPtr = SDL.SDL_LoadBMP("Resources/Play.bmp");
+            SDLImageDictionary.Add("PlayImg", SDL.SDL_CreateTextureFromSurface(rendererPtr, playImgPtr).ToInt32());
 
+
+            int gltxtrID;
+            GL.GenTextures(1, out gltxtrID);
+            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, gltxtrID);
+            GL.PixelStorei(GL.Enum.GL_UNPACK_ROW_LENGTH, 0);
+            GL.TexImage2D(GL.Enum.GL_TEXTURE_2D, 0, (int)GL.Enum.GL_RGBA, 16, 16, 0, GL.Enum.GL_RGBA, GL.Enum.GL_UNSIGNED_BYTE, playImgPtr);
+
+            GLImageDictionary["PlayImg"] = gltxtrID;
+            GL.Enable(GL.Enum.GL_TEXTURE_2D);
+        }
+
+        internal void EntitySelected(Guid entityGuid)
+        {
+            LastClickedEntity = MapRendering.IconEntityStates[entityGuid];
+            if (ActiveOrderWidow != null)
+                ActiveOrderWidow.TargetEntity(LastClickedEntity);
         }
     }
 }

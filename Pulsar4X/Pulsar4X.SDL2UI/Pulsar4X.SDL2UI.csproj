@@ -61,6 +61,7 @@
     <Compile Include="Helpers.cs" />
     <Compile Include="MapRendering\Icons\NameIcon.cs" />
     <Compile Include="DebugWindow.cs" />
+    <Compile Include="EntityContextMenu.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
