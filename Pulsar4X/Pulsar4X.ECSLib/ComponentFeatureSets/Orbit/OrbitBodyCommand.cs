@@ -25,6 +25,21 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore] Entity _factionEntity;
 
 
+
+        public static void CreateOrbitBodyCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid targetEntity, double ApihelionKm, double PerhelionKm)
+        {
+            var cmd = new OrbitBodyCommand()
+            {
+                RequestingFactionGuid = factionGuid,
+                EntityCommandingGuid = orderEntity,
+                CreatedDate = starSysDate,
+                TargetEntityGuid = targetEntity,
+                ApihelionInKM = ApihelionKm,
+                PerhelionInKM = PerhelionKm,
+            };
+            game.OrderHandler.HandleOrder(cmd);
+        }
+
         internal override bool IsValidCommand(Game game)
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))

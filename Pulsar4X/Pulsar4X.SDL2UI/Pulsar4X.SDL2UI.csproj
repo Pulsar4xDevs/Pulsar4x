@@ -51,10 +51,10 @@
     <Compile Include="MainMenuItems.cs" />
     <Compile Include="MapRendering\Camera.cs" />
     <Compile Include="MapRendering\Icons\TestDrawIconData.cs" />
-    <Compile Include="MapRendering\Icons\PlanetDrawData.cs" />
+    <Compile Include="MapRendering\Icons\SysBodyIcon.cs" />
     <Compile Include="MapRendering\Icons\DrawPrimitive.cs" />
     <Compile Include="MapRendering\Icons\OrbitIcon.cs" />
-    <Compile Include="MapRendering\Icons\StarDrawData.cs" />
+    <Compile Include="MapRendering\Icons\StarIcon.cs" />
     <Compile Include="MapRendering\Icons\Icon.cs" />
     <Compile Include="MapRendering\Icons\ShipIcon.cs" />
     <Compile Include="SettingsWindow.cs" />

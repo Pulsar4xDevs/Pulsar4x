@@ -4,14 +4,14 @@ using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
-    class PlanetDrawData : Icon
+    class SysBodyIcon : Icon
     {
         SystemBodyInfoDB _systemBodyInfoDB;
         BodyType _bodyType;
         MassVolumeDB _massVolDB;
         Random _rng;
 
-        public PlanetDrawData(Entity entity): base(entity.GetDataBlob<PositionDB>())
+        public SysBodyIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _positionDB = entity.GetDataBlob<PositionDB>();
             Setup(entity);
@@ -41,15 +41,15 @@ namespace Pulsar4X.SDL2UI
 
             if (entity.HasDataBlob<AtmosphereDB>())
             {
-                
+
             }
         }
 
         void Terestrial()
         {
 
-            int vertDiameter = 16;
-            int horDiameter = 16;
+            int vertDiameter = 8;
+            int horDiameter = 8;
             int segments = 32;
             var points = CreatePrimitiveShapes.CreateArc(0, 0, horDiameter, vertDiameter, 0, Math.PI * 2, segments);
 
@@ -66,19 +66,19 @@ namespace Pulsar4X.SDL2UI
 
         void Asteroid()
         {
-            int vertDiameter = _rng.Next(8, 16);
-            int horDiameter = _rng.Next(8, 16);
+            int vertDiameter = _rng.Next(4, 8);
+            int horDiameter = _rng.Next(4, 8);
             int segments = _rng.Next(8, 32);
             int jagMax = _rng.Next(5, 8);
             int jagMin = _rng.Next(4, jagMax);
 
             var points = CreatePrimitiveShapes.CreateArc(0, 0, horDiameter, vertDiameter, 0, Math.PI * 2, segments);
-            for (int i = 0; i < segments; i = i+2)
+            for (int i = 0; i < segments; i = i + 2)
             {
                 //this is not right, need to pull the points in towards the center, not just pull them left. 
-                int x = points[i].x - _rng.Next(jagMin, jagMax);
-                int y = points[i].y - _rng.Next(jagMin, jagMax);
-                points[i] = new SDL2.SDL.SDL_Point() { x = x, y = y };
+                double x = points[i].x - _rng.Next(jagMin, jagMax);
+                double y = points[i].y - _rng.Next(jagMin, jagMax);
+                points[i] = new PointD() { x = x, y = y };
             }
             //colors picked out of my ass for a brown look. 
             //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 
@@ -92,9 +92,9 @@ namespace Pulsar4X.SDL2UI
 
         void Unknown()
         {
-            int vertDiameter = 16;
-            int horDiameter = 16;
-            int segments = 16;
+            int vertDiameter = 8;
+            int horDiameter = 8;
+            int segments = 8;
             var points = CreatePrimitiveShapes.CreateArc(0, 0, horDiameter, vertDiameter, 0, Math.PI * 2, segments);
 
             //colors picked out of my ass for a blue/green look. 
@@ -109,3 +109,4 @@ namespace Pulsar4X.SDL2UI
 
     }
 }
+

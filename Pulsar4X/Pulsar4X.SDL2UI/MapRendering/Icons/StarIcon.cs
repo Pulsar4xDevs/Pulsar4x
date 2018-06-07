@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
-    class StarDrawData : Icon
+    class StarIcon : Icon
     {
         double _tempK;
         SDL.SDL_Color _color;
 
-        public StarDrawData(Entity entity): base(entity.GetDataBlob<PositionDB>())
+        public StarIcon(Entity entity): base(entity.GetDataBlob<PositionDB>())
         {
             StarInfoDB starInfo = entity.GetDataBlob<StarInfoDB>();
             _tempK = starInfo.Temperature + 273.15;
@@ -53,18 +53,18 @@ namespace Pulsar4X.SDL2UI
             byte spikeDepth = 8;
             double arc = (2 * Math.PI) / spikes;
             double startAngle = 1.5708 - arc / 2;
-            List<SDL.SDL_Point> shapePoints = new List<SDL.SDL_Point>();
+            List<PointD> shapePoints = new List<PointD>();
             for (int i = 0; i < spikes; i++)
             {
                 var a1 = arc * i;
                 int x1 = (int)(0 * Math.Cos(a1) - spikeheight * Math.Sin(a1));
                 int y1 = (int)(0 * Math.Sin(a1) + spikeheight * Math.Cos(a1));
-                var p1 = new SDL.SDL_Point() { x = x1, y = y1 };
+                var p1 = new PointD() { x = x1, y = y1 };
 
                 var a2 = a1 + arc * 0.5;
                 int x2 = (int)(0 * Math.Cos(a2) - spikeDepth * Math.Sin(a2));
                 int y2 = (int)(0 * Math.Sin(a2) + spikeDepth * Math.Cos(a2));
-                var p2 = new SDL.SDL_Point() { x = x2, y = y2 };
+                var p2 = new PointD() { x = x2, y = y2 };
 
                 shapePoints.Add(p1);
                 shapePoints.Add(p2);

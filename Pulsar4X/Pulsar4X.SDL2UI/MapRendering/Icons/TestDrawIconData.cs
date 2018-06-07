@@ -21,13 +21,13 @@ namespace Pulsar4X.SDL2UI
         {
             
             List<Shape> shapes = new List<Shape>();
-            SDL.SDL_Point[] lpoints1 = new SDL.SDL_Point[] {
-                new SDL.SDL_Point { x = 0, y = -160 },
-                new SDL.SDL_Point { x = 0, y = 160 },
+            PointD[] lpoints1 = new PointD[] {
+                new PointD { x = 0, y = -160 },
+                new PointD { x = 0, y = 160 },
             };
-            SDL.SDL_Point[] lpoints2 = new SDL.SDL_Point[] {
-                new SDL.SDL_Point { x = -25, y = 0 },
-                new SDL.SDL_Point { x = 25, y = 0 }
+            PointD[] lpoints2 = new PointD[] {
+                new PointD { x = -25, y = 0 },
+                new PointD { x = 25, y = 0 }
             };
             SDL.SDL_Color lcolor = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
             shapes.Add( new Shape() { Points = lpoints1, Color = lcolor });
@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
 
             for (int i = 0; i < 4; i++)
             {
-                SDL.SDL_Point[] points = CreatePrimitiveShapes.CreateArc(50 + 50 * i, 400, 100, 100, 0, 4.71, 160);
+                PointD[] points = CreatePrimitiveShapes.CreateArc(50 + 50 * i, 400, 100, 100, 0, 4.71, 160);
                 SDL.SDL_Color color = new SDL.SDL_Color() { r = (byte)(i * 60), g = 100, b = 100, a = 255 };
                 Shape shape = new Shape() { Points = points, Color = color };
                 PositionDB pos1 = new PositionDB(new Vector4(0, 0, 0, 0), new Guid());

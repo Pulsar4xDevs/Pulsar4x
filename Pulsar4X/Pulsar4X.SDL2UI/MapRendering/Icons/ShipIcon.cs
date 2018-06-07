@@ -95,18 +95,18 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
 
 
-            SDL.SDL_Point p0 = new SDL.SDL_Point() { x = offsetX, y = (int)(offsetY - height * 0.5) };
-            SDL.SDL_Point p1 = new SDL.SDL_Point() { x = offsetX + frontWidth, y = (int)(offsetY - height * 0.5) };
-            SDL.SDL_Point p2 = new SDL.SDL_Point() { x = (int)(offsetX + width * 0.5), y = (int)(offsetY - height * 0.3) };
-            SDL.SDL_Point p3 = new SDL.SDL_Point() { x = (int)(offsetX + width * 0.5), y = -(int)(offsetY - height * 0.25) };
-            SDL.SDL_Point p4 = new SDL.SDL_Point() { x = offsetX + backWidth, y = -(int)(offsetY - height * 0.5) };
-            SDL.SDL_Point p5 = new SDL.SDL_Point() { x = offsetX, y = -(int)(offsetY - height * 0.5) };
-            SDL.SDL_Point p6 = new SDL.SDL_Point() { x = offsetX - backWidth, y = (int)(offsetY + height * 0.5) };
-            SDL.SDL_Point p7 = new SDL.SDL_Point() { x = (int)(offsetX + -width * 0.5), y = (int)(offsetY + height * 0.25) };
-            SDL.SDL_Point p8 = new SDL.SDL_Point() { x = (int)(offsetX + -width * 0.5), y = -(int)(offsetY + height * 0.3) };
-            SDL.SDL_Point p9 = new SDL.SDL_Point() { x = offsetX - frontWidth, y = -(int)(offsetY + height * 0.5) };
-            SDL.SDL_Point p10 = new SDL.SDL_Point() { x = offsetX, y = -(int)(offsetY + height * 0.5) };
-            var shape = new Shape() { Color = colour, Points = new SDL.SDL_Point[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 } };
+            PointD p0 = new PointD() { x = offsetX, y = (int)(offsetY - height * 0.5) };
+            PointD p1 = new PointD() { x = offsetX + frontWidth, y = (int)(offsetY - height * 0.5) };
+            PointD p2 = new PointD() { x = (int)(offsetX + width * 0.5), y = (int)(offsetY - height * 0.3) };
+            PointD p3 = new PointD() { x = (int)(offsetX + width * 0.5), y = -(int)(offsetY - height * 0.25) };
+            PointD p4 = new PointD() { x = offsetX + backWidth, y = -(int)(offsetY - height * 0.5) };
+            PointD p5 = new PointD() { x = offsetX, y = -(int)(offsetY - height * 0.5) };
+            PointD p6 = new PointD() { x = offsetX - backWidth, y = (int)(offsetY + height * 0.5) };
+            PointD p7 = new PointD() { x = (int)(offsetX + -width * 0.5), y = (int)(offsetY + height * 0.25) };
+            PointD p8 = new PointD() { x = (int)(offsetX + -width * 0.5), y = -(int)(offsetY + height * 0.3) };
+            PointD p9 = new PointD() { x = offsetX - frontWidth, y = -(int)(offsetY + height * 0.5) };
+            PointD p10 = new PointD() { x = offsetX, y = -(int)(offsetY + height * 0.5) };
+            var shape = new Shape() { Color = colour, Points = new PointD[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 } };
             Shapes.Add(shape);
                 
 

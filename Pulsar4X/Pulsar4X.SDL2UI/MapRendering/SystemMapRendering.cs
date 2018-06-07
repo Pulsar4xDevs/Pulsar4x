@@ -59,9 +59,12 @@ namespace Pulsar4X.SDL2UI
         {
             _sysMap = factionVM.SystemMap;
             _faction = _state.Faction;
+            _sysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
 
             foreach (var entityItem in _sysMap.IconableEntitys)
             {
+
+
                 var entityState = new EntityState() { Entity = entityItem, Name = "Unknown"  };
 
                 if (entityItem.HasDataBlob<NameDB>())
@@ -79,11 +82,11 @@ namespace Pulsar4X.SDL2UI
                 }
                 if (entityItem.HasDataBlob<StarInfoDB>())
                 {
-                    _entityIcons.Add(entityItem.Guid, new StarDrawData(entityItem));
+                    _entityIcons.Add(entityItem.Guid, new StarIcon(entityItem));
                 }
                 if (entityItem.HasDataBlob<SystemBodyInfoDB>())
                 {
-                    _entityIcons.Add(entityItem.Guid, new PlanetDrawData(entityItem));
+                    _entityIcons.Add(entityItem.Guid, new SysBodyIcon(entityItem));
                 }
                 if (entityItem.HasDataBlob<ShipInfoDB>())
                 {
@@ -95,6 +98,27 @@ namespace Pulsar4X.SDL2UI
 
 
         }
+
+        void OnSystemDateChange(DateTime newDate)
+        {
+            if (_sysMap.UpdatesReady)
+                HandleChanges();
+
+            foreach (var icon in _orbitRings.Values)
+            {
+                icon.OnPhysicsUpdate();
+            }
+            foreach (var icon in _entityIcons.Values)
+            {
+
+                icon.OnPhysicsUpdate();
+            }
+            foreach (var icon in _nameIcons.Values)
+            {
+                icon.OnPhysicsUpdate();
+            }
+        }
+
 
         public void UpdateUserOrbitSettings()
         {
@@ -211,41 +235,56 @@ namespace Pulsar4X.SDL2UI
 
         internal void Draw()
         {
+
+            byte oR, oG, oB, oA;
+            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
+            SDL.SDL_BlendMode blendMode;
+            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
             Matrix matrix = new Matrix();
-
-
-
             matrix.Scale(_camera.ZoomLevel);
+
             if (_sysMap == null)
             {
-                foreach (var item in _testIcons.Values)
+                foreach (var icon in _testIcons.Values)
                 {
-                    item.ViewScreenPos = matrix.Transform(item.WorldPositionX, item.WorldPositionY);
-                    item.Draw(rendererPtr, _camera);
+                    icon.ViewScreenPos = matrix.Transform(icon.WorldPosition.X, icon.WorldPosition.Y);
+                    icon.Draw(rendererPtr, _camera);
                 }
             }
             else
             {
-                if (_sysMap.UpdatesReady)
-                    HandleChanges();
-
 
 
                 foreach (var icon in _orbitRings.Values)
                 {
-                    icon.ViewScreenPos = matrix.Transform(icon.WorldPositionX, icon.WorldPositionY);
+                    icon.OnFrameUpdate(matrix, _camera);
+                }
+                foreach (var icon in _entityIcons.Values)
+                {
+
+                    icon.OnFrameUpdate(matrix, _camera);
+                }
+                foreach (var icon in _nameIcons.Values)
+                {
+                    icon.OnFrameUpdate(matrix, _camera);
+                }
+
+
+                foreach (var icon in _orbitRings.Values)
+                {
+                    
                     icon.Draw(rendererPtr, _camera);
                 }
                 foreach (var icon in _entityIcons.Values)
                 {
-                    icon.ViewScreenPos = matrix.Transform(icon.WorldPositionX, icon.WorldPositionY);
                     icon.Draw(rendererPtr, _camera);
                 }
-                foreach (var icon in _nameIcons.Values)
-                {
-                    icon.ViewScreenPos = matrix.Transform(icon.WorldPositionX, icon.WorldPositionY);
-                    //icon.Draw(rendererPtr, _camera); //cannot Begin here. 
-                }
+
+
+                SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
+                SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
             }
         }
     }

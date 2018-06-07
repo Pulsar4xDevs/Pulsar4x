@@ -25,7 +25,6 @@ namespace Pulsar4X.SDL2UI
     public class OrbitIcon : Icon
     {
 
-        
         #region Static properties
         OrbitDB _orbitDB;
         PositionDB _bodyPositionDB;
@@ -38,6 +37,7 @@ namespace Pulsar4X.SDL2UI
         float _orbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
         float _focalDistance; //distance from the center of the ellpse to one of the focal points. 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        SDL.SDL_Point[] _drawPoints;
         #endregion
 
         #region Dynamic Properties
@@ -72,36 +72,33 @@ namespace Pulsar4X.SDL2UI
             {
                 _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position. 
             }
-            Setup();
-        }
 
-        internal OrbitIcon(OrbitDB orbitDB, PositionDB positionDB, PositionDB parentPosDB): base(parentPosDB)
-        {
-            _orbitDB = orbitDB;
-            _bodyPositionDB = positionDB;
-
-            Setup();
-        }
-
-        private void Setup()
-        {
             _orbitEllipseSemiMaj = (float)_orbitDB.SemiMajorAxis;
             _orbitEllipseMajor = _orbitEllipseSemiMaj * 2; //Major Axis
             _orbitEllipseMinor = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
             _orbitEllipseSemiMinor = _orbitEllipseMinor * 0.5f;
             _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis * 2); //This is the LoP + AoP.
-            _orbitAngleRadians = (float)Angle.NormaliseRadians( Angle.ToRadians(_orbitAngleDegrees));
+            _orbitAngleRadians = (float)Angle.NormaliseRadians(Angle.ToRadians(_orbitAngleDegrees));
             _focalDistance = (float)(_orbitDB.Eccentricity * _orbitEllipseMajor * 0.5f); //linear ecentricity
 
-
-            _points = new PointD[_numberOfArcSegments + 1];
-            double angle = 0;//_orbitAngleRadians;
-
             UpdateUserSettings();
+            CreatePointArray();
 
+            OnPhysicsUpdate();
+
+      
+
+        }
+
+
+
+        void CreatePointArray()
+        {
+            _points = new PointD[_numberOfArcSegments + 1];
+            double angle = 0;
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
-                
+
                 double x1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _focalDistance; //we add the focal distance so the focal point is "center"
                 double y1 = _orbitEllipseSemiMinor * Math.Cos(angle);
 
@@ -111,9 +108,6 @@ namespace Pulsar4X.SDL2UI
                 angle += _segmentArcSweepRadians;
                 _points[i] = new PointD() { x = x2, y = y2 };
             }
-
-            Update();
-
         }
 
 
@@ -126,7 +120,7 @@ namespace Pulsar4X.SDL2UI
             if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
             {
                 _numberOfArcSegments = _userSettings.NumberOfArcSegments;
-                Setup(); 
+                CreatePointArray();
             }
 
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
@@ -135,14 +129,17 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        public override void Update()
+
+        /*
+         * this gets the index by attempting to find the angle between the body and the center of the ellipse. possibly faster, but math is hard. 
+        public override void OnPhysicsUpdate()
         {
 
             //adjust so moons get the right positions  
             Vector4 pos = _bodyPositionDB.AbsolutePosition;// - _positionDB.AbsolutePosition;   
             PointD pointD = new PointD() { x = pos.X, y = pos.Y };
 
-            /* this gets the index by attempting to find the angle between the body and the center of the ellipse. possibly faster, but math is hard. 
+             
             //adjust for focal point
             pos.X += _focalDistance; 
 
@@ -161,8 +158,15 @@ namespace Pulsar4X.SDL2UI
                 unAdjustedIndex += (2 * Math.PI);
             }
             _index = (int)unAdjustedIndex;
-            */
 
+        }
+*/
+
+        public override void OnPhysicsUpdate()
+        {
+
+            Vector4 pos = _bodyPositionDB.AbsolutePosition;
+            PointD pointD = new PointD() { x = pos.X, y = pos.Y };
 
             double minDist = CalcDistance(pointD, _points[_index]);
 
@@ -183,53 +187,46 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-
-        public override void Draw(IntPtr rendererPtr, Camera camera)
+        public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
-            Update();
-            base.Draw(rendererPtr, camera);
-            byte oR, oG, oB, oA;
-            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-            SDL.SDL_BlendMode blendMode;
-            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
 
 
             //get matrix transformations for zoom
-            Matrix matrix = new Matrix();
-            matrix.Scale(camera.ZoomLevel);
+            //Matrix matrix2 = new Matrix();
+            //matrix2.Scale(camera.ZoomLevel);
 
             int index = _index;
             var camerapoint = camera.CameraViewCoordinate();
-            var translatedPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
-            {                   
+            {
 
                 if (index < _numberOfArcSegments - 1)
                     index++;
                 else
                     index = 0;
-                
+
                 var translated = matrix.Transform(_points[index].x, _points[index].y); //add zoom transformation. 
 
                 //translate everything to viewscreen & camera positions
-                int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x); 
+                int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
                 int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
 
-                translatedPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+                _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }
+        }
 
+        public override void Draw(IntPtr rendererPtr, Camera camera)
+        {
             //now we draw a line between each of the points in the translatedPoints[] array.
             float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
                 SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
-                SDL.SDL_RenderDrawLine(rendererPtr, translatedPoints[i].x, translatedPoints[i].y, translatedPoints[i + 1].x, translatedPoints[i +1].y);
+                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
                 alpha -= _alphaChangeAmount; 
             }
-            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
     }
 }

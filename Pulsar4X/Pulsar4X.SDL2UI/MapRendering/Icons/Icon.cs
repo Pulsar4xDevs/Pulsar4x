@@ -7,7 +7,8 @@ namespace Pulsar4X.SDL2UI
 
     public interface IDrawData
     {
-        void Update();
+        void OnFrameUpdate(Matrix matrix, Camera camera);
+        void OnPhysicsUpdate();
         void Draw(IntPtr rendererPtr, Camera camera);
     }
 
@@ -17,7 +18,7 @@ namespace Pulsar4X.SDL2UI
     public struct Shape
     {
         public SDL.SDL_Color Color;    //could change due to entity changes. 
-        public SDL.SDL_Point[] Points; //ralitive to the IconPosition. could change with entity changes. 
+        public PointD[] Points; //ralitive to the IconPosition. could change with entity changes. 
     }
     
     /// <summary>
@@ -26,60 +27,86 @@ namespace Pulsar4X.SDL2UI
     public class Icon : IDrawData
     {
         protected ECSLib.PositionDB _positionDB;
-        public double WorldPositionX { get { return _positionDB.X; } } //this will change every game tick
-        public double WorldPositionY { get { return _positionDB.Y; } } //this will change every game tick
+        ECSLib.Vector4 _worldPosition;
+        public ECSLib.Vector4 WorldPosition { get { if (positionByDB) return _positionDB.AbsolutePosition; else return _worldPosition; } }
+        protected bool positionByDB;
         public SDL.SDL_Point ViewScreenPos;
         public List<Shape> Shapes = new List<Shape>(); //these could change with entity changes. 
+        public Shape[] DrawShapes;
         public bool ShapesScaleWithZoom = false; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings 
+
+        public float Scale = 1;
+
 
         public Icon(ECSLib.PositionDB positionDB)
         {
             _positionDB = positionDB;
+            positionByDB = true;
+        }
+        public Icon(ECSLib.Vector4 position)
+        {
+            _worldPosition = position;
+            positionByDB = false;
         }
 
-        public virtual void Update()
+        public virtual void OnPhysicsUpdate()
         {
-
+            
         }
 
-        public virtual void Draw(IntPtr rendererPtr, Camera camera)
+        public virtual void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            byte oR, oG, oB, oA;
-            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-            SDL.SDL_BlendMode blendMode;
-            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            var camerapoint = camera.CameraViewCoordinate();
+
+            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
+
+            //matrix.Translate(WorldPosition.X + camerapoint.x, WorldPosition.Y + camerapoint.y);
+
+            //todo: proper matrix transformations might clean this code up a bit. I'm failing to get it working properly though. 
+            //Matrix matrix2 = new Matrix();
+            //matrix2.Translate(WorldPosition.X, WorldPosition.Y);
+            //matrix2.Scale(camera.ZoomLevel);
+            //matrix2.Translate(camerapoint.x, camerapoint.y);
+
+
             float zoomLevel = 1;
 
             if (ShapesScaleWithZoom)
                 zoomLevel = camera.ZoomLevel;
-            List<Shape> transformedShapes = new List<Shape>();
-            foreach (var shape in Shapes)
+            DrawShapes = new Shape[this.Shapes.Count];
+            for (int i = 0; i < Shapes.Count; i++)
             {
-                SDL.SDL_Point[] drawPoints = new SDL.SDL_Point[shape.Points.Length];//matrix.Transform(shape.Points);
-                for (int i = 0; i < shape.Points.Length; i++)
+                var shape = Shapes[i];
+                PointD[] drawPoints = new PointD[shape.Points.Length];//matrix.Transform(shape.Points);
+                for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
-                    var camerapoint = camera.CameraViewCoordinate();
-                    int x = (int)(ViewScreenPos.x + (shape.Points[i].x + camerapoint.x) * zoomLevel);
-                    int y = (int)(ViewScreenPos.y + (shape.Points[i].y + camerapoint.y) * zoomLevel);
-                    drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+
+                    int x = (int)(ViewScreenPos.x + (shape.Points[i2].x + camerapoint.x) * zoomLevel);
+                    int y = (int)(ViewScreenPos.y + (shape.Points[i2].y + camerapoint.y) * zoomLevel);
+
+                    //SDL.SDL_Point pnt = matrix2.Transform(shape.Points[i2].x, shape.Points[i2].y);
+                    //int x1 = (int)(pnt.x * zoomLevel);
+                    //int y1 = (int)(pnt.y * zoomLevel);
+                    drawPoints[i2] = new PointD() { x = x, y = y };
                 }
-                transformedShapes.Add(new Shape() { Points = drawPoints, Color = shape.Color });
+                DrawShapes[i] = (new Shape() { Points = drawPoints, Color = shape.Color });
             }
+        }
 
-
-
-            foreach (var shape in transformedShapes)
+        public virtual void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            if (DrawShapes == null)
+                return;
+            foreach (var shape in DrawShapes)
             {
                 SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, shape.Points[i].x, shape.Points[i].y, shape.Points[i + 1].x, shape.Points[i + 1].y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].x, (int)shape.Points[i].y, (int)shape.Points[i + 1].x, (int)shape.Points[i + 1].y);
                 }
             }
-            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
+
         }
 
     }

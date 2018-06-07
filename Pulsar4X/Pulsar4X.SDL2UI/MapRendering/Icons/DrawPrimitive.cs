@@ -117,9 +117,9 @@ namespace Pulsar4X.SDL2UI
         /// <param name="startAngleRadians">Start angle in radians.</param>
         /// <param name="arcAngleRadians">Arc angle in radians.</param>
         /// <param name="segments">Number of segments this arc will have, resolution. ie a full circle with 6 arcs will draw a hexigon.</param>
-        public static Point[] CreateArc(int posX, int posY, double xRadius, double yRadius, double startAngleRadians, double arcAngleRadians, int segments)
+        public static PointD[] CreateArc(int posX, int posY, double xRadius, double yRadius, double startAngleRadians, double arcAngleRadians, int segments)
         {
-            Point[] points = new SDL.SDL_Point[segments + 1];
+            PointD[] points = new PointD[segments + 1];
 
             double incrementAngle = arcAngleRadians / segments;
 
@@ -131,25 +131,25 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawX = posX + (int)Math.Round(xRadius * Math.Sin(nextAngle));
                 drawY = posY + (int)Math.Round(yRadius * Math.Cos(nextAngle));
-                points[i] = new SDL.SDL_Point() { x = drawX, y = drawY };
+                points[i] = new PointD() { x = drawX, y = drawY };
             }
 
             return points;
         }
 
-        public static Point[] RoundedCylinder(int minorRadius, int majorRadius, int offsetX, int offsetY)
+        public static PointD[] RoundedCylinder(int minorRadius, int majorRadius, int offsetX, int offsetY)
         {
-            List<Point> points = new List<Point>();
+            List<PointD> points = new List<PointD>();
             int x1 = (int)(minorRadius * 0.5);
             int y1 = (int)(majorRadius * 0.5 - minorRadius * 0.5);
 
             points.AddRange(CreateArc(offsetX, y1 + offsetY, x1, x1, ThreeQuarterCircle, HalfCircle, 16));
-            points.Add(new Point() { x = x1 + offsetX, y = y1 + offsetY });
-            points.Add(new Point() { x = x1 + offsetX, y = -y1 + offsetY });
+            points.Add(new PointD() { x = x1 + offsetX, y = y1 + offsetY });
+            points.Add(new PointD() { x = x1 + offsetX, y = -y1 + offsetY });
 
             points.AddRange(CreateArc(offsetX, -y1 + offsetY, x1, x1, QuarterCircle, HalfCircle, 16));
-            points.Add(new Point() { x = -x1 + offsetX, y = -y1 + offsetY });
-            points.Add(new Point() { x = -x1 + offsetX, y = y1 + offsetY });
+            points.Add(new PointD() { x = -x1 + offsetX, y = -y1 + offsetY });
+            points.Add(new PointD() { x = -x1 + offsetX, y = y1 + offsetY });
             return points.ToArray();
         }
 
@@ -161,14 +161,14 @@ namespace Pulsar4X.SDL2UI
             BottomRight,
             Center
         }
-        public static Point[] Rectangle(int posX, int posY, int width, int height, PosFrom positionFrom = PosFrom.TopLeft)
+        public static PointD[] Rectangle(int posX, int posY, int width, int height, PosFrom positionFrom = PosFrom.TopLeft)
         {
 
-            var points = new Point[4] ;
-            Point tl;
-            Point tr;
-            Point br;
-            Point bl;
+            var points = new PointD[4] ;
+            PointD tl;
+            PointD tr;
+            PointD br;
+            PointD bl;
 
             switch (positionFrom)
             {
@@ -182,7 +182,7 @@ namespace Pulsar4X.SDL2UI
                         br.y = posY + height;
                         bl.x = posX;
                         bl.y = posY + height;
-                        points = new Point[] { tl, tr, br, bl };
+                        points = new PointD[] { tl, tr, br, bl };
                     }
                     break;
                 case PosFrom.TopRight:
@@ -195,7 +195,7 @@ namespace Pulsar4X.SDL2UI
                         bl.y = posY + height;
                         tl.x = posX - width;
                         tl.y = posY;
-                        points = new Point[] { tr, br, bl, tl };
+                        points = new PointD[] { tr, br, bl, tl };
                     }
                     break;
                 case PosFrom.BottomRight:
@@ -208,7 +208,7 @@ namespace Pulsar4X.SDL2UI
                         tl.y = posY - height;
                         tr.x = posX;
                         tr.y = posY - height;
-                        points = new Point[] { br, bl, tl, tr };
+                        points = new PointD[] { br, bl, tl, tr };
                     }
                     break;
                 case PosFrom.BottomLeft:
@@ -222,7 +222,7 @@ namespace Pulsar4X.SDL2UI
                         tr.y = posY - height;
                         br.x = posX + width;
                         br.y = posY;
-                        points = new Point[] { bl, tl, tr, br };
+                        points = new PointD[] { bl, tl, tr, br };
                     }
                     break;
                 case PosFrom.Center:
@@ -235,7 +235,7 @@ namespace Pulsar4X.SDL2UI
                         br.y = posY + (int)(height * 0.5);
                         bl.x = posX - (int)(width * 0.5);
                         bl.y = posY + (int)(height * 0.5);
-                        points = new Point[] { tl, tr, br, bl, tl };
+                        points = new PointD[] { tl, tr, br, bl, tl };
                     }
                     break;
             }
@@ -266,7 +266,7 @@ namespace Pulsar4X.SDL2UI
                 //then go through each of the points and draw a line from one point to the next. 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, shape.Points[i].x, shape.Points[i].y, shape.Points[i + 1].x, shape.Points[i + 1].y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].x, (int)shape.Points[i].y, (int)shape.Points[i + 1].x, (int)shape.Points[i + 1].y);
                 }
             }
 

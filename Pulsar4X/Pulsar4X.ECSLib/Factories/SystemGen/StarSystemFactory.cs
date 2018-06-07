@@ -278,8 +278,8 @@ namespace Pulsar4X.ECSLib
                 sensorProfile = new SensorProfileDB();
                 sensorProfile.EmittedEMSpectra.Add(waveform, 3.827e23);
                 Entity planet = new Entity(sol, new List<BaseDataBlob> {sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
-            }*/
-
+            }
+*/
 
             JPSurveyFactory.GenerateJPSurveyPoints(sol);
 
