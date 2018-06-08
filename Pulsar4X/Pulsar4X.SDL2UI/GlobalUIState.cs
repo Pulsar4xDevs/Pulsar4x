@@ -36,6 +36,7 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
         internal EntityState LastClickedEntity;
+        internal Vector4 LastWorldPointClicked;
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
@@ -74,11 +75,24 @@ namespace Pulsar4X.SDL2UI
             GL.Enable(GL.Enum.GL_TEXTURE_2D);
         }
 
-        internal void EntitySelected(Guid entityGuid)
+
+        internal void MapClicked(Vector4 worldCoord, MouseButtons button)
         {
-            LastClickedEntity = MapRendering.IconEntityStates[entityGuid];
-            if (ActiveOrderWidow != null)
-                ActiveOrderWidow.TargetEntity(LastClickedEntity);
+            if (button == MouseButtons.Primary)
+                LastWorldPointClicked = worldCoord;
+
+            if (ActiveWindow != null)
+                ActiveWindow.MapClicked(worldCoord, button);
         }
+        internal void EntityClicked(Guid entityGuid, MouseButtons button)
+        {
+            
+            if (button == 0)
+                LastClickedEntity = MapRendering.IconEntityStates[entityGuid];
+
+            if (ActiveWindow != null)
+                ActiveWindow.EntityClicked(MapRendering.IconEntityStates[entityGuid].Entity, button);
+        }
+
     }
 }

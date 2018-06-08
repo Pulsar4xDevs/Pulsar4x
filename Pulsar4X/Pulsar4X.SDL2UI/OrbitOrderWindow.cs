@@ -1,188 +1,91 @@
 ﻿using System;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
-using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
-    public interface IOrderWindow
+    public class OrbitOrderWindow : PulsarGuiWindow// IOrderWindow
     {
-        void TargetEntity(EntityState entity);
-        void SDLEvent(SDL.SDL_Event e);
-    }
+        GlobalUIState _state;
+        EntityState OrderingEntity;
 
+        EntityState TargetEntity;
+        Vector4 InsertionPoint;
+        Vector4 PeriapsisPoint;
+        double _semiMajorKm;
+        double _semiMinorKm;
 
-    public class OrbitOrderWindow : PulsarGuiWindow, IOrderWindow
-    {
-        public enum States : byte
-        {
-            NeedEntity,
-            NeedTarget,
-            NeedInsertion,
-            NeedEccentricity,
-            NeedActioning
-        }
-        public States CurrentState;
-        public enum Events : byte
-        {
-            MouseClickEntity,
-            MouseClickMap,
-            MouseClickActionButton,
-            MouseAltClick
-        }
+        enum States: byte { NeedsEntity, NeedsTarget, NeedsApoapsis, NeedsPeriapsis, NeedsActioning }
+        States CurrentState;
+
+        enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked }
 
         Action[,] fsm;
 
-        EntityState OrderingEntity;
-        EntityState TargetEntity;
-        PositionDB _targetPositionDB;
-        GlobalUIState _state;
-        //SDL.SDL_Point _targetViewscreenPos;
-        Vector4 _insertionPoint;
         string _displayText;
-
-        double _kmFromTgtToApoapsis;
-        double _focalDistanceKm;
-        double _kmFromTgtToPeriapsis;
-
-        OrbitOrderWidgetIcon _orbitWidget;
-
+        string _tooltipText = "";
         public OrbitOrderWindow(GlobalUIState state, EntityState entity)
         {
             _state = state;
             OrderingEntity = entity;
             _state.OpenWindows.Add(this);
-            _displayText = "Order: " + OrderingEntity.Name;
-
+            _displayText = "Orbit Order: " + OrderingEntity.Name;
+            _tooltipText = "Select target to orbit";
+            CurrentState = States.NeedsTarget;
 
             fsm = new Action[5, 4]
             {
-                //ClickEntity   clickMap        clickAction,    altClick   
-
-                {EntitySel,     DoNothing,      DoNothing,      Disregard,},      //NeedEntity
-                {TgtSelect,     DoNothing,      DoNothing,      Disregard,},      //NeedTarget
-                {TgtSelect,     SetInsert,      DoNothing,      EntitySel,},      //NeedInsertion
-                {TgtSelect,     SetEcentr,      DoNothing,      SetInsert,},      //NeedEccentricity
-                {TgtSelect,     DoNothing,      Actioned,       Disregard},       //NeedActioning
+                //selectEntity      selectPos               clickAction     altClick
+                {DoNothing,    DoNothing,              DoNothing,      Disregard},     //needsEntity
+                {TargetSelected,    DoNothing,              DoNothing,      GoBackState,}, //needsTarget
+                {DoNothing,         InsertionPntSelected,   DoNothing,      GoBackState,}, //needsApopapsis
+                {DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState,}, //needsPeriapsis
+                {DoNothing,         DoNothing,              ActionCmd,      GoBackState,}  //needsActoning
             };
-            CurrentState = States.NeedTarget;
+
         }
 
-        void EntitySel()
-        {
-            CurrentState = States.NeedTarget;
-        }
-        void TgtSelect() 
-        {
-            _targetPositionDB = TargetEntity.Entity.GetDataBlob<PositionDB>();
-            _orbitWidget = new OrbitOrderWidgetIcon(_targetPositionDB);
-            _state.MapRendering.UIWidgets.Add(_orbitWidget);
-            CurrentState = States.NeedInsertion; 
-        }
-        void SetInsert()
-        {
-            CurrentState = States.NeedEccentricity;
-        }
-        void SetEcentr() { CurrentState = States.NeedActioning; }
-        void Actioned()
-        {
-            //CurrentState = States.Closed; 
-        }
-        void Disregard() 
-        { 
-            DestroySelf(); 
-        }
         void DoNothing() { return; }
-
-        void NeedEntityState()
-        {
-
+        void EntitySelected() { 
+            OrderingEntity = _state.LastClickedEntity;
+            CurrentState = States.NeedsTarget;
         }
-        void NeedTgtState()
-        {
-            ImGui.SetTooltip("Select Body to Orbit");
-            ImGui.Text("Target: ");
+        void TargetSelected() { 
+            TargetEntity = _state.LastClickedEntity;
+            _tooltipText = "Select Apoapsis point";
+            CurrentState = States.NeedsApoapsis;
         }
-
-        void NeedInsertion()
-        {
-
-            var mousePos = ImGui.IO.MousePosition;
-            _insertionPoint = _state.Camera.MouseWorldCoordinate();//_targetPositionDB.AbsolutePosition - _state.Camera.MouseWorldCoordinate(); 
-
-            _orbitWidget.InsertionPoint = _insertionPoint;
-            _orbitWidget.SetPointArray();
-            _orbitWidget.PhysicsUpdate();
-            _kmFromTgtToApoapsis = Distance.AuToKm(_orbitWidget._orbitEllipseSemiMinor);
-
-
-
-
-
-            ImGui.Text("Target: ");
-            ImGui.SameLine();
-            ImGui.Text(TargetEntity.Name);
-
-            ImGui.SetTooltip("Set Insertion Point");
-            ImGui.Text("Appoapsis: ");
-            ImGui.SameLine();
-            ImGui.Text(_kmFromTgtToApoapsis.ToString() + "Km");
-            //ImGui.Text(_orbitWidget._orbitEllipseSemiMaj.ToString());
-            ImGui.Text("x: " + _insertionPoint.X);
-            ImGui.SameLine();
-            ImGui.Text("y: " + _insertionPoint.Y);
-        
+        void InsertionPntSelected() { 
+            InsertionPoint = _state.LastWorldPointClicked;
+            _semiMajorKm = (GetTargetPosition() - InsertionPoint).Length();
+            _tooltipText = "Select Periapsis point";
+            CurrentState = States.NeedsPeriapsis;
         }
-
-        void NeedEcentricity()
+        void PeriapsisPntSelected() { 
+            PeriapsisPoint = _state.LastWorldPointClicked;
+            _semiMinorKm = (GetTargetPosition() - PeriapsisPoint).Length();
+            _tooltipText = "Action to give order";
+            CurrentState = States.NeedsActioning;
+        }
+        void ActionCmd() 
         {
-            var focalPoint = _targetPositionDB.AbsolutePosition - _state.Camera.MouseWorldCoordinate();
-            var focalDistance = focalPoint.Length();
+            OrbitBodyCommand.CreateOrbitBodyCommand(
+                _state.Game, 
+                _state.Faction, 
+                OrderingEntity.Entity, 
+                TargetEntity.Entity, 
+                _semiMajorKm, 
+                _semiMinorKm);
+            _state.OpenWindows.Remove(this); 
+        }
+        void Disregard() { _state.OpenWindows.Remove(this); }
+        void GoBackState() {/*???*/}
 
-            _orbitWidget._focalDistance = focalDistance;
-            _orbitWidget.PhysicsUpdate();
-            _focalDistanceKm = Distance.AuToKm(focalDistance);
-            _kmFromTgtToPeriapsis = _orbitWidget._orbitEllipseSemiMinor;
-
-            ImGui.Text("Target: ");
-            ImGui.SameLine();
-            ImGui.Text(TargetEntity.Name);
-
-            ImGui.Text("Appoapsis: ");
-            ImGui.SameLine();
-            ImGui.Text(_kmFromTgtToApoapsis.ToString());
-
-            ImGui.SetTooltip("Set Eccentricity");
-            ImGui.Text("Linear Eccentricity: ");
-            ImGui.SameLine();
-            ImGui.Text(_focalDistanceKm.ToString());
+        Vector4 GetTargetPosition()
+        {
+            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
 
-        void NeedAction()
-        {
-            ImGui.Text("Target: ");
-            ImGui.SameLine();
-            ImGui.Text(TargetEntity.Name);
-
-            ImGui.Text("Appoapsis: ");
-            ImGui.SameLine();
-            ImGui.Text(_kmFromTgtToApoapsis.ToString());
-
-            ImGui.Text("Linear Eccentricity: ");
-            ImGui.SameLine();
-            ImGui.Text(_focalDistanceKm.ToString());
-
-            ImGui.Text("Periapsis: ");
-            ImGui.SameLine();
-            ImGui.Text(_kmFromTgtToPeriapsis.ToString());
-
-            if (ImGui.Button("Action Order"))
-            {
-                var sysDateTime = OrderingEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime;
-                OrbitBodyCommand.CreateOrbitBodyCommand(_state.Game, sysDateTime, _state.Faction.Guid, this.OrderingEntity.Entity.Guid, TargetEntity.Entity.Guid, _kmFromTgtToApoapsis, _kmFromTgtToPeriapsis);
-                DestroySelf();
-            }
-        }
         internal override void Display()
         {
             ImVec2 size = new ImVec2(200, 100);
@@ -193,57 +96,67 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.Begin(_displayText, ref IsActive, _flags);
 
+            ImGui.SetTooltip(_tooltipText);
+            ImGui.Text("Target: ");
+            ImGui.SameLine();
+            ImGui.Text(TargetEntity.Name);
+
+            ImGui.Text("Apoapsis: ");
+            ImGui.SameLine();
+            ImGui.Text(_semiMajorKm.ToString());
+
+            ImGui.Text("Periapsis: ");
+            ImGui.SameLine();
+            ImGui.Text(_semiMinorKm.ToString());
+
+            if (ImGui.Button("Action Order"))
+                fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
+
+            /*
             switch (CurrentState)
             {
-                case States.NeedEntity:
-                    break;
-                case States.NeedTarget:
-                    NeedTgtState();
-                    break;
-                case States.NeedInsertion:
-                    NeedInsertion();
-                    break;
-                case States.NeedEccentricity:
-                    NeedEcentricity();
-                    break;
-                case States.NeedActioning:
-                    NeedAction();
-                    break;
-            }
+                case States.NeedsEntity:
+                    
+                break;
+                case States.NeedsTarget:
+                    DisplayStateNeedsTarget();
+                break;
+                case States.NeedsApoapsis:
+                    DisplayStateNeedsInsertionPnt();
+                break;
+                case States.NeedsPeriapsis:
+                break;
+                case States.NeedsActioning:
+                break;
+                default:
+                break;
+            }*/
 
 
 
             ImGui.End();
         }
 
-        void DestroySelf()
+        internal override void EntityClicked(Entity entity, MouseButtons button)
         {
-            if(_orbitWidget != null)
-                _state.MapRendering.UIWidgets.Remove(_orbitWidget);
-            _state.OpenWindows.Remove(this);
-
+            if(button == MouseButtons.Primary)
+                fsm[(byte)CurrentState, (byte)Events.SelectedEntity].Invoke();
         }
-
-        void IOrderWindow.TargetEntity(EntityState entity)
+        internal override void MapClicked(Vector4 worldPos, MouseButtons button)
         {
-            TargetEntity = entity;
-            fsm[(byte)CurrentState, (byte)Events.MouseClickEntity].Invoke();
-        }
-
-        public void SDLEvent(SDL.SDL_Event e)
-        {
-            if (ImGui.IsMouseClicked(0))
+            if (button == MouseButtons.Primary)
             {
-                fsm[(byte)CurrentState, (byte)Events.MouseClickEntity].Invoke();
+                fsm[(byte)CurrentState, (byte)Events.SelectedPosition].Invoke();
             }
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && !ImGui.IO.WantCaptureMouse)
+            if (button == MouseButtons.Alt)
             {
-                if (e.button.button == 1)
-                    fsm[(byte)CurrentState, (byte)Events.MouseClickMap].Invoke();
-                if (e.button.button == 3)
-                    fsm[(byte)CurrentState, (byte)Events.MouseAltClick].Invoke();
+                fsm[(byte)CurrentState, (byte)Events.AltClicked].Invoke();
             }
-
         }
+
+        //void IOrderWindow.TargetEntity(EntityState entity)
+        //{
+        //    TargetEntity = entity;
+        //}
     }
 }

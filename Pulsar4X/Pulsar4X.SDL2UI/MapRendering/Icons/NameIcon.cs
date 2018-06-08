@@ -80,14 +80,16 @@ namespace Pulsar4X.SDL2UI
             ImGui.Begin(NameString, ref IsActive, _flags);
 
             ImGui.PushStyleColor(ImGuiCol.Button, new ImVec4(0, 0, 0, 0));
-            if (ImGui.Button(NameString)) //name.
+
+            if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
-                _state.EntitySelected(_entityGuid);
+                _state.EntityClicked(_entityGuid, 0);
             }
+
             ImGui.PopStyleColor();
             if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
             {
-                //if(_state.ContextMenu == null)
+                _state.EntityClicked(_entityGuid, MouseButtons.Alt);
                 _state.ContextMenu = new EntityContextMenu(_state, _entityGuid);
                 _state.ContextMenu.Display();
 

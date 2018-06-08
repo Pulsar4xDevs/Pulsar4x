@@ -33,7 +33,11 @@ namespace Pulsar4X.SDL2UI
         private FileDialog _Dialog = new FileDialog(false, false, true, false, false, false);
 
         ImVec3 backColor = new ImVec3(0 / 255f, 0 / 255f, 28 / 255f);
-         
+
+        int mouseDownX;
+        int mouseDownY;
+        int mouseDownAltX;
+        int mouseDownAltY;
 
         public PulsarMainWindow()
             : base("Pulsar4X")
@@ -71,12 +75,34 @@ namespace Pulsar4X.SDL2UI
                 _state.Camera.IsGrabbingMap = true;
                 _state.Camera.MouseFrameIncrementX = e.motion.x;
                 _state.Camera.MouseFrameIncrementY = e.motion.y;
+                mouseDownX = mouseX;
+                mouseDownY = mouseY;
             }
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 1)
             {
                 _state.Camera.IsGrabbingMap = false;
+
+                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.  
+                {
+                    _state.MapClicked(_state.Camera.WorldCoordinate(mouseX, mouseY), MouseButtons.Primary);//sdl and imgu use different numbers for buttons.
+                }
             }
                  
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 3 & !ImGui.IO.WantCaptureMouse)
+            {
+                mouseDownAltX = mouseX;
+                mouseDownAltY = mouseY;
+            }
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 3)
+            {
+                _state.Camera.IsGrabbingMap = false;
+
+                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.  
+                {
+                    _state.MapClicked(_state.Camera.WorldCoordinate(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
+                }
+            }
+
 
             if (_state.Camera.IsGrabbingMap)
             {
@@ -141,6 +167,16 @@ namespace Pulsar4X.SDL2UI
         }
 
     }
+    public enum MouseButtons
+    {
+        Primary,
+        Alt,
+        Middle
+    }
+    public class MouseState
+    {
+        
+    }
 
     public abstract class PulsarGuiWindow
     {
@@ -148,8 +184,11 @@ namespace Pulsar4X.SDL2UI
         internal bool IsActive = false;
         internal abstract void Display();
 
-        internal virtual void Clicked(Entity entity)
-        { }
+        internal virtual void EntityClicked(Entity entity, MouseButtons button){ }
+
+
+        internal virtual void MapClicked(Vector4 worldPos, MouseButtons button) { }
+
 
     }
 }

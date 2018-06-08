@@ -19,56 +19,6 @@ namespace Pulsar4X.SDL2UI
         void TargetEntity(EntityState entity);
     }
 
-    public class OrbitOrderWindow : PulsarGuiWindow, IOrderWindow
-    {
-        EntityState OrderingEntity;
-        EntityState TargetEntity;
-        GlobalUIState _state;
-        string _displayText;
-        public OrbitOrderWindow(GlobalUIState state, EntityState entity)
-        {
-            _state = state;
-            OrderingEntity = entity;
-            _state.OpenWindows.Add(this);
-            _displayText = "Order: " + OrderingEntity.Name;
-        }
-        
-        internal override void Display()
-        {
-            ImVec2 size = new ImVec2(200, 100);
-            ImVec2 pos = new ImVec2(_state.MainWinSize.x / 2 - size.x / 2, _state.MainWinSize.y / 2 - size.y / 2);
-
-            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
-
-            ImGui.Begin(_displayText, ref IsActive, _flags);
-            ImGui.Text("Target: ");
-            ImGui.SameLine();
-            if (TargetEntity.Entity == null)
-                ImGui.Text("Select Body To Orbit");
-            else
-            {
-                ImGui.Text(TargetEntity.Name);
-                ImGui.SetTooltip("Point Of Orbital Insertion, This will be the Apoapsis");
-                ImGui.Text("Apoapsis: ");
-
-                ImGui.Text("Periapsis: ");
-                ImGui.SameLine();
-                ImGui.Text("Km");
-
-            }
-
-
-
-            ImGui.End();
-        }
-
-        void IOrderWindow.TargetEntity(EntityState entity)
-        {
-            TargetEntity = entity;
-        }
-    }
-
     public class EntityContextMenu : PulsarGuiWindow
     {
 
@@ -99,7 +49,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.SmallButton("Orbit"))
                 {
-                    _state.ActiveOrderWidow = new OrbitOrderWindow(_state, _entityState);
+                    _state.ActiveWindow = new OrbitOrderWindow(_state, _entityState);
 
                 }
             }

@@ -40,6 +40,20 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
+        public static void CreateOrbitBodyCommand(Game game, Entity faction, Entity orderEntity, Entity targetEntity, double ApihelionKm, double PerhelionKm)
+        {
+            var cmd = new OrbitBodyCommand()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = orderEntity.Guid,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                TargetEntityGuid = targetEntity.Guid,
+                ApihelionInKM = ApihelionKm,
+                PerhelionInKM = PerhelionKm,
+            };
+            game.OrderHandler.HandleOrder(cmd);
+        }
+
         internal override bool IsValidCommand(Game game)
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))

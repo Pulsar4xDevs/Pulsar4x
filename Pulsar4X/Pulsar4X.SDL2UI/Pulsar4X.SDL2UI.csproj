@@ -62,6 +62,8 @@
     <Compile Include="MapRendering\Icons\NameIcon.cs" />
     <Compile Include="DebugWindow.cs" />
     <Compile Include="EntityContextMenu.cs" />
+    <Compile Include="MapRendering\Icons\OrbitOrderWiget.cs" />
+    <Compile Include="OrbitOrderWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
