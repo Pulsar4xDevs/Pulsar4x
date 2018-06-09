@@ -5,8 +5,6 @@ namespace Pulsar4X.SDL2UI
 {
     public class SettingsWindow : PulsarGuiWindow
     {
-        GlobalUIState _state;
-
         ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.CollapsingHeader;
         UserOrbitSettings _userOrbitSettings;
         int _arcSegments;
@@ -16,6 +14,7 @@ namespace Pulsar4X.SDL2UI
         public SettingsWindow(GlobalUIState state)
         {
             _state = state;
+            _state.OpenWindows.Add(this);
             _userOrbitSettings = state.UserOrbitSettings;
             _arcSegments = _userOrbitSettings.NumberOfArcSegments;
             _maxAlpha = _userOrbitSettings.MaxAlpha;
@@ -24,7 +23,7 @@ namespace Pulsar4X.SDL2UI
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
         }
 
-        internal override void Display()
+        protected override void DisplayActual()
         {
             ImVec2 size = new ImVec2(200, 100);
             ImVec2 pos = new ImVec2(0, 0);

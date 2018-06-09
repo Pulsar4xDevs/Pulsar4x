@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        internal override void Display()
+        protected override void DisplayActual()
         {
             ImVec2 size = new ImVec2(200, 100);
             ImVec2 pos = new ImVec2(0,0);

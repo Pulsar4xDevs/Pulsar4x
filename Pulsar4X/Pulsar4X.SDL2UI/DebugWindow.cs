@@ -17,10 +17,11 @@ namespace Pulsar4X.SDL2UI
         int _frameRateIndex = 0;
         float _currentFPS;
         float[] _frameRates = new float[120];
-
+        bool open = true;
         public DebugWindow(GlobalUIState state)
         {
             _state = state;
+
         }
 
         internal void SetGameEvents()
@@ -51,10 +52,10 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        internal override void Display()
+        protected override void DisplayActual()
         {
             SetFrameRateArray();
-            ImGui.Begin("debug");
+            ImGui.Begin("debug", ref IsActive);
             if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
             {
                 //core game processing rate.
@@ -74,10 +75,10 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("StartAngleRadians: " + startRadian);
                     ImGui.Text("StartAngleDegrees: " + startDegrees);
                 }
-            }   
+            }
 
             ImGui.End();
-
+        
         }
 
     }

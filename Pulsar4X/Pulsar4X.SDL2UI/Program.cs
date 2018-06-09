@@ -70,8 +70,8 @@ namespace Pulsar4X.SDL2UI
             if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 &! ImGui.IO.WantCaptureMouse)
-            { 
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 & !ImGui.IO.WantCaptureMouse)
+            {
                 _state.Camera.IsGrabbingMap = true;
                 _state.Camera.MouseFrameIncrementX = e.motion.x;
                 _state.Camera.MouseFrameIncrementY = e.motion.y;
@@ -87,7 +87,7 @@ namespace Pulsar4X.SDL2UI
                     _state.MapClicked(_state.Camera.WorldCoordinate(mouseX, mouseY), MouseButtons.Primary);//sdl and imgu use different numbers for buttons.
                 }
             }
-                 
+
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 3 & !ImGui.IO.WantCaptureMouse)
             {
                 mouseDownAltX = mouseX;
@@ -116,6 +116,18 @@ namespace Pulsar4X.SDL2UI
             }
 
 
+            if (e.type == SDL.SDL_EventType.SDL_KEYUP)
+            {
+                if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
+                {
+                    if (!_state.OpenWindows.Contains(_state.MainMenu))
+                    {
+                        _state.MainMenu.IsActive = true;
+                        _state.OpenWindows.Add(_state.MainMenu);
+                    }
+                }
+            }
+
             if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
             {
                 if (e.wheel.y > 0)
@@ -138,6 +150,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
             ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
             //ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
+
             foreach (var item in _state.OpenWindows.ToArray())
             {
                 item.Display();
@@ -182,7 +195,22 @@ namespace Pulsar4X.SDL2UI
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.Default;
         internal bool IsActive = false;
-        internal abstract void Display();
+        //protected bool _IsOpen;
+        internal GlobalUIState _state;
+
+        internal void Display()
+        {
+            if (IsActive)
+            {
+                DisplayActual();
+            }
+            else
+            {
+                _state.OpenWindows.Remove(this);
+            }
+        }
+
+        protected abstract void DisplayActual();
 
         internal virtual void EntityClicked(Entity entity, MouseButtons button){ }
 

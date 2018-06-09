@@ -25,17 +25,19 @@ namespace Pulsar4X.SDL2UI
 
         internal Entity ActiveEntity; //interacting with/ordering this entity
 
-        GlobalUIState _state;
+
         EntityState _entityState;
 
         public EntityContextMenu(GlobalUIState state, Guid entityGuid)
         {
             _state = state;
+            _state.OpenWindows.Add(this);
+            IsActive = true;
             _entityState = state.MapRendering.IconEntityStates[entityGuid];
 
         }
 
-        internal override void Display()
+        protected override void DisplayActual()
         {
             ActiveEntity = _entityState.Entity;
             if (ImGui.SmallButton("Pin Camera"))

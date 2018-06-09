@@ -6,7 +6,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class OrbitOrderWindow : PulsarGuiWindow// IOrderWindow
     {
-        GlobalUIState _state;
+       
         EntityState OrderingEntity;
 
         EntityState TargetEntity;
@@ -30,7 +30,9 @@ namespace Pulsar4X.SDL2UI
         {
             _state = state;
             OrderingEntity = entity;
+            IsActive = true;
             _state.OpenWindows.Add(this);
+
             _displayText = "Orbit Order: " + OrderingEntity.Name;
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
@@ -44,7 +46,7 @@ namespace Pulsar4X.SDL2UI
             fsm = new Action[5, 4]
             {
                 //selectEntity      selectPos               clickAction     altClick
-                {DoNothing,    DoNothing,              DoNothing,      Disregard},     //needsEntity
+                {DoNothing,         DoNothing,              DoNothing,      AbortOrder},     //needsEntity
                 {TargetSelected,    DoNothing,              DoNothing,      GoBackState,}, //needsTarget
                 {DoNothing,         InsertionPntSelected,   DoNothing,      GoBackState,}, //needsApopapsis
                 {DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState,}, //needsPeriapsis
@@ -97,7 +99,7 @@ namespace Pulsar4X.SDL2UI
                 _semiMinorKm);
             _state.OpenWindows.Remove(this); 
         }
-        void Disregard() { _state.OpenWindows.Remove(this); }
+        void AbortOrder() { _state.OpenWindows.Remove(this); }
         void GoBackState() {/*???*/}
 
         Vector4 GetTargetPosition()
@@ -105,7 +107,7 @@ namespace Pulsar4X.SDL2UI
             return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
 
-        internal override void Display()
+        protected override void DisplayActual()
         {
             ImVec2 size = new ImVec2(200, 100);
             ImVec2 pos = new ImVec2(_state.MainWinSize.x / 2 - size.x / 2, _state.MainWinSize.y / 2 - size.y / 2);

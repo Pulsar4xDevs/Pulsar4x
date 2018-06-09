@@ -22,7 +22,7 @@ namespace Pulsar4X.SDL2UI
         internal SettingsWindow SettingsWindow { get; }
         internal SystemMapRendering MapRendering { get; set; }
         internal EntityContextMenu ContextMenu { get; set; }
-        internal IOrderWindow ActiveOrderWidow { get; set; }
+        //internal IOrderWindow ActiveOrderWidow { get; set; }
         internal DebugWindow Debug { get; set; }
 
         internal Camera Camera;// = new Camera();
@@ -50,6 +50,7 @@ namespace Pulsar4X.SDL2UI
             Camera = new Camera(viewport);
 
             MainMenu = new MainMenuItems(this);
+
             OpenWindows.Add(MainMenu);
             NewGameOptions = new NewGameOptions(this);
             SettingsWindow = new SettingsWindow(this);

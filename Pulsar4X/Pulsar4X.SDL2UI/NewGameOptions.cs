@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
 
     public class NewGameOptions: PulsarGuiWindow
     {
-        GlobalUIState _state;
+
         enum gameType { Nethost, Standalone }
         int gameTypeButtonGrp = 0;
         gameType selectedGameType = gameType.Standalone;
@@ -30,14 +30,15 @@ namespace Pulsar4X.SDL2UI
         internal NewGameOptions(GlobalUIState state)
         { 
             _state = state;
+            _state.OpenWindows.Add(this);
         }
 
 
 
         ECSLib.NewGameSettings gameSettings = new ECSLib.NewGameSettings();
-        internal override void Display()
+        protected override void DisplayActual()
         {
-            ImGui.Begin("New Game Setup");
+            ImGui.Begin("New Game Setup", ref IsActive);
 
             ImGui.InputText("Game Name", nameInputBuffer, (uint)nameInputBuffer.Length);
             ImGui.InputText("Faction Name", factionNameInputBuffer, 16);

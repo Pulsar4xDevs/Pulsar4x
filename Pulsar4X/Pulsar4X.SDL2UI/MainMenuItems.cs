@@ -11,12 +11,13 @@ namespace Pulsar4X.SDL2UI
         ImVec2 buttonSize = new ImVec2(184, 24);
         internal MainMenuItems(GlobalUIState state)
         {
+           
             IsActive = true;
             _state = state;
             _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
         }
 
-        internal override void Display()
+        protected override void DisplayActual()
         {
             ImVec2 size = new ImVec2(200, 100);
             ImVec2 pos = new ImVec2(_state.MainWinSize.x / 2 - size.x / 2, _state.MainWinSize.y / 2 - size.y / 2);
