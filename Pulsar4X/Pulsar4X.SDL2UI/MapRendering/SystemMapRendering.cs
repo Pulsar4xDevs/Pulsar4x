@@ -29,6 +29,7 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr surfacePtr; 
         internal IntPtr rendererPtr;
         ImGuiSDL2CSWindow _window;
+        internal List<Icon> UIWidgets = new List<Icon>();
         Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, Icon> _entityIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, OrbitIcon> _orbitRings = new Dictionary<Guid, OrbitIcon>();
@@ -49,6 +50,7 @@ namespace Pulsar4X.SDL2UI
             windowPtr = window.Handle;
             surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
             rendererPtr = SDL.SDL_GetRenderer(windowPtr);
+            //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position. 
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
                 _testIcons.Add(Guid.NewGuid(), item);
@@ -103,7 +105,10 @@ namespace Pulsar4X.SDL2UI
         {
             if (_sysMap.UpdatesReady)
                 HandleChanges();
-
+            foreach (var icon in UIWidgets)
+            {
+                icon.OnPhysicsUpdate();
+            }
             foreach (var icon in _orbitRings.Values)
             {
                 icon.OnPhysicsUpdate();
@@ -256,7 +261,10 @@ namespace Pulsar4X.SDL2UI
             else
             {
 
-
+                foreach (var icon in UIWidgets)
+                {
+                    icon.OnFrameUpdate(matrix, _camera);
+                }
                 foreach (var icon in _orbitRings.Values)
                 {
                     icon.OnFrameUpdate(matrix, _camera);
@@ -272,6 +280,10 @@ namespace Pulsar4X.SDL2UI
                 }
 
 
+                foreach (var icon in UIWidgets)
+                {
+                    icon.Draw(rendererPtr, _camera);
+                }
                 foreach (var icon in _orbitRings.Values)
                 {
                     

@@ -59,12 +59,12 @@ namespace Pulsar4X.SDL2UI
                 var a1 = arc * i;
                 int x1 = (int)(0 * Math.Cos(a1) - spikeheight * Math.Sin(a1));
                 int y1 = (int)(0 * Math.Sin(a1) + spikeheight * Math.Cos(a1));
-                var p1 = new PointD() { x = x1, y = y1 };
+                var p1 = new PointD() { X = x1, Y = y1 };
 
                 var a2 = a1 + arc * 0.5;
                 int x2 = (int)(0 * Math.Cos(a2) - spikeDepth * Math.Sin(a2));
                 int y2 = (int)(0 * Math.Sin(a2) + spikeDepth * Math.Cos(a2));
-                var p2 = new PointD() { x = x2, y = y2 };
+                var p2 = new PointD() { X = x2, Y = y2 };
 
                 shapePoints.Add(p1);
                 shapePoints.Add(p2);

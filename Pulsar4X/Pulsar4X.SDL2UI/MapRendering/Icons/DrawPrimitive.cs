@@ -131,7 +131,7 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawX = posX + (int)Math.Round(xRadius * Math.Sin(nextAngle));
                 drawY = posY + (int)Math.Round(yRadius * Math.Cos(nextAngle));
-                points[i] = new PointD() { x = drawX, y = drawY };
+                points[i] = new PointD() { X = drawX, Y = drawY };
             }
 
             return points;
@@ -144,12 +144,12 @@ namespace Pulsar4X.SDL2UI
             int y1 = (int)(majorRadius * 0.5 - minorRadius * 0.5);
 
             points.AddRange(CreateArc(offsetX, y1 + offsetY, x1, x1, ThreeQuarterCircle, HalfCircle, 16));
-            points.Add(new PointD() { x = x1 + offsetX, y = y1 + offsetY });
-            points.Add(new PointD() { x = x1 + offsetX, y = -y1 + offsetY });
+            points.Add(new PointD() { X = x1 + offsetX, Y = y1 + offsetY });
+            points.Add(new PointD() { X = x1 + offsetX, Y = -y1 + offsetY });
 
             points.AddRange(CreateArc(offsetX, -y1 + offsetY, x1, x1, QuarterCircle, HalfCircle, 16));
-            points.Add(new PointD() { x = -x1 + offsetX, y = -y1 + offsetY });
-            points.Add(new PointD() { x = -x1 + offsetX, y = y1 + offsetY });
+            points.Add(new PointD() { X = -x1 + offsetX, Y = -y1 + offsetY });
+            points.Add(new PointD() { X = -x1 + offsetX, Y = y1 + offsetY });
             return points.ToArray();
         }
 
@@ -174,67 +174,67 @@ namespace Pulsar4X.SDL2UI
             {
                 case PosFrom.TopLeft:
                     {
-                        tl.x = posX;
-                        tl.y = posY;
-                        tr.x = posX + width;
-                        tr.y = posY;
-                        br.x = posX + width;
-                        br.y = posY + height;
-                        bl.x = posX;
-                        bl.y = posY + height;
+                        tl.X = posX;
+                        tl.Y = posY;
+                        tr.X = posX + width;
+                        tr.Y = posY;
+                        br.X = posX + width;
+                        br.Y = posY + height;
+                        bl.X = posX;
+                        bl.Y = posY + height;
                         points = new PointD[] { tl, tr, br, bl };
                     }
                     break;
                 case PosFrom.TopRight:
                     { 
-                        tr.x = posX;
-                        tr.y = posY;
-                        br.x = posX;
-                        br.y = posY + height;
-                        bl.x = posX - width;
-                        bl.y = posY + height;
-                        tl.x = posX - width;
-                        tl.y = posY;
+                        tr.X = posX;
+                        tr.Y = posY;
+                        br.X = posX;
+                        br.Y = posY + height;
+                        bl.X = posX - width;
+                        bl.Y = posY + height;
+                        tl.X = posX - width;
+                        tl.Y = posY;
                         points = new PointD[] { tr, br, bl, tl };
                     }
                     break;
                 case PosFrom.BottomRight:
                     {
-                        br.x = posX;
-                        br.y = posY;
-                        bl.x = posX - width;
-                        bl.y = posY;
-                        tl.x = posX - width;
-                        tl.y = posY - height;
-                        tr.x = posX;
-                        tr.y = posY - height;
+                        br.X = posX;
+                        br.Y = posY;
+                        bl.X = posX - width;
+                        bl.Y = posY;
+                        tl.X = posX - width;
+                        tl.Y = posY - height;
+                        tr.X = posX;
+                        tr.Y = posY - height;
                         points = new PointD[] { br, bl, tl, tr };
                     }
                     break;
                 case PosFrom.BottomLeft:
                     {
 
-                        bl.x = posX;
-                        bl.y = posY;
-                        tl.x = posX;
-                        tl.y = posY - height;
-                        tr.x = posX + width;
-                        tr.y = posY - height;
-                        br.x = posX + width;
-                        br.y = posY;
+                        bl.X = posX;
+                        bl.Y = posY;
+                        tl.X = posX;
+                        tl.Y = posY - height;
+                        tr.X = posX + width;
+                        tr.Y = posY - height;
+                        br.X = posX + width;
+                        br.Y = posY;
                         points = new PointD[] { bl, tl, tr, br };
                     }
                     break;
                 case PosFrom.Center:
                     {
-                        tl.x = posX - (int)(width * 0.5);
-                        tl.y = posY - (int)(height * 0.5);
-                        tr.x = posX + (int)(width * 0.5);
-                        tr.y = posY - (int)(height * 0.5);
-                        br.x = posX + (int)(width * 0.5);
-                        br.y = posY + (int)(height * 0.5);
-                        bl.x = posX - (int)(width * 0.5);
-                        bl.y = posY + (int)(height * 0.5);
+                        tl.X = posX - (int)(width * 0.5);
+                        tl.Y = posY - (int)(height * 0.5);
+                        tr.X = posX + (int)(width * 0.5);
+                        tr.Y = posY - (int)(height * 0.5);
+                        br.X = posX + (int)(width * 0.5);
+                        br.Y = posY + (int)(height * 0.5);
+                        bl.X = posX - (int)(width * 0.5);
+                        bl.Y = posY + (int)(height * 0.5);
                         points = new PointD[] { tl, tr, br, bl, tl };
                     }
                     break;
@@ -266,7 +266,7 @@ namespace Pulsar4X.SDL2UI
                 //then go through each of the points and draw a line from one point to the next. 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].x, (int)shape.Points[i].y, (int)shape.Points[i + 1].x, (int)shape.Points[i + 1].y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
                 }
             }
 
@@ -278,8 +278,53 @@ namespace Pulsar4X.SDL2UI
 
     public struct PointD
     {
-        public double x;
-        public double y;
+        public double X;
+        public double Y;
+    }
+    public static class PointDFunctions
+    {
+        public static PointD NewFrom(ECSLib.Vector4 vector4)
+        {
+            return new PointD() { X = vector4.X, Y = vector4.Y };
+        }
+        public static PointD NewFrom(SDL.SDL_Point sDL_Point)
+        {
+            return new PointD() { X = sDL_Point.x, Y = sDL_Point.y };
+        }
+        public static PointD Add(PointD p1, PointD p2)
+        {
+            return new PointD() { X = p1.X + p2.X, Y = p1.Y + p2.Y };
+        }
+        public static PointD Sub(PointD p1, PointD p2)
+        {
+            return new PointD() { X = p1.X - p2.X, Y = p1.Y - p2.Y };
+        }
+        public static double Length(PointD point)
+        {
+            return Math.Sqrt(LengthSquared(point)); 
+        }
+        public static double LengthSquared(PointD point)
+        {
+            return (point.X * point.X) + (point.Y * point.Y);
+        }
+
+    }
+
+    public static class EllipseFunctions
+    {
+        public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
+        {
+            return semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity);
+        }
+
+        public static double LinierEccentricity(double appoapsis, double semiMajorAxis)
+        {
+            return appoapsis - semiMajorAxis;
+        }
+        public static double Eccentricity(double linierEccentricity, double semiMajorAxis)
+        {
+            return linierEccentricity / semiMajorAxis;
+        }
     }
 
     public interface IRectangle

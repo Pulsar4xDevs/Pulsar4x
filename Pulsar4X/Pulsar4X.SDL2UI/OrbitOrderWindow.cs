@@ -15,15 +15,17 @@ namespace Pulsar4X.SDL2UI
         double _semiMajorKm;
         double _semiMinorKm;
 
-        enum States: byte { NeedsEntity, NeedsTarget, NeedsApoapsis, NeedsPeriapsis, NeedsActioning }
-        States CurrentState;
-
-        enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked }
-
-        Action[,] fsm;
-
         string _displayText;
         string _tooltipText = "";
+        OrbitOrderWiget _orbitWidget;
+
+
+        enum States: byte { NeedsEntity, NeedsTarget, NeedsApoapsis, NeedsPeriapsis, NeedsActioning }
+        States CurrentState;
+        enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked }
+        Action[,] fsm;
+
+
         public OrbitOrderWindow(GlobalUIState state, EntityState entity)
         {
             _state = state;
@@ -32,6 +34,12 @@ namespace Pulsar4X.SDL2UI
             _displayText = "Orbit Order: " + OrderingEntity.Name;
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
+
+            if (OrderingEntity.Entity.HasDataBlob<OrbitDB>())
+            {
+                _orbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());
+                _state.MapRendering.UIWidgets.Add(_orbitWidget);
+            }
 
             fsm = new Action[5, 4]
             {
@@ -52,6 +60,17 @@ namespace Pulsar4X.SDL2UI
         }
         void TargetSelected() { 
             TargetEntity = _state.LastClickedEntity;
+            if (_orbitWidget != null)
+            {
+                int index = _state.MapRendering.UIWidgets.IndexOf(_orbitWidget);
+                _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
+                _state.MapRendering.UIWidgets[index] = _orbitWidget;
+            }
+            else
+            {
+                _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
+                _state.MapRendering.UIWidgets.Add(_orbitWidget);
+            }
             _tooltipText = "Select Apoapsis point";
             CurrentState = States.NeedsApoapsis;
         }
@@ -111,26 +130,43 @@ namespace Pulsar4X.SDL2UI
 
             if (ImGui.Button("Action Order"))
                 fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
-
-            /*
-            switch (CurrentState)
+            if (_orbitWidget != null)
             {
-                case States.NeedsEntity:
-                    
-                break;
-                case States.NeedsTarget:
-                    DisplayStateNeedsTarget();
-                break;
-                case States.NeedsApoapsis:
-                    DisplayStateNeedsInsertionPnt();
-                break;
-                case States.NeedsPeriapsis:
-                break;
-                case States.NeedsActioning:
-                break;
-                default:
-                break;
-            }*/
+
+                switch (CurrentState)
+                {
+                    case States.NeedsEntity:
+
+                        break;
+                    case States.NeedsTarget:
+                       
+                        break;
+                    case States.NeedsApoapsis:
+                        {
+                            var mousePos = ImGui.GetMousePos();
+
+                            var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
+                            var ralitivePos = (GetTargetPosition() - mouseWorldPos);
+                            _orbitWidget.SetApoapsis(ralitivePos.X, ralitivePos.Y);
+
+                            //_orbitWidget.OrbitEllipseSemiMaj = (float)_semiMajorKm;
+                            break;
+                        }
+                    case States.NeedsPeriapsis:
+                        {
+                            var mousePos = ImGui.GetMousePos();
+
+                            var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
+                            var ralitivePos = (GetTargetPosition() - mouseWorldPos);
+                            _orbitWidget.SetPeriapsis(ralitivePos.X, ralitivePos.Y);
+                            break;
+                        }
+                    case States.NeedsActioning:
+                        break;
+                    default:
+                        break;
+                }
+            }
 
 
 

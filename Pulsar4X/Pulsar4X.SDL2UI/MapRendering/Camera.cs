@@ -82,6 +82,7 @@ namespace Pulsar4X.SDL2UI
             return point;
         }
         /// <summary>
+        /// THIS MAY RETURN INCORRECT VALUE TODO: Debug/Test this (might need to adjust for CameraWorldPosition)
         /// returns the viewCoordinate of a given world Coordinate 
         /// </summary>
         /// <param name="worldCoord"></param>
@@ -96,6 +97,14 @@ namespace Pulsar4X.SDL2UI
         }
 
 
+        public Vector4 MouseWorldCoordinate()
+        {
+            ImVec2 mouseCoord = ImGui.GetMousePos();
+            double x = ((mouseCoord.x - ViewPortCenter.x) / ZoomLevel) - CameraWorldPosition.X;
+            double y = ((mouseCoord.y - ViewPortCenter.y) / ZoomLevel) - CameraWorldPosition.Y; 
+            return new Vector4(x, y, 0, 0);
+
+        }
 
         /// <summary>
         /// returns the worldCoordinate of a given View Coordinate 
@@ -104,8 +113,8 @@ namespace Pulsar4X.SDL2UI
         /// <returns></returns>
         public Vector4 WorldCoordinate(int viewCoordinateX, int viewCoordinateY)
         {
-            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel);
-            double y = ((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel);
+            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel) - CameraWorldPosition.X;
+            double y = ((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y;
             return new Vector4(x, y, 0, 0);
         }
 
@@ -223,5 +232,34 @@ namespace Pulsar4X.SDL2UI
             transformMatrix.Translate(CameraWorldPosition.X, CameraWorldPosition.Y);  //ViewCoordinate(x, y));
             return transformMatrix;
         }
+    }
+
+    /// <summary>
+    /// Cursor crosshair.
+    /// Primarily made to debug a problem with getting the world coordinate of the mouse cursor. 
+    /// </summary>
+    class CursorCrosshair : Icon
+    {
+        public CursorCrosshair(Vector4 position) : base(position)
+        {
+            var colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
+
+            PointD point0 = new PointD() { X = -5, Y = 0 };
+            PointD point1 = new PointD() { X = +5, Y = 0 };
+            Shape shape0 = new Shape() { Points = new PointD[2] { point0, point1 }, Color = colour };
+
+            PointD point2 = new PointD() { X = 0, Y = -5 };
+            PointD point3 = new PointD() { X = 0, Y = +5 };
+            Shape shape1 = new Shape() { Points = new PointD[2] { point2, point3 }, Color = colour };
+
+            this.Shapes = new System.Collections.Generic.List<Shape>() { shape0, shape1 };
+        }
+
+        public override void OnFrameUpdate(Matrix matrix, Camera camera)
+        {
+            WorldPosition = camera.MouseWorldCoordinate();
+            base.OnFrameUpdate(matrix, camera);
+        }
+
     }
 }

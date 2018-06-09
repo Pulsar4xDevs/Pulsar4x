@@ -53,6 +53,24 @@ namespace Pulsar4X.SDL2UI
             return newPoint;
         }
 
+        public PointD TransformD(double itemx, double itemy)
+        {
+
+            PointD newPoint = new PointD();
+            //multiply a 2x2 matrix by a 2x1 matrix
+            double x;
+            x = X[0] * itemx;
+            x += X[1] * itemy;
+            newPoint.X = x;
+            double y;
+            y = Y[0] * itemx;
+            y += Y[1] * itemy;
+            newPoint.Y = y;
+
+
+            return newPoint;
+        }
+
         public SDL.SDL_Point[] Transform(ICollection<SDL.SDL_Point> points)
         {
             SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
@@ -86,13 +104,13 @@ namespace Pulsar4X.SDL2UI
                 PointD newPoint = new PointD();
                 //multiply a 2x2 matrix by a 2x1 matrix
                 double x;
-                x = X[0] * item.x;
-                x += X[1] * item.y;
-                newPoint.x = x;
+                x = X[0] * item.X;
+                x += X[1] * item.Y;
+                newPoint.X = x;
                 double y;
-                y = Y[0] * item.x;
-                y += Y[1] * item.y;
-                newPoint.y = y;
+                y = Y[0] * item.X;
+                y += Y[1] * item.Y;
+                newPoint.Y = y;
 
                 newPoints[i] = newPoint;
                 i++;

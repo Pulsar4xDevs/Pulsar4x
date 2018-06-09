@@ -106,7 +106,7 @@ namespace Pulsar4X.SDL2UI
                 double x2 = (x1 * Math.Cos(_orbitAngleRadians)) - (y1 * Math.Sin(_orbitAngleRadians));
                 double y2 = (x1 * Math.Sin(_orbitAngleRadians)) + (y1 * Math.Cos(_orbitAngleRadians));
                 angle += _segmentArcSweepRadians;
-                _points[i] = new PointD() { x = x2, y = y2 };
+                _points[i] = new PointD() { X = x2, Y = y2 };
             }
         }
 
@@ -166,7 +166,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             Vector4 pos = _bodyPositionDB.AbsolutePosition;
-            PointD pointD = new PointD() { x = pos.X, y = pos.Y };
+            PointD pointD = new PointD() { X = pos.X, Y = pos.Y };
 
             double minDist = CalcDistance(pointD, _points[_index]);
 
@@ -183,7 +183,7 @@ namespace Pulsar4X.SDL2UI
 
         double CalcDistance(PointD p1, PointD p2)
         {
-            return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) +(p1.y - p2.y) * (p1.y - p2.y));
+            return PointDFunctions.Length(PointDFunctions.Sub(p1, p2));
         }
 
 
@@ -207,11 +207,11 @@ namespace Pulsar4X.SDL2UI
                 else
                     index = 0;
 
-                var translated = matrix.Transform(_points[index].x, _points[index].y); //add zoom transformation. 
+                var translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
                 //translate everything to viewscreen & camera positions
-                int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
-                int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
+                int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
+                int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
 
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }

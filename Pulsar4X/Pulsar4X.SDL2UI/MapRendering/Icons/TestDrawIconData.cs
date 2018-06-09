@@ -22,12 +22,12 @@ namespace Pulsar4X.SDL2UI
             
             List<Shape> shapes = new List<Shape>();
             PointD[] lpoints1 = new PointD[] {
-                new PointD { x = 0, y = -160 },
-                new PointD { x = 0, y = 160 },
+                new PointD { X = 0, Y = -160 },
+                new PointD { X = 0, Y = 160 },
             };
             PointD[] lpoints2 = new PointD[] {
-                new PointD { x = -25, y = 0 },
-                new PointD { x = 25, y = 0 }
+                new PointD { X = -25, Y = 0 },
+                new PointD { X = 25, Y = 0 }
             };
             SDL.SDL_Color lcolor = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
             shapes.Add( new Shape() { Points = lpoints1, Color = lcolor });

@@ -76,9 +76,9 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < segments; i = i + 2)
             {
                 //this is not right, need to pull the points in towards the center, not just pull them left. 
-                double x = points[i].x - _rng.Next(jagMin, jagMax);
-                double y = points[i].y - _rng.Next(jagMin, jagMax);
-                points[i] = new PointD() { x = x, y = y };
+                double x = points[i].X - _rng.Next(jagMin, jagMax);
+                double y = points[i].Y - _rng.Next(jagMin, jagMax);
+                points[i] = new PointD() { X = x, Y = y };
             }
             //colors picked out of my ass for a brown look. 
             //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 

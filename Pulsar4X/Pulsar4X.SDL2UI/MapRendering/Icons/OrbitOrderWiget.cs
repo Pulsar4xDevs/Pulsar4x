@@ -25,17 +25,26 @@ namespace Pulsar4X.SDL2UI
     public class OrbitOrderWiget : Icon
     {
 
+        enum SetModes
+        {
+            Nothing,
+            SetMajor,
+            SetMinor,
+            SetLoP,//Longditude of Periapsis
+        }
+
         #region Static properties
 
         PositionDB _bodyPositionDB;
 
+        internal PointD Apoapsis;
+        internal PointD Periapsis;
+        internal double OrbitEllipseSemiMaj;
+        internal double OrbitEllipseSemiMinor;
 
-        float _orbitEllipseSemiMaj;
+        internal double OrbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
 
-        float _orbitEllipseSemiMinor;
-
-        float _orbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
-        float _focalDistance; //distance from the center of the ellpse to one of the focal points. 
+        double _focalDistance; //distance from the center of the ellpse to one of the focal points. 
 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
@@ -44,7 +53,7 @@ namespace Pulsar4X.SDL2UI
 
         #region Dynamic Properties
         //change each game update
-        internal float _ellipseStartArcAngleRadians;
+        float _ellipseStartArcAngleRadians;
         int _index;
 
         public float EllipseSweepRadians = 4.71239f;
@@ -64,22 +73,20 @@ namespace Pulsar4X.SDL2UI
         float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         float _alphaChangeAmount;
 
+        double _eccentricity;
 
         #endregion
 
-        internal OrbitOrderWiget(ref Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
+        internal OrbitOrderWiget(Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
         {
             
 
             _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
 
 
-            _orbitEllipseSemiMaj = 20000;
+            OrbitEllipseSemiMaj = 20000;
+            OrbitEllipseSemiMinor = 20000;
 
-            //_orbitEllipseMinor = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
-            //_orbitEllipseSemiMinor = _orbitEllipseMinor * 0.5f;
-           
-            //_orbitAngleRadians = (float)Angle.NormaliseRadians(Angle.ToRadians(_orbitAngleDegrees));
             _focalDistance = 0;
 
 
@@ -91,7 +98,7 @@ namespace Pulsar4X.SDL2UI
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)MaxAlpha - MinAlpha) / _numberOfDrawSegments;
-
+            _ellipseStartArcAngleRadians = (float)OrbitAngleRadians;
 
             CreatePointArray();
 
@@ -99,6 +106,55 @@ namespace Pulsar4X.SDL2UI
 
 
 
+        }
+
+        public OrbitOrderWiget(OrbitDB orbitDB): base(orbitDB.Parent.GetDataBlob<PositionDB>())
+        {
+            var targetEntity = orbitDB.Parent;
+            _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
+
+            OrbitEllipseSemiMaj = (float)orbitDB.SemiMajorAxis;
+            _eccentricity = orbitDB.Eccentricity;
+            EllipseFunctions.SemiMinorAxis(OrbitEllipseSemiMaj, _eccentricity);
+            _focalDistance = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);
+
+            _numberOfArcSegments = NumberOfArcSegments;
+            CreatePointArray();
+
+
+            _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
+            _numberOfDrawSegments = (int)Math.Max(1, (EllipseSweepRadians / _segmentArcSweepRadians));
+            _alphaChangeAmount = ((float)MaxAlpha - MinAlpha) / _numberOfDrawSegments;
+            _ellipseStartArcAngleRadians = (float)OrbitAngleRadians;
+
+            CreatePointArray();
+
+            OnPhysicsUpdate();
+        }
+
+
+        public void SetApoapsis(double x, double y)
+        {
+            Apoapsis = new PointD() { X = x, Y = y };
+
+            OrbitEllipseSemiMaj = PointDFunctions.Length(PointDFunctions.Add(Periapsis, Apoapsis)) / 2;
+            double linierEcentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
+            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(linierEcentricity, 2));
+            _eccentricity = EllipseFunctions.Eccentricity(linierEcentricity, OrbitEllipseSemiMaj);
+            _focalDistance = (float)(_eccentricity * OrbitEllipseSemiMaj);
+            OrbitAngleRadians = Math.Atan2(y, x);
+        }
+
+        public void SetPeriapsis(double x, double y)
+        {
+            Periapsis = new PointD() { X = x, Y = y };
+
+            OrbitEllipseSemiMaj = PointDFunctions.Length(PointDFunctions.Add(Periapsis , Apoapsis)) / 2;
+            double linierEcentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
+            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(linierEcentricity, 2));
+            _eccentricity = EllipseFunctions.Eccentricity(linierEcentricity, OrbitEllipseSemiMaj);
+            _focalDistance = (float)(_eccentricity * OrbitEllipseSemiMaj);
+            OrbitAngleRadians = Math.Atan2(y, x);
         }
 
 
@@ -110,14 +166,14 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
-                double x1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _focalDistance; //we add the focal distance so the focal point is "center"
-                double y1 = _orbitEllipseSemiMinor * Math.Cos(angle);
+                double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _focalDistance; //we add the focal distance so the focal point is "center"
+                double y1 = OrbitEllipseSemiMinor * Math.Cos(angle);
 
                 //rotates the points to allow for the LongditudeOfPeriapsis. 
-                double x2 = (x1 * Math.Cos(_orbitAngleRadians)) - (y1 * Math.Sin(_orbitAngleRadians));
-                double y2 = (x1 * Math.Sin(_orbitAngleRadians)) + (y1 * Math.Cos(_orbitAngleRadians));
+                double x2 = (x1 * Math.Cos(OrbitAngleRadians)) - (y1 * Math.Sin(OrbitAngleRadians));
+                double y2 = (x1 * Math.Sin(OrbitAngleRadians)) + (y1 * Math.Cos(OrbitAngleRadians));
                 angle += _segmentArcSweepRadians;
-                _points[i] = new PointD() { x = x2, y = y2 };
+                _points[i] = new PointD() { X = x2, Y = y2 };
             }
         }
 
@@ -160,7 +216,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             Vector4 pos = _bodyPositionDB.AbsolutePosition;
-            PointD pointD = new PointD() { x = pos.X, y = pos.Y };
+            PointD pointD = new PointD() { X = pos.X, Y = pos.Y };
 
             double minDist = CalcDistance(pointD, _points[_index]);
 
@@ -177,15 +233,14 @@ namespace Pulsar4X.SDL2UI
 
         double CalcDistance(PointD p1, PointD p2)
         {
-            return Math.Sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+            return PointDFunctions.Length(PointDFunctions.Sub(p1, p2));
         }
 
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
+            CreatePointArray();
             ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
-
-
 
 
 
@@ -201,7 +256,7 @@ namespace Pulsar4X.SDL2UI
                 else
                     index = 0;
 
-                var translated = matrix.Transform(_points[index].x, _points[index].y); //add zoom transformation. 
+                var translated = matrix.Transform(_points[index].X, _points[index].Y); //add zoom transformation. 
 
                 //translate everything to viewscreen & camera positions
                 int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
@@ -210,6 +265,8 @@ namespace Pulsar4X.SDL2UI
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }
         }
+
+
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
@@ -221,6 +278,8 @@ namespace Pulsar4X.SDL2UI
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
                 alpha -= _alphaChangeAmount;
             }
+
+
         }
     }
 }

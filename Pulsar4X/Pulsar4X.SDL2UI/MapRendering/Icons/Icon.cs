@@ -28,7 +28,14 @@ namespace Pulsar4X.SDL2UI
     {
         protected ECSLib.PositionDB _positionDB;
         ECSLib.Vector4 _worldPosition;
-        public ECSLib.Vector4 WorldPosition { get { if (positionByDB) return _positionDB.AbsolutePosition; else return _worldPosition; } }
+        public ECSLib.Vector4 WorldPosition
+        {
+            get { if (positionByDB) return _positionDB.AbsolutePosition + _worldPosition; else return _worldPosition; }
+            set { _worldPosition = value; }
+        }
+        /// <summary>
+        /// If this is true, WorldPosition will be the sum of the PositionDB and any value given to WorldPosition
+        /// </summary>
         protected bool positionByDB;
         public SDL.SDL_Point ViewScreenPos;
         public List<Shape> Shapes = new List<Shape>(); //these could change with entity changes. 
@@ -81,13 +88,13 @@ namespace Pulsar4X.SDL2UI
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
 
-                    int x = (int)(ViewScreenPos.x + (shape.Points[i2].x + camerapoint.x) * zoomLevel);
-                    int y = (int)(ViewScreenPos.y + (shape.Points[i2].y + camerapoint.y) * zoomLevel);
+                    int x = (int)(ViewScreenPos.x + (shape.Points[i2].X + camerapoint.x) * zoomLevel);
+                    int y = (int)(ViewScreenPos.y + (shape.Points[i2].Y + camerapoint.y) * zoomLevel);
 
                     //SDL.SDL_Point pnt = matrix2.Transform(shape.Points[i2].x, shape.Points[i2].y);
                     //int x1 = (int)(pnt.x * zoomLevel);
                     //int y1 = (int)(pnt.y * zoomLevel);
-                    drawPoints[i2] = new PointD() { x = x, y = y };
+                    drawPoints[i2] = new PointD() { X = x, Y = y };
                 }
                 DrawShapes[i] = (new Shape() { Points = drawPoints, Color = shape.Color });
             }
@@ -103,7 +110,7 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].x, (int)shape.Points[i].y, (int)shape.Points[i + 1].x, (int)shape.Points[i + 1].y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
                 }
             }
 
