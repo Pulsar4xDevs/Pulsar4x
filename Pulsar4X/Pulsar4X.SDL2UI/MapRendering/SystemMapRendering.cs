@@ -103,6 +103,7 @@ namespace Pulsar4X.SDL2UI
 
         void OnSystemDateChange(DateTime newDate)
         {
+            _state.CurrentSystemDateTime = newDate;
             if (_sysMap.UpdatesReady)
                 HandleChanges();
             foreach (var icon in UIWidgets)

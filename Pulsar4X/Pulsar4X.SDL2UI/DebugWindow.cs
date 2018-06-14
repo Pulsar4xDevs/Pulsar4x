@@ -7,22 +7,28 @@ namespace Pulsar4X.SDL2UI
 {
     public class DebugWindow :PulsarGuiWindow
     {
-        GlobalUIState _state;
         TimeSpan _timeSpan = new TimeSpan();
 
         int _gameRateIndex = 0;
-        float[] _gameRates = new float[120];
-
-
+        float[] _gameRates = new float[10];
+        float _lastProcessTime;
         int _frameRateIndex = 0;
         float _currentFPS;
         float[] _frameRates = new float[120];
-        bool open = true;
-        public DebugWindow(GlobalUIState state)
-        {
-            _state = state;
 
+        private DebugWindow() 
+        {
         }
+        internal static DebugWindow GetInstance()
+        {
+            if (!_state.LoadedWindows.ContainsKey(typeof(DebugWindow)))
+            {
+                return new DebugWindow();
+            }
+            return (DebugWindow)_state.LoadedWindows[typeof(DebugWindow)];
+        }
+
+
 
         internal void SetGameEvents()
         {
@@ -33,7 +39,7 @@ namespace Pulsar4X.SDL2UI
         void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
         {
             _timeSpan = _state.Game.GameLoop.LastProcessingTime;
-            _gameRates[_gameRateIndex] = (float)_timeSpan.TotalMilliseconds;
+            _gameRates[_gameRateIndex] = (float)_timeSpan.TotalSeconds;
             if (_gameRateIndex < _gameRates.Length - 1)
                 _gameRateIndex++;
             else
@@ -52,32 +58,39 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        protected override void DisplayActual()
+        internal override void Display()
         {
-            SetFrameRateArray();
-            ImGui.Begin("debug", ref IsActive);
-            if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
+            if (IsActive)
             {
-                //core game processing rate.
-                ImGui.PlotHistogram("##GRHistogram", _gameRates, _gameRateIndex, "", 0f, 2000f, new ImVec2(240, 100), 1);
-
-                //current star system processing rate. 
-
-                //ui framerate
-                ImGui.PlotHistogram("##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 2000f, new ImVec2(240, 100), 1);
-            }
-            if (_state.LastClickedEntity.OrbitIcon != null)
-            {
-                if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name, ImGuiTreeNodeFlags.CollapsingHeader))
+                SetFrameRateArray();
+                if (ImGui.Begin("debug", ref IsActive))
                 {
-                    string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
-                    string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
-                    ImGui.Text("StartAngleRadians: " + startRadian);
-                    ImGui.Text("StartAngleDegrees: " + startDegrees);
-                }
-            }
+                    if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
+                    {
+                        //core game processing rate.
+                        ImGui.PlotHistogram("##GRHistogram", _gameRates, _gameRateIndex, _timeSpan.TotalSeconds.ToString(), 0, 1, new ImVec2(0, 80), 1);
+                        //ImGui.PlotHistogram("##GRHistogram1", _gameRates, _gameRateIndex , _timeSpan.TotalSeconds.ToString(), 1f, 10, new ImVec2(240, 100), 1);
+                        //ImGui.PlotHistogram("##GRHistogram2", _gameRates, _gameRateIndex, _timeSpan.TotalSeconds.ToString(), 0.1f, 0.10f, new ImVec2(240, 100), 1);
 
-            ImGui.End();
+                        //current star system processing rate. 
+
+                        //ui framerate
+                        ImGui.PlotHistogram("##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 1, new ImVec2(0, 80), 1);
+                    }
+                    if (_state.LastClickedEntity.OrbitIcon != null)
+                    {
+                        if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name, ImGuiTreeNodeFlags.CollapsingHeader))
+                        {
+                            string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
+                            string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
+                            ImGui.Text("StartAngleRadians: " + startRadian);
+                            ImGui.Text("StartAngleDegrees: " + startDegrees);
+                        }
+                    }
+                }
+                //else IsActive = false;
+                ImGui.End();
+            }
         
         }
 

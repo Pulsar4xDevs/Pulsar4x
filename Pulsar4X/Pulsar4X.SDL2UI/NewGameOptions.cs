@@ -27,33 +27,44 @@ namespace Pulsar4X.SDL2UI
         byte[] passInputBuffer = new byte[8];
         string passString { get { return System.Text.Encoding.UTF8.GetString(passInputBuffer); } }
 
-        internal NewGameOptions(GlobalUIState state)
+        private NewGameOptions() 
         { 
-            _state = state;
-            _state.OpenWindows.Add(this);
+
+        }
+        internal static NewGameOptions GetInstance()
+        {
+            if (!_state.LoadedWindows.ContainsKey(typeof(NewGameOptions)))
+            {
+                return new NewGameOptions();
+            }
+            return (NewGameOptions)_state.LoadedWindows[typeof(NewGameOptions)];
         }
 
-
-
         ECSLib.NewGameSettings gameSettings = new ECSLib.NewGameSettings();
-        protected override void DisplayActual()
+
+        internal override void Display()
         {
-            ImGui.Begin("New Game Setup", ref IsActive);
+            if (IsActive)
+            {
+                if (ImGui.Begin("New Game Setup", ref IsActive, _flags))
+                {
 
-            ImGui.InputText("Game Name", nameInputBuffer, (uint)nameInputBuffer.Length);
-            ImGui.InputText("Faction Name", factionNameInputBuffer, 16);
-            ImGui.InputText("Password", passInputBuffer, 16);
+                    ImGui.InputText("Game Name", nameInputBuffer, (uint)nameInputBuffer.Length);
+                    ImGui.InputText("Faction Name", factionNameInputBuffer, 16);
+                    ImGui.InputText("Password", passInputBuffer, 16);
 
-            if (ImGui.RadioButton("Host Network Game", ref gameTypeButtonGrp, 1))
-                selectedGameType = gameType.Nethost;
-            if (ImGui.RadioButton("Start Standalone Game", ref gameTypeButtonGrp, 0))
-                selectedGameType = gameType.Standalone;
-            if (selectedGameType == gameType.Nethost)
-                ImGui.InputText("Network Port", netPortInputBuffer, 8);
-            if (ImGui.Button("Create New Game!"))
-                CreateNewGame(System.Text.Encoding.UTF8.GetString(nameInputBuffer));
+                    if (ImGui.RadioButton("Host Network Game", ref gameTypeButtonGrp, 1))
+                        selectedGameType = gameType.Nethost;
+                    if (ImGui.RadioButton("Start Standalone Game", ref gameTypeButtonGrp, 0))
+                        selectedGameType = gameType.Standalone;
+                    if (selectedGameType == gameType.Nethost)
+                        ImGui.InputText("Network Port", netPortInputBuffer, 8);
+                    if (ImGui.Button("Create New Game!"))
+                        CreateNewGame(System.Text.Encoding.UTF8.GetString(nameInputBuffer));
 
-            ImGui.End();
+                    ImGui.End();
+                }
+            }
 
         }
 
@@ -73,8 +84,8 @@ namespace Pulsar4X.SDL2UI
             };
 
             _state.Game = new ECSLib.Game(gameSettings);
-            _state.OpenWindows.Add(new TimeControl(_state));
-            _state.OpenWindows.Remove(this);
+            //_state.LoadedWindows.Add(new TimeControl(_state));
+            //_state.LoadedWindows.Remove(this);
             ECSLib.FactionVM factionVM = new ECSLib.FactionVM(_state.Game);
             _state.FactionUIState = factionVM;
 
@@ -82,8 +93,9 @@ namespace Pulsar4X.SDL2UI
 
             //_state.MapRendering.SetSystem(factionVM.KnownSystems[0]);
             _state.MapRendering.SetSystem(factionVM);
-            _state.Debug.SetGameEvents();
-
+            DebugWindow.GetInstance().SetGameEvents();
+            IsActive = false;
+            TimeControl.GetInstance().IsActive = true;
         }
     }
 }

@@ -64,11 +64,13 @@
     <Compile Include="EntityContextMenu.cs" />
     <Compile Include="MapRendering\Icons\OrbitOrderWiget.cs" />
     <Compile Include="OrbitOrderWindow.cs" />
+    <Compile Include="SM\SMPannel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="MapRendering\" />
     <Folder Include="MapRendering\Icons\" />
+    <Folder Include="SM\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\PulsarLogo.png">

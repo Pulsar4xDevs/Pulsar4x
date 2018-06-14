@@ -95,7 +95,7 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan EconomyCycleTime { get; set; } = TimeSpan.FromDays(1); //this is currently not used here, need to re-implement
 
-        public bool? EnableMultiThreading { get; set; } = false;
+        public bool EnableMultiThreading { get; set; } = false;
 
 
 

@@ -18,20 +18,21 @@ namespace Pulsar4X.SDL2UI
         string _displayText;
         string _tooltipText = "";
         OrbitOrderWiget _orbitWidget;
-
+        bool _smMode;
 
         enum States: byte { NeedsEntity, NeedsTarget, NeedsApoapsis, NeedsPeriapsis, NeedsActioning }
         States CurrentState;
-        enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked }
+        enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked}
         Action[,] fsm;
 
 
-        public OrbitOrderWindow(GlobalUIState state, EntityState entity)
+        private OrbitOrderWindow(EntityState entity, bool smMode = false)
         {
-            _state = state;
+            
+
             OrderingEntity = entity;
+            _smMode = smMode;
             IsActive = true;
-            _state.OpenWindows.Add(this);
 
             _displayText = "Orbit Order: " + OrderingEntity.Name;
             _tooltipText = "Select target to orbit";
@@ -46,14 +47,27 @@ namespace Pulsar4X.SDL2UI
             fsm = new Action[5, 4]
             {
                 //selectEntity      selectPos               clickAction     altClick
-                {DoNothing,         DoNothing,              DoNothing,      AbortOrder},     //needsEntity
-                {TargetSelected,    DoNothing,              DoNothing,      GoBackState,}, //needsTarget
-                {DoNothing,         InsertionPntSelected,   DoNothing,      GoBackState,}, //needsApopapsis
-                {DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState,}, //needsPeriapsis
-                {DoNothing,         DoNothing,              ActionCmd,      GoBackState,}  //needsActoning
+                {DoNothing,         DoNothing,              DoNothing,      AbortOrder,  },     //needsEntity
+                {TargetSelected,    DoNothing,              DoNothing,      GoBackState, }, //needsTarget
+                {DoNothing,         InsertionPntSelected,   DoNothing,      GoBackState, }, //needsApopapsis
+                {DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState, }, //needsPeriapsis
+                {DoNothing,         DoNothing,              ActionCmd,      GoBackState, }  //needsActoning
             };
 
         }
+
+        internal static OrbitOrderWindow GetInstance(EntityState entity)
+        {
+            if (!_state.LoadedWindows.ContainsKey(typeof(OrbitOrderWindow)))
+            {
+                return new OrbitOrderWindow(entity);
+            }
+            var instance = (OrbitOrderWindow)_state.LoadedWindows[typeof(OrbitOrderWindow)];
+            instance.OrderingEntity = entity;
+            instance.CurrentState = States.NeedsTarget;
+            return instance;
+        }
+
 
         void DoNothing() { return; }
         void EntitySelected() { 
@@ -95,87 +109,108 @@ namespace Pulsar4X.SDL2UI
                 _state.Faction, 
                 OrderingEntity.Entity, 
                 TargetEntity.Entity, 
-                _semiMajorKm, 
-                _semiMinorKm);
-            _state.OpenWindows.Remove(this); 
+                PointDFunctions.Length(_orbitWidget.Apoapsis), 
+                PointDFunctions.Length(_orbitWidget.Periapsis));
+            CloseWindow();
         }
-        void AbortOrder() { _state.OpenWindows.Remove(this); }
-        void GoBackState() {/*???*/}
+        void ActionAddDB()
+        {
+            _state.SpaceMasterVM.SMSetOrbitToEntity(OrderingEntity.Entity, TargetEntity.Entity, PointDFunctions.Length(_orbitWidget.Periapsis), _state.CurrentSystemDateTime);
+            CloseWindow();
+        }
+
+        void AbortOrder() { CloseWindow(); }
+        void GoBackState() { CurrentState -= 1; }
 
         Vector4 GetTargetPosition()
         {
             return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
 
-        protected override void DisplayActual()
+        internal override void Display()
         {
-            ImVec2 size = new ImVec2(200, 100);
-            ImVec2 pos = new ImVec2(_state.MainWinSize.x / 2 - size.x / 2, _state.MainWinSize.y / 2 - size.y / 2);
-
-            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
-            ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
-
-            ImGui.Begin(_displayText, ref IsActive, _flags);
-
-            ImGui.SetTooltip(_tooltipText);
-            ImGui.Text("Target: ");
-            ImGui.SameLine();
-            ImGui.Text(TargetEntity.Name);
-
-            ImGui.Text("Apoapsis: ");
-            ImGui.SameLine();
-            ImGui.Text(_semiMajorKm.ToString());
-
-            ImGui.Text("Periapsis: ");
-            ImGui.SameLine();
-            ImGui.Text(_semiMinorKm.ToString());
-
-            if (ImGui.Button("Action Order"))
-                fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
-            if (_orbitWidget != null)
+            if (IsActive)
             {
+                ImVec2 size = new ImVec2(200, 100);
+                ImVec2 pos = new ImVec2(_state.MainWinSize.x / 2 - size.x / 2, _state.MainWinSize.y / 2 - size.y / 2);
 
-                switch (CurrentState)
+                ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+                ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
+
+                if (ImGui.Begin(_displayText, ref IsActive, _flags))
                 {
-                    case States.NeedsEntity:
 
-                        break;
-                    case States.NeedsTarget:
-                       
-                        break;
-                    case States.NeedsApoapsis:
+                    ImGui.SetTooltip(_tooltipText);
+                    ImGui.Text("Target: ");
+                    ImGui.SameLine();
+                    ImGui.Text(TargetEntity.Name);
+
+                    ImGui.Text("Apoapsis: ");
+                    ImGui.SameLine();
+                    ImGui.Text(_semiMajorKm.ToString());
+
+                    ImGui.Text("Periapsis: ");
+                    ImGui.SameLine();
+                    ImGui.Text(_semiMinorKm.ToString());
+
+                    if (ImGui.Button("Action Order"))
+                        fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
+
+                    if (_smMode)
+                    {
+                        ImGui.SameLine();
+                        if (ImGui.Button("Add OrbitDB"))
                         {
-                            var mousePos = ImGui.GetMousePos();
-
-                            var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
-                            var ralitivePos = (GetTargetPosition() - mouseWorldPos);
-                            _orbitWidget.SetApoapsis(ralitivePos.X, ralitivePos.Y);
-
-                            //_orbitWidget.OrbitEllipseSemiMaj = (float)_semiMajorKm;
-                            break;
+                            ActionAddDB();
                         }
-                    case States.NeedsPeriapsis:
+                    }
+
+                    if (_orbitWidget != null)
+                    {
+
+                        switch (CurrentState)
                         {
-                            var mousePos = ImGui.GetMousePos();
+                            case States.NeedsEntity:
 
-                            var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
-                            var ralitivePos = (GetTargetPosition() - mouseWorldPos);
-                            _orbitWidget.SetPeriapsis(ralitivePos.X, ralitivePos.Y);
-                            break;
+                                break;
+                            case States.NeedsTarget:
+
+                                break;
+                            case States.NeedsApoapsis:
+                                {
+                                    var mousePos = ImGui.GetMousePos();
+
+                                    var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
+                                    var ralitivePos = (GetTargetPosition() - mouseWorldPos);
+                                    _orbitWidget.SetApoapsis(ralitivePos.X, ralitivePos.Y);
+
+                                    //_orbitWidget.OrbitEllipseSemiMaj = (float)_semiMajorKm;
+                                    break;
+                                }
+                            case States.NeedsPeriapsis:
+                                {
+                                    var mousePos = ImGui.GetMousePos();
+
+                                    var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
+                                    var ralitivePos = (GetTargetPosition() - mouseWorldPos);
+                                    _orbitWidget.SetPeriapsis(ralitivePos.X, ralitivePos.Y);
+                                    break;
+                                }
+                            case States.NeedsActioning:
+                                break;
+                            default:
+                                break;
                         }
-                    case States.NeedsActioning:
-                        break;
-                    default:
-                        break;
+                    }
+
+
+
+                    ImGui.End();
                 }
             }
-
-
-
-            ImGui.End();
         }
 
-        internal override void EntityClicked(Entity entity, MouseButtons button)
+        internal override void EntityClicked(EntityState entity, MouseButtons button)
         {
             if(button == MouseButtons.Primary)
                 fsm[(byte)CurrentState, (byte)Events.SelectedEntity].Invoke();
@@ -192,9 +227,14 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        //void IOrderWindow.TargetEntity(EntityState entity)
-        //{
-        //    TargetEntity = entity;
-        //}
+        void CloseWindow()
+        {
+            IsActive = false;
+            CurrentState = States.NeedsEntity;
+
+
+            if(_orbitWidget != null)
+                _state.MapRendering.UIWidgets.Remove(_orbitWidget);
+        }
     }
 }

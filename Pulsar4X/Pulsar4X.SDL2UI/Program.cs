@@ -5,6 +5,7 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using System.Drawing;
 using Pulsar4X.ECSLib;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -120,11 +121,8 @@ namespace Pulsar4X.SDL2UI
             {
                 if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
                 {
-                    if (!_state.OpenWindows.Contains(_state.MainMenu))
-                    {
-                        _state.MainMenu.IsActive = true;
-                        _state.OpenWindows.Add(_state.MainMenu);
-                    }
+                    MainMenuItems mainMenu = MainMenuItems.GetInstance();
+                    mainMenu.IsActive = true;
                 }
             }
 
@@ -144,14 +142,17 @@ namespace Pulsar4X.SDL2UI
 
         public unsafe override void ImGuiLayout()
         {
-            
+            /* uncomment this to attempt image display
             ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(), new ImVec4(255, 0, 0, 255));
             ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(), new ImVec4(255, 0, 0, 255));
             ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
             ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
+            */
+
             //ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
 
-            foreach (var item in _state.OpenWindows.ToArray())
+
+            foreach (var item in _state.LoadedWindows.Values.ToArray())
             {
                 item.Display();
             }
@@ -191,32 +192,5 @@ namespace Pulsar4X.SDL2UI
         
     }
 
-    public abstract class PulsarGuiWindow
-    {
-        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.Default;
-        internal bool IsActive = false;
-        //protected bool _IsOpen;
-        internal GlobalUIState _state;
 
-        internal void Display()
-        {
-            if (IsActive)
-            {
-                DisplayActual();
-            }
-            else
-            {
-                _state.OpenWindows.Remove(this);
-            }
-        }
-
-        protected abstract void DisplayActual();
-
-        internal virtual void EntityClicked(Entity entity, MouseButtons button){ }
-
-
-        internal virtual void MapClicked(Vector4 worldPos, MouseButtons button) { }
-
-
-    }
 }

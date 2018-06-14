@@ -77,13 +77,14 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new ImVec4(0, 0, 0, 0)); //make the background transperent. 
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
 
+
             ImGui.Begin(NameString, ref IsActive, _flags);
 
             ImGui.PushStyleColor(ImGuiCol.Button, new ImVec4(0, 0, 0, 0));
 
             if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
-                _state.EntityClicked(_entityGuid, 0);
+                _state.EntityClicked(_entityGuid, MouseButtons.Primary);
             }
 
             ImGui.PopStyleColor();

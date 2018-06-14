@@ -7,12 +7,13 @@ namespace Pulsar4X.SDL2UI
 {
     public class TimeControl : PulsarGuiWindow
     {
-        GlobalUIState _state;
+        
         ECSLib.TimeLoop _timeloop {get { return _state.Game.GameLoop; } }
 
         bool _isPaused = true;
         int _timeSpanValue = 1;
         int _timeSpanType = 2;
+        new ImGuiWindowFlags _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
 
         string[] _timespanTypeSelection = new string[7]
         {
@@ -31,18 +32,20 @@ namespace Pulsar4X.SDL2UI
         float _freqTimeSpanValue = 0.5f;
         int _freqSpanType = 0;
 
-        internal TimeControl(GlobalUIState state)
+        private TimeControl()
         {
             IsActive = true;
-            _state = state;
-
-            _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
-
-
-
+        }
+        internal static TimeControl GetInstance()
+        {
+            if (!_state.LoadedWindows.ContainsKey(typeof(TimeControl)))
+            {
+                return new TimeControl();
+            }
+            return (TimeControl)_state.LoadedWindows[typeof(TimeControl)];
         }
 
-        protected override void DisplayActual()
+        internal override void Display()
         {
             ImVec2 size = new ImVec2(200, 100);
             ImVec2 pos = new ImVec2(0,0);

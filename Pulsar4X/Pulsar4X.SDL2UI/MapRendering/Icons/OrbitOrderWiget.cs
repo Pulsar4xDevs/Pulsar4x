@@ -154,7 +154,7 @@ namespace Pulsar4X.SDL2UI
             OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(linierEcentricity, 2));
             _eccentricity = EllipseFunctions.Eccentricity(linierEcentricity, OrbitEllipseSemiMaj);
             _focalDistance = (float)(_eccentricity * OrbitEllipseSemiMaj);
-            OrbitAngleRadians = Math.Atan2(y, x);
+            //OrbitAngleRadians = Math.Atan2(y, x);
         }
 
 

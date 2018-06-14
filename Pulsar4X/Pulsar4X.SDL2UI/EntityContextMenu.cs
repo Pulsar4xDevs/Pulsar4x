@@ -19,10 +19,10 @@ namespace Pulsar4X.SDL2UI
         void TargetEntity(EntityState entity);
     }
 
-    public class EntityContextMenu : PulsarGuiWindow
+    public class EntityContextMenu
     {
 
-
+        GlobalUIState _state;
         internal Entity ActiveEntity; //interacting with/ordering this entity
 
 
@@ -31,13 +31,13 @@ namespace Pulsar4X.SDL2UI
         public EntityContextMenu(GlobalUIState state, Guid entityGuid)
         {
             _state = state;
-            _state.OpenWindows.Add(this);
-            IsActive = true;
+            //_state.OpenWindows.Add(this);
+            //IsActive = true;
             _entityState = state.MapRendering.IconEntityStates[entityGuid];
 
         }
 
-        protected override void DisplayActual()
+        internal void Display()
         {
             ActiveEntity = _entityState.Entity;
             if (ImGui.SmallButton("Pin Camera"))
@@ -51,8 +51,8 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.SmallButton("Orbit"))
                 {
-                    _state.ActiveWindow = new OrbitOrderWindow(_state, _entityState);
-
+                    OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
+                    _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
                 }
             }
 
