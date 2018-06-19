@@ -62,8 +62,12 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.Button("Create New Game!"))
                         CreateNewGame(System.Text.Encoding.UTF8.GetString(nameInputBuffer));
 
-                    ImGui.End();
+
                 }
+                else
+                    MainMenuItems.GetInstance().IsActive = true;
+
+                ImGui.End();
             }
 
         }

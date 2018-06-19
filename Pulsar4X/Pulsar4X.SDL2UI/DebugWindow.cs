@@ -7,14 +7,17 @@ namespace Pulsar4X.SDL2UI
 {
     public class DebugWindow :PulsarGuiWindow
     {
-        TimeSpan _timeSpan = new TimeSpan();
-
+        float _currentGFPS;
         int _gameRateIndex = 0;
-        float[] _gameRates = new float[10];
-        float _lastProcessTime;
-        int _frameRateIndex = 0;
+        float[] _gameRates = new float[80];
+
         float _currentFPS;
-        float[] _frameRates = new float[120];
+        int _frameRateIndex = 0;
+        float[] _frameRates = new float[80];
+
+        float _currentSFPS;
+        int _systemRateIndex = 0;
+        float[] _systemRates = new float[80];
 
         private DebugWindow() 
         {
@@ -33,17 +36,20 @@ namespace Pulsar4X.SDL2UI
         internal void SetGameEvents()
         {
             if (_state.Game != null)
+            {
                 _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
+                _state.MapRendering.SysMap.SystemSubpulse.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
+            }
         }
 
         void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
         {
-            _timeSpan = _state.Game.GameLoop.LastProcessingTime;
-            _gameRates[_gameRateIndex] = (float)_timeSpan.TotalSeconds;
-            if (_gameRateIndex < _gameRates.Length - 1)
-                _gameRateIndex++;
-            else
+            _currentGFPS = (float)_state.Game.GameLoop.LastSubtickTime.TotalSeconds;
+            _gameRates[_gameRateIndex] = _currentGFPS;
+            if (_gameRateIndex >= _gameRates.Length - 1)
                 _gameRateIndex = 0;
+            else
+                _gameRateIndex++;
         }
 
 
@@ -58,6 +64,17 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        void SystemSubpulse_SystemDateChangedEvent(DateTime newDate)
+        {
+            _currentSFPS = (float)_state.Game.GameLoop.LastSubtickTime.TotalSeconds;
+            _systemRates[_systemRateIndex] = _currentSFPS;
+            if (_systemRateIndex >= _systemRates.Length - 1)
+                _systemRateIndex = 0;
+            else
+                _systemRateIndex++;
+        }
+
+
         internal override void Display()
         {
             if (IsActive)
@@ -67,15 +84,19 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
+
+                        //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
                         //core game processing rate.
-                        ImGui.PlotHistogram("##GRHistogram", _gameRates, _gameRateIndex, _timeSpan.TotalSeconds.ToString(), 0, 1, new ImVec2(0, 80), 1);
-                        //ImGui.PlotHistogram("##GRHistogram1", _gameRates, _gameRateIndex , _timeSpan.TotalSeconds.ToString(), 1f, 10, new ImVec2(240, 100), 1);
-                        //ImGui.PlotHistogram("##GRHistogram2", _gameRates, _gameRateIndex, _timeSpan.TotalSeconds.ToString(), 0.1f, 0.10f, new ImVec2(240, 100), 1);
-
+                        //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
+                        //ImGui.PlotHistogram("##GRHistogram1", _gameRatesDisplay, 0 , _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
+                        ImGui.PlotHistogram("Game Tick ##GTHistogram", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0f, 1f, new ImVec2(248, 60), sizeof(float));
+                        ImGui.PlotLines("Game Tick ##GTPlotlines", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0, 1, new ImVec2(248, 60), sizeof(float));
                         //current star system processing rate. 
-
+                        ImGui.PlotHistogram("System Tick ##STHistogram", _systemRates, _systemRateIndex, _currentSFPS.ToString(), 0f, 1f, new ImVec2(248, 60), sizeof(float));
+                        ImGui.PlotLines("System Tick ##STPlotlines", _systemRates, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new ImVec2(248, 60), sizeof(float));
                         //ui framerate
-                        ImGui.PlotHistogram("##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 1, new ImVec2(0, 80), 1);
+                        ImGui.PlotHistogram("Frame Rate ##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new ImVec2(248, 60), sizeof(float));
+
                     }
                     if (_state.LastClickedEntity.OrbitIcon != null)
                     {

@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<Guid, NameIcon> _nameIcons = new Dictionary<Guid, NameIcon>();
         List<Vector4> _positions = new List<Vector4>();
         List<OrbitDB> _orbits = new List<OrbitDB>();
-        SystemMap_DrawableVM _sysMap;
+        internal SystemMap_DrawableVM SysMap;
         Entity _faction;
 
         internal Dictionary<Guid, EntityState> IconEntityStates = new Dictionary<Guid, EntityState>();
@@ -59,11 +59,11 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetSystem(FactionVM factionVM)
         {
-            _sysMap = factionVM.SystemMap;
+            SysMap = factionVM.SystemMap;
             _faction = _state.Faction;
-            _sysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
+            SysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
 
-            foreach (var entityItem in _sysMap.IconableEntitys)
+            foreach (var entityItem in SysMap.IconableEntitys)
             {
 
 
@@ -104,7 +104,7 @@ namespace Pulsar4X.SDL2UI
         void OnSystemDateChange(DateTime newDate)
         {
             _state.CurrentSystemDateTime = newDate;
-            if (_sysMap.UpdatesReady)
+            if (SysMap.UpdatesReady)
                 HandleChanges();
             foreach (var icon in UIWidgets)
             {
@@ -136,7 +136,7 @@ namespace Pulsar4X.SDL2UI
 
         void HandleChanges()
         {
-            var updates = _sysMap.GetUpdates();
+            var updates = SysMap.GetUpdates();
             foreach (var changeData in updates)
             {
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
@@ -251,7 +251,7 @@ namespace Pulsar4X.SDL2UI
             Matrix matrix = new Matrix();
             matrix.Scale(_camera.ZoomLevel);
 
-            if (_sysMap == null)
+            if (SysMap == null)
             {
                 foreach (var icon in _testIcons.Values)
                 {

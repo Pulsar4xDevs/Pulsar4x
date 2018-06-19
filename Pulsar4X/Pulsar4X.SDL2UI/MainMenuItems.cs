@@ -51,18 +51,16 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Button("Resume a Current Game", buttonSize);
                     ImGui.Button("Connect to a Network Game", buttonSize);
                 }
-                /*
-                if (!_state.LoadedWindows.Contains(SMPannel.GetInstance(_state)))
-                    if (ImGui.Button("SM Mode", buttonSize))
-                    {
-                        var pannel = SMPannel.GetInstance(_state);
-                        _state.LoadedWindows.Add(pannel);
-                        _state.ActiveWindow = pannel;
-                        pannel.IsActive = true;
-                        this.IsActive = false;
 
-                    }
-                    */
+
+                if (ImGui.Button("SM Mode", buttonSize))
+                {
+                    var pannel = SMPannel.GetInstance();
+                    _state.ActiveWindow = pannel;
+                    pannel.IsActive = true;
+                    this.IsActive = false;
+                }
+                    
                 //if (_saveGame)
 
                 ImGui.End();

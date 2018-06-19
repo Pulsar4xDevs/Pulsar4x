@@ -56,11 +56,11 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        internal static OrbitOrderWindow GetInstance(EntityState entity)
+        internal static OrbitOrderWindow GetInstance(EntityState entity, bool SMMode = false)
         {
             if (!_state.LoadedWindows.ContainsKey(typeof(OrbitOrderWindow)))
             {
-                return new OrbitOrderWindow(entity);
+                return new OrbitOrderWindow(entity, SMMode);
             }
             var instance = (OrbitOrderWindow)_state.LoadedWindows[typeof(OrbitOrderWindow)];
             instance.OrderingEntity = entity;

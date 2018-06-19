@@ -6,29 +6,22 @@ namespace Pulsar4X.SDL2UI
 {
     public class SMPannel : PulsarGuiWindow
     {
-        private static SMPannel instance = null;
-        public static bool Exsists;
+
 
         EntityState _selectedEntity;
 
         private SMPannel() 
         {
-
-            Exsists = true;
-            instance = this;
-            IsActive = false;
             _state.SpaceMasterVM = new SpaceMasterVM();
-
         }
         //TODO auth of some kind. 
         public static SMPannel GetInstance()
         {
-            if (instance != null)
-                return instance;
-            else
-            {       
+            if (!_state.LoadedWindows.ContainsKey(typeof(SMPannel)))
+            {
                 return new SMPannel();
             }
+            return (SMPannel)_state.LoadedWindows[typeof(SMPannel)];
         }
 
         internal override void Display()
@@ -47,12 +40,15 @@ namespace Pulsar4X.SDL2UI
                     }
                     if (ImGui.Button("AddOrbit"))
                     {
-                        //_state.LoadedWindows.Add(new OrbitOrderWindow(_state, _selectedEntity, true));
+                        var pannel = OrbitOrderWindow.GetInstance(_selectedEntity, true);
+                        pannel.IsActive = true;
+                        _state.ActiveWindow = pannel;
                     }
 
                 }
-                ImGui.End();
+
             }
+            ImGui.End();
         }
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)

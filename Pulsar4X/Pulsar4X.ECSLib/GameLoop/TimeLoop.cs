@@ -18,6 +18,7 @@ namespace Pulsar4X.ECSLib
         private SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
 
         private Stopwatch _stopwatch = new Stopwatch();
+        Stopwatch _subpulseStopwatch = new Stopwatch();
         private Timer _timer = new Timer();
 
         //changes how often the tick happens
@@ -47,7 +48,7 @@ namespace Pulsar4X.ECSLib
         /// length of time it took to process the last DoProcess
         /// </summary>
         public TimeSpan LastProcessingTime { get; private set; } = TimeSpan.Zero;
-
+        public TimeSpan LastSubtickTime { get; private set; } = TimeSpan.Zero;
         /// <summary>
         /// This invokes the DateChangedEvent.
         /// </summary>
@@ -184,6 +185,7 @@ namespace Pulsar4X.ECSLib
          
             while (GameGlobalDateTime < targetDateTime)
             {
+                _subpulseStopwatch.Start();
                 DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
                 //do system processors
               
@@ -197,8 +199,9 @@ namespace Pulsar4X.ECSLib
                         starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
                     }
                 }
-
+                LastSubtickTime = _subpulseStopwatch.Elapsed;
                 GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
+                _subpulseStopwatch.Reset();
             }
 
             LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
