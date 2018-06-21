@@ -7,6 +7,13 @@ namespace Pulsar4X.SDL2UI
 {
     public class DebugWindow :PulsarGuiWindow
     {
+        
+        float largestGFPS = 0;
+        int largestIndex = 0;
+/*
+float nextLargeGFPS = 0;
+        int nextLargeIndex = 0;
+*/
         float _currentGFPS;
         int _gameRateIndex = 0;
         float[] _gameRates = new float[80];
@@ -21,6 +28,7 @@ namespace Pulsar4X.SDL2UI
 
         private DebugWindow() 
         {
+            
         }
         internal static DebugWindow GetInstance()
         {
@@ -45,6 +53,43 @@ namespace Pulsar4X.SDL2UI
         void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
         {
             _currentGFPS = (float)_state.Game.GameLoop.LastSubtickTime.TotalSeconds;
+
+            if (_currentGFPS > largestGFPS)
+            {
+                largestGFPS = _currentGFPS;
+                largestIndex = 0;
+            }
+            else if (largestIndex == _gameRates.Length)
+            {
+                largestGFPS = _currentGFPS;
+                foreach (var item in _gameRates)
+                {
+                    if (item > largestGFPS)
+                        largestGFPS = item;
+                }
+            }
+            else
+            {
+                largestIndex++;
+            }
+            /*
+            else if (_currentGFPS > nextLargeGFPS)
+            {
+                nextLargeGFPS = _currentGFPS;
+                nextLargeIndex = 0;
+            }
+            if (largestIndex > _gameRates.Length * 2)
+            {
+                largestGFPS = nextLargeGFPS;
+                largestIndex = nextLargeIndex;
+                nextLargeGFPS = _currentGFPS;
+                nextLargeIndex = 0;
+            }
+            if(nextLargeIndex > _gameRates.Length)
+            {
+                nextLargeGFPS = _currentGFPS;
+                nextLargeIndex = 0;
+            }*/
             _gameRates[_gameRateIndex] = _currentGFPS;
             if (_gameRateIndex >= _gameRates.Length - 1)
                 _gameRateIndex = 0;
@@ -89,8 +134,8 @@ namespace Pulsar4X.SDL2UI
                         //core game processing rate.
                         //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
                         //ImGui.PlotHistogram("##GRHistogram1", _gameRatesDisplay, 0 , _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
-                        ImGui.PlotHistogram("Game Tick ##GTHistogram", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0f, 1f, new ImVec2(248, 60), sizeof(float));
-                        ImGui.PlotLines("Game Tick ##GTPlotlines", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0, 1, new ImVec2(248, 60), sizeof(float));
+                        ImGui.PlotHistogram("Game Tick ##GTHistogram", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new ImVec2(248, 60), sizeof(float));
+                        ImGui.PlotLines("Game Tick ##GTPlotlines", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new ImVec2(248, 60), sizeof(float));
                         //current star system processing rate. 
                         ImGui.PlotHistogram("System Tick ##STHistogram", _systemRates, _systemRateIndex, _currentSFPS.ToString(), 0f, 1f, new ImVec2(248, 60), sizeof(float));
                         ImGui.PlotLines("System Tick ##STPlotlines", _systemRates, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new ImVec2(248, 60), sizeof(float));

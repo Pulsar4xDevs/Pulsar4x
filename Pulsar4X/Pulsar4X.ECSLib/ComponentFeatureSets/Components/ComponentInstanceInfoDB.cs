@@ -10,8 +10,17 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentInstanceInfoDB : BaseDataBlob
     {
+        /// <summary>
+        /// This is the entity that this component entity is mounted on. 
+        /// </summary>
+        /// <value>The parent entity.</value>
         [JsonProperty]
         public Entity ParentEntity { get; internal set; }
+
+        /// <summary>
+        /// This is the design of this component. 
+        /// </summary>
+        /// <value>The design entity.</value>
         [JsonProperty]
         public Entity DesignEntity { get; internal set; }
         [JsonProperty]

@@ -78,7 +78,7 @@ namespace Pulsar4X.SDL2UI
             gameSettings = new ECSLib.NewGameSettings
             {
                 GameName = name,
-                MaxSystems = 100,
+                MaxSystems = 0,
                 SMPassword = "",
                 //DataSets = options.SelectedModList.Select(dvi => dvi.Directory),
                 CreatePlayerFaction = true,

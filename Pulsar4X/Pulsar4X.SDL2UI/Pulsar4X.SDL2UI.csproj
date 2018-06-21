@@ -65,6 +65,7 @@
     <Compile Include="MapRendering\Icons\OrbitOrderWiget.cs" />
     <Compile Include="OrbitOrderWindow.cs" />
     <Compile Include="SM\SMPannel.cs" />
+    <Compile Include="WeaponTargetingControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

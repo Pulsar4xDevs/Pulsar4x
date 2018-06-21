@@ -93,17 +93,18 @@ namespace Pulsar4X.ECSLib
         private static void AddComponentInstanceToEntity(Entity parentEntity, Entity instance)
         {
 
-                Entity design = instance.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
-                AttributeToAbilityMap.AddAbility(parentEntity, design, instance);
+            Entity design = instance.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
+            AttributeToAbilityMap.AddAbility(parentEntity, design, instance);
 
-                ComponentInstancesDB instancesDict = parentEntity.GetDataBlob<ComponentInstancesDB>();
+            ComponentInstancesDB instancesDict = parentEntity.GetDataBlob<ComponentInstancesDB>();
 
             if (!instancesDict.SpecificInstances.ContainsKey(design))
             {
                 instancesDict.SpecificInstances.Add(design, new PrIwObsList<Entity>(new List<Entity>() { instance}) );
             }
             else
-                instancesDict.SpecificInstances[design].Add(instance);           
+                instancesDict.SpecificInstances[design].Add(instance);
+            instancesDict.ComponentsByGuid.Add(instance.Guid, instance);
         }
     }
 

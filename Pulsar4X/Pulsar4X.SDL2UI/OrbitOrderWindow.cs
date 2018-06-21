@@ -80,7 +80,10 @@ namespace Pulsar4X.SDL2UI
             {
                 int index = _state.MapRendering.UIWidgets.IndexOf(_orbitWidget);
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
-                _state.MapRendering.UIWidgets[index] = _orbitWidget;
+                if (index != -1)
+                    _state.MapRendering.UIWidgets[index] = _orbitWidget;
+                else
+                    _state.MapRendering.UIWidgets.Add(_orbitWidget);
             }
             else
             {
