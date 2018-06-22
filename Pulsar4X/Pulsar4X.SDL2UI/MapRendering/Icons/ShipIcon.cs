@@ -15,7 +15,7 @@ namespace Pulsar4X.SDL2UI
             _shipInfo = entity.GetDataBlob<ShipInfoDB>();
             _componentInstances = entity.GetDataBlob<ComponentInstancesDB>();
 
-            foreach (var componentType in _componentInstances.SpecificInstances)
+            foreach (var componentType in _componentInstances.ComponentsByDesign)
             {
                 int numberOf = componentType.Value.Count;
             }

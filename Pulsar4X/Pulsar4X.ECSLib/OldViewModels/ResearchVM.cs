@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
             {
                 List<Guid> labDesigns = _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Select(design => design.Key).ToList();
                 ComponentInstancesDB instances = colony.GetDataBlob<ComponentInstancesDB>();
-                foreach (var kvp in instances.SpecificInstances)
+                foreach (var kvp in instances.ComponentsByDesign)
                 {
                     if (labDesigns.Contains(kvp.Key.Guid))
                     {
@@ -186,7 +186,7 @@ namespace Pulsar4X.ECSLib
             foreach (var tech in _factionTech.ResearchableTechs.Keys)
                 ResearchableTechs.Add(tech, tech.Name);
 
-            foreach (var kvp in _colonyEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
+            foreach (var kvp in _colonyEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign)
             {
                 if (labDesigns.Contains(kvp.Key))
                     _allLabs.Add(kvp.Key.Guid, kvp.Value.Count);

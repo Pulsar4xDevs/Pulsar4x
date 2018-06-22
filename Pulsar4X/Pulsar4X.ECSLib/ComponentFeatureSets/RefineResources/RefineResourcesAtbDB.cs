@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    public class RefineResourcesAtbDB : BaseDataBlob
+    public class RefineResourcesAtbDB : BaseDataBlob, IComponentAttribute
     {
         [JsonProperty]
         public List<Guid> RefinableMatsList { get; internal set; }

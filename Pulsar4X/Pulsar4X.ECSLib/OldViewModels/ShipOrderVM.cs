@@ -479,10 +479,19 @@ namespace Pulsar4X.ECSLib
 
 
 
-            // The component instances all seem to think that their parent entity is Ensuing Calm, regardless of SelectedShip
+        
             var instanceDB = SelectedShip.GetDataBlob<ComponentInstancesDB>();
-            List<KeyValuePair<Entity, List<Entity>>> fcList = EntityStoreHelpers.GetComponentsOfType<BeamFireControlAtbDB>(instanceDB.SpecificInstances);
+            var fcList = instanceDB.GetDesignsByType(typeof(BeamFireControlAtbDB));
+            int fcCount = 0;
+            foreach (var item in fcList)
+            {
+                fcCount++;
+                _fireControlList.Add(item, item.GetDataBlob<NameDB>().DefaultName + fcCount); 
+            }
+
+            //List<KeyValuePair<Entity, List<Entity>>> fcList = EntityStoreHelpers.GetComponentsOfType<BeamFireControlAtbDB>(instanceDB.SpecificInstances);
             //new List<KeyValuePair<Entity, List<Entity>>>(instanceDB.SpecificInstances.ToDictionary().Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
+            /*
             foreach (KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {
                 int fcCount = 0;
@@ -495,7 +504,7 @@ namespace Pulsar4X.ECSLib
                         
                 
             }
-
+*/
             _fireControlList.SelectedIndex = 0;
 
             
@@ -527,16 +536,34 @@ namespace Pulsar4X.ECSLib
             else
                 _attachedBeamList.Clear();
             var instancesDB = SelectedShip.GetDataBlob<ComponentInstancesDB>();
+
+            var designs = instancesDB.GetDesignsByType(typeof(BeamWeaponAtbDB));
+            _freeBeamList.Clear();
+            foreach (var design in designs)
+            {
+                foreach (var instance in instancesDB.GetComponentsByDesign(design.Guid))
+                {
+                    int beamCount = 0;
+                    if (instance.OwningEntity.GetDataBlob<WeaponStateDB>().FireControl == null)
+                        _freeBeamList.Add(new KeyValuePair<Entity, string>(instance.ParentEntity, design.GetDataBlob<NameDB>().DefaultName + " " + ++beamCount));
+
+                }
+            }
+
+
+            /*
             List<KeyValuePair<Entity, List<Entity>>> beamList = EntityStoreHelpers.GetComponentsOfType<BeamWeaponAtbDB>(instancesDB.SpecificInstances);
             beamList.AddRange(EntityStoreHelpers.GetComponentsOfType<SimpleBeamWeaponAtbDB>(instancesDB.SpecificInstances));
             //new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>() || item.Key.HasDataBlob<SimpleBeamWeaponAtbDB>()).ToList());
 
             bool isBeamControlled = false;
-            _freeBeamList.Clear();
+            */
+
 
             // Get a list of all beam weapons not currently controlled by a fire control
             // @todo: make sure you check all fire controls - currently only lists
             // beams not set to the current fire control
+            /*
             foreach (KeyValuePair<Entity, List<Entity>> kvp in beamList)
             {
                 int beamCount = 0;
@@ -546,7 +573,7 @@ namespace Pulsar4X.ECSLib
                         _freeBeamList.Add(new KeyValuePair<Entity, string>(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + " " + ++beamCount));
 
                 }
-            }
+            }*/
 
             OnPropertyChanged(nameof(AttachedBeamList));
             OnPropertyChanged(nameof(FreeBeamList));
@@ -559,9 +586,24 @@ namespace Pulsar4X.ECSLib
                 return false;
 
             var instancesDB = SelectedShip.GetDataBlob<ComponentInstancesDB>();
-            List<KeyValuePair<Entity, List<Entity>>> fcList = EntityStoreHelpers.GetComponentsOfType<BeamFireControlAtbDB>(instancesDB.SpecificInstances);
-            //new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
 
+            var designs = instancesDB.GetDesignsByType(typeof(BeamFireControlAtbDB));
+
+            foreach (var design in designs)
+            {
+                foreach (var fc in instancesDB.GetComponentsByDesign(design.Guid))
+                {
+                    if (fc.ParentEntity.GetDataBlob<FireControlInstanceAbilityDB>().AssignedWeapons.Contains(beam))
+                        return true;
+                }
+
+            }
+
+
+
+            //List<KeyValuePair<Entity, List<Entity>>> fcList = EntityStoreHelpers.GetComponentsOfType<BeamFireControlAtbDB>(instancesDB.SpecificInstances);
+            //new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamFireControlAtbDB>()).ToList());
+            /*
             foreach (KeyValuePair<Entity, List<Entity>> kvp in fcList)
             {
                 foreach (Entity instance in kvp.Value)
@@ -570,7 +612,7 @@ namespace Pulsar4X.ECSLib
                         return true;
                 }
             }
-
+            */
             return false;
         }
 

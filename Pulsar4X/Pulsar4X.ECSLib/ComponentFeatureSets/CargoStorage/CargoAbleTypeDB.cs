@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     /// Contains info on how an entitiy can be stored.
     /// NOTE an entity with this datablob must also have a MassVolumeDB
     /// </summary>
-    public class CargoAbleTypeDB : BaseDataBlob , ICargoable
+    public class CargoAbleTypeDB : BaseDataBlob , ICargoable, IComponentAttribute
     {
         [JsonProperty]
         public Guid CargoTypeID { get; internal set; }

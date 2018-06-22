@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public class MineResourcesAtbDB : BaseDataBlob
+    public class MineResourcesAtbDB : BaseDataBlob, IComponentAttribute
     {
         public Dictionary<Guid, int> ResourcesPerEconTick { get; internal set; }
 

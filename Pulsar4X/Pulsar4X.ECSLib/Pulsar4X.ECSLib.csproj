@@ -16,6 +16,7 @@
     <PackageReference Include="NUnit" Version="3.10.1" />
     <Compile Remove="Properties\AssemblyInfo.cs" />
     <Compile Remove="ComponentFeatureSets\Rendering\RenderingInfoDB.cs" />
+    <Compile Remove="ComponentFeatureSets\Components\ComponentAtbParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Data\Pulsar4x\CargoTypeData.json" />
@@ -61,5 +62,10 @@
     <None Update="Data\Pulsar4x\AtmosphericData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ComponentFeatureSets\Components\" />
+    <Folder Include="DataBlobs\ComponentInstanceDBs\" />
+    <Folder Include="Factories\ShipComponents\" />
   </ItemGroup>
 </Project>

@@ -144,6 +144,31 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid, int> rates = new Dictionary<Guid, int>();
             ComponentInstancesDB instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
+
+            var designs = instancesDB.GetDesignsByType(typeof(RefineResourcesAtbDB));
+
+            foreach (var design in designs)
+            {
+                var componentDesign = design.GetDataBlob<RefineResourcesAtbDB>();
+                foreach (var instanceInfo in instancesDB.GetComponentsByDesign(design.Guid))
+                {
+                    //TODO: need to check availible workers. 
+                    if (instanceInfo.IsEnabled)
+                    {
+                        var healthPercent = instanceInfo.HealthPercent();
+                        foreach (var item in componentDesign.RefinableMatsList)
+                        {
+                            rates.SafeValueAdd(item, (int)(componentDesign.RefineryPoints * healthPercent));
+                        }
+                    }
+                }
+            }
+
+
+
+
+
+            /*
             List<KeyValuePair<Entity, PrIwObsList<Entity>>> refineingEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<RefineResourcesAtbDB>()).ToList();
             foreach (var refiningComponentDesignList in refineingEntities)
             {
@@ -157,6 +182,7 @@ namespace Pulsar4X.ECSLib
                     }
                 }
             }
+            */
             int maxPoints = 0;
             foreach (int p in rates.Values)
             {

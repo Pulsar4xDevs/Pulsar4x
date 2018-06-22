@@ -179,6 +179,29 @@ namespace Pulsar4X.ECSLib
                 {ConstructionType.Ships, 0},
             };
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
+
+            var designs = instancesDB.GetDesignsByType(typeof(ConstructionAtbDB));
+
+            foreach (var design in designs)
+            {
+                var componentDesign = design.GetDataBlob<ConstructionAtbDB>();
+                foreach (var instanceInfo in instancesDB.GetComponentsByDesign(design.Guid))
+                {
+                    //TODO: need to check availible workers. 
+                    if (instanceInfo.IsEnabled)
+                    {
+                        var healthPercent = instanceInfo.HealthPercent();
+                        foreach (var item in componentDesign.InternalConstructionPoints)
+                        {
+                            typeRates.SafeValueAdd(item.Key, (int)(item.Value * healthPercent));
+                        }
+                    }
+                }
+
+            }
+
+
+            /*
             List<KeyValuePair<Entity, PrIwObsList<Entity>>> factoryEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<ConstructionAtbDB>()).ToList();
             foreach (var factoryDesignList in factoryEntities)
             {
@@ -190,7 +213,7 @@ namespace Pulsar4X.ECSLib
                         typeRates.SafeValueAdd(item.Key, item.Value);
                     }
                 }
-            }
+            }*/
 
 
             colonyEntity.GetDataBlob<ConstructionDB>().ConstructionRates = typeRates;

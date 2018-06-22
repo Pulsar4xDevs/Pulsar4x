@@ -51,10 +51,10 @@ namespace Pulsar4X.ECSLib
             _colonyEntity = colonyEntity;
             _facilities = new ObservableCollection<FacilityVM>();
             ComponentInstancesDB instaces = colonyEntity.GetDataBlob<ComponentInstancesDB>();
-            foreach (var installation in instaces.SpecificInstances)
+            foreach (var installation in instaces.ComponentsByDesign)
             {
                 //Facilities.Add(new FacilityVM(installation.Key, instaces));
-                FacilitesList.Add(new ComponentSpecificDesignVM(installation.Key, installation.Value));
+                //FacilitesList.Add(new ComponentSpecificDesignVM(installation.Key, installation.Value));
             }
 
 
@@ -199,7 +199,7 @@ namespace Pulsar4X.ECSLib
         public string Name { get { return _facilityEntity.GetDataBlob<NameDB>().DefaultName; } }
         public int Count
         {
-            get { return _componentInstancesDB.SpecificInstances[_facilityEntity].Count; }//_colonyInfo.Installations[_facilityEntity];}
+            get { return _componentInstancesDB.ComponentsByDesign[_facilityEntity].Count; }//_colonyInfo.Installations[_facilityEntity];}
         }
         public int WorkersRequired { get { return _facilityEntity.GetDataBlob<ComponentInfoDB>().CrewRequrements * Count; } }
 

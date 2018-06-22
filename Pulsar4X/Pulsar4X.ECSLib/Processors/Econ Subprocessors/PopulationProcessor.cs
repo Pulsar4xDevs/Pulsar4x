@@ -12,17 +12,28 @@ namespace Pulsar4X.ECSLib
             // Get current population
             Dictionary<Entity, long> currentPopulation = colony.GetDataBlob<ColonyInfoDB>().Population;
             var instancesDB = colony.GetDataBlob<ComponentInstancesDB>();
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> infrastructure = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
+
+            var infrustructureDesigns = instancesDB.GetDesignsByType(typeof(PopulationSupportAtbDB));
+
+            //List<KeyValuePair<Entity, PrIwObsList<Entity>>> infrastructure = instancesDB.ComponentsByDesign.GetInternalDictionary().Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
             long popSupportValue;
 
             //  Pop Cap = Total Population Support Value / Colony Cost
             // Get total popSupport
             popSupportValue = 0;
 
-            foreach (var installation in infrastructure)
+
+            foreach (var design in infrustructureDesigns)
             {
                 //if(installations[kvp.Key]
-                popSupportValue += installation.Key.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
+                foreach (var component in instancesDB.GetComponentsByDesign(design.Guid))
+                {
+                    if (component.IsEnabled)
+                    {     
+                        popSupportValue += (long)(design.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity * component.HealthPercent());
+                    }
+                }
+
             }
 
             long needsSupport = 0;
@@ -92,14 +103,21 @@ namespace Pulsar4X.ECSLib
 
             var infrastructure = new List<Entity>();
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> infrastructureEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
+
+            //List<KeyValuePair<Entity, PrIwObsList<Entity>>> infrastructureEntities = instancesDB.ComponentsByDesign.GetInternalDictionary().Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
+            var infrastructureDesigns = instancesDB.GetDesignsByType(typeof(PopulationSupportAtbDB));
+
             long totalMaxPop = 0;
 
-            foreach (var infrastructureDesignList in infrastructureEntities)
+            foreach (var design in infrastructureDesigns)
             {
-                foreach (var infrastructureInstance in infrastructureDesignList.Value)
+                int designPopCap = design.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
+                foreach (var infrastructureInstance in instancesDB.GetComponentsByDesign(design.Guid))
                 {
-                    totalMaxPop += infrastructureDesignList.Key.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
+                    if (infrastructureInstance.IsEnabled)
+                    {
+                        totalMaxPop += (int)(designPopCap * infrastructureInstance.HealthPercent());
+                    }
                 }
             }
 

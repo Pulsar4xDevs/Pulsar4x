@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib
     //
     //@summary Provides the ability to support a number of colonists in a population.  Dependent on the colony cost.
     //
-    public class PopulationSupportAtbDB : BaseDataBlob
+    public class PopulationSupportAtbDB : BaseDataBlob, IComponentAttribute
     {
         [JsonProperty]
         // Population capacity at 1.0 colony cost

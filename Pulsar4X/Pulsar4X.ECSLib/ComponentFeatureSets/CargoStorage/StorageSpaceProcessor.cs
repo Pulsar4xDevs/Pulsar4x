@@ -138,8 +138,41 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, CargoTypeStore> storageDBStoredCargos = parentEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes;
 
             Dictionary<Guid, long> calculatedMaxStorage = new Dictionary<Guid, long>();
-            
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> storageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
+
+            var instances = parentEntity.GetDataBlob<ComponentInstancesDB>();
+            var designs = instances.GetDesignsByType(typeof(CargoStorageAtbDB));
+
+            foreach (var design in designs)
+            {
+                foreach (var instanceInfo in instances.GetComponentsByDesign(design.Guid))
+                {
+                    var componentDesign = instanceInfo.DesignEntity.GetDataBlob<CargoStorageAtbDB>();
+                    long allowableSpace = 0;
+
+                    Guid cargoTypeID = componentDesign.CargoTypeGuid;
+
+                    var healthPercent = instanceInfo.HealthPercent();
+                    if (healthPercent > 0.75) //hardcoded health percent at 3/4, cargo is delecate? TODO: streach goal make this modable
+                        allowableSpace = componentDesign.StorageCapacity;
+
+                    calculatedMaxStorage.SafeValueAdd(cargoTypeID, allowableSpace);
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+            //List<KeyValuePair<Entity, PrIwObsList<Entity>>> storageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
+
+
+
+            /*
             foreach (var kvp in storageComponents) //first loop through the component types
             {                
                 Entity componentDesign = kvp.Key;
@@ -157,7 +190,7 @@ namespace Pulsar4X.ECSLib
                 else
                     calculatedMaxStorage[cargoTypeID] += alowableSpace;    
             }
-            
+            */
             //now loop through our tempory dictionary and match it up with the real one. 
             foreach (var kvp in calculatedMaxStorage)
             {

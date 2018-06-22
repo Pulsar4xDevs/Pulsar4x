@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     /// For example, you can have a component that provides 5 Installations CP's, and provides 2 Installations | Ships CP's.
     /// Final result will be 7 Installation CP's, and 2 Ship CP's.
     /// </summary>
-    public class ConstructionAtbDB : BaseDataBlob
+    public class ConstructionAtbDB : BaseDataBlob, IComponentAttribute
     {
         public ReadOnlyDictionary<ConstructionType, int> ConstructionPoints => new ReadOnlyDictionary<ConstructionType, int>(InternalConstructionPoints);
 

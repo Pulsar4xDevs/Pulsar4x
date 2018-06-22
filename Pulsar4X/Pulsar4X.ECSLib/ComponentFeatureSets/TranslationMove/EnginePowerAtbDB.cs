@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class EnginePowerAtbDB : BaseDataBlob
+    public class EnginePowerAtbDB : BaseDataBlob, IComponentAttribute
     {
         [JsonProperty]
         public int EnginePower { get; internal set; }

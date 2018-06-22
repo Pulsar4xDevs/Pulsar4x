@@ -41,7 +41,9 @@ namespace Pulsar4X.ECSLib
         public static void RecalcBeamWeapons(Entity ship)
         {
             var instancesDB = ship.GetDataBlob<ComponentInstancesDB>();
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> beamWeaponEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>()).ToList();
+
+            var beamWeaponEntites = instancesDB.GetDesignsByType(typeof(BeamWeaponAtbDB));
+            //List<KeyValuePair<Entity, PrIwObsList<Entity>>> beamWeaponEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>()).ToList();
             List<Entity>fireControlEntities = new List<Entity>();
 
             BeamWeaponsDB bwDB;
@@ -53,6 +55,15 @@ namespace Pulsar4X.ECSLib
             int maxRange = 0;
             int maxTrackingSpeed = 0;
 
+
+            foreach (var beamWeapon in beamWeaponEntites)
+            {
+                var design = beamWeapon.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
+
+
+            }
+
+            /*
             foreach (KeyValuePair<Entity, PrIwObsList<Entity>> beamWeaponTemplate in beamWeaponEntities)
             {
                 foreach(Entity beamWeapon in beamWeaponTemplate.Value)
@@ -77,7 +88,7 @@ namespace Pulsar4X.ECSLib
                     if (fcAtb.TrackingSpeed > maxTrackingSpeed)
                         maxTrackingSpeed = fcAtb.TrackingSpeed;
                 }
-            }
+            }*/
             numFireControls = fireControlEntities.Count;
 
             bwDB = ship.GetDataBlob<BeamWeaponsDB>();
@@ -91,6 +102,61 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    public class SetFireControlOrder : EntityCommand
+    {
+        internal override int ActionLanes => 1;
+
+        internal override bool IsBlocking => false;
+
+        Entity _entityCommanding;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+        [JsonIgnore]
+        Entity _factionEntity;
+
+        [JsonProperty]
+        public Guid TargetEntityGuid { get; set; }
+        private Entity _targetEntity;
+
+        public List<Guid> WeaponsAssigned = new List<Guid>();
+
+
+        internal override void ActionCommand(Game game)
+        {
+            //get weapons listed in the weaponEntity list from the commanding Entities components. 
+            List<Entity> weaponEntitys = new List<Entity>();
+            foreach (var itemGuid in WeaponsAssigned)
+            {
+                foreach (var list in _entityCommanding.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign.Values)
+                {
+                    foreach (var component in list)
+                    {
+                        if (component.Guid == itemGuid && component.HasDataBlob<SimpleBeamWeaponAtbDB>())
+                            weaponEntitys.Add(component);
+                    }
+                }
+            }
+
+
+        }
+
+        internal override bool IsFinished()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                if (game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out _targetEntity))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
 
     public static class FireControlProcessor

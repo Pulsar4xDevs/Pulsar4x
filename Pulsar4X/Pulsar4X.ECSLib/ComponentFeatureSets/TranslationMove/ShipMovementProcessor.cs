@@ -250,31 +250,73 @@ namespace Pulsar4X.ECSLib
             return distance;
         }
 
-        public static void CalcFuelUsePerMeter(Entity entity)
+
+        /*
+         * 
+         * Calc MaxSpeed does this
+        public static void CalcFuelUsePerKMeter(Entity entity)
         {
 
             Dictionary<Guid, double> fuelUse = new Dictionary<Guid, double>();
             var instancesDB = entity.GetDataBlob<ComponentInstancesDB>();
-            foreach (var engineKVP in instancesDB.SpecificInstances.GetInternalDictionary().Where(i => i.Key.HasDataBlob<EnginePowerAtbDB>()))
+            var engines = instancesDB.ComponentsByAttribute[typeof(EnginePowerAtbDB)];
+
+            foreach (Entity engine in engines)
             {
-                foreach (var item in engineKVP.Key.GetDataBlob<ResourceConsumptionAtbDB>().MaxUsage)
+                var instanceInfo = engine.GetDataBlob<ComponentInstanceInfoDB>();
+                var consumption = instanceInfo.DesignEntity.GetDataBlob<ResourceConsumptionAtbDB>();
+
+                if (instanceInfo.IsEnabled)
                 {
-                    fuelUse.SafeValueAdd(item.Key, item.Value * engineKVP.Value.Count); //todo only count non damaged enabled engines
-                }               
-            }
+                    foreach (var fuelUseRate in consumption.MaxUsage)
+                    {
+                        fuelUse.SafeValueAdd(fuelUseRate.Key, fuelUseRate.Value); //* instanceInfo.HealthPercent()); damaged engines use same amount of fuel for less power. 
+                    }
+                }
+            }   
+
+            //foreach (var engineKVP in instancesDB.SpecificInstances.GetInternalDictionary().Where(i => i.Key.HasDataBlob<EnginePowerAtbDB>()))
+            //{
+            //    foreach (var item in engineKVP.Key.GetDataBlob<ResourceConsumptionAtbDB>().MaxUsage)
+            //    {
+            //        fuelUse.SafeValueAdd(item.Key, item.Value * engineKVP.Value.Count); //todo only count non damaged enabled engines
+            //    }               
+            //}
 
             entity.GetDataBlob<PropulsionDB>().FuelUsePerKM = fuelUse;
         }
+    */
 
         /// <summary>
         /// recalculates a shipsMaxSpeed.
         /// </summary>
         /// <param name="ship"></param>
-        public static void CalcMaxSpeed(Entity ship)
+        public static void CalcMaxSpeedAndFuelUsage(Entity ship)
         {
             int totalEnginePower = 0;
             Dictionary<Guid, double> totalFuelUsage = new Dictionary<Guid, double>();
             var instancesDB = ship.GetDataBlob<ComponentInstancesDB>();
+            var designs = instancesDB.GetDesignsByType(typeof(EnginePowerAtbDB));
+            foreach (var design in designs)
+            {
+                foreach (var instanceInfo in instancesDB.GetComponentsByDesign(design.Guid))
+                {
+                    var power = instanceInfo.DesignEntity.GetDataBlob<EnginePowerAtbDB>();
+                    var fuelUsage = instanceInfo.DesignEntity.GetDataBlob<ResourceConsumptionAtbDB>();
+                    if (instanceInfo.IsEnabled)
+                    {
+                        totalEnginePower += (int)(power.EnginePower * instanceInfo.HealthPercent());
+                        foreach (var item in fuelUsage.MaxUsage)
+                        {
+                            totalFuelUsage.SafeValueAdd(item.Key, item.Value);
+                        }
+                    }
+                }
+            }
+
+
+
+            /*
             List<KeyValuePair<Entity,PrIwObsList<Entity>>> engineEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<EnginePowerAtbDB>()).ToList();
             foreach (var engineDesign in engineEntities)
             {
@@ -287,7 +329,7 @@ namespace Pulsar4X.ECSLib
                         totalFuelUsage.SafeValueAdd(kvp.Key, kvp.Value);
                     }                    
                 }
-            }
+            }*/
 
             //Note: TN aurora uses the TCS for max speed calcs. 
             PropulsionDB propulsionDB = ship.GetDataBlob<PropulsionDB>();

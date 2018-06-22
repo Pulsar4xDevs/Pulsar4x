@@ -46,19 +46,19 @@ namespace Pulsar4X.ECSLib
 
             //replace the ships references to the design's specific instances with shiny new specific instances
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
-            var newSpecificInstances = new PrIwObsDict<Entity, PrIwObsList<Entity>>();
-            foreach (var kvp in componentInstances.SpecificInstances)
+            var newSpecificInstances = new Dictionary<Entity, List<Entity>>();
+            foreach (var kvp in componentInstances.ComponentsByDesign)
             {
-                newSpecificInstances.Add(kvp.Key, new PrIwObsList<Entity>());
+                newSpecificInstances.Add(kvp.Key, new List<Entity>());
                 for (int i = 0; i < kvp.Value.Count; i++)
                 {
                     var ownerdb = ownerFaction.GetDataBlob<FactionOwnerDB>();
                     newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction, ownerdb, systemEntityManager));
                 }
             }
-            componentInstances.SpecificInstances = newSpecificInstances;
+            componentInstances.ComponentsByDesign = newSpecificInstances;
 
-            foreach (var componentType in shipEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances)
+            foreach (var componentType in shipEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign)
             {
                 int numComponents = componentType.Value.Count;
                 componentType.Value.Clear();

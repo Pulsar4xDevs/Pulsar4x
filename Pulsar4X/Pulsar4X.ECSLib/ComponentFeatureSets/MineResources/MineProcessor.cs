@@ -82,7 +82,17 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid,int> rates = new Dictionary<Guid, int>();
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> mineEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<MineResourcesAtbDB>()).ToList();
+            //List<KeyValuePair<Entity, List<Entity>>> mineEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<MineResourcesAtbDB>()).ToList();
+            var designs = instancesDB.GetDesignsByType(typeof(MineResourcesAtbDB));
+            foreach (var design in designs)
+            {
+                var designAmount = design.GetDataBlob<MineResourcesAtbDB>().ResourcesPerEconTick;
+                foreach (var item in designAmount)
+                {
+                    rates.SafeValueAdd(item.Key, item.Value);
+                }
+            }  
+            /*
             foreach (var mineComponentDesignList in mineEntities)
             {
                 foreach (var mineInstance in mineComponentDesignList.Value)
@@ -93,7 +103,7 @@ namespace Pulsar4X.ECSLib
                         rates.SafeValueAdd(item.Key, item.Value);
                     }                    
                 }
-            }
+            }*/
             colonyEntity.GetDataBlob<MiningDB>().MineingRate = rates;
         }
 

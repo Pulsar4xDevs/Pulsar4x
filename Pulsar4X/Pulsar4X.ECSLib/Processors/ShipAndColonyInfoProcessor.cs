@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
             float totalTonnage = 0;
             int totalHTK = 0;
             double totalVolume = 0;
-            foreach (var componentDesign in componentInstances.SpecificInstances)
+            foreach (var componentDesign in componentInstances.ComponentsByDesign)
             {                
                 var componentVolume = componentDesign.Key.GetDataBlob<MassVolumeDB>().Volume;
                 var componentTonnage = componentDesign.Key.GetDataBlob<ComponentInfoDB>().SizeInTons;
@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
             if (shipInfo.Tonnage != totalTonnage)
             {
                 shipInfo.Tonnage = totalTonnage;
-                ShipMovementProcessor.CalcMaxSpeed(shipEntity);
+                ShipMovementProcessor.CalcMaxSpeedAndFuelUsage(shipEntity);
             }
             shipInfo.InternalHTK = totalHTK;
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
