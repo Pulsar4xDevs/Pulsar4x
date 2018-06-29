@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoStorageAtbDB : BaseDataBlob, IComponentAttribute
+    public class CargoStorageAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         /// <summary>
         /// Storage Capacity of this module.
@@ -47,6 +47,13 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new CargoStorageAtbDB(this);
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<CargoStorageDB>())
+                parentEntity.SetDataBlob(new CargoStorageDB());
+            StorageSpaceProcessor.ReCalcCapacity(parentEntity);
         }
     }
 }

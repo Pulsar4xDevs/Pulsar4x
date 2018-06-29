@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class EnginePowerAtbDB : BaseDataBlob, IComponentAttribute
+    public class EnginePowerAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
         public int EnginePower { get; internal set; }
@@ -29,6 +29,13 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new EnginePowerAtbDB(this);
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<PropulsionDB>())
+                parentEntity.SetDataBlob(new PropulsionDB());
+            ShipMovementProcessor.CalcMaxSpeedAndFuelUsage(parentEntity);
         }
     }
 }

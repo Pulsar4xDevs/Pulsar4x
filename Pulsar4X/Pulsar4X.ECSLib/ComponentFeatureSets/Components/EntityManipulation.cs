@@ -24,10 +24,10 @@ namespace Pulsar4X.ECSLib
         internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity, Entity ownerFaction, FactionOwnerDB ownerDB)
         {
             Entity instance;
-            
+
             if (parentEntity.HasDataBlob<ComponentInstancesDB>())
             {
-                if (!componentEntity.HasDataBlob<ComponentInstanceInfoDB>() )
+                if (!componentEntity.HasDataBlob<ComponentInstanceInfoDB>())
                 {
                     if (componentEntity.HasDataBlob<ComponentInfoDB>())
                     {
@@ -94,14 +94,19 @@ namespace Pulsar4X.ECSLib
         {
 
             Entity design = instance.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
-            AttributeToAbilityMap.AddAbility(parentEntity, design, instance);
+            foreach (IComponentDesignAttribute attribute in design.DataBlobs.Where( item => item is IComponentDesignAttribute ))
+            {
+                attribute.OnComponentInstalation(parentEntity, instance);
+            }
+            instance.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity = parentEntity;
+            //AttributeToAbilityMap.AddAbility(parentEntity, design, instance);
 
             ComponentInstancesDB instancesDict = parentEntity.GetDataBlob<ComponentInstancesDB>();
             instancesDict.AddComponentInstance(instance);
 
             if (!instancesDict.ComponentsByDesign.ContainsKey(design))
             {
-                instancesDict.ComponentsByDesign.Add(design, new List<Entity>(new List<Entity>() { instance}) );
+                instancesDict.ComponentsByDesign.Add(design, new List<Entity>(new List<Entity>() { instance }));
             }
             else
                 instancesDict.ComponentsByDesign[design].Add(instance);
@@ -111,6 +116,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// this is used to give an High level entity such as a ship or colony an abilityDB 
     /// </summary>
+    /*
     internal static class AttributeToAbilityMap
     {
         //[ThreadStatic]
@@ -123,7 +129,7 @@ namespace Pulsar4X.ECSLib
             { typeof(CargoStorageAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity)=> { if (!shipOrColonyEntity.HasDataBlob<CargoStorageDB>()) shipOrColonyEntity.SetDataBlob(new CargoStorageDB()); }) },
             { typeof(BeamWeaponAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<BeamWeaponsDB>()) shipOrColonyEntity.SetDataBlob(new BeamWeaponsDB()); }) },
             { typeof(SimpleBeamWeaponAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<BeamWeaponsDB>()) shipOrColonyEntity.SetDataBlob(new BeamWeaponsDB()); }) },
-            { typeof(BeamFireControlAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<FireControlInstanceAbilityDB>()) shipOrColonyEntity.SetDataBlob(new FireControlInstanceAbilityDB()); }) },
+            { typeof(BeamFireControlAtbDB), new Action<Entity, Entity>((shipOrColonyEntity, componentInstanceEntity) => { if (!componentInstanceEntity.HasDataBlob<FireControlInstanceAbilityDB>()) BeamFireControlAtbDB.SetToShip(shipOrColonyEntity);})}//shipOrColonyEntity.SetDataBlob(new FireControlInstanceAbilityDB()); }) },
         };
 
         /// <summary>
@@ -143,5 +149,5 @@ namespace Pulsar4X.ECSLib
             }
             componentInstance.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity = shipOrColony;
         }
-    }
+    }*/
 }

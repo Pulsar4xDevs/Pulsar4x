@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     /// Contains info on how an entitiy can be stored.
     /// NOTE an entity with this datablob must also have a MassVolumeDB
     /// </summary>
-    public class CargoAbleTypeDB : BaseDataBlob , ICargoable, IComponentAttribute
+    public class CargoAbleTypeDB : BaseDataBlob , ICargoable, IComponentDesignAttribute
     {
         [JsonProperty]
         public Guid CargoTypeID { get; internal set; }
@@ -61,6 +61,22 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new CargoAbleTypeDB(this);
+        }
+
+        public void OnComponentInstantiation(Entity componentInstance)
+        {
+            if (!componentInstance.HasDataBlob<CargoAbleTypeDB>())
+                componentInstance.SetDataBlob(new CargoAbleTypeDB(this)); //basicaly just clone the design to the instance. 
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity component)
+        {
+
+        }
+
+        public void OnComponentDeInstalation(Entity ship, Entity component)
+        {
+            throw new NotImplementedException();
         }
     }
 }

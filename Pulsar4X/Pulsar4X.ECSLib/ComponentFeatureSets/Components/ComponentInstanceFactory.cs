@@ -21,7 +21,8 @@ namespace Pulsar4X.ECSLib
             //Components have a mass and volume.
             MassVolumeDB mvDB = new MassVolumeDB();
             blobs.Add(mvDB);
-            //TODO: this seems ugly, consider using an Interface on the datablobs for this?
+
+            //TODO: this seems ugly, consider using an Interface on the datablobs for this? YES: TODO put this in the IComponentDesignAttribute
             if (design.HasDataBlob<BeamFireControlAtbDB>())
                 blobs.Add(new FireControlInstanceAbilityDB());
 

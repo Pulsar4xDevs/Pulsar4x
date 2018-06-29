@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    public class RefineResourcesAtbDB : BaseDataBlob, IComponentAttribute
+    public class RefineResourcesAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
         public List<Guid> RefinableMatsList { get; internal set; }
@@ -43,6 +43,13 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new RefineResourcesAtbDB(this);
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<RefiningDB>())
+                parentEntity.SetDataBlob(new RefiningDB());
+            RefiningProcessor.ReCalcRefiningRate(parentEntity);
         }
     }
 }

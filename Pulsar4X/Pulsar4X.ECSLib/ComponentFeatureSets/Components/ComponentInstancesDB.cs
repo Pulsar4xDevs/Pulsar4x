@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
             var design = info.DesignEntity;
             foreach (var datablob in design.DataBlobs)
             {
-                if (datablob is IComponentAttribute)
+                if (datablob is IComponentDesignAttribute)
                 {
                     //add the design to the dictionary if it's not already there.
                     if (!designsByAtbType.ContainsKey(datablob.GetType()))
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (var datablob in design.DataBlobs)
             {
-                if (datablob is IComponentAttribute)
+                if (datablob is IComponentDesignAttribute)
                 {
                     designsByAtbType[datablob.GetType()].Remove(design);
                     if (designsByAtbType[datablob.GetType()].Count == 0)

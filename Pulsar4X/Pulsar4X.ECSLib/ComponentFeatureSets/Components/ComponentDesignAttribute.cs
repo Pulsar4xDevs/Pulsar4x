@@ -5,8 +5,11 @@ using NCalc;
 
 namespace Pulsar4X.ECSLib
 {
-    interface IComponentAttribute
+    interface IComponentDesignAttribute
     {
+        //void OnComponentInstantiation(Entity component);
+        void OnComponentInstalation(Entity parentEntity, Entity componentInstance);
+        //void OnComponentDeInstalation(Entity ship, Entity component);
     }
     
     public class ComponentDesignAttribute

@@ -36,5 +36,11 @@ namespace Pulsar4X.ECSLib
         {
             return new BeamFireControlAtbDB(Range, TrackingSpeed, FinalFireOnly);
         }
+
+        internal static void SetToShip(Entity ship)
+        {
+            if (!ship.HasDataBlob<FireControlAbilityDB>())
+                ship.SetDataBlob<FireControlAbilityDB>(new FireControlAbilityDB());
+        }
     }
 }

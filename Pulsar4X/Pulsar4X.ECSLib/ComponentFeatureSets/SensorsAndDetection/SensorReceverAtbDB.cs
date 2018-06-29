@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class SensorReceverAtbDB : BaseDataBlob
+    public class SensorReceverAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
         internal EMWaveForm RecevingWaveformCapabilty;
@@ -59,6 +59,15 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new SensorReceverAtbDB(this);
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        {
+            //we're cloning the design to the instance here. when we do another pass on the sensors we'll likely change this. 
+            if (!componentInstance.HasDataBlob<SensorReceverAtbDB>())
+                componentInstance.SetDataBlob(new SensorReceverAtbDB(this));//'this' should be the instance's designs db.
+            //SensorProcessorTools.(componentInstance);
+
         }
     }
 }

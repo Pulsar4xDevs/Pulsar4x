@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -69,7 +70,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var componentInstance in componentType.Value)
                 {
                     // Set the parent/owning Entity to the shipEntity
-                    AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance);
+                    //AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance); //we're doing this already 4 lines up at EntityManipulation.AddComponentToEntity!
 
                     //TODO: do this somewhere else, recalcprocessor maybe?
                     if (componentInstance.HasDataBlob<SensorReceverAtbDB>())

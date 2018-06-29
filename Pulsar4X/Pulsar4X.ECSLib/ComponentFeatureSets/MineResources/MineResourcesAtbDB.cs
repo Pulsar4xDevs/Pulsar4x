@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public class MineResourcesAtbDB : BaseDataBlob, IComponentAttribute
+    public class MineResourcesAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         public Dictionary<Guid, int> ResourcesPerEconTick { get; internal set; }
 
@@ -30,6 +30,13 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new MineResourcesAtbDB(this);
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<MiningDB>())
+                parentEntity.SetDataBlob(new MiningDB());
+            MineResourcesProcessor.CalcMaxRate(parentEntity);
         }
     }
 }
