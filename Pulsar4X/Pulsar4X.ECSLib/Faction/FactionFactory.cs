@@ -59,29 +59,6 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        //TODO: #Cleanup #Deadcode. Curently not using this anywhere, I think. have I discarded the idea? 
-        /// <summary>
-        /// The idea of this was to have an entity for system specific faction info. would contain a list of owned entities in that system, etc. 
-        /// 
-        /// </summary>
-        /// <returns>The system faction entity.</returns>
-        /// <param name="game">Game.</param>
-        /// <param name="faction">Faction.</param>
-        /// <param name="starSystem">Star system.</param>
-        public static Entity CreateSystemFactionEntity(Game game, Entity faction, StarSystem starSystem)
-        {
-            var blobs = new List<BaseDataBlob>
-            {
-                faction.GetDataBlob<NameDB>(),//it apears that two different entites can share a datablob. this could be useful, 
-                //but could also be tricky if a procesor does an action on all entites with datablob X
-
-                new FactionSystemInfoDB(starSystem),
-            };
-            var systemFactionEntity = Entity.Create(starSystem, blobs);
-            new OwnedDB(faction, systemFactionEntity);
-            return systemFactionEntity;
-        }
-
         public static Entity CreatePlayerFaction(Game game, Player owningPlayer, string factionName)
         {
             Entity faction = CreateFaction(game, factionName);

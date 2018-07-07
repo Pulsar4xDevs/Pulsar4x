@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
 
 
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
-            var facSystemInfo = FactionFactory.CreateSystemFactionEntity(game, factionEntity, sol);
+
             //test systems
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).Guid);
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).Guid);

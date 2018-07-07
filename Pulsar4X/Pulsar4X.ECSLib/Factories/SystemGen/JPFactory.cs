@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
 
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};
 
-            Entity jumpPoint = Entity.Create(system, dataBlobs);
+            Entity jumpPoint = Entity.Create(system, Guid.Empty, dataBlobs);
             return jumpPoint;
         }
 

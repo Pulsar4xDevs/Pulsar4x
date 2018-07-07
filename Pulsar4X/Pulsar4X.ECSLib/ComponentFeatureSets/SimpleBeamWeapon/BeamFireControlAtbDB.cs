@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class BeamFireControlAtbDB : BaseDataBlob
+    public class BeamFireControlAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         /// <summary>
         /// Max range of this Beam Fire Control
@@ -37,10 +37,16 @@ namespace Pulsar4X.ECSLib
             return new BeamFireControlAtbDB(Range, TrackingSpeed, FinalFireOnly);
         }
 
-        internal static void SetToShip(Entity ship)
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
         {
-            if (!ship.HasDataBlob<FireControlAbilityDB>())
-                ship.SetDataBlob<FireControlAbilityDB>(new FireControlAbilityDB());
+            if (!parentEntity.HasDataBlob<FireControlAbilityDB>())
+                parentEntity.SetDataBlob<FireControlAbilityDB>(new FireControlAbilityDB());
+            var ability = parentEntity.GetDataBlob<FireControlAbilityDB>();
+            if (!componentInstance.HasDataBlob<FireControlInstanceStateDB>())
+                componentInstance.SetDataBlob(new FireControlInstanceStateDB());
+            
+            ability.AddFirecontrolToParentEntity(componentInstance);
         }
     }
 }

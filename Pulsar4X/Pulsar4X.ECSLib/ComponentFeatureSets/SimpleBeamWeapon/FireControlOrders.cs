@@ -25,19 +25,28 @@ namespace Pulsar4X.ECSLib
 
         public List<Guid> WeaponsAssigned = new List<Guid>();
         private List<Entity> _weaponsAssigned = new List<Entity>();
-        SetWeaponsFireControlOrder(Guid factionGuid, Guid shipGuid, Guid fireControlGuid, List<Guid> weaponsAssigned)
+
+
+        public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, List<Guid> weaponsAssigned)
         {
-            RequestingFactionGuid = factionGuid;
-            EntityCommandingGuid = shipGuid;
-            FireControlGuid = fireControlGuid;
-            WeaponsAssigned = weaponsAssigned;
+            var cmd = new SetWeaponsFireControlOrder()
+            {
+                RequestingFactionGuid = factionGuid,
+                EntityCommandingGuid = orderEntity,
+                CreatedDate = starSysDate,
+                FireControlGuid = fireControlGuid,
+                WeaponsAssigned = weaponsAssigned
+            };
+            game.OrderHandler.HandleOrder(cmd);
         }
+
+
 
         internal override void ActionCommand(Game game)
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceAbilityDB>();
+                var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>();
                 fcinstance.AssignedWeapons = _weaponsAssigned;
                 IsRunning = true;
             }
@@ -92,19 +101,25 @@ namespace Pulsar4X.ECSLib
         private Entity _fireControlComponent;
 
 
-
-        SetTargetFireControlOrder(Guid factionGuid, Guid shipGuid, Guid fireControlGuid, Guid targetGuid)
+        public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, Guid targetGuid)
         {
-            RequestingFactionGuid = factionGuid;
-            EntityCommandingGuid = shipGuid;
-            FireControlGuid = fireControlGuid;
-            TargetEntityGuid = targetGuid;
+            var cmd = new SetTargetFireControlOrder()
+            {
+                RequestingFactionGuid = factionGuid,
+                EntityCommandingGuid = orderEntity,
+                CreatedDate = starSysDate,
+                FireControlGuid = fireControlGuid,
+                TargetEntityGuid = targetGuid,
+            };
+            game.OrderHandler.HandleOrder(cmd);
         }
+
+
 
         internal override void ActionCommand(Game game)
         {
             if (!IsRunning)
-                _fireControlComponent.GetDataBlob<FireControlInstanceAbilityDB>().Target = _targetEntity;
+                _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>().Target = _targetEntity;
 
         }
 
@@ -173,7 +188,7 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceAbilityDB>();
+                var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>();
                 if (IsFiring == FireModes.OpenFire)
                     fcinstance.IsEngaging = true;
                 else if (IsFiring == FireModes.CeaseFire)

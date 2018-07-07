@@ -14,8 +14,8 @@ namespace Pulsar4X.ECSLib
         public static void FireBeamWeapons(StarSystem starSys, Entity beamWeapon)
         {
 
-            WeaponStateDB stateInfo = beamWeapon.GetDataBlob<WeaponStateDB>();
-            FireControlInstanceAbilityDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceAbilityDB>();
+            WeaponInstanceStateDB stateInfo = beamWeapon.GetDataBlob<WeaponInstanceStateDB>();
+            FireControlInstanceStateDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceStateDB>();
 
             // only fire if the beam weapon is finished with its cooldown
             if (stateInfo.CoolDown <= TimeSpan.FromSeconds(0) && stateInfo.FireControl != null && fireControl.IsEngaging)
@@ -107,24 +107,24 @@ namespace Pulsar4X.ECSLib
 
         public static void SetWeaponToFC(Entity fireControlInstance, Entity weaponInstance)
         {
-            if (fireControlInstance.HasDataBlob<FireControlInstanceAbilityDB>() && weaponInstance.HasDataBlob<WeaponStateDB>())
-                weaponInstance.GetDataBlob<WeaponStateDB>().FireControl = fireControlInstance;
+            if (fireControlInstance.HasDataBlob<FireControlInstanceStateDB>() && weaponInstance.HasDataBlob<WeaponInstanceStateDB>())
+                weaponInstance.GetDataBlob<WeaponInstanceStateDB>().FireControl = fireControlInstance;
             else
                 throw new Exception("needs FireContInstanceAbilityDB on fireControlInstance, and WeaponStateDB on weaponInstance");
         }
 
         public static void RemoveWeaponFromFC(Entity weaponInstance)
         {
-            if (weaponInstance.HasDataBlob<WeaponStateDB>())
-                weaponInstance.GetDataBlob<WeaponStateDB>().FireControl = null;
+            if (weaponInstance.HasDataBlob<WeaponInstanceStateDB>())
+                weaponInstance.GetDataBlob<WeaponInstanceStateDB>().FireControl = null;
             else
                 throw new Exception("needs WeaponStateDB on weaponInstance");
         }
 
         public static void SetTarget(Entity fireControlInstance, Entity target)
         {
-            if (fireControlInstance.HasDataBlob<FireControlInstanceAbilityDB>())
-                fireControlInstance.GetDataBlob<FireControlInstanceAbilityDB>().Target = target;
+            if (fireControlInstance.HasDataBlob<FireControlInstanceStateDB>())
+                fireControlInstance.GetDataBlob<FireControlInstanceStateDB>().Target = target;
             else
                 throw new Exception("No FireContInstanceAbilityDB on entity");
         }

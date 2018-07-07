@@ -51,7 +51,6 @@ namespace Pulsar4X.ECSLib
         internal Dictionary<Guid, Entity> SensorEntites = new Dictionary<Guid, Entity>();
 
 
-
         public FactionInfoDB() : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() ) { }
 
         public FactionInfoDB(

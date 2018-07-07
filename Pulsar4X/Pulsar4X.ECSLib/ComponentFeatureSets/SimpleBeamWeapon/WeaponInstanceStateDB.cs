@@ -4,7 +4,7 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    public class WeaponStateDB : BaseDataBlob
+    public class WeaponInstanceStateDB : BaseDataBlob
     {
         [JsonProperty]
         public TimeSpan CoolDown { get; internal set; }
@@ -17,24 +17,23 @@ namespace Pulsar4X.ECSLib
                 return _fireControl;
             }
 
-            // Needs to be accessible from outside ECSLib, so no internal set
             set
             {
                 if (value == null)
                     _fireControl = null;
-                else if (value.HasDataBlob<FireControlInstanceAbilityDB>())
+                else if (value.HasDataBlob<FireControlInstanceStateDB>())
                     _fireControl = value;
                 else
                     _fireControl = null;
             }
         }
 
-        public WeaponStateDB()
+        public WeaponInstanceStateDB()
         {
             FireControl = null;
         }
 
-        public WeaponStateDB(WeaponStateDB db)
+        public WeaponInstanceStateDB(WeaponInstanceStateDB db)
         {
             CoolDown = db.CoolDown;
             FireControl = db.FireControl;
@@ -42,7 +41,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new WeaponStateDB(this);
+            return new WeaponInstanceStateDB(this);
         }
     }
 }

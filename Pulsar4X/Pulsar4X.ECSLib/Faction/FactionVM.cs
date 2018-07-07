@@ -27,6 +27,11 @@ namespace Pulsar4X.ECSLib
             SetFaction(factionEntity);
         }
 
+        public List<Entity> GetEntitiesForSystem(EntityManager system)
+        {
+            return new List<Entity>( system.GetEntitiesByFaction(FactionEntity.Guid));
+        }
+
         //TODO: should I out a message here?
         public bool TrySetFaction(string factionName, string password)
         {

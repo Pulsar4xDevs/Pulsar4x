@@ -386,8 +386,8 @@ namespace Pulsar4X.ECSLib
 
 
 
-
-            entity = Entity.Create(manager, protoEntity);
+            //TODO: #Seralisation we may need to find the entity owner from the json and put that in the second parameter.
+            entity = Entity.Create(manager, Guid.Empty, protoEntity);
             game.PostGameLoad();
             return entity;
         }

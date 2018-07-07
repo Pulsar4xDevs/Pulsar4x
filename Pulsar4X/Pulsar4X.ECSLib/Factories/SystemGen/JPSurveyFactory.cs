@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (ProtoEntity surveyPoint in surveyPoints)
             {
-                var realPoint = Entity.Create(system, surveyPoint);
+                var realPoint = Entity.Create(system, Guid.Empty, surveyPoint);
                 realPoint.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
             }
         }

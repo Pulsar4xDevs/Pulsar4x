@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
             int bodyCount = 1;
             foreach (ProtoEntity protoBody in systemBodies)
             {
-                Entity body = Entity.Create(system, protoBody);
+                Entity body = Entity.Create(system, Guid.Empty, protoBody);
                 FinalizeBodies(staticData, system, body, bodyCount, currentDateTime);
                 bodyCount++;
             }
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
 
                 FinalizeSystemBodyDB(staticData, system, newCometProto);
                 
-                var comet = Entity.Create(system, newCometProto);
+                var comet = Entity.Create(system, Guid.Empty, newCometProto);
                 comet.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
             }
         }
@@ -545,7 +545,7 @@ namespace Pulsar4X.ECSLib
             // create proper entities:
             foreach (var moon in moons)
             {
-                var realMoon = Entity.Create(system, moon);
+                var realMoon = Entity.Create(system, Guid.Empty, moon);
                 realMoon.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
             }
         }
@@ -559,7 +559,7 @@ namespace Pulsar4X.ECSLib
             while (beltMVDB.Mass > 0)
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
-                Entity newBody = Entity.Create(system, newProtoBody);
+                Entity newBody = Entity.Create(system, Guid.Empty, newProtoBody);
                 newBody.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
                 SystemBodyInfoDB newBodyDB = newBody.GetDataBlob<SystemBodyInfoDB>();
 

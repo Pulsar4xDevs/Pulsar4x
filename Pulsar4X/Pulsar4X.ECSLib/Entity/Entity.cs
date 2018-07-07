@@ -20,6 +20,8 @@ namespace Pulsar4X.ECSLib
         [NotNull]
         [JsonIgnore]
         public EntityManager Manager { get; private set; }
+        [JsonProperty]
+        public Guid FactionOwner { get; internal set; }
 
         [NotNull]
         [PublicAPI]
@@ -42,13 +44,15 @@ namespace Pulsar4X.ECSLib
             Manager = InvalidManager;
         }
 
-        internal Entity([NotNull] EntityManager manager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(manager, Guid.NewGuid(), dataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.NewGuid(), manager, Guid.Empty, dataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, Guid factionOwner, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.NewGuid(), manager,  factionOwner, dataBlobs) { }
 
-        internal Entity([NotNull] EntityManager manager, Guid id, IEnumerable<BaseDataBlob> dataBlobs = null)
+
+        internal Entity(Guid id, [NotNull] EntityManager manager, Guid factionOwner,  IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             Manager = manager;
             Guid = id;
-
+            FactionOwner = factionOwner;
             //This is problematic, currently, if a datablob references it's own entity (ie namedb in faction entity) the entity will get a new guid. 
             //and (presumably) the db will point to an empty entity. 
             //TODO: should we throw an exception instead of just replacing the guid with a new one? I'm leaning towards yes. 
@@ -78,7 +82,8 @@ namespace Pulsar4X.ECSLib
             */
         }
 
-        internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(manager, protoEntity.Guid, protoEntity.DataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, Guid factionID, [NotNull] ProtoEntity protoEntity) : this(protoEntity.Guid, manager, factionID, protoEntity.DataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(protoEntity.Guid, manager, Guid.Empty, protoEntity.DataBlobs) { }
 
         /// <summary>
         /// Sets the mask, called by the manager during SetupEntity.
@@ -99,23 +104,36 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool IsValid => this != InvalidEntity && Manager != InvalidManager && Manager.IsValidEntity(this);
 
+
         /// <summary>
         /// Creates a new entity with a randomly generated Guid, registered with the provided manager with the optionally provided dataBlobs.
         /// </summary>
+        /// <returns>The create.</returns>
+        /// <param name="manager">Manager.</param>
+        /// <param name="faction">the faction owner of this new entity. use Guid.Empty for a non owned entity.</param>
+        /// <param name="dataBlobs">Data blobs.</param>
         [PublicAPI]
-        public static Entity Create([NotNull] EntityManager manager, [CanBeNull] IEnumerable<BaseDataBlob> dataBlobs = null)
+
+        public static Entity Create([NotNull] EntityManager manager, Guid faction, [CanBeNull] IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             if (manager == null)
             {
                 throw new ArgumentNullException(nameof(manager));
             }
 
-            return new Entity(manager, dataBlobs);
+            return new Entity(manager, faction, dataBlobs);
         }
 
-        public static Entity Create(EntityManager manager, ProtoEntity protoEntity)
+        /// <summary>
+        /// Create an entity from specified manager, faction and protoEntity.
+        /// </summary>
+        /// <returns>The create.</returns>
+        /// <param name="manager">Manager.</param>
+        /// <param name="faction">the faction owner of this new entity. use Guid.Empty for a non owned entity.</param>
+        /// <param name="protoEntity">Proto entity.</param>
+        public static Entity Create(EntityManager manager, Guid faction, ProtoEntity protoEntity)
         {
-            return new Entity(manager, protoEntity.Guid, protoEntity.DataBlobs);
+            return new Entity(protoEntity.Guid, manager, faction, protoEntity.DataBlobs);
         }
 
         [PublicAPI]
@@ -387,8 +405,8 @@ namespace Pulsar4X.ECSLib
                 if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                     return entity;
 
-                // If no entity was found, create a new entity in the global manager.
-                entity = new Entity(game.GlobalManager, entityGuid);
+                // If no entity was found, create a new entity in the global manager. TODO: we need to get the FactionOwner guid from the json and use that here. 
+                entity = new Entity(entityGuid, game.GlobalManager, Guid.Empty);
                 return entity;
             }
 

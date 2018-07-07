@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
 
-                stars.Add(Entity.Create(system, baseDataBlobs));
+                stars.Add(Entity.Create(system, Guid.Empty, baseDataBlobs));
             }
 
             // The root star must be the most massive. Find it.

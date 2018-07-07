@@ -142,12 +142,12 @@ namespace Pulsar4X.SDL2UI
 
         public unsafe override void ImGuiLayout()
         {
-            /* uncomment this to attempt image display
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(), new ImVec4(255, 0, 0, 255));
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(), new ImVec4(255, 0, 0, 255));
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(0,0,0,255), new ImVec4(255, 0, 0, 255));
-            */
+            /* uncomment this to attempt image display */
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(1,1,1,1), new ImVec4(1, 0, 0, 1));
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(1,1,1,1), new ImVec4(255, 0, 0, 255));
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(0,0,0,1), new ImVec4(255, 0, 0, 255));
+            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(0,0,0,1), new ImVec4(255, 0, 0, 255));
+
 
             //ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
 

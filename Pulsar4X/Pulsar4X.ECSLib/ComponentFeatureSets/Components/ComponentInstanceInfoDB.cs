@@ -15,8 +15,16 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <value>The parent entity.</value>
         [JsonProperty]
-        public Entity ParentEntity { get; internal set; }
+        public Entity ParentEntity
+        {
+            get { return _parentEntity; }
+            internal set { _parentEntity = value; ParentInstances = ParentEntity.GetDataBlob<ComponentInstancesDB>(); }
+        }
 
+        private Entity _parentEntity;
+
+        [JsonIgnore]
+        public ComponentInstancesDB ParentInstances { get; private set; }
         /// <summary>
         /// This is the design of this component. 
         /// </summary>
@@ -32,6 +40,14 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int HTKMax { get; private set; }
 
+        /// <summary>
+        /// Avoid doing this each frame, it looks up the name via doing a GetDataBlob and an List.IndexOf()
+        /// </summary>
+        public string GetName()
+        {
+            string designName = DesignEntity.GetDataBlob<NameDB>().DefaultName;
+            return designName + " " + ParentInstances.GetComponentsByDesign(DesignEntity.Guid).IndexOf(this);
+        }
 
         public ComponentInstanceInfoDB() { }
 

@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
             ComponentInstancesDB installations = new ComponentInstancesDB();
             blobs.Add(installations);
 
-            Entity colonyEntity = new Entity(planetEntity.Manager, blobs);
+            Entity colonyEntity = new Entity(planetEntity.Manager, factionEntity.Guid, blobs);
             factionEntity.GetDataBlob<FactionInfoDB>().Colonies.Add(colonyEntity);
             var OwnedDB = new OwnedDB(factionEntity, colonyEntity);
 

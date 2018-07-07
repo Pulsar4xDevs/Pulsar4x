@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
 
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
-            Entity shipEntity = new Entity(systemEntityManager, protoShip);
+            Entity shipEntity = new Entity(systemEntityManager, ownerFaction.Guid, protoShip);
             new OwnedDB(ownerFaction, shipEntity);
 
             //replace the ships references to the design's specific instances with shiny new specific instances
@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
             };
 
             // now lets create the ship class:
-            Entity shipClassEntity = new Entity(game.GlobalManager, shipDBList); 
+            Entity shipClassEntity = new Entity(game.GlobalManager, faction.Guid, shipDBList); 
             new OwnedDB(faction, shipClassEntity);
             // also gets factionDB:
             FactionInfoDB factionDB = faction.GetDataBlob<FactionInfoDB>();

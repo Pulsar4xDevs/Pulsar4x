@@ -31,8 +31,16 @@ namespace Pulsar4X.ECSLib
 
         internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
-        internal List<AEntityChangeListner> EntityListners = new List<AEntityChangeListner>(); 
+        internal List<AEntityChangeListner> EntityListners = new List<AEntityChangeListner>();
 
+        Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();  
+        internal List<Entity> GetEntitiesByFaction(Guid factionGuid)
+        {
+            if (EntitesByFaction.ContainsKey(factionGuid))
+                return EntitesByFaction[factionGuid];
+            else
+                return new List<Entity>();
+        }
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { 
             get; 
@@ -159,9 +167,15 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);  
+            UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);
 
-            //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity. 
+            if (entity.FactionOwner != null)
+            {
+                if (!EntitesByFaction.ContainsKey(entity.FactionOwner))
+                    EntitesByFaction.Add(entity.FactionOwner, new List<Entity>());
+                EntitesByFaction[entity.FactionOwner].Add(entity);
+            }
+                //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity. 
         }
 
         /// <summary>
@@ -223,6 +237,9 @@ namespace Pulsar4X.ECSLib
                 // This is a "fake" manager that does not link to other managers.
                 _localEntityDictionary.Remove(entity.Guid);
             }
+
+            EntitesByFaction[entity.FactionOwner].Remove(entity);
+
         }
 
         internal List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)
@@ -764,8 +781,8 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    // Entity has not been previously deserialized.
-                    Entity.Create(this, protoEntity);
+                    // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here. 
+                    Entity.Create(this, Guid.Empty, protoEntity);
                 }
             }
         }

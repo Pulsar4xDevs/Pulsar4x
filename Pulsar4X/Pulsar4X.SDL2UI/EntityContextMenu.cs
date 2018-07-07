@@ -14,11 +14,6 @@ namespace Pulsar4X.SDL2UI
 
     }
 
-    public interface IOrderWindow
-    {
-        void TargetEntity(EntityState entity);
-    }
-
     public class EntityContextMenu
     {
 
@@ -40,6 +35,7 @@ namespace Pulsar4X.SDL2UI
         internal void Display()
         {
             ActiveEntity = _entityState.Entity;
+            ImGui.BeginGroup();
             if (ImGui.SmallButton("Pin Camera"))
             {
                 _state.Camera.PinToEntity(_entityState.Entity);
@@ -55,6 +51,13 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
                 }
             }
+            if (ImGui.SmallButton("Fire Control"))
+            {
+                var instance = WeaponTargetingControl.GetInstance(_entityState);
+                instance.SetOrderEntity(_entityState);
+                instance.IsActive = true;
+                _state.ActiveWindow = instance;
+            }
 
             //if entity can target
 
@@ -62,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             //if entity can mine || refine || build
             //econOrderwindow
 
-
+            ImGui.EndGroup();
 
         }
     }

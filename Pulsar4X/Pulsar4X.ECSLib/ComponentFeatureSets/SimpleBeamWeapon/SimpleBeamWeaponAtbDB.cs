@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    public class SimpleBeamWeaponAtbDB : BaseDataBlob
+    public class SimpleBeamWeaponAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
         public double MaxRange { get; internal set; }
@@ -35,6 +35,17 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new SimpleBeamWeaponAtbDB(this);
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        {
+            if (parentEntity.HasDataBlob<FireControlAbilityDB>())
+            {
+                var ability = parentEntity.GetDataBlob<FireControlAbilityDB>();
+                if (!componentInstance.HasDataBlob<WeaponInstanceStateDB>())
+                    componentInstance.SetDataBlob(new WeaponInstanceStateDB());
+                ability.AddWeaponToParentEntity(componentInstance);
+            }
         }
     }
 }

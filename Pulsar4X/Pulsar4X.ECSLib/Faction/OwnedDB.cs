@@ -43,6 +43,7 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("SetFactionOwner should be called from FactionOwnerDB.SetOwned");
             _factionOwner = factionOwnerDB.OwningEntity;
             FactionOwnerDB = factionOwnerDB;
+            OwningEntity.FactionOwner = factionOwnerDB.OwningEntity.Guid;
         }
 
         /*

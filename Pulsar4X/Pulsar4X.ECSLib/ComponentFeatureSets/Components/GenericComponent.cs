@@ -112,7 +112,7 @@ namespace Pulsar4X.ECSLib
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
             FactionInfoDB faction = factionEntity.GetDataBlob<FactionInfoDB>();
             //TODO probilby do checking to see if valid here?
-            Entity component = new Entity(globalEntityManager);
+            Entity component = new Entity(globalEntityManager, factionEntity);
             
             TechSD tech = new TechSD();
             tech.ID = Guid.NewGuid();

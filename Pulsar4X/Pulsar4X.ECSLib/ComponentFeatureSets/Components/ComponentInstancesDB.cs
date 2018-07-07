@@ -74,6 +74,7 @@ namespace Pulsar4X.ECSLib
             allComponents.Remove(entity);
             componentsByDesign[design.Guid].Remove(info);
 
+
             foreach (var datablob in design.DataBlobs)
             {
                 if (datablob is IComponentDesignAttribute)
