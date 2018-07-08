@@ -121,27 +121,30 @@ namespace Pulsar4X.ECSLib
                 return true;
             }
 
-            var ownedDB = @event.Entity?.GetDataBlob<OwnedDB>();
-            if (ownedDB != null)
+            //var ownedDB = @event.Entity?.GetDataBlob<OwnedDB>();
+            if (@event.Entity != null)
             {
-                foreach (KeyValuePair<Entity, AccessRole> keyValuePair in player.AccessRoles)
+                if (@event.Entity.FactionOwner != Guid.Empty)
                 {
-                    Entity arFaction = keyValuePair.Key;
-                    AccessRole arRole = keyValuePair.Value;
-                    if (ownedDB.OwnedByFaction == arFaction)
+                    foreach (KeyValuePair<Entity, AccessRole> keyValuePair in player.AccessRoles)
                     {
-                        if (@event.Entity.HasDataBlob<ShipInfoDB>() && (arRole & AccessRole.UnitVision) == AccessRole.UnitVision)
+                        Entity arFaction = keyValuePair.Key;
+                        AccessRole arRole = keyValuePair.Value;
+                        if (@event.Entity.FactionOwner == arFaction.Guid)
                         {
-                            return true;
+                            if (@event.Entity.HasDataBlob<ShipInfoDB>() && (arRole & AccessRole.UnitVision) == AccessRole.UnitVision)
+                            {
+                                return true;
+                            }
+                            if (@event.Entity.HasDataBlob<ColonyInfoDB>() && (arRole & AccessRole.ColonyVision) == AccessRole.ColonyVision)
+                            {
+                                return true;
+                            }
+                            return false;
                         }
-                        if (@event.Entity.HasDataBlob<ColonyInfoDB>() && (arRole & AccessRole.ColonyVision) == AccessRole.ColonyVision)
-                        {
-                            return true;
-                        }
-                        return false;
                     }
+                    return false;
                 }
-                return false;
             }
 
             if (@event.SystemGuid != Guid.Empty)
@@ -164,8 +167,8 @@ namespace Pulsar4X.ECSLib
                             continue;
                         }
 
-                        List<Entity> ownedEntities = _game.Systems[knownSystem].GetAllEntitiesWithDataBlob<OwnedDB>();
-                        if (ownedEntities.Any(ownedEntity => ownedEntity.GetDataBlob<OwnedDB>().OwnedByFaction == arFaction))
+                        List<Entity> ownedEntities = _game.Systems[knownSystem].GetEntitiesByFaction(arFaction.Guid);
+                        if (ownedEntities.Count > 0)
                         {
                             return true;
                         }

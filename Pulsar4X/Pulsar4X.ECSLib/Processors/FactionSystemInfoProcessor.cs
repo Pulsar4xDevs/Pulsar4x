@@ -18,18 +18,11 @@ namespace Pulsar4X.ECSLib
         }
         void CreateFactionInfo(EntityManager manager, Entity faction) 
         { 
-            List<Entity> entitesWithOrbits = new List<Entity>(manager.GetAllEntitiesWithDataBlob<OrbitDB>()); 
-            List<Entity> entitiesWithOwners = new List<Entity>(manager.GetAllEntitiesWithDataBlob<OwnedDB>());
+            List<Entity> entitesWithOrbits = new List<Entity>(manager.GetAllEntitiesWithDataBlob<OrbitDB>());
+            List<Entity> entitiesWithOwners = new List<Entity>(manager.GetEntitiesByFaction(faction.Guid));
 
             FactionSystemKnowledge factionKen = new FactionSystemKnowledge();
-
-            foreach (var item in entitiesWithOwners)
-            {
-                if (item.GetDataBlob<OwnedDB>().OwnedByFaction == faction)
-                    factionKen.OwnedEntites.Add(item);
-                
-            }
-
+            factionKen.OwnedEntites.AddRange(entitiesWithOwners);
 
         }
 

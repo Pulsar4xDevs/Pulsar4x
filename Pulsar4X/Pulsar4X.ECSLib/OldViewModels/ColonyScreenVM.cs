@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
     {
         public Entity _colonyEntity;
         private ColonyInfoDB ColonyInfo { get { return _colonyEntity.GetDataBlob<ColonyInfoDB>(); } }
-        private Entity FactionEntity { get { return _colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction; } }
+        private Entity _factionEntity;
         public CargoStorageVM CargoStoreVM { get; set; }
         private ObservableCollection<FacilityVM> _facilities;
         public ObservableCollection<FacilityVM> Facilities
@@ -35,10 +35,10 @@ namespace Pulsar4X.ECSLib
 
         public string ColonyName
         {
-            get { return _colonyEntity.GetDataBlob<NameDB>().GetName(FactionEntity); }
+            get { return _colonyEntity.GetDataBlob<NameDB>().GetName(_factionEntity); }
             set
             {
-                _colonyEntity.GetDataBlob<NameDB>().SetName(FactionEntity, value);
+                _colonyEntity.GetDataBlob<NameDB>().SetName(_factionEntity, value);
                 OnPropertyChanged();
             }
         }
@@ -49,6 +49,7 @@ namespace Pulsar4X.ECSLib
 
             gameVM.Game.GameLoop.GameGlobalDateChangedEvent += GameVM_DateChangedEvent;
             _colonyEntity = colonyEntity;
+            _colonyEntity.Manager.FindEntityByGuid(_colonyEntity.FactionOwner, out _factionEntity);
             _facilities = new ObservableCollection<FacilityVM>();
             ComponentInstancesDB instaces = colonyEntity.GetDataBlob<ComponentInstancesDB>();
             foreach (var installation in instaces.ComponentsByDesign)
@@ -60,7 +61,7 @@ namespace Pulsar4X.ECSLib
 
             UpdatePop();
 
-            CommandReferences cmdRef = new CommandReferences(FactionEntity.Guid, _colonyEntity.Guid, gameVM.Game.OrderHandler, _colonyEntity.Manager.ManagerSubpulses);
+            CommandReferences cmdRef = new CommandReferences(_colonyEntity.FactionOwner, _colonyEntity.Guid, gameVM.Game.OrderHandler, _colonyEntity.Manager.ManagerSubpulses);
             CargoStoreVM = new CargoStorageVM(staticData, cmdRef, colonyEntity.GetDataBlob<CargoStorageDB>());
 
             PlanetMineralDepositVM = new PlanetMineralDepositVM(staticData, _colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity);

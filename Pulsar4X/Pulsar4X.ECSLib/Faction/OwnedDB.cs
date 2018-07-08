@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+    /*
     public class OwnedDB : BaseDataBlob, IGetValuesHash
     {
         [JsonIgnore]
@@ -71,7 +72,7 @@ namespace Pulsar4X.ECSLib
             _factionOwner = objectOwnerDB.OwningEntity;
             ObjectOwnerDB = objectOwnerDB;
         }
-        */
+        
 
 
         // Json Constructor
@@ -119,7 +120,7 @@ namespace Pulsar4X.ECSLib
     }
 
 
-
+    */
     public class ObjectOwnershipDB : TreeHierarchyDB, IGetValuesHash
     {
         /*
@@ -191,44 +192,24 @@ namespace Pulsar4X.ECSLib
         internal void SetOwned(Entity entity)
         {
             OwnedEntities[entity.Guid] = entity;
-            if (!entity.HasDataBlob<OwnedDB>())
-            { }
-
-            var ownedDB = entity.GetDataBlob<OwnedDB>();
-            ownedDB.SetFactionOwner(this);
+            entity.FactionOwner = this.OwningEntity.Guid;
         }
 
         internal void AddEntity(Entity entity)
         {
             OwnedEntities[entity.Guid] = entity;
-
-            var ownedDB = entity.GetDataBlob<OwnedDB>();
-            if (ownedDB.OwnedByFaction != this.OwningEntity)
-                ownedDB.OwnedByFaction = this.OwningEntity;
-            //if(ownedDB.ObjectOwner.
+            entity.FactionOwner = this.OwningEntity.FactionOwner;
         }
 
         internal void RemoveEntity(Entity entity)
         {
             if (OwnedEntities.ContainsKey(entity.Guid))
+            {
                 OwnedEntities.Remove(entity.Guid);
+                entity.FactionOwner = Guid.Empty;
+            }
         }
 
-        /// <summary>
-        /// Gets entities owned by a faction for a specific StarSystem
-        /// </summary>
-        /// <returns>The owned for system.</returns>
-        /// <param name="systemID">System identifier.</param>
-        internal List<Entity> GetOwnedForStarSystem(Guid systemID)
-        {
-            if (ByStarSystem.ContainsKey(systemID))
-                return ByStarSystem[systemID];
-            else
-                return new List<Entity>();
-        }
-
-        internal void GetAllOwned()
-        { }
 
         public override object Clone()
         {

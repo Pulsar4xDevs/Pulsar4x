@@ -62,9 +62,8 @@ namespace Pulsar4X.ECSLib
         {
             if(globalManager.FindEntityByGuid(targetEntityGuid, out targetEntity)) {
                 if(globalManager.FindEntityByGuid(factionGuid, out factionEntity)) {
-                    if(targetEntity.GetDataBlob<OwnedDB>().OwnedByFaction == factionEntity) {
+                    if(targetEntity.FactionOwner == factionEntity.Guid) 
                         return true;
-                    }
                 }
             }
             factionEntity = Entity.InvalidEntity;

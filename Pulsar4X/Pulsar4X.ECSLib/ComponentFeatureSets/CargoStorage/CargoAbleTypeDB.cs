@@ -37,9 +37,19 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public string Name
         {
-            get { return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.GetDataBlob<OwnedDB>()?.OwnedByFaction) ?? "Unknown Object"; }
+            
+            get 
+            {
+                if (this.OwningEntity.GetDataBlob<NameDB>() != null)
+                {
+                    Entity faction;
+                    this.OwningEntity.Manager.FindEntityByGuid(OwningEntity.FactionOwner, out faction);
+                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(faction);
+                }
+                else return "Unknown Object"; 
+            }
         }
-        
+
         public CargoAbleTypeDB()
         {
         }

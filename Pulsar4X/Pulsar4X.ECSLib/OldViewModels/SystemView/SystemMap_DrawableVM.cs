@@ -33,7 +33,6 @@ namespace Pulsar4X.ECSLib
             _viewingFaction = viewingFaction;
 
             var listnerblobs = new List<int>();
-            listnerblobs.Add(EntityManager.DataBlobTypes[typeof(OwnedDB)]);
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
             EntityChangeListner changeListner = new EntityChangeListner(starSys, viewingFaction, listnerblobs);
             _changeListner = changeListner;

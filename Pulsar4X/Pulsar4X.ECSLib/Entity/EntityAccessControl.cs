@@ -37,60 +37,66 @@ namespace Pulsar4X.ECSLib
 
         private static bool IsOwnedEntityAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
         {
-            
-            if (entityMask[EntityManager.GetTypeIndex<OwnedDB>()])
-            {
-                var entityOwnedDB = entity.GetDataBlob<OwnedDB>();
-                var factions = new List<Entity>();
-
-                if (entityMask[EntityManager.GetTypeIndex<SensorProfileDB>()])
-                {
-                    factions = FactionsWithAccess(authorizedPlayer, AccessRole.SensorVision);
-                }
-                /*
-                if (entityMask[EntityManager.GetTypeIndex<ColonyInfoDB>()])
-                {
-                    // Check if entity is a SensorContact
-                    if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
-                    {
-                        // Entity is not a SensorContact
-                        factions = FactionsWithAccess(authorizedPlayer, AccessRole.ColonyVision);
-                    }
-                }
-                else if (entityMask[EntityManager.GetTypeIndex<ShipInfoDB>()])
-                {
-                    var entityShipInfoDB = entity.GetDataBlob<ShipInfoDB>();
-                    if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
-                    {
-                        if (entityShipInfoDB.IsClassDefinition())
-                        {
-                            factions = FactionsWithAccess(authorizedPlayer, AccessRole.Intelligence);
-                        }
-                        else
-                        {
-                            // Entity is an actual ship
-                            factions = FactionsWithAccess(authorizedPlayer, AccessRole.UnitVision);
-                        }
-                    }
-                }
-                else if (entityMask[EntityManager.GetTypeIndex<FactionInfoDB>()])
-                {
-                    if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
-                    {
-                        factions = FactionsWithAccess(authorizedPlayer, AccessRole.FullAccess);
-                    }
-                } */
-
-                foreach (Entity faction in factions)
-                {
-                    if (faction == entityOwnedDB.OwnedByFaction)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            //TODO: TotalyHacked because fuck knows how we're going to do this now. 
+            return true;
         }
+
+        //private static bool IsOwnedEntityAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
+        //{
+            
+        //    if (entityMask[EntityManager.GetTypeIndex<OwnedDB>()])
+        //    {
+        //        var entityOwnedDB = entity.GetDataBlob<OwnedDB>();
+        //        var factions = new List<Entity>();
+
+        //        if (entityMask[EntityManager.GetTypeIndex<SensorProfileDB>()])
+        //        {
+        //            factions = FactionsWithAccess(authorizedPlayer, AccessRole.SensorVision);
+        //        }
+        //        /*
+        //        if (entityMask[EntityManager.GetTypeIndex<ColonyInfoDB>()])
+        //        {
+        //            // Check if entity is a SensorContact
+        //            if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
+        //            {
+        //                // Entity is not a SensorContact
+        //                factions = FactionsWithAccess(authorizedPlayer, AccessRole.ColonyVision);
+        //            }
+        //        }
+        //        else if (entityMask[EntityManager.GetTypeIndex<ShipInfoDB>()])
+        //        {
+        //            var entityShipInfoDB = entity.GetDataBlob<ShipInfoDB>();
+        //            if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
+        //            {
+        //                if (entityShipInfoDB.IsClassDefinition())
+        //                {
+        //                    factions = FactionsWithAccess(authorizedPlayer, AccessRole.Intelligence);
+        //                }
+        //                else
+        //                {
+        //                    // Entity is an actual ship
+        //                    factions = FactionsWithAccess(authorizedPlayer, AccessRole.UnitVision);
+        //                }
+        //            }
+        //        }
+        //        else if (entityMask[EntityManager.GetTypeIndex<FactionInfoDB>()])
+        //        {
+        //            if (entityOwnedDB.OwnedByFaction == entityOwnedDB.ObjectOwner)
+        //            {
+        //                factions = FactionsWithAccess(authorizedPlayer, AccessRole.FullAccess);
+        //            }
+        //        } */
+
+        //        foreach (Entity faction in factions)
+        //        {
+        //            if (faction == entityOwnedDB.OwnedByFaction)
+        //            {
+        //                return true;
+        //            }
+        //        }
+        //    }
+        //    return false;
+        //}
 
         private static bool IsSystemBodyAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
         {

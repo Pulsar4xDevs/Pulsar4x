@@ -43,7 +43,8 @@ namespace Pulsar4X.ECSLib
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
             Entity shipEntity = new Entity(systemEntityManager, ownerFaction.Guid, protoShip);
-            new OwnedDB(ownerFaction, shipEntity);
+            FactionOwnerDB factionOwner = ownerFaction.GetDataBlob<FactionOwnerDB>();
+            factionOwner.SetOwned(shipEntity);
 
             //replace the ships references to the design's specific instances with shiny new specific instances
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
@@ -53,8 +54,7 @@ namespace Pulsar4X.ECSLib
                 newSpecificInstances.Add(kvp.Key, new List<Entity>());
                 for (int i = 0; i < kvp.Value.Count; i++)
                 {
-                    var ownerdb = ownerFaction.GetDataBlob<FactionOwnerDB>();
-                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction, ownerdb, systemEntityManager));
+                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction.Guid, systemEntityManager));
                 }
             }
             componentInstances.ComponentsByDesign = newSpecificInstances;
@@ -127,7 +127,8 @@ namespace Pulsar4X.ECSLib
 
             // now lets create the ship class:
             Entity shipClassEntity = new Entity(game.GlobalManager, faction.Guid, shipDBList); 
-            new OwnedDB(faction, shipClassEntity);
+            FactionOwnerDB factionOwner = faction.GetDataBlob<FactionOwnerDB>();
+            factionOwner.SetOwned(shipClassEntity);
             // also gets factionDB:
             FactionInfoDB factionDB = faction.GetDataBlob<FactionInfoDB>();
 

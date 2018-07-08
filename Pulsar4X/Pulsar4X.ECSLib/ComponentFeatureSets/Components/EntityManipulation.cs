@@ -9,11 +9,14 @@ namespace Pulsar4X.ECSLib
     static class EntityManipulation
     {
 
+        /// <summary>
+        /// Adds the component to entity owned by the parentEntites factionOwner.
+        /// </summary>
+        /// <param name="parentEntity">Parent entity.</param>
+        /// <param name="componentEntity">Component entity.</param>
         internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity)
         {
-            Entity ownerFaction = parentEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            FactionOwnerDB ownerdb = ownerFaction.GetDataBlob<FactionOwnerDB>();
-            AddComponentToEntity(parentEntity, componentEntity, ownerFaction, ownerdb);
+            AddComponentToEntity(parentEntity, componentEntity, parentEntity.FactionOwner);
         }
 
         /// <summary>
@@ -21,7 +24,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="parentEntity">entity that contains an ComponentInstancesDB</param>        
         /// <param name="componentEntity">Can be either a design or instance entity</param>
-        internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity, Entity ownerFaction, FactionOwnerDB ownerDB)
+        /// <param name="factionID">Guid of the faction that this entity should be owned by</param>
+        internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity, Guid factionID)
         {
             Entity instance;
 
@@ -31,7 +35,7 @@ namespace Pulsar4X.ECSLib
                 {
                     if (componentEntity.HasDataBlob<ComponentInfoDB>())
                     {
-                        instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, ownerFaction, ownerDB, parentEntity.Manager);
+                        instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, factionID, parentEntity.Manager);
                     }
                     else throw new Exception("componentEntity does not contain either a ComponentInfoDB or a ComponentInstanceInfoDB. Entity Not a ComponentDesign or ComponentInstance");
                 }
@@ -60,7 +64,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="parentEntity">entity that contains an ComponentInstancesDB</param>        
         /// <param name="componentEntitys">Can be either a design or instance entity</param>
-        internal static void AddComponentToEntity(Entity parentEntity, List<Entity> componentEntitys, Entity faction, FactionOwnerDB owner)
+        internal static void AddComponentToEntity(Entity parentEntity, List<Entity> componentEntitys, Guid factionID)
         {
             Entity instance;
             foreach (var componentEntity in componentEntitys)
@@ -71,7 +75,7 @@ namespace Pulsar4X.ECSLib
                     {
                         if (componentEntity.HasDataBlob<ComponentInfoDB>())
                         {
-                            instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, faction, owner, parentEntity.Manager);
+                            instance = ComponentInstanceFactory.NewInstanceFromDesignEntity(componentEntity, factionID, parentEntity.Manager);
                         }
                         else throw new Exception("componentEntity does not contain either a ComponentInfoDB or a ComponentInstanceInfoDB. Entity Not a ComponentDesign or ComponentInstance");
                     }

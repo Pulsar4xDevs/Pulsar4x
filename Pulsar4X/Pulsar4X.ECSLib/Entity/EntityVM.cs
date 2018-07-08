@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
             _viewmodelDict.Clear();
             Guid key = SelectableEntites.GetKey(newindex);
             _entity = _selectableEntitys[key];
-            CmdRef = new CommandReferences(_entity.GetDataBlob<OwnedDB>().OwnedByFaction.Guid, _entity.Guid, _game.OrderHandler, _entity.Manager.ManagerSubpulses);
+            CmdRef = new CommandReferences(_entity.FactionOwner, _entity.Guid, _game.OrderHandler, _entity.Manager.ManagerSubpulses);
             HasEntity = true;
             _entity.Manager.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
             Update();

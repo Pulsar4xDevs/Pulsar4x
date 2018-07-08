@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     public static class ComponentInstanceFactory
     {
 
-        internal static Entity NewInstanceFromDesignEntity(Entity design, Entity faction, FactionOwnerDB ownerdb, EntityManager manager)
+        internal static Entity NewInstanceFromDesignEntity(Entity design, Guid factionID, EntityManager manager)
         {
 
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
@@ -31,8 +31,7 @@ namespace Pulsar4X.ECSLib
             if (design.HasDataBlob<SensorReceverAtbDB>())
                 blobs.Add((SensorReceverAtbDB)design.GetDataBlob<SensorReceverAtbDB>().Clone());
 
-            Entity newInstance = new Entity(manager, faction.Guid, blobs);
-            new OwnedDB(faction, newInstance); //the constructor of OwnedDB sets itself to the entity
+            Entity newInstance = new Entity(manager, factionID, blobs);
             return newInstance;
         }
     }

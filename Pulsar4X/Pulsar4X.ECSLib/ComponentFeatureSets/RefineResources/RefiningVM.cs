@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
             _staticData = game.StaticData;
             _refineDB = refiningDB;
             _orderHandler = game.OrderHandler;
-            _factionGuid = refiningDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction.Guid;
+            _factionGuid = refiningDB.OwningEntity.FactionOwner;
             _cmdRef = cmdRef;
             foreach (var kvp in _staticData.ProcessedMaterials)
             {

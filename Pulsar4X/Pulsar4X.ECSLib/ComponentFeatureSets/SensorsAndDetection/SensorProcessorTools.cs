@@ -7,10 +7,11 @@ namespace Pulsar4X.ECSLib
 
     public static class SensorProcessorTools
     {
-        internal static void DetectEntites(SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
+        internal static void DetectEntites(Entity receverFaction, FactionInfoDB factionInfo, SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
         {
-            Entity receverFaction = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            var knownContacts = receverFaction.GetDataBlob<FactionInfoDB>().SensorEntites;
+            //Entity receverFaction;// = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
+            //detectableEntity.Manager.FindEntityByGuid(receverDB.OwningEntity.FactionOwner, out receverFaction);
+            var knownContacts = factionInfo.SensorEntites; //receverFaction.GetDataBlob<FactionInfoDB>().SensorEntites;
 
             SensorProfileDB sensorProfile = detectableEntity.GetDataBlob<SensorProfileDB>();
 

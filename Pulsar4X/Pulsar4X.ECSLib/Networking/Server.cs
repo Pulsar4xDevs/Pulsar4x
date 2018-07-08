@@ -475,14 +475,9 @@ namespace Pulsar4X.Networking
         void SendSystemData(NetConnection recipient, StarSystem starSystem)
         {
             Entity faction = Game.GlobalManager.GetGlobalEntityByGuid(_connectedFactions[recipient]);
-            FactionOwnerDB factionOwner = faction.GetDataBlob<FactionOwnerDB>();
-            List<Entity> ownedEntitiesForSystem = factionOwner.GetOwnedForStarSystem(starSystem.Guid);
+            List<Entity> ownedEntitiesForSystem = starSystem.GetEntitiesByFaction(faction.Guid);
 
             var mStream = new MemoryStream();
-
-
-
-
 
 
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();

@@ -42,10 +42,10 @@ namespace Pulsar4X.ECSLib
         internal static void ConstructStuff(Entity colony)
         {
             CargoStorageDB stockpile = colony.GetDataBlob<CargoStorageDB>();
-
+            Entity faction;
+            colony.Manager.FindEntityByGuid(colony.FactionOwner, out faction);
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             var colonyConstruction = colony.GetDataBlob<ConstructionDB>();
-            var factionInfo = colony.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
-
 
             var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
             int maxPoints = colonyConstruction.PointsPerTick;
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
 
                     if (batchJob.ProductionPointsLeft == 0)
                     {
-                        BatchJobItemComplete(colony, stockpile, batchJob,designInfo);
+                        BatchJobItemComplete(colony, stockpile, batchJob, designInfo);
                     }
                 }
             }
@@ -100,11 +100,8 @@ namespace Pulsar4X.ECSLib
             batchJob.MineralsRequired = designInfo.MinerialCosts;
             batchJob.MineralsRequired = designInfo.MaterialCosts;
             batchJob.MineralsRequired = designInfo.ComponentCosts;
-            var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
-            Entity designEntity = factionInfo.ComponentDesigns[batchJob.ItemGuid];
-            Entity factionOwner = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            FactionOwnerDB ownerdb = factionOwner.GetDataBlob<FactionOwnerDB>();
-            Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designEntity, factionOwner, ownerdb, colonyEntity.Manager);
+
+            Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designInfo.OwningEntity, colonyEntity.FactionOwner, colonyEntity.Manager);
             if (batchJob.InstallOn != null)
             {
                 if (batchJob.InstallOn == colonyEntity || StorageSpaceProcessor.HasEntity(storage, colonyEntity.GetDataBlob<CargoAbleTypeDB>()))
@@ -235,10 +232,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         /// <param name="job"></param>
         [PublicAPI]
-        public static void AddJob(Entity colonyEntity, ConstructionJob job)
+        public static void AddJob(FactionInfoDB factionInfo, Entity colonyEntity, ConstructionJob job)
         {
             var constructingDB = colonyEntity.GetDataBlob<ConstructionDB>();
-            var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
+            //var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //check that this faction does have the design on file. I *think* all this type of construction design will get stored in factionInfo.ComponentDesigns

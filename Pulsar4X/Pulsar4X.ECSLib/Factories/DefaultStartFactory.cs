@@ -142,7 +142,7 @@ namespace Pulsar4X.ECSLib
                 deadWeight  //330   1000
             };
 
-            EntityManipulation.AddComponentToEntity(shipDesign, components, faction, faction.GetDataBlob<FactionOwnerDB>());
+            EntityManipulation.AddComponentToEntity(shipDesign, components, faction.Guid);
             return shipDesign;
         }
 
@@ -171,7 +171,7 @@ namespace Pulsar4X.ECSLib
                 deadWeight, //290
             };
 
-            EntityManipulation.AddComponentToEntity(shipDesign, components, faction, faction.GetDataBlob<FactionOwnerDB>());
+            EntityManipulation.AddComponentToEntity(shipDesign, components, faction.Guid);
             return shipDesign;
         }
 

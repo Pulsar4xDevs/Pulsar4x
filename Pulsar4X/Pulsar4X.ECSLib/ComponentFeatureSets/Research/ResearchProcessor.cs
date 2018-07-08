@@ -50,9 +50,11 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionTechs"></param>
         internal void DoResearch(Entity entity)
         {
-            var Faction = entity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            FactionAbilitiesDB factionAbilities = Faction.GetDataBlob<FactionAbilitiesDB>();
-            FactionTechDB factionTechs = Faction.GetDataBlob<FactionTechDB>();
+            
+            Entity faction;
+            entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
+            FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
+            FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>();
             Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
 
             //why am I doing this here instead of as a recalc.

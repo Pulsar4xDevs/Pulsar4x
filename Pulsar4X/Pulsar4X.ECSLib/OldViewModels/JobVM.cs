@@ -23,7 +23,11 @@ namespace Pulsar4X.ECSLib
                 if (_job is RefineingJob)
                     return _staticData.ProcessedMaterials[_job.ItemGuid].Name;
                 else if (_job is ConstructionJob)
-                    return _colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<NameDB>().DefaultName;
+                {
+                    Entity faction;
+                    _colonyEntity.Manager.FindEntityByGuid(_colonyEntity.FactionOwner, out faction);
+                    return faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<NameDB>().DefaultName;
+                }
                 else
                     return "Unknown Jobtype";
 

@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
                     SetPositionClone(sensorInfo),               
                     };
                 sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager, detectingFaction.Guid, datablobs);
-                new OwnedDB(detectingFaction, sensorInfo.SensorEntity);
+                detectingFaction.GetDataBlob<FactionOwnerDB>().SetOwned(sensorInfo.SensorEntity);
             }
 
             foreach (ISensorCloneMethod db in sensorInfo.DetectedEntity.DataBlobs.OfType<ISensorCloneMethod>())

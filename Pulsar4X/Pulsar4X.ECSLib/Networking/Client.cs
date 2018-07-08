@@ -395,10 +395,13 @@ namespace Pulsar4X.Networking
             }
             //this ensures that the ownership is properly set. I've tried a couple of other ways of doing this, but so far this seems to work the best.
             //doing it in the datablob post deserialization caused it to attempt to set the ownership before the entity was valid, and added an entity with an empty guid to the owned data. 
-            if (entity.HasDataBlob<OwnedDB>())
+
+            var owned = entity.FactionOwner;
+            if (owned != Guid.Empty)
             {
-                var owned = entity.GetDataBlob<OwnedDB>();
-                var owner = owned.OwnedByFaction.GetDataBlob<FactionOwnerDB>();
+                Entity faction;
+                entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
+                var owner = faction.GetDataBlob<FactionOwnerDB>();
                 if (!owner.OwnedEntities.ContainsKey(entity.Guid))
                 {
                     Messages.Add("owned entity not being set to owner, setting now");
@@ -413,6 +416,8 @@ namespace Pulsar4X.Networking
                     Messages.Add("ownership seems to have added ok");
                 }
             }
+            else
+                Messages.Add("This entity is owned by noone! this is probibly a serialization/deserialization error, all entitys sent to the client should be owned");
 
             mStream.Close();
 

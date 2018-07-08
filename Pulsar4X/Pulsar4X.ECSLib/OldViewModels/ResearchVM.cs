@@ -121,7 +121,8 @@ namespace Pulsar4X.ECSLib
 
         public ColonyResearchVM(StaticDataStore staticData, Entity colonyEntity)
         {
-            _factionEntity = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
+            //_factionEntity;// = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
+            colonyEntity.Manager.FindEntityByGuid(colonyEntity.FactionOwner, out _factionEntity);
             _colonyEntity = colonyEntity;
             _factionTech = _factionEntity.GetDataBlob<FactionTechDB>();
             Scientists = new List<ScientistControlVM>();

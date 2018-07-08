@@ -58,9 +58,9 @@ namespace Pulsar4X.ECSLib
                 distanceToMove = fuelMaxDistanceAU;
                 double percent = fuelMaxDistanceAU / distanceToNextTPos;
                 newPos = nextTPos + deltaVecToNextT * percent;
-                Event usedAllFuel = new Event(manager.ManagerSubpulses.SystemLocalDateTime, "Used all Fuel", entity.GetDataBlob<OwnedDB>().OwnedByFaction, entity);
-                usedAllFuel.EventType = EventType.FuelExhausted;
-                manager.Game.EventLog.AddEvent(usedAllFuel);
+                //Event usedAllFuel = new Event(manager.ManagerSubpulses.SystemLocalDateTime, "Used all Fuel", entity.GetDataBlob<OwnedDB>().OwnedByFaction, entity);
+                //usedAllFuel.EventType = EventType.FuelExhausted;
+                //manager.Game.EventLog.AddEvent(usedAllFuel);
             }
             else
             {

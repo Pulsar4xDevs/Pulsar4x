@@ -119,23 +119,17 @@ namespace Pulsar4X.ECSLib
             _ownerDB = ListenForFaction.GetDataBlob<FactionOwnerDB>();
             IncludeDBTypeIndexFilter = datablobFilter;
 
-            if(!IncludeDBTypeIndexFilter.Contains(EntityManager.DataBlobTypes[typeof(OwnedDB)]))
-                IncludeDBTypeIndexFilter.Add(EntityManager.DataBlobTypes[typeof(OwnedDB)]);
-
             bool include = false;
-            foreach (var entityitem in manager.GetAllEntitiesWithDataBlob<OwnedDB>()) //TODO: this could maybe be made more efficent if GetAllEntiesWithDatablobs(mask) had some use instructions.
+            foreach (var entityitem in manager.GetEntitiesByFaction(ListenForFaction.Guid))
             {
-                if (entityitem.GetDataBlob<OwnedDB>().OwnedByFaction == ListenForFaction)
+                foreach (var item in IncludeDBTypeIndexFilter)
                 {
-                    foreach (var item in IncludeDBTypeIndexFilter)
+                    if (entityitem.HasDataBlob(item))
+                        include = true;
+                    else
                     {
-                        if (entityitem.HasDataBlob(item))
-                            include = true;
-                        else
-                        {
-                            include = false;
-                            break;
-                        }
+                        include = false;
+                        break;
                     }
                 }
                 if (include)

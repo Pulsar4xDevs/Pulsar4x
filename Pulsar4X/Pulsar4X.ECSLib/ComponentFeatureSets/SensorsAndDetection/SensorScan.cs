@@ -11,20 +11,23 @@ namespace Pulsar4X.ECSLib
         internal override void ProcessEntity(Entity entity, int deltaSeconds)
         {
             EntityManager manager = entity.Manager;
-            Entity faction = entity.GetDataBlob<OwnedDB>().OwnedByFaction;
+            Entity faction;// = entity.GetDataBlob<OwnedDB>().OwnedByFaction;
+            entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
             DateTime atDate = manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds);
-            var receverDB = entity.GetDataBlob<SensorReceverAtbDB>();
+
+            SensorReceverAtbDB receverDB = entity.GetDataBlob<SensorReceverAtbDB>();
+            FactionInfoDB factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
             var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
             foreach (var detectableEntity in detectableEntitys)
             {
                 //Entity detectableEntity = sensorProfile.OwningEntity;
 
-                if (detectableEntity.HasDataBlob<OwnedDB>())
+                if (detectableEntity.FactionOwner != Guid.Empty)
                 {
-                    if (detectableEntity.GetDataBlob<OwnedDB>().OwnedByFaction != faction)
+                    if (detectableEntity.FactionOwner != faction.FactionOwner)
                     {
-                        SensorProcessorTools.DetectEntites(receverDB, detectableEntity, atDate);
+                        SensorProcessorTools.DetectEntites(faction, factionInfo, receverDB, detectableEntity, atDate);
                     }
                     else
                     {
@@ -33,7 +36,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    SensorProcessorTools.DetectEntites(receverDB, detectableEntity, atDate);
+                    SensorProcessorTools.DetectEntites(faction, factionInfo, receverDB, detectableEntity, atDate);
                 }
             }
 
