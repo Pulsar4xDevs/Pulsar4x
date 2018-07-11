@@ -18,7 +18,7 @@ namespace Pulsar4X.Tests
         private StarSystem _starSystem;
         private Entity _shipClass;
         private Entity _ship;
-        private Entity _engineComponent;
+        private Entity _engineComponentDesign;
         private ComponentTemplateSD _engineSD;
 
         [SetUp]
@@ -48,31 +48,31 @@ namespace Pulsar4X.Tests
 
             ComponentDesign engineDesign;// = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
       
-            _engineSD = NameLookup.TryGetTemplateSD(_game, "Engine");
+            _engineSD = NameLookup.GetTemplateSD(_game, "Engine");
             engineDesign = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             engineDesign.ComponentDesignAttributes[0].SetValueFromInput(5); //size = 25 power.
                                     
-            _engineComponent = GenericComponentFactory.DesignToDesignEntity(_game, _faction, engineDesign);
+            _engineComponentDesign = GenericComponentFactory.DesignToDesignEntity(_game, _faction, engineDesign);
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
 
-            Assert.True(_shipClass.GetDataBlob<OwnedDB>().OwnedByFaction == _faction);
+            Assert.True(_shipClass.FactionOwner == _faction.Guid);
 
-            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
-            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponent);
+            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
+            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
 
             Vector4 pos = new Vector4(0, 0, 0, 0);
             _ship = ShipFactory.CreateShip(_shipClass, _starSystem, _faction, pos, _starSystem, "Serial Peacemaker");
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
-            Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().SpecificInstances.ContainsKey(_engineComponent));
+            Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid) == 2);
             Assert.AreEqual(50, propulsion.TotalEnginePower, "Incorrect TotalEnginePower");
             float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
             int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage1);
             Assert.AreEqual(expectedSpeed1, propulsion.MaximumSpeed, "Incorrect Max Speed");
 
-            EntityManipulation.AddComponentToEntity(_ship, _engineComponent); //add second engine
+            EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign); //add second engine
             Assert.AreEqual(75, propulsion.TotalEnginePower, "Incorrect TotalEnginePower 2nd engine added");
             float tonnage2 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
             int expectedSpeed2 = ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage2);

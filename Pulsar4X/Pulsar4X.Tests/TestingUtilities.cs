@@ -40,7 +40,7 @@ namespace Pulsar4X.Tests
 
             if (generateDefaultHumans)
             {
-                DefaultStartFactory.DefaultHumans(game, game.SpaceMaster, "Humans");
+                DefaultStartFactory.DefaultHumans(game, "Humans");
             }
 
             return game;
@@ -104,7 +104,7 @@ namespace Pulsar4X.Tests
 
             StarSystemFactory starfac = new StarSystemFactory(Game);
             Sol = starfac.CreateSol(Game);
-            Earth = NameLookup.TryGetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created 
+            Earth = NameLookup.GetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created 
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
 
             DefaultEngineDesign = DefaultStartFactory.DefaultEngineDesign(Game, HumanFaction);

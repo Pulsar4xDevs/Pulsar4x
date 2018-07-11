@@ -172,7 +172,7 @@ namespace Pulsar4X.Tests
             ImportExportSystem(system);
 
             //Now do the same thing, but with Sol.
-            DefaultStartFactory.DefaultHumans(_game, _game.SpaceMaster, "Humans");
+            DefaultStartFactory.DefaultHumans(_game, "Humans");
 
             systems = _game.GetSystems(_smAuthToken);
             system = systems[systems.Count - 1];

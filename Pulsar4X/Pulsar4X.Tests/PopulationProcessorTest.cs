@@ -210,20 +210,20 @@ namespace Pulsar4X.Tests
             Dictionary<Entity, long> returnPop = new Dictionary<Entity, long>();
             Entity colonyPlanet = colony.GetDataBlob<ColonyInfoDB>().PlanetEntity;
             var instancesDB = colony.GetDataBlob<ComponentInstancesDB>();
-            List<KeyValuePair<Entity, List<Entity>>> infrastructure = EntityStoreHelpers.GetComponentsOfType<PopulationSupportAtbDB>(instancesDB.SpecificInstances);
-            //colony.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<PopulationSupportAtbDB>()).ToList();
-            long popSupportValue;
+            var popSupportTypes = instancesDB.GetDesignsByType(typeof(PopulationSupportAtbDB));
 
-            //  Pop Cap = Total Population Support Value / Colony Cost
-            // Get total popSupport
-            popSupportValue = 0;
+
+            long popSupportValue = 0;
+            foreach (var design in popSupportTypes)
+            {
+                var designValue = design.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
+                var numberOf = instancesDB.GetNumberOfComponentsOfDesign(design.Guid);
+                popSupportValue = designValue * numberOf;
+            }
+
 
             returnPop.Clear();
 
-            foreach (var installation in infrastructure)
-            {
-                popSupportValue += installation.Key.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
-            }
 
             long needsSupport = 0;
 
