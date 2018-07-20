@@ -182,7 +182,7 @@ namespace Pulsar4X.ECSLib
             foreach (var design in designs)
             {
                 var componentDesign = design.GetDataBlob<ConstructionAtbDB>();
-                foreach (var instanceInfo in instancesDB.GetComponentsByDesign(design.Guid))
+                foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     //TODO: need to check availible workers. 
                     if (instanceInfo.IsEnabled)

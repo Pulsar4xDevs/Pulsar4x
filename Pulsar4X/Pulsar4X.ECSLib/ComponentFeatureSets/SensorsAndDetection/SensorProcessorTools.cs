@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
 
     public static class SensorProcessorTools
     {
-        internal static void DetectEntites(Entity receverFaction, FactionInfoDB factionInfo, SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
+        internal static void DetectEntites(Entity receverFaction, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
         {
             //Entity receverFaction;// = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
             //detectableEntity.Manager.FindEntityByGuid(receverDB.OwningEntity.FactionOwner, out receverFaction);
@@ -23,8 +23,17 @@ namespace Pulsar4X.ECSLib
             //TODO: is this still neccicary now that I've found and fixed the loop? (refelctions were getting bounced around)
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
                SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
+            
 
-            SensorReturnValues detectionValues = DetectonQuality(receverDB, sensorProfile);
+
+            PositionDB targetPosition;
+            if (detectableEntity.HasDataBlob<PositionDB>())
+                targetPosition = detectableEntity.GetDataBlob<PositionDB>();
+            else
+                targetPosition = detectableEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//target may be a componentDB. not a shipDB
+
+            var distance = PositionDB.GetDistanceBetween(receverPos, targetPosition);
+            SensorReturnValues detectionValues = DetectonQuality(receverDB, AttenuatedForDistance(sensorProfile, distance));
             SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)
             {
@@ -50,7 +59,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal static SensorReturnValues DetectonQuality(SensorReceverAtbDB recever, SensorProfileDB target)
+        internal static SensorReturnValues DetectonQuality(SensorReceverAtbDB recever, Dictionary<EMWaveForm, double> signalAtPosition)
         {
             /*
              * Thoughts (spitballing):
@@ -86,6 +95,8 @@ namespace Pulsar4X.ECSLib
              * compare angles of the detected intersection and the target signal to see if the shape is simular?
              * if range is known acurately, this could affect the intel gathered. 
              */
+
+            /*
             var myPosition = recever.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
             if (myPosition == null) //then it's probilby a colony
                 myPosition = recever.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
@@ -99,7 +110,7 @@ namespace Pulsar4X.ECSLib
             var detectionResolution = recever.Resolution;
 
             var signalAtPosition = AttenuatedForDistance(target, distance);
-
+*/
             double receverSensitivityFreqMin = recever.RecevingWaveformCapabilty.WavelengthMin_nm;
             double receverSensitivityFreqAvg = recever.RecevingWaveformCapabilty.WavelengthAverage_nm;
             double receverSensitivityFreqMax = recever.RecevingWaveformCapabilty.WavelengthMax_nm;
@@ -239,17 +250,17 @@ namespace Pulsar4X.ECSLib
         /// returns a dictionary of all emmisions including reflected emmisions. 
         /// </summary>
         /// <returns>The for distance.</returns>
-        /// <param name="emission">Emission.</param>
+        /// <param name="emissionProfile">Emission.</param>
         /// <param name="distance">Distance.</param>
-        internal static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorProfileDB emission, double distance)
+        internal static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorProfileDB emissionProfile, double distance)
         {
             var dict = new Dictionary<EMWaveForm, double>();
-            foreach (var emitedItem in emission.EmittedEMSpectra)
+            foreach (var emitedItem in emissionProfile.EmittedEMSpectra)
             {
                 var powerAtDistance = AttenuationCalc(emitedItem.Value, distance);
                 dict.Add(emitedItem.Key, powerAtDistance);
             }
-            foreach (var reflectedItem in emission.ReflectedEMSpectra)
+            foreach (var reflectedItem in emissionProfile.ReflectedEMSpectra)
             {
                 var reflectedValue = AttenuationCalc(reflectedItem.Value, distance);              
                 dict.Add(reflectedItem.Key, reflectedValue);

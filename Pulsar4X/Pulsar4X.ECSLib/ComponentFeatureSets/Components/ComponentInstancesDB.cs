@@ -17,9 +17,9 @@ namespace Pulsar4X.ECSLib
         /// Key is the component design entity
         /// Value is a list of specific instances of that component design, that entity will hold info on damage, cooldown etc.
         /// </summary>
-        [JsonProperty]
-        [PublicAPI]
-        public Dictionary<Entity, List<Entity>> ComponentsByDesign { get; internal set; } = new Dictionary<Entity, List<Entity>>();
+        //[JsonProperty]
+        //[PublicAPI]
+        //public Dictionary<Entity, List<Entity>> ComponentsByDesign { get; internal set; } = new Dictionary<Entity, List<Entity>>();
 
 
         // list of components and where in the ship they are - this is how likely a component is to take damage. 
@@ -29,11 +29,15 @@ namespace Pulsar4X.ECSLib
         //internal Dictionary<Guid, Entity> ComponentsByGuid = new Dictionary<Guid, Entity>();
 
         [JsonProperty]
-        List<Entity> allComponents = new List<Entity>();
-        [JsonProperty]
-        Dictionary<Type, List<Entity>> designsByAtbType = new Dictionary<Type, List<Entity>>();
+        internal readonly List<Entity> AllComponents = new List<Entity>();
         [JsonIgnore]
-        Dictionary<Guid, List<ComponentInstanceInfoDB>> componentsByDesign = new Dictionary<Guid, List<ComponentInstanceInfoDB>>();
+        internal readonly Dictionary<Guid, Entity> AllDesigns = new Dictionary<Guid, Entity>();
+        [JsonIgnore]
+        internal readonly Dictionary<Entity, int> DesignsAndComponentCount = new Dictionary<Entity, int>();
+        [JsonIgnore] 
+        Dictionary<Type, List<Entity>> _designsByAtbType = new Dictionary<Type, List<Entity>>();
+        [JsonIgnore]
+        Dictionary<Guid, List<ComponentInstanceInfoDB>> _componentsByDesign = new Dictionary<Guid, List<ComponentInstanceInfoDB>>();
 
 
 
@@ -44,64 +48,86 @@ namespace Pulsar4X.ECSLib
 
             var info = entity.GetDataBlob<ComponentInstanceInfoDB>();
             var design = info.DesignEntity;
+            AllDesigns[design.Guid] = design;
             foreach (var datablob in design.DataBlobs)
             {
                 if (datablob is IComponentDesignAttribute)
                 {
                     //add the design to the dictionary if it's not already there.
-                    if (!designsByAtbType.ContainsKey(datablob.GetType()))
-                        designsByAtbType.Add(datablob.GetType(), new List<Entity>());
+                    if (!_designsByAtbType.ContainsKey(datablob.GetType()))
+                        _designsByAtbType.Add(datablob.GetType(), new List<Entity>());
                     
-                    if (!designsByAtbType[datablob.GetType()].Contains(design))
-                        designsByAtbType[datablob.GetType()].Add(design);
+                    if (!_designsByAtbType[datablob.GetType()].Contains(design))
+                        _designsByAtbType[datablob.GetType()].Add(design);
                 }
             }
 
             //add the component instance to the dictionary if it's not already there. 
-            if (!componentsByDesign.ContainsKey(design.Guid))
-                componentsByDesign.Add(design.Guid, new List<ComponentInstanceInfoDB>());
-            if (!componentsByDesign[design.Guid].Contains(info))
-                componentsByDesign[design.Guid].Add(info);
+            if (!_componentsByDesign.ContainsKey(design.Guid))
+                _componentsByDesign.Add(design.Guid, new List<ComponentInstanceInfoDB>());
+            if (!_componentsByDesign[design.Guid].Contains(info))
+                _componentsByDesign[design.Guid].Add(info);
 
-            if (!allComponents.Contains(entity))
-                allComponents.Add(entity);
+            if (!AllComponents.Contains(entity))
+                AllComponents.Add(entity);
+            if (!DesignsAndComponentCount.ContainsKey(design))
+                DesignsAndComponentCount.Add(design, 1);
+            else
+                DesignsAndComponentCount[design] += 1;
         }
         internal void RemoveComponentInstance(Entity entity)
         {
             var info = entity.GetDataBlob<ComponentInstanceInfoDB>();
             var design = info.DesignEntity;
-            
-            allComponents.Remove(entity);
-            componentsByDesign[design.Guid].Remove(info);
+            AllDesigns.Remove(design.Guid);
+            AllComponents.Remove(entity);
+            _componentsByDesign[design.Guid].Remove(info);
 
 
             foreach (var datablob in design.DataBlobs)
             {
                 if (datablob is IComponentDesignAttribute)
                 {
-                    designsByAtbType[datablob.GetType()].Remove(design);
-                    if (designsByAtbType[datablob.GetType()].Count == 0)
+                    _designsByAtbType[datablob.GetType()].Remove(design);
+                    if (_designsByAtbType[datablob.GetType()].Count == 0)
                     {
-                        designsByAtbType.Remove(datablob.GetType());
+                        _designsByAtbType.Remove(datablob.GetType());
                     }
                 }
             }
+            DesignsAndComponentCount[design] -= 1;
+            if (DesignsAndComponentCount[design] == 0)
+                DesignsAndComponentCount.Remove(design);
         }
 
         internal List<Entity> GetDesignsByType(Type type)
         {
-            if (designsByAtbType.ContainsKey(type))
-                return designsByAtbType[type];
+            if (_designsByAtbType.ContainsKey(type))
+                return _designsByAtbType[type];
             else
                 return new List<Entity>();
         }
-        internal List<ComponentInstanceInfoDB> GetComponentsByDesign(Guid designGuid)
+        internal List<ComponentInstanceInfoDB> GetComponentsBySpecificDesign(Guid designGuid)
         {
-            return componentsByDesign[designGuid];
+            return _componentsByDesign[designGuid];
+        }
+        internal Dictionary<Guid, List<Entity>> GetComponentsByDesigns()
+        {
+            Dictionary<Guid, List<Entity>> componentsByDesign = new Dictionary<Guid, List<Entity>>();
+            foreach (var designKVP in _componentsByDesign)
+            {
+                List<Entity> entitys = new List<Entity>();
+                foreach (var instance in designKVP.Value)
+                {
+                    entitys.Add(instance.OwningEntity);
+                }
+                componentsByDesign.Add(designKVP.Key, entitys);
+            }
+            return componentsByDesign;
         }
         internal int GetNumberOfComponentsOfDesign(Guid designGuid)
         {
-            return componentsByDesign[designGuid].Count;
+            return _componentsByDesign[designGuid].Count;
         }
 
         public ComponentInstancesDB()
@@ -111,11 +137,11 @@ namespace Pulsar4X.ECSLib
 
         public ComponentInstancesDB(ComponentInstancesDB db)
         {
-            allComponents = new List<Entity>(db.allComponents);
-            designsByAtbType = new Dictionary<Type, List<Entity>>(db.designsByAtbType);
-            componentsByDesign = new Dictionary<Guid, List<ComponentInstanceInfoDB>>(db.componentsByDesign);
+            AllComponents = new List<Entity>(db.AllComponents);
+            _designsByAtbType = new Dictionary<Type, List<Entity>>(db._designsByAtbType);
+            _componentsByDesign = new Dictionary<Guid, List<ComponentInstanceInfoDB>>(db._componentsByDesign);
 
-            ComponentsByDesign = new Dictionary<Entity, List<Entity>>(db.ComponentsByDesign);
+            //ComponentsByDesign = new Dictionary<Entity, List<Entity>>(db.ComponentsByDesign);
             ComponentDictionary = new Dictionary<Entity, double>(db.ComponentDictionary);
         }
 
@@ -132,10 +158,15 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
-            foreach (var item in allComponents)
-            {
-                AddComponentInstance(item);
-            }
+            var game = (Game)context.Context;
+            game.PostLoad += (sender, args) => 
+            { 
+                foreach (var item in AllComponents)
+                {
+                    AddComponentInstance(item);
+                }
+            };
+
         }
     }
 }

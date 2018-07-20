@@ -58,15 +58,19 @@ namespace Pulsar4X.Tests
 
             Assert.True(_shipClass.FactionOwner == _faction.Guid);
 
+
             EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
             EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
 
             Vector4 pos = new Vector4(0, 0, 0, 0);
+            int designEngineNumber = _shipClass.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid);
+            Assert.AreEqual(2, designEngineNumber);
             _ship = ShipFactory.CreateShip(_shipClass, _starSystem, _faction, pos, _starSystem, "Serial Peacemaker");
+            Assert.AreEqual(designEngineNumber, _ship.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid), "Number of engine components not the same as design");
+
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
-            Assert.True(_ship.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid) == 2);
             Assert.AreEqual(50, propulsion.TotalEnginePower, "Incorrect TotalEnginePower");
             float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
             int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage1);

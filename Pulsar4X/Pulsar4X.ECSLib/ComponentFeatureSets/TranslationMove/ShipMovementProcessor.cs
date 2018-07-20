@@ -299,7 +299,7 @@ namespace Pulsar4X.ECSLib
             var designs = instancesDB.GetDesignsByType(typeof(EnginePowerAtbDB));
             foreach (var design in designs)
             {
-                foreach (var instanceInfo in instancesDB.GetComponentsByDesign(design.Guid))
+                foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     var power = instanceInfo.DesignEntity.GetDataBlob<EnginePowerAtbDB>();
                     var fuelUsage = instanceInfo.DesignEntity.GetDataBlob<ResourceConsumptionAtbDB>();

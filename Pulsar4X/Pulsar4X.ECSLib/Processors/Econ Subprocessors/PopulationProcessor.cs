@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
             foreach (var design in infrustructureDesigns)
             {
                 //if(installations[kvp.Key]
-                foreach (var component in instancesDB.GetComponentsByDesign(design.Guid))
+                foreach (var component in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     if (component.IsEnabled)
                     {     
@@ -112,7 +112,7 @@ namespace Pulsar4X.ECSLib
             foreach (var design in infrastructureDesigns)
             {
                 int designPopCap = design.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
-                foreach (var infrastructureInstance in instancesDB.GetComponentsByDesign(design.Guid))
+                foreach (var infrastructureInstance in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     if (infrastructureInstance.IsEnabled)
                     {

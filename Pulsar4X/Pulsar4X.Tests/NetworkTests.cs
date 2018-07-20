@@ -26,7 +26,7 @@ namespace Pulsar4X.Tests
             //_client.OrderHandler = new ClientOrderHandler(_client, _netClient); 
         }
 
-        [Test] 
+        //[Test] 
         public void TestFactionConnect()
         {
             _netClient.ClientConnect();

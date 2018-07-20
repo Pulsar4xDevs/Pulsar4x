@@ -15,7 +15,9 @@ namespace Pulsar4X.ECSLib
             entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
             DateTime atDate = manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds);
 
-            SensorReceverAtbDB receverDB = entity.GetDataBlob<SensorReceverAtbDB>();
+            var designEntity = entity.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
+            SensorReceverAtbDB receverDB = designEntity.GetDataBlob<SensorReceverAtbDB>();
+
             FactionInfoDB factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
             var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
@@ -25,9 +27,13 @@ namespace Pulsar4X.ECSLib
 
                 if (detectableEntity.FactionOwner != Guid.Empty)
                 {
-                    if (detectableEntity.FactionOwner != faction.FactionOwner)
+                    if (detectableEntity.FactionOwner != faction.FactionOwner)                        
                     {
-                        SensorProcessorTools.DetectEntites(faction, factionInfo, receverDB, detectableEntity, atDate);
+                        var position = entity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
+                        if (position == null) //then it's probilby a colony
+                            position = entity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
+
+                        SensorProcessorTools.DetectEntites(faction, factionInfo,position, receverDB, detectableEntity, atDate);
                     }
                     else
                     {
@@ -36,7 +42,12 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    SensorProcessorTools.DetectEntites(faction, factionInfo, receverDB, detectableEntity, atDate);
+
+                    var position = entity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
+                    if (position == null) //then it's probilby a colony
+                        position = entity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
+
+                    SensorProcessorTools.DetectEntites(faction, factionInfo, position, receverDB, detectableEntity, atDate);
                 }
             }
 

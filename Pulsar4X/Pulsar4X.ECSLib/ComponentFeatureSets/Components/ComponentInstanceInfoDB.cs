@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         public string GetName()
         {
             string designName = DesignEntity.GetDataBlob<NameDB>().DefaultName;
-            return designName + " " + ParentInstances.GetComponentsByDesign(DesignEntity.Guid).IndexOf(this);
+            return designName + " " + ParentInstances.GetComponentsBySpecificDesign(DesignEntity.Guid).IndexOf(this);
         }
 
         public ComponentInstanceInfoDB() { }

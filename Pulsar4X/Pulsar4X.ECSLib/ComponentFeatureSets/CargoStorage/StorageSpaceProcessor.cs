@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (var design in designs)
             {
-                foreach (var instanceInfo in instances.GetComponentsByDesign(design.Guid))
+                foreach (var instanceInfo in instances.GetComponentsBySpecificDesign(design.Guid))
                 {
                     var componentDesign = instanceInfo.DesignEntity.GetDataBlob<CargoStorageAtbDB>();
                     long allowableSpace = 0;

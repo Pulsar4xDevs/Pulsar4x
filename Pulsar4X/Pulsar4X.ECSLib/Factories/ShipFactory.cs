@@ -42,45 +42,47 @@ namespace Pulsar4X.ECSLib
 
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
+            //replace the ships references to the design's specific instances with shiny new specific instances
+            ComponentInstancesDB componentInstances = new ComponentInstancesDB();
+            var classInstances = classEntity.GetDataBlob<ComponentInstancesDB>();
+            foreach (var designKVP in classInstances.DesignsAndComponentCount)
+            {
+                for (int i = 0; i < designKVP.Value; i++)
+                {
+                    Entity newInstance = ComponentInstanceFactory.NewInstanceFromDesignEntity(designKVP.Key, ownerFaction.Guid, systemEntityManager);
+
+                    componentInstances.AddComponentInstance(newInstance);
+                }
+            }
+            protoShip.RemoveDataBlob<ComponentInstancesDB>();
+            protoShip.SetDataBlob(componentInstances);
+
+
             Entity shipEntity = new Entity(systemEntityManager, ownerFaction.Guid, protoShip);
+
+            //we need to set all the new components parents to the ship entity.
+            var components = componentInstances.AllComponents;
+            foreach (var component in components)
+            {
+                component.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity = shipEntity;
+            }
+
             FactionOwnerDB factionOwner = ownerFaction.GetDataBlob<FactionOwnerDB>();
             factionOwner.SetOwned(shipEntity);
+            ComponentInstancesDB shipComponentInstanceDB = shipEntity.GetDataBlob<ComponentInstancesDB>();
 
-            //replace the ships references to the design's specific instances with shiny new specific instances
-            ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
-            var newSpecificInstances = new Dictionary<Entity, List<Entity>>();
-            foreach (var kvp in componentInstances.ComponentsByDesign)
+            //TODO: do this somewhere else, recalcprocessor maybe?
+            foreach (var design in shipComponentInstanceDB.GetDesignsByType(typeof(SensorReceverAtbDB)))
             {
-                newSpecificInstances.Add(kvp.Key, new List<Entity>());
-                for (int i = 0; i < kvp.Value.Count; i++)
+                foreach (var instance in shipComponentInstanceDB.GetComponentsBySpecificDesign(design.Guid))
                 {
-                    newSpecificInstances[kvp.Key].Add(ComponentInstanceFactory.NewInstanceFromDesignEntity(kvp.Key, ownerFaction.Guid, systemEntityManager));
+                    var sensor = design.GetDataBlob<SensorReceverAtbDB>();
+                    DateTime nextDatetime = shipEntity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(sensor.ScanTime);
+                    shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan().TypeName, instance.OwningEntity);
+
                 }
-            }
-            componentInstances.ComponentsByDesign = newSpecificInstances;
-
-            foreach (var componentType in shipEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign)
-            {
-                int numComponents = componentType.Value.Count;
-                componentType.Value.Clear();
-
-                for(int i=0; i < numComponents;i++)
-                    EntityManipulation.AddComponentToEntity(shipEntity, componentType.Key);
-
-                foreach (var componentInstance in componentType.Value)
-                {
-                    // Set the parent/owning Entity to the shipEntity
-                    //AttributeToAbilityMap.AddAbility(shipEntity, componentType.Key, componentInstance); //we're doing this already 4 lines up at EntityManipulation.AddComponentToEntity!
-
-                    //TODO: do this somewhere else, recalcprocessor maybe?
-                    if (componentInstance.HasDataBlob<SensorReceverAtbDB>())
-                    {
-                        var sensor = componentInstance.GetDataBlob<SensorReceverAtbDB>();
-                        DateTime nextDatetime = shipEntity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(sensor.ScanTime);
-                        shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan().TypeName, componentInstance);
-                    }
-                }
-            }
+            }   
+            
 
             ReCalcProcessor.ReCalcAbilities(shipEntity);
             return shipEntity;

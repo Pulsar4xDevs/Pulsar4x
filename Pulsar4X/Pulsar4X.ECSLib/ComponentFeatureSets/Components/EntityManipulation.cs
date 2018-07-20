@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         /// This is for adding components and installations to ships and colonies. 
         /// </summary>
         /// <param name="parentEntity">entity that contains an ComponentInstancesDB</param>        
-        /// <param name="componentEntity">Can be either a design or instance entity</param>
+        /// <param name="componentEntity">Can be either a design or instance entity, if a design a new instance will be made</param>
         /// <param name="factionID">Guid of the faction that this entity should be owned by</param>
         internal static void AddComponentToEntity(Entity parentEntity, Entity componentEntity, Guid factionID)
         {
@@ -91,6 +91,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// This is for adding and exsisting component or installation *instance* to ships and colonies. 
+        /// doesn't force a Recalc. hence being private. 
         /// </summary>
         /// <param name="instance">an exsisting componentInstance</param>
         /// <param name="parentEntity">entity that contains an ComponentInstancesDB ie a ship or colony</param>
@@ -108,12 +109,6 @@ namespace Pulsar4X.ECSLib
             ComponentInstancesDB instancesDict = parentEntity.GetDataBlob<ComponentInstancesDB>();
             instancesDict.AddComponentInstance(instance);
 
-            if (!instancesDict.ComponentsByDesign.ContainsKey(design))
-            {
-                instancesDict.ComponentsByDesign.Add(design, new List<Entity>(new List<Entity>() { instance }));
-            }
-            else
-                instancesDict.ComponentsByDesign[design].Add(instance);
         }
     }
 

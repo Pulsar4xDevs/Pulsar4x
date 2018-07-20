@@ -26,11 +26,7 @@ namespace Pulsar4X.ECSLib
             {
                 _parentEntity = newEntity;
                 _componentInstancesDB = _parentEntity.GetDataBlob<ComponentInstancesDB>();
-                //_componentInstancesDB.ComponentsByDesign.CollectionChanged += SpecificInstances_CollectionChanged;
-                foreach (var kvp in _componentInstancesDB.ComponentsByDesign)
-                {
-                    //Designs.Add(new ComponentSpecificDesignVM(kvp.Key, kvp.Value));
-                }
+
             }
         }
 

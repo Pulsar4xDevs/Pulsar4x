@@ -18,10 +18,10 @@ namespace Pulsar4X.ECSLib
             float totalTonnage = 0;
             int totalHTK = 0;
             double totalVolume = 0;
-            foreach (var componentDesign in componentInstances.ComponentsByDesign)
+            foreach (var componentDesign in componentInstances.GetComponentsByDesigns())
             {                
-                var componentVolume = componentDesign.Key.GetDataBlob<MassVolumeDB>().Volume;
-                var componentTonnage = componentDesign.Key.GetDataBlob<ComponentInfoDB>().SizeInTons;
+                var componentVolume = componentInstances.AllDesigns[componentDesign.Key].GetDataBlob<MassVolumeDB>().Volume;
+                var componentTonnage = componentInstances.AllDesigns[componentDesign.Key].GetDataBlob<ComponentInfoDB>().SizeInTons;
                 
                 foreach (var componentInstance in componentDesign.Value)
                 {
