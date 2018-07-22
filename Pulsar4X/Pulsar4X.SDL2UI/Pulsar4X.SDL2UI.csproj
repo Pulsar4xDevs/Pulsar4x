@@ -75,6 +75,7 @@
     <Compile Include="OrbitOrderWindow.cs" />
     <Compile Include="SM\SMPannel.cs" />
     <Compile Include="WeaponTargetingControl.cs" />
+    <Compile Include="RenameWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

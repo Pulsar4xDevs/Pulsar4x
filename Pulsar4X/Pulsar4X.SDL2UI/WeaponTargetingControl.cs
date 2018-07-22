@@ -45,6 +45,7 @@ namespace Pulsar4X.SDL2UI
             _shipFCDB = _orderingEntity.GetDataBlob<FireControlAbilityDB>();
             _weaponNames = new Dictionary<Guid, string>();
             _unAssignedWeapons = new List<Guid>();
+            systemEntityNames = new Dictionary<Guid, string>();
             for (int fcInstanceIndex = 0; fcInstanceIndex < _shipFCDB.FireControlInsances.Count; fcInstanceIndex++)
             {
                 var fireControlInstance = _shipFCDB.FireControlComponents[fcInstanceIndex].GetDataBlob<ComponentInstanceInfoDB>();
@@ -134,8 +135,10 @@ namespace Pulsar4X.SDL2UI
                             {
                                 if (ImGui.Button(_weaponNames[wpn]))
                                 {
+                                    
                                     _unAssignedWeapons.Add(wpn);
                                     _selectedFCAssignedWeapons.Remove(wpn);
+                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.CurrentSystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
                                 }
                             }
                             ImGui.EndGroup();
@@ -150,12 +153,8 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     _selectedFCAssignedWeapons.Add(wpn);
                                     _unAssignedWeapons.Remove(wpn);
+                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.CurrentSystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
                                 }
-                            }
-                            if (ImGui.Button("Set Weapons"))
-                            {
-                                SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.CurrentSystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
-
                             }
                             ImGui.EndGroup();
                             //ImGui.EndChild();

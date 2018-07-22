@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     {
         [JsonProperty]
         internal Guid CmdID { get; set; } = Guid.NewGuid();
-
+        internal bool UseActionLanes = true;
         internal abstract int ActionLanes { get;  }
         internal abstract bool IsBlocking { get; }
 
@@ -85,6 +85,55 @@ namespace Pulsar4X.ECSLib
             EntityGuid = entity;
             Handler = handler;
             _subPulse = subPulse;
+        }
+    }
+
+    public class RenameCommand : EntityCommand
+    {
+        
+        internal override int ActionLanes => 0;
+
+        internal override bool IsBlocking => false;
+        Entity _factionEntity;
+        Entity _entityCommanding;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+        bool _isFinished = false;
+        string NewName;
+
+
+        public static void CreateRenameCommand(Game game, Entity faction, Entity orderEntity, string newName)
+        {
+            var cmd = new RenameCommand()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = orderEntity.Guid,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                NewName = newName,
+                UseActionLanes = false
+            };
+
+            game.OrderHandler.HandleOrder(cmd);
+        }
+
+        internal override void ActionCommand(Game game)
+        {
+            var namedb = _entityCommanding.GetDataBlob<NameDB>();
+            namedb.SetName(_factionEntity, NewName);
+            _isFinished = true;
+        }
+
+        internal override bool IsFinished()
+        {
+            return _isFinished;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

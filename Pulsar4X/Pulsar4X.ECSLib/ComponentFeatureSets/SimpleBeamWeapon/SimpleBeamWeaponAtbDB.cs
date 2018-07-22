@@ -39,13 +39,16 @@ namespace Pulsar4X.ECSLib
 
         public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
         {
-            if (parentEntity.HasDataBlob<FireControlAbilityDB>())
+            if (!parentEntity.HasDataBlob<FireControlAbilityDB>())
             {
-                var ability = parentEntity.GetDataBlob<FireControlAbilityDB>();
-                if (!componentInstance.HasDataBlob<WeaponInstanceStateDB>())
-                    componentInstance.SetDataBlob(new WeaponInstanceStateDB());
-                ability.AddWeaponToParentEntity(componentInstance);
+                var fcdb = new FireControlAbilityDB();
+                parentEntity.SetDataBlob(fcdb);
             }
+            var ability = parentEntity.GetDataBlob<FireControlAbilityDB>();
+            if (!componentInstance.HasDataBlob<WeaponInstanceStateDB>())
+                componentInstance.SetDataBlob(new WeaponInstanceStateDB());
+            ability.AddWeaponToParentEntity(componentInstance);
+
         }
     }
 }

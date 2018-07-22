@@ -23,7 +23,7 @@ namespace Pulsar4X.SDL2UI
             _state = state;
             _entityGuid = entityState.Entity.Guid;
             _nameDB = entityState.Entity.GetDataBlob<NameDB>();
-            NameString = _nameDB.DefaultName;
+            NameString = _nameDB.GetName(state.Faction);
             entityState.Name = NameString;
             entityState.NameIcon = this;
         }

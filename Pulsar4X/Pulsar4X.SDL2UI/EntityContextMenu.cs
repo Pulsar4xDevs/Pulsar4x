@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
 
         GlobalUIState _state;
         internal Entity ActiveEntity; //interacting with/ordering this entity
-
+        ImVec2 buttonSize = new ImVec2(100, 12);
 
         EntityState _entityState;
 
@@ -36,6 +36,7 @@ namespace Pulsar4X.SDL2UI
         {
             ActiveEntity = _entityState.Entity;
             ImGui.BeginGroup();
+
             if (ImGui.SmallButton("Pin Camera"))
             {
                 _state.Camera.PinToEntity(_entityState.Entity);
@@ -51,14 +52,22 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
                 }
             }
-            if (ImGui.SmallButton("Fire Control"))
+            if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>())
             {
-                var instance = WeaponTargetingControl.GetInstance(_entityState);
-                instance.SetOrderEntity(_entityState);
-                instance.IsActive = true;
-                _state.ActiveWindow = instance;
+                if (ImGui.SmallButton("Fire Control"))
+                {
+                    var instance = WeaponTargetingControl.GetInstance(_entityState);
+                    instance.SetOrderEntity(_entityState);
+                    instance.IsActive = true;
+                    _state.ActiveWindow = instance;
+                }
             }
-
+            if (ImGui.SmallButton("Rename"))
+            {
+                RenameWindow.GetInstance(_entityState).IsActive = true;
+                _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
+                ImGui.CloseCurrentPopup();
+            }
             //if entity can target
 
 
