@@ -31,11 +31,29 @@ namespace Pulsar4X.SDL2UI
         void BasicShape()
         {
             //TODO break the vertical up depending on percentage of ship dedicated to each thing. 
-            Front(6, 10, 0, -11); 
-            Cargo(16, 16, 0, -12);
-            Wings(26, 26, 8, 5, 0, 0);
-            Reactors(10, 10, 0, 9);
-            Engines(10, 6, 0, 13);
+            //Front(6, 10, 0, -11); 
+            //Cargo(16, 16, 0, -12);
+            //Wings(26, 26, 8, 5, 0, 0);
+            //Reactors(10, 10, 0, 9);
+            //Engines(10, 6, 0, 13);
+
+            //For now we're just going to use a simple cheveron to represent ships, make something fancier in the future 
+            //by somone who has some design mojo. 
+            byte r = 50;
+            byte g = 50;
+            byte b = 200;
+            byte a = 255;
+            PointD[] points = {
+            new PointD { X = 0, Y = -5 },
+            new PointD { X = 5, Y = 5 },
+            new PointD { X = 0, Y = 0 },
+            new PointD { X = -5, Y = 5 },
+            new PointD { X = 0, Y = -5 }
+            };
+
+            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            Shapes.Add(new Shape() { Points = points, Color = colour });
+
         }
         void Front(int width, int height, int offsetX, int offsetY) //crew 
         {
