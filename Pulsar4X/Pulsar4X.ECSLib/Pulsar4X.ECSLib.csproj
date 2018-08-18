@@ -17,6 +17,7 @@
     <Compile Remove="Properties\AssemblyInfo.cs" />
     <Compile Remove="ComponentFeatureSets\Rendering\RenderingInfoDB.cs" />
     <Compile Remove="ComponentFeatureSets\Components\ComponentAtbParser.cs" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Data\Pulsar4x\CargoTypeData.json" />
@@ -67,5 +68,6 @@
     <Folder Include="ComponentFeatureSets\Components\" />
     <Folder Include="DataBlobs\ComponentInstanceDBs\" />
     <Folder Include="Factories\ShipComponents\" />
+    <Folder Include="Components\" />
   </ItemGroup>
 </Project>

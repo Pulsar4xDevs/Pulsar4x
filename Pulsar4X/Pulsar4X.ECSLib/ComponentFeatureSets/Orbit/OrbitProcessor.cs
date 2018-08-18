@@ -115,11 +115,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="time">Time position desired from.</param>
         public static Vector4 GetAbsolutePosition(OrbitDB orbit, DateTime time)
         {
+            Vector4 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition;
             if (orbit.IsStationary)
             {
-                return new Vector4(0, 0, 0, 0);
+                return rootPos;
             }
-            Vector4 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition;
+
             return rootPos + GetPosition(orbit, GetTrueAnomaly(orbit, time));
         }
 
@@ -187,7 +188,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
         /// </summary>
-        private static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
+        public static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             //Kepler's Equation
             const int numIterations = 100;

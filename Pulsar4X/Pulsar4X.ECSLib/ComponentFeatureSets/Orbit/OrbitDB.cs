@@ -99,9 +99,9 @@ namespace Pulsar4X.ECSLib
         public bool IsStationary { get; private set; }
 
         [JsonProperty]
-        private readonly double _parentMass;
+        private double _parentMass;
         [JsonProperty]
-        private readonly double _myMass;
+        private double _myMass;
 
         #region Construction Interface
         /// <summary>
@@ -196,6 +196,8 @@ namespace Pulsar4X.ECSLib
             LongitudeOfAscendingNode = toCopy.LongitudeOfAscendingNode;
             ArgumentOfPeriapsis = toCopy.ArgumentOfPeriapsis;
             MeanAnomaly = toCopy.MeanAnomaly;
+            _parentMass = toCopy._parentMass;
+            _myMass = toCopy._myMass;
             Epoch = toCopy.Epoch;
         }
         #endregion
@@ -244,6 +246,7 @@ namespace Pulsar4X.ECSLib
 
         public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
         {
+            OrbitDB clone;
             if (this.Parent != null)
             {
                 Entity cloneParent;
@@ -259,9 +262,11 @@ namespace Pulsar4X.ECSLib
                         cloneParent = SensorEntityFactory.UpdateSensorContact(sensorInfo.Faction, parentSensorInfo);
                     }
                 }
-                return new OrbitDB(this, sensorInfo, cloneParent);
+                clone = new OrbitDB(this, sensorInfo, cloneParent);
             }
-            return new OrbitDB(this, sensorInfo, null); //the root sun will not have an orbitDB parent. 
+            else
+                clone = new OrbitDB(this, sensorInfo, null); //the root sun will not have an orbitDB parent. 
+            return clone; 
         }
 
         public void SensorUpdate(SensorInfoDB sensorInfo)
@@ -291,6 +296,9 @@ namespace Pulsar4X.ECSLib
             LongitudeOfAscendingNode = actualDB.LongitudeOfAscendingNode;
             ArgumentOfPeriapsis = actualDB.ArgumentOfPeriapsis;
             MeanAnomaly = actualDB.MeanAnomaly;
+            _parentMass = actualDB._parentMass;
+            _myMass = actualDB._myMass;
+            CalculateExtendedParameters();
         }
 
         public int GetValueCompareHash(int hash = 17)

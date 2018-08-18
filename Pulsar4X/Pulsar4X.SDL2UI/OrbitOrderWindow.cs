@@ -10,10 +10,18 @@ namespace Pulsar4X.SDL2UI
         EntityState OrderingEntity;
 
         EntityState TargetEntity;
-        Vector4 InsertionPoint;
-        Vector4 PeriapsisPoint;
-        double _semiMajorKm;
-        double _semiMinorKm;
+        //Vector4 _apoapsisPoint;
+        //Vector4 _periapsisPoint;
+        double _apoapsisKm;
+        double _periapsisKM;
+        double _targetRadius;
+        double _peAlt { get { return _periapsisKM - _targetRadius; } }
+        double _apAlt { get { return _apoapsisKm - _targetRadius; } }
+
+        double _apMax;
+        double _peMin { get { return _targetRadius; } }
+
+        (Vector4, TimeSpan) _intercept;
 
         string _displayText;
         string _tooltipText = "";
@@ -90,30 +98,37 @@ namespace Pulsar4X.SDL2UI
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
                 _state.MapRendering.UIWidgets.Add(_orbitWidget);
             }
-            _tooltipText = "Select Apoapsis point";
+            _targetRadius = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInKM;
+            _apMax = GMath.GetSOI(TargetEntity.Entity);
+            _intercept = InterceptCalcs.FTLIntercept(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
+            _tooltipText = "Select Apoapsis height";
             CurrentState = States.NeedsApoapsis;
         }
         void InsertionPntSelected() { 
-            InsertionPoint = _state.LastWorldPointClicked;
-            _semiMajorKm = (GetTargetPosition() - InsertionPoint).Length();
-            _tooltipText = "Select Periapsis point";
+            //var apoapsisPoint = _state.LastWorldPointClicked;
+            //var distanceSelected = Distance.AuToKm((GetTargetPosition() - apoapsisPoint).Length());
+            //_apoapsisKm = Math.Min(_apMax, distanceSelected);
+            //_apAlt = _apoapsisKm - _targetRadius;
+            _tooltipText = "Select Periapsis height";
             CurrentState = States.NeedsPeriapsis;
         }
         void PeriapsisPntSelected() { 
-            PeriapsisPoint = _state.LastWorldPointClicked;
-            _semiMinorKm = (GetTargetPosition() - PeriapsisPoint).Length();
+            //var periapsisPoint = _state.LastWorldPointClicked;
+            //var distanceSelected = Distance.AuToKm((GetTargetPosition() - periapsisPoint).Length());
+            //_periapsisKM = Math.Min(Math.Max(_peMin, distanceSelected), _apoapsisKm); 
+            //_peAlt = _periapsisKM - _targetRadius;
             _tooltipText = "Action to give order";
             CurrentState = States.NeedsActioning;
         }
         void ActionCmd() 
         {
             OrbitBodyCommand.CreateOrbitBodyCommand(
-                _state.Game, 
-                _state.Faction, 
-                OrderingEntity.Entity, 
-                TargetEntity.Entity, 
-                PointDFunctions.Length(_orbitWidget.Apoapsis), 
-                PointDFunctions.Length(_orbitWidget.Periapsis));
+                _state.Game,
+                _state.Faction,
+                OrderingEntity.Entity,
+                TargetEntity.Entity,
+                _apoapsisKm,//PointDFunctions.Length(_orbitWidget.Apoapsis), 
+                _periapsisKM);//PointDFunctions.Length(_orbitWidget.Periapsis));
             CloseWindow();
         }
         void ActionAddDB()
@@ -146,15 +161,15 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SetTooltip(_tooltipText);
                     ImGui.Text("Target: ");
                     ImGui.SameLine();
-                    ImGui.Text(TargetEntity.Name);
+                    ImGui.Text( TargetEntity.Name);
 
                     ImGui.Text("Apoapsis: ");
                     ImGui.SameLine();
-                    ImGui.Text(_semiMajorKm.ToString());
+                    ImGui.Text(_apoapsisKm.ToString("g3") + " (Alt: " + _apAlt.ToString("g3") + ")");
 
                     ImGui.Text("Periapsis: ");
                     ImGui.SameLine();
-                    ImGui.Text(_semiMinorKm.ToString());
+                    ImGui.Text(_periapsisKM.ToString("g3") + " (Alt: " + _peAlt.ToString("g3") + ")");
 
                     if (ImGui.Button("Action Order"))
                         fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
@@ -187,6 +202,12 @@ namespace Pulsar4X.SDL2UI
                                     var ralitivePos = (GetTargetPosition() - mouseWorldPos);
                                     _orbitWidget.SetApoapsis(ralitivePos.X, ralitivePos.Y);
 
+                                    //_apoapsisKm = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
+                                    var distanceSelected = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
+                                    var d1 = Math.Min(_apMax, distanceSelected); //can't be higher than SOI
+                                    _apoapsisKm = Math.Max(d1, _peMin); //cant be lower than the body radius
+
+
                                     //_orbitWidget.OrbitEllipseSemiMaj = (float)_semiMajorKm;
                                     break;
                                 }
@@ -195,8 +216,15 @@ namespace Pulsar4X.SDL2UI
                                     var mousePos = ImGui.GetMousePos();
 
                                     var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
+
                                     var ralitivePos = (GetTargetPosition() - mouseWorldPos);
                                     _orbitWidget.SetPeriapsis(ralitivePos.X, ralitivePos.Y);
+
+                                    //_periapsisKM = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
+                                    var distanceSelected = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
+                                    var d1 = Math.Max(_peMin, distanceSelected); //can't be lower than body radius
+                                    _periapsisKM = Math.Min(d1, _apoapsisKm);  //can't be higher than apoapsis. 
+
                                     break;
                                 }
                             case States.NeedsActioning:
@@ -212,6 +240,8 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
+
+
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)
         {

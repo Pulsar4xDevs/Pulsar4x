@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
         internal double MoveRangeInKM;
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
-        [JsonProperty]
+        [JsonProperty] //TODO: This will break savegames. don't store datablobs. 
         internal PositionDB TargetPositionDB;
 
         public TranslateMoveDB()

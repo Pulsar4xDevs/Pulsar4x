@@ -3,6 +3,7 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
+    //TODO: get rid of AU, why are we using AU.
     public class PositionDB : TreeHierarchyDB, IGetValuesHash
     {
 
@@ -186,7 +187,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Static function to find the distance between two positions.
+        /// Static function to find the distance in AU between two positions.
         /// </summary>
         /// <returns>Distance between posA and posB.</returns>
         public static double GetDistanceBetween(PositionDB posA, PositionDB posB)
@@ -200,7 +201,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Instance function for those who don't like static functions.
+        /// Instance function for those who don't like static functions. In AU
         /// </summary>
         public double GetDistanceTo(PositionDB otherPos)
         {

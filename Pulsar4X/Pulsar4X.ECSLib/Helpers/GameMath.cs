@@ -89,6 +89,11 @@ namespace Pulsar4X.ECSLib
         {
             return au * GameConstants.Units.KmPerAu;
         }
+        public static Vector4 AuToKm(Vector4 Au)
+        {
+            return new Vector4( AuToKm(Au.X), AuToKm(Au.Y), AuToKm(Au.Z), 0);
+        }
+       
     }
 
     /// <summary>
@@ -495,10 +500,32 @@ namespace Pulsar4X.ECSLib
             return speed;
         }
 
+        /// <summary>
+        /// Gets the soi.
+        /// </summary>
+        /// <returns>The soi.</returns>
+        /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the earth around the sun</param>
+        /// <param name="mass">Mass of the smaller body ie the earth</param>
+        /// <param name="parentMass">Parent mass. ie the sun</param>
         public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
         {
-            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
+            return semiMajorAxis * Math.Pow((mass / parentMass), 2) / 5;
         }
+
+        /// <summary>
+        /// Gets the of a given body.
+        /// </summary>
+        /// <returns>The soi.</returns>
+        /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
+        public static double GetSOI(Entity entity)
+        {
+            var semiMajAxis = entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
+            var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+            var parentMass = entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<MassVolumeDB>().Mass;
+
+            return GetSOI(semiMajAxis, myMass, parentMass);
+        }
+
     }
 
     /// <summary>
@@ -535,5 +562,86 @@ namespace Pulsar4X.ECSLib
                                               
         }
 
+
+        public static (Vector4, TimeSpan) FTLIntercept(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
+        {
+            
+            //OrbitDB targetOrbit = target.GetDataBlob<OrbitDB>();
+            //PositionDB targetPosition = target.GetDataBlob<PositionDB>();
+            //PositionDB moverPosition = mover.GetDataBlob<PositionDB>();
+
+            OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
+            Vector4 moverPosInKM = Distance.AuToKm( OrbitProcessor.GetAbsolutePosition(moverOrbit, atDateTime));
+
+            PropulsionDB moverPropulsion = mover.GetDataBlob<PropulsionDB>();
+
+            Vector4 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition(targetOrbit, atDateTime)));
+
+            int speed = 299792458;// moverPropulsion.MaximumSpeed;
+
+            (Vector4, TimeSpan) intercept = ( new Vector4(), TimeSpan.Zero );
+
+                
+            TimeSpan eti = new TimeSpan();
+            TimeSpan eti_prev = new TimeSpan();
+            DateTime edi = atDateTime;
+            DateTime edi_prev = atDateTime;
+
+            for (int i = 0; i < 1000; i++)
+            {
+
+                eti_prev = eti;
+                edi_prev = edi;
+
+                Vector4 predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition(targetOrbit, edi_prev));
+                //var vectorAU = OrbitProcessor.GetAbsolutePosition(targetOrbit, edi_prev);
+
+                double distance = (predictedPosKM - moverPosInKM).Length();
+                eti = TimeSpan.FromSeconds((distance * 1000) / speed);
+                edi = atDateTime + eti;
+
+                var timeDifference = Math.Abs(eti.TotalSeconds - eti_prev.TotalSeconds);
+
+                if (timeDifference * speed <= 1000)  
+                    break;
+
+            }
+
+            return intercept;
+        }
     }
+
+    /// <summary>
+    /// An experimental distance value struct. 
+    /// idea here was to simply define what a distance value was and handle very small or very large numbers equaly well.   
+    /// </summary>
+    public struct DistanceValue
+    {
+        public enum ValueTypeEnum : sbyte//number of zeros. 
+        {
+            NanoMeters  = -9,
+            MicroMeters = -6,
+            MilliMeters = -3,
+            CentiMeters = -2,
+            DeciMeters  = -1,
+            Meters      = 0,
+            DecaMeters  = 1,
+            HectoMeters = 2,
+            KeloMeters  = 3,
+            MegaMeters  = 6,
+            GigaMeters  = 9,
+        }
+        public ValueTypeEnum ValueType;
+        public double Value;
+
+        public static double Convert(DistanceValue value, ValueTypeEnum convertTo)
+        {
+            int fval = (int)value.ValueType;    //from
+            int tval = (int)convertTo;          //to
+
+            return value.Value  * Math.Pow(10, tval - fval);
+        }
+
+    }
+
 }

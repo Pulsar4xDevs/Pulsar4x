@@ -137,7 +137,12 @@ namespace Pulsar4X.SDL2UI
         {
             Apoapsis = new PointD() { X = x, Y = y };
 
-            OrbitEllipseSemiMaj = PointDFunctions.Length(PointDFunctions.Add(Periapsis, Apoapsis)) / 2;
+
+            var aplen = PointDFunctions.Length(Apoapsis);
+            var pelen = PointDFunctions.Length(Periapsis);
+            OrbitEllipseSemiMaj = (aplen + pelen) * 0.5;//PointDFunctions.Length(PointDFunctions.Add(Periapsis, Apoapsis)) / 2;
+
+
             double linierEcentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
             OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(linierEcentricity, 2));
             _eccentricity = EllipseFunctions.Eccentricity(linierEcentricity, OrbitEllipseSemiMaj);
@@ -148,8 +153,9 @@ namespace Pulsar4X.SDL2UI
         public void SetPeriapsis(double x, double y)
         {
             Periapsis = new PointD() { X = x, Y = y };
-
-            OrbitEllipseSemiMaj = PointDFunctions.Length(PointDFunctions.Add(Periapsis , Apoapsis)) / 2;
+            var aplen = PointDFunctions.Length(Apoapsis);
+            var pelen = PointDFunctions.Length(Periapsis);
+            OrbitEllipseSemiMaj = (aplen + pelen) * 0.5;// PointDFunctions.Length(PointDFunctions.Add(Periapsis , Apoapsis)) / 2;
             double linierEcentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
             OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(linierEcentricity, 2));
             _eccentricity = EllipseFunctions.Eccentricity(linierEcentricity, OrbitEllipseSemiMaj);

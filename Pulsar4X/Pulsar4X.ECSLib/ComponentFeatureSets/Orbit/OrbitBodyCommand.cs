@@ -86,7 +86,14 @@ namespace Pulsar4X.ECSLib
                     }
                     else //insert new translate move
                     {
-                        var cmd = new TranslateMoveCommand() { RequestingFactionGuid = this.RequestingFactionGuid, EntityCommandingGuid = this.EntityCommandingGuid, CreatedDate = this.CreatedDate, TargetEntityGuid = this.TargetEntityGuid, RangeInKM = this.ApihelionInKM };
+                        var cmd = new TranslateMoveCommand() 
+                        { 
+                            RequestingFactionGuid = this.RequestingFactionGuid, 
+                            EntityCommandingGuid = this.EntityCommandingGuid, 
+                            CreatedDate = this.CreatedDate, 
+                            TargetEntityGuid = this.TargetEntityGuid, 
+                            RangeInKM = this.ApihelionInKM 
+                        };
                         NestedCommands.Insert(0, cmd);
                         cmd.IsValidCommand(game);
                         cmd.ActionCommand(game);

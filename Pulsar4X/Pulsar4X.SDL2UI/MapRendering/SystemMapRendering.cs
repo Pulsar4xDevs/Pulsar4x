@@ -5,6 +5,7 @@ using SDL2;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ImGuiNET;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -285,7 +286,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     icon.Draw(rendererPtr, _camera);
                 }
-                foreach (var icon in _orbitRings.Values)
+                foreach (var icon in _orbitRings.Values.ToArray())
                 {
                     
                     icon.Draw(rendererPtr, _camera);

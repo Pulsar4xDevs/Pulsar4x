@@ -19,8 +19,8 @@ namespace Pulsar4X.SDL2UI
         List<Guid> _selectedFCAssignedWeapons = new List<Guid>();
         ImVec2 _selectableBtnSize = new ImVec2(100, 18);
 
-        Dictionary<Guid, string> systemEntityNames = new Dictionary<Guid, string>();  
-        //List<Guid> knownSystemEntites = new List<Guid>();
+        Dictionary<Guid, string> _systemEntityNames = new Dictionary<Guid, string>();
+        Dictionary<Guid, Entity> _systemEntites = new Dictionary<Guid, Entity>();
 
         private WeaponTargetingControl(EntityState entity)
         {
@@ -45,7 +45,8 @@ namespace Pulsar4X.SDL2UI
             _shipFCDB = _orderingEntity.GetDataBlob<FireControlAbilityDB>();
             _weaponNames = new Dictionary<Guid, string>();
             _unAssignedWeapons = new List<Guid>();
-            systemEntityNames = new Dictionary<Guid, string>();
+            _systemEntityNames = new Dictionary<Guid, string>();
+            _systemEntites = new Dictionary<Guid, Entity>();
             for (int fcInstanceIndex = 0; fcInstanceIndex < _shipFCDB.FireControlInsances.Count; fcInstanceIndex++)
             {
                 var fireControlInstance = _shipFCDB.FireControlComponents[fcInstanceIndex].GetDataBlob<ComponentInstanceInfoDB>();
@@ -64,7 +65,9 @@ namespace Pulsar4X.SDL2UI
                 if (item.HasDataBlob<NameDB>() && item.HasDataBlob<PositionDB>())
                 {
                     string name = item.GetDataBlob<NameDB>().GetName(_state.Faction);
-                    systemEntityNames.Add(item.Guid, name);
+                    _systemEntityNames.Add(item.Guid, name);
+                    _systemEntites.Add(item.Guid, item);
+
                 }
             }
 
@@ -165,13 +168,27 @@ namespace Pulsar4X.SDL2UI
                         ImGui.BeginGroup();
                         {
                             ImGui.Text("Set Target");
-                            foreach (var item in systemEntityNames)
+                            foreach (var item in _systemEntityNames)
                             {
-                                if (ImGui.Button(item.Value))
+                                if (ImGui.SmallButton(item.Value))
                                 {
                                     SetTargetFireControlOrder.CreateCommand(_state.Game, _state.CurrentSystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, item.Key);
                                 }
                             }
+
+                        }
+                        ImGui.EndGroup();
+                        ImGui.SameLine();
+                        ImGui.BeginGroup();
+                        {
+                            ImGui.Text("Range in AU");
+                            foreach (var item in _systemEntityNames)
+                            {
+                                Entity targetEntity = _systemEntites[item.Key];
+                                double distance = _orderingEntity.GetDataBlob<PositionDB>().GetDistanceTo(targetEntity.GetDataBlob<PositionDB>());
+                                ImGui.Text(distance.ToString());
+                            }
+
                         }
                         ImGui.EndGroup();
                     }
