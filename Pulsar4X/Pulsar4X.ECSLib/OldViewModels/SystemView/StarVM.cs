@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
 
         public void Refresh(bool partialRefresh = false)
         {
-            _position = Entity.GetDataBlob<PositionDB>().AbsolutePosition;   
+            _position = Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;   
             
         }
 

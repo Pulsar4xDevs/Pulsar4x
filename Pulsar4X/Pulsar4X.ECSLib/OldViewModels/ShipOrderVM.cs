@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVector.Length()).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVectorMS.Length()).ToString("N2");
             }
         }
 
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVector.X).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVectorMS.X).ToString("N2");
             }
         }
 
@@ -197,7 +197,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVector.Y).ToString("N2");
+                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionDB>().CurrentVectorMS.Y).ToString("N2");
             }
         }
 
@@ -227,7 +227,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return SelectedShip.GetDataBlob<PropulsionDB>().MaximumSpeed.ToString("N5");
+                return SelectedShip.GetDataBlob<PropulsionDB>().MaximumSpeed_MS.ToString("N5");
             }
         }
 
@@ -240,7 +240,7 @@ namespace Pulsar4X.ECSLib
                 if (SelectedMoveTarget == null)
                     return "N/A";
 
-                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition - SelectedMoveTarget.GetDataBlob<PositionDB>().AbsolutePosition;
+                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition_AU - SelectedMoveTarget.GetDataBlob<PositionDB>().AbsolutePosition_AU;
                 return Distance.AuToKm(delta.Length()).ToString("N2") ;
             }
         }

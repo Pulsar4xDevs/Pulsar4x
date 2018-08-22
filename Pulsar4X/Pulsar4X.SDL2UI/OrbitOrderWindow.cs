@@ -142,7 +142,7 @@ namespace Pulsar4X.SDL2UI
 
         Vector4 GetTargetPosition()
         {
-            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
+            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
         }
 
         internal override void Display()

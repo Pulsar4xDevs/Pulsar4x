@@ -206,7 +206,7 @@
               "Name": "Total Fuel Consumption per Km",
               "Description": "Fuel Consumption Calc",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability(3)"
+              "AbilityFormula": "Ability(3) * 0.001"
             },
             {
               "Name": "Fuel Consumption",

@@ -132,9 +132,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
         void SetIconFor(PropulsionDB db)
         {
 
-            int maxSpeed = db.MaximumSpeed / 10;
+            int maxSpeed = db.MaximumSpeed_MS / 10;
             int totalEP = db.TotalEnginePower / 25;
-            PointF currentSpeed = new PointF((float)db.CurrentVector.X, (float)db.CurrentVector.Y);
+            PointF currentSpeed = new PointF((float)db.CurrentVectorMS.X, (float)db.CurrentVectorMS.Y);
             float currentSpeedLen = currentSpeed.Length / 10;
 
             Pen enginePen = new Pen(Colors.DarkGray);
@@ -172,9 +172,9 @@ namespace Pulsar4X.CrossPlatformUI.Views
         {
             //int maxFuel = db.FuelStorageCapicity / 10;
 
-            int maxSpeed = db.MaximumSpeed / 10;
+            int maxSpeed = db.MaximumSpeed_MS / 10;
             int totalEP = db.TotalEnginePower / 25;
-            PointF currentSpeed = new PointF((float)db.CurrentVector.X, (float)db.CurrentVector.Y);
+            PointF currentSpeed = new PointF((float)db.CurrentVectorMS.X, (float)db.CurrentVectorMS.Y);
             float currentSpeedLen = currentSpeed.Length / 10;
 
             Pen thrustPen = new Pen(Colors.OrangeRed);

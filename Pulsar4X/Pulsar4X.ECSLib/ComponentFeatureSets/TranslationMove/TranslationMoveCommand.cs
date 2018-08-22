@@ -41,8 +41,9 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                _db = new TranslateMoveDB(_targetEntity.GetDataBlob<PositionDB>());
-                _db.MoveRangeInKM = RangeInKM;
+                Vector4 targetIntercept = InterceptCalcs.Intercept(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime);
+                _db = new TranslateMoveDB(targetIntercept);
+                _db.MoveRange_KM = RangeInKM;
                 if (EntityCommanding.HasDataBlob<OrbitDB>())
                     EntityCommanding.RemoveDataBlob<OrbitDB>();
                 EntityCommanding.SetDataBlob(_db);

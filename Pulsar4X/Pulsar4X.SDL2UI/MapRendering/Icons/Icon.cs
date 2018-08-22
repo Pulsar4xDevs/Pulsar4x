@@ -30,7 +30,7 @@ namespace Pulsar4X.SDL2UI
         ECSLib.Vector4 _worldPosition;
         public ECSLib.Vector4 WorldPosition
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition + _worldPosition; else return _worldPosition; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
         }
         /// <summary>

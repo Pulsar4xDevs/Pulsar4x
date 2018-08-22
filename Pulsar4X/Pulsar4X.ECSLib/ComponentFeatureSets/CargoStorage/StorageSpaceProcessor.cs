@@ -31,6 +31,15 @@ namespace Pulsar4X.ECSLib
             }
             return true;
         }
+
+        public static long GetAmount(CargoStorageDB storeDB, Guid storeTypeGuid, Guid itemGuid)
+        {
+            return storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts[itemGuid];
+        }
+        public static long GetAmount(CargoStorageDB storeDB, ICargoable item)
+        {
+            return storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID];
+        }
         
         /// <summary>
         /// must be mins or mats DOES NOT CHECK Availiblity

@@ -102,7 +102,7 @@ namespace Pulsar4X.CrossPlatformUI.Views
         private float GetStartArcAngle()
         {
 
-            Vector4 pos = _bodyPositionDB.AbsolutePosition - _parentPositionDB.AbsolutePosition; //adjust so moons get the right positions    
+            Vector4 pos = _bodyPositionDB.AbsolutePosition_AU - _parentPositionDB.AbsolutePosition_AU; //adjust so moons get the right positions    
             //do a rotational matrix so the normalised position is ralitive to the ellipse.       
             double normalX = (pos.X * Math.Cos(-_radianAngle)) - (pos.Y * Math.Sin(-_radianAngle));
             double normalY = (pos.X * Math.Sin(-_radianAngle)) + (pos.Y * Math.Cos(-_radianAngle));
@@ -115,8 +115,8 @@ namespace Pulsar4X.CrossPlatformUI.Views
         public void DrawMe(Graphics g)
         {
 
-            PointF boundingBoxTopLeft = new PointF((float)_parentPositionDB.AbsolutePosition.X * _camera.ZoomLevel, (float)_parentPositionDB.AbsolutePosition.Y * _camera.ZoomLevel);
-            PointF bodyPos = new PointF((float)_bodyPositionDB.AbsolutePosition.X * _camera.ZoomLevel, (float)_bodyPositionDB.AbsolutePosition.Y * _camera.ZoomLevel);
+            PointF boundingBoxTopLeft = new PointF((float)_parentPositionDB.AbsolutePosition_AU.X * _camera.ZoomLevel, (float)_parentPositionDB.AbsolutePosition_AU.Y * _camera.ZoomLevel);
+            PointF bodyPos = new PointF((float)_bodyPositionDB.AbsolutePosition_AU.X * _camera.ZoomLevel, (float)_bodyPositionDB.AbsolutePosition_AU.Y * _camera.ZoomLevel);
             SizeF elipseSize = new SizeF(_orbitElipseWidth * _camera.ZoomLevel, _orbitElipseHeight * _camera.ZoomLevel);
             RectangleF elipseBoundingBox = new RectangleF(boundingBoxTopLeft, elipseSize);
             g.SaveTransform();

@@ -129,17 +129,21 @@ namespace Pulsar4X.ECSLib
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
             Entity sensor = ShipPassiveSensor(game, faction);
-            Entity deadWeight = DeadWeight(game, faction, 330);
+            Entity deadWeight = DeadWeight(game, faction, 130);
             List<Entity> components = new List<Entity>()
             {
                 engine,     //50   
-                engine,     //50    100
-                fuelTank,   //250   350
-                fuelTank,   //250   600 60%
-                laser,      //10    610
-                bfc,        //10    620
-                sensor,     //50    670
-                deadWeight  //330   1000
+                engine,     //50  
+                engine,     //50  
+                engine,     //50  
+                engine,     //50  
+                engine,     //50    300
+                fuelTank,   //250   550
+                fuelTank,   //250   800 60%
+                laser,      //10    810
+                bfc,        //10    820
+                sensor,     //50    870
+                deadWeight  //130   1000
             };
 
             EntityManipulation.AddComponentToEntity(shipDesign, components, faction.Guid);
@@ -153,10 +157,12 @@ namespace Pulsar4X.ECSLib
             Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
-            Entity deadWeight = DeadWeight(game, faction, 290);
+            Entity deadWeight = DeadWeight(game, faction, 190);
             Entity sensor = ShipPassiveSensor(game, faction);
             List<Entity> components = new List<Entity>()
             {
+                engine,     //50
+                engine,     //50
                 engine,     //50
                 engine,     //50
                 fuelTank,   //250
@@ -168,7 +174,7 @@ namespace Pulsar4X.ECSLib
                 bfc,        //10
                 bfc,        //10
                 sensor,     //50
-                deadWeight, //290
+                deadWeight, //190
             };
 
             EntityManipulation.AddComponentToEntity(shipDesign, components, faction.Guid);
@@ -183,7 +189,7 @@ namespace Pulsar4X.ECSLib
             engineDesign = GenericComponentFactory.StaticToDesign(engineSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
             engineDesign.ComponentDesignAttributes[0].SetValueFromInput(50); //size 50 = 250 power
             engineDesign.Name = "DefaultEngine-250";
-            //engineDesignDB.ComponentDesignAbilities[1]
+            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
             return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);
         }
 

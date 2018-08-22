@@ -147,29 +147,72 @@ float nextLargeGFPS = 0;
                         ImGui.PlotHistogram("Frame Rate ##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new ImVec2(248, 60), sizeof(float));
 
                     }
-                    if (_state.LastClickedEntity.OrbitIcon != null)
-                    {
-                        if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name + "###OrbitHeader" , ImGuiTreeNodeFlags.CollapsingHeader ))
-                        {
-                            OrbitDB orbitDB = _state.LastClickedEntity.Entity.GetDataBlob<OrbitDB>();
-                            
-                            string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
-                            string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
-                            ImGui.Text("StartAngleRadians: " + startRadian);
-                            ImGui.Text("StartAngleDegrees: " + startDegrees);
 
-                            if (_state.CurrentSystemDateTime != lastDate)
+                    if (_state.LastClickedEntity.Name != null)
+                    {
+                        if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                        {
+                            if (_state.LastClickedEntity.Entity.HasDataBlob<PositionDB>())
                             {
-                                pos = OrbitProcessor.GetAbsolutePosition(orbitDB, _state.CurrentSystemDateTime);
-                                truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.CurrentSystemDateTime);
-                                lastDate = _state.CurrentSystemDateTime;
+                                var positiondb = _state.LastClickedEntity.Entity.GetDataBlob<PositionDB>();
+                                var posv4 = positiondb.PositionInKm;
+                                ImGui.Text("x: " + posv4.X);
+                                ImGui.Text("y: " + posv4.Y);
+                                ImGui.Text("z: " + posv4.Z);
+                            }
+                            if (_state.LastClickedEntity.OrbitIcon != null)
+                            {
+                                
+                                if (ImGui.CollapsingHeader("Orbit: ###OrbitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                {
+                                    OrbitDB orbitDB = _state.LastClickedEntity.Entity.GetDataBlob<OrbitDB>();
+
+                                    string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
+                                    string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
+                                    ImGui.Text("StartAngleRadians: " + startRadian);
+                                    ImGui.Text("StartAngleDegrees: " + startDegrees);
+
+                                    if (_state.CurrentSystemDateTime != lastDate)
+                                    {
+                                        pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.CurrentSystemDateTime);
+                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.CurrentSystemDateTime);
+                                        lastDate = _state.CurrentSystemDateTime;
+                                    }
+
+                                    ImGui.Text("x: " + pos.X);
+                                    ImGui.Text("y: " + pos.Y);
+                                    ImGui.Text("z: " + pos.Z);
+                                    ImGui.Text("TrueAnomaly: " + truAnomoly);
+                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
+
+                                }
                             }
 
-                            ImGui.Text("x: " + pos.X);
-                            ImGui.Text("y: " + pos.Y);
-                            ImGui.Text("z: " + pos.Z);
-                            ImGui.Text("TrueAnomaly: " + truAnomoly);
-                            ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
+                            if (_state.LastClickedEntity.Entity.HasDataBlob<PropulsionDB>())
+                            {
+                                if (ImGui.CollapsingHeader("Propulsion: ###PropulsionHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                {
+                                    PropulsionDB propulsionDB = _state.LastClickedEntity.Entity.GetDataBlob<PropulsionDB>();
+                                    ImGui.Text("NonNewt Engine Power: " + propulsionDB.TotalEnginePower);
+                                    ImGui.Text("Max Speed: " + propulsionDB.MaximumSpeed_MS);
+                                    ImGui.Text("CurrentVector: " + propulsionDB.CurrentVectorMS);
+                                    if (_state.LastClickedEntity.Entity.HasDataBlob<CargoStorageDB>())
+                                    {
+                                        var fuelsGuid = propulsionDB.FuelUsePerKM;
+                                        var storage = _state.LastClickedEntity.Entity.GetDataBlob<CargoStorageDB>();
+                                        foreach (var fuelItemGuid in fuelsGuid.Keys)
+                                        {
+                                            var fuel = _state.Game.StaticData.GetICargoable(fuelItemGuid);
+                                            ImGui.Text(fuel.Name);
+                                            ImGui.SameLine();
+                                            ImGui.Text(StorageSpaceProcessor.GetAmount(storage, fuel).ToString());
+                                                 
+                                        }
+
+                                    }
+                                }
+
+                            }
 
                         }
                     }

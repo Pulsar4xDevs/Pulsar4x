@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
@@ -74,6 +75,10 @@ namespace Pulsar4X.ECSLib
     public static class Distance
     {
         public static Vector4 MToAU(Vector4 meters)
+        {
+            return meters * 0.001 / GameConstants.Units.KmPerAu;
+        }
+        public static double MToAU(double meters)
         {
             return meters * 0.001 / GameConstants.Units.KmPerAu;
         }
@@ -463,14 +468,14 @@ namespace Pulsar4X.ECSLib
         /// <returns>The vector.</returns>
         /// <param name="currentPosition">Current position.</param>
         /// <param name="targetPosition">Target position.</param>
-        /// <param name="speedMagnitude">Speed magnitude.</param>
-        public static Vector4 GetVector(Vector4 currentPosition, Vector4 targetPosition, double speedMagnitude)
+        /// <param name="speedMagnitude_AU">Speed magnitude.</param>
+        public static Vector4 GetVector(Vector4 currentPosition, Vector4 targetPosition, double speedMagnitude_AU)
         {
             Vector4 speed = new Vector4(0, 0, 0, 0);
             double length;
 
 
-            Vector4 speedMagInKM = new Vector4(0, 0, 0, 0);
+            Vector4 speedMagInAU = new Vector4(0, 0, 0, 0);
 
             Vector4 direction = new Vector4(0, 0, 0, 0);
             direction.X = targetPosition.X - currentPosition.X;
@@ -487,21 +492,21 @@ namespace Pulsar4X.ECSLib
                 direction.Y = (direction.Y / length);
                 direction.Z = (direction.Z / length);
             
-                speedMagInKM.X = direction.X * speedMagnitude;
-                speedMagInKM.Y = direction.Y * speedMagnitude;
-                speedMagInKM.Z = direction.Z * speedMagnitude;
+                speedMagInAU.X = direction.X * speedMagnitude_AU;
+                speedMagInAU.Y = direction.Y * speedMagnitude_AU;
+                speedMagInAU.Z = direction.Z * speedMagnitude_AU;
             }
 
 
-            speed.X = Distance.KmToAU(speedMagInKM.X);
-            speed.Y = Distance.KmToAU(speedMagInKM.Y);
-            speed.Z = Distance.KmToAU(speedMagInKM.Z);
+            speed.X = (speedMagInAU.X);
+            speed.Y = (speedMagInAU.Y);
+            speed.Z = (speedMagInAU.Z);
 
             return speed;
         }
 
         /// <summary>
-        /// Gets the soi.
+        /// Gets the soi radius of a given body
         /// </summary>
         /// <returns>The soi.</returns>
         /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the earth around the sun</param>
@@ -513,17 +518,24 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the of a given body.
+        /// Gets the SOI radius of a given body.
         /// </summary>
         /// <returns>The soi.</returns>
         /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
         public static double GetSOI(Entity entity)
         {
-            var semiMajAxis = entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
-            var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
-            var parentMass = entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<MassVolumeDB>().Mass;
+            var orbitDB = entity.GetDataBlob<OrbitDB>();
+            if (orbitDB.Parent != null) //if we're not the parent star
+            {
+                var semiMajAxis = orbitDB.SemiMajorAxis;
 
-            return GetSOI(semiMajAxis, myMass, parentMass);
+                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+
+                return GetSOI(semiMajAxis, myMass, parentMass);
+            }
+            else return double.MaxValue; //if we're the parent star, then soi is infinate. 
         }
 
     }
@@ -544,10 +556,14 @@ namespace Pulsar4X.ECSLib
 
     public static class InterceptCalcs
     {
-        //WIP but this is essentialy the calc, two burns dv1 and dv2. 
-        //return a struct with both doubles maybe?
-        //or maybe return an orbitDB
-        public static void Hohmann(double GravParamOfParent, double semiMajAxisCurrentBody, double semiMajAxisOfTarget)
+        /// <summary>
+        /// Hohmann the specified GravParamOfParent, semiMajAxisCurrentBody and semiMajAxisOfTarget.
+        /// </summary>
+        /// <returns>Dv burn1 prograde, Dv burn2 retrograde</returns>
+        /// <param name="GravParamOfParent">Grav parameter of parent.</param>
+        /// <param name="semiMajAxisCurrentBody">Semi maj axis current body.</param>
+        /// <param name="semiMajAxisOfTarget">Semi maj axis of target.</param>
+        public static (double, double) Hohmann(double GravParamOfParent, double semiMajAxisCurrentBody, double semiMajAxisOfTarget)
         {
             double semMajAxisOfHohman = semiMajAxisCurrentBody + semiMajAxisOfTarget;
             double velCurrentBody = Math.Sqrt(GravParamOfParent / semiMajAxisCurrentBody);
@@ -559,7 +575,8 @@ namespace Pulsar4X.ECSLib
 
             double deltaVBurn1 = velOfHohmannAtPeriapsis - velCurrentBody;
             double deltaVBurn2 = velOfHohmannAtApoaxis - velTarg;
-                                              
+
+            return (deltaVBurn1, deltaVBurn2);                              
         }
 
 
@@ -571,15 +588,16 @@ namespace Pulsar4X.ECSLib
             //PositionDB moverPosition = mover.GetDataBlob<PositionDB>();
 
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
-            Vector4 moverPosInKM = Distance.AuToKm( OrbitProcessor.GetAbsolutePosition(moverOrbit, atDateTime));
+            Vector4 moverPosInKM = Distance.AuToKm( OrbitProcessor.GetAbsolutePosition_AU(moverOrbit, atDateTime));
 
             PropulsionDB moverPropulsion = mover.GetDataBlob<PropulsionDB>();
 
-            Vector4 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition(targetOrbit, atDateTime)));
+            Vector4 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime)));
 
-            int speed = 299792458;// moverPropulsion.MaximumSpeed;
+            int speed = 25000;//moverPropulsion.MaximumSpeed * 100; //299792458;
 
             (Vector4, TimeSpan) intercept = ( new Vector4(), TimeSpan.Zero );
+
 
                 
             TimeSpan eti = new TimeSpan();
@@ -587,27 +605,116 @@ namespace Pulsar4X.ECSLib
             DateTime edi = atDateTime;
             DateTime edi_prev = atDateTime;
 
-            for (int i = 0; i < 1000; i++)
+            Vector4 predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, edi_prev));
+            double distance = (predictedPosKM - moverPosInKM).Length();
+            eti = TimeSpan.FromSeconds((distance * 1000) / speed);
+
+            int steps = 0;
+            if (eti < targetOrbit.OrbitalPeriod)
             {
+                
+                double timeDifference = double.MaxValue;
+                double distanceDifference = timeDifference * speed;
+                while ( distanceDifference >= 1000)
+                {
 
-                eti_prev = eti;
-                edi_prev = edi;
+                    eti_prev = eti;
+                    edi_prev = edi;
 
-                Vector4 predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition(targetOrbit, edi_prev));
-                //var vectorAU = OrbitProcessor.GetAbsolutePosition(targetOrbit, edi_prev);
+                    predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, edi_prev));
 
-                double distance = (predictedPosKM - moverPosInKM).Length();
-                eti = TimeSpan.FromSeconds((distance * 1000) / speed);
-                edi = atDateTime + eti;
+                    distance = (predictedPosKM - moverPosInKM).Length();
+                    eti = TimeSpan.FromSeconds((distance * 1000) / speed);
+                    edi = atDateTime + eti;
 
-                var timeDifference = Math.Abs(eti.TotalSeconds - eti_prev.TotalSeconds);
-
-                if (timeDifference * speed <= 1000)  
-                    break;
-
+                    timeDifference = Math.Abs(eti.TotalSeconds - eti_prev.TotalSeconds);
+                    distanceDifference = timeDifference * speed;
+                    steps++;
+                }
             }
 
             return intercept;
+        }
+
+        public static Vector4 Intercept(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
+        {
+#if DEBUG
+            var timespent = Stopwatch.StartNew();
+#endif
+            Vector4 pos = OrbitProcessor.GetAbsolutePosition_AU(mover.GetDataBlob<OrbitDB>(), atDateTime);
+
+            double spd = mover.GetDataBlob<PropulsionDB>().MaximumSpeed_MS;
+
+            double transTime = 0;
+
+            TimeSpan orbitalPeriod = targetOrbit.OrbitalPeriod;
+            int i1 = 0, i2 = 0, i3 = 0;
+            Vector4 p = new Vector4();
+            TimeSpan t = new TimeSpan();
+            double tt;
+            double dt = orbitalPeriod.TotalSeconds *  0.01 ;
+            double a0;
+            double a1 = -1;
+            double T;
+
+            //find coarse intercept
+            while (t < orbitalPeriod)
+            {
+                p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t);
+                tt = Distance.AuToKm((p - pos).Length()) / (spd / 1000);
+                a0 = tt - t.TotalSeconds;
+                if (a0 > 0.0)
+                {
+                    a0 /= orbitalPeriod.TotalSeconds;
+                    a0 -= Math.Floor(a0);
+                    a0 *= orbitalPeriod.TotalSeconds;
+                    if (a0 < a1 || a1 < 0)
+                    {
+                        a1 = a0;
+                        transTime = tt;
+                    }
+                
+                }
+                t += TimeSpan.FromSeconds(dt);
+                i1++;
+            }
+            //find finer intercept;
+            for (i2 = 0; i2 < 3; i2++)
+            {
+                a1 = -1.0;
+
+                t = TimeSpan.FromSeconds(transTime - dt);
+                T = transTime + dt;
+                dt *= 0.1;
+
+                while (t < orbitalPeriod)
+                {
+                    p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t);
+                    tt = Distance.AuToKm((p - pos).Length()) / (spd / 1000);
+                    a0 = tt - t.TotalSeconds;
+                    if (a0 > 0.0)
+                    {
+                        a0 /= orbitalPeriod.TotalSeconds;
+                        a0 -= Math.Floor(a0);
+                        a0 *= orbitalPeriod.TotalSeconds;
+                        if (a0 < a1 || a1 < 0)
+                        {
+                            a1 = a0;
+                            transTime = tt;
+                        }
+
+                    }
+                    t += TimeSpan.FromSeconds(dt);
+                    i3++;
+                }
+                p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit ,atDateTime + TimeSpan.FromSeconds( transTime));
+                //var dir = Vector4. p-pos
+            }
+#if DEBUG
+            timespent.Stop();
+            Console.WriteLine("Intercept Calc Steps: " + i1 + i2 + i3 + " TimeSpent: " + timespent.Elapsed);
+#endif
+            return p;
         }
     }
 

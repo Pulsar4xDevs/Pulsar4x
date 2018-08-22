@@ -124,7 +124,7 @@
           "Description": "",
           "ID": "f3f10e56-9345-40cc-af42-342e7240355d",
           "MaxLevel": 1,
-          "DataFormula": "5",
+          "DataFormula": "1000",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": [

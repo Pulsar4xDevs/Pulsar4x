@@ -38,13 +38,13 @@ namespace Pulsar4X.ECSLib
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
 
 
             Vector4 offset = velocity * timeToCollision.TotalSeconds;
             targetPos -=  Distance.KmToAU(offset);
-            position.AbsolutePosition = targetPos;
+            position.AbsolutePosition_AU = targetPos;
             position.SystemGuid = starSys.Guid;
             balisticTraj.CurrentSpeed = velocity;
 
@@ -88,13 +88,13 @@ namespace Pulsar4X.ECSLib
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
 
 
             Vector4 offset = velocity * timeToCollision.TotalSeconds;
             targetPos -= Distance.KmToAU(offset);
-            position.AbsolutePosition = targetPos;
+            position.AbsolutePosition_AU = targetPos;
             position.SystemGuid = starSys.Guid;
             balisticTraj.CurrentSpeed = velocity;
 

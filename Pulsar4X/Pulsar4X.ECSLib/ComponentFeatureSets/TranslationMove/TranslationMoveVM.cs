@@ -10,9 +10,9 @@ namespace Pulsar4X.ECSLib
         TranslateMoveDB _tMoveDB;
         PositionDB _posDB;
         PropulsionDB _propDB;
-        public double Xpos { get {return _posDB.AbsolutePosition.X; }}
-        public double Ypos { get { return _posDB.AbsolutePosition.Y; }}
-        public double Speed { get { return _propDB.CurrentVector.Length(); }}
+        public double Xpos { get {return _posDB.AbsolutePosition_AU.X; }}
+        public double Ypos { get { return _posDB.AbsolutePosition_AU.Y; }}
+        public double Speed { get { return _propDB.CurrentVectorMS.Length(); }}
 
         Entity _selectedEntity { get { return _targetDict[TargetList.SelectedKey]; } }
         private Dictionary<Guid, Entity> _targetDict = new Dictionary<Guid, Entity>();

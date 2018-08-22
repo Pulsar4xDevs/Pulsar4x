@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
                 
                 NewtonBalisticDB balisticDB = objectEntity.GetDataBlob<NewtonBalisticDB>();
                 PositionDB position = objectEntity.GetDataBlob<PositionDB>();
-                position.RelativePosition += Distance.KmToAU(balisticDB.CurrentSpeed * deltaSeconds);
+                position.RelativePosition_AU += Distance.KmToAU(balisticDB.CurrentSpeed * deltaSeconds);
 
                 /*TODO: rethink how this is done, unless this is the only place we're going to do collision, then it shouldnt be done here. 
                  * ALso, this currently breaks down in a network situation because we're not sending the target entity (the client probilby shouldnt know that) 
