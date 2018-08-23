@@ -4,14 +4,26 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// This datablob gets added to an entity when that entity is doing non-newtonion translation type movement.
+    /// It gets removed from the entity once the entity has finished the translation. 
+    /// </summary>
     public class TranslateMoveDB : BaseDataBlob
     {
-        
-        public Vector4 TargetPosition_AU { get; internal set; }
         [JsonProperty]
-        internal Vector4 CurrentVectorMS;
+        public Vector4 SavedNewtonionVector_MS { get; internal set; }
+
+        [JsonProperty]
+        public Vector4 TranslateEntryPoint_AU { get; internal set; }
+        [JsonProperty]
+        public Vector4 TranslationExitPoint_AU { get; internal set; }
+
+        [JsonProperty]
+        internal Vector4 CurrentNonNewtonionVectorMS;
+
         [JsonProperty]
         internal double MoveRange_KM;
+
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
 
@@ -24,17 +36,6 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.TranslateMoveDB"/> class.
-        /// use this one to move to a moving target (though currently it doesn't predict, better to predict movement and move to a vector position)
-        /// </summary>
-        /// <param name="targetPosition">Target position.</param>
-        public TranslateMoveDB(PositionDB targetPosition)
-        {
-            TargetPositionDB = targetPosition;
-            TargetEntity = targetPosition.OwningEntity;
-            TargetPosition_AU = targetPosition.AbsolutePosition_AU;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.TranslateMoveDB"/> class.
@@ -43,14 +44,14 @@ namespace Pulsar4X.ECSLib
         /// <param name="targetPosition_AU">Target position au.</param>
         public TranslateMoveDB(Vector4 targetPosition_AU)
         {
-            TargetPosition_AU = targetPosition_AU;
+            TranslationExitPoint_AU = targetPosition_AU;
 
         }
 
         public TranslateMoveDB(TranslateMoveDB db)
         {
             TargetPositionDB = db.TargetPositionDB;
-            CurrentVectorMS = db.CurrentVectorMS;
+            CurrentNonNewtonionVectorMS = db.CurrentNonNewtonionVectorMS;
             MoveRange_KM = db.MoveRange_KM;
             IsAtTarget = db.IsAtTarget;
         }

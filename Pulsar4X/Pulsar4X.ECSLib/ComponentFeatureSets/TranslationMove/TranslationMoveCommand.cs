@@ -47,6 +47,7 @@ namespace Pulsar4X.ECSLib
                 if (EntityCommanding.HasDataBlob<OrbitDB>())
                     EntityCommanding.RemoveDataBlob<OrbitDB>();
                 EntityCommanding.SetDataBlob(_db);
+                TranslateMoveProcessor.StartNonNewtTranslation(EntityCommanding);
                 IsRunning = true;
             }
         }

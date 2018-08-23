@@ -98,6 +98,18 @@ namespace Pulsar4X.ECSLib
         {
             return new Vector4( AuToKm(Au.X), AuToKm(Au.Y), AuToKm(Au.Z), 0);
         }
+
+        public static Vector4 AuToMt(Vector4 au)
+        {
+            Vector4 meters = au * GameConstants.Units.MetersPerAu;
+            return meters;
+        }
+
+        public static Vector4 MtToAu(Vector4 meters)
+        {
+            Vector4 au = meters / GameConstants.Units.MetersPerAu;
+            return au;
+        }
        
     }
 
@@ -652,7 +664,7 @@ namespace Pulsar4X.ECSLib
             Vector4 p = new Vector4();
             TimeSpan t = new TimeSpan();
             double tt;
-            double dt = orbitalPeriod.TotalSeconds *  0.01 ;
+            double dt = orbitalPeriod.TotalSeconds * 0.01 ;
             double a0;
             double a1 = -1;
             double T;

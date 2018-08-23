@@ -71,13 +71,13 @@ namespace Pulsar4X.Tests
             PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
-            Assert.AreEqual(50, propulsion.TotalEnginePower, "Incorrect TotalEnginePower");
+            Assert.AreEqual(10000, propulsion.TotalEnginePower, "Incorrect TotalEnginePower");
             float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
             int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage1);
             Assert.AreEqual(expectedSpeed1, propulsion.MaximumSpeed_MS, "Incorrect Max Speed");
 
             EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign); //add second engine
-            Assert.AreEqual(75, propulsion.TotalEnginePower, "Incorrect TotalEnginePower 2nd engine added");
+            Assert.AreEqual(15000, propulsion.TotalEnginePower, "Incorrect TotalEnginePower 2nd engine added");
             float tonnage2 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
             int expectedSpeed2 = ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage2);
             Assert.AreEqual(expectedSpeed2, propulsion.MaximumSpeed_MS, "Incorrect Max Speed 2nd engine");

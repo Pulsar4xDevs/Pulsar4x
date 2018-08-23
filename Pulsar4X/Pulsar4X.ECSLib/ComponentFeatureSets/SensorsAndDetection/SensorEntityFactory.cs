@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
 
                 Vector4 velocityDetectionInacuracy = new Vector4() { }; //some random noise depending on quality value
 
-                sensorEntityMove.CurrentVectorMS = detectedEntitiesMove.CurrentVectorMS + velocityDetectionInacuracy;
+                sensorEntityMove.CurrentNonNewtonionVectorMS = detectedEntitiesMove.CurrentNonNewtonionVectorMS + velocityDetectionInacuracy;
             }
 
 

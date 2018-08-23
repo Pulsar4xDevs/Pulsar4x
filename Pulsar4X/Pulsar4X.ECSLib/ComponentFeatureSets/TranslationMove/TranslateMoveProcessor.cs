@@ -50,6 +50,9 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class TranslateMoveProcessor : IHotloopProcessor
     {
+        static StaticDataStore staticData;//maybe shouldnt do this, however I can't currently see a reason we'd ever want to run with two different static data sets.
+
+
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromMinutes(10);
@@ -58,7 +61,40 @@ namespace Pulsar4X.ECSLib
 
         public void Init(Game game)
         {
-            //nothing needed for this one. 
+            staticData = game.StaticData; 
+        }
+
+        public static void StartNonNewtTranslation(Entity entity)
+        {
+            var moveDB = entity.GetDataBlob<TranslateMoveDB>();
+            var propulsionDB = entity.GetDataBlob<PropulsionDB>();
+            var positionDB = entity.GetDataBlob<PositionDB>();
+            var maxSpeedMS = propulsionDB.MaximumSpeed_MS;
+
+            Vector4 targetPosMt = Distance.AuToMt(moveDB.TranslationExitPoint_AU);
+            Vector4 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
+
+            Vector4 postionDelta = currentPositionMt - targetPosMt;
+            double totalDistance = postionDelta.Length();
+
+            double maxKMeters = ShipMovementProcessor.CalcMaxFuelDistance_KM(entity);
+            double fuelMaxDistanceMt = maxKMeters * 1000;
+
+            if (fuelMaxDistanceMt >= totalDistance)
+            {
+                var currentVelocityMS = Vector4.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
+                propulsionDB.CurrentVectorMS = currentVelocityMS;
+                moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
+                moveDB.TranslateEntryPoint_AU = positionDB.AbsolutePosition_AU;
+                CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
+
+                foreach (var item in propulsionDB.FuelUsePerKM)
+                {
+                    var fuel = staticData.GetICargoable(item.Key);
+                    StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * totalDistance));
+                }
+            }
+
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
@@ -66,80 +102,46 @@ namespace Pulsar4X.ECSLib
             var manager = entity.Manager;
             var moveDB = entity.GetDataBlob<TranslateMoveDB>();
             var propulsionDB = entity.GetDataBlob<PropulsionDB>();
-            //var currentVector = propulsionDB.CurrentSpeed;
-            var maxSpeedMS = propulsionDB.MaximumSpeed_MS;
+            var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
+
             var positionDB = entity.GetDataBlob<PositionDB>();
             var currentPositionAU = positionDB.AbsolutePosition_AU;
-            //targetPosition taking the range (how close we want to get) into account. 
-            Vector4 targetPosAU;
-            if (moveDB.TargetPositionDB != null)
+            Vector4 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
+
+            Vector4 targetPosMt;
+
+            targetPosMt = Distance.AuToMt(moveDB.TranslationExitPoint_AU);
+
+            var deltaVecToTargetMt = currentPositionMt - targetPosMt;
+
+            var newPositionMt = currentPositionMt + currentVelocityMS * deltaSeconds;
+
+            //var distanceToTargetAU = deltaVecToTargetAU.Length();  //in au
+            var distanceToTargetMt = deltaVecToTargetMt.Length();
+
+            //var deltaVecToTimeAU = currentPositionAU - TimePosAU;
+            var positionDelta = currentPositionMt - newPositionMt;
+
+            double distanceToMove = positionDelta.Length();
+            var distnaceToMove2 = Vector4.Magnitude(positionDelta);
+
+
+
+            if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
             {
-                moveDB.TargetPosition_AU = moveDB.TargetPositionDB.AbsolutePosition_AU;
-                targetPosAU = moveDB.TargetPosition_AU * (1 - (moveDB.MoveRange_KM / GameConstants.Units.KmPerAu) / moveDB.TargetPosition_AU.Length());
-            }
-            else
-                targetPosAU = moveDB.TargetPosition_AU;
-            
-            var deltaVecToTargetAU = currentPositionAU - targetPosAU;
-
-
-            var currentVelocityMS = Distance.AuToKm( GMath.GetVector(currentPositionAU, targetPosAU, Distance.MToAU( maxSpeedMS) )) * 1000;
-
-            propulsionDB.CurrentVectorMS = currentVelocityMS;
-            moveDB.CurrentVectorMS = currentVelocityMS;
-            StaticDataStore staticData = entity.Manager.Game.StaticData;
-            CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
-            Dictionary<Guid, double> fuelUsePerMeter = propulsionDB.FuelUsePerKM;
-            double maxKMeters = ShipMovementProcessor.CalcMaxFuelDistance_KM(entity);
-
-            var TimePosAU = currentPositionAU +  Distance.MToAU(currentVelocityMS) * deltaSeconds; ;
-
-
-            var distanceToTargetAU = deltaVecToTargetAU.Length();  //in au
-
-            var deltaVecToTimeAU = currentPositionAU - TimePosAU;
-            var fuelMaxDistanceAU = maxKMeters / GameConstants.Units.KmPerAu;
-
-
-
-            Vector4 newPosAU = currentPositionAU;
-
-            double distanceToNextTPosAU = deltaVecToTimeAU.Length();
-            double distanceToMoveAU;
-            if (fuelMaxDistanceAU < distanceToNextTPosAU)
-            {
-                distanceToMoveAU = fuelMaxDistanceAU;
-                double percent = fuelMaxDistanceAU / distanceToNextTPosAU;
-                newPosAU = TimePosAU + deltaVecToTimeAU * percent;
-                //Event usedAllFuel = new Event(manager.ManagerSubpulses.SystemLocalDateTime, "Used all Fuel", entity.GetDataBlob<OwnedDB>().OwnedByFaction, entity);
-                //usedAllFuel.EventType = EventType.FuelExhausted;
-                //manager.Game.EventLog.AddEvent(usedAllFuel);
-            }
-            else
-            {
-                distanceToMoveAU = distanceToNextTPosAU;
-                newPosAU = TimePosAU;
-            }
-
-
-
-            if (distanceToTargetAU < distanceToMoveAU) // moving would overtake target, just go directly to target
-            {
-                distanceToMoveAU = distanceToTargetAU;
+                //distanceToMoveAU = distanceToTargetAU;
+                distanceToMove = distanceToTargetMt;
                 propulsionDB.CurrentVectorMS = new Vector4(0, 0, 0, 0);
-                newPosAU = targetPosAU;
+                //newPosAU = targetPosAU;
+                newPositionMt = targetPosMt;
                 moveDB.IsAtTarget = true;
                 entity.RemoveDataBlob<TranslateMoveDB>();
             }
 
-            positionDB.AbsolutePosition_AU = newPosAU;
+            positionDB.AbsolutePosition_AU = Distance.MtToAu( newPositionMt);
 
-            double kMetersMoved = Distance.AuToKm(distanceToMoveAU);
-            foreach (var item in propulsionDB.FuelUsePerKM)
-            {
-                var fuel = staticData.GetICargoable(item.Key);
-                StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * kMetersMoved));
-            }
+            double metersMoved = distanceToMove;
+
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)

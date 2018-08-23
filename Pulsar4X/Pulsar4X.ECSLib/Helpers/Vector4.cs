@@ -124,6 +124,15 @@ namespace Pulsar4X.ECSLib
             return Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y) + (vector.Z * vector.Z) + (vector.W * vector.W));
         }
 
+        public static Vector4 Normalise(Vector4 vector)
+        {
+            double magnatude = Magnitude(vector);
+            if (magnatude != 0)
+                return vector / magnatude;
+            else
+                return vector;
+        }
+
         /// <summary>
         /// Returns the dot product of two vectors
         /// </summary>
