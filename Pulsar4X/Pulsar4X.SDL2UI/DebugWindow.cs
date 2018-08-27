@@ -25,7 +25,8 @@ float nextLargeGFPS = 0;
         float _currentSFPS;
         int _systemRateIndex = 0;
         float[] _systemRates = new float[80];
-
+        bool _dateChangeSinceLastFrame = true;
+        bool _isRunningFrame = false;
         private DebugWindow() 
         {
             
@@ -111,6 +112,7 @@ float nextLargeGFPS = 0;
 
         void SystemSubpulse_SystemDateChangedEvent(DateTime newDate)
         {
+            _dateChangeSinceLastFrame = true;
             _currentSFPS = (float)_state.Game.GameLoop.LastSubtickTime.TotalSeconds;
             _systemRates[_systemRateIndex] = _currentSFPS;
             if (_systemRateIndex >= _systemRates.Length - 1)
@@ -125,6 +127,7 @@ float nextLargeGFPS = 0;
 
         internal override void Display()
         {
+            _isRunningFrame = true;
             if (IsActive)
             {
                 SetFrameRateArray();
@@ -152,18 +155,42 @@ float nextLargeGFPS = 0;
                     {
                         if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                         {
+                            ImGui.Text(_state.LastClickedEntity.Entity.Guid.ToString());
                             if (_state.LastClickedEntity.Entity.HasDataBlob<PositionDB>())
                             {
                                 var positiondb = _state.LastClickedEntity.Entity.GetDataBlob<PositionDB>();
-                                var posv4 = positiondb.PositionInKm;
+                                var posv4 = positiondb.AbsolutePosition_AU;
                                 ImGui.Text("x: " + posv4.X);
                                 ImGui.Text("y: " + posv4.Y);
                                 ImGui.Text("z: " + posv4.Z);
                             }
+                            if (_state.LastClickedEntity.Entity.HasDataBlob<OrbitDB>())
+                            {
+
+                                if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                {
+                                    OrbitDB orbitDB = _state.LastClickedEntity.Entity.GetDataBlob<OrbitDB>();
+
+
+                                    //if (_state.CurrentSystemDateTime != lastDate)
+                                    //{
+                                        pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.CurrentSystemDateTime);
+                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.CurrentSystemDateTime);
+                                        lastDate = _state.CurrentSystemDateTime;
+                                    //}
+
+                                    ImGui.Text("x: " + pos.X);
+                                    ImGui.Text("y: " + pos.Y);
+                                    ImGui.Text("z: " + pos.Z);
+                                    ImGui.Text("TrueAnomaly: " + truAnomoly);
+                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
+
+                                }
+                            }
                             if (_state.LastClickedEntity.OrbitIcon != null)
                             {
-                                
-                                if (ImGui.CollapsingHeader("Orbit: ###OrbitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+
+                                if (ImGui.CollapsingHeader("OrbitIcon: ###OrbitIconHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     OrbitDB orbitDB = _state.LastClickedEntity.Entity.GetDataBlob<OrbitDB>();
 
@@ -171,19 +198,6 @@ float nextLargeGFPS = 0;
                                     string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
                                     ImGui.Text("StartAngleRadians: " + startRadian);
                                     ImGui.Text("StartAngleDegrees: " + startDegrees);
-
-                                    if (_state.CurrentSystemDateTime != lastDate)
-                                    {
-                                        pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.CurrentSystemDateTime);
-                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.CurrentSystemDateTime);
-                                        lastDate = _state.CurrentSystemDateTime;
-                                    }
-
-                                    ImGui.Text("x: " + pos.X);
-                                    ImGui.Text("y: " + pos.Y);
-                                    ImGui.Text("z: " + pos.Z);
-                                    ImGui.Text("TrueAnomaly: " + truAnomoly);
-                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
 
                                 }
                             }
@@ -220,7 +234,8 @@ float nextLargeGFPS = 0;
                 //else IsActive = false;
                 ImGui.End();
             }
-        
+            _isRunningFrame = false;
+            _dateChangeSinceLastFrame = false;
         }
 
 

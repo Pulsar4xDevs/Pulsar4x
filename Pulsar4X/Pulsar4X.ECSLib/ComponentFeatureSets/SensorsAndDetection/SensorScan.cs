@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
 
                 if (detectableEntity.FactionOwner != Guid.Empty)
                 {
-                    if (detectableEntity.FactionOwner != faction.FactionOwner)                        
+                    if (detectableEntity.FactionOwner != faction.Guid)                        
                     {
                         var position = entity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
                         if (position == null) //then it's probilby a colony

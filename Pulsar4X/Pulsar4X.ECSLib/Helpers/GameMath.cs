@@ -648,23 +648,28 @@ namespace Pulsar4X.ECSLib
             return intercept;
         }
 
-        public static Vector4 Intercept(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
+        public static (Vector4, DateTime) Intercept(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
         {
 #if DEBUG
             var timespent = Stopwatch.StartNew();
 #endif
-            Vector4 pos = OrbitProcessor.GetAbsolutePosition_AU(mover.GetDataBlob<OrbitDB>(), atDateTime);
-
+            Vector4 moverPos;
+            if (mover.HasDataBlob<OrbitDB>())
+            {
+                moverPos = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(mover.GetDataBlob<OrbitDB>(), atDateTime));
+            }
+            else
+                moverPos = Distance.AuToMt(mover.GetDataBlob<PositionDB>().AbsolutePosition_AU);
             double spd = mover.GetDataBlob<PropulsionDB>().MaximumSpeed_MS;
 
             double transTime = 0;
 
             TimeSpan orbitalPeriod = targetOrbit.OrbitalPeriod;
             int i1 = 0, i2 = 0, i3 = 0;
-            Vector4 p = new Vector4();
+            Vector4 workingPosition = new Vector4();
             TimeSpan t = new TimeSpan();
-            double tt;
-            double dt = orbitalPeriod.TotalSeconds * 0.01 ;
+            double workingTimeToTarget;
+            double deltaTime = orbitalPeriod.TotalSeconds * 0.01 ;
             double a0;
             double a1 = -1;
             double T;
@@ -672,22 +677,22 @@ namespace Pulsar4X.ECSLib
             //find coarse intercept
             while (t < orbitalPeriod)
             {
-                p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t);
-                tt = Distance.AuToKm((p - pos).Length()) / (spd / 1000);
-                a0 = tt - t.TotalSeconds;
-                if (a0 > 0.0)
+                workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t));
+                workingTimeToTarget = (workingPosition - moverPos).Length() / spd ;
+                a0 = workingTimeToTarget - t.TotalSeconds;
+                if (a0 > 0.0) //ignore overshoots, only do undershoots. 
                 {
-                    a0 /= orbitalPeriod.TotalSeconds;
+                    a0 /= orbitalPeriod.TotalSeconds; //remove full periods from the difference
                     a0 -= Math.Floor(a0);
                     a0 *= orbitalPeriod.TotalSeconds;
                     if (a0 < a1 || a1 < 0)
                     {
                         a1 = a0;
-                        transTime = tt;
+                        transTime = workingTimeToTarget;
                     }
                 
                 }
-                t += TimeSpan.FromSeconds(dt);
+                t += TimeSpan.FromSeconds(deltaTime);
                 i1++;
             }
             //find finer intercept;
@@ -695,15 +700,15 @@ namespace Pulsar4X.ECSLib
             {
                 a1 = -1.0;
 
-                t = TimeSpan.FromSeconds(transTime - dt);
-                T = transTime + dt;
-                dt *= 0.1;
+                t = TimeSpan.FromSeconds(transTime - deltaTime);
+                T = transTime + deltaTime;
+                deltaTime *= 0.1;
 
                 while (t < orbitalPeriod)
                 {
-                    p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t);
-                    tt = Distance.AuToKm((p - pos).Length()) / (spd / 1000);
-                    a0 = tt - t.TotalSeconds;
+                    workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t));
+                    workingTimeToTarget = (workingPosition - moverPos).Length() / spd;
+                    a0 = workingTimeToTarget - t.TotalSeconds;
                     if (a0 > 0.0)
                     {
                         a0 /= orbitalPeriod.TotalSeconds;
@@ -712,21 +717,22 @@ namespace Pulsar4X.ECSLib
                         if (a0 < a1 || a1 < 0)
                         {
                             a1 = a0;
-                            transTime = tt;
+                            transTime = workingTimeToTarget;
                         }
 
                     }
-                    t += TimeSpan.FromSeconds(dt);
+                    t += TimeSpan.FromSeconds(deltaTime);
                     i3++;
                 }
-                p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit ,atDateTime + TimeSpan.FromSeconds( transTime));
+                workingPosition = Distance.AuToMt( OrbitProcessor.GetAbsolutePosition_AU(targetOrbit ,atDateTime + TimeSpan.FromSeconds( transTime)));
                 //var dir = Vector4. p-pos
             }
 #if DEBUG
             timespent.Stop();
-            Console.WriteLine("Intercept Calc Steps: " + i1 + i2 + i3 + " TimeSpent: " + timespent.Elapsed);
-#endif
-            return p;
+            Console.WriteLine("Intercept Calc Steps: " + i1 + i2 + i3 + " TimeSpent: " + timespent.Elapsed.TotalMilliseconds + " ms");
+#endif      
+            var finalPostion = Distance.MtToAu(workingPosition);
+            return (finalPostion, atDateTime + TimeSpan.FromSeconds(transTime));
         }
     }
 

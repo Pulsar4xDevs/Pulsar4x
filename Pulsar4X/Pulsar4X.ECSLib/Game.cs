@@ -136,7 +136,7 @@ namespace Pulsar4X.ECSLib
 
                 if (newGameSettings.DefaultSolStart ?? false)
                 {
-                    DefaultStartFactory.DefaultHumans(this, newGameSettings.DefaultFactionName);
+                    //DefaultStartFactory.DefaultHumans(this, newGameSettings.DefaultFactionName);
                 }
                 else
                 {

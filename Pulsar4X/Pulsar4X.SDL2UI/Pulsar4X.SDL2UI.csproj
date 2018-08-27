@@ -53,6 +53,15 @@
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="ImGuiCS">
+      <HintPath>Libs\ImGuiCS.dll</HintPath>
+    </Reference>
+    <Reference Include="ImGuiSDL2CS">
+      <HintPath>Libs\ImGuiSDL2CS.dll</HintPath>
+    </Reference>
+    <Reference Include="SDL2-CS">
+      <HintPath>Libs\SDL2-CS.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
