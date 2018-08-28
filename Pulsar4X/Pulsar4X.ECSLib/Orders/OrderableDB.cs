@@ -8,6 +8,11 @@ namespace Pulsar4X.ECSLib
 
         internal List<EntityCommand> ActionList = new List<EntityCommand>();
 
+
+        public List<EntityCommand> GetActionList()
+        {
+            return new List<EntityCommand>( ActionList );
+        }
         public OrderableDB()
         {
         }

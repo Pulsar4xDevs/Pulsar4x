@@ -17,6 +17,10 @@ namespace Pulsar4X.ECSLib
         public Vector4 TranslateEntryPoint_AU { get; internal set; }
         [JsonProperty]
         public Vector4 TranslationExitPoint_AU { get; internal set; }
+        [JsonProperty]
+        public DateTime EntryDateTime { get; internal set; }
+        [JsonProperty]
+        public DateTime PredictedExitTime { get; internal set; }
 
         [JsonProperty]
         internal Vector4 CurrentNonNewtonionVectorMS;

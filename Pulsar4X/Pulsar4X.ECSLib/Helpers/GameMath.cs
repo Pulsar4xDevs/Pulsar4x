@@ -110,6 +110,11 @@ namespace Pulsar4X.ECSLib
             Vector4 au = meters / GameConstants.Units.MetersPerAu;
             return au;
         }
+
+        public static double DistanceBetween(Vector4 p1, Vector4 p2)
+        {
+            return (p1 - p2).Length();
+        }
        
     }
 
@@ -648,7 +653,14 @@ namespace Pulsar4X.ECSLib
             return intercept;
         }
 
-        public static (Vector4, DateTime) Intercept(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
+        /// <summary>
+        /// Calculates a cartisian position for an intercept for a ship and an target's orbit. 
+        /// </summary>
+        /// <returns>The intercept position and DateTime</returns>
+        /// <param name="mover">The entity that is trying to intercept a target.</param>
+        /// <param name="targetOrbit">Target orbit.</param>
+        /// <param name="atDateTime">Datetime of transit start</param>
+        public static (Vector4, DateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
         {
 #if DEBUG
             var timespent = Stopwatch.StartNew();
@@ -667,19 +679,18 @@ namespace Pulsar4X.ECSLib
             TimeSpan orbitalPeriod = targetOrbit.OrbitalPeriod;
             int i1 = 0, i2 = 0, i3 = 0;
             Vector4 workingPosition = new Vector4();
-            TimeSpan t = new TimeSpan();
+            double timePeriod = 0;
             double workingTimeToTarget;
             double deltaTime = orbitalPeriod.TotalSeconds * 0.01 ;
             double a0;
             double a1 = -1;
-            double T;
 
             //find coarse intercept
-            while (t < orbitalPeriod)
+            while (timePeriod < orbitalPeriod.TotalSeconds)
             {
-                workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t));
+                workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(timePeriod)));
                 workingTimeToTarget = (workingPosition - moverPos).Length() / spd ;
-                a0 = workingTimeToTarget - t.TotalSeconds;
+                a0 = workingTimeToTarget - timePeriod;
                 if (a0 > 0.0) //ignore overshoots, only do undershoots. 
                 {
                     a0 /= orbitalPeriod.TotalSeconds; //remove full periods from the difference
@@ -692,7 +703,7 @@ namespace Pulsar4X.ECSLib
                     }
                 
                 }
-                t += TimeSpan.FromSeconds(deltaTime);
+                timePeriod += deltaTime;
                 i1++;
             }
             //find finer intercept;
@@ -700,15 +711,14 @@ namespace Pulsar4X.ECSLib
             {
                 a1 = -1.0;
 
-                t = TimeSpan.FromSeconds(transTime - deltaTime);
-                T = transTime + deltaTime;
+                timePeriod = transTime - deltaTime;
                 deltaTime *= 0.1;
 
-                while (t < orbitalPeriod)
+                while (timePeriod < orbitalPeriod.TotalSeconds)
                 {
-                    workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + t));
+                        workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(timePeriod)));
                     workingTimeToTarget = (workingPosition - moverPos).Length() / spd;
-                    a0 = workingTimeToTarget - t.TotalSeconds;
+                    a0 = workingTimeToTarget - timePeriod;
                     if (a0 > 0.0)
                     {
                         a0 /= orbitalPeriod.TotalSeconds;
@@ -721,7 +731,7 @@ namespace Pulsar4X.ECSLib
                         }
 
                     }
-                    t += TimeSpan.FromSeconds(deltaTime);
+                    timePeriod += deltaTime;
                     i3++;
                 }
                 workingPosition = Distance.AuToMt( OrbitProcessor.GetAbsolutePosition_AU(targetOrbit ,atDateTime + TimeSpan.FromSeconds( transTime)));

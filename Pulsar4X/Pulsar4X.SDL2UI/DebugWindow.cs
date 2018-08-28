@@ -210,6 +210,7 @@ float nextLargeGFPS = 0;
                                     ImGui.Text("NonNewt Engine Power: " + propulsionDB.TotalEnginePower);
                                     ImGui.Text("Max Speed: " + propulsionDB.MaximumSpeed_MS);
                                     ImGui.Text("CurrentVector: " + propulsionDB.CurrentVectorMS);
+                                    ImGui.Text("Current Speed: " + Vector4.Magnitude( propulsionDB.CurrentVectorMS));
                                     if (_state.LastClickedEntity.Entity.HasDataBlob<CargoStorageDB>())
                                     {
                                         var fuelsGuid = propulsionDB.FuelUsePerKM;
@@ -225,8 +226,31 @@ float nextLargeGFPS = 0;
 
                                     }
                                 }
+                                if (_state.LastClickedEntity.Entity.HasDataBlob<TranslateMoveDB>())
+                                {
+                                    var db = _state.LastClickedEntity.Entity.GetDataBlob<TranslateMoveDB>();
+                                    if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+                                        ImGui.Text("EntryPoint " + db.TranslateEntryPoint_AU);
+                                        ImGui.Text("ExitPoint  " + db.TranslationExitPoint_AU);
+                                        ImGui.Text("EDA " + db.PredictedExitTime.ToString());
+                                        double distance = Distance.DistanceBetween(db.TranslateEntryPoint_AU, db.TranslationExitPoint_AU);
+                                        ImGui.Text("Distance " + distance + " AU");
+                                        ImGui.SameLine();
+                                        double distancekm = Distance.AuToKm(distance);
+                                        ImGui.Text(distancekm.ToString() + " KM");
+                                        var timeToTarget = db.PredictedExitTime - _state.CurrentSystemDateTime;
+                                        ImGui.Text("Remaining TTT " + timeToTarget);
+                                        var totalTime = db.PredictedExitTime - db.EntryDateTime;
+                                        ImGui.Text("Total TTT  " + totalTime);
+                                        double speed = ((distancekm * 1000) / totalTime.TotalSeconds);
+                                        ImGui.Text("speed2 " + speed);
+                                    }
+
+                                }
 
                             }
+
 
                         }
                     }

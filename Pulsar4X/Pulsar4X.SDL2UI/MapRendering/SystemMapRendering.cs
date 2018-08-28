@@ -34,6 +34,7 @@ namespace Pulsar4X.SDL2UI
         Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, Icon> _entityIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, OrbitIcon> _orbitRings = new Dictionary<Guid, OrbitIcon>();
+        Dictionary<Guid, ShipMoveWidget> _moveIcons = new Dictionary<Guid, ShipMoveWidget>();
         internal Dictionary<Guid, NameIcon> _nameIcons = new Dictionary<Guid, NameIcon>();
         List<Vector4> _positions = new List<Vector4>();
         List<OrbitDB> _orbits = new List<OrbitDB>();
@@ -156,6 +157,15 @@ namespace Pulsar4X.SDL2UI
                         
                         }
                     }
+                    if (changeData.Datablob is TranslateMoveDB)
+                    {
+                        var widget = new ShipMoveWidget(changeData.Entity);
+                        //Matrix matrix = new Matrix();
+                        //matrix.Scale(_camera.ZoomLevel);
+                        //widget.OnFrameUpdate(matrix, _camera);
+                        _moveIcons[changeData.Entity.Guid] = widget;
+                        //_moveIcons.Add(changeData.Entity.Guid, widget);
+                    }
                     //if (changeData.Datablob is NameDB)
                         //TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);
 
@@ -165,6 +175,9 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (changeData.Datablob is OrbitDB)
                         _orbitRings.Remove(changeData.Entity.Guid);
+                    if (changeData.Datablob is TranslateMoveDB)
+                        _moveIcons.Remove(changeData.Entity.Guid);
+
                     //if (changeData.Datablob is NameDB)
                         //TextIconList.Remove(changeData.Entity.Guid);
                 }
@@ -263,26 +276,30 @@ namespace Pulsar4X.SDL2UI
             else
             {
 
-                foreach (var icon in UIWidgets)
+                foreach (var icon in UIWidgets.ToArray())
                 {
                     icon.OnFrameUpdate(matrix, _camera);
                 }
-                foreach (var icon in _orbitRings.Values)
+                foreach (var icon in _orbitRings.Values.ToArray())
                 {
                     icon.OnFrameUpdate(matrix, _camera);
                 }
-                foreach (var icon in _entityIcons.Values)
+                foreach (var icon in _moveIcons.Values.ToArray())
+                {
+                    icon.OnFrameUpdate(matrix, _camera);
+                }
+                foreach (var icon in _entityIcons.Values.ToArray())
                 {
 
                     icon.OnFrameUpdate(matrix, _camera);
                 }
-                foreach (var icon in _nameIcons.Values)
+                foreach (var icon in _nameIcons.Values.ToArray())
                 {
                     icon.OnFrameUpdate(matrix, _camera);
                 }
 
 
-                foreach (var icon in UIWidgets)
+                foreach (var icon in UIWidgets.ToArray())
                 {
                     icon.Draw(rendererPtr, _camera);
                 }
@@ -291,7 +308,11 @@ namespace Pulsar4X.SDL2UI
                     
                     icon.Draw(rendererPtr, _camera);
                 }
-                foreach (var icon in _entityIcons.Values)
+                foreach (var icon in _moveIcons.Values.ToArray())
+                {
+                    icon.Draw(rendererPtr, _camera);
+                }
+                foreach (var icon in _entityIcons.Values.ToArray())
                 {
                     icon.Draw(rendererPtr, _camera);
                 }
