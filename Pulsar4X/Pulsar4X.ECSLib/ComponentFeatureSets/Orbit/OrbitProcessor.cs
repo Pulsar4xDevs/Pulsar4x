@@ -30,19 +30,21 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), entity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds));
+            DateTime toDate = entity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), toDate);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            UpdateSystemOrbits(manager);
+            DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            UpdateSystemOrbits(manager, toDate);
         }
 
-        internal static void UpdateSystemOrbits(EntityManager manager)
+        internal static void UpdateSystemOrbits(EntityManager manager, DateTime toDate)
         {
        
-            TimeSpan orbitCycle = manager.Game.Settings.OrbitCycleTime;
-            DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + orbitCycle;
+            //TimeSpan orbitCycle = manager.Game.Settings.OrbitCycleTime;
+            //DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + orbitCycle;
             //starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, UpdateSystemOrbits);
             //manager.ManagerSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.OrbitProcessor);
             // Find the first orbital entity.
