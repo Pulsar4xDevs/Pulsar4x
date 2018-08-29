@@ -62,6 +62,15 @@
     <Reference Include="SDL2-CS">
       <HintPath>Libs\SDL2-CS.dll</HintPath>
     </Reference>
+    <Reference Include="ImGuiCS">
+      <HintPath>Libs\ImGuiCS.dll</HintPath>
+    </Reference>
+    <Reference Include="ImGuiSDL2CS">
+      <HintPath>Libs\ImGuiSDL2CS.dll</HintPath>
+    </Reference>
+    <Reference Include="SDL2-CS">
+      <HintPath>Libs\SDL2-CS.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

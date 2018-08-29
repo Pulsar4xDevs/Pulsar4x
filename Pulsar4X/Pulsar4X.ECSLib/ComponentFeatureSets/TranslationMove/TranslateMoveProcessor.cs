@@ -91,7 +91,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var item in propulsionDB.FuelUsePerKM)
                 {
                     var fuel = staticData.GetICargoable(item.Key);
-                    StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * totalDistance));
+                    StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * totalDistance / 1000));
                 }
             }
 

@@ -674,13 +674,13 @@ namespace Pulsar4X.ECSLib
                 moverPos = Distance.AuToMt(mover.GetDataBlob<PositionDB>().AbsolutePosition_AU);
             double spd = mover.GetDataBlob<PropulsionDB>().MaximumSpeed_MS;
 
-            double transTime = 0;
+            double transitTime1 = 0;
 
             TimeSpan orbitalPeriod = targetOrbit.OrbitalPeriod;
             int i1 = 0, i2 = 0, i3 = 0;
             Vector4 workingPosition = new Vector4();
             double timePeriod = 0;
-            double workingTimeToTarget;
+            double transitTime2;
             double deltaTime = orbitalPeriod.TotalSeconds * 0.01 ;
             double a0;
             double a1 = -1;
@@ -689,8 +689,8 @@ namespace Pulsar4X.ECSLib
             while (timePeriod < orbitalPeriod.TotalSeconds)
             {
                 workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(timePeriod)));
-                workingTimeToTarget = (workingPosition - moverPos).Length() / spd ;
-                a0 = workingTimeToTarget - timePeriod;
+                transitTime2 = (workingPosition - moverPos).Length() / spd ;
+                a0 = transitTime2 - timePeriod;
                 if (a0 > 0.0) //ignore overshoots, only do undershoots. 
                 {
                     a0 /= orbitalPeriod.TotalSeconds; //remove full periods from the difference
@@ -699,7 +699,7 @@ namespace Pulsar4X.ECSLib
                     if (a0 < a1 || a1 < 0)
                     {
                         a1 = a0;
-                        transTime = workingTimeToTarget;
+                        transitTime1 = transitTime2;
                     }
                 
                 }
@@ -711,14 +711,14 @@ namespace Pulsar4X.ECSLib
             {
                 a1 = -1.0;
 
-                timePeriod = transTime - deltaTime;
+                timePeriod = transitTime1 - deltaTime;
                 deltaTime *= 0.1;
 
                 while (timePeriod < orbitalPeriod.TotalSeconds)
                 {
-                        workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(timePeriod)));
-                    workingTimeToTarget = (workingPosition - moverPos).Length() / spd;
-                    a0 = workingTimeToTarget - timePeriod;
+                    workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(timePeriod)));
+                    transitTime2 = (workingPosition - moverPos).Length() / spd;
+                    a0 = transitTime2 - timePeriod;
                     if (a0 > 0.0)
                     {
                         a0 /= orbitalPeriod.TotalSeconds;
@@ -727,22 +727,22 @@ namespace Pulsar4X.ECSLib
                         if (a0 < a1 || a1 < 0)
                         {
                             a1 = a0;
-                            transTime = workingTimeToTarget;
+                            transitTime1 = transitTime2;
                         }
 
                     }
                     timePeriod += deltaTime;
                     i3++;
                 }
-                workingPosition = Distance.AuToMt( OrbitProcessor.GetAbsolutePosition_AU(targetOrbit ,atDateTime + TimeSpan.FromSeconds( transTime)));
-                //var dir = Vector4. p-pos
+                workingPosition = Distance.AuToMt( OrbitProcessor.GetAbsolutePosition_AU(targetOrbit ,atDateTime + TimeSpan.FromSeconds( transitTime1)));
+
             }
 #if DEBUG
             timespent.Stop();
-            Console.WriteLine("Intercept Calc Steps: " + i1 + i2 + i3 + " TimeSpent: " + timespent.Elapsed.TotalMilliseconds + " ms");
+            Console.WriteLine("Intercept Calc Steps: " + i1 + i3 + " TimeSpent: " + timespent.Elapsed.TotalMilliseconds + " ms");
 #endif      
             var finalPostion = Distance.MtToAu(workingPosition);
-            return (finalPostion, atDateTime + TimeSpan.FromSeconds(transTime));
+            return (finalPostion, atDateTime + TimeSpan.FromSeconds(transitTime1));
         }
     }
 
