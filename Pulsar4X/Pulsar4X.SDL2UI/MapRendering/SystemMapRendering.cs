@@ -184,7 +184,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        /*
+
         public void TextIconsDistribute()
         {
             if (_nameIcons.Count == 0)
@@ -192,10 +192,7 @@ namespace Pulsar4X.SDL2UI
             var occupiedPosition = new List<IRectangle>();
             IComparer<IRectangle> byViewPos = new ByViewPosition();
             var textIconList = new List<NameIcon>(_nameIcons.Values);
-            foreach (var item in _nameIcons.Values)
-            {
-                item.ViewOffset = item.DefaultViewOffset;
-            }
+
 
             //Consolidate TextIcons that share the same position and name
             textIconList.Sort();
@@ -220,7 +217,7 @@ namespace Pulsar4X.SDL2UI
             //Placement happens bottom to top, left to right
             //Each newly placed Texticon is compared to only the Texticons that are placed above its position
             //Therefore a sorted list of the occupied Positions is maintained
-            occupiedPosition.Add(textIconList[0]);
+            occupiedPosition.Add(textIconList[0].ViewDisplayRect);
 
 
 
@@ -232,7 +229,8 @@ namespace Pulsar4X.SDL2UI
             for (int i = 1; i < numTextIcons; i++)
             {
                 var item = texiconsCopy[i];
-                int lowestPosIndex = occupiedPosition.BinarySearch(item + new Point(0, (int)item.Height), byViewPos);
+                ImVec2 foo = new ImVec2() { x = 0, y = item.Height };
+                int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + foo, byViewPos);
                 int lpi = lowestPosIndex;
                 if (lowestPosIndex < 0)
                     lpi = ~lowestPosIndex;
@@ -241,17 +239,26 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
                     {
-                        item.ViewOffset -= new PointF(0, item.ViewDisplayRect.Bottom - occupiedPosition[j].Top);
+                        float positionTop = occupiedPosition[j].Y - occupiedPosition[j].Height;
+                        var newpoint = new ImVec2()
+                        {
+                            x = item.ViewOffset.x,
+                            y = item.ViewDisplayRect.Y - positionTop
+                        };
+                        item.ViewOffset = newpoint;
+                        //item.ViewOffset -= new PointF(0,  item.ViewDisplayRect.Bottom - occupiedPosition[j].Top);
                     }
                 }
                 //Inserts the new label sorted
-                int insertIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect, byViewPos);
+                int insertIndex = occupiedPosition.BinarySearch(item, byViewPos);
                 if (insertIndex < 0) insertIndex = ~insertIndex;
-                occupiedPosition.Insert(insertIndex, item.ViewDisplayRect);
+                occupiedPosition.Insert(insertIndex, item);
             }
 
 
-        }*/
+        }
+
+
 
         internal void Draw()
         {
@@ -297,7 +304,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     icon.OnFrameUpdate(matrix, _camera);
                 }
-
+                TextIconsDistribute();
 
                 foreach (var icon in UIWidgets.ToArray())
                 {
@@ -325,17 +332,17 @@ namespace Pulsar4X.SDL2UI
     }
 
     /// <summary>
-    /// IComparer for the Texticonrectangles (or any other rectancle)
+    /// IComparer for the Texticonrectangles (or any other rectangle)
     /// Sorts Bottom to top, left to right
     /// </summary>
     internal class ByViewPosition : IComparer<IRectangle>
     {
         public int Compare(IRectangle r1, IRectangle r2)
         {
-            int r1B = r1.Y + r1.Height;
-            int r1L = r1.X;
-            int r2B = r2.Y + r1.Height;
-            int r2L = r2.X;
+            float r1B = r1.Y + r1.Height;
+            float r1L = r1.X;
+            float r2B = r2.Y + r1.Height;
+            float r2L = r2.X;
 
             if (r1B > r2B) return -1;
             else if (r1B < r2B) return 1;

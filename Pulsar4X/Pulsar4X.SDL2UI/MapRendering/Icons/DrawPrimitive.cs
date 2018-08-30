@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ImGuiNET;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
 
@@ -329,10 +330,53 @@ namespace Pulsar4X.SDL2UI
 
     public interface IRectangle
     {
-        int X { get; }
-        int Y { get; }
-        int Width  { get; }
-        int Height { get; }
+        float X { get;  }
+        float Y { get;  }
+        float Width { get;  }
+        float Height { get;  }
+
+
+    }
+
+    public class Rectangle : IRectangle
+    {
+        public float X { get; set; }
+
+        public float Y { get; set; }
+
+        public float Width { get; set; }
+
+        public float Height { get; set; }
+
+        public static Rectangle operator +(Rectangle rectangle, ImVec2 point)
+        {
+            Rectangle newRect = new Rectangle();
+
+            newRect.X = rectangle.X + point.x;
+            newRect.Y = rectangle.Y + point.y;
+            return newRect;
+
+        }
+
+        public bool Intersects(IRectangle icon)
+        {
+            float myL = X;
+            float myR = X + Width;
+            float myT = Y;
+            float myB = Y + Height;
+
+
+            float iconL = icon.X;
+            float iconR = icon.X + icon.Width;
+            float iconT = icon.Y;
+            float iconB = icon.Y + icon.Height;
+
+
+            return (myL < iconR &&
+                    myR > iconL &&
+                    myT < iconB &&
+                    myB > iconT);
+        }
     }
 
 }

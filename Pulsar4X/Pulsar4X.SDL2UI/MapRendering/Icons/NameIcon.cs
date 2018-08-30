@@ -12,11 +12,14 @@ namespace Pulsar4X.SDL2UI
         GlobalUIState _state;
         NameDB _nameDB;
         internal string NameString;
-        public int Width { get; set; }
-        public int Height{ get; set; }
-        public int X { get { return ViewScreenPos.x; } }
-        public int Y { get { return ViewScreenPos.y; } }
+        public float Width { get; set; }
+        public float Height{ get; set; }
+        public float X { get { return ViewScreenPos.x; }  }
+        public float Y { get { return ViewScreenPos.y; } }
         Guid _entityGuid;
+
+        public ImVec2 ViewOffset { get; set; } = new ImVec2();
+        public Rectangle ViewDisplayRect = new Rectangle(); 
 
         public NameIcon(ref EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
@@ -26,8 +29,37 @@ namespace Pulsar4X.SDL2UI
             NameString = _nameDB.GetName(state.Faction);
             entityState.Name = NameString;
             entityState.NameIcon = this;
+
         }
 
+
+        public static NameIcon operator +(NameIcon nameIcon, SDL.SDL_Point point)
+        {
+            ImVec2 newpoint = new ImVec2()
+            {
+                x = nameIcon.ViewOffset.x + point.x,
+                y = nameIcon.ViewOffset.y + point.y
+            };
+            nameIcon.ViewOffset = newpoint;
+
+            return nameIcon;
+
+        }
+
+
+
+        public override void OnFrameUpdate(Matrix matrix, Camera camera)
+        {
+            //DefaultViewOffset = new SDL.SDL_Point() { x = Width, y = -Height };
+
+            ImVec2 defualtOffset = new ImVec2(4,-(Height / 2));
+            ViewOffset = defualtOffset;
+            base.OnFrameUpdate(matrix, camera);
+
+            ViewDisplayRect.X = ViewScreenPos.x;
+            ViewDisplayRect.Y = ViewScreenPos.y;
+
+        }
 
         /// <summary>
         /// Default comparer, based on worldposition.
@@ -47,31 +79,13 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public bool Intersects(NameIcon icon)
-        {
-            int myL = ViewScreenPos.x;
-            int myR = ViewScreenPos.x + Width;
-            int myT = ViewScreenPos.y;
-            int myB = ViewScreenPos.y + Height; 
 
-
-            int iconL = icon.ViewScreenPos.x;
-            int iconR = icon.ViewScreenPos.x + icon.Width;
-            int iconT = icon.ViewScreenPos.y;
-            int iconB = icon.ViewScreenPos.y + icon.Height;
-
-
-            return (myL < iconR &&
-                    myR > iconL &&
-                    myT < iconB &&
-                    myB > iconT);
-        }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             var camerapoint = camera.CameraViewCoordinate();
-            int x = (int)(ViewScreenPos.x + camerapoint.x);
-            int y = (int)(ViewScreenPos.y + camerapoint.y);
+            int x = (int)(X + camerapoint.x + ViewOffset.x);
+            int y = (int)(Y + camerapoint.y + ViewOffset.y);
             ImVec2 pos = new ImVec2(x, y);
 
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new ImVec4(0, 0, 0, 0)); //make the background transperent. 
@@ -85,7 +99,13 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
                 _state.EntityClicked(_entityGuid, MouseButtons.Primary);
+
             }
+            var size = ImGui.GetLastItemRectSize();
+            Height = (int)size.y;
+            Width = (int)size.x;
+            ViewDisplayRect.Width = (int)size.x;
+            ViewDisplayRect.Height = (int)size.y;
 
             ImGui.PopStyleColor();
             if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
