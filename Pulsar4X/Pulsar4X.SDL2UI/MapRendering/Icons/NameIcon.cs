@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
@@ -62,7 +63,7 @@ namespace Pulsar4X.SDL2UI
         }
 
         /// <summary>
-        /// Default comparer, based on worldposition.
+        /// Default comparer, based on worldposition. TODO: should this maybe be done on viewscreen position?
         /// Sorts Bottom to top, left to right, then alphabetically
         /// </summary>
         /// <param name="compareIcon"></param>
@@ -95,17 +96,16 @@ namespace Pulsar4X.SDL2UI
             ImGui.Begin(NameString, ref IsActive, _flags);
 
             ImGui.PushStyleColor(ImGuiCol.Button, new ImVec4(0, 0, 0, 0));
-
-            if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
+            if (ImGui.SmallButton(NameString)) //If the name gets clicked, we tell the state. 
             {
                 _state.EntityClicked(_entityGuid, MouseButtons.Primary);
 
             }
             var size = ImGui.GetLastItemRectSize();
-            Height = (int)size.y;
-            Width = (int)size.x;
-            ViewDisplayRect.Width = (int)size.x;
-            ViewDisplayRect.Height = (int)size.y;
+            Height = size.y;
+            Width = size.x;
+            ViewDisplayRect.Width = size.x;
+            ViewDisplayRect.Height = size.y;
 
             ImGui.PopStyleColor();
             if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
@@ -123,5 +123,29 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopStyleColor(); //have to pop the color change after pushing it. 
         }
 
+    }
+
+    /// <summary>
+    /// IComparer for the Texticonrectangles (or any other rectangle)
+    /// Sorts Bottom to top, left to right
+    /// </summary>
+    internal class ByViewPosition : IComparer<IRectangle>
+    {
+        public int Compare(IRectangle r1, IRectangle r2)
+        {
+            float r1B = r1.Y + r1.Height;
+            float r1L = r1.X;
+            float r2B = r2.Y + r1.Height;
+            float r2L = r2.X;
+
+            if (r1B > r2B) return -1;
+            else if (r1B < r2B) return 1;
+            else
+            {
+                if (r1L > r2L) return -1;
+                else if (r1L < r2L) return 1;
+                else return 0;
+            }
+        }
     }
 }

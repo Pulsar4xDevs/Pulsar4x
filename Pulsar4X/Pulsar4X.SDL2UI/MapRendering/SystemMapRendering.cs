@@ -217,7 +217,7 @@ namespace Pulsar4X.SDL2UI
             //Placement happens bottom to top, left to right
             //Each newly placed Texticon is compared to only the Texticons that are placed above its position
             //Therefore a sorted list of the occupied Positions is maintained
-            occupiedPosition.Add(textIconList[0].ViewDisplayRect);
+            occupiedPosition.Add(textIconList[0]);
 
 
 
@@ -228,9 +228,9 @@ namespace Pulsar4X.SDL2UI
 
             for (int i = 1; i < numTextIcons; i++)
             {
-                var item = texiconsCopy[i];
-                ImVec2 foo = new ImVec2() { x = 0, y = item.Height };
-                int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + foo, byViewPos);
+                var item = texiconsCopy[i-1];
+                ImVec2 height = new ImVec2() { x = 0, y = item.Height };
+                int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + height, byViewPos);
                 int lpi = lowestPosIndex;
                 if (lowestPosIndex < 0)
                     lpi = ~lowestPosIndex;
@@ -239,14 +239,12 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
                     {
-                        float positionTop = occupiedPosition[j].Y - occupiedPosition[j].Height;
                         var newpoint = new ImVec2()
                         {
                             x = item.ViewOffset.x,
-                            y = item.ViewDisplayRect.Y - positionTop
+                            y = item.ViewOffset.Y - occupiedPosition[j].Height
                         };
                         item.ViewOffset = newpoint;
-                        //item.ViewOffset -= new PointF(0,  item.ViewDisplayRect.Bottom - occupiedPosition[j].Top);
                     }
                 }
                 //Inserts the new label sorted
@@ -327,30 +325,6 @@ namespace Pulsar4X.SDL2UI
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
                 SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
-            }
-        }
-    }
-
-    /// <summary>
-    /// IComparer for the Texticonrectangles (or any other rectangle)
-    /// Sorts Bottom to top, left to right
-    /// </summary>
-    internal class ByViewPosition : IComparer<IRectangle>
-    {
-        public int Compare(IRectangle r1, IRectangle r2)
-        {
-            float r1B = r1.Y + r1.Height;
-            float r1L = r1.X;
-            float r2B = r2.Y + r1.Height;
-            float r2L = r2.X;
-
-            if (r1B > r2B) return -1;
-            else if (r1B < r2B) return 1;
-            else
-            {
-                if (r1L > r2L) return -1;
-                else if (r1L < r2L) return 1;
-                else return 0;
             }
         }
     }

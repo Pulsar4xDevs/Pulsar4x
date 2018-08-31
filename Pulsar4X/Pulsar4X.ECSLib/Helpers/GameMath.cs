@@ -706,6 +706,9 @@ namespace Pulsar4X.ECSLib
                 timePeriod += deltaTime;
                 i1++;
             }
+#if DEBUG
+            Console.WriteLine("CoarseTimeSpan :" +  TimeSpan.FromSeconds(transitTime1));
+#endif
             //find finer intercept;
             for (i2 = 0; i2 < 3; i2++)
             {
@@ -735,7 +738,9 @@ namespace Pulsar4X.ECSLib
                     i3++;
                 }
                 workingPosition = Distance.AuToMt( OrbitProcessor.GetAbsolutePosition_AU(targetOrbit ,atDateTime + TimeSpan.FromSeconds( transitTime1)));
-
+                #if DEBUG
+                Console.WriteLine("FineTimeSpan #" + i2 + " : " + TimeSpan.FromSeconds(transitTime1));
+#endif
             }
 #if DEBUG
             timespent.Stop();
