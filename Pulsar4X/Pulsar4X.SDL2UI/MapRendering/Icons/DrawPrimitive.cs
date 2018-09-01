@@ -29,6 +29,31 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+
+        /// <summary>
+        /// This is maybe a naive possibly slow way of drawing a filled circle. maybe revisit this if it turns out to be slow.
+        /// </summary>
+        /// <param name="renderer">Renderer.</param>
+        /// <param name="posX">Position x.</param>
+        /// <param name="posY">Position y.</param>
+        /// <param name="radius">Radius.</param>
+        public static void DrawFilledCircle(IntPtr renderer, int posX, int posY, int radius)
+        { 
+
+            for (int w = 0; w < radius * 2; w++)
+            {
+                for (int h = 0; h < radius * 2; h++)
+                {
+                    int dx = radius - w; // horizontal offset
+                    int dy = radius - h; // vertical offset
+                    if ((dx * dx + dy * dy) <= (radius * radius))
+                    {
+                        SDL.SDL_RenderDrawPoint(renderer, posX, posY);
+                    }
+                }
+            }        
+        }
+
         public static void DrawArc(IntPtr renderer, int posX, int posY, double xWidth, double yWidth, double startAngleRadians, double arcAngleRadians)
         {
             byte _numberOfArcSegments = 255;

@@ -531,7 +531,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="parentMass">Parent mass. ie the sun</param>
         public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
         {
-            return semiMajorAxis * Math.Pow((mass / parentMass), 2) / 5;
+            var massdiv = mass / parentMass;
+            var root = Math.Pow(massdiv, 1.0 / 5);
+
+            return semiMajorAxis * Math.Pow(root, 2);
         }
 
         /// <summary>

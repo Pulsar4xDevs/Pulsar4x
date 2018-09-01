@@ -96,7 +96,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Begin(NameString, ref IsActive, _flags);
 
             ImGui.PushStyleColor(ImGuiCol.Button, new ImVec4(0, 0, 0, 0));
-            if (ImGui.SmallButton(NameString)) //If the name gets clicked, we tell the state. 
+            if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
                 _state.EntityClicked(_entityGuid, MouseButtons.Primary);
 

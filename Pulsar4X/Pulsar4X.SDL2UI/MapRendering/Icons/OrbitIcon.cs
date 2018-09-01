@@ -198,6 +198,14 @@ namespace Pulsar4X.SDL2UI
 
             int index = _index;
             var camerapoint = camera.CameraViewCoordinate();
+
+            var vsp = new SDL.SDL_Point()
+            {
+                x = ViewScreenPos.x + camerapoint.x,
+                y = ViewScreenPos.y + camerapoint.y
+            };
+            ViewScreenPos = vsp;
+
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
@@ -210,8 +218,10 @@ namespace Pulsar4X.SDL2UI
                 var translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
                 //translate everything to viewscreen & camera positions
-                int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
-                int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
+                //int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
+                //int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
+                int x = (int)(ViewScreenPos.x + translated.X);
+                int y = (int)(ViewScreenPos.y + translated.Y);
 
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }

@@ -48,8 +48,8 @@ namespace Pulsar4X.SDL2UI
 
             if (OrderingEntity.Entity.HasDataBlob<OrbitDB>())
             {
-                _orbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());
-                _state.MapRendering.UIWidgets.Add(_orbitWidget);
+                //_orbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());
+                //_state.MapRendering.UIWidgets.Add(_orbitWidget);
             }
 
             fsm = new Action[5, 4]
@@ -82,8 +82,27 @@ namespace Pulsar4X.SDL2UI
             OrderingEntity = _state.LastClickedEntity;
             CurrentState = States.NeedsTarget;
         }
+
         void TargetSelected() { 
             TargetEntity = _state.LastClickedEntity;
+
+            _state.Camera.PinToEntity(TargetEntity.Entity);
+
+            var soiWorldRad_AU = GMath.GetSOI(TargetEntity.Entity);
+            _apMax = soiWorldRad_AU;
+
+            float soiViewUnits = _state.Camera.ViewDistance(soiWorldRad_AU);
+
+            ImVec2 viewPortSize = _state.Camera.ViewPortSize;
+            float windowLen = Math.Min(viewPortSize.x, viewPortSize.y);
+            if (soiViewUnits < windowLen * 0.5)
+            {
+                //zoom so soi fills ~3/4 screen.
+                var soilenwanted = windowLen * 0.375;
+                _state.Camera.ZoomLevel = (float)(soilenwanted / _apMax) ; 
+            }
+
+
             if (_orbitWidget != null)
             {
                 int index = _state.MapRendering.UIWidgets.IndexOf(_orbitWidget);
@@ -98,8 +117,8 @@ namespace Pulsar4X.SDL2UI
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
                 _state.MapRendering.UIWidgets.Add(_orbitWidget);
             }
+
             _targetRadius = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInKM;
-            _apMax = GMath.GetSOI(TargetEntity.Entity);
             _intercept = InterceptCalcs.FTLIntercept(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
             _tooltipText = "Select Apoapsis height";
             CurrentState = States.NeedsApoapsis;
@@ -144,7 +163,10 @@ namespace Pulsar4X.SDL2UI
         {
             return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
         }
-
+        Vector4 GetMyPosition()
+        {
+            return OrderingEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+        }
         internal override void Display()
         {
             if (IsActive)
@@ -196,10 +218,19 @@ namespace Pulsar4X.SDL2UI
                                 break;
                             case States.NeedsApoapsis:
                                 {
+
+                                    
+
                                     var mousePos = ImGui.GetMousePos();
 
                                     var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
                                     var ralitivePos = (GetTargetPosition() - mouseWorldPos);
+
+                                    //var intercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
+                                    //var point = intercept.Item1;
+                                    //var distance = Distance.DistanceBetween(GetMyPosition(), point);
+                                    //var angle = Vector4.AngleBetween(GetMyPosition(), point);
+
                                     _orbitWidget.SetApoapsis(ralitivePos.X, ralitivePos.Y);
 
                                     //_apoapsisKm = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());

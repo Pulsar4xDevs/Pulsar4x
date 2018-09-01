@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System;
+using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using SDL2;
@@ -13,7 +14,8 @@ namespace Pulsar4X.SDL2UI
         internal int MouseFrameIncrementX;
         internal int MouseFrameIncrementY;
 
-        bool IsPinnedToEntity;
+        internal bool IsPinnedToEntity { get; private set; }
+        internal Guid PinnedEntityGuid;
         PositionDB _entityPosDB;
         Vector4 _camWorldPos = new Vector4();
         public Vector4 CameraWorldPosition
@@ -64,8 +66,10 @@ namespace Pulsar4X.SDL2UI
                 _entityPosDB = entity.GetDataBlob<PositionDB>();
                 _camWorldPos = new Vector4(); //zero on it. 
                 IsPinnedToEntity = true;
+                PinnedEntityGuid = entity.Guid;
             }
         }
+
         public void CenterOnEntity(Entity entity)
         {
             if (entity.HasDataBlob<PositionDB>())
@@ -135,9 +139,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="dist"></param>
         /// <returns></returns>
-        public float ViewDistance(float dist)
+        public float ViewDistance(double dist)
         {
-            return dist * ZoomLevel;
+            return (float)(dist * ZoomLevel);
         }
 
         /// <summary>
@@ -145,7 +149,7 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="dist"></param>
         /// <returns></returns>
-        public float WorldDistance(float dist)
+        public double WorldDistance(float dist)
         {
             return dist / ZoomLevel;
         }

@@ -49,6 +49,9 @@ namespace Pulsar4X.SDL2UI
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
 
+        double _soiWorldRadius;
+        float _soiViewRadius;
+
         #endregion
 
         #region Dynamic Properties
@@ -79,32 +82,17 @@ namespace Pulsar4X.SDL2UI
 
         internal OrbitOrderWiget(Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
         {
-            
 
             _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
-
 
             OrbitEllipseSemiMaj = 20000;
             OrbitEllipseSemiMinor = 20000;
 
             _focalDistance = 0;
 
+            _soiWorldRadius = GMath.GetSOI(targetEntity);
 
-
-            _numberOfArcSegments = NumberOfArcSegments;
-            CreatePointArray();
-
-
-            _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
-            _numberOfDrawSegments = (int)Math.Max(1, (EllipseSweepRadians / _segmentArcSweepRadians));
-            _alphaChangeAmount = ((float)MaxAlpha - MinAlpha) / _numberOfDrawSegments;
-            _ellipseStartArcAngleRadians = (float)OrbitAngleRadians;
-
-            CreatePointArray();
-
-            OnPhysicsUpdate();
-
-
+            Setup();
 
         }
 
@@ -118,20 +106,28 @@ namespace Pulsar4X.SDL2UI
             EllipseFunctions.SemiMinorAxis(OrbitEllipseSemiMaj, _eccentricity);
             _focalDistance = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);
 
+            _soiWorldRadius =  GMath.GetSOI(targetEntity);
+
+            Setup();
+        }
+
+
+        void Setup()
+        {
             _numberOfArcSegments = NumberOfArcSegments;
             CreatePointArray();
-
 
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)MaxAlpha - MinAlpha) / _numberOfDrawSegments;
             _ellipseStartArcAngleRadians = (float)OrbitAngleRadians;
 
+
+
             CreatePointArray();
 
             OnPhysicsUpdate();
         }
-
 
         public void SetApoapsis(double x, double y)
         {
@@ -249,10 +245,19 @@ namespace Pulsar4X.SDL2UI
             ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
 
 
-
+            _soiViewRadius = camera.ViewDistance(_soiWorldRadius);
 
             int index = _index;
             var camerapoint = camera.CameraViewCoordinate();
+            //ViewScreenPos += camerapoint;
+
+            var vsp = new SDL.SDL_Point()
+            {
+                x = ViewScreenPos.x + camerapoint.x,
+                y = ViewScreenPos.y + camerapoint.y
+            };
+            ViewScreenPos = vsp;
+
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
@@ -265,8 +270,8 @@ namespace Pulsar4X.SDL2UI
                 var translated = matrix.Transform(_points[index].X, _points[index].Y); //add zoom transformation. 
 
                 //translate everything to viewscreen & camera positions
-                int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
-                int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
+                int x = ViewScreenPos.x + translated.x;//(int)(ViewScreenPos.x + translated.x + camerapoint.x);
+                int y = ViewScreenPos.y + translated.y;//(int)(ViewScreenPos.y + translated.y + camerapoint.y);
 
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }
@@ -285,7 +290,9 @@ namespace Pulsar4X.SDL2UI
                 alpha -= _alphaChangeAmount;
             }
 
-
+            SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
+            //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
+            DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
         }
     }
 }
