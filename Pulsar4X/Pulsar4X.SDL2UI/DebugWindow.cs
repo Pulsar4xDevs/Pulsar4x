@@ -134,6 +134,12 @@ float nextLargeGFPS = 0;
                 if (ImGui.Begin("debug", ref IsActive))
                 {
                     ImGui.Text(_state.CurrentSystemDateTime.ToString());
+                    ImGui.Text("Cursor World Coordinate:");
+                    var mouseWorldCoord = _state.Camera.MouseWorldCoordinate();
+                    ImGui.Text("x" + mouseWorldCoord.X);
+                    ImGui.SameLine();
+                    ImGui.Text("y" + mouseWorldCoord.Y);
+
                     if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
 
