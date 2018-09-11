@@ -141,6 +141,19 @@ namespace Pulsar4X.ECSLib
         {
             return left.X * right.X + left.Y * right.Y + left.Z * right.Z + left.W * right.W;
         }
+
+        /// <summary>
+        /// Cross product of left and right. Note: this ignores the fourth (W) property and treats them as 3d vectors.
+        /// </summary>
+        public static Vector4 Cross(Vector4 left, Vector4 right)
+        {
+            return new Vector4()
+            {
+                X = left.Y * right.Z - left.Z * right.Y,
+                Y = left.Z * right.X - left.X * right.Z,
+                Z = left.X * right.Y - left.Y * right.X
+            };
+        }
         
         /// <summary>
         /// Returns the angle between two vectors

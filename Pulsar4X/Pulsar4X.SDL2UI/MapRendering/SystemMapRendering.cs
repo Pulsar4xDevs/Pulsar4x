@@ -30,7 +30,7 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr surfacePtr; 
         internal IntPtr rendererPtr;
         ImGuiSDL2CSWindow _window;
-        internal List<Icon> UIWidgets = new List<Icon>();
+        internal List<IDrawData> UIWidgets = new List<IDrawData>();
         Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, Icon> _entityIcons = new Dictionary<Guid, Icon>();
         Dictionary<Guid, OrbitIcon> _orbitRings = new Dictionary<Guid, OrbitIcon>();

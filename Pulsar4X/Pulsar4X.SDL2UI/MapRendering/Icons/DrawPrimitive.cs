@@ -267,6 +267,41 @@ namespace Pulsar4X.SDL2UI
             }
             return points;
         }
+
+        public static PointD[] Circle(int posX, int posY, int radius, short segments)
+        {
+            PointD[] points = new PointD[segments + 1];
+            double incrementAngle = PI2 / segments;
+
+            int drawX;
+            int drawY;
+
+            for (int i = 0; i < segments + 1; i++)
+            {
+                double nextAngle = 0 + incrementAngle * i;
+                drawX = posX + (int)Math.Round(radius * Math.Sin(nextAngle));
+                drawY = posY + (int)Math.Round(radius * Math.Cos(nextAngle));
+                points[i] = new PointD() { X = drawX, Y = drawY };
+            }
+
+            return points;
+
+        }
+
+        public static PointD[] CreateArrow()
+        {
+            PointD[] arrowPoints = new PointD[7];
+            arrowPoints[0] = new PointD() { X =  0, Y = 32 };
+            arrowPoints[1] = new PointD() { X =  1, Y = 31 };
+            arrowPoints[2] = new PointD() { X =  3, Y = 29 };
+            arrowPoints[3] = new PointD() { X =  0, Y = 32 };
+            arrowPoints[4] = new PointD() { X = -3, Y = 29 };
+            arrowPoints[5] = new PointD() { X = -1, Y = 31 };
+            arrowPoints[6] = new PointD() { X =  0, Y = 0  };
+
+            return arrowPoints;
+        }
+    
     }
 
 
@@ -336,22 +371,7 @@ namespace Pulsar4X.SDL2UI
 
     }
 
-    public static class EllipseFunctions
-    {
-        public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
-        {
-            return semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity);
-        }
 
-        public static double LinierEccentricity(double appoapsis, double semiMajorAxis)
-        {
-            return appoapsis - semiMajorAxis;
-        }
-        public static double Eccentricity(double linierEccentricity, double semiMajorAxis)
-        {
-            return linierEccentricity / semiMajorAxis;
-        }
-    }
 
     public interface IRectangle
     {

@@ -104,6 +104,24 @@ namespace Pulsar4X.ECSLib
         private double _myMass;
 
         #region Construction Interface
+
+
+        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, Vector4 position, Vector4 velocity, DateTime epoch)
+        {
+            var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            var ke = OrbitMath.SetParametersFromVelocityAndPosition(sgp, position, velocity);
+
+            return new OrbitDB(parent, parentMass, myMass, 
+                               ke.SemiMajorAxis, 
+                               ke.Eccentricity, 
+                               ke.Inclination,
+                               ke.LoAN, 
+                               ke.AoP, 
+                               ke.MeanAnomaly, 
+                               epoch);
+        }
+
+
         /// <summary>
         /// Returns an orbit representing the defined parameters.
         /// </summary>

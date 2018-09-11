@@ -44,7 +44,7 @@ namespace Pulsar4X.SDL2UI
 
         internal double OrbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
 
-        double _focalDistance; //distance from the center of the ellpse to one of the focal points. 
+        double _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
@@ -78,6 +78,7 @@ namespace Pulsar4X.SDL2UI
 
         double _eccentricity;
 
+
         #endregion
 
         internal OrbitOrderWiget(Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
@@ -88,7 +89,7 @@ namespace Pulsar4X.SDL2UI
             OrbitEllipseSemiMaj = 20000;
             OrbitEllipseSemiMinor = 20000;
 
-            _focalDistance = 0;
+            _linearEccentricity = 0;
 
             _soiWorldRadius = GMath.GetSOI(targetEntity);
 
@@ -103,8 +104,8 @@ namespace Pulsar4X.SDL2UI
 
             OrbitEllipseSemiMaj = (float)orbitDB.SemiMajorAxis;
             _eccentricity = orbitDB.Eccentricity;
-            EllipseFunctions.SemiMinorAxis(OrbitEllipseSemiMaj, _eccentricity);
-            _focalDistance = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);
+            EllipseMath.SemiMinorAxis(OrbitEllipseSemiMaj, _eccentricity);
+            _linearEccentricity = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);
 
             _soiWorldRadius =  GMath.GetSOI(targetEntity);
 
@@ -139,10 +140,10 @@ namespace Pulsar4X.SDL2UI
             OrbitEllipseSemiMaj = (aplen + pelen) * 0.5;//PointDFunctions.Length(PointDFunctions.Add(Periapsis, Apoapsis)) / 2;
 
 
-            double linierEcentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
-            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(linierEcentricity, 2));
-            _eccentricity = EllipseFunctions.Eccentricity(linierEcentricity, OrbitEllipseSemiMaj);
-            _focalDistance = (float)(_eccentricity * OrbitEllipseSemiMaj);
+            _linearEccentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
+            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(_linearEccentricity, 2));
+            _eccentricity = EllipseMath.Eccentricity(_linearEccentricity, OrbitEllipseSemiMaj);
+
             OrbitAngleRadians = Math.Atan2(y, x);
         }
 
@@ -152,14 +153,38 @@ namespace Pulsar4X.SDL2UI
             var aplen = PointDFunctions.Length(Apoapsis);
             var pelen = PointDFunctions.Length(Periapsis);
             OrbitEllipseSemiMaj = (aplen + pelen) * 0.5;// PointDFunctions.Length(PointDFunctions.Add(Periapsis , Apoapsis)) / 2;
-            double linierEcentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
-            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(linierEcentricity, 2));
-            _eccentricity = EllipseFunctions.Eccentricity(linierEcentricity, OrbitEllipseSemiMaj);
-            _focalDistance = (float)(_eccentricity * OrbitEllipseSemiMaj);
+            _linearEccentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
+            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(_linearEccentricity, 2));
+            _eccentricity = EllipseMath.Eccentricity(_linearEccentricity, OrbitEllipseSemiMaj);
+
             //OrbitAngleRadians = Math.Atan2(y, x);
         }
 
+        public void SetParametersFromVelocityAndPosition(double standardGravParam, Vector4 position, Vector4 velocity)
+        {
 
+            var keplerElements = OrbitMath.SetParametersFromVelocityAndPosition(standardGravParam, position, velocity);
+
+            _eccentricity = keplerElements.Eccentricity;
+            _linearEccentricity = keplerElements.LinierEccentricity;
+
+            OrbitAngleRadians = keplerElements.LoAN + keplerElements.AoP; 
+
+            OrbitEllipseSemiMaj = keplerElements.SemiMajorAxis; 
+            OrbitEllipseSemiMinor = keplerElements.SemiMinorAxis;
+
+            Periapsis = new PointD()
+            {
+                X = Math.Sin(keplerElements.TrueAnomaly) * keplerElements.Periapsis,
+                Y = Math.Cos(keplerElements.TrueAnomaly) * keplerElements.Periapsis
+
+            };
+            Apoapsis = new PointD() {
+                X = Math.Sin(keplerElements.TrueAnomaly) * keplerElements.Apoapsis,
+                Y = Math.Cos(keplerElements.TrueAnomaly) * keplerElements.Apoapsis
+            };
+
+        }
 
         void CreatePointArray()
         {
@@ -168,7 +193,7 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
-                double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _focalDistance; //we add the focal distance so the focal point is "center"
+                double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
                 double y1 = OrbitEllipseSemiMinor * Math.Cos(angle);
 
                 //rotates the points to allow for the LongditudeOfPeriapsis. 

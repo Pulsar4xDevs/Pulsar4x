@@ -21,14 +21,17 @@ namespace Pulsar4X.SDL2UI
         double _apMax;
         double _peMin { get { return _targetRadius; } }
 
+        double _PreciseOrbitalSpeedKm_s = double.NaN;
+
         (Vector4, TimeSpan) _intercept;
 
         string _displayText;
         string _tooltipText = "";
         OrbitOrderWiget _orbitWidget;
+        TranslateMoveOrderWidget _moveWidget;
         bool _smMode;
 
-        enum States: byte { NeedsEntity, NeedsTarget, NeedsApoapsis, NeedsPeriapsis, NeedsActioning }
+        enum States: byte { NeedsEntity, NeedsTarget, NeedsArrivalApsis, NeedsActioning }
         States CurrentState;
         enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked}
         Action[,] fsm;
@@ -50,15 +53,20 @@ namespace Pulsar4X.SDL2UI
             {
                 //_orbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());
                 //_state.MapRendering.UIWidgets.Add(_orbitWidget);
+                if (_moveWidget == null)
+                {
+                    _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntity.Entity);
+                    _state.MapRendering.UIWidgets.Add(_moveWidget);
+                }
             }
 
-            fsm = new Action[5, 4]
+            fsm = new Action[4, 4]
             {
                 //selectEntity      selectPos               clickAction     altClick
                 {DoNothing,         DoNothing,              DoNothing,      AbortOrder,  },     //needsEntity
                 {TargetSelected,    DoNothing,              DoNothing,      GoBackState, }, //needsTarget
                 {DoNothing,         InsertionPntSelected,   DoNothing,      GoBackState, }, //needsApopapsis
-                {DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState, }, //needsPeriapsis
+                //{DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState, }, //needsPeriapsis
                 {DoNothing,         DoNothing,              ActionCmd,      GoBackState, }  //needsActoning
             };
 
@@ -118,19 +126,24 @@ namespace Pulsar4X.SDL2UI
                 _state.MapRendering.UIWidgets.Add(_orbitWidget);
             }
 
+            _moveWidget.SetArrivalTarget(TargetEntity.Entity);
+
             _targetRadius = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInKM;
             _intercept = InterceptCalcs.FTLIntercept(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
             _tooltipText = "Select Apoapsis height";
-            CurrentState = States.NeedsApoapsis;
+            CurrentState = States.NeedsArrivalApsis;
         }
         void InsertionPntSelected() { 
-            //var apoapsisPoint = _state.LastWorldPointClicked;
-            //var distanceSelected = Distance.AuToKm((GetTargetPosition() - apoapsisPoint).Length());
+            var transitLeavePnt = _state.LastWorldPointClicked;
+            var ralitiveLeavePnt =  transitLeavePnt - GetTargetPosition();
+            var distanceSelectedKM = Distance.AuToKm(ralitiveLeavePnt.Length());
+            _moveWidget.SetArrivalPosition(ralitiveLeavePnt);
             //_apoapsisKm = Math.Min(_apMax, distanceSelected);
             //_apAlt = _apoapsisKm - _targetRadius;
-            _tooltipText = "Select Periapsis height";
-            CurrentState = States.NeedsPeriapsis;
+            _tooltipText = "Action to give order";
+            CurrentState = States.NeedsActioning;
         }
+        /*
         void PeriapsisPntSelected() { 
             //var periapsisPoint = _state.LastWorldPointClicked;
             //var distanceSelected = Distance.AuToKm((GetTargetPosition() - periapsisPoint).Length());
@@ -138,7 +151,7 @@ namespace Pulsar4X.SDL2UI
             //_peAlt = _periapsisKM - _targetRadius;
             _tooltipText = "Action to give order";
             CurrentState = States.NeedsActioning;
-        }
+        }*/
         void ActionCmd() 
         {
             OrbitBodyCommand.CreateOrbitBodyCommand(
@@ -193,6 +206,10 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text(_periapsisKM.ToString("g3") + " (Alt: " + _peAlt.ToString("g3") + ")");
 
+                    ImGui.Text("OrbitalVelocity: ");
+                    ImGui.SameLine();
+                    ImGui.Text(_PreciseOrbitalSpeedKm_s.ToString());
+
                     if (ImGui.Button("Action Order"))
                         fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
 
@@ -216,7 +233,7 @@ namespace Pulsar4X.SDL2UI
                             case States.NeedsTarget:
 
                                 break;
-                            case States.NeedsApoapsis:
+                            case States.NeedsArrivalApsis:
                                 {
 
                                     
@@ -224,26 +241,54 @@ namespace Pulsar4X.SDL2UI
                                     var mousePos = ImGui.GetMousePos();
 
                                     var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
-                                    var ralitivePos = (GetTargetPosition() - mouseWorldPos);
+                                    var ralPosTBAU = (mouseWorldPos - GetTargetPosition());
 
                                     //var intercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
-                                    //var point = intercept.Item1;
-                                    //var distance = Distance.DistanceBetween(GetMyPosition(), point);
-                                    //var angle = Vector4.AngleBetween(GetMyPosition(), point);
 
-                                    _orbitWidget.SetApoapsis(ralitivePos.X, ralitivePos.Y);
+                                    //var distanceAU = (GetTargetPosition() - mouseWorldPos).Length();
+                                    //var distanceSelectedKM = Distance.AuToKm(distanceAU);
+                                    //var d1 = Math.Min(_apMax, distanceSelectedKM); //can't be higher than SOI
+                                    //_apoapsisKm = Math.Max(d1, _peMin); //cant be lower than the body radius
 
-                                    //_apoapsisKm = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
-                                    var distanceSelected = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
-                                    var d1 = Math.Min(_apMax, distanceSelected); //can't be higher than SOI
-                                    _apoapsisKm = Math.Max(d1, _peMin); //cant be lower than the body radius
+                                    //_moveWidget.SetArrivalRadius(distanceAU);
+                                    _moveWidget.SetArrivalPosition(ralPosTBAU);
 
+                                    var massCurrBody = OrderingEntity.Entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<MassVolumeDB>().Mass;
+                                    var massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
+                                    var mymass = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
 
-                                    //_orbitWidget.OrbitEllipseSemiMaj = (float)_semiMajorKm;
+                                    var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
+                                    var smaCurrOrbtAU = OrderingEntity.Entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
+
+                                    var sgpCBAU = GameConstants.Science.GravitationalConstant * (massCurrBody + mymass) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
+                                    var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
+                                    var sgpTBAU = GameConstants.Science.GravitationalConstant * (massTargetBody + mymass) / 3.347928976e33;
+
+                                    var ke = OrbitMath.SetParametersFromVelocityAndPosition(sgpTBAU, ralPosTBAU, velAU);
+                                    var p = new PointD()
+                                    {
+                                        X = Math.Sin(ke.TrueAnomaly) * ke.Periapsis,
+                                        Y = Math.Cos(ke.TrueAnomaly) * ke.Periapsis
+                                                
+                                    };
+                                    var a = new PointD()
+                                    {
+                                        X = Math.Sin(ke.TrueAnomaly) * ke.Apoapsis,
+                                        Y = Math.Cos(ke.TrueAnomaly) * ke.Apoapsis
+                                    };
+
+                                    _PreciseOrbitalSpeedKm_s = Distance.AuToKm(velAU.Length());
+
+                                    _orbitWidget.SetApoapsis(a.X, a.Y);
+                                    _orbitWidget.SetPeriapsis(p.X, p.Y);
+                                    _apoapsisKm = Distance.AuToKm(ke.Apoapsis);
+                                    _periapsisKM = Distance.AuToKm(ke.Periapsis);
                                     break;
                                 }
-                            case States.NeedsPeriapsis:
+                                /*
+                            case States.NeedsSecondApsis:
                                 {
+                                     TODO: when we've got newtonion engines, allow second apsis choise and expend Dv.
                                     var mousePos = ImGui.GetMousePos();
 
                                     var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
@@ -257,7 +302,7 @@ namespace Pulsar4X.SDL2UI
                                     _periapsisKM = Math.Min(d1, _apoapsisKm);  //can't be higher than apoapsis. 
 
                                     break;
-                                }
+                                }*/
                             case States.NeedsActioning:
                                 break;
                             default:
@@ -272,7 +317,19 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        /// <summary>
+        /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
+        /// </summary>
+        /// <returns>the distance traveled in a second</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDatetime">At datetime.</param>
+        double hackspeed(OrbitDB orbit, DateTime atDatetime)
+        {
+            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
+            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
 
+            return Distance.DistanceBetween(pos1, pos2);
+        }
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)
         {
@@ -299,6 +356,8 @@ namespace Pulsar4X.SDL2UI
 
             if(_orbitWidget != null)
                 _state.MapRendering.UIWidgets.Remove(_orbitWidget);
+            if (_moveWidget != null)
+                _state.MapRendering.UIWidgets.Remove(_moveWidget);
         }
     }
 }

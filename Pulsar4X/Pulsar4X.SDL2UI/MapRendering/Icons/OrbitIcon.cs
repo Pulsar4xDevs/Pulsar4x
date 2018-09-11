@@ -35,7 +35,7 @@ namespace Pulsar4X.SDL2UI
         float _orbitEllipseSemiMinor;
         float _orbitAngleDegrees; //the orbit is an ellipse which is rotated arround one of the focal points. 
         float _orbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
-        float _focalDistance; //distance from the center of the ellpse to one of the focal points. 
+        float _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
         #endregion
@@ -79,7 +79,7 @@ namespace Pulsar4X.SDL2UI
             _orbitEllipseSemiMinor = _orbitEllipseMinor * 0.5f;
             _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis * 2); //This is the LoP + AoP.
             _orbitAngleRadians = (float)Angle.NormaliseRadians(Angle.ToRadians(_orbitAngleDegrees));
-            _focalDistance = (float)(_orbitDB.Eccentricity * _orbitEllipseMajor * 0.5f); //linear ecentricity
+            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitEllipseMajor * 0.5f); //linear ecentricity
 
             UpdateUserSettings();
             CreatePointArray();
@@ -99,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
-                double x1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _focalDistance; //we add the focal distance so the focal point is "center"
+                double x1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
                 double y1 = _orbitEllipseSemiMinor * Math.Cos(angle);
 
                 //rotates the points to allow for the LongditudeOfPeriapsis. 

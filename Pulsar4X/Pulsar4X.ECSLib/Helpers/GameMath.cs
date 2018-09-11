@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The radians.</returns>
         /// <param name="radians">Radians.</param>
         public static double NormaliseRadians(double radians)
-        { 
+        {
             radians = radians % (2 * Math.PI);
             return radians;
         }
@@ -525,22 +525,19 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Gets the soi radius of a given body
         /// </summary>
-        /// <returns>The soi.</returns>
+        /// <returns>The SOI radius in whatever units you feed the semiMajorAxis.</returns>
         /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the earth around the sun</param>
         /// <param name="mass">Mass of the smaller body ie the earth</param>
         /// <param name="parentMass">Parent mass. ie the sun</param>
         public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
         {
-            var massdiv = mass / parentMass;
-            var root = Math.Pow(massdiv, 1.0 / 5);
-
-            return semiMajorAxis * Math.Pow(root, 2);
+            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
         }
 
         /// <summary>
         /// Gets the SOI radius of a given body.
         /// </summary>
-        /// <returns>The soi.</returns>
+        /// <returns>The SOI radius in AU</returns>
         /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
         public static double GetSOI(Entity entity)
         {

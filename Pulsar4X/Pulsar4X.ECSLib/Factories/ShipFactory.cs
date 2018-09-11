@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
             Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction,  position, starsys, shipName);
 
             var orbitDB = ShipMovementProcessor.CreateOrbitHereWithSemiMajAxis(ship, parent, 10000, systemEntityManager.ManagerSubpulses.SystemLocalDateTime);
-
+            ship.GetDataBlob<PositionDB>().SetParent(orbitDB.Parent);
             ship.SetDataBlob(orbitDB);
 
             return ship;

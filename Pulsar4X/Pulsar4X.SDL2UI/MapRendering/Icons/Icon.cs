@@ -27,7 +27,7 @@ namespace Pulsar4X.SDL2UI
     public class Icon : IDrawData
     {
         protected ECSLib.PositionDB _positionDB;
-        ECSLib.Vector4 _worldPosition;
+        protected ECSLib.Vector4 _worldPosition;
         public ECSLib.Vector4 WorldPosition
         {
             get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
@@ -110,7 +110,7 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, Convert.ToInt32(shape.Points[i].X), Convert.ToInt32(shape.Points[i].Y), Convert.ToInt32(shape.Points[i + 1].X), Convert.ToInt32(shape.Points[i + 1].Y));
                 }
             }
 

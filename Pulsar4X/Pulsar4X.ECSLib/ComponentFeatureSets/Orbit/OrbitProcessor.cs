@@ -234,7 +234,45 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
+        public static double StandardGravitationalParameter(double mass)
+        {
+            return mass * GameConstants.Science.GravitationalConstant;
+        }
 
+        /// <summary>
+        /// returns the speed for an object of a given mass at a given radius from a body.
+        /// </summary>
+        /// <returns>The orbital speed.</returns>
+        /// <param name="mass">Mass.</param>
+        /// <param name="distance">Radius.</param>
+        /// <param name="semiMajAxis">Semi maj axis.</param>
+        public static double PreciseOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
+        {
+            //var sgp = StandardGravitationalParameter(mass);
+            var twoDivDist = 2 / distance;
+            var oneDivSma = 1 / semiMajAxis;
+            var sub = twoDivDist - oneDivSma;
+            var sgpx = standardGravParameter * sub;
+            var fin = Math.Sqrt(sgpx);
+            return Math.Sqrt(standardGravParameter * (2 / distance - 1 / semiMajAxis));
+        }
+        /// <summary>
+        /// 2d! vector. 
+        /// </summary>
+        /// <returns>The orbital vector.</returns>
+        /// <param name="sgp">Sgp.</param>
+        /// <param name="position">Position.</param>
+        /// <param name="sma">Sma.</param>
+        public static Vector4 PreciseOrbitalVector(double sgp, Vector4 position, double sma)
+        {
+            var radius = position.Length();
+            var angle = Math.Atan2(position.X, position.Y);
+            var spd = PreciseOrbitalSpeed(sgp, radius, sma);
+            return new Vector4() {
+                X = Math.Sin(angle) * spd,
+                Y = Math.Cos(angle) * spd
+            };
+        }
 
         private class OrbitProcessorException : Exception
         {

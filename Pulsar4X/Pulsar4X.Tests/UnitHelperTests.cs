@@ -27,6 +27,18 @@ namespace Pulsar4X.Tests
         }
 
 
+        /*
+        [TestCase]//(new Vector4 { X = 100, Y = 0, Z = 0 }, new Vector4 { X = 0, Y = 1, Z = 0 }, ExpectedResult = 0.01)]
+        public void AngleTest()//Vector4 position, Vector4 velocity, double value)
+        {
+            Vector4 position = new Vector4 { X = 100, Y = 0, Z = 0 };
+            Vector4 velocity = new Vector4 { X = 0, Y = 1, Z = 0 };
+            double speed = velocity.Length();
+            Vector4 angularVelocity = Angle.AngularVelocityVector(position, velocity);
+            Assert.That(angularVelocity.Length() / position.Length(), Is.EqualTo(speed).Within(0.0000000001));
+        }*/
+
+
         [TestCase(1000, 6.6845871222684454959959533702106e-6, true)]
         [TestCase(1000000000000, 6684.5871222684454959959533702106, true)]
         [TestCase(1232539865, 8.2390201092614883053947104074657, true)]
@@ -81,5 +93,9 @@ namespace Pulsar4X.Tests
                 Assert.That(Temperature.ToCelsius(from), Is.EqualTo(to).Within(0.0001));
             }
         }
+
+
+
+
     }
 }

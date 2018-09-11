@@ -116,6 +116,7 @@ namespace Pulsar4X.ECSLib
                     game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, 0);
             }
 
+            OrbitProcessor.UpdateSystemOrbits(sol, sol.ManagerSubpulses.SystemLocalDateTime);//make sure stuff is at the right datetime.
 
             return factionEntity;
         }
