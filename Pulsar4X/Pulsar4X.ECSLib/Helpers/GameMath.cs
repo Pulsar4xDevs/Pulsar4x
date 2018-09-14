@@ -480,6 +480,16 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Standard Gravitational parameter. in m^3 s^-2
+        /// </summary>
+        /// <returns>The gravitational parameter.</returns>
+        /// <param name="mass">Mass.</param>
+        public static double StandardGravitationalParameter(double mass)
+        {
+            return mass * GameConstants.Science.GravitationalConstant;
+        }
+
+        /// <summary>
         /// calculates a vector from two positions and a magnatude
         /// </summary>
         /// <returns>The vector.</returns>
@@ -553,6 +563,24 @@ namespace Pulsar4X.ECSLib
                 return GetSOI(semiMajAxis, myMass, parentMass);
             }
             else return double.MaxValue; //if we're the parent star, then soi is infinate. 
+        }
+
+        /// <summary>
+        /// A decimal Sqrt. not as fast as normal Math.Sqrt, but better precision. 
+        /// </summary>
+        /// <returns>The sqrt. of x</returns>
+        /// <param name="x">x</param>
+        /// <param name="guess">normaly ignored, this is for the recursion</param>
+        public static decimal Sqrt(decimal x, decimal? guess = null)
+        {
+            var ourGuess = guess.GetValueOrDefault(x / 2m);
+            var result = x / ourGuess;
+            var average = (ourGuess + result) / 2m;
+
+            if (average == ourGuess) // This checks for the maximum precision possible with a decimal.
+                return average;
+            else
+                return Sqrt(x, average);
         }
 
     }

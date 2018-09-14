@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
 
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
-            SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.068f };
+            SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.068f }; //Albedo = 0.068f
             MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
             NameDB mercuryNameDB = new NameDB("Mercury");
             double mercurySemiMajAxis = 0.387098;
@@ -80,7 +80,7 @@ namespace Pulsar4X.ECSLib
             PositionDB mercuryPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(mercuryOrbitDB, game.CurrentDateTime), sol.Guid);
             //AtmosphereDB mercuryAtmo = new AtmosphereDB();
             SensorProfileDB sensorProfile = new SensorProfileDB();
-            Entity mercury = new Entity(sol, new List<BaseDataBlob>{mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
+            Entity mercury = new Entity(sol, new List<BaseDataBlob>{sensorProfile, mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mercury);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);
 
@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
             NameDB lunaNameDB = new NameDB("Luna");
             double lunaSemiMajAxis = Distance.KmToAU(0.3844E6);
             double lunaEccentricity = 0.0549;
-            double lunaInclination = 5.1;
+            double lunaInclination = 0;//5.1;
             // Next three values are unimportant. Luna's LoAN and AoP regress/progress by one revolution every 18.6/8.85 years respectively.
             // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
             double lunaLoAN = 125.08;
@@ -147,7 +147,7 @@ namespace Pulsar4X.ECSLib
             NameDB marsNameDB = new NameDB("Mars");
             double marsSemiMajAxis = Distance.KmToAU(227.92E6);
             double marsEccentricity = 0.0934; //wiki says .0934
-            double marsInclination = 1.85;
+            double marsInclination = 0;//1.85;
             double marsLoAN = 49.57854;
             double marsAoP = 336.04084;
             double marsMeanLong = 355.45332;
@@ -164,6 +164,22 @@ namespace Pulsar4X.ECSLib
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mars);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, marsBodyDB, marsMVDB);
 
+
+            SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            NameDB halleysNameDB = new NameDB("Halleys Comet");
+            double halleysSemiMajAxis = 17.834; //AU
+            double halleysEccentricity = 0.96714;
+            double halleysInclination = 180; //162.26° note retrograde orbit.
+            double halleysLoAN = 58.42; //°
+            double halleysAoP = 111.33;//°
+            double halleysMeanAnomaly = 38.38;//°
+            OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(sun, sunMVDB.Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
+            PositionDB halleysPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(halleysOrbitDB, game.CurrentDateTime) + earthPositionDB.AbsolutePosition_AU, sol.Guid);
+            sensorProfile = new SensorProfileDB();
+            Entity halleysComet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, halleysPositionDB, halleysBodyDB, halleysMVDB, halleysNameDB, halleysOrbitDB });
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, halleysComet);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);
             /*
 
             SystemBody Jupiter = new SystemBody(sun, SystemBody.PlanetType.GasGiant);

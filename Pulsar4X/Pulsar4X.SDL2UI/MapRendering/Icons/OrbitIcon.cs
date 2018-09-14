@@ -28,7 +28,7 @@ namespace Pulsar4X.SDL2UI
         #region Static properties
         OrbitDB _orbitDB;
         PositionDB _bodyPositionDB;
-
+        PointD _bodyPos;
         float _orbitEllipseMajor;
         float _orbitEllipseSemiMaj;
         float _orbitEllipseMinor;
@@ -38,6 +38,7 @@ namespace Pulsar4X.SDL2UI
         float _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
+        bool IsClockwiseOrbit = true;
         #endregion
 
         #region Dynamic Properties
@@ -74,12 +75,15 @@ namespace Pulsar4X.SDL2UI
             }
 
             _orbitEllipseSemiMaj = (float)_orbitDB.SemiMajorAxis;
-            _orbitEllipseMajor = _orbitEllipseSemiMaj * 2; //Major Axis
-            _orbitEllipseMinor = (float)Math.Sqrt((_orbitDB.SemiMajorAxis * _orbitDB.SemiMajorAxis) * (1 - _orbitDB.Eccentricity * _orbitDB.Eccentricity)) * 2;
-            _orbitEllipseSemiMinor = _orbitEllipseMinor * 0.5f;
-            _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis * 2); //This is the LoP + AoP.
+            _orbitEllipseMajor = _orbitEllipseSemiMaj * 2; 
+            _orbitEllipseSemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
+            _orbitEllipseMinor = _orbitEllipseSemiMinor * 2;
+            _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis); //This is the LoP + AoP.
             _orbitAngleRadians = (float)Angle.NormaliseRadians(Angle.ToRadians(_orbitAngleDegrees));
-            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitEllipseMajor * 0.5f); //linear ecentricity
+            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
+
+            if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270)  
+                IsClockwiseOrbit = false;
 
             UpdateUserSettings();
             CreatePointArray();
@@ -132,6 +136,7 @@ namespace Pulsar4X.SDL2UI
 
         /*
          * this gets the index by attempting to find the angle between the body and the center of the ellipse. possibly faster, but math is hard. 
+         * TODO: try doing this using TrueAnnomaly. 
         public override void OnPhysicsUpdate()
         {
 
@@ -166,13 +171,13 @@ namespace Pulsar4X.SDL2UI
         {
 
             Vector4 pos = _bodyPositionDB.AbsolutePosition_AU;
-            PointD pointD = new PointD() { X = pos.X, Y = pos.Y };
+            _bodyPos = new PointD() { X = pos.X, Y = pos.Y };
 
-            double minDist = CalcDistance(pointD, _points[_index]);
+            double minDist = CalcDistance(_bodyPos, _points[_index]);
 
             for (int i =0; i < _points.Count(); i++)
             {
-                double dist = CalcDistance(pointD, _points[i]);
+                double dist = CalcDistance(_bodyPos, _points[i]);
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -207,15 +212,32 @@ namespace Pulsar4X.SDL2UI
             ViewScreenPos = vsp;
 
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
-            for (int i = 0; i < _numberOfDrawSegments; i++)
+
+            //first index in the drawPoints is the position of the body
+            var translated = matrix.TransformD(_bodyPos.X, _bodyPos.Y);
+            _drawPoints[0] = new SDL.SDL_Point() { x = (int)(ViewScreenPos.x + translated.X), y = (int)(ViewScreenPos.y + translated.Y) };
+
+
+
+            for (int i = 1; i < _numberOfDrawSegments; i++)
             {
 
-                if (index < _numberOfArcSegments - 1)
-                    index++;
-                else
-                    index = 0;
+                if (IsClockwiseOrbit) 
+                {
+                    if (index < _numberOfArcSegments - 1)
 
-                var translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
+                        index++;
+                    else
+                        index = 0;
+                }
+                else if ( index > 0)
+                {
+                    index--;
+                }
+                else
+                    index = _numberOfArcSegments -1;
+
+                translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
                 //translate everything to viewscreen & camera positions
                 //int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
@@ -226,6 +248,8 @@ namespace Pulsar4X.SDL2UI
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }
         }
+
+
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {

@@ -169,11 +169,11 @@ namespace Pulsar4X.ECSLib
                 return new Vector4(0, 0, 0, 0);
             }
 
+            //TODO: radius as KM could cause loss at large values, if we're going to do this then we might as well store everything as Km.
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
             double radius = Distance.AuToKm(orbit.SemiMajorAxis) * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
 
-            // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
-            trueAnomaly += Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+
             double inclination = Angle.ToRadians(orbit.Inclination);
 
             // Convert KM to AU
@@ -181,13 +181,13 @@ namespace Pulsar4X.ECSLib
 
             //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
             double lofAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
-            double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double tA = trueAnomaly;
+            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+            double tA = trueAnomaly + Angle.ToRadians(orbit.ArgumentOfPeriapsis);
             double incl = inclination;
 
-            double x = Math.Cos(lofAN) * Math.Cos(aofP + tA) - Math.Sin(lofAN) * Math.Sin(aofP + tA) * Math.Cos(incl);
-            double y = Math.Sin(lofAN) * Math.Cos(aofP + tA) + Math.Cos(lofAN) * Math.Sin(aofP + tA) * Math.Cos(incl);
-            double z = Math.Sin(incl) * Math.Sin(aofP + tA);
+            double x = Math.Cos(lofAN) * Math.Cos(tA) - Math.Sin(lofAN) * Math.Sin(tA) * Math.Cos(incl);
+            double y = Math.Sin(lofAN) * Math.Cos(tA) + Math.Cos(lofAN) * Math.Sin(tA) * Math.Cos(incl);
+            double z = Math.Sin(incl) * Math.Sin(tA);
 
             return new Vector4(x, y, z, 0) * radius;
         }
@@ -234,10 +234,6 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
-        public static double StandardGravitationalParameter(double mass)
-        {
-            return mass * GameConstants.Science.GravitationalConstant;
-        }
 
         /// <summary>
         /// returns the speed for an object of a given mass at a given radius from a body.

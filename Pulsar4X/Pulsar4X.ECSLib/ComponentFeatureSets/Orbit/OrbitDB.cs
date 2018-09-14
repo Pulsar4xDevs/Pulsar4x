@@ -106,19 +106,36 @@ namespace Pulsar4X.ECSLib
         #region Construction Interface
 
 
-        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, Vector4 position, Vector4 velocity, DateTime epoch)
+        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime epoch)
         {
-            var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.SetParametersFromVelocityAndPosition(sgp, position, velocity);
+            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
+                        ke.SemiMajorAxis,
+                        ke.Eccentricity,
+                        Angle.ToDegrees(ke.Inclination),
+                        Angle.ToDegrees(ke.LoAN),
+                        Angle.ToDegrees(ke.AoP),
+                        Angle.ToDegrees(ke.MeanAnomaly),
+                        epoch);
+            var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, epoch);
+            return orbit;
+        }
 
-            return new OrbitDB(parent, parentMass, myMass, 
-                               ke.SemiMajorAxis, 
-                               ke.Eccentricity, 
-                               ke.Inclination,
-                               ke.LoAN, 
-                               ke.AoP, 
-                               ke.MeanAnomaly, 
-                               epoch);
+        public static OrbitDB FromVectorKM(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime epoch)
+        {
+            //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            var ke = OrbitMath.SetParametersFromVelocityAndPosition(sgp, position, velocity);
+            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
+                        Distance.KmToAU(ke.SemiMajorAxis),
+                        ke.Eccentricity,
+                        Angle.ToDegrees(ke.Inclination),
+                        Angle.ToDegrees(ke.LoAN),
+                        Angle.ToDegrees(ke.AoP),
+                        Angle.ToDegrees(ke.MeanAnomaly),
+                        epoch);
+            var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, epoch);
+            return orbit;
         }
 
 
@@ -323,10 +340,7 @@ namespace Pulsar4X.ECSLib
         {
             hash = Misc.ValueHash(SemiMajorAxis, hash);
             hash = Misc.ValueHash(Eccentricity, hash);
-            hash = Misc.ValueHash(Inclination, hash);
-            hash = Misc.ValueHash(LongitudeOfAscendingNode, hash);
-            hash = Misc.ValueHash(ArgumentOfPeriapsis, hash);
-            hash = Misc.ValueHash(MeanAnomaly, hash);
+
 
             return hash;
         }

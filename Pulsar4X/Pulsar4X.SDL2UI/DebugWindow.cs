@@ -188,6 +188,7 @@ float nextLargeGFPS = 0;
                                     ImGui.Text("x: " + pos.X);
                                     ImGui.Text("y: " + pos.Y);
                                     ImGui.Text("z: " + pos.Z);
+                                    ImGui.Text("AoP:" + orbitDB.ArgumentOfPeriapsis);
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
                                     ImGui.Text("SOI Radius: " + Distance.AuToKm( GMath.GetSOI(_state.LastClickedEntity.Entity)));

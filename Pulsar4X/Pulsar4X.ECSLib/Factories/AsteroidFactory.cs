@@ -106,13 +106,69 @@ namespace Pulsar4X.ECSLib
             var myEccentricity = 0.8;
             var myInclination = 0;
             var myLoAN = 0;
-            double myLoP = 10;
+            var myAoP = -10;
+            //var EccentricAnomaly = Math.Atan2()
+            //var meanAnomaly =;
+            double myLoP = 0;
             double myMeanLongd = 355.5;
+            //OrbitDB orbit = OrbitDB.FromAsteroidFormat(parent, parentMass, myMass, mySemiMajorAxis, myEccentricity, myInclination, myLoAN, myAoP, meanAnomaly, starSys.Game.CurrentDateTime); 
             OrbitDB orbit = OrbitDB.FromMajorPlanetFormat(parent, parentMass, myMass, mySemiMajorAxis, myEccentricity, myInclination, myLoAN, myLoP, myMeanLongd, starSys.Game.CurrentDateTime);
 
             var planetDBs = new List<BaseDataBlob>
             {
                 position,
+                massVolume,
+                planetInfo,
+                name,
+                orbit,
+                AsteroidDmg,
+                sensorPfil
+            };
+
+            Entity newELE = new Entity(starSys, planetDBs);
+            return newELE;
+        }
+
+        public static Entity CreateAsteroid3(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
+        {
+            //todo rand these a bit.
+            double radius = Distance.KmToAU(0.5);
+
+            double mass;
+            if (asteroidMass == -1.0)
+                mass = 1.5e+12; //about 1.5 billion tonne
+            else
+                mass = asteroidMass;
+
+            var speed = Distance.KmToAU(40);
+            Vector4 velocity = new Vector4(0, -speed, 0, 0);
+            var position = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
+
+            var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);
+            var planetInfo = new SystemBodyInfoDB();
+            var name = new NameDB("Ellie");
+            var AsteroidDmg = new AsteroidDamageDB();
+            var sensorPfil = new SensorProfileDB();
+
+            planetInfo.SupportsPopulations = false;
+            planetInfo.BodyType = BodyType.Asteroid;
+
+            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
+            TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
+
+
+            var parent = target.GetDataBlob<OrbitDB>().Parent;
+            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
+            var myMass = massVolume.Mass;
+
+            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, collisionDate);
+
+            var currentpos = OrbitProcessor.GetAbsolutePosition_AU(orbit, starSys.Game.CurrentDateTime);
+            var posDB = new PositionDB(currentpos.X, currentpos.Y, currentpos.Z, parent.Manager.ManagerGuid, parent);
+            var planetDBs = new List<BaseDataBlob>
+            {
+                posDB,
                 massVolume,
                 planetInfo,
                 name,

@@ -35,33 +35,36 @@ namespace Pulsar4X.ECSLib
 
             double specificOrbitalEnergy = velocity.Length() * velocity.Length() * 0.5 - standardGravParam / position.Length();
 
-            double apoaLen;
-            double periLen;
+
+            double semiMajorAxis;
+            double p;
             if (Math.Abs(eccentricity - 1.0) > 1e-15)
             {
-                apoaLen = -standardGravParam / (2 * specificOrbitalEnergy);
-                periLen = apoaLen * (1 - eccentricity * eccentricity);
+                semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
+                p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
             else
             {
-                periLen = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
-                apoaLen = double.MaxValue;
+                p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
+                semiMajorAxis = double.MaxValue;
             }
-            var aplenKM = Distance.AuToKm(apoaLen);
-            var perlenKM = Distance.AuToKm(periLen);
-            double semiMajorAxis = (apoaLen + periLen) * 0.5;//position.Length() + eccentricity;
-            double semiMinorAxis = Math.Sqrt(Math.Abs(apoaLen) * Math.Abs(periLen));
+
+
+            double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
+            double linierEccentricity = eccentricity * semiMajorAxis;
 
             double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. 
             if (double.IsNaN(inclination))
                 inclination = 0;
 
             double loANlen = nodeVector.X / nodeVector.Length();
+            double longdOfAN = 0;
             if (double.IsNaN(loANlen))
                 loANlen = 0;
             else
                 loANlen = GMath.Clamp(loANlen, -1, 1);
-            double longdOfAN = Math.Acos(loANlen); //RAAN or LoAN or Omega letter
+            if(loANlen != 0)
+                longdOfAN = Math.Acos(loANlen); //RAAN or LoAN or Omega letter
 
 
             double argOfPeriaps;
@@ -82,14 +85,7 @@ namespace Pulsar4X.ECSLib
             }
 
 
-            var dotEccPos = Vector4.Dot(eccentVector, position);
-            var talen = eccentVector.Length() * position.Length();
-            talen = dotEccPos / talen;
-            talen = GMath.Clamp(talen, -1, 1);
-            var trueAnomoly = Math.Acos(talen);
 
-            if (Vector4.Dot(position, velocity) < 0)
-                trueAnomoly = Math.PI * 2 - trueAnomoly;
 
             var eccAng = Vector4.Dot(eccentVector, position);
             eccAng = semiMajorAxis / eccAng;
@@ -102,15 +98,81 @@ namespace Pulsar4X.ECSLib
             ke.SemiMajorAxis = semiMajorAxis;
             ke.SemiMinorAxis = semiMinorAxis;
             ke.Eccentricity = eccentricity;
-            ke.LinierEccentricity = eccentricity * semiMajorAxis;
-            ke.Apoapsis = apoaLen;
-            ke.Periapsis = periLen;
+
+            ke.Apoapsis = EllipseMath.Apoapsis(eccentricity, semiMajorAxis);
+            ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
+            ke.LinierEccentricity = EllipseMath.LinierEccentricity(ke.Apoapsis, semiMajorAxis);
             ke.LoAN = longdOfAN;
             ke.AoP = argOfPeriaps;
             ke.Inclination = inclination;
             ke.MeanAnomaly = meanAnomaly;
-            ke.TrueAnomaly = trueAnomoly;
+            ke.TrueAnomaly = TrueAnomaly(eccentVector, position, velocity);
             return ke;
+        }
+
+        public static double TrueAnomaly(Vector4 eccentVector, Vector4 position, Vector4 velocity)
+        {
+
+            var dotEccPos = Vector4.Dot(eccentVector, position);
+            var talen = eccentVector.Length() * position.Length();
+            talen = dotEccPos / talen;
+            talen = GMath.Clamp(talen, -1, 1);
+            var trueAnomoly = Math.Acos(talen);
+
+            if (Vector4.Dot(position, velocity) < 0)
+                trueAnomoly = Math.PI * 2 - trueAnomoly;
+
+            return trueAnomoly;
+        }
+
+        public static Vector4 Pos(double combinedMass, double semiMajAxis, double meanAnomaly, double eccentricity, double aoP, double loAN, double i)
+        {
+            var G = 6.6725985e-11;
+
+
+            double eca = meanAnomaly + eccentricity / 2;
+            double diff = 10000;
+            double eps = 0.000001;
+            double e1 = 0;
+
+            while (diff > eps)
+            {
+                e1 = eca - (eca - eccentricity * Math.Sin(eca) - meanAnomaly) / (1 - eccentricity * Math.Cos(eca));
+                diff = Math.Abs(e1 - eca);
+                eca = e1;
+            }
+
+            var ceca = Math.Cos(eca);
+            var seca = Math.Sin(eca);
+            e1 = semiMajAxis * Math.Sqrt(Math.Abs(1 - eccentricity * eccentricity));
+            var xw = semiMajAxis * (ceca - eccentricity);
+            var yw = e1 * seca;
+
+            var edot = Math.Sqrt((G * combinedMass) / semiMajAxis) / (semiMajAxis * (1 - eccentricity * ceca));
+            var xdw = -semiMajAxis * edot * seca;
+            var ydw = e1 * edot * ceca;
+
+            var Cw = Math.Cos(aoP);
+            var Sw = Math.Sin(aoP);
+            var co = Math.Cos(loAN);
+            var so = Math.Sin(loAN);
+            var ci = Math.Cos(i);
+            var si = Math.Sin(i);
+            var swci = Sw * ci;
+            var cwci = Cw * ci;
+            var pX = Cw * co - so * swci;
+            var pY = Cw * so + co * swci;
+            var pZ = Sw * si;
+            var qx = -Sw * co - so * cwci;
+            var qy = -Sw * so + co * cwci;
+            var qz = Cw * si;
+
+            return new Vector4()
+            {
+                X = xw * pX + yw * qx,
+                Y = xw * pY + yw * qy,
+                Z = xw * pZ + yw * qz
+            };
         }
     }
 
@@ -118,7 +180,23 @@ namespace Pulsar4X.ECSLib
     /// A bunch of convenient functions for calculating various ellipse parameters.
     /// </summary>
     public static class EllipseMath
-    { 
+    {
+        /// <summary>
+        /// SemiMajorAxis from SGP and SpecificEnergy
+        /// </summary>
+        /// <returns>The major axis.</returns>
+        /// <param name="sgp">Standard Gravitational Parameter</param>
+        /// <param name="specificEnergy">Specific energy.</param>
+        public static double SemiMajorAxis(double sgp, double specificEnergy)
+        {
+            return sgp / (2 * specificEnergy);
+        }
+
+        public static double SemiMajorAxisFromApsis(double apoapsis, double periapsis)
+        {
+            return (apoapsis + periapsis) / 2;
+        }
+
         public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
         {
             return semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity);
@@ -137,5 +215,15 @@ namespace Pulsar4X.ECSLib
         {
             return linierEccentricity / semiMajorAxis;
         }
+
+        public static double Apoapsis(double eccentricity, double semiMajorAxis)
+        {
+            return (1 + eccentricity) * semiMajorAxis;
+        }
+        public static double Periapsis(double eccentricity, double semiMajorAxis)
+        {
+            return (1 - eccentricity) * semiMajorAxis;
+        }
+
     }
 }
