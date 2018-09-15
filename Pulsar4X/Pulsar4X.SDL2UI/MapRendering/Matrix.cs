@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < 2; i++)
             {
                 X[i] = X[i] + x;
-                Y[i] = Y[i] + y;
+                Y[i] = Y[i] - y;
             }
         }
 
@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
                 double y;
                 y = Y[0] * itemx;
                 y += Y[1] * itemy;
-                newPoint.y = (int)y;
+                newPoint.y = -(int)y;
 
 
             return newPoint;
@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             double y;
             y = Y[0] * itemx;
             y += Y[1] * itemy;
-            newPoint.Y = y;
+            newPoint.Y = -y;
 
 
             return newPoint;
@@ -86,7 +86,7 @@ namespace Pulsar4X.SDL2UI
                 double y; 
                 y = Y[0] * item.x;
                 y += Y[1] * item.y;
-                newPoint.y = (int)y;
+                newPoint.y = -(int)y;
 
                 newPoints[i] = newPoint;
                 i++;
@@ -110,7 +110,7 @@ namespace Pulsar4X.SDL2UI
                 double y;
                 y = Y[0] * item.X;
                 y += Y[1] * item.Y;
-                newPoint.Y = y;
+                newPoint.Y = -y;
 
                 newPoints[i] = newPoint;
                 i++;

@@ -28,7 +28,7 @@ namespace Pulsar4X.SDL2UI
         #region Static properties
         OrbitDB _orbitDB;
         PositionDB _bodyPositionDB;
-        PointD _bodyPos;
+        PointD _bodyRalitivePos;
         float _orbitEllipseMajor;
         float _orbitEllipseSemiMaj;
         float _orbitEllipseMinor;
@@ -78,13 +78,21 @@ namespace Pulsar4X.SDL2UI
             _orbitEllipseMajor = _orbitEllipseSemiMaj * 2; 
             _orbitEllipseSemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
             _orbitEllipseMinor = _orbitEllipseSemiMinor * 2;
-            _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis); //This is the LoP + AoP.
-            _orbitAngleRadians = (float)Angle.NormaliseRadians(Angle.ToRadians(_orbitAngleDegrees));
+
+
             _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
 
-            if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270)  
+            if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270)
+            {
                 IsClockwiseOrbit = false;
-
+                _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
+            }
+            else
+            {
+                
+                _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis); 
+            }
+                _orbitAngleRadians = (float)Angle.NormaliseRadians(Angle.ToRadians(_orbitAngleDegrees));
             UpdateUserSettings();
             CreatePointArray();
 
@@ -170,14 +178,15 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            Vector4 pos = _bodyPositionDB.AbsolutePosition_AU;
-            _bodyPos = new PointD() { X = pos.X, Y = pos.Y };
+            //Vector4 pos = _bodyPositionDB.AbsolutePosition_AU;
+            Vector4 pos = OrbitProcessor.GetPosition_AU(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime);
+            _bodyRalitivePos = new PointD() { X = pos.X, Y = pos.Y };
 
-            double minDist = CalcDistance(_bodyPos, _points[_index]);
+            double minDist = CalcDistance(_bodyRalitivePos, _points[_index]);
 
             for (int i =0; i < _points.Count(); i++)
             {
-                double dist = CalcDistance(_bodyPos, _points[i]);
+                double dist = CalcDistance(_bodyRalitivePos, _points[i]);
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -214,7 +223,7 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
 
             //first index in the drawPoints is the position of the body
-            var translated = matrix.TransformD(_bodyPos.X, _bodyPos.Y);
+            var translated = matrix.TransformD(_bodyRalitivePos.X, _bodyRalitivePos.Y);
             _drawPoints[0] = new SDL.SDL_Point() { x = (int)(ViewScreenPos.x + translated.X), y = (int)(ViewScreenPos.y + translated.Y) };
 
 

@@ -23,7 +23,11 @@ namespace Pulsar4X.SDL2UI
             get
             {
                 if (IsPinnedToEntity && _entityPosDB != null)
-                    return _camWorldPos - _entityPosDB.AbsolutePosition_AU;
+                    return new Vector4
+                    {
+                        X = _camWorldPos.X - _entityPosDB.AbsolutePosition_AU.X,
+                        Y = -(_camWorldPos.Y - _entityPosDB.AbsolutePosition_AU.Y)
+                    };
                 else
                     return _camWorldPos;
             }
@@ -105,7 +109,7 @@ namespace Pulsar4X.SDL2UI
         {
             ImVec2 mouseCoord = ImGui.GetMousePos();
             double x = ((mouseCoord.x - ViewPortCenter.x) / ZoomLevel) - CameraWorldPosition.X;
-            double y = ((mouseCoord.y - ViewPortCenter.y) / ZoomLevel) - CameraWorldPosition.Y; 
+            double y = -((mouseCoord.y - ViewPortCenter.y) / ZoomLevel) - CameraWorldPosition.Y; 
             return new Vector4(x, y, 0, 0);
 
         }
@@ -172,8 +176,16 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void WorldOffset(double xOffset, double yOffset)
         {
-            _camWorldPos.X -= (float)(xOffset * 1.0f / ZoomLevel);
-            _camWorldPos.Y -= (float)(yOffset * 1.0f / ZoomLevel);
+            if (IsPinnedToEntity)
+            {
+                _camWorldPos.X -= (float)(xOffset * 1.0f / ZoomLevel);
+                _camWorldPos.Y -= (float)(-yOffset * 1.0f / ZoomLevel);
+            }
+            else
+            {
+                _camWorldPos.X -= (float)(xOffset * 1.0f / ZoomLevel);
+                _camWorldPos.Y -= (float)(yOffset * 1.0f / ZoomLevel);
+            }
         }
 
 
