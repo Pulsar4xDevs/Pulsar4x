@@ -77,7 +77,7 @@ namespace Pulsar4X.SDL2UI
         float _alphaChangeAmount;
 
         double _eccentricity;
-
+        Vector4 _position;
 
         #endregion
 
@@ -131,7 +131,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        public void SetParametersFromKeplerElements(KeplerElements ke)
+        public void SetParametersFromKeplerElements(KeplerElements ke, Vector4 position)
         {
 
             _eccentricity = ke.Eccentricity;
@@ -162,6 +162,8 @@ namespace Pulsar4X.SDL2UI
 
                 OrbitAngleRadians = ke.LoAN + ke.AoP;
             }
+            _position = position;
+            OnPhysicsUpdate();
         }
 
         void CreatePointArray()
@@ -220,9 +222,9 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            Vector4 pos = _bodyPositionDB.AbsolutePosition_AU;
+  
 
-            PointD pointD = new PointD() { X = pos.X, Y = pos.Y };
+            PointD pointD = new PointD() { X = _position.X, Y = _position.Y };
 
             double minDist = CalcDistance(pointD, _points[_index]);
 
@@ -263,7 +265,7 @@ namespace Pulsar4X.SDL2UI
             ViewScreenPos = vsp;
             PointD translated;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
-            for (int i = 1; i < _numberOfDrawSegments; i++)
+            for (int i = 0; i < _numberOfDrawSegments; i++)
             {
 
                 if (IsClockwiseOrbit)

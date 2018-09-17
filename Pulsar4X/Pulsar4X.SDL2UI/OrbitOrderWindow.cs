@@ -269,7 +269,7 @@ namespace Pulsar4X.SDL2UI
 
                                     _PreciseOrbitalSpeedKm_s = Distance.AuToKm(velAU.Length());
 
-                                    _orbitWidget.SetParametersFromKeplerElements(ke);
+                                    _orbitWidget.SetParametersFromKeplerElements(ke, _targetInsertionPoint_AU);
                                     _apoapsisKm = Distance.AuToKm(ke.Apoapsis);
                                     _periapsisKM = Distance.AuToKm(ke.Periapsis);
                                     break;

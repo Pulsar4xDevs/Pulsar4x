@@ -77,10 +77,8 @@ namespace Pulsar4X.SDL2UI
             //these are ralitive to thier respective bodies, for the initial default, copying the position shoul be fine.
             //however a better default would djust the distance from the target to get a circular orbit and
             //check if it's above minimum and that the resulting orbit is within soi 
-
-            SetArrivalPosition(_transitLeavePositionRalitive);
-
-
+             
+            OnPhysicsUpdate();
         }
 
         public void SetArrivalPosition(Vector4 ralitiveWorldPosition)
@@ -105,20 +103,20 @@ namespace Pulsar4X.SDL2UI
                 _transitLeaveDateTime = _currentDateTime;
 
             _transitLeavePositionRalitive = OrbitProcessor.GetPosition_AU(_movingEntityCurrentOrbit, _transitLeaveDateTime);
-            _departIcon.SetTransitPostion(_transitLeavePositionRalitive);
+
 
             _progradeAngle = Math.Atan2(_transitLeavePositionRalitive.X , _transitLeavePositionRalitive.Y);
 
             _progradeAngle -= Math.PI * 0.5;
             _departIcon.ProgradeAngle = _progradeAngle;
-            _departIcon.OnPhysicsUpdate();
+            _departIcon.SetTransitPostion(_transitLeavePositionRalitive);
 
 
             if (_arriveIcon != null)
             {
+                _arriveIcon.ProgradeAngle = _progradeAngle;
                 _arriveIcon.SetTransitPostion(_progradeAngle, _arrivePntRadius);
 
-                _arriveIcon.OnPhysicsUpdate();
             }
         }
 
