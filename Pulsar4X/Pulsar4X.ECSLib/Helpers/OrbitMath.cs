@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
     public class OrbitMath
     {
 
-        public static KeplerElements SetParametersFromVelocityAndPosition(double standardGravParam, Vector4 position, Vector4 velocity)
+        public static KeplerElements KeplerFromVelocityAndPosition(double standardGravParam, Vector4 position, Vector4 velocity)
         {
             KeplerElements ke = new KeplerElements();
             Vector4 angularVelocity = Vector4.Cross(position, velocity);

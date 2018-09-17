@@ -141,8 +141,8 @@ namespace Pulsar4X.ECSLib
                 mass = asteroidMass;
 
             var speed = Distance.KmToAU(40);
-            Vector4 velocity = new Vector4(0, -speed, 0, 0);
-            var position = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector4 velocity = new Vector4(speed, 0, 0, 0);
+
 
             var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);
             var planetInfo = new SystemBodyInfoDB();
@@ -162,7 +162,7 @@ namespace Pulsar4X.ECSLib
             var myMass = massVolume.Mass;
 
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
-            OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, collisionDate);
+            OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
             var currentpos = OrbitProcessor.GetAbsolutePosition_AU(orbit, starSys.Game.CurrentDateTime);
             var posDB = new PositionDB(currentpos.X, currentpos.Y, currentpos.Z, parent.Manager.ManagerGuid, parent);

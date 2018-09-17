@@ -29,13 +29,13 @@ namespace Pulsar4X.Tests
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
-            KeplerElements elements = OrbitMath.SetParametersFromVelocityAndPosition(sgp, position, velocity);
+            KeplerElements elements = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
 
             Vector4 postionKm = new Vector4() { X = 405400 };
             Vector4 velocityKm = new Vector4() { Y = 0.97 };
             double sgpKm = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
 
-            KeplerElements elementsKm = OrbitMath.SetParametersFromVelocityAndPosition(sgpKm, postionKm, velocityKm);
+            KeplerElements elementsKm = OrbitMath.KeplerFromVelocityAndPosition(sgpKm, postionKm, velocityKm);
 
             //check that the function is unit agnostic.
             Assert.AreEqual(Distance.AuToKm(elements.SemiMajorAxis), elementsKm.SemiMajorAxis, 0.001);
@@ -113,7 +113,7 @@ namespace Pulsar4X.Tests
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
-            KeplerElements ke = OrbitMath.SetParametersFromVelocityAndPosition(sgp, position, velocity);
+            KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
 
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);
@@ -178,7 +178,7 @@ namespace Pulsar4X.Tests
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
-            KeplerElements ke = OrbitMath.SetParametersFromVelocityAndPosition(sgp, position, velocity);
+            KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
 
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);
@@ -259,7 +259,7 @@ namespace Pulsar4X.Tests
             double parentMass = 1.989e30;
             double objMass = 2.2e+15;
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
-            KeplerElements ke = OrbitMath.SetParametersFromVelocityAndPosition(sgp, position, velocity);
+            KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
 
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);

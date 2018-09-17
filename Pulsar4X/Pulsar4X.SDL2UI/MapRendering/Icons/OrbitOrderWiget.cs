@@ -58,7 +58,7 @@ namespace Pulsar4X.SDL2UI
         //change each game update
         float _ellipseStartArcAngleRadians;
         int _index;
-
+        bool IsClockwiseOrbit = true;
         public float EllipseSweepRadians = 4.71239f;
 
         //32 is a good low number, slightly ugly.  180 is a little overkill till you get really big orbits. 
@@ -130,60 +130,38 @@ namespace Pulsar4X.SDL2UI
             OnPhysicsUpdate();
         }
 
-        public void SetApoapsis(double x, double y)
-        {
-            Apoapsis = new PointD() { X = x, Y = y };
 
-
-            var aplen = PointDFunctions.Length(Apoapsis);
-            var pelen = PointDFunctions.Length(Periapsis);
-            OrbitEllipseSemiMaj = (aplen + pelen) * 0.5;//PointDFunctions.Length(PointDFunctions.Add(Periapsis, Apoapsis)) / 2;
-
-
-            _linearEccentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
-            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(_linearEccentricity, 2));
-            _eccentricity = EllipseMath.Eccentricity(_linearEccentricity, OrbitEllipseSemiMaj);
-
-            OrbitAngleRadians = Math.Atan2(y, x);
-        }
-
-        public void SetPeriapsis(double x, double y)
-        {
-            Periapsis = new PointD() { X = x, Y = y };
-            var aplen = PointDFunctions.Length(Apoapsis);
-            var pelen = PointDFunctions.Length(Periapsis);
-            OrbitEllipseSemiMaj = (aplen + pelen) * 0.5;// PointDFunctions.Length(PointDFunctions.Add(Periapsis , Apoapsis)) / 2;
-            _linearEccentricity = PointDFunctions.Length(Apoapsis) - OrbitEllipseSemiMaj;
-            OrbitEllipseSemiMinor = Math.Sqrt(Math.Pow(OrbitEllipseSemiMaj, 2) - Math.Pow(_linearEccentricity, 2));
-            _eccentricity = EllipseMath.Eccentricity(_linearEccentricity, OrbitEllipseSemiMaj);
-
-            //OrbitAngleRadians = Math.Atan2(y, x);
-        }
-
-        public void SetParametersFromVelocityAndPosition(double standardGravParam, Vector4 position, Vector4 velocity)
+        public void SetParametersFromKeplerElements(KeplerElements ke)
         {
 
-            var keplerElements = OrbitMath.SetParametersFromVelocityAndPosition(standardGravParam, position, velocity);
+            _eccentricity = ke.Eccentricity;
+            _linearEccentricity = ke.LinierEccentricity;
 
-            _eccentricity = keplerElements.Eccentricity;
-            _linearEccentricity = keplerElements.LinierEccentricity;
 
-            OrbitAngleRadians = keplerElements.LoAN + keplerElements.AoP; 
-
-            OrbitEllipseSemiMaj = keplerElements.SemiMajorAxis; 
-            OrbitEllipseSemiMinor = keplerElements.SemiMinorAxis;
+            OrbitEllipseSemiMaj = ke.SemiMajorAxis; 
+            OrbitEllipseSemiMinor = ke.SemiMinorAxis;
 
             Periapsis = new PointD()
             {
-                X = Math.Sin(keplerElements.TrueAnomaly) * keplerElements.Periapsis,
-                Y = Math.Cos(keplerElements.TrueAnomaly) * keplerElements.Periapsis
+                X = Math.Sin(ke.TrueAnomaly) * ke.Periapsis,
+                Y = Math.Cos(ke.TrueAnomaly) * ke.Periapsis
 
             };
             Apoapsis = new PointD() {
-                X = Math.Sin(keplerElements.TrueAnomaly) * keplerElements.Apoapsis,
-                Y = Math.Cos(keplerElements.TrueAnomaly) * keplerElements.Apoapsis
+                X = Math.Sin(ke.TrueAnomaly) * ke.Apoapsis,
+                Y = Math.Cos(ke.TrueAnomaly) * ke.Apoapsis
             };
 
+            if (ke.Inclination > Math.PI * 0.5 && ke.Inclination < Math.PI * 1.5) //ke inclination is in radians.
+            {
+                IsClockwiseOrbit = false;
+                OrbitAngleRadians = ke.LoAN - ke.AoP;
+            }
+            else
+            {
+
+                OrbitAngleRadians = ke.LoAN + ke.AoP;
+            }
         }
 
         void CreatePointArray()
@@ -193,7 +171,7 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
-                double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
+                double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the linearEccentricity so the focal point is "center"
                 double y1 = OrbitEllipseSemiMinor * Math.Cos(angle);
 
                 //rotates the points to allow for the LongditudeOfPeriapsis. 
@@ -243,6 +221,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             Vector4 pos = _bodyPositionDB.AbsolutePosition_AU;
+
             PointD pointD = new PointD() { X = pos.X, Y = pos.Y };
 
             double minDist = CalcDistance(pointD, _points[_index]);
@@ -282,21 +261,30 @@ namespace Pulsar4X.SDL2UI
                 y = ViewScreenPos.y + camerapoint.y
             };
             ViewScreenPos = vsp;
-
+            PointD translated;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
-            for (int i = 0; i < _numberOfDrawSegments; i++)
+            for (int i = 1; i < _numberOfDrawSegments; i++)
             {
 
-                if (index < _numberOfArcSegments - 1)
-                    index++;
+                if (IsClockwiseOrbit)
+                {
+                    if (index < _numberOfArcSegments - 1)
+
+                        index++;
+                    else
+                        index = 0;
+                }
+                else if (index > 0)
+                {
+                    index--;
+                }
                 else
-                    index = 0;
+                    index = _numberOfArcSegments - 1;
 
-                var translated = matrix.Transform(_points[index].X, _points[index].Y); //add zoom transformation. 
+                translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
-                //translate everything to viewscreen & camera positions
-                int x = ViewScreenPos.x + translated.x;//(int)(ViewScreenPos.x + translated.x + camerapoint.x);
-                int y = ViewScreenPos.y + translated.y;//(int)(ViewScreenPos.y + translated.y + camerapoint.y);
+                int x = (int)(ViewScreenPos.x + translated.X);
+                int y = (int)(ViewScreenPos.y + translated.Y);
 
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }

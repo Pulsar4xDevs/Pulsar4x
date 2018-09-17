@@ -82,17 +82,18 @@ namespace Pulsar4X.SDL2UI
 
             _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
 
-            if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270)
+            if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270) //orbitDB is in degrees.
             {
                 IsClockwiseOrbit = false;
-                _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
+                _orbitAngleDegrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
             }
             else
             {
                 
-                _orbitAngleDegrees = (float)Angle.NormaliseDegrees(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis); 
+                _orbitAngleDegrees = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis); 
             }
-                _orbitAngleRadians = (float)Angle.NormaliseRadians(Angle.ToRadians(_orbitAngleDegrees));
+            _orbitAngleRadians = (float)(Angle.ToRadians(_orbitAngleDegrees));
+
             UpdateUserSettings();
             CreatePointArray();
 

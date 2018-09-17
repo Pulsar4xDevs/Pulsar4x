@@ -109,7 +109,7 @@ namespace Pulsar4X.SDL2UI
         {
             ImVec2 mouseCoord = ImGui.GetMousePos();
             double x = ((mouseCoord.x - ViewPortCenter.x) / ZoomLevel) - CameraWorldPosition.X;
-            double y = -((mouseCoord.y - ViewPortCenter.y) / ZoomLevel) - CameraWorldPosition.Y; 
+            double y = -(((mouseCoord.y - ViewPortCenter.y) / ZoomLevel) - CameraWorldPosition.Y); 
             return new Vector4(x, y, 0, 0);
 
         }
