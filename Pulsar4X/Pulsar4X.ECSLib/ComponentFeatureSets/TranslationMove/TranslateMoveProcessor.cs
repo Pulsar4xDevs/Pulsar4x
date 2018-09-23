@@ -70,7 +70,7 @@ namespace Pulsar4X.ECSLib
             var propulsionDB = entity.GetDataBlob<PropulsionDB>();
             var positionDB = entity.GetDataBlob<PositionDB>();
             var maxSpeedMS = propulsionDB.MaximumSpeed_MS;
-
+            positionDB.SetParent(null);
             Vector4 targetPosMt = Distance.AuToMt(moveDB.TranslationExitPoint_AU);
             Vector4 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
 
@@ -85,24 +85,33 @@ namespace Pulsar4X.ECSLib
                 var currentVelocityMS = Vector4.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
                 propulsionDB.CurrentVectorMS = currentVelocityMS;
                 moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
-                moveDB.TranslateEntryPoint_AU = positionDB.AbsolutePosition_AU;
-                CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
+                moveDB.LastProcessDateTime = entity.Manager.ManagerSubpulses.SystemLocalDateTime;
 
+                CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
                 foreach (var item in propulsionDB.FuelUsePerKM)
                 {
                     var fuel = staticData.GetICargoable(item.Key);
                     StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * totalDistance / 1000));
                 }
             }
-
         }
 
+        /// <summary>
+        /// Moves an entity while it's in a non newtonion translation state. 
+        /// TODO: doing this in meters will likely cause problems for ships that have a large position value.
+        /// (position in meters could consevably go out of max value)
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        /// <param name="deltaSeconds">Unused</param>
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
+            
             var manager = entity.Manager;
             var moveDB = entity.GetDataBlob<TranslateMoveDB>();
             var propulsionDB = entity.GetDataBlob<PropulsionDB>();
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
+            var dateTime = manager.ManagerSubpulses.SystemLocalDateTime;
+            double deltaT = (dateTime - moveDB.LastProcessDateTime).TotalSeconds;
 
             var positionDB = entity.GetDataBlob<PositionDB>();
             var currentPositionAU = positionDB.AbsolutePosition_AU;
@@ -114,7 +123,7 @@ namespace Pulsar4X.ECSLib
 
             var deltaVecToTargetMt = currentPositionMt - targetPosMt;
 
-            var newPositionMt = currentPositionMt + currentVelocityMS * deltaSeconds;
+            var newPositionMt = currentPositionMt + currentVelocityMS * deltaT;
 
             //var distanceToTargetAU = deltaVecToTargetAU.Length();  //in au
             var distanceToTargetMt = deltaVecToTargetMt.Length();
@@ -129,18 +138,34 @@ namespace Pulsar4X.ECSLib
 
             if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
             {
+   
+
                 //distanceToMoveAU = distanceToTargetAU;
                 distanceToMove = distanceToTargetMt;
                 propulsionDB.CurrentVectorMS = new Vector4(0, 0, 0, 0);
                 //newPosAU = targetPosAU;
                 newPositionMt = targetPosMt;
+
+
+                var targetSOI = GMath.GetSOI(moveDB.TargetEntity);
+                OrbitDB newOrbit = OrbitDB.FromVector(moveDB.TargetEntity, entity, moveDB.SavedNewtonionVector_MS);
+                if (newOrbit.Periapsis > targetSOI)
+                {
+                    //TODO: find who's SOI we're currently in and create an orbit for that;
+                }
+                if (newOrbit.Apoapsis > targetSOI)
+                {
+                    //TODO: change orbit to new parent at SOI change
+                }
+
+                positionDB.SetParent(moveDB.TargetEntity);
                 moveDB.IsAtTarget = true;
                 entity.RemoveDataBlob<TranslateMoveDB>();
+                entity.SetDataBlob(newOrbit);
             }
 
-            positionDB.AbsolutePosition_AU = Distance.MtToAu( newPositionMt);
-
-            double metersMoved = distanceToMove;
+            positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);
+            moveDB.LastProcessDateTime = dateTime;
 
         }
 

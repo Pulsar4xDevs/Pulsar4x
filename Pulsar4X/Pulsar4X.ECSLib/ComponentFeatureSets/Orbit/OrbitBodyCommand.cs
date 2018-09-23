@@ -1,9 +1,112 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using NUnit.Framework;
 
 namespace Pulsar4X.ECSLib
 {
+
+    public class TransitToOrbitCommand : EntityCommand
+    {
+        internal override int ActionLanes => 1;
+        internal override bool IsBlocking => true;
+
+        Entity _factionEntity;
+        Entity _entityCommanding;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+        public Guid TargetEntityGuid { get; set; }
+
+        private Entity _targetEntity;
+        public Vector4 TargetOffsetPosition_AU;
+        public DateTime TransitStartDateTime;
+        public Vector4 DeltaVExpendAtExit;
+
+        TranslateMoveDB _db;
+
+
+        public static void CreateTransitCmd(Game game, Entity faction, Entity orderEntity, Entity targetEntity, Vector4 targetOffsetPos_AU, DateTime transitStartDatetime)
+        {
+            var cmd = new TransitToOrbitCommand()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = orderEntity.Guid,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                TargetEntityGuid = targetEntity.Guid,
+                TargetOffsetPosition_AU = targetOffsetPos_AU,
+                TransitStartDateTime = transitStartDatetime
+            };
+            game.OrderHandler.HandleOrder(cmd);
+        }
+
+
+
+        internal override void ActionCommand(Game game)
+        {
+            
+            if (!IsRunning)
+            {
+                
+
+                (Vector4, DateTime) targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), TransitStartDateTime, TargetOffsetPosition_AU);
+                OrbitDB orbitDB = _entityCommanding.GetDataBlob<OrbitDB>();
+                Vector4 currentPos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, TransitStartDateTime);
+                var ralPos = OrbitProcessor.GetPosition_AU(orbitDB, TransitStartDateTime);
+                var masses = _entityCommanding.GetDataBlob<MassVolumeDB>().Mass + orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+                var sgp = GameConstants.Science.GravitationalConstant * masses / 3.347928976e33;
+
+                Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
+                _db = new TranslateMoveDB(targetIntercept.Item1);
+                _db.EntryDateTime = TransitStartDateTime;
+                _db.PredictedExitTime = targetIntercept.Item2;
+                _db.TranslateEntryPoint_AU = currentPos;
+                _db.SavedNewtonionVector_MS = currentVec;
+                _db.TargetEntity = _targetEntity;
+                if (EntityCommanding.HasDataBlob<OrbitDB>())
+                    EntityCommanding.RemoveDataBlob<OrbitDB>();
+                EntityCommanding.SetDataBlob(_db);
+                TranslateMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+                IsRunning = true;
+
+
+                var distance = (currentPos - targetIntercept.Item1).Length();
+                var distancekm = Distance.AuToKm(distance);
+
+                var time = targetIntercept.Item2 - TransitStartDateTime;
+
+                double spd = _entityCommanding.GetDataBlob<PropulsionDB>().MaximumSpeed_MS;
+                spd = Distance.MToAU(spd);
+                var distb = spd * time.TotalSeconds;
+                var distbKM = Distance.AuToKm(distb);
+
+                var dif = distancekm - distbKM;
+                //Assert.AreEqual(distancekm, distbKM);
+            }
+
+        }
+
+        internal override bool IsFinished()
+        {
+            if (_db.IsAtTarget)
+                return true;
+            return false;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                if (game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out _targetEntity))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+
+
     public class OrbitBodyCommand : EntityCommand
     {
 
@@ -18,8 +121,8 @@ namespace Pulsar4X.ECSLib
 
         private Entity _targetEntity;
 
-        public double ApihelionInKM { get; set; }
-        public double PerhelionInKM { get; set; }
+        public double ApoapsisInKM { get; set; }
+        public double PeriapsisInKM { get; set; }
         internal List<EntityCommand> NestedCommands { get; } = new List<EntityCommand>();
 
         [JsonIgnore] Entity _factionEntity;
@@ -34,13 +137,13 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = orderEntity,
                 CreatedDate = starSysDate,
                 TargetEntityGuid = targetEntity,
-                ApihelionInKM = ApihelionKm,
-                PerhelionInKM = PerhelionKm,
+                ApoapsisInKM = ApihelionKm,
+                PeriapsisInKM = PerhelionKm,
             };
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        public static void CreateOrbitBodyCommand(Game game, Entity faction, Entity orderEntity, Entity targetEntity, double ApihelionKm, double PerhelionKm)
+        public static void CreateOrbitBodyCommand(Game game, Entity faction, Entity orderEntity, Entity targetEntity, double apoapsisKm, double periapsisKm)
         {
             var cmd = new OrbitBodyCommand()
             {
@@ -48,11 +151,12 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
                 TargetEntityGuid = targetEntity.Guid,
-                ApihelionInKM = ApihelionKm,
-                PerhelionInKM = PerhelionKm,
+                ApoapsisInKM = apoapsisKm,
+                PeriapsisInKM = periapsisKm,
             };
             game.OrderHandler.HandleOrder(cmd);
         }
+
 
         internal override bool IsValidCommand(Game game)
         {
@@ -76,11 +180,11 @@ namespace Pulsar4X.ECSLib
                     var entPos = _entityCommanding.GetDataBlob<PositionDB>().PositionInKm;
                     var tarPos = _targetEntity.GetDataBlob<PositionDB>().PositionInKm;
                     double distanceAU = PositionDB.GetDistanceBetween(_entityCommanding.GetDataBlob<PositionDB>(), _targetEntity.GetDataBlob<PositionDB>());
-                    var rangeAU = ApihelionInKM / GameConstants.Units.KmPerAu;
+                    var rangeAU = ApoapsisInKM / GameConstants.Units.KmPerAu;
                     if (Math.Abs(rangeAU - distanceAU) <= 500 / GameConstants.Units.MetersPerAu) //distance within 500m 
                     {
                         DateTime datenow = _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime;
-                        var newOrbit = ShipMovementProcessor.CreateOrbitHereWithPerihelion(_entityCommanding, _targetEntity, PerhelionInKM, datenow);
+                        var newOrbit = ShipMovementProcessor.CreateOrbitHereWithPerihelion(_entityCommanding, _targetEntity, PeriapsisInKM, datenow);
                         _entityCommanding.SetDataBlob(newOrbit);
                         IsRunning = true;
                     }
@@ -92,7 +196,7 @@ namespace Pulsar4X.ECSLib
                             EntityCommandingGuid = this.EntityCommandingGuid, 
                             CreatedDate = this.CreatedDate, 
                             TargetEntityGuid = this.TargetEntityGuid, 
-                            RangeInKM = this.ApihelionInKM 
+                            RangeInKM = this.ApoapsisInKM 
                         };
                         NestedCommands.Insert(0, cmd);
                         cmd.IsValidCommand(game);

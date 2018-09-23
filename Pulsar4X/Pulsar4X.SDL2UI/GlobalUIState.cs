@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityState LastClickedEntity;
         internal Vector4 LastWorldPointClicked;
 
-        internal DateTime CurrentSystemDateTime = new DateTime();
+        internal DateTime CurrentSystemDateTime; //= new DateTime();
 
         internal SpaceMasterVM SpaceMasterVM;
 

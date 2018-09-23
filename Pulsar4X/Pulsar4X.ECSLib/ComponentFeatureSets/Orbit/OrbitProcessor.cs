@@ -256,9 +256,9 @@ namespace Pulsar4X.ECSLib
         /// 2d! vector. 
         /// </summary>
         /// <returns>The orbital vector.</returns>
-        /// <param name="sgp">Sgp.</param>
-        /// <param name="position">Position.</param>
-        /// <param name="sma">Sma.</param>
+        /// <param name="sgp">Standard Grav Perameter.</param>
+        /// <param name="position">Ralitive Position.</param>
+        /// <param name="sma">SemiMajorAxis</param>
         public static Vector4 PreciseOrbitalVector(double sgp, Vector4 position, double sma)
         {
             var radius = position.Length();

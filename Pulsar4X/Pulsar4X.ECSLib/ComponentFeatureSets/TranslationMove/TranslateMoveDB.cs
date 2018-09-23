@@ -11,6 +11,9 @@ namespace Pulsar4X.ECSLib
     public class TranslateMoveDB : BaseDataBlob
     {
         [JsonProperty]
+        public DateTime LastProcessDateTime = new DateTime();
+
+        [JsonProperty]
         public Vector4 SavedNewtonionVector_MS { get; internal set; }
 
         [JsonProperty]
@@ -24,9 +27,6 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         internal Vector4 CurrentNonNewtonionVectorMS;
-
-        [JsonProperty]
-        internal double MoveRange_KM;
 
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
@@ -56,7 +56,6 @@ namespace Pulsar4X.ECSLib
         {
             TargetPositionDB = db.TargetPositionDB;
             CurrentNonNewtonionVectorMS = db.CurrentNonNewtonionVectorMS;
-            MoveRange_KM = db.MoveRange_KM;
             IsAtTarget = db.IsAtTarget;
         }
         // JSON deserialization callback.

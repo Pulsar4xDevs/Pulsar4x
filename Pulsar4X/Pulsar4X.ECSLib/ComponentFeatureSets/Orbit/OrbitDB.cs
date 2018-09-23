@@ -105,6 +105,35 @@ namespace Pulsar4X.ECSLib
 
         #region Construction Interface
 
+        /// <summary>
+        /// Creates on Orbit at current location from a given velocity
+        /// </summary>
+        /// <returns>The Orbit Does not attach the OrbitDB to the entity!</returns>
+        /// <param name="parent">Parent.</param>
+        /// <param name="entity">Entity.</param>
+        /// <param name="velocity">Velocity.</param>
+        public static OrbitDB FromVector(Entity parent, Entity entity, Vector4 velocity)
+        {
+            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
+            var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+            //ralitive position.
+            var position = parent.GetDataBlob<PositionDB>().AbsolutePosition_AU - entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+
+            var epoch = parent.Manager.ManagerSubpulses.SystemLocalDateTime;
+
+            var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
+            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
+                        Math.Abs(ke.SemiMajorAxis),
+                        ke.Eccentricity,
+                        Angle.ToDegrees(ke.Inclination),
+                        Angle.ToDegrees(ke.LoAN),
+                        Angle.ToDegrees(ke.AoP),
+                        Angle.ToDegrees(ke.MeanAnomaly),
+                        epoch);
+            var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, epoch);
+            return orbit;
+        }
 
         public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime epoch)
         {

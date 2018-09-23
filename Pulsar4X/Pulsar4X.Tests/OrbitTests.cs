@@ -316,5 +316,67 @@ namespace Pulsar4X.Tests
             }
 
         }
+
+
+        [Test]
+        public void TestIntercept()
+        {
+            double myMass = 10000;
+            double parentMass = 1.989e30; //solar mass.
+            Game game = new Game();
+            EntityManager man = new EntityManager(game, false);
+
+            BaseDataBlob[] parentblobs = new BaseDataBlob[2];
+            parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
+            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            Entity parentEntity = new Entity(man, parentblobs);
+
+            Vector4 currentPos = new Vector4 { X=-0.77473184638034, Y = 0.967145228951685 };
+            Vector4 currentVelocity = new Vector4 { Y = Distance.KmToAU(40) };
+            double nonNewtSpeed = Distance.KmToAU( 283.018);
+
+            Vector4 targetObjPosition = new Vector4 { X = 0.149246434443459, Y=-0.712107888348067 };
+            Vector4 targetObjVelocity = new Vector4 { Y = Distance.KmToAU(35) };
+
+
+            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            //KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, targetObjPosition, targetObjVelocity);
+
+            var currentDateTime = new DateTime(2000, 1, 1);
+
+            OrbitDB targetOrbit = OrbitDB.FromVector(parentEntity, myMass, parentMass, sgp, targetObjPosition, targetObjVelocity, currentDateTime);
+
+
+
+            var intercept = InterceptCalcs.GetInterceptPosition2(currentPos, nonNewtSpeed, targetOrbit ,currentDateTime);
+
+            var futurePos1 = Distance.AuToKm( OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, intercept.Item2));
+
+            var futurePos2 = Distance.AuToKm( intercept.Item1);
+
+
+
+
+            Assert.AreEqual(futurePos1.Length(), futurePos2.Length(), 0.01);
+            Assert.AreEqual(futurePos1.X, futurePos2.X, 0.01);
+            Assert.AreEqual(futurePos1.Y, futurePos2.Y, 0.01);
+            Assert.AreEqual(futurePos1.Z, futurePos2.Z, 0.01);
+            var time = intercept.Item2 - currentDateTime;
+
+            var distance = (currentPos - intercept.Item1).Length();
+            var distancekm = Distance.AuToKm(distance);
+
+            var speed = distance / time.TotalSeconds;
+            var speed2 = distancekm / time.TotalSeconds;
+
+            var distb = nonNewtSpeed * time.TotalSeconds;
+            var distbKM = Distance.AuToKm(distb);
+            var timeb = distance / nonNewtSpeed;
+
+            Assert.AreEqual(nonNewtSpeed, speed, 1.0e-10 );
+
+            var dif = distancekm - distbKM;
+            Assert.AreEqual(distancekm, distbKM);
+        }
     }
 }

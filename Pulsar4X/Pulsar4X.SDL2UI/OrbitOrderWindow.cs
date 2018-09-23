@@ -23,7 +23,7 @@ namespace Pulsar4X.SDL2UI
 
         double _PreciseOrbitalSpeedKm_s = double.NaN;
 
-        (Vector4, TimeSpan) _intercept;
+        //(Vector4, TimeSpan) _intercept;
 
         string _displayText;
         string _tooltipText = "";
@@ -130,7 +130,8 @@ namespace Pulsar4X.SDL2UI
             _moveWidget.SetArrivalTarget(TargetEntity.Entity);
 
             _targetRadius = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInKM;
-            _intercept = InterceptCalcs.FTLIntercept(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
+            //_intercept = InterceptCalcs.FTLIntercept(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
+            //_intercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _state.CurrentSystemDateTime); 
             _tooltipText = "Select Insertion Point";
             CurrentState = States.NeedsInsertionPoint;
         }
@@ -155,6 +156,7 @@ namespace Pulsar4X.SDL2UI
         }*/
         void ActionCmd() 
         {
+            /*
             OrbitBodyCommand.CreateOrbitBodyCommand(
                 _state.Game,
                 _state.Faction,
@@ -162,6 +164,14 @@ namespace Pulsar4X.SDL2UI
                 TargetEntity.Entity,
                 _apoapsisKm,//PointDFunctions.Length(_orbitWidget.Apoapsis), 
                 _periapsisKM);//PointDFunctions.Length(_orbitWidget.Periapsis));
+            */
+            TransitToOrbitCommand.CreateTransitCmd(
+                _state.Game,
+                _state.Faction,
+                OrderingEntity.Entity,
+                TargetEntity.Entity,
+                _targetInsertionPoint_AU,
+                _state.CurrentSystemDateTime);
             CloseWindow();
         }
         void ActionAddDB()

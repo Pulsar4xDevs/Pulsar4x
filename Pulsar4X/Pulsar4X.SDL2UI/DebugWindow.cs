@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
@@ -27,6 +28,9 @@ float nextLargeGFPS = 0;
         float[] _systemRates = new float[80];
         bool _dateChangeSinceLastFrame = true;
         bool _isRunningFrame = false;
+
+        List<Vector4> positions = new List<Vector4>();
+
         private DebugWindow() 
         {
             
@@ -49,6 +53,11 @@ float nextLargeGFPS = 0;
                 _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
                 _state.MapRendering.SysMap.SystemSubpulse.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
             }
+        }
+
+        private void _state_EntityClicked(Guid arg1, MouseButtons arg2)
+        {
+            throw new NotImplementedException();
         }
 
         void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
@@ -96,6 +105,8 @@ float nextLargeGFPS = 0;
                 _gameRateIndex = 0;
             else
                 _gameRateIndex++;
+
+            positions.Add(_state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU);
         }
 
 
@@ -169,6 +180,11 @@ float nextLargeGFPS = 0;
                                 ImGui.Text("x: " + posv4.X);
                                 ImGui.Text("y: " + posv4.Y);
                                 ImGui.Text("z: " + posv4.Z);
+                                if (positiondb.Parent != null)
+                                {
+                                    ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
+                                    ImGui.Text("Dist: " + Distance.AuToKm( positiondb.RelativePosition_AU.Length()));
+                                }
                             }
                             if (_state.LastClickedEntity.Entity.HasDataBlob<OrbitDB>())
                             {
@@ -188,6 +204,7 @@ float nextLargeGFPS = 0;
                                     ImGui.Text("x: " + pos.X);
                                     ImGui.Text("y: " + pos.Y);
                                     ImGui.Text("z: " + pos.Z);
+                                    ImGui.Text("Eccentricity: " + orbitDB.Eccentricity);
                                     ImGui.Text("AoP:" + orbitDB.ArgumentOfPeriapsis);
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
@@ -252,6 +269,12 @@ float nextLargeGFPS = 0;
                                         ImGui.Text("Total TTT  " + totalTime);
                                         double speed = ((distancekm * 1000) / totalTime.TotalSeconds);
                                         ImGui.Text("speed2 " + speed);
+                                        ImGui.Text("LastDateTime: ");
+                                        ImGui.Text(db.LastProcessDateTime.ToString());
+                                        ImGui.Text("Time Since Last: ");
+                                        var timelen = _state.CurrentSystemDateTime - db.LastProcessDateTime;
+                                        ImGui.Text(timelen.ToString());
+
                                     }
 
                                 }

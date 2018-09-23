@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
                 _db.EntryDateTime = _entityCommanding.Manager.ManagerSubpulses.SystemLocalDateTime;
                 _db.PredictedExitTime = targetIntercept.Item2;
                 _db.TranslateEntryPoint_AU = _entityCommanding.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-                _db.MoveRange_KM = RangeInKM;
+                _db.TargetEntity = _targetEntity;
                 if (EntityCommanding.HasDataBlob<OrbitDB>())
                     EntityCommanding.RemoveDataBlob<OrbitDB>();
                 EntityCommanding.SetDataBlob(_db);
