@@ -840,10 +840,14 @@ namespace Pulsar4X.ECSLib
                 a0 /= pl.T;                                   // remove full periods from the difference
                 a0 -= Math.Floor(a0);
                 a0 *= pl.T;
-                if ((a0 < a1) || (a1 < 0.0)) { a1 = a0; tim = tt; }   // remember best option
+                if ((a0 < a1) || (a1 < 0.0)) 
+                { 
+                    a1 = a0; 
+                    tim = tt; 
+                }   // remember best option
             }
             // find orbital position with min error (fine)
-            for (i = 0; i < 3; i++)                               // recursive increase of accuracy
+            for (i = 0; i < 10; i++)                               // recursive increase of accuracy
                 for (a1 = -1.0, t = tim - dt, T = tim + dt, dt *= 0.1; t < T; t += dt)
                 {
                     p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
@@ -853,7 +857,11 @@ namespace Pulsar4X.ECSLib
                     a0 /= pl.T;                                   // remove full periods from the difference
                     a0 -= Math.Floor(a0);
                     a0 *= pl.T;
-                    if ((a0 < a1) || (a1 < 0.0)) { a1 = a0; tim = tt; }   // remember best option
+                    if ((a0 < a1) || (a1 < 0.0)) 
+                    {
+                        a1 = a0; 
+                    tim = tt; 
+                    }   // remember best option
                 }
             // direction
             p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);

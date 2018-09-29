@@ -98,7 +98,7 @@ namespace Pulsar4X.SDL2UI
             {
                 _state.Camera.IsGrabbingMap = false;
 
-                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.  
+                if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.  
                 {
                     _state.MapClicked(_state.Camera.WorldCoordinate(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
                 }

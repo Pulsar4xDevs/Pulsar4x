@@ -168,6 +168,7 @@ namespace Pulsar4X.Tests
                 Assert.IsTrue(objOrbit.Inclination == 0);
             }
 
+
         }
 
         [Test]
@@ -376,7 +377,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(nonNewtSpeed, speed, 1.0e-10 );
 
             var dif = distancekm - distbKM;
-            Assert.AreEqual(distancekm, distbKM);
+            Assert.AreEqual(distancekm, distbKM, 1.0e-1);
         }
     }
 }
