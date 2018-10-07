@@ -262,9 +262,24 @@ namespace Pulsar4X.ECSLib
         public static Vector4 PreciseOrbitalVector(double sgp, Vector4 position, double sma)
         {
             var radius = position.Length();
-            var angle = Math.Atan2(position.X, position.Y);
+            var angle = Math.Atan2(position.Y, position.X);
             var spd = PreciseOrbitalSpeed(sgp, radius, sma);
             return new Vector4() {
+                X = Math.Sin(angle) * spd,
+                Y = Math.Cos(angle) * spd
+            };
+        }
+
+        public static Vector4 PreciseOrbitalVector(OrbitDB orbit, DateTime atDateTime)
+        {
+            var position = GetPosition_AU(orbit, atDateTime);
+            var sgp = orbit.GravitationalParameter;
+            var sma = orbit.SemiMajorAxis;
+            var radius = position.Length();
+            var angle = Math.Atan2(position.X, position.Y);
+            var spd = PreciseOrbitalSpeed(sgp, radius, sma);
+            return new Vector4()
+            {
                 X = Math.Sin(angle) * spd,
                 Y = Math.Cos(angle) * spd
             };

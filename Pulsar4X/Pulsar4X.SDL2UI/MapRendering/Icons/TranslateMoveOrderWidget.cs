@@ -102,12 +102,13 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
+
             _transitLeavePositionRalitive = OrbitProcessor.GetPosition_AU(_movingEntityCurrentOrbit, _transitLeaveDateTime);
 
 
-            _progradeAngle = Math.Atan2(_transitLeavePositionRalitive.X , _transitLeavePositionRalitive.Y);
-
-            _progradeAngle -= Math.PI * 0.5;
+            _progradeAngle = Math.Atan2(_transitLeavePositionRalitive.Y , _transitLeavePositionRalitive.X);
+            //OrbitProcessor.PreciseOrbitalVector(
+            _progradeAngle -= Math.PI ;
             _departIcon.ProgradeAngle = _progradeAngle;
             _departIcon.SetTransitPostion(_transitLeavePositionRalitive);
 
@@ -173,7 +174,6 @@ namespace Pulsar4X.SDL2UI
         public SDL_Color PrimaryColour = new SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
         public SDL_Color VectorColour = new SDL_Color() { r = 255, g = 0, b = 255, a = 255 };
 
-        public PointD ProgradeArrowPoint = new PointD { X = 64, Y = 64 };
         public double ProgradeAngle = 0;
         double _arrivePntRadius;
         PositionDB _parentPosition;
@@ -260,11 +260,7 @@ namespace Pulsar4X.SDL2UI
         void CreateProgradeArrow()
         {
 
-            /*
-            PointD[] arrowPoints = new PointD[2];
-            arrowPoints[0] = new PointD() { X = 0, Y = 0 };
-            arrowPoints[1] = ProgradeArrowPoint;
-            */
+
             PointD[] pnts = CreatePrimitiveShapes.CreateArrow();
             List<PointD> arrowPoints = new List<PointD>(pnts.Length);
             foreach (var point in pnts)

@@ -291,7 +291,8 @@ namespace Pulsar4X.SDL2UI
         public static PointD[] CreateArrow()
         {
             PointD[] arrowPoints = new PointD[7];
-            arrowPoints[0] = new PointD() { X =  0, Y = 32 };
+
+            arrowPoints[0] = new PointD() { X =  0, Y = 0 };
             arrowPoints[1] = new PointD() { X =  1, Y = 31 };
             arrowPoints[2] = new PointD() { X =  3, Y = 29 };
             arrowPoints[3] = new PointD() { X =  0, Y = 32 };
