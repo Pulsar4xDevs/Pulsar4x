@@ -126,10 +126,24 @@ namespace Pulsar4X.ECSLib
                 return rootPos;
             }
 
-            return rootPos + GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
-            
+            if(orbit.Eccentricity < 1)
+                return rootPos + GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
+            else
+                return rootPos + GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
+            //if (orbit.Eccentricity == 1)
+            //    return GetAbsolutePositionForParabolicOrbit_AU();
+            //else
+            //    return GetAbsolutePositionForHyperbolicOrbit_AU(orbit, time);
 
         }
+
+        //public static Vector4 GetAbsolutePositionForParabolicOrbit_AU()
+        //{ }
+
+        //public static Vector4 GetAbsolutePositionForHyperbolicOrbit_AU(OrbitDB orbitDB, DateTime time)
+        //{
+            
+        //}
 
         public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
         {
@@ -235,6 +249,8 @@ namespace Pulsar4X.ECSLib
         }
 
 
+
+
         /// <summary>
         /// returns the speed for an object of a given mass at a given radius from a body.
         /// </summary>
@@ -256,7 +272,7 @@ namespace Pulsar4X.ECSLib
         /// 2d! vector. 
         /// </summary>
         /// <returns>The orbital vector.</returns>
-        /// <param name="sgp">Standard Grav Perameter.</param>
+        /// <param name="sgp">Standard Grav Perameter. in AU</param>
         /// <param name="position">Ralitive Position.</param>
         /// <param name="sma">SemiMajorAxis</param>
         public static Vector4 PreciseOrbitalVector(double sgp, Vector4 position, double sma)
@@ -270,10 +286,16 @@ namespace Pulsar4X.ECSLib
             };
         }
 
+        /// <summary>
+        /// Not Tested
+        /// </summary>
+        /// <returns>The orbital vector.</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
         public static Vector4 PreciseOrbitalVector(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
-            var sgp = orbit.GravitationalParameter;
+            var sgp = orbit.GravitationalParameter / 3.347929e+33;
             var sma = orbit.SemiMajorAxis;
             var radius = position.Length();
             var angle = Math.Atan2(position.X, position.Y);

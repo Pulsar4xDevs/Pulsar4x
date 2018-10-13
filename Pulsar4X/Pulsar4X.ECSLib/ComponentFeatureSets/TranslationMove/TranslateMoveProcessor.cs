@@ -110,9 +110,11 @@ namespace Pulsar4X.ECSLib
             var moveDB = entity.GetDataBlob<TranslateMoveDB>();
             var propulsionDB = entity.GetDataBlob<PropulsionDB>();
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
-            var dateTime = manager.ManagerSubpulses.SystemLocalDateTime;
-            double deltaT = (dateTime - moveDB.LastProcessDateTime).TotalSeconds;
+            DateTime dateTimeFrom = moveDB.LastProcessDateTime;
+            DateTime dateTimeNow = manager.ManagerSubpulses.SystemLocalDateTime;
+            DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
 
+            double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
             var positionDB = entity.GetDataBlob<PositionDB>();
             var currentPositionAU = positionDB.AbsolutePosition_AU;
             Vector4 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
@@ -132,8 +134,6 @@ namespace Pulsar4X.ECSLib
             var positionDelta = currentPositionMt - newPositionMt;
 
             double distanceToMove = positionDelta.Length();
-            var distnaceToMove2 = Vector4.Magnitude(positionDelta);
-
 
 
             if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
@@ -148,7 +148,8 @@ namespace Pulsar4X.ECSLib
 
 
                 var targetSOI = GMath.GetSOI(moveDB.TargetEntity);
-                OrbitDB newOrbit = OrbitDB.FromVector(moveDB.TargetEntity, entity, moveDB.SavedNewtonionVector_MS);
+                //DateTime epoch = 
+                OrbitDB newOrbit = OrbitDB.FromVector(moveDB.TargetEntity, entity, moveDB.SavedNewtonionVector_MS, dateTimeFuture);
                 if (newOrbit.Periapsis > targetSOI)
                 {
                     //TODO: find who's SOI we're currently in and create an orbit for that;
@@ -165,7 +166,7 @@ namespace Pulsar4X.ECSLib
             }
 
             positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);
-            moveDB.LastProcessDateTime = dateTime;
+            moveDB.LastProcessDateTime = dateTimeFuture;
 
         }
 
