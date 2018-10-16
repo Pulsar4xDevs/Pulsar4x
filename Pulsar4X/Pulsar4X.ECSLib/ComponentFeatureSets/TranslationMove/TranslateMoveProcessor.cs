@@ -138,7 +138,7 @@ namespace Pulsar4X.ECSLib
 
             if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
             {
-   
+
 
                 //distanceToMoveAU = distanceToTargetAU;
                 distanceToMove = distanceToTargetMt;
@@ -146,6 +146,7 @@ namespace Pulsar4X.ECSLib
                 //newPosAU = targetPosAU;
                 newPositionMt = targetPosMt;
 
+                positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
 
                 var targetSOI = GMath.GetSOI(moveDB.TargetEntity);
                 //DateTime epoch = 
@@ -164,8 +165,12 @@ namespace Pulsar4X.ECSLib
                 entity.RemoveDataBlob<TranslateMoveDB>();
                 entity.SetDataBlob(newOrbit);
             }
+            else
+            {
+                positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);
+            }
 
-            positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);
+
             moveDB.LastProcessDateTime = dateTimeFuture;
 
         }

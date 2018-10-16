@@ -37,18 +37,35 @@ namespace Pulsar4X.ECSLib
 
 
             double semiMajorAxis;
-            double p;
-            if (Math.Abs(eccentricity - 1.0) > 1e-15)
+            double p; //wtf is p? idk. it's not used, but it was in the origional formula. 
+            if (Math.Abs(eccentricity) > 1) //hypobola
+            {
+                semiMajorAxis = -(-standardGravParam / (2 * specificOrbitalEnergy));
+                p = semiMajorAxis * (1 - eccentricity * eccentricity);
+            }
+            else if (Math.Abs(eccentricity) < 1) //ellipse
             {
                 semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
-            else
+            else //parabola
             {
                 p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
                 semiMajorAxis = double.MaxValue;
             }
 
+            /*
+            if (Math.Abs(eccentricity - 1.0) > 1e-15)
+            {
+                semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
+                p = semiMajorAxis * (1 - eccentricity * eccentricity);
+            }
+            else //parabola
+            {
+                p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
+                semiMajorAxis = double.MaxValue;
+            }
+*/
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
             double linierEccentricity = eccentricity * semiMajorAxis;

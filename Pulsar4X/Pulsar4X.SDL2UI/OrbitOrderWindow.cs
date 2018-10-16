@@ -126,6 +126,11 @@ namespace Pulsar4X.SDL2UI
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
                 _state.MapRendering.UIWidgets.Add(_orbitWidget);
             }
+            if (_moveWidget == null)
+            {
+                _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntity.Entity);
+                _state.MapRendering.UIWidgets.Add(_moveWidget);
+            }
 
             _moveWidget.SetArrivalTarget(TargetEntity.Entity);
 
@@ -246,9 +251,7 @@ namespace Pulsar4X.SDL2UI
                                 break;
                             case States.NeedsInsertionPoint:
                                 {
-
-                                    
-
+                                                                   
                                     var mousePos = ImGui.GetMousePos();
 
                                     var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
@@ -353,10 +356,16 @@ namespace Pulsar4X.SDL2UI
             CurrentState = States.NeedsEntity;
 
 
-            if(_orbitWidget != null)
+            if (_orbitWidget != null)
+            {
                 _state.MapRendering.UIWidgets.Remove(_orbitWidget);
+                _orbitWidget = null;
+            }
             if (_moveWidget != null)
+            {
                 _state.MapRendering.UIWidgets.Remove(_moveWidget);
+                _moveWidget = null;
+            }
         }
     }
 }

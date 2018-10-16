@@ -209,6 +209,9 @@ float nextLargeGFPS = 0;
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
                                     ImGui.Text("SOI Radius: " + Distance.AuToKm( GMath.GetSOI(_state.LastClickedEntity.Entity)));
+                                    ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
+                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis);   
+                                                
                                 }
                             }
                             if (_state.LastClickedEntity.OrbitIcon != null)

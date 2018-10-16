@@ -261,7 +261,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            PointD[] pnts = CreatePrimitiveShapes.CreateArrow();
+            PointD[] pnts = CreatePrimitiveShapes.CreateArrow(24);
             List<PointD> arrowPoints = new List<PointD>(pnts.Length);
             foreach (var point in pnts)
             {

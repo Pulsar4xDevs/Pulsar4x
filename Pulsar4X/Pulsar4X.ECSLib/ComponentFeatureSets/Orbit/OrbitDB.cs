@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
         public DateTime Epoch { get; internal set; }
 
         /// <summary>
-        /// 2-Body gravitational parameter of system.
+        /// 2-Body gravitational parameter of system in km^3/s^2
         /// </summary>
         [PublicAPI]
         public double GravitationalParameter { get; private set; }
@@ -112,14 +112,16 @@ namespace Pulsar4X.ECSLib
         /// <param name="parent">Parent.</param>
         /// <param name="entity">Entity.</param>
         /// <param name="velocity">Velocity.</param>
-        public static OrbitDB FromVector(Entity parent, Entity entity, Vector4 velocity)
+        public static OrbitDB FromVector(Entity parent, Entity entity, Vector4 velocity, DateTime epoch)
         {
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
             var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
             //ralitive position.
-            var position = parent.GetDataBlob<PositionDB>().AbsolutePosition_AU - entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
 
-            var epoch = parent.Manager.ManagerSubpulses.SystemLocalDateTime;
+            var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), epoch); //need to use the parent position at the epoch
+            var position = parentPos - entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+
+            //var epoch = parent.Manager.ManagerSubpulses.SystemLocalDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
             var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);

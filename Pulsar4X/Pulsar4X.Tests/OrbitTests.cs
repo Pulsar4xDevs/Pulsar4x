@@ -168,7 +168,9 @@ namespace Pulsar4X.Tests
                 Assert.IsTrue(objOrbit.Inclination == 0);
             }
 
-
+            var speedVectorAU = OrbitProcessor.PreciseOrbitalVector(sgp, position, ke.SemiMajorAxis);
+            var speedVectorAU2 = OrbitProcessor.PreciseOrbitalVector(objOrbit, new DateTime());
+            Assert.AreEqual(speedVectorAU, speedVectorAU2);
         }
 
         [Test]
