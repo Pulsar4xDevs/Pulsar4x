@@ -123,6 +123,10 @@ namespace Pulsar4X.SDL2UI
 
                 icon.OnPhysicsUpdate();
             }
+            foreach (var icon in _moveIcons.Values.ToArray())
+            {
+                icon.OnPhysicsUpdate();
+            }
             foreach (var icon in _nameIcons.Values)
             {
                 icon.OnPhysicsUpdate();

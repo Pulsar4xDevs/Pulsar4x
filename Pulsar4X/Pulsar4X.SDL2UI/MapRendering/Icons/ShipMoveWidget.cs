@@ -6,13 +6,14 @@ namespace Pulsar4X.SDL2UI
 {
     public class ShipMoveWidget : Icon
     {
+        //PositionDB _positionDB;
         Vector4 _translateStartPoint = new Vector4();
         Vector4 _translateEndPoint = new Vector4();
-        Vector4 _currentPosition;
+        Vector4 _currentPosition = new Vector4();
         public byte Red = 255;
         public byte Grn = 255;
         public byte Blu = 0;
-        byte alpha = 255;
+        byte alpha = 100;
         SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[2];
         public ShipMoveWidget(Entity entity): base(new Vector4())
         {
@@ -27,11 +28,16 @@ namespace Pulsar4X.SDL2UI
                 var orderable = entity.GetDataBlob<OrderableDB>();
                 var lst = orderable.GetActionList();
             }
+            _positionDB = entity.GetDataBlob<PositionDB>();
 
 
         }
 
+        public override void OnPhysicsUpdate()
+        {
+            _currentPosition = _positionDB.AbsolutePosition_AU; 
 
+        }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
@@ -40,12 +46,17 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[2];
 
 
-
+            /*
             var translated = matrix.Transform(_translateStartPoint.X, _translateStartPoint.Y);  
             int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
             int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
             _drawPoints[0] = new SDL.SDL_Point() { x = x, y = y };
+*/
 
+            var translated = matrix.Transform(_currentPosition.X, _currentPosition.Y);
+            int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
+            int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
+            _drawPoints[0] = new SDL.SDL_Point() { x = x, y = y };
 
             translated = matrix.Transform(_translateEndPoint.X, _translateEndPoint.Y);
             x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
