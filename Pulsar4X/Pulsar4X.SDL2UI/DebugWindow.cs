@@ -210,7 +210,17 @@ float nextLargeGFPS = 0;
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
                                     ImGui.Text("SOI Radius: " + Distance.AuToKm( GMath.GetSOI(_state.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
-                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis);   
+                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis);
+                                    if(orbitDB.Parent != null)
+                                        ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
+                                    if (orbitDB.Children.Count > 0)
+                                    {
+                                        foreach (var item in orbitDB.Children)
+                                        {
+                                            ImGui.Text(item.GetDataBlob<NameDB>().DefaultName);
+                                        }
+
+                                    }
                                                 
                                 }
                             }

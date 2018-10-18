@@ -61,7 +61,12 @@ namespace Pulsar4X.ECSLib
                 _db.PredictedExitTime = targetIntercept.Item2;
                 _db.TranslateEntryPoint_AU = currentPos;
                 _db.SavedNewtonionVector_MS = currentVec;
-                _db.TargetEntity = _targetEntity;
+                if (_targetEntity.HasDataBlob<SensorInfoDB>())
+                {
+                    _db.TargetEntity = _targetEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                }
+                else
+                    _db.TargetEntity = _targetEntity;
                 if (EntityCommanding.HasDataBlob<OrbitDB>())
                     EntityCommanding.RemoveDataBlob<OrbitDB>();
                 EntityCommanding.SetDataBlob(_db);

@@ -164,6 +164,7 @@ namespace Pulsar4X.ECSLib
                 moveDB.IsAtTarget = true;
                 entity.RemoveDataBlob<TranslateMoveDB>();
                 entity.SetDataBlob(newOrbit);
+                newOrbit.SetParent(moveDB.TargetEntity);
             }
             else
             {
