@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
             //ralitive position.
 
             var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), epoch); //need to use the parent position at the epoch
-            var position = parentPos - entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+            var position = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
 
             //var epoch = parent.Manager.ManagerSubpulses.SystemLocalDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
