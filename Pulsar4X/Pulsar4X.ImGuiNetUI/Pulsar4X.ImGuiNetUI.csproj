@@ -41,10 +41,12 @@
     <Reference Include="ImGui.NET">
       <HintPath>..\packages\ImGui.NET.1.65.0-beta1\lib\netstandard2.0\ImGui.NET.dll</HintPath>
     </Reference>
+    <Reference Include="SDL2-CS">
+      <HintPath>Libs\SDL2-CS.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="Resources\Pause.ico" />
     <None Include="Resources\PauseDisabled.ico" />
     <None Include="Resources\Play.bmp" />
@@ -68,13 +70,12 @@
       <Link>SDL2-CS.pdb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Libs\libcimgui.so">
+      <Link>libcimgui.so</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SDL2-CS\SDL2_ttf.cs" />
-    <Compile Include="SDL2-CS\SDL2_mixer.cs" />
-    <Compile Include="SDL2-CS\SDL2_image.cs" />
-    <Compile Include="SDL2-CS\SDL2.cs" />
-    <Compile Include="SDL2-CS\LPUtf8StrMarshaler.cs" />
     <Compile Include="DebugWindow.cs" />
     <Compile Include="OrbitOrderWindow.cs" />
     <Compile Include="Program.cs" />
@@ -117,12 +118,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="IMGUISDL\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Libs\SDL2.dll">
-      <Link>SDL2.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

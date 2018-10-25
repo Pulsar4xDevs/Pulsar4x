@@ -20,8 +20,10 @@ namespace ImGuiSDL2CS {
                 return;
             _Initialized = true;
 
-            ImGuiIOPtr io = ImGui.GetIO();
+            IntPtr context = ImGui.CreateContext();
+            ImGui.SetCurrentContext(context);
 
+            ImGuiIOPtr io = ImGui.GetIO();
 
 
             io.KeyMap[(int)ImGuiKey.Tab] = (int) SDL.SDL_Keycode.SDLK_TAB;
@@ -53,6 +55,8 @@ namespace ImGuiSDL2CS {
             if (io.Fonts.Fonts.Size == 0)
                 io.Fonts.AddFontDefault();
         }
+
+
 
         public static void NewFrame(Vector2 size, Vector2 scale, ImVec2 mousePosition, uint mouseMask, ref float mouseWheel, bool[] mousePressed, ref double g_Time) {
             ImGuiIOPtr io = ImGui.GetIO();

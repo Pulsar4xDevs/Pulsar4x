@@ -46,6 +46,7 @@ namespace ImGuiSDL2CS {
             SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
         ) : base(title, x, y, width, height, flags) {
             _IsSuperClass = GetType() == typeof(ImGuiSDL2CSWindow);
+            var io = ImGui.GetIO();
             ImGuiSDL2CSHelper.Init();
             OnEvent = ImGuiOnEvent;
             OnLoop = ImGuiOnLoop;

@@ -114,10 +114,6 @@
     <Content Include="Resources\Play.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Libs\SDL2.dll">
-      <Link>SDL2.dll</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\PulsarLogo.bmp">
@@ -129,6 +125,9 @@
     </None>
     <None Include="Resources\Play.ico" />
     <None Include="packages.config" />
+    <None Include="Libs\SDL2.dll">
+      <Link>SDL2.dll</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
