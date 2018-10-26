@@ -106,7 +106,6 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-
             if (_state.Camera.IsGrabbingMap)
             {
                 int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;

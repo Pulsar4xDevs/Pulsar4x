@@ -79,7 +79,7 @@ namespace ImGuiSDL2CS {
             uint mouseMask = SDL.SDL_GetMouseState(out mouseX, out mouseY);
             if ((SDL.SDL_GetWindowFlags(Handle) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MOUSE_FOCUS) == 0)
                 mouseX = mouseY = -1;
-            ImGuiSDL2CSHelper.NewFrame(Size, Vector2.One, new ImVec2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
+            ImGuiSDL2CSHelper.NewFrame(Size, Vector2.One, new Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
 
             ImGuiLayout();
 
@@ -128,6 +128,8 @@ namespace ImGuiSDL2CS {
             io.Fonts.ClearTexData(); // Clears CPU side texture data.
             GL.BindTexture(GL.Enum.GL_TEXTURE_2D, lastTexture);
         }
+
+
 
         protected override void Dispose(bool disposing) {
             ImGuiIOPtr io = ImGui.GetIO();

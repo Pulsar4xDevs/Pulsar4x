@@ -58,7 +58,7 @@ namespace ImGuiSDL2CS {
 
 
 
-        public static void NewFrame(Vector2 size, Vector2 scale, ImVec2 mousePosition, uint mouseMask, ref float mouseWheel, bool[] mousePressed, ref double g_Time) {
+        public static void NewFrame(Vector2 size, Vector2 scale, Vector2 mousePosition, uint mouseMask, ref float mouseWheel, bool[] mousePressed, ref double g_Time) {
             ImGuiIOPtr io = ImGui.GetIO();
             io.DisplaySize = size;
             io.DisplayFramebufferScale = scale;
@@ -67,7 +67,7 @@ namespace ImGuiSDL2CS {
             io.DeltaTime = g_Time > 0D ? (float) (currentTime - g_Time) : (1f/60f);
             g_Time = currentTime;
 
-            //io.MousePosition = mousePosition;
+            io.MousePos = mousePosition;
 
             io.MouseDown[0] = mousePressed[0] || (mouseMask & SDL.SDL_BUTTON(SDL.SDL_BUTTON_LEFT)) != 0;
             io.MouseDown[1] = mousePressed[1] || (mouseMask & SDL.SDL_BUTTON(SDL.SDL_BUTTON_RIGHT)) != 0;

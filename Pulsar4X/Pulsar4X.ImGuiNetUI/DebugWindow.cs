@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
+
 using ImGuiNET;
-using ImGuiSDL2CS;
+
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
@@ -11,10 +13,7 @@ namespace Pulsar4X.SDL2UI
         
         float largestGFPS = 0;
         int largestIndex = 0;
-/*
-float nextLargeGFPS = 0;
-        int nextLargeIndex = 0;
-*/
+
         float _currentGFPS;
         int _gameRateIndex = 0;
         float[] _gameRates = new float[80];
@@ -29,7 +28,7 @@ float nextLargeGFPS = 0;
         bool _dateChangeSinceLastFrame = true;
         bool _isRunningFrame = false;
 
-        List<Vector4> positions = new List<Vector4>();
+        List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
 
         private DebugWindow() 
         {
@@ -82,24 +81,7 @@ float nextLargeGFPS = 0;
             {
                 largestIndex++;
             }
-            /*
-            else if (_currentGFPS > nextLargeGFPS)
-            {
-                nextLargeGFPS = _currentGFPS;
-                nextLargeIndex = 0;
-            }
-            if (largestIndex > _gameRates.Length * 2)
-            {
-                largestGFPS = nextLargeGFPS;
-                largestIndex = nextLargeIndex;
-                nextLargeGFPS = _currentGFPS;
-                nextLargeIndex = 0;
-            }
-            if(nextLargeIndex > _gameRates.Length)
-            {
-                nextLargeGFPS = _currentGFPS;
-                nextLargeIndex = 0;
-            }*/
+
             _gameRates[_gameRateIndex] = _currentGFPS;
             if (_gameRateIndex >= _gameRates.Length - 1)
                 _gameRateIndex = 0;
@@ -133,7 +115,7 @@ float nextLargeGFPS = 0;
         }
 
         DateTime lastDate = new DateTime();
-        Vector4 pos = new Vector4();
+        ECSLib.Vector4 pos = new ECSLib.Vector4();
         double truAnomoly = 0;
 
         internal override void Display()
@@ -158,15 +140,16 @@ float nextLargeGFPS = 0;
                         //core game processing rate.
                         //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
                         //ImGui.PlotHistogram("##GRHistogram1", _gameRatesDisplay, 0 , _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
-                        /*
-                        ImGui.PlotHistogram("Game Tick ##GTHistogram", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new ImVec2(248, 60), sizeof(float));
-                        ImGui.PlotLines("Game Tick ##GTPlotlines", _gameRates, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new ImVec2(248, 60), sizeof(float));
+                        //string label, ref float values... 
+                        //ImGui.PlotHistogram(
+                        ImGui.PlotHistogram("Game Tick ##GTHistogram", ref _gameRates[0], _gameRates.Length , _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new Vector2(248, 60), sizeof(float));
+                        ImGui.PlotLines("Game Tick ##GTPlotlines", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new Vector2(248, 60), sizeof(float));
                         //current star system processing rate. 
-                        ImGui.PlotHistogram("System Tick ##STHistogram", _systemRates, _systemRateIndex, _currentSFPS.ToString(), 0f, 1f, new ImVec2(248, 60), sizeof(float));
-                        ImGui.PlotLines("System Tick ##STPlotlines", _systemRates, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new ImVec2(248, 60), sizeof(float));
+                        ImGui.PlotHistogram("System Tick ##STHistogram", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0f, 1f, new Vector2(248, 60), sizeof(float));
+                        ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new Vector2(248, 60), sizeof(float));
                         //ui framerate
-                        ImGui.PlotHistogram("Frame Rate ##FPSHistogram", _frameRates, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new ImVec2(248, 60), sizeof(float));
-*/
+                        ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new Vector2(248, 60), sizeof(float));
+
                     }
 
                     if (_state.LastClickedEntity.Name != null)
@@ -248,7 +231,7 @@ float nextLargeGFPS = 0;
                                     ImGui.Text("NonNewt Engine Power: " + propulsionDB.TotalEnginePower);
                                     ImGui.Text("Max Speed: " + propulsionDB.MaximumSpeed_MS);
                                     ImGui.Text("CurrentVector: " + propulsionDB.CurrentVectorMS);
-                                    ImGui.Text("Current Speed: " + Vector4.Magnitude( propulsionDB.CurrentVectorMS));
+                                    ImGui.Text("Current Speed: " + ECSLib.Vector4.Magnitude( propulsionDB.CurrentVectorMS));
                                     if (_state.LastClickedEntity.Entity.HasDataBlob<CargoStorageDB>())
                                     {
                                         var fuelsGuid = propulsionDB.FuelUsePerKM;
