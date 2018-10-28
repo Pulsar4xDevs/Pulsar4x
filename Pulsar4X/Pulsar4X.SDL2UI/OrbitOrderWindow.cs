@@ -9,7 +9,11 @@ namespace Pulsar4X.SDL2UI
        
         EntityState OrderingEntity;
 
-        EntityState TargetEntity;
+        EntityState TargetEntity 
+        { 
+            get; 
+            set; 
+        }
         //Vector4 _apoapsisPoint;
         //Vector4 _periapsisPoint;
         double _apoapsisKm;

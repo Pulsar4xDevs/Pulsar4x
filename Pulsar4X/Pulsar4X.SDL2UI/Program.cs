@@ -167,11 +167,11 @@ namespace Pulsar4X.SDL2UI
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
-            /*
+
             var imgSize = new SDL.SDL_Rect() { x = 0, y = 0, h = 98, w = 273 };
             var txtr = (IntPtr)_state.SDLImageDictionary["Logo"];
             SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, txtr, ref imgSize, ref imgSize);
-            */
+
 
             _state.MapRendering.Draw();
 

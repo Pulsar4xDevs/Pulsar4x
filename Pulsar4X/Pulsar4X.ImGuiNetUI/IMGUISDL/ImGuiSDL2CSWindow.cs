@@ -125,6 +125,7 @@ namespace ImGuiSDL2CS {
 
             // Store the texture identifier in the ImFontAtlas substructure.
             io.Fonts.SetTexID(new IntPtr( g_FontTexture));
+            ImGuiSDL2CSHelper.FontTextureID = g_FontTexture;
             io.Fonts.ClearTexData(); // Clears CPU side texture data.
             GL.BindTexture(GL.Enum.GL_TEXTURE_2D, lastTexture);
         }

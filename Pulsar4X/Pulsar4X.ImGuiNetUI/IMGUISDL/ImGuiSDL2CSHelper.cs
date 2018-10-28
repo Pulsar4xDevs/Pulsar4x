@@ -14,7 +14,7 @@ namespace ImGuiSDL2CS {
 
         private static bool _Initialized = false;
         public static bool Initialized => _Initialized;
-
+        public static int FontTextureID;
         public static void Init() {
             if (_Initialized)
                 return;
@@ -148,18 +148,36 @@ namespace ImGuiSDL2CS {
                 long idxBufferOffset = 0;
                 for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; cmdi++) {
                     ImDrawCmdPtr pcmd = cmdList.CmdBuffer[cmdi];
-                    if (pcmd.UserCallback != IntPtr.Zero) {
+
+                    if (pcmd.UserCallback != IntPtr.Zero)
+                    {
                         throw new NotImplementedException();
                         //pcmd.InvokeUserCallback(ref cmdList, ref pcmd);
-                    } else {
-                        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (int) pcmd.TextureId);
+                    }
+                    else if (FontTextureID == (int)pcmd.TextureId)
+                    {
+                        GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (int)pcmd.TextureId);
                         GL.Scissor(
-                            (int) pcmd.ClipRect.X,
-                            (int) (io.DisplaySize.Y - pcmd.ClipRect.W),
-                            (int) (pcmd.ClipRect.Z - pcmd.ClipRect.X),
-                            (int) (pcmd.ClipRect.W - pcmd.ClipRect.Y)
+                            (int)pcmd.ClipRect.X,
+                            (int)(io.DisplaySize.Y - pcmd.ClipRect.W),
+                            (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
+                            (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y)
                         );
-                        GL.DrawElements(GL.Enum.GL_TRIANGLES, (int) pcmd.ElemCount, GL.Enum.GL_UNSIGNED_SHORT, new IntPtr((long) idxBuffer.Data + idxBufferOffset));
+                        GL.DrawElements(GL.Enum.GL_TRIANGLES, (int)pcmd.ElemCount, GL.Enum.GL_UNSIGNED_SHORT, new IntPtr((long)idxBuffer.Data + idxBufferOffset));
+
+                    }
+                    else
+                    {
+                        float w, h;
+                        SDL.SDL_GL_BindTexture(pcmd.TextureId, out w, out h);
+                        GL.Scissor(
+                        (int)pcmd.ClipRect.X,
+                        (int)(io.DisplaySize.Y - pcmd.ClipRect.W),
+                        (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
+                        (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y)
+                        );
+                        GL.DrawElements(GL.Enum.GL_TRIANGLES, (int)pcmd.ElemCount, GL.Enum.GL_UNSIGNED_SHORT, new IntPtr((long)idxBuffer.Data + idxBufferOffset));
+
                     }
                     idxBufferOffset += pcmd.ElemCount * 2 /*sizeof(ushort)*/;
                 }
@@ -203,7 +221,7 @@ namespace ImGuiSDL2CS {
                     {
                         // THIS IS THE ONLY UNSAFE THING LEFT!
 
-                        ImGui.GetIO().AddInputCharactersUTF8(e.text.ToString()); //maybe?
+                        ImGui.GetIO().AddInputCharactersUTF8(e.text.ToString()); 
                     }
                     return true;
                 case SDL.SDL_EventType.SDL_KEYDOWN:

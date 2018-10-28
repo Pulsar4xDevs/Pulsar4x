@@ -328,6 +328,7 @@ namespace Pulsar4X.SDL2UI
                     icon.Draw(rendererPtr, _camera);
                 }
 
+                //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
                 SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);

@@ -90,10 +90,10 @@ namespace Pulsar4X.SDL2UI
             int y = (int)(Y + camerapoint.y + ViewOffset.y);
             Vector2 pos = new Vector2(x, y);
 
+
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
+
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-
-
             ImGui.Begin(NameString, ref IsActive, _flags);
 
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
@@ -122,7 +122,8 @@ namespace Pulsar4X.SDL2UI
 
 
             ImGui.End();
-            ImGui.PopStyleColor(); //have to pop the color change after pushing it. 
+            ImGui.PopStyleColor(); //have to pop the color change after pushing it.
+
         }
 
     }

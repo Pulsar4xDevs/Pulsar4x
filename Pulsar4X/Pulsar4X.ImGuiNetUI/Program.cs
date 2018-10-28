@@ -143,14 +143,10 @@ namespace Pulsar4X.SDL2UI
 
         public unsafe override void ImGuiLayout()
         {
-            /* uncomment this to attempt image display 
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(1,1,1,1), new ImVec4(1, 0, 0, 1));
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(1,1,1,1), new ImVec4(255, 0, 0, 255));
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(1, 1), new ImVec4(0,0,0,1), new ImVec4(255, 0, 0, 255));
-            ImGui.Image(_state.GLImageDictionary["PlayImg"], new ImVec2(16, 16), new ImVec2(0, 0), new ImVec2(16, 16), new ImVec4(0,0,0,1), new ImVec4(255, 0, 0, 255));
-*/
+            ImGui.Image(_state.SDLImageDictionary["Logo"], new System.Numerics.Vector2(273, 98));
+            ImGui.Image(_state.SDLImageDictionary["PlayImg"], new System.Numerics.Vector2(16, 16)); 
 
-            //ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
+            ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
 
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {
@@ -168,11 +164,11 @@ namespace Pulsar4X.SDL2UI
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
-            /*
-            var imgSize = new SDL.SDL_Rect() { x = 0, y = 0, h = 98, w = 273 };
-            var txtr = (IntPtr)_state.SDLImageDictionary["Logo"];
-            SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, txtr, ref imgSize, ref imgSize);
-            */
+
+            //var imgSize = new SDL.SDL_Rect() { x = 0, y = 0, h = 98, w = 273 };
+            //var txtr = (IntPtr)_state.img2;//(IntPtr)_state.SDLImageDictionary["Logo"];
+            //SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, txtr, ref imgSize, ref imgSize);
+
 
             _state.MapRendering.Draw();
 

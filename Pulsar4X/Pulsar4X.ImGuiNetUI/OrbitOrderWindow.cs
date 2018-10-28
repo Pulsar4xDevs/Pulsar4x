@@ -41,7 +41,7 @@ namespace Pulsar4X.SDL2UI
 
         private OrbitOrderWindow(EntityState entity, bool smMode = false)
         {
-            
+
 
             OrderingEntity = entity;
             _smMode = smMode;
@@ -50,7 +50,7 @@ namespace Pulsar4X.SDL2UI
             _displayText = "Orbit Order: " + OrderingEntity.Name;
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
-
+            TargetEntity = new EntityState() { Name = "" };
             if (OrderingEntity.Entity.HasDataBlob<OrbitDB>())
             {
                 //_orbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());

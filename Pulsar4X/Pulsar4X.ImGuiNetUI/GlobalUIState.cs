@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
 
 
         internal UserOrbitSettings UserOrbitSettings = new UserOrbitSettings();
-        internal Dictionary<string, int> SDLImageDictionary = new Dictionary<string, int>();
+        internal Dictionary<string, IntPtr> SDLImageDictionary = new Dictionary<string, IntPtr>();
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
         internal EntityState LastClickedEntity;
@@ -67,13 +67,15 @@ namespace Pulsar4X.SDL2UI
 
             //LoadedWindows.Add(SettingsWindow);
 
-            IntPtr logoPtr = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
-            SDLImageDictionary.Add("Logo", SDL.SDL_CreateTextureFromSurface(rendererPtr, logoPtr).ToInt32());
+            IntPtr sdlSurface = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
+            IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
+            SDLImageDictionary.Add("Logo", SDL.SDL_CreateTextureFromSurface(rendererPtr, sdltexture));
 
             IntPtr playImgPtr = SDL.SDL_LoadBMP("Resources/Play.bmp");
-            SDLImageDictionary.Add("PlayImg", SDL.SDL_CreateTextureFromSurface(rendererPtr, playImgPtr).ToInt32());
+            sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, playImgPtr);
+            SDLImageDictionary.Add("PlayImg", SDL.SDL_CreateTextureFromSurface(rendererPtr, sdltexture));
 
-
+            /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
             GL.BindTexture(GL.Enum.GL_TEXTURE_2D, gltxtrID);
@@ -82,6 +84,7 @@ namespace Pulsar4X.SDL2UI
 
             GLImageDictionary["PlayImg"] = gltxtrID;
             GL.Enable(GL.Enum.GL_TEXTURE_2D);
+            */
         }
 
 
