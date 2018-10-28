@@ -68,7 +68,13 @@ namespace Pulsar4X.SDL2UI
             //LoadedWindows.Add(SettingsWindow);
 
             IntPtr sdlSurface = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
+            //string err = SDL.SDL_GetError();
             IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
+            //err = SDL.SDL_GetError();
+            int w, h, a;
+            uint f;
+               
+            int foo = SDL.SDL_QueryTexture(sdltexture, out f, out a, out w, out h);
             SDLImageDictionary.Add("Logo", SDL.SDL_CreateTextureFromSurface(rendererPtr, sdltexture));
 
             IntPtr playImgPtr = SDL.SDL_LoadBMP("Resources/Play.bmp");

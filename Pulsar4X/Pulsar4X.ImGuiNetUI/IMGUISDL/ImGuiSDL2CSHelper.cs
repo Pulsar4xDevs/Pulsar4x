@@ -169,13 +169,17 @@ namespace ImGuiSDL2CS {
                     else
                     {
                         float w, h;
-                        SDL.SDL_GL_BindTexture(pcmd.TextureId, out w, out h);
+                        var txid = pcmd.TextureId;
+                        var sdlid = SDL.SDL_GL_BindTexture(pcmd.TextureId, out w, out h);
+
+                        string errstr = SDL.SDL_GetError();
                         GL.Scissor(
                         (int)pcmd.ClipRect.X,
                         (int)(io.DisplaySize.Y - pcmd.ClipRect.W),
                         (int)(pcmd.ClipRect.Z - pcmd.ClipRect.X),
                         (int)(pcmd.ClipRect.W - pcmd.ClipRect.Y)
                         );
+
                         GL.DrawElements(GL.Enum.GL_TRIANGLES, (int)pcmd.ElemCount, GL.Enum.GL_UNSIGNED_SHORT, new IntPtr((long)idxBuffer.Data + idxBufferOffset));
 
                     }

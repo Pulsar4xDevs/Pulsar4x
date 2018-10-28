@@ -47,13 +47,27 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Pause.ico" />
-    <None Include="Resources\PauseDisabled.ico" />
-    <None Include="Resources\Play.bmp" />
-    <None Include="Resources\Play.ico" />
-    <None Include="Resources\PlayDisabled.ico" />
-    <None Include="Resources\PulsarLogo.bmp" />
-    <None Include="Resources\PulsarLogo.png" />
+    <None Include="Resources\Pause.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\PauseDisabled.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Play.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Play.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\PlayDisabled.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\PulsarLogo.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\PulsarLogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Libs\SDL2-CS.dll" />
     <None Include="Libs\SDL2-CS.dll.config" />
     <None Include="Libs\SDL2-CS.pdb" />
