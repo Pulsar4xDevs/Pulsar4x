@@ -73,10 +73,10 @@ namespace Pulsar4X.SDL2UI
                 AdjustTimeSpan();
             ImGui.SameLine();
 
-            if (ImGui.ImageButton(new IntPtr( _state.GLImageDictionary["PlayImg"]), new Vector2(16, 16), new Vector2(0, 0), new Vector2(16, 16), 0, new Vector4(0, 0, 0, 0), new Vector4(0, 0, 0, 0)))
+            if (ImGui.ImageButton(_state.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))
                 PausePlayPressed();
             ImGui.SameLine();
-            if (ImGui.Button("||>"))
+            if (ImGui.ImageButton(_state.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))
                 OneStepPressed();
             if (_expanded)
             {
