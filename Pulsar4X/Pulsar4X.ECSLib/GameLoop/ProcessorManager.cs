@@ -45,11 +45,28 @@ namespace Pulsar4X.ECSLib
             return _hotloopProcessors[typeof(T)];
         }
 
+        /// <summary>
+        /// Runs a hotloop process on a single entity.
+        /// </summary>
+        /// <param name="entity">Entity.</param>
+        /// <param name="deltaSeconds">Delta seconds.</param>
+        /// <typeparam name="T">The datablob for the given hotloop process</typeparam>
         internal void RunProcessOnEntity<T>(Entity entity, int deltaSeconds)
             where T : BaseDataBlob
         {
             var type = typeof(T);
             _hotloopProcessors[type].ProcessEntity(entity, deltaSeconds);
+        }
+
+        /// <summary>
+        /// Runs a given instance process on an entity.
+        /// </summary>
+        /// <param name="typeName">the typename of the instance process</param>
+        /// <param name="entity">Entity.</param>
+        /// <param name="dateTime">Date time.</param>
+        internal void RunInstanceProcessOnEntity(string typeName, Entity entity, DateTime dateTime)
+        {
+            _instanceProcessors[typeName].ProcessEntity(entity, dateTime);
         }
 
         internal void RecalcEntity(Entity entity)
@@ -160,7 +177,7 @@ namespace Pulsar4X.ECSLib
     public abstract class IInstanceProcessor
     {
         internal string TypeName { get { return GetType().Name; } }
-        internal abstract void ProcessEntity(Entity entity, int deltaSeconds);
+        internal abstract void ProcessEntity(Entity entity, DateTime atDateTime);
     }
 
 

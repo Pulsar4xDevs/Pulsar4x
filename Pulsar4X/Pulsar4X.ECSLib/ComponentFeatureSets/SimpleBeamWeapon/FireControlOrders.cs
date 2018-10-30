@@ -48,6 +48,10 @@ namespace Pulsar4X.ECSLib
             {
                 var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>();
                 fcinstance.AssignedWeapons = _weaponsAssigned;
+                foreach (var wpn in _weaponsAssigned)
+                {
+                    wpn.GetDataBlob<WeaponInstanceStateDB>().FireControl = _fireControlComponent;
+                }
                 IsRunning = true;
             }
         }
@@ -176,12 +180,17 @@ namespace Pulsar4X.ECSLib
 
         public FireModes IsFiring;
 
-        SetOpenFireControlOrder(Guid factionGuid, Guid shipGuid, Guid fireControlGuid, FireModes isFiring)
+        public static void CreateCmd(Game game, Entity faction, Entity shipEntity, Guid fireControlGuid, FireModes isFiring)
         {
-            RequestingFactionGuid = factionGuid;
-            EntityCommandingGuid = shipGuid;
-            FireControlGuid = fireControlGuid;
-            IsFiring = isFiring;
+            var cmd = new SetOpenFireControlOrder()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = shipEntity.Guid,
+                CreatedDate = shipEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                FireControlGuid = fireControlGuid,
+                IsFiring = isFiring
+            };
+            game.OrderHandler.HandleOrder(cmd);
         }
 
         internal override void ActionCommand(Game game)
@@ -190,9 +199,16 @@ namespace Pulsar4X.ECSLib
             {
                 var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>();
                 if (IsFiring == FireModes.OpenFire)
+                {
                     fcinstance.IsEngaging = true;
+                    DateTime dateTimeNow = _fireControlComponent.Manager.ManagerSubpulses.SystemLocalDateTime;
+                    foreach (var wpn in fcinstance.AssignedWeapons)
+                        game.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor), wpn, dateTimeNow);
+                }
                 else if (IsFiring == FireModes.CeaseFire)
+                {
                     fcinstance.IsEngaging = false;
+                }
                 IsRunning = true;
             }
         }

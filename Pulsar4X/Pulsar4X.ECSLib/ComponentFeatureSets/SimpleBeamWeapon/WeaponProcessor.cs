@@ -7,36 +7,72 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    public static class WeaponProcessor
+    public class WeaponProcessor : IInstanceProcessor
     {
+        internal override void ProcessEntity(Entity beamWeapon, DateTime atDate)
+        {
+            WeaponInstanceStateDB stateInfo = beamWeapon.GetDataBlob<WeaponInstanceStateDB>();
+            if (stateInfo.FireControl != null) 
+            {
+                FireControlInstanceStateDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceStateDB>();
+                if (fireControl.IsEngaging)
+                {
+                    if (!stateInfo.ReadyToFire)
+                    {
+                        if (stateInfo.CoolDown <= atDate)
+                        {
+                            stateInfo.ReadyToFire = true;
+                            FireBeamWeapons(beamWeapon, atDate);
+                        }
+                    }
+                    else
+                        FireBeamWeapons(beamWeapon, atDate);
+                    beamWeapon.Manager.ManagerSubpulses.AddEntityInterupt(stateInfo.CoolDown, nameof(WeaponProcessor), beamWeapon);
+                }
+            }
+
+            
 
 
-        public static void FireBeamWeapons(StarSystem starSys, Entity beamWeapon)
+            
+            
+            
+        }
+
+        public static void FireBeamWeapons(Entity beamWeapon, DateTime atDate)
         {
 
             WeaponInstanceStateDB stateInfo = beamWeapon.GetDataBlob<WeaponInstanceStateDB>();
             FireControlInstanceStateDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceStateDB>();
+            var myPos = beamWeapon.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
+            var targetPos = fireControl.Target.GetDataBlob<PositionDB>();
 
-            // only fire if the beam weapon is finished with its cooldown
-            if (stateInfo.CoolDown <= TimeSpan.FromSeconds(0) && stateInfo.FireControl != null && fireControl.IsEngaging)
+
+            //TODO chance to hit
+            //int damageAmount = 10;//TODO damageAmount calc
+            int damageAmount = beamWeapon.GetDataBlob<BeamWeaponAtbDB>().BaseDamage; // TODO: Better damage calculation
+
+            double range = myPos.GetDistanceTo(myPos);
+
+            // only fire if target is in range TODO: fire anyway, but miss. TODO: this will be wrong if we do movement last, this needs to be done after movement. 
+            if (range <= Math.Min(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
             {
-                //TODO chance to hit
-                //int damageAmount = 10;//TODO damageAmount calc
-                int damageAmount = beamWeapon.GetDataBlob<BeamWeaponAtbDB>().BaseDamage; // TODO: Better damage calculation
+                DamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
+                stateInfo.CoolDown = atDate + TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
+                stateInfo.ReadyToFire = false;    
 
-                double range = fireControl.Target.GetDataBlob<PositionDB>().GetDistanceTo(beamWeapon.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>());
+            }
 
-                // only fire if target is in range
-                if (range <= Math.Min(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
-                {
-                    DamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
-                    stateInfo.CoolDown = TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
-                    //starSys.SystemManager.ManagerSubpulses.AddEntityInterupt(starSys.SystemManager.ManagerSubpulses.SystemLocalDateTime + stateInfo.CoolDown, PulseActionEnum.SomeOtherProcessor, beamWeapon);
-                }
 
-                
-            }            
+
         }
+    }
+
+    public static class WeaponHelpers
+    {
+
+
+
 
         public static void RecalcBeamWeapons(Entity ship)
         {

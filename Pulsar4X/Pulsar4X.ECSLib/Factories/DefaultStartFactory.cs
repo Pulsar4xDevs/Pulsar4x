@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
             foreach (var entityItem in entitiesWithSensors)
             {
                 if(entityItem.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity != null) //don't do the designs, just the actual physical entity components. 
-                    game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, 0);
+                    game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, game.CurrentDateTime);
             }
 
             OrbitProcessor.UpdateSystemOrbits(sol, sol.ManagerSubpulses.SystemLocalDateTime);//make sure stuff is at the right datetime.

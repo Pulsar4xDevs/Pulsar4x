@@ -29,6 +29,11 @@ namespace Pulsar4X.SDL2UI
             IsActive = true;
         }
 
+        private void OpenFire(FireControlInstanceStateDB fc)
+        {
+            SetOpenFireControlOrder.CreateCmd(_state.Game, _state.Faction, _orderingEntity, fc.OwningEntity.Guid, SetOpenFireControlOrder.FireModes.OpenFire);
+        }
+
         internal static WeaponTargetingControl GetInstance(EntityState entity)
         {
             if (!_state.LoadedWindows.ContainsKey(typeof(WeaponTargetingControl)))
@@ -122,6 +127,8 @@ namespace Pulsar4X.SDL2UI
                         else
                             ImGui.Text(fc.Target.GetDataBlob<NameDB>().GetName(_state.Faction));
                         selectable++;
+                        if (ImGui.Button("Open Fire"))
+                            OpenFire(fc);
 
                     }
                     ImGui.EndGroup();

@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         Railgun,
     }
 
-    public class BeamWeaponAtbDB : BaseDataBlob
+    public class BeamWeaponAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         /// <summary>
         /// Max range of this weapon. Measured in KM.
@@ -78,6 +78,12 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new BeamWeaponAtbDB(MaxRange, BaseDamage, AccuracyMultiplier, PowerRequired, PowerRechargeRate, ShotsPerVolley, WeaponType);
+        }
+
+        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        {
+            if (!componentInstance.HasDataBlob<WeaponInstanceStateDB>())
+                componentInstance.SetDataBlob(new WeaponInstanceStateDB());
         }
     }
 }

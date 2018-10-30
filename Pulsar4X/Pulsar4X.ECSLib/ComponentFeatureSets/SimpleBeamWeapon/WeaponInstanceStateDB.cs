@@ -7,7 +7,9 @@ namespace Pulsar4X.ECSLib
     public class WeaponInstanceStateDB : BaseDataBlob
     {
         [JsonProperty]
-        public TimeSpan CoolDown { get; internal set; }
+        public DateTime CoolDown { get; internal set; }
+        [JsonProperty]
+        public bool ReadyToFire { get; internal set; }
         [JsonProperty]
         private Entity _fireControl;
         public Entity FireControl

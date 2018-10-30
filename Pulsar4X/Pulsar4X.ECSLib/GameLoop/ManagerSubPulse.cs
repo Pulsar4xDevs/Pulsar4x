@@ -318,7 +318,7 @@ namespace Pulsar4X.ECSLib
                     foreach(var entity in instanceProcessSet.Value)
                     {
                         var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
-                        processor.ProcessEntity(entity, deltaSeconds);
+                        processor.ProcessEntity(entity, nextInteruptDateTime);
                     }
                 }
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 

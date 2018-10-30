@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
         float _orbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
         float _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
-        SDL.SDL_Point[] _drawPoints;
+        SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
         bool IsClockwiseOrbit = true;
         #endregion
 

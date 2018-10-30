@@ -22,15 +22,6 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB mvDB = new MassVolumeDB();
             blobs.Add(mvDB);
 
-            //TODO: this seems ugly, consider using an Interface on the datablobs for this? YES: TODO put this in the IComponentDesignAttribute
-            if (design.HasDataBlob<BeamFireControlAtbDB>())
-                blobs.Add(new FireControlInstanceStateDB());
-
-            if (design.HasDataBlob<BeamWeaponAtbDB>() || design.HasDataBlob<SimpleBeamWeaponAtbDB>())
-                blobs.Add(new WeaponInstanceStateDB());
-            if (design.HasDataBlob<SensorReceverAtbDB>())
-                blobs.Add((SensorReceverAtbDB)design.GetDataBlob<SensorReceverAtbDB>().Clone());
-
             Entity newInstance = new Entity(manager, factionID, blobs);
             return newInstance;
         }

@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
                 { typeof(RefiningDB), new Action<RefiningDB>(processor => { RefiningProcessor.ReCalcRefiningRate(CurrentEntity); }) },
                 { typeof(ConstructionDB), new Action<ConstructionDB>(processor => { ConstructionProcessor.ReCalcConstructionRate(CurrentEntity); }) },
                 { typeof(ColonyLifeSupportDB), new Action<ColonyLifeSupportDB>(processor => {PopulationProcessor.ReCalcMaxPopulation(CurrentEntity); }) },
-                { typeof(BeamWeaponsDB), new Action<BeamWeaponsDB>(processor => {WeaponProcessor.RecalcBeamWeapons(CurrentEntity); }) },
+                { typeof(BeamWeaponsDB), new Action<BeamWeaponsDB>(processor => {WeaponHelpers.RecalcBeamWeapons(CurrentEntity); }) },
                 { typeof(CargoStorageDB), new Action<CargoStorageDB>(processor => {StorageSpaceProcessor.ReCalcCapacity(CurrentEntity); }) },
 
             };
