@@ -14,7 +14,11 @@ namespace Pulsar4X.ECSLib
 
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             ComponentInstanceInfoDB info = new ComponentInstanceInfoDB(design);
+            NameDB name = new NameDB(design.GetDataBlob<NameDB>().DefaultName);
+            name.SetName(factionID, design.GetDataBlob<NameDB>().GetName(factionID));
+
             blobs.Add(info);
+            blobs.Add(name);
             blobs.Add(new DesignInfoDB(design));
             // Added because each component instance needs its own copy of this datablob
 

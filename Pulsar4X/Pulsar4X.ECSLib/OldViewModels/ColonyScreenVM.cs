@@ -35,10 +35,10 @@ namespace Pulsar4X.ECSLib
 
         public string ColonyName
         {
-            get { return _colonyEntity.GetDataBlob<NameDB>().GetName(_factionEntity); }
+            get { return _colonyEntity.GetDataBlob<NameDB>().GetName(_factionEntity.Guid); }
             set
             {
-                _colonyEntity.GetDataBlob<NameDB>().SetName(_factionEntity, value);
+                _colonyEntity.GetDataBlob<NameDB>().SetName(_factionEntity.Guid, value);
                 OnPropertyChanged();
             }
         }

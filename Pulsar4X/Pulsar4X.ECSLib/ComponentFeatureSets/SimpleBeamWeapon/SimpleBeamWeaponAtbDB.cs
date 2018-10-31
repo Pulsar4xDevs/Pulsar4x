@@ -12,17 +12,17 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public double MaxRange { get; internal set; }
         [JsonProperty]
-        public double DamageAmount { get; internal set; }
+        public int DamageAmount { get; internal set; }
         [JsonProperty]
-        public double ReloadRate { get; internal set; }
+        public int ReloadRate { get; internal set; }
 
         public SimpleBeamWeaponAtbDB() { }
 
         public SimpleBeamWeaponAtbDB(double maxRange, double damageAmount, double reloadRate)
         {
             MaxRange = maxRange;
-            DamageAmount = damageAmount;
-            ReloadRate = reloadRate;
+            DamageAmount = (int)damageAmount;
+            ReloadRate = (int)reloadRate;
         }
 
         public SimpleBeamWeaponAtbDB(SimpleBeamWeaponAtbDB db)

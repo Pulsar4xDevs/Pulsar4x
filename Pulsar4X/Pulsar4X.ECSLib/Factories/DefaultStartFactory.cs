@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
             foreach (var entity in namedEntites)
             {
                 var nameDB = entity.GetDataBlob<NameDB>();
-                nameDB.SetName(factionEntity, nameDB.DefaultName);
+                nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
             }
 
 
@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).Guid);
 
 
-            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity, "UEF");
+            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
 
 
             // Todo: handle this in CreateShip

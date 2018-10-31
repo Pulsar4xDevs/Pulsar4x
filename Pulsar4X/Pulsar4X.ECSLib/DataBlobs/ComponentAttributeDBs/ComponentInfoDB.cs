@@ -49,6 +49,8 @@ namespace Pulsar4X.ECSLib
 
         public ConstructionType ConstructionType { get; internal set; }
 
+        public List<IComponentDesignAttribute> DesignAttributes = new List<IComponentDesignAttribute>();
+
         public ComponentInfoDB()
         {
         }

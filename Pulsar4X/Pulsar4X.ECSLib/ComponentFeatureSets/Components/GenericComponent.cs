@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         public static ComponentDesign StaticToDesign(ComponentTemplateSD component, FactionTechDB factionTech, StaticDataStore staticData)
         {
             ComponentDesign design = new ComponentDesign();
-
+            design.RawName = component.Name;
             design.Name = component.Name;
             design.Description = component.Description;
 
@@ -122,8 +122,8 @@ namespace Pulsar4X.ECSLib
             tech.CostFormula = componentDesign.ResearchCostValue.ToString();
 
             factionTech.ResearchableTechs.Add(tech, 0);
-            NameDB nameDB = new NameDB(componentDesign.Name);
-
+            NameDB nameDB = new NameDB(componentDesign.RawName);
+            nameDB.SetName(factionEntity.Guid, componentDesign.Name);
             Dictionary<Guid, int> mineralCosts = new Dictionary<Guid, int>();
             Dictionary<Guid, int> materalCosts = new Dictionary<Guid, int>();
             Dictionary<Guid, int> componentCosts = new Dictionary<Guid, int>();
@@ -166,6 +166,8 @@ namespace Pulsar4X.ECSLib
                     object[] constructorArgs = designAttribute.DataBlobArgs;
                     dynamic datablob = (BaseDataBlob)Activator.CreateInstance(designAttribute.DataBlobType, constructorArgs);
                     component.SetDataBlob(datablob);
+                    if(datablob is IComponentDesignAttribute)
+                        componentInfo.DesignAttributes.Add(datablob);
                 }
             }
 

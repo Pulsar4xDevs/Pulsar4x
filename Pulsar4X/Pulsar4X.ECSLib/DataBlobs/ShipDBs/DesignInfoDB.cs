@@ -13,6 +13,7 @@ namespace Pulsar4X.ECSLib
     {
         internal Entity DesignEntity { get; private set; }
 
+        internal List<IComponentDesignAttribute> DesignAttributes = new List<IComponentDesignAttribute>();
 
         public DesignInfoDB() { }
 

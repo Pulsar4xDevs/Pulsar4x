@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateColony(Entity factionEntity, Entity speciesEntity, Entity planetEntity)
         {
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
-            string planetName = planetEntity.GetDataBlob<NameDB>().GetName(factionEntity);
+            string planetName = planetEntity.GetDataBlob<NameDB>().GetName(factionEntity.Guid);
             NameDB name = new NameDB(planetName + " Colony"); // TODO: Review default name.
             blobs.Add(name);
             ColonyInfoDB colonyInfoDB = new ColonyInfoDB(speciesEntity, 0, planetEntity);

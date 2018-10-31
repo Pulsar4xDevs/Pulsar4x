@@ -42,9 +42,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (this.OwningEntity.GetDataBlob<NameDB>() != null)
                 {
-                    Entity faction;
-                    this.OwningEntity.Manager.FindEntityByGuid(OwningEntity.FactionOwner, out faction);
-                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(faction);
+                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.FactionOwner);
                 }
                 else return "Unknown Object"; 
             }

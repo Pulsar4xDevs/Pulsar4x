@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (entityItem.HasDataBlob<PositionDB>() && entityItem.HasDataBlob<NameDB>())
                 {
-                    TargetList.Add(entityItem.Guid, entityItem.GetDataBlob<NameDB>().GetName(faction));
+                    TargetList.Add(entityItem.Guid, entityItem.GetDataBlob<NameDB>().GetName(faction.Guid));
                     _targetDict.Add(entityItem.Guid, entityItem);
                 }
             }

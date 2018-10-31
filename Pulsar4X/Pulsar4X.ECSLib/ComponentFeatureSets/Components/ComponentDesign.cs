@@ -14,6 +14,7 @@ namespace Pulsar4X.ECSLib
     }
     public class ComponentDesign
     {
+        public string RawName { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
 

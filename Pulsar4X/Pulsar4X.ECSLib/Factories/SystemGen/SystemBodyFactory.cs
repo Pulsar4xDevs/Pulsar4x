@@ -173,7 +173,7 @@ namespace Pulsar4X.ECSLib
 
                 ProtoEntity newCometProto = CreateBaseBody();
                 NameDB cometName = newCometProto.GetDataBlob<NameDB>();
-                cometName.SetName(Entity.InvalidEntity, starName.DefaultName + " - Comet " + (i + 1));
+                cometName.SetName(Guid.Empty, starName.DefaultName + " - Comet " + (i + 1));
 
                 SystemBodyInfoDB cometBodyDB = newCometProto.GetDataBlob<SystemBodyInfoDB>();
                 cometBodyDB.BodyType = BodyType.Comet;
@@ -489,7 +489,7 @@ namespace Pulsar4X.ECSLib
             // Set this body's name.
             string parentName = parent.GetDataBlob<NameDB>().DefaultName;
             string bodyName = parentName + " - " + bodyCount + suffix;
-            body.GetDataBlob<NameDB>().SetName(Entity.InvalidEntity, bodyName);
+            body.GetDataBlob<NameDB>().SetName(Guid.Empty, bodyName);
         }
 
         private void GenerateMoons(StarSystem system, Entity parent, DateTime currentDateTime)

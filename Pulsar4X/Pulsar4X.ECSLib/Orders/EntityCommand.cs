@@ -118,7 +118,7 @@ namespace Pulsar4X.ECSLib
         internal override void ActionCommand(Game game)
         {
             var namedb = _entityCommanding.GetDataBlob<NameDB>();
-            namedb.SetName(_factionEntity, NewName);
+            namedb.SetName(_factionEntity.Guid, NewName);
             _isFinished = true;
         }
 

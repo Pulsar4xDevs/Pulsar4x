@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
             } 
 
             NameDB nameDB = new NameDB(shipName);
-            nameDB.SetName(ownerFaction, shipName);
+            nameDB.SetName(ownerFaction.Guid, shipName);
             protoShip.SetDataBlob(nameDB);
 
             OrderableDB orderableDB = new OrderableDB();
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
             var maintenance = new MaintenanceDB();
             var sensorProfile = new SensorProfileDB();
             var name = new NameDB(className);
-            name.SetName(faction, className);
+            name.SetName(faction.Guid, className);
             var componentInstancesDB = new ComponentInstancesDB();
             var massVolumeDB = new MassVolumeDB();
 

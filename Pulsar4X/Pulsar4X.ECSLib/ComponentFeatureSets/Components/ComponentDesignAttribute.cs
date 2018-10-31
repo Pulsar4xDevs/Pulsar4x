@@ -5,7 +5,7 @@ using NCalc;
 
 namespace Pulsar4X.ECSLib
 {
-    interface IComponentDesignAttribute
+    public interface IComponentDesignAttribute
     {
         //void OnComponentInstantiation(Entity component);
         void OnComponentInstalation(Entity parentEntity, Entity componentInstance);
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
         private StaticDataStore _staticDataStore;
         private FactionTechDB _factionTechDB;
         private ComponentDesign _design;
-        private ComponentDesignAttribute _designAbility;
+        private ComponentDesignAttribute _designAttribute;
         private Expression _expression;
 
         // ReSharper disable once NotAccessedField.Local (Used for debuging puroposes. though maybe it could be public and shown in the UI?)
@@ -193,7 +193,7 @@ namespace Pulsar4X.ECSLib
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
             _design = designAbility.ParentComponent;
-            _designAbility = designAbility;
+            _designAttribute = designAbility;
             ReplaceExpression(expressionString);
         }
 
@@ -226,7 +226,7 @@ namespace Pulsar4X.ECSLib
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
             _design = designAbility.ParentComponent;
-            _designAbility = designAbility;
+            _designAttribute = designAbility;
             _expression = expression;
             SetupExpression();
 
@@ -346,7 +346,7 @@ namespace Pulsar4X.ECSLib
             if (name == "GuidDict")
             {
                 Dictionary<Guid, double> dict = new Dictionary<Guid, double>();
-                foreach (var kvp in _designAbility.GuidDictionary)
+                foreach (var kvp in _designAttribute.GuidDictionary)
                 {
                     //MakeThisDependant(kvp.Value);
                     dict.Add((Guid.Parse(kvp.Key.ToString())), kvp.Value.DResult);
@@ -409,7 +409,7 @@ namespace Pulsar4X.ECSLib
                     enumConstants.Add(Enum.GetName(type, value), value);
                 }
 
-                foreach (var kvp in _designAbility.GuidDictionary)
+                foreach (var kvp in _designAttribute.GuidDictionary)
                 {
                     dynamic key = enumConstants[(string)kvp.Key];
                     dict.Add(key, kvp.Value.DResult);
@@ -453,18 +453,18 @@ namespace Pulsar4X.ECSLib
             //TODO document blobs and what args they take!!
             if (name == "DataBlobArgs")
             {
-                if (_designAbility.DataBlobType == null)
+                if (_designAttribute.DataBlobType == null)
                     throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
                 //_designAbility.DataBlobArgs = new List<double>();
                 List<object> argList = new List<object>();
                 foreach (var argParam in args.Parameters)
                 {
-                    ChainedExpression argExpression = new ChainedExpression(argParam, _designAbility, _factionTechDB, _staticDataStore);
+                    ChainedExpression argExpression = new ChainedExpression(argParam, _designAttribute, _factionTechDB, _staticDataStore);
                     _isDependant = false;
                     argExpression.Evaluate();
                     argList.Add(argExpression.Result);
                 }
-                _designAbility.DataBlobArgs = argList.ToArray();
+                _designAttribute.DataBlobArgs = argList.ToArray();
                 args.Result = argList;
             }
 

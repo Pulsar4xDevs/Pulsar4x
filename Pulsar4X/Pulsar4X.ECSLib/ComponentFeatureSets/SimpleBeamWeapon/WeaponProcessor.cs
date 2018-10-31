@@ -50,7 +50,8 @@ namespace Pulsar4X.ECSLib
 
             //TODO chance to hit
             //int damageAmount = 10;//TODO damageAmount calc
-            int damageAmount = beamWeapon.GetDataBlob<BeamWeaponAtbDB>().BaseDamage; // TODO: Better damage calculation
+            var designAtb = beamWeapon.GetDataBlob<DesignInfoDB>().DesignEntity.GetDataBlob<SimpleBeamWeaponAtbDB>();
+            int damageAmount = designAtb.DamageAmount; // TODO: Better damage calculation
 
             double range = myPos.GetDistanceTo(myPos);
 
@@ -58,9 +59,9 @@ namespace Pulsar4X.ECSLib
             if (range <= Math.Min(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
             {
                 DamageProcessor.OnTakingDamage(stateInfo.FireControl, damageAmount);
-                stateInfo.CoolDown = atDate + TimeSpan.FromSeconds(beamWeapon.GetDataBlob<BeamWeaponAtbDB>().PowerRechargeRate);
+                int reloadRate = designAtb.ReloadRate;
+                stateInfo.CoolDown = atDate + TimeSpan.FromSeconds(reloadRate);
                 stateInfo.ReadyToFire = false;    
-
             }
 
 
