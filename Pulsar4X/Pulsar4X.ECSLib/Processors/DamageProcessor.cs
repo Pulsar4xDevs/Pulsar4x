@@ -52,8 +52,7 @@ namespace Pulsar4X.ECSLib
                 while (damageAmount > 0)
                 {
 
-
-                    int randValue = mySystem.RNG.Next((int)DamageableEntity.GetDataBlob<MassVolumeDB>().Volume * 100000);
+                    int randValue = mySystem.RNG.Next((int)(DamageableEntity.GetDataBlob<MassVolumeDB>().VolumeM3)); //volume in m^3
 
                     foreach (KeyValuePair<Entity, double> pair in ShipInst.ComponentDictionary)
                     {

@@ -19,6 +19,13 @@ namespace Pulsar4X.ECSLib
         public double Volume { get; internal set; }
 
         /// <summary>
+        /// Gets the volume in m^3.
+        /// </summary>
+        /// <value>The volume m^3.</value>
+        [JsonIgnore]
+        public double VolumeM3 { get { return Volume * 1e9; } }
+
+        /// <summary>
         /// The density of the body in g/cm^3
         /// </summary> 
         [JsonProperty]

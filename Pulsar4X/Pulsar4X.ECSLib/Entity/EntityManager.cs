@@ -230,7 +230,7 @@ namespace Pulsar4X.ECSLib
                 {
                     _globalGuidDictionaryLock.ExitWriteLock();
                 }
-                UpdateListners(_entities[entityID], null, EntityChangeType.DBAdded);
+                UpdateListners(_entities[entityID], null, EntityChangeType.EntityRemoved);
             }
             else
             {
