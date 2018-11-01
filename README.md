@@ -46,26 +46,23 @@ There is currently no Eto.forms plugin for Rider.
 
 ## Instructions:
 
+NOTE: you'll need a 64bit PC. possibly 32bit windows could be done but some libs are not availible in 32bit linux. 
+you'll need SDL2 installed. 
+
 1. Clone the Git Repo.
 
-2. Open the solution file "Pulsar4X\Pulsar4X.sln".
+2. Open the solution file "Pulsar4X\Pulsar4X.sln". in Monodevelop or Visual studio
 
-3. a. If you're running Windows: unload the GTK and Mac projects by right clicking them in the solution explorer (!Don't delete them!) (this should eventualy  be fixed but at the time of this writing they're WIP.)
-  
- b. If you're running Linux: Our primary linux dev has disapeared into the either, but I've started attempting to dev on linux mint. wish me luck...  
-install monodev and mono-complete. (bare minimum)
-open the Pulsar4x.sln in monodevelop.  
+3. a. If you're running Windows: Let me know, I've not yet tested this yet. 
 
- c. If you're running Mac: you'll need xamarin studio to compile it for mac, there is a dedicated mac project, but that is missing the OpenTK lib. as I dont' have access to mac I'm unable to test or fix this. you can however run the gtk project, which has some bugs I'm hoping will get fixed when a new version of eto.forms comes out.
+3. b. If you're running Linux: Should work.
 
-4. a. if you're running Windows Set Pulsar4x.CrossPlatform.WPF project as the startup project. you should be able to build and/or run from there.   
- b. Linux: Set Pulsar4x.CrossPlatform.Gtk2 as teh startup project. if you have problems building and running try unloading the WPF, Mac and Test projects.
- c. Mac:  See 3c
+ c. If you're running Mac: you'll need xamarin studio to compile it for mac, I've not tested this. let me know.
 
-Note! there are a number of nuget packages that VS should automaticaly get the first time you attempt to build. 
+4. Set the imguinetUI project as the startup project. and run/debug to compile.  
+
+Note! there are a number of nuget packages that VS/Monodevelop should automaticaly get the first time you attempt to build. 
 the IDE will have a number of errors, build the solution anyway, VS will get the packages for you.
-
-You *can* also run the gtk2 project in visual studio, this will help with debugging linux side of things as visual studio debugger apears to be superior to monodevelop. there currently apear to be some null refference exceptions that get hit when running from the GTK2 project that don't happen in the wpf. 
 
 ##Working with the code:
 I need to flesh this section out a bit more, but for now, read the pages in the wiki, or ask me on IRC.
