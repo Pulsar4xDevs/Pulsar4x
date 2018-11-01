@@ -5,14 +5,12 @@ Pulsar4X/packages/*
 
 #Doxygen output
 doc/doxygen/html/
-
 #C# Temp Files:
 *.db
 *.suo
 *.user
 _ReSharper.Pulsar4X
 _ReSharper.AuroraExtract
-
 # Build results
 *_i.c
 *_p.c
@@ -34,13 +32,11 @@ _ReSharper.AuroraExtract
 *.vssscc
 *.msi
 *.wixpdb
-
 # Visual Studio profiler
 *.psess
 *.vsp
 *.vspx
 /Pulsar4X/Pulsar4X.UI/StyleCop.Cache
-
 # Monodevelop user specific files
 *.userprefs
 *.usertasks
