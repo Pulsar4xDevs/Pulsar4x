@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         public double Volume { get; internal set; }
 
         /// <summary>
-        /// The density of the body in kg/cm^3
+        /// The density of the body in g/cm^3
         /// </summary> 
         [JsonProperty]
         public double Density { get; internal set; }
@@ -141,10 +141,10 @@ namespace Pulsar4X.ECSLib
         /// <returns>Density in g/cm^3</returns>
         public static double CalculateDensity(double mass, double volume)
         {
-            double volumeInM3 = mass / (volume / 1.0e-9); // convert volume to meters cube now to make later conversions eaiser.
+            double densityinkg_m3 = mass / (volume * 1.0e9); // convert volume to meters cube now to make later conversions eaiser.
 
             // now convert to g/cm^3
-            return volumeInM3 * 0.001;
+            return densityinkg_m3 * 0.001;
         }
 
         /// <summary>

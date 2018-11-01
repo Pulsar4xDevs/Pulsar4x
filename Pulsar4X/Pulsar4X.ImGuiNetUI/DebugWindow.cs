@@ -170,6 +170,17 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Dist: " + Distance.AuToKm( positiondb.RelativePosition_AU.Length()));
                                 }
                             }
+                            if (_state.LastClickedEntity.Entity.HasDataBlob<MassVolumeDB>())
+                            {
+                                if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                {
+                                    MassVolumeDB mvdb = _state.LastClickedEntity.Entity.GetDataBlob<MassVolumeDB>();
+                                    ImGui.Text("Mass " + mvdb.Mass + "Kg");
+                                    ImGui.Text("Volume " + mvdb.Volume + "Km^3");
+                                    ImGui.Text("Density " + mvdb.Density + "g/cm^3");
+                                    ImGui.Text("Radius " + mvdb.Radius + "Km");
+                                }
+                            }
                             if (_state.LastClickedEntity.Entity.HasDataBlob<OrbitDB>())
                             {
 

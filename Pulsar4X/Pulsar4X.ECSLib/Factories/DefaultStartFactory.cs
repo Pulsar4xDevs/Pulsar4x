@@ -130,7 +130,7 @@ namespace Pulsar4X.ECSLib
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
             Entity sensor = ShipPassiveSensor(game, faction);
-            Entity deadWeight = DeadWeight(game, faction, 130);
+            Entity deadWeight = DeadWeight(game, faction, 1300);
             List<Entity> components = new List<Entity>()
             {
                 engine,     //50   
@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib
             Entity fuelTank = DefaultFuelTank(game, faction);
             Entity laser = DefaultSimpleLaser(game, faction);
             Entity bfc = DefaultBFC(game, faction);
-            Entity deadWeight = DeadWeight(game, faction, 190);
+            Entity deadWeight = DeadWeight(game, faction, 1900);
             Entity sensor = ShipPassiveSensor(game, faction);
             List<Entity> components = new List<Entity>()
             {
@@ -188,7 +188,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesign = GenericComponentFactory.StaticToDesign(engineSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            engineDesign.ComponentDesignAttributes[0].SetValueFromInput(50); //size 50 = 250 power
+            engineDesign.ComponentDesignAttributes[0].SetValueFromInput(500); //size 500 = 2500 power
             engineDesign.Name = "DefaultEngine-250";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
             return GenericComponentFactory.DesignToDesignEntity(game, faction, engineDesign);
@@ -199,7 +199,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesign fuelTankDesign;
             ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
             fuelTankDesign = GenericComponentFactory.StaticToDesign(tankSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            fuelTankDesign.ComponentDesignAttributes[0].SetValueFromInput(250);
+            fuelTankDesign.ComponentDesignAttributes[0].SetValueFromInput(2500);
             fuelTankDesign.Name = "Tank-500";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, fuelTankDesign);
         }
@@ -209,7 +209,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesign laserDesign;
             ComponentTemplateSD laserSD = game.StaticData.ComponentTemplates[new Guid("8923f0e1-1143-4926-a0c8-66b6c7969425")];
             laserDesign = GenericComponentFactory.StaticToDesign(laserSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            laserDesign.ComponentDesignAttributes[0].SetValueFromInput(10);
+            laserDesign.ComponentDesignAttributes[0].SetValueFromInput(100);
             laserDesign.ComponentDesignAttributes[1].SetValueFromInput(5000);
             laserDesign.ComponentDesignAttributes[2].SetValueFromInput(5);
 
@@ -222,7 +222,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesign fireControlDesign;
             ComponentTemplateSD bfcSD = game.StaticData.ComponentTemplates[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
             fireControlDesign = GenericComponentFactory.StaticToDesign(bfcSD, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            fireControlDesign.ComponentDesignAttributes[0].SetValueFromInput(10);
+            fireControlDesign.ComponentDesignAttributes[0].SetValueFromInput(100);
             fireControlDesign.ComponentDesignAttributes[1].SetValueFromInput(5000);
             fireControlDesign.ComponentDesignAttributes[2].SetValueFromInput(1);
 
@@ -245,7 +245,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesign sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            sensor.ComponentDesignAttributes[0].SetValueFromInput(50);  //size
+            sensor.ComponentDesignAttributes[0].SetValueFromInput(500);  //size
             sensor.ComponentDesignAttributes[1].SetValueFromInput(600); //best wavelength
             sensor.ComponentDesignAttributes[2].SetValueFromInput(250); //wavelength detection width 
             //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
@@ -262,7 +262,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesign sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            sensor.ComponentDesignAttributes[0].SetValueFromInput(500);  //size
+            sensor.ComponentDesignAttributes[0].SetValueFromInput(5000);  //size
             sensor.ComponentDesignAttributes[1].SetValueFromInput(500); //best wavelength
             sensor.ComponentDesignAttributes[2].SetValueFromInput(1000); //wavelength detection width 
                                                                          //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)                                                                        //[4] worst detection magnatude (not settable)

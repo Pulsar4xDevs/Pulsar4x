@@ -9,7 +9,7 @@
           "Description": "Detects emmisions and reflections from other objects",
           "ID": "2368ea53-bd01-42f0-a1c9-da55c051cd4c",
           "MassFormula": "Ability(0)",
-          "VolumeFormula": "Ability(0) / 2",
+          "VolumeFormula": "Ability(0)",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {
@@ -121,7 +121,7 @@
           "Description": "Moves a ship",
           "ID": "e76bd999-ecd7-4511-ad41-6d0c59ca97e6",
           "MassFormula": "Ability(0)",
-          "VolumeFormula": "Ability(0) / 2",
+          "VolumeFormula": "Ability(0)",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {
@@ -131,7 +131,7 @@
                 "Value": "[Mass] * 8"
               }
             ]
-          }, 
+          },
           "ResearchCostFormula": "[Mass] * 10",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
@@ -141,12 +141,12 @@
           "ComponentAbilitySDs": [
             {
               "Name": "Engine Size",
-              "Description": "Size of this engine in Tons",
+              "Description": "Size of this engine in Kg",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "2500",
-              "MinFormula": "1",
+              "MaxFormula": "25000",
+              "MinFormula": "250",
               "StepFormula": "1",
-              "AbilityFormula": "250"
+              "AbilityFormula": "2500"
             },
             {
               "Name": "Engine Type",
@@ -247,7 +247,7 @@
           "Description": "Laser Gun",
           "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
           "MassFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2)",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {
@@ -308,7 +308,7 @@
           "Description": "",
           "ID": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
           "MassFormula": "Ability(4)",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {
@@ -406,7 +406,7 @@
           "Description": "",
           "ID": "57614ddb-0756-44cf-857b-8a6578493792",
           "MassFormula": "Ability(0)",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
           "MineralCostFormula": {

@@ -46,29 +46,25 @@ namespace Pulsar4X.ECSLib
             protoShip.SetDataBlob(new DesignInfoDB(classEntity));
 
             //replace the ships references to the design's specific instances with shiny new specific instances
-            ComponentInstancesDB componentInstances = new ComponentInstancesDB();
-            var classInstances = classEntity.GetDataBlob<ComponentInstancesDB>();
+
+            ComponentInstancesDB classInstances = classEntity.GetDataBlob<ComponentInstancesDB>();
+
+
+            Entity shipEntity = new Entity(systemEntityManager, ownerFaction.Guid, protoShip);
+            shipEntity.RemoveDataBlob<ComponentInstancesDB>();
+            shipEntity.SetDataBlob(new ComponentInstancesDB());
+            shipEntity.RemoveDataBlob<FireControlAbilityDB>();
+
             foreach (var designKVP in classInstances.DesignsAndComponentCount)
             {
                 for (int i = 0; i < designKVP.Value; i++)
                 {
                     Entity newInstance = ComponentInstanceFactory.NewInstanceFromDesignEntity(designKVP.Key, ownerFaction.Guid, systemEntityManager);
-
-                    componentInstances.AddComponentInstance(newInstance);
+                    EntityManipulation.AddComponentToEntity(shipEntity, newInstance);
                 }
             }
-            protoShip.RemoveDataBlob<ComponentInstancesDB>();
-            protoShip.SetDataBlob(componentInstances);
 
 
-            Entity shipEntity = new Entity(systemEntityManager, ownerFaction.Guid, protoShip);
-
-            //we need to set all the new components parents to the ship entity.
-            var components = componentInstances.AllComponents;
-            foreach (var component in components)
-            {
-                component.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity = shipEntity;
-            }
 
             FactionOwnerDB factionOwner = ownerFaction.GetDataBlob<FactionOwnerDB>();
             factionOwner.SetOwned(shipEntity);

@@ -9,7 +9,7 @@
           "Description": "Mines Resources",
           "ID": "f7084155-04c3-49e8-bf43-c7ef4befa550",
           "MassFormula": "25000",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "50000",
           "MineralCostFormula": {
@@ -96,7 +96,7 @@
           "Description": "Creates Research Points",
           "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
           "MassFormula": "500000",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
           "MineralCostFormula": {
@@ -135,7 +135,7 @@
           "Description": "Refines Sorium into fuel",
           "ID": "90592586-0bd6-4885-8526-7181e08556b5",
           "MassFormula": "500000",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
           "MineralCostFormula": {
@@ -168,7 +168,7 @@
               "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
-                "Entries": 
+                "Entries":
                 [
                   {
                     "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
@@ -193,7 +193,7 @@
           "Description": "Constructs Facilities, Fighters Ammo and Components",
           "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
           "MassFormula": "500000",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
           "MineralCostFormula": {
@@ -286,7 +286,7 @@
           "Description": "Component and buildings needed to keep colonists alive on hostile worlds",
           "ID": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
           "MassFormula": "1000",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "1000",
           "CrewReqFormula": "10",
           "MineralCostFormula": {
@@ -341,7 +341,7 @@
           "Description": "Stores General Cargo",
           "ID": "30cd60f8-1de3-4faa-acba-0933eb84c199",
           "MassFormula": "500000",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "Ability(1)",
           "MineralCostFormula": {
@@ -412,7 +412,7 @@
           "Description": "Stores Fuel",
           "ID": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
           "MassFormula": "Ability(0)",
-          "VolumeFormula": "[Mass] / 2",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "Ability(1)",
           "MineralCostFormula": {

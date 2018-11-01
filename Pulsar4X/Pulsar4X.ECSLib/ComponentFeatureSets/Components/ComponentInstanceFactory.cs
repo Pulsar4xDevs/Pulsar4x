@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
             // Added because each component instance needs its own copy of this datablob
 
             //Components have a mass and volume.
-            MassVolumeDB mvDB = new MassVolumeDB();
+            MassVolumeDB mvDB = (MassVolumeDB)design.GetDataBlob<MassVolumeDB>().Clone();
             blobs.Add(mvDB);
 
             Entity newInstance = new Entity(manager, factionID, blobs);

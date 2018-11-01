@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
                 {
 
 
-                    int randValue = mySystem.RNG.Next((int)DamageableEntity.GetDataBlob<MassVolumeDB>().Volume);
+                    int randValue = mySystem.RNG.Next((int)DamageableEntity.GetDataBlob<MassVolumeDB>().Volume * 100000);
 
                     foreach (KeyValuePair<Entity, double> pair in ShipInst.ComponentDictionary)
                     {
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
                             MassVolumeDB mvDB = pair.Key.GetDataBlob<MassVolumeDB>();
 
                             double DensityThreshold = 1.0; //what should this be?
-                            double dmgPercent = DensityThreshold * mvDB.Density;
+                            double dmgPercent = DensityThreshold * mvDB.Density * 1000;
 
                             int dmgDone = (int)(damageAmount * dmgPercent);
 

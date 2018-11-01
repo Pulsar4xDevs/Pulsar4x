@@ -155,7 +155,8 @@ namespace Pulsar4X.ECSLib
             component.SetDataBlob(componentInfo);
             component.SetDataBlob(nameDB);
             component.SetDataBlob(cargoType);
-            component.SetDataBlob(MassVolumeDB.NewFromMassAndVolume(componentDesign.MassValue, componentDesign.VolumeValue));
+            //note: MassVolumeDB stores mass in kg and volume in km^3, however we use kg and m^3 in the json data. 
+            component.SetDataBlob(MassVolumeDB.NewFromMassAndVolume(componentDesign.MassValue, componentDesign.VolumeValue * 1e-9));
             foreach (var designAttribute in componentDesign.ComponentDesignAttributes)
             {
                 if (designAttribute.DataBlobType != null)
