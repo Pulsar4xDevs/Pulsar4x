@@ -13,6 +13,7 @@ namespace Pulsar4X.SDL2UI
         internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
         internal Entity Faction { get { return FactionUIState.FactionEntity; } }
+        internal StarSystem ActiveSystem;
         internal bool ShowMetrixWindow;
         internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;

@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             _faction = _state.Faction;
             SysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
             _state.CurrentSystemDateTime = SysMap.SystemSubpulse.SystemLocalDateTime;
-            //_state.LastClickedEntity =
+            _state.ActiveSystem = SysMap.StarSystem;
 
             foreach (var entityItem in SysMap.IconableEntitys)
             {

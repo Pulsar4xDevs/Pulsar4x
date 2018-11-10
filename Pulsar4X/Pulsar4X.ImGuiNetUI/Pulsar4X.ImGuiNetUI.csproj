@@ -1,143 +1,72 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8F27EDF1-1680-4CD2-809C-A9D25B207168}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Pulsar4X.ImGuiNetUI</RootNamespace>
-    <AssemblyName>Pulsar4X.ImGuiNetUI</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFramework>net47</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug Linux|x64' ">
+    <IntermediateOutputPath>obj\x64\Debug Linux</IntermediateOutputPath>
+    <DebugType></DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>bin\x64\Debug Linux</OutputPath>
+    <DefineConstants></DefineConstants>
+    <NoWarn></NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug Windows|x64' ">
+    <IntermediateOutputPath>obj\x64\Debug Windows</IntermediateOutputPath>
+    <DebugType></DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x64\Debug Windows</OutputPath>
+    <DefineConstants></DefineConstants>
+    <NoWarn></NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug Windows|x86' ">
+    <IntermediateOutputPath>obj\x86\Debug Windows</IntermediateOutputPath>
+    <DebugType></DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x86\Debug Windows</OutputPath>
+    <DefineConstants></DefineConstants>
+    <NoWarn></NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Buffers">
-      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics.Vectors">
-      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="mscorlib" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.4.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
-    <Reference Include="ImGui.NET">
-      <HintPath>..\packages\ImGui.NET.1.65.0-beta1\lib\netstandard2.0\ImGui.NET.dll</HintPath>
-    </Reference>
+    <PackageReference Include="ImGui.NET" Version="1.65.0-beta3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="SDL2-CS">
       <HintPath>Libs\SDL2-CS.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Pause.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\PauseDisabled.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Play.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Play.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\PlayDisabled.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\PulsarLogo.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\PulsarLogo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\SDL2-CS.dll" />
-    <None Include="Libs\SDL2-CS.dll.config" />
-    <None Include="Libs\SDL2-CS.pdb" />
-    <None Include="Libs\SDL2.dll" />
-    <None Include="Libs\SDL2-CS.dll.config">
-      <Link>SDL2-CS.dll.config</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\SDL2-CS.dll">
-      <Link>SDL2-CS.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\SDL2-CS.pdb">
-      <Link>SDL2-CS.pdb</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Libs\libcimgui.so">
+    <None Remove="Resources\OneStep.bmp" />
+    <None Remove="Resources\Pause.bmp" />
+    <None Remove="Resources\Play.bmp" />
+    <None Remove="Resources\PulsarLogo.bmp" />
+    <None Remove="Resources\PulsarLogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Libs\libcimgui.so" Visable="false">
       <Link>libcimgui.so</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Resources\OneStep.bmp">
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\OneStep.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Pause.bmp">
+    </Content>
+    <Content Include="Resources\Pause.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="Resources\Play.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\PulsarLogo.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\PulsarLogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="DebugWindow.cs" />
-    <Compile Include="OrbitOrderWindow.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="GlobalUIState.cs" />
-    <Compile Include="WeaponTargetingControl.cs" />
-    <Compile Include="RenameWindow.cs" />
-    <Compile Include="EntityContextMenu.cs" />
-    <Compile Include="NewGameOptions.cs" />
-    <Compile Include="MainMenuItems.cs" />
-    <Compile Include="SettingsWindow.cs" />
-    <Compile Include="TimeControl.cs" />
-    <Compile Include="Helpers.cs" />
-    <Compile Include="MapRendering\Camera.cs" />
-    <Compile Include="MapRendering\Matrix.cs" />
-    <Compile Include="MapRendering\SystemMapRendering.cs" />
-    <Compile Include="MapRendering\Icons\DrawPrimitive.cs" />
-    <Compile Include="MapRendering\Icons\Icon.cs" />
-    <Compile Include="MapRendering\Icons\NameIcon.cs" />
-    <Compile Include="MapRendering\Icons\OrbitIcon.cs" />
-    <Compile Include="MapRendering\Icons\OrbitOrderWiget.cs" />
-    <Compile Include="MapRendering\Icons\ShipIcon.cs" />
-    <Compile Include="MapRendering\Icons\ShipMoveWidget.cs" />
-    <Compile Include="MapRendering\Icons\StarIcon.cs" />
-    <Compile Include="MapRendering\Icons\SysBodyIcon.cs" />
-    <Compile Include="MapRendering\Icons\TestDrawIconData.cs" />
-    <Compile Include="MapRendering\Icons\TranslateMoveOrderWidget.cs" />
-    <Compile Include="SM\SMPannel.cs" />
-    <Compile Include="IMGUISDL\SDL2CSGL.cs" />
-    <Compile Include="IMGUISDL\SDL2Helper.cs" />
-    <Compile Include="IMGUISDL\SDL2Window.cs" />
-    <Compile Include="IMGUISDL\ImGuiSDL2CSHelper.cs" />
-    <Compile Include="IMGUISDL\ImGuiSDL2CSWindow.cs" />
-    <Compile Include="IMGUISDL\ImVec.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
-      <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
-      <Name>Pulsar4X.ECSLib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="IMGUISDL\" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

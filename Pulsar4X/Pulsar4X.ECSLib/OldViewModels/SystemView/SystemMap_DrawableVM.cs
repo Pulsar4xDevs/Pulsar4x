@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
 
         public ManagerSubPulse SystemSubpulse { get; private set; }
         private AEntityChangeListner _changeListner;
-
+        public StarSystem StarSystem;
         //public Dictionary<IDrawIconMethod, List<AIconData<BaseDataBlob>>> IconsDictionary = new Dictionary<IDrawIconMethod, List<AIconData<BaseDataBlob>>>();
 
         public void InitializeForGM(GameVM gameVM, StarSystem starSys)
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public void Initialise(GameVM gameVM, StarSystem starSys, Entity viewingFaction)
         {
             _viewingFaction = viewingFaction;
-
+            StarSystem = starSys;
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
             EntityChangeListner changeListner = new EntityChangeListner(starSys, viewingFaction, listnerblobs);

@@ -151,7 +151,23 @@ namespace Pulsar4X.SDL2UI
                         ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new Vector2(248, 60), sizeof(float));
 
                     }
+                    if (ImGui.CollapsingHeader("Entity List"))
+                    {
 
+                        List<Entity> factionOwnedEntites  = _state.ActiveSystem.GetEntitiesByFaction(_state.Faction.Guid);
+                        List<string> entityNames = new List<string>();
+                        foreach (var entity in factionOwnedEntites)
+                        {
+                            var name = entity.GetDataBlob<NameDB>();
+                            if (name != null)
+                            {
+                                entityNames.Add(name.GetName(_state.Faction.Guid));
+                            }
+                        }
+                        int item = 0;
+                        ImGui.ListBox("Entites", ref item, entityNames.ToArray(), entityNames.Count);
+
+                    }
                     if (_state.LastClickedEntity.Name != null)
                     {
                         if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
