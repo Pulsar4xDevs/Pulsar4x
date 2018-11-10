@@ -33,9 +33,9 @@ namespace Pulsar4X.Tests
             Entity greyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(greyAlienFaction, game.GlobalManager);
 
             // Greys Name the Humans.
-            humanSpecies.GetDataBlob<NameDB>().SetName(greyAlienFaction, "Stupid Terrans");
+            humanSpecies.GetDataBlob<NameDB>().SetName(greyAlienFaction.Guid, "Stupid Terrans");
             // Humans name the Greys.
-            greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction, "Space bugs");
+            greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction.Guid, "Space bugs");
             //TODO Expand the "Test Universe" to cover more datablobs and entities. And ships. Etc.
 
             if (generateDefaultHumans)
@@ -97,9 +97,9 @@ namespace Pulsar4X.Tests
             GreyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(GreyAlienFaction, Game.GlobalManager);
 
             // Greys Name the Humans.
-            HumanSpecies.GetDataBlob<NameDB>().SetName(GreyAlienFaction, "Stupid Terrans");
+            HumanSpecies.GetDataBlob<NameDB>().SetName(GreyAlienFaction.Guid, "Stupid Terrans");
             // Humans name the Greys.
-            GreyAlienSpecies.GetDataBlob<NameDB>().SetName(HumanFaction, "Space bugs");
+            GreyAlienSpecies.GetDataBlob<NameDB>().SetName(HumanFaction.Guid, "Space bugs");
 
 
             StarSystemFactory starfac = new StarSystemFactory(Game);

@@ -53,7 +53,8 @@ namespace Pulsar4X.ECSLib
             Entity shipEntity = new Entity(systemEntityManager, ownerFaction.Guid, protoShip);
             shipEntity.RemoveDataBlob<ComponentInstancesDB>();
             shipEntity.SetDataBlob(new ComponentInstancesDB());
-            shipEntity.RemoveDataBlob<FireControlAbilityDB>();
+            if(shipEntity.HasDataBlob<FireControlAbilityDB>())
+                shipEntity.RemoveDataBlob<FireControlAbilityDB>();
 
             foreach (var designKVP in classInstances.DesignsAndComponentCount)
             {

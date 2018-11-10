@@ -47,7 +47,7 @@ namespace Pulsar4X.Tests
         {
             NameDB name = new NameDB();
             Entity testEntity = Entity.Create(_game.GlobalManager, Guid.Empty);
-            name.SetName(testEntity, "TestName");
+            name.SetName(testEntity.Guid, "TestName");
             testEntity.SetDataBlob(name);
 
             //serialise the test entity into a mem stream
