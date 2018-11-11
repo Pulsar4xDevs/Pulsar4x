@@ -4,29 +4,61 @@
     <TargetFramework>net47</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug Linux|x64' ">
-    <IntermediateOutputPath>obj\x64\Debug Linux</IntermediateOutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
+    <IntermediateOutputPath>obj\Linux_x64\Debug</IntermediateOutputPath>
+    <DebugSymbols>true</DebugSymbols>
     <DebugType></DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\x64\Debug Linux</OutputPath>
+    <OutputPath>bin\Linux_x64\Debug</OutputPath>
     <DefineConstants></DefineConstants>
     <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug Windows|x64' ">
-    <IntermediateOutputPath>obj\x64\Debug Windows</IntermediateOutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Linux_x64' ">
+    <IntermediateOutputPath>obj\Linux_x64\Release</IntermediateOutputPath>
     <DebugType></DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\x64\Debug Windows</OutputPath>
+    <OutputPath>bin\Linux_x64\Release</OutputPath>
     <DefineConstants></DefineConstants>
     <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug Windows|x86' ">
-    <IntermediateOutputPath>obj\x86\Debug Windows</IntermediateOutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows_x64' ">
+    <IntermediateOutputPath>obj\Windows_x64\Debug</IntermediateOutputPath>
+    <DebugSymbols>false</DebugSymbols>
     <DebugType></DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\x86\Debug Windows</OutputPath>
+    <OutputPath>bin\Windows_x64\Debug</OutputPath>
     <DefineConstants></DefineConstants>
     <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows_x64' ">
+    <IntermediateOutputPath>obj\Windows_x64\Release</IntermediateOutputPath>
+    <DebugType></DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Windows_x64\Release</OutputPath>
+    <DefineConstants></DefineConstants>
+    <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows_x86' ">
+    <IntermediateOutputPath>obj\Windows_x86\Debug</IntermediateOutputPath>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType></DebugType>
+    <OutputPath>bin\Windows_x86\Debug</OutputPath>
+    <DefineConstants></DefineConstants>
+    <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows_x86' ">
+    <IntermediateOutputPath>obj\Windows_x86\Release</IntermediateOutputPath>
+    <DebugType></DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Windows_x86\Release</OutputPath>
+    <DefineConstants></DefineConstants>
+    <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.65.0-beta3" />
@@ -46,12 +78,33 @@
     <None Remove="Resources\PulsarLogo.bmp" />
     <None Remove="Resources\PulsarLogo.png" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Libs\libcimgui.so" Visable="false">
+  <ItemGroup Condition=" '$(Platform)' == 'Linux_x64' ">
+    <None Include="Libs\cimgui\linux-x64\cimgui.so" Visable="false">
       <Link>libcimgui.so</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup Condition=" '$(Platform)' == 'Windows_x64' ">
+    <None Include="Libs\cimgui\win-x64\cimgui.dll" Visable="false">
+      <Link>cimgui.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Libs\sdl2\win-x64\SDL2.dll" Visable="false">
+      <Link>SDL2.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(Platform)' == 'Windows_x86' ">
+    <None Include="Libs\cimgui\win-x86\cimgui.dll" Visable="false">
+      <Link>cimgui.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Libs\sdl2\win-x86\SDL2.dll" Visable="false">
+      <Link>SDL2.dll</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
     <Content Include="Resources\OneStep.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
