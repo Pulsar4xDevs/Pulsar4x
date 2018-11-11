@@ -77,6 +77,7 @@
     <None Remove="Resources\Play.bmp" />
     <None Remove="Resources\PulsarLogo.bmp" />
     <None Remove="Resources\PulsarLogo.png" />
+    <None Remove="Libs\libcimgui.so" />
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
     <None Include="Libs\cimgui\linux-x64\cimgui.so" Visable="false">
