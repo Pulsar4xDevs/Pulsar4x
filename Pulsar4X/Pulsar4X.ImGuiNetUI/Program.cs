@@ -143,22 +143,24 @@ namespace Pulsar4X.SDL2UI
 
         public unsafe override void ImGuiLayout()
         {
-            foreach (var kvp in _state.SDLImageDictionary)
+            if (_state.ShowImgDbg)
             {
-                int h, w, a;
-                uint f;
-                int q = SDL.SDL_QueryTexture(kvp.Value, out f, out a, out w, out h);
-                if (q != 0)
+                foreach (var kvp in _state.SDLImageDictionary)
                 {
-                    ImGui.Text("QueryResult: " + q);
-                    ImGui.Text(SDL.SDL_GetError());
+                    int h, w, a;
+                    uint f;
+                    int q = SDL.SDL_QueryTexture(kvp.Value, out f, out a, out w, out h);
+                    if (q != 0)
+                    {
+                        ImGui.Text("QueryResult: " + q);
+                        ImGui.Text(SDL.SDL_GetError());
+                    }
+                    ImGui.Image(kvp.Value, new System.Numerics.Vector2(w, h));
                 }
-                ImGui.Image(kvp.Value, new System.Numerics.Vector2(w, h));
             }
-            //ImGui.Image(_state.SDLImageDictionary["Logo"], new System.Numerics.Vector2(273, 98));
-            //ImGui.Image(_state.SDLImageDictionary["PlayImg"], new System.Numerics.Vector2(16, 16)); 
 
-            ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
+            if (_state.ShowMetrixWindow)
+                ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
 
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {

@@ -15,6 +15,7 @@ namespace Pulsar4X.SDL2UI
         internal Entity Faction { get { return FactionUIState.FactionEntity; } }
         internal StarSystem ActiveSystem;
         internal bool ShowMetrixWindow;
+        internal bool ShowImgDbg;
         internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;
 

@@ -46,10 +46,16 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.Button("Show Debug Window"))
                     {
-                        DebugWindow.GetInstance().IsActive = true;
+                        var instance = DebugWindow.GetInstance();
+                        instance.IsActive = !instance.IsActive;
                         //_state.LoadedWindows.Add(_state.Debug);
 
                     }
+                    if (ImGui.Button("Show ImguiMetrix"))
+                        _state.ShowMetrixWindow = !_state.ShowMetrixWindow;
+                    if (ImGui.Button("Show ImgDebug"))
+                        _state.ShowImgDbg = !_state.ShowImgDbg;
+
                     if (ImGui.CollapsingHeader("Process settings", _xpanderFlags))
                     {
                         if (ImGui.Checkbox("MultiThreaded", ref IsThreaded))
