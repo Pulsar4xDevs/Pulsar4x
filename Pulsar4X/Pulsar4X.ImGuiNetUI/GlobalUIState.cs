@@ -5,6 +5,7 @@ using SDL2;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.IO;
 namespace Pulsar4X.SDL2UI
 {
     public class GlobalUIState
@@ -34,8 +35,6 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new Dictionary<Type, PulsarGuiWindow>();
         internal PulsarGuiWindow ActiveWindow { get; set; }
 
-
-        IntPtr Logo;
 
         internal UserOrbitSettings UserOrbitSettings = new UserOrbitSettings();
         internal Dictionary<string, IntPtr> SDLImageDictionary = new Dictionary<string, IntPtr>();
@@ -69,19 +68,19 @@ namespace Pulsar4X.SDL2UI
 
             //LoadedWindows.Add(SettingsWindow);
 
-            IntPtr sdlSurface = SDL.SDL_LoadBMP("Resources/PulsarLogo.bmp");
+            IntPtr sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/PulsarLogo.bmp"));
             IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
             SDLImageDictionary.Add("Logo", sdltexture);
 
-            sdlSurface = SDL.SDL_LoadBMP("Resources/Play.bmp");
+            sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/Play.bmp"));
             sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
             SDLImageDictionary.Add("PlayImg", sdltexture);
 
-            sdlSurface = SDL.SDL_LoadBMP("Resources/Pause.bmp");
+            sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/Pause.bmp"));
             sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
             SDLImageDictionary.Add("PauseImg", sdltexture);
 
-            sdlSurface = SDL.SDL_LoadBMP("Resources/OneStep.bmp");
+            sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/OneStep.bmp"));
             sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
             SDLImageDictionary.Add("OneStepImg", sdltexture);
 
