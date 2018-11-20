@@ -123,7 +123,7 @@ namespace Pulsar4X.SDL2UI
         }
         void AdjustFreqency()
         {
-            switch (_timeSpanType)
+            switch (_freqSpanType)
             {
                 case 0:
                     _timeloop.TickFrequency = TimeSpan.FromSeconds(_freqTimeSpanValue);
