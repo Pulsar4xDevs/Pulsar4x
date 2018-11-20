@@ -1,0 +1,4 @@
+change atbDB to not be datablobs.
+designs don't need to be entites.
+moving away from this should make things a bit less confusing.
+it will allow different designs and ships themselfs to share the atb file.

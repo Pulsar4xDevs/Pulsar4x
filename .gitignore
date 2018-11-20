@@ -37,6 +37,10 @@ _ReSharper.AuroraExtract
 *.vsp
 *.vspx
 /Pulsar4X/Pulsar4X.UI/StyleCop.Cache
+
+# Visual Studio 2015 cache/options directory
+.vs/
+
 # Monodevelop user specific files
 *.userprefs
 *.usertasks
