@@ -10,7 +10,7 @@ branches:
     - master
 
   # blacklist
-  except:
+  # except:
 
 
 os: Visual Studio 2015
