@@ -19,9 +19,9 @@ cache:
 before_build:
 - nuget restore Pulsar4X/Pulsar4X.sln
 platform:
-- Any CPU
+- Windows_x64
 configuration:
-- Windows
+- Debug
 build:
   project: Pulsar4X/Pulsar4X.sln
 
