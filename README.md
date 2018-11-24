@@ -32,6 +32,7 @@ installing via this script: https://github.com/cra0zy/monodevelop-run-installer
 is an option, and will run/debug, however versioncontrol is currently disabled due to a missing dependancy. 
 also note that eto.forms plugin for MD is not currently as feature complete as it is for VS. 
 
+For the current ui to work, you'll need SDL version 2.0.5 or higher, if you're runing ubuntu < than 18, you'll likely need to compile and install SDL from source, if your update repositories are high enough you should be fine. this shouldnt be a problem in windows since the dll is included for the windows build. 
 
 ### Mac
 mono + GTK + Xamarin Studio
