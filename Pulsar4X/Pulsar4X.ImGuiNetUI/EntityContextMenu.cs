@@ -12,6 +12,8 @@ namespace Pulsar4X.SDL2UI
         public NameIcon NameIcon;
         public OrbitIcon OrbitIcon;
 
+        public CommandReferences CmdRef;
+
     }
 
     public class EntityContextMenu
@@ -70,7 +72,15 @@ namespace Pulsar4X.SDL2UI
             }
             //if entity can target
 
-
+            if (_entityState.Entity.HasDataBlob<CargoStorageDB>())
+            {
+                if (ImGui.SmallButton("Cargo"))
+                {
+                    var instance = ColonyPanel.GetInstance(_entityState);
+                    instance.IsActive = true;
+                    _state.ActiveWindow = instance;
+                }
+            }
             //if entity can mine || refine || build
             //econOrderwindow
 

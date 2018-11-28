@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
             var factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             factionInfo.Colonies.Add(colonyEntity);
             factionEntity.GetDataBlob<FactionOwnerDB>().SetOwned(colonyEntity);
-
+            planetEntity.GetDataBlob<SystemBodyInfoDB>().Colonies.Add(colonyEntity);
             return colonyEntity;
         }
     }

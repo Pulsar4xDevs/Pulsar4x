@@ -43,6 +43,10 @@ namespace Pulsar4X.SDL2UI
             {
 
             }
+            if (_systemBodyInfoDB.Colonies.Count > 0)
+            {
+
+            }
         }
 
         void Terestrial()

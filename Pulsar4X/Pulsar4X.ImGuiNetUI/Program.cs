@@ -15,7 +15,6 @@ namespace Pulsar4X.SDL2UI
         [STAThread]
         public static void Main()
         {
-
             Instance = new PulsarMainWindow();
             Instance.Run();
             Instance.Dispose();
@@ -26,7 +25,6 @@ namespace Pulsar4X.SDL2UI
     {
         private GlobalUIState _state; 
 
-        IntPtr _logoTexture;
 
         //private MemoryEditor _MemoryEditor = new MemoryEditor();
         //private byte[] _MemoryEditorData;

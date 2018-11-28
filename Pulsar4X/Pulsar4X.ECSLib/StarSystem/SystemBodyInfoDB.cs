@@ -122,7 +122,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public bool SupportsPopulations { get; internal set; }
-        
+
         /// <summary>
         /// List of Colonies that reside on this body.
         /// </summary>
@@ -133,7 +133,7 @@ namespace Pulsar4X.ECSLib
         /// </remarks>
         [PublicAPI]
         [JsonProperty]
-        public List<Entity> Colonies { get; internal set; }
+        public List<Entity> Colonies { get; internal set; } = new List<Entity>();
 
         /// <summary>
         /// Length of day for this body. Mostly fluff.
@@ -217,6 +217,7 @@ namespace Pulsar4X.ECSLib
             LengthOfDay = origionalDB.LengthOfDay;
             Gravity = origionalDB.Gravity;
             Minerals = new Dictionary<Guid, MineralDepositInfo>(origionalDB.Minerals); //This really needs to be handled properly
+            Colonies = new List<Entity>(origionalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
         }
 
         public int GetValueCompareHash(int hash = 17)

@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
         public float X { get { return ViewScreenPos.x; }  }
         public float Y { get { return ViewScreenPos.y; } }
         Guid _entityGuid;
-
+        public Dictionary<Guid, string> SubNames = new Dictionary<Guid, string>();
         public ImVec2 ViewOffset { get; set; } = new ImVec2();
         public Rectangle ViewDisplayRect = new Rectangle(); 
 
@@ -48,7 +48,16 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-
+        //adds or updates the subname - this is mostly used for colonys on a planet
+        public void AddSubName(Entity entity)
+        {
+            var nameString = entity.GetDataBlob<NameDB>().GetName(_state.Faction);
+            SubNames[entity.Guid] = nameString;
+        }
+        public void RemoveSubName(Guid guid)
+        {
+            SubNames.Remove(guid);
+        }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
@@ -93,7 +102,11 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
 
+            //ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+            //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 1));
             ImGui.Begin(NameString, ref IsActive, _flags);
 
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
@@ -102,14 +115,6 @@ namespace Pulsar4X.SDL2UI
                 _state.EntityClicked(_entityGuid, MouseButtons.Primary);
 
             }
-            var size = ImGui.GetItemRectSize();
-            //var size = ImGui.GetLastItemRectSize();
-            Height = size.Y;
-            Width = size.X;
-            ViewDisplayRect.Width = size.X;
-            ViewDisplayRect.Height = size.Y;
-
-            ImGui.PopStyleColor();
             if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
             {
                 _state.EntityClicked(_entityGuid, MouseButtons.Alt);
@@ -119,10 +124,36 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndPopup();
             }
 
+            foreach (var name in SubNames)
+            {
+                if (ImGui.Button(name.Value))
+                {
+                    _state.EntityClicked(name.Key, MouseButtons.Primary);
+                }
+                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key, 1))
+                {
+                    _state.EntityClicked(name.Key, MouseButtons.Alt);
+                    _state.ContextMenu = new EntityContextMenu(_state, name.Key);
+                    _state.ContextMenu.Display();
+
+                    ImGui.EndPopup();
+                }
+            }
+            var size = ImGui.GetWindowSize();
+            //var size = ImGui.GetLastItemRectSize();
+            Height = size.Y;
+            Width = size.X;
+            ViewDisplayRect.Width = size.X;
+            ViewDisplayRect.Height = size.Y;
+
+            ImGui.PopStyleColor();
+
+
 
 
             ImGui.End();
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
+            ImGui.PopStyleVar();
 
         }
 

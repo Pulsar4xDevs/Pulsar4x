@@ -77,6 +77,8 @@ namespace Pulsar4X.SDL2UI
                 {
                     _nameIcons.Add(entityItem.Guid, new NameIcon(ref entityState, _state));
                 }
+
+
                 if (entityItem.HasDataBlob<OrbitDB>())
                 {
                     var orbitDB = entityItem.GetDataBlob<OrbitDB>();
@@ -93,6 +95,19 @@ namespace Pulsar4X.SDL2UI
                 if (entityItem.HasDataBlob<SystemBodyInfoDB>())
                 {
                     _entityIcons.Add(entityItem.Guid, new SysBodyIcon(entityItem));
+                    if (entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies.Count > 0)
+                    {
+                        foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
+                        {
+                            _nameIcons[entityItem.Guid].AddSubName(colony);
+                            IconEntityStates.Add(colony.Guid, new EntityState()
+                            {
+                                Entity = colony,
+                                Name = _nameIcons[entityItem.Guid].SubNames[colony.Guid],
+                                NameIcon = _nameIcons[entityItem.Guid]
+                            }); 
+                        }
+                    }
                 }
                 if (entityItem.HasDataBlob<ShipInfoDB>())
                 {

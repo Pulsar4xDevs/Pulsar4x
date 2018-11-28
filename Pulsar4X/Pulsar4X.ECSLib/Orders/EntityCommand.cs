@@ -86,6 +86,18 @@ namespace Pulsar4X.ECSLib
             Handler = handler;
             _subPulse = subPulse;
         }
+        public static CommandReferences CreateForEntity(Game game, Entity entity)
+        {
+            return new CommandReferences(entity.FactionOwner, entity.Guid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+        }
+        public static CommandReferences CreateForEntity(Game game, Guid entityGuid)
+        {
+            Entity entity;
+            if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+                return new CommandReferences(entity.FactionOwner, entityGuid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+            else
+                throw new Exception("Entity Not Found");
+        }
     }
 
     public class RenameCommand : EntityCommand

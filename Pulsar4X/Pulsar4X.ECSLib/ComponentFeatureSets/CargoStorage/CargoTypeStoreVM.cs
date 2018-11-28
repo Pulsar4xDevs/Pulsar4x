@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
 
         public string FreeCapacity { get; set; }
 
-        internal CargoTypeStoreVM(StaticDataStore staticDataStore, Guid typeGuid, CargoTypeStore typeStore)
+        public CargoTypeStoreVM(StaticDataStore staticDataStore, Guid typeGuid, CargoTypeStore typeStore)
         {
 
             _staticData = staticDataStore;
@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal void Update()
+        public void Update()
         {
             if(_maxCapacity != _typeStore.MaxCapacity) {
                 _maxCapacity = _typeStore.MaxCapacity;

@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
         /// Key is CargoTypeID (as defined by the ICargoable.CargoTypeID)
         /// </summary>
         [JsonProperty]
-        internal Dictionary<Guid, CargoTypeStore> StoredCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
+        public Dictionary<Guid, CargoTypeStore> StoredCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
 
 
         public CargoStorageDB()
@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Lists items of the same CargoType, and the number of those items.
     /// </summary>
-    internal class CargoTypeStore
+    public class CargoTypeStore
     {
         //[JsonProperty]
         /// <summary>
@@ -54,19 +54,19 @@ namespace Pulsar4X.ECSLib
         /// The Maximum that this entity can store of this type.
         /// </summary>
         [JsonProperty]
-        internal long MaxCapacity { get; set; }
+        public long MaxCapacity { get; internal set; }
 
         /// <summary>
         /// The amount of free space remaining.
         /// </summary>
         [JsonProperty]
-        internal long FreeCapacity { get; set; } 
-        
+        public long FreeCapacity { get; internal set; } 
+
         [JsonProperty]
-        internal Dictionary<Guid, long> ItemsAndAmounts { get;} = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> ItemsAndAmounts { get;} = new Dictionary<Guid, long>();
          
         [JsonProperty]
-        internal Dictionary<Guid,List<Entity>> SpecificEntites { get; } = new Dictionary<Guid, List<Entity>>();
+        public Dictionary<Guid,List<Entity>> SpecificEntites { get; } = new Dictionary<Guid, List<Entity>>();
         
     }
 }

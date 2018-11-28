@@ -11,15 +11,36 @@ namespace Pulsar4X.ECSLib
         StaticDataStore _staticData;
 
         Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
-        public ObservableCollection<CargoTypeStoreVM> CargoResourceStores { get; } = new ObservableCollection<CargoTypeStoreVM>();
+        public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
         
-        internal CargoStorageVM(StaticDataStore staticData, CommandReferences cmdRef, CargoStorageDB storeDB)
+        public CargoStorageVM(StaticDataStore staticData, CommandReferences cmdRef, CargoStorageDB storeDB)
+        {
+            _staticData = staticData;
+            _storageDatablob = storeDB;
+            CmdRef = cmdRef;
+            Update();
+        }
+
+        public CargoStorageVM(StaticDataStore staticData, CargoStorageDB storeDB)
         {
             _staticData = staticData;
             _storageDatablob = storeDB;
             Update();
         }
+
+        public void SetUpdateListner(ManagerSubPulse subPulse)
+        {
+            subPulse.SystemDateChangedEvent += OnSubPulse_SystemDateChangedEvent;
+        }
+
         public CommandReferences CmdRef { get; set; }
+        void OnSubPulse_SystemDateChangedEvent(DateTime newDate)
+        {
+            Update();
+        }
+
+
+
         public void Update()
         {
             foreach(var kvp in _storageDatablob.StoredCargoTypes) 

@@ -28,7 +28,7 @@ namespace Pulsar4X.SDL2UI
                 Vector2 pos = new Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 10));
                 if (ImGui.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
                 {
 
@@ -65,6 +65,7 @@ namespace Pulsar4X.SDL2UI
                 //if (_saveGame)
 
                 ImGui.End();
+                ImGui.PopStyleVar();
             }
         }
     }

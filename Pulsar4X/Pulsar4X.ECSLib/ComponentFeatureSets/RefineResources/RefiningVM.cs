@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
 
         private CommandReferences _cmdRef;
 
-        private void OnNewBatchJob()
+        public void OnNewBatchJob()
         {
             DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
             var newBatchCommand = new RefineOrdersCommand(_factionGuid, _refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
