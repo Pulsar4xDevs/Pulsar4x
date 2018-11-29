@@ -225,7 +225,13 @@ namespace ImGuiSDL2CS {
                     {
                         // THIS IS THE ONLY UNSAFE THING LEFT!
 
-                        ImGui.GetIO().AddInputCharactersUTF8(e.text.ToString()); 
+                        //ImGui.GetIO().AddInputCharactersUTF8(e.text.ToString());
+                        int i = 0;
+                        while (e.text.text[i] != 0)
+                        {
+                            ImGui.GetIO().AddInputCharacter(e.text.text[i]);
+                            i += 1;
+                        }
                     }
                     return true;
                 case SDL.SDL_EventType.SDL_KEYDOWN:

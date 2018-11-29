@@ -17,7 +17,7 @@ namespace Pulsar4X.SDL2UI
         internal StarSystem ActiveSystem;
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
-        internal bool ShowDemoWindow = true;
+        internal bool ShowDemoWindow;
         internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;
 
