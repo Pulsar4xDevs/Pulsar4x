@@ -70,6 +70,14 @@ namespace Pulsar4X.ECSLib
             NewJobBatchCount = 1;
             NewJobRepeat = false;
         }
+        public void SetUpdateListner(ManagerSubPulse subPulse)
+        {
+            subPulse.SystemDateChangedEvent += OnSubPulse_SystemDateChangedEvent;
+        }
+        void OnSubPulse_SystemDateChangedEvent(DateTime newDate)
+        {
+            Update();
+        }
 
         public void Update()
         {

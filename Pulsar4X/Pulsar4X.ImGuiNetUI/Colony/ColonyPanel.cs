@@ -45,8 +45,10 @@ namespace Pulsar4X.SDL2UI
             //installation pannel (install constructed components
             if (ImGui.Begin("Cargo", ref IsActive, _flags))
             {
+
                 if (_storeVM != null)
                 {
+                    ImGui.BeginGroup();
                     foreach (var storetype in _storeVM.CargoResourceStores)
                     {
                         if(ImGui.CollapsingHeader(storetype.HeaderText + "###" + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
@@ -65,12 +67,17 @@ namespace Pulsar4X.SDL2UI
                             
                         }
                     }
+                    ImGui.EndGroup();
                 }
+
 
                 if(_refineryVM != null)
                 {
+
                     if(ImGui.CollapsingHeader("Refinary"))
                     {
+                        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
+                        ImGui.BeginChild("Current Jobs", new System.Numerics.Vector2(0, 100), true, ImGuiWindowFlags.ChildWindow);
                         foreach (var job in _refineryVM.CurrentJobs)
                         {
                             ImGui.Text(job.Item);
@@ -79,6 +86,10 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text(job.ItemPercentRemaining.ToString());
 
                         }
+                        ImGui.EndChild();
+
+                        ImGui.BeginChild("CreateJob", new System.Numerics.Vector2(0,84), true, ImGuiWindowFlags.ChildWindow);
+
                         int curItem = _refineryVM.NewJobSelectedIndex;
                         if(ImGui.Combo("NewJobSelection", ref curItem, _refineryVM.ItemDictionary.DisplayList.ToArray(), _refineryVM.ItemDictionary.Count))
                         {
@@ -97,7 +108,11 @@ namespace Pulsar4X.SDL2UI
                         {
                             _refineryVM.OnNewBatchJob();
                         }
+
+                        ImGui.EndChild();
+                        ImGui.PopStyleVar();
                     }
+
                 }
             }
             ImGui.End();
@@ -116,6 +131,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var refinaryDB = _selectedEntity.Entity.GetDataBlob<RefiningDB>();
                 _refineryVM = new RefiningVM(_state.Game, _selectedEntity.CmdRef, refinaryDB);
+                _refineryVM.SetUpdateListner(_selectedEntity.Entity.Manager.ManagerSubpulses);
             }
         }
 

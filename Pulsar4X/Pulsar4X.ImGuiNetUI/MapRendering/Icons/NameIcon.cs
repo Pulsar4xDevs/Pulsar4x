@@ -123,7 +123,7 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.EndPopup();
             }
-
+            ImGui.BeginChild("subnames");
             foreach (var name in SubNames)
             {
                 if (ImGui.Button(name.Value))
@@ -139,6 +139,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndPopup();
                 }
             }
+            ImGui.EndChild();
             var size = ImGui.GetWindowSize();
             //var size = ImGui.GetLastItemRectSize();
             Height = size.Y;

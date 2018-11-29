@@ -55,7 +55,8 @@ namespace Pulsar4X.SDL2UI
                         _state.ShowMetrixWindow = !_state.ShowMetrixWindow;
                     if (ImGui.Button("Show ImgDebug"))
                         _state.ShowImgDbg = !_state.ShowImgDbg;
-
+                    if(ImGui.Checkbox("DemoWindow", ref _state.ShowDemoWindow))
+                        
                     if (ImGui.CollapsingHeader("Process settings", _xpanderFlags))
                     {
                         if (ImGui.Checkbox("MultiThreaded", ref IsThreaded))

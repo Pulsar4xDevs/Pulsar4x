@@ -159,7 +159,11 @@ namespace Pulsar4X.SDL2UI
 
             if (_state.ShowMetrixWindow)
                 ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
-
+            if (_state.ShowDemoWindow)
+            {
+                ImGui.ShowDemoWindow();
+                ImGui.ShowUserGuide();
+            }
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {
                 item.Display();
