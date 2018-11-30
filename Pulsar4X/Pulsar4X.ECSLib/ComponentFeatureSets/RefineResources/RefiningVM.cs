@@ -28,7 +28,8 @@ namespace Pulsar4X.ECSLib
 
         Dictionary<Guid, RefineJobVM> _currentJobsDict = new Dictionary<Guid, RefineJobVM>();
         public ObservableCollection<RefineJobVM> CurrentJobs { get; } = new ObservableCollection<RefineJobVM>();
-
+        public RefineJobVM CurrentJobSelectedItem;
+        public int CurrentJobSelectedIndex; 
         //public ObservableCollection<object> NewJobSelectionItems { get; } = new ObservableCollection<object>();
         public DictionaryVM<Guid, string> ItemDictionary { get; } = new DictionaryVM<Guid, string>(DisplayMode.Value);
         public int NewJobSelectedIndex { get { return ItemDictionary.SelectedIndex; } }
@@ -83,19 +84,6 @@ namespace Pulsar4X.ECSLib
         {
             PointsPerDay = _refineDB.PointsPerTick;
 
-            /*
-            foreach(var jobItem in _refineDB.JobBatchList)
-            {
-
-                if(!_currentJobsDict.ContainsKey(jobItem.JobID))
-                {
-                    var newJobVM = new RefineJobVM(this, _staticData, jobItem, _cmdRef);
-                    _currentJobsDict.Add(jobItem.JobID, newJobVM);
-                    CurrentJobs.Add(newJobVM);
-                }
-                _currentJobsDict[jobItem.JobID].Update();
-            }*/
-
             for (int index = 0; index < _refineDB.JobBatchList.Count; index++)
             {
                 var jobItem = _refineDB.JobBatchList[index];
@@ -107,6 +95,7 @@ namespace Pulsar4X.ECSLib
                     _currentJobsDict.Add(jobID, newJobVM);
                     CurrentJobs.Insert(index, newJobVM);
                 }
+
                 if(CurrentJobs[index].JobID != jobID)
                 {
                     var outOfOrderVM = CurrentJobs[index];
@@ -118,7 +107,7 @@ namespace Pulsar4X.ECSLib
                     }
                     else
                     {
-                        _currentJobsDict.Remove(jobID);
+                        _currentJobsDict.Remove(outOfOrderVM.JobID);
                     }
 
                     if (!_currentJobsDict.ContainsKey(jobID))
@@ -139,10 +128,11 @@ namespace Pulsar4X.ECSLib
     {
         internal RefineingJob JobItem { get; private set; }
         StaticDataStore _staticData;
-        internal Guid JobID { get { return JobItem.JobID; } }
+        public Guid JobID { get { return JobItem.JobID; } }
         public CommandReferences _cmdRef;
         private IDBViewmodel _parent;
         public string Item { get; set; }
+        public string SingleLineText { get; set; }
         public bool Repeat => JobItem.Auto;
         public int Completed => JobItem.NumberCompleted;
         public int BatchQuantity => JobItem.NumberOrdered;
@@ -167,6 +157,7 @@ namespace Pulsar4X.ECSLib
 
         internal void Update()
         {
+            SingleLineText = Item + " " + Completed + "/" + BatchQuantity;  
             OnPropertyChanged(nameof(Repeat));
             OnPropertyChanged(nameof(Completed));
             OnPropertyChanged(nameof(BatchQuantity));

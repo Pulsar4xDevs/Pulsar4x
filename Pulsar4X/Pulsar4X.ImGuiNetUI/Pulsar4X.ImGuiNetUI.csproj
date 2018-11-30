@@ -78,6 +78,10 @@
     <None Remove="Resources\PulsarLogo.bmp" />
     <None Remove="Resources\PulsarLogo.png" />
     <None Remove="Libs\libcimgui.so" />
+    <None Remove="Resources\CancelIco.bmp" />
+    <None Remove="Resources\DnArrow.bmp" />
+    <None Remove="Resources\RepeatIco.bmp" />
+    <None Remove="Resources\UpArrow.bmp" />
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
     <None Include="Libs\cimgui\linux-x64\cimgui.so" Visable="false">
@@ -121,8 +125,28 @@
     <Content Include="Resources\PulsarLogo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\CancelIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\DnArrow.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\RepeatIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\UpArrow.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Colony\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Resources\CancelIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\UpArrow.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

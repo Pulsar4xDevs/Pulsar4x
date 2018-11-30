@@ -68,7 +68,7 @@ namespace Pulsar4X.SDL2UI
             //Debug = new DebugWindow(this);
 
             //LoadedWindows.Add(SettingsWindow);
-
+            /*
             IntPtr sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/PulsarLogo.bmp"));
             IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
             SDLImageDictionary.Add("Logo", sdltexture);
@@ -84,6 +84,15 @@ namespace Pulsar4X.SDL2UI
             sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/OneStep.bmp"));
             sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
             SDLImageDictionary.Add("OneStepImg", sdltexture);
+*/
+            LoadImg("Logo", "Resources/PulsarLogo.bmp");
+            LoadImg("PlayImg", "Resources/Play.bmp");
+            LoadImg("PauseImg", "Resources/Pause.bmp");
+            LoadImg("OneStepImg", "Resources/OneStep.bmp");
+            LoadImg("UpImg", "Resources/UpArrow.bmp");
+            LoadImg("DnImg", "Resources/DnArrow.bmp");
+            LoadImg("RepeatImg", "Resources/RepeatIco.bmp");
+            LoadImg("CancelImg", "Resources/CancelIco.bmp");
 
             /*
             int gltxtrID;
@@ -95,6 +104,13 @@ namespace Pulsar4X.SDL2UI
             GLImageDictionary["PlayImg"] = gltxtrID;
             GL.Enable(GL.Enum.GL_TEXTURE_2D);
             */
+        }
+
+        internal void LoadImg(string name, string path)
+        {
+            IntPtr sdlSurface = SDL.SDL_LoadBMP(path);
+            IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
+            SDLImageDictionary.Add(name, sdltexture);
         }
 
 

@@ -36,8 +36,11 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(Game game)
         {
-            RefiningProcessor.AddJob(_staticData, _entityCommanding, _job);
-            IsRunning = true;
+            if (!IsRunning)
+            {
+                RefiningProcessor.AddJob(_staticData, _entityCommanding, _job);
+                IsRunning = true;
+            }
         }
 
 

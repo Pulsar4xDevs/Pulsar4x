@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -20,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         {
             ColonyPanel instance;
             if (selectedEntity.CmdRef == null)
-                CommandReferences.CreateForEntity(_state.Game, selectedEntity.Entity);
+               selectedEntity.CmdRef = CommandReferences.CreateForEntity(_state.Game, selectedEntity.Entity);
             if (!_state.LoadedWindows.ContainsKey(typeof(ColonyPanel)))
             {
                 instance = new ColonyPanel(selectedEntity);
@@ -77,15 +78,49 @@ namespace Pulsar4X.SDL2UI
                     if(ImGui.CollapsingHeader("Refinary"))
                     {
                         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-                        ImGui.BeginChild("Current Jobs", new System.Numerics.Vector2(0, 100), true, ImGuiWindowFlags.ChildWindow);
-                        foreach (var job in _refineryVM.CurrentJobs)
+                        ImGui.BeginChild("Current Jobs", new System.Numerics.Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
+
+                        foreach (var job in _refineryVM.CurrentJobs.ToArray())
                         {
-                            ImGui.Text(job.Item);
-                            ImGui.SameLine();
-                            ImGui.Text(job.BatchQuantity.ToString());
-                            ImGui.Text(job.ItemPercentRemaining.ToString());
+
+                            bool selected = false;
+                            if (job == _refineryVM.CurrentJobSelectedItem)
+                                selected = true;
+
+                            if (ImGui.Selectable(job.SingleLineText, ref selected))
+                            {
+                                _refineryVM.CurrentJobSelectedItem = job;
+                            }
+
+                            if (job.Repeat)
+                            {
+                                ImGui.SameLine();
+                                ImGui.Image(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16));
+                            }
+                                
 
                         }
+                        ImGui.EndChild();
+                        ImGui.SameLine();
+
+                        ImGui.BeginChild("Buttons", new System.Numerics.Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
+                        ImGui.BeginGroup();
+                        if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
+                        { _refineryVM.CurrentJobSelectedItem.ChangePriority(-1); }
+                        if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
+                        { _refineryVM.CurrentJobSelectedItem.ChangePriority(1); }
+                        ImGui.EndGroup();
+                        ImGui.SameLine();
+                        if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
+                        {}
+                        ImGui.SameLine();
+                        if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
+                        { }
+
+
+
+                        ImGui.EndGroup();
+
                         ImGui.EndChild();
 
                         ImGui.BeginChild("CreateJob", new System.Numerics.Vector2(0,84), true, ImGuiWindowFlags.ChildWindow);
