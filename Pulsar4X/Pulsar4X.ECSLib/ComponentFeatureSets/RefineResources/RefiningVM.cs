@@ -154,7 +154,18 @@ namespace Pulsar4X.ECSLib
             _cmdRef.Handler.HandleOrder(newCommand);
             _parent.Update();
         }
-
+        public void ChangeRepeat(bool repeats)
+        {
+            ChangeRepeatJob newCommand = new ChangeRepeatJob(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID, repeats);
+            _cmdRef.Handler.HandleOrder(newCommand);
+            _parent.Update();
+        }
+        public void CancelJob()
+        {
+            CancelJob newCommand = new CancelJob(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID);
+            _cmdRef.Handler.HandleOrder(newCommand);
+            _parent.Update();
+        }
         internal void Update()
         {
             SingleLineText = Item + " " + Completed + "/" + BatchQuantity;  

@@ -112,10 +112,10 @@ namespace Pulsar4X.SDL2UI
                         ImGui.EndGroup();
                         ImGui.SameLine();
                         if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
-                        {}
+                            _refineryVM.CurrentJobSelectedItem.ChangeRepeat(!_refineryVM.CurrentJobSelectedItem.Repeat); 
                         ImGui.SameLine();
                         if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
-                        { }
+                            _refineryVM.CurrentJobSelectedItem.CancelJob(); 
 
 
 
