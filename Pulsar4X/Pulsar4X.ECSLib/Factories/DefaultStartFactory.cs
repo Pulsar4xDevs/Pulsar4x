@@ -15,7 +15,6 @@ namespace Pulsar4X.ECSLib
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
-            Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
 
             var namedEntites = sol.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
@@ -24,6 +23,8 @@ namespace Pulsar4X.ECSLib
                 nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
             }
 
+            Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
+            Entity marsColony = ColonyFactory.CreateColony(factionEntity, speciesEntity, NameLookup.GetFirstEntityWithName(sol, "Mars"));
 
             ComponentTemplateSD mineSD = game.StaticData.ComponentTemplates[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
             ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
@@ -59,7 +60,7 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(colonyEntity, fuelTank);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, cargoInstalation);
-
+            EntityManipulation.AddComponentToEntity(marsColony, cargoInstalation);
             Entity colonySensor = FacPassiveSensor(game, factionEntity);
             EntityManipulation.AddComponentToEntity(colonyEntity, colonySensor);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
