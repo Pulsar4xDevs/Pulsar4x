@@ -44,113 +44,116 @@ namespace Pulsar4X.SDL2UI
             //construction pannel, expandable?
             //constructed but not installed components. 
             //installation pannel (install constructed components
-            if (ImGui.Begin("Cargo", ref IsActive, _flags))
+            if (IsActive)
             {
-
-                if (_storeVM != null)
-                {
-                    ImGui.BeginGroup();
-                    foreach (var storetype in _storeVM.CargoResourceStores)
-                    {
-                        if(ImGui.CollapsingHeader(storetype.HeaderText + "###" + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
-                        {
-                            foreach (var item in storetype.CargoItems)
-                            {
-                                ImGui.Text(item.ItemName);
-                                ImGui.SameLine();
-                                ImGui.Text(item.ItemWeightPerUnit);
-                                ImGui.SameLine();
-                                ImGui.Text(item.NumberOfItems);
-                                ImGui.SameLine();
-                                ImGui.Text(item.TotalWeight);
-                                
-                            }
-                            
-                        }
-                    }
-                    ImGui.EndGroup();
-                }
-
-
-                if(_refineryVM != null)
+                if (ImGui.Begin("Cargo", ref IsActive, _flags))
                 {
 
-                    if(ImGui.CollapsingHeader("Refinary"))
+                    if (_storeVM != null)
                     {
-                        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-                        ImGui.BeginChild("Current Jobs", new System.Numerics.Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
-
-                        foreach (var job in _refineryVM.CurrentJobs.ToArray())
-                        {
-
-                            bool selected = false;
-                            if (job == _refineryVM.CurrentJobSelectedItem)
-                                selected = true;
-
-                            if (ImGui.Selectable(job.SingleLineText, ref selected))
-                            {
-                                _refineryVM.CurrentJobSelectedItem = job;
-                            }
-
-                            if (job.Repeat)
-                            {
-                                ImGui.SameLine();
-                                ImGui.Image(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16));
-                            }
-                                
-
-                        }
-                        ImGui.EndChild();
-                        ImGui.SameLine();
-
-                        ImGui.BeginChild("Buttons", new System.Numerics.Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
                         ImGui.BeginGroup();
-                        if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
-                        { _refineryVM.CurrentJobSelectedItem.ChangePriority(-1); }
-                        if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
-                        { _refineryVM.CurrentJobSelectedItem.ChangePriority(1); }
+                        foreach (var storetype in _storeVM.CargoResourceStores)
+                        {
+                            if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
+                            {
+                                foreach (var item in storetype.CargoItems)
+                                {
+                                    ImGui.Text(item.ItemName);
+                                    ImGui.SameLine();
+                                    ImGui.Text(item.ItemWeightPerUnit);
+                                    ImGui.SameLine();
+                                    ImGui.Text(item.NumberOfItems);
+                                    ImGui.SameLine();
+                                    ImGui.Text(item.TotalWeight);
+
+                                }
+
+                            }
+                        }
                         ImGui.EndGroup();
-                        ImGui.SameLine();
-                        if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
-                            _refineryVM.CurrentJobSelectedItem.ChangeRepeat(!_refineryVM.CurrentJobSelectedItem.Repeat); 
-                        ImGui.SameLine();
-                        if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
-                            _refineryVM.CurrentJobSelectedItem.CancelJob(); 
-
-
-
-                        ImGui.EndGroup();
-
-                        ImGui.EndChild();
-
-                        ImGui.BeginChild("CreateJob", new System.Numerics.Vector2(0,84), true, ImGuiWindowFlags.ChildWindow);
-
-                        int curItem = _refineryVM.NewJobSelectedIndex;
-                        if(ImGui.Combo("NewJobSelection", ref curItem, _refineryVM.ItemDictionary.DisplayList.ToArray(), _refineryVM.ItemDictionary.Count))
-                        {
-                            _refineryVM.ItemDictionary.SelectedIndex = curItem;
-                        }
-                        int batchCount = _refineryVM.NewJobBatchCount;
-                        if (ImGui.InputInt("Batch Count", ref batchCount))
-                            _refineryVM.NewJobBatchCount = (ushort)batchCount;
-                        bool repeatJob = _refineryVM.NewJobRepeat;
-                        if(ImGui.Checkbox("Repeat Job", ref repeatJob))
-                        {
-                            _refineryVM.NewJobRepeat = repeatJob;
-                        }
-                        ImGui.SameLine();
-                        if(ImGui.Button("Create New Job"))
-                        {
-                            _refineryVM.OnNewBatchJob();
-                        }
-
-                        ImGui.EndChild();
-                        ImGui.PopStyleVar();
                     }
 
+
+                    if (_refineryVM != null)
+                    {
+
+                        if (ImGui.CollapsingHeader("Refinary"))
+                        {
+                            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
+                            ImGui.BeginChild("Current Jobs", new System.Numerics.Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
+
+                            foreach (var job in _refineryVM.CurrentJobs.ToArray())
+                            {
+
+                                bool selected = false;
+                                if (job == _refineryVM.CurrentJobSelectedItem)
+                                    selected = true;
+
+                                if (ImGui.Selectable(job.SingleLineText, ref selected))
+                                {
+                                    _refineryVM.CurrentJobSelectedItem = job;
+                                }
+
+                                if (job.Repeat)
+                                {
+                                    ImGui.SameLine();
+                                    ImGui.Image(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16));
+                                }
+
+
+                            }
+                            ImGui.EndChild();
+                            ImGui.SameLine();
+
+                            ImGui.BeginChild("Buttons", new System.Numerics.Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
+                            ImGui.BeginGroup();
+                            if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
+                            { _refineryVM.CurrentJobSelectedItem.ChangePriority(-1); }
+                            if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
+                            { _refineryVM.CurrentJobSelectedItem.ChangePriority(1); }
+                            ImGui.EndGroup();
+                            ImGui.SameLine();
+                            if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
+                                _refineryVM.CurrentJobSelectedItem.ChangeRepeat(!_refineryVM.CurrentJobSelectedItem.Repeat);
+                            ImGui.SameLine();
+                            if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
+                                _refineryVM.CurrentJobSelectedItem.CancelJob();
+
+
+
+                            ImGui.EndGroup();
+
+                            ImGui.EndChild();
+
+                            ImGui.BeginChild("CreateJob", new System.Numerics.Vector2(0, 84), true, ImGuiWindowFlags.ChildWindow);
+
+                            int curItem = _refineryVM.NewJobSelectedIndex;
+                            if (ImGui.Combo("NewJobSelection", ref curItem, _refineryVM.ItemDictionary.DisplayList.ToArray(), _refineryVM.ItemDictionary.Count))
+                            {
+                                _refineryVM.ItemDictionary.SelectedIndex = curItem;
+                            }
+                            int batchCount = _refineryVM.NewJobBatchCount;
+                            if (ImGui.InputInt("Batch Count", ref batchCount))
+                                _refineryVM.NewJobBatchCount = (ushort)batchCount;
+                            bool repeatJob = _refineryVM.NewJobRepeat;
+                            if (ImGui.Checkbox("Repeat Job", ref repeatJob))
+                            {
+                                _refineryVM.NewJobRepeat = repeatJob;
+                            }
+                            ImGui.SameLine();
+                            if (ImGui.Button("Create New Job"))
+                            {
+                                _refineryVM.OnNewBatchJob();
+                            }
+
+                            ImGui.EndChild();
+                            ImGui.PopStyleVar();
+                        }
+
+                    }
                 }
+                ImGui.End();
             }
-            ImGui.End();
         }
 
         internal void HardRefresh()

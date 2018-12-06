@@ -55,12 +55,13 @@ namespace Pulsar4X.ECSLib
                 var masses = _entityCommanding.GetDataBlob<MassVolumeDB>().Mass + orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
                 var sgp = GameConstants.Science.GravitationalConstant * masses / 3.347928976e33;
 
-                Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
+                //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
+                Vector4 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
                 _db = new TranslateMoveDB(targetIntercept.Item1);
                 _db.EntryDateTime = TransitStartDateTime;
                 _db.PredictedExitTime = targetIntercept.Item2;
                 _db.TranslateEntryPoint_AU = currentPos;
-                _db.SavedNewtonionVector_MS = currentVec;
+                _db.SavedNewtonionVector_AU = currentVec;
                 if (_targetEntity.HasDataBlob<SensorInfoDB>())
                 {
                     _db.TargetEntity = _targetEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
@@ -110,7 +111,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-
+    /*
 
     public class OrbitBodyCommand : EntityCommand
     {
@@ -217,5 +218,5 @@ namespace Pulsar4X.ECSLib
                 return true;
             return false;
         }
-    }
+    }*/
 }

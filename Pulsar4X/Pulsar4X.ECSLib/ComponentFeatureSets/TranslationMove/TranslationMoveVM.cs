@@ -66,6 +66,7 @@ namespace Pulsar4X.ECSLib
             OnPropertyChanged(nameof(CanMatchSelected));
         }
 
+        /*
         private ICommand _orbitCommand;
         public ICommand OrbitCommand
         {
@@ -74,7 +75,7 @@ namespace Pulsar4X.ECSLib
                 return _orbitCommand ?? (_orbitCommand = new CommandHandler(OnOrbitCommand, true));
             }
         }
-
+        */
         private ICommand _moveCommand;
         public ICommand MoveCommand
         {
@@ -84,6 +85,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /*
         private void OnOrbitCommand()
         {
             OrbitBodyCommand newmove = new OrbitBodyCommand()
@@ -96,7 +98,7 @@ namespace Pulsar4X.ECSLib
                 PeriapsisInKM = this.Perihelion,
             };
             _cmdRef.Handler.HandleOrder(newmove);
-        }
+        }*/
 
         private void OnMoveCommand()
         {

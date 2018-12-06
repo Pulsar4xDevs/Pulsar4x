@@ -168,10 +168,12 @@ namespace Pulsar4X.SDL2UI
             {
                 item.Display();
             }
-            foreach (var item in _state.MapRendering._nameIcons.Values)
-            {
-                item.Draw(_state.rendererPtr, _state.Camera);
-            }
+
+            //because the nameIcons are IMGUI not SDL we draw them here. 
+            _state.MapRendering.DrawNameIcons();
+
+            ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
+
         }
 
 

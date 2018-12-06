@@ -8,20 +8,20 @@ namespace Pulsar4X.SDL2UI
 {
     public static class DrawPrimitive
     {
-        public static void DrawEllipse(IntPtr renderer, int posX, int posY, double xWidth, double yWidth)
+        public static void DrawEllipse(IntPtr renderer, int posX, int posY, double xRadius, double yRadius)
         {
             byte _numberOfArcSegments = 255;
 
             double angle = (Math.PI * 2.0) / (_numberOfArcSegments);
 
-            int lastX = posX + (int)Math.Round(xWidth * Math.Sin(angle));
-            int lastY = posY + (int)Math.Round(yWidth * Math.Cos(angle));
+            int lastX = posX + (int)Math.Round(xRadius * Math.Sin(angle));
+            int lastY = posY + (int)Math.Round(yRadius * Math.Cos(angle));
             int drawX;
             int drawY;
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
-                drawX = posX + (int)Math.Round(xWidth * Math.Sin(angle * i));
-                drawY = posY + (int)Math.Round(yWidth * Math.Cos(angle * i));
+                drawX = posX + (int)Math.Round(xRadius * Math.Sin(angle * i));
+                drawY = posY + (int)Math.Round(yRadius * Math.Cos(angle * i));
                 //SDL.SDL_RenderDrawPoint(renderer, drawX, drawY);
                 SDL.SDL_RenderDrawLine(renderer, lastX, lastY, drawX, drawY);
                 lastX = drawX;

@@ -46,6 +46,11 @@ namespace Pulsar4X.ECSLib
 
         #region Static Properties
 
+        public static Vector4 NaN
+        {
+            get { return new Vector4(double.NaN, double.NaN, double.NaN, double.NaN); }
+        }
+
         /// <summary>
         /// Gets a vector whose 4 elements are equal to one. 
         /// </summary>

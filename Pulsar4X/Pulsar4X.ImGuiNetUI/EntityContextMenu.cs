@@ -4,14 +4,14 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
-    public struct EntityState
+    public class EntityState
     {
         public Entity Entity;
         public string Name;
 
         public NameIcon NameIcon;
         public OrbitIcon OrbitIcon;
-
+        public OrbitOrderWiget DebugOrbitOrder;
         public CommandReferences CmdRef;
 
     }

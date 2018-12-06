@@ -15,6 +15,11 @@ namespace Pulsar4X.ECSLib
         private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
         private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="T:Pulsar4X.ECSLib.OrbitProcessor"/> use ralitive velocity.
+        /// </summary>
+        /// <value><c>true</c> if use ralitive velocity; otherwise, uses absolute <c>false</c>.</value>
+        public static bool UseRalitiveVelocity { get; set; } = true;
 
         public TimeSpan RunFrequency => TimeSpan.FromHours(1);
 
@@ -248,13 +253,51 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
+        /// <summary>
+        /// Gets the orbital vector, will be either Absolute or Ralitive depending on static bool UseRalitiveVelocity
+        /// </summary>
+        /// <returns>The orbital vector.</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        public static Vector4 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
+        {
+            if (UseRalitiveVelocity)
+                return PreciseOrbitalVector(orbit, atDateTime);
+            else
+                return AbsoluteOrbitalVector(orbit, atDateTime);
+        }
 
+        public static Vector4 GetOrbitalInsertionVector(Vector4 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
+        {
+            if (UseRalitiveVelocity)
+                return departureVelocity;
+            else
+            {
+                var targetVelocity = AbsoluteOrbitalVector(targetOrbit, arrivalDateTime);
+                return departureVelocity - targetVelocity;
+            }
+        }
+
+        /// <summary>
+        /// The orbital vector.
+        /// </summary>
+        /// <returns>The orbital vector, ralitive to the root object (ie sun)</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        public static Vector4 AbsoluteOrbitalVector(OrbitDB orbit, DateTime atDateTime)       
+        {
+            Vector4 vector = PreciseOrbitalVector(orbit, atDateTime);
+            if(orbit.Parent != null)
+                vector += AbsoluteOrbitalVector((OrbitDB)orbit.ParentDB, atDateTime);
+            return vector;
+
+        }
 
 
         /// <summary>
         /// returns the speed for an object of a given mass at a given radius from a body.
         /// </summary>
-        /// <returns>The orbital speed.</returns>
+        /// <returns>The orbital speed, ralitive to the parent</returns>
         /// <param name="mass">Mass.</param>
         /// <param name="distance">Radius.</param>
         /// <param name="semiMajAxis">Semi maj axis.</param>
@@ -271,7 +314,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// 2d! vector. 
         /// </summary>
-        /// <returns>The orbital vector.</returns>
+        /// <returns>The orbital vector ralitive to the parent</returns>
         /// <param name="sgp">Standard Grav Perameter. in AU</param>
         /// <param name="position">Ralitive Position.</param>
         /// <param name="sma">SemiMajorAxis</param>
@@ -287,16 +330,18 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Not Tested
+        /// 2d vector
         /// </summary>
-        /// <returns>The orbital vector.</returns>
+        /// <returns>The orbital vector ralitive to the parent</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
         public static Vector4 PreciseOrbitalVector(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
-            var sgp = orbit.GravitationalParameter / 3.347929e+33;
             var sma = orbit.SemiMajorAxis;
+            if (orbit.GravitationalParameter == 0 || sma == 0)
+                return new Vector4(); //so we're not returning NaN;
+            var sgp = orbit.GravitationalParameter / 3.347929e+33;
             var radius = position.Length();
             var angle = Math.Atan2(position.X, position.Y);
             var spd = PreciseOrbitalSpeed(sgp, radius, sma);

@@ -145,10 +145,6 @@ namespace Pulsar4X.SDL2UI
                     x = (arrive.x + camerapoint.x),
                     y = (arrive.y + camerapoint.y)
                 };
-
-
-
-
             }
 
         }

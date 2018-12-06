@@ -12,6 +12,7 @@ namespace Pulsar4X.SDL2UI
         int _maxAlpha;
         int _minAlpha;
         bool IsThreaded;
+        bool RalitiveOrbitVelocity;
         private SettingsWindow()
         {
             _userOrbitSettings = _state.UserOrbitSettings;
@@ -21,6 +22,7 @@ namespace Pulsar4X.SDL2UI
             _colour = Helpers.Color(_userOrbitSettings.Red, _userOrbitSettings.Grn, _userOrbitSettings.Blu);
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             IsThreaded = _state.Game.Settings.EnableMultiThreading;
+            RalitiveOrbitVelocity = ECSLib.OrbitProcessor.UseRalitiveVelocity;
         }
         internal static SettingsWindow GetInstance()
         {
@@ -51,11 +53,9 @@ namespace Pulsar4X.SDL2UI
                         //_state.LoadedWindows.Add(_state.Debug);
 
                     }
-                    if (ImGui.Button("Show ImguiMetrix"))
-                        _state.ShowMetrixWindow = !_state.ShowMetrixWindow;
-                    if (ImGui.Button("Show ImgDebug"))
-                        _state.ShowImgDbg = !_state.ShowImgDbg;
-                    if(ImGui.Checkbox("DemoWindow", ref _state.ShowDemoWindow))
+                    ImGui.Checkbox("Show ImguiMetrix", ref _state.ShowMetrixWindow);
+                    ImGui.Checkbox("Show ImgDebug", ref _state.ShowImgDbg);
+                    ImGui.Checkbox("DemoWindow", ref _state.ShowDemoWindow);
                         
                     if (ImGui.CollapsingHeader("Process settings", _xpanderFlags))
                     {
@@ -63,7 +63,18 @@ namespace Pulsar4X.SDL2UI
                         {
                             _state.Game.Settings.EnableMultiThreading = IsThreaded;
                         }
-
+                        if (ImGui.Checkbox("Translate Uses Ralitive Velocity", ref RalitiveOrbitVelocity))
+                        {
+                            ECSLib.OrbitProcessor.UseRalitiveVelocity = RalitiveOrbitVelocity;
+                        }
+                        if (ImGui.IsItemHovered())
+                        { 
+                            if (RalitiveOrbitVelocity)
+                                ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using a vector ralitive to it's origin parent");
+                            else
+                                ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using the absolute Vector (ie raltive to the root'sun'");
+                        }
+                        
                     }
 
 

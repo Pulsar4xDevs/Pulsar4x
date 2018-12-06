@@ -48,10 +48,14 @@ namespace Pulsar4X.SDL2UI
 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
-
-        double _soiWorldRadius;
+        //sphere of influance radius, if the entity is outside this, then this is affected by the parent (or other) gravitational body
+        double _soiWorldRadius; 
         float _soiViewRadius;
-
+        //this is the size of the planet that we're trying to orbit, 
+        //if the entity is inside this... currently nothing happens, 
+        //but it shoudl be bad. we should not allow translations inside this radius, and warn if the orbit goes within this radius. 
+        double _targetWorldRadius;
+        float _targetViewRadius;
         #endregion
 
         #region Dynamic Properties
@@ -92,7 +96,7 @@ namespace Pulsar4X.SDL2UI
             _linearEccentricity = 0;
 
             _soiWorldRadius = GMath.GetSOI(targetEntity);
-
+            _targetWorldRadius = targetEntity.GetDataBlob<MassVolumeDB>().Radius;
             Setup();
 
         }
@@ -108,7 +112,7 @@ namespace Pulsar4X.SDL2UI
             _linearEccentricity = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);
 
             _soiWorldRadius =  GMath.GetSOI(targetEntity);
-
+            _targetWorldRadius = targetEntity.GetDataBlob<MassVolumeDB>().Radius;
             Setup();
         }
 
@@ -128,6 +132,7 @@ namespace Pulsar4X.SDL2UI
             CreatePointArray();
 
             OnPhysicsUpdate();
+
         }
 
 
@@ -252,7 +257,7 @@ namespace Pulsar4X.SDL2UI
 
 
             _soiViewRadius = camera.ViewDistance(_soiWorldRadius);
-
+            _targetViewRadius = camera.ViewDistance(_targetWorldRadius);
             int index = _index;
             var camerapoint = camera.CameraViewCoordinate();
             //ViewScreenPos += camerapoint;
@@ -308,6 +313,8 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
             //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
+            SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 100);
+            DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
         }
     }
 }

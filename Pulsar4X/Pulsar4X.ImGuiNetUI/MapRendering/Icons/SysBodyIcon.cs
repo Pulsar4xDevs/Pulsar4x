@@ -111,6 +111,19 @@ namespace Pulsar4X.SDL2UI
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
+        /*
+        public override void OnFrameUpdate(Matrix matrix, Camera camera)
+        {
+
+            var bodyRadiusAU = _massVolDB.Radius;
+            var viewRadius = camera.ViewDistance(bodyRadiusAU);
+            if (viewRadius < 8)
+                ShapesScaleWithZoom = false;
+            else
+                ShapesScaleWithZoom = true;
+            base.OnFrameUpdate(matrix, camera);
+
+        }*/
     }
 }
 

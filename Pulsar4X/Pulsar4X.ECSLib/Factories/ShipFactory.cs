@@ -9,10 +9,11 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
         {
             Vector4 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            position.Y += Distance.KmToAU(10000);
+            var distanceFromParent = parent.GetDataBlob<MassVolumeDB>().Radius * 2;
+            position.Y += distanceFromParent;
             Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction,  position, starsys, shipName);
 
-            var orbitDB = ShipMovementProcessor.CreateOrbitHereWithSemiMajAxis(ship, parent, 10000, systemEntityManager.ManagerSubpulses.SystemLocalDateTime);
+            var orbitDB = ShipMovementProcessor.CreateOrbitHereWithSemiMajAxis(ship, parent, Distance.AuToKm(distanceFromParent), systemEntityManager.ManagerSubpulses.SystemLocalDateTime);
             ship.GetDataBlob<PositionDB>().SetParent(orbitDB.Parent);
             ship.SetDataBlob(orbitDB);
 

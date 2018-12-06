@@ -9,7 +9,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class NameIcon : Icon, IComparable<NameIcon>, IRectangle
     {
-        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
+        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings;
         internal bool IsActive = true;
         GlobalUIState _state;
         NameDB _nameDB;
@@ -102,13 +102,14 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
 
-            //ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
             //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));
             ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 1));
-            ImGui.Begin(NameString, ref IsActive, _flags);
 
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 2));
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+
+            ImGui.Begin(NameString, ref IsActive, _flags);
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
             if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
@@ -123,6 +124,7 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.EndPopup();
             }
+
             ImGui.BeginChild("subnames");
             foreach (var name in SubNames)
             {
@@ -139,22 +141,21 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndPopup();
                 }
             }
+
             ImGui.EndChild();
+
+            //var size = ImGui.GetItemRectSize();
             var size = ImGui.GetWindowSize();
-            //var size = ImGui.GetLastItemRectSize();
-            Height = size.Y;
             Width = size.X;
+            Height = size.Y; 
             ViewDisplayRect.Width = size.X;
             ViewDisplayRect.Height = size.Y;
 
             ImGui.PopStyleColor();
 
-
-
-
             ImGui.End();
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
-            ImGui.PopStyleVar();
+            ImGui.PopStyleVar(3);
 
         }
 

@@ -32,10 +32,13 @@ namespace Pulsar4X.SDL2UI
         ImGuiSDL2CSWindow _window;
         internal List<IDrawData> UIWidgets = new List<IDrawData>();
         Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
-        Dictionary<Guid, Icon> _entityIcons = new Dictionary<Guid, Icon>();
-        Dictionary<Guid, OrbitIcon> _orbitRings = new Dictionary<Guid, OrbitIcon>();
-        Dictionary<Guid, ShipMoveWidget> _moveIcons = new Dictionary<Guid, ShipMoveWidget>();
+        Dictionary<Guid, IDrawData> _entityIcons = new Dictionary<Guid, IDrawData>();
+        Dictionary<Guid, IDrawData> _orbitRings = new Dictionary<Guid, IDrawData>();
+        Dictionary<Guid, IDrawData> _moveIcons = new Dictionary<Guid, IDrawData>();
         internal Dictionary<Guid, NameIcon> _nameIcons = new Dictionary<Guid, NameIcon>();
+
+        internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
+
         List<Vector4> _positions = new List<Vector4>();
         List<OrbitDB> _orbits = new List<OrbitDB>();
         internal SystemMap_DrawableVM SysMap;
@@ -151,8 +154,8 @@ namespace Pulsar4X.SDL2UI
 
         public void UpdateUserOrbitSettings()
         {
-            foreach (var item in _orbitRings.Values)
-            {
+            foreach (OrbitIcon item in _orbitRings.Values)
+            {                
                 item.UpdateUserSettings();
             }
         }
@@ -302,51 +305,56 @@ namespace Pulsar4X.SDL2UI
             else
             {
 
-                foreach (var icon in UIWidgets.ToArray())
-                {
-                    icon.OnFrameUpdate(matrix, _camera);
-                }
-                foreach (var icon in _orbitRings.Values.ToArray())
-                {
-                    icon.OnFrameUpdate(matrix, _camera);
-                }
-                foreach (var icon in _moveIcons.Values.ToArray())
-                {
-                    icon.OnFrameUpdate(matrix, _camera);
-                }
-                foreach (var icon in _entityIcons.Values.ToArray())
-                {
+                UpdateAndDraw(UIWidgets, matrix);
 
-                    icon.OnFrameUpdate(matrix, _camera);
-                }
-                foreach (var icon in _nameIcons.Values.ToArray())
+                UpdateAndDraw(_orbitRings, matrix);
+
+                UpdateAndDraw(_moveIcons, matrix);
+
+                UpdateAndDraw(_entityIcons, matrix);
+
+                UpdateAndDraw(SelectedEntityExtras, matrix);
+
+                //because _nameIcons are imgui not sdl, we don't draw them here.
+                //we draw them in PulsarMainWindow.ImGuiLayout
+                lock (_nameIcons) 
                 {
-                    icon.OnFrameUpdate(matrix, _camera);
+                    foreach (var item in _nameIcons.Values)
+                        item.OnFrameUpdate(matrix, _camera);
                 }
                 TextIconsDistribute();
 
-                foreach (var icon in UIWidgets.ToArray())
-                {
-                    icon.Draw(rendererPtr, _camera);
-                }
-                foreach (var icon in _orbitRings.Values.ToArray())
-                {
-                    
-                    icon.Draw(rendererPtr, _camera);
-                }
-                foreach (var icon in _moveIcons.Values.ToArray())
-                {
-                    icon.Draw(rendererPtr, _camera);
-                }
-                foreach (var icon in _entityIcons.Values.ToArray())
-                {
-                    icon.Draw(rendererPtr, _camera);
-                }
+                //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
-                ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
-                
                 SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
                 SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
+            }
+        }
+
+        public void DrawNameIcons()
+        {
+            lock (_nameIcons)
+            {
+                foreach (var item in _nameIcons.Values)
+                    item.Draw(_state.rendererPtr, _state.Camera);
+            }
+        }
+
+        void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)
+        {
+            foreach (var item in icons)
+                item.OnFrameUpdate(matrix, _camera);
+            foreach (var item in icons)           
+                item.Draw(rendererPtr, _camera);
+        }
+        void UpdateAndDraw(Dictionary<Guid, IDrawData> icons, Matrix matrix)
+        {
+            lock (icons)
+            {
+                foreach (var item in icons.Values)
+                    item.OnFrameUpdate(matrix, _camera);
+                foreach (var item in icons.Values)
+                    item.Draw(rendererPtr, _camera);
             }
         }
     }

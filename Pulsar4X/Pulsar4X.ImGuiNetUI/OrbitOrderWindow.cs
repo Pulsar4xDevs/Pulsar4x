@@ -15,16 +15,25 @@ namespace Pulsar4X.SDL2UI
         //Vector4 _periapsisPoint;
         double _apoapsisKm;
         double _periapsisKM;
-        double _targetRadius;
-        double _peAlt { get { return _periapsisKM - _targetRadius; } }
-        double _apAlt { get { return _apoapsisKm - _targetRadius; } }
+        double _targetRadiusAU;
+        double _targetRadiusKM;
+        double _peAlt { get { return _periapsisKM - _targetRadiusKM; } }
+        double _apAlt { get { return _apoapsisKm - _targetRadiusKM; } }
 
         double _apMax;
-        double _peMin { get { return _targetRadius; } }
+        double _peMin { get { return _targetRadiusKM; } }
 
-        double _PreciseOrbitalSpeedKm_s = double.NaN;
-
+        DateTime _departureDateTime;
+        double _departureOrbitalSpeed = double.NaN;
+        ECSLib.Vector4 _departureOrbitalVelocity = ECSLib.Vector4.NaN;
+        double _insertionOrbitalSpeed = double.NaN;
+        ECSLib.Vector4 _insertionOrbitalVelocity = ECSLib.Vector4.NaN;
         //(Vector4, TimeSpan) _intercept;
+
+        double _massOrderingEntity = double.NaN;
+        double _massTargetBody = double.NaN;
+        double _massCurrentBody = double.NaN;
+        double _stdGravParamTargetBody = double.NaN;
 
         string _displayText;
         string _tooltipText = "";
@@ -83,25 +92,41 @@ namespace Pulsar4X.SDL2UI
             var instance = (OrbitOrderWindow)_state.LoadedWindows[typeof(OrbitOrderWindow)];
             instance.OrderingEntity = entity;
             instance.CurrentState = States.NeedsTarget;
+            instance._departureDateTime = _state.CurrentSystemDateTime;
+            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent += instance.OnSystemDateTimeChange;
+            instance.EntitySelected();
             return instance;
         }
 
-
+        #region Stuff that gets calculated when the state changes.
         void DoNothing() { return; }
-        void EntitySelected() { 
+        void EntitySelected() 
+        { 
             OrderingEntity = _state.LastClickedEntity;
             CurrentState = States.NeedsTarget;
+            _massOrderingEntity = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
+            _departureOrbitalVelocity = OrbitProcessor.GetOrbitalVector(OrderingEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            _departureOrbitalSpeed = _departureOrbitalVelocity.Length();
         }
 
-        void TargetSelected() { 
+
+        void TargetSelected() 
+        { 
             TargetEntity = _state.LastClickedEntity;
 
             _state.Camera.PinToEntity(TargetEntity.Entity);
+            _targetRadiusAU = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().Radius;
+            _targetRadiusKM = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInKM;
 
             var soiWorldRad_AU = GMath.GetSOI(TargetEntity.Entity);
             _apMax = soiWorldRad_AU;
 
             float soiViewUnits = _state.Camera.ViewDistance(soiWorldRad_AU);
+
+            _massCurrentBody = OrderingEntity.Entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<MassVolumeDB>().Mass;
+            _massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
+            targetCalcs();
+
 
             Vector2 viewPortSize = _state.Camera.ViewPortSize;
             float windowLen = Math.Min(viewPortSize.X, viewPortSize.Y);
@@ -127,17 +152,16 @@ namespace Pulsar4X.SDL2UI
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
                 _state.MapRendering.UIWidgets.Add(_orbitWidget);
             }
+            
             if (_moveWidget == null)
             {
                 _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntity.Entity);
                 _state.MapRendering.UIWidgets.Add(_moveWidget);
             }
-
+            OrderingEntity.DebugOrbitOrder = _orbitWidget;
             _moveWidget.SetArrivalTarget(TargetEntity.Entity);
 
-            _targetRadius = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInKM;
-            //_intercept = InterceptCalcs.FTLIntercept(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
-            //_intercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _state.CurrentSystemDateTime); 
+
             _tooltipText = "Select Insertion Point";
             CurrentState = States.NeedsInsertionPoint;
         }
@@ -151,26 +175,10 @@ namespace Pulsar4X.SDL2UI
             _tooltipText = "Action to give order";
             CurrentState = States.NeedsActioning;
         }
-        /*
-        void PeriapsisPntSelected() { 
-            //var periapsisPoint = _state.LastWorldPointClicked;
-            //var distanceSelected = Distance.AuToKm((GetTargetPosition() - periapsisPoint).Length());
-            //_periapsisKM = Math.Min(Math.Max(_peMin, distanceSelected), _apoapsisKm); 
-            //_peAlt = _periapsisKM - _targetRadius;
-            _tooltipText = "Action to give order";
-            CurrentState = States.NeedsActioning;
-        }*/
+
         void ActionCmd() 
         {
-            /*
-            OrbitBodyCommand.CreateOrbitBodyCommand(
-                _state.Game,
-                _state.Faction,
-                OrderingEntity.Entity,
-                TargetEntity.Entity,
-                _apoapsisKm,//PointDFunctions.Length(_orbitWidget.Apoapsis), 
-                _periapsisKM);//PointDFunctions.Length(_orbitWidget.Periapsis));
-            */
+
             TransitToOrbitCommand.CreateTransitCmd(
                 _state.Game,
                 _state.Faction,
@@ -189,14 +197,49 @@ namespace Pulsar4X.SDL2UI
         void AbortOrder() { CloseWindow(); }
         void GoBackState() { CurrentState -= 1; }
 
-        ECSLib.Vector4 GetTargetPosition()
+
+        #endregion
+
+        #region Stuff that happens when the system date changes goes here
+
+
+
+        void OnSystemDateTimeChange(DateTime newDate)
         {
-            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+
+            if (_departureDateTime < newDate)
+                _departureDateTime = newDate;
+
+            switch (CurrentState) 
+            {
+                case States.NeedsEntity:
+
+                    break;
+                case States.NeedsTarget:
+                    {
+                        var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
+                        var smaCurrOrbtAU = OrderingEntity.Entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
+                    }
+
+                    break;
+                case States.NeedsInsertionPoint:
+                    {
+                        //rough calc, this calculates direct to the target. 
+                        targetCalcs();
+                        break;
+                    }
+
+                case States.NeedsActioning:
+                    break;
+                default:
+                    break;
+            }
         }
-        ECSLib.Vector4 GetMyPosition()
-        {
-            return OrderingEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-        }
+
+        #endregion
+
+        #region Stuff that happens each frame goes here
+
         internal override void Display()
         {
             if (IsActive)
@@ -225,7 +268,7 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.Text("OrbitalVelocity: ");
                     ImGui.SameLine();
-                    ImGui.Text(_PreciseOrbitalSpeedKm_s.ToString());
+                    ImGui.Text(_departureOrbitalSpeed.ToString());
 
                     if (ImGui.Button("Action Order"))
                         fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
@@ -242,12 +285,15 @@ namespace Pulsar4X.SDL2UI
                     if (_orbitWidget != null)
                     {
 
-                        switch (CurrentState)
+                        switch (CurrentState) //put stuff that needs refreshing each frame in here.
                         {
                             case States.NeedsEntity:
 
                                 break;
                             case States.NeedsTarget:
+                                {
+                                 
+                                }
 
                                 break;
                             case States.NeedsInsertionPoint:
@@ -256,7 +302,7 @@ namespace Pulsar4X.SDL2UI
                                     var mousePos = ImGui.GetMousePos();
 
                                     var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
-                                    _targetInsertionPoint_AU = (mouseWorldPos - GetTargetPosition());
+                                    _targetInsertionPoint_AU = (mouseWorldPos - GetTargetPosition()); //ralitive to the target body
 
                                     //var intercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), TargetEntity.Entity.Manager.ManagerSubpulses.SystemLocalDateTime);
 
@@ -268,20 +314,7 @@ namespace Pulsar4X.SDL2UI
                                     //_moveWidget.SetArrivalRadius(distanceAU);
                                     _moveWidget.SetArrivalPosition(_targetInsertionPoint_AU);
 
-                                    var massCurrBody = OrderingEntity.Entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<MassVolumeDB>().Mass;
-                                    var massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
-                                    var mymass = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
-
-                                    var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
-                                    var smaCurrOrbtAU = OrderingEntity.Entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
-
-                                    var sgpCBAU = GameConstants.Science.GravitationalConstant * (massCurrBody + mymass) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
-                                    var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
-                                    var sgpTBAU = GameConstants.Science.GravitationalConstant * (massTargetBody + mymass) / 3.347928976e33;
-
-                                    var ke = OrbitMath.KeplerFromVelocityAndPosition(sgpTBAU, _targetInsertionPoint_AU, velAU);
-
-                                    _PreciseOrbitalSpeedKm_s = Distance.AuToKm(velAU.Length());
+                                    var ke = OrbitMath.KeplerFromVelocityAndPosition(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity);
 
                                     _orbitWidget.SetParametersFromKeplerElements(ke, _targetInsertionPoint_AU);
                                     _apoapsisKm = Distance.AuToKm(ke.Apoapsis);
@@ -320,6 +353,10 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        #endregion
+
+        #region helper calcs
+
         /// <summary>
         /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
         /// </summary>
@@ -333,6 +370,33 @@ namespace Pulsar4X.SDL2UI
 
             return Distance.DistanceBetween(pos1, pos2);
         }
+
+        ECSLib.Vector4 GetTargetPosition()
+        {
+            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+        }
+        ECSLib.Vector4 GetMyPosition()
+        {
+            return OrderingEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+        }
+
+        void targetCalcs()
+        {
+            OrbitDB targetOrbit = TargetEntity.Entity.GetDataBlob<OrbitDB>();
+            (ECSLib.Vector4, DateTime) targetIntercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            var sgpCBAU = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
+            DateTime estArivalDateTime = targetIntercept.Item2; //rough calc. 
+            var parentOrbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, estArivalDateTime);
+
+            _insertionOrbitalVelocity = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+
+            _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
+            _stdGravParamTargetBody = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
+
+        }
+
+        #endregion
+
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)
         {
@@ -355,7 +419,7 @@ namespace Pulsar4X.SDL2UI
         {
             IsActive = false;
             CurrentState = States.NeedsEntity;
-
+            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
 
             if (_orbitWidget != null)
             {

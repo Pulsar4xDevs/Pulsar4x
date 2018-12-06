@@ -138,33 +138,14 @@ namespace Pulsar4X.ECSLib
 
             if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
             {
-
-
-                //distanceToMoveAU = distanceToTargetAU;
-                distanceToMove = distanceToTargetMt;
-                propulsionDB.CurrentVectorMS = new Vector4(0, 0, 0, 0);
-                //newPosAU = targetPosAU;
+            
                 newPositionMt = targetPosMt;
 
                 positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
 
-                var targetSOI = GMath.GetSOI(moveDB.TargetEntity);
-                //DateTime epoch = 
-                OrbitDB newOrbit = OrbitDB.FromVector(moveDB.TargetEntity, entity, moveDB.SavedNewtonionVector_MS, dateTimeFuture);
-                if (newOrbit.Periapsis > targetSOI)
-                {
-                    //TODO: find who's SOI we're currently in and create an orbit for that;
-                }
-                if (newOrbit.Apoapsis > targetSOI)
-                {
-                    //TODO: change orbit to new parent at SOI change
-                }
+                SetOrbitHere(entity, propulsionDB, positionDB, moveDB, dateTimeFuture);
 
-                positionDB.SetParent(moveDB.TargetEntity);
-                moveDB.IsAtTarget = true;
-                entity.RemoveDataBlob<TranslateMoveDB>();
-                entity.SetDataBlob(newOrbit);
-                newOrbit.SetParent(moveDB.TargetEntity);
+
             }
             else
             {
@@ -174,6 +155,43 @@ namespace Pulsar4X.ECSLib
 
             moveDB.LastProcessDateTime = dateTimeFuture;
 
+        }
+
+        void SetOrbitHere(Entity entity, PropulsionDB propulsionDB, PositionDB positionDB, TranslateMoveDB moveDB, DateTime epoch)
+        {
+
+            propulsionDB.CurrentVectorMS = new Vector4(0, 0, 0, 0);
+
+            double targetSOI = GMath.GetSOI(moveDB.TargetEntity);
+
+            Entity targetEntity;
+
+            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo(positionDB) > targetSOI)
+            {
+                targetEntity = moveDB.TargetEntity.GetDataBlob<OrbitDB>().Parent; //TODO: it's concevable we could be in another SOI not the parent (ie we could be in a target's moon's SOI)
+            }
+            else
+            {
+                targetEntity = moveDB.TargetEntity;
+            }
+            OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
+            Vector4 parentOrbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, epoch);
+            Vector4 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, epoch ); 
+            OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector, epoch);
+            if (newOrbit.Periapsis > targetSOI)
+            {
+                //TODO: find who's SOI we're currently in and create an orbit for that;
+            }
+            if (newOrbit.Apoapsis > targetSOI)
+            {
+                //TODO: change orbit to new parent at SOI change
+            }
+
+            positionDB.SetParent(targetEntity);
+            moveDB.IsAtTarget = true;
+            entity.RemoveDataBlob<TranslateMoveDB>();
+            entity.SetDataBlob(newOrbit);
+            newOrbit.SetParent(targetEntity);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)

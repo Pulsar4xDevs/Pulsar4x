@@ -130,6 +130,16 @@ namespace Pulsar4X.SDL2UI
 
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(MapRendering.IconEntityStates[entityGuid], button);
+            OnEntitySelected();
+        }
+
+        void OnEntitySelected()
+        {
+            MapRendering.SelectedEntityExtras = new List<IDrawData>();
+            if(LastClickedEntity.DebugOrbitOrder != null)
+            {
+                MapRendering.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
+            }
         }
 
     }
