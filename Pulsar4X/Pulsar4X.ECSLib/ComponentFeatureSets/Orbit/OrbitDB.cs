@@ -66,6 +66,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         public double GravitationalParameter { get; private set; }
+        [PublicAPI]
+        public double GravitationalParameterAU { get; private set; }
 
         /// <summary>
         /// Orbital Period of orbit.
@@ -282,7 +284,7 @@ namespace Pulsar4X.ECSLib
             // Calculate extended parameters.
             // http://en.wikipedia.org/wiki/Standard_gravitational_parameter#Two_bodies_orbiting_each_other
             GravitationalParameter = GameConstants.Science.GravitationalConstant * (_parentMass + _myMass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
-
+            GravitationalParameterAU = GameConstants.Science.GravitationalConstant * (_parentMass + _myMass) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
             double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.AuToKm(SemiMajorAxis), 3) / (GravitationalParameter));
             if (orbitalPeriod * 10000000 > long.MaxValue)

@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         /// <value><c>true</c> if use ralitive velocity; otherwise, uses absolute <c>false</c>.</value>
         public static bool UseRalitiveVelocity { get; set; } = true;
 
-        public TimeSpan RunFrequency => TimeSpan.FromHours(1);
+        public TimeSpan RunFrequency => TimeSpan.FromMinutes(5);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
 
@@ -73,7 +73,8 @@ namespace Pulsar4X.ECSLib
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
 
-            
+            //if(toDate.Minute > entityOrbitDB.OrbitalPeriod.TotalMinutes)
+
             // Get our Parent-Relative coordinates.
             try
             {
@@ -341,9 +342,9 @@ namespace Pulsar4X.ECSLib
             var sma = orbit.SemiMajorAxis;
             if (orbit.GravitationalParameter == 0 || sma == 0)
                 return new Vector4(); //so we're not returning NaN;
-            var sgp = orbit.GravitationalParameter / 3.347929e+33;
+            var sgp = orbit.GravitationalParameterAU;
             var radius = position.Length();
-            var angle = Math.Atan2(position.X, position.Y);
+            var angle = Math.Atan2(position.Y, position.X);
             var spd = PreciseOrbitalSpeed(sgp, radius, sma);
             return new Vector4()
             {

@@ -222,7 +222,9 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("SOI Radius: " + Distance.AuToKm( GMath.GetSOI(_state.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis);
-                                    if(orbitDB.Parent != null)
+                                    ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis).ToString("g3") + " Km");
+                                    ImGui.Text("Appoapsis: " + Distance.AuToKm(orbitDB.Apoapsis).ToString("g3") + " Km");
+                                    if (orbitDB.Parent != null)
                                         ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
                                     if (orbitDB.Children.Count > 0)
                                     {
