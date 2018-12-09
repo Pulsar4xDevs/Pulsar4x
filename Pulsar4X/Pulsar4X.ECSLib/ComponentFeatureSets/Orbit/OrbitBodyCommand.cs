@@ -80,7 +80,7 @@ namespace Pulsar4X.ECSLib
 
                 var time = targetIntercept.Item2 - TransitStartDateTime;
 
-                double spd = _entityCommanding.GetDataBlob<PropulsionDB>().MaximumSpeed_MS;
+                double spd = _entityCommanding.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS;
                 spd = Distance.MToAU(spd);
                 var distb = spd * time.TotalSeconds;
                 var distbKM = Distance.AuToKm(distb);

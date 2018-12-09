@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
 
         TranslateMoveDB _tMoveDB;
         PositionDB _posDB;
-        PropulsionDB _propDB;
+        PropulsionAbilityDB _propDB;
         public double Xpos { get {return _posDB.AbsolutePosition_AU.X; }}
         public double Ypos { get { return _posDB.AbsolutePosition_AU.Y; }}
         public double Speed { get { return _propDB.CurrentVectorMS.Length(); }}
@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
         {
             _tMoveDB = entity.GetDataBlob<TranslateMoveDB>();
             _posDB = entity.GetDataBlob<PositionDB>();
-            _propDB = entity.GetDataBlob<PropulsionDB>();
+            _propDB = entity.GetDataBlob<PropulsionAbilityDB>();
             _cmdRef = cmdRef;
             TargetList.SelectionChangedEvent += OnTargetSelectonChange;
             Entity faction;

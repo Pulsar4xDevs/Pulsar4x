@@ -46,7 +46,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             //if entity can move
-            if (_entityState.Entity.HasDataBlob<PropulsionDB>())
+            if (_entityState.Entity.HasDataBlob<PropulsionAbilityDB>())
             {
                 if (ImGui.SmallButton("Orbit"))
                 {

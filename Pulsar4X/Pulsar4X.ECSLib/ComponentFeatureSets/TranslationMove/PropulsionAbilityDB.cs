@@ -6,18 +6,25 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Contains info on the ships engines and fuel reserves.
     /// </summary>
-    public class PropulsionDB : BaseDataBlob, ICreateViewmodel
+    public class PropulsionAbilityDB : BaseDataBlob, ICreateViewmodel
     {
+        //Non Newtonion:
         public int MaximumSpeed_MS { get; set; }
         public Vector4 CurrentVectorMS { get; set; }
         public int TotalEnginePower { get; set; }
         public Dictionary<Guid, double> FuelUsePerKM { get; internal set; } = new Dictionary<Guid, double>();
 
-        public PropulsionDB()
+
+        //Newtonion
+        public int TotalDV {get;set;}
+        public int RemainingDV {get;set;}
+
+        
+        public PropulsionAbilityDB()
         {
         }
 
-        public PropulsionDB(PropulsionDB propulsionDB)
+        public PropulsionAbilityDB(PropulsionAbilityDB propulsionDB)
         {
             MaximumSpeed_MS = propulsionDB.MaximumSpeed_MS;
             CurrentVectorMS = propulsionDB.CurrentVectorMS;
@@ -27,7 +34,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new PropulsionDB(this);
+            return new PropulsionAbilityDB(this);
         }
 
         public IDBViewmodel CreateVM(Game game, CommandReferences cmdRef)

@@ -33,8 +33,8 @@ namespace Pulsar4X.ECSLib
 
         public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
         {
-            if (!parentEntity.HasDataBlob<PropulsionDB>())
-                parentEntity.SetDataBlob(new PropulsionDB());
+            if (!parentEntity.HasDataBlob<PropulsionAbilityDB>())
+                parentEntity.SetDataBlob(new PropulsionAbilityDB());
             ShipMovementProcessor.CalcMaxSpeedAndFuelUsage(parentEntity);
         }
     }

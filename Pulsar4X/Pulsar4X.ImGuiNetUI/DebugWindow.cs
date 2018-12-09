@@ -252,11 +252,11 @@ namespace Pulsar4X.SDL2UI
                                 }
                             }
 
-                            if (_state.LastClickedEntity.Entity.HasDataBlob<PropulsionDB>())
+                            if (_state.LastClickedEntity.Entity.HasDataBlob<PropulsionAbilityDB>())
                             {
                                 if (ImGui.CollapsingHeader("Propulsion: ###PropulsionHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    PropulsionDB propulsionDB = _state.LastClickedEntity.Entity.GetDataBlob<PropulsionDB>();
+                                    PropulsionAbilityDB propulsionDB = _state.LastClickedEntity.Entity.GetDataBlob<PropulsionAbilityDB>();
                                     ImGui.Text("NonNewt Engine Power: " + propulsionDB.TotalEnginePower);
                                     ImGui.Text("Max Speed: " + propulsionDB.MaximumSpeed_MS);
                                     ImGui.Text("CurrentVector: " + propulsionDB.CurrentVectorMS);

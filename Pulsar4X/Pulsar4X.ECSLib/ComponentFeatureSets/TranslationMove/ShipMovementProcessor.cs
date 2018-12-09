@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib
         public static double CalcMaxFuelDistance_KM(Entity shipEntity)
         {
             CargoStorageDB storedResources = shipEntity.GetDataBlob<CargoStorageDB>();
-            PropulsionDB propulsionDB = shipEntity.GetDataBlob<PropulsionDB>();
+            PropulsionAbilityDB propulsionDB = shipEntity.GetDataBlob<PropulsionAbilityDB>();
             StaticDataStore staticData = shipEntity.Manager.Game.StaticData;
             ICargoable fuelResource;
             double distance = 0;
@@ -136,7 +136,7 @@ namespace Pulsar4X.ECSLib
             }*/
 
             //Note: TN aurora uses the TCS for max speed calcs. 
-            PropulsionDB propulsionDB = ship.GetDataBlob<PropulsionDB>();
+            PropulsionAbilityDB propulsionDB = ship.GetDataBlob<PropulsionAbilityDB>();
             propulsionDB.TotalEnginePower = totalEnginePower;
             propulsionDB.FuelUsePerKM = totalFuelUsage;
             var mass = ship.GetDataBlob<ShipInfoDB>().Tonnage;

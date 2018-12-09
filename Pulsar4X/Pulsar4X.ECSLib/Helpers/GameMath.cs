@@ -635,7 +635,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
             Vector4 moverPosInKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(moverOrbit, atDateTime));
 
-            PropulsionDB moverPropulsion = mover.GetDataBlob<PropulsionDB>();
+            PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
 
             Vector4 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime)));
 
@@ -700,7 +700,7 @@ namespace Pulsar4X.ECSLib
             }
             else
                 moverPos = mover.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            double spd = mover.GetDataBlob<PropulsionDB>().MaximumSpeed_MS;
+            double spd = mover.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS;
             var spd1 = Distance.MToAU(spd);
             return GetInterceptPosition2(moverPos, spd1, targetOrbit, atDateTime, offsetPosition);
         }

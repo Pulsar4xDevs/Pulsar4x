@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
         public static void StartNonNewtTranslation(Entity entity)
         {
             var moveDB = entity.GetDataBlob<TranslateMoveDB>();
-            var propulsionDB = entity.GetDataBlob<PropulsionDB>();
+            var propulsionDB = entity.GetDataBlob<PropulsionAbilityDB>();
             var positionDB = entity.GetDataBlob<PositionDB>();
             var maxSpeedMS = propulsionDB.MaximumSpeed_MS;
             positionDB.SetParent(null);
@@ -108,7 +108,7 @@ namespace Pulsar4X.ECSLib
             
             var manager = entity.Manager;
             var moveDB = entity.GetDataBlob<TranslateMoveDB>();
-            var propulsionDB = entity.GetDataBlob<PropulsionDB>();
+            var propulsionDB = entity.GetDataBlob<PropulsionAbilityDB>();
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
             DateTime dateTimeFrom = moveDB.LastProcessDateTime;
             DateTime dateTimeNow = manager.ManagerSubpulses.SystemLocalDateTime;
@@ -157,7 +157,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        void SetOrbitHere(Entity entity, PropulsionDB propulsionDB, PositionDB positionDB, TranslateMoveDB moveDB, DateTime epoch)
+        void SetOrbitHere(Entity entity, PropulsionAbilityDB propulsionDB, PositionDB positionDB, TranslateMoveDB moveDB, DateTime epoch)
         {
 
             propulsionDB.CurrentVectorMS = new Vector4(0, 0, 0, 0);

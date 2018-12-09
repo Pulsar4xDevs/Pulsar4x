@@ -68,7 +68,7 @@ namespace Pulsar4X.Tests
             _ship = ShipFactory.CreateShip(_shipClass, _starSystem, _faction, pos, _starSystem, "Serial Peacemaker");
             Assert.AreEqual(designEngineNumber, _ship.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid), "Number of engine components not the same as design");
 
-            PropulsionDB propulsion = _ship.GetDataBlob<PropulsionDB>();
+            PropulsionAbilityDB propulsion = _ship.GetDataBlob<PropulsionAbilityDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
             Assert.AreEqual(500000, propulsion.TotalEnginePower, "Incorrect TotalEnginePower");
