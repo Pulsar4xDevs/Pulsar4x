@@ -118,9 +118,10 @@ namespace Pulsar4X.Tests
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);
 
-            BaseDataBlob[] parentblobs = new BaseDataBlob[2];
+            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(man.ManagerGuid) {X = 0, Y = 0, Z = 0 };
             parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
 
 
@@ -186,9 +187,10 @@ namespace Pulsar4X.Tests
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);
 
-            BaseDataBlob[] parentblobs = new BaseDataBlob[2];
+            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
             parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
 
             OrbitDB objOrbit = OrbitDB.FromVectorKM(parentEntity, objMass, parentMass, sgp, position, velocity, new DateTime());
@@ -267,9 +269,10 @@ namespace Pulsar4X.Tests
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);
 
-            BaseDataBlob[] parentblobs = new BaseDataBlob[2];
+            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
             parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
 
 
@@ -327,12 +330,13 @@ namespace Pulsar4X.Tests
             double myMass = 10000;
             double parentMass = 1.989e30; //solar mass.
             Game game = new Game();
-            EntityManager man = new EntityManager(game, false);
+            EntityManager mgr = new EntityManager(game, false);
 
-            BaseDataBlob[] parentblobs = new BaseDataBlob[2];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
+            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
+            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { X = 0, Y = 0, Z = 0 };
             parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
-            Entity parentEntity = new Entity(man, parentblobs);
+            parentblobs[2] = new OrbitDB();
+            Entity parentEntity = new Entity(mgr, parentblobs);
 
             Vector4 currentPos = new Vector4 { X=-0.77473184638034, Y = 0.967145228951685 };
             Vector4 currentVelocity = new Vector4 { Y = Distance.KmToAU(40) };
