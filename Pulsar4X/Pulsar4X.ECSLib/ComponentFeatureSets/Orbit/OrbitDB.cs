@@ -118,16 +118,16 @@ namespace Pulsar4X.ECSLib
         {
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
             var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
-            //ralitive position.
+
+            var epoch1 = parent.Manager.ManagerSubpulses.SystemLocalDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
             var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), epoch); //need to use the parent position at the epoch
-            var position = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
-            if (position.Length() > GMath.GetSOI(parent))
+            var ralitivePos = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
+            if (ralitivePos.Length() > GMath.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
-            //var epoch = parent.Manager.ManagerSubpulses.SystemLocalDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
             var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocityAU);
+            var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, ralitivePos, velocityAU);
             OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
                         Math.Abs(ke.SemiMajorAxis),
                         ke.Eccentricity,
@@ -137,6 +137,7 @@ namespace Pulsar4X.ECSLib
                         Angle.ToDegrees(ke.MeanAnomaly),
                         epoch);
             var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, epoch);
+
             return orbit;
         }
 

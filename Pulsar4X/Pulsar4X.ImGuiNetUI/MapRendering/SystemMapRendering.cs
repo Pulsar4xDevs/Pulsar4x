@@ -78,7 +78,8 @@ namespace Pulsar4X.SDL2UI
 
                 if (entityItem.HasDataBlob<NameDB>())
                 {
-                    _nameIcons.Add(entityItem.Guid, new NameIcon(ref entityState, _state));
+                    lock(_nameIcons)
+                        _nameIcons.Add(entityItem.Guid, new NameIcon(ref entityState, _state));
                 }
 
 
@@ -88,16 +89,21 @@ namespace Pulsar4X.SDL2UI
                     if(!orbitDB.IsStationary)
                     {
                         OrbitIcon orbit = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
-                        _orbitRings.Add(entityItem.Guid, orbit);
+                        lock (_orbitRings)
+                        {
+                            _orbitRings.Add(entityItem.Guid, orbit);
+                        }
                     }
                 }
                 if (entityItem.HasDataBlob<StarInfoDB>())
                 {
-                    _entityIcons.Add(entityItem.Guid, new StarIcon(entityItem));
+                    lock(_entityIcons)
+                        _entityIcons.Add(entityItem.Guid, new StarIcon(entityItem));
                 }
                 if (entityItem.HasDataBlob<SystemBodyInfoDB>())
                 {
-                    _entityIcons.Add(entityItem.Guid, new SysBodyIcon(entityItem));
+                    lock (_entityIcons)
+                        _entityIcons.Add(entityItem.Guid, new SysBodyIcon(entityItem));
                     if (entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies.Count > 0)
                     {
                         foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
@@ -114,7 +120,8 @@ namespace Pulsar4X.SDL2UI
                 }
                 if (entityItem.HasDataBlob<ShipInfoDB>())
                 {
-                    _entityIcons.Add(entityItem.Guid, new ShipIcon(entityItem));
+                    lock (_entityIcons)
+                        _entityIcons.Add(entityItem.Guid, new ShipIcon(entityItem));
                 }
 
                 IconEntityStates.Add(entityItem.Guid, entityState);
@@ -187,7 +194,8 @@ namespace Pulsar4X.SDL2UI
                         //Matrix matrix = new Matrix();
                         //matrix.Scale(_camera.ZoomLevel);
                         //widget.OnFrameUpdate(matrix, _camera);
-                        _moveIcons[changeData.Entity.Guid] = widget;
+                        lock(_moveIcons)
+                            _moveIcons[changeData.Entity.Guid] = widget;
                         //_moveIcons.Add(changeData.Entity.Guid, widget);
                     }
                     //if (changeData.Datablob is NameDB)
@@ -198,9 +206,11 @@ namespace Pulsar4X.SDL2UI
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
                 {
                     if (changeData.Datablob is OrbitDB)
+                        lock(_orbitRings)
                         _orbitRings.Remove(changeData.Entity.Guid);
                     if (changeData.Datablob is TranslateMoveDB)
-                        _moveIcons.Remove(changeData.Entity.Guid);
+                        lock(_moveIcons)
+                            _moveIcons.Remove(changeData.Entity.Guid);
 
                     //if (changeData.Datablob is NameDB)
                         //TextIconList.Remove(changeData.Entity.Guid);
