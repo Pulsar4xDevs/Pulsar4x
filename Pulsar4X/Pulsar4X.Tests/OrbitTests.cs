@@ -105,13 +105,37 @@ namespace Pulsar4X.Tests
 
         }
 
+
         [Test]
-        public void TestOrbitDBFromVectors()
+        public void OrbitsFromVectorTests()
         {
-            Vector4 position = new Vector4() { X = Distance.KmToAU(405400) }; //moon at apoapsis
-            Vector4 velocity = new Vector4() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
+            Vector4 position = new Vector4() { X = Distance.KmToAU(405400) }; //moon at apoapsis
+            Vector4 velocity = new Vector4() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+
+            //test high eccentricity orbit
+            parentMass = 1.989e30;
+            objMass = 2.2e+15;
+            position = new Vector4() { X = 0.57 }; //Halley's Comet at periapse aprox
+            velocity = new Vector4() { Y = Distance.KmToAU(54) };
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+
+
+
+            parentMass = 1.989e30;
+            objMass = 2.2e+15;
+            position = new Vector4() { X = 0.25, Y = 0.25 }; 
+            velocity = new Vector4() { Y = Distance.KmToAU(54) };
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+
+        }
+
+
+        public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector4 position, Vector4 velocity)
+        {
+
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
             KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
 
@@ -130,7 +154,9 @@ namespace Pulsar4X.Tests
 
             //check trueAnomaly 
             var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
-            Assert.AreEqual(ke.TrueAnomaly, orbTrueAnom);
+            var differenceInRadians = orbTrueAnom - ke.TrueAnomaly;
+            var differenceInDegrees = Angle.ToDegrees(differenceInRadians);
+            Assert.AreEqual(ke.TrueAnomaly, orbTrueAnom, 1.0e15, "more than 1.0e15 radians difference, at" + differenceInRadians + "("+ Angle.ToDegrees(1.0e15) + "/"   +differenceInDegrees+")");
 
             Assert.AreEqual(ke.Eccentricity, objOrbit.Eccentricity);
             Assert.AreEqual(ke.SemiMajorAxis, objOrbit.SemiMajorAxis);
@@ -172,154 +198,8 @@ namespace Pulsar4X.Tests
             //var speedVectorAU = OrbitProcessor.PreciseOrbitalVector(sgp, position, ke.SemiMajorAxis);
             //var speedVectorAU2 = OrbitProcessor.PreciseOrbitalVector(objOrbit, new DateTime());
             //Assert.AreEqual(speedVectorAU, speedVectorAU2);
-        }
-
-        [Test]
-        public void TestOrbitDBFromVectorsInKM()
-        {
-            Vector4 position = new Vector4() { X = 405400 }; //moon at apoapsis
-            Vector4 velocity = new Vector4() { Y = 0.97 }; //approx velocity of moon at apoapsis
-            double parentMass = 5.97237e24;
-            double objMass = 7.342e22;
-            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
-            KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
-
-            Game game = new Game();
-            EntityManager man = new EntityManager(game, false);
-
-            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
-            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
-            parentblobs[2] = new OrbitDB();
-            Entity parentEntity = new Entity(man, parentblobs);
-
-            OrbitDB objOrbit = OrbitDB.FromVectorKM(parentEntity, objMass, parentMass, sgp, position, velocity, new DateTime());
-            Vector4 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
 
 
-            Assert.AreEqual(ke.Eccentricity, objOrbit.Eccentricity);
-            Assert.AreEqual(ke.SemiMajorAxis, Distance.AuToKm(objOrbit.SemiMajorAxis)); 
-
-
-            var lenke1 = ke.SemiMajorAxis * 2;
-            var lenke2 = ke.Apoapsis + ke.Periapsis;
-            Assert.AreEqual(lenke1, lenke2);
-            var lendb1 = objOrbit.SemiMajorAxis * 2;
-            var lendb2 = objOrbit.Apoapsis + objOrbit.Periapsis;
-
-            //check lengths of ellipse are the same;
-            Assert.AreEqual(lendb1, lendb2);
-            Assert.AreEqual(lenke1, Distance.AuToKm( lendb1));
-            Assert.AreEqual(lenke2, Distance.AuToKm( lendb2));
-
-            var sma1 = ke.SemiMinorAxis;
-            var sma2 = EllipseMath.SemiMinorAxisFromApsis(ke.Apoapsis, ke.Periapsis);
-            var sma3 = EllipseMath.SemiMinorAxis(ke.SemiMajorAxis, ke.Eccentricity);
-
-            Assert.AreEqual(sma1, sma2);
-            var dif = sma2 - sma3;
-            Assert.AreEqual(sma2, sma3, double.Epsilon);
-
-            var sma4 = EllipseMath.SemiMinorAxis(objOrbit.SemiMajorAxis, objOrbit.Eccentricity);
-            var sma5 = EllipseMath.SemiMinorAxisFromApsis(objOrbit.Apoapsis, objOrbit.Periapsis);
-
-            var dif2 = sma4 - sma5;
-            Assert.AreEqual(sma4, sma5, 1.0e-15);
-            //check the orbitWidths are the same;
-            Assert.AreEqual(sma1, Distance.AuToKm(sma4), 1.0e-9);
-
-            Assert.GreaterOrEqual(ke.Apoapsis, ke.Periapsis);
-            Assert.GreaterOrEqual(objOrbit.Apoapsis, objOrbit.Periapsis);
-
-
-            var db_apkm = Distance.AuToKm(objOrbit.Apoapsis);
-            var db_pekm = Distance.AuToKm(objOrbit.Periapsis);
-            var differnce = ke.Apoapsis - db_apkm;
-            var peDif = ke.Periapsis - db_pekm;
-            Assert.AreEqual(ke.Apoapsis, db_apkm, 1.0e-10); 
-            Assert.AreEqual(ke.Periapsis, db_pekm, 1.0e-10);
-
-
-
-            //check trueAnomaly 
-            var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
-            Assert.AreEqual(ke.TrueAnomaly, orbTrueAnom);
-
-            Vector4 resultKM = Distance.AuToKm(resultPos);
-            var diference = position.Length() - resultKM.Length();
-            Assert.AreEqual(position.Length(), resultKM.Length(), 0.01);
-
-
-
-            Assert.AreEqual(position.X, resultKM.X, 0.01);
-            Assert.AreEqual(position.Y, resultKM.Y, 0.01);
-            Assert.AreEqual(position.Z, resultKM.Z, 0.01);
-        }
-
-        [Test]
-        public void TestOrbitDBFromVectorsHighEccent()
-        {
-            Vector4 position = new Vector4() { X = 0.57 }; //Halley's Comet at periapse aprox
-            Vector4 velocity = new Vector4() { Y = Distance.KmToAU(54) }; 
-            double parentMass = 1.989e30;
-            double objMass = 2.2e+15;
-            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
-            KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
-
-            Game game = new Game();
-            EntityManager man = new EntityManager(game, false);
-
-            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
-            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
-            parentblobs[2] = new OrbitDB();
-            Entity parentEntity = new Entity(man, parentblobs);
-
-
-            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp, position, velocity, new DateTime());
-            Vector4 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
-
-            //check trueAnomaly 
-            var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
-            var degreeDifference = Angle.ToDegrees( orbTrueAnom - ke.TrueAnomaly);
-            Assert.AreEqual(ke.TrueAnomaly, orbTrueAnom, 1.0e15);
-
-            Assert.AreEqual(ke.Eccentricity, objOrbit.Eccentricity);
-            Assert.AreEqual(ke.SemiMajorAxis, objOrbit.SemiMajorAxis);
-
-
-            var lenke1 = ke.SemiMajorAxis * 2;
-            var lenke2 = ke.Apoapsis + ke.Periapsis;
-            Assert.AreEqual(lenke1, lenke2);
-            var lendb1 = objOrbit.SemiMajorAxis * 2;
-            var lendb2 = objOrbit.Apoapsis + objOrbit.Periapsis;
-            Assert.AreEqual(lendb1, lendb2);
-            Assert.AreEqual(lenke1, lendb1);
-            Assert.AreEqual(lenke2, lendb2);
-
-
-
-            var ke_apkm = Distance.AuToKm(ke.Apoapsis);
-            var db_apkm = Distance.AuToKm(objOrbit.Apoapsis);
-            var differnce = ke_apkm - db_apkm;
-            Assert.AreEqual(ke.Apoapsis, objOrbit.Apoapsis);
-            Assert.AreEqual(ke.Periapsis, objOrbit.Periapsis);
-
-            Vector4 posKM = Distance.AuToKm(position);
-            Vector4 resultKM = Distance.AuToKm(resultPos);
-
-
-
-            Assert.AreEqual(posKM.Length(), resultKM.Length(), 0.01);
-            Assert.AreEqual(posKM.X, resultKM.X, 0.01);
-            Assert.AreEqual(posKM.Y, resultKM.Y, 0.01);
-            Assert.AreEqual(posKM.Z, resultKM.Z, 0.01);
-
-            if (velocity.Z == 0)
-            {
-                Assert.IsTrue(ke.Inclination == 0);
-                Assert.IsTrue(objOrbit.Inclination == 0);
-            }
 
         }
 
