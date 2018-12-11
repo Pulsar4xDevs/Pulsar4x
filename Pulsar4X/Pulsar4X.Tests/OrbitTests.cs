@@ -156,7 +156,7 @@ namespace Pulsar4X.Tests
             var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
             var differenceInRadians = orbTrueAnom - ke.TrueAnomaly;
             var differenceInDegrees = Angle.ToDegrees(differenceInRadians);
-            Assert.AreEqual(ke.TrueAnomaly, orbTrueAnom, 1.0e15, "more than 1.0e15 radians difference, at" + differenceInRadians + "("+ Angle.ToDegrees(1.0e15) + "/"   +differenceInDegrees+")");
+            Assert.AreEqual(ke.TrueAnomaly, orbTrueAnom, 0.008726655, "more than 0.00872665 radians difference, at" + differenceInRadians + "("+ Angle.ToDegrees(0.008726655) + "/"   +differenceInDegrees+")");
 
             Assert.AreEqual(ke.Eccentricity, objOrbit.Eccentricity);
             Assert.AreEqual(ke.SemiMajorAxis, objOrbit.SemiMajorAxis);
