@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ImGuiNET;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -31,11 +32,11 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr rendererPtr;
         ImGuiSDL2CSWindow _window;
         internal List<IDrawData> UIWidgets = new List<IDrawData>();
-        Dictionary<Guid, Icon> _testIcons = new Dictionary<Guid, Icon>();
-        Dictionary<Guid, IDrawData> _entityIcons = new Dictionary<Guid, IDrawData>();
-        Dictionary<Guid, IDrawData> _orbitRings = new Dictionary<Guid, IDrawData>();
-        Dictionary<Guid, IDrawData> _moveIcons = new Dictionary<Guid, IDrawData>();
-        internal Dictionary<Guid, NameIcon> _nameIcons = new Dictionary<Guid, NameIcon>();
+        ConcurrentDictionary<Guid, Icon> _testIcons = new ConcurrentDictionary<Guid, Icon>();
+        ConcurrentDictionary<Guid, IDrawData> _entityIcons = new ConcurrentDictionary<Guid, IDrawData>();
+        ConcurrentDictionary<Guid, IDrawData> _orbitRings = new ConcurrentDictionary<Guid, IDrawData>();
+        ConcurrentDictionary<Guid, IDrawData> _moveIcons = new ConcurrentDictionary<Guid, IDrawData>();
+        internal ConcurrentDictionary<Guid, NameIcon> _nameIcons = new ConcurrentDictionary<Guid, NameIcon>();
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
 
@@ -58,7 +59,7 @@ namespace Pulsar4X.SDL2UI
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position. 
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
-                _testIcons.Add(Guid.NewGuid(), item);
+                _testIcons.TryAdd(Guid.NewGuid(), item);
             }
         }
 
@@ -78,8 +79,7 @@ namespace Pulsar4X.SDL2UI
 
                 if (entityItem.HasDataBlob<NameDB>())
                 {
-                    lock(_nameIcons)
-                        _nameIcons.Add(entityItem.Guid, new NameIcon(ref entityState, _state));
+                    _nameIcons.TryAdd(entityItem.Guid, new NameIcon(ref entityState, _state));
                 }
 
 
@@ -89,21 +89,17 @@ namespace Pulsar4X.SDL2UI
                     if(!orbitDB.IsStationary)
                     {
                         OrbitIcon orbit = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
-                        lock (_orbitRings)
-                        {
-                            _orbitRings.Add(entityItem.Guid, orbit);
-                        }
+                        _orbitRings.TryAdd(entityItem.Guid, orbit);
+
                     }
                 }
                 if (entityItem.HasDataBlob<StarInfoDB>())
                 {
-                    lock(_entityIcons)
-                        _entityIcons.Add(entityItem.Guid, new StarIcon(entityItem));
+                    _entityIcons.TryAdd(entityItem.Guid, new StarIcon(entityItem));
                 }
                 if (entityItem.HasDataBlob<SystemBodyInfoDB>())
                 {
-                    lock (_entityIcons)
-                        _entityIcons.Add(entityItem.Guid, new SysBodyIcon(entityItem));
+                    _entityIcons.TryAdd(entityItem.Guid, new SysBodyIcon(entityItem));
                     if (entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies.Count > 0)
                     {
                         foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
@@ -120,8 +116,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 if (entityItem.HasDataBlob<ShipInfoDB>())
                 {
-                    lock (_entityIcons)
-                        _entityIcons.Add(entityItem.Guid, new ShipIcon(entityItem));
+                    _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
                 }
 
                 IconEntityStates.Add(entityItem.Guid, entityState);
@@ -194,8 +189,7 @@ namespace Pulsar4X.SDL2UI
                         //Matrix matrix = new Matrix();
                         //matrix.Scale(_camera.ZoomLevel);
                         //widget.OnFrameUpdate(matrix, _camera);
-                        lock(_moveIcons)
-                            _moveIcons[changeData.Entity.Guid] = widget;
+                        _moveIcons[changeData.Entity.Guid] = widget;
                         //_moveIcons.Add(changeData.Entity.Guid, widget);
                     }
                     //if (changeData.Datablob is NameDB)
@@ -206,11 +200,15 @@ namespace Pulsar4X.SDL2UI
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
                 {
                     if (changeData.Datablob is OrbitDB)
-                        lock(_orbitRings)
-                        _orbitRings.Remove(changeData.Entity.Guid);
-                    if (changeData.Datablob is TranslateMoveDB)
-                        lock(_moveIcons)
-                            _moveIcons.Remove(changeData.Entity.Guid);
+                    {
+                        IDrawData foo;
+                        _orbitRings.TryRemove(changeData.Entity.Guid, out foo);
+                    }
+                    if (changeData.Datablob is TranslateMoveDB) 
+                    {
+                        IDrawData foo;
+                        _moveIcons.TryRemove(changeData.Entity.Guid, out foo);
+                    }
 
                     //if (changeData.Datablob is NameDB)
                         //TextIconList.Remove(changeData.Entity.Guid);
@@ -366,6 +364,13 @@ namespace Pulsar4X.SDL2UI
                 foreach (var item in icons.Values)
                     item.Draw(rendererPtr, _camera);
             }
+        }
+        void UpdateAndDraw(ConcurrentDictionary<Guid, IDrawData> icons, Matrix matrix)
+        {
+            foreach (var item in icons.Values)
+                item.OnFrameUpdate(matrix, _camera);
+            foreach (var item in icons.Values)
+                item.Draw(rendererPtr, _camera);
         }
     }
 }

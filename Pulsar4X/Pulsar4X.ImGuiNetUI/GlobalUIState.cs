@@ -125,7 +125,7 @@ namespace Pulsar4X.SDL2UI
         internal void EntityClicked(Guid entityGuid, MouseButtons button)
         {
             
-            if (button == MouseButtons.Primary)
+            //if (button == MouseButtons.Primary)
                 LastClickedEntity = MapRendering.IconEntityStates[entityGuid];
 
             if (ActiveWindow != null)
