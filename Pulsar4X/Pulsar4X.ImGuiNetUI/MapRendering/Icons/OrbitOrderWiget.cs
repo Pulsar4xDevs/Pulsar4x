@@ -190,45 +190,11 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-
-
-        /*
-         * this gets the index by attempting to find the angle between the body and the center of the ellipse. possibly faster, but math is hard. 
         public override void OnPhysicsUpdate()
         {
 
-            //adjust so moons get the right positions  
-            Vector4 pos = _bodyPositionDB.AbsolutePosition;// - _positionDB.AbsolutePosition;   
-            PointD pointD = new PointD() { x = pos.X, y = pos.Y };
 
-             
-            //adjust for focal point
-            pos.X += _focalDistance; 
-
-            //rotate to the LonditudeOfPeriapsis. 
-            double x2 = (pos.X * Math.Cos(-_orbitAngleRadians)) - (pos.Y * Math.Sin(-_orbitAngleRadians));
-            double y2 = (pos.X * Math.Sin(-_orbitAngleRadians)) + (pos.Y * Math.Cos(-_orbitAngleRadians));
-
-            _ellipseStartArcAngleRadians = (float)(Math.Atan2(y2, x2));  //Atan2 returns a value between -180 and 180; 
-
-            //PointD pnt = _points.OrderBy(p => CalcDistance(p, new PointD() {x = pos.X, y = pos.Y })).First();
-
-            //get the indexPosition in the point array we want to start drawing from: this should be the segment where the planet is. 
-            double unAdjustedIndex = (_ellipseStartArcAngleRadians / _segmentArcSweepRadians);
-            while (unAdjustedIndex < 0)
-            {
-                unAdjustedIndex += (2 * Math.PI);
-            }
-            _index = (int)unAdjustedIndex;
-
-        }
-*/
-
-        public override void OnPhysicsUpdate()
-        {
-
-  
-
+            CreatePointArray();
             PointD pointD = new PointD() { X = _position.X, Y = _position.Y };
 
             double minDist = CalcDistance(pointD, _points[_index]);
@@ -252,7 +218,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            CreatePointArray();
+
             ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
 
 

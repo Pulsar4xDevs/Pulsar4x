@@ -13,6 +13,13 @@ namespace Pulsar4X.SDL2UI
         EntityState TargetEntity;
         //Vector4 _apoapsisPoint;
         //Vector4 _periapsisPoint;
+        float _maxDV = 1000;
+        float _progradeDV;
+        float _radialDV;
+
+        ECSLib.Vector4 _deltaV; //vector ralitive to system cartisian coordinates. 
+
+        KeplerElements _ke;
         double _apoapsisKm;
         double _periapsisKM;
         double _targetRadiusAU;
@@ -24,6 +31,7 @@ namespace Pulsar4X.SDL2UI
         double _peMin { get { return _targetRadiusKM; } }
 
         double _eccentricity = double.NaN;
+
 
         DateTime _departureDateTime;
         double _departureOrbitalSpeed = double.NaN;
@@ -216,8 +224,6 @@ namespace Pulsar4X.SDL2UI
 
         #region Stuff that happens when the system date changes goes here
 
-
-
         void OnSystemDateTimeChange(DateTime newDate)
         {
 
@@ -231,13 +237,21 @@ namespace Pulsar4X.SDL2UI
                     break;
                 case States.NeedsTarget:
                     {
+
+                        _departureOrbitalVelocity = OrbitProcessor.GetOrbitalVector(OrderingEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+                        _departureOrbitalSpeed = _departureOrbitalVelocity.Length();
+
                         var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
                         var smaCurrOrbtAU = OrderingEntity.Entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
+
                     }
 
                     break;
                 case States.NeedsInsertionPoint:
                     {
+                        _departureOrbitalVelocity = OrbitProcessor.GetOrbitalVector(OrderingEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+                        _departureOrbitalSpeed = _departureOrbitalVelocity.Length();
+
                         //rough calc, this calculates direct to the target. 
                         targetCalcs();
                         break;
@@ -284,6 +298,15 @@ namespace Pulsar4X.SDL2UI
                             case States.NeedsInsertionPoint:
                                 {
 
+                                    if(ImGui.SliderFloat("Prograde DV", ref _progradeDV, -_maxDV, _maxDV))
+                                    {
+                                     
+                                    }
+                                    if(ImGui.SliderFloat("Radial DV", ref _radialDV, -_maxDV, _maxDV))
+                                    { 
+
+                                    }
+
                                     var mousePos = ImGui.GetMousePos();
 
                                     var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
@@ -294,7 +317,7 @@ namespace Pulsar4X.SDL2UI
                                     //var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
 
                                     var ke = OrbitMath.KeplerFromVelocityAndPosition(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity);
-
+                                    _ke = ke;
                                     _orbitWidget.SetParametersFromKeplerElements(ke, _targetInsertionPoint_AU);
                                     _apoapsisKm = Distance.AuToKm(ke.Apoapsis);
                                     _periapsisKM = Distance.AuToKm(ke.Periapsis);
@@ -352,6 +375,26 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.Text("Eccentricity: ");
                     ImGui.Text(_eccentricity.ToString("g3"));
+
+                    ImGui.Text("Departure Vector: ");
+                    ImGui.SameLine();
+                    ImGui.Text(_departureOrbitalVelocity.ToString("g3"));
+
+                    ImGui.Text("Insertion Vector: ");
+                    ImGui.SameLine();
+                    ImGui.Text(_insertionOrbitalVelocity.ToString("g3"));
+
+                    ImGui.Text("LoAN: ");
+                    ImGui.SameLine();
+                    ImGui.Text(_ke.LoAN.ToString("g3"));
+
+                    ImGui.Text("AoP: ");
+                    ImGui.SameLine();
+                    ImGui.Text(_ke.AoP.ToString("g3"));
+
+                    ImGui.Text("Angle: ");
+                    ImGui.SameLine();
+                    ImGui.Text((_ke.LoAN + _ke.AoP).ToString("g3"));
 
                     if (ImGui.Button("Action Order"))
                         fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();

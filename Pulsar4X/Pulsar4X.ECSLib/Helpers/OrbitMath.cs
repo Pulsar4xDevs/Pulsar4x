@@ -7,29 +7,38 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public struct KeplerElements
     {
-        public double SemiMajorAxis;
-        public double SemiMinorAxis;
-        public double Eccentricity;
+        public double SemiMajorAxis;        //a
+        public double SemiMinorAxis;        //b
+        public double Eccentricity;         //e
         public double LinierEccentricity;
-        public double Periapsis;
-        public double Apoapsis;
-        public double LoAN;
-        public double AoP;
-        public double Inclination;
-        public double MeanAnomaly;
-        public double TrueAnomaly;
+        public double Periapsis;            //q
+        public double Apoapsis;             //Q
+        public double LoAN;                 //Omega (upper case)
+        public double AoP;                  //omega (lower case)
+        public double Inclination;          //i
+        public double MeanAnomaly;          //M
+        public double TrueAnomaly;          //v or f
+        //public double Period              //P
+        //public double EccentricAnomaly    //E
     }
 
     public class OrbitMath
     {
 
+        /// <summary>
+        /// Kepler elements from velocity and position.
+        /// </summary>
+        /// <returns>a struct of Kepler elements.</returns>
+        /// <param name="standardGravParam">Standard grav parameter.</param>
+        /// <param name="position">Position ralitive to parent</param>
+        /// <param name="velocity">Velocity ralitive to parent</param>
         public static KeplerElements KeplerFromVelocityAndPosition(double standardGravParam, Vector4 position, Vector4 velocity)
         {
             KeplerElements ke = new KeplerElements();
             Vector4 angularVelocity = Vector4.Cross(position, velocity);
             Vector4 nodeVector = Vector4.Cross(new Vector4(0, 0, 1, 0), angularVelocity);
 
-            Vector4 eccentVector = ((velocity.Length() * velocity.Length() - standardGravParam / position.Length()) * position - Vector4.Dot(position, velocity) * velocity) / standardGravParam;
+            Vector4 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
 
@@ -102,8 +111,6 @@ namespace Pulsar4X.ECSLib
             }
 
 
-
-
             var eccAng = Vector4.Dot(eccentVector, position);
             eccAng = semiMajorAxis / eccAng;
             eccAng = GMath.Clamp(eccAng, -1, 1);
@@ -127,6 +134,29 @@ namespace Pulsar4X.ECSLib
             return ke;
         }
 
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/Eccentricity_vector
+        /// </summary>
+        /// <returns>The vector.</returns>
+        /// <param name="sgp">StandardGravParam.</param>
+        /// <param name="position">Position, ralitive to parent.</param>
+        /// <param name="velocity">Velocity, ralitive to parent.</param>
+        public static Vector4 EccentricityVector(double sgp, Vector4 position, Vector4 velocity)
+        {
+            Vector4 angularMomentum = Vector4.Cross(position, velocity);
+            Vector4 foo1 = Vector4.Cross(velocity, angularMomentum);
+            foo1 = foo1 / sgp;
+            var foo2 = position / position.Length();
+            return foo1 - foo2;
+        }
+
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/True_anomaly#From_state_vectors
+        /// </summary>
+        /// <returns>The anomaly.</returns>
+        /// <param name="eccentVector">Eccentricity vector.</param>
+        /// <param name="position">Position ralitive to parent</param>
+        /// <param name="velocity">Velocity ralitive to parent</param>
         public static double TrueAnomaly(Vector4 eccentVector, Vector4 position, Vector4 velocity)
         {
 
@@ -141,6 +171,7 @@ namespace Pulsar4X.ECSLib
 
             return trueAnomoly;
         }
+
 
         public static Vector4 Pos(double combinedMass, double semiMajAxis, double meanAnomaly, double eccentricity, double aoP, double loAN, double i)
         {
