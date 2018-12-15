@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
 
             int drawX;
             int drawY;
-            int totalSegments = (int)(arcAngleRadians / incrementAngle);
+            int totalSegments = (int)(Math.Abs(arcAngleRadians) / incrementAngle);
 
 
             SDL.SDL_Point[] points = new SDL.SDL_Point[totalSegments];

@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         public double AoP;                  //omega (lower case)
         public double Inclination;          //i
         public double MeanAnomaly;          //M
-        public double TrueAnomaly;          //v or f
+        public double TrueAnomaly;          //v or f or theta
         //public double Period              //P
         //public double EccentricAnomaly    //E
     }
@@ -93,22 +93,27 @@ namespace Pulsar4X.ECSLib
                 longdOfAN = Math.Acos(loANlen); //RAAN or LoAN or Omega letter
 
 
+
+            // https://en.wikipedia.org/wiki/Argument_of_periapsis#Calculation
             double argOfPeriaps;
             if (longdOfAN == 0)
             {
                 argOfPeriaps = Math.Atan2(eccentVector.Y, eccentVector.X);
-                if (Vector4.Cross(position, velocity).Z < 0)
+                if (Vector4.Cross(position, velocity).Z < 0) //anti clockwise orbit
                     argOfPeriaps = Math.PI * 2 - argOfPeriaps;
             }
+
             else
             {
-                var aopLen = Vector4.Dot(nodeVector, eccentVector);
+                double aopLen = Vector4.Dot(nodeVector, eccentVector);
                 aopLen = aopLen / (nodeVector.Length() * eccentricity);
                 aopLen = GMath.Clamp(aopLen, -1, 1);
                 argOfPeriaps = Math.Acos(aopLen);
-                if (eccentVector.Z < 0)
+                if (eccentVector.Z < 0) //anti clockwise orbit.
                     argOfPeriaps = Math.PI * 2 - argOfPeriaps;
             }
+
+
 
 
             var eccAng = Vector4.Dot(eccentVector, position);
@@ -117,6 +122,7 @@ namespace Pulsar4X.ECSLib
             var eccentricAnomoly = Math.Acos(eccAng);
 
             var meanAnomaly = eccentricAnomoly - eccentricity * Math.Sin(eccentricAnomoly);
+
 
 
             ke.SemiMajorAxis = semiMajorAxis;

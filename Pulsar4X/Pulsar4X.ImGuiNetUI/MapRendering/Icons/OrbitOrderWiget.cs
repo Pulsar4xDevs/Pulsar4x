@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
         internal double OrbitEllipseSemiMaj;
         internal double OrbitEllipseSemiMinor;
 
-        internal double OrbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
+        internal double OrbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. this is eqal to the LoAN + AoP 
 
         double _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
 
@@ -83,6 +83,13 @@ namespace Pulsar4X.SDL2UI
         double _eccentricity;
         Vector4 _position;
 
+        #endregion
+
+        #region debugData
+
+        double _aoP = 0;
+        double _loAN = 0;
+        double _trueAnomaly = 0;
         #endregion
 
         internal OrbitOrderWiget(Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
@@ -168,6 +175,10 @@ namespace Pulsar4X.SDL2UI
                 OrbitAngleRadians = ke.LoAN + ke.AoP;
             }
             _position = position;
+
+            _loAN = ke.LoAN;
+            _aoP = ke.AoP;
+            _trueAnomaly = ke.TrueAnomaly;
             OnPhysicsUpdate();
         }
 
@@ -281,6 +292,15 @@ namespace Pulsar4X.SDL2UI
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
             SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 100);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
+
+            SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 100, 0, 160);
+            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 63, 63, 0, _loAN); //draw LoAN angle
+
+            SDL.SDL_SetRenderDrawColor(rendererPtr, 50, 0, 100, 160);
+            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 64, 64, _loAN, -_aoP); //draw AoP angle
+
+            //SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 160);
+            //DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 66, 66, -OrbitAngleRadians, -OrbitAngleRadians - _trueAnomaly);
         }
     }
 }
