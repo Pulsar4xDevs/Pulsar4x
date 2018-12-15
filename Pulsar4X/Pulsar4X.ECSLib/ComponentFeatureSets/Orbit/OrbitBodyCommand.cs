@@ -20,12 +20,22 @@ namespace Pulsar4X.ECSLib
         private Entity _targetEntity;
         public Vector4 TargetOffsetPosition_AU;
         public DateTime TransitStartDateTime;
-        public Vector4 DeltaVExpendAtExit;
+        public Vector4 ExpendDeltaV;
 
         TranslateMoveDB _db;
 
 
-        public static void CreateTransitCmd(Game game, Entity faction, Entity orderEntity, Entity targetEntity, Vector4 targetOffsetPos_AU, DateTime transitStartDatetime)
+        /// <summary>
+        /// Creates the transit cmd.
+        /// </summary>
+        /// <param name="game">Game.</param>
+        /// <param name="faction">Faction.</param>
+        /// <param name="orderEntity">Order entity.</param>
+        /// <param name="targetEntity">Target entity.</param>
+        /// <param name="targetOffsetPos_AU">Target offset position in au.</param>
+        /// <param name="transitStartDatetime">Transit start datetime.</param>
+        /// <param name="expendDeltaV_AU">Amount of DV to expend to change the orbit in AU/s</param>
+        public static void CreateTransitCmd(Game game, Entity faction, Entity orderEntity, Entity targetEntity, Vector4 targetOffsetPos_AU, DateTime transitStartDatetime, Vector4 expendDeltaV_AU)
         {
             var cmd = new TransitToOrbitCommand()
             {
@@ -34,7 +44,8 @@ namespace Pulsar4X.ECSLib
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
                 TargetEntityGuid = targetEntity.Guid,
                 TargetOffsetPosition_AU = targetOffsetPos_AU,
-                TransitStartDateTime = transitStartDatetime
+                TransitStartDateTime = transitStartDatetime,
+                ExpendDeltaV = expendDeltaV_AU,
             };
             game.OrderHandler.HandleOrder(cmd);
         }
@@ -62,6 +73,7 @@ namespace Pulsar4X.ECSLib
                 _db.PredictedExitTime = targetIntercept.Item2;
                 _db.TranslateEntryPoint_AU = currentPos;
                 _db.SavedNewtonionVector_AU = currentVec;
+                _db.ExpendDeltaV_AU = ExpendDeltaV;
                 if (_targetEntity.HasDataBlob<SensorInfoDB>())
                 {
                     _db.TargetEntity = _targetEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;

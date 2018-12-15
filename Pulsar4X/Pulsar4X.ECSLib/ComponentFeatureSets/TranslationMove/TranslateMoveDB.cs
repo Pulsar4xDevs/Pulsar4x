@@ -29,6 +29,12 @@ namespace Pulsar4X.ECSLib
         internal Vector4 CurrentNonNewtonionVectorMS;
 
         [JsonProperty]
+        /// <summary>
+        /// The amount of deltaV to expend, in AU/s.
+        /// </summary>
+        internal Vector4 ExpendDeltaV_AU;
+
+        [JsonProperty]
         internal bool IsAtTarget { get; set; }
 
         [JsonProperty]
@@ -56,6 +62,7 @@ namespace Pulsar4X.ECSLib
         {
             TargetPositionDB = db.TargetPositionDB;
             CurrentNonNewtonionVectorMS = db.CurrentNonNewtonionVectorMS;
+            ExpendDeltaV_AU = db.ExpendDeltaV_AU;
             IsAtTarget = db.IsAtTarget;
         }
         // JSON deserialization callback.
