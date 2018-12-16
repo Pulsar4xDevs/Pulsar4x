@@ -301,12 +301,13 @@ namespace Pulsar4X.SDL2UI
                                 break;
                             case States.NeedsInsertionPoint:
                                 {
-
-                                    if(ImGui.SliderFloat("Prograde DV", ref _progradeDV, -_maxDV, _maxDV))
+                                    var maxprogradeDV = _maxDV - Math.Abs(_radialDV);
+                                    var maxradialDV = _maxDV - Math.Abs(_progradeDV);
+                                    if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
                                     {
                                         targetCalcs();
                                     }
-                                    if(ImGui.SliderFloat("Radial DV", ref _radialDV, -_maxDV, _maxDV))
+                                    if(ImGui.SliderFloat("Radial DV", ref _radialDV, -maxradialDV, maxradialDV))
                                     {
                                         targetCalcs();
                                     }
@@ -348,11 +349,13 @@ namespace Pulsar4X.SDL2UI
                             }*/
                             case States.NeedsActioning:
                                 {
-                                    if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -_maxDV, _maxDV))
+                                    var maxprogradeDV = _maxDV - Math.Abs(_radialDV);
+                                    var maxradialDV = _maxDV - Math.Abs(_progradeDV);
+                                    if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
                                     {
                                         targetCalcs();
                                     }
-                                    if (ImGui.SliderFloat("Radial DV", ref _radialDV, -_maxDV, _maxDV))
+                                    if (ImGui.SliderFloat("Radial DV", ref _radialDV, -maxradialDV, maxradialDV))
                                     {
                                         targetCalcs();
                                     }
@@ -420,8 +423,12 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text((_ke.LoAN + _ke.AoP).ToString("g3"));
 
-                    if (ImGui.Button("Action Order"))
+                    if(CurrentState != States.NeedsActioning) //use alpha on the button if it's not useable. 
+                        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f); 
+                    if (ImGui.Button("Action Order") && CurrentState == States.NeedsActioning) //only do suff if clicked if it's usable. 
                         fsm[(byte)CurrentState, (byte)Events.ClickedAction].Invoke();
+                    if (CurrentState != States.NeedsActioning)
+                        ImGui.PopStyleVar(); 
 
                     if (_smMode)
                     {
@@ -483,12 +490,12 @@ namespace Pulsar4X.SDL2UI
             _insertionOrbitalVelocity -= Distance.MToAU( _deltaV);
             _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
 
-
+            /*
             var sgpCBAU = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
             var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
             var smaCurrOrbtAU = OrderingEntity.Entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
             var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
-
+            */
         }
 
 
