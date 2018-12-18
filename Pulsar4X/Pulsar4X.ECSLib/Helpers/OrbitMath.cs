@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
             double argOfPeriaps;
             if (longdOfAN == 0)
             {
-                argOfPeriaps = Math.Atan2(eccentVector.Y, eccentVector.X);
+                argOfPeriaps = Math.Atan2(eccentVector.X, -eccentVector.Y);
                 if (Vector4.Cross(position, velocity).Z < 0) //anti clockwise orbit
                     argOfPeriaps = Math.PI * 2 - argOfPeriaps;
             }
@@ -133,7 +133,7 @@ namespace Pulsar4X.ECSLib
             ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
             ke.LinierEccentricity = EllipseMath.LinierEccentricity(ke.Apoapsis, semiMajorAxis);
             ke.LoAN = longdOfAN;
-            ke.AoP = argOfPeriaps;
+            ke.AoP = Angle.NormaliseRadians( argOfPeriaps);
             ke.Inclination = inclination;
             ke.MeanAnomaly = meanAnomaly;
             ke.TrueAnomaly = TrueAnomaly(eccentVector, position, velocity);
@@ -176,6 +176,63 @@ namespace Pulsar4X.ECSLib
                 trueAnomoly = Math.PI * 2 - trueAnomoly;
 
             return trueAnomoly;
+        }
+
+        public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double sma, double eccentricity, double loP)
+        {
+            var radius = position.Length();
+            var spd = PreciseOrbitalSpeed(sgp, radius, sma);
+
+            double linierEcc = EllipseMath.LinierEccentricityFromEccentricity(sma, eccentricity);
+
+            double referenceToPosAngle = Math.Atan2(position.X, -position.Y); //we switch x and y here so atan2 works in the y direction. 
+
+            double anglef = loP - referenceToPosAngle;
+
+            //find angle alpha using law of cos: (a^2 + b^2 - c^2) / 2ab
+            double sideA = radius;
+            double sideB = 2 * sma - radius;
+            double sideC = 2 * linierEcc;
+            double alpha = Math.Acos((sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB));
+
+            double angle = Math.PI - (referenceToPosAngle + ((Math.PI - alpha) * 0.5));
+
+            return new Tuple<double, double>(spd, angle);
+        }
+
+        /// <summary>
+        /// 2d! vector. 
+        /// </summary>
+        /// <returns>The orbital vector ralitive to the parent</returns>
+        /// <param name="sgp">Standard Grav Perameter. in AU</param>
+        /// <param name="position">Ralitive Position.</param>
+        /// <param name="sma">SemiMajorAxis</param>
+        /// <param name="loP">Longditude of Periapsis (LoAN+ AoP) </param>
+        public static Vector4 PreciseOrbitalVelocityVector(double sgp, Vector4 position, double sma, double eccentricity, double loP)
+        {
+            var pc = PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, loP);
+            var v = new Vector4()
+            {
+                X= Math.Sin(pc.Item2) * pc.Item1,
+                Y = Math.Cos(pc.Item2) * pc.Item1
+            };
+
+            if (double.IsNaN(v.X) || double.IsNaN(v.Y))
+                throw new Exception("Result is NaN");
+
+            return v;
+        }
+
+        /// <summary>
+        /// returns the speed for an object of a given mass at a given radius from a body. this is the vis-viva calculation
+        /// </summary>
+        /// <returns>The orbital speed, ralitive to the parent</returns>
+        /// <param name="standardGravParameter">standardGravParameter.</param>
+        /// <param name="distance">Radius.</param>
+        /// <param name="semiMajAxis">Semi maj axis.</param>
+        public static double PreciseOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
+        {
+            return Math.Sqrt(standardGravParameter * (2 / distance - 1 / semiMajAxis));
         }
 
 
@@ -250,7 +307,10 @@ namespace Pulsar4X.ECSLib
         {
             return (apoapsis + periapsis) / 2;
         }
-
+        public static double SemiMajorAxisFromLinerEccentricity(double linierEccentricity, double eccentricity)
+        {
+            return linierEccentricity * eccentricity;
+        }
         public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
         {
             return semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity);
@@ -264,6 +324,10 @@ namespace Pulsar4X.ECSLib
         public static double LinierEccentricity(double appoapsis, double semiMajorAxis)
         {
             return appoapsis - semiMajorAxis;
+        }
+        public static double LinierEccentricityFromEccentricity(double semiMajorAxis, double eccentricity)
+        {
+            return semiMajorAxis * eccentricity;
         }
         public static double Eccentricity(double linierEccentricity, double semiMajorAxis)
         {

@@ -16,8 +16,8 @@ namespace Pulsar4X.ECSLib
 
 
         //Newtonion
-        public int TotalDV {get;set;}
-        public int RemainingDV {get;set;}
+        public float TotalDV_MS { get; set; } = 10000;
+        public float RemainingDV_MS { get; set; } = 10000;
 
         
         public PropulsionAbilityDB()

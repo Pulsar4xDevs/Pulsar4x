@@ -153,17 +153,20 @@ namespace Pulsar4X.SDL2UI
             OrbitEllipseSemiMaj = ke.SemiMajorAxis; 
             OrbitEllipseSemiMinor = ke.SemiMinorAxis;
 
+            //TODO: Periapsis and Apoapsis calc doesn't look right to me... though it's not currently being used. 
+            //this was probibly written when the orbit could only be created when the ship was at the pere or apo. 
+            /*
             Periapsis = new PointD()
             {
-                X = Math.Sin(ke.TrueAnomaly) * ke.Periapsis,
-                Y = Math.Cos(ke.TrueAnomaly) * ke.Periapsis
+                Y = Math.Sin(ke.TrueAnomaly) * ke.Periapsis,
+                X = Math.Cos(ke.TrueAnomaly) * ke.Periapsis
 
             };
             Apoapsis = new PointD() {
-                X = Math.Sin(ke.TrueAnomaly) * ke.Apoapsis,
-                Y = Math.Cos(ke.TrueAnomaly) * ke.Apoapsis
+                Y = Math.Sin(ke.TrueAnomaly) * ke.Apoapsis,
+                X = Math.Cos(ke.TrueAnomaly) * ke.Apoapsis
             };
-
+            */
             if (ke.Inclination > Math.PI * 0.5 && ke.Inclination < Math.PI * 1.5) //ke inclination is in radians.
             {
                 IsClockwiseOrbit = false;
@@ -189,14 +192,14 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
-                double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the linearEccentricity so the focal point is "center"
-                double y1 = OrbitEllipseSemiMinor * Math.Cos(angle);
+                double x1 = OrbitEllipseSemiMinor * Math.Cos(angle);
+                double y1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the linearEccentricity so the focal point is "center"
 
                 //rotates the points to allow for the LongditudeOfPeriapsis. 
                 double x2 = (x1 * Math.Cos(OrbitAngleRadians)) - (y1 * Math.Sin(OrbitAngleRadians));
                 double y2 = (x1 * Math.Sin(OrbitAngleRadians)) + (y1 * Math.Cos(OrbitAngleRadians));
                 angle += _segmentArcSweepRadians;
-                _points[i] = new PointD() { X = x2, Y = y2 };
+                _points[i] = new PointD() { X = -x2, Y = -y2 };
             }
         }
 
@@ -290,6 +293,7 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
             //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
+
             SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 100);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
 
@@ -297,10 +301,10 @@ namespace Pulsar4X.SDL2UI
             DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 63, 63, 0, _loAN); //draw LoAN angle
 
             SDL.SDL_SetRenderDrawColor(rendererPtr, 50, 0, 100, 160);
-            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 64, 64, _loAN, -_aoP); //draw AoP angle
+            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 64, 64, _loAN, _aoP); //draw AoP angle
 
-            //SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 160);
-            //DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 66, 66, -OrbitAngleRadians, -OrbitAngleRadians - _trueAnomaly);
+            SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 160);
+            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 66, 66, OrbitAngleRadians,  _trueAnomaly);
         }
     }
 }

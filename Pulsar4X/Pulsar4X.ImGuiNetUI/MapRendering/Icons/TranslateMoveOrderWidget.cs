@@ -94,7 +94,11 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-
+        public void SetProgradeAngle(double angle)
+        {
+            _progradeAngle = angle;
+            
+        }
 
         public void OnPhysicsUpdate()
         {
@@ -106,9 +110,12 @@ namespace Pulsar4X.SDL2UI
             _transitLeavePositionRalitive = OrbitProcessor.GetPosition_AU(_movingEntityCurrentOrbit, _transitLeaveDateTime);
 
 
-            _progradeAngle = Math.Atan2(_transitLeavePositionRalitive.Y , _transitLeavePositionRalitive.X);
+            //_progradeAngle = Math.Atan2(_transitLeavePositionRalitive.Y , _transitLeavePositionRalitive.X);
             //OrbitProcessor.PreciseOrbitalVector(
-            _progradeAngle -= Math.PI ;
+            //_progradeAngle -= Math.PI ;
+
+
+
             _departIcon.ProgradeAngle = _progradeAngle;
             _departIcon.SetTransitPostion(_transitLeavePositionRalitive);
 
@@ -261,9 +268,9 @@ namespace Pulsar4X.SDL2UI
             List<PointD> arrowPoints = new List<PointD>(pnts.Length);
             foreach (var point in pnts)
             {
-                double x = point.X * Math.Cos(ProgradeAngle) + point.Y * Math.Sin(ProgradeAngle);
-                double y = point.X * -Math.Sin(ProgradeAngle) + point.Y * Math.Cos(ProgradeAngle);
-                arrowPoints.Add(new PointD() { X = x, Y = y });
+                double x = point.X * Math.Cos(ProgradeAngle) - point.Y * Math.Sin(ProgradeAngle);
+                double y = point.X * Math.Sin(ProgradeAngle) + point.Y * Math.Cos(ProgradeAngle);
+                arrowPoints.Add(new PointD() { X = -x, Y = -y });
             }
 
             Shape vectorArrow = new Shape()

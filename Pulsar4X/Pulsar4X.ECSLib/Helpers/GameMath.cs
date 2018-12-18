@@ -104,6 +104,10 @@ namespace Pulsar4X.ECSLib
             Vector4 meters = au * GameConstants.Units.MetersPerAu;
             return meters;
         }
+        public static double AuToMt(double au)
+        {
+            return au * GameConstants.Units.MetersPerAu; 
+        }
 
         public static double DistanceBetween(Vector4 p1, Vector4 p2)
         {

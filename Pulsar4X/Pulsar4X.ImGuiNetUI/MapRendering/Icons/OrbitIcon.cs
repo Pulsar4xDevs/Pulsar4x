@@ -264,6 +264,8 @@ namespace Pulsar4X.SDL2UI
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             //now we draw a line between each of the points in the translatedPoints[] array.
+            if (_drawPoints.Count() < _numberOfDrawSegments - 1)
+                return;
             float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {

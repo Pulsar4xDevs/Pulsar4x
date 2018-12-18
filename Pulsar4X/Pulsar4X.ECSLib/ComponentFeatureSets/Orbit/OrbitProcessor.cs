@@ -263,7 +263,7 @@ namespace Pulsar4X.ECSLib
         public static Vector4 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
         {
             if (UseRalitiveVelocity)
-                return PreciseOrbitalVector(orbit, atDateTime);
+                return PreciseOrbitalVelocityVector(orbit, atDateTime);
             else
                 return AbsoluteOrbitalVector(orbit, atDateTime);
         }
@@ -287,47 +287,24 @@ namespace Pulsar4X.ECSLib
         /// <param name="atDateTime">At date time.</param>
         public static Vector4 AbsoluteOrbitalVector(OrbitDB orbit, DateTime atDateTime)       
         {
-            Vector4 vector = PreciseOrbitalVector(orbit, atDateTime);
+            Vector4 vector = PreciseOrbitalVelocityVector(orbit, atDateTime);
             if(orbit.Parent != null)
                 vector += AbsoluteOrbitalVector((OrbitDB)orbit.ParentDB, atDateTime);
             return vector;
 
         }
 
+        public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
+        {
+            var position = GetPosition_AU(orbit, atDateTime);
+            var sma = orbit.SemiMajorAxis;
+            if (orbit.GravitationalParameter == 0 || sma == 0)
+                return new Tuple<double, double>(0,0); //so we're not returning NaN;
+            var sgp = orbit.GravitationalParameterAU;
 
-        /// <summary>
-        /// returns the speed for an object of a given mass at a given radius from a body.
-        /// </summary>
-        /// <returns>The orbital speed, ralitive to the parent</returns>
-        /// <param name="mass">Mass.</param>
-        /// <param name="distance">Radius.</param>
-        /// <param name="semiMajAxis">Semi maj axis.</param>
-        public static double PreciseOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
-        {
-            //var sgp = StandardGravitationalParameter(mass);
-            var twoDivDist = 2 / distance;
-            var oneDivSma = 1 / semiMajAxis;
-            var sub = twoDivDist - oneDivSma;
-            var sgpx = standardGravParameter * sub;
-            var fin = Math.Sqrt(sgpx);
-            return Math.Sqrt(standardGravParameter * (2 / distance - 1 / semiMajAxis));
-        }
-        /// <summary>
-        /// 2d! vector. 
-        /// </summary>
-        /// <returns>The orbital vector ralitive to the parent</returns>
-        /// <param name="sgp">Standard Grav Perameter. in AU</param>
-        /// <param name="position">Ralitive Position.</param>
-        /// <param name="sma">SemiMajorAxis</param>
-        public static Vector4 PreciseOrbitalVector(double sgp, Vector4 position, double sma)
-        {
-            var radius = position.Length();
-            var angle = Math.Atan2(position.Y, position.X);
-            var spd = PreciseOrbitalSpeed(sgp, radius, sma);
-            return new Vector4() {
-                X = Math.Sin(angle) * spd,
-                Y = Math.Cos(angle) * spd
-            };
+            double e = orbit.Eccentricity;
+
+            return OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, e, orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
         }
 
         /// <summary>
@@ -336,21 +313,17 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector ralitive to the parent</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector4 PreciseOrbitalVector(OrbitDB orbit, DateTime atDateTime)
+        public static Vector4 PreciseOrbitalVelocityVector(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
             var sma = orbit.SemiMajorAxis;
             if (orbit.GravitationalParameter == 0 || sma == 0)
                 return new Vector4(); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
-            var radius = position.Length();
-            var angle = Math.Atan2(position.Y, position.X);
-            var spd = PreciseOrbitalSpeed(sgp, radius, sma);
-            return new Vector4()
-            {
-                X = Math.Sin(angle) * spd,
-                Y = Math.Cos(angle) * spd
-            };
+
+            double e = orbit.Eccentricity;
+
+            return OrbitMath.PreciseOrbitalVelocityVector(sgp, position, sma, e, orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
         }
 
         private class OrbitProcessorException : Exception
