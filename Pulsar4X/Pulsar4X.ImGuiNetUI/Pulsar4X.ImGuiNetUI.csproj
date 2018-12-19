@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Colony\" />
+    <Folder Include="OrbitalWidgets\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Resources\CancelIco.bmp">

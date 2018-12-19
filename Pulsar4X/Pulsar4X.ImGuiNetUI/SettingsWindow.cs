@@ -45,14 +45,8 @@ namespace Pulsar4X.SDL2UI
 
                 if (ImGui.Begin("Settings", ref IsActive, _flags))
                 {
-
-                    if (ImGui.Button("Show Debug Window"))
-                    {
-                        var instance = DebugWindow.GetInstance();
-                        instance.IsActive = !instance.IsActive;
-                        //_state.LoadedWindows.Add(_state.Debug);
-
-                    }
+                
+                    ImGui.Checkbox("Show Pulsar Debug Window", ref DebugWindow.GetInstance().IsActive);
                     ImGui.Checkbox("Show ImguiMetrix", ref _state.ShowMetrixWindow);
                     ImGui.Checkbox("Show ImgDebug", ref _state.ShowImgDbg);
                     ImGui.Checkbox("DemoWindow", ref _state.ShowDemoWindow);

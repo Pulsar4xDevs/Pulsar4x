@@ -244,12 +244,18 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     OrbitDB orbitDB = _state.LastClickedEntity.Entity.GetDataBlob<OrbitDB>();
 
-                                    string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
-                                    string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
-                                    ImGui.Text("StartAngleRadians: " + startRadian);
-                                    ImGui.Text("StartAngleDegrees: " + startDegrees);
-
+                                    //string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
+                                    //string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
+                                    //ImGui.Text("StartAngleRadians: " + startRadian);
+                                    //ImGui.Text("StartAngleDegrees: " + startDegrees);
+                                    if (ImGui.CollapsingHeader("OrbitIconLines", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+                                        var window = OrbitalDebugWindow.GetWindow(_state.LastClickedEntity);
+                                        window.Display();
+                                        window.Enable(true, _state);
+                                    }
                                 }
+
                             }
 
                             if (_state.LastClickedEntity.Entity.HasDataBlob<PropulsionAbilityDB>())
