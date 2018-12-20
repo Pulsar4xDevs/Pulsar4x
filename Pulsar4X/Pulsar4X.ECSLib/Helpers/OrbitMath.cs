@@ -38,7 +38,9 @@ namespace Pulsar4X.ECSLib
             Vector4 angularVelocity = Vector4.Cross(position, velocity);
             Vector4 nodeVector = Vector4.Cross(new Vector4(0, 0, 1, 0), angularVelocity);
 
-            Vector4 eccentVector = EccentricityVector(standardGravParam, position, velocity);
+            Vector4 eccentVector1 = EccentricityVector(standardGravParam, position, velocity);
+
+            Vector4 eccentVector = EccentricityVector2(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
 
@@ -154,6 +156,16 @@ namespace Pulsar4X.ECSLib
             foo1 = foo1 / sgp;
             var foo2 = position / position.Length();
             return foo1 - foo2;
+        }
+
+        public static Vector4 EccentricityVector2(double sgp, Vector4 position, Vector4 velocity)
+        {
+            var speed = velocity.Length();
+            var radius = position.Length();
+            var foo1 = (speed * speed - sgp / radius) * position ;
+            var foo2 = Vector4.Dot(position, velocity) * velocity;
+            var foo3 = (foo1 - foo2) / sgp;
+            return foo3;
         }
 
         /// <summary>
