@@ -173,7 +173,9 @@ namespace Pulsar4X.ECSLib
 
 
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
-            return Math.Atan2(Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly), Math.Cos(eccentricAnomaly) - orbit.Eccentricity);
+            var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
+            var y = Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly);
+            return Math.Atan2(y, x);
         }
 
         /// <summary>

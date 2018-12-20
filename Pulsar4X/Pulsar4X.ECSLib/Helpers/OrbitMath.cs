@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
             double argOfPeriaps;
             if (longdOfAN == 0)
             {
-                argOfPeriaps = Math.Atan2(eccentVector.X, -eccentVector.Y);
+                argOfPeriaps = Math.Atan2(eccentVector.Y, eccentVector.X);
                 if (Vector4.Cross(position, velocity).Z < 0) //anti clockwise orbit
                     argOfPeriaps = Math.PI * 2 - argOfPeriaps;
             }

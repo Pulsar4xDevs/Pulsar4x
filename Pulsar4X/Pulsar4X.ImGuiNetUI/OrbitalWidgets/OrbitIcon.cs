@@ -187,7 +187,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            //Vector4 pos = _bodyPositionDB.AbsolutePosition_AU;
+            Vector4 pos1 = BodyPositionDB.AbsolutePosition_AU; //TODO this is the position we should be using, since it'll be faster, however it's sometimes not the same for some reason as the slow way we're getting it below.
             Vector4 pos = OrbitProcessor.GetPosition_AU(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime);
             _bodyRalitivePos = new PointD() { X = pos.X, Y = pos.Y };
 

@@ -217,7 +217,7 @@ namespace Pulsar4X.SDL2UI
             _loP = orbitIcon._orbitAngleRadians;
 
             var cP = new PointD() { X = orbitIcon.WorldPosition.X, Y = orbitIcon.WorldPosition.Y };
-            cP.Y -= orbitIcon._linearEccentricity;
+            cP.X -= orbitIcon._linearEccentricity;
 
             var f1 = new PointD() { X = cP.X, Y = cP.Y + orbitIcon._linearEccentricity };
             var f2 = new PointD() { X = cP.X, Y = cP.Y - orbitIcon._linearEccentricity };
@@ -246,8 +246,8 @@ namespace Pulsar4X.SDL2UI
         {
             PointD newPoint = new PointD()
             {
-                X = (point.X * Math.Cos(_loP)) - (point.Y * Math.Sin(angle)),
-                Y = (point.X * Math.Sin(_loP)) + (point.Y * Math.Cos(_loP))
+                X = (point.X * Math.Cos(angle)) - (point.Y * Math.Sin(angle)),
+                Y = (point.X * Math.Sin(angle)) + (point.Y * Math.Cos(angle))
             };
 
             return newPoint;
