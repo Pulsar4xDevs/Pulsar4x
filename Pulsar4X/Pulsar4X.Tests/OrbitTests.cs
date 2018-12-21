@@ -8,6 +8,27 @@ namespace Pulsar4X.Tests
     public class OrbitTests
     {
 
+        public void TestOrbitEpoch()
+        {
+            Game game = new Game();
+            EntityManager man = new EntityManager(game, false);
+
+            double parentMass = 1.989e30;
+            double objMass = 2.2e+15;
+            Vector4 position = new Vector4() { X = 0.57 }; //Halley's Comet at periapse aprox
+            Vector4 velocity = new Vector4() { Y = Distance.KmToAU(54) };
+
+            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
+            parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
+            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[2] = new OrbitDB();
+            Entity parentEntity = new Entity(man, parentblobs);
+            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
+
+            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp, position, velocity, new DateTime());
+            Vector4 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
+        }
+
 
         [Test]
         public void TestPreciseOrbitalSpeed()

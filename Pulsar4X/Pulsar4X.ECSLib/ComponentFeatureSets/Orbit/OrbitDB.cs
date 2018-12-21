@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
             if (ralitivePos.Length() > GMath.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
 
-            var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, ralitivePos, velocityAU);
             OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
                         Math.Abs(ke.SemiMajorAxis),
@@ -135,7 +135,7 @@ namespace Pulsar4X.ECSLib
                         Angle.ToDegrees(ke.LoAN),
                         Angle.ToDegrees(ke.AoP),
                         Angle.ToDegrees(ke.MeanAnomaly),
-                        epoch);
+                        epoch - TimeSpan.FromSeconds(ke.Epoch));
             var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, epoch);
 
             return orbit;
@@ -154,7 +154,7 @@ namespace Pulsar4X.ECSLib
                         Angle.ToDegrees(ke.LoAN),
                         Angle.ToDegrees(ke.AoP),
                         Angle.ToDegrees(ke.MeanAnomaly),
-                        epoch);
+                        epoch - TimeSpan.FromSeconds(ke.Epoch));
             var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, epoch);
             return orbit;
         }
@@ -172,7 +172,7 @@ namespace Pulsar4X.ECSLib
                         Angle.ToDegrees(ke.LoAN),
                         Angle.ToDegrees(ke.AoP),
                         Angle.ToDegrees(ke.MeanAnomaly),
-                        epoch);
+                        epoch - TimeSpan.FromSeconds(ke.Epoch));
             var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, epoch);
             return orbit;
         }

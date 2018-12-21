@@ -20,6 +20,7 @@ namespace Pulsar4X.ECSLib
         public double TrueAnomaly;          //v or f or theta
         //public double Period              //P
         //public double EccentricAnomaly    //E
+        public double Epoch;                //time since periapsis. 
     }
 
     public class OrbitMath
@@ -139,23 +140,43 @@ namespace Pulsar4X.ECSLib
             ke.Inclination = inclination;
             ke.MeanAnomaly = meanAnomaly;
             ke.TrueAnomaly = TrueAnomaly(eccentVector, position, velocity);
+            ke.Epoch = Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
             return ke;
         }
 
-        /// <summary>
-        /// https://en.wikipedia.org/wiki/Eccentricity_vector
-        /// </summary>
-        /// <returns>The vector.</returns>
-        /// <param name="sgp">StandardGravParam.</param>
-        /// <param name="position">Position, ralitive to parent.</param>
-        /// <param name="velocity">Velocity, ralitive to parent.</param>
-        public static Vector4 EccentricityVector(double sgp, Vector4 position, Vector4 velocity)
+        public static double Epoch(double semiMaj, double semiMin, double eccentricAnomaly, double Period)
+        {
+
+            double areaOfEllipse = semiMaj * semiMin * Math.PI;
+            double eccentricAnomalyArea = EllipseMath.AreaOfEllipseSector(semiMaj, semiMaj, 0, eccentricAnomaly); //we get the area as if it's a circile. 
+            double trueArea = semiMin / semiMaj * eccentricAnomalyArea; //we then multiply the result by a fraction of b / a
+            //double areaOfSegment = EllipseMath.AreaOfEllipseSector(semiMaj, semiMin, 0, lop + trueAnomaly);
+
+            double t = Period * (trueArea / areaOfEllipse);
+
+            return t;
+
+        }
+
+            /// <summary>
+            /// https://en.wikipedia.org/wiki/Eccentricity_vector
+            /// </summary>
+            /// <returns>The vector.</returns>
+            /// <param name="sgp">StandardGravParam.</param>
+            /// <param name="position">Position, ralitive to parent.</param>
+            /// <param name="velocity">Velocity, ralitive to parent.</param>
+            public static Vector4 EccentricityVector(double sgp, Vector4 position, Vector4 velocity)
         {
             Vector4 angularMomentum = Vector4.Cross(position, velocity);
             Vector4 foo1 = Vector4.Cross(velocity, angularMomentum);
             foo1 = foo1 / sgp;
             var foo2 = position / position.Length();
             return foo1 - foo2;
+        }
+
+        public static double OrbitalPeriod(double sgp, double semiMajAxis)
+        {
+            return 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajAxis, 3) / sgp);
         }
 
         public static Vector4 EccentricityVector2(double sgp, Vector4 position, Vector4 velocity)
@@ -353,6 +374,23 @@ namespace Pulsar4X.ECSLib
         public static double Periapsis(double eccentricity, double semiMajorAxis)
         {
             return (1 - eccentricity) * semiMajorAxis;
+        }
+
+        public static double AreaOfEllipseSector(double semiMaj, double semiMin, double firstAngle, double secondAngle)
+        {
+
+            var theta1 = firstAngle;
+            var theta2 = secondAngle;
+            var theta3 = theta2 - theta1;
+
+            //var foo2 = Math.Atan((semiMin - semiMaj) * Math.Sin(2 * theta2) / (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta2)));
+            var foo2 = Math.Atan2((semiMin - semiMaj) * Math.Sin(2 * theta2) , (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta2)));
+            //var foo3 = Math.Atan((semiMin - semiMaj) * Math.Sin(2 * theta1) / (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta1)));
+            var foo3 = Math.Atan2((semiMin - semiMaj) * Math.Sin(2 * theta1) , (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta1)));
+
+            var area = semiMaj * semiMin / 2 * (theta3 - foo2 + foo3);
+
+            return area;
         }
 
     }
