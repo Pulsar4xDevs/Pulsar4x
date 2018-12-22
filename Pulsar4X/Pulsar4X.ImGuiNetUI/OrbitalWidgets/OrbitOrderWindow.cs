@@ -436,6 +436,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text((_ke.LoAN + _ke.AoP).ToString("g3") + " radians or " + Angle.ToDegrees(_ke.LoAN + _ke.AoP).ToString("F") + " deg ");
 
+                    if(_orbitWidget != null)
+                        ImGui.Text("Clockwise " +  _orbitWidget.IsClockwiseOrbit.ToString());
+
+
+
                     //if (CurrentState != States.NeedsActioning) //use alpha on the button if it's not useable. 
                     //ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
                     if (ImGui.Button("Action Order") && CurrentState == States.NeedsActioning) //only do suff if clicked if it's usable.
@@ -506,7 +511,7 @@ namespace Pulsar4X.SDL2UI
 
             double x = (_radialDV * Math.Cos(_departureAngle)) - (_progradeDV * Math.Sin(_departureAngle));
             double y = (_radialDV * Math.Sin(_departureAngle)) + (_progradeDV * Math.Cos(_departureAngle));
-            _deltaV = new ECSLib.Vector4(y, x, 0, 0);
+            _deltaV = new ECSLib.Vector4(x, y, 0, 0);
 
             _insertionOrbitalVelocity = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
 

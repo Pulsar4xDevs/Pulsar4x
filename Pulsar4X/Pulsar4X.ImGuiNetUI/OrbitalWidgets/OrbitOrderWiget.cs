@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         //change each game update
         float _ellipseStartArcAngleRadians;
         int _index;
-        bool IsClockwiseOrbit = true;
+        internal bool IsClockwiseOrbit = true;
         public float EllipseSweepRadians = 4.71239f;
 
         //32 is a good low number, slightly ugly.  180 is a little overkill till you get really big orbits. 
@@ -174,7 +174,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-
+                IsClockwiseOrbit = true;
                 OrbitAngleRadians = ke.LoAN + ke.AoP;
             }
             _position = position;
@@ -262,7 +262,7 @@ namespace Pulsar4X.SDL2UI
 
                         index++;
                     else
-                        index = 0;
+                        index = 0; 
                 }
                 else if (index > 0)
                 {
@@ -270,7 +270,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 else
                     index = _numberOfArcSegments - 1;
-
+                    
                 translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
                 int x = (int)(ViewScreenPos.x + translated.X);
