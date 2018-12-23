@@ -37,8 +37,10 @@ namespace Pulsar4X.SDL2UI
         double _departureOrbitalSpeed = double.NaN;
         ECSLib.Vector4 _departureOrbitalVelocity = ECSLib.Vector4.NaN;
         double _departureAngle = double.NaN;
+
         double _insertionOrbitalSpeed = double.NaN;
         ECSLib.Vector4 _insertionOrbitalVelocity = ECSLib.Vector4.NaN;
+        double _insertionAngle = double.NaN;
         //(Vector4, TimeSpan) _intercept;
 
         double _massOrderingEntity = double.NaN;
@@ -473,6 +475,7 @@ namespace Pulsar4X.SDL2UI
 
         /// <summary>
         /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
+        /// Fairly slow and inefficent. 
         /// </summary>
         /// <returns>the distance traveled in a second</returns>
         /// <param name="orbit">Orbit.</param>
@@ -499,7 +502,7 @@ namespace Pulsar4X.SDL2UI
             _departureOrbitalVelocity = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _departureDateTime);
             _departureOrbitalSpeed = _departureOrbitalVelocity.Length();
             _departureAngle = Math.Atan2(_departureOrbitalVelocity.X, _departureOrbitalVelocity.Y);
-            _moveWidget.SetProgradeAngle(_departureAngle);
+            _moveWidget.SetDepartureProgradeAngle(_departureAngle);
         }
 
         void InsertionCalcs()
@@ -517,6 +520,8 @@ namespace Pulsar4X.SDL2UI
 
             _insertionOrbitalVelocity -= Distance.MToAU( _deltaV);
             _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
+            _insertionAngle = Math.Atan2(_insertionOrbitalVelocity.X, _insertionOrbitalVelocity.Y);
+            _moveWidget.SetArivalProgradeAngle(_insertionAngle);
 
             /*
             var sgpCBAU = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);

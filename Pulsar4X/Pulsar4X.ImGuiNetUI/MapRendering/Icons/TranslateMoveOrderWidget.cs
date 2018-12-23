@@ -32,9 +32,6 @@ namespace Pulsar4X.SDL2UI
 
         SDL_Point[] _linePoints;
 
-        double _progradeAngle;
-        double _arrivePntRadius;
-
         public TranslateMoveOrderWidget(GlobalUIState state, Entity orderingEntity)
         {
             _state = state;
@@ -50,11 +47,9 @@ namespace Pulsar4X.SDL2UI
             _movingEntityCurrentOrbit = _movingEntity.GetDataBlob<OrbitDB>();
             _transitLeaveDateTime = _currentDateTime;
 
-            //_transitLeavePosition = OrbitProcessor.GetAbsolutePosition_AU(_movingEntityCurrentOrbit, _transitLeaveDateTime);
             _parentPositionDB = _movingEntityCurrentOrbit.Parent.GetDataBlob<PositionDB>();
             _departIcon = TransitIcon.CreateDepartIcon(_parentPositionDB);
             OnPhysicsUpdate();
-            //_icons.Add(new TransitIcon(_targetPositionDB, _transitArrivePosition));
         }
 
         public void SetDepartDateTime(DateTime dateTime)
@@ -87,17 +82,21 @@ namespace Pulsar4X.SDL2UI
             _arriveIcon.SetTransitPostion(_transitArrivePosition);
         }
 
-        public void SetArrivalRadius(double radius)
+
+
+        public void SetDepartureProgradeAngle(double angle)
         {
-            _arrivePntRadius = radius;
-            _arriveIcon.SetTransitPostion(_progradeAngle, radius);
+            _departIcon.ProgradeAngle = angle;
+            _departIcon.SetTransitPostion(_transitLeavePositionRalitive);
+
         }
-
-
-        public void SetProgradeAngle(double angle)
+        public void SetArivalProgradeAngle(double angle)
         {
-            _progradeAngle = angle;
-            
+            if (_arriveIcon != null)
+            {
+                _arriveIcon.ProgradeAngle = angle;
+                _arriveIcon.SetTransitPostion(_transitArrivePosition);
+            }
         }
 
         public void OnPhysicsUpdate()
@@ -106,26 +105,8 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-
             _transitLeavePositionRalitive = OrbitProcessor.GetPosition_AU(_movingEntityCurrentOrbit, _transitLeaveDateTime);
 
-
-            //_progradeAngle = Math.Atan2(_transitLeavePositionRalitive.Y , _transitLeavePositionRalitive.X);
-            //OrbitProcessor.PreciseOrbitalVector(
-            //_progradeAngle -= Math.PI ;
-
-
-
-            _departIcon.ProgradeAngle = _progradeAngle;
-            _departIcon.SetTransitPostion(_transitLeavePositionRalitive);
-
-
-            if (_arriveIcon != null)
-            {
-                _arriveIcon.ProgradeAngle = _progradeAngle;
-                _arriveIcon.SetTransitPostion(_progradeAngle, _arrivePntRadius);
-
-            }
         }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -316,7 +297,6 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            base.OnPhysicsUpdate();
             CreateProgradeArrow();
         }
 
