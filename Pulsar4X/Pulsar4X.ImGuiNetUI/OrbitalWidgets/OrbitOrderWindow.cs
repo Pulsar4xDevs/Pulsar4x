@@ -5,6 +5,9 @@ using System.Numerics;
 
 namespace Pulsar4X.SDL2UI
 {
+    /// <summary>
+    /// Orbit order window - this whole thing is a somewhat horrible state machine
+    /// </summary>
     public class OrbitOrderWindow : PulsarGuiWindow// IOrderWindow
     {
        
@@ -17,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         float _progradeDV;
         float _radialDV;
 
-        ECSLib.Vector4 _deltaV; 
+        ECSLib.Vector4 _deltaV_MS; 
 
         KeplerElements _ke;
         double _apoapsisKm;
@@ -218,7 +221,7 @@ namespace Pulsar4X.SDL2UI
                 TargetEntity.Entity,
                 _targetInsertionPoint_AU,
                 _state.CurrentSystemDateTime,
-                Distance.AuToMt(_deltaV));
+                Distance.MToAU(_deltaV_MS));
             
             CloseWindow();
         }
@@ -460,10 +463,6 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
 
-         
-
-
-
                     ImGui.End();
                 }
             }
@@ -473,20 +472,7 @@ namespace Pulsar4X.SDL2UI
 
         #region helper calcs
 
-        /// <summary>
-        /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
-        /// Fairly slow and inefficent. 
-        /// </summary>
-        /// <returns>the distance traveled in a second</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="atDatetime">At datetime.</param>
-        double hackspeed(OrbitDB orbit, DateTime atDatetime)
-        {
-            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
-            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
 
-            return Distance.DistanceBetween(pos1, pos2);
-        }
 
         ECSLib.Vector4 GetTargetPosition()
         {
@@ -514,11 +500,11 @@ namespace Pulsar4X.SDL2UI
 
             double x = (_radialDV * Math.Cos(_departureAngle)) - (_progradeDV * Math.Sin(_departureAngle));
             double y = (_radialDV * Math.Sin(_departureAngle)) + (_progradeDV * Math.Cos(_departureAngle));
-            _deltaV = new ECSLib.Vector4(x, y, 0, 0);
+            _deltaV_MS = new ECSLib.Vector4(x, y, 0, 0);
 
             _insertionOrbitalVelocity = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
 
-            _insertionOrbitalVelocity -= Distance.MToAU( _deltaV);
+            _insertionOrbitalVelocity += Distance.MToAU( _deltaV_MS);
             _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
             _insertionAngle = Math.Atan2(_insertionOrbitalVelocity.X, _insertionOrbitalVelocity.Y);
             _moveWidget.SetArivalProgradeAngle(_insertionAngle);

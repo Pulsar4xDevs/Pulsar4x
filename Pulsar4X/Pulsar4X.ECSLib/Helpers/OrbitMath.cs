@@ -268,6 +268,21 @@ namespace Pulsar4X.ECSLib
             return Math.Sqrt(standardGravParameter * (2 / distance - 1 / semiMajAxis));
         }
 
+        /// <summary>
+        /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
+        /// Fairly slow and inefficent. 
+        /// </summary>
+        /// <returns>the distance traveled in a second</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDatetime">At datetime.</param>
+        public double Hackspeed(OrbitDB orbit, DateTime atDatetime)
+        {
+            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
+            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
+
+            return Distance.DistanceBetween(pos1, pos2);
+        }
+
 
         public static Vector4 Pos(double combinedMass, double semiMajAxis, double meanAnomaly, double eccentricity, double aoP, double loAN, double i)
         {
