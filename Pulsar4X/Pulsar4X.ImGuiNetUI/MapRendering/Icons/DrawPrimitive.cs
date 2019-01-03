@@ -312,7 +312,7 @@ namespace Pulsar4X.SDL2UI
 
             for (int i = 0; i < segments + 1; i++)
             {
-                double nextAngle = 0 + incrementAngle * i;
+                double nextAngle = incrementAngle * i;
                 drawX = posX + radius * Math.Sin(nextAngle);
                 drawY = posY + radius * Math.Cos(nextAngle);
                 points[i] = new PointD() { X = drawX, Y = drawY };

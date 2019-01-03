@@ -55,7 +55,7 @@ namespace Pulsar4X.SDL2UI
         {
             _iconMinSize = 8;
             short segments = 32;
-            var points = CreatePrimitiveShapes.Circle(0, 0, 1, segments);
+            var points = CreatePrimitiveShapes.Circle(0, 0, 100, segments);
 
 
             //colors picked out of my ass for a blue/green look. 
@@ -71,8 +71,8 @@ namespace Pulsar4X.SDL2UI
         void Asteroid()
         {
             _iconMinSize = 8;
-            double vertDiameter = _rng.Next(50, 100) * 0.1;
-            double horDiameter = _rng.Next(50, 100) * 0.1;
+            double vertDiameter = _rng.Next(50, 100);
+            double horDiameter = _rng.Next(50, 100);
             int segments = _rng.Next(8, 32);
             int jagMax = _rng.Next(5, 8);
             int jagMin = _rng.Next(4, jagMax);
@@ -98,9 +98,9 @@ namespace Pulsar4X.SDL2UI
         void Unknown()
         {
 
-            short segments = 16;
-            var points = CreatePrimitiveShapes.Circle(0, 0, 1, segments);
-            //colors picked out of my ass for a blue/green look. 
+            short segments = 24;
+            var points = CreatePrimitiveShapes.Circle(0, 0, 100, segments);
+            //colors picked out of my ass . 
             //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 
             byte r = 100;
             byte g = 100;
@@ -115,9 +115,9 @@ namespace Pulsar4X.SDL2UI
         {
             _viewRadius = camera.ViewDistance(_bodyRadiusAU);
             if (_viewRadius < _iconMinSize)
-                Scale = _iconMinSize;
+                Scale = _iconMinSize * 0.01f;
             else
-                Scale = _viewRadius;
+                Scale = _viewRadius * 0.01f;
             base.OnFrameUpdate(matrix, camera);
         }
     }

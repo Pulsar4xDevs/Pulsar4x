@@ -52,8 +52,8 @@ namespace Pulsar4X.SDL2UI
 
 
             byte spikes = (byte)(starInfo.SpectralType + 4);
-            float spikeheight = 1;
-            float spikeDepth = 0.5f;
+            float spikeheight = 100;
+            float spikeDepth = 50;
             double arc = (2 * Math.PI) / spikes;
             double startAngle = 1.5708 - arc / 2;
             List<PointD> shapePoints = new List<PointD>();
@@ -99,9 +99,9 @@ namespace Pulsar4X.SDL2UI
         {
             var viewRadius = camera.ViewDistance(_bodyRadiusAU);
             if (viewRadius < _iconMinSize)
-                Scale = _iconMinSize;
+                Scale = _iconMinSize * 0.01f;
             else
-                Scale = viewRadius;
+                Scale = viewRadius * 0.01f;
             base.OnFrameUpdate(matrix, camera);
             base.OnFrameUpdate(matrix, camera);
         }
