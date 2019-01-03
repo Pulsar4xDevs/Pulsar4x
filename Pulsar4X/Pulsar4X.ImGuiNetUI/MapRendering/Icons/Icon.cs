@@ -47,8 +47,7 @@ namespace Pulsar4X.SDL2UI
         public SDL.SDL_Point ViewScreenPos;
         public List<Shape> Shapes = new List<Shape>(); //these could change with entity changes. 
         public Shape[] DrawShapes;
-        public bool ShapesScaleWithZoom = false; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings 
-
+        //public bool ShapesScaleWithZoom = false; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings
         public float Scale = 1;
 
 
@@ -70,9 +69,7 @@ namespace Pulsar4X.SDL2UI
 
         public virtual void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            var camerapoint = camera.CameraViewCoordinate();
 
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
 
             //matrix.Translate(WorldPosition.X + camerapoint.x, WorldPosition.Y + camerapoint.y);
 
@@ -82,28 +79,32 @@ namespace Pulsar4X.SDL2UI
             //matrix2.Scale(camera.ZoomLevel);
             //matrix2.Translate(camerapoint.x, camerapoint.y);
 
+            var camerapoint = camera.CameraViewCoordinate();
 
-            float zoomLevel = 1;
+            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
 
-            if (ShapesScaleWithZoom)
-                zoomLevel = camera.ZoomLevel;
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];//matrix.Transform(shape.Points);
+                PointD[] drawPoints = new PointD[shape.Points.Length];
+                Matrix zoomMatrix;
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
+                    int x;
+                    int y;
 
-                    int x = (int)(ViewScreenPos.x + (shape.Points[i2].X + camerapoint.x) * zoomLevel);
-                    int y = (int)(ViewScreenPos.y + (shape.Points[i2].Y + camerapoint.y) * zoomLevel);
 
-                    //SDL.SDL_Point pnt = matrix2.Transform(shape.Points[i2].x, shape.Points[i2].y);
-                    //int x1 = (int)(pnt.x * zoomLevel);
-                    //int y1 = (int)(pnt.y * zoomLevel);
+                    zoomMatrix = new Matrix();
+                    zoomMatrix.Scale(Scale);
+                
+
+                    var tranlsatedPoint = zoomMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
+                    x = (int)(ViewScreenPos.x + tranlsatedPoint.X + camerapoint.x);
+                    y = (int)(ViewScreenPos.y + tranlsatedPoint.Y + camerapoint.y);
                     drawPoints[i2] = new PointD() { X = x, Y = y };
                 }
-                DrawShapes[i] = (new Shape() { Points = drawPoints, Color = shape.Color });
+                DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
         }
 

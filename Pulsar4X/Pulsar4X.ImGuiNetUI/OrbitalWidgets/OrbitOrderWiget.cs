@@ -245,12 +245,9 @@ namespace Pulsar4X.SDL2UI
             var camerapoint = camera.CameraViewCoordinate();
             //ViewScreenPos += camerapoint;
 
-            var vsp = new SDL.SDL_Point()
-            {
-                x = ViewScreenPos.x + camerapoint.x,
-                y = ViewScreenPos.y + camerapoint.y
-            };
-            ViewScreenPos = vsp;
+            ViewScreenPos.x += camerapoint.x;
+            ViewScreenPos.y += camerapoint.y;
+
             PointD translated;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
@@ -296,18 +293,19 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
             //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
-            /*
+
             SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 100);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
+            /*
+             SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 100, 0, 160);
+             DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 63, 63, 0, _loAN); //draw LoAN angle
 
-            SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 100, 0, 160);
-            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 63, 63, 0, _loAN); //draw LoAN angle
+             SDL.SDL_SetRenderDrawColor(rendererPtr, 50, 0, 100, 160);
+             DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 64, 64, _loAN, _aoP); //draw AoP angle
 
-            SDL.SDL_SetRenderDrawColor(rendererPtr, 50, 0, 100, 160);
-            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 64, 64, _loAN, _aoP); //draw AoP angle
-
-            SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 160);
-            DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 66, 66, OrbitAngleRadians,  _trueAnomaly);*/
+             SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 160);
+             DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 66, 66, OrbitAngleRadians,  _trueAnomaly);
+             */
         }
     }
 }

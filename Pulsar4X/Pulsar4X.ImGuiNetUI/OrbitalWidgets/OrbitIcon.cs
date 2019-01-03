@@ -222,18 +222,18 @@ namespace Pulsar4X.SDL2UI
             int index = _index;
             var camerapoint = camera.CameraViewCoordinate();
 
-            var vsp = new SDL.SDL_Point()
+            var vsp = new PointD
             {
-                x = ViewScreenPos.x + camerapoint.x,
-                y = ViewScreenPos.y + camerapoint.y
+                X = ViewScreenPos.x + camerapoint.x,
+                Y = ViewScreenPos.y + camerapoint.y
             };
-            ViewScreenPos = vsp;
+
 
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
 
             //first index in the drawPoints is the position of the body
             var translated = matrix.TransformD(_bodyRalitivePos.X, _bodyRalitivePos.Y);
-            _drawPoints[0] = new SDL.SDL_Point() { x = (int)(ViewScreenPos.x + translated.X), y = (int)(ViewScreenPos.y + translated.Y) };
+            _drawPoints[0] = new SDL.SDL_Point() { x = (int)(vsp.X + translated.X), y = (int)(vsp.Y + translated.Y) };
 
 
 
@@ -260,8 +260,8 @@ namespace Pulsar4X.SDL2UI
                 //translate everything to viewscreen & camera positions
                 //int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
                 //int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
-                int x = (int)(ViewScreenPos.x + translated.X);
-                int y = (int)(ViewScreenPos.y + translated.Y);
+                int x = (int)(vsp.X + translated.X);
+                int y = (int)(vsp.Y + translated.Y);
 
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }

@@ -9,8 +9,10 @@ namespace Pulsar4X.SDL2UI
         SystemBodyInfoDB _systemBodyInfoDB;
         BodyType _bodyType;
         MassVolumeDB _massVolDB;
+        double _bodyRadiusAU;
+        float _viewRadius;
         Random _rng;
-
+        float _iconMinSize = 8;
         public SysBodyIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _positionDB = entity.GetDataBlob<PositionDB>();
@@ -23,7 +25,7 @@ namespace Pulsar4X.SDL2UI
             _systemBodyInfoDB = entity.GetDataBlob<SystemBodyInfoDB>();
             _bodyType = _systemBodyInfoDB.BodyType;
             _massVolDB = entity.GetDataBlob<MassVolumeDB>();
-
+            _bodyRadiusAU = _massVolDB.Radius;
             _rng = new Random(entity.Guid.GetHashCode()); //use entity guid as a seed for psudoRandomness. 
 
             switch (_bodyType)
@@ -51,11 +53,9 @@ namespace Pulsar4X.SDL2UI
 
         void Terestrial()
         {
-
-            int vertDiameter = 8;
-            int horDiameter = 8;
-            int segments = 32;
-            var points = CreatePrimitiveShapes.CreateArc(0, 0, horDiameter, vertDiameter, 0, Math.PI * 2, segments);
+            _iconMinSize = 8;
+            short segments = 32;
+            var points = CreatePrimitiveShapes.Circle(0, 0, 1, segments);
 
 
             //colors picked out of my ass for a blue/green look. 
@@ -70,8 +70,9 @@ namespace Pulsar4X.SDL2UI
 
         void Asteroid()
         {
-            int vertDiameter = _rng.Next(4, 8);
-            int horDiameter = _rng.Next(4, 8);
+            _iconMinSize = 8;
+            double vertDiameter = _rng.Next(50, 100) * 0.1;
+            double horDiameter = _rng.Next(50, 100) * 0.1;
             int segments = _rng.Next(8, 32);
             int jagMax = _rng.Next(5, 8);
             int jagMin = _rng.Next(4, jagMax);
@@ -96,11 +97,9 @@ namespace Pulsar4X.SDL2UI
 
         void Unknown()
         {
-            int vertDiameter = 8;
-            int horDiameter = 8;
-            int segments = 8;
-            var points = CreatePrimitiveShapes.CreateArc(0, 0, horDiameter, vertDiameter, 0, Math.PI * 2, segments);
 
+            short segments = 16;
+            var points = CreatePrimitiveShapes.Circle(0, 0, 1, segments);
             //colors picked out of my ass for a blue/green look. 
             //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 
             byte r = 100;
@@ -111,19 +110,16 @@ namespace Pulsar4X.SDL2UI
             Shapes.Add(new Shape() { Color = colour, Points = points });
         }
 
-        /*
+
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
-            var bodyRadiusAU = _massVolDB.Radius;
-            var viewRadius = camera.ViewDistance(bodyRadiusAU);
-            if (viewRadius < 8)
-                ShapesScaleWithZoom = false;
+            _viewRadius = camera.ViewDistance(_bodyRadiusAU);
+            if (_viewRadius < _iconMinSize)
+                Scale = _iconMinSize;
             else
-                ShapesScaleWithZoom = true;
+                Scale = _viewRadius;
             base.OnFrameUpdate(matrix, camera);
-
-        }*/
+        }
     }
 }
 

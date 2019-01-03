@@ -226,6 +226,17 @@ namespace Pulsar4X.SDL2UI
         }
 
         /// <summary>
+        /// returns a matrix scaled to zoom. is not translated to camera position. 
+        /// </summary>
+        /// <returns>The zoom matrix.</returns>
+        public Matrix GetZoomMatrix()
+        {
+            Matrix matrix = new Matrix();
+            matrix.Scale(ZoomLevel);
+            return matrix;
+        }
+
+        /// <summary>
         /// Returns the translation matrix for a world position, relative to the camera position
         /// </summary>
         /// <param name="position">Position in World Units</param>

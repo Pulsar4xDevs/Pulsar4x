@@ -299,9 +299,7 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
             SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
 
-            Matrix matrix = new Matrix();
-
-            matrix.Scale(_camera.ZoomLevel);
+            var matrix =_camera.GetZoomMatrix();
 
             if (SysMap == null)
             {

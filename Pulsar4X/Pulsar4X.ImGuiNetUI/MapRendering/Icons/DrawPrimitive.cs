@@ -149,14 +149,14 @@ namespace Pulsar4X.SDL2UI
 
             double incrementAngle = arcAngleRadians / segments;
 
-            int drawX;
-            int drawY;
+            double drawX;
+            double drawY;
 
             for (int i = 0; i < segments + 1; i++)
             {
                 double nextAngle = startAngleRadians + incrementAngle * i;
-                drawX = posX + (int)Math.Round(xRadius * Math.Sin(nextAngle));
-                drawY = posY + (int)Math.Round(yRadius * Math.Cos(nextAngle));
+                drawX = posX + xRadius * Math.Sin(nextAngle);
+                drawY = posY + yRadius * Math.Cos(nextAngle);
                 points[i] = new PointD() { X = drawX, Y = drawY };
             }
 
@@ -200,14 +200,14 @@ namespace Pulsar4X.SDL2UI
         public static PointD[] RoundedCylinder(int minorRadius, int majorRadius, int offsetX, int offsetY)
         {
             List<PointD> points = new List<PointD>();
-            int x1 = (int)(minorRadius * 0.5);
-            int y1 = (int)(majorRadius * 0.5 - minorRadius * 0.5);
+            double x1 = (minorRadius * 0.5);
+            double y1 = (majorRadius * 0.5 - minorRadius * 0.5);
 
-            points.AddRange(CreateArc(offsetX, y1 + offsetY, x1, x1, ThreeQuarterCircle, HalfCircle, 16));
+            points.AddRange(CreateArc(offsetX, (int)(y1 + offsetY), x1, x1, ThreeQuarterCircle, HalfCircle, 16));
             points.Add(new PointD() { X = x1 + offsetX, Y = y1 + offsetY });
             points.Add(new PointD() { X = x1 + offsetX, Y = -y1 + offsetY });
 
-            points.AddRange(CreateArc(offsetX, -y1 + offsetY, x1, x1, QuarterCircle, HalfCircle, 16));
+            points.AddRange(CreateArc(offsetX, (int)(-y1 + offsetY), x1, x1, QuarterCircle, HalfCircle, 16));
             points.Add(new PointD() { X = -x1 + offsetX, Y = -y1 + offsetY });
             points.Add(new PointD() { X = -x1 + offsetX, Y = y1 + offsetY });
             return points.ToArray();
@@ -307,14 +307,14 @@ namespace Pulsar4X.SDL2UI
             PointD[] points = new PointD[segments + 1];
             double incrementAngle = PI2 / segments;
 
-            int drawX;
-            int drawY;
+            double drawX;
+            double drawY;
 
             for (int i = 0; i < segments + 1; i++)
             {
                 double nextAngle = 0 + incrementAngle * i;
-                drawX = posX + (int)Math.Round(radius * Math.Sin(nextAngle));
-                drawY = posY + (int)Math.Round(radius * Math.Cos(nextAngle));
+                drawX = posX + radius * Math.Sin(nextAngle);
+                drawY = posY + radius * Math.Cos(nextAngle);
                 points[i] = new PointD() { X = drawX, Y = drawY };
             }
 
