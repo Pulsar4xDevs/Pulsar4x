@@ -80,6 +80,7 @@ namespace Pulsar4X.SDL2UI
         /// <returns></returns>
         public int CompareTo(NameIcon compareIcon)
         {
+
             if (WorldPosition.Y > compareIcon.WorldPosition.Y) return -1;
             else if (this.WorldPosition.Y < compareIcon.WorldPosition.Y) return 1;
             else
@@ -89,8 +90,6 @@ namespace Pulsar4X.SDL2UI
                 else return -NameString.CompareTo(compareIcon.NameString);
             }
         }
-
-
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
