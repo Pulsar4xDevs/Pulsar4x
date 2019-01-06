@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var db = entity.GetDataBlob<TranslateMoveDB>();
                 _translateStartPoint = db.TranslateEntryPoint_AU;
-                _translateEndPoint = db.TranslationExitPoint_AU;
+                _translateEndPoint = db.TranslateExitPoint_AU;
             }
             if (entity.HasDataBlob<OrderableDB>())
             {

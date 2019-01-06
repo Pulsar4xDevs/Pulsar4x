@@ -220,7 +220,7 @@ namespace Pulsar4X.SDL2UI
                 OrderingEntity.Entity,
                 TargetEntity.Entity,
                 _targetInsertionPoint_AU,
-                _state.CurrentSystemDateTime,
+                _departureDateTime,
                 Distance.MToAU(_deltaV_MS));
             
             CloseWindow();

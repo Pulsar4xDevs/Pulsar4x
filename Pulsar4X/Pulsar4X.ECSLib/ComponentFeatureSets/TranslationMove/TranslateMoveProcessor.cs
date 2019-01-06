@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
             var positionDB = entity.GetDataBlob<PositionDB>();
             var maxSpeedMS = propulsionDB.MaximumSpeed_MS;
             positionDB.SetParent(null);
-            Vector4 targetPosMt = Distance.AuToMt(moveDB.TranslationExitPoint_AU);
+            Vector4 targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
             Vector4 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
 
             Vector4 postionDelta = currentPositionMt - targetPosMt;
@@ -121,7 +121,7 @@ namespace Pulsar4X.ECSLib
 
             Vector4 targetPosMt;
 
-            targetPosMt = Distance.AuToMt(moveDB.TranslationExitPoint_AU);
+            targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
 
             var deltaVecToTargetMt = currentPositionMt - targetPosMt;
 
@@ -157,7 +157,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        void SetOrbitHere(Entity entity, PropulsionAbilityDB propulsionDB, PositionDB positionDB, TranslateMoveDB moveDB, DateTime epoch)
+        void SetOrbitHere(Entity entity, PropulsionAbilityDB propulsionDB, PositionDB positionDB, TranslateMoveDB moveDB, DateTime atDateTime)
         {
 
             propulsionDB.CurrentVectorMS = new Vector4(0, 0, 0, 0);
@@ -175,11 +175,11 @@ namespace Pulsar4X.ECSLib
                 targetEntity = moveDB.TargetEntity;
             }
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
-            Vector4 parentOrbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, epoch);
-            Vector4 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, epoch );
+            Vector4 parentOrbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, atDateTime);
+            Vector4 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime );
             insertionVector += moveDB.ExpendDeltaV_AU; //TODO: only use it if we have it. 
             propulsionDB.RemainingDV_MS -= (float)Distance.AuToMt(moveDB.ExpendDeltaV_AU).Length();
-            OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector, epoch);
+            OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector, atDateTime);
             if (newOrbit.Periapsis > targetSOI)
             {
                 //TODO: find who's SOI we're currently in and create an orbit for that;

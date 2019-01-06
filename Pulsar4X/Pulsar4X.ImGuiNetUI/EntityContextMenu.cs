@@ -48,10 +48,15 @@ namespace Pulsar4X.SDL2UI
             //if entity can move
             if (_entityState.Entity.HasDataBlob<PropulsionAbilityDB>())
             {
-                if (ImGui.SmallButton("Orbit"))
+                if (ImGui.SmallButton("Translate to a new orbit"))
                 {
                     OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
+                }
+                if(ImGui.SmallButton("Change current orbit"))
+                {
+                    ChangeCurrentOrbitWindow.GetInstance(_entityState).IsActive = true;
+                    _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
             }
             if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>())

@@ -6,6 +6,80 @@ using NUnit.Framework;
 namespace Pulsar4X.ECSLib
 {
 
+    public class ChangeCurrentOrbitCommand : EntityCommand
+    {
+        internal override int ActionLanes => 1;
+        internal override bool IsBlocking => true;
+
+        Entity _factionEntity;
+        Entity _entityCommanding;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+        NewtonionMoveDB _db;
+
+        public static void CreateCommand(Game game, Entity faction, Entity orderEntity, DateTime actionDateTime, Vector4 expendDeltaV_AU)
+        {
+            var cmd = new ChangeCurrentOrbitCommand()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = orderEntity.Guid,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+
+            };
+
+            cmd._db = new NewtonionMoveDB();
+            cmd._db.ActionOnDateTime = actionDateTime;
+            cmd._db.DeltaVToExpend_AU = expendDeltaV_AU;
+            
+
+
+            game.OrderHandler.HandleOrder(cmd);
+        }
+
+        internal override void ActionCommand(Game game)
+        {
+            if (!IsRunning)
+            {
+                Entity parentEntity = EntityCommanding.GetDataBlob<OrbitDB>().Parent;
+                Vector4 newVector = OrbitProcessor.PreciseOrbitalVelocityVector(EntityCommanding.GetDataBlob<OrbitDB>(), _db.ActionOnDateTime);
+                newVector += _db.DeltaVToExpend_AU;
+                var spdmps = Distance.AuToMt( newVector.Length());
+                OrbitDB newOrbit = OrbitDB.FromVector(parentEntity, EntityCommanding, newVector, _db.ActionOnDateTime);
+                /*
+                if (newOrbit.Periapsis > targetSOI)
+                {
+                    //TODO: find who's SOI we're currently in and create an orbit for that;
+                }
+                if (newOrbit.Apoapsis > targetSOI)
+                {
+                    //TODO: change orbit to new parent at SOI change
+                }
+                */
+
+
+                EntityCommanding.SetDataBlob(newOrbit);
+                newOrbit.SetParent(parentEntity);
+
+            }
+        }
+
+        internal override bool IsFinished()
+        {
+            if (IsRunning)
+                return true;
+            else
+                return false;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+                return true;
+            else
+                return false;
+        }
+    }
+
     public class TransitToOrbitCommand : EntityCommand
     {
         internal override int ActionLanes => 1;

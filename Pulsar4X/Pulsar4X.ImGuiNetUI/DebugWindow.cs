@@ -288,9 +288,9 @@ namespace Pulsar4X.SDL2UI
                                     if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                     {
                                         ImGui.Text("EntryPoint " + db.TranslateEntryPoint_AU);
-                                        ImGui.Text("ExitPoint  " + db.TranslationExitPoint_AU);
+                                        ImGui.Text("ExitPoint  " + db.TranslateExitPoint_AU);
                                         ImGui.Text("EDA " + db.PredictedExitTime.ToString());
-                                        double distance = Distance.DistanceBetween(db.TranslateEntryPoint_AU, db.TranslationExitPoint_AU);
+                                        double distance = Distance.DistanceBetween(db.TranslateEntryPoint_AU, db.TranslateExitPoint_AU);
                                         ImGui.Text("Distance " + distance + " AU");
                                         ImGui.SameLine();
                                         double distancekm = Distance.AuToKm(distance);
