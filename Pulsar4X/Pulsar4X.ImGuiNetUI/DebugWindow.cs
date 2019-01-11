@@ -10,7 +10,8 @@ namespace Pulsar4X.SDL2UI
 {
     public class DebugWindow :PulsarGuiWindow
     {
-        
+        EntityState _selectedEntityState;
+        Entity _selectedEntity { get { return _selectedEntityState.Entity; } }
         float largestGFPS = 0;
         int largestIndex = 0;
 
@@ -32,15 +33,19 @@ namespace Pulsar4X.SDL2UI
 
         private DebugWindow() 
         {
-            
+            _selectedEntityState = _state.LastClickedEntity;   
         }
         internal static DebugWindow GetInstance()
         {
+            DebugWindow instance;
             if (!_state.LoadedWindows.ContainsKey(typeof(DebugWindow)))
+                instance = new DebugWindow();
+            else
             {
-                return new DebugWindow();
+                instance = (DebugWindow)_state.LoadedWindows[typeof(DebugWindow)];
+                instance._selectedEntityState = _state.LastClickedEntity;
             }
-            return (DebugWindow)_state.LoadedWindows[typeof(DebugWindow)];
+            return instance;
         }
 
 
@@ -51,12 +56,16 @@ namespace Pulsar4X.SDL2UI
             {
                 _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
                 _state.MapRendering.SysMap.SystemSubpulse.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
+                _state.EntityClickedEvent += _state_EntityClicked;
             }
         }
 
-        private void _state_EntityClicked(Guid arg1, MouseButtons arg2)
+        private void _state_EntityClicked(EntityState entityState, MouseButtons btn)
         {
-            throw new NotImplementedException();
+            if(btn == MouseButtons.Primary)
+            {
+                _selectedEntityState = entityState;
+            }
         }
 
         void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
@@ -168,14 +177,14 @@ namespace Pulsar4X.SDL2UI
                         ImGui.ListBox("Entites", ref item, entityNames.ToArray(), entityNames.Count);
 
                     }
-                    if (_state.LastClickedEntity.Name != null)
+                    if (_selectedEntityState.Name != null && _selectedEntity.IsValid)
                     {
                         if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                         {
                             ImGui.Text(_state.LastClickedEntity.Entity.Guid.ToString());
-                            if (_state.LastClickedEntity.Entity.HasDataBlob<PositionDB>())
+                            if (_selectedEntity.HasDataBlob<PositionDB>())
                             {
-                                var positiondb = _state.LastClickedEntity.Entity.GetDataBlob<PositionDB>();
+                                var positiondb = _selectedEntity.GetDataBlob<PositionDB>();
                                 var posv4 = positiondb.AbsolutePosition_AU;
                                 ImGui.Text("x: " + posv4.X);
                                 ImGui.Text("y: " + posv4.Y);
@@ -186,23 +195,23 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Dist: " + Distance.AuToKm( positiondb.RelativePosition_AU.Length()));
                                 }
                             }
-                            if (_state.LastClickedEntity.Entity.HasDataBlob<MassVolumeDB>())
+                            if (_selectedEntity.HasDataBlob<MassVolumeDB>())
                             {
                                 if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    MassVolumeDB mvdb = _state.LastClickedEntity.Entity.GetDataBlob<MassVolumeDB>();
+                                    MassVolumeDB mvdb = _selectedEntity.GetDataBlob<MassVolumeDB>();
                                     ImGui.Text("Mass " + mvdb.Mass + "Kg");
                                     ImGui.Text("Volume " + mvdb.Volume + "Km^3");
                                     ImGui.Text("Density " + mvdb.Density + "g/cm^3");
                                     ImGui.Text("Radius " + mvdb.Radius + "Km");
                                 }
                             }
-                            if (_state.LastClickedEntity.Entity.HasDataBlob<OrbitDB>())
+                            if (_selectedEntity.HasDataBlob<OrbitDB>())
                             {
 
                                 if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    OrbitDB orbitDB = _state.LastClickedEntity.Entity.GetDataBlob<OrbitDB>();
+                                    OrbitDB orbitDB = _selectedEntity.GetDataBlob<OrbitDB>();
 
 
                                     //if (_state.CurrentSystemDateTime != lastDate)
@@ -242,7 +251,7 @@ namespace Pulsar4X.SDL2UI
 
                                 if (ImGui.CollapsingHeader("OrbitIcon: ###OrbitIconHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    OrbitDB orbitDB = _state.LastClickedEntity.Entity.GetDataBlob<OrbitDB>();
+                                    OrbitDB orbitDB = _selectedEntity.GetDataBlob<OrbitDB>();
 
                                     //string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
                                     //string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
@@ -258,7 +267,7 @@ namespace Pulsar4X.SDL2UI
 
                             }
 
-                            if (_state.LastClickedEntity.Entity.HasDataBlob<PropulsionAbilityDB>())
+                            if (_selectedEntity.HasDataBlob<PropulsionAbilityDB>())
                             {
                                 if (ImGui.CollapsingHeader("Propulsion: ###PropulsionHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
@@ -312,7 +321,15 @@ namespace Pulsar4X.SDL2UI
                                 }
 
                             }
-
+                            if (_selectedEntity.HasDataBlob<SensorInfoDB>())
+                            {
+                                var actualEntity = _selectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                                if (actualEntity.IsValid && actualEntity.HasDataBlob<AsteroidDamageDB>())
+                                {
+                                    var dmgDB = actualEntity.GetDataBlob<AsteroidDamageDB>();
+                                    ImGui.Text("Remaining HP: " + dmgDB.Health.ToString());
+                                }
+                            }
 
                         }
                     }

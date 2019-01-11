@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         /// Asteroids are damageable and need to store their health value.
         /// </summary>
         [JsonProperty]
-        private Int32 _health = 100;
+        private int _health = 100;
 
         [PublicAPI]
         public int Health
@@ -22,6 +22,9 @@ namespace Pulsar4X.ECSLib
             get { return _health; }
             internal set { _health = value; }
         }
+
+        public PercentValue FractureChance { get; internal set; }
+
 
 
         /// <summary>

@@ -73,56 +73,71 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var entityItem in SysMap.IconableEntitys)
             {
-
-
-                var entityState = new EntityState() { Entity = entityItem, Name = "Unknown"  };
-
-                if (entityItem.HasDataBlob<NameDB>())
-                {
-                    _nameIcons.TryAdd(entityItem.Guid, new NameIcon(ref entityState, _state));
-                }
-
-
-                if (entityItem.HasDataBlob<OrbitDB>())
-                {
-                    var orbitDB = entityItem.GetDataBlob<OrbitDB>();
-                    if(!orbitDB.IsStationary)
-                    {
-                        OrbitIcon orbit = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
-                        _orbitRings.TryAdd(entityItem.Guid, orbit);
-
-                    }
-                }
-                if (entityItem.HasDataBlob<StarInfoDB>())
-                {
-                    _entityIcons.TryAdd(entityItem.Guid, new StarIcon(entityItem));
-                }
-                if (entityItem.HasDataBlob<SystemBodyInfoDB>())
-                {
-                    _entityIcons.TryAdd(entityItem.Guid, new SysBodyIcon(entityItem));
-                    if (entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies.Count > 0)
-                    {
-                        foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
-                        {
-                            _nameIcons[entityItem.Guid].AddSubName(colony);
-                            IconEntityStates.Add(colony.Guid, new EntityState()
-                            {
-                                Entity = colony,
-                                Name = _nameIcons[entityItem.Guid].SubNames[colony.Guid],
-                                NameIcon = _nameIcons[entityItem.Guid]
-                            }); 
-                        }
-                    }
-                }
-                if (entityItem.HasDataBlob<ShipInfoDB>())
-                {
-                    _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
-                }
-
-                IconEntityStates.Add(entityItem.Guid, entityState);
+                AddIconable(entityItem);
             }
             _state.LastClickedEntity = _state.MapRendering.IconEntityStates.Values.ElementAt(0);
 
+        }
+
+        void AddIconable(Entity entityItem)
+        {
+            var entityState = new EntityState(entityItem) { Name = "Unknown" };
+
+            if (entityItem.HasDataBlob<NameDB>())
+            {
+                _nameIcons.TryAdd(entityItem.Guid, new NameIcon(ref entityState, _state));
+            }
+
+
+            if (entityItem.HasDataBlob<OrbitDB>())
+            {
+                var orbitDB = entityItem.GetDataBlob<OrbitDB>();
+                if (!orbitDB.IsStationary)
+                {
+                    OrbitIcon orbit = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
+                    _orbitRings.TryAdd(entityItem.Guid, orbit);
+
+                }
+            }
+            if (entityItem.HasDataBlob<StarInfoDB>())
+            {
+                _entityIcons.TryAdd(entityItem.Guid, new StarIcon(entityItem));
+            }
+            if (entityItem.HasDataBlob<SystemBodyInfoDB>())
+            {
+                _entityIcons.TryAdd(entityItem.Guid, new SysBodyIcon(entityItem));
+                if (entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies.Count > 0)
+                {
+                    foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
+                    {
+                        _nameIcons[entityItem.Guid].AddSubName(colony);
+                        IconEntityStates.Add(colony.Guid, new EntityState(colony)
+                        {
+
+                            Name = _nameIcons[entityItem.Guid].SubNames[colony.Guid],
+                            NameIcon = _nameIcons[entityItem.Guid]
+                        });
+                    }
+                }
+            }
+            if (entityItem.HasDataBlob<ShipInfoDB>())
+            {
+                _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
+            }
+
+            IconEntityStates.Add(entityItem.Guid, entityState);
+        }
+
+        void RemoveIconable(Entity entity)
+        {
+            if (IconEntityStates.ContainsKey(entity.Guid))
+            {
+                //var entityState = IconEntityStates[entity.Guid];
+                IconEntityStates.Remove(entity.Guid);
+            }
+            _nameIcons.TryRemove(entity.Guid, out NameIcon nameIcon);
+            _entityIcons.TryRemove(entity.Guid, out IDrawData entityIcon);
+            _orbitRings.TryRemove(entity.Guid, out IDrawData orbitIcon);
         }
 
         void OnSystemDateChange(DateTime newDate)
@@ -167,6 +182,16 @@ namespace Pulsar4X.SDL2UI
             var updates = SysMap.GetUpdates();
             foreach (var changeData in updates)
             {
+                if(changeData.ChangeType == EntityChangeData.EntityChangeType.EntityAdded)
+                {
+                    AddIconable(changeData.Entity);              
+                }
+
+                if (changeData.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
+                {
+                    RemoveIconable(changeData.Entity);
+                }
+
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
                 {
                     if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
@@ -177,7 +202,7 @@ namespace Pulsar4X.SDL2UI
                             if (IconEntityStates.ContainsKey(changeData.Entity.Guid))
                                 entityState = IconEntityStates[changeData.Entity.Guid];
                             else
-                                entityState = new EntityState() { Entity = changeData.Entity, Name = "Unknown" };
+                                entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
                             
                             _orbitRings[changeData.Entity.Guid] = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
                         

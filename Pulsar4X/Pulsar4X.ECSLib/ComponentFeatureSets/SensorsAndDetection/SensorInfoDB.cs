@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal Guid DetectedEntityID;
         [JsonIgnore]
-        internal Entity DetectedEntity; //the actual entity that we've detected. 
+        public Entity DetectedEntity; //the actual entity that we've detected. 
         [JsonProperty]
         internal Entity SensorEntity; //this is a clone of the DetectedEntity, with inacuracies in some of the data, may have datablobs which are references to the actual entitey datablobs
         [JsonProperty]

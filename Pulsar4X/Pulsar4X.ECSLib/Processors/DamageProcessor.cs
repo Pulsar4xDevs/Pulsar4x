@@ -22,37 +22,38 @@ namespace Pulsar4X.ECSLib
         /// This will work for missiles, ships, asteroids, and populations at some point.
         /// Damage type may eventually be required.
         /// </summary>
-        /// <param name="DamageableEntity"></param>
+        /// <param name="damageableEntity"></param>
         /// <param name="damageAmount"></param>
-        public static void OnTakingDamage(Entity DamageableEntity, int damageAmount)
+        public static void OnTakingDamage(Entity damageableEntity, int damageAmount, DateTime atDateTime)
         {
-            if (DamageableEntity.HasDataBlob<AsteroidDamageDB>())
+        
+            if (damageableEntity.HasDataBlob<AsteroidDamageDB>())
             {
-                AsteroidDamageDB AstDmgDB = DamageableEntity.GetDataBlob<AsteroidDamageDB>();
+                AsteroidDamageDB AstDmgDB = damageableEntity.GetDataBlob<AsteroidDamageDB>();
                 AstDmgDB.Health = AstDmgDB.Health - damageAmount;
 
                 if (AstDmgDB.Health <= 0)
-                    SpawnSubAsteroids(DamageableEntity);
+                    SpawnSubAsteroids(damageableEntity, atDateTime);
             }
-            else if (DamageableEntity.HasDataBlob<ShipInfoDB>())
+            else if (damageableEntity.HasDataBlob<ShipInfoDB>())
             {
                 //do shield damage
                 //do armor damage
                 //for components: 
-                Game game = DamageableEntity.Manager.Game;
-                PositionDB ShipPosition = DamageableEntity.GetDataBlob<PositionDB>();
+                Game game = damageableEntity.Manager.Game;
+                PositionDB ShipPosition = damageableEntity.GetDataBlob<PositionDB>();
 
                 StarSystem mySystem;
                 if (!game.Systems.TryGetValue(ShipPosition.SystemGuid, out mySystem))
                     throw new GuidNotFoundException(ShipPosition.SystemGuid);
 
-                ComponentInstancesDB ShipInst = DamageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are ship components in this context
+                ComponentInstancesDB ShipInst = damageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are ship components in this context
 
                 int damageAttempt = 0;
                 while (damageAmount > 0)
                 {
 
-                    int randValue = mySystem.RNG.Next((int)(DamageableEntity.GetDataBlob<MassVolumeDB>().VolumeM3)); //volume in m^3
+                    int randValue = mySystem.RNG.Next((int)(damageableEntity.GetDataBlob<MassVolumeDB>().VolumeM3)); //volume in m^3
 
                     foreach (KeyValuePair<Entity, double> pair in ShipInst.ComponentDictionary)
                     {
@@ -112,20 +113,20 @@ namespace Pulsar4X.ECSLib
 
                 if (damageAttempt == 20) // the ship is destroyed. how to mark it as such?
                 {
-                    SpawnWreck(DamageableEntity);
+                    SpawnWreck(damageableEntity);
                 }
                 else
                 {
-                    ReCalcProcessor.ReCalcAbilities(DamageableEntity);
+                    ReCalcProcessor.ReCalcAbilities(damageableEntity);
                 }
             }
-            else if (DamageableEntity.HasDataBlob<ColonyInfoDB>())
+            else if (damageableEntity.HasDataBlob<ColonyInfoDB>())
             {
                 //Think about how to unify this one and shipInfoDB if possible.
                 //do Terraforming/Infra/Pop damage
-                Game game = DamageableEntity.Manager.Game;
+                Game game = damageableEntity.Manager.Game;
 
-                ColonyInfoDB ColIDB = DamageableEntity.GetDataBlob<ColonyInfoDB>();
+                ColonyInfoDB ColIDB = damageableEntity.GetDataBlob<ColonyInfoDB>();
                 SystemBodyInfoDB SysInfoDB = ColIDB.PlanetEntity.GetDataBlob<SystemBodyInfoDB>();
 
                 PositionDB ColonyPosition = ColIDB.PlanetEntity.GetDataBlob<PositionDB>();
@@ -145,11 +146,11 @@ namespace Pulsar4X.ECSLib
 
 
                 //Installation Damage section:
-                ComponentInstancesDB ColInst = DamageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are installations in this context
+                ComponentInstancesDB ColInst = damageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are installations in this context
                 int damageAttempt = 0;
                 while (damageAmount > 0)
                 {
-                    int randValue = mySystem.RNG.Next((int)DamageableEntity.GetDataBlob<MassVolumeDB>().Volume);
+                    int randValue = mySystem.RNG.Next((int)damageableEntity.GetDataBlob<MassVolumeDB>().Volume);
 
                     foreach (KeyValuePair<Entity, double> pair in ColInst.ComponentDictionary)
                     {
@@ -198,7 +199,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 //This will need to be updated to deal with colonies.
-                ReCalcProcessor.ReCalcAbilities(DamageableEntity);
+                ReCalcProcessor.ReCalcAbilities(damageableEntity);
             }
         }
 
@@ -229,7 +230,7 @@ namespace Pulsar4X.ECSLib
         /// This asteroid was destroyed, see if it is big enough for child asteroids to spawn, and if so spawn them.
         /// </summary>
         /// <param name="Asteroid"></param>
-        internal static void SpawnSubAsteroids(Entity Asteroid)
+        internal static void SpawnSubAsteroids(Entity Asteroid, DateTime atDateTime)
         {
             Game game = Asteroid.Manager.Game;
             MassVolumeDB ADB = Asteroid.GetDataBlob<MassVolumeDB>();
@@ -242,22 +243,20 @@ namespace Pulsar4X.ECSLib
 
                 double newMass = ADB.Mass * 0.4; //add a random factor into this? do we care? will mass be printed to the player?
 
-                NewtonBalisticDB nDB = Asteroid.GetDataBlob<NewtonBalisticDB>();
+                OrbitDB origOrbit = Asteroid.GetDataBlob<OrbitDB>();
                 PositionDB pDB = Asteroid.GetDataBlob<PositionDB>();
 
-                StarSystem mySystem;
-                if (!game.Systems.TryGetValue(pDB.SystemGuid, out mySystem))
-                    throw new GuidNotFoundException(pDB.SystemGuid);
+                EntityManager mySystem = Asteroid.Manager;
+                
 
-                Entity myTarget;
-                if (!mySystem.FindEntityByGuid(nDB.TargetGuid, out myTarget))
-                    throw new GuidNotFoundException(nDB.TargetGuid);
+                var origVel = OrbitProcessor.AbsoluteOrbitalVector(origOrbit, atDateTime);
 
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
                 //I need the target entity, the collisionDate, and the starSystem. I may have starsystem from guid.
                 //Ok so this should create the asteroid without having to add the new asteroids to a list. as that is done in the factory.
-                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid(mySystem, myTarget, nDB.CollisionDate, newMass);
-                Entity newAsteroid2 = AsteroidFactory.CreateAsteroid(mySystem, myTarget, nDB.CollisionDate, newMass);
+                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition_AU, origOrbit, atDateTime, newMass); 
+                //var newOrbit = OrbitDB.FromVector(origOrbit.Parent, )
+                Entity newAsteroid2 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition_AU, origOrbit, atDateTime, newMass);
 
                 mySystem.RemoveEntity(Asteroid);
 

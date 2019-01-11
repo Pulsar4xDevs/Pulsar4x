@@ -7,11 +7,14 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    public delegate void EntityChangeHandler (EntityChangeData.EntityChangeType changeType, BaseDataBlob db);
+
     [DebuggerDisplay("{" + nameof(DebugDisplay) + "}")]
     [JsonConverter(typeof(EntityConverter))]
     [PublicAPI]
     public sealed class Entity : ProtoEntity
     {
+        public event EntityChangeHandler ChangeEvent;
         // Index slot of this entity's datablobs in its EntityManager.
         internal int ID;
 
@@ -37,6 +40,11 @@ namespace Pulsar4X.ECSLib
         [NotNull]
         [PublicAPI]
         public static readonly Entity InvalidEntity = new Entity();
+
+        public void InvokeChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        {
+            ChangeEvent?.Invoke(changeType, db); 
+        }
 
         #region Entity Constructors
         private Entity()

@@ -8,6 +8,7 @@ using System.Numerics;
 using System.IO;
 namespace Pulsar4X.SDL2UI
 {
+    public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
         internal Game Game;
@@ -41,6 +42,7 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, IntPtr> SDLImageDictionary = new Dictionary<string, IntPtr>();
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
+        public event EntityClickedEventHandler EntityClickedEvent;
         internal EntityState LastClickedEntity;
         internal ECSLib.Vector4 LastWorldPointClicked;
 
@@ -124,9 +126,10 @@ namespace Pulsar4X.SDL2UI
         }
         internal void EntityClicked(Guid entityGuid, MouseButtons button)
         {
-            
-            //if (button == MouseButtons.Primary)
-                LastClickedEntity = MapRendering.IconEntityStates[entityGuid];
+        
+            LastClickedEntity = MapRendering.IconEntityStates[entityGuid];
+
+            EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(MapRendering.IconEntityStates[entityGuid], button);

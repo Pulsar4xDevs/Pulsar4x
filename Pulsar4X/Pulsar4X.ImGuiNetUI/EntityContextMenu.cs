@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -12,7 +13,35 @@ namespace Pulsar4X.SDL2UI
         public NameIcon NameIcon;
         public OrbitIcon OrbitIcon;
         public OrbitOrderWiget DebugOrbitOrder;
+
+        public Dictionary<Type,BaseDataBlob> DataBlobs = new Dictionary<Type,BaseDataBlob>();
+
         public CommandReferences CmdRef;
+
+        public EntityState(Entity entity)
+        {
+            Entity = entity;
+            foreach (var db in entity.DataBlobs)
+            {
+                DataBlobs.Add(db.GetType(), db);
+            }
+            entity.ChangeEvent += On_entityChangeEvent;
+        }
+
+        void On_entityChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        {
+            switch (changeType)
+            {
+                case EntityChangeData.EntityChangeType.DBAdded:
+                    DataBlobs.Add(db.GetType(), db);
+                    break;
+                case EntityChangeData.EntityChangeType.DBRemoved:
+                    DataBlobs.Remove(db.GetType());
+                    break;
+                default:
+                    break;
+            }
+        }
 
     }
 

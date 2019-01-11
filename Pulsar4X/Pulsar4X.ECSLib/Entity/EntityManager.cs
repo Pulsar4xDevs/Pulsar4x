@@ -230,7 +230,7 @@ namespace Pulsar4X.ECSLib
                 {
                     _globalGuidDictionaryLock.ExitWriteLock();
                 }
-                UpdateListners(_entities[entityID], null, EntityChangeType.EntityRemoved);
+                UpdateListners(entity, null, EntityChangeType.EntityRemoved);
             }
             else
             {
@@ -335,6 +335,7 @@ namespace Pulsar4X.ECSLib
 
         private void UpdateListners(Entity entity, BaseDataBlob db, EntityChangeType change)
         {
+            //listners to this work on thier own threads and are not affected by this one. 
             if (EntityListners.Count > 0)
             {
                 var changeData = new EntityChangeData() {
@@ -347,6 +348,10 @@ namespace Pulsar4X.ECSLib
                     item.AddChange(changeData);
                 }
             }
+
+
+            //this one works on the active (ie this) thread
+            entity.InvokeChangeEvent(change, db); 
         }
 
         #region Public API Functions

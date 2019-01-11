@@ -76,7 +76,7 @@ namespace Pulsar4X.SDL2UI
             _displayText = "Orbit Order: " + OrderingEntity.Name;
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
-            TargetEntity = new EntityState() { Name = "" };
+            TargetEntity = new EntityState(Entity.InvalidEntity) { Name = "" };
             if (OrderingEntity.Entity.HasDataBlob<OrbitDB>())
             {
                 //_orbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());

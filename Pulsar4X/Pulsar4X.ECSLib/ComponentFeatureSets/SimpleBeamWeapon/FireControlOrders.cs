@@ -96,8 +96,9 @@ namespace Pulsar4X.ECSLib
         Entity _factionEntity;
 
         [JsonProperty]
-        public Guid TargetEntityGuid { get; set; }
-        private Entity _targetEntity;
+        public Guid TargetSensorEntityGuid { get; set; }
+        private Entity _targetSensorEntity;
+        private Entity _targetActualEntity;
 
         [JsonProperty]
         public Guid FireControlGuid;
@@ -113,7 +114,7 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = orderEntity,
                 CreatedDate = starSysDate,
                 FireControlGuid = fireControlGuid,
-                TargetEntityGuid = targetGuid,
+                TargetSensorEntityGuid = targetGuid,
             };
             game.OrderHandler.HandleOrder(cmd);
         }
@@ -123,7 +124,9 @@ namespace Pulsar4X.ECSLib
         internal override void ActionCommand(Game game)
         {
             if (!IsRunning)
-                _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>().Target = _targetEntity;
+            {
+                _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>().Target = _targetActualEntity;
+            }
 
         }
 
@@ -132,7 +135,7 @@ namespace Pulsar4X.ECSLib
             if (IsRunning)
                 return true;
             return false;
-            //if target is dead? or not seen for x amount of time? how do we see if a target is dead? 
+            //if target is dead? or not seen for x amount of time? 
         }
 
         internal override bool IsValidCommand(Game game)
@@ -144,8 +147,13 @@ namespace Pulsar4X.ECSLib
             //IsCommandValid also checks that the entity we're commanding is owned by our faction. 
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out _targetEntity))
+                if (game.GlobalManager.FindEntityByGuid(TargetSensorEntityGuid, out _targetSensorEntity))
                 {
+                    if (_targetSensorEntity.HasDataBlob<SensorInfoDB>()) //we want to damage the actual entity, not the sensor clone. 
+                        _targetActualEntity = _targetSensorEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                    else
+                        _targetActualEntity = _targetSensorEntity;
+
                     if (game.GlobalManager.FindEntityByGuid(FireControlGuid, out _fireControlComponent))
                         return true;
                 }

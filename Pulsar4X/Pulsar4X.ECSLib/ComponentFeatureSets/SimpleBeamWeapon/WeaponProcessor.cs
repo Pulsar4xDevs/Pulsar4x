@@ -44,6 +44,13 @@ namespace Pulsar4X.ECSLib
 
             WeaponInstanceStateDB stateInfo = beamWeapon.GetDataBlob<WeaponInstanceStateDB>();
             FireControlInstanceStateDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceStateDB>();
+            if(!fireControl.Target.IsValid)
+            {
+                fireControl.Target = null;
+                fireControl.IsEngaging = false;
+                return;
+            }
+
             var myPos = beamWeapon.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
             var targetPos = fireControl.Target.GetDataBlob<PositionDB>();
 
@@ -58,7 +65,7 @@ namespace Pulsar4X.ECSLib
             // only fire if target is in range TODO: fire anyway, but miss. TODO: this will be wrong if we do movement last, this needs to be done after movement. 
             if (range <= designAtb.MaxRange)//TODO: firecontrol shoudl have max range too?: Math.Min(designAtb.MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
             {
-                DamageProcessor.OnTakingDamage(fireControl.Target, damageAmount);
+                DamageProcessor.OnTakingDamage(fireControl.Target, damageAmount, atDate);
                 int reloadRate = designAtb.ReloadRate;
                 stateInfo.CoolDown = atDate + TimeSpan.FromSeconds(reloadRate);
                 stateInfo.ReadyToFire = false;    
