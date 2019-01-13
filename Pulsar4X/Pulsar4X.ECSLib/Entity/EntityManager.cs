@@ -33,6 +33,8 @@ namespace Pulsar4X.ECSLib
 
         internal List<AEntityChangeListner> EntityListners = new List<AEntityChangeListner>();
 
+        public Dictionary<Guid, SystemSensorContacts> FactionSensorManagers = new Dictionary<Guid, SystemSensorContacts>();
+
         Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();  
         public List<Entity> GetEntitiesByFaction(Guid factionGuid)
         {

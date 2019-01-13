@@ -3,8 +3,14 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
+    public interface IPosition
+    {
+        Vector4 AbsolutePosition_AU { get; }
+        Vector4 RelativePosition_AU { get; }
+
+    }
     //TODO: get rid of AU, why are we using AU.
-    public class PositionDB : TreeHierarchyDB, IGetValuesHash
+    public class PositionDB : TreeHierarchyDB, IGetValuesHash, IPosition
     {
 
         [JsonProperty]

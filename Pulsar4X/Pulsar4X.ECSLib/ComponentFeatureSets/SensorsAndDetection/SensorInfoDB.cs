@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public Entity DetectedEntity; //the actual entity that we've detected. 
         [JsonProperty]
-        internal Entity SensorEntity; //this is a clone of the DetectedEntity, with inacuracies in some of the data, may have datablobs which are references to the actual entitey datablobs
+        internal SensorContact SensorContact; 
         [JsonProperty]
         internal DateTime LastDetection; //the datetime of teh last detection
         [JsonProperty]
@@ -29,7 +29,8 @@ namespace Pulsar4X.ECSLib
             Faction = factionEntity;
             DetectedEntity = detectedEntity;
             LastDetection = atDate;
-            factionEntity.GetDataBlob<FactionInfoDB>().SensorEntites.Add(detectedEntity.Guid, SensorEntityFactory.UpdateSensorContact(factionEntity, this));
+
+
         }
 
         public override object Clone()
@@ -41,7 +42,7 @@ namespace Pulsar4X.ECSLib
         {
             hash = Misc.ValueHash(Faction, hash);
             hash = Misc.ValueHash(DetectedEntityID, hash);
-            hash = Misc.ValueHash(SensorEntity, hash);
+            hash = Misc.ValueHash(SensorContact, hash);
             hash = Misc.ValueHash(LastDetection, hash);
             hash = Misc.ValueHash(LatestDetectionQuality, hash);
             hash = Misc.ValueHash(HighestDetectionQuality, hash);
@@ -54,7 +55,7 @@ namespace Pulsar4X.ECSLib
             Faction = db.Faction;
             DetectedEntityID = db.DetectedEntityID;
             DetectedEntity = db.DetectedEntity;
-            SensorEntity = db.SensorEntity;
+            SensorContact = db.SensorContact;
             LastDetection = db.LastDetection;
             LatestDetectionQuality = db.LatestDetectionQuality;
             HighestDetectionQuality = db.HighestDetectionQuality;

@@ -58,7 +58,7 @@ namespace Pulsar4X.SDL2UI
 
         #endregion
 
-        internal OrbitIcon(ref EntityState entityState, UserOrbitSettings settings): base(entityState.Entity.GetDataBlob<PositionDB>())
+        internal OrbitIcon(EntityState entityState, UserOrbitSettings settings): base(entityState.Entity.GetDataBlob<PositionDB>())
         {
             entityState.OrbitIcon = this;
  

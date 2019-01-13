@@ -26,6 +26,7 @@ namespace Pulsar4X.SDL2UI
     internal class SystemMapRendering
     {
         GlobalUIState _state;
+        SystemSensorContacts _sensorMgr;
         Camera _camera;
         internal IntPtr windowPtr;
         internal IntPtr surfacePtr; 
@@ -70,14 +71,19 @@ namespace Pulsar4X.SDL2UI
             SysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
             _state.CurrentSystemDateTime = SysMap.SystemSubpulse.SystemLocalDateTime;
             _state.ActiveSystem = SysMap.StarSystem;
-
+            _sensorMgr = SysMap.StarSystem.FactionSensorManagers[_faction.Guid];
             foreach (var entityItem in SysMap.IconableEntitys)
             {
                 AddIconable(entityItem);
             }
+            foreach (var sensorContact in _sensorMgr.GetAllContacts())
+            {
+                AddIconable(sensorContact.ActualEntity);
+            }
             _state.LastClickedEntity = _state.MapRendering.IconEntityStates.Values.ElementAt(0);
 
         }
+
 
         void AddIconable(Entity entityItem)
         {
@@ -85,7 +91,7 @@ namespace Pulsar4X.SDL2UI
 
             if (entityItem.HasDataBlob<NameDB>())
             {
-                _nameIcons.TryAdd(entityItem.Guid, new NameIcon(ref entityState, _state));
+                _nameIcons.TryAdd(entityItem.Guid, new NameIcon(entityState, _state));
             }
 
 
@@ -94,7 +100,7 @@ namespace Pulsar4X.SDL2UI
                 var orbitDB = entityItem.GetDataBlob<OrbitDB>();
                 if (!orbitDB.IsStationary)
                 {
-                    OrbitIcon orbit = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
+                    OrbitIcon orbit = new OrbitIcon(entityState, _state.UserOrbitSettings);
                     _orbitRings.TryAdd(entityItem.Guid, orbit);
 
                 }
@@ -204,7 +210,7 @@ namespace Pulsar4X.SDL2UI
                             else
                                 entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
                             
-                            _orbitRings[changeData.Entity.Guid] = new OrbitIcon(ref entityState, _state.UserOrbitSettings);
+                            _orbitRings[changeData.Entity.Guid] = new OrbitIcon(entityState, _state.UserOrbitSettings);
                         
                         }
                     }

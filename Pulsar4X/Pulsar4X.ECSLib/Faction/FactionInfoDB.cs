@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// stores sensor contacts for the entire faction, when a contact is created it gets added here. 
         /// </summary>
-        internal Dictionary<Guid, Entity> SensorEntites = new Dictionary<Guid, Entity>();
+        internal Dictionary<Guid, SensorContact> SensorContacts = new Dictionary<Guid, SensorContact>();
 
 
         public FactionInfoDB() : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() ) { }

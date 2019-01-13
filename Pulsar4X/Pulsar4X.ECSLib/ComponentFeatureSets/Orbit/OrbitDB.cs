@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    public class OrbitDB : TreeHierarchyDB, ISensorCloneMethod, IGetValuesHash
+    public class OrbitDB : TreeHierarchyDB, IGetValuesHash
     {
         /// <summary>
         /// Semimajor Axis of orbit stored in AU.
@@ -321,30 +321,7 @@ namespace Pulsar4X.ECSLib
 
         #region ISensorCloneInterface
 
-        public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
-        {
-            OrbitDB clone;
-            if (this.Parent != null)
-            {
-                Entity cloneParent;
-                if (this.Parent.HasDataBlob<SensorInfoDB>())
-                    cloneParent = this.Parent;
-                else
-                {
-                    if (sensorInfo.Faction.GetDataBlob<FactionInfoDB>().SensorEntites.ContainsKey(this.Parent.Guid))
-                        cloneParent = sensorInfo.Faction.GetDataBlob<FactionInfoDB>().SensorEntites[this.Parent.Guid];
-                    else
-                    {
-                        SensorInfoDB parentSensorInfo = new SensorInfoDB(sensorInfo.Faction, this.Parent, sensorInfo.LastDetection);
-                        cloneParent = SensorEntityFactory.UpdateSensorContact(sensorInfo.Faction, parentSensorInfo);
-                    }
-                }
-                clone = new OrbitDB(this, sensorInfo, cloneParent);
-            }
-            else
-                clone = new OrbitDB(this, sensorInfo, null); //the root sun will not have an orbitDB parent. 
-            return clone; 
-        }
+
 
         public void SensorUpdate(SensorInfoDB sensorInfo)
         {

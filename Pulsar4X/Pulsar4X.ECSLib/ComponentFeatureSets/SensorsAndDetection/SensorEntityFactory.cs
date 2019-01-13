@@ -8,32 +8,34 @@ namespace Pulsar4X.ECSLib
     {
 
 
-        internal static Entity UpdateSensorContact(Entity detectingFaction, SensorInfoDB sensorInfo)
+        internal static SensorContact UpdateSensorContact(Entity detectingFaction, SensorInfoDB sensorInfo)
         {
             Entity detectedEntity = sensorInfo.DetectedEntity;
 
-            if (sensorInfo.SensorEntity == null)
+            if (sensorInfo.SensorContact == null)
             {
                  
-
+                //if()
                 List<BaseDataBlob> datablobs = new List<BaseDataBlob>(){                    
                     sensorInfo,
                     SetPositionClone(sensorInfo),               
                     };
-                sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager, detectingFaction.Guid, datablobs);
-                detectingFaction.GetDataBlob<FactionOwnerDB>().SetOwned(sensorInfo.SensorEntity);
+                //sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager.FactionSensorManagers[detectingFaction.Guid], detectingFaction.Guid, datablobs);
+                var pos = SetPositionClone(sensorInfo);
+
+                //detectingFaction.GetDataBlob<FactionOwnerDB>().SetOwned(sensorInfo.SensorContact);
             }
 
             foreach (ISensorCloneMethod db in sensorInfo.DetectedEntity.DataBlobs.OfType<ISensorCloneMethod>())
             {
-
+                /*
                 int typeIndex1 = EntityManager.DataBlobTypes[db.GetType()];
                 int typeIndex;
                 EntityManager.TryGetTypeIndex(db.GetType(), out typeIndex);
-                if (!sensorInfo.SensorEntity.HasDataBlob(typeIndex)) 
+                if (!sensorInfo.SensorContact.HasDataBlob(typeIndex)) 
                 {
                     var cloned = db.SensorClone(sensorInfo);
-                    sensorInfo.SensorEntity.SetDataBlob(cloned);  
+                    sensorInfo.SensorContact.SetDataBlob(cloned);  
                 }
                 else
                 {
@@ -41,7 +43,7 @@ namespace Pulsar4X.ECSLib
                     db.SensorUpdate(sensorInfo);    
                     //TODO: Networking: we need to send this DB to any listning network clients since it's a change that they wont(and shouldn't) know how to calculate on thier own. 
                     //TODO: Networking: write an EntityChangeListner to handle serverside DB change notification. 
-                }
+                }*/
             }
 
 
@@ -50,13 +52,13 @@ namespace Pulsar4X.ECSLib
             //if (sensorInfo.DetectedEntity.HasDataBlob<OrbitDB>())
             //{ SetOrbitClone(detectedEntity.GetDataBlob<OrbitDB>(), sensorInfo); }
 
-            return sensorInfo.SensorEntity;        
+            return sensorInfo.SensorContact;        
         }
 
-        private static PositionDB SetPositionClone( SensorInfoDB sensorInfo)
+        private static SensorPositionDB SetPositionClone( SensorInfoDB sensorInfo)
         {
             PositionDB position = sensorInfo.DetectedEntity.GetDataBlob<PositionDB>();
-            PositionDB sensorEntityPosition = GenericClone<PositionDB>(position, sensorInfo);
+            SensorPositionDB sensorEntityPosition = new SensorPositionDB(position);
             //tweak add some random noise depending on quality; 
             return sensorEntityPosition;
 
