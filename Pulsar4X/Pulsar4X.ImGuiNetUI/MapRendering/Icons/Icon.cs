@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public class Icon : IDrawData
     {
-        protected ECSLib.PositionDB _positionDB;
+        protected ECSLib.IPosition _positionDB;
         protected ECSLib.Vector4 _worldPosition;
         public ECSLib.Vector4 WorldPosition
         {
@@ -51,7 +51,7 @@ namespace Pulsar4X.SDL2UI
         public float Scale = 1;
 
 
-        public Icon(ECSLib.PositionDB positionDB)
+        public Icon(ECSLib.IPosition positionDB)
         {
             _positionDB = positionDB;
             positionByDB = true;

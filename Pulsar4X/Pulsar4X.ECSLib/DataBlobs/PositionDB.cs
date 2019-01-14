@@ -196,7 +196,7 @@ namespace Pulsar4X.ECSLib
         /// Static function to find the distance in AU between two positions.
         /// </summary>
         /// <returns>Distance between posA and posB.</returns>
-        public static double GetDistanceBetween(PositionDB posA, PositionDB posB)
+        public static double GetDistanceBetween(IPosition posA, IPosition posB)
         {
             return (posA.AbsolutePosition_AU - posB.AbsolutePosition_AU).Length();
         }
@@ -209,7 +209,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Instance function for those who don't like static functions. In AU
         /// </summary>
-        public double GetDistanceTo(PositionDB otherPos)
+        public double GetDistanceTo(IPosition otherPos)
         {
             return GetDistanceBetween(this, otherPos);
         }

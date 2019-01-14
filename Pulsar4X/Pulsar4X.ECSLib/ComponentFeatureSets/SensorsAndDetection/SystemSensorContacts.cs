@@ -31,7 +31,15 @@ namespace Pulsar4X.ECSLib
             var factionInfoDB = factionEntity.GetDataBlob<FactionInfoDB>();
             if (!factionInfoDB.SensorContacts.ContainsKey(actualEntity.Guid))
                 factionInfoDB.SensorContacts.Add(actualEntity.Guid, this);
+            actualEntity.ChangeEvent += ActualEntity_ChangeEvent;
+        }
 
+        void ActualEntity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        {
+            if(changeType == EntityChangeData.EntityChangeType.EntityRemoved)
+            {
+                Position.GetDataFrom = DataFrom.Memory; 
+            }
         }
 
     }
@@ -50,7 +58,7 @@ namespace Pulsar4X.ECSLib
         {
             ParentManager = parentManager;
             FactionEntity = faction;
-            parentManager.FactionSensorManagers.Add(faction.Guid, this);
+            parentManager.FactionSensorContacts.Add(faction.Guid, this);
         }
 
         public bool SensorContactExists(Guid actualEntityGuid)
@@ -66,9 +74,18 @@ namespace Pulsar4X.ECSLib
         {
             _sensorContactsByActualGuid.Add(sensorContact.ActualEntityGuid, sensorContact);
         }
+        internal void RemoveContact(Guid ActualEntityGuid)
+        {
+            if(_sensorContactsByActualGuid.ContainsKey(ActualEntityGuid))
+                _sensorContactsByActualGuid.Remove(ActualEntityGuid); 
+        }
         public List<SensorContact> GetAllContacts()
         {
             return _sensorContactsByActualGuid.Values.ToList();
+        }
+        public List<Guid> GetAllContactGuids()
+        {
+            return _sensorContactsByActualGuid.Keys.ToList();
         }
     }
 }

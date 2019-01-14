@@ -22,10 +22,10 @@ namespace Pulsar4X.ECSLib
             var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
 
             SystemSensorContacts sensorMgr;
-            if (!manager.FactionSensorManagers.ContainsKey(entity.FactionOwner))
+            if (!manager.FactionSensorContacts.ContainsKey(entity.FactionOwner))
                 sensorMgr = new SystemSensorContacts(manager, faction);
             else 
-                sensorMgr = manager.FactionSensorManagers[entity.FactionOwner];
+                sensorMgr = manager.FactionSensorContacts[entity.FactionOwner];
 
             foreach (var detectableEntity in detectableEntitys)
             {

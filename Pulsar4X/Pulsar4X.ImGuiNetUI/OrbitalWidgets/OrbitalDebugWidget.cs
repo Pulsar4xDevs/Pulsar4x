@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
             if(_orbitalDebugWindow == null)
                 _orbitalDebugWindow = new OrbitalDebugWindow(entityState); 
             
-            if (_orbitalDebugWindow._debugWidget.EntityGuid != entityState.OrbitIcon.BodyPositionDB.OwningEntity.Guid)
+            if (_orbitalDebugWindow._debugWidget.EntityGuid != entityState.Entity.Guid)
                 _orbitalDebugWindow = new OrbitalDebugWindow(entityState);
 
             return _orbitalDebugWindow;
@@ -211,7 +211,7 @@ namespace Pulsar4X.SDL2UI
             //double x2 = (x1 * Math.Cos(_loP)) - (y1 * Math.Sin(_loP));
             //double y2 = (x1 * Math.Sin(_loP)) + (y1 * Math.Cos(_loP));
 
-            EntityGuid = orbitIcon.BodyPositionDB.OwningEntity.Guid;
+            EntityGuid = entityState.Entity.Guid;
 
 
             _loP = orbitIcon._orbitAngleRadians;

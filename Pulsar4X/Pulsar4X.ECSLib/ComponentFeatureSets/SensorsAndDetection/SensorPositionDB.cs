@@ -17,7 +17,7 @@
                 if (GetDataFrom == DataFrom.Sensors)
                     return ActualEntityPositionDB.AbsolutePosition_AU + AcuracyOffset;
                 else
-                    return ParentPositionDB.AbsolutePosition_AU + MemoryRalitivePosition;
+                    return ParentPositionDB.AbsolutePosition_AU + MemoryRalitivePosition; 
             }
         }
 
@@ -37,6 +37,8 @@
         public SensorPositionDB(PositionDB actualEntityPosition, DataFrom dataFrom = DataFrom.Parent)
         {
             ActualEntityPositionDB = actualEntityPosition;
+            //if(actualEntityPosition.ParentDB != null)
+            ParentPositionDB = (PositionDB)actualEntityPosition.ParentDB;
             GetDataFrom = DataFrom.Parent; 
         }
 

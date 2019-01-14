@@ -56,7 +56,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// this is used to marshal events to the UI thread. 
         /// </summary>
-        internal SynchronizationContext SyncContext { get; private set; }
+        public SynchronizationContext SyncContext { get; private set; }
 
         [PublicAPI]
         [JsonProperty]

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -21,7 +22,7 @@ namespace Pulsar4X.SDL2UI
         Vector2 _selectableBtnSize = new Vector2(100, 18);
 
         Dictionary<Guid, string> _systemEntityNames = new Dictionary<Guid, string>();
-        Dictionary<Guid, Entity> _systemEntites = new Dictionary<Guid, Entity>();
+        Dictionary<Guid, SensorContact> _sensorContacts = new Dictionary<Guid, SensorContact>();
 
         private WeaponTargetingControl(EntityState entity)
         {
@@ -42,6 +43,7 @@ namespace Pulsar4X.SDL2UI
             }
             var instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
             instance.SetOrderEntity(entity);
+            
             return instance;
         }
 
@@ -52,7 +54,7 @@ namespace Pulsar4X.SDL2UI
             _weaponNames = new Dictionary<Guid, string>();
             _unAssignedWeapons = new List<Guid>();
             _systemEntityNames = new Dictionary<Guid, string>();
-            _systemEntites = new Dictionary<Guid, Entity>();
+            _sensorContacts = new Dictionary<Guid, SensorContact>();
             for (int fcInstanceIndex = 0; fcInstanceIndex < _shipFCDB.FireControlInsances.Count; fcInstanceIndex++)
             {
                 var fireControlInstance = _shipFCDB.FireControlComponents[fcInstanceIndex].GetDataBlob<ComponentInstanceInfoDB>();
@@ -66,6 +68,14 @@ namespace Pulsar4X.SDL2UI
                 if (weaponInstanace.OwningEntity.GetDataBlob<WeaponInstanceStateDB>().FireControl == null)
                     _unAssignedWeapons.Add(weaponInstanace.OwningEntity.Guid);
             }
+            foreach (var item in _state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContacts())
+            {
+                var entityItem = item.ActualEntity;
+                string name = entityItem.GetDataBlob<NameDB>().GetName(_state.Faction);
+                _systemEntityNames.Add(item.ActualEntityGuid, name);
+                _sensorContacts.Add(item.ActualEntityGuid, item);
+            }
+            /*
             foreach (var item in _state.FactionUIState.GetEntitiesForSystem(_orderingEntity.Manager))
             {
                 if (item.HasDataBlob<NameDB>() && item.HasDataBlob<PositionDB>())
@@ -75,8 +85,38 @@ namespace Pulsar4X.SDL2UI
                     _systemEntites.Add(item.Guid, item);
 
                 }
+            }*/
+
+        }
+
+        internal void OnPhysicsUpdate()
+        {
+            var contacts = _state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContacts();
+
+            HashSet<Guid> contacs2 = new HashSet<Guid>(_state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContactGuids());
+
+            List<Guid> contactsToRemove = new List<Guid>();
+            foreach (var contact in _sensorContacts)
+            {
+                if (!contacs2.Contains(contact.Key))
+                    contactsToRemove.Add(contact.Key);
             }
 
+            foreach (var contactGuid in contactsToRemove)
+            {
+                _sensorContacts.Remove(contactGuid);
+            }
+
+            foreach (var item in contacts)
+            {
+                if (!_sensorContacts.ContainsKey(item.ActualEntityGuid))
+                {
+                    var entityItem = item.ActualEntity;
+                    string name = entityItem.GetDataBlob<NameDB>().GetName(_state.Faction);
+                    _systemEntityNames.Add(item.ActualEntityGuid, name);
+                    _sensorContacts.Add(item.ActualEntityGuid, item); 
+                }
+            }
         }
 
         internal override void Display()
@@ -198,10 +238,10 @@ namespace Pulsar4X.SDL2UI
                         ImGui.BeginGroup();
                         {
                             ImGui.Text("Range in AU");
-                            foreach (var item in _systemEntityNames)
+                            foreach (var item in _sensorContacts)
                             {
-                                Entity targetEntity = _systemEntites[item.Key];
-                                double distance = _orderingEntity.GetDataBlob<PositionDB>().GetDistanceTo(targetEntity.GetDataBlob<PositionDB>());
+                                var targetEntity = _sensorContacts[item.Key];
+                                double distance = _orderingEntity.GetDataBlob<PositionDB>().GetDistanceTo(targetEntity.Position);
                                 ImGui.Text(distance.ToString());
                             }
 

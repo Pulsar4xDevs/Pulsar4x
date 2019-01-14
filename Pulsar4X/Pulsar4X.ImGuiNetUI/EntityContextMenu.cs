@@ -10,10 +10,11 @@ namespace Pulsar4X.SDL2UI
         public Entity Entity;
         public string Name;
 
+        public IPosition Position;
         public NameIcon NameIcon;
         public OrbitIcon OrbitIcon;
         public OrbitOrderWiget DebugOrbitOrder;
-
+        public bool IsDestroyed = false;
         public Dictionary<Type,BaseDataBlob> DataBlobs = new Dictionary<Type,BaseDataBlob>();
 
         public CommandReferences CmdRef;
@@ -25,8 +26,18 @@ namespace Pulsar4X.SDL2UI
             {
                 DataBlobs.Add(db.GetType(), db);
             }
+            Position = entity.GetDataBlob<PositionDB>();
             entity.ChangeEvent += On_entityChangeEvent;
         }
+
+        public EntityState(SensorContact sensorContact)
+        {
+            Entity = sensorContact.ActualEntity;
+            Position = sensorContact.Position;
+            //sensorContact.ActualEntity.ChangeEvent += on
+        }
+
+
 
         void On_entityChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
         {
@@ -37,6 +48,10 @@ namespace Pulsar4X.SDL2UI
                     break;
                 case EntityChangeData.EntityChangeType.DBRemoved:
                     DataBlobs.Remove(db.GetType());
+                    break;
+                case EntityChangeData.EntityChangeType.EntityRemoved:
+                    DataBlobs.Clear();
+                    IsDestroyed = true;
                     break;
                 default:
                     break;

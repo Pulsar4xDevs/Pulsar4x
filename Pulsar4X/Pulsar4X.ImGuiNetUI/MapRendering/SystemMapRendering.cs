@@ -71,7 +71,7 @@ namespace Pulsar4X.SDL2UI
             SysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
             _state.CurrentSystemDateTime = SysMap.SystemSubpulse.SystemLocalDateTime;
             _state.ActiveSystem = SysMap.StarSystem;
-            _sensorMgr = SysMap.StarSystem.FactionSensorManagers[_faction.Guid];
+            _sensorMgr = SysMap.StarSystem.FactionSensorContacts[_faction.Guid];
             foreach (var entityItem in SysMap.IconableEntitys)
             {
                 AddIconable(entityItem);
@@ -134,23 +134,35 @@ namespace Pulsar4X.SDL2UI
             IconEntityStates.Add(entityItem.Guid, entityState);
         }
 
-        void RemoveIconable(Entity entity)
+        void RemoveIconable(Guid entityGuid)
         {
-            if (IconEntityStates.ContainsKey(entity.Guid))
+            if (IconEntityStates.ContainsKey(entityGuid))
             {
                 //var entityState = IconEntityStates[entity.Guid];
-                IconEntityStates.Remove(entity.Guid);
+                IconEntityStates.Remove(entityGuid);
             }
-            _nameIcons.TryRemove(entity.Guid, out NameIcon nameIcon);
-            _entityIcons.TryRemove(entity.Guid, out IDrawData entityIcon);
-            _orbitRings.TryRemove(entity.Guid, out IDrawData orbitIcon);
+            _nameIcons.TryRemove(entityGuid, out NameIcon nameIcon);
+            _entityIcons.TryRemove(entityGuid, out IDrawData entityIcon);
+            _orbitRings.TryRemove(entityGuid, out IDrawData orbitIcon);
         }
 
         void OnSystemDateChange(DateTime newDate)
         {
             _state.CurrentSystemDateTime = newDate;
+
             if (SysMap.UpdatesReady)
                 HandleChanges();
+            var itemsToDelete = new List<EntityState>();
+            foreach (var item in IconEntityStates)
+            {
+                if (item.Value.IsDestroyed)
+                    itemsToDelete.Add(item.Value);
+            }
+            foreach (var item in itemsToDelete)
+            {
+                RemoveIconable(item.Entity.Guid);
+            }
+
             foreach (var icon in UIWidgets)
             {
                 icon.OnPhysicsUpdate();
@@ -195,7 +207,7 @@ namespace Pulsar4X.SDL2UI
 
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
                 {
-                    RemoveIconable(changeData.Entity);
+                    RemoveIconable(changeData.Entity.Guid);
                 }
 
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
@@ -323,7 +335,8 @@ namespace Pulsar4X.SDL2UI
 
         internal void Draw()
         {
-
+            if (_state.Game != null && _state.Game.SyncContext != System.Threading.SynchronizationContext.Current)
+                throw new Exception("Wrong ThreadException");
             byte oR, oG, oB, oA;
             SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
             SDL.SDL_BlendMode blendMode;
