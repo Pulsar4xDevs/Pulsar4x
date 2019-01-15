@@ -141,6 +141,12 @@ namespace Pulsar4X.SDL2UI
 
         public unsafe override void ImGuiLayout()
         {
+            foreach (var systemState in _state.StarSystemStates.Values)
+            {
+                systemState.SortItemsToBin();
+            }
+
+
             if (_state.ShowImgDbg)
             {
                 foreach (var kvp in _state.SDLImageDictionary)
@@ -192,6 +198,11 @@ namespace Pulsar4X.SDL2UI
 
             // Render ImGui on top of the rest.
             base.ImGuiRender();
+
+            foreach (var systemState in _state.StarSystemStates.Values)
+            {
+                systemState.EmptyRecycleBin();
+            }
         }
 
     }

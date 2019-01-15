@@ -21,12 +21,14 @@ namespace Pulsar4X.SDL2UI
         public byte Grn = 0;
         public byte Blu = 255;
         public byte MaxAlpha = 255;
-        public byte MinAlpha = 0; 
+        public byte MinAlpha = 0;
     }
+
     internal class SystemMapRendering
     {
         GlobalUIState _state;
         SystemSensorContacts _sensorMgr;
+        SystemState _sysState;
         Camera _camera;
         internal IntPtr windowPtr;
         internal IntPtr surfacePtr; 
@@ -52,6 +54,7 @@ namespace Pulsar4X.SDL2UI
         internal SystemMapRendering(ImGuiSDL2CSWindow window, GlobalUIState state)
         {
             _state = state;
+
             _camera = _state.Camera;
             _window = window;
             windowPtr = window.Handle;
@@ -66,28 +69,34 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetSystem(FactionVM factionVM)
         {
+            if (_state.StarSystemStates.ContainsKey(factionVM.SystemMap.StarSystem.Guid))
+                _sysState = _state.StarSystemStates[factionVM.SystemMap.StarSystem.Guid];
+            else
+            {
+                _sysState = new SystemState(factionVM.SystemMap.StarSystem, factionVM.FactionEntity);
+                _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
+            }
+
             SysMap = factionVM.SystemMap;
             _faction = _state.Faction;
             SysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
             _state.CurrentSystemDateTime = SysMap.SystemSubpulse.SystemLocalDateTime;
             _state.ActiveSystem = SysMap.StarSystem;
             _sensorMgr = SysMap.StarSystem.FactionSensorContacts[_faction.Guid];
-            foreach (var entityItem in SysMap.IconableEntitys)
+
+            foreach (var entityItem in _sysState.EntityStates.Values)
             {
                 AddIconable(entityItem);
             }
-            foreach (var sensorContact in _sensorMgr.GetAllContacts())
-            {
-                AddIconable(sensorContact.ActualEntity);
-            }
+
             _state.LastClickedEntity = _state.MapRendering.IconEntityStates.Values.ElementAt(0);
 
         }
 
 
-        void AddIconable(Entity entityItem)
+        void AddIconable(EntityState entityState)
         {
-            var entityState = new EntityState(entityItem) { Name = "Unknown" };
+            var entityItem = entityState.Entity;
 
             if (entityItem.HasDataBlob<NameDB>())
             {
@@ -150,6 +159,7 @@ namespace Pulsar4X.SDL2UI
         {
             _state.CurrentSystemDateTime = newDate;
 
+            /*
             if (SysMap.UpdatesReady)
                 HandleChanges();
             var itemsToDelete = new List<EntityState>();
@@ -162,6 +172,11 @@ namespace Pulsar4X.SDL2UI
             {
                 RemoveIconable(item.Entity.Guid);
             }
+            */
+
+
+
+
 
             foreach (var icon in UIWidgets)
             {
@@ -195,6 +210,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        /*
         void HandleChanges()
         {
             var updates = SysMap.GetUpdates();
@@ -202,7 +218,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if(changeData.ChangeType == EntityChangeData.EntityChangeType.EntityAdded)
                 {
-                    AddIconable(changeData.Entity);              
+                    //AddIconable(changeData.Entity);              
                 }
 
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
@@ -258,7 +274,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
-
+        */
 
         public void TextIconsDistribute()
         {
@@ -335,8 +351,20 @@ namespace Pulsar4X.SDL2UI
 
         internal void Draw()
         {
-            if (_state.Game != null && _state.Game.SyncContext != System.Threading.SynchronizationContext.Current)
-                throw new Exception("Wrong ThreadException");
+            if (_sysState != null)
+            {
+                foreach (var entityGuid in _sysState.EntitiesAdded)
+                {
+                    AddIconable(_sysState.EntityStates[entityGuid]);
+                }
+
+                foreach (var item in _sysState.EntitysToBin)
+                {
+                    RemoveIconable(item);
+                }
+            }
+
+
             byte oR, oG, oB, oA;
             SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
             SDL.SDL_BlendMode blendMode;
