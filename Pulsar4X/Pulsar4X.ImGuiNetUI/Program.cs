@@ -145,7 +145,7 @@ namespace Pulsar4X.SDL2UI
         {
             foreach (var systemState in _state.StarSystemStates.Values)
             {
-                systemState.SortItemsToBin();
+                systemState.PreFrameSetup();
             }
 
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
@@ -158,7 +158,7 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var systemState in _state.StarSystemStates.Values)
             {
-                systemState.EmptyRecycleBin();
+                systemState.PostFrameCleanup();
             }
         }
 

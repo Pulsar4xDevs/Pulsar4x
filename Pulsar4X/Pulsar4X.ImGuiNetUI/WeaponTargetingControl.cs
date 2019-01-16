@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
     public class WeaponTargetingControl : PulsarGuiWindow
     {
         Entity _orderingEntity;
-
+        SystemState _sysState;
 
         Dictionary<Guid, string> _weaponNames = new Dictionary<Guid, string>();
         List<Guid> _unAssignedWeapons = new List<Guid>();
@@ -43,7 +43,7 @@ namespace Pulsar4X.SDL2UI
             }
             var instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
             instance.SetOrderEntity(entity);
-            
+            instance._sysState = _state.StarSystemStates[_state.ActiveSystem.Guid];
             return instance;
         }
 
@@ -91,8 +91,8 @@ namespace Pulsar4X.SDL2UI
 
         internal void OnPhysicsUpdate()
         {
-            var contacts = _state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContacts();
 
+            var contacts = _sysState.StarSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContacts();
             HashSet<Guid> contacs2 = new HashSet<Guid>(_state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContactGuids());
 
             List<Guid> contactsToRemove = new List<Guid>();

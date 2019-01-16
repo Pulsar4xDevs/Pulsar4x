@@ -39,7 +39,7 @@ namespace Pulsar4X.SDL2UI
 
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            EntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, listnerblobs);
+            EntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, new List<int>());//, listnerblobs);
             _changeListner = changeListner;
 
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
@@ -81,7 +81,7 @@ namespace Pulsar4X.SDL2UI
         /// Populates the EntitesToBin list. 
         /// Call this before any UI work done.
         /// </summary>
-        public void SortItemsToBin()
+        public void PreFrameSetup()
         {
             HandleUpdates();
             foreach (var item in EntityStates.Values)
@@ -99,7 +99,7 @@ namespace Pulsar4X.SDL2UI
         /// clears the EntitysToBin list.
         /// Call this afer all UI work is done. (each ui object needs to handle it's own cleanup using EntitesToBin list as a reference before this is called)
         /// </summary>
-        public void EmptyRecycleBin()
+        public void PostFrameCleanup()
         {
             foreach (var itemGuid in EntitysToBin)
             {
@@ -107,6 +107,10 @@ namespace Pulsar4X.SDL2UI
             }
             EntitysToBin = new List<Guid>();
             EntitiesAdded = new List<Guid>();
+            foreach (var item in EntityStates.Values)
+            {
+                item.PostFrameCleanup();
+            }
         }
     }
 }
