@@ -1,6 +1,7 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -15,17 +16,21 @@ namespace Pulsar4X.SDL2UI
     public class SystemState
     {
         internal StarSystem StarSystem;
-        SystemSensorContacts SystemContacts;
+        internal SystemSensorContacts SystemContacts;
+        ConcurrentQueue<EntityChangeData> _sensorChanges;
+        internal List<EntityChangeData> SensorChanges = new List<EntityChangeData>();
         ManagerSubPulse PulseMgr;
         EntityChangeListner _changeListner;
         public List<Guid> EntitysToBin = new List<Guid>();
         public List<Guid> EntitiesAdded = new List<Guid>();
+        public List<EntityChangeData> SystemChanges = new List<EntityChangeData>();
         public Dictionary<Guid, EntityState> EntityStates = new Dictionary<Guid, EntityState>();
 
         public SystemState(StarSystem system, Entity faction)
         {
             StarSystem = system;
             SystemContacts = system.FactionSensorContacts[faction.Guid];
+            _sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
 
             foreach (Entity entityItem in StarSystem.GetEntitiesByFaction(faction.Guid))
@@ -51,15 +56,13 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        void HandleUpdates()
+        void HandleUpdates(EntityChangeData change)
         {
-            while (_changeListner.TryDequeue(out EntityChangeData change))
-            {
 
                 switch (change.ChangeType)
                 {
                     case EntityChangeData.EntityChangeType.EntityAdded:
-                        if (change.Entity.HasDataBlob<PositionDB>())
+                        if (change.Entity.IsValid && change.Entity.HasDataBlob<PositionDB>())
                         {
                             var entityState = new EntityState(change.Entity) { Name = "Unknown" };
                             EntityStates.Add(change.Entity.Guid, entityState);
@@ -73,17 +76,26 @@ namespace Pulsar4X.SDL2UI
                         break;
                 }
 
-            }
-
         }
 
         /// <summary>
-        /// Populates the EntitesToBin list. 
+        /// Populates the EntitesToBin list and changes. 
         /// Call this before any UI work done.
         /// </summary>
         public void PreFrameSetup()
         {
-            HandleUpdates();
+            while (_changeListner.TryDequeue(out EntityChangeData change))
+            {
+                SystemChanges.Add(change);
+                HandleUpdates(change);
+            }
+            while (_sensorChanges.TryDequeue(out EntityChangeData change))
+            {
+                SensorChanges.Add(change);
+                HandleUpdates(change);
+            }
+
+
             foreach (var item in EntityStates.Values)
             {
                 if (item.IsDestroyed) //items get flagged via an event triggered by worker threads. 
@@ -107,6 +119,8 @@ namespace Pulsar4X.SDL2UI
             }
             EntitysToBin = new List<Guid>();
             EntitiesAdded = new List<Guid>();
+            SensorChanges = new List<EntityChangeData>();
+            SystemChanges = new List<EntityChangeData>();
             foreach (var item in EntityStates.Values)
             {
                 item.PostFrameCleanup();

@@ -28,6 +28,7 @@ namespace Pulsar4X.SDL2UI
     {
         GlobalUIState _state;
         SystemSensorContacts _sensorMgr;
+        ConcurrentQueue<EntityChangeData> _sensorChanges;
         SystemState _sysState;
         Camera _camera;
         internal IntPtr windowPtr;
@@ -78,7 +79,7 @@ namespace Pulsar4X.SDL2UI
             _state.CurrentSystemDateTime = SysMap.SystemSubpulse.SystemLocalDateTime;
             _state.ActiveSystem = SysMap.StarSystem;
             _sensorMgr = SysMap.StarSystem.FactionSensorContacts[_faction.Guid];
-
+            _sensorChanges = _sensorMgr.Changes.Subscribe();
             foreach (var entityItem in _sysState.EntityStates.Values)
             {
                 AddIconable(entityItem);
@@ -150,20 +151,6 @@ namespace Pulsar4X.SDL2UI
         {
             _state.CurrentSystemDateTime = newDate;
 
-            /*
-            if (SysMap.UpdatesReady)
-                HandleChanges();
-            var itemsToDelete = new List<EntityState>();
-            foreach (var item in IconEntityStates)
-            {
-                if (item.Value.IsDestroyed)
-                    itemsToDelete.Add(item.Value);
-            }
-            foreach (var item in itemsToDelete)
-            {
-                RemoveIconable(item.Entity.Guid);
-            }
-            */
 
 
 
@@ -395,6 +382,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void Draw()
         {
+
             if (_sysState != null)
             {
                 foreach (var entityGuid in _sysState.EntitiesAdded)
@@ -413,7 +401,6 @@ namespace Pulsar4X.SDL2UI
                     RemoveIconable(item);
                 }
             }
-
 
             byte oR, oG, oB, oA;
             SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);

@@ -4,6 +4,7 @@ using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -11,6 +12,7 @@ namespace Pulsar4X.SDL2UI
     {
         Entity _orderingEntity;
         SystemState _sysState;
+
 
         Dictionary<Guid, string> _weaponNames = new Dictionary<Guid, string>();
         List<Guid> _unAssignedWeapons = new List<Guid>();
@@ -37,13 +39,18 @@ namespace Pulsar4X.SDL2UI
 
         internal static WeaponTargetingControl GetInstance(EntityState entity)
         {
+            WeaponTargetingControl instance;
             if (!_state.LoadedWindows.ContainsKey(typeof(WeaponTargetingControl)))
             {
-                return new WeaponTargetingControl(entity);
+                instance = new WeaponTargetingControl(entity);
             }
-            var instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
+            else
+                instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
             instance.SetOrderEntity(entity);
             instance._sysState = _state.StarSystemStates[_state.ActiveSystem.Guid];
+            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
+
+
             return instance;
         }
 
@@ -89,38 +96,66 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
+        {
+            OnPhysicsUpdate();
+        }
+
+
         internal void OnPhysicsUpdate()
         {
 
-            var contacts = _sysState.StarSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContacts();
-            HashSet<Guid> contacs2 = new HashSet<Guid>(_state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContactGuids());
 
-            List<Guid> contactsToRemove = new List<Guid>();
-            foreach (var contact in _sensorContacts)
+
+        }
+
+        void PreFrameSetup()
+        {
+            foreach (var changeData in _sysState.SensorChanges)
             {
-                if (!contacs2.Contains(contact.Key))
-                    contactsToRemove.Add(contact.Key);
+                HandleChangeData(changeData);
+            }
+            foreach (var changeData in _sysState.SystemChanges)
+            {
+                HandleChangeData(changeData);
             }
 
-            foreach (var contactGuid in contactsToRemove)
+            //Code below shouldn't be neccisary but for some reason,
+            //the code above was not catching all the removed objects.
+            foreach (var item in _sysState.EntitysToBin) 
             {
-                _sensorContacts.Remove(contactGuid);
+                if (_sensorContacts.ContainsKey(item))
+                    _sensorContacts.Remove(item);
+                if (_systemEntityNames.ContainsKey(item))
+                    _systemEntityNames.Remove(item);
             }
 
-            foreach (var item in contacts)
+        }
+
+        void HandleChangeData(EntityChangeData changeData)
+        {
+            if (changeData.Entity.IsValid)
             {
-                if (!_sensorContacts.ContainsKey(item.ActualEntityGuid))
+                switch (changeData.ChangeType)
                 {
-                    var entityItem = item.ActualEntity;
-                    string name = entityItem.GetDataBlob<NameDB>().GetName(_state.Faction);
-                    _systemEntityNames.Add(item.ActualEntityGuid, name);
-                    _sensorContacts.Add(item.ActualEntityGuid, item); 
+                    case EntityChangeData.EntityChangeType.EntityAdded:
+
+                        string name = changeData.Entity.GetDataBlob<NameDB>().GetName(_state.Faction);
+                        _systemEntityNames.Add(changeData.Entity.Guid, name);
+                        _sensorContacts[changeData.Entity.Guid] = _sysState.SystemContacts.GetSensorContact(changeData.Entity.Guid);
+                        break;
+                    case EntityChangeData.EntityChangeType.EntityRemoved:
+                        _systemEntityNames.Remove(changeData.Entity.Guid);
+                        _sensorContacts.Remove(changeData.Entity.Guid);
+                        break;
                 }
             }
         }
 
         internal override void Display()
         {
+            if (_sysState != null)
+                PreFrameSetup();
             if (IsActive)
             {
                 Vector2 size = new Vector2(200, 100);
@@ -250,7 +285,15 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
                 ImGui.End();
+                if (!IsActive)
+                    OnClose();
             }
+        }
+
+        void OnClose()
+        {
+            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent -= ManagerSubpulses_SystemDateChangedEvent;
+
         }
     }
 
