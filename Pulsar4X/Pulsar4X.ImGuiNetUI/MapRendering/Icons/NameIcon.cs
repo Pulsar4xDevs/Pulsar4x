@@ -23,7 +23,7 @@ namespace Pulsar4X.SDL2UI
         public ImVec2 ViewOffset { get; set; } = new ImVec2();
         public Rectangle ViewDisplayRect = new Rectangle(); 
 
-        public NameIcon(ref EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
+        public NameIcon(EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
             _state = state;
             _entityGuid = entityState.Entity.Guid;

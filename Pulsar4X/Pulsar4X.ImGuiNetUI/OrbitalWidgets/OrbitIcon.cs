@@ -26,8 +26,9 @@ namespace Pulsar4X.SDL2UI
     {
 
         #region Static properties
+        EntityManager _mgr;
         OrbitDB _orbitDB;
-        internal PositionDB BodyPositionDB;
+        internal IPosition BodyPositionDB;
         PointD _bodyRalitivePos;
         float _orbitEllipseMajor;
         internal float _orbitEllipseSemiMaj;
@@ -58,13 +59,13 @@ namespace Pulsar4X.SDL2UI
 
         #endregion
 
-        internal OrbitIcon(ref EntityState entityState, UserOrbitSettings settings): base(entityState.Entity.GetDataBlob<PositionDB>())
+        internal OrbitIcon(EntityState entityState, UserOrbitSettings settings): base(entityState.Entity.GetDataBlob<PositionDB>())
         {
             entityState.OrbitIcon = this;
- 
+            _mgr = entityState.Entity.Manager;
             _userSettings = settings;
             _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
-            BodyPositionDB = entityState.Entity.GetDataBlob<PositionDB>();
+            BodyPositionDB = entityState.Position; //entityState.Entity.GetDataBlob<PositionDB>();
             if (_orbitDB.Parent == null) //primary star
             {
                 _positionDB = BodyPositionDB;
@@ -188,7 +189,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             Vector4 pos1 = BodyPositionDB.AbsolutePosition_AU; //TODO this is the position we should be using, since it'll be faster, however it's sometimes not the same for some reason as the slow way we're getting it below.
-            Vector4 pos = OrbitProcessor.GetPosition_AU(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime);
+            Vector4 pos = OrbitProcessor.GetPosition_AU(_orbitDB, _mgr.ManagerSubpulses.SystemLocalDateTime);
             _bodyRalitivePos = new PointD() { X = pos.X, Y = pos.Y };
 
             double minDist = CalcDistance(_bodyRalitivePos, _points[_index]);

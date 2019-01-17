@@ -7,11 +7,14 @@ namespace Pulsar4X.ECSLib
 
     public static class SensorProcessorTools
     {
-        internal static void DetectEntites(Entity receverFaction, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
+        internal static void DetectEntites(SystemSensorContacts sensorMgr, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
         {
+            Entity receverFaction = sensorMgr.FactionEntity;
             //Entity receverFaction;// = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
             //detectableEntity.Manager.FindEntityByGuid(receverDB.OwningEntity.FactionOwner, out receverFaction);
-            var knownContacts = factionInfo.SensorEntites; //receverFaction.GetDataBlob<FactionInfoDB>().SensorEntites;
+            var knownContacts = factionInfo.SensorContacts; //receverFaction.GetDataBlob<FactionInfoDB>().SensorEntites;
+            var knownContacts1 = sensorMgr.GetAllContacts();
+            
 
             SensorProfileDB sensorProfile = detectableEntity.GetDataBlob<SensorProfileDB>();
 
@@ -37,9 +40,10 @@ namespace Pulsar4X.ECSLib
             SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)
             {
-                if (knownContacts.ContainsKey(detectableEntity.Guid))
+                if (sensorMgr.SensorContactExists(detectableEntity.Guid))
                 {
-                    sensorInfo = knownContacts[detectableEntity.Guid].GetDataBlob<SensorInfoDB>();
+                    //sensorInfo = knownContacts[detectableEntity.Guid].GetDataBlob<SensorInfoDB>();
+                    sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Guid).SensorInfo;
                     sensorInfo.LatestDetectionQuality = detectionValues;
                     sensorInfo.LastDetection = atDate;
                     if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)
@@ -51,7 +55,9 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    sensorInfo = new SensorInfoDB(receverFaction, detectableEntity, atDate);
+                    SensorContact contact = new SensorContact(receverFaction, detectableEntity, atDate);
+                    sensorMgr.AddContact(contact);
+
 
                     //knownContacts.Add(detectableEntity.Guid, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo)); moved this line to the SensorInfoDB constructor
                 }

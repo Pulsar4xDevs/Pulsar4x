@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
         //that way, a ship can have multiple different sensors which run at different intervals. 
         //I'll need to get the parent ship... or maybe just the systemfactionInfo to store the detected ships though.
         //having the ships      what they detect could be usefull info to display though. 
-        internal override void ProcessEntity(Entity entity, DateTime atDate)
+        internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
             EntityManager manager = entity.Manager;
             Entity faction;// = entity.GetDataBlob<OwnedDB>().OwnedByFaction;
@@ -20,6 +20,13 @@ namespace Pulsar4X.ECSLib
             FactionInfoDB factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
             var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
+
+            SystemSensorContacts sensorMgr;
+            if (!manager.FactionSensorContacts.ContainsKey(entity.FactionOwner))
+                sensorMgr = new SystemSensorContacts(manager, faction);
+            else 
+                sensorMgr = manager.FactionSensorContacts[entity.FactionOwner];
+
             foreach (var detectableEntity in detectableEntitys)
             {
                 //Entity detectableEntity = sensorProfile.OwningEntity;
@@ -32,7 +39,7 @@ namespace Pulsar4X.ECSLib
                         if (position == null) //then it's probilby a colony
                             position = entity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
 
-                        SensorProcessorTools.DetectEntites(faction, factionInfo,position, receverDB, detectableEntity, atDate);
+                        SensorProcessorTools.DetectEntites(sensorMgr, factionInfo,position, receverDB, detectableEntity, atDateTime);
                     }
                     else
                     {
@@ -46,13 +53,13 @@ namespace Pulsar4X.ECSLib
                     if (position == null) //then it's probilby a colony
                         position = entity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
 
-                    SensorProcessorTools.DetectEntites(faction, factionInfo, position, receverDB, detectableEntity, atDate);
+                    SensorProcessorTools.DetectEntites(sensorMgr, factionInfo, position, receverDB, detectableEntity, atDateTime);
                 }
             }
 
 
 
-            manager.ManagerSubpulses.AddEntityInterupt(atDate + TimeSpan.FromSeconds(receverDB.ScanTime), this.TypeName, entity);
+            manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(receverDB.ScanTime), this.TypeName, entity);
 
         }
     }

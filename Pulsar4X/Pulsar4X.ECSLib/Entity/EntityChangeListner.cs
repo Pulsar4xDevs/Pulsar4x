@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal bool HasUpdates()
+        public bool HasUpdates()
         {
             return (EntityChanges.Count > 0);
         }
@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
             EntityChanges.Enqueue(changeData);
         }
 
-        internal bool TryDequeue(out EntityChangeData changeData)
+        public bool TryDequeue(out EntityChangeData changeData)
         {
 
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
         /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.EntityChangeListnerDB"/> class.
         /// </summary>
         /// <param name="factionEntity">will listen for any entites added or removed that are owned by this entity</param>
-        internal EntityChangeListner(EntityManager manager, Entity factionEntity, List<int> datablobFilter) : base(manager)
+        public EntityChangeListner(EntityManager manager, Entity factionEntity, List<int> datablobFilter) : base(manager)
         {
             ListenForFaction = factionEntity;
             _ownerDB = ListenForFaction.GetDataBlob<FactionOwnerDB>();

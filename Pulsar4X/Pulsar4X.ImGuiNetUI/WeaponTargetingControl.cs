@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
+using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Pulsar4X.SDL2UI
 {
     public class WeaponTargetingControl : PulsarGuiWindow
     {
         Entity _orderingEntity;
+        SystemState _sysState;
 
 
         Dictionary<Guid, string> _weaponNames = new Dictionary<Guid, string>();
@@ -21,7 +24,7 @@ namespace Pulsar4X.SDL2UI
         Vector2 _selectableBtnSize = new Vector2(100, 18);
 
         Dictionary<Guid, string> _systemEntityNames = new Dictionary<Guid, string>();
-        Dictionary<Guid, Entity> _systemEntites = new Dictionary<Guid, Entity>();
+        Dictionary<Guid, SensorContact> _sensorContacts = new Dictionary<Guid, SensorContact>();
 
         private WeaponTargetingControl(EntityState entity)
         {
@@ -36,12 +39,18 @@ namespace Pulsar4X.SDL2UI
 
         internal static WeaponTargetingControl GetInstance(EntityState entity)
         {
+            WeaponTargetingControl instance;
             if (!_state.LoadedWindows.ContainsKey(typeof(WeaponTargetingControl)))
             {
-                return new WeaponTargetingControl(entity);
+                instance = new WeaponTargetingControl(entity);
             }
-            var instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
+            else
+                instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
             instance.SetOrderEntity(entity);
+            instance._sysState = _state.StarSystemStates[_state.ActiveSystem.Guid];
+            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
+
+
             return instance;
         }
 
@@ -52,7 +61,7 @@ namespace Pulsar4X.SDL2UI
             _weaponNames = new Dictionary<Guid, string>();
             _unAssignedWeapons = new List<Guid>();
             _systemEntityNames = new Dictionary<Guid, string>();
-            _systemEntites = new Dictionary<Guid, Entity>();
+            _sensorContacts = new Dictionary<Guid, SensorContact>();
             for (int fcInstanceIndex = 0; fcInstanceIndex < _shipFCDB.FireControlInsances.Count; fcInstanceIndex++)
             {
                 var fireControlInstance = _shipFCDB.FireControlComponents[fcInstanceIndex].GetDataBlob<ComponentInstanceInfoDB>();
@@ -66,6 +75,14 @@ namespace Pulsar4X.SDL2UI
                 if (weaponInstanace.OwningEntity.GetDataBlob<WeaponInstanceStateDB>().FireControl == null)
                     _unAssignedWeapons.Add(weaponInstanace.OwningEntity.Guid);
             }
+            foreach (var item in _state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContacts())
+            {
+                var entityItem = item.ActualEntity;
+                string name = entityItem.GetDataBlob<NameDB>().GetName(_state.Faction);
+                _systemEntityNames.Add(item.ActualEntityGuid, name);
+                _sensorContacts.Add(item.ActualEntityGuid, item);
+            }
+            /*
             foreach (var item in _state.FactionUIState.GetEntitiesForSystem(_orderingEntity.Manager))
             {
                 if (item.HasDataBlob<NameDB>() && item.HasDataBlob<PositionDB>())
@@ -75,12 +92,70 @@ namespace Pulsar4X.SDL2UI
                     _systemEntites.Add(item.Guid, item);
 
                 }
+            }*/
+
+        }
+
+        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
+        {
+            OnPhysicsUpdate();
+        }
+
+
+        internal void OnPhysicsUpdate()
+        {
+
+
+
+        }
+
+        void PreFrameSetup()
+        {
+            foreach (var changeData in _sysState.SensorChanges)
+            {
+                HandleChangeData(changeData);
+            }
+            foreach (var changeData in _sysState.SystemChanges)
+            {
+                HandleChangeData(changeData);
+            }
+
+            //Code below shouldn't be neccisary but for some reason,
+            //the code above was not catching all the removed objects.
+            foreach (var item in _sysState.EntitysToBin) 
+            {
+                if (_sensorContacts.ContainsKey(item))
+                    _sensorContacts.Remove(item);
+                if (_systemEntityNames.ContainsKey(item))
+                    _systemEntityNames.Remove(item);
             }
 
         }
 
+        void HandleChangeData(EntityChangeData changeData)
+        {
+            if (changeData.Entity.IsValid)
+            {
+                switch (changeData.ChangeType)
+                {
+                    case EntityChangeData.EntityChangeType.EntityAdded:
+
+                        string name = changeData.Entity.GetDataBlob<NameDB>().GetName(_state.Faction);
+                        _systemEntityNames.Add(changeData.Entity.Guid, name);
+                        _sensorContacts[changeData.Entity.Guid] = _sysState.SystemContacts.GetSensorContact(changeData.Entity.Guid);
+                        break;
+                    case EntityChangeData.EntityChangeType.EntityRemoved:
+                        _systemEntityNames.Remove(changeData.Entity.Guid);
+                        _sensorContacts.Remove(changeData.Entity.Guid);
+                        break;
+                }
+            }
+        }
+
         internal override void Display()
         {
+            if (_sysState != null)
+                PreFrameSetup();
             if (IsActive)
             {
                 Vector2 size = new Vector2(200, 100);
@@ -198,10 +273,10 @@ namespace Pulsar4X.SDL2UI
                         ImGui.BeginGroup();
                         {
                             ImGui.Text("Range in AU");
-                            foreach (var item in _systemEntityNames)
+                            foreach (var item in _sensorContacts)
                             {
-                                Entity targetEntity = _systemEntites[item.Key];
-                                double distance = _orderingEntity.GetDataBlob<PositionDB>().GetDistanceTo(targetEntity.GetDataBlob<PositionDB>());
+                                var targetEntity = _sensorContacts[item.Key];
+                                double distance = _orderingEntity.GetDataBlob<PositionDB>().GetDistanceTo(targetEntity.Position);
                                 ImGui.Text(distance.ToString());
                             }
 
@@ -210,7 +285,15 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
                 ImGui.End();
+                if (!IsActive)
+                    OnClose();
             }
+        }
+
+        void OnClose()
+        {
+            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent -= ManagerSubpulses_SystemDateChangedEvent;
+
         }
     }
 

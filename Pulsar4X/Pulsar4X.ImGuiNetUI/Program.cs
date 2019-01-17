@@ -139,6 +139,29 @@ namespace Pulsar4X.SDL2UI
             return true;
         }
 
+
+
+        public override void ImGuiRender()
+        {
+            foreach (var systemState in _state.StarSystemStates.Values)
+            {
+                systemState.PreFrameSetup();
+            }
+
+            GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
+            GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
+
+            _state.MapRendering.Draw();
+
+            // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
+            base.ImGuiRender();
+
+            foreach (var systemState in _state.StarSystemStates.Values)
+            {
+                systemState.PostFrameCleanup();
+            }
+        }
+
         public unsafe override void ImGuiLayout()
         {
             if (_state.ShowImgDbg)
@@ -174,24 +197,6 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
-        }
-
-
-        public override void ImGuiRender()
-        {
-            GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
-            GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
-
-
-            //var imgSize = new SDL.SDL_Rect() { x = 0, y = 0, h = 98, w = 273 };
-            //var txtr = (IntPtr)_state.img2;//(IntPtr)_state.SDLImageDictionary["Logo"];
-            //SDL.SDL_RenderCopy(_state.MapRendering.rendererPtr, txtr, ref imgSize, ref imgSize);
-
-
-            _state.MapRendering.Draw();
-
-            // Render ImGui on top of the rest.
-            base.ImGuiRender();
         }
 
     }

@@ -29,6 +29,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityContextMenu ContextMenu { get; set; }
         //internal IOrderWindow ActiveOrderWidow { get; set; }
         //internal DebugWindow Debug { get; set; }
+        internal Dictionary<Guid, SystemState> StarSystemStates = new Dictionary<Guid, SystemState>();
 
         internal Camera Camera;// = new Camera();
         internal ImGuiSDL2CSWindow ViewPort;
@@ -63,30 +64,7 @@ namespace Pulsar4X.SDL2UI
 
             MainMenuItems.GetInstance().IsActive = true;
 
-            //LoadedWindows.Add(MainMenu);
-            //NewGameOptions = new NewGameOptions(this);
-            //SettingsWindow = new SettingsWindow(this);
-            //ContextMenu = new EntityContextMenu(this);
-            //Debug = new DebugWindow(this);
 
-            //LoadedWindows.Add(SettingsWindow);
-            /*
-            IntPtr sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/PulsarLogo.bmp"));
-            IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-            SDLImageDictionary.Add("Logo", sdltexture);
-
-            sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/Play.bmp"));
-            sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-            SDLImageDictionary.Add("PlayImg", sdltexture);
-
-            sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/Pause.bmp"));
-            sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-            SDLImageDictionary.Add("PauseImg", sdltexture);
-
-            sdlSurface = SDL.SDL_LoadBMP(Path.GetFullPath("Resources/OneStep.bmp"));
-            sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-            SDLImageDictionary.Add("OneStepImg", sdltexture);
-*/
             LoadImg("Logo", "Resources/PulsarLogo.bmp");
             LoadImg("PlayImg", "Resources/Play.bmp");
             LoadImg("PauseImg", "Resources/Pause.bmp");
@@ -127,12 +105,12 @@ namespace Pulsar4X.SDL2UI
         internal void EntityClicked(Guid entityGuid, MouseButtons button)
         {
         
-            LastClickedEntity = MapRendering.IconEntityStates[entityGuid];
+            LastClickedEntity = StarSystemStates[ActiveSystem.Guid].EntityStates[entityGuid];
 
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
             if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(MapRendering.IconEntityStates[entityGuid], button);
+                ActiveWindow.EntityClicked(StarSystemStates[ActiveSystem.Guid].EntityStates[entityGuid], button);
             OnEntitySelected();
         }
 
@@ -146,6 +124,7 @@ namespace Pulsar4X.SDL2UI
         }
 
     }
+
 
     public abstract class PulsarGuiWindow
     {
