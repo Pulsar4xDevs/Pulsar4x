@@ -37,6 +37,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Vector4 TranslateExitPoint_AU { get; internal set; }
         [JsonProperty]
+        public float Heading_Radians { get; internal set; }
+        [JsonProperty]
         public DateTime EntryDateTime { get; internal set; }
         [JsonProperty]
         public DateTime PredictedExitTime { get; internal set; }
@@ -71,7 +73,7 @@ namespace Pulsar4X.ECSLib
         public TranslateMoveDB(Vector4 targetPosition_AU)
         {
             TranslateExitPoint_AU = targetPosition_AU;
-
+            Heading_Radians = (float)Math.Atan2(targetPosition_AU.Y, targetPosition_AU.X);
         }
 
         public TranslateMoveDB(TranslateMoveDB db)

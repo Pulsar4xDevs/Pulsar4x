@@ -49,7 +49,7 @@ namespace Pulsar4X.SDL2UI
         public Shape[] DrawShapes;
         //public bool ShapesScaleWithZoom = false; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings
         public float Scale = 1;
-
+        public float Heading = 0;
 
         public Icon(ECSLib.IPosition positionDB)
         {

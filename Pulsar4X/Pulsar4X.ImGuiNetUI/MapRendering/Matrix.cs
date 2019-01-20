@@ -35,6 +35,27 @@ namespace Pulsar4X.SDL2UI
             Y[1] = Y[1] * Math.Cos(radians);
         }
 
+        public static Matrix GetRotationMatrix(double radians)
+        {
+            Matrix matrix = new Matrix()
+            {
+                X = new double[2] {Math.Cos(radians) , Math.Sin(radians) },
+                Y = new double[2] {-Math.Sin(radians), Math.Cos(radians) }
+            };
+            return matrix;
+        }
+
+        public static Matrix operator *(Matrix matrixA, Matrix matrixB)
+        {
+            Matrix newMatrix = new Matrix();
+            newMatrix.X[0] = matrixA.X[0] * matrixB.X[0] + matrixA.X[1] * matrixB.Y[0];
+            newMatrix.X[1] = matrixA.X[0] * matrixB.X[1] + matrixA.X[1] * matrixB.Y[1];
+
+            newMatrix.Y[0] = matrixA.Y[0] * matrixB.X[0] + matrixA.Y[1] * matrixB.Y[0];
+            newMatrix.Y[1] = matrixA.Y[0] * matrixB.X[1] + matrixA.Y[1] * matrixB.Y[1];
+            return newMatrix;
+        }
+
         public SDL.SDL_Point Transform(double itemx, double itemy)
         {
 
@@ -51,6 +72,11 @@ namespace Pulsar4X.SDL2UI
 
 
             return newPoint;
+        }
+
+        public PointD TransformD(PointD point)
+        {
+            return TransformD(point.X, point.Y); 
         }
 
         public PointD TransformD(double itemx, double itemy)

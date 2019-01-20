@@ -9,13 +9,13 @@ namespace Pulsar4X.SDL2UI
     {
         ShipInfoDB _shipInfo;
         ComponentInstancesDB _componentInstances;
-
+        Entity _entity;
         public ShipIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _shipInfo = entity.GetDataBlob<ShipInfoDB>();
             _componentInstances = entity.GetDataBlob<ComponentInstancesDB>();
 
-
+            _entity = entity;
             BasicShape();
         }
 
@@ -53,7 +53,6 @@ namespace Pulsar4X.SDL2UI
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
             Shapes.Add(new Shape() { Points = points, Color = colour });
-
         }
         void Front(int width, int height, int offsetX, int offsetY) //crew 
         {
@@ -165,6 +164,51 @@ namespace Pulsar4X.SDL2UI
                 Shapes.Add(new Shape() { Color = colourbox, Points = CreatePrimitiveShapes.Rectangle(toffset, (int)(offsetY + boxHeight * 0.5), boxWidth, boxHeight, CreatePrimitiveShapes.PosFrom.Center) });
                 Shapes.Add(new Shape() { Color = colourCone, Points = CreatePrimitiveShapes.CreateArc(toffset, offsetY + boxHeight + coneHeight, (int)(boxWidth * 0.5), coneHeight, CreatePrimitiveShapes.QuarterCircle, CreatePrimitiveShapes.HalfCircle, 8) });
                 toffset += twidth;
+            }
+        }
+
+
+
+        public override void OnPhysicsUpdate()
+        {
+
+            DateTime atDateTime = _entity.Manager.ManagerSubpulses.SystemLocalDateTime;
+            if (_entity.HasDataBlob<OrbitDB>())
+            {
+                var vector = OrbitProcessor.PreciseOrbitalVelocityPolarCoordinate(_entity.GetDataBlob<OrbitDB>(), atDateTime);
+                Heading = (float)vector.Item2;
+            }
+            else if (_entity.HasDataBlob<TranslateMoveDB>())
+            {
+                Heading = _entity.GetDataBlob<TranslateMoveDB>().Heading_Radians;
+            }
+        }
+
+        public override void OnFrameUpdate(Matrix matrix, Camera camera)
+        {
+            var zoomMatrix = new Matrix();
+            zoomMatrix.Scale(Scale);
+            var rotateMatrix = Matrix.GetRotationMatrix(Heading);
+
+            var useMatrix = rotateMatrix * zoomMatrix;
+
+            var camerapoint = camera.CameraViewCoordinate();
+
+            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
+
+            DrawShapes = new Shape[this.Shapes.Count];
+            for (int i = 0; i < Shapes.Count; i++)
+            {
+                var shape = Shapes[i];
+                PointD[] drawPoints = new PointD[shape.Points.Length];
+                for (int i2 = 0; i2 < shape.Points.Length; i2++)
+                {
+                    var tranlsatedPoint = useMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
+                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X + camerapoint.x);
+                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y + camerapoint.y);
+                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                }
+                DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
         }
     }

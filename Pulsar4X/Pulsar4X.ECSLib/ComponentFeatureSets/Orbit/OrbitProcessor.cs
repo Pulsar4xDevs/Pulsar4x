@@ -296,6 +296,12 @@ namespace Pulsar4X.ECSLib
 
         }
 
+        /// <summary>
+        /// PreciseOrbital Velocy in polar coordinates
+        /// </summary>
+        /// <returns>item1 is speed, item2 angle</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
         public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);

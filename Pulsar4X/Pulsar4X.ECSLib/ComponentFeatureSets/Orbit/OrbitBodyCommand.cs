@@ -147,6 +147,7 @@ namespace Pulsar4X.ECSLib
                 _db.PredictedExitTime = targetIntercept.Item2;
                 _db.TranslateEntryPoint_AU = currentPos;
                 _db.SavedNewtonionVector_AU = currentVec;
+
                 _db.ExpendDeltaV_AU = ExpendDeltaV;
                 if (_targetEntity.HasDataBlob<SensorInfoDB>())
                 {

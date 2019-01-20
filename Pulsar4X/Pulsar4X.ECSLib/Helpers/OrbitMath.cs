@@ -211,6 +211,15 @@ namespace Pulsar4X.ECSLib
             return trueAnomoly;
         }
 
+        /// <summary>
+        /// Velocity vector in polar coordinates.
+        /// </summary>
+        /// <returns>item1 is speed, item2 is angle.</returns>
+        /// <param name="sgp">Sgp.</param>
+        /// <param name="position">Position.</param>
+        /// <param name="sma">Sma.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        /// <param name="loP">Lo p.</param>
         public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double sma, double eccentricity, double loP)
         {
             var radius = position.Length();
