@@ -251,7 +251,7 @@ namespace Pulsar4X.SDL2UI
             {
                 double x = point.X * Math.Cos(ProgradeAngle) - point.Y * Math.Sin(ProgradeAngle);
                 double y = point.X * Math.Sin(ProgradeAngle) + point.Y * Math.Cos(ProgradeAngle);
-                arrowPoints.Add(new PointD() { X = -x, Y = -y });
+                arrowPoints.Add(new PointD() { X = x, Y = y });
             }
 
             Shape vectorArrow = new Shape()

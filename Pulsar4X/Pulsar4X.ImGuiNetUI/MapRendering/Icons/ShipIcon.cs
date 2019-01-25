@@ -182,13 +182,14 @@ namespace Pulsar4X.SDL2UI
             {
                 Heading = _entity.GetDataBlob<TranslateMoveDB>().Heading_Radians;
             }
+
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             var zoomMatrix = new Matrix();
             zoomMatrix.Scale(Scale);
-            var rotateMatrix = Matrix.GetRotationMatrix(Heading);
+            var rotateMatrix = Matrix.GetRotationMatrix(Heading + Math.PI);
 
             var useMatrix = rotateMatrix * zoomMatrix;
 
