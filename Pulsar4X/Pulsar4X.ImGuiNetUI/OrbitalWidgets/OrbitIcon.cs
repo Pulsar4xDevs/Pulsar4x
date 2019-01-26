@@ -188,8 +188,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            Vector4 pos = BodyPositionDB.RelativePosition_AU; //TODO this is the position we should be using, since it'll be faster, however it's sometimes not the same for some reason as the slow way we're getting it below.
-            //Vector4 pos = OrbitProcessor.GetPosition_AU(_orbitDB, _mgr.ManagerSubpulses.SystemLocalDateTime);
+            Vector4 pos = BodyPositionDB.RelativePosition_AU; 
             _bodyRalitivePos = new PointD() { X = pos.X, Y = pos.Y };
 
             double minDist = CalcDistance(_bodyRalitivePos, _points[_index]);

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Reflection;
+using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace Pulsar4X.ECSLib
 {
@@ -19,6 +21,8 @@ namespace Pulsar4X.ECSLib
     { 
         [JsonProperty]
         private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
+
+        public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
 
         private ProcessorManager _processManager;
 
@@ -310,16 +314,25 @@ namespace Pulsar4X.ECSLib
 
                 foreach(var systemProcess in QueuedProcesses[nextInteruptDateTime].SystemProcessors)
                 {
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
                     systemProcess.ProcessManager(_entityManager, deltaSeconds);
+                    sw.Stop();
+                    ProcessTime[systemProcess.GetType()] = sw.Elapsed;
                     AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
                 foreach(var instanceProcessSet in QueuedProcesses[nextInteruptDateTime].InstanceProcessors)
                 {
-                    foreach(var entity in instanceProcessSet.Value)
+                    var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
+                    foreach (var entity in instanceProcessSet.Value)
                     {
-                        var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
+
                         processor.ProcessEntity(entity, nextInteruptDateTime);
                     }
+                    sw.Stop();
+                    ProcessTime[processor.GetType()] = sw.Elapsed;
                 }
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }

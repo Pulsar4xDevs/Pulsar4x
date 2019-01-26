@@ -12,6 +12,7 @@ namespace Pulsar4X.SDL2UI
     {
         EntityState _selectedEntityState;
         Entity _selectedEntity { get { return _selectedEntityState.Entity; } }
+        SystemState _systemState;
         float largestGFPS = 0;
         int largestIndex = 0;
 
@@ -33,7 +34,7 @@ namespace Pulsar4X.SDL2UI
 
         private DebugWindow() 
         {
-            _selectedEntityState = _state.LastClickedEntity;   
+              
         }
         internal static DebugWindow GetInstance()
         {
@@ -45,6 +46,8 @@ namespace Pulsar4X.SDL2UI
                 instance = (DebugWindow)_state.LoadedWindows[typeof(DebugWindow)];
                 instance._selectedEntityState = _state.LastClickedEntity;
             }
+            instance._selectedEntityState = _state.LastClickedEntity;
+            instance._systemState = _state.StarSystemStates[_state.ActiveSystem.Guid];
             return instance;
         }
 
@@ -158,6 +161,13 @@ namespace Pulsar4X.SDL2UI
                         ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new Vector2(248, 60), sizeof(float));
                         //ui framerate
                         ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new Vector2(248, 60), sizeof(float));
+
+                        foreach (var item in _systemState.StarSystem.ManagerSubpulses.ProcessTime)
+                        {
+                            ImGui.Text(item.Key.Name);
+                            ImGui.SameLine();
+                            ImGui.Text(item.Value.ToString());
+                        }
 
                     }
                     if (ImGui.CollapsingHeader("Entity List"))
