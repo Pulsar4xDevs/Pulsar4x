@@ -24,7 +24,9 @@ namespace Pulsar4X.SDL2UI
         public List<Guid> EntitysToBin = new List<Guid>();
         public List<Guid> EntitiesAdded = new List<Guid>();
         public List<EntityChangeData> SystemChanges = new List<EntityChangeData>();
-        public Dictionary<Guid, EntityState> EntityStates = new Dictionary<Guid, EntityState>();
+        public Dictionary<Guid, EntityState> EntityStatesWithNames = new Dictionary<Guid, EntityState>();
+        public Dictionary<Guid, EntityState> EntityStatesWithPosition = new Dictionary<Guid, EntityState>();
+        public Dictionary<Guid, EntityState> EntityStatesColonies = new Dictionary<Guid, EntityState>();
 
         public SystemState(StarSystem system, Entity faction)
         {
@@ -35,10 +37,19 @@ namespace Pulsar4X.SDL2UI
 
             foreach (Entity entityItem in StarSystem.GetEntitiesByFaction(faction.Guid))
             {
-                if (entityItem.HasDataBlob<PositionDB>())
+                if (entityItem.HasDataBlob<NameDB>())
                 {
                     var entityState = new EntityState(entityItem) { Name = "Unknown" };
-                    EntityStates.Add(entityItem.Guid, entityState);
+                    EntityStatesWithNames.Add(entityItem.Guid, entityState);
+                    if (entityItem.HasDataBlob<PositionDB>())
+                    {
+                        EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                    }
+                    else if( entityItem.HasDataBlob<ColonyInfoDB>())
+                    {
+                        EntityStatesColonies.Add(entityItem.Guid, entityState);
+                    }
+
                 }
             }
 
@@ -50,7 +61,8 @@ namespace Pulsar4X.SDL2UI
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {
                 var entityState = new EntityState(sensorContact) { Name = "Unknown" };
-                EntityStates.Add(sensorContact.ActualEntity.Guid, entityState);
+                EntityStatesWithNames.Add(sensorContact.ActualEntityGuid, entityState);
+                EntityStatesWithPosition.Add(sensorContact.ActualEntityGuid, entityState);
             }
 
         }
@@ -73,7 +85,7 @@ namespace Pulsar4X.SDL2UI
                 if (entityItem.HasDataBlob<PositionDB>())
                 {
                     var entityState = new EntityState(entityItem) { Name = "Unknown" };
-                    EntityStates.Add(entityItem.Guid, entityState);
+                    EntityStatesWithPosition.Add(entityItem.Guid, entityState);
                 }
             }
 
@@ -98,7 +110,7 @@ namespace Pulsar4X.SDL2UI
                         if (change.Entity.IsValid && change.Entity.HasDataBlob<PositionDB>())
                         {
                             var entityState = new EntityState(change.Entity) { Name = "Unknown" };
-                            EntityStates.Add(change.Entity.Guid, entityState);
+                            EntityStatesWithPosition.Add(change.Entity.Guid, entityState);
                             EntitiesAdded.Add(change.Entity.Guid);
                         }
                         break;
@@ -129,7 +141,7 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            foreach (var item in EntityStates.Values)
+            foreach (var item in EntityStatesWithPosition.Values)
             {
                 if (item.IsDestroyed) //items get flagged via an event triggered by worker threads. 
                 {
@@ -148,13 +160,13 @@ namespace Pulsar4X.SDL2UI
         {
             foreach (var itemGuid in EntitysToBin)
             {
-                EntityStates.Remove(itemGuid);
+                EntityStatesWithPosition.Remove(itemGuid);
             }
             EntitysToBin = new List<Guid>();
             EntitiesAdded = new List<Guid>();
             SensorChanges = new List<EntityChangeData>();
             SystemChanges = new List<EntityChangeData>();
-            foreach (var item in EntityStates.Values)
+            foreach (var item in EntityStatesWithPosition.Values)
             {
                 item.PostFrameCleanup();
             }

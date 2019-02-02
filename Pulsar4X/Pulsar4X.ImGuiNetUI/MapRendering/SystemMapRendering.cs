@@ -83,12 +83,12 @@ namespace Pulsar4X.SDL2UI
             _state.SetActiveSystem(starSys.Guid);
 
 
-            foreach (var entityItem in _sysState.EntityStates.Values)
+            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
             {
                 AddIconable(entityItem);
             }
 
-            _state.LastClickedEntity = _sysState.EntityStates.Values.ElementAt(0);
+            _state.LastClickedEntity = _sysState.EntityStatesWithPosition.Values.ElementAt(0);
 
         }
 
@@ -110,7 +110,7 @@ namespace Pulsar4X.SDL2UI
 
 
             _sensorChanges = _sensorMgr.Changes.Subscribe();
-            foreach (var entityItem in _sysState.EntityStates.Values)
+            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
             {
                 AddIconable(entityItem);
             }
@@ -153,7 +153,7 @@ namespace Pulsar4X.SDL2UI
                     foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
                     {
                         _nameIcons[entityItem.Guid].AddSubName(colony);
-                        _sysState.EntityStates[entityItem.Guid].NameIcon = _nameIcons[entityItem.Guid];
+                        _sysState.EntityStatesWithPosition[entityItem.Guid].NameIcon = _nameIcons[entityItem.Guid];
                         /*
                         IconEntityStates.Add(colony.Guid, new EntityState(colony)
                         {
@@ -230,8 +230,8 @@ namespace Pulsar4X.SDL2UI
                     {
                         if (!((OrbitDB)changeData.Datablob).IsStationary)
                         {
-                            if (_sysState.EntityStates.ContainsKey(changeData.Entity.Guid))
-                                entityState = _sysState.EntityStates[changeData.Entity.Guid];
+                            if (_sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Guid))
+                                entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Guid];
                             else
                                 entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
 
@@ -352,9 +352,9 @@ namespace Pulsar4X.SDL2UI
             {
                 foreach (var entityGuid in _sysState.EntitiesAdded)
                 {
-                    AddIconable(_sysState.EntityStates[entityGuid]);
+                    AddIconable(_sysState.EntityStatesWithPosition[entityGuid]);
                 }
-                foreach (var item in _sysState.EntityStates.Values)
+                foreach (var item in _sysState.EntityStatesWithPosition.Values)
                 {
                     if (item.Changes.Count > 0)
                     {

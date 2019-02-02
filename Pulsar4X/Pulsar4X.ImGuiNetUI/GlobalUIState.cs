@@ -135,12 +135,12 @@ namespace Pulsar4X.SDL2UI
         internal void EntityClicked(Guid entityGuid, MouseButtons button)
         {
         
-            LastClickedEntity = StarSystemStates[PrimarySystem.Guid].EntityStates[entityGuid];
+            LastClickedEntity = StarSystemStates[PrimarySystem.Guid].EntityStatesWithNames[entityGuid];
 
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
             if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(StarSystemStates[PrimarySystem.Guid].EntityStates[entityGuid], button);
+                ActiveWindow.EntityClicked(StarSystemStates[PrimarySystem.Guid].EntityStatesWithNames[entityGuid], button);
             OnEntitySelected();
         }
 
