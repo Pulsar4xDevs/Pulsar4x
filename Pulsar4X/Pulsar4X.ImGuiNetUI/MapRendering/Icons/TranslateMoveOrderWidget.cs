@@ -35,7 +35,7 @@ namespace Pulsar4X.SDL2UI
         public TranslateMoveOrderWidget(GlobalUIState state, Entity orderingEntity)
         {
             _state = state;
-            _currentDateTime = _state.CurrentSystemDateTime;
+            _currentDateTime = _state.PrimarySystemDateTime;
 
             _movingEntity = orderingEntity;
 
@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI
 
         public void OnPhysicsUpdate()
         {
-            _currentDateTime = _state.CurrentSystemDateTime;
+            _currentDateTime = _state.PrimarySystemDateTime;
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 

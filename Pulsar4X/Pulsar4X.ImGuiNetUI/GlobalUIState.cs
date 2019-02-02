@@ -15,7 +15,6 @@ namespace Pulsar4X.SDL2UI
         internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
         internal Entity Faction { get { return FactionUIState.FactionEntity; } }
-        internal StarSystem ActiveSystem;
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
@@ -25,7 +24,12 @@ namespace Pulsar4X.SDL2UI
         //internal MainMenuItems MainMenu { get; }
         //internal NewGameOptions NewGameOptions { get; }
         //internal SettingsWindow SettingsWindow { get; }
-        internal SystemMapRendering MapRendering { get; set; }
+        internal GalacticMapRender GalacticMap;
+
+        internal StarSystem PrimarySystem;
+        internal SystemMapRendering PrimaryMapRender { get { return GalacticMap.PrimarySysMap; } }
+        internal DateTime PrimarySystemDateTime; //= new DateTime();
+
         internal EntityContextMenu ContextMenu { get; set; }
         //internal IOrderWindow ActiveOrderWidow { get; set; }
         //internal DebugWindow Debug { get; set; }
@@ -47,7 +51,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityState LastClickedEntity;
         internal ECSLib.Vector4 LastWorldPointClicked;
 
-        internal DateTime CurrentSystemDateTime; //= new DateTime();
+
 
         internal SpaceMasterVM SpaceMasterVM;
 
@@ -93,6 +97,32 @@ namespace Pulsar4X.SDL2UI
             SDLImageDictionary.Add(name, sdltexture);
         }
 
+        internal void SetFaction(Entity factionEntity)
+        {
+            FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
+            StarSystemStates = new Dictionary<Guid, SystemState>();
+            foreach (var guid in factionInfo.KnownSystems)
+            {
+                StarSystemStates[guid] = new SystemState(Game.Systems[guid], factionEntity);
+            }
+            GalacticMap.SetFaction();
+        }
+
+        internal void SetActiveSystem(Guid activeSysID)
+        {
+            PrimarySystem = StarSystemStates[activeSysID].StarSystem;
+            PrimarySystemDateTime = PrimarySystem.ManagerSubpulses.SystemLocalDateTime;
+            GalacticMap.PrimarySysMap = GalacticMap.RenderedMaps[activeSysID];
+        }
+
+        internal void EnableGameMaster()
+        {
+            StarSystemStates = new Dictionary<Guid, SystemState>();
+            foreach (var system in Game.Systems)
+            {
+                StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
+            }
+        }
 
         internal void MapClicked(ECSLib.Vector4 worldCoord, MouseButtons button)
         {
@@ -105,21 +135,21 @@ namespace Pulsar4X.SDL2UI
         internal void EntityClicked(Guid entityGuid, MouseButtons button)
         {
         
-            LastClickedEntity = StarSystemStates[ActiveSystem.Guid].EntityStates[entityGuid];
+            LastClickedEntity = StarSystemStates[PrimarySystem.Guid].EntityStates[entityGuid];
 
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
             if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(StarSystemStates[ActiveSystem.Guid].EntityStates[entityGuid], button);
+                ActiveWindow.EntityClicked(StarSystemStates[PrimarySystem.Guid].EntityStates[entityGuid], button);
             OnEntitySelected();
         }
 
         void OnEntitySelected()
         {
-            MapRendering.SelectedEntityExtras = new List<IDrawData>();
+            PrimaryMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
             {
-                MapRendering.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
+                PrimaryMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
         }
 

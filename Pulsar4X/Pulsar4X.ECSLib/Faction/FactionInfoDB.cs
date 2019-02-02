@@ -10,11 +10,11 @@ namespace Pulsar4X.ECSLib
     {
 
         [JsonProperty]
-        public List<Entity> Species { get; internal set; }
+        public List<Entity> Species { get; internal set; } = new List<Entity>();
 
 
         [JsonProperty]
-        public List<Guid> KnownSystems { get; internal set; }
+        public List<Guid> KnownSystems { get; internal set; } = new List<Guid>();
 
 
         public ReadOnlyDictionary<Guid, List<Entity>> KnownJumpPoints => new ReadOnlyDictionary<Guid, List<Entity>>(InternalKnownJumpPoints);
@@ -23,15 +23,15 @@ namespace Pulsar4X.ECSLib
 
 
         [JsonProperty]
-        public List<Entity> KnownFactions { get; internal set; }
+        public List<Entity> KnownFactions { get; internal set; } = new List<Entity>();
 
 
         [PublicAPI]
         [JsonProperty]
-        public List<Entity> Colonies { get; internal set; }
+        public List<Entity> Colonies { get; internal set; } = new List<Entity>();
 
         [JsonProperty]
-        public List<Entity> ShipClasses { get; internal set; }
+        public List<Entity> ShipClasses { get; internal set; } = new List<Entity>();
 
 
         public ReadOnlyDictionary<Guid, Entity> ComponentDesigns => new ReadOnlyDictionary<Guid, Entity>(InternalComponentDesigns);
@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
         internal Dictionary<Guid, SensorContact> SensorContacts = new Dictionary<Guid, SensorContact>();
 
 
-        public FactionInfoDB() : this(new List<Entity>(), new List<Guid>(), new List<Entity>(), new List<Entity>() ) { }
+        public FactionInfoDB()  { }
 
         public FactionInfoDB(
             List<Entity> species,

@@ -95,8 +95,10 @@ namespace Pulsar4X.SDL2UI
 
             factionVM.CreateDefaultFaction(factionNameString, passString);
 
+            _state.SetFaction(factionVM.FactionEntity);
             //_state.MapRendering.SetSystem(factionVM.KnownSystems[0]);
-            _state.MapRendering.SetSystem(factionVM);
+            //_state.MapRendering.SetSystem(factionVM);
+            _state.SetActiveSystem(factionVM.KnownSystems[0].Guid);
             DebugWindow.GetInstance().SetGameEvents();
             IsActive = false;
             TimeControl.GetInstance().IsActive = true;

@@ -47,8 +47,8 @@ namespace Pulsar4X.SDL2UI
             else
                 instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
             instance.SetOrderEntity(entity);
-            instance._sysState = _state.StarSystemStates[_state.ActiveSystem.Guid];
-            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
+            instance._sysState = _state.StarSystemStates[_state.PrimarySystem.Guid];
+            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
 
 
             return instance;
@@ -75,7 +75,7 @@ namespace Pulsar4X.SDL2UI
                 if (weaponInstanace.OwningEntity.GetDataBlob<WeaponInstanceStateDB>().FireControl == null)
                     _unAssignedWeapons.Add(weaponInstanace.OwningEntity.Guid);
             }
-            foreach (var item in _state.ActiveSystem.FactionSensorContacts[_state.Faction.Guid].GetAllContacts())
+            foreach (var item in _state.PrimarySystem.GetSensorContacts(_state.Faction.Guid).GetAllContacts())
             {
                 var entityItem = item.ActualEntity;
                 string name = entityItem.GetDataBlob<NameDB>().GetName(_state.Faction);
@@ -232,7 +232,7 @@ namespace Pulsar4X.SDL2UI
                                     
                                     _unAssignedWeapons.Add(wpn);
                                     _selectedFCAssignedWeapons.Remove(wpn);
-                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.CurrentSystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
+                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
                                 }
                             }
                             ImGui.EndGroup();
@@ -247,7 +247,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     _selectedFCAssignedWeapons.Add(wpn);
                                     _unAssignedWeapons.Remove(wpn);
-                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.CurrentSystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
+                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
                                 }
                             }
                             ImGui.EndGroup();
@@ -263,7 +263,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 if (ImGui.SmallButton(item.Value))
                                 {
-                                    SetTargetFireControlOrder.CreateCommand(_state.Game, _state.CurrentSystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, item.Key);
+                                    SetTargetFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, item.Key);
                                 }
                             }
 
@@ -292,7 +292,7 @@ namespace Pulsar4X.SDL2UI
 
         void OnClose()
         {
-            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent -= ManagerSubpulses_SystemDateChangedEvent;
+            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent -= ManagerSubpulses_SystemDateChangedEvent;
 
         }
     }

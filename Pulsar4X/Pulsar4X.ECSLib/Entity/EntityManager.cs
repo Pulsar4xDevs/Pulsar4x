@@ -33,8 +33,13 @@ namespace Pulsar4X.ECSLib
 
         internal List<AEntityChangeListner> EntityListners = new List<AEntityChangeListner>();
 
-        public Dictionary<Guid, SystemSensorContacts> FactionSensorContacts = new Dictionary<Guid, SystemSensorContacts>();
-
+        internal Dictionary<Guid, SystemSensorContacts> FactionSensorContacts = new Dictionary<Guid, SystemSensorContacts>();
+        public SystemSensorContacts GetSensorContacts(Guid factionGuid)
+        {
+            if (!FactionSensorContacts.ContainsKey(factionGuid))
+                return new SystemSensorContacts(this, GetGlobalEntityByGuid(factionGuid));
+            return FactionSensorContacts[factionGuid];
+        }
         Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();  
         public List<Entity> GetEntitiesByFaction(Guid factionGuid)
         {
@@ -396,7 +401,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         [NotNull]
-        internal List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
+        public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
 
@@ -540,7 +545,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         [NotNull]
-        internal Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
+        public Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
         {
             return GetFirstEntityWithDataBlob(GetTypeIndex<T>());
         }

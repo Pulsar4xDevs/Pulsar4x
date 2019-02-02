@@ -36,12 +36,12 @@ namespace Pulsar4X.ECSLib
         }
 
         internal ProcessorManager ProcessorManager; 
-        
+
         /// <summary>
         /// List of StarSystems currently in the game.
         /// </summary>
         [JsonProperty]
-        internal Dictionary<Guid, StarSystem> Systems { get; private set; } = new Dictionary<Guid, StarSystem>();
+        public Dictionary<Guid, StarSystem> Systems { get; private set; } = new Dictionary<Guid, StarSystem>();
 
         [JsonProperty]
         public readonly EntityManager GlobalManager;

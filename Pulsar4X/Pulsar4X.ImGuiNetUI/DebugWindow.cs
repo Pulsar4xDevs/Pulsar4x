@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
                 instance._selectedEntityState = _state.LastClickedEntity;
             }
             instance._selectedEntityState = _state.LastClickedEntity;
-            instance._systemState = _state.StarSystemStates[_state.ActiveSystem.Guid];
+            instance._systemState = _state.StarSystemStates[_state.PrimarySystem.Guid];
             return instance;
         }
 
@@ -58,7 +58,7 @@ namespace Pulsar4X.SDL2UI
             if (_state.Game != null)
             {
                 _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
-                _state.MapRendering.SysMap.SystemSubpulse.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
+                _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
                 _state.EntityClickedEvent += _state_EntityClicked;
             }
         }
@@ -138,7 +138,7 @@ namespace Pulsar4X.SDL2UI
                 SetFrameRateArray();
                 if (ImGui.Begin("debug", ref IsActive))
                 {
-                    ImGui.Text(_state.CurrentSystemDateTime.ToString());
+                    ImGui.Text(_state.PrimarySystemDateTime.ToString());
                     ImGui.Text("Cursor World Coordinate:");
                     var mouseWorldCoord = _state.Camera.MouseWorldCoordinate();
                     ImGui.Text("x" + mouseWorldCoord.X);
@@ -173,7 +173,7 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.CollapsingHeader("Entity List"))
                     {
 
-                        List<Entity> factionOwnedEntites  = _state.ActiveSystem.GetEntitiesByFaction(_state.Faction.Guid);
+                        List<Entity> factionOwnedEntites  = _state.PrimarySystem.GetEntitiesByFaction(_state.Faction.Guid);
                         List<string> entityNames = new List<string>();
                         foreach (var entity in factionOwnedEntites)
                         {
@@ -226,9 +226,9 @@ namespace Pulsar4X.SDL2UI
 
                                     //if (_state.CurrentSystemDateTime != lastDate)
                                     //{
-                                        pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.CurrentSystemDateTime);
-                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.CurrentSystemDateTime);
-                                        lastDate = _state.CurrentSystemDateTime;
+                                        pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.PrimarySystemDateTime);
+                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.PrimarySystemDateTime);
+                                        lastDate = _state.PrimarySystemDateTime;
                                     //}
 
                                     ImGui.Text("x: " + pos.X);
@@ -314,7 +314,7 @@ namespace Pulsar4X.SDL2UI
                                         ImGui.SameLine();
                                         double distancekm = Distance.AuToKm(distance);
                                         ImGui.Text(distancekm.ToString() + " KM");
-                                        var timeToTarget = db.PredictedExitTime - _state.CurrentSystemDateTime;
+                                        var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;
                                         ImGui.Text("Remaining TTT " + timeToTarget);
                                         var totalTime = db.PredictedExitTime - db.EntryDateTime;
                                         ImGui.Text("Total TTT  " + totalTime);
@@ -323,7 +323,7 @@ namespace Pulsar4X.SDL2UI
                                         ImGui.Text("LastDateTime: ");
                                         ImGui.Text(db.LastProcessDateTime.ToString());
                                         ImGui.Text("Time Since Last: ");
-                                        var timelen = _state.CurrentSystemDateTime - db.LastProcessDateTime;
+                                        var timelen = _state.PrimarySystemDateTime - db.LastProcessDateTime;
                                         ImGui.Text(timelen.ToString());
 
                                     }

@@ -56,7 +56,8 @@ namespace Pulsar4X.SDL2UI
             */
             backColor = new ImVec3(0 / 255f, 0 / 255f, 28 / 255f);
 
-            _state.MapRendering = new SystemMapRendering(this, _state);
+            _state.GalacticMap = new GalacticMapRender(this, _state);
+            //_state.MapRendering = new SystemMapRendering(this, _state);
 
 
             OnEvent = MyEventHandler;
@@ -151,7 +152,8 @@ namespace Pulsar4X.SDL2UI
             GL.ClearColor(backColor.X, backColor.Y, backColor.Z, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
-            _state.MapRendering.Draw();
+            _state.GalacticMap.Draw();
+            //_state.MapRendering.Draw();
 
             // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
             base.ImGuiRender();
@@ -193,7 +195,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             //because the nameIcons are IMGUI not SDL we draw them here. 
-            _state.MapRendering.DrawNameIcons();
+            _state.GalacticMap.DrawNameIcons();
 
             ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 

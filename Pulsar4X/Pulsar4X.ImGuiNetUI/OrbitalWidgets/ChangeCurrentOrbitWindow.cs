@@ -80,7 +80,7 @@ namespace Pulsar4X.SDL2UI
             var instance = (ChangeCurrentOrbitWindow)_state.LoadedWindows[typeof(ChangeCurrentOrbitWindow)];
             if(instance.OrderingEntity != entity)
                 instance.OnEntityChange(entity);
-            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent += instance.OnSystemDateTimeChange;
+            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent += instance.OnSystemDateTimeChange;
 
             return instance;
         }
@@ -88,7 +88,7 @@ namespace Pulsar4X.SDL2UI
         void OnEntityChange(EntityState entity)
         {
             OrderingEntity = entity;
-            _actionDateTime = _state.CurrentSystemDateTime;
+            _actionDateTime = _state.PrimarySystemDateTime;
             _orderEntityOrbit = entity.Entity.GetDataBlob<OrbitDB>();
 
             _massParentBody = _orderEntityOrbit.Parent.GetDataBlob<MassVolumeDB>().Mass;
@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI
                     if (_orbitWidget == null)
                     {
                         _orbitWidget = new OrbitOrderWiget(_orderEntityOrbit.Parent);
-                        _state.MapRendering.UIWidgets.Add(_orbitWidget);
+                        _state.PrimaryMapRender.UIWidgets.Add(_orbitWidget);
                     }
 
                     var maxprogradeDV = _maxDV - Math.Abs(_radialDV);
@@ -190,11 +190,11 @@ namespace Pulsar4X.SDL2UI
         internal void CloseWindow()
         {
             IsActive = false;
-            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
+            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
 
             if (_orbitWidget != null)
             {
-                _state.MapRendering.UIWidgets.Remove(_orbitWidget);
+                _state.PrimaryMapRender.UIWidgets.Remove(_orbitWidget);
                 _orbitWidget = null;
             }
 

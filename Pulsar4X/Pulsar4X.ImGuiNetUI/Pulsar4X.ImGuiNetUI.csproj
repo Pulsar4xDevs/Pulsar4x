@@ -150,4 +150,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="MapRendering\GalaxyMap.cs" />
+  </ItemGroup>
 </Project>

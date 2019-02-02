@@ -84,7 +84,7 @@ namespace Pulsar4X.SDL2UI
                 if (_moveWidget == null)
                 {
                     _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntity.Entity);
-                    _state.MapRendering.UIWidgets.Add(_moveWidget);
+                    _state.PrimaryMapRender.UIWidgets.Add(_moveWidget);
 
                 }
             }
@@ -115,8 +115,8 @@ namespace Pulsar4X.SDL2UI
             var instance = (OrbitOrderWindow)_state.LoadedWindows[typeof(OrbitOrderWindow)];
             instance.OrderingEntity = entity;
             instance.CurrentState = States.NeedsTarget;
-            instance._departureDateTime = _state.CurrentSystemDateTime;
-            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent += instance.OnSystemDateTimeChange;
+            instance._departureDateTime = _state.PrimarySystemDateTime;
+            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent += instance.OnSystemDateTimeChange;
             instance.EntitySelected();
             return instance;
         }
@@ -135,7 +135,7 @@ namespace Pulsar4X.SDL2UI
             if (_moveWidget == null)
             {
                 _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntity.Entity);
-                _state.MapRendering.UIWidgets.Add(_moveWidget);
+                _state.PrimaryMapRender.UIWidgets.Add(_moveWidget);
             }
             DepartureCalcs();
 
@@ -179,17 +179,17 @@ namespace Pulsar4X.SDL2UI
 
             if (_orbitWidget != null)
             {
-                int index = _state.MapRendering.UIWidgets.IndexOf(_orbitWidget);
+                int index = _state.PrimaryMapRender.UIWidgets.IndexOf(_orbitWidget);
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
                 if (index != -1)
-                    _state.MapRendering.UIWidgets[index] = _orbitWidget;
+                    _state.PrimaryMapRender.UIWidgets[index] = _orbitWidget;
                 else
-                    _state.MapRendering.UIWidgets.Add(_orbitWidget);
+                    _state.PrimaryMapRender.UIWidgets.Add(_orbitWidget);
             }
             else
             {
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
-                _state.MapRendering.UIWidgets.Add(_orbitWidget);
+                _state.PrimaryMapRender.UIWidgets.Add(_orbitWidget);
             }
             
 
@@ -227,7 +227,7 @@ namespace Pulsar4X.SDL2UI
         }
         void ActionAddDB()
         {
-            _state.SpaceMasterVM.SMSetOrbitToEntity(OrderingEntity.Entity, TargetEntity.Entity, PointDFunctions.Length(_orbitWidget.Periapsis), _state.CurrentSystemDateTime);
+            _state.SpaceMasterVM.SMSetOrbitToEntity(OrderingEntity.Entity, TargetEntity.Entity, PointDFunctions.Length(_orbitWidget.Periapsis), _state.PrimarySystemDateTime);
             CloseWindow();
         }
 
@@ -544,16 +544,16 @@ namespace Pulsar4X.SDL2UI
         {
             IsActive = false;
             CurrentState = States.NeedsEntity;
-            _state.ActiveSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
+            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
 
             if (_orbitWidget != null)
             {
-                _state.MapRendering.UIWidgets.Remove(_orbitWidget);
+                _state.PrimaryMapRender.UIWidgets.Remove(_orbitWidget);
                 _orbitWidget = null;
             }
             if (_moveWidget != null)
             {
-                _state.MapRendering.UIWidgets.Remove(_moveWidget);
+                _state.PrimaryMapRender.UIWidgets.Remove(_moveWidget);
                 _moveWidget = null;
             }
         }

@@ -29,7 +29,7 @@ namespace Pulsar4X.SDL2UI
         public SystemState(StarSystem system, Entity faction)
         {
             StarSystem = system;
-            SystemContacts = system.FactionSensorContacts[faction.Guid];
+            SystemContacts = system.GetSensorContacts(faction.Guid);
             _sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
 
@@ -55,6 +55,39 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+
+        public static SystemState GetMasterState(StarSystem starSystem)
+        {
+            return new SystemState(starSystem);
+        }
+
+        private SystemState(StarSystem system)
+        {
+            StarSystem = system;
+            //SystemContacts = system.FactionSensorContacts[faction.Guid];
+            //_sensorChanges = SystemContacts.Changes.Subscribe();
+            PulseMgr = system.ManagerSubpulses;
+
+            foreach (Entity entityItem in StarSystem.GetAllEntitiesWithDataBlob<PositionDB>())
+            {
+                if (entityItem.HasDataBlob<PositionDB>())
+                {
+                    var entityState = new EntityState(entityItem) { Name = "Unknown" };
+                    EntityStates.Add(entityItem.Guid, entityState);
+                }
+            }
+
+            var listnerblobs = new List<int>();
+            listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
+            //EntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, new List<int>());//, listnerblobs);
+            //_changeListner = changeListner;
+            /*
+            foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
+            {
+                var entityState = new EntityState(sensorContact) { Name = "Unknown" };
+                EntityStates.Add(sensorContact.ActualEntity.Guid, entityState);
+            }*/
+        }
 
         void HandleUpdates(EntityChangeData change)
         {

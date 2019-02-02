@@ -43,8 +43,8 @@ namespace Pulsar4X.SDL2UI
         internal ConcurrentDictionary<Guid, NameIcon> _nameIcons = new ConcurrentDictionary<Guid, NameIcon>();
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
-
-        internal SystemMap_DrawableVM SysMap;
+        internal PointD GalacticMapPosition = new PointD();
+        //internal SystemMap_DrawableVM SysMap;
         Entity _faction;
 
         internal SystemMapRendering(ImGuiSDL2CSWindow window, GlobalUIState state)
@@ -72,20 +72,51 @@ namespace Pulsar4X.SDL2UI
                 _sysState = new SystemState(factionVM.SystemMap.StarSystem, factionVM.FactionEntity);
                 _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
             }
-
-            SysMap = factionVM.SystemMap;
+            var starSys = _sysState.StarSystem;
             _faction = _state.Faction;
-            SysMap.SystemSubpulse.SystemDateChangedEvent += OnSystemDateChange;
-            _state.CurrentSystemDateTime = SysMap.SystemSubpulse.SystemLocalDateTime;
-            _state.ActiveSystem = SysMap.StarSystem;
-            _sensorMgr = SysMap.StarSystem.FactionSensorContacts[_faction.Guid];
+            starSys.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
+            _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
             _sensorChanges = _sensorMgr.Changes.Subscribe();
+
+
+
+            _state.SetActiveSystem(starSys.Guid);
+
+
             foreach (var entityItem in _sysState.EntityStates.Values)
             {
                 AddIconable(entityItem);
             }
 
             _state.LastClickedEntity = _sysState.EntityStates.Values.ElementAt(0);
+
+        }
+
+        internal void SetSystem(StarSystem starSys)
+        {
+            if (_state.StarSystemStates.ContainsKey(starSys.Guid))
+                _sysState = _state.StarSystemStates[starSys.Guid];
+            else
+            {
+                _sysState = new SystemState(starSys, _state.Faction);
+                _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
+            }
+
+
+            _faction = _state.Faction;
+
+            starSys.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
+            _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
+
+
+            _sensorChanges = _sensorMgr.Changes.Subscribe();
+            foreach (var entityItem in _sysState.EntityStates.Values)
+            {
+                AddIconable(entityItem);
+            }
+
+            //_state.LastClickedEntity = _sysState.EntityStates.Values.ElementAt(0);
+
 
         }
 
@@ -149,7 +180,7 @@ namespace Pulsar4X.SDL2UI
 
         void OnSystemDateChange(DateTime newDate)
         {
-            _state.CurrentSystemDateTime = newDate;
+            _state.PrimarySystemDateTime = newDate;
 
 
 
@@ -241,73 +272,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        /*
-        void HandleChanges()
-        {
-            var updates = SysMap.GetUpdates();
-            foreach (var changeData in updates)
-            {
-                if(changeData.ChangeType == EntityChangeData.EntityChangeType.EntityAdded)
-                {
-                    //AddIconable(changeData.Entity);              
-                }
-
-                if (changeData.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
-                {
-                    RemoveIconable(changeData.Entity.Guid);
-                }
-
-                if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
-                {
-                    if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
-                    {
-                        if (!((OrbitDB)changeData.Datablob).IsStationary)
-                        {
-                            EntityState entityState;
-                            if (IconEntityStates.ContainsKey(changeData.Entity.Guid))
-                                entityState = IconEntityStates[changeData.Entity.Guid];
-                            else
-                                entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
-                            
-                            _orbitRings[changeData.Entity.Guid] = new OrbitIcon(entityState, _state.UserOrbitSettings);
-                        
-                        }
-                    }
-                    if (changeData.Datablob is TranslateMoveDB)
-                    {
-                        var widget = new ShipMoveWidget(changeData.Entity);
-                        //Matrix matrix = new Matrix();
-                        //matrix.Scale(_camera.ZoomLevel);
-                        //widget.OnFrameUpdate(matrix, _camera);
-                        _moveIcons[changeData.Entity.Guid] = widget;
-                        //_moveIcons.Add(changeData.Entity.Guid, widget);
-                    }
-                    //if (changeData.Datablob is NameDB)
-                        //TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);
-
-                    //_entityIcons[changeData.Entity.Guid] = new EntityIcon(changeData.Entity, _camera);
-                }
-                if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
-                {
-                    if (changeData.Datablob is OrbitDB)
-                    {
-                        IDrawData foo;
-                        _orbitRings.TryRemove(changeData.Entity.Guid, out foo);
-                    }
-                    if (changeData.Datablob is TranslateMoveDB) 
-                    {
-                        IDrawData foo;
-                        _moveIcons.TryRemove(changeData.Entity.Guid, out foo);
-                    }
-
-                    //if (changeData.Datablob is NameDB)
-                        //TextIconList.Remove(changeData.Entity.Guid);
-                }
-            }
-        }
-        */
-
-        public void TextIconsDistribute()
+        void TextIconsDistribute()
         {
             if (_nameIcons.Count == 0)
                 return;
@@ -410,6 +375,7 @@ namespace Pulsar4X.SDL2UI
 
             var matrix =_camera.GetZoomMatrix();
 
+            /*
             if (SysMap == null)
             {
                 foreach (var icon in _testIcons.Values)
@@ -420,7 +386,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-
+            */
                 UpdateAndDraw(UIWidgets, matrix);
 
                 UpdateAndDraw(_orbitRings, matrix);
@@ -444,7 +410,7 @@ namespace Pulsar4X.SDL2UI
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
                 SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
-            }
+            //}
         }
 
         public void DrawNameIcons()
