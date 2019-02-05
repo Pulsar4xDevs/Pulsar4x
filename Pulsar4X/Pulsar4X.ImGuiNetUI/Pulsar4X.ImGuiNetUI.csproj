@@ -19,10 +19,11 @@
     <IntermediateOutputPath>obj\Linux_x64\Release</IntermediateOutputPath>
     <DebugType></DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Linux_x64\Release</OutputPath>
+    <OutputPath>..\build\bin\Linux_x64\Release</OutputPath>
     <DefineConstants></DefineConstants>
     <NoWarn></NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Pulsar4X</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows_x64' ">
     <IntermediateOutputPath>obj\Windows_x64\Debug</IntermediateOutputPath>

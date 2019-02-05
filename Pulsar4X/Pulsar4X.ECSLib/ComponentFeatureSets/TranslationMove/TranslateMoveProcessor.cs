@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
                 var currentVelocityMS = Vector4.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
                 propulsionDB.CurrentVectorMS = currentVelocityMS;
                 moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
-                moveDB.LastProcessDateTime = entity.Manager.ManagerSubpulses.SystemLocalDateTime;
+                moveDB.LastProcessDateTime = entity.Manager.ManagerSubpulses.StarSysDateTime;
 
                 CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
                 foreach (var item in propulsionDB.FuelUsePerKM)
@@ -111,7 +111,7 @@ namespace Pulsar4X.ECSLib
             var propulsionDB = entity.GetDataBlob<PropulsionAbilityDB>();
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
             DateTime dateTimeFrom = moveDB.LastProcessDateTime;
-            DateTime dateTimeNow = manager.ManagerSubpulses.SystemLocalDateTime;
+            DateTime dateTimeNow = manager.ManagerSubpulses.StarSysDateTime;
             DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
 
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;

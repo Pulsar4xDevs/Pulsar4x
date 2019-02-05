@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
             {
                 RequestingFactionGuid = faction.Guid,
                 EntityCommandingGuid = orderEntity.Guid,
-                CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
 
             };
 
@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
             {
                 RequestingFactionGuid = faction.Guid,
                 EntityCommandingGuid = orderEntity.Guid,
-                CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 TargetEntityGuid = targetEntity.Guid,
                 TargetOffsetPosition_AU = targetOffsetPos_AU,
                 TransitStartDateTime = transitStartDatetime,

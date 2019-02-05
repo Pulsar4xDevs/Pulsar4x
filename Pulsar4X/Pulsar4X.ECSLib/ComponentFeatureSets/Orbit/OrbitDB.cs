@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
             var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
 
-            var epoch1 = parent.Manager.ManagerSubpulses.SystemLocalDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
+            var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
             var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
             var ralitivePos = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;

@@ -40,6 +40,8 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+
+
         internal void DrawNameIcons()
         {
             foreach (var kvp in RenderedMaps)

@@ -29,7 +29,7 @@ namespace Pulsar4X.SDL2UI
             //selectedEntityData
             if (ImGui.Begin("SM", ref IsActive, _flags))
             {
-                if (_selectedEntity.Entity != null)
+                if (_selectedEntity != null && _selectedEntity.Entity != null)
                 {
                     Entity entity = _selectedEntity.Entity;
                     var datablobs = entity.DataBlobs;

@@ -194,7 +194,7 @@ namespace Pulsar4X.ECSLib
             {
                 RequestingFactionGuid = faction.Guid,
                 EntityCommandingGuid = shipEntity.Guid,
-                CreatedDate = shipEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                CreatedDate = shipEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 FireControlGuid = fireControlGuid,
                 IsFiring = isFiring
             };
@@ -209,7 +209,7 @@ namespace Pulsar4X.ECSLib
                 if (IsFiring == FireModes.OpenFire)
                 {
                     fcinstance.IsEngaging = true;
-                    DateTime dateTimeNow = _fireControlComponent.Manager.ManagerSubpulses.SystemLocalDateTime;
+                    DateTime dateTimeNow = _fireControlComponent.Manager.ManagerSubpulses.StarSysDateTime;
                     foreach (var wpn in fcinstance.AssignedWeapons)
                         game.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor), wpn, dateTimeNow);
                 }

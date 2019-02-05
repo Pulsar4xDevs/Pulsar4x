@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
             position.Y += distanceFromParent;
             Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction,  position, starsys, shipName);
 
-            var orbitDB = ShipMovementProcessor.CreateOrbitHereWithSemiMajAxis(ship, parent, Distance.AuToKm(distanceFromParent), systemEntityManager.ManagerSubpulses.SystemLocalDateTime);
+            var orbitDB = ShipMovementProcessor.CreateOrbitHereWithSemiMajAxis(ship, parent, Distance.AuToKm(distanceFromParent), systemEntityManager.ManagerSubpulses.StarSysDateTime);
             ship.GetDataBlob<PositionDB>().SetParent(orbitDB.Parent);
             ship.SetDataBlob(orbitDB);
 
@@ -78,7 +78,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var instance in shipComponentInstanceDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     var sensor = design.GetDataBlob<SensorReceverAtbDB>();
-                    DateTime nextDatetime = shipEntity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(sensor.ScanTime);
+                    DateTime nextDatetime = shipEntity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(sensor.ScanTime);
                     shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan().TypeName, instance.OwningEntity);
 
                 }

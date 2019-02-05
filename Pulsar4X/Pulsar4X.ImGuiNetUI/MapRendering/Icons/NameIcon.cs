@@ -146,7 +146,7 @@ namespace Pulsar4X.SDL2UI
             //var size = ImGui.GetItemRectSize();
             var size = ImGui.GetWindowSize();
             Width = size.X;
-            Height = size.Y; 
+            Height = size.Y;
             ViewDisplayRect.Width = size.X;
             ViewDisplayRect.Height = size.Y;
 
@@ -155,6 +155,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.End();
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
             ImGui.PopStyleVar(3);
+
 
         }
 

@@ -172,7 +172,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            DateTime atDateTime = _entity.Manager.ManagerSubpulses.SystemLocalDateTime;
+            DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
             if (_entity.HasDataBlob<OrbitDB>())
             {
                 var vector = OrbitProcessor.PreciseOrbitalVelocityPolarCoordinate(_entity.GetDataBlob<OrbitDB>(), atDateTime);

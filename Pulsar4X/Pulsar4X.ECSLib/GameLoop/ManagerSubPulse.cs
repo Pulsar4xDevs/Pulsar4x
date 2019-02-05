@@ -148,13 +148,13 @@ namespace Pulsar4X.ECSLib
             //logevent.EventType = EventType.SystemDateChange;
             //_entityManager.Game.EventLog.AddEvent(logevent);
 
-            SystemDateChangedEvent?.Invoke(SystemLocalDateTime);
+            SystemDateChangedEvent?.Invoke(StarSysDateTime);
         }
 
 
         [JsonProperty]
         private DateTime _systemLocalDateTime;
-        public DateTime SystemLocalDateTime
+        public DateTime StarSysDateTime
         {
             get { return _systemLocalDateTime; }
             private set
@@ -208,7 +208,7 @@ namespace Pulsar4X.ECSLib
             {
                 //the date time here is going to be inconsistant when a game is saved then loaded, vs running without a save/load. needs fixing. 
                 //also we may want to run many of these before the first turn, and still have this offset. 
-                AddSystemInterupt(SystemLocalDateTime + item.Value.FirstRunOffset, item.Value);
+                AddSystemInterupt(StarSysDateTime + item.Value.FirstRunOffset, item.Value);
             }
         }
 
@@ -266,18 +266,18 @@ namespace Pulsar4X.ECSLib
 
         internal void ProcessSystem(DateTime targetDateTime)
         {
-            if(targetDateTime < SystemLocalDateTime)
+            if(targetDateTime < StarSysDateTime)
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
             //the system may need to run several times for a target datetime
             //keep processing the system till we've reached the wanted datetime
-            while (SystemLocalDateTime < targetDateTime)
+            while (StarSysDateTime < targetDateTime)
             {
                 //calculate max time the system can run/time to next interupt
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
-                TimeSpan timeDeltaMax = targetDateTime - SystemLocalDateTime;
+                TimeSpan timeDeltaMax = targetDateTime - StarSysDateTime;
                 DateTime nextDate = GetNextInterupt(timeDeltaMax);
 
-                TimeSpan deltaActual = nextDate - SystemLocalDateTime;
+                TimeSpan deltaActual = nextDate - StarSysDateTime;
 
                 //ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
                 //_entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
@@ -289,12 +289,12 @@ namespace Pulsar4X.ECSLib
 
         private DateTime GetNextInterupt(TimeSpan maxSpan)
         {
-            DateTime nextInteruptDateTime = SystemLocalDateTime + maxSpan;
+            DateTime nextInteruptDateTime = StarSysDateTime + maxSpan;
             if (QueuedProcesses.Keys.Count != 0 && nextInteruptDateTime > QueuedProcesses.Keys.Min())
             {
                 nextInteruptDateTime = QueuedProcesses.Keys.Min();
             }
-            if (nextInteruptDateTime < SystemLocalDateTime)
+            if (nextInteruptDateTime < StarSysDateTime)
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
             return nextInteruptDateTime;
         }
@@ -336,7 +336,7 @@ namespace Pulsar4X.ECSLib
                 }
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }
-            SystemLocalDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent                   
+            StarSysDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent                   
         }
 
         public int GetTotalNumberOfProceses()

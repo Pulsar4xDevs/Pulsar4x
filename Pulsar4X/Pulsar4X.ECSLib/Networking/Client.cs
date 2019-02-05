@@ -691,7 +691,7 @@ namespace Pulsar4X.Networking
             }
             else 
             {
-                if (entity.Manager.ManagerSubpulses.SystemLocalDateTime != hashData.AtDatetime)
+                if (entity.Manager.ManagerSubpulses.StarSysDateTime != hashData.AtDatetime)
                 { Messages.Add("Unmatched Date, can't compare hashes"); }
                 else
                 {

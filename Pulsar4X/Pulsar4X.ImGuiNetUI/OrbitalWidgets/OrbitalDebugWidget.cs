@@ -237,7 +237,7 @@ namespace Pulsar4X.SDL2UI
             _semiMinAxis = orbitIcon._orbitEllipseSemiMinor;
 
 
-            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.SystemLocalDateTime);
+            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
             CreateLines();
 
         }
@@ -375,7 +375,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.SystemLocalDateTime);
+            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
             var listtrueAnom = new List<PointD>();
             listtrueAnom.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 64, 4, _loP, _trueAnom, 128));
             Angles[1].Points = listtrueAnom;

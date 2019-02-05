@@ -59,6 +59,7 @@ namespace Pulsar4X.SDL2UI
                     var pannel = SMPannel.GetInstance();
                     _state.ActiveWindow = pannel;
                     pannel.IsActive = true;
+                    _state.EnableGameMaster();
                     this.IsActive = false;
                 }
                     

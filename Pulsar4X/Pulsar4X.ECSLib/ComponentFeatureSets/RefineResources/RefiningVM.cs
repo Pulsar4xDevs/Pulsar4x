@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib
 
         public void OnNewBatchJob()
         {
-            DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.SystemLocalDateTime;
+            DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime;
             var newBatchCommand = new RefineOrdersCommand(_factionGuid, _refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
             _orderHandler.HandleOrder(newBatchCommand);
             Update();

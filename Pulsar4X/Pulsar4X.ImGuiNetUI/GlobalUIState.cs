@@ -111,17 +111,18 @@ namespace Pulsar4X.SDL2UI
         internal void SetActiveSystem(Guid activeSysID)
         {
             PrimarySystem = StarSystemStates[activeSysID].StarSystem;
-            PrimarySystemDateTime = PrimarySystem.ManagerSubpulses.SystemLocalDateTime;
+            PrimarySystemDateTime = PrimarySystem.ManagerSubpulses.StarSysDateTime;
             GalacticMap.PrimarySysMap = GalacticMap.RenderedMaps[activeSysID];
         }
 
         internal void EnableGameMaster()
         {
             StarSystemStates = new Dictionary<Guid, SystemState>();
-            foreach (var system in Game.Systems)
-            {
-                StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
-            }
+            if(Game != null)
+                foreach (var system in Game.Systems)
+                {
+                    StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
+                }
         }
 
         internal void MapClicked(ECSLib.Vector4 worldCoord, MouseButtons button)

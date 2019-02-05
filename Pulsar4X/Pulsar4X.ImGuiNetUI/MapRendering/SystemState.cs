@@ -17,10 +17,10 @@ namespace Pulsar4X.SDL2UI
     {
         internal StarSystem StarSystem;
         internal SystemSensorContacts SystemContacts;
-        ConcurrentQueue<EntityChangeData> _sensorChanges;
+        ConcurrentQueue<EntityChangeData> _sensorChanges = new ConcurrentQueue<EntityChangeData>();
         internal List<EntityChangeData> SensorChanges = new List<EntityChangeData>();
         ManagerSubPulse PulseMgr;
-        EntityChangeListner _changeListner;
+        AEntityChangeListner _changeListner;
         public List<Guid> EntitysToBin = new List<Guid>();
         public List<Guid> EntitiesAdded = new List<Guid>();
         public List<EntityChangeData> SystemChanges = new List<EntityChangeData>();
@@ -55,7 +55,7 @@ namespace Pulsar4X.SDL2UI
 
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            EntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, new List<int>());//, listnerblobs);
+            AEntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, new List<int>());//, listnerblobs);
             _changeListner = changeListner;
 
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
@@ -91,8 +91,8 @@ namespace Pulsar4X.SDL2UI
 
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            //EntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, new List<int>());//, listnerblobs);
-            //_changeListner = changeListner;
+            AEntityChangeListner changeListner = new EntityChangeListnerSM(StarSystem);//, listnerblobs);
+            _changeListner = changeListner;
             /*
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {

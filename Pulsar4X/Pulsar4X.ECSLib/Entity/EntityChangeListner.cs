@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
 
     public class EntityChangeListnerSM : AEntityChangeListner
     {
-        internal EntityChangeListnerSM(EntityManager manager) : base(manager)
+        public EntityChangeListnerSM(EntityManager manager) : base(manager)
         { }
     }
 

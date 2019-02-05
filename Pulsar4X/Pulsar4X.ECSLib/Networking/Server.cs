@@ -419,7 +419,7 @@ namespace Pulsar4X.Networking
             NetOutgoingMessage netMessage = NetPeerObject.CreateMessage();
             netMessage.Write((byte)ToClientMsgType.SendEntityHashData);
             netMessage.Write(entity.Guid.ToByteArray());                                        //Entity Guid
-            netMessage.Write(entity.Manager.ManagerSubpulses.SystemLocalDateTime.ToBinary());   //Date
+            netMessage.Write(entity.Manager.ManagerSubpulses.StarSysDateTime.ToBinary());   //Date
             netMessage.Write(entity.GetHashCode());                                             //Entity Hash
             netMessage.Write(entity.DataBlobs.Count);                                           //NumberOfDatablobs
             foreach (IGetValuesHash item in entity.DataBlobs)                                   //

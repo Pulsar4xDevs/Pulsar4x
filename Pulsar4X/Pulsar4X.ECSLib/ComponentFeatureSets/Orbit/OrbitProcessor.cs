@@ -36,13 +36,13 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            DateTime toDate = entity.Manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            DateTime toDate = entity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), toDate);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             UpdateSystemOrbits(manager, toDate);
         }
 

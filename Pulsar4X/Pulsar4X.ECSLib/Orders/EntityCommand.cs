@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
         internal Guid EntityGuid;
         internal IOrderHandler Handler;
         private ManagerSubPulse _subPulse;
-        internal DateTime GetSystemDatetime { get { return _subPulse.SystemLocalDateTime; } }
+        internal DateTime GetSystemDatetime { get { return _subPulse.StarSysDateTime; } }
 
         internal CommandReferences(Guid faction, Guid entity, IOrderHandler handler, ManagerSubPulse subPulse)
         {
@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
             {
                 RequestingFactionGuid = faction.Guid,
                 EntityCommandingGuid = orderEntity.Guid,
-                CreatedDate = orderEntity.Manager.ManagerSubpulses.SystemLocalDateTime,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 NewName = newName,
                 UseActionLanes = false
             };

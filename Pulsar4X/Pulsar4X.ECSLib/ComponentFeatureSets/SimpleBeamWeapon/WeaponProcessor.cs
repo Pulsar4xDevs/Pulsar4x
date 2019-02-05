@@ -27,7 +27,8 @@ namespace Pulsar4X.ECSLib
                     }
                     else
                         FireBeamWeapons(beamWeapon, atDate);
-                    beamWeapon.Manager.ManagerSubpulses.AddEntityInterupt(stateInfo.CoolDown, nameof(WeaponProcessor), beamWeapon);
+                    if(fireControl.IsEngaging)
+                        beamWeapon.Manager.ManagerSubpulses.AddEntityInterupt(stateInfo.CoolDown, nameof(WeaponProcessor), beamWeapon);
                 }
             }
 
@@ -60,7 +61,7 @@ namespace Pulsar4X.ECSLib
             var designAtb = beamWeapon.GetDataBlob<DesignInfoDB>().DesignEntity.GetDataBlob<SimpleBeamWeaponAtbDB>();
             int damageAmount = designAtb.DamageAmount; // TODO: Better damage calculation
 
-            double range = myPos.GetDistanceTo(myPos);
+            double range = myPos.GetDistanceTo(targetPos);
 
             // only fire if target is in range TODO: fire anyway, but miss. TODO: this will be wrong if we do movement last, this needs to be done after movement. 
             if (range <= designAtb.MaxRange)//TODO: firecontrol shoudl have max range too?: Math.Min(designAtb.MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
