@@ -6,6 +6,33 @@ namespace Pulsar4X.ECSLib
 {
     public static class Misc
     {
+
+        public static string StringifyWeight(double amountInKg, string format = "0.###")
+        {
+            string stringWeight = "0 Kg";
+            if (amountInKg > 100000000)
+            {
+                amountInKg = amountInKg * 0.00000001;
+                stringWeight = amountInKg.ToString(format) + "MT";
+            }
+            else if (amountInKg > 100000)
+            {
+                amountInKg = amountInKg * 0.00001;
+                stringWeight = amountInKg.ToString(format) + "KT";
+            }
+            else if (amountInKg > 1000)
+            {
+                amountInKg = amountInKg * 0.001;
+                stringWeight = amountInKg.ToString(format) + "T";
+            }
+
+            else { stringWeight = amountInKg.ToString(format) + "Kg"; }
+
+            return stringWeight;
+        }
+
+
+
         public static bool HasReqiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
         {
             if (costs == null)

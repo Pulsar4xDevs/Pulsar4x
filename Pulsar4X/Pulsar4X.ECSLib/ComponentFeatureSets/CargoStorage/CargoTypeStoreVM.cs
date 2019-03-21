@@ -20,7 +20,24 @@ namespace Pulsar4X.ECSLib
 
         Dictionary<Guid, CargoItemVM> _cargoItemsDict = new Dictionary<Guid, CargoItemVM>();
         public ObservableCollection<CargoItemVM> CargoItems { get; } = new ObservableCollection<CargoItemVM>();
-
+        public CargoItemVM GetItemVM(Guid guid)
+        {
+            return _cargoItemsDict[guid]; 
+        }
+        public CargoItemVM GetOrAddItemVM(ICargoable cargoableItem)
+        {
+            if (!_cargoItemsDict.ContainsKey(cargoableItem.ID))
+            {
+                var itemVM = new CargoItemVM(cargoableItem);
+                _cargoItemsDict.Add(cargoableItem.ID, itemVM);
+                CargoItems.Add(itemVM);
+            }
+            return _cargoItemsDict[cargoableItem.ID];
+        }
+        public bool ContainsItem(Guid guid)
+        {
+            return _cargoItemsDict.ContainsKey(guid); 
+        }
         private long _maxCapacity;
         public string MaxCapacity { get; set; }
         private long _freeCapacity;

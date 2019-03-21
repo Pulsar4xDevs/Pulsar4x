@@ -7,23 +7,38 @@ namespace Pulsar4X.ECSLib
     public class CargoItemVM : INotifyPropertyChanged
     {
 
-        private ICargoable _cargoableItem;
+        public ICargoable CargoableItem;
         internal Guid ItemGuid
         {
             get
             {
-                return _cargoableItem.ID;
+                return CargoableItem.ID;
             }
         }
         private long _itemCount = 0;
-
+        public long ItemStoredCount { get { return _itemCount; } }
+        public long ItemsTotal      { get { return _itemCount + ItemIncomingAmount - ItemOutgoingAmount; } } 
+        public long ItemIncomingAmount = 0;
+        public long ItemOutgoingAmount = 0;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string ItemName { get { return _cargoableItem.Name; } }
-        public string ItemWeightPerUnit { get { return _cargoableItem.Mass.ToString(); } }
+        public string ItemName { get { return CargoableItem.Name; } }
+        public string ItemWeightPerUnit { get { return CargoableItem.Mass.ToString(); } }
         private string _noOfItems;
         public string NumberOfItems {
             get { return _noOfItems; } set { _noOfItems = value; OnPropertyChanged(); }
+        }
+        public string GetIncomingWeight()
+        {
+            return Misc.StringifyWeight(ItemIncomingAmount * CargoableItem.Mass, "0.###"); 
+        }
+        public string GetOutgoungWeight()
+        {
+            return Misc.StringifyWeight(ItemOutgoingAmount * CargoableItem.Mass, "0.###");
+        }
+        public string GetStoredWeight()
+        {
+            return Misc.StringifyWeight(_itemCount * CargoableItem.Mass, "0.###");
         }
 
         private string _totalWeight;
@@ -39,22 +54,18 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal CargoItemVM(ICargoable cargoableItem)
+        public CargoItemVM(ICargoable cargoableItem)
         {
-            _cargoableItem = cargoableItem;
+            CargoableItem = cargoableItem;
         }
 
         private void setTotalWeight()
         {
-            double totalWeight = _itemCount * _cargoableItem.Mass;
-            if(totalWeight > 1000) {
-                totalWeight = totalWeight * 0.001;
-                TotalWeight = totalWeight.ToString("0.###") + "T";
-            }
-            else { TotalWeight = totalWeight.ToString("0.###") + "Kg"; } //add KT and MT?
+            double totalWeight = _itemCount * CargoableItem.Mass;
+            TotalWeight = Misc.StringifyWeight(totalWeight, "0.###");
         }
 
-        internal void Update(long itemCount)
+        public void Update(long itemCount)
         {
             
             if(_itemCount != itemCount) {

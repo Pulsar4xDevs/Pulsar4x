@@ -12,25 +12,29 @@ namespace Pulsar4X.SDL2UI
         EntityState _selectedEntity;
         CargoStorageVM _storeVM;
         RefiningVM _refineryVM;
-        private ColonyPanel(EntityState selectedEntity)
+        CargoListPannelSimple _cargoList;
+        StaticDataStore _staticData;
+        private ColonyPanel(StaticDataStore staticData, EntityState selectedEntity)
         {
             _selectedEntity = selectedEntity;
+            _cargoList = new CargoListPannelSimple(staticData, selectedEntity);
+            _staticData = staticData;
         }
 
-        public static ColonyPanel GetInstance(EntityState selectedEntity)
+        public static ColonyPanel GetInstance(StaticDataStore staticData, EntityState selectedEntity)
         {
             ColonyPanel instance;
             if (selectedEntity.CmdRef == null)
                selectedEntity.CmdRef = CommandReferences.CreateForEntity(_state.Game, selectedEntity.Entity);
             if (!_state.LoadedWindows.ContainsKey(typeof(ColonyPanel)))
             {
-                instance = new ColonyPanel(selectedEntity);
+                instance = new ColonyPanel(staticData, selectedEntity);
                 instance.HardRefresh();
                 return instance;
             }
             instance = (ColonyPanel)_state.LoadedWindows[typeof(ColonyPanel)];
             instance._selectedEntity = selectedEntity;
-
+            
             return instance;
         }
 
@@ -51,6 +55,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (_storeVM != null)
                     {
+                        /*
                         ImGui.BeginGroup();
                         foreach (var storetype in _storeVM.CargoResourceStores)
                         {
@@ -71,6 +76,8 @@ namespace Pulsar4X.SDL2UI
                             }
                         }
                         ImGui.EndGroup();
+                        */
+                        _cargoList.Display();                       
                     }
 
 
@@ -171,6 +178,7 @@ namespace Pulsar4X.SDL2UI
                 _refineryVM = new RefiningVM(_state.Game, _selectedEntity.CmdRef, refinaryDB);
                 _refineryVM.SetUpdateListner(_selectedEntity.Entity.Manager.ManagerSubpulses);
             }
+            _cargoList = new CargoListPannelSimple(_staticData, _selectedEntity);
         }
 
         internal override void EntityClicked(EntityState entity, MouseButtons button)

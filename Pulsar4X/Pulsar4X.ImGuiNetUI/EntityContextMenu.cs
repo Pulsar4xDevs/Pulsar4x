@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
                     OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
                 }
-                if(ImGui.SmallButton("Change current orbit"))
+                if (ImGui.SmallButton("Change current orbit"))
                 {
                     ChangeCurrentOrbitWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
@@ -70,13 +70,23 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.SmallButton("Cargo"))
                 {
-                    var instance = ColonyPanel.GetInstance(_entityState);
+                    var instance = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState);
                     instance.IsActive = true;
                     _state.ActiveWindow = instance;
                 }
             }
             //if entity can mine || refine || build
             //econOrderwindow
+
+            if (_entityState.Entity.HasDataBlob<ColonyInfoDB>()) 
+            { 
+                if (ImGui.SmallButton("Econ"))
+                {
+                    var instance = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState);
+                    instance.IsActive = true;
+                    _state.ActiveWindow = instance;
+                } 
+            }
 
             ImGui.EndGroup();
 

@@ -292,6 +292,142 @@ namespace Pulsar4X.ECSLib
             return Distance.DistanceBetween(pos1, pos2);
         }
 
+        /// <summary>
+        /// This is an aproximation of the mean velocity of an orbit. 
+        /// </summary>
+        /// <returns>The orbital velocity in au.</returns>
+        /// <param name="orbit">Orbit.</param>
+        public static double MeanOrbitalVelocityInAU(OrbitDB orbit)
+        {
+            double a = orbit.SemiMajorAxis;
+            double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
+            double orbitalPerodSeconds = orbit.OrbitalPeriod.TotalSeconds;
+            double peremeter = Math.PI * (3* (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
+            return orbitalPerodSeconds / peremeter;
+        }
+
+        /// <summary>
+        /// Tsiolkovsky's rocket equation.
+        /// </summary>
+        /// <returns>deltaV</returns>
+        /// <param name="wetMass">Wet mass.</param>
+        /// <param name="dryMass">Dry mass.</param>
+        /// <param name="specificImpulse">Specific impulse.</param>
+        public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double specificImpulse)
+        {
+            double ve = specificImpulse * 9.8;
+            double deltaV = ve * Math.Log(wetMass / dryMass);
+            return deltaV;
+        }
+
+
+        public void CargoTransferCostFromPlanet(Entity recever, Entity planet, Shuttle shuttle)
+        {
+
+            //minExchangeRadius = min range to exchange cargo: body radius + atmo.
+            //Dv cost at Min range. 
+            //cargo capacity at Min range.
+                //total capacity. - defined by shuttle
+                //fuel weight.
+            //Maximum Dv at 0 cargo. - defined by shuttle
+            //Time per trip. (not even sure how I'm going to calc this)
+            //capacity per trip. (from target orbit DV)
+
+            //other ideas which would affect this:
+            //single use launches (from a ground station) more cargo, less fuel but higher other resources.
+            //re-usable - higher fuel cost ie. de-orbit burn and reentry, would be higher on atmoless planets, lower cost on other resources. 
+
+            var bodyRadius = planet.GetDataBlob<MassVolumeDB>().RadiusInKM;
+            var targetOrbit = recever.GetDataBlob<OrbitDB>();
+            var sgp = targetOrbit.GravitationalParameter;
+
+            //shuttleData: this should all come from a datablob
+            double shuttleWetMass = shuttle.shuttleWetMass;
+            double shuttleDryMass = shuttle.shuttleDryMass;
+            double shuttleEngineISP = shuttle.shuttleEngineISP;
+            double shuttleMaxCargoMass = shuttle.shuttleMaxCargoMass;
+
+
+
+            //minExchangeRadius
+
+            double minExchangeRadius = bodyRadius * 1.25; //ie atmosphereless body. 
+            float atmoPressure = 0;
+            if (planet.HasDataBlob<AtmosphereDB>())
+            {
+                var atmo = planet.GetDataBlob<AtmosphereDB>();
+                atmoPressure = atmo.Pressure;
+
+                // karmanLine is an 'outofmyass' calculation. 
+                //earths radius is ~6.7km, the Karman line is 100km, 
+                //earths mesopause is 80km, 
+                //the ISS orbits at 330 to 410km
+                // radius of earth * 15 gets close to the karman line. 
+                var karmanLine = bodyRadius * 15;
+                minExchangeRadius = bodyRadius + karmanLine * atmoPressure; //so karman line * atmopressure should give us a good safe distance for cargo tranfer.
+            }
+
+            //DvCost at min range;
+            double dvToMinOrbit = PreciseOrbitalSpeed(sgp, minExchangeRadius, minExchangeRadius); //dv to a low circular orbit.  
+            //todo: dvToMinOrbit += gravityDrag, atmosphereDrag, etc etc.  
+
+            double dvAtMaxCargo = TsiolkovskyRocketEquation(shuttleWetMass + shuttleMaxCargoMass, shuttleDryMass + shuttleMaxCargoMass, shuttleEngineISP);
+            double dvAtNoCargo = TsiolkovskyRocketEquation(shuttleWetMass, shuttleDryMass, shuttleEngineISP);
+
+
+        }
+
+        /// <summary>
+        /// TODO: add atmo drag and 'gravity drag' (ie thrust to weight ratio) to this. 
+        /// </summary>
+        /// <returns>The to orbit dv.</returns>
+        /// <param name="targetOrbit">Target orbit.</param>
+        /// <param name="departBody">Depart body.</param>
+        public double AccentToOrbitDV(OrbitDB targetOrbit, Entity departBody, double thrustToWeight, double aerodynamicDrag, double areodynamicLift, double arodynamicStrength)
+        {
+            var sgp = targetOrbit.GravitationalParameter;
+            var bodyRadius = departBody.GetDataBlob<MassVolumeDB>().RadiusInKM;
+            var periaps = Distance.AuToKm( targetOrbit.Periapsis);
+            var sma = targetOrbit.SemiMajorAxis;
+            var distance = periaps - bodyRadius;
+
+            var dvAtPeriapsis = PreciseOrbitalSpeed(sgp, periaps, sma); //this could be ralitivly high speed if orbit is elliptical
+
+            // this is an 'outofmyass' calculation, I'm suprised it's so far, I always thought of the atmosphere as being ralitivly thin compared to the radius.  
+            //earths radius is ~6.7km, the Karman line is 100km, 
+            //the mesopause is 80km, 
+            //the ISS orbits at 330 to 410km
+            // radius of earth * 15 gets close to the karman line. 
+            var lowOrbitDistance = bodyRadius * 15;
+
+            var dvAtLowOrbit = PreciseOrbitalSpeed(sgp, lowOrbitDistance, lowOrbitDistance); //dv to a low circular orbit.  
+
+            var dvDifference = dvAtPeriapsis - dvAtLowOrbit;
+            var distanceDifference = periaps - lowOrbitDistance;
+
+            double heightOfAtmoBoundry = 0;
+            float atmoPressure = 0;
+            if (departBody.HasDataBlob<AtmosphereDB>())
+            {
+
+                var atmo = departBody.GetDataBlob<AtmosphereDB>();
+                atmoPressure = atmo.Pressure;
+                heightOfAtmoBoundry = lowOrbitDistance * 0.25;
+            }
+            //var timeToLowOrbit = thrustToWeight
+            //var timeToLowOrbit
+
+
+
+            double timeSpentInTroposphere;
+            double timeSpentInStratosphere;
+            double timeSpentInMesosphere;
+            double timeSpentInThermosphere;
+
+
+
+            throw new NotImplementedException();
+        }
 
         public static Vector4 Pos(double combinedMass, double semiMajAxis, double meanAnomaly, double eccentricity, double aoP, double loAN, double i)
         {

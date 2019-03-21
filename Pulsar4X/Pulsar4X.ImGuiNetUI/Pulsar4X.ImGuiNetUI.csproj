@@ -142,6 +142,7 @@
   <ItemGroup>
     <Folder Include="Colony\" />
     <Folder Include="OrbitalWidgets\" />
+    <Folder Include="Cargo\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Resources\CancelIco.bmp">

@@ -16,7 +16,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonProperty]
         public Dictionary<Guid, CargoTypeStore> StoredCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
-
+        public Dictionary<Guid, CargoTypeStore> OutgoingCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
+        public Dictionary<Guid, CargoTypeStore> IncomingCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
+        public List<Shuttle> Shuttles = new List<Shuttle>(); //todo: move this to a seperate DB?
 
         public CargoStorageDB()
         {
@@ -37,6 +39,8 @@ namespace Pulsar4X.ECSLib
             return new CargoStorageVM(game.StaticData, cmdRef, this);
         }
     }
+
+
 
     /// <summary>
     /// Lists items of the same CargoType, and the number of those items.

@@ -267,7 +267,8 @@ namespace Pulsar4X.ECSLib
             sensor.ComponentDesignAttributes[0].SetValueFromInput(5000);  //size
             sensor.ComponentDesignAttributes[1].SetValueFromInput(500); //best wavelength
             sensor.ComponentDesignAttributes[2].SetValueFromInput(1000); //wavelength detection width 
-                                                                         //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)                                                                        //[4] worst detection magnatude (not settable)
+            //[3] best detection magnatude. (Not settable)
+            //[4] worst detection magnatude (not settable)
             sensor.ComponentDesignAttributes[5].SetValueFromInput(5);   //resolution
             sensor.ComponentDesignAttributes[6].SetValueFromInput(3600);//Scan Time
             sensor.Name = "PassiveSensor-S500";
