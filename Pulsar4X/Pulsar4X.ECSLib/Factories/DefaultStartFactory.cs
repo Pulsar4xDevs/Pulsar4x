@@ -95,9 +95,14 @@ namespace Pulsar4X.ECSLib
             Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol, factionEntity, earth, sol, "Prevailing Stillness");
             StorageSpaceProcessor.AddCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
+
+            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), sol, factionEntity, earth, sol, "Planet Express Ship");
+            StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+
             sol.SetDataBlob(ship1.ID, new TransitableDB());
             sol.SetDataBlob(ship2.ID, new TransitableDB());
             sol.SetDataBlob(gunShip.ID, new TransitableDB());
+            sol.SetDataBlob(courier.ID, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB
@@ -184,6 +189,34 @@ namespace Pulsar4X.ECSLib
             return shipDesign;
         }
 
+        public static Entity CargoShipDesign(Game game, Entity faction)
+        {
+            var shipDesign = ShipFactory.CreateNewShipClass(game, faction, "Cargo Courier");
+            Entity engine = DefaultEngineDesign(game, faction);
+            Entity fuelTank = DefaultFuelTank(game, faction);
+            Entity laser = DefaultSimpleLaser(game, faction);
+            Entity bfc = DefaultBFC(game, faction);
+            Entity sensor = ShipPassiveSensor(game, faction);
+            Entity cargo = ShipGenericCargo(game, faction);
+
+            List<Entity> components = new List<Entity>()
+            {
+                engine,     //50
+                engine,     //50
+                engine,     //50
+                engine,     //50
+                fuelTank,   //250
+                fuelTank,   //250 60%
+                laser,      //10
+                bfc,        //10
+                sensor,     //50
+                cargo,      //190
+            };
+
+            EntityManipulation.AddComponentToEntity(shipDesign, components, faction.Guid);
+            return shipDesign;
+        }
+
         public static Entity DefaultEngineDesign(Game game, Entity faction)
         {
             ComponentDesign engineDesign;
@@ -240,6 +273,16 @@ namespace Pulsar4X.ECSLib
             cargoInstalation.ComponentDesignAttributes[0].SetValueFromInput(1000000);
             cargoInstalation.Name = "CargoInstalation1";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, cargoInstalation);
+        }
+
+        public static Entity ShipGenericCargo(Game game, Entity faction)
+        { 
+            ComponentDesign cargoComponent;
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            cargoComponent = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
+            cargoComponent.ComponentDesignAttributes[0].SetValueFromInput(5000); //5t storage
+            cargoComponent.Name = "CargoComponent5t";
+            return GenericComponentFactory.DesignToDesignEntity(game, faction, cargoComponent);
         }
 
         public static Entity ShipPassiveSensor(Game game, Entity faction)

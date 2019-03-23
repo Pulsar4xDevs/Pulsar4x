@@ -7,7 +7,9 @@ namespace Pulsar4X.ECSLib
 {
 
     /// <summary>
-    /// Contains info on a ships cargo capicity.
+    /// Contains info on a ships cargo capacity.
+    /// TODO: is it going to be easier to store items flat, 
+    /// ie a dict of guid,long, and just keep track of max and free space of typestore 
     /// </summary>
     public class CargoStorageDB : BaseDataBlob, ICreateViewmodel
     {
@@ -58,14 +60,18 @@ namespace Pulsar4X.ECSLib
         /// The Maximum that this entity can store of this type.
         /// </summary>
         [JsonProperty]
-        public long MaxCapacity { get; internal set; }
+        public long MaxCapacityKg { get; internal set; } = 0;
 
         /// <summary>
         /// The amount of free space remaining.
         /// </summary>
         [JsonProperty]
-        public long FreeCapacity { get; internal set; } 
+        public long FreeCapacityKg { get; internal set; } = 0;
 
+        /// <summary>
+        /// Gets the items and amounts (number of items, not weight)
+        /// </summary>
+        /// <value>The items and amounts.</value>
         [JsonProperty]
         public Dictionary<Guid, long> ItemsAndAmounts { get;} = new Dictionary<Guid, long>();
          

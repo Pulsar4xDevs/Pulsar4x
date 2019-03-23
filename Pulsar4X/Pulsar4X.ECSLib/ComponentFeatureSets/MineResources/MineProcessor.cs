@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
                 double actualRate = kvp.Value * mineBonuses * accessability;
                 int amountMinableThisTick = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
                 
-                long freeCapacity = stockpile.StoredCargoTypes[mineral.CargoTypeID].FreeCapacity;
+                long freeCapacity = stockpile.StoredCargoTypes[mineral.CargoTypeID].FreeCapacityKg;
 
                 long weightMinableThisTick = itemMassPerUnit * amountMinableThisTick;
                 weightMinableThisTick = Math.Min(weightMinableThisTick, freeCapacity);  

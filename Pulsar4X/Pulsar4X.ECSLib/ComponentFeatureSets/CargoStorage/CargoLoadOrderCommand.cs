@@ -1,16 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoLoadOrder:EntityCommand
+    public class CargoXferOrder:EntityCommand
     {
 
-        public long TotalAmountToTransfer { get; set; }
 
-        public Guid LoadCargoFromEntityGuid { get; set; }
 
-        public Guid ItemToTransfer { get; set; }
+        public List<Tuple<Guid, long>> ItemsGuidsToTransfer;
+        public List<Tuple<ICargoable, long>> ItemICargoablesToTransfer;
+        public Guid SendCargoToEntityGuid { get; set; }
 
         internal override int ActionLanes => 1;
         internal override bool IsBlocking => true;
@@ -18,10 +19,25 @@ namespace Pulsar4X.ECSLib
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
+        private CargoTransferDB _cargoTransferDB;
+
         [JsonIgnore]
         Entity factionEntity;
         [JsonIgnore]
-        Entity loadFromEntity;
+        Entity sendToEntity;
+
+        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<Tuple<Guid,long>> itemsToMove )
+        {
+            var cmd = new CargoXferOrder()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = cargoFromEntity.Guid,
+                CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                SendCargoToEntityGuid = cargoToEntity.Guid,
+                ItemsGuidsToTransfer = itemsToMove
+            };
+            game.OrderHandler.HandleOrder(cmd);
+        }
 
         /// <summary>
         /// Validates and actions the command. 
@@ -31,25 +47,38 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         internal override void ActionCommand(Game game)
         {
-            CargoTransferDB newTransferDB = new CargoTransferDB();
-            newTransferDB.CargoToEntity = EntityCommanding;
-            newTransferDB.CargoToDB = EntityCommanding.GetDataBlob<CargoStorageDB>();
-            newTransferDB.CargoFromEntity = loadFromEntity;
-            newTransferDB.CargoFromDB = loadFromEntity.GetDataBlob<CargoStorageDB>();
+            if (!IsRunning)
+            {
+                _cargoTransferDB = new CargoTransferDB();
+                _cargoTransferDB.CargoToEntity = sendToEntity;
+                _cargoTransferDB.CargoToDB = sendToEntity.GetDataBlob<CargoStorageDB>();
+                _cargoTransferDB.CargoFromEntity = EntityCommanding;
+                _cargoTransferDB.CargoFromDB = EntityCommanding.GetDataBlob<CargoStorageDB>();
 
-            newTransferDB.TotalAmountToTransfer = TotalAmountToTransfer;
-            newTransferDB.ItemToTranfer = (ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
-            EntityCommanding.Manager.SetDataBlob(EntityCommanding.ID, newTransferDB);
-            IsRunning = true;
+                _cargoTransferDB.ItemsLeftToTransfer = ItemICargoablesToTransfer;
+                _cargoTransferDB.OrderedToTransfer = ItemICargoablesToTransfer;
+
+                EntityCommanding.Manager.SetDataBlob(EntityCommanding.ID, _cargoTransferDB);
+                IsRunning = true;
+            }
         }
 
+        private void GetItemsToTransfer(StaticDataStore staticData)
+        {
+            foreach (var tup in ItemsGuidsToTransfer)
+            {
+                //(ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
+                ItemICargoablesToTransfer.Add(new Tuple<ICargoable, long>( staticData.GetICargoable(tup.Item1), tup.Item2));
+            }
+        }
 
         internal override bool IsValidCommand(Game game)
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.TryGetEntityByGuid(LoadCargoFromEntityGuid, out loadFromEntity))
+                if (game.GlobalManager.TryGetEntityByGuid(SendCargoToEntityGuid, out sendToEntity))
                 {
+                    GetItemsToTransfer(game.StaticData);//should I try catch this? nah it's unlikely to be bad here. 
                     return true;
                 }
             }
@@ -58,12 +87,26 @@ namespace Pulsar4X.ECSLib
 
         internal override bool IsFinished()
         {
-            throw new NotImplementedException();
+            if (_cargoTransferDB == null)
+                return false;
+            if (AmountLeftToXfer() > 0)
+                return false;
+            else
+                return true;
         }
-
-        public CargoLoadOrder()
+        long AmountLeftToXfer()
         {
+            long amount = 0;
+            foreach (var tup in _cargoTransferDB.ItemsLeftToTransfer)
+            {
+                amount += tup.Item2;
+            }
+            return amount;
+         }
 
-        }
+        //public CargoXferOrder(Entity entityCommanding, Entity loadFromEntity, List<Tuple<Guid,long>> typesAndAmounts )
+        //{
+
+        //}
     }
 }

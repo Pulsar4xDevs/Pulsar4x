@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -17,13 +18,13 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         internal CargoStorageDB CargoToDB { get; set; }
 
-        internal ICargoable ItemToTranfer { get; set; }
-        internal long TotalAmountToTransfer { get; set; }
+        internal List<Tuple<ICargoable, long>> OrderedToTransfer { get; set; }
+        internal List<Tuple<ICargoable, long>> ItemsLeftToTransfer;
 
         internal double DistanceBetweenEntitys { get; set; }
-        internal int TransferRate { get; set; }
+        internal int TransferRateInKG { get; set; } = 1000;
 
-        internal long AmountTransfered { get; set; }
+
 
         public CargoTransferDB()
         {

@@ -41,13 +41,13 @@ namespace Pulsar4X.ECSLib
 
         public void SendNewLoadCargoOrder(DateTime currentDatetime)
         {
-            var newOrder = new CargoLoadOrder();
+            var newOrder = new CargoXferOrder();
             newOrder.CreatedDate = currentDatetime;
             newOrder.RequestingFactionGuid = _faction.Guid;
-            newOrder.LoadCargoFromEntityGuid = _loadFromEntity.Guid;
+            newOrder.SendCargoToEntityGuid = _loadFromEntity.Guid;
             newOrder.EntityCommandingGuid = _faction.Guid;
-            newOrder.ItemToTransfer = SelectedCargoItem.ID;
-            newOrder.TotalAmountToTransfer = AmountToTransfer;
+            //newOrder.ItemToTransfer = SelectedCargoItem.ID;
+            //newOrder.TotalAmountToTransfer = AmountToTransfer;
             _orderHandler.HandleOrder(newOrder);
         }
 

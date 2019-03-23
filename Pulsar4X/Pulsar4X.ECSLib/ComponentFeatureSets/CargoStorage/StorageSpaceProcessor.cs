@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
             }
             storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] -= amount;
             //FreeCapacity is *MASS*
-            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacity += item.Mass * amount; 
+            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg += item.Mass * amount; 
         }
 
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
             
             storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] += amount;
             //FreeCapacity is *MASS*
-            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacity -= item.Mass * amount; 
+            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg -= item.Mass * amount; 
         }
 
         internal static bool HasEntity(CargoStorageDB storeDB, CargoAbleTypeDB item)        
@@ -210,16 +210,16 @@ namespace Pulsar4X.ECSLib
                 if (!storageDBStoredCargos.ContainsKey(cargoTypeID))
                 {
                     var newStore = new CargoTypeStore();
-                    newStore.MaxCapacity = validMaxCapacity;
-                    newStore.FreeCapacity = validMaxCapacity;
+                    newStore.MaxCapacityKg = validMaxCapacity;
+                    newStore.FreeCapacityKg = validMaxCapacity;
                     storageDBStoredCargos.Add(cargoTypeID, newStore);                                        
                 }
                 
-                else if (storageDBStoredCargos[cargoTypeID].MaxCapacity != validMaxCapacity)
+                else if (storageDBStoredCargos[cargoTypeID].MaxCapacityKg != validMaxCapacity)
                 {    
-                    long usedSpace = storageDBStoredCargos[cargoTypeID].MaxCapacity - storageDBStoredCargos[cargoTypeID].FreeCapacity;
+                    long usedSpace = storageDBStoredCargos[cargoTypeID].MaxCapacityKg - storageDBStoredCargos[cargoTypeID].FreeCapacityKg;
                     
-                    storageDBStoredCargos[cargoTypeID].MaxCapacity = validMaxCapacity;
+                    storageDBStoredCargos[cargoTypeID].MaxCapacityKg = validMaxCapacity;
 
                     if (!(usedSpace <= validMaxCapacity))
                     {

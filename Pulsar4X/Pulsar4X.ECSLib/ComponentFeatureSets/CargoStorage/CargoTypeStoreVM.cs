@@ -59,16 +59,30 @@ namespace Pulsar4X.ECSLib
             Update();
         }
 
+        public List<Tuple<Guid, long>> ItemsToMoveOut()
+        {
+            List<Tuple<Guid, long>> items = new List<Tuple<Guid, long>>();
+
+            foreach (var item in _cargoItemsDict)
+            {
+                if(item.Value.ItemOutgoingAmount > 0)
+                {
+                    items.Add(new Tuple<Guid, long>(item.Key, item.Value.ItemOutgoingAmount)); 
+                }
+            }
+
+            return items;
+        }
 
         public void Update()
         {
-            if(_maxCapacity != _typeStore.MaxCapacity) {
-                _maxCapacity = _typeStore.MaxCapacity;
+            if(_maxCapacity != _typeStore.MaxCapacityKg) {
+                _maxCapacity = _typeStore.MaxCapacityKg;
                 MaxCapacity = _maxCapacity.ToString();
 
             }
-            if(_freeCapacity != _typeStore.FreeCapacity) {
-                _freeCapacity = _typeStore.FreeCapacity;
+            if(_freeCapacity != _typeStore.FreeCapacityKg) {
+                _freeCapacity = _typeStore.FreeCapacityKg;
                 FreeCapacity = _freeCapacity.ToString();
             }
 

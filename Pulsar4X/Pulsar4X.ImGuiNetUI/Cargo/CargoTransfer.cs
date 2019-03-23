@@ -122,6 +122,18 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        internal List<Tuple<Guid,long>> GetAllToMoveOut()
+        {
+            List<Tuple<Guid, long>> listToMove = new List<Tuple<Guid, long>>();
+
+            foreach (var item in _cargoResourceStoresDict.Values)
+            {
+                listToMove.AddRange(item.ItemsToMoveOut());
+            }
+
+            return listToMove; 
+        }
+
         internal void AddUICargoIn(ICargoable cargoItem, long itemCount)
         {
             CargoTypeStoreVM store;
@@ -164,6 +176,8 @@ namespace Pulsar4X.SDL2UI
 
             return amount;
         }
+
+        
 
         internal bool HasCargoInStore(ICargoable cargoItem)
         {
@@ -221,8 +235,8 @@ namespace Pulsar4X.SDL2UI
     public class CargoTransfer : PulsarGuiWindow
     {
         StaticDataStore _staticData;
-        EntityState _selectedEntity1;
-        EntityState _selectedEntity2;
+        EntityState _selectedEntityLeft;
+        EntityState _selectedEntityRight;
 
         CargoListPannelComplex _cargoList1;
         CargoListPannelComplex CargoListLeft
@@ -251,16 +265,16 @@ namespace Pulsar4X.SDL2UI
                 instance = new CargoTransfer
                 {
                     _staticData = staticData,
-                    _selectedEntity1 = selectedEntity1
+                    _selectedEntityLeft = selectedEntity1
                 };
             }
             else
             {
                 instance = (CargoTransfer)_state.LoadedWindows[typeof(CargoTransfer)];
-                instance._selectedEntity1 = selectedEntity1;
+                instance._selectedEntityLeft = selectedEntity1;
 
             }
-            if (instance._selectedEntity1.Entity.HasDataBlob<CargoStorageDB>())
+            if (instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
                 instance.CargoListLeft = new CargoListPannelComplex(staticData, selectedEntity1);
                 instance._hasCargoAbilityLeft = true;
@@ -270,10 +284,10 @@ namespace Pulsar4X.SDL2UI
 
 
 
-            if (instance._selectedEntity2 != null && instance._selectedEntity1.Entity.HasDataBlob<CargoStorageDB>())
+            if (instance._selectedEntityRight != null && instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
                 if (!instance._hasCargoAbilityRight)
-                    instance.CargoListRight = new CargoListPannelComplex(staticData, instance._selectedEntity2);
+                    instance.CargoListRight = new CargoListPannelComplex(staticData, instance._selectedEntityRight);
                 instance._hasCargoAbilityRight = true;
             }
             else
@@ -283,10 +297,10 @@ namespace Pulsar4X.SDL2UI
 
         internal void Set2ndCargo(EntityState entity)
         {
-            if (_selectedEntity1.Entity.HasDataBlob<CargoStorageDB>())
+            if (_selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
-                _selectedEntity2 = entity;
-                CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntity2);
+                _selectedEntityRight = entity;
+                CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight);
                 _hasCargoAbilityRight = true;
             }
         }
@@ -328,7 +342,25 @@ namespace Pulsar4X.SDL2UI
         }
 
         private void ActionXferOrder()
-        { }
+        {
+
+            //create order for items to go to right
+            CargoXferOrder.CreateCommand(
+                _state.Game,
+                _state.Faction,
+                _selectedEntityLeft.Entity,
+                _selectedEntityRight.Entity, 
+                CargoListLeft.GetAllToMoveOut());
+
+            //create order for items to go to left
+            CargoXferOrder.CreateCommand(
+                _state.Game,
+                _state.Faction,
+                _selectedEntityRight.Entity,
+                _selectedEntityLeft.Entity,
+                CargoListRight.GetAllToMoveOut());
+        }
+
         internal override void Display()
         {
             if (IsActive)

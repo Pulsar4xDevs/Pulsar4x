@@ -340,10 +340,10 @@
           "Name": "General Storage",
           "Description": "Stores General Cargo",
           "ID": "30cd60f8-1de3-4faa-acba-0933eb84c199",
-          "MassFormula": "500000",
+          "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "Ability(1)",
+          "CrewReqFormula": "Ability(1) * 0.1",
           "MineralCostFormula": {
             "Entries": [
               {

@@ -31,7 +31,31 @@ namespace Pulsar4X.ECSLib
             return stringWeight;
         }
 
+        
+        public static string StringifyDistance(double lengthInKM,  string format = "0.###")
+        {
 
+            string stringDistance = "0 Km";
+            if (lengthInKM > 100000000)
+            {
+                lengthInKM = lengthInKM * 0.00000001;
+                stringDistance = lengthInKM.ToString(format) + "Gm";
+            }
+            else if (lengthInKM > 100000)
+            {
+                lengthInKM = lengthInKM * 0.00001;
+                stringDistance = lengthInKM.ToString(format) + "Mm";
+            }
+            else if (lengthInKM > 1000)
+            {
+                lengthInKM = lengthInKM * 0.001;
+                stringDistance = lengthInKM.ToString(format) + "KKm";
+            }
+
+            else { stringDistance = lengthInKM.ToString(format) + "Km"; }
+
+            return stringDistance;
+        }
 
         public static bool HasReqiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
         {
