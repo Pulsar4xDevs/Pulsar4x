@@ -19,8 +19,15 @@ namespace Pulsar4X.SDL2UI
             _staticData = staticData;
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
+            entity.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
             Update();
         }
+
+        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
+        {
+            Update();
+        }
+
 
         public void Update()
         {
@@ -49,7 +56,7 @@ namespace Pulsar4X.SDL2UI
 
         public void Display()
         {
-
+            Update();
             var width = ImGui.GetWindowWidth() * 0.5f;
             
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
@@ -97,6 +104,12 @@ namespace Pulsar4X.SDL2UI
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
             HeadersIsOpenDict = headersOpenDict;
+            entity.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
+            Update();
+        }
+
+        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
+        {
             Update();
         }
 
@@ -201,6 +214,7 @@ namespace Pulsar4X.SDL2UI
             var width = ImGui.GetWindowWidth() * 0.5f;
 
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
+            ImGui.Text(_entityState.Name);
             foreach (var storetype in CargoResourceStores)
             {
                 ImGui.SetNextTreeNodeOpen(HeadersIsOpenDict[storetype.TypeID]);

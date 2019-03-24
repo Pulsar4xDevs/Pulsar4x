@@ -6,11 +6,8 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoXferOrder:EntityCommand
     {
-
-
-
         public List<Tuple<Guid, long>> ItemsGuidsToTransfer;
-        public List<Tuple<ICargoable, long>> ItemICargoablesToTransfer;
+        public List<Tuple<ICargoable, long>> ItemICargoablesToTransfer = new List<Tuple<ICargoable, long>>();
         public Guid SendCargoToEntityGuid { get; set; }
 
         internal override int ActionLanes => 1;
@@ -76,7 +73,7 @@ namespace Pulsar4X.ECSLib
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.TryGetEntityByGuid(SendCargoToEntityGuid, out sendToEntity))
+                if (game.GlobalManager.FindEntityByGuid(SendCargoToEntityGuid, out sendToEntity))
                 {
                     GetItemsToTransfer(game.StaticData);//should I try catch this? nah it's unlikely to be bad here. 
                     return true;

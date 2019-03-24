@@ -30,7 +30,7 @@ namespace Pulsar4X.SDL2UI
         bool _dateChangeSinceLastFrame = true;
         bool _isRunningFrame = false;
 
-        List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
+        //List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
 
         private DebugWindow() 
         {
@@ -100,7 +100,7 @@ namespace Pulsar4X.SDL2UI
             else
                 _gameRateIndex++;
 
-            positions.Add(_state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU);
+            //positions.Add(_state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU);
         }
 
 
