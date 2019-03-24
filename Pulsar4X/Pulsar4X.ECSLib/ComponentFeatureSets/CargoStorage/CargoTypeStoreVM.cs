@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
         StaticDataStore _staticData;
         public string StorageTypeName { get; set; }
         public string StorageTypeDescription { get; set; }
-
+        public Guid TypeID;
         private string _headerText;
         public string HeaderText{get { return _headerText; } set { _headerText = value; OnPropertyChanged(); } }
 
@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
 
         public CargoTypeStoreVM(StaticDataStore staticDataStore, Guid typeGuid, CargoTypeStore typeStore)
         {
-
+            TypeID = typeGuid;
             _staticData = staticDataStore;
             _typeStore = typeStore;
 

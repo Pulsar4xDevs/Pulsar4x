@@ -89,11 +89,14 @@ namespace Pulsar4X.SDL2UI
         Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
         public CargoItemVM SelectedCargoVM = null;
-        public CargoListPannelComplex(StaticDataStore staticData, EntityState entity)
+        internal Dictionary<Guid,bool> HeadersIsOpenDict { get; set; }
+
+        public CargoListPannelComplex(StaticDataStore staticData, EntityState entity, Dictionary<Guid,bool> headersOpenDict)
         {
             _staticData = staticData;
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
+            HeadersIsOpenDict = headersOpenDict;
             Update();
         }
 
@@ -110,6 +113,8 @@ namespace Pulsar4X.SDL2UI
                     CargoResourceStores.Add(newCargoTypeStoreVM);
                 }
                 _cargoResourceStoresDict[kvp.Key].Update();
+                if (!HeadersIsOpenDict.ContainsKey(kvp.Key))
+                    HeadersIsOpenDict[kvp.Key] = false;
             }
 
             foreach (var key in _cargoResourceStoresDict.Keys.ToArray())
@@ -198,9 +203,10 @@ namespace Pulsar4X.SDL2UI
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
             foreach (var storetype in CargoResourceStores)
             {
+                ImGui.SetNextTreeNodeOpen(HeadersIsOpenDict[storetype.TypeID]);
                 if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + _entityState.Name + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
                 {
-
+                    HeadersIsOpenDict[storetype.TypeID] = true;
                     foreach (CargoItemVM item in storetype.CargoItems)
                     {
                         bool isSelected = SelectedCargoVM == item;
@@ -226,6 +232,8 @@ namespace Pulsar4X.SDL2UI
 
                     }
                 }
+                else
+                    HeadersIsOpenDict[storetype.TypeID] = false;
             }
             ImGui.EndChild();
         }
@@ -254,7 +262,7 @@ namespace Pulsar4X.SDL2UI
         CargoListPannelComplex UnselectedCargoPannel;
         bool _hasCargoAbilityLeft;
         bool _hasCargoAbilityRight;
-
+        Dictionary<Guid, bool> headersOpenDict = new Dictionary<Guid, bool>();
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
         {
             CargoTransfer instance;
@@ -276,7 +284,7 @@ namespace Pulsar4X.SDL2UI
             }
             if (instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
-                instance.CargoListLeft = new CargoListPannelComplex(staticData, selectedEntity1);
+                instance.CargoListLeft = new CargoListPannelComplex(staticData, selectedEntity1, instance.headersOpenDict);
                 instance._hasCargoAbilityLeft = true;
             }
             else
@@ -287,7 +295,7 @@ namespace Pulsar4X.SDL2UI
             if (instance._selectedEntityRight != null && instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
                 if (!instance._hasCargoAbilityRight)
-                    instance.CargoListRight = new CargoListPannelComplex(staticData, instance._selectedEntityRight);
+                    instance.CargoListRight = new CargoListPannelComplex(staticData, instance._selectedEntityRight, instance.headersOpenDict);
                 instance._hasCargoAbilityRight = true;
             }
             else
@@ -300,7 +308,7 @@ namespace Pulsar4X.SDL2UI
             if (_selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
                 _selectedEntityRight = entity;
-                CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight);
+                CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
                 _hasCargoAbilityRight = true;
             }
         }
