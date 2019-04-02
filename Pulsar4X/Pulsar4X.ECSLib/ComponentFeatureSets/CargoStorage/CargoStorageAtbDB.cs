@@ -18,7 +18,17 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid CargoTypeGuid { get; internal set; }
 
-        //public CargoTypeSD CargoType { get; private set; }
+        //todo maybe move these to thier own attribute. 
+        /// <summary>
+        /// Gets or sets the transfer rate.
+        /// </summary>
+        /// <value>The transfer rate in Kg/h</value>
+        public int TransferRate { get; internal set; }
+        /// <summary>
+        /// Gets or sets the transfer range.
+        /// </summary>
+        /// <value>DeltaV in km/s, Low Earth Orbit is about 10km/s</value>
+        public double TransferRange { get; internal set; }
 
         /// <summary>
         /// JSON constructor
@@ -30,12 +40,14 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="storageCapacity">will get cast to an int</param>
         /// <param name="cargoType">cargo type ID as defined in StaticData CargoTypeSD</param>
-        public CargoStorageAtbDB(double storageCapacity, Guid cargoType) : this((int)storageCapacity, cargoType) { }
+        public CargoStorageAtbDB(double storageCapacity, Guid cargoType, double transferRate, double TransferRange) : this((int)storageCapacity, cargoType, (int)transferRate, TransferRange ) { }
 
-        public CargoStorageAtbDB(int storageCapacity, Guid cargoType)
+        public CargoStorageAtbDB(int storageCapacity, Guid cargoType, int transferRate, double transferRange)
         {
             StorageCapacity = storageCapacity;
             CargoTypeGuid = cargoType;
+            TransferRate = transferRate;
+            TransferRange = transferRange;
         }
 
         public CargoStorageAtbDB(CargoStorageAtbDB db)
@@ -56,4 +68,6 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.ReCalcCapacity(parentEntity);
         }
     }
+
+
 }

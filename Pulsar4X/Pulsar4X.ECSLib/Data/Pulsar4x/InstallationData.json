@@ -328,7 +328,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "DataBlobArgs(Ability(1), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'))",
+              "AbilityFormula": "DataBlobArgs(Ability(1), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), 0 , 0)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
@@ -383,14 +383,39 @@
                 "Entries": []
               },
               "AbilityFormula": "Ability(0) * 0.01"
-            },                      {
+            },                      
+            {
+              "Name": "Cargo Transfer Rate",
+              "Description": "How much cargo can be transfered per hour in kg.",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AbilityFormula": "50000"
+            },
+            {
+              "Name": "Transfer Range",
+              "Description": "How much Dv can be expended to transfer cargo",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AbilityFormula": "50000"
+            },
+            {
               "Name": "Total Cargo Stored",
               "Description": "The amount of cargo this can store.",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "Ability(0) - Ability(1)"
+              "AbilityFormula": "Ability(0) - Ability(1) - Ability(2)"
             },
             {
               "Name": "DBargs",
@@ -399,7 +424,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "DataBlobArgs(Ability(2), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'))",
+              "AbilityFormula": "DataBlobArgs(Ability(4), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(2), Ability(3))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
@@ -470,7 +495,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "DataBlobArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'))",
+              "AbilityFormula": "DataBlobArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]

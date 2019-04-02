@@ -215,6 +215,8 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
             ImGui.Text(_entityState.Name);
+            ImGui.Text("Transfer Rate: " + _storageDatablob.TransferRateInKgHr);
+            ImGui.Text("At DeltaV < " + _storageDatablob.TransferRangeDv + " Km/s");
             foreach (var storetype in CargoResourceStores)
             {
                 ImGui.SetNextTreeNodeOpen(HeadersIsOpenDict[storetype.TypeID]);
@@ -277,6 +279,10 @@ namespace Pulsar4X.SDL2UI
         bool _hasCargoAbilityLeft;
         bool _hasCargoAbilityRight;
         Dictionary<Guid, bool> headersOpenDict = new Dictionary<Guid, bool>();
+
+        int _transferRate = 0;
+        double _dvDifference;
+        double _dvMaxDiff;
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
         {
             CargoTransfer instance;
@@ -323,7 +329,38 @@ namespace Pulsar4X.SDL2UI
             {
                 _selectedEntityRight = entity;
                 CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
+
+                CalcTransferRate();
+
                 _hasCargoAbilityRight = true;
+            }
+        }
+
+        void CalcTransferRate()
+        {
+            double? dvDif;
+            OrbitDB leftOrbit;
+            if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>()) 
+            {
+                dvDif = Distance.AuToKm(OrbitMath.MeanOrbitalVelocityInAU(_selectedEntityRight.Entity.GetDataBlob<OrbitDB>()));
+            }
+            else
+            {
+                leftOrbit = _selectedEntityLeft.Entity.GetDataBlob<OrbitDB>();
+                dvDif = CargoTransferProcessor.CalcDVDifferenceKmPerSecond(leftOrbit, _selectedEntityRight.Entity.GetDataBlob<OrbitDB>()); }
+            if (dvDif == null)
+            {
+                _transferRate = 0;
+            }
+            else
+            {
+                var cargoDBLeft = _selectedEntityLeft.Entity.GetDataBlob<CargoStorageDB>();
+                var cargoDBRight = _selectedEntityRight.Entity.GetDataBlob<CargoStorageDB>();
+                _dvMaxDiff = Math.Max(cargoDBLeft.TransferRangeDv, cargoDBRight.TransferRangeDv);
+                _dvDifference = (double)dvDif;
+                _transferRate = CargoTransferProcessor.CalcTransferRate(_dvDifference,
+                    cargoDBLeft,
+                    cargoDBRight);
             }
         }
 
@@ -406,13 +443,21 @@ namespace Pulsar4X.SDL2UI
                             ImGui.SameLine();
                             if (ImGui.Button("x1"))
                             { MoveItems(1); }
+                            if (ImGui.Button("Action Order"))
+                            { ActionXferOrder(); }
+
                         }
-                        if(ImGui.Button("Action Order"))
-                        { ActionXferOrder(); }
+
                         ImGui.EndChild();
                         ImGui.SameLine();
                         if (_hasCargoAbilityRight)
+                        {
                             CargoListRight.Display();
+                            ImGui.Text("DeltaV Difference Km/s: " + _dvDifference);
+                            ImGui.Text("Max DeltaV Difference Km/s: " + _dvMaxDiff);
+                            ImGui.Text("Transfer Rate Kg/h: " + _transferRate);
+                            
+                        }
                         else
                             ImGui.Text("Select Entity For Transfer");
                     }

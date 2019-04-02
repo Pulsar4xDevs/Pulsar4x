@@ -143,14 +143,16 @@ namespace Pulsar4X.ECSLib
 
         internal static void ReCalcCapacity(Entity parentEntity)
         {
-
-            Dictionary<Guid, CargoTypeStore> storageDBStoredCargos = parentEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes;
+            CargoStorageDB cargoStorageDB = parentEntity.GetDataBlob<CargoStorageDB>();
+            Dictionary<Guid, CargoTypeStore> storageDBStoredCargos = cargoStorageDB.StoredCargoTypes;
 
             Dictionary<Guid, long> calculatedMaxStorage = new Dictionary<Guid, long>();
 
             var instances = parentEntity.GetDataBlob<ComponentInstancesDB>();
             var designs = instances.GetDesignsByType(typeof(CargoStorageAtbDB));
-
+            double transferRate = 0;
+            double transferRange = 0;
+            int i = 0;
             foreach (var design in designs)
             {
                 foreach (var instanceInfo in instances.GetComponentsBySpecificDesign(design.Guid))
@@ -165,12 +167,18 @@ namespace Pulsar4X.ECSLib
                         allowableSpace = componentDesign.StorageCapacity;
 
                     calculatedMaxStorage.SafeValueAdd(cargoTypeID, allowableSpace);
+
+                    transferRate += componentDesign.TransferRate;
+                    transferRange += componentDesign.TransferRange;
+                    i++;
+
                 }
             }
 
 
-
-
+            //transfer rate and ranges are averaged. 
+            cargoStorageDB.TransferRateInKgHr = (int)(transferRate / i);
+            cargoStorageDB.TransferRangeDv = (transferRange / i);
 
 
 

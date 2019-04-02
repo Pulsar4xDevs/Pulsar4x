@@ -187,7 +187,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.ListBox("Entites", ref item, entityNames.ToArray(), entityNames.Count);
 
                     }
-                    if (_selectedEntityState.Name != null && _selectedEntity.IsValid)
+                    if (_selectedEntityState !=null && _selectedEntityState.Name != null && _selectedEntity.IsValid)
                     {
                         if (ImGui.CollapsingHeader("Selected Entity: " + _state.LastClickedEntity.Name + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                         {
@@ -237,7 +237,9 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Eccentricity: " + orbitDB.Eccentricity);
                                     ImGui.Text("AoP:" + orbitDB.ArgumentOfPeriapsis);
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
-                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion);
+                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion + " in Deg/s");
+                                    ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
+                                    ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
                                     ImGui.Text("SOI Radius: " + Distance.AuToKm( GMath.GetSOI(_state.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis);

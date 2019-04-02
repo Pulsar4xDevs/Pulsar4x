@@ -303,7 +303,7 @@ namespace Pulsar4X.ECSLib
             double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
             double orbitalPerodSeconds = orbit.OrbitalPeriod.TotalSeconds;
             double peremeter = Math.PI * (3* (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
-            return orbitalPerodSeconds / peremeter;
+            return peremeter  / orbitalPerodSeconds;
         }
 
         /// <summary>

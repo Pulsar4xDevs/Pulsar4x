@@ -280,7 +280,9 @@ namespace Pulsar4X.ECSLib
             ComponentDesign cargoComponent;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
             cargoComponent = GenericComponentFactory.StaticToDesign(template, faction.GetDataBlob<FactionTechDB>(), game.StaticData);
-            cargoComponent.ComponentDesignAttributes[0].SetValueFromInput(5000); //5t storage
+            cargoComponent.ComponentDesignAttributes[0].SetValueFromInput(5000); //5t component
+            cargoComponent.ComponentDesignAttributes[2].SetValueFromInput(500);
+            cargoComponent.ComponentDesignAttributes[3].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent5t";
             return GenericComponentFactory.DesignToDesignEntity(game, faction, cargoComponent);
         }

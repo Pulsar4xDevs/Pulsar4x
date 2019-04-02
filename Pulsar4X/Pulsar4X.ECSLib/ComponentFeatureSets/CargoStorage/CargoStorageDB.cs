@@ -20,7 +20,17 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, CargoTypeStore> StoredCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
         public Dictionary<Guid, CargoTypeStore> OutgoingCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
         public Dictionary<Guid, CargoTypeStore> IncomingCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
-        public List<Shuttle> Shuttles = new List<Shuttle>(); //todo: move this to a seperate DB?
+
+        /// <summary>
+        /// Gets or sets the transfer rate in kg hr.
+        /// </summary>
+        /// <value>The transfer rate in Kg/h</value>
+        public int TransferRateInKgHr { get; set; } = 500;
+        /// <summary>
+        /// Gets or sets the transfer range dv.
+        /// </summary>
+        /// <value>DeltaV in Km/s</value>
+        public double TransferRangeDv { get; set; } = 0.1; 
 
         public CargoStorageDB()
         {
