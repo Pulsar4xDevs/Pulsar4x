@@ -277,7 +277,12 @@ namespace Pulsar4X.SDL2UI
         CargoListPannelComplex CargoListRight
         {
             get { return _cargoList2; }
-            set { _cargoList2 = value; value.CargoItemSelectedEvent += OnCargoItemSelectedEvent; }
+            set 
+            { 
+                _cargoList2 = value;
+                if(value != null)
+                    value.CargoItemSelectedEvent += OnCargoItemSelectedEvent; 
+             }
         }
         CargoListPannelComplex SelectedCargoPannel;
         CargoListPannelComplex UnselectedCargoPannel;
@@ -337,11 +342,20 @@ namespace Pulsar4X.SDL2UI
             if (_selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
                 _selectedEntityRight = entity;
-                CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
+                if (entity.Entity.HasDataBlob<CargoStorageDB>())
+                {
+                    CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
 
-                CalcTransferRate();
+                    CalcTransferRate();
 
-                _hasCargoAbilityRight = true;
+                    _hasCargoAbilityRight = true;
+                }
+                else
+                {
+                    CargoListRight = null;
+                    _hasCargoAbilityRight = false;
+                    _transferRate = 0; 
+                }
             }
         }
 
