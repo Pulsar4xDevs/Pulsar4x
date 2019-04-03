@@ -7,7 +7,7 @@ namespace Pulsar4X.SDL2UI
     public class EntityState
     {
         public Entity Entity;
-        public string Name;
+        public string Name = "Unknown";
 
         public IPosition Position;
         public NameIcon NameIcon;

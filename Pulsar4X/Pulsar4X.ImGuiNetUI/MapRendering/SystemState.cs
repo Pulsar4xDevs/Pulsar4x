@@ -39,7 +39,8 @@ namespace Pulsar4X.SDL2UI
             {
                 if (entityItem.HasDataBlob<NameDB>())
                 {
-                    var entityState = new EntityState(entityItem) { Name = "Unknown" };
+                    var entityState = new EntityState(entityItem);// { Name = "Unknown" };
+                    entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(faction);
                     EntityStatesWithNames.Add(entityItem.Guid, entityState);
                     if (entityItem.HasDataBlob<PositionDB>())
                     {
