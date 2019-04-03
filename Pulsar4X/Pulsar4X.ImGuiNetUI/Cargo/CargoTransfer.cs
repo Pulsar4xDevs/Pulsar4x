@@ -152,6 +152,11 @@ namespace Pulsar4X.SDL2UI
             return listToMove; 
         }
 
+        internal bool CanStore(Guid cargoTypeID)
+        {
+            return _cargoResourceStoresDict.ContainsKey(cargoTypeID);
+        }
+
         internal void AddUICargoIn(ICargoable cargoItem, long itemCount)
         {
             CargoTypeStoreVM store;
@@ -161,7 +166,7 @@ namespace Pulsar4X.SDL2UI
                 CargoItemVM item = store.GetOrAddItemVM(cargoItem);
                 item.ItemIncomingAmount += itemCount;
             }
-            else throw new Exception("Can't contain this type of cargo");
+
         }
 
         internal void AddUICargoOut(ICargoable cargoItem, long itemCount)
@@ -179,7 +184,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 item.ItemOutgoingAmount += itemCount;
             }
-            else throw new Exception("Doesn't store this type of cargo");
+
 
         }
 
@@ -286,8 +291,6 @@ namespace Pulsar4X.SDL2UI
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
         {
             CargoTransfer instance;
-            //if (selectedEntity1.CmdRef == null)
-            //    selectedEntity1.CmdRef = CommandReferences.CreateForEntity(_state.Game, selectedEntity1.Entity);
             if (!_state.LoadedWindows.ContainsKey(typeof(CargoTransfer)))
             {
                 instance = new CargoTransfer
@@ -299,8 +302,13 @@ namespace Pulsar4X.SDL2UI
             else
             {
                 instance = (CargoTransfer)_state.LoadedWindows[typeof(CargoTransfer)];
-                instance._selectedEntityLeft = selectedEntity1;
-
+                if (instance._selectedEntityLeft != selectedEntity1)
+                {
+                    instance._selectedEntityLeft = selectedEntity1;
+                    instance.headersOpenDict = new Dictionary<Guid, bool>();
+                    instance.SelectedCargoPannel = null;
+                    instance.UnselectedCargoPannel = null;
+                } 
             }
             if (instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
@@ -309,8 +317,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
                 instance._hasCargoAbilityLeft = false;
-
-
+                
 
             if (instance._selectedEntityRight != null && instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
             {
@@ -322,6 +329,8 @@ namespace Pulsar4X.SDL2UI
                 instance._hasCargoAbilityRight = false;
             return instance;
         }
+
+
 
         internal void Set2ndCargo(EntityState entity)
         {
@@ -387,17 +396,8 @@ namespace Pulsar4X.SDL2UI
         {
             var selectedCargoVM = SelectedCargoPannel.SelectedCargoVM;
             var selectedCargoItem = selectedCargoVM.CargoableItem;
-            if (SelectedCargoPannel == CargoListRight) //move item left
-            {
-                SelectedCargoPannel.AddUICargoOut(selectedCargoVM.CargoableItem, amount);
-                UnselectedCargoPannel.AddUICargoIn(selectedCargoVM.CargoableItem, amount);
-            }
-            else //left side is selected, move item right
-            {
-                //if(CargoListRight.AmountInStoreAndMove(selectedCargoItem.CargoTypeID, selectedCargoItem.ID) > amount) lets not check, we should allow it to go into the red in the ui. 
-                SelectedCargoPannel.AddUICargoOut(selectedCargoVM.CargoableItem, amount);
-                UnselectedCargoPannel.AddUICargoIn(selectedCargoVM.CargoableItem, amount);
-            }
+            SelectedCargoPannel.AddUICargoOut(selectedCargoVM.CargoableItem, amount);
+            UnselectedCargoPannel.AddUICargoIn(selectedCargoVM.CargoableItem, amount);
         }
 
         private void ActionXferOrder()
@@ -435,17 +435,21 @@ namespace Pulsar4X.SDL2UI
 
                         if (SelectedCargoPannel != null && SelectedCargoPannel.SelectedCargoVM != null)
                         {
-                            if (ImGui.Button("x100"))
-                            { MoveItems(100); }
-                            ImGui.SameLine();
-                            if (ImGui.Button("x10"))
-                            { MoveItems(10); }
-                            ImGui.SameLine();
-                            if (ImGui.Button("x1"))
-                            { MoveItems(1); }
-                            if (ImGui.Button("Action Order"))
-                            { ActionXferOrder(); }
-
+                            if (UnselectedCargoPannel.CanStore(SelectedCargoPannel.SelectedCargoVM.CargoableItem.CargoTypeID))
+                            {
+                                if (ImGui.Button("x100"))
+                                { MoveItems(100); }
+                                ImGui.SameLine();
+                                if (ImGui.Button("x10"))
+                                { MoveItems(10); }
+                                ImGui.SameLine();
+                                if (ImGui.Button("x1"))
+                                { MoveItems(1); }
+                                if (ImGui.Button("Action Order"))
+                                { ActionXferOrder(); }
+                            }
+                            //else
+                                //can't transfer due to target unable to store this type
                         }
 
                         ImGui.EndChild();
