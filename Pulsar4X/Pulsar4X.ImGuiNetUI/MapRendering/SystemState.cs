@@ -81,12 +81,19 @@ namespace Pulsar4X.SDL2UI
             //_sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
 
-            foreach (Entity entityItem in StarSystem.GetAllEntitiesWithDataBlob<PositionDB>())
+            foreach (var entityItem in system.GetAllEntitiesWithDataBlob<NameDB>())
             {
+
+                var entityState = new EntityState(entityItem);// { Name = "Unknown" };
+                entityState.Name = entityItem.GetDataBlob<NameDB>().DefaultName;
+                EntityStatesWithNames.Add(entityItem.Guid, entityState);
                 if (entityItem.HasDataBlob<PositionDB>())
                 {
-                    var entityState = new EntityState(entityItem) { Name = "Unknown" };
                     EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                }
+                else if (entityItem.HasDataBlob<ColonyInfoDB>())
+                {
+                    EntityStatesColonies.Add(entityItem.Guid, entityState);
                 }
             }
 

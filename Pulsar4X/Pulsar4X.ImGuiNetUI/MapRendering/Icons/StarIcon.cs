@@ -103,7 +103,6 @@ namespace Pulsar4X.SDL2UI
             else
                 Scale = viewRadius * 0.01f;
             base.OnFrameUpdate(matrix, camera);
-            base.OnFrameUpdate(matrix, camera);
         }
     }
 }

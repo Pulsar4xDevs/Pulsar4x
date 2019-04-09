@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
         private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
         private readonly Dictionary<Guid, EntityManager> _globalEntityDictionary;
         private readonly ReaderWriterLockSlim _globalGuidDictionaryLock;
-
+        public int NumberOfEntites { get { return _entities.Count; } }
         private int _nextID;
 
         internal readonly List<ComparableBitArray> EntityMasks = new List<ComparableBitArray>();

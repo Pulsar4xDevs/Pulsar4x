@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
                 instance._selectedEntityState = _state.LastClickedEntity;
             }
             instance._selectedEntityState = _state.LastClickedEntity;
-            instance._systemState = _state.StarSystemStates[_state.PrimarySystem.Guid];
+            instance._systemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
             return instance;
         }
 
@@ -58,7 +58,7 @@ namespace Pulsar4X.SDL2UI
             if (_state.Game != null)
             {
                 _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
-                _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
+                _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
                 _state.EntityClickedEvent += _state_EntityClicked;
             }
         }
@@ -170,10 +170,12 @@ namespace Pulsar4X.SDL2UI
                         }
 
                     }
+                    ImGui.Text("Selected Star System: " + _state.SelectedStarSysGuid);
+                    ImGui.Text("Number Of Entites: " + _state.SelectedSystem.NumberOfEntites);
                     if (ImGui.CollapsingHeader("Entity List"))
                     {
 
-                        List<Entity> factionOwnedEntites  = _state.PrimarySystem.GetEntitiesByFaction(_state.Faction.Guid);
+                        List<Entity> factionOwnedEntites  = _state.SelectedSystem.GetEntitiesByFaction(_state.Faction.Guid);
                         List<string> entityNames = new List<string>();
                         foreach (var entity in factionOwnedEntites)
                         {

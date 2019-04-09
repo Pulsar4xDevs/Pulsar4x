@@ -26,8 +26,9 @@ namespace Pulsar4X.SDL2UI
         //internal SettingsWindow SettingsWindow { get; }
         internal GalacticMapRender GalacticMap;
 
-        internal StarSystem PrimarySystem;
-        internal SystemMapRendering PrimaryMapRender { get { return GalacticMap.PrimarySysMap; } }
+        internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
+        internal Guid SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
+        internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime; //= new DateTime();
 
         internal EntityContextMenu ContextMenu { get; set; }
@@ -110,9 +111,9 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetActiveSystem(Guid activeSysID)
         {
-            PrimarySystem = StarSystemStates[activeSysID].StarSystem;
-            PrimarySystemDateTime = PrimarySystem.ManagerSubpulses.StarSysDateTime;
-            GalacticMap.PrimarySysMap = GalacticMap.RenderedMaps[activeSysID];
+            var SelectedSystem = StarSystemStates[activeSysID].StarSystem;
+            PrimarySystemDateTime = SelectedSystem.ManagerSubpulses.StarSysDateTime;
+            GalacticMap.SelectedStarSysGuid = activeSysID;
         }
 
         internal void EnableGameMaster()
@@ -123,6 +124,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
                 }
+            GalacticMap.SetFaction();
         }
 
         internal void MapClicked(ECSLib.Vector4 worldCoord, MouseButtons button)
@@ -133,24 +135,24 @@ namespace Pulsar4X.SDL2UI
             if (ActiveWindow != null)
                 ActiveWindow.MapClicked(worldCoord, button);
         }
-        internal void EntityClicked(Guid entityGuid, MouseButtons button)
+        internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {
         
-            LastClickedEntity = StarSystemStates[PrimarySystem.Guid].EntityStatesWithNames[entityGuid];
+            LastClickedEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
 
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
             if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(StarSystemStates[PrimarySystem.Guid].EntityStatesWithNames[entityGuid], button);
+                ActiveWindow.EntityClicked(StarSystemStates[starSys].EntityStatesWithNames[entityGuid], button);
             OnEntitySelected();
         }
 
         void OnEntitySelected()
         {
-            PrimaryMapRender.SelectedEntityExtras = new List<IDrawData>();
+            SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
             {
-                PrimaryMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
+                SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
         }
 

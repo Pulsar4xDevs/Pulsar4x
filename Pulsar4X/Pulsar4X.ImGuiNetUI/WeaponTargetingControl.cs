@@ -47,8 +47,8 @@ namespace Pulsar4X.SDL2UI
             else
                 instance = (WeaponTargetingControl)_state.LoadedWindows[typeof(WeaponTargetingControl)];
             instance.SetOrderEntity(entity);
-            instance._sysState = _state.StarSystemStates[_state.PrimarySystem.Guid];
-            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
+            instance._sysState = _state.StarSystemStates[_state.SelectedSystem.Guid];
+            _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
 
 
             return instance;
@@ -75,7 +75,7 @@ namespace Pulsar4X.SDL2UI
                 if (weaponInstanace.OwningEntity.GetDataBlob<WeaponInstanceStateDB>().FireControl == null)
                     _unAssignedWeapons.Add(weaponInstanace.OwningEntity.Guid);
             }
-            foreach (var item in _state.PrimarySystem.GetSensorContacts(_state.Faction.Guid).GetAllContacts())
+            foreach (var item in _state.SelectedSystem.GetSensorContacts(_state.Faction.Guid).GetAllContacts())
             {
                 var entityItem = item.ActualEntity;
                 string name = entityItem.GetDataBlob<NameDB>().GetName(_state.Faction);
@@ -292,7 +292,7 @@ namespace Pulsar4X.SDL2UI
 
         void OnClose()
         {
-            _state.PrimarySystem.ManagerSubpulses.SystemDateChangedEvent -= ManagerSubpulses_SystemDateChangedEvent;
+            _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent -= ManagerSubpulses_SystemDateChangedEvent;
 
         }
     }

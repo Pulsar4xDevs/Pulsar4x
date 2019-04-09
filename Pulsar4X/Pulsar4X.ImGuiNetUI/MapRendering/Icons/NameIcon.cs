@@ -19,6 +19,7 @@ namespace Pulsar4X.SDL2UI
         public float X { get { return ViewScreenPos.x; }  }
         public float Y { get { return ViewScreenPos.y; } }
         Guid _entityGuid;
+        Guid _starSysGuid;
         public Dictionary<Guid, string> SubNames = new Dictionary<Guid, string>();
         public ImVec2 ViewOffset { get; set; } = new ImVec2();
         public Rectangle ViewDisplayRect = new Rectangle(); 
@@ -27,6 +28,8 @@ namespace Pulsar4X.SDL2UI
         {
             _state = state;
             _entityGuid = entityState.Entity.Guid;
+            StarSystem starsys = (StarSystem)entityState.Entity.Manager;
+            _starSysGuid = starsys.Guid;
             _nameDB = entityState.Entity.GetDataBlob<NameDB>();
             NameString = _nameDB.GetName(state.Faction);
             entityState.Name = NameString;
@@ -112,12 +115,12 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
             if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
-                _state.EntityClicked(_entityGuid, MouseButtons.Primary);
+                _state.EntityClicked(_entityGuid, _starSysGuid, MouseButtons.Primary);
 
             }
             if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
             {
-                _state.EntityClicked(_entityGuid, MouseButtons.Alt);
+                _state.EntityClicked(_entityGuid, _starSysGuid, MouseButtons.Alt);
                 _state.ContextMenu = new EntityContextMenu(_state, _entityGuid);
                 _state.ContextMenu.Display();
 
@@ -129,11 +132,11 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.Button(name.Value))
                 {
-                    _state.EntityClicked(name.Key, MouseButtons.Primary);
+                    _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Primary);
                 }
                 if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key, 1))
                 {
-                    _state.EntityClicked(name.Key, MouseButtons.Alt);
+                    _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Alt);
                     _state.ContextMenu = new EntityContextMenu(_state, name.Key);
                     _state.ContextMenu.Display();
 

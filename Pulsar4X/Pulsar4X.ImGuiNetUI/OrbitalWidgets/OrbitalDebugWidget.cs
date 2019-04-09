@@ -31,14 +31,14 @@ namespace Pulsar4X.SDL2UI
         {
             if (enable && !_isEnabled)
             {
-                if (!state.PrimaryMapRender.SelectedEntityExtras.Contains(_debugWidget))
-                    state.PrimaryMapRender.SelectedEntityExtras.Add(_debugWidget);
+                if (!state.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
+                    state.SelectedSysMapRender.SelectedEntityExtras.Add(_debugWidget);
                 _isEnabled = true;
             }
             else if(!enable && _isEnabled)
             {
-                if (state.PrimaryMapRender.SelectedEntityExtras.Contains(_debugWidget))
-                    state.PrimaryMapRender.SelectedEntityExtras.Remove(_debugWidget);
+                if (state.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
+                    state.SelectedSysMapRender.SelectedEntityExtras.Remove(_debugWidget);
                 _isEnabled = false;
             }
         }

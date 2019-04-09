@@ -16,16 +16,16 @@ namespace Pulsar4X.SDL2UI
     {
 
         enum gameType { Nethost, Standalone }
-        int gameTypeButtonGrp = 0;
-        gameType selectedGameType = gameType.Standalone;
-        byte[] netPortInputBuffer = new byte[8];
-        string netPortString { get { return System.Text.Encoding.UTF8.GetString(netPortInputBuffer); } }
-
-        byte[] nameInputBuffer = System.Text.Encoding.UTF8.GetBytes("Test Game");
-        byte[] factionNameInputBuffer = System.Text.Encoding.UTF8.GetBytes("UEF");
-        string factionNameString { get { return System.Text.Encoding.UTF8.GetString(factionNameInputBuffer); } }
-        byte[] passInputBuffer = new byte[8];
-        string passString { get { return System.Text.Encoding.UTF8.GetString(passInputBuffer); } }
+        int _gameTypeButtonGrp = 0;
+        gameType _selectedGameType = gameType.Standalone;
+        byte[] _netPortInputBuffer = new byte[8];
+        string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
+        int _maxSystems = 5;
+        byte[] _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes("Test Game");
+        byte[] _factionNameInputBuffer = System.Text.Encoding.UTF8.GetBytes("UEF");
+        string _factionNameString { get { return System.Text.Encoding.UTF8.GetString(_factionNameInputBuffer); } }
+        byte[] _passInputBuffer = new byte[8];
+        string _passString { get { return System.Text.Encoding.UTF8.GetString(_passInputBuffer); } }
 
         private NewGameOptions() 
         { 
@@ -49,18 +49,18 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Begin("New Game Setup", ref IsActive, _flags))
                 {
 
-                    ImGui.InputText("Game Name", nameInputBuffer, (uint)nameInputBuffer.Length);
-                    ImGui.InputText("Faction Name", factionNameInputBuffer, 16);
-                    ImGui.InputText("Password", passInputBuffer, 16);
-
-                    if (ImGui.RadioButton("Host Network Game", ref gameTypeButtonGrp, 1))
-                        selectedGameType = gameType.Nethost;
-                    if (ImGui.RadioButton("Start Standalone Game", ref gameTypeButtonGrp, 0))
-                        selectedGameType = gameType.Standalone;
-                    if (selectedGameType == gameType.Nethost)
-                        ImGui.InputText("Network Port", netPortInputBuffer, 8);
+                    ImGui.InputText("Game Name", _nameInputBuffer, (uint)_nameInputBuffer.Length);
+                    ImGui.InputText("Faction Name", _factionNameInputBuffer, 16);
+                    ImGui.InputText("Password", _passInputBuffer, 16);
+                    ImGui.InputInt("Max Systems", ref _maxSystems);
+                    if (ImGui.RadioButton("Host Network Game", ref _gameTypeButtonGrp, 1))
+                        _selectedGameType = gameType.Nethost;
+                    if (ImGui.RadioButton("Start Standalone Game", ref _gameTypeButtonGrp, 0))
+                        _selectedGameType = gameType.Standalone;
+                    if (_selectedGameType == gameType.Nethost)
+                        ImGui.InputText("Network Port", _netPortInputBuffer, 8);
                     if (ImGui.Button("Create New Game!"))
-                        CreateNewGame(System.Text.Encoding.UTF8.GetString(nameInputBuffer));
+                        CreateNewGame(System.Text.Encoding.UTF8.GetString(_nameInputBuffer));
 
 
                 }
@@ -78,7 +78,7 @@ namespace Pulsar4X.SDL2UI
             gameSettings = new ECSLib.NewGameSettings
             {
                 GameName = name,
-                MaxSystems = 0,
+                MaxSystems = _maxSystems,
                 SMPassword = "",
                 //DataSets = options.SelectedModList.Select(dvi => dvi.Directory),
                 CreatePlayerFaction = true,
@@ -93,7 +93,7 @@ namespace Pulsar4X.SDL2UI
             ECSLib.FactionVM factionVM = new ECSLib.FactionVM(_state.Game);
             _state.FactionUIState = factionVM;
 
-            factionVM.CreateDefaultFaction(factionNameString, passString);
+            factionVM.CreateDefaultFaction(_factionNameString, _passString);
 
             _state.SetFaction(factionVM.FactionEntity);
             //_state.MapRendering.SetSystem(factionVM.KnownSystems[0]);

@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
         public List<EntityChangeData> Changes = new List<EntityChangeData>();
         public List<EntityChangeData> _changesNextFrame = new List<EntityChangeData>();
         public CommandReferences CmdRef;
-
+        internal Guid StarSysGuid;
         public EntityState(Entity entity)
         {
             Entity = entity;
@@ -29,7 +29,8 @@ namespace Pulsar4X.SDL2UI
             Position = entity.GetDataBlob<PositionDB>();
 
             //Name = entity.GetDataBlob<NameDB>().GetName(_state.Faction);
-
+            StarSystem starSys = (StarSystem)entity.Manager;
+            StarSysGuid = starSys.Guid;
             entity.ChangeEvent += On_entityChangeEvent;
         }
 
@@ -39,7 +40,8 @@ namespace Pulsar4X.SDL2UI
             Position = sensorContact.Position;
 
             //Name = sensorContact.GetDataBlob<NameDB>().GetName(_state.Faction);
-
+            StarSystem starSys = (StarSystem)Entity.Manager;
+            StarSysGuid = starSys.Guid;
             sensorContact.ActualEntity.ChangeEvent += On_entityChangeEvent;
 
         }
