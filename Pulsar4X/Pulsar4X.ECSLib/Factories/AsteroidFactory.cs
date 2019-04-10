@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// Asteroid factory. creates rocks to collide with planets
+    /// </summary>
     public static class AsteroidFactory
     {
         /// <summary>

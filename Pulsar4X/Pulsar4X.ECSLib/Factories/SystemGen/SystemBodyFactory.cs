@@ -188,7 +188,9 @@ namespace Pulsar4X.ECSLib
                 FinalizeSystemBodyDB(staticData, system, newCometProto);
                 
                 var comet = Entity.Create(system, Guid.Empty, newCometProto);
-                comet.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
+                var pos = comet.GetDataBlob<PositionDB>();
+                pos.SystemGuid = system.Guid;
+                pos.SetParent(comet.GetDataBlob<OrbitDB>().Parent);
             }
         }
 
@@ -547,7 +549,9 @@ namespace Pulsar4X.ECSLib
             foreach (var moon in moons)
             {
                 var realMoon = Entity.Create(system, Guid.Empty, moon);
-                realMoon.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
+                var pos = realMoon.GetDataBlob<PositionDB>();
+                pos.SystemGuid = system.Guid;
+                pos.SetParent(realMoon.GetDataBlob<OrbitDB>().Parent);
             }
         }
 
@@ -633,8 +637,10 @@ namespace Pulsar4X.ECSLib
             // now Create the orbit:
             MassVolumeDB parentMVDB = referenceOrbit.Parent.GetDataBlob<MassVolumeDB>();
             MassVolumeDB myMVDB = newBody.GetDataBlob<MassVolumeDB>();
-            newBody.SetDataBlob(OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, parentMVDB.Mass, myMVDB.Mass, semiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000));
+            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, parentMVDB.Mass, myMVDB.Mass, semiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000);
+            newBody.SetDataBlob(newOrbit);
+            newBody.GetDataBlob<PositionDB>().SetParent(newOrbit.Parent);
         }
 
         /// <summary>

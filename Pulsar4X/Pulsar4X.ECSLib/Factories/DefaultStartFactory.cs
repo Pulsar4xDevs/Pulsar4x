@@ -123,7 +123,7 @@ namespace Pulsar4X.ECSLib
                     game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, game.CurrentDateTime);
             }
 
-            OrbitProcessor.UpdateSystemOrbits(sol, sol.ManagerSubpulses.StarSysDateTime);//make sure stuff is at the right datetime.
+
 
             return factionEntity;
         }

@@ -151,7 +151,7 @@ namespace Pulsar4X.ECSLib
 
                 OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.Mass, currentStar.GetDataBlob<MassVolumeDB>().Mass, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
                 currentStar.SetDataBlob(currentOrbit);
-
+                currentStar.GetDataBlob<PositionDB>().SetParent(currentOrbit.Parent);
                 previousStar = currentStar;
                 starIndex++;
             }

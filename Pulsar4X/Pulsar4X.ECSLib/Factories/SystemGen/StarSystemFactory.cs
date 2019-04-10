@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
 
             //add this system to the GameMaster's Known Systems list.
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.Guid);
-
+            OrbitProcessor.UpdateSystemOrbits(newSystem, game.CurrentDateTime); //sets the positions of all the entites.
             return newSystem;
         }
 
