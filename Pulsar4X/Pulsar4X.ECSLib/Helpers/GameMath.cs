@@ -530,38 +530,7 @@ namespace Pulsar4X.ECSLib
             return speed;
         }
 
-        /// <summary>
-        /// Gets the soi radius of a given body
-        /// </summary>
-        /// <returns>The SOI radius in whatever units you feed the semiMajorAxis.</returns>
-        /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the earth around the sun</param>
-        /// <param name="mass">Mass of the smaller body ie the earth</param>
-        /// <param name="parentMass">Parent mass. ie the sun</param>
-        public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
-        {
-            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
-        }
 
-        /// <summary>
-        /// Gets the SOI radius of a given body.
-        /// </summary>
-        /// <returns>The SOI radius in AU</returns>
-        /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
-        public static double GetSOI(Entity entity)
-        {
-            var orbitDB = entity.GetDataBlob<OrbitDB>();
-            if (orbitDB.Parent != null) //if we're not the parent star
-            {
-                var semiMajAxis = orbitDB.SemiMajorAxis;
-
-                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
-
-                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
-
-                return GetSOI(semiMajAxis, myMass, parentMass);
-            }
-            else return double.MaxValue; //if we're the parent star, then soi is infinate. 
-        }
 
         /// <summary>
         /// A decimal Sqrt. not as fast as normal Math.Sqrt, but better precision. 

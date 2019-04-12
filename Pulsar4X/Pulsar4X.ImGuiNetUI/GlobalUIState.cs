@@ -45,6 +45,7 @@ namespace Pulsar4X.SDL2UI
 
 
         internal UserOrbitSettings UserOrbitSettings = new UserOrbitSettings();
+        internal bool DrawNames = true;
         internal Dictionary<string, IntPtr> SDLImageDictionary = new Dictionary<string, IntPtr>();
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 

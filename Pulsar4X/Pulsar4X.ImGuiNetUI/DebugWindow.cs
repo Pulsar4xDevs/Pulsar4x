@@ -242,7 +242,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
                                     ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
-                                    ImGui.Text("SOI Radius: " + Distance.AuToKm( GMath.GetSOI(_state.LastClickedEntity.Entity)));
+                                    ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI(_state.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis);
                                     ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis).ToString("g3") + " Km");

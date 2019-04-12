@@ -136,7 +136,11 @@ namespace Pulsar4X.SDL2UI
                 var orbitDB = entityItem.GetDataBlob<OrbitDB>();
                 if (!orbitDB.IsStationary)
                 {
-                    OrbitIcon orbit = new OrbitIcon(entityState, _state.UserOrbitSettings);
+                    OrbitIconBase orbit;
+                    if(orbitDB.Eccentricity > 1)
+                        orbit = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettings);
+                    else
+                        orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettings);
                     _orbitRings.TryAdd(entityItem.Guid, orbit);
 
                 }
@@ -213,7 +217,7 @@ namespace Pulsar4X.SDL2UI
 
         public void UpdateUserOrbitSettings()
         {
-            foreach (OrbitIcon item in _orbitRings.Values)
+            foreach (OrbitEllipseIcon item in _orbitRings.Values)
             {                
                 item.UpdateUserSettings();
             }
@@ -235,7 +239,7 @@ namespace Pulsar4X.SDL2UI
                             else
                                 entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
 
-                            _orbitRings[changeData.Entity.Guid] = new OrbitIcon(entityState, _state.UserOrbitSettings);
+                            _orbitRings[changeData.Entity.Guid] = new OrbitEllipseIcon(entityState, _state.UserOrbitSettings);
 
                         }
                     }
@@ -402,15 +406,17 @@ namespace Pulsar4X.SDL2UI
 
                 UpdateAndDraw(SelectedEntityExtras, matrix);
 
-                //because _nameIcons are imgui not sdl, we don't draw them here.
-                //we draw them in PulsarMainWindow.ImGuiLayout
-                lock (_nameIcons)
+                if (_state.DrawNames)
                 {
-                    foreach (var item in _nameIcons.Values)
-                        item.OnFrameUpdate(matrix, _camera);
+                    //because _nameIcons are imgui not sdl, we don't draw them here.
+                    //we draw them in PulsarMainWindow.ImGuiLayout
+                    lock (_nameIcons)
+                    {
+                        foreach (var item in _nameIcons.Values)
+                            item.OnFrameUpdate(matrix, _camera);
+                    }
+                    TextIconsDistribute();
                 }
-                TextIconsDistribute();
-
                 //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
@@ -421,10 +427,13 @@ namespace Pulsar4X.SDL2UI
 
         public void DrawNameIcons()
         {
-            lock (_nameIcons)
+            if (_state.DrawNames)
             {
-                foreach (var item in _nameIcons.Values)
-                    item.Draw(_state.rendererPtr, _state.Camera);
+                lock (_nameIcons)
+                {
+                    foreach (var item in _nameIcons.Values)
+                        item.Draw(_state.rendererPtr, _state.Camera);
+                }
             }
         }
 

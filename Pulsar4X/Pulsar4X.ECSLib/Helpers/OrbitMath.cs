@@ -49,10 +49,10 @@ namespace Pulsar4X.ECSLib
 
 
             double semiMajorAxis;
-            double p; //wtf is p? idk. it's not used, but it was in the origional formula. 
+            double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
             if (Math.Abs(eccentricity) > 1) //hypobola
             {
-                semiMajorAxis = -(-standardGravParam / (2 * specificOrbitalEnergy));
+                semiMajorAxis = -(-standardGravParam / (2 * specificOrbitalEnergy)); //in this case the sma is negitive
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
             else if (Math.Abs(eccentricity) < 1) //ellipse
@@ -158,14 +158,14 @@ namespace Pulsar4X.ECSLib
 
         }
 
-            /// <summary>
-            /// https://en.wikipedia.org/wiki/Eccentricity_vector
-            /// </summary>
-            /// <returns>The vector.</returns>
-            /// <param name="sgp">StandardGravParam.</param>
-            /// <param name="position">Position, ralitive to parent.</param>
-            /// <param name="velocity">Velocity, ralitive to parent.</param>
-            public static Vector4 EccentricityVector(double sgp, Vector4 position, Vector4 velocity)
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/Eccentricity_vector
+        /// </summary>
+        /// <returns>The vector.</returns>
+        /// <param name="sgp">StandardGravParam.</param>
+        /// <param name="position">Position, ralitive to parent.</param>
+        /// <param name="velocity">Velocity, ralitive to parent.</param>
+        public static Vector4 EccentricityVector(double sgp, Vector4 position, Vector4 velocity)
         {
             Vector4 angularMomentum = Vector4.Cross(position, velocity);
             Vector4 foo1 = Vector4.Cross(velocity, angularMomentum);
@@ -306,6 +306,15 @@ namespace Pulsar4X.ECSLib
             return peremeter  / orbitalPerodSeconds;
         }
 
+        public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
+        {
+            //r = p / (1 + e * cos(theta))
+            //1 + e * cos(theta) = p/r
+            //((p / r) -1) / e = cos(theta)
+
+            return Math.Acos(((semiLatusRectum / radius) -1) / eccentricity);
+        }
+
         /// <summary>
         /// Tsiolkovsky's rocket equation.
         /// </summary>
@@ -320,115 +329,40 @@ namespace Pulsar4X.ECSLib
             return deltaV;
         }
 
-
-        public void CargoTransferCostFromPlanet(Entity recever, Entity planet, Shuttle shuttle)
+        public static double TimeToRadius(OrbitDB orbit, double radiusAU)
         {
-
-            //minExchangeRadius = min range to exchange cargo: body radius + atmo.
-            //Dv cost at Min range. 
-            //cargo capacity at Min range.
-                //total capacity. - defined by shuttle
-                //fuel weight.
-            //Maximum Dv at 0 cargo. - defined by shuttle
-            //Time per trip. (not even sure how I'm going to calc this)
-            //capacity per trip. (from target orbit DV)
-
-            //other ideas which would affect this:
-            //single use launches (from a ground station) more cargo, less fuel but higher other resources.
-            //re-usable - higher fuel cost ie. de-orbit burn and reentry, would be higher on atmoless planets, lower cost on other resources. 
-
-            var bodyRadius = planet.GetDataBlob<MassVolumeDB>().RadiusInKM;
-            var targetOrbit = recever.GetDataBlob<OrbitDB>();
-            var sgp = targetOrbit.GravitationalParameter;
-
-            //shuttleData: this should all come from a datablob
-            double shuttleWetMass = shuttle.shuttleWetMass;
-            double shuttleDryMass = shuttle.shuttleDryMass;
-            double shuttleEngineISP = shuttle.shuttleEngineISP;
-            double shuttleMaxCargoMass = shuttle.shuttleMaxCargoMass;
+            double seconds = 0;
 
 
 
-            //minExchangeRadius
-
-            double minExchangeRadius = bodyRadius * 1.25; //ie atmosphereless body. 
-            float atmoPressure = 0;
-            if (planet.HasDataBlob<AtmosphereDB>())
-            {
-                var atmo = planet.GetDataBlob<AtmosphereDB>();
-                atmoPressure = atmo.Pressure;
-
-                // karmanLine is an 'outofmyass' calculation. 
-                //earths radius is ~6.7km, the Karman line is 100km, 
-                //earths mesopause is 80km, 
-                //the ISS orbits at 330 to 410km
-                // radius of earth * 15 gets close to the karman line. 
-                var karmanLine = bodyRadius * 15;
-                minExchangeRadius = bodyRadius + karmanLine * atmoPressure; //so karman line * atmopressure should give us a good safe distance for cargo tranfer.
-            }
-
-            //DvCost at min range;
-            double dvToMinOrbit = PreciseOrbitalSpeed(sgp, minExchangeRadius, minExchangeRadius); //dv to a low circular orbit.  
-            //todo: dvToMinOrbit += gravityDrag, atmosphereDrag, etc etc.  
-
-            double dvAtMaxCargo = TsiolkovskyRocketEquation(shuttleWetMass + shuttleMaxCargoMass, shuttleDryMass + shuttleMaxCargoMass, shuttleEngineISP);
-            double dvAtNoCargo = TsiolkovskyRocketEquation(shuttleWetMass, shuttleDryMass, shuttleEngineISP);
-
-
+            return seconds; 
         }
 
         /// <summary>
-        /// TODO: add atmo drag and 'gravity drag' (ie thrust to weight ratio) to this. 
+        /// Gets the soi radius of a given body
         /// </summary>
-        /// <returns>The to orbit dv.</returns>
-        /// <param name="targetOrbit">Target orbit.</param>
-        /// <param name="departBody">Depart body.</param>
-        public double AccentToOrbitDV(OrbitDB targetOrbit, Entity departBody, double thrustToWeight, double aerodynamicDrag, double areodynamicLift, double arodynamicStrength)
+        /// <returns>The SOI radius in whatever units you feed the semiMajorAxis.</returns>
+        /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the earth around the sun</param>
+        /// <param name="mass">Mass of the smaller body ie the earth</param>
+        /// <param name="parentMass">Parent mass. ie the sun</param>
+        public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
         {
-            var sgp = targetOrbit.GravitationalParameter;
-            var bodyRadius = departBody.GetDataBlob<MassVolumeDB>().RadiusInKM;
-            var periaps = Distance.AuToKm( targetOrbit.Periapsis);
-            var sma = targetOrbit.SemiMajorAxis;
-            var distance = periaps - bodyRadius;
-
-            var dvAtPeriapsis = PreciseOrbitalSpeed(sgp, periaps, sma); //this could be ralitivly high speed if orbit is elliptical
-
-            // this is an 'outofmyass' calculation, I'm suprised it's so far, I always thought of the atmosphere as being ralitivly thin compared to the radius.  
-            //earths radius is ~6.7km, the Karman line is 100km, 
-            //the mesopause is 80km, 
-            //the ISS orbits at 330 to 410km
-            // radius of earth * 15 gets close to the karman line. 
-            var lowOrbitDistance = bodyRadius * 15;
-
-            var dvAtLowOrbit = PreciseOrbitalSpeed(sgp, lowOrbitDistance, lowOrbitDistance); //dv to a low circular orbit.  
-
-            var dvDifference = dvAtPeriapsis - dvAtLowOrbit;
-            var distanceDifference = periaps - lowOrbitDistance;
-
-            double heightOfAtmoBoundry = 0;
-            float atmoPressure = 0;
-            if (departBody.HasDataBlob<AtmosphereDB>())
-            {
-
-                var atmo = departBody.GetDataBlob<AtmosphereDB>();
-                atmoPressure = atmo.Pressure;
-                heightOfAtmoBoundry = lowOrbitDistance * 0.25;
-            }
-            //var timeToLowOrbit = thrustToWeight
-            //var timeToLowOrbit
-
-
-
-            double timeSpentInTroposphere;
-            double timeSpentInStratosphere;
-            double timeSpentInMesosphere;
-            double timeSpentInThermosphere;
-
-
-
-            throw new NotImplementedException();
+            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
         }
 
+
+
+        /// <summary>
+        /// Another way of getting position, untested, currently unused, copied from somehwere on the net. 
+        /// </summary>
+        /// <returns>The position.</returns>
+        /// <param name="combinedMass">Combined mass.</param>
+        /// <param name="semiMajAxis">Semi maj axis.</param>
+        /// <param name="meanAnomaly">Mean anomaly.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        /// <param name="aoP">AngleOfPeriapsis.</param>
+        /// <param name="loAN">LongditudeOfAccendingNode.</param>
+        /// <param name="i">I don't even remmebr what this is inclination maybe</param>
         public static Vector4 Pos(double combinedMass, double semiMajAxis, double meanAnomaly, double eccentricity, double aoP, double loAN, double i)
         {
             var G = 6.6725985e-11;
@@ -478,80 +412,5 @@ namespace Pulsar4X.ECSLib
                 Z = xw * pZ + yw * qz
             };
         }
-    }
-
-    /// <summary>
-    /// A bunch of convenient functions for calculating various ellipse parameters.
-    /// </summary>
-    public static class EllipseMath
-    {
-        /// <summary>
-        /// SemiMajorAxis from SGP and SpecificEnergy
-        /// </summary>
-        /// <returns>The major axis.</returns>
-        /// <param name="sgp">Standard Gravitational Parameter</param>
-        /// <param name="specificEnergy">Specific energy.</param>
-        public static double SemiMajorAxis(double sgp, double specificEnergy)
-        {
-            return sgp / (2 * specificEnergy);
-        }
-
-        public static double SemiMajorAxisFromApsis(double apoapsis, double periapsis)
-        {
-            return (apoapsis + periapsis) / 2;
-        }
-        public static double SemiMajorAxisFromLinerEccentricity(double linierEccentricity, double eccentricity)
-        {
-            return linierEccentricity * eccentricity;
-        }
-        public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
-        {
-            return semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity);
-        }
-
-        public static double SemiMinorAxisFromApsis(double apoapsis, double periapsis)
-        {
-            return Math.Sqrt(Math.Abs(apoapsis) * Math.Abs(periapsis));
-        }
-
-        public static double LinierEccentricity(double appoapsis, double semiMajorAxis)
-        {
-            return appoapsis - semiMajorAxis;
-        }
-        public static double LinierEccentricityFromEccentricity(double semiMajorAxis, double eccentricity)
-        {
-            return semiMajorAxis * eccentricity;
-        }
-        public static double Eccentricity(double linierEccentricity, double semiMajorAxis)
-        {
-            return linierEccentricity / semiMajorAxis;
-        }
-
-        public static double Apoapsis(double eccentricity, double semiMajorAxis)
-        {
-            return (1 + eccentricity) * semiMajorAxis;
-        }
-        public static double Periapsis(double eccentricity, double semiMajorAxis)
-        {
-            return (1 - eccentricity) * semiMajorAxis;
-        }
-
-        public static double AreaOfEllipseSector(double semiMaj, double semiMin, double firstAngle, double secondAngle)
-        {
-
-            var theta1 = firstAngle;
-            var theta2 = secondAngle;
-            var theta3 = theta2 - theta1;
-
-            //var foo2 = Math.Atan((semiMin - semiMaj) * Math.Sin(2 * theta2) / (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta2)));
-            var foo2 = Math.Atan2((semiMin - semiMaj) * Math.Sin(2 * theta2) , (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta2)));
-            //var foo3 = Math.Atan((semiMin - semiMaj) * Math.Sin(2 * theta1) / (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta1)));
-            var foo3 = Math.Atan2((semiMin - semiMaj) * Math.Sin(2 * theta1) , (semiMaj + semiMin + (semiMin - semiMaj) * Math.Cos(2 * theta1)));
-
-            var area = semiMaj * semiMin / 2 * (theta3 - foo2 + foo3);
-
-            return area;
-        }
-
     }
 }

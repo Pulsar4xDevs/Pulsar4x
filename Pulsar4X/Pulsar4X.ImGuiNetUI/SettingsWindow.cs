@@ -12,6 +12,7 @@ namespace Pulsar4X.SDL2UI
         int _maxAlpha;
         int _minAlpha;
         bool IsThreaded;
+
         bool RalitiveOrbitVelocity;
         private SettingsWindow()
         {
@@ -22,6 +23,7 @@ namespace Pulsar4X.SDL2UI
             _colour = Helpers.Color(_userOrbitSettings.Red, _userOrbitSettings.Grn, _userOrbitSettings.Blu);
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             IsThreaded = _state.Game.Settings.EnableMultiThreading;
+
             RalitiveOrbitVelocity = ECSLib.OrbitProcessor.UseRalitiveVelocity;
         }
         internal static SettingsWindow GetInstance()
@@ -74,6 +76,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.CollapsingHeader("Map Settings", _xpanderFlags))
                     {
+                        ImGui.Checkbox("Draw Names", ref _state.DrawNames);
                         //TODO: make this a knob/dial? need to create a custom control: https://github.com/ocornut/imgui/issues/942
                         if (ImGui.SliderAngle("Sweep Angle", ref _userOrbitSettings.EllipseSweepRadians, 1f, 360f))
                             _state.SelectedSysMapRender.UpdateUserOrbitSettings();

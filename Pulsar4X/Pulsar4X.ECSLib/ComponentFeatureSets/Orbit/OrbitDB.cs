@@ -123,7 +123,7 @@ namespace Pulsar4X.ECSLib
 
             var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
             var ralitivePos = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
-            if (ralitivePos.Length() > GMath.GetSOI(parent))
+            if (ralitivePos.Length() > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
 
             var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
@@ -146,7 +146,7 @@ namespace Pulsar4X.ECSLib
 
         public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime atDateTime)
         {
-            if (position.Length() > GMath.GetSOI(parent))
+            if (position.Length() > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
             //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);
@@ -164,7 +164,7 @@ namespace Pulsar4X.ECSLib
 
         public static OrbitDB FromVectorKM(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime atDateTime)
         {
-            if (Distance.KmToAU(position.Length()) > GMath.GetSOI(parent))
+            if (Distance.KmToAU(position.Length()) > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
             //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, position, velocity);

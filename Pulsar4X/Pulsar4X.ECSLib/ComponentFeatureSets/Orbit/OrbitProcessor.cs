@@ -7,6 +7,15 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// Orbit processor.
+    /// How Orbits are calculated:
+    /// First we get the time since epoch. (time from when the planet is at its closest to it's parent)
+    /// Then we get the Mean Anomaly. (stored) 
+    /// Eccentric Anomaly is calculated from the Mean Anomaly, and takes the most work. 
+    /// True Anomaly, is calculated using the Eccentric Anomaly this is the angle from the parent (or focal point of the ellipse) to the body. 
+    /// With the true anomaly, we can then use trig to calculate the position.  
+    /// </summary>
     public class OrbitProcessor : IHotloopProcessor
     {
         /// <summary>
@@ -192,15 +201,10 @@ namespace Pulsar4X.ECSLib
                 return new Vector4(0, 0, 0, 0);
             }
 
-            //TODO: radius as KM could cause loss at large values, if we're going to do this then we might as well store everything as Km.
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = Distance.AuToKm(orbit.SemiMajorAxis) * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
-
+            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
 
             double inclination = Angle.ToRadians(orbit.Inclination);
-
-            // Convert KM to AU
-            radius = Distance.KmToAU(radius);
 
             //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
             double lofAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
@@ -333,6 +337,27 @@ namespace Pulsar4X.ECSLib
             double e = orbit.Eccentricity;
 
             return OrbitMath.PreciseOrbitalVelocityVector(sgp, position, sma, e, orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
+        }
+
+        /// <summary>
+        /// Gets the SOI radius of a given body.
+        /// </summary>
+        /// <returns>The SOI radius in AU</returns>
+        /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
+        public static double GetSOI(Entity entity)
+        {
+            var orbitDB = entity.GetDataBlob<OrbitDB>();
+            if (orbitDB.Parent != null) //if we're not the parent star
+            {
+                var semiMajAxis = orbitDB.SemiMajorAxis;
+
+                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+
+                return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
+            }
+            else return double.MaxValue; //if we're the parent star, then soi is infinate. 
         }
 
         private class OrbitProcessorException : Exception
