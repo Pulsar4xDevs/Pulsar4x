@@ -129,7 +129,7 @@ namespace Pulsar4X.ECSLib
             var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, ralitivePos, velocityAU);
 
-            var epoch = atDateTime - TimeSpan.FromSeconds(ke.Epoch); //epoch is a point in time it was at periapsis.  
+            var epoch = atDateTime - TimeSpan.FromSeconds(ke.Epoch); //ke.Epoch is seconds from periapsis.   
 
             OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
                         Math.Abs(ke.SemiMajorAxis),
@@ -162,6 +162,7 @@ namespace Pulsar4X.ECSLib
             return orbit;
         }
 
+
         public static OrbitDB FromVectorKM(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime atDateTime)
         {
             if (Distance.KmToAU(position.Length()) > OrbitProcessor.GetSOI(parent))
@@ -180,6 +181,20 @@ namespace Pulsar4X.ECSLib
             return orbit;
         }
 
+        public static OrbitDB FromKeplerElements(Entity parent, double parentMass, double myMass, KeplerElements ke, DateTime atDateTime)
+        {
+
+            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
+                       ke.SemiMajorAxis,
+                       ke.Eccentricity,
+                       Angle.ToDegrees(ke.Inclination),
+                       Angle.ToDegrees(ke.LoAN),
+                       Angle.ToDegrees(ke.AoP),
+                       Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
+                       atDateTime - TimeSpan.FromSeconds(ke.Epoch));
+            //var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
+            return orbit;
+        }
 
         /// <summary>
         /// Returns an orbit representing the defined parameters.

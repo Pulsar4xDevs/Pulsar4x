@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
 
             double eccentricity = eccentVector.Length();
 
-            double specificOrbitalEnergy = velocity.Length() * velocity.Length() * 0.5 - standardGravParam / position.Length();
+            double specificOrbitalEnergy = Math.Pow(velocity.Length(),2) * 0.5 - standardGravParam / position.Length();
 
 
             double semiMajorAxis;

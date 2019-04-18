@@ -66,7 +66,58 @@ namespace Pulsar4X.ECSLib
                 var DistanceToMove_Km = newtonMoveDB.CurrentVector_kms * timeStep;
 
                 positionDB.RelativePosition_AU += Distance.KmToAU(DistanceToMove_Km);
+                double sOIRadius_AU = OrbitProcessor.GetSOI(newtonMoveDB.SOIParent);
+                if (positionDB.RelativePosition_AU.Length() >= sOIRadius_AU)
+                {
+                    Entity newParent;
+                    Vector4 parentRalitiveVector;
+                    if (newtonMoveDB.SOIParent.HasDataBlob<OrbitDB>())
+                    {
+                        var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
+                        newParent = orbitDB.Parent;
+                        var parentVelocity = OrbitProcessor.PreciseOrbitalVelocityVector(orbitDB, entity.Manager.ManagerSubpulses.StarSysDateTime);
+                        parentRalitiveVector = Distance.KmToAU(newtonMoveDB.CurrentVector_kms) + parentVelocity;
+                        var pvlen = Distance.AuToKm( parentVelocity.Length());
+                        var vlen = newtonMoveDB.CurrentVector_kms.Length();
+                        var rvlen = Distance.AuToKm( parentRalitiveVector.Length());
+                    }
+                    else //if (newtonMoveDB.SOIParent.HasDataBlob<NewtonMoveDB>())
+                    { 
+                        newParent = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().SOIParent;
+                        var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().CurrentVector_kms;
+                        parentRalitiveVector = Distance.KmToAU(newtonMoveDB.CurrentVector_kms + parentVelocity);
+                    }
+                    double newParentMass = newParent.GetDataBlob<MassVolumeDB>().Mass;
+                    double sgp = GameConstants.Science.GravitationalConstant * (newParentMass + Mass_Kg) / 3.347928976e33;
+                    Vector4 posRalitiveToNewParent = positionDB.AbsolutePosition_AU - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+                     
+                    var kE = OrbitMath.KeplerFromVelocityAndPosition(sgp, posRalitiveToNewParent, parentRalitiveVector);
+                    var dateTime = entity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
+                    if (kE.Eccentricity < 1)
+                    {
 
+                        var newOrbit = OrbitDB.FromKeplerElements(
+                            newParent, 
+                            newParentMass, 
+                            Mass_Kg, 
+                            kE,
+                            dateTime);
+
+                        entity.RemoveDataBlob<NewtonMoveDB>();
+                        entity.SetDataBlob(newOrbit);
+                        positionDB.SetParent(newParent);
+                        positionDB.RelativePosition_AU = OrbitProcessor.GetPosition_AU(newOrbit, dateTime);
+                        break;
+                    }
+                    else
+                    {
+                        positionDB.SetParent(newParent);
+                        newtonMoveDB.ParentMass = newParentMass;
+                        newtonMoveDB.SOIParent = newParent;
+                        
+                    }
+
+                }
                 secondsToItterate -= timeStep;
             }
         }
