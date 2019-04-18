@@ -1,6 +1,6 @@
-using Newtonsoft.Json;
 using System;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         [JsonProperty]
-        public double MeanAnomaly { get; private set; }
+        public double MeanAnomalyAtEpoch { get; private set; }
 
         /// <summary>
         /// reference time. Orbital parameters are stored relative to this reference.
@@ -137,7 +137,7 @@ namespace Pulsar4X.ECSLib
                         Angle.ToDegrees(ke.Inclination),
                         Angle.ToDegrees(ke.LoAN),
                         Angle.ToDegrees(ke.AoP),
-                        Angle.ToDegrees(ke.MeanAnomaly),
+                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
                         epoch);
             var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
 
@@ -156,7 +156,7 @@ namespace Pulsar4X.ECSLib
                         Angle.ToDegrees(ke.Inclination),
                         Angle.ToDegrees(ke.LoAN),
                         Angle.ToDegrees(ke.AoP),
-                        Angle.ToDegrees(ke.MeanAnomaly),
+                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
                         atDateTime - TimeSpan.FromSeconds(ke.Epoch));
             var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
             return orbit;
@@ -174,7 +174,7 @@ namespace Pulsar4X.ECSLib
                         Angle.ToDegrees(ke.Inclination),
                         Angle.ToDegrees(ke.LoAN),
                         Angle.ToDegrees(ke.AoP),
-                        Angle.ToDegrees(ke.MeanAnomaly),
+                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
                         atDateTime - TimeSpan.FromSeconds(ke.Epoch));
             var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
             return orbit;
@@ -237,7 +237,7 @@ namespace Pulsar4X.ECSLib
             Inclination = inclination;
             LongitudeOfAscendingNode = longitudeOfAscendingNode;
             ArgumentOfPeriapsis = argumentOfPeriapsis;
-            MeanAnomaly = meanAnomaly;
+            MeanAnomalyAtEpoch = meanAnomaly;
             Epoch = epoch;
 
             _parentMass = parentMass;
@@ -272,7 +272,7 @@ namespace Pulsar4X.ECSLib
             Inclination = toCopy.Inclination;
             LongitudeOfAscendingNode = toCopy.LongitudeOfAscendingNode;
             ArgumentOfPeriapsis = toCopy.ArgumentOfPeriapsis;
-            MeanAnomaly = toCopy.MeanAnomaly;
+            MeanAnomalyAtEpoch = toCopy.MeanAnomalyAtEpoch;
             _parentMass = toCopy._parentMass;
             _myMass = toCopy._myMass;
             Epoch = toCopy.Epoch;
@@ -349,7 +349,7 @@ namespace Pulsar4X.ECSLib
             Inclination = actualDB.Inclination;
             LongitudeOfAscendingNode = actualDB.LongitudeOfAscendingNode;
             ArgumentOfPeriapsis = actualDB.ArgumentOfPeriapsis;
-            MeanAnomaly = actualDB.MeanAnomaly;
+            MeanAnomalyAtEpoch = actualDB.MeanAnomalyAtEpoch;
             _parentMass = actualDB._parentMass;
             _myMass = actualDB._myMass;
             CalculateExtendedParameters();

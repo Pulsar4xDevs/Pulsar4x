@@ -7,6 +7,8 @@ namespace Pulsar4X.SDL2UI
 {
     public class OrbitHypobolicIcon : OrbitIconBase
     {
+        int _numberOfPoints;
+
         public OrbitHypobolicIcon(EntityState entityState, UserOrbitSettings settings) : base(entityState, settings)
         {
             UpdateUserSettings();
@@ -18,15 +20,15 @@ namespace Pulsar4X.SDL2UI
         {
             double soi = OrbitProcessor.GetSOI(_orbitDB.OwningEntity);
             double e = _orbitDB.Eccentricity;
-            double p = EllipseMath.SemiLatusRectum(_orbitEllipseSemiMaj, e);
-            double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, _orbitDB.Eccentricity));
+            double p = EllipseMath.SemiLatusRectum(-_orbitEllipseSemiMaj, e);
+            double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
 
             double arc = angleToSOIPoint * 2;
-            int numberOfPoints = (int)(_numberOfArcSegments / arc) + 1;
-            _points = new PointD[numberOfPoints];
+            _numberOfPoints = (int)(_numberOfArcSegments / arc) + 1;
+            _points = new PointD[_numberOfPoints];
             double angle = angleToSOIPoint;
 
-            for (int i = 0; i < numberOfPoints; i++)
+            for (int i = 0; i < _numberOfPoints; i++)
             {
 
                 //double x1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
@@ -57,9 +59,9 @@ namespace Pulsar4X.SDL2UI
             };
 
 
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            _drawPoints = new SDL.SDL_Point[_numberOfPoints];
 
-            for (int i = 0; i < _numberOfDrawSegments; i++)
+            for (int i = 0; i < _numberOfPoints; i++)
             {
 
                 PointD translated = matrix.TransformD(_points[i].X, _points[i].Y); //add zoom transformation. 
@@ -78,10 +80,10 @@ namespace Pulsar4X.SDL2UI
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             //now we draw a line between each of the points in the translatedPoints[] array.
-            if (_drawPoints.Count() < _numberOfDrawSegments - 1)
+            if (_drawPoints.Count() < _numberOfPoints - 1)
                 return;
             float alpha = _userSettings.MaxAlpha;
-            for (int i = 0; i < _numberOfDrawSegments - 1; i++)
+            for (int i = 0; i < _numberOfPoints - 1; i++)
             {
                 SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);

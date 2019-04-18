@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
         public double LoAN;                 //Omega (upper case)
         public double AoP;                  //omega (lower case)
         public double Inclination;          //i
-        public double MeanAnomaly;          //M
+        public double MeanAnomalyAtEpoch;          //M0
         public double TrueAnomaly;          //v or f or theta
         //public double Period              //P
         //public double EccentricAnomaly    //E
@@ -138,13 +138,37 @@ namespace Pulsar4X.ECSLib
             ke.LoAN = longdOfAN;
             ke.AoP = Angle.NormaliseRadians( argOfPeriaps);
             ke.Inclination = inclination;
-            ke.MeanAnomaly = meanAnomaly;
+            ke.MeanAnomalyAtEpoch = meanAnomaly;
             ke.TrueAnomaly = TrueAnomaly(eccentVector, position, velocity);
-            ke.Epoch = Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
+            ke.Epoch = TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
+            //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
+
             return ke;
         }
 
-        public static double Epoch(double semiMaj, double semiMin, double eccentricAnomaly, double Period)
+
+        /// <summary>
+        /// Returns the TimeFromPeriapsis
+        /// </summary>
+        /// <returns>time from periapsis.</returns>
+        /// <param name="semiMaj">Semi maj.</param>
+        /// <param name="standardGravParam">Standard grav parameter.</param>
+        /// <param name="currentMeanAnomaly">Mean anomaly current.</param>
+        public static double TimeFromPeriapsis(double semiMaj, double standardGravParam, double currentMeanAnomaly)
+        {
+            return Math.Pow((Math.Pow(semiMaj, 3) / standardGravParam), 0.5) * currentMeanAnomaly;
+        }
+
+        /// <summary>
+        /// Alternate way to get TimeFromPeriapsis
+        /// Doesn't work with Hypobolic orbits due to period being undefined. 
+        /// </summary>
+        /// <returns>The epoch.</returns>
+        /// <param name="semiMaj">Semi maj.</param>
+        /// <param name="semiMin">Semi minimum.</param>
+        /// <param name="eccentricAnomaly">Eccentric anomaly.</param>
+        /// <param name="Period">Period.</param>
+        public static double TimeFromPeriapsis(double semiMaj, double semiMin, double eccentricAnomaly, double Period)
         {
 
             double areaOfEllipse = semiMaj * semiMin * Math.PI;
@@ -168,15 +192,9 @@ namespace Pulsar4X.ECSLib
         public static Vector4 EccentricityVector(double sgp, Vector4 position, Vector4 velocity)
         {
             Vector4 angularMomentum = Vector4.Cross(position, velocity);
-            Vector4 foo1 = Vector4.Cross(velocity, angularMomentum);
-            foo1 = foo1 / sgp;
+            Vector4 foo1 = Vector4.Cross(velocity, angularMomentum) / sgp;
             var foo2 = position / position.Length();
             return foo1 - foo2;
-        }
-
-        public static double OrbitalPeriod(double sgp, double semiMajAxis)
-        {
-            return 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajAxis, 3) / sgp);
         }
 
         public static Vector4 EccentricityVector2(double sgp, Vector4 position, Vector4 velocity)
@@ -187,6 +205,11 @@ namespace Pulsar4X.ECSLib
             var foo2 = Vector4.Dot(position, velocity) * velocity;
             var foo3 = (foo1 - foo2) / sgp;
             return foo3;
+        }
+
+        public static double OrbitalPeriod(double sgp, double semiMajAxis)
+        {
+            return 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajAxis, 3) / sgp);
         }
 
         /// <summary>
@@ -306,13 +329,40 @@ namespace Pulsar4X.ECSLib
             return peremeter  / orbitalPerodSeconds;
         }
 
+        /*
+        public static double GetTrueAnomaly(Vector4 eccentricityVector, Vector4 positionVector)
+        {
+            var a = Vector4.Dot(eccentricityVector, positionVector);
+            var h = eccentricityVector.Length() * positionVector.Length();
+            var ta = Math.Acos(a / h);
+            double b = 0;
+           
+            if(a/b > 1 || a/b < 1)
+            {
+                b = Math.Sqrt(a * a + b * b);
+                ta = Math.Atan(b / a);
+            }
+
+        }*/
+
+
+
         public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
         {
             //r = p / (1 + e * cos(theta))
             //1 + e * cos(theta) = p/r
             //((p / r) -1) / e = cos(theta)
+            var a = (semiLatusRectum / radius - 1);
+            if( a / eccentricity < 1 && a > -1 )
+            {
+                return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
+            }
+            else
+            {
+                var b = Math.Sqrt(a * a + eccentricity * eccentricity);
+                return Math.Atan(b / a);
+            }
 
-            return Math.Acos(((semiLatusRectum / radius) -1) / eccentricity);
         }
 
         /// <summary>
@@ -329,13 +379,92 @@ namespace Pulsar4X.ECSLib
             return deltaV;
         }
 
-        public static double TimeToRadius(OrbitDB orbit, double radiusAU)
+        /// <summary>
+        /// Incorrect DONOTUSE
+        /// </summary>
+        /// <returns>The to radius from periapsis.</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="radiusAU">Radius au.</param>
+        public static double TimeToRadiusFromPeriapsis(OrbitDB orbit, double radiusAU)
         {
-            double seconds = 0;
+            var a = orbit.SemiMajorAxis;
+            var e = orbit.Eccentricity;
+            var p = EllipseMath.SemiLatusRectum(a, e);
+            var angle = AngleAtRadus(radiusAU, p, e);
+            //var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
+            return TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch);
+        }
+
+        /// <summary>
+        /// Gets the eccentric anomaly.
+        /// This can take a number of itterations to calculate so may not be fast. 
+        /// </summary>
+        /// <returns>The eccentric anomaly.</returns>
+        /// <param name="eccentricity">Eccentricity.</param>
+        /// <param name="currentMeanAnomaly">Current mean anomaly.</param>
+        public static double GetEccentricAnomaly(double eccentricity, double currentMeanAnomaly)
+        {
+            
+            //Kepler's Equation
+            const int numIterations = 100;
+            var e = new double[numIterations];
+            const double epsilon = 1E-12; // Plenty of accuracy.
+            int i = 0;
+
+            if (eccentricity > 0.8)
+            {
+                e[i] = Math.PI;
+            }
+            else
+            {
+                e[i] = currentMeanAnomaly;
+            }
+
+            do
+            {
+                // Newton's Method.
+                /*                   E(n) - e sin(E(n)) - M(t)
+                 * E(n+1) = E(n) - ( ------------------------- )
+                 *                        1 - e cos(E(n)
+                 * 
+                 * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
+                 * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
+                */
+                e[i + 1] = e[i] - (e[i] - eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - eccentricity * Math.Cos(e[i]));
+                i++;
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
+
+            if (i + 1 >= numIterations)
+            {
+                throw new Exception("Non-convergence of Newton's method while calculating Eccentric Anomaly.");
+            }
+
+            return e[i - 1];
+        }
 
 
+        /// <summary>
+        /// Calculates CurrentMeanAnomaly
+        /// </summary>
+        /// <returns>The mean anomaly.</returns>
+        /// <param name="meanAnomalyAtEpoch">InRadians.</param>
+        /// <param name="meanMotion">InRadians/s.</param>
+        /// <param name="secondsFromEpoch">Seconds from epoch.</param>
+        public static double CurrentMeanAnomaly(double meanAnomalyAtEpoch, double meanMotion, double secondsFromEpoch)
+        {
+            // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)
+            // Convert MeanAnomaly to radians.
+            double currentMeanAnomaly = meanAnomalyAtEpoch;
+            // Add nT
+            currentMeanAnomaly += meanMotion * secondsFromEpoch;
+            // Large nT can cause meanAnomaly to go past 2*Pi. Roll it down. It shouldn't, because timeSinceEpoch should be tapered above, but it has.
+            currentMeanAnomaly = currentMeanAnomaly % (Math.PI * 2);
+            return currentMeanAnomaly;
+        }
 
-            return seconds; 
+        public static double GetHypobolicMeanAnomaly(double hypobolicEccentricAnomaly, double eccentricity)
+        {
+            return eccentricity * Math.Sinh(hypobolicEccentricAnomaly) - hypobolicEccentricAnomaly; 
         }
 
         /// <summary>

@@ -119,5 +119,6 @@
     <Folder Include="DataBlobs\ComponentInstanceDBs\" />
     <Folder Include="Factories\ShipComponents\" />
     <Folder Include="Components\" />
+    <Folder Include="ComponentFeatureSets\NewtonionMovement\" />
   </ItemGroup>
 </Project>

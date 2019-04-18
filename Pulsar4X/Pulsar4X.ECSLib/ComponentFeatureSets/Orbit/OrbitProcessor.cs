@@ -173,14 +173,9 @@ namespace Pulsar4X.ECSLib
                 orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
             }
 
-            // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)
-            // Convert MeanAnomaly to radians.
-            double currentMeanAnomaly = Angle.ToRadians(orbit.MeanAnomaly);
-            // Add nT
-            currentMeanAnomaly += Angle.ToRadians(orbit.MeanMotion) * timeSinceEpoch.TotalSeconds;
-            // Large nT can cause meanAnomaly to go past 2*Pi. Roll it down. It shouldn't, because timeSinceEpoch should be tapered above, but it has.
-            currentMeanAnomaly = currentMeanAnomaly % (Math.PI * 2);
-
+            double m0 = Angle.ToRadians(orbit.MeanAnomalyAtEpoch);
+            double n = Angle.ToRadians(orbit.MeanMotion);
+            double currentMeanAnomaly = OrbitMath.CurrentMeanAnomaly(m0, n, timeSinceEpoch.TotalSeconds);
 
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
             var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
