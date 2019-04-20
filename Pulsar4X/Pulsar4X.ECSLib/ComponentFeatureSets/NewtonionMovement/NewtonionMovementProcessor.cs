@@ -95,14 +95,15 @@ namespace Pulsar4X.ECSLib
                     var dateTime = entity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
                     if (kE.Eccentricity < 1)
                     {
-
+                        /*
                         var newOrbit = OrbitDB.FromKeplerElements(
                             newParent, 
                             newParentMass, 
                             Mass_Kg, 
                             kE,
                             dateTime);
-
+                            */
+                        var newOrbit = OrbitDB.FromVector(newParent, entity, parentRalitiveVector, dateTime);
                         entity.RemoveDataBlob<NewtonMoveDB>();
                         entity.SetDataBlob(newOrbit);
                         positionDB.SetParent(newParent);

@@ -12,8 +12,30 @@ namespace Pulsar4X.SDL2UI
 {
     public class UserOrbitSettings
     {
-        public float EllipseSweepRadians = 4.71239f;
+        internal enum OrbitBodyType
+        {
+            Unknown,
+            Star,
+            Planet,
+            Moon,
+            Asteroid,
+            Comet,
+            Ship,
+            NumberOf
 
+        }
+        internal enum OrbitTrajectoryType
+        {
+            Unknown,
+            Elliptical,
+            Hyperbolic,
+            NewtonionThrust,
+            NonNewtonionTranslation,
+            NumberOf         
+        }
+
+        public float EllipseSweepRadians = 4.71239f;
+        public float ShowNameAtZoom = 100;
         //32 is a good low number, slightly ugly.  180 is a little overkill till you get really big orbits. 
         public byte NumberOfArcSegments = 180; 
 
@@ -138,9 +160,9 @@ namespace Pulsar4X.SDL2UI
                 {
                     OrbitIconBase orbit;
                     if(orbitDB.Eccentricity > 1)
-                        orbit = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettings);
+                        orbit = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
                     else
-                        orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettings);
+                        orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
                     _orbitRings.TryAdd(entityItem.Guid, orbit);
 
                 }
@@ -239,7 +261,7 @@ namespace Pulsar4X.SDL2UI
                             else
                                 entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
 
-                            _orbitRings[changeData.Entity.Guid] = new OrbitEllipseIcon(entityState, _state.UserOrbitSettings);
+                            _orbitRings[changeData.Entity.Guid] = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
 
                         }
                     }
@@ -406,17 +428,16 @@ namespace Pulsar4X.SDL2UI
 
                 UpdateAndDraw(SelectedEntityExtras, matrix);
 
-                if (_state.DrawNames)
+
+                //because _nameIcons are imgui not sdl, we don't draw them here.
+                //we draw them in PulsarMainWindow.ImGuiLayout
+                lock (_nameIcons)
                 {
-                    //because _nameIcons are imgui not sdl, we don't draw them here.
-                    //we draw them in PulsarMainWindow.ImGuiLayout
-                    lock (_nameIcons)
-                    {
-                        foreach (var item in _nameIcons.Values)
-                            item.OnFrameUpdate(matrix, _camera);
-                    }
-                    TextIconsDistribute();
+                    foreach (var item in _nameIcons.Values)
+                        item.OnFrameUpdate(matrix, _camera);
                 }
+                TextIconsDistribute();
+
                 //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
@@ -427,14 +448,15 @@ namespace Pulsar4X.SDL2UI
 
         public void DrawNameIcons()
         {
-            if (_state.DrawNames)
+
+            lock (_nameIcons)
             {
-                lock (_nameIcons)
+                foreach (var item in _nameIcons.Values)
                 {
-                    foreach (var item in _nameIcons.Values)
-                        item.Draw(_state.rendererPtr, _state.Camera);
+                    item.Draw(_state.rendererPtr, _state.Camera);
                 }
             }
+            
         }
 
         void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)

@@ -11,6 +11,7 @@ namespace Pulsar4X.SDL2UI
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
+
         internal Game Game;
         internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
@@ -43,9 +44,9 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new Dictionary<Type, PulsarGuiWindow>();
         internal PulsarGuiWindow ActiveWindow { get; set; }
 
+        internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new List<List<UserOrbitSettings>>();
+        internal List<float> DrawNameZoomLvl = new List<float>();
 
-        internal UserOrbitSettings UserOrbitSettings = new UserOrbitSettings();
-        internal bool DrawNames = true;
         internal Dictionary<string, IntPtr> SDLImageDictionary = new Dictionary<string, IntPtr>();
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
@@ -64,6 +65,16 @@ namespace Pulsar4X.SDL2UI
             var windowPtr = viewport.Handle;
             surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
             rendererPtr = SDL.SDL_GetRenderer(windowPtr);
+
+            for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
+            {
+                UserOrbitSettingsMtx.Add(new List<UserOrbitSettings>());
+                DrawNameZoomLvl.Add(100f);
+                for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
+                {
+                    UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());
+                }
+            }
 
 
             Camera = new Camera(viewport);
@@ -91,6 +102,7 @@ namespace Pulsar4X.SDL2UI
             GL.Enable(GL.Enum.GL_TEXTURE_2D);
             */
         }
+
 
         internal void LoadImg(string name, string path)
         {

@@ -30,8 +30,10 @@ namespace Pulsar4X.SDL2UI
 
 
 
-        internal OrbitEllipseIcon(EntityState entityState, UserOrbitSettings settings): base(entityState, settings)
+        internal OrbitEllipseIcon(EntityState entityState, List<List<UserOrbitSettings>> settings): base(entityState, settings)
         {
+
+            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Elliptical;
 
 
             UpdateUserSettings();

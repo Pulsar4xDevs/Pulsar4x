@@ -1,26 +1,25 @@
 ﻿using System;
 using ImGuiNET;
 using System.Numerics;
+using System.Collections.Generic;
+
 namespace Pulsar4X.SDL2UI
 {
     public class SettingsWindow : PulsarGuiWindow
     {
         ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.CollapsingHeader;
-        UserOrbitSettings _userOrbitSettings;
-        int _arcSegments;
-        Vector3 _colour;
-        int _maxAlpha;
-        int _minAlpha;
+        List<List<UserOrbitSettings>> _userOrbitSettingsMtx;
+        //UserOrbitSettings _userOrbitSettings;
+
         bool IsThreaded;
 
         bool RalitiveOrbitVelocity;
         private SettingsWindow()
         {
-            _userOrbitSettings = _state.UserOrbitSettings;
-            _arcSegments = _userOrbitSettings.NumberOfArcSegments;
-            _maxAlpha = _userOrbitSettings.MaxAlpha;
-            _minAlpha = _userOrbitSettings.MinAlpha;
-            _colour = Helpers.Color(_userOrbitSettings.Red, _userOrbitSettings.Grn, _userOrbitSettings.Blu);
+            _userOrbitSettingsMtx = _state.UserOrbitSettingsMtx;
+
+
+
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             IsThreaded = _state.Game.Settings.EnableMultiThreading;
 
@@ -76,33 +75,63 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.CollapsingHeader("Map Settings", _xpanderFlags))
                     {
-                        ImGui.Checkbox("Draw Names", ref _state.DrawNames);
-                        //TODO: make this a knob/dial? need to create a custom control: https://github.com/ocornut/imgui/issues/942
-                        if (ImGui.SliderAngle("Sweep Angle", ref _userOrbitSettings.EllipseSweepRadians, 1f, 360f))
-                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
 
-                        if (ImGui.SliderInt("Number Of Segments", ref _arcSegments, 1, 255, _userOrbitSettings.NumberOfArcSegments.ToString()))
-                        {
-                            _userOrbitSettings.NumberOfArcSegments = (byte)_arcSegments;
-                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
-                        }
 
-                        if (ImGui.ColorEdit3("Orbit Ring Colour", ref _colour))
+                        for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
                         {
-                            _userOrbitSettings.Red = Helpers.Color(_colour.X);
-                            _userOrbitSettings.Grn = Helpers.Color(_colour.Y);
-                            _userOrbitSettings.Blu = Helpers.Color(_colour.Z);
-                        }
-                        if (ImGui.SliderInt("Max Alpha", ref _maxAlpha, _minAlpha, 255, ""))
-                        {
-                            _userOrbitSettings.MaxAlpha = (byte)_maxAlpha;
-                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
-                        }
+                            UserOrbitSettings.OrbitBodyType otype = (UserOrbitSettings.OrbitBodyType)i;
+                            string typeStr = otype.ToString();
+                            if (ImGui.TreeNode(typeStr ))
+                            {
+                                float _nameZoomLevel = _state.DrawNameZoomLvl[(int)otype];
+                                ImGui.SliderFloat("Draw Names at Zoom: ", ref _nameZoomLevel, 0.01f, 10000f);
+                                _state.DrawNameZoomLvl[(int)otype] = _nameZoomLevel;
+                                for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
+                                {
 
-                        if (ImGui.SliderInt("Min Alpha", ref _minAlpha, 0, _maxAlpha, ""))
-                        {
-                            _userOrbitSettings.MinAlpha = (byte)_minAlpha;
-                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                    UserOrbitSettings.OrbitTrajectoryType trtype = (UserOrbitSettings.OrbitTrajectoryType)j;
+                                    string trtypeStr = trtype.ToString();
+                                    if (ImGui.TreeNode(trtypeStr))
+                                    {
+
+                                        UserOrbitSettings _userOrbitSettings = _userOrbitSettingsMtx[i][j];
+                                        int _arcSegments = _userOrbitSettings.NumberOfArcSegments;
+                                        Vector3 _colour = Helpers.Color(_userOrbitSettings.Red, _userOrbitSettings.Grn, _userOrbitSettings.Blu);
+                                        int _maxAlpha = _userOrbitSettings.MaxAlpha;
+                                        int _minAlpha = _userOrbitSettings.MinAlpha;
+
+
+                                        //TODO: make this a knob/dial? need to create a custom control: https://github.com/ocornut/imgui/issues/942
+                                        if (ImGui.SliderAngle("Sweep Angle ##" + i + j, ref _userOrbitSettings.EllipseSweepRadians, 1f, 360f))
+                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+
+                                        if (ImGui.SliderInt("Number Of Segments ##" + i + j, ref _arcSegments, 1, 255, _userOrbitSettings.NumberOfArcSegments.ToString()))
+                                        {
+                                            _userOrbitSettings.NumberOfArcSegments = (byte)_arcSegments;
+                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                        }
+
+                                        if (ImGui.ColorEdit3("Orbit Ring Colour ##" + i + j, ref _colour))
+                                        {
+                                            _userOrbitSettings.Red = Helpers.Color(_colour.X);
+                                            _userOrbitSettings.Grn = Helpers.Color(_colour.Y);
+                                            _userOrbitSettings.Blu = Helpers.Color(_colour.Z);
+                                        }
+                                        if (ImGui.SliderInt("Max Alpha ##" + i + j, ref _maxAlpha, _minAlpha, 255, ""))
+                                        {
+                                            _userOrbitSettings.MaxAlpha = (byte)_maxAlpha;
+                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                        }
+
+                                        if (ImGui.SliderInt("Min Alpha  ##" + i + j, ref _minAlpha, 0, _maxAlpha, ""))
+                                        {
+                                            _userOrbitSettings.MinAlpha = (byte)_minAlpha;
+                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                        }
+                                    } 
+                                }
+                                ImGui.TreePop();
+                            }
                         }
                     }
 

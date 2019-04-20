@@ -19,6 +19,7 @@ namespace Pulsar4X.SDL2UI
         public List<EntityChangeData> _changesNextFrame = new List<EntityChangeData>();
         public CommandReferences CmdRef;
         internal Guid StarSysGuid;
+        internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
         public EntityState(Entity entity)
         {
             Entity = entity;
@@ -32,6 +33,10 @@ namespace Pulsar4X.SDL2UI
             StarSystem starSys = (StarSystem)entity.Manager;
             StarSysGuid = starSys.Guid;
             entity.ChangeEvent += On_entityChangeEvent;
+
+            SetBodyType();
+
+
         }
 
         public EntityState(SensorContact sensorContact)
@@ -43,9 +48,50 @@ namespace Pulsar4X.SDL2UI
             StarSystem starSys = (StarSystem)Entity.Manager;
             StarSysGuid = starSys.Guid;
             sensorContact.ActualEntity.ChangeEvent += On_entityChangeEvent;
-
+            SetBodyType();
         }
 
+        void SetBodyType()
+        {
+            if (Entity.HasDataBlob<SystemBodyInfoDB>())
+            {
+                switch (Entity.GetDataBlob<SystemBodyInfoDB>().BodyType)
+                {
+                    case ECSLib.BodyType.Asteroid:
+                        {
+                            BodyType = UserOrbitSettings.OrbitBodyType.Asteroid;
+                            break;
+                        }
+                    case ECSLib.BodyType.Comet:
+                        {
+                            BodyType = UserOrbitSettings.OrbitBodyType.Comet;
+                            break;
+                        }
+                    case ECSLib.BodyType.DwarfPlanet:
+                    case ECSLib.BodyType.GasDwarf:
+                    case ECSLib.BodyType.GasGiant:
+                    case ECSLib.BodyType.IceGiant:
+                    case ECSLib.BodyType.Terrestrial:
+                        {
+                            BodyType = UserOrbitSettings.OrbitBodyType.Planet;
+                            break;
+                        }
+
+                    case ECSLib.BodyType.Moon:
+                        {
+                            BodyType = UserOrbitSettings.OrbitBodyType.Moon;
+                            break;
+                        }
+                    default:
+                        break;
+                }
+
+            }
+            if (Entity.HasDataBlob<StarInfoDB>())
+                BodyType = UserOrbitSettings.OrbitBodyType.Star;
+            if (Entity.HasDataBlob<ShipInfoDB>())
+                BodyType = UserOrbitSettings.OrbitBodyType.Ship;
+        }
 
         //maybe this should be done in the SystemState?
         void On_entityChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
@@ -74,5 +120,6 @@ namespace Pulsar4X.SDL2UI
             _changesNextFrame = new List<EntityChangeData>();
         }
 
+        
     }
 }

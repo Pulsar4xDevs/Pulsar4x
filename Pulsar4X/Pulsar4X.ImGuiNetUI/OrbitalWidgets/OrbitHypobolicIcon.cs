@@ -2,6 +2,7 @@
 using Pulsar4X.ECSLib;
 using SDL2;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -9,7 +10,7 @@ namespace Pulsar4X.SDL2UI
     {
         int _numberOfPoints;
 
-        public OrbitHypobolicIcon(EntityState entityState, UserOrbitSettings settings) : base(entityState, settings)
+        public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState, settings)
         {
             UpdateUserSettings();
             CreatePointArray();

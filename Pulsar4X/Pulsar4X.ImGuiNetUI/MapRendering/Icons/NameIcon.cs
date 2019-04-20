@@ -22,8 +22,9 @@ namespace Pulsar4X.SDL2UI
         Guid _starSysGuid;
         public Dictionary<Guid, string> SubNames = new Dictionary<Guid, string>();
         public ImVec2 ViewOffset { get; set; } = new ImVec2();
-        public Rectangle ViewDisplayRect = new Rectangle(); 
-
+        public Rectangle ViewDisplayRect = new Rectangle();
+        UserOrbitSettings.OrbitBodyType _bodyType = UserOrbitSettings.OrbitBodyType.Unknown;
+        internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[(int)_bodyType]; } }
         public NameIcon(EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
             _state = state;
@@ -34,7 +35,7 @@ namespace Pulsar4X.SDL2UI
             NameString = _nameDB.GetName(state.Faction);
             entityState.Name = NameString;
             entityState.NameIcon = this;
-
+            _bodyType = entityState.BodyType;
         }
 
 
@@ -65,7 +66,8 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             //DefaultViewOffset = new SDL.SDL_Point() { x = Width, y = -Height };
-
+            if (camera.ZoomLevel < DrawAtZoom)
+                return;
             ImVec2 defualtOffset = new ImVec2(4,-(Height / 2));
             ViewOffset = defualtOffset;
             base.OnFrameUpdate(matrix, camera);
@@ -96,6 +98,8 @@ namespace Pulsar4X.SDL2UI
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
+            if (camera.ZoomLevel < DrawAtZoom)
+                return;
             var camerapoint = camera.CameraViewCoordinate();
             int x = (int)(X + camerapoint.x + ViewOffset.x);
             int y = (int)(Y + camerapoint.y + ViewOffset.y);

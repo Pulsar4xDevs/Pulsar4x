@@ -36,7 +36,10 @@ namespace Pulsar4X.SDL2UI
         protected int _index;
 
         //user adjustable variables:
-        protected UserOrbitSettings _userSettings;
+        internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
+        internal UserOrbitSettings.OrbitTrajectoryType TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Unknown;
+        protected List<List<UserOrbitSettings>> _userOrbitSettingsMtx;
+        protected UserOrbitSettings _userSettings { get { return _userOrbitSettingsMtx[(int)BodyType][(int)TrajectoryType]; } }
 
         //change after user makes adjustments:
         protected byte _numberOfArcSegments = 180; //how many segments in a complete 360 degree ellipse. this is set in UserOrbitSettings, localy adjusted because the whole point array needs re-creating when it changes. 
@@ -46,12 +49,13 @@ namespace Pulsar4X.SDL2UI
 
 
         #endregion
-        public OrbitIconBase(EntityState entityState, UserOrbitSettings settings) : base(entityState.Entity.GetDataBlob<PositionDB>())
+        public OrbitIconBase(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
+            BodyType = entityState.BodyType;
 
             entityState.OrbitIcon = this;
             _mgr = entityState.Entity.Manager;
-            _userSettings = settings;
+            _userOrbitSettingsMtx = settings;
             _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
             BodyPositionDB = entityState.Position; //entityState.Entity.GetDataBlob<PositionDB>();
             if (_orbitDB.Parent == null) //primary star
