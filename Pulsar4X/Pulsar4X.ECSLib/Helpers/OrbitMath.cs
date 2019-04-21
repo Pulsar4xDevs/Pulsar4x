@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
         public double LoAN;                 //Omega (upper case)
         public double AoP;                  //omega (lower case)
         public double Inclination;          //i
-        public double MeanAnomalyAtEpoch;          //M0
+        public double MeanAnomalyAtEpoch;   //M0
         public double TrueAnomaly;          //v or f or theta
         //public double Period              //P
         //public double EccentricAnomaly    //E

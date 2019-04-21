@@ -417,7 +417,7 @@ namespace Pulsar4X.ECSLib
         {
             EventLog eventLog = new EventLog(game);
             eventLog = Import(game, inputStream, eventLog);
-            game.EventLog = eventLog;
+            StaticRefLib.SetEventlog(eventLog);
             return eventLog;
         }
         private static TObj Import<TObj>([NotNull] Game game, [NotNull] Stream inputStream, [NotNull] TObj obj)

@@ -287,7 +287,7 @@ namespace Pulsar4X.Networking
             _gameVM.Game = Game;
             Game.OrderHandler = this;
             var mStream = new MemoryStream(data);
-            Game.Settings = SerializationManager.ImportGameSettings(mStream);
+            StaticRefLib.GameSettings = SerializationManager.ImportGameSettings(mStream);
             mStream.Close();
             Game.GameLoop.GameGlobalDateTime = hostDateTime;
             //TODO: #CleanCode: the below should probilby be in refactored to somewhere else. 

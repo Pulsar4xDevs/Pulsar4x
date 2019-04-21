@@ -211,7 +211,7 @@ namespace Pulsar4X.ECSLib
                     fcinstance.IsEngaging = true;
                     DateTime dateTimeNow = _fireControlComponent.Manager.ManagerSubpulses.StarSysDateTime;
                     foreach (var wpn in fcinstance.AssignedWeapons)
-                        game.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor), wpn, dateTimeNow);
+                        StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor), wpn, dateTimeNow);
                 }
                 else if (IsFiring == FireModes.CeaseFire)
                 {

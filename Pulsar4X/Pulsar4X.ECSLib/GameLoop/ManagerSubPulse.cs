@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
             {
                 Game game = (Game)context.Context;
                 Dictionary<string, List<Guid>> instanceProcessors = (Dictionary<string, List<Guid>>)info.GetValue(nameof(InstanceProcessors), typeof(Dictionary<string, List<Guid>>));
-                ProcessorManager processManager = game.ProcessorManager;
+                ProcessorManager processManager = StaticRefLib.ProcessorManager;
                 Entity entity;
                 foreach (var kvpItem in instanceProcessors)
                 {
@@ -162,8 +162,8 @@ namespace Pulsar4X.ECSLib
                 if (value < _systemLocalDateTime)
                     throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
                 _systemLocalDateTime = value;
-                if (_entityManager.Game.SyncContext != null)
-                    _entityManager.Game.SyncContext.Post(InvokeDateChange, value);//marshal to the main (UI) thread, so the event is invoked on that thread.
+                if (StaticRefLib.SyncContext != null)
+                    StaticRefLib.SyncContext.Post(InvokeDateChange, value);//marshal to the main (UI) thread, so the event is invoked on that thread.
                 else //if context is null, we're probibly running tests or headless.
                     InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)   
             }
@@ -176,7 +176,7 @@ namespace Pulsar4X.ECSLib
 
         internal ManagerSubPulse(EntityManager entityMan, ProcessorManager procMan) 
         {
-            _systemLocalDateTime = entityMan.Game.CurrentDateTime;
+            _systemLocalDateTime = StaticRefLib.CurrentDateTime;
             _entityManager = entityMan;
             _processManager = procMan;
             InitHotloopProcessors();
@@ -185,7 +185,7 @@ namespace Pulsar4X.ECSLib
         internal void PostLoadInit(StreamingContext context, EntityManager entityManager) //this one is used after loading a game. 
         {
             _entityManager = entityManager;
-            _processManager = entityManager.Game.ProcessorManager;
+            _processManager = StaticRefLib.ProcessorManager;
             InitHotloopProcessors();
         }
 

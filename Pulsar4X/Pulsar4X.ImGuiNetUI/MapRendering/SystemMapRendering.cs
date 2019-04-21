@@ -87,6 +87,12 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetSystem(FactionVM factionVM)
         {
+            if (_sysState != null)
+            {
+                _sysState.StarSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateChange;
+                _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
+
+            }
             if (_state.StarSystemStates.ContainsKey(factionVM.SystemMap.StarSystem.Guid))
                 _sysState = _state.StarSystemStates[factionVM.SystemMap.StarSystem.Guid];
             else
@@ -116,6 +122,12 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetSystem(StarSystem starSys)
         {
+            if(_sysState != null)
+            {
+                _sysState.StarSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateChange;
+                _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
+            
+            }
             if (_state.StarSystemStates.ContainsKey(starSys.Guid))
                 _sysState = _state.StarSystemStates[starSys.Guid];
             else
@@ -126,6 +138,8 @@ namespace Pulsar4X.SDL2UI
 
 
             _faction = _state.Faction;
+
+
 
             starSys.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
             _sensorMgr = starSys.GetSensorContacts(_faction.Guid);

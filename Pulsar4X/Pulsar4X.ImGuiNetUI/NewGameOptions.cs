@@ -26,7 +26,7 @@ namespace Pulsar4X.SDL2UI
         string _factionNameString { get { return System.Text.Encoding.UTF8.GetString(_factionNameInputBuffer); } }
         byte[] _passInputBuffer = new byte[8];
         string _passString { get { return System.Text.Encoding.UTF8.GetString(_passInputBuffer); } }
-
+        int _masterSeed = 12345678;
         private NewGameOptions() 
         { 
 
@@ -53,6 +53,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.InputText("Faction Name", _factionNameInputBuffer, 16);
                     ImGui.InputText("Password", _passInputBuffer, 16);
                     ImGui.InputInt("Max Systems", ref _maxSystems);
+                    ImGui.InputInt("Master Seed:", ref _masterSeed);
                     if (ImGui.RadioButton("Host Network Game", ref _gameTypeButtonGrp, 1))
                         _selectedGameType = gameType.Nethost;
                     if (ImGui.RadioButton("Start Standalone Game", ref _gameTypeButtonGrp, 0))
@@ -74,7 +75,7 @@ namespace Pulsar4X.SDL2UI
 
         void CreateNewGame(string name)
         {
-            
+
             gameSettings = new ECSLib.NewGameSettings
             {
                 GameName = name,
@@ -85,6 +86,7 @@ namespace Pulsar4X.SDL2UI
                 DefaultFactionName = "UEF",
                 DefaultPlayerPassword = "",
                 DefaultSolStart = true,
+                MasterSeed = _masterSeed
             };
 
             _state.Game = new ECSLib.Game(gameSettings);

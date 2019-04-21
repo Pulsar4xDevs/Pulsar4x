@@ -73,6 +73,8 @@ namespace Pulsar4X.ECSLib
 
         public int MaxSystems { get; set; } = 1000;
 
+        public WeightedList<int> StarChances { get; set; } = new WeightedList<int>();
+
         public DateTime StartDateTime { get; set; } = DateTime.Parse("2050-01-01T00:00:00");
 
         public VersionInfo Version => VersionInfo.PulsarVersionInfo;
@@ -146,6 +148,15 @@ namespace Pulsar4X.ECSLib
         public float NPREconomyBonus { get; set; } = 1.0f;
 
         #endregion
+
+        public GameSettings()
+        {
+            StarChances.Add(0.75, 1);
+            StarChances.Add(0.125, 2);
+            StarChances.Add(0.0625, 3);
+            StarChances.Add(0.03125, 4);
+            StarChances.Add(0.015625, 5);
+        }
     }
 
     [Serializable]

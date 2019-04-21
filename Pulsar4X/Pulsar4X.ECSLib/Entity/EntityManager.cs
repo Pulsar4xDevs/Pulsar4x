@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
-            ManagerSubpulses = new ManagerSubPulse(this, game.ProcessorManager);
+            ManagerSubpulses = new ManagerSubPulse(this, StaticRefLib.ProcessorManager);
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()

@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
             planetInfo.BodyType = BodyType.Asteroid;
 
             Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
-            TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
+            TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
             Vector4 offset = velocity * timeToCollision.TotalSeconds;
@@ -92,7 +92,7 @@ namespace Pulsar4X.ECSLib
             planetInfo.BodyType = BodyType.Asteroid;
 
             Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
-            TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
+            TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
             Vector4 offset = velocity * timeToCollision.TotalSeconds;
@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
             double myLoP = 0;
             double myMeanLongd = 355.5;
             //OrbitDB orbit = OrbitDB.FromAsteroidFormat(parent, parentMass, myMass, mySemiMajorAxis, myEccentricity, myInclination, myLoAN, myAoP, meanAnomaly, starSys.Game.CurrentDateTime); 
-            OrbitDB orbit = OrbitDB.FromMajorPlanetFormat(parent, parentMass, myMass, mySemiMajorAxis, myEccentricity, myInclination, myLoAN, myLoP, myMeanLongd, starSys.Game.CurrentDateTime);
+            OrbitDB orbit = OrbitDB.FromMajorPlanetFormat(parent, parentMass, myMass, mySemiMajorAxis, myEccentricity, myInclination, myLoAN, myLoP, myMeanLongd, StaticRefLib.CurrentDateTime);
 
             var planetDBs = new List<BaseDataBlob>
             {
@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib
             planetInfo.BodyType = BodyType.Asteroid;
 
             Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
-            TimeSpan timeToCollision = collisionDate - starSys.Game.CurrentDateTime;
+            TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
             var parent = target.GetDataBlob<OrbitDB>().Parent;
@@ -168,7 +168,7 @@ namespace Pulsar4X.ECSLib
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
-            var currentpos = OrbitProcessor.GetAbsolutePosition_AU(orbit, starSys.Game.CurrentDateTime);
+            var currentpos = OrbitProcessor.GetAbsolutePosition_AU(orbit, StaticRefLib.CurrentDateTime);
             var posDB = new PositionDB(currentpos.X, currentpos.Y, currentpos.Z, parent.Manager.ManagerGuid, parent);
 
 

@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
         {
             Event logevent = new Event(GameGlobalDateTime, "Game Global Date Changed", null, null, null);
             logevent.EventType = EventType.GlobalDateChange;
-            _game.EventLog.AddEvent(logevent);
+            StaticRefLib.EventLog.AddEvent(logevent);
 
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }
@@ -69,8 +69,8 @@ namespace Pulsar4X.ECSLib
             internal set
             {
                 _gameGlobalDateTime = value;
-                if (_game.SyncContext != null)
-                    _game.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
+                if (StaticRefLib.SyncContext != null)
+                    StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
                 else
                     InvokeDateChange(value);//if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.    
             }

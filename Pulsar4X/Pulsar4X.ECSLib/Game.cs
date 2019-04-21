@@ -29,13 +29,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool IsLoaded { get; internal set; } = false;
 
-        [PublicAPI]
-        public DateTime CurrentDateTime
-        {
-            get { return GameLoop.GameGlobalDateTime; }
-        }
-
-        internal ProcessorManager ProcessorManager; 
+        //internal ProcessorManager ProcessorManager; 
 
         /// <summary>
         /// List of StarSystems currently in the game.
@@ -53,26 +47,22 @@ namespace Pulsar4X.ECSLib
         internal IOrderHandler OrderHandler { get; set; }
 
 
-        /// <summary>
-        /// this is used to marshal events to the UI thread. 
-        /// </summary>
-        public SynchronizationContext SyncContext { get; private set; }
+
 
         [PublicAPI]
         [JsonProperty]
-        public TimeLoop GameLoop { get; set; }
+        public TimeLoop GameLoop { get { return StaticRefLib.GameLoop; } }
 
-        [JsonProperty]
+            [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
 
-        [PublicAPI]
-        public EventLog EventLog { get; internal set; }
+
         
         private PathfindingManager _pathfindingManager;
 
         [PublicAPI]
         [JsonProperty]
-        public GameSettings Settings { get; set; }
+        public GameSettings Settings { get { return StaticRefLib.GameSettings; } }//TODO remove from here and get from RefLib
 
         #endregion
 
@@ -88,12 +78,13 @@ namespace Pulsar4X.ECSLib
 
         internal Game()
         {
-            SyncContext = SynchronizationContext.Current;
-            GameLoop = new TimeLoop(this);
-            EventLog = new EventLog(this);
-            ProcessorManager = new ProcessorManager(this);
+
+
+            StaticRefLib.Setup(this);
+
             GlobalManager = new EntityManager(this, true);
             OrderHandler = new StandAloneOrderHandler(this);
+
         }
 
         public Game([NotNull] NewGameSettings newGameSettings) : this()
@@ -105,7 +96,7 @@ namespace Pulsar4X.ECSLib
 
             GalaxyGen = new GalaxyFactory(true, newGameSettings.MasterSeed);
 
-            Settings = newGameSettings;
+            StaticRefLib.GameSettings = newGameSettings;
             GameLoop.GameGlobalDateTime = newGameSettings.StartDateTime;
 
             // Load Static Data
@@ -199,7 +190,7 @@ namespace Pulsar4X.ECSLib
         {
             var player = new Player(playerName, playerPassword);
             Players.Add(player);
-            EventLog.AddPlayer(player);
+            StaticRefLib.EventLog.AddPlayer(player);
             return player;
         }
 

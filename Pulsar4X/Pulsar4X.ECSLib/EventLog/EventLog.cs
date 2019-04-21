@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
 
         internal EventLog(Game game) 
         {
-            _loadTime = game.CurrentDateTime;
+            _loadTime = StaticRefLib.CurrentDateTime;
             _game = game;
             
             _newEvents.Add(SpaceMaster, new List<Event>());

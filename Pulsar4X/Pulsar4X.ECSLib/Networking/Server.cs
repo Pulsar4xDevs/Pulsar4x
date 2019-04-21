@@ -104,7 +104,7 @@ namespace Pulsar4X.Networking
             Messages.Add("RX DiscoveryRequest " + message.SenderEndPoint);
             NetOutgoingMessage response = NetServerObject.CreateMessage();
             response.Write("Pulsar4x Game");//Game.GameName);
-            response.Write(Game.CurrentDateTime.ToBinary());
+            response.Write(StaticRefLib.CurrentDateTime.ToBinary());
 
             NetServerObject.SendDiscoveryResponse(response, message.SenderEndPoint);
 
@@ -361,7 +361,7 @@ namespace Pulsar4X.Networking
             int len = byteArray.Length;
             NetOutgoingMessage sendMsg = NetPeerObject.CreateMessage();
             sendMsg.Write((byte)ToClientMsgType.SendGameData);
-            sendMsg.Write(game.CurrentDateTime.ToBinary());
+            sendMsg.Write(StaticRefLib.CurrentDateTime.ToBinary());
             sendMsg.Write(len);
             sendMsg.Write(byteArray);
             NetServerObject.SendMessage(sendMsg, recipient, NetDeliveryMethod.ReliableOrdered);

@@ -121,13 +121,13 @@ namespace Pulsar4X.ECSLib
             //sol.SystemManager.SetDataBlob(ship.ID, new TransitableDB());
 
             //Entity rock = AsteroidFactory.CreateAsteroid2(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
-            Entity rock = AsteroidFactory.CreateAsteroid3(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
+            Entity rock = AsteroidFactory.CreateAsteroid3(sol, earth, StaticRefLib.CurrentDateTime + TimeSpan.FromDays(365));
 
             var entitiesWithSensors = sol.GetAllEntitiesWithDataBlob<SensorReceverAtbDB>();
             foreach (var entityItem in entitiesWithSensors)
             {
                 if(entityItem.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity != null) //don't do the designs, just the actual physical entity components. 
-                    game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, game.CurrentDateTime);
+                    StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
             }
 
 
