@@ -34,10 +34,20 @@ namespace Pulsar4X.ECSLib
         //ParserConstrutor
         public SensorReceverAtbDB(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)
         {
-            //TODO: the below should not crash the game, just make the requested component invalid. 
-            Debug.Assert(bestSensitivity > 0, "Sensitivity is" + bestSensitivity + " *Must* be a positiveNumber");
-            Debug.Assert(bestSensitivity < worstSensitivity, "bestSensitivity " + bestSensitivity + " *Must* be < than worstSensitivity" + worstSensitivity +"(lower is better)");
+            //TODO:  should make this component invalid. 
+            if (bestSensitivity > 0)
+            {
+                var ev = new Event("Sensitivity is" + bestSensitivity + " *Must* be a positiveNumber");
+                StaticRefLib.EventLog.AddEvent(ev);
+                bestSensitivity = 0;
 
+            }
+            if (bestSensitivity < worstSensitivity) 
+            {
+                var ev = new Event("bestSensitivity " + bestSensitivity + " *Must* be < than worstSensitivity" + worstSensitivity + "(lower is better)");
+                StaticRefLib.EventLog.AddEvent(ev);
+                worstSensitivity = bestSensitivity;
+            }
             RecevingWaveformCapabilty = new EMWaveForm() { WavelengthMin_nm = peakWaveLength - waveLengthWidth, WavelengthAverage_nm = peakWaveLength, WavelengthMax_nm = peakWaveLength + waveLengthWidth };
             BestSensitivity_kW = bestSensitivity;
             WorstSensitivity_kW = worstSensitivity;

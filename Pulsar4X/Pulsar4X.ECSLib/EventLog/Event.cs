@@ -20,8 +20,33 @@ namespace Pulsar4X.ECSLib
         public Entity Entity { get; internal set; }
 
         public EventType EventType { get; internal set; }
-        
-        internal List<Guid> ConcernedPlayers { get; set; }
+
+        internal List<Guid> ConcernedPlayers { get; set; } = new List<Guid>();
+
+
+        public Event(string message)
+        {
+            Time = StaticRefLib.CurrentDateTime;
+            Message = message;
+            
+        }
+
+        public Event(DateTime time, string message, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null) : this(time, message, Guid.Empty, faction, entity, concernedPlayers)
+        { }
+
+        public Event(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null)
+        {
+            Time = time;
+            Message = message;
+            Faction = faction;
+            SystemGuid = systemGuid;
+            Entity = entity;
+            if (concernedPlayers != null)
+            {
+                ConcernedPlayers = concernedPlayers;
+            }
+
+        }
 
         public Event(SerializationInfo info, StreamingContext context)
         {
@@ -36,24 +61,6 @@ namespace Pulsar4X.ECSLib
                 ConcernedPlayers = (List<Guid>)info.GetValue(nameof(ConcernedPlayers), typeof(List<Guid>));
             }
         }
-
-        public Event(DateTime time, string message, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null) : this(time, message, Guid.Empty, faction, entity, concernedPlayers)
-        { }
-
-        public Event(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null)
-        {
-            Time = time;
-            Message = message;
-            Faction = faction;
-            SystemGuid = systemGuid;
-            Entity = entity;
-            if (concernedPlayers == null)
-            {
-                concernedPlayers = new List<Guid>();
-            }
-            ConcernedPlayers = concernedPlayers;
-        }
-
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
