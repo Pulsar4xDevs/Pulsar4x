@@ -25,7 +25,7 @@ namespace Pulsar4X.Tests
             _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
-            var system = ssf.CreateSystem(_game, "Argon Prime"); // Keeping with the X3 theme :P
+            var system = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
 
             // lets test that the stars generated okay:
             List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);

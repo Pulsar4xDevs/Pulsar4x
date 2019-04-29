@@ -181,7 +181,7 @@ namespace Pulsar4X.SDL2UI
 
             _loAN = ke.LoAN;
             _aoP = ke.AoP;
-            _trueAnomaly = ke.TrueAnomaly;
+            _trueAnomaly = ke.TrueAnomalyAtEpoch;
             OnPhysicsUpdate();
         }
 

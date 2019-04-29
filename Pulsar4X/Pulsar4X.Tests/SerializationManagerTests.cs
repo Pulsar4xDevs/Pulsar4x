@@ -54,7 +54,7 @@ namespace Pulsar4X.Tests
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
             Assert.AreEqual(totalSystems, _game.GetSystems(_smAuthToken).Count);
-            Assert.AreEqual(_testTime, _game.CurrentDateTime);
+            Assert.AreEqual(_testTime, StaticRefLib.CurrentDateTime);
             List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>(_smAuthToken);
             Assert.AreEqual(3, entities.Count);
             entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>(_smAuthToken);
@@ -76,7 +76,7 @@ namespace Pulsar4X.Tests
 
             Entity ship = newGame.GlobalManager.GetFirstEntityWithDataBlob<TransitableDB>();
             StarSystem firstSystem = newGame.Systems.First().Value;
-            DateTime jumpTime = newGame.CurrentDateTime + TimeSpan.FromMinutes(1);
+            DateTime jumpTime = StaticRefLib.CurrentDateTime + TimeSpan.FromMinutes(1);
 
             //insert a jump so that we can compair timeloop dictionary
             InterSystemJumpProcessor.SetJump(newGame, jumpTime,  firstSystem, jumpTime, ship);

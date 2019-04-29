@@ -96,9 +96,11 @@ namespace Pulsar4X.ECSLib
             }
             catch (OrbitProcessorException e)
             {
-                // TODO: Debug log this exception. Do NOT fail to the UI. There is NO data-corruption on this exception.
+                //Do NOT fail to the UI. There is NO data-corruption on this exception.
                 // In this event, we did NOT update our position.  
-                throw new Exception("Position Exception thrown in OrbitProcessor");
+                Event evt = new Event(StaticRefLib.CurrentDateTime, "Non Critical Position Exception thrown in OrbitProcessor for EntityItem " + entity.Guid + " " + e.Message);
+                evt.EventType = EventType.Opps;
+                StaticRefLib.EventLog.AddEvent(evt);
             }
 
             // Update our children.

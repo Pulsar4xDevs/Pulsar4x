@@ -140,9 +140,9 @@ namespace Pulsar4X.ECSLib
             {
             
                 newPositionMt = targetPosMt;
-
-                positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
-
+                positionDB.SetParent(moveDB.TargetEntity);
+                //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
+                positionDB.RelativePosition_AU = moveDB.TranslateRalitiveExit_AU;
                 SetOrbitHere(entity, propulsionDB, positionDB, moveDB, dateTimeFuture);
 
 

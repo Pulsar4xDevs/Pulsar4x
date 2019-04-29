@@ -37,6 +37,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Vector4 TranslateExitPoint_AU { get; internal set; }
         [JsonProperty]
+        public Vector4 TranslateRalitiveExit_AU { get; internal set; }
+        [JsonProperty]
         public float Heading_Radians { get; internal set; }
         [JsonProperty]
         public DateTime EntryDateTime { get; internal set; }

@@ -91,7 +91,7 @@ namespace Pulsar4X.ECSLib
                     double sgp = GameConstants.Science.GravitationalConstant * (newParentMass + Mass_Kg) / 3.347928976e33;
                     Vector4 posRalitiveToNewParent = positionDB.AbsolutePosition_AU - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
                      
-                    var kE = OrbitMath.KeplerFromVelocityAndPosition(sgp, posRalitiveToNewParent, parentRalitiveVector);
+                    var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector);
                     var dateTime = entity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
                     if (kE.Eccentricity < 1)
                     {
@@ -107,7 +107,10 @@ namespace Pulsar4X.ECSLib
                         entity.RemoveDataBlob<NewtonMoveDB>();
                         entity.SetDataBlob(newOrbit);
                         positionDB.SetParent(newParent);
-                        positionDB.RelativePosition_AU = OrbitProcessor.GetPosition_AU(newOrbit, dateTime);
+                        var currentPos = Distance.AuToKm(positionDB.RelativePosition_AU);
+                        var newPos = OrbitProcessor.GetPosition_AU(newOrbit, dateTime);
+                        var newPosKM = Distance.AuToKm(newPos);
+                        positionDB.RelativePosition_AU = newPos;
                         break;
                     }
                     else

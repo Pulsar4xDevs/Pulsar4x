@@ -143,6 +143,7 @@ namespace Pulsar4X.ECSLib
                 //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
                 Vector4 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
                 _db = new TranslateMoveDB(targetIntercept.Item1);
+                _db.TranslateRalitiveExit_AU = TargetOffsetPosition_AU;
                 _db.EntryDateTime = TransitStartDateTime;
                 _db.PredictedExitTime = targetIntercept.Item2;
                 _db.TranslateEntryPoint_AU = currentPos;

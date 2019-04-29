@@ -10,14 +10,14 @@ namespace Pulsar4X.ECSLib
         public double SemiMajorAxis;        //a
         public double SemiMinorAxis;        //b
         public double Eccentricity;         //e
-        public double LinierEccentricity;
+        public double LinierEccentricity;   //ae
         public double Periapsis;            //q
         public double Apoapsis;             //Q
-        public double LoAN;                 //Omega (upper case)
-        public double AoP;                  //omega (lower case)
+        public double LoAN;                 //Ω (upper case Omega)
+        public double AoP;                  //ω (lower case omega)
         public double Inclination;          //i
         public double MeanAnomalyAtEpoch;   //M0
-        public double TrueAnomaly;          //v or f or theta
+        public double TrueAnomalyAtEpoch;   //ν or f or  θ
         //public double Period              //P
         //public double EccentricAnomaly    //E
         public double Epoch;                //time since periapsis. 
@@ -33,15 +33,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="standardGravParam">Standard grav parameter.</param>
         /// <param name="position">Position ralitive to parent</param>
         /// <param name="velocity">Velocity ralitive to parent</param>
-        public static KeplerElements KeplerFromVelocityAndPosition(double standardGravParam, Vector4 position, Vector4 velocity)
+        public static KeplerElements KeplerFromPositionAndVelocity(double standardGravParam, Vector4 position, Vector4 velocity)
         {
             KeplerElements ke = new KeplerElements();
             Vector4 angularVelocity = Vector4.Cross(position, velocity);
             Vector4 nodeVector = Vector4.Cross(new Vector4(0, 0, 1, 0), angularVelocity);
 
-            Vector4 eccentVector1 = EccentricityVector(standardGravParam, position, velocity);
+            Vector4 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
-            Vector4 eccentVector = EccentricityVector2(standardGravParam, position, velocity);
+            //Vector4 eccentVector2 = EccentricityVector2(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
 
@@ -82,7 +82,8 @@ namespace Pulsar4X.ECSLib
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
             double linierEccentricity = eccentricity * semiMajorAxis;
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. 
+            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+  
             if (double.IsNaN(inclination))
                 inclination = 0;
 
@@ -119,14 +120,38 @@ namespace Pulsar4X.ECSLib
 
 
 
+
+
+            /*
+            var ta = Math.Acos( Vector4.Dot(eccentVector, velocity) / (eccentVector.Length() * velocity.Length()));
+            var ta2 = TrueAnomaly(eccentVector, position, velocity);
+            var ta3 = TrueAnomaly2(standardGravParam, position, velocity);
+            var ta4 = Math.Atan2(position.Y, position.X);
+            var tad = Angle.ToDegrees(ta);
+            var tad2 = Angle.ToDegrees(ta2);
+            var tad3 = Angle.ToDegrees(ta3);
+            var tad4 = Angle.ToDegrees(ta4);
+            */
+            var ta2 = TrueAnomaly(eccentVector, position, velocity);
+
             var eccAng = Vector4.Dot(eccentVector, position);
             eccAng = semiMajorAxis / eccAng;
             eccAng = GMath.Clamp(eccAng, -1, 1);
-            var eccentricAnomoly = Math.Acos(eccAng);
+            var eccentricAnomoly1 = Math.Acos(eccAng);
+
+            var eccentricAnomoly = GetEccentricAnomalyFromStateVectors(position, semiMajorAxis, semiMinorAxis, linierEccentricity, argOfPeriaps);
+
+            /*
+            var ea1 = Math.Sqrt(1 - Math.Pow(eccentricity, 2)) * Math.Sin(ta3);
+            var ea2 = 1 + eccentricity * Math.Cos(ta3);
+            var eccentricAnomaly2 = Math.Atan(ea1 / ea2);
+            */
+
+            var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
 
             var meanAnomaly = eccentricAnomoly - eccentricity * Math.Sin(eccentricAnomoly);
-
-
+           
+            var ta5 = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
 
             ke.SemiMajorAxis = semiMajorAxis;
             ke.SemiMinorAxis = semiMinorAxis;
@@ -139,8 +164,8 @@ namespace Pulsar4X.ECSLib
             ke.AoP = Angle.NormaliseRadians( argOfPeriaps);
             ke.Inclination = inclination;
             ke.MeanAnomalyAtEpoch = meanAnomaly;
-            ke.TrueAnomaly = TrueAnomaly(eccentVector, position, velocity);
-            ke.Epoch = TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
+            ke.TrueAnomalyAtEpoch = ta2;
+            ke.Epoch = 0; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
             return ke;
@@ -232,6 +257,26 @@ namespace Pulsar4X.ECSLib
                 trueAnomoly = Math.PI * 2 - trueAnomoly;
 
             return trueAnomoly;
+        }
+
+
+        public static double TrueAnomaly2(double sgp, Vector4 position, Vector4 velocity)
+        {
+            var H = Vector4.Cross(position, velocity).Length();
+            var R = position.Length();
+            var q = Vector4.Dot(position, velocity);  // dot product of r*v
+            var TAx = H * H / (R * sgp) - 1;
+            var TAy = H * q / (R * sgp);
+            var TA = Math.Atan2(TAy, TAx);
+            return TA;
+
+        }
+
+        public static double TrueAnomalyFromEccentricAnomaly(double eccentricity, double eccentricAnomaly )
+        {        
+            var x = Math.Cos(eccentricAnomaly) - eccentricity;
+            var y = Math.Sqrt(1 - Math.Pow(eccentricity, 2) * Math.Sin(eccentricAnomaly));
+            return Math.Atan2(y, x);
         }
 
         /// <summary>
@@ -395,6 +440,14 @@ namespace Pulsar4X.ECSLib
             return TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch);
         }
 
+        public static double GetEccentricAnomalyFromStateVectors(Vector4 position, double a, double b, double linierEccentricity, double aop)
+        {
+            var x = (position.X * Math.Cos(-aop)) - (position.Y * Math.Sin(-aop));
+            x = linierEccentricity + x;
+            return Math.Acos(x / a);
+
+        }
+
         /// <summary>
         /// Gets the eccentric anomaly.
         /// This can take a number of itterations to calculate so may not be fast. 
@@ -442,6 +495,10 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
+        public static double GetEccentricAnomaly2(double ν, double eccentricity)
+        {
+            return Math.Acos((Math.Cos(ν) + eccentricity) / (1 + eccentricity * Math.Cos(ν)));
+        }
 
         /// <summary>
         /// Calculates CurrentMeanAnomaly

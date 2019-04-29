@@ -11,7 +11,7 @@ namespace Pulsar4X.Tests
 
         Game _client;
         Networking.NetworkClient _netClient;
-        private DateTime _currentDateTime { get { return _host.Game.CurrentDateTime; } }
+        private DateTime _currentDateTime { get { return StaticRefLib.CurrentDateTime; } }
 
 
 
