@@ -118,21 +118,7 @@ namespace Pulsar4X.ECSLib
             }
 
 
-
-
-
-
-            /*
-            var ta = Math.Acos( Vector4.Dot(eccentVector, velocity) / (eccentVector.Length() * velocity.Length()));
-            var ta2 = TrueAnomaly(eccentVector, position, velocity);
-            var ta3 = TrueAnomaly2(standardGravParam, position, velocity);
-            var ta4 = Math.Atan2(position.Y, position.X);
-            var tad = Angle.ToDegrees(ta);
-            var tad2 = Angle.ToDegrees(ta2);
-            var tad3 = Angle.ToDegrees(ta3);
-            var tad4 = Angle.ToDegrees(ta4);
-            */
-            var ta2 = TrueAnomaly(eccentVector, position, velocity);
+            var trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
 
             var eccAng = Vector4.Dot(eccentVector, position);
             eccAng = semiMajorAxis / eccAng;
@@ -141,17 +127,9 @@ namespace Pulsar4X.ECSLib
 
             var eccentricAnomoly = GetEccentricAnomalyFromStateVectors(position, semiMajorAxis, semiMinorAxis, linierEccentricity, argOfPeriaps);
 
-            /*
-            var ea1 = Math.Sqrt(1 - Math.Pow(eccentricity, 2)) * Math.Sin(ta3);
-            var ea2 = 1 + eccentricity * Math.Cos(ta3);
-            var eccentricAnomaly2 = Math.Atan(ea1 / ea2);
-            */
-
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
 
             var meanAnomaly = eccentricAnomoly - eccentricity * Math.Sin(eccentricAnomoly);
-           
-            var ta5 = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
 
             ke.SemiMajorAxis = semiMajorAxis;
             ke.SemiMinorAxis = semiMinorAxis;
@@ -164,7 +142,7 @@ namespace Pulsar4X.ECSLib
             ke.AoP = Angle.NormaliseRadians( argOfPeriaps);
             ke.Inclination = inclination;
             ke.MeanAnomalyAtEpoch = meanAnomaly;
-            ke.TrueAnomalyAtEpoch = ta2;
+            ke.TrueAnomalyAtEpoch = trueAnomaly;
             ke.Epoch = 0; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
@@ -240,7 +218,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// https://en.wikipedia.org/wiki/True_anomaly#From_state_vectors
         /// </summary>
-        /// <returns>The anomaly.</returns>
+        /// <returns>The True Anomaly in radians</returns>
         /// <param name="eccentVector">Eccentricity vector.</param>
         /// <param name="position">Position ralitive to parent</param>
         /// <param name="velocity">Velocity ralitive to parent</param>
@@ -259,8 +237,14 @@ namespace Pulsar4X.ECSLib
             return trueAnomoly;
         }
 
-
-        public static double TrueAnomaly2(double sgp, Vector4 position, Vector4 velocity)
+        /// <summary>
+        /// True Anomaly
+        /// </summary>
+        /// <returns>The True Anomaly in radians</returns>
+        /// <param name="sgp">Sgp.</param>
+        /// <param name="position">Position.</param>
+        /// <param name="velocity">Velocity.</param>
+        public static double TrueAnomaly(double sgp, Vector4 position, Vector4 velocity)
         {
             var H = Vector4.Cross(position, velocity).Length();
             var R = position.Length();
@@ -272,12 +256,13 @@ namespace Pulsar4X.ECSLib
 
         }
 
+        /*
         public static double TrueAnomalyFromEccentricAnomaly(double eccentricity, double eccentricAnomaly )
         {        
             var x = Math.Cos(eccentricAnomaly) - eccentricity;
             var y = Math.Sqrt(1 - Math.Pow(eccentricity, 2) * Math.Sin(eccentricAnomaly));
             return Math.Atan2(y, x);
-        }
+        }*/
 
         /// <summary>
         /// Velocity vector in polar coordinates.
