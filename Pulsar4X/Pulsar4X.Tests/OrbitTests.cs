@@ -41,7 +41,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void TestTruAnomalyCalcs()
+        public void TestEccentricAnomalyCalc()
         {
             double parentMass = 1.989e30;
             double objMass = 2.2e+15;
@@ -49,16 +49,84 @@ namespace Pulsar4X.Tests
             Vector4 pos = new Vector4() { X = 0.25, Y = 0.25 };
             Vector4 vel = new Vector4() { Y = Distance.KmToAU(54) };
             Vector4 ev = OrbitMath.EccentricityVector(sgp, pos, vel);
-            double e =  ev.Length();
+            double e = ev.Length();
             double specificOrbitalEnergy = Math.Pow(vel.Length(), 2) * 0.5 - sgp / pos.Length();
             double a = -sgp / (2 * specificOrbitalEnergy);
-            double ae = a * e;
+            double ae = e * a;
+            double aop = Math.Atan2(ev.Y, ev.X);
+            var ν = OrbitMath.TrueAnomaly(sgp, pos, vel);
+
+            var E1 = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, a, ae, aop);
+            var meanAnomaly = E1 - e * Math.Sin(E1);
+            var E2 = OrbitMath.GetEccentricAnomaly(e, meanAnomaly);
+            var E3 = OrbitMath.GetEccentricAnomaly2(ν, e);
+
+            Assert.AreEqual(E1, E2, 0.00000001);
+            Assert.AreEqual(E1, E3, 0.00000001);
+        }
+                        
+
+        [Test]
+        public void TestTrueAnomalyCalcs()
+        {
+            Vector4 pos = new Vector4() { X = 0.25, Y = 0.25 };
+            Vector4 vel = new Vector4() { Y = Distance.KmToAU(54) };
+            TrueAnomalyCalcs(pos, vel);
+
+
+             pos = new Vector4() { X = 0.25, Y = 0.25 };
+             vel = new Vector4() { Y = Distance.KmToAU(54) };
+            TrueAnomalyCalcs(pos, vel);
+             pos = new Vector4() { X = 0.25, Y = -0.25 };
+             vel = new Vector4() { X = Distance.KmToAU(54) };
+            TrueAnomalyCalcs(pos, vel);
+             pos = new Vector4() { X = -0.25, Y = 0.25 };
+             vel = new Vector4() { X = Distance.KmToAU(-54) };
+            TrueAnomalyCalcs(pos, vel);
+             pos = new Vector4() { X = -0.25, Y = -0.25 };
+             vel = new Vector4() { Y = Distance.KmToAU(-54) };
+            TrueAnomalyCalcs(pos, vel);
+
+            pos = new Vector4() { X = 0.25, Y = 0.25 };
+            vel = new Vector4() { Y = Distance.KmToAU(54) };
+            TrueAnomalyCalcs(pos, vel);
+            pos = new Vector4() { X = 0.25, Y = 0.25 };
+            vel = new Vector4() { Y = Distance.KmToAU(-54) };
+            TrueAnomalyCalcs(pos, vel); //this one fails currently, however the calcs used in this test are not used in code
+            pos = new Vector4() { X = 0.25, Y = 0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(54) };
+            TrueAnomalyCalcs(pos, vel);
+            pos = new Vector4() { X = 0.25, Y = 0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(-54) };
+            TrueAnomalyCalcs(pos, vel); //this one failes currently, however the calcs used in this test are not used in code
+
+        }
+
+        private void TrueAnomalyCalcs(Vector4 pos, Vector4 vel)
+        {
+            double angleΔ = 0.0000000001;
+            double parentMass = 1.989e30;
+            double objMass = 2.2e+15;
+            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
+
+            Vector4 ev = OrbitMath.EccentricityVector(sgp, pos, vel);
+            double e = ev.Length();
+            double specificOrbitalEnergy = Math.Pow(vel.Length(), 2) * 0.5 - sgp / pos.Length();
+            double a = -sgp / (2 * specificOrbitalEnergy);
+            double ae = e * a;
+            double aop = Math.Atan2(ev.Y, ev.X);
+            double eccentricAnomaly = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, a, ae, aop);
 
             var θ1 = OrbitMath.TrueAnomaly(sgp, pos, vel);
             var θ2 = OrbitMath.TrueAnomaly(ev, pos, vel);
-            //var θ3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(e, ae);
+            var θ3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(e, eccentricAnomaly);
+            var θ4 = OrbitMath.TrueAnomalyFromEccentricAnomaly2(e, eccentricAnomaly);
+            //var θ5 = OrbitMath.TrueAnomalyFromEccentricAnomaly3(e, eccentricAnomaly);
+
             Assert.AreEqual(θ1, θ2);
-            //Assert.AreEqual(θ1, θ3);
+            Assert.AreEqual(θ1, θ3, angleΔ, "Difference of " + Angle.ToDegrees(θ1 - θ3) + "degrees");
+            Assert.AreEqual(θ1, θ4, angleΔ, "Difference of " + Angle.ToDegrees(θ1 - θ4) + "degrees");
+            //Assert.AreEqual(θ1, θ5, "Difference of " + Angle.ToDegrees(θ1 - θ5) + "degrees"); 
         }
 
         [Test]
@@ -176,7 +244,7 @@ namespace Pulsar4X.Tests
 
         public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector4 position, Vector4 velocity)
         {
-            double angleΔ = Angle.ToRadians(0.25);
+            double angleΔ = 0.0000000001; 
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
             KeplerElements ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity);
 
@@ -219,7 +287,7 @@ namespace Pulsar4X.Tests
 
             //check EccentricAnomaly:
             var objE = (OrbitProcessor.GetEccentricAnomaly(objOrbit, objOrbit.MeanAnomalyAtEpoch));
-            var keE =   (OrbitMath.GetEccentricAnomalyFromStateVectors(position, ke.SemiMajorAxis, ke.SemiMinorAxis, ke.LinierEccentricity, ke.AoP));
+            var keE =   (OrbitMath.GetEccentricAnomalyFromStateVectors(position, ke.SemiMajorAxis, ke.LinierEccentricity, ke.AoP));
             if (objE != keE)
             {
                 var dif = objE - keE;

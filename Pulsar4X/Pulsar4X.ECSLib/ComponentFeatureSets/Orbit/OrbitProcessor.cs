@@ -180,9 +180,12 @@ namespace Pulsar4X.ECSLib
             double currentMeanAnomaly = OrbitMath.CurrentMeanAnomaly(m0, n, timeSinceEpoch.TotalSeconds);
 
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
+            return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+            /*
             var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
             var y = Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly);
             return Math.Atan2(y, x);
+            */
         }
 
         /// <summary>
