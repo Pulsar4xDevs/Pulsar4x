@@ -7,6 +7,10 @@ using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
+    interface IOrbitIcon
+    {
+        void UpdateUserSettings();
+    }
 
     /// <summary>
     /// A Collection of Shapes which will make up an icon.

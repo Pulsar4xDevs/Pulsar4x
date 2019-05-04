@@ -49,6 +49,7 @@ namespace Pulsar4X.SDL2UI
             _points = new PointD[_numberOfArcSegments + 1];
             double angle = 0;
 
+
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
@@ -65,6 +66,59 @@ namespace Pulsar4X.SDL2UI
                 angle += _segmentArcSweepRadians;
                 _points[i] = new PointD() { X = x2, Y = y2 };
             }
+
+            /* This should give smoother ellipses by having more points at the sharper ends of the ellipse
+             * unused due to position being wrong.            
+            var dtheta = 2 * Math.PI / _numberOfArcSegments;
+            var ct = Math.Cos(_orbitAngleRadians);
+            var st = Math.Sin(_orbitAngleRadians);
+            var cdp = Math.Cos(dtheta);
+            var sdp = Math.Sin(dtheta);
+            var cndp = 1.0;
+            var sndp = 0.0;
+            var xc = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity;
+            var yc = 0;
+            for (int i = 0; i < _numberOfArcSegments + 1; i++)
+            {
+                var x1 = _orbitEllipseSemiMaj * cndp;
+                var y1 = _orbitEllipseSemiMinor * sndp;
+                var xn = xc + x1 * ct - y1 * st;
+                var yn = yc + x1 * st + y1 * ct;
+
+                _points[i] = new PointD() { X = xn, Y = yn };
+
+                var tmp = cndp * cdp - sndp * sdp;
+                sndp = sndp * cdp + cndp * sdp;
+                cndp = tmp; 
+            }
+            */
+            /* this is suposed to be a more efficent version of the above, but there's a mistake somewhere. 
+            var dtheta = 2 * Math.PI / _numberOfArcSegments;
+            var ct = Math.Cos(_orbitAngleRadians);
+            var st = Math.Sin(_orbitAngleRadians);
+            var cdp = Math.Cos(dtheta);
+            var sdp = Math.Sin(dtheta);
+
+            var fooA = cdp + sdp * st * ct * (_orbitEllipseSemiMaj / _orbitEllipseMinor - _orbitEllipseMinor / _orbitEllipseMajor);
+            var fooB = -sdp * (Math.Pow(_orbitEllipseMinor * st, 2) + Math.Pow(_orbitEllipseMajor * ct, 2)) / (_orbitEllipseSemiMaj * _orbitEllipseSemiMinor);
+            var fooC = sdp * (Math.Pow(_orbitEllipseSemiMinor * ct, 2) + Math.Pow(_orbitEllipseSemiMaj * st, 2)) / (_orbitEllipseSemiMaj * _orbitEllipseSemiMinor);
+            var fooD = cdp + sdp * (st * ct * (_orbitEllipseSemiMinor / _orbitEllipseSemiMaj - _orbitEllipseSemiMaj / _orbitEllipseSemiMinor));
+            fooD = fooD - (fooC * fooB) / fooA;
+            fooC = fooC / fooA;
+            var x1 = _orbitEllipseSemiMaj * ct;
+            var y1 = _orbitEllipseSemiMaj * st;
+
+            var xc = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity;
+            var yc = 0;
+            for (int i = 0; i < _numberOfArcSegments + 1; i++)
+            {
+                var xn = xc + x1;
+                var yn = yc + y1;
+                _points[i] = new PointD() { X = xn, Y = yn };
+                x1 = fooA * x1 + fooB * y1;
+                y1 = fooC * x1 + fooD * y1;
+            }
+            */
         }
 
 
@@ -73,7 +127,7 @@ namespace Pulsar4X.SDL2UI
 
         /*
          * this gets the index by attempting to find the angle between the body and the center of the ellipse. possibly faster, but math is hard. 
-         * TODO: try doing this using TrueAnnomaly. 
+         * TODO: try doing this using EccentricAnomaly. 
         public override void OnPhysicsUpdate()
         {
 

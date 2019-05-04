@@ -173,14 +173,23 @@ namespace Pulsar4X.SDL2UI
                 if (!orbitDB.IsStationary)
                 {
                     OrbitIconBase orbit;
-                    if(orbitDB.Eccentricity > 1)
-                        orbit = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
-                    else
+                    if (orbitDB.Eccentricity < 1)
+                    {
                         orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
-                    _orbitRings.TryAdd(entityItem.Guid, orbit);
+                        _orbitRings.TryAdd(entityItem.Guid, orbit);
+                    }
 
                 }
             }
+
+            if(entityItem.HasDataBlob<NewtonMoveDB>())
+            {
+                var hyp = entityItem.GetDataBlob<NewtonMoveDB>();
+                OrbitHypobolicIcon orb;
+                orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                _orbitRings.TryAdd(entityItem.Guid, orb);
+            }
+
             if (entityItem.HasDataBlob<StarInfoDB>())
             {
                 _entityIcons.TryAdd(entityItem.Guid, new StarIcon(entityItem));
