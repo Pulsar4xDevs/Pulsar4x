@@ -31,7 +31,8 @@ namespace Pulsar4X.SDL2UI
         protected int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
         protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         protected float _alphaChangeAmount;
-        
+        double _aoP = 0;
+
         public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
         {
             _mgr = entityState.Entity.Manager;
@@ -68,34 +69,7 @@ namespace Pulsar4X.SDL2UI
         }
         internal void CreatePointArray()
         {
-            /*
-            double soi = OrbitProcessor.GetSOI(_orbitDB.OwningEntity);
-            double e = _orbitDB.Eccentricity;
-            double p = EllipseMath.SemiLatusRectum(-_orbitEllipseSemiMaj, e);
-            double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
 
-            double arc = angleToSOIPoint * 2;
-            _numberOfPoints = (int)(_numberOfArcSegments / arc) + 1;
-            _points = new PointD[_numberOfPoints];
-            double angle = angleToSOIPoint;
-
-            for (int i = 0; i < _numberOfPoints; i++)
-            {
-
-                //double x1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
-                //double y1 = _orbitEllipseSemiMinor * Math.Cos(angle);
-                double r = p / (1 + e * Math.Cos(angle));
-                double x1 = r * Math.Sin(angle); // - _linearEccentricity; we don't do this here because we're doing the angles from the focal point. 
-                double y1 = r * Math.Cos(angle);
-
-
-                //rotates the points to allow for the LongditudeOfPeriapsis. 
-                double x2 = (x1 * Math.Cos(_orbitAngleRadians)) - (y1 * Math.Sin(_orbitAngleRadians));
-                double y2 = (x1 * Math.Sin(_orbitAngleRadians)) + (y1 * Math.Cos(_orbitAngleRadians));
-                angle += _segmentArcSweepRadians;
-                _points[i] = new PointD() { X = x2, Y = y2 };
-            }
-            */
             Vector4 vel = Distance.KmToAU(_newtonMoveDB.CurrentVector_kms);
             Vector4 pos = myPosDB.RelativePosition_AU;
             Vector4 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
@@ -112,6 +86,11 @@ namespace Pulsar4X.SDL2UI
             var b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);
             double linierEccentricity = e * a;
             double soi = OrbitProcessor.GetSOI(_newtonMoveDB.SOIParent);
+
+
+            _aoP = Math.Atan2(eccentVector.Y, eccentVector.X);
+            if (Vector4.Cross(pos, vel).Z < 0) //anti clockwise orbit
+                _aoP = Math.PI * 2 - _aoP;
 
             double p = EllipseMath.SemiLatusRectum(a, e);
             double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
@@ -143,22 +122,28 @@ namespace Pulsar4X.SDL2UI
             _points = new PointD[_numberOfPoints];
             _points[ctrIndex] = new PointD()
             {
-                X = points[0].X - linierEccentricity,
-                Y = points[0].Y
+                X = ((points[0].X - linierEccentricity )* Math.Cos(_aoP)) - (points[0].Y * Math.Sin(_aoP)),
+                Y = ((points[0].X - linierEccentricity) * Math.Sin(_aoP)) + (points[0].Y * Math.Cos(_aoP))
             };
             for (int i = 1; i < ctrIndex + 1; i++)
             {
-
+                double x = points[i].X - linierEccentricity; //adjust for the focal point
+                double ya = points[i].Y;
+                double yb = -points[i].Y;
+                double x2a = (x * Math.Cos(_aoP)) - (ya * Math.Sin(_aoP)); //rotate to loan
+                double y2a = (x * Math.Sin(_aoP)) + (ya * Math.Cos(_aoP));
+                double x2b = (x * Math.Cos(_aoP)) - (yb * Math.Sin(_aoP));
+                double y2b = (x * Math.Sin(_aoP)) + (yb * Math.Cos(_aoP));
                 _points[ctrIndex + i] = new PointD()
                 {
-                    X = points[i].X - linierEccentricity,
-                    Y = points[i].Y 
+                    X = x2a,
+                    Y = y2a 
                 };
 
                 _points[ctrIndex - i] = new PointD()
                 {
-                    X = points[i].X - linierEccentricity,
-                    Y = -points[i].Y
+                    X = x2b,
+                    Y = y2b
                 };
             }
 
