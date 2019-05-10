@@ -1,4 +1,5 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using Newtonsoft.Json;
+namespace Pulsar4X.ECSLib
 {
     public class SensorPositionDB : BaseDataBlob, IPosition
     {
@@ -33,6 +34,11 @@
                     return MemoryRalitivePosition;
             }
         }
+
+
+        [JsonConstructor]
+        private SensorPositionDB()
+        { }
 
         public SensorPositionDB(PositionDB actualEntityPosition, DataFrom dataFrom = DataFrom.Parent)
         {
