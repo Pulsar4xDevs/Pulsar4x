@@ -239,44 +239,6 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class Shuttle
-    {
-        public double shuttleWetMass = 2000;
-        public double shuttleDryMass = 500;
-        public double shuttleEngineISP = 300;
-        public double shuttleMaxCargoMass = 500;
-        public double secondsTillComplete;
-        public CargoStorageDB Cargo { get; set; } 
-        /*
-         * var atmoDragMax; for atmobreaking uses less Dv when decending in atmo.
-         * var atmoDragMin; lower is better for getting up in atmo.       
-         * var atmoLift;? reduces Dv getting up in atmo?
-         * var engineAtmoEfficencyProfile; engines tend to work best at a specific pressure range.
-         * var engineOxyBreathing efficency; hybrid engines can breath air, increasing DV in an oxy atmo.
-         */
-    }
-
-    public static class CargoEntityFactory
-    {
-        public class TransferDataDB : BaseDataBlob
-        {
-            public List<Shuttle> Shuttles = new List<Shuttle>();
-            public override object Clone()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public static Entity CreateCargoTransferEntity(Entity from, Entity to, CargoStorageDB cargo)
-        {
-            if (from.Manager != to.Manager)
-                throw new Exception("Attempt to transfer cargo between objects in different managers");
-            List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
-            dataBlobs.Add(cargo);
-            dataBlobs.Add(new TransferDataDB());
-            return new Entity(from.Manager, dataBlobs);
-        }
-    }
 }
 
 
