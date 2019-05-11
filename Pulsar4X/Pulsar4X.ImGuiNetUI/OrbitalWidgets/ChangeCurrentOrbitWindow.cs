@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI
                     if (_orbitWidget == null)
                     {
                         _orbitWidget = new OrbitOrderWiget(_orderEntityOrbit.Parent);
-                        _state.SelectedSysMapRender.UIWidgets.Add(_orbitWidget);
+                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(OrbitOrderWiget), _orbitWidget);
                     }
 
                     var maxprogradeDV = _maxDV - Math.Abs(_radialDV);
@@ -194,7 +194,7 @@ namespace Pulsar4X.SDL2UI
 
             if (_orbitWidget != null)
             {
-                _state.SelectedSysMapRender.UIWidgets.Remove(_orbitWidget);
+                _state.SelectedSysMapRender.UIWidgets.Remove(nameof(OrbitOrderWiget));
                 _orbitWidget = null;
             }
 

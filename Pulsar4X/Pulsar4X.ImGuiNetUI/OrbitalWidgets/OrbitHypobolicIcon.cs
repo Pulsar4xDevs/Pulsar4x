@@ -94,8 +94,8 @@ namespace Pulsar4X.SDL2UI
 
             double p = EllipseMath.SemiLatusRectum(a, e);
             double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
-            double arc = angleToSOIPoint * 2;
-            _numberOfPoints = (int)(_numberOfArcSegments / arc);
+            //double arc = angleToSOIPoint * 2;
+            //_numberOfPoints = (int)(_numberOfArcSegments / arc);
 
             if (_numberOfPoints % 2 == 0)
                 _numberOfPoints += 1;

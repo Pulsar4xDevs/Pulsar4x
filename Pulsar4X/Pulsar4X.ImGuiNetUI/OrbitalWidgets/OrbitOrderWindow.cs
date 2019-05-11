@@ -84,7 +84,7 @@ namespace Pulsar4X.SDL2UI
                 if (_moveWidget == null)
                 {
                     _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntity.Entity);
-                    _state.SelectedSysMapRender.UIWidgets.Add(_moveWidget);
+                    _state.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
 
                 }
             }
@@ -135,7 +135,7 @@ namespace Pulsar4X.SDL2UI
             if (_moveWidget == null)
             {
                 _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntity.Entity);
-                _state.SelectedSysMapRender.UIWidgets.Add(_moveWidget);
+                _state.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
             }
             DepartureCalcs();
 
@@ -179,17 +179,14 @@ namespace Pulsar4X.SDL2UI
 
             if (_orbitWidget != null)
             {
-                int index = _state.SelectedSysMapRender.UIWidgets.IndexOf(_orbitWidget);
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
-                if (index != -1)
-                    _state.SelectedSysMapRender.UIWidgets[index] = _orbitWidget;
-                else
-                    _state.SelectedSysMapRender.UIWidgets.Add(_orbitWidget);
+                _state.SelectedSysMapRender.UIWidgets[nameof(_orbitWidget)] = _orbitWidget;
+ 
             }
             else
             {
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
-                _state.SelectedSysMapRender.UIWidgets.Add(_orbitWidget);
+                _state.SelectedSysMapRender.UIWidgets.Add(nameof(_orbitWidget), _orbitWidget);
             }
             
 
@@ -548,12 +545,12 @@ namespace Pulsar4X.SDL2UI
 
             if (_orbitWidget != null)
             {
-                _state.SelectedSysMapRender.UIWidgets.Remove(_orbitWidget);
+                _state.SelectedSysMapRender.UIWidgets.Remove(nameof(_orbitWidget));
                 _orbitWidget = null;
             }
             if (_moveWidget != null)
             {
-                _state.SelectedSysMapRender.UIWidgets.Remove(_moveWidget);
+                _state.SelectedSysMapRender.UIWidgets.Remove(nameof(_moveWidget));
                 _moveWidget = null;
             }
         }

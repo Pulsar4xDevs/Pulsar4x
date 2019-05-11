@@ -402,24 +402,17 @@ namespace Pulsar4X.ECSLib
 
 
 
-
+        public static double RadiusAtAngle(double angle, double semiLatusRectum, double eccentricity)
+        {
+            return semiLatusRectum / (1 + eccentricity * Math.Cos(angle)); 
+        }
 
         public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
         {
-            //r = p / (1 + e * cos(theta))
-            //1 + e * cos(theta) = p/r
-            //((p / r) -1) / e = cos(theta)
-            var a = (semiLatusRectum / radius - 1);
-            if( a / eccentricity < 1 && a > -1 )
-            {
-                return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
-            }
-            else
-            {
-                var b = Math.Sqrt(a * a + eccentricity * eccentricity);
-                return Math.Atan(b / a);
-            }
-
+            //r = p / (1 + e * cos(θ))
+            //1 + e * cos(θ) = p/r
+            //((p / r) -1) / e = cos(θ)
+            return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
         }
 
         /// <summary>

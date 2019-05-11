@@ -15,6 +15,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Creates orbit here using the current distance between the two entites as aphelion(furthest distance) and a given semiMajorAxis
+        /// *NOTE BUG* this only returns a correct orbit DB if the position is y=0 and is +x (ie the position is in the reference direction)
         /// </summary>
         /// <returns>An OrbitDB. Does Not set DB to Entity.</returns>
         /// <param name="shipEntity">Ship entity.</param>
@@ -31,9 +32,13 @@ namespace Pulsar4X.ECSLib
             double linierEcentricity = aphelionAU - semiMajAxisAU;
             double semiMinorAxsis =  Math.Sqrt(Math.Pow(semiMajAxisAU, 2) - Math.Pow(linierEcentricity, 2));
             double ecentricity = linierEcentricity / semiMajAxisAU;
-            Vector4 ralitivePos = (myPosition.AbsolutePosition_AU - parentPosition.AbsolutePosition_AU);
-            double angle = Math.Tan(ralitivePos.X / ralitivePos.Y);
-            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajAxisAU, ecentricity, 0, 0, angle, 0, time);
+            Vector4 ralitivePos = myPosition.RelativePosition_AU; 
+             
+            double angle = Math.Atan2(ralitivePos.Y, ralitivePos.X); 
+            var theta = Angle.ToDegrees(angle);
+            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajAxisAU, ecentricity, 0, 0, angle, angle, time);
+            var pos = OrbitProcessor.GetPosition_AU(newOrbit, time);
+            var pos2 = Distance.AuToKm(pos);
             return newOrbit;
         }
 

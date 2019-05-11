@@ -10,11 +10,11 @@ namespace Pulsar4X.ECSLib
         {
             Vector4 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
             var distanceFromParent = parent.GetDataBlob<MassVolumeDB>().Radius * 2;
-            position.Y += distanceFromParent;
+            position.X += distanceFromParent;
             Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction,  position, starsys, shipName);
-
+            ship.GetDataBlob<PositionDB>().SetParent(parent);
             var orbitDB = ShipMovementProcessor.CreateOrbitHereWithSemiMajAxis(ship, parent, Distance.AuToKm(distanceFromParent), systemEntityManager.ManagerSubpulses.StarSysDateTime);
-            ship.GetDataBlob<PositionDB>().SetParent(orbitDB.Parent);
+
             ship.SetDataBlob(orbitDB);
 
             return ship;

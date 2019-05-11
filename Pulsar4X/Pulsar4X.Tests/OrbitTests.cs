@@ -32,7 +32,7 @@ namespace Pulsar4X.Tests
 
         [Test]
         public void TestPreciseOrbitalSpeed()
-        { 
+        {
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
             double sgpKm = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
@@ -64,7 +64,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(E1, E2, 0.00000001);
             Assert.AreEqual(E1, E3, 0.00000001);
         }
-                        
+
 
         [Test]
         public void TestTrueAnomalyCalcs()
@@ -74,17 +74,17 @@ namespace Pulsar4X.Tests
             TrueAnomalyCalcs(pos, vel);
 
 
-             pos = new Vector4() { X = 0.25, Y = 0.25 };
-             vel = new Vector4() { Y = Distance.KmToAU(54) };
+            pos = new Vector4() { X = 0.25, Y = 0.25 };
+            vel = new Vector4() { Y = Distance.KmToAU(54) };
             TrueAnomalyCalcs(pos, vel);
-             pos = new Vector4() { X = 0.25, Y = -0.25 };
-             vel = new Vector4() { X = Distance.KmToAU(54) };
+            pos = new Vector4() { X = 0.25, Y = -0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(54) };
             TrueAnomalyCalcs(pos, vel);
-             pos = new Vector4() { X = -0.25, Y = 0.25 };
-             vel = new Vector4() { X = Distance.KmToAU(-54) };
+            pos = new Vector4() { X = -0.25, Y = 0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(-54) };
             TrueAnomalyCalcs(pos, vel);
-             pos = new Vector4() { X = -0.25, Y = -0.25 };
-             vel = new Vector4() { Y = Distance.KmToAU(-54) };
+            pos = new Vector4() { X = -0.25, Y = -0.25 };
+            vel = new Vector4() { Y = Distance.KmToAU(-54) };
             TrueAnomalyCalcs(pos, vel);
 
             pos = new Vector4() { X = 0.25, Y = 0.25 };
@@ -127,6 +127,24 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(θ1, θ3, angleΔ, "Difference of " + Angle.ToDegrees(θ1 - θ3) + "degrees");
             Assert.AreEqual(θ1, θ4, angleΔ, "Difference of " + Angle.ToDegrees(θ1 - θ4) + "degrees");
             //Assert.AreEqual(θ1, θ5, "Difference of " + Angle.ToDegrees(θ1 - θ5) + "degrees"); 
+        }
+
+
+        [Test]
+        public void TestAngles() 
+        {
+            var e = 0.5;
+            var a = 100;
+            var p = EllipseMath.SemiLatusRectum(a, e);
+            double angleDelta = 0.00001;
+            var i = 0;
+            for (double angle = 0; angle < Math.PI; angle += 0.0174533)
+            {
+                var r = OrbitMath.RadiusAtAngle(angle, p, e);
+                var theta = OrbitMath.AngleAtRadus(r, p, e);
+                Assert.AreEqual(angle, theta, angleDelta,  "inc: " + i + " r: " + r);
+                i++;
+            }
         }
 
         [Test]
