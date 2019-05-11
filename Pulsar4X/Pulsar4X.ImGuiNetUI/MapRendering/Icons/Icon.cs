@@ -125,4 +125,74 @@ namespace Pulsar4X.SDL2UI
         }
 
     }
+
+
+    public class SimpleCircle : IDrawData
+    {
+        Shape _shape;
+        Shape _drawShape;
+        protected ECSLib.IPosition _positionDB;
+        protected ECSLib.Vector4 _worldPosition;
+        public SDL.SDL_Point ViewScreenPos;
+
+        bool positionByDB;
+
+        public ECSLib.Vector4 WorldPosition
+        {
+            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
+            set { _worldPosition = value; }
+        }
+
+        public SimpleCircle(ECSLib.IPosition positionDB, double radius, SDL.SDL_Color colour)
+        {
+            _positionDB = positionDB;
+            positionByDB = true;
+            _shape = new Shape()
+            {
+                Points = CreatePrimitiveShapes.Circle(0, 0, radius, 128),
+                Color = colour,
+            };
+        }
+
+        public void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            SDL.SDL_SetRenderDrawColor(rendererPtr, _drawShape.Color.r, _drawShape.Color.g, _drawShape.Color.b, _drawShape.Color.a);
+
+            for (int i = 0; i < _shape.Points.Length - 1; i++)
+            {
+                var x0 = Convert.ToInt32(_drawShape.Points[i].X);
+                var y0 = Convert.ToInt32(_drawShape.Points[i].Y);
+                var x1 = Convert.ToInt32(_drawShape.Points[i + 1].X);
+                var y1 = Convert.ToInt32(_drawShape.Points[i + 1].Y);
+                SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
+            }
+        }
+
+        public void OnFrameUpdate(Matrix matrix, Camera camera)
+        {
+            var camerapoint = camera.CameraViewCoordinate();
+
+            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
+            var vsp = new PointD
+            {
+                X = ViewScreenPos.x + camerapoint.x,
+                Y = ViewScreenPos.y + camerapoint.y
+            };
+            PointD[] drawPoints = new PointD[_shape.Points.Length];
+
+            for (int i2 = 0; i2 < _shape.Points.Length; i2++)
+            {           
+                var translatedPoint = matrix.TransformD(_shape.Points[i2].X, _shape.Points[i2].Y);
+                int x = (int)(vsp.X + translatedPoint.X);
+                int y = (int)(vsp.Y + translatedPoint.Y);
+                drawPoints[i2] = new PointD() { X = x, Y = y };
+            }
+            _drawShape = new Shape() { Points = drawPoints, Color = _shape.Color };
+        }
+
+        public void OnPhysicsUpdate()
+        {
+
+        }
+    }
 }

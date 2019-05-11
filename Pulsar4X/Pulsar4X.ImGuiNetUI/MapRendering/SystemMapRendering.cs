@@ -54,10 +54,10 @@ namespace Pulsar4X.SDL2UI
         SystemState _sysState;
         Camera _camera;
         internal IntPtr windowPtr;
-        internal IntPtr surfacePtr; 
+        internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;
         ImGuiSDL2CSWindow _window;
-        internal List<IDrawData> UIWidgets = new List<IDrawData>();
+        internal Dictionary<string, IDrawData> UIWidgets = new Dictionary<string, IDrawData>();
         ConcurrentDictionary<Guid, Icon> _testIcons = new ConcurrentDictionary<Guid, Icon>();
         ConcurrentDictionary<Guid, IDrawData> _entityIcons = new ConcurrentDictionary<Guid, IDrawData>();
         ConcurrentDictionary<Guid, IDrawData> _orbitRings = new ConcurrentDictionary<Guid, IDrawData>();
@@ -122,11 +122,11 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetSystem(StarSystem starSys)
         {
-            if(_sysState != null)
+            if (_sysState != null)
             {
                 _sysState.StarSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateChange;
                 _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
-            
+
             }
             if (_state.StarSystemStates.ContainsKey(starSys.Guid))
                 _sysState = _state.StarSystemStates[starSys.Guid];
@@ -182,7 +182,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if(entityItem.HasDataBlob<NewtonMoveDB>())
+            if (entityItem.HasDataBlob<NewtonMoveDB>())
             {
                 var hyp = entityItem.GetDataBlob<NewtonMoveDB>();
                 OrbitHypobolicIcon orb;
@@ -236,7 +236,7 @@ namespace Pulsar4X.SDL2UI
 
 
 
-            foreach (var icon in UIWidgets)
+            foreach (var icon in UIWidgets.Values)
             {
                 icon.OnPhysicsUpdate();
             }
@@ -263,7 +263,7 @@ namespace Pulsar4X.SDL2UI
         public void UpdateUserOrbitSettings()
         {
             foreach (OrbitEllipseIcon item in _orbitRings.Values)
-            {                
+            {
                 item.UpdateUserSettings();
             }
         }
@@ -359,12 +359,12 @@ namespace Pulsar4X.SDL2UI
 
             List<NameIcon> texiconsCopy = new List<NameIcon>();
             texiconsCopy.AddRange(_nameIcons.Values);
-                
+
             int numTextIcons = texiconsCopy.Count;
 
             for (int i = 1; i < numTextIcons; i++)
             {
-                var item = texiconsCopy[i-1];
+                var item = texiconsCopy[i - 1];
                 ImVec2 height = new ImVec2() { x = 0, y = item.Height };
                 int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + height, byViewPos);
                 int lpi = lowestPosIndex;
@@ -397,7 +397,7 @@ namespace Pulsar4X.SDL2UI
         internal void Draw()
         {
             if (_camera.ZoomLevel <= 0.1) //todo: base this number off the largest orbit
-            { 
+            {
                 //draw galaxy map instead
             }
             else
@@ -479,7 +479,15 @@ namespace Pulsar4X.SDL2UI
                     item.Draw(_state.rendererPtr, _state.Camera);
                 }
             }
-            
+
+        }
+
+        void UpdateAndDraw(Dictionary<string, IDrawData> icons, Matrix matrix)
+        {
+            foreach (var item in icons.Values)
+                item.OnFrameUpdate(matrix, _camera);
+            foreach (var item in icons.Values)
+                item.Draw(rendererPtr, _camera);
         }
 
         void UpdateAndDraw(IList<IDrawData> icons, Matrix matrix)

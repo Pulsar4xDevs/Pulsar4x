@@ -29,7 +29,7 @@ namespace Pulsar4X.SDL2UI
         float[] _systemRates = new float[80];
         bool _dateChangeSinceLastFrame = true;
         bool _isRunningFrame = false;
-
+        bool _drawSOI = false;
         //List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
 
         private DebugWindow() 
@@ -217,18 +217,34 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Density " + mvdb.Density + "g/cm^3");
                                     ImGui.Text("Radius " + mvdb.Radius + "Km");
                                 }
+
                             }
                             if (_selectedEntity.HasDataBlob<OrbitDB>())
                             {
 
+                                if (ImGui.Checkbox("Draw SOI", ref _drawSOI))
+                                {
+                                    SimpleCircle cir; 
+                                    if (_drawSOI)
+                                    {
+                                        var soiradius = OrbitProcessor.GetSOI(_selectedEntity);
+                                        var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
+                                        cir = new SimpleCircle(_selectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
+
+                                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(cir), cir);
+                                    }
+                                    else
+                                        _state.SelectedSysMapRender.UIWidgets.Remove(nameof(cir));
+                                }
+
                                 if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    OrbitDB orbitDB = _selectedEntity.GetDataBlob<OrbitDB>();
 
+                                    OrbitDB orbitDB = _selectedEntity.GetDataBlob<OrbitDB>();
 
                                     //if (_state.CurrentSystemDateTime != lastDate)
                                     //{
-                                        pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.PrimarySystemDateTime);
+                                    pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.PrimarySystemDateTime);
                                         truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.PrimarySystemDateTime);
                                         lastDate = _state.PrimarySystemDateTime;
                                     //}

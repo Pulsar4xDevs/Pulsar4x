@@ -302,7 +302,7 @@ namespace Pulsar4X.SDL2UI
             return points;
         }
 
-        public static PointD[] Circle(int posX, int posY, int radius, short segments)
+        public static PointD[] Circle(int posX, int posY, double radius, short segments)
         {
             PointD[] points = new PointD[segments + 1];
             double incrementAngle = PI2 / segments;
