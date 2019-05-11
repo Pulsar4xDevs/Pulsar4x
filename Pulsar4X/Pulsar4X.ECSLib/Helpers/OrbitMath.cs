@@ -401,12 +401,25 @@ namespace Pulsar4X.ECSLib
         }
 
 
-
+        /// <summary>
+        /// works with ellipse and hyperabola
+        /// </summary>
+        /// <returns>The radius from the focal point for a given angle</returns>
+        /// <param name="angle">Angle.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
         public static double RadiusAtAngle(double angle, double semiLatusRectum, double eccentricity)
         {
             return semiLatusRectum / (1 + eccentricity * Math.Cos(angle)); 
         }
 
+        /// <summary>
+        /// works with ellipse and hyperabola
+        /// </summary>
+        /// <returns>The angle from the focal point for a given radius</returns>
+        /// <param name="radius">Radius.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
         public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
         {
             //r = p / (1 + e * cos(θ))
@@ -414,6 +427,16 @@ namespace Pulsar4X.ECSLib
             //((p / r) -1) / e = cos(θ)
             return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
         }
+
+
+        public Vector4 PositionFromRadius(double radius, double semiLatusRectum, double eccentricity)
+        {
+            double θ = AngleAtRadus(radius, semiLatusRectum, eccentricity);
+            var x = radius * Math.Cos(θ);
+            var y = radius * Math.Sin(θ);
+            return new Vector4() { X = x, Y = y };
+        }
+
 
         /// <summary>
         /// Tsiolkovsky's rocket equation.

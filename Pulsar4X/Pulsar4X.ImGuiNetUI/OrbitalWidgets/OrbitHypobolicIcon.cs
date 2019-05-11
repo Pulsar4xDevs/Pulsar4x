@@ -19,6 +19,8 @@ namespace Pulsar4X.SDL2UI
         //protected float b;
         protected PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+        PointD[] _debugPoints;
+        SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
 
         //user adjustable variables:
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -82,7 +84,7 @@ namespace Pulsar4X.SDL2UI
             var a2 = _sgp / (2 * foobar);
             var a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);
             var a3 = -(-_sgp / (2 * specificOrbitalEnergy));
- 
+
             var b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);
             double linierEccentricity = e * a;
             double soi = OrbitProcessor.GetSOI(_newtonMoveDB.SOIParent);
@@ -94,13 +96,12 @@ namespace Pulsar4X.SDL2UI
 
             double p = EllipseMath.SemiLatusRectum(a, e);
             double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
-            //double arc = angleToSOIPoint * 2;
-            //_numberOfPoints = (int)(_numberOfArcSegments / arc);
+            double thetaMax = angleToSOIPoint;
 
             if (_numberOfPoints % 2 == 0)
                 _numberOfPoints += 1;
             var ctrIndex = _numberOfPoints / 2;
-            var dtheta = (angleToSOIPoint) / (ctrIndex);
+            var dtheta = thetaMax / (ctrIndex -1);
             var fooA = Math.Cosh(dtheta);
             var fooB = (a / b) * Math.Sinh(dtheta);
             var fooC = (b / a) * Math.Sinh(dtheta);

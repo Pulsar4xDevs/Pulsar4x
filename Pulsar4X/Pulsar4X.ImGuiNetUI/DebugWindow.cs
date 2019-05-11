@@ -30,6 +30,7 @@ namespace Pulsar4X.SDL2UI
         bool _dateChangeSinceLastFrame = true;
         bool _isRunningFrame = false;
         bool _drawSOI = false;
+        bool _drawParentSOI = false;
         //List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
 
         private DebugWindow() 
@@ -276,6 +277,63 @@ namespace Pulsar4X.SDL2UI
                                                 
                                 }
                             }
+
+                            if (_selectedEntity.HasDataBlob< NewtonMoveDB>())
+                            {
+                                if (ImGui.Checkbox("Draw Parent SOI", ref _drawParentSOI))
+                                {
+                                    SimpleCircle psoi;
+                                    SimpleLine psoilin;
+                                    if (_drawParentSOI)
+                                    {
+                                        var myPos = _selectedEntity.GetDataBlob<PositionDB>();
+                                        var parent = myPos.Parent;
+                                        var pObt = parent.GetDataBlob<OrbitDB>();
+                                        var cnmve = _selectedEntity.GetDataBlob<NewtonMoveDB>();
+
+                                        var soiradius = OrbitProcessor.GetSOI(parent);
+                                        var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
+                                        psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
+                                        var pmass = parent.GetDataBlob<MassVolumeDB>().Mass;
+                                        var mymass = _selectedEntity.GetDataBlob<MassVolumeDB>().Mass;
+
+                                        var sgp = GameConstants.Science.GravitationalConstant * (pmass + mymass) / 3.347928976e33;
+                                        var vel = Distance.KmToAU(cnmve.CurrentVector_kms);
+                                        var cpos = myPos.RelativePosition_AU;
+                                        var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
+                                        double ce = eccentVector.Length();
+                                        var r = cpos.Length();
+                                        var v = vel.Length();
+
+                                        var ca = 1 / (2 / r - Math.Pow(v, 2) / sgp);
+                                        var cp = EllipseMath.SemiLatusRectum(ca, ce);
+
+                                        var cAoP = Math.Atan2(eccentVector.Y, eccentVector.X);
+
+                                        /*
+                                        var pa = pObt.SemiMajorAxis;
+                                        var pe = pObt.Eccentricity;
+                                        var pp = EllipseMath.SemiLatusRectum(pa, pe);
+                                        */
+                                        double θ = OrbitMath.AngleAtRadus(soiradius, cp, ce);
+                                        θ += cAoP;
+
+                                        var x = soiradius * Math.Cos(θ);
+                                        var y = soiradius * Math.Sin(θ);
+                                        psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new PointD() { X = x, Y = y }, colour);
+
+                                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
+                                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
+                                    }
+                                    else
+                                    {
+                                        _state.SelectedSysMapRender.UIWidgets.Remove(nameof(psoi));
+                                        _state.SelectedSysMapRender.UIWidgets.Remove(nameof(psoilin));
+                                    }
+                                }
+
+                            }
+
                             if (_state.LastClickedEntity.OrbitIcon != null)
                             {
 
