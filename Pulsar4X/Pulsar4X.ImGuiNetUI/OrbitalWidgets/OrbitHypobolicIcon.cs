@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
         protected int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
         protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         protected float _alphaChangeAmount;
-        double _aoP = 0;
+        double _lop = 0; //longditudeOfPeriapsis;
 
         public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
         {
@@ -80,19 +80,15 @@ namespace Pulsar4X.SDL2UI
             var r = pos.Length();
             var v = vel.Length();
 
-            var foobar = Math.Pow(v, 2) / 2 - _sgp / r;
-            var a2 = _sgp / (2 * foobar);
-            var a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);
-            var a3 = -(-_sgp / (2 * specificOrbitalEnergy));
-
-            var b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);
+            var a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
+            var b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
             double linierEccentricity = e * a;
             double soi = OrbitProcessor.GetSOI(_newtonMoveDB.SOIParent);
 
 
-            _aoP = Math.Atan2(eccentVector.Y, eccentVector.X);
+            _lop = Math.Atan2(eccentVector.Y, eccentVector.X);
             if (Vector4.Cross(pos, vel).Z < 0) //anti clockwise orbit
-                _aoP = Math.PI * 2 - _aoP;
+                _lop = Math.PI * 2 - _lop;
 
             double p = EllipseMath.SemiLatusRectum(a, e);
             double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
@@ -123,18 +119,18 @@ namespace Pulsar4X.SDL2UI
             _points = new PointD[_numberOfPoints];
             _points[ctrIndex] = new PointD()
             {
-                X = ((points[0].X - linierEccentricity )* Math.Cos(_aoP)) - (points[0].Y * Math.Sin(_aoP)),
-                Y = ((points[0].X - linierEccentricity) * Math.Sin(_aoP)) + (points[0].Y * Math.Cos(_aoP))
+                X = ((points[0].X - linierEccentricity )* Math.Cos(_lop)) - (points[0].Y * Math.Sin(_lop)),
+                Y = ((points[0].X - linierEccentricity) * Math.Sin(_lop)) + (points[0].Y * Math.Cos(_lop))
             };
             for (int i = 1; i < ctrIndex + 1; i++)
             {
                 double x = points[i].X - linierEccentricity; //adjust for the focal point
                 double ya = points[i].Y;
                 double yb = -points[i].Y;
-                double x2a = (x * Math.Cos(_aoP)) - (ya * Math.Sin(_aoP)); //rotate to loan
-                double y2a = (x * Math.Sin(_aoP)) + (ya * Math.Cos(_aoP));
-                double x2b = (x * Math.Cos(_aoP)) - (yb * Math.Sin(_aoP));
-                double y2b = (x * Math.Sin(_aoP)) + (yb * Math.Cos(_aoP));
+                double x2a = (x * Math.Cos(_lop)) - (ya * Math.Sin(_lop)); //rotate to loan
+                double y2a = (x * Math.Sin(_lop)) + (ya * Math.Cos(_lop));
+                double x2b = (x * Math.Cos(_lop)) - (yb * Math.Sin(_lop));
+                double y2b = (x * Math.Sin(_lop)) + (yb * Math.Cos(_lop));
                 _points[ctrIndex + i] = new PointD()
                 {
                     X = x2a,

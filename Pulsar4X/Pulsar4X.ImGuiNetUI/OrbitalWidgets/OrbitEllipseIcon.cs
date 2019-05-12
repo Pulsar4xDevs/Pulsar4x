@@ -53,16 +53,16 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
-                double x1 = _orbitEllipseSemiMaj *  Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
-                double y1 = _orbitEllipseSemiMinor * Math.Cos(angle);
+                double x1 = SemiMaj *  Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
+                double y1 = SemiMinor * Math.Cos(angle);
 
                 //double x1 = _orbitEllipseSemiMinor * Math.Cos(angle);
                 //double y1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the linearEccentricity so the focal point is "center"
 
 
                 //rotates the points to allow for the LongditudeOfPeriapsis. 
-                double x2 = (x1 * Math.Cos(_orbitAngleRadians)) - (y1 * Math.Sin(_orbitAngleRadians));
-                double y2 = (x1 * Math.Sin(_orbitAngleRadians)) + (y1 * Math.Cos(_orbitAngleRadians));
+                double x2 = (x1 * Math.Cos(_loP_radians)) - (y1 * Math.Sin(_loP_radians));
+                double y2 = (x1 * Math.Sin(_loP_radians)) + (y1 * Math.Cos(_loP_radians));
                 angle += _segmentArcSweepRadians;
                 _points[i] = new PointD() { X = x2, Y = y2 };
             }

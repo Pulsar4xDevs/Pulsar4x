@@ -214,16 +214,16 @@ namespace Pulsar4X.SDL2UI
             EntityGuid = entityState.Entity.Guid;
 
 
-            _loP = orbitIcon._orbitAngleRadians;
+            _loP = orbitIcon._loP_radians;
 
             var cP = new PointD() { X = orbitIcon.WorldPosition.X, Y = orbitIcon.WorldPosition.Y };
             cP.X -= orbitIcon._linearEccentricity;
 
             var f1 = new PointD() { X = cP.X, Y = cP.Y + orbitIcon._linearEccentricity };
             var f2 = new PointD() { X = cP.X, Y = cP.Y - orbitIcon._linearEccentricity };
-            var coVertex = new PointD() { X = cP.X + orbitIcon._orbitEllipseSemiMinor, Y = cP.Y };
-            var periapsisPnt = new PointD() { X = cP.X, Y = cP.Y - orbitIcon._orbitEllipseSemiMaj };
-            var apoapsisPnt = new PointD() { X = cP.X, Y = cP.Y + orbitIcon._orbitEllipseSemiMaj };
+            var coVertex = new PointD() { X = cP.X + orbitIcon.SemiMinor, Y = cP.Y };
+            var periapsisPnt = new PointD() { X = cP.X, Y = cP.Y - orbitIcon.SemiMaj };
+            var apoapsisPnt = new PointD() { X = cP.X, Y = cP.Y + orbitIcon.SemiMaj };
 
             _cP = RotatePoint(cP, _loP);
             _f1 = RotatePoint(f1, _loP);
@@ -233,8 +233,8 @@ namespace Pulsar4X.SDL2UI
             _apoapsisPnt = RotatePoint(apoapsisPnt, _loP);
 
 
-            _semiMajAxis = orbitIcon._orbitEllipseSemiMaj;
-            _semiMinAxis = orbitIcon._orbitEllipseSemiMinor;
+            _semiMajAxis = orbitIcon.SemiMaj;
+            _semiMinAxis = orbitIcon.SemiMinor;
 
 
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);

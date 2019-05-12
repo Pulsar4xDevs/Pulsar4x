@@ -22,12 +22,10 @@ namespace Pulsar4X.SDL2UI
         protected OrbitDB _orbitDB;
         internal IPosition BodyPositionDB;
         protected PointD _bodyRalitivePos;
-        protected float _orbitEllipseMajor;
-        internal float _orbitEllipseSemiMaj;
-        protected float _orbitEllipseMinor;
-        internal float _orbitEllipseSemiMinor;
-        protected float _orbitAngleDegrees; //the orbit is an ellipse which is rotated arround one of the focal points. 
-        internal float _orbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. 
+        internal float SemiMaj;
+        internal float SemiMinor;
+        protected float _loP_Degrees; //longditudeOfPeriapsis (loan + aop) 
+        internal float _loP_radians; //longditudeOfPeriapsis (loan + aop) in radians
         internal float _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
         protected PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
@@ -71,10 +69,10 @@ namespace Pulsar4X.SDL2UI
                 _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position. 
             }
 
-            _orbitEllipseSemiMaj = (float)_orbitDB.SemiMajorAxis;
-            _orbitEllipseMajor = _orbitEllipseSemiMaj * 2;
-            _orbitEllipseSemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
-            _orbitEllipseMinor = _orbitEllipseSemiMinor * 2;
+            SemiMaj = (float)_orbitDB.SemiMajorAxis;
+
+            SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
+
 
 
             _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
@@ -82,14 +80,14 @@ namespace Pulsar4X.SDL2UI
             if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270) //orbitDB is in degrees.
             {
                 IsClockwiseOrbit = false;
-                _orbitAngleDegrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
+                _loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
             }
             else
             {
 
-                _orbitAngleDegrees = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis);
+                _loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis);
             }
-            _orbitAngleRadians = (float)(Angle.ToRadians(_orbitAngleDegrees));
+            _loP_radians = (float)(Angle.ToRadians(_loP_Degrees));
 
 
 
