@@ -402,7 +402,7 @@ namespace Pulsar4X.ECSLib
 
 
         /// <summary>
-        /// works with ellipse and hyperabola
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
         /// </summary>
         /// <returns>The radius from the focal point for a given angle</returns>
         /// <param name="angle">Angle.</param>
@@ -414,7 +414,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// works with ellipse and hyperabola
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
         /// </summary>
         /// <returns>The angle from the focal point for a given radius</returns>
         /// <param name="radius">Radius.</param>
@@ -429,7 +429,7 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public Vector4 PositionFromRadius(double radius, double semiLatusRectum, double eccentricity)
+        public static Vector4 PositionFromRadius(double radius, double semiLatusRectum, double eccentricity)
         {
             double θ = AngleAtRadus(radius, semiLatusRectum, eccentricity);
             var x = radius * Math.Cos(θ);

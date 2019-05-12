@@ -95,7 +95,7 @@ namespace Pulsar4X.ECSLib
             Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol, factionEntity, earth, sol, "Prevailing Stillness");
             gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector4(0, 8.52699302490434E-05, 0, 0);
             StorageSpaceProcessor.AddCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
-            //give the gunship a parabolic orbit to test:
+            //give the gunship a hypobolic orbit to test:
             var velInAU = Distance.KmToAU(25);
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
             gunShip.RemoveDataBlob<OrbitDB>();

@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
         protected int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
         protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         protected float _alphaChangeAmount;
-        double _lop = 0; //longditudeOfPeriapsis;
+ 
 
         public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
         {
@@ -69,6 +69,7 @@ namespace Pulsar4X.SDL2UI
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
             _numberOfPoints = _numberOfDrawSegments + 1;
         }
+
         internal void CreatePointArray()
         {
 
@@ -76,33 +77,37 @@ namespace Pulsar4X.SDL2UI
             Vector4 pos = myPosDB.RelativePosition_AU;
             Vector4 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
             double e = eccentVector.Length();
-            double specificOrbitalEnergy = Math.Pow(vel.Length(), 2) * 0.5 - _sgp / pos.Length();
-            var r = pos.Length();
-            var v = vel.Length();
-
-            var a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
-            var b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
+            double r = pos.Length();
+            double v = vel.Length();
+            double a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
+            double b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
             double linierEccentricity = e * a;
             double soi = OrbitProcessor.GetSOI(_newtonMoveDB.SOIParent);
 
-
-            _lop = Math.Atan2(eccentVector.Y, eccentVector.X);
+            //longditudeOfPeriapsis;
+            double _lop = Math.Atan2(eccentVector.Y, eccentVector.X);
             if (Vector4.Cross(pos, vel).Z < 0) //anti clockwise orbit
                 _lop = Math.PI * 2 - _lop;
 
             double p = EllipseMath.SemiLatusRectum(a, e);
             double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
-            double thetaMax = angleToSOIPoint;
+            //double thetaMax = angleToSOIPoint;
+
+            double maxX = soi * Math.Cos(angleToSOIPoint);
+            //maxX = maxX - a + linierEccentricity;
+            double foo = maxX / a;
+            double thetaMax = Math.Log(foo + Math.Sqrt(foo * foo - 1));
+
 
             if (_numberOfPoints % 2 == 0)
                 _numberOfPoints += 1;
-            var ctrIndex = _numberOfPoints / 2;
-            var dtheta = thetaMax / (ctrIndex -1);
-            var fooA = Math.Cosh(dtheta);
-            var fooB = (a / b) * Math.Sinh(dtheta);
-            var fooC = (b / a) * Math.Sinh(dtheta);
-            var xn = a;
-            var yn = 0d;
+            int ctrIndex = _numberOfPoints / 2;
+            double dtheta = thetaMax / (ctrIndex - 1);
+            double fooA = Math.Cosh(dtheta);
+            double fooB = (a / b) * Math.Sinh(dtheta);
+            double fooC = (b / a) * Math.Sinh(dtheta);
+            double xn = a;
+            double yn = 0;
 
             var points = new PointD[ctrIndex + 1];
             points[0] = new PointD() { X = xn, Y = yn };
