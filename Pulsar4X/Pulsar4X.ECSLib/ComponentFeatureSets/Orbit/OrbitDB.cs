@@ -145,6 +145,9 @@ namespace Pulsar4X.ECSLib
             if (d > 1)
             {
                 var e = new Event(atDateTime, "Positional difference of " + d + "Km when creating orbit from velocity");
+                e.Entity = entity;
+                e.SystemGuid = entity.Manager.ManagerGuid;
+                //e.Faction =  entity.FactionOwner;
                 StaticRefLib.EventLog.AddEvent(e);
             }
             return orbit;

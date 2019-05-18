@@ -173,6 +173,52 @@ namespace Pulsar4X.SDL2UI
                     }
                     ImGui.Text("Selected Star System: " + _state.SelectedStarSysGuid);
                     ImGui.Text("Number Of Entites: " + _state.SelectedSystem.NumberOfEntites);
+                    if(ImGui.CollapsingHeader("Log"))
+                    {
+                        ImGui.BeginChild("LogChild", new Vector2(800, 300), true);
+                        ImGui.Columns(4, "Events", true);
+                        ImGui.Text("DateTime");
+                        ImGui.NextColumn();
+                        ImGui.Text("Faction");
+                        ImGui.NextColumn();
+                        ImGui.Text("Entity");
+                        ImGui.NextColumn();
+                        ImGui.Text("Event Message");
+                        ImGui.NextColumn();
+
+                        foreach (var gameEvent in StaticRefLib.EventLog.GetAllEvents())
+                        {
+
+                            string entityStr = "";
+                            if (gameEvent.Entity != null)
+                                if (gameEvent.Entity.HasDataBlob<NameDB>())
+                                    entityStr = gameEvent.Entity.GetDataBlob<NameDB>().DefaultName;
+                                else
+                                    entityStr = gameEvent.Entity.Guid.ToString();
+                            string factionStr = "";
+                            if (gameEvent.Faction != null)
+                                if (gameEvent.Faction.HasDataBlob<NameDB>())
+                                    factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
+                                else
+                                    factionStr = gameEvent.Faction.Guid.ToString();
+
+                            ImGui.Separator();
+                            ImGui.Text(gameEvent.Time.ToString()); 
+                                ImGui.NextColumn();
+                            ImGui.Text(factionStr);
+                                ImGui.NextColumn();
+                            ImGui.Text(entityStr);
+                                ImGui.NextColumn();
+                            ImGui.TextWrapped(gameEvent.Message);
+
+                                ImGui.NextColumn();
+                               
+
+                        }
+                        //ImGui.Separator();
+                        //ImGui.Columns();
+                        ImGui.EndChild();
+                    }
                     if (ImGui.CollapsingHeader("Entity List"))
                     {
 

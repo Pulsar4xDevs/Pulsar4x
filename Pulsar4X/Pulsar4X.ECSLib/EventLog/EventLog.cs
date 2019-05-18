@@ -59,6 +59,11 @@ namespace Pulsar4X.ECSLib
             return retVal;
         }
 
+        public List<Event> GetAllEvents()
+        {
+            return _events.ToList();
+        }
+
         /// <summary>
         /// gets all events for this authTokens player, from last time this function was called for teh given authToken
         /// </summary>
