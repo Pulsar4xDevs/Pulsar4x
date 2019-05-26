@@ -438,5 +438,44 @@ namespace Pulsar4X.Tests
             var dif = distancekm - distbKM;
             Assert.AreEqual(distancekm, distbKM, 0.25);
         }
+
+        [Test]
+        public void TestNewtonTrajectory()
+        {
+            Game game = new Game();
+            EntityManager mgr = new EntityManager(game, false);
+            Entity parentEntity = TestingUtilities.BasicEarth(mgr);
+
+            PositionDB pos1 = new PositionDB(mgr.ManagerGuid) { X = 0, Y = 8.52699302490434E-05, Z = 0 };
+            BaseDataBlob[] objBlobs1 = new BaseDataBlob[3];
+            objBlobs1[0] = pos1;
+            objBlobs1[1] = new MassVolumeDB() { Mass = 10000 };
+            objBlobs1[2] = new NewtonMoveDB(parentEntity)
+            {
+                CurrentVector_kms = new Vector4(-10.0, 0, 0, 0)
+            };
+            Entity objEntity1 = new Entity(mgr, objBlobs1);
+            PositionDB pos2 = new PositionDB(mgr.ManagerGuid) { X = 0, Y = 8.52699302490434E-05, Z = 0 };
+            BaseDataBlob[] objBlobs2 = new BaseDataBlob[3];
+            objBlobs2[0] = pos2;
+            objBlobs2[1] = new MassVolumeDB() { Mass = 10000 };
+            objBlobs2[2] = new NewtonMoveDB(parentEntity)
+            {
+                CurrentVector_kms = new Vector4(-10.0, 0, 0, 0)
+            };
+            Entity objEntity2 = new Entity(mgr, objBlobs2);
+
+            var seconds = 100;
+            for (int i = 0; i < seconds; i++)
+            {
+                NewtonionMovementProcessor.NewtonMove(objEntity1, 1);
+            }
+            NewtonionMovementProcessor.NewtonMove(objEntity2, seconds);
+            var distance1 = Distance.AuToKm(pos1.AbsolutePosition_AU.Length());
+            var distance2 = Distance.AuToKm( pos2.AbsolutePosition_AU.Length());
+            Assert.AreEqual(distance1, distance2);
+
+
+        }
     }
 }

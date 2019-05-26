@@ -405,7 +405,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 if (ImGui.CollapsingHeader("Propulsion: ###PropulsionHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    PropulsionAbilityDB propulsionDB = _state.LastClickedEntity.Entity.GetDataBlob<PropulsionAbilityDB>();
+                                    PropulsionAbilityDB propulsionDB = _selectedEntity.GetDataBlob<PropulsionAbilityDB>();
                                     ImGui.Text("NonNewt Engine Power: " + propulsionDB.TotalEnginePower);
                                     ImGui.Text("Max Speed: " + propulsionDB.MaximumSpeed_MS);
                                     ImGui.Text("CurrentVector: " + propulsionDB.CurrentVectorMS);

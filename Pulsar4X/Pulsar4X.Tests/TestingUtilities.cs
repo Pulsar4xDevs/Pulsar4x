@@ -9,6 +9,26 @@ namespace Pulsar4X.Tests
 {
     internal static class TestingUtilities
     {
+        public static Entity BasicSol(EntityManager mgr)
+        {
+            double parentMass = 1.989e30;
+            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
+            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { X = 0, Y = 0, Z = 0 };
+            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[2] = new OrbitDB();
+            return new Entity(mgr, parentblobs);
+        }
+
+        public static Entity BasicEarth(EntityManager mgr)
+        {
+            double parentMass = 5.97237e24;
+            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
+            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { X = 0, Y = 0, Z = 0 };
+            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[2] = new OrbitDB();
+            return new Entity(mgr, parentblobs);
+        }
+
         internal static Game CreateTestUniverse(int numSystems, DateTime testTime, bool generateDefaultHumans = false)
         {
             var gamesettings = new NewGameSettings { GameName = "Unit Test Game", StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };

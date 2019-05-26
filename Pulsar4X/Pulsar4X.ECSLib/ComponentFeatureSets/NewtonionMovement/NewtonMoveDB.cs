@@ -1,27 +1,36 @@
 ﻿using System;
-
+using Newtonsoft.Json;
 namespace Pulsar4X.ECSLib
 {
     public class NewtonMoveDB : BaseDataBlob
     {
-        //internal DateTime TimeSinceLastRun { get; set; }
+        internal DateTime LastProcessDateTime = new DateTime();
         public Vector4 ThrustVector { get; internal set; } = Vector4.Zero;
         public Vector4 CurrentVector_kms { get; internal set; }
 
         public Entity SOIParent { get; internal set; }
         public double ParentMass { get; internal set; }
 
-        public NewtonMoveDB() { }
+        [JsonConstructor]
+        private NewtonMoveDB() { }
 
         public NewtonMoveDB(Entity sphereOfInfluenceParent)
         {
             SOIParent = sphereOfInfluenceParent;
             ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().Mass;
+            LastProcessDateTime = sphereOfInfluenceParent.Manager.ManagerSubpulses.StarSysDateTime;
         }
-
+        public NewtonMoveDB(NewtonMoveDB db)
+        {
+            LastProcessDateTime = db.LastProcessDateTime;
+            ThrustVector = db.ThrustVector;
+            CurrentVector_kms = db.CurrentVector_kms;
+            SOIParent = db.SOIParent;
+            ParentMass = db.ParentMass; 
+        }
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new NewtonMoveDB(this);
         }
     }
 }
