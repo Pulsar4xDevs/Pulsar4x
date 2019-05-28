@@ -122,7 +122,9 @@ namespace Pulsar4X.ECSLib
             var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
             var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
-            var ralitivePos = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
+            var posdb = entity.GetDataBlob<PositionDB>();
+            posdb.SetParent(parent);
+            var ralitivePos = posdb.RelativePosition_AU;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
             if (ralitivePos.Length() > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
 
@@ -147,6 +149,7 @@ namespace Pulsar4X.ECSLib
                 var e = new Event(atDateTime, "Positional difference of " + d + "Km when creating orbit from velocity");
                 e.Entity = entity;
                 e.SystemGuid = entity.Manager.ManagerGuid;
+                e.EventType = EventType.Opps;
                 //e.Faction =  entity.FactionOwner;
                 StaticRefLib.EventLog.AddEvent(e);
             }

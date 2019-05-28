@@ -69,42 +69,53 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestTrueAnomalyCalcs()
         {
-            Vector4 pos = new Vector4() { X = 0.25, Y = 0.25 };
-            Vector4 vel = new Vector4() { Y = Distance.KmToAU(54) };
+            Vector4 pos;// = new Vector4() { X = 0.25, Y = 0.25 };
+            Vector4 vel;// = new Vector4() { X = Distance.KmToAU(25), Y = Distance.KmToAU(25) };
+                        //TrueAnomalyCalcs(pos, vel);
+            pos = new Vector4() { X = 0.25, Y = 0 };
+            vel = new Vector4() { X = Distance.KmToAU(0), Y = Distance.KmToAU(25) };
+            TrueAnomalyCalcs(pos, vel);
+            pos = new Vector4() { X = 0, Y = 0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(0) };
+            TrueAnomalyCalcs(pos, vel);
+            pos = new Vector4() { X = -0.25, Y = 0 };
+            vel = new Vector4() { X = Distance.KmToAU(0), Y = Distance.KmToAU(-25) };
+            TrueAnomalyCalcs(pos, vel);
+            pos = new Vector4() { X = 0, Y = -0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(25), Y = Distance.KmToAU(0) };
             TrueAnomalyCalcs(pos, vel);
 
-
             pos = new Vector4() { X = 0.25, Y = 0.25 };
-            vel = new Vector4() { Y = Distance.KmToAU(54) };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(25) };
             TrueAnomalyCalcs(pos, vel);
             pos = new Vector4() { X = 0.25, Y = -0.25 };
-            vel = new Vector4() { X = Distance.KmToAU(54) };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(25) };
             TrueAnomalyCalcs(pos, vel);
             pos = new Vector4() { X = -0.25, Y = 0.25 };
-            vel = new Vector4() { X = Distance.KmToAU(-54) };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(25) };
             TrueAnomalyCalcs(pos, vel);
             pos = new Vector4() { X = -0.25, Y = -0.25 };
-            vel = new Vector4() { Y = Distance.KmToAU(-54) };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(25) };
             TrueAnomalyCalcs(pos, vel);
 
             pos = new Vector4() { X = 0.25, Y = 0.25 };
-            vel = new Vector4() { Y = Distance.KmToAU(54) };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(-25) };
             TrueAnomalyCalcs(pos, vel);
-            pos = new Vector4() { X = 0.25, Y = 0.25 };
-            vel = new Vector4() { Y = Distance.KmToAU(-54) };
+            pos = new Vector4() { X = 0.25, Y = -0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(-25) };
             TrueAnomalyCalcs(pos, vel); //this one fails currently, however the calcs used in this test are not used in code
-            pos = new Vector4() { X = 0.25, Y = 0.25 };
-            vel = new Vector4() { X = Distance.KmToAU(54) };
+            pos = new Vector4() { X = -0.25, Y = 0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(-25) };
             TrueAnomalyCalcs(pos, vel);
-            pos = new Vector4() { X = 0.25, Y = 0.25 };
-            vel = new Vector4() { X = Distance.KmToAU(-54) };
+            pos = new Vector4() { X = -0.25, Y = -0.25 };
+            vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(-25) };
             TrueAnomalyCalcs(pos, vel); //this one failes currently, however the calcs used in this test are not used in code
 
         }
 
         private void TrueAnomalyCalcs(Vector4 pos, Vector4 vel)
         {
-            double angleΔ = 0.0000000001;
+            double angleΔ = 0.0000001;
             double parentMass = 1.989e30;
             double objMass = 2.2e+15;
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
@@ -116,17 +127,29 @@ namespace Pulsar4X.Tests
             double ae = e * a;
             double aop = Math.Atan2(ev.Y, ev.X);
             double eccentricAnomaly = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, a, ae, aop);
+            double aopD = Angle.ToDegrees(aop);
+            double directAngle = Math.Atan2(pos.Y, pos.X);
 
             var θ1 = OrbitMath.TrueAnomaly(sgp, pos, vel);
             var θ2 = OrbitMath.TrueAnomaly(ev, pos, vel);
             var θ3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(e, eccentricAnomaly);
             var θ4 = OrbitMath.TrueAnomalyFromEccentricAnomaly2(e, eccentricAnomaly);
-            //var θ5 = OrbitMath.TrueAnomalyFromEccentricAnomaly3(e, eccentricAnomaly);
+            //var θ5 = OrbitMath.TrueAnomaly2(ev, pos, vel);
+            var θ6 = OrbitMath.TrueAnomaly(pos, aop);
+            var d1 = Angle.ToDegrees(θ1);
+            var d2 = Angle.ToDegrees(θ2);
+            var d3 = Angle.ToDegrees(θ3);
+            var d4 = Angle.ToDegrees(θ4);
+            //var d5 = Angle.ToDegrees(θ5);
+            var d6 = Angle.ToDegrees(θ6);
 
-            Assert.AreEqual(θ1, θ2);
-            Assert.AreEqual(θ1, θ3, angleΔ, "Difference of " + Angle.ToDegrees(θ1 - θ3) + "degrees");
-            Assert.AreEqual(θ1, θ4, angleΔ, "Difference of " + Angle.ToDegrees(θ1 - θ4) + "degrees");
-            //Assert.AreEqual(θ1, θ5, "Difference of " + Angle.ToDegrees(θ1 - θ5) + "degrees"); 
+            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - θ1), angleΔ);
+            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - θ2), angleΔ);
+            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - θ3), angleΔ);
+            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - θ4), angleΔ);
+            //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - θ5), angleΔ);
+            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - θ6), angleΔ);
+
         }
 
 
@@ -473,7 +496,8 @@ namespace Pulsar4X.Tests
             NewtonionMovementProcessor.NewtonMove(objEntity2, seconds);
             var distance1 = Distance.AuToKm(pos1.AbsolutePosition_AU.Length());
             var distance2 = Distance.AuToKm( pos2.AbsolutePosition_AU.Length());
-            Assert.AreEqual(distance1, distance2);
+
+            Assert.AreEqual(distance1, distance2); //if we put the variable timstep which is related to the speed of the object in we'll have to give this a delta
 
 
         }

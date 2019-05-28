@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
             gunShip.RemoveDataBlob<OrbitDB>();
             var nmdb = new NewtonMoveDB(earth);
-            nmdb.CurrentVector_kms = new Vector4(-10.0, 0, 0, 0);
+            nmdb.CurrentVector_kms = new Vector4(10.0, 0, 0, 0);
             gunShip.SetDataBlob<NewtonMoveDB>(nmdb);
 
             Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), sol, factionEntity, earth, sol, "Planet Express Ship");

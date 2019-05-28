@@ -41,6 +41,17 @@ namespace Pulsar4X.ECSLib
             degrees = degrees % 360;
             return degrees;
         }
+
+        public static double DifferenceBetweenRadians(double a1, double a2)
+        {
+            return Math.PI - Math.Abs(Math.Abs(a1 - a2) - Math.PI);
+        }
+
+        public static double DifferenceBetweenDegrees(double a1, double a2)
+        {
+            return 180 - Math.Abs(Math.Abs(a1 - a2) - 180);
+        }
+
     }
 
     /// <summary>

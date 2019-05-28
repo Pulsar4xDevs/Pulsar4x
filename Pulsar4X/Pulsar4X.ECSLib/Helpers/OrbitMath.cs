@@ -126,8 +126,9 @@ namespace Pulsar4X.ECSLib
             var eccentricAnomoly1 = Math.Acos(eccAng);
 
             var eccentricAnomoly = GetEccentricAnomalyFromStateVectors(position, semiMajorAxis, linierEccentricity, argOfPeriaps);
-            var trueAnomaly = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
 
+            //var trueAnomaly = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
+            var trueAnomaly = TrueAnomaly(position, longdOfAN + argOfPeriaps);
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
 
             var meanAnomaly = eccentricAnomoly - eccentricity * Math.Sin(eccentricAnomoly);
@@ -217,7 +218,18 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// DO NOT USE: this calc is wrong if velocity is -x or -y
+        /// The True Anomaly in radians
+        /// </summary>
+        /// <returns>The anomaly.</returns>
+        /// <param name="position">Position.</param>
+        /// <param name="loP">Lo p.</param>
+        public static double TrueAnomaly(Vector4 position, double loP)
+        {
+            return Math.Atan2(position.Y, position.X) - loP; 
+        }
+
+        /// <summary>
+        /// The True Anomaly in radians
         /// https://en.wikipedia.org/wiki/True_anomaly#From_state_vectors
         /// </summary>
         /// <returns>The True Anomaly in radians</returns>
@@ -226,7 +238,6 @@ namespace Pulsar4X.ECSLib
         /// <param name="velocity">Velocity ralitive to parent</param>
         public static double TrueAnomaly(Vector4 eccentVector, Vector4 position, Vector4 velocity)
         {
-
             var dotEccPos = Vector4.Dot(eccentVector, position);
             var talen = eccentVector.Length() * position.Length();
             talen = dotEccPos / talen;
@@ -238,9 +249,28 @@ namespace Pulsar4X.ECSLib
 
             return trueAnomoly;
         }
+        /*
+        public static double TrueAnomaly2(Vector4 eccentVector, Vector4 position, Vector4 velocity)
+        {
+            var r = Math.Sqrt(Vector4.Dot(position, position));
+            var b = new Vector4{X = -eccentVector.Y, Y = eccentVector.X};
+            var cos_TA = Vector4.Dot(position, eccentVector) / r;
+            var sin_TA = Vector4.Dot(position, b) / r;
+            double trueAnomoly = 0;
+            if (sin_TA >= 0)
+            {
+                trueAnomoly = Math.Acos(cos_TA);
+            }
+            else if (sin_TA < 0)
+            {
+                trueAnomoly = 2 * Math.PI - Math.Acos(cos_TA);
+            }
+            return trueAnomoly;
+        }
+        */
 
         /// <summary>
-        /// DO NOT USE: this calc is wrong if velocity is -x or -y
+        /// The True Anomaly in radians
         /// </summary>
         /// <returns>The True Anomaly in radians</returns>
         /// <param name="sgp">Sgp.</param>
@@ -255,7 +285,6 @@ namespace Pulsar4X.ECSLib
             var TAy = H * q / (R * sgp);
             var TA = Math.Atan2(TAy, TAx);
             return TA;
-
         }
 
         public static double TrueAnomalyFromEccentricAnomaly(double eccentricity, double eccentricAnomaly)
@@ -472,7 +501,8 @@ namespace Pulsar4X.ECSLib
         {
             var x = (position.X * Math.Cos(-aop)) - (position.Y * Math.Sin(-aop));
             x = linierEccentricity + x;
-            return Math.Acos(x / a);
+            double foo = GMath.Clamp(x / a, -1, 1); //because sometimes we were getting a floating point error that resulted in numbers infinatly smaller than -1
+            return Math.Acos(foo);
 
         }
 
