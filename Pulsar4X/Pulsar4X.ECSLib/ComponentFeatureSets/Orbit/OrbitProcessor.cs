@@ -255,7 +255,12 @@ namespace Pulsar4X.ECSLib
 
             if (i + 1 >= numIterations)
             {
-                throw new OrbitProcessorException("Non-convergence of Newton's method while calculating Eccentric Anomaly.", orbit.OwningEntity);
+                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.");
+                gameEvent.Entity = orbit.OwningEntity;
+                gameEvent.EventType = EventType.Opps;
+
+                StaticRefLib.EventLog.AddEvent(gameEvent);
+                //throw new OrbitProcessorException("Non-convergence of Newton's method while calculating Eccentric Anomaly.", orbit.OwningEntity);
             }
 
             return e[i - 1];

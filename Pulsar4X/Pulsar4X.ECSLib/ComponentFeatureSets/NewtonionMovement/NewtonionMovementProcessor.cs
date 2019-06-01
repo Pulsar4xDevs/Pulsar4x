@@ -111,9 +111,10 @@ namespace Pulsar4X.ECSLib
                     double newParentMass = newParent.GetDataBlob<MassVolumeDB>().Mass;
                     double sgp = GameConstants.Science.GravitationalConstant * (newParentMass + Mass_Kg) / 3.347928976e33;
                     Vector4 posRalitiveToNewParent = positionDB.AbsolutePosition_AU - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-                     
-                    var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector);
-                    var dateTime = entity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
+
+                    var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
+                    var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector, dateTime);
+
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
                     {
                         /*

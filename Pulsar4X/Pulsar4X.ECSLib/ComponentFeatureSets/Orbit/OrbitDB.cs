@@ -129,7 +129,7 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("Entity not in target SOI");
 
             var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, ralitivePos, velocityAU);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, ralitivePos, velocityAU, atDateTime);
 
             var epoch = atDateTime;// - TimeSpan.FromSeconds(ke.Epoch); //ke.Epoch is seconds from periapsis.   
 
@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib
             if (position.Length() > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
             //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, atDateTime);
             OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
                         ke.SemiMajorAxis,
                         ke.Eccentricity,
@@ -188,7 +188,7 @@ namespace Pulsar4X.ECSLib
             if (Distance.KmToAU(position.Length()) > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
             //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, atDateTime);
             OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
                         Distance.KmToAU(ke.SemiMajorAxis),
                         ke.Eccentricity,
@@ -211,7 +211,7 @@ namespace Pulsar4X.ECSLib
                        Angle.ToDegrees(ke.LoAN),
                        Angle.ToDegrees(ke.AoP),
                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
-                       atDateTime);// - TimeSpan.FromSeconds(ke.Epoch));
+                       ke.Epoch);// - TimeSpan.FromSeconds(ke.Epoch));
             //var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
             return orbit;
         }

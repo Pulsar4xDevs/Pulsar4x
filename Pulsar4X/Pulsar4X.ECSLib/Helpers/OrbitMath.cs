@@ -16,14 +16,20 @@ namespace Pulsar4X.ECSLib
         public double LoAN;                 //Ω (upper case Omega)
         public double AoP;                  //ω (lower case omega)
         public double Inclination;          //i
-        public double MeanMotion; 
+        public double MeanMotion;           //n
         public double MeanAnomalyAtEpoch;   //M0
         public double TrueAnomalyAtEpoch;   //ν or f or  θ
         //public double Period              //P
         //public double EccentricAnomaly    //E
-        public double Epoch;                //time since periapsis. 
+        public DateTime Epoch;                //
     }
 
+    /// <summary>
+    /// Orbit math.
+    /// note multiple simular functions for doing the same thing, some of these are untested.
+    /// Take care when using unless the function has a decent test in the tests project. 
+    /// Some simular functions with simular inputs left in for future performance testing (ie one of the two might be slightly more performant).
+    /// </summary>
     public class OrbitMath
     {
 
@@ -34,7 +40,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="standardGravParam">Standard grav parameter.</param>
         /// <param name="position">Position ralitive to parent</param>
         /// <param name="velocity">Velocity ralitive to parent</param>
-        public static KeplerElements KeplerFromPositionAndVelocity(double standardGravParam, Vector4 position, Vector4 velocity)
+        public static KeplerElements KeplerFromPositionAndVelocity(double standardGravParam, Vector4 position, Vector4 velocity, DateTime epoch)
         {
             KeplerElements ke = new KeplerElements();
             Vector4 angularVelocity = Vector4.Cross(position, velocity);
@@ -96,32 +102,12 @@ namespace Pulsar4X.ECSLib
                 loANlen = GMath.Clamp(loANlen, -1, 1);
             if(loANlen != 0)
                 longdOfAN = Math.Acos(loANlen); //RAAN or LoAN or Ω
+                
 
+            double eccentricAnomoly = GetEccentricAnomaly(standardGravParam, semiMajorAxis, position, velocity);
 
-
-            // https://en.wikipedia.org/wiki/Argument_of_periapsis#Calculation
-            //double argOfPeriaps1 = ArgumentOfPeriapsis(longdOfAN, eccentVector, position, velocity, nodeVector);
-            //double argOfPeriaps = ArgumentOfPeriapsis(nodeVector, eccentVector, position, velocity);
-
-
-
-            var eccentricAnomoly2 = GetEccentricAnomaly3(semiMajorAxis, eccentVector, position);
-            var eccentricAnomoly = GetEccentricAnomaly4(standardGravParam, semiMajorAxis, position, velocity);
-
-            var trueAnomaly = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
+            double trueAnomaly = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
             double argOfPeriaps = ArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
-
-
-            //var trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
-
-            //var eccentricAnomoly = GetEccentricAnomalyFromStateVectors(position, semiMajorAxis, linierEccentricity, argOfPeriaps);
-            //var trueAnomaly = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
-
-
-            //var trueAnomaly1 = TrueAnomaly(position, longdOfAN + argOfPeriaps);
-
-            //var tadeg1 = Angle.ToDegrees(trueAnomaly1);
-            //var tadeg = Angle.ToDegrees(trueAnomaly);
 
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
 
@@ -135,16 +121,18 @@ namespace Pulsar4X.ECSLib
             ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
             ke.LinierEccentricity = EllipseMath.LinierEccentricity(ke.Apoapsis, semiMajorAxis);
             ke.LoAN = longdOfAN;
-            ke.AoP = Angle.NormaliseRadians( argOfPeriaps);
+            ke.AoP = argOfPeriaps;
             ke.Inclination = inclination;
             ke.MeanMotion = meanMotion;
             ke.MeanAnomalyAtEpoch = meanAnomaly;
             ke.TrueAnomalyAtEpoch = trueAnomaly;
-            ke.Epoch = 0; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
+            ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
             return ke;
         }
+
+        #region ArgumentOfPeriapsis
 
         public static double ArgumentOfPeriapsis(double loAN, Vector4 eccentVector, Vector4 position, Vector4 velocity, Vector4 nodeVector)
         {
@@ -210,40 +198,9 @@ namespace Pulsar4X.ECSLib
             return W;
         }
 
-        /// <summary>
-        /// Returns the TimeFromPeriapsis
-        /// </summary>
-        /// <returns>time from periapsis.</returns>
-        /// <param name="semiMaj">Semi maj.</param>
-        /// <param name="standardGravParam">Standard grav parameter.</param>
-        /// <param name="currentMeanAnomaly">Mean anomaly current.</param>
-        public static double TimeFromPeriapsis(double semiMaj, double standardGravParam, double currentMeanAnomaly)
-        {
-            return Math.Pow((Math.Pow(semiMaj, 3) / standardGravParam), 0.5) * currentMeanAnomaly;
-        }
+        #endregion
 
-        /// <summary>
-        /// Alternate way to get TimeFromPeriapsis
-        /// Doesn't work with Hypobolic orbits due to period being undefined. 
-        /// </summary>
-        /// <returns>The epoch.</returns>
-        /// <param name="semiMaj">Semi maj.</param>
-        /// <param name="semiMin">Semi minimum.</param>
-        /// <param name="eccentricAnomaly">Eccentric anomaly.</param>
-        /// <param name="Period">Period.</param>
-        public static double TimeFromPeriapsis(double semiMaj, double semiMin, double eccentricAnomaly, double Period)
-        {
-
-            double areaOfEllipse = semiMaj * semiMin * Math.PI;
-            double eccentricAnomalyArea = EllipseMath.AreaOfEllipseSector(semiMaj, semiMaj, 0, eccentricAnomaly); //we get the area as if it's a circile. 
-            double trueArea = semiMin / semiMaj * eccentricAnomalyArea; //we then multiply the result by a fraction of b / a
-            //double areaOfSegment = EllipseMath.AreaOfEllipseSector(semiMaj, semiMin, 0, lop + trueAnomaly);
-
-            double t = Period * (trueArea / areaOfEllipse);
-
-            return t;
-
-        }
+        #region EccentricityVector
 
         /// <summary>
         /// https://en.wikipedia.org/wiki/Eccentricity_vector
@@ -270,11 +227,11 @@ namespace Pulsar4X.ECSLib
             return foo3;
         }
 
-        public static double OrbitalPeriod(double sgp, double semiMajAxis)
-        {
-            return 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajAxis, 3) / sgp);
-        }
+        #endregion
 
+        #region TrueAnomaly
+
+        /*
         /// <summary>
         /// The True Anomaly in radians
         /// </summary>
@@ -285,7 +242,7 @@ namespace Pulsar4X.ECSLib
         {
             return Math.Atan2(position.Y, position.X) - loP; 
         }
-
+        */
         /// <summary>
         /// The True Anomaly in radians
         /// https://en.wikipedia.org/wiki/True_anomaly#From_state_vectors
@@ -391,6 +348,9 @@ namespace Pulsar4X.ECSLib
         }
         */
 
+        #endregion
+
+        #region VelocityAndSpeed;
 
         /// <summary>
         /// Velocity vector in polar coordinates.
@@ -488,72 +448,9 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        /// <summary>
-        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
-        /// </summary>
-        /// <returns>The radius from the focal point for a given angle</returns>
-        /// <param name="angle">Angle.</param>
-        /// <param name="semiLatusRectum">Semi latus rectum.</param>
-        /// <param name="eccentricity">Eccentricity.</param>
-        public static double RadiusAtAngle(double angle, double semiLatusRectum, double eccentricity)
-        {
-            return semiLatusRectum / (1 + eccentricity * Math.Cos(angle)); 
-        }
+        #endregion
 
-        /// <summary>
-        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
-        /// </summary>
-        /// <returns>The angle from the focal point for a given radius</returns>
-        /// <param name="radius">Radius.</param>
-        /// <param name="semiLatusRectum">Semi latus rectum.</param>
-        /// <param name="eccentricity">Eccentricity.</param>
-        public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
-        {
-            //r = p / (1 + e * cos(θ))
-            //1 + e * cos(θ) = p/r
-            //((p / r) -1) / e = cos(θ)
-            return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
-        }
-
-
-        public static Vector4 PositionFromRadius(double radius, double semiLatusRectum, double eccentricity)
-        {
-            double θ = AngleAtRadus(radius, semiLatusRectum, eccentricity);
-            var x = radius * Math.Cos(θ);
-            var y = radius * Math.Sin(θ);
-            return new Vector4() { X = x, Y = y };
-        }
-
-
-        /// <summary>
-        /// Tsiolkovsky's rocket equation.
-        /// </summary>
-        /// <returns>deltaV</returns>
-        /// <param name="wetMass">Wet mass.</param>
-        /// <param name="dryMass">Dry mass.</param>
-        /// <param name="specificImpulse">Specific impulse.</param>
-        public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double specificImpulse)
-        {
-            double ve = specificImpulse * 9.8;
-            double deltaV = ve * Math.Log(wetMass / dryMass);
-            return deltaV;
-        }
-
-        /// <summary>
-        /// Incorrect DONOTUSE
-        /// </summary>
-        /// <returns>The to radius from periapsis.</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="radiusAU">Radius au.</param>
-        public static double TimeToRadiusFromPeriapsis(OrbitDB orbit, double radiusAU)
-        {
-            var a = orbit.SemiMajorAxis;
-            var e = orbit.Eccentricity;
-            var p = EllipseMath.SemiLatusRectum(a, e);
-            var angle = AngleAtRadus(radiusAU, p, e);
-            //var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
-            return TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch);
-        }
+        #region EccentricAnomaly
 
         public static double GetEccentricAnomalyFromStateVectors(Vector4 position, double a, double linierEccentricity, double aop)
         {
@@ -610,30 +507,24 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
-        public static double GetEccentricAnomaly2(double ν, double eccentricity)
+        public static double GetEccentricAnomalyFromTrueAnomaly(double ν, double eccentricity)
         {
             return Math.Acos((Math.Cos(ν) + eccentricity) / (1 + eccentricity * Math.Cos(ν)));
         }
 
-        public static double GetEccentricAnomaly3(double semiMajorAxis, Vector4 eccentVector, Vector4 position)
+        public static double GetEccentricAnomaly(double sgp, double semiMajorAxis, Vector4 position, Vector4 velocity)
         {
-            var eccAng = Vector4.Dot(eccentVector, position);
-            eccAng = semiMajorAxis / eccAng;
-            eccAng = GMath.Clamp(eccAng, -1, 1);
-            var eccentricAnomoly = Math.Acos(eccAng);
-            return eccentricAnomoly;
-        }
-
-        public static double GetEccentricAnomaly4(double sgp, double semiMajorAxis, Vector4 position, Vector4 velocity)
-        {
-            var R = position.Length();
+            var radius = position.Length();
             var q = Vector4.Dot(position, velocity);
-            var Ex = 1 - R / semiMajorAxis;
+            var Ex = 1 - radius / semiMajorAxis;
             var Ey = q / Math.Sqrt(semiMajorAxis * sgp);
             var u = Math.Atan2(Ey, Ex); // eccentric anomoly 
             return u;
         }
 
+        #endregion
+
+        #region MeanAnomaly
         /// <summary>
         /// Calculates CurrentMeanAnomaly
         /// </summary>
@@ -653,21 +544,34 @@ namespace Pulsar4X.ECSLib
             return currentMeanAnomaly;
         }
 
+        /// <summary>
+        /// Untested
+        /// </summary>
+        /// <returns>The hypobolic mean anomaly.</returns>
+        /// <param name="hypobolicEccentricAnomaly">Hypobolic eccentric anomaly.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
         public static double GetHypobolicMeanAnomaly(double hypobolicEccentricAnomaly, double eccentricity)
         {
             return eccentricity * Math.Sinh(hypobolicEccentricAnomaly) - hypobolicEccentricAnomaly; 
         }
 
+        #endregion
+
+        #region Positions:
+
         /// <summary>
-        /// Gets the soi radius of a given body
+        /// Gets the position of an intersect between an orbit and a circle(radius)
         /// </summary>
-        /// <returns>The SOI radius in whatever units you feed the semiMajorAxis.</returns>
-        /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the earth around the sun</param>
-        /// <param name="mass">Mass of the smaller body ie the earth</param>
-        /// <param name="parentMass">Parent mass. ie the sun</param>
-        public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
+        /// <returns>The from radius.</returns>
+        /// <param name="radius">Radius.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static Vector4 PositionFromRadius(double radius, double semiLatusRectum, double eccentricity)
         {
-            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
+            double θ = AngleAtRadus(radius, semiLatusRectum, eccentricity);
+            var x = radius * Math.Cos(θ);
+            var y = radius * Math.Sin(θ);
+            return new Vector4() { X = x, Y = y };
         }
 
 
@@ -683,6 +587,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Another way of getting position, untested, currently unused, copied from somehwere on the net. 
+        /// Untested
         /// </summary>
         /// <returns>The position.</returns>
         /// <param name="combinedMass">Combined mass.</param>
@@ -741,5 +646,143 @@ namespace Pulsar4X.ECSLib
                 Z = xw * pZ + yw * qz
             };
         }
+
+
+        #endregion
+
+        #region Time
+
+        public static double GetOrbitalPeriodInSeconds(double sgp, double semiMajAxis)
+        {
+            return 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajAxis, 3) / sgp);
+        }
+        public static TimeSpan GetOrbitalPeriodAsTimeSpan(double sgp, double SemiMajorAxis)
+        {
+            // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
+            TimeSpan period;
+            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis, 3) / sgp);
+            if (orbitalPeriod * 10000000 > long.MaxValue)
+            {
+                period = TimeSpan.MaxValue;
+            }
+            else
+            {
+                period = TimeSpan.FromSeconds(orbitalPeriod);
+            }
+            return period;
+        }
+
+        /// <summary>
+        /// Returns the TimeFromPeriapsis
+        /// </summary>
+        /// <returns>time from periapsis.</returns>
+        /// <param name="semiMaj">Semi maj.</param>
+        /// <param name="standardGravParam">Standard grav parameter.</param>
+        /// <param name="currentMeanAnomaly">Mean anomaly current.</param>
+        public static double TimeFromPeriapsis(double semiMaj, double standardGravParam, double currentMeanAnomaly)
+        {
+            return Math.Pow((Math.Pow(semiMaj, 3) / standardGravParam), 0.5) * currentMeanAnomaly;
+        }
+
+        /// <summary>
+        /// Alternate way to get TimeFromPeriapsis
+        /// Doesn't work with Hypobolic orbits due to period being undefined. 
+        /// </summary>
+        /// <returns>The epoch.</returns>
+        /// <param name="semiMaj">Semi maj.</param>
+        /// <param name="semiMin">Semi minimum.</param>
+        /// <param name="eccentricAnomaly">Eccentric anomaly.</param>
+        /// <param name="Period">Period.</param>
+        public static double TimeFromPeriapsis(double semiMaj, double semiMin, double eccentricAnomaly, double Period)
+        {
+
+            double areaOfEllipse = semiMaj * semiMin * Math.PI;
+            double eccentricAnomalyArea = EllipseMath.AreaOfEllipseSector(semiMaj, semiMaj, 0, eccentricAnomaly); //we get the area as if it's a circile. 
+            double trueArea = semiMin / semiMaj * eccentricAnomalyArea; //we then multiply the result by a fraction of b / a
+            //double areaOfSegment = EllipseMath.AreaOfEllipseSector(semiMaj, semiMin, 0, lop + trueAnomaly);
+
+            double t = Period * (trueArea / areaOfEllipse);
+
+            return t;
+
+        }
+
+
+        /// <summary>
+        /// Incorrect/Incomplete Unfinished DONOTUSE
+        /// </summary>
+        /// <returns>The to radius from periapsis.</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="radiusAU">Radius au.</param>
+        public static double TimeToRadiusFromPeriapsis(OrbitDB orbit, double radiusAU)
+        {
+            throw new NotImplementedException();
+            var a = orbit.SemiMajorAxis;
+            var e = orbit.Eccentricity;
+            var p = EllipseMath.SemiLatusRectum(a, e);
+            var angle = AngleAtRadus(radiusAU, p, e);
+            //var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
+            return TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch);
+        }
+
+        #endregion
+
+
+        /// <summary>
+        /// Gets the soi radius of a given body
+        /// </summary>
+        /// <returns>The SOI radius in whatever units you feed the semiMajorAxis.</returns>
+        /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the earth around the sun</param>
+        /// <param name="mass">Mass of the smaller body ie the earth</param>
+        /// <param name="parentMass">Parent mass. ie the sun</param>
+        public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
+        {
+            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
+        }
+
+        /// <summary>
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
+        /// </summary>
+        /// <returns>The radius from the focal point for a given angle</returns>
+        /// <param name="angle">Angle.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static double RadiusAtAngle(double angle, double semiLatusRectum, double eccentricity)
+        {
+            return semiLatusRectum / (1 + eccentricity * Math.Cos(angle));
+        }
+
+        /// <summary>
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
+        /// </summary>
+        /// <returns>The angle from the focal point for a given radius</returns>
+        /// <param name="radius">Radius.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
+        {
+            //r = p / (1 + e * cos(θ))
+            //1 + e * cos(θ) = p/r
+            //((p / r) -1) / e = cos(θ)
+            return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
+        }
+
+
+        /// <summary>
+        /// Tsiolkovsky's rocket equation.
+        /// </summary>
+        /// <returns>deltaV</returns>
+        /// <param name="wetMass">Wet mass.</param>
+        /// <param name="dryMass">Dry mass.</param>
+        /// <param name="specificImpulse">Specific impulse.</param>
+        public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double specificImpulse)
+        {
+            double ve = specificImpulse * 9.8;
+            double deltaV = ve * Math.Log(wetMass / dryMass);
+            return deltaV;
+        }
+
+
+
     }
 }

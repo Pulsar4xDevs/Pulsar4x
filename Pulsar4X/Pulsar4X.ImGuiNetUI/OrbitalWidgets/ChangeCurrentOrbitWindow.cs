@@ -174,7 +174,7 @@ namespace Pulsar4X.SDL2UI
             _newAngle = Math.Atan2(_newOrbitalVelocity.X, _newOrbitalVelocity.Y);
 
 
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParam, _positonAtChange_AU, _newOrbitalVelocity);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParam, _positonAtChange_AU, _newOrbitalVelocity, _actionDateTime);
             _ke = ke;
 
             _orbitWidget.SetParametersFromKeplerElements(ke, _positonAtChange_AU);

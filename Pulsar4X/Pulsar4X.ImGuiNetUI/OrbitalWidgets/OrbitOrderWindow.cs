@@ -327,7 +327,7 @@ namespace Pulsar4X.SDL2UI
                                     //var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
 
 
-                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity);
+                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity, _departureDateTime);
                                     _ke = ke;
 
                                     _orbitWidget.SetParametersFromKeplerElements(ke, _targetInsertionPoint_AU);
@@ -366,7 +366,7 @@ namespace Pulsar4X.SDL2UI
                                     {
                                         InsertionCalcs();
                                     }
-                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity);
+                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity, _departureDateTime);
                                     _ke = ke;
                                     _orbitWidget.SetParametersFromKeplerElements(ke, _targetInsertionPoint_AU);
                                     _apoapsisKm = Distance.AuToKm(ke.Apoapsis);
