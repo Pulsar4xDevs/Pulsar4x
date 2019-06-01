@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -103,14 +104,16 @@ namespace Pulsar4X.Tests
             TrueAnomalyCalcs(pos, vel);
             pos = new Vector4() { X = 0.25, Y = -0.25 };
             vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(-25) };
-            TrueAnomalyCalcs(pos, vel); //this one fails currently, however the calcs used in this test are not used in code
+            TrueAnomalyCalcs(pos, vel); 
             pos = new Vector4() { X = -0.25, Y = 0.25 };
             vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(-25) };
             TrueAnomalyCalcs(pos, vel);
             pos = new Vector4() { X = -0.25, Y = -0.25 };
             vel = new Vector4() { X = Distance.KmToAU(-25), Y = Distance.KmToAU(-25) };
-            TrueAnomalyCalcs(pos, vel); //this one failes currently, however the calcs used in this test are not used in code
-
+            TrueAnomalyCalcs(pos, vel);
+            pos = new Vector4() { X = -0.208994076275941, Y = 0.955838328099748 };
+            vel = new Vector4() { X = -2.1678187689294E-07, Y = -7.93096769486992E-08 };
+            TrueAnomalyCalcs(pos, vel);
         }
 
         private void TrueAnomalyCalcs(Vector4 pos, Vector4 vel)
@@ -126,6 +129,7 @@ namespace Pulsar4X.Tests
             double a = -sgp / (2 * specificOrbitalEnergy);
             double ae = e * a;
             double aop = Math.Atan2(ev.Y, ev.X);
+
             double eccentricAnomaly = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, a, ae, aop);
             double aopD = Angle.ToDegrees(aop);
             double directAngle = Math.Atan2(pos.Y, pos.X);
@@ -152,6 +156,75 @@ namespace Pulsar4X.Tests
 
         }
 
+        [Test]
+        public void OrbitsFromVectorTests2()
+        {
+            Game game = new Game();
+            StarSystem sol = new StarSystem(game, "Sol", -1);
+            var sun = TestingUtilities.BasicSol(sol);
+            MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
+
+            DateTime timeNow = new DateTime(1994, 2, 17);
+
+            SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f }; //Albedo = 0.04f 
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            NameDB halleysNameDB = new NameDB("Halleys Comet");
+            double halleysSemiMajAxis = 17.834; //AU
+            double halleysEccentricity = 0.96714;
+            double halleysInclination = 0; //180; //162.26° note retrograde orbit.
+            double halleysLoAN = 0; //58.42; //°
+            double halleysAoP = 111.33;//°
+            double halleysMeanAnomaly = 38.38;//°
+            OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(sun, sunMVDB.Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
+            PositionDB halleysPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(halleysOrbitDB, timeNow), sol.Guid, sun);
+            Entity halleysComet = new Entity(sol, new List<BaseDataBlob> {halleysPositionDB, halleysBodyDB, halleysMVDB, halleysNameDB, halleysOrbitDB });
+
+            var velocity = OrbitProcessor.PreciseOrbitalVelocityVector(halleysOrbitDB, timeNow);
+            var position = OrbitProcessor.GetPosition_AU(halleysOrbitDB, timeNow);
+
+            double sgp = GameConstants.Science.GravitationalConstant * (sunMVDB.Mass + halleysMVDB.Mass) / 3.347928976e33;
+            Vector4 angularVelocity = Vector4.Cross(position, velocity);
+            Vector4 nodeVector = Vector4.Cross(new Vector4(0, 0, 1, 0), angularVelocity);
+            Vector4 eccentVector = OrbitMath.EccentricityVector(sgp, position, velocity);
+
+            var timeSinceEpoch = timeNow - new System.DateTime(1994, 2, 17);
+
+            var ta = OrbitProcessor.GetTrueAnomaly(halleysOrbitDB, timeNow);
+
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity);
+
+            Assert.AreEqual(halleysSemiMajAxis, ke.SemiMajorAxis, 0.001); //should be more accurate than this, and normaly is.
+            Assert.AreEqual(halleysEccentricity, ke.Eccentricity, 0.00001);
+
+
+
+            Assert.AreEqual(halleysInclination, ke.Inclination);
+            Assert.AreEqual(halleysLoAN, ke.LoAN);
+            Assert.AreEqual(Angle.ToRadians( halleysOrbitDB.MeanMotion), ke.MeanMotion, 1.0E-7);
+
+            double m0 = Angle.ToRadians(halleysOrbitDB.MeanAnomalyAtEpoch);
+            double E1 = OrbitProcessor.GetEccentricAnomaly(halleysOrbitDB, m0);
+            //double E2 = OrbitMath.GetEccentricAnomaly4
+
+           
+            double n = Angle.ToRadians(halleysOrbitDB.MeanMotion);
+            double kemeanAnomaly = OrbitMath.CurrentMeanAnomaly(ke.MeanAnomalyAtEpoch, ke.MeanMotion, 0);
+            double currentMeanAnomaly = OrbitMath.CurrentMeanAnomaly(m0, n, timeSinceEpoch.TotalSeconds);
+
+            Assert.AreEqual(currentMeanAnomaly, ke.MeanAnomalyAtEpoch, 1.0E-10);
+
+            var aop1 = OrbitMath.ArgumentOfPeriapsis(nodeVector, eccentVector, position, velocity);
+            var aop1d = Angle.ToDegrees(aop1);
+            var aop2 = OrbitMath.ArgumentOfPeriapsis2(position, halleysOrbitDB.Inclination, halleysOrbitDB.LongitudeOfAscendingNode, ta);
+            var aop2d = Angle.ToDegrees(aop2);
+            Assert.AreEqual(halleysAoP, aop1d);
+            Assert.AreEqual(halleysAoP, aop2d);
+
+            double keta = OrbitMath.TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, OrbitMath.GetEccentricAnomaly(ke.Eccentricity, currentMeanAnomaly));
+            Assert.AreEqual(ta, keta, 1.0E-10);
+
+
+        }
 
         [Test]
         public void TestAngles() 
@@ -279,9 +352,44 @@ namespace Pulsar4X.Tests
             velocity = new Vector4() { Y = Distance.KmToAU(54) };
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
+            parentMass = 1.989e30;
+            objMass = 10000;
+            position = new Vector4() { X = 0.25, Y = 0.25 };
+            velocity = new Vector4() { X = Distance.KmToAU(0), Y = Distance.KmToAU(1) };
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+
+            /*
+            //this is something that is breaking ingame
+            parentMass = 1.989e30;
+            objMass = 10000;
+            position = new Vector4() { X = -0.208994076275941, Y = 0.955838328099748 };
+            velocity = new Vector4() { X = -2.1678187689294E-07, Y = -7.93096769486992E-08};
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+            */
+
+
+
         }
 
+        [Test]
+        public void FailingOrbitsFromVectorTests()
+        {
+            double parentMass = 1.989e30;
+            double objMass = 10000;
+            Vector4 position = new Vector4() { X = 0.25, Y = 0.25 };
+            Vector4 velocity = new Vector4() { X = Distance.KmToAU(0), Y = Distance.KmToAU(1) }; //passes
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
+            velocity = new Vector4() { X = Distance.KmToAU(0), Y = -Distance.KmToAU(1) }; //fails
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+
+            velocity = new Vector4() { X = Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+
+            velocity = new Vector4() { X = -Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
+            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
+
+        }
 
         public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector4 position, Vector4 velocity)
         {
@@ -337,6 +445,7 @@ namespace Pulsar4X.Tests
 
             //check trueAnomaly 
             var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
+            var orbtaDeg = Angle.ToDegrees(orbTrueAnom);
             var differenceInRadians = orbTrueAnom - ke.TrueAnomalyAtEpoch;
             var differenceInDegrees = Angle.ToDegrees(differenceInRadians);
             if (ke.TrueAnomalyAtEpoch != orbTrueAnom) 
@@ -349,13 +458,16 @@ namespace Pulsar4X.Tests
                 var diffa = differenceInDegrees;
                 var diffb = Angle.ToDegrees(orbTrueAnom - tacalc1);
                 var diffc = Angle.ToDegrees(orbTrueAnom - tacalc2);
-                var orbtaDeg = Angle.ToDegrees(orbTrueAnom);
+
                 var ketaDeg = Angle.ToDegrees(tacalc1);
             }
-            Assert.AreEqual(ke.TrueAnomalyAtEpoch, orbTrueAnom, angleΔ, 
-                "more than "+ angleΔ + " radians difference, at " + differenceInRadians + " \n " +
-                "(more than "+ Angle.ToDegrees(angleΔ) + " degrees difference at "   +differenceInDegrees+")");
 
+            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke.TrueAnomalyAtEpoch, orbTrueAnom), angleΔ,
+                "more than " + angleΔ + " radians difference, at " + differenceInRadians + " \n " +
+                "(more than " + Angle.ToDegrees(angleΔ) + " degrees difference at " + differenceInDegrees + ")" + " \n " +
+                "ke Angle: " + ke.TrueAnomalyAtEpoch + " obj Angle: " + orbTrueAnom + " \n " +
+                "ke Angle: " + Angle.ToDegrees(ke.TrueAnomalyAtEpoch) + " obj Angle: " + Angle.ToDegrees(orbTrueAnom));
+                
             Assert.AreEqual(ke.Eccentricity, objOrbit.Eccentricity);
             Assert.AreEqual(ke.SemiMajorAxis, objOrbit.SemiMajorAxis);
 
@@ -380,12 +492,16 @@ namespace Pulsar4X.Tests
             Vector4 posKM = Distance.AuToKm(position);
             Vector4 resultKM = Distance.AuToKm(resultPos);
 
+            double keslr = EllipseMath.SemiLatusRectum(ke.SemiMajorAxis, ke.Eccentricity);
+            double keradius = OrbitMath.RadiusAtAngle(ke.TrueAnomalyAtEpoch, keslr, ke.Eccentricity);
+            Vector4 kemathPos = OrbitMath.GetRalitivePosition(ke.LoAN, ke.AoP, ke.Inclination, ke.TrueAnomalyAtEpoch, keradius);
+            Vector4 kemathPosKM = Distance.AuToKm(kemathPos);
+            Assert.AreEqual(kemathPosKM.Length(), posKM.Length(), 0.01);
 
-
-            Assert.AreEqual(posKM.Length(), resultKM.Length(), 0.01);
-            Assert.AreEqual(posKM.X, resultKM.X, 0.01);
-            Assert.AreEqual(posKM.Y, resultKM.Y, 0.01);
-            Assert.AreEqual(posKM.Z, resultKM.Z, 0.01);
+            Assert.AreEqual(posKM.Length(), resultKM.Length(), 0.01, "TA: " + orbtaDeg);
+            Assert.AreEqual(posKM.X, resultKM.X, 0.01, "TA: " + orbtaDeg);
+            Assert.AreEqual(posKM.Y, resultKM.Y, 0.01, "TA: " + orbtaDeg);
+            Assert.AreEqual(posKM.Z, resultKM.Z, 0.01, "TA: " + orbtaDeg);
 
             if (velocity.Z == 0)
             {
@@ -495,8 +611,10 @@ namespace Pulsar4X.Tests
             }
             NewtonionMovementProcessor.NewtonMove(objEntity2, seconds);
             var distance1 = Distance.AuToKm(pos1.AbsolutePosition_AU.Length());
-            var distance2 = Distance.AuToKm( pos2.AbsolutePosition_AU.Length());
+            var distance2 = Distance.AuToKm(pos2.AbsolutePosition_AU.Length());
 
+            //this test is currently failing and I'm unsure why. right now the code is using a 1s timestep so it should come out exact...
+            //it looks ok graphicaly though so I'm not *too* conserned about this one right now. 
             Assert.AreEqual(distance1, distance2); //if we put the variable timstep which is related to the speed of the object in we'll have to give this a delta
 
 

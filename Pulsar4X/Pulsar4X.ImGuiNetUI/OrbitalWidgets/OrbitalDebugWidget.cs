@@ -129,6 +129,8 @@ namespace Pulsar4X.SDL2UI
                 foreach (var item in _debugWidget.Angles)
                 {
                     ImGui.Text(_debugWidget.AngleNames[i]);
+                    ImGui.SameLine();
+                    ImGui.Text(_debugWidget.AngleAngle[i].ToString("###.###"));
                     if (ImGui.IsItemHovered())
                     {
                         item.Color = new SDL.SDL_Color()
@@ -165,6 +167,8 @@ namespace Pulsar4X.SDL2UI
         double _semiMajAxis;
         double _semiMinAxis;
 
+        double _loan;
+        double _aop;
         double _loP;
         double _trueAnom;
 
@@ -181,7 +185,7 @@ namespace Pulsar4X.SDL2UI
         internal List<MutableShape> Angles = new List<MutableShape>();
         internal List<SDL.SDL_Color> AngleColours = new List<SDL.SDL_Color>();
         internal List<string> AngleNames = new List<string>();
-
+        internal List<double> AngleAngle = new List<double>();
         internal List<MutableShape> AllShapes;
 
         public OrbitalDebugWidget(EntityState entityState) : base(entityState.OrbitIcon.BodyPositionDB)
@@ -213,7 +217,8 @@ namespace Pulsar4X.SDL2UI
 
             EntityGuid = entityState.Entity.Guid;
 
-
+            _loan = Angle.ToRadians( _orbitDB.LongitudeOfAscendingNode);
+            _aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
             _loP = orbitIcon._loP_radians;
 
             var cP = new PointD() { X = orbitIcon.WorldPosition.X, Y = orbitIcon.WorldPosition.Y };
@@ -339,10 +344,38 @@ namespace Pulsar4X.SDL2UI
             });
 
 
+            //loan angle
+            var loanColour = new SDL.SDL_Color() { r = 0, g = 100, b = 0, a = 100 };
+            var listloan = new List<PointD>();
+            listloan.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 63, -6, 0, _loan, 128));
+            Angles.Add(new MutableShape()
+            {
+                Points = listloan,
+                Color = loanColour,
+                Scales = false
+            });
+            AngleColours.Add(loanColour);
+            AngleNames.Add("Longditude Of Assending Node");
+            AngleAngle.Add(Angle.ToDegrees(_loan));
+
+            //aop angle
+            var aopColour = new SDL.SDL_Color() { r = 100, g = 100, b = 0, a = 100 };
+            var listaop = new List<PointD>();
+            listaop.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 63, -6, _loan, _aop, 128));
+            Angles.Add(new MutableShape()
+            {
+                Points = listaop,
+                Color = aopColour,
+                Scales = false
+            });
+            AngleColours.Add(loanColour);
+            AngleNames.Add("Argument Of Periapsis");
+            AngleAngle.Add(Angle.ToDegrees(_aop));
+
             //lop angle
-            var lopColour = new SDL.SDL_Color() { r = 100, g = 100, b = 0, a = 100 };
+            var lopColour = new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 100 };
             var listlop = new List<PointD>();
-            listlop.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 64, -6, 0, _loP, 128));
+            listlop.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 65, 6, 0, _loP, 128));
             Angles.Add(new MutableShape()
             {
                 Points = listlop,
@@ -351,7 +384,7 @@ namespace Pulsar4X.SDL2UI
             });
             AngleColours.Add(lopColour);
             AngleNames.Add("Longditude Of Periapsis");
-
+            AngleAngle.Add(Angle.ToDegrees(_loP));
 
             //trueAnom angle
             var trueAnomColour = new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 100 };
@@ -365,6 +398,7 @@ namespace Pulsar4X.SDL2UI
             });
             AngleColours.Add(trueAnomColour);
             AngleNames.Add("True Anomoly");
+            AngleAngle.Add(Angle.ToDegrees(_trueAnom));
 
             AllShapes = new List<MutableShape>();
             AllShapes.AddRange(SemiMajorAxisLines);
@@ -378,7 +412,8 @@ namespace Pulsar4X.SDL2UI
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
             var listtrueAnom = new List<PointD>();
             listtrueAnom.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 64, 4, _loP, _trueAnom, 128));
-            Angles[1].Points = listtrueAnom;
+            Angles[3].Points = listtrueAnom; //if we add more angles to teh list this will need to be changed. this is not great code...
+            AngleAngle[3] = Angle.ToDegrees(_trueAnom);
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -415,8 +450,8 @@ namespace Pulsar4X.SDL2UI
                     }
                     else
                     {
-                        x = (int)(ViewScreenPos.x + pnt.X);
-                        y = (int)(ViewScreenPos.y + pnt.Y);
+                        x = (int)(ViewScreenPos.x + pnt.Y);
+                        y = (int)(ViewScreenPos.y + pnt.X);
                     }
                     points[pntIndex] = new PointD() { X = x, Y = y };
                     pntIndex++;

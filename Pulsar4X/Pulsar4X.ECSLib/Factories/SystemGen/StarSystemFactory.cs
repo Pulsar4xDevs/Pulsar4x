@@ -170,7 +170,7 @@ namespace Pulsar4X.ECSLib
             double halleysAoP = 111.33;//°
             double halleysMeanAnomaly = 38.38;//°
             OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(sun, sunMVDB.Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
-            PositionDB halleysPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(halleysOrbitDB, StaticRefLib.CurrentDateTime) + earthPositionDB.AbsolutePosition_AU, sol.Guid);
+            PositionDB halleysPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(halleysOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun); // + earthPositionDB.AbsolutePosition_AU, sol.Guid);
             sensorProfile = new SensorProfileDB();
             Entity halleysComet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, halleysPositionDB, halleysBodyDB, halleysMVDB, halleysNameDB, halleysOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, halleysComet);

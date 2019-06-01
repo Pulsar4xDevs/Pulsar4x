@@ -152,6 +152,14 @@ namespace Pulsar4X.ECSLib
                 e.EventType = EventType.Opps;
                 //e.Faction =  entity.FactionOwner;
                 StaticRefLib.EventLog.AddEvent(e);
+
+                //other info:
+                var keta = Angle.ToDegrees( ke.TrueAnomalyAtEpoch);
+                var obta = Angle.ToDegrees( OrbitProcessor.GetTrueAnomaly(orbit, atDateTime));
+                var tadif = Angle.ToDegrees(Angle.DifferenceBetweenRadians(keta, obta));
+                var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDateTime);
+                var pos2 = OrbitProcessor.GetPosition_AU(orbit, ke.TrueAnomalyAtEpoch);
+                var d2 = Distance.AuToKm(pos1 - pos2).Length();
             }
             return orbit;
         }
