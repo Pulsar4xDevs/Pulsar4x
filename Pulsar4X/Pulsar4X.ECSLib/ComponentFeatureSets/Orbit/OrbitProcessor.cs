@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
 
             double m0 = Angle.ToRadians(orbit.MeanAnomalyAtEpoch);
             double n = Angle.ToRadians(orbit.MeanMotion);
-            double currentMeanAnomaly = OrbitMath.CurrentMeanAnomaly(m0, n, timeSinceEpoch.TotalSeconds);
+            double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, timeSinceEpoch.TotalSeconds);
 
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
             return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib
         public static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             //Kepler's Equation
-            const int numIterations = 100;
+            const int numIterations = 1000;
             var e = new double[numIterations];
             const double epsilon = 1E-12; // Plenty of accuracy.
             int i = 0;

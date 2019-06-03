@@ -104,7 +104,7 @@ namespace Pulsar4X.ECSLib
                 longdOfAN = Math.Acos(loANlen); //RAAN or LoAN or Ω
                 
 
-            double eccentricAnomoly = GetEccentricAnomaly(standardGravParam, semiMajorAxis, position, velocity);
+            double eccentricAnomoly = GetEccentricAnomalyFromStateVectors2(standardGravParam, semiMajorAxis, position, velocity);
 
             double trueAnomaly = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
             double argOfPeriaps = ArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
@@ -134,14 +134,14 @@ namespace Pulsar4X.ECSLib
 
         #region ArgumentOfPeriapsis
 
-        public static double ArgumentOfPeriapsis(double loAN, Vector4 eccentVector, Vector4 position, Vector4 velocity, Vector4 nodeVector)
+        public static double ArgumentOfPeriapsis(Vector4 nodeVector, Vector4 eccentVector, Vector4 pos, Vector4 vel, double loAN)
         {
             double eccentricity = eccentVector.Length();
             double argOfPeriaps;
             if (loAN == 0)
             {
                 argOfPeriaps = Math.Atan2(eccentVector.Y, eccentVector.X);
-                if (Vector4.Cross(position, velocity).Z < 0) //anti clockwise orbit
+                if (Vector4.Cross(pos, vel).Z < 0) //anti clockwise orbit
                     argOfPeriaps = Math.PI * 2 - argOfPeriaps;
             }
 
@@ -452,13 +452,7 @@ namespace Pulsar4X.ECSLib
 
         #region EccentricAnomaly
 
-        public static double GetEccentricAnomalyFromStateVectors(Vector4 position, double a, double linierEccentricity, double aop)
-        {
-            var x = (position.X * Math.Cos(-aop)) - (position.Y * Math.Sin(-aop));
-            x = linierEccentricity + x;
-            double foo = GMath.Clamp(x / a, -1, 1); //because sometimes we were getting a floating point error that resulted in numbers infinatly smaller than -1
-            return Math.Acos(foo);
-        }
+
 
         /// <summary>
         /// Gets the eccentric anomaly.
@@ -467,11 +461,11 @@ namespace Pulsar4X.ECSLib
         /// <returns>The eccentric anomaly.</returns>
         /// <param name="eccentricity">Eccentricity.</param>
         /// <param name="currentMeanAnomaly">Current mean anomaly.</param>
-        public static double GetEccentricAnomaly(double eccentricity, double currentMeanAnomaly)
+        public static double GetEccentricAnomalyNewtonsMethod(double eccentricity, double currentMeanAnomaly)
         {
             
             //Kepler's Equation
-            const int numIterations = 100;
+            const int numIterations = 1000;
             var e = new double[numIterations];
             const double epsilon = 1E-12; // Plenty of accuracy.
             int i = 0;
@@ -507,12 +501,36 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
+        public static double GetEccentricAnomalyNewtonsMethod2(double eccentricity, double currentMeanAnomaly)
+        {
+            double eca = currentMeanAnomaly + eccentricity / 2;
+            double diff = 10000;
+            double eps = 0.000001;
+            double e1 = 0;
+
+            while (diff > eps)
+            {
+                e1 = eca - (eca - eccentricity * Math.Sin(eca) - currentMeanAnomaly) / (1 - eccentricity * Math.Cos(eca));
+                diff = Math.Abs(e1 - eca);
+                eca = e1;
+            }
+            return eca;
+        }
+
         public static double GetEccentricAnomalyFromTrueAnomaly(double ν, double eccentricity)
         {
             return Math.Acos((Math.Cos(ν) + eccentricity) / (1 + eccentricity * Math.Cos(ν)));
         }
 
-        public static double GetEccentricAnomaly(double sgp, double semiMajorAxis, Vector4 position, Vector4 velocity)
+        public static double GetEccentricAnomalyFromStateVectors(Vector4 position, double semiMajAxis, double linierEccentricity, double aop)
+        {
+            var x = (position.X * Math.Cos(-aop)) - (position.Y * Math.Sin(-aop));
+            x = linierEccentricity + x;
+            double foo = GMath.Clamp(x / semiMajAxis, -1, 1); //because sometimes we were getting a floating point error that resulted in numbers infinatly smaller than -1
+            return Math.Acos(foo);
+        }
+
+        public static double GetEccentricAnomalyFromStateVectors2(double sgp, double semiMajorAxis, Vector4 position, Vector4 velocity)
         {
             var radius = position.Length();
             var q = Vector4.Dot(position, velocity);
@@ -525,6 +543,12 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region MeanAnomaly
+
+        public static double GetMeanAnomaly(double eccentricity, double eccentricAnomaly)
+        {
+            return eccentricAnomaly - eccentricity * Math.Sin(eccentricAnomaly);
+        }
+
         /// <summary>
         /// Calculates CurrentMeanAnomaly
         /// </summary>
@@ -532,7 +556,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="meanAnomalyAtEpoch">InRadians.</param>
         /// <param name="meanMotion">InRadians/s.</param>
         /// <param name="secondsFromEpoch">Seconds from epoch.</param>
-        public static double CurrentMeanAnomaly(double meanAnomalyAtEpoch, double meanMotion, double secondsFromEpoch)
+        public static double GetMeanAnomalyFromTime(double meanAnomalyAtEpoch, double meanMotion, double secondsFromEpoch)
         {
             // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)
             // Convert MeanAnomaly to radians.
