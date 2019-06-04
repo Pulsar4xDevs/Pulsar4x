@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
                         if (job.ProductionPointsLeft == material.RefineryPointCost)
                         {
                             //consume all ingredients for this job on the first point use. 
-                            if (StorageSpaceProcessor.HasReqiredItems(stockpiles, cargoablecosts))
+                            if (StorageSpaceProcessor.HasRequiredItems(stockpiles, cargoablecosts))
                             {
                                 StorageSpaceProcessor.RemoveResources(stockpiles, cargoablecosts);
                             }

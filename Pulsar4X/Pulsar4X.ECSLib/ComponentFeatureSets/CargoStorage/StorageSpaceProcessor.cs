@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="stockpile"></param>
         /// <param name="costs"></param>
         /// <returns></returns>
-        public static bool HasReqiredItems(CargoStorageDB stockpile, Dictionary<ICargoable, int> costs)
+        public static bool HasRequiredItems(CargoStorageDB stockpile, Dictionary<ICargoable, int> costs)
         {            
             if (costs == null)
                 return true;
@@ -25,7 +25,15 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var costitem in costs)
                 {
-                    if (costitem.Value >= stockpile.StoredCargoTypes[costitem.Key.CargoTypeID].ItemsAndAmounts[costitem.Key.ID])
+                    if (costitem.Value > 0)
+                    {
+                        if (stockpile.StoredCargoTypes.ContainsKey(costitem.Key.CargoTypeID) == false)
+                            return false;
+                        if (stockpile.StoredCargoTypes[costitem.Key.CargoTypeID].ItemsAndAmounts.ContainsKey(costitem.Key.ID) == false)
+                            return false;
+                    }
+
+                    if (costitem.Value > stockpile.StoredCargoTypes[costitem.Key.CargoTypeID].ItemsAndAmounts[costitem.Key.ID])
                         return false;
                 }
             }
