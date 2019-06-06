@@ -133,7 +133,7 @@ namespace Pulsar4X.ECSLib
         }
 
         #region ArgumentOfPeriapsis
-
+        /*
         public static double ArgumentOfPeriapsis(Vector4 nodeVector, Vector4 eccentVector, Vector4 pos, Vector4 vel, double loAN)
         {
             double eccentricity = eccentVector.Length();
@@ -176,7 +176,7 @@ namespace Pulsar4X.ECSLib
             }
             return aop;
         }
-
+        */
         public static double ArgumentOfPeriapsis2(Vector4 pos, double incl, double lan, double trueAnomaly)
         {
             double Sw = 0;
@@ -353,9 +353,9 @@ namespace Pulsar4X.ECSLib
         #region VelocityAndSpeed;
 
         /// <summary>
-        /// Velocity vector in polar coordinates.
+        /// 2d Velocity vector in polar coordinates.
         /// </summary>
-        /// <returns>item1 is speed, item2 is angle.</returns>
+        /// <returns>item1 is speed (distance/s), item2 is heading in radians.</returns>
         /// <param name="sgp">Sgp.</param>
         /// <param name="position">Position.</param>
         /// <param name="sma">Sma.</param>
@@ -425,12 +425,30 @@ namespace Pulsar4X.ECSLib
         /// <returns>the distance traveled in a second</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDatetime">At datetime.</param>
-        public double Hackspeed(OrbitDB orbit, DateTime atDatetime)
+        public static double Hackspeed(OrbitDB orbit, DateTime atDatetime)
         {
             var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
             var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
 
             return Distance.DistanceBetween(pos1, pos2);
+        }
+
+        public static double HackVelocityHeading(OrbitDB orbit, DateTime atDatetime)
+        {
+            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
+            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
+
+            Vector4 vector = pos2 - pos1;
+            double heading = Math.Atan2(vector.Y, vector.X);
+            return heading;
+        }
+
+        public static Vector4 HackVelocityVector(OrbitDB orbit, DateTime atDatetime)
+        {
+            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
+            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
+            //double speed = Distance.DistanceBetween(pos1, pos2);
+            return pos2 - pos1;
         }
 
         /// <summary>
