@@ -319,10 +319,10 @@ namespace Pulsar4X.ECSLib
             if (orbit.GravitationalParameter == 0 || sma == 0)
                 return new Tuple<double, double>(0,0); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
-
+            
             double e = orbit.Eccentricity;
-
-            return OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, e, orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
+            double trueAnomaly = OrbitProcessor.GetTrueAnomaly(orbit, atDateTime);
+            return OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly,  orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
         }
 
         /// <summary>
@@ -340,8 +340,8 @@ namespace Pulsar4X.ECSLib
             var sgp = orbit.GravitationalParameterAU;
 
             double e = orbit.Eccentricity;
-
-            return OrbitMath.PreciseOrbitalVelocityVector(sgp, position, sma, e, orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
+            double trueAnomaly = OrbitProcessor.GetTrueAnomaly(orbit, atDateTime);
+            return OrbitMath.PreciseOrbitalVelocityVector(sgp, position, sma, e, trueAnomaly, orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
         }
 
         /// <summary>

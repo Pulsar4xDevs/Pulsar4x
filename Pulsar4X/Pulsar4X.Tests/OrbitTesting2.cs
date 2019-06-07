@@ -95,13 +95,13 @@ namespace Pulsar4X.Tests
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
-                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_lop);
 
                 o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
                 o_E = OrbitProcessor.GetEccentricAnomaly(testOrbitDB, o_M);
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
 
+                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
+                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_lop);
 
                 double linierEccentricity = o_e * o_a;
 
@@ -132,12 +132,12 @@ namespace Pulsar4X.Tests
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
-                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_lop);
-
                 o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
                 o_E = OrbitProcessor.GetEccentricAnomaly(testOrbitDB, o_M);
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
+
+                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
+                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_lop);
 
                 var M1 = OrbitMath.GetMeanAnomaly(o_e, o_E);
 
@@ -155,12 +155,12 @@ namespace Pulsar4X.Tests
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
-                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_lop);
-
                 o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
                 o_E = OrbitProcessor.GetEccentricAnomaly(testOrbitDB, o_M);
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
+
+                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
+                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_lop);
 
                 Vector4 angularVelocity = Vector4.Cross(pos, vel);
                 Vector4 nodeVector = Vector4.Cross(new Vector4(0, 0, 1, 0), angularVelocity);
@@ -192,12 +192,12 @@ namespace Pulsar4X.Tests
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
-                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_lop);
-
                 o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
                 o_E = OrbitProcessor.GetEccentricAnomaly(testOrbitDB, o_M);
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
+
+                var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
+                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_lop);
 
                 double aop = OrbitMath.ArgumentOfPeriapsis2(pos, i, o_Ω, o_ν);
                 double ea = o_e * o_a;
@@ -238,14 +238,19 @@ namespace Pulsar4X.Tests
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
+                o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
+                o_E = OrbitProcessor.GetEccentricAnomaly(testOrbitDB, o_M);
+                o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
+
                 var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_lop);
+                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_lop);
+
                 Vector4 angularVelocity = Vector4.Cross(pos, vel);
                 double r = pos.Length();
                 double speedau = OrbitMath.PreciseOrbitalSpeed(sgp, r, o_a);
-                Tuple<double, double> polarVelocity = OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_lop);
-
-
+                Tuple<double, double> polarVelocity = OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν, o_lop);
+                //Tuple<double, double> polarVelocity2 = OrbitMath.PreciseOrbitalVelocityPolarCoordinate2(sgp, pos, o_a, o_e, o_ν, o_lop);
+                double heading = OrbitMath.heading(pos, o_e, o_a, o_ν);
                 Assert.IsTrue(angularVelocity.Z > 0); //TODO:this will break if we test an anti clockwise orbit.
                 Assert.IsTrue(speedau > 0); //I'm assuming that speed will be <0 if retrograde orbit. 
                 Assert.AreEqual(vel.Length(), speedau, 1.0E-7);
@@ -253,7 +258,7 @@ namespace Pulsar4X.Tests
 
                 double hackHeading = OrbitMath.HackVelocityHeading(testOrbitDB, segmentDatetime);
                 double hackheadD = Angle.ToDegrees(hackHeading);
-                double headingD = Angle.ToDegrees(polarVelocity.Item2);
+                double headingD = Angle.ToDegrees(heading);
 
 
                 if (o_e == 0)//we can make this work with ellipses if we add the lop to the position. 
@@ -261,22 +266,26 @@ namespace Pulsar4X.Tests
                     if (pos.X > 0 && pos.Y > 0)//top right quadrant
                     {
                         //Assert.IsTrue(polarVelocity.Item2 > Math.PI * 0.5 && polarVelocity.Item2 < Math.PI);
-                        Assert.IsTrue(hackHeading > Math.PI * 0.5 && hackHeading < Math.PI);
+                        //Assert.IsTrue(hackHeading > Math.PI * 0.5 && hackHeading < Math.PI);
+                        Assert.IsTrue(heading >= Math.PI * 0.5 && heading <= Math.PI);
                     }
                     if (pos.X < 0 && pos.Y > 0)//top left quadrant
                     {
                         //Assert.IsTrue(polarVelocity.Item2 > Math.PI && polarVelocity.Item2 < Math.PI * 1.5);
-                        Assert.IsTrue(hackHeading > Math.PI && hackHeading < Math.PI * 1.5);
+                        //Assert.IsTrue(hackHeading > Math.PI && hackHeading < Math.PI * 1.5);
+                        Assert.IsTrue(heading >= Math.PI && heading <= Math.PI * 1.5);
                     }
                     if (pos.X < 0 && pos.Y < 0)//bottom left quadrant
                     {
                         //Assert.IsTrue(polarVelocity.Item2 > Math.PI * 1.5 && polarVelocity.Item2 < Math.PI * 2); 
-                        Assert.IsTrue(hackHeading > Math.PI * 1.5 && hackHeading < Math.PI * 2); 
+                        //Assert.IsTrue(hackHeading > Math.PI * 1.5 && hackHeading < Math.PI * 2);
+                        Assert.IsTrue(heading >= Math.PI * 1.5 && heading <= Math.PI * 2);
                     }
                     if (pos.X > 0 && pos.Y < 0)//bottom right quadrant
                     {
                         //Assert.IsTrue(polarVelocity.Item2 > 0 && polarVelocity.Item2 < Math.PI * 0.5);
-                        Assert.IsTrue(hackHeading > 0 && hackHeading < Math.PI * 0.5);
+                        //Assert.IsTrue(hackHeading > 0 && hackHeading < Math.PI * 0.5);
+                        Assert.IsTrue(heading >= 0 && heading <= Math.PI * 0.5);
                     }
                 }
 
@@ -298,8 +307,12 @@ namespace Pulsar4X.Tests
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
 
+                o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
+                o_E = OrbitProcessor.GetEccentricAnomaly(testOrbitDB, o_M);
+                o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
+
                 var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_Ω);
+                var vel = OrbitMath.PreciseOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_Ω);
 
                 var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, segmentDatetime);
 
@@ -315,9 +328,6 @@ namespace Pulsar4X.Tests
                 double ke_E = OrbitMath.GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, ke_M0);
                 double ke_ν = OrbitMath.TrueAnomalyFromEccentricAnomaly(ke_e, ke_E);
 
-                o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
-                o_E = OrbitProcessor.GetEccentricAnomaly(testOrbitDB, o_M);
-                o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
 
                 Assert.Multiple(() =>
                 {

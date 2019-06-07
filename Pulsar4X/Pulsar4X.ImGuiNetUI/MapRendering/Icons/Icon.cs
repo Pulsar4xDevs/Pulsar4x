@@ -28,6 +28,17 @@ namespace Pulsar4X.SDL2UI
         public bool Scales = true;
     }
 
+
+    public class ComplexShape
+    {
+        public PointD StartPoint;
+        public List<PointD> Points;
+        public List<SDL.SDL_Color> Colors;
+        public List<int> ColourChanges;
+        public bool Scales;
+
+    }
+
     /// <summary>
     /// A Collection of Shapes which will make up an icon. 
     /// </summary>

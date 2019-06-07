@@ -351,7 +351,7 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region VelocityAndSpeed;
-
+            /*
         /// <summary>
         /// 2d Velocity vector in polar coordinates.
         /// </summary>
@@ -381,6 +381,47 @@ namespace Pulsar4X.ECSLib
             double angle = Math.PI - (referenceToPosAngle + ((Math.PI - alpha) * 0.5));
 
             return new Tuple<double, double>(spd, angle);
+        }*/
+
+        public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double semiMajorAxis, double eccentricity, double trueAnomaly, double loP)
+        {
+            var radius = position.Length();
+            var spd = PreciseOrbitalSpeed(sgp, radius, semiMajorAxis);
+
+
+            double r = position.Length();
+            double a = semiMajorAxis;
+            double e = eccentricity;
+            double k = r / a;
+            double f = trueAnomaly;
+
+            double bar = ((2 - 2 * e * e) / (k * (2 - k))) - 1;
+            double foo = GMath.Clamp(bar, -1, 1);
+            double alpha = Math.Acos(foo);
+            if (trueAnomaly > Math.PI)
+                alpha = -alpha;
+            double v =  loP + f + ((Math.PI - alpha) / 2);
+            return new Tuple<double, double>(spd, v);
+        }
+
+
+        public static double heading(Vector4 pos, double eccentcity, double semiMajorAxis, double trueAnomaly)
+        {
+
+            double r = pos.Length();
+            double a = semiMajorAxis;
+            double e = eccentcity;
+            double k = r / a;
+            double f = trueAnomaly;
+
+            double bar = ((2 - 2 * e * e) / (k * (2 - k))) - 1 ;
+            double foo = GMath.Clamp(bar, - 1, 1);
+            double alpha = Math.Acos(foo);
+            if (trueAnomaly > Math.PI)
+                alpha = -alpha;
+            double v = f + ((Math.PI - alpha) / 2);
+            return v;
+
         }
 
         /// <summary>
@@ -391,9 +432,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="position">Ralitive Position.</param>
         /// <param name="sma">SemiMajorAxis</param>
         /// <param name="loP">Longditude of Periapsis (LoAN+ AoP) </param>
-        public static Vector4 PreciseOrbitalVelocityVector(double sgp, Vector4 position, double sma, double eccentricity, double loP)
+        public static Vector4 PreciseOrbitalVelocityVector(double sgp, Vector4 position, double sma, double eccentricity, double trueAnomaly, double loP)
         {
-            var pc = PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, loP);
+            var pc = PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly, loP);
             var v = new Vector4()
             {
                 X= Math.Sin(pc.Item2) * pc.Item1,
