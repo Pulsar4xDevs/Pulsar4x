@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
@@ -47,163 +48,17 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            if(ImGui.TreeNode("SemiMajorAxis"))
+            foreach (var item in _debugWidget.ElementItems)
             {
-                int i = 1;
-                foreach (var item in _debugWidget.SemiMajorAxisLines)
-                {
-                    ImGui.Text(i.ToString());
-                    if(ImGui.IsItemHovered())
-                    {
-                        item.Color = new SDL2.SDL.SDL_Color()
-                        {
-                            r = item.Color.r,
-                            g = item.Color.g,
-                            b = item.Color.b,
-                            a = 255
-                        };
-                    }
-                    else                   
-                        item.Color = _debugWidget.SMAColour; 
-
-                    i++;
-                }
-                ImGui.TreePop();
-            }
-
-
-            if (ImGui.TreeNode("SemiMinorAxis"))
-            {
-                int i = 1;
-                foreach (var item in _debugWidget.SemiMinorAxisLines)
-                {
-                    ImGui.Text(i.ToString());
-                    if (ImGui.IsItemHovered())
-                    {
-                        item.Color = new SDL.SDL_Color()
-                        {
-                            r = item.Color.r,
-                            g = item.Color.g,
-                            b = item.Color.b,
-                            a = 255
-                        };
-                    }
-                    else
-                        item.Color = _debugWidget.SMinAColour;
-
-                    i++;
-                }
-                ImGui.TreePop();
-            }
-
-
-            if (ImGui.TreeNode("LinnierEccentricity"))
-            {
-                int i = 1;
-                foreach (var item in _debugWidget.LinierEccentricityLines)
-                {
-                    ImGui.Text(i.ToString());
-                    if (ImGui.IsItemHovered())
-                    {
-                        item.Color = new SDL.SDL_Color()
-                        {
-                            r = item.Color.r,
-                            g = item.Color.g,
-                            b = item.Color.b,
-                            a = 255
-                        };
-                    }
-                    else
-                        item.Color = _debugWidget.LeColour;
-
-                    i++;
-                }
-
-                ImGui.TreePop();
-            }
-
-            if (ImGui.TreeNode("Points"))
-            {
-                ImGui.Text("FocalPoint 1 (Parent)");
+                ImGui.Text(item.NameString);
                 if (ImGui.IsItemHovered())
-                {
-                    if (ImGui.IsItemHovered())
-                    {
-                        foreach (var item in _debugWidget.F1Point)
-                        {
-                            item.Color = new SDL.SDL_Color()
-                            {
-                                r = item.Color.r,
-                                g = item.Color.g,
-                                b = item.Color.b,
-                                a = 255
-                            };
-                        }
-                    }
-                    else
-                    {
-                        foreach (var item in _debugWidget.F1Point)
-                        {
-                            item.Color = _debugWidget.F1PointColour;
-                        }
-                    }
-                }
-
-                ImGui.Text("FocalPoint 2");
-                if (ImGui.IsItemHovered())
-                {
-                    if (ImGui.IsItemHovered())
-                    {
-                        foreach (var item in _debugWidget.F2Point)
-                        {
-                            item.Color = new SDL.SDL_Color()
-                            {
-                                r = item.Color.r,
-                                g = item.Color.g,
-                                b = item.Color.b,
-                                a = 255
-                            };
-                        }
-                    }
-                    else
-                    {
-                        foreach (var item in _debugWidget.F2Point)
-                        {
-                            item.Color = _debugWidget.F2PointColour;
-                        }
-                    }
-                }
-
-
-                ImGui.TreePop();
+                    item.SetHighlight(true);
+                else
+                    item.SetHighlight(false);
+                ImGui.SameLine();
+                ImGui.Text(item.DataString);
             }
 
-            if (ImGui.TreeNode("Angles "))
-            {
-                int i = 0;
-                foreach (var item in _debugWidget.Angles)
-                {
-                    ImGui.Text(_debugWidget.AngleNames[i]);
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        item.Color = new SDL.SDL_Color()
-                        {
-                            r = item.Color.r,
-                            g = item.Color.g,
-                            b = item.Color.b,
-                            a = 255
-                        };
-                    }
-                    else
-                        item.Color = _debugWidget.AngleColours[i];
-                    ImGui.SameLine();
-                    ImGui.Text(_debugWidget.AngleAngle[i].ToString("###.###"));
-                    i++;
-                }
-
-                ImGui.TreePop();
-            }
         }
     }
 
@@ -211,6 +66,7 @@ namespace Pulsar4X.SDL2UI
     {
         //OrbitIcon orbitIcon;
         OrbitDB _orbitDB;
+        IPosition _bodyPosition;
         internal Guid EntityGuid;
 
         PointD _f1;
@@ -225,36 +81,45 @@ namespace Pulsar4X.SDL2UI
         double _loan;
         double _aop;
         double _loP;
+
         double _trueAnom;
+        double _eccentricAnom;
+        double _meanAnom;
+        PointD _bodyPosPnt;
+        PointD _bodyEAPnt;
 
+        internal class ElementItem
+        {
+            internal string NameString;
+            internal double DataItem;
+            internal string DataString;
+            internal ComplexShape Shape;
+            internal SDL.SDL_Color[] Colour;
+            internal SDL.SDL_Color[] HighlightColour;
 
-        internal List<MutableShape> SemiMajorAxisLines = new List<MutableShape>();
-        internal SDL.SDL_Color SMAColour = new SDL.SDL_Color() { r = 0, g = 160, b = 0, a = 100 };
+            internal void SetHighlight(bool isHighlighted)
+            {
+                if (isHighlighted)
+                    Shape.Colors = HighlightColour;
+                else
+                    Shape.Colors = Colour;
+            }
+        }
 
-        internal List<MutableShape> SemiMinorAxisLines = new List<MutableShape>();
-        internal SDL.SDL_Color SMinAColour = new SDL.SDL_Color() { r = 0, g = 0, b = 150, a = 100 };
+        internal List<ElementItem> ElementItems = new List<ElementItem>();
+        //updateables
+        ElementItem _trueAnomalyAngleItem;
+        ElementItem _radiusToBody;
 
-        internal List<MutableShape> LinierEccentricityLines = new List<MutableShape>();
-        internal SDL.SDL_Color LeColour = new SDL.SDL_Color() { r = 0, g = 170, b = 10, a = 100 };
-
-        internal List<MutableShape> Angles = new List<MutableShape>();
-        internal List<SDL.SDL_Color> AngleColours = new List<SDL.SDL_Color>();
-        internal List<string> AngleNames = new List<string>();
-        internal List<double> AngleAngle = new List<double>();
-
-        internal List<MutableShape> F1Point = new List<MutableShape>();
-        internal SDL.SDL_Color F1PointColour = new SDL.SDL_Color() { r = 200, g = 170, b = 170, a = 100 };
-
-        internal List<MutableShape> F2Point = new List<MutableShape>();
-        internal SDL.SDL_Color F2PointColour = new SDL.SDL_Color() { r = 160, g = 170, b = 170, a = 100 };
-
-        internal List<MutableShape> AllShapes = new List<MutableShape>();
-        internal List<ComplexShape> AllComplexShapes = new List<ComplexShape>();
+        ElementItem _meanAnomalyItem;
+        ElementItem _eccentricAnomalyItem;
+        ElementItem _bodyPosItem;
+        private List<ComplexShape> DrawComplexShapes = new List<ComplexShape>();
 
         public OrbitalDebugWidget(EntityState entityState) : base(entityState.OrbitIcon.BodyPositionDB)
         {
             var orbitIcon = entityState.OrbitIcon;
-
+            _bodyPosition = orbitIcon.BodyPositionDB;
 
             _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
             if (_orbitDB.Parent == null) //primary star
@@ -267,16 +132,6 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            //double x1 = _semiMajAxis * Math.Sin(_loP) - _linearEccentricity; //we add the focal distance so the focal point is "center"
-            //double y1 = _semiMinAxis * Math.Cos(_loP);
-
-            //double x1 = _orbitEllipseSemiMinor * Math.Cos(angle);
-            //double y1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the linearEccentricity so the focal point is "center"
-
-
-            //rotates the points to allow for the LongditudeOfPeriapsis. 
-            //double x2 = (x1 * Math.Cos(_loP)) - (y1 * Math.Sin(_loP));
-            //double y2 = (x1 * Math.Sin(_loP)) + (y1 * Math.Cos(_loP));
 
             EntityGuid = entityState.Entity.Guid;
 
@@ -289,7 +144,7 @@ namespace Pulsar4X.SDL2UI
 
             var f1 = new PointD() { X = cP.X + orbitIcon._linearEccentricity, Y = cP.Y};
             var f2 = new PointD() { X = cP.X - orbitIcon._linearEccentricity, Y = cP.Y};
-            var coVertex = new PointD() { X = cP.X + orbitIcon.SemiMinor, Y = cP.Y };
+            var coVertex = new PointD() { X = cP.X , Y = cP.Y + orbitIcon.SemiMinor };
             var periapsisPnt = new PointD() { X = cP.X - orbitIcon.SemiMaj, Y = cP.Y  };
             var apoapsisPnt = new PointD() { X = cP.X + orbitIcon.SemiMaj, Y = cP.Y  };
 
@@ -304,8 +159,17 @@ namespace Pulsar4X.SDL2UI
             _semiMajAxis = orbitIcon.SemiMaj;
             _semiMinAxis = orbitIcon.SemiMinor;
 
-
-            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
+            DateTime systemDateTime = _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime;
+            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, systemDateTime);
+            double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
+            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_orbitDB.MeanAnomalyAtEpoch, _orbitDB.MeanMotion, secondsFromEpoch);
+            
+            _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
+            _bodyPosPnt = new PointD()
+            {
+                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition).X,
+                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition).Y
+            };
             CreateLines();
 
         }
@@ -323,251 +187,568 @@ namespace Pulsar4X.SDL2UI
 
         void CreateLines()
         {
+            SDL.SDL_Color[] SMAColour =
+            {   new SDL.SDL_Color() { r = 0, g = 160, b = 0, a = 100 }};
+            SDL.SDL_Color[] SMAHighlight =
+            {   new SDL.SDL_Color() { r = 0, g = 160, b = 0, a = 255 },};
 
-            SemiMajorAxisLines.Add(new MutableShape()
+            ElementItem sma1 = new ElementItem()
             {
-                Points = new List<PointD>
+                NameString = "Semi Major Axis (a) ",
+                Colour = SMAColour,
+                HighlightColour = SMAHighlight,
+                DataItem = _semiMajAxis,
+                DataString = Distance.AuToKm(_semiMajAxis).ToString() + "Km",
+                Shape = new ComplexShape()
+                {
+                    Points = new PointD[]
                 {
                     _cP,
                     _periapsisPnt
                 },
-                Color = SMAColour
-            });
-            SemiMajorAxisLines.Add(new MutableShape()
+                    Colors = SMAColour,
+                    ColourChanges = new Tuple<int, int>[]
+                {
+                    new Tuple<int, int>(0,0),
+                },
+                    Scales = true
+                },
+
+            };
+            ElementItems.Add(sma1);
+            ElementItem sma2 = new ElementItem() 
             {
-                Points = new List<PointD>
+                NameString = "Semi Major Axis 2",
+                Colour = SMAColour,
+                HighlightColour = SMAHighlight,
+                DataItem = _semiMajAxis,
+                Shape = new ComplexShape()
+            {
+                Points = new PointD[]
                 {
                     _cP,
                     _apoapsisPnt
                 },
-                Color = SMAColour
-            });
-            SemiMajorAxisLines.Add(new MutableShape()
-            {
-                Points = new List<PointD>
+                Colors = SMAColour,
+                ColourChanges = new Tuple<int, int>[]
                 {
+                    new Tuple<int, int>(0,0),
+                },
+                Scales = true
+            } 
+            };
+            ElementItems.Add(sma2);
+            ElementItem sma3 = new ElementItem()
+            {
+                NameString = "Distance from focal point to the covertex is also (a)",
+                Colour = SMAColour,
+                HighlightColour = SMAHighlight,
+                DataItem = _semiMajAxis,
+                Shape = new ComplexShape()
+                {
+                    Points = new PointD[]
+                    {
                     _f1,
                     _coVertex
-                },
-                Color = SMAColour
-            });
-
+                    },
+                    Colors = SMAColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                    new Tuple<int, int>(0,0),
+                    },
+                    Scales = true
+                }
+            };
+            ElementItems.Add(sma3);
             var listSMaj = new List<PointD>();
             listSMaj.AddRange(CreatePrimitiveShapes.Circle(_cP, _semiMajAxis, 255));
-            SemiMajorAxisLines.Add(new MutableShape()
+            ElementItem sma4 = new ElementItem()
             {
-                Points = listSMaj,
-                Color = SMAColour
-            });
+                NameString = "Semi Major Axis Circle",
+                Colour = SMAColour,
+                HighlightColour = SMAHighlight,
+                DataItem = _semiMajAxis,
+                Shape = new ComplexShape()
+                {
+                    Points = listSMaj.ToArray(),
+                    Colors = SMAColour,
+                    ColourChanges = new Tuple<int, int>[]
+                {
+                    new Tuple<int, int>(0,0),
+                },
+                    Scales = true
+                }
+            };
+            ElementItems.Add(sma4);
 
-            SemiMinorAxisLines.Add(new MutableShape()
+            SDL.SDL_Color[] SMinAColour =
+                { new SDL.SDL_Color(){ r = 0, g = 0, b = 150, a = 100 } };
+            SDL.SDL_Color[] SMinAHighlight =
+                { new SDL.SDL_Color(){ r = 0, g = 0, b = 150, a = 255 } };
+
+            ElementItem smina1 = new ElementItem()
             {
-                Points = new List<PointD>
+                NameString = "Semi Minor Axis (b)",
+                Colour = SMinAColour,
+                HighlightColour = SMinAHighlight,
+                DataItem = _semiMinAxis,
+                DataString = Distance.AuToKm(_semiMinAxis).ToString() + " Km",
+                Shape = new ComplexShape()
                 {
-                    _cP,
-                    _coVertex
-                },
-                Color = SMinAColour
-            });
-            SemiMinorAxisLines.Add(new MutableShape()
+                    Points = new PointD[]
+                    {
+                        _cP,
+                        _coVertex
+                    },
+                    Colors = SMinAColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                        Scales = true
+                    }
+            };
+            ElementItems.Add(smina1);
+
+
+            //fuckit I can't figure this one out
+            /*
+            ElementItem smina2 = new ElementItem()
             {
-                Points = new List<PointD>
+                NameString = "Semi Minor Axis (b)",
+                Colour = SMinAColour,
+                HighlightColour = SMinAHighlight,
+                DataItem = _semiMinAxis,
+                Shape = new ComplexShape()
                 {
-                    _cP,
-                    new PointD(){X = -_coVertex.X, Y= _coVertex.Y }
-                },
-                Color = SMinAColour
-            });
+                    Points = new Points = new PointD[]
+                    {
+                        _cP,
+                        new PointD(){X = _cP.X - _coVertex.X, Y = _cP.Y - _coVertex.Y }
+                    },
+                    Colors = SMinAColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                        Scales = true
+                    }
+            }};*/
+
+
             var listSMin = new List<PointD>();
             listSMin.AddRange(CreatePrimitiveShapes.Circle(_cP, _semiMinAxis, 255));
-            SemiMinorAxisLines.Add(new MutableShape()
+            ElementItem smina2 = new ElementItem()
             {
-                Points = listSMin,
-                Color = SMinAColour
-            });
-
-
-            LinierEccentricityLines.Add(new MutableShape()
-            {
-                Points = new List<PointD>
+                NameString = "Semi Minor Axis Circle",
+                Colour = SMinAColour,
+                HighlightColour = SMinAHighlight,
+                DataItem = _semiMinAxis,
+                Shape = new ComplexShape()
                 {
-                    _cP,
-                    _f1
-                },
-                Color = LeColour
-            });
-            LinierEccentricityLines.Add(new MutableShape()
-            {
-                Points = new List<PointD>
+                    Points = listSMin.ToArray(),
+                    Colors = SMinAColour,
+                    ColourChanges = new Tuple<int, int>[]
                 {
-                    _cP,
-                    _f2
+                    new Tuple<int, int>(0,0),
                 },
-                Color = LeColour
-            });
+                    Scales = true
+                }
+            };
+            ElementItems.Add(smina2);
+            SDL.SDL_Color[] LeColour =
+            { new SDL.SDL_Color() { r = 0, g = 170, b = 10, a = 100 } };
+            SDL.SDL_Color[] LeHighlight =
+            { new SDL.SDL_Color() { r = 0, g = 170, b = 10, a = 255 } };
+            var akm = Distance.AuToKm(_semiMajAxis) ;
+            var e = _orbitDB.Eccentricity;
+            string datastring = akm.ToString() + " * " + e.ToString() + " = " + (akm * e).ToString() + "Km";
+           ElementItem linec1 = new ElementItem()
+            {
+                NameString = "Linear Eccentricity (a * e)",
+                Colour = LeColour,
+                HighlightColour = LeHighlight,
+                DataItem = akm * e,
+                DataString = datastring,
+                Shape = new ComplexShape()
+                {
+                    Points = new PointD[]
+                    {
+                        _cP,
+                        _f1
+                    },
+                    Colors = LeColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = true
+                }
+            };
+            ElementItems.Add(linec1);
+            ElementItem linec2 = new ElementItem()
+            {
+                NameString = "Linear Eccentricity 2",
+                Colour = LeColour,
+                HighlightColour = LeHighlight,
+                DataItem = _semiMajAxis * _orbitDB.Eccentricity,
+                
+                Shape = new ComplexShape()
+                {
+                    Points = new PointD[]
+                    {
+                        _cP,
+                        _f2
+                    },
+                    Colors = LeColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = true
+                }
+            };
+            ElementItems.Add(linec2);
 
-            F1Point.Add(new MutableShape()
+            SDL.SDL_Color[] F1PointColour =
+            {   new SDL.SDL_Color(){ r = 200, g = 0, b = 0, a = 100 },
+                new SDL.SDL_Color(){a = 0} };
+            SDL.SDL_Color[] F1PointHighlight =
+            {   new SDL.SDL_Color(){ r = 200, g = 0, b = 0, a = 255 },
+                new SDL.SDL_Color(){a = 0} };
+            ElementItem f1pnt = new ElementItem()
             {
-                Points = new List<PointD>
+                NameString = "Focal Point 1 (Barycenter)",
+                Colour = F1PointColour,
+                HighlightColour = F1PointHighlight,
+                //DataItem = ,
+                Shape = new ComplexShape()
                 {
-                    new PointD(){ X = _f1.X - 8, Y =  _f1.Y },
-                    new PointD(){ X = _f1.X + 8, Y =  _f1.Y }
-                },
-                Color = F1PointColour,
-                Scales = true
-            });
-            F1Point.Add(new MutableShape()
-            {
-                Points = new List<PointD>
-                {
-                    new PointD(){ X = _f1.X , Y =  _f1.Y - 8 },
-                    new PointD(){ X = _f1.X , Y =  _f1.Y + 8 }
-                },
-                Color = F1PointColour,
-                Scales = true
-            });
-
-            AllComplexShapes.Add(new ComplexShape()
-            {
-                StartPoint = new PointD() { X = _f1.X, Y = _f1.Y },
-                Points = new List<PointD>
+                    StartPoint = new PointD() { X = _f1.X, Y = _f1.Y },
+                    Points = new PointD[]
                 {
                     new PointD(){ X = - 8, Y =  0 },
                     new PointD(){ X = + 8, Y = 0 },
                     new PointD(){ X = 0 , Y =  0 - 8 },
                     new PointD(){ X = 0 , Y =  0 + 8 }
                 },
-                Colors = new List<SDL.SDL_Color>()
+                    Colors = F1PointColour,
+                    ColourChanges = new Tuple<int, int>[]
                 {
-                    F1PointColour,
-                    new SDL.SDL_Color(){a = 0},
-                    F1PointColour,
+                    new Tuple<int, int>(0,0),
+                    new Tuple<int, int>(1,1),
+                    new Tuple<int, int>(2,0),
                 },
-                ColourChanges = new List<int>()
-                {
-                    2,//between points 1 and 2 we use the next colour on the list. 
-                    3 //from point 3 onwards we use the next colour again. 
-                },
-                Scales = false
-            });
-
-            AllComplexShapes.Add(new ComplexShape()
+                    Scales = false
+                }
+            };
+            ElementItems.Add(f1pnt);
+            ElementItem f2pnt = new ElementItem()
             {
-                StartPoint = new PointD() { X = _f2.X, Y = _f2.Y },
-                Points = new List<PointD>
+                NameString = "Focal Point 2",
+                Colour = F1PointColour,
+                HighlightColour = F1PointHighlight,
+                //DataItem = ,
+                Shape = new ComplexShape()
+                {
+                    StartPoint = new PointD() { X = _f2.X, Y = _f2.Y },
+                    Points = new PointD[]
                 {
                     new PointD(){ X = - 8, Y =  0 },
                     new PointD(){ X =  + 8, Y = 0 },
                     new PointD(){ X = 0 , Y =   - 8 },
                     new PointD(){ X = 0 , Y =   + 8 }
                 },
-                Colors = new List<SDL.SDL_Color>()
+                    Colors = F1PointColour,
+                    ColourChanges = new Tuple<int, int>[]
                 {
-                    F2PointColour,
-                    new SDL.SDL_Color(){a = 0},
-                    F2PointColour,
+                    new Tuple<int, int>(0,0),
+                    new Tuple<int, int>(1,1),
+                    new Tuple<int, int>(2,0),
                 },
-                ColourChanges = new List<int>()
-                {
-                    2,//between points 1 and 2 we use the next colour on the list. 
-                    3 //from point 3 onwards we use the next colour again. 
-                },
-                Scales = false
-            });
+                    Scales = false
+                }
+            };
+            ElementItems.Add(f2pnt);
 
-            F2Point.Add(new MutableShape()
+            SDL.SDL_Color[] coVertexColour =
+            {   new SDL.SDL_Color(){ r = 50, g = 50, b = 0, a = 100 },
+                new SDL.SDL_Color(){a = 0} };
+            SDL.SDL_Color[] coVertexHColour =
+            {   new SDL.SDL_Color(){ r = 150, g = 50, b = 0, a = 255 },
+                new SDL.SDL_Color(){a = 0} };
+            ElementItem coVertex = new ElementItem()
             {
-                Points = new List<PointD>
+                NameString = "Co-Vertex",
+                Colour = coVertexColour,
+                HighlightColour = coVertexHColour,
+                //DataItem = ,
+                Shape = new ComplexShape()
                 {
-                    new PointD(){ X = _f2.X - 8, Y =  _f2.Y },
-                    new PointD(){ X = _f2.X + 8, Y =  _f2.Y }
-                },
-                Color = F1PointColour,
-                Scales = true
-            });
-            F2Point.Add(new MutableShape()
+                    StartPoint = new PointD() { X = _coVertex.X, Y = _coVertex.Y },
+                    Points = new PointD[]
+                    {
+                    new PointD(){ X = - 8, Y =  0 },
+                    new PointD(){ X =  + 8, Y = 0 },
+                    new PointD(){ X = 0 , Y =   - 8 },
+                    new PointD(){ X = 0 , Y =   + 8 }
+                    },
+                    Colors = coVertexColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                    new Tuple<int, int>(0,0),
+                    new Tuple<int, int>(1,1),
+                    new Tuple<int, int>(2,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(coVertex);
+
+            SDL.SDL_Color[] objPntColour =
+                {   new SDL.SDL_Color(){ r = 50, g = 50, b = 0, a = 100 },
+                    new SDL.SDL_Color(){a = 0} };
+            SDL.SDL_Color[] objPntHColour =
+                {   new SDL.SDL_Color(){ r = 150, g = 50, b = 0, a = 255 },
+                    new SDL.SDL_Color(){a = 0} };
+            _bodyPosItem = new ElementItem()
             {
-                Points = new List<PointD>
+                NameString = "Object Position (P)",
+                Colour = objPntColour,
+                HighlightColour = objPntHColour,
+                //DataItem = ,
+                Shape = new ComplexShape()
                 {
-                    new PointD(){ X = _f2.X , Y =  _f2.Y - 8 },
-                    new PointD(){ X = _f2.X , Y =  _f2.Y + 8 }
-                },
-                Color = F1PointColour,
-                Scales = true
-            });
+                    StartPoint = new PointD() { X = _bodyPosPnt.X, Y = _bodyPosPnt.Y },
+                    Points = new PointD[]
+                    {
+                    new PointD(){ X = - 8, Y =  0 },
+                    new PointD(){ X =  + 8, Y = 0 },
+                    new PointD(){ X = 0 , Y =   - 8 },
+                    new PointD(){ X = 0 , Y =   + 8 }
+                    },
+                    Colors = objPntColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                    new Tuple<int, int>(0,0),
+                    new Tuple<int, int>(1,1),
+                    new Tuple<int, int>(2,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_bodyPosItem);
 
             //loan angle
-            var loanColour = new SDL.SDL_Color() { r = 0, g = 100, b = 0, a = 100 };
-            var listloan = new List<PointD>();
-            listloan.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 63, -6, 0, -_loan, 128));
-            Angles.Add(new MutableShape()
+            SDL.SDL_Color[] loanColour =
+                { new SDL.SDL_Color() { r = 0, g = 100, b = 0, a = 100 } };
+            SDL.SDL_Color[] loanHColour =
+                { new SDL.SDL_Color() { r = 0, g = 100, b = 0, a = 255 } };
+            ElementItem loanAngle = new ElementItem()
             {
-                Points = listloan,
-                Color = loanColour,
-                Scales = true
-            });
-            AngleColours.Add(loanColour);
-            AngleNames.Add("Longditude Of Assending Node");
-            AngleAngle.Add(Angle.ToDegrees(_loan));
+                NameString = "Longditude Of Assending Node (Ω)",
+                Colour = loanColour,
+                HighlightColour = loanHColour,
+                DataItem = Angle.ToDegrees(_loan),
+                DataString = Angle.ToDegrees(_loan).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, 0, -_loan, 128),
+                    Colors = loanColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(loanAngle);
 
             //aop angle
-            var aopColour = new SDL.SDL_Color() { r = 100, g = 100, b = 0, a = 100 };
-            var listaop = new List<PointD>();
-            listaop.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 63, -6, -_loan, -_aop, 128));
-            Angles.Add(new MutableShape()
+            SDL.SDL_Color[] aopColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 100 } };
+            SDL.SDL_Color[] aopHColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 255 } };
+            ElementItem aopAngle = new ElementItem()
             {
-                Points = listaop,
-                Color = aopColour,
-                Scales = false
-            });
-            AngleColours.Add(aopColour);
-            AngleNames.Add("Argument Of Periapsis");
-            AngleAngle.Add(Angle.ToDegrees(_aop));
+                NameString = "Argument Of Periapsis (ω)",
+                Colour = aopColour,
+                HighlightColour = aopHColour,
+                DataItem = Angle.ToDegrees(_aop),
+                DataString = Angle.ToDegrees(_aop).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, -_loan, -_aop, 128),
+                    Colors = aopColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(aopAngle);
 
             //lop angle
-            var lopColour = new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 100 };
-            var listlop = new List<PointD>();
-            listlop.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 65, 6, 0, -_loP, 128));
-            Angles.Add(new MutableShape()
+            SDL.SDL_Color[] lopColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 100 } };
+            SDL.SDL_Color[] lopHColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 255 } };
+            ElementItem lopAngle = new ElementItem()
             {
-                Points = listlop,
-                Color = lopColour,
-                Scales = false
-            });
-            AngleColours.Add(lopColour);
-            AngleNames.Add("Longditude Of Periapsis");
-            AngleAngle.Add(Angle.ToDegrees(_loP));
+                NameString = "Longditude Of Periapsis",
+                Colour = lopColour,
+                HighlightColour = lopHColour,
+                DataItem = Angle.ToDegrees(_loP),
+                DataString = Angle.ToDegrees(_loP).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 65, 6, 0, -_loP, 128),
+                    Colors = lopColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(lopAngle);
 
-            //trueAnom angle
-            var trueAnomColour = new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 100 };
-            var listtrueAnom = new List<PointD>();
-            listtrueAnom.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 64, 6, -_loP, -_trueAnom, 128));
-            Angles.Add(new MutableShape()
+            //trueAnom angle index 3
+            SDL.SDL_Color[] trueAnomColour = 
+            {   
+                new SDL.SDL_Color { r = 100, g = 0, b = 0, a = 100 },
+            };
+            SDL.SDL_Color[] trueAnomHColour = 
+            { 
+                new SDL.SDL_Color { r = 100, g = 0, b = 0, a = 255},
+            };
+
+
+            _trueAnomalyAngleItem = new ElementItem()
             {
-                Points = listtrueAnom,
-                Color = trueAnomColour,
-                Scales = false
-            });
-            AngleColours.Add(trueAnomColour);
-            AngleNames.Add("True Anomoly");
-            AngleAngle.Add(Angle.ToDegrees(_trueAnom));
+                NameString = "True Anomoly ν",
+                Colour = trueAnomColour,
+                HighlightColour = trueAnomHColour,
+                DataItem = Angle.ToDegrees(_trueAnom),
+                DataString = Angle.ToDegrees(_trueAnom).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 6, -_loP, -_trueAnom, 128),
+                Colors = trueAnomColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = false
+            } };
+            ElementItems.Add(_trueAnomalyAngleItem);
+            _radiusToBody = new ElementItem()
+            {
+                NameString = "Radius (r)",
+                Colour = trueAnomColour,
+                HighlightColour = trueAnomHColour,
+                DataItem = _bodyPosition.RelativePosition_AU.Length(),
+                DataString = Distance.AuToKm(_bodyPosition.RelativePosition_AU.Length()) + "Km",
+                Shape = new ComplexShape()
+                {
+                    Points = new PointD[]{
+                        _f1,
+                        _bodyPosPnt
+                        },
+                    Colors = trueAnomColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = true
+                }
+            };
+            ElementItems.Add(_radiusToBody);
 
 
-            AllShapes.AddRange(SemiMajorAxisLines);
-            AllShapes.AddRange(SemiMinorAxisLines);
-            AllShapes.AddRange(LinierEccentricityLines);
-            //AllShapes.AddRange(F1Point);
-            //AllShapes.AddRange(F2Point);
-            AllShapes.AddRange(Angles);
+
+            //MeanAnom angle index 4
+            SDL.SDL_Color[] meanAnomColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 100 } };
+            SDL.SDL_Color[] meanAnomHColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 255 } };
+
+            _meanAnomalyItem = new ElementItem()
+            {
+                NameString = "Mean Anomoly (M)",
+                Colour = meanAnomColour,
+                HighlightColour = meanAnomHColour,
+                DataItem = Angle.ToDegrees(_meanAnom),
+                DataString = Angle.ToDegrees(_meanAnom).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 67, 6, 0, -_meanAnom, 128),
+                    Colors = meanAnomColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_meanAnomalyItem);
+
+            //EccentricAnom angle index 5
+            SDL.SDL_Color[] eAnomColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 100 } };
+            SDL.SDL_Color[] eAnomHColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 255 } };
+            _eccentricAnomalyItem = new ElementItem()
+            {
+                NameString = "Eccentric Anomoly (E)",
+                Colour = eAnomColour,
+                HighlightColour = eAnomHColour,
+                DataItem = Angle.ToDegrees(_eccentricAnom),
+                DataString = Angle.ToDegrees(_eccentricAnom).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    StartPoint = new PointD() { X = _cP.X, Y = _cP.Y },
+                    Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, -_loP, -_eccentricAnom, 128),
+                    Colors = eAnomColour,
+                    ColourChanges = new Tuple<int, int>[]
+                    {
+                        new Tuple<int, int>(0,0),
+                    },
+                    Scales = false
+                }
+            };
+
+            ElementItems.Add(_eccentricAnomalyItem);
+
         }
 
         public override void OnPhysicsUpdate()
         {
-            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
-            var listtrueAnom = new List<PointD>();
-            listtrueAnom.AddRange(CreatePrimitiveShapes.AngleArc(_cP, 64, 4, -_loP, -_trueAnom, 128));
-            Angles[3].Points = listtrueAnom; //if we add more angles to teh list this will need to be changed. this is not great code...
-            AngleAngle[3] = Angle.ToDegrees(_trueAnom);
+            DateTime systemDateTime = _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime;
+            double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
+            _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, systemDateTime);
+            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_orbitDB.MeanAnomalyAtEpoch, _orbitDB.MeanMotion, secondsFromEpoch);
+            _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
+
+            _trueAnomalyAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 4, -_loP, -_trueAnom, 128);
+            _trueAnomalyAngleItem.DataItem = Angle.ToDegrees(_trueAnom);
+            _trueAnomalyAngleItem.DataString = Angle.ToDegrees(_trueAnom).ToString() + "°";
+
+            _radiusToBody.Shape.Points = new PointD[]
+            {
+                new PointD{X = _f1.X, Y = _f1.Y },
+                new PointD{X = _bodyPosPnt.X, Y = _bodyPosPnt.Y }};
+            _radiusToBody.DataItem = _bodyPosition.RelativePosition_AU.Length();
+            _radiusToBody.DataString = Distance.AuToKm(_bodyPosition.RelativePosition_AU.Length()) + "Km";
+
+            _meanAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 67, 6, 0, -_meanAnom, 128);
+            _meanAnomalyItem.DataItem = Angle.ToDegrees(_meanAnom);
+            _meanAnomalyItem.DataString = Angle.ToDegrees(_meanAnom).ToString() + "°";
+
+            _eccentricAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, -_loP, -_eccentricAnom, 128);
+            _eccentricAnomalyItem.DataItem = Angle.ToDegrees(_eccentricAnom);
+            _eccentricAnomalyItem.DataString = Angle.ToDegrees(_eccentricAnom).ToString() + "°";
+
+            _bodyPosPnt = new PointD() 
+            { 
+                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition).X, 
+                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition).Y 
+            };
+            _bodyPosItem.Shape.StartPoint = _bodyPosPnt;
+
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -583,58 +764,20 @@ namespace Pulsar4X.SDL2UI
             };
             ViewScreenPos = vsp;
 
-            DrawShapes = new Shape[AllShapes.Count + AllComplexShapes.Count];
 
-            int lineIndex = 0;
-            foreach (MutableShape shape in AllShapes)
+            DrawComplexShapes = new List<ComplexShape>() {};
+
+            foreach (var item in ElementItems)
             {
-
-                PointD[] points = new PointD[shape.Points.Count];
-                int pntIndex = 0;
-                foreach (var pnt in shape.Points)
-                {
-                    int x;
-                    int y;
-                    if (shape.Scales)
-                    {
-                        var translated = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
-
-                        x = (int)(ViewScreenPos.x + translated.X);
-                        y = (int)(ViewScreenPos.y + translated.Y);
-                    }
-                    else
-                    {
-                        x = (int)(ViewScreenPos.x + pnt.Y);
-                        y = (int)(ViewScreenPos.y + pnt.X);
-                    }
-                    points[pntIndex] = new PointD() { X = x, Y = y };
-                    pntIndex++;
-                }
-                DrawShapes[lineIndex] = new Shape()
-                {
-                    Points = points,
-                    Color = shape.Color, 
-                };
-                lineIndex++;
-            }
-            foreach (MutableShape shape in Angles)
-            {
-
-            }
-            foreach (ComplexShape shape in AllComplexShapes)
-            {
-                PointD[] points = new PointD[shape.Points.Count];
-                int pntIndex = 0;
+                var shape = item.Shape;
                 var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
-                var startColour = shape.Colors[0];
-                int colourIndex = 0;
-                for (int i = 0; i < shape.Points.Count; i++)
+
+                PointD[] points = new PointD[shape.Points.Length];
+
+                for (int i = 0; i < shape.Points.Length; i++)
                 {
                     var pnt = shape.Points[i];
-                    if (i > shape.ColourChanges[colourIndex])
-                        colourIndex++;
-                    var colour = shape.Colors[colourIndex];
-                
+
                     int x;
                     int y;
 
@@ -650,29 +793,44 @@ namespace Pulsar4X.SDL2UI
                         x = (int)(ViewScreenPos.x + pnt.Y + startPoint.X);
                         y = (int)(ViewScreenPos.y + pnt.X + startPoint.Y);
                     }
-                    points[pntIndex] = new PointD() { X = x, Y = y };
-                    pntIndex++;
+                    points[i] = new PointD() { X = x, Y = y };
+
                 }
-                DrawShapes[lineIndex] = new Shape()
+
+                DrawComplexShapes.Add( new ComplexShape()
                 {
                     Points = points,
-                    Color = shape.Colors[0],
-                };
-                lineIndex++;
+                    Colors = shape.Colors,
+                    ColourChanges = shape.ColourChanges
+                });
+
+
+               
+
             }
         }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
-            base.Draw(rendererPtr, camera);
-
-            foreach (var shape in DrawShapes)
+            foreach (var shape in DrawComplexShapes)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
+                int colourIndex = 0;
+                var colour = shape.Colors[shape.ColourChanges[colourIndex].Item2];
+                SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, Convert.ToInt32(shape.Points[i].X), Convert.ToInt32(shape.Points[i].Y), Convert.ToInt32(shape.Points[i + 1].X), Convert.ToInt32(shape.Points[i + 1].Y));
+                    if(shape.ColourChanges.Length > i && shape.ColourChanges[colourIndex].Item1 == i)
+                    {
+                        colour = shape.Colors[shape.ColourChanges[colourIndex].Item2];
+                        SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
+                        colourIndex++;
+                    }
+                    int x1 = Convert.ToInt32(shape.Points[i].X);
+                    int y1 = Convert.ToInt32(shape.Points[i].Y);
+                    int x2 = Convert.ToInt32(shape.Points[i + 1].X);
+                    int y2 = Convert.ToInt32(shape.Points[i + 1].Y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
         }

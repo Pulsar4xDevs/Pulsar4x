@@ -32,9 +32,9 @@ namespace Pulsar4X.SDL2UI
     public class ComplexShape
     {
         public PointD StartPoint;
-        public List<PointD> Points;
-        public List<SDL.SDL_Color> Colors;
-        public List<int> ColourChanges;
+        public PointD[] Points;
+        public SDL.SDL_Color[] Colors;
+        public Tuple<int,int>[] ColourChanges; //at Points[item1] we change to Colors[item2]
         public bool Scales;
 
     }

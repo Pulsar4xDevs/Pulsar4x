@@ -257,6 +257,10 @@ namespace Pulsar4X.SDL2UI
             {
                 icon.OnPhysicsUpdate();
             }
+            foreach(var icon in SelectedEntityExtras)
+            {
+                icon.OnPhysicsUpdate();
+            }
         }
 
 
