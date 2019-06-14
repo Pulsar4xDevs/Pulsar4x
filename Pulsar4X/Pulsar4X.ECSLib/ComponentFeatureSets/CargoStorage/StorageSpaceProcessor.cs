@@ -247,6 +247,16 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
+
+        public static long GetAvailableSpaceInItemCount(CargoStorageDB storeDB, Guid itemGuid, ICargoDefinitionsLibrary library)
+        {
+            var cargoDefinition = library.GetOther(itemGuid);
+            if (cargoDefinition.Mass == 0)
+                return long.MaxValue;
+
+            return storeDB.StoredCargoTypes[cargoDefinition.CargoTypeID].FreeCapacityKg / cargoDefinition.Mass;
+        }
+
     }
 
 }

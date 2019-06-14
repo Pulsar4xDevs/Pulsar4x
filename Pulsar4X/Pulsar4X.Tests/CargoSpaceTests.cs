@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 using System.Diagnostics;
+using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
 
 namespace Pulsar4X.Tests
 {
@@ -119,6 +120,28 @@ namespace Pulsar4X.Tests
             };
             var hasCookies = StorageSpaceProcessor.HasRequiredItems(cookiePile, cookieCheck);
             Assert.IsTrue(hasCookies);
+        }
+
+        [Test]
+        public void StorageSpaceProcessor_When_AskedToCheckAvailableStorageSpace_Should_ReturnCorrectAnswerForTheRequestedCargoItem()
+        {
+            var cookies = SetupCookieTradeGood();
+            var library = new CargoDefinitionsLibrary();
+            library.LoadOtherDefinitions(new List<ICargoable>() { cookies });
+
+            var cookiePile = new CargoStorageDB();
+            cookiePile.StoredCargoTypes.Add(cookies.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 35007, FreeCapacityKg = 32154 });
+            cookiePile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99998, FreeCapacityKg = 99997 });
+            cookiePile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99996, FreeCapacityKg = 99995 });
+
+            var canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpaceInItemCount(cookiePile, cookies.ID, library);
+            Assert.AreEqual(32154, canStoreThisManyItems);
+
+            StorageSpaceProcessor.AddCargo(cookiePile, cookies, 2154);
+
+            canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpaceInItemCount(cookiePile, cookies.ID, library);
+            Assert.AreEqual(30000, canStoreThisManyItems);
+
         }
 
         private ProcessedMaterialSD SetupCookieTradeGood()
