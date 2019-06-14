@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
 
         public void Init(Game game)
         {
-            _minerals = game.StaticData.Minerals;
+            _minerals = game.StaticData.CargoGoods.GetMinerals();
         }
         
         public void ProcessEntity(Entity entity, int deltaSeconds)

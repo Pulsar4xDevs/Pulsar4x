@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -44,6 +45,7 @@ namespace Pulsar4X.ECSLib
         {
             return storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts[itemGuid];
         }
+
         public static long GetAmount(CargoStorageDB storeDB, ICargoable item)
         {
             return storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID];

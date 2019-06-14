@@ -843,7 +843,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // this body has at least some minerals, lets generate them:
-            foreach (var min in staticData.Minerals.Values)
+            foreach (var min in staticData.CargoGoods.GetMineralsList())
             {
                 // create a MineralDepositInfo
                 MineralDepositInfo mdi = new MineralDepositInfo();
@@ -875,7 +875,7 @@ namespace Pulsar4X.ECSLib
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
             bodyInfo.Minerals.Clear();  // because this function can be called on existing bodies we need to clear any existing minerals.
 
-            foreach (var min in staticData.Minerals.Values)
+            foreach (var min in staticData.CargoGoods.GetMineralsList())
             {
                 // create a MineralDepositInfo
                 MineralDepositInfo mdi = new MineralDepositInfo

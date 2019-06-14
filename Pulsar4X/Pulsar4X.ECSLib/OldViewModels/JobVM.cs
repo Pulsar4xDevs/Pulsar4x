@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
             get
             {
                 if (_job is RefineingJob)
-                    return _staticData.ProcessedMaterials[_job.ItemGuid].Name;
+                    return _staticData.CargoGoods.GetMaterial(_job.ItemGuid).Name;
                 else if (_job is ConstructionJob)
                 {
                     Entity faction;
@@ -56,7 +56,7 @@ namespace Pulsar4X.ECSLib
             _parentJobAbility = parentJobAbilityVM;
 
             if (_job is RefineingJob)
-                _jobTotalPoints = _staticData.ProcessedMaterials[_job.ItemGuid].RefineryPointCost;
+                _jobTotalPoints = _staticData.CargoGoods.GetMaterial(_job.ItemGuid).RefineryPointCost;
             else if (_job is ConstructionJob)
                 _jobTotalPoints = _colonyEntity.GetDataBlob<ObjectOwnershipDB>().Parent.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<ComponentInfoDB>().BuildPointCost;
 

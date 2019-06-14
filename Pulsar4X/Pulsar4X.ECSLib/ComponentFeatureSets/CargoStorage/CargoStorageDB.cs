@@ -18,8 +18,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonProperty]
         public Dictionary<Guid, CargoTypeStore> StoredCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
-        public Dictionary<Guid, CargoTypeStore> OutgoingCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
-        public Dictionary<Guid, CargoTypeStore> IncomingCargoTypes { get; private set; } = new Dictionary<Guid, CargoTypeStore>();
 
         /// <summary>
         /// Gets or sets the transfer rate in kg hr.
@@ -59,13 +57,6 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class CargoTypeStore
     {
-        //[JsonProperty]
-        /// <summary>
-        /// This is the CargoTypeSD.ID/ICargoable.CargoTypeID
-        /// </summary>
-        /// <value>The CargoType GUID.</value>
-        //internal Guid TypeGuid { get; set; } //irelevent since this is stored in a dictionary with this as a key. 
-
         /// <summary>
         /// The Maximum that this entity can store of this type.
         /// </summary>

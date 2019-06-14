@@ -122,9 +122,9 @@ namespace Pulsar4X.ECSLib
         public RefineryAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {
             ItemDictionary = new DictionaryVM<Guid, string>(DisplayMode.Value);
-            foreach (var kvp in _staticData_.ProcessedMaterials)
+            foreach (var kvp in _staticData_.CargoGoods.GetMaterialsList())
             {
-                ItemDictionary.Add(kvp.Key, kvp.Value.Name);
+                ItemDictionary.Add(kvp.ID, kvp.Name);
             }
             //NewJobSelectedItem = ItemDictionary[ItemDictionary.ElementAt(0).Key];
             NewJobSelectedIndex = 0;
@@ -134,7 +134,7 @@ namespace Pulsar4X.ECSLib
 
         public override void OnNewBatchJob()
         {
-            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.ProcessedMaterials[NewJobSelectedItem].RefineryPointCost, NewJobRepeat);
+            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.CargoGoods.GetMaterial(NewJobSelectedItem).RefineryPointCost, NewJobRepeat);
             RefiningProcessor.AddJob(_staticData_, _colonyEntity_, newjob);
             Refresh();
         }

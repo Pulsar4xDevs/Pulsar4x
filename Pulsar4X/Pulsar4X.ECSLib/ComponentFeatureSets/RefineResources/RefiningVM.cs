@@ -63,7 +63,7 @@ namespace Pulsar4X.ECSLib
             _orderHandler = game.OrderHandler;
             _factionGuid = refiningDB.OwningEntity.FactionOwner;
             _cmdRef = cmdRef;
-            foreach (var kvp in _staticData.ProcessedMaterials)
+            foreach (var kvp in _staticData.CargoGoods.GetMaterials())
             {
                 ItemDictionary.Add(kvp.Key, kvp.Value.Name);
             }
@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
             _parent = parentVM;
             _staticData = staticData;
             JobItem = job;
-            Item = _staticData.ProcessedMaterials[JobItem.ItemGuid].Name;
+            Item = _staticData.CargoGoods.GetMaterial(JobItem.ItemGuid).Name;
             _cmdRef = cmdRef;
         }
 

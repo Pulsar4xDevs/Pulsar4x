@@ -49,9 +49,9 @@ namespace Pulsar4X.ECSLib
             _staticData = game.StaticData;
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (_staticData.ProcessedMaterials.ContainsKey(MaterialGuid))
+                if (_staticData.CargoGoods.IsMaterial(MaterialGuid))
                 {
-                    int pointCost = _staticData.ProcessedMaterials[MaterialGuid].RefineryPointCost;
+                    int pointCost = _staticData.CargoGoods.GetMaterial(MaterialGuid).RefineryPointCost;
                     _job = new RefineingJob(MaterialGuid, NumberOrderd, pointCost, RepeatJob);
                     return true;
                 }
