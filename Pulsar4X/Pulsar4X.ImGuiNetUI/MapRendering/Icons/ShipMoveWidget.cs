@@ -41,26 +41,18 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
-            var camerapoint = camera.CameraViewCoordinate();
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
             _drawPoints = new SDL.SDL_Point[2];
 
 
-            /*
-            var translated = matrix.Transform(_translateStartPoint.X, _translateStartPoint.Y);  
-            int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
-            int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
-            _drawPoints[0] = new SDL.SDL_Point() { x = x, y = y };
-*/
-
             var translated = matrix.Transform(_currentPosition.X, _currentPosition.Y);
-            int x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
-            int y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
+            int x = (int)(ViewScreenPos.x + translated.x);
+            int y = (int)(ViewScreenPos.y + translated.y);
             _drawPoints[0] = new SDL.SDL_Point() { x = x, y = y };
 
             translated = matrix.Transform(_translateEndPoint.X, _translateEndPoint.Y);
-            x = (int)(ViewScreenPos.x + translated.x + camerapoint.x);
-            y = (int)(ViewScreenPos.y + translated.y + camerapoint.y);
+            x = (int)(ViewScreenPos.x + translated.x );
+            y = (int)(ViewScreenPos.y + translated.y );
             _drawPoints[1] = new SDL.SDL_Point() { x = x, y = y };
 
         }
@@ -70,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         {
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, alpha); 
-                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[0].x, _drawPoints[0].y, _drawPoints[1].x, _drawPoints[1].y);
+                DrawTools.DrawLine(rendererPtr, _drawPoints[0].x, _drawPoints[0].y, _drawPoints[1].x, _drawPoints[1].y);
 
         }
     }

@@ -153,16 +153,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
-
-            var camerapoint = camera.CameraViewCoordinate();
-
-            var vsp = new PointD
-            {
-                X = ViewScreenPos.x + camerapoint.x,
-                Y = ViewScreenPos.y + camerapoint.y
-            };
-
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
 
             _drawPoints = new SDL.SDL_Point[_numberOfPoints];
 
@@ -174,8 +165,8 @@ namespace Pulsar4X.SDL2UI
                 //translate everything to viewscreen & camera positions
                 //int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
                 //int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
-                int x = (int)(vsp.X + translated.X);
-                int y = (int)(vsp.Y + translated.Y);
+                int x = (int)(ViewScreenPos.x + translated.X);
+                int y = (int)(ViewScreenPos.y + translated.Y);
 
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }
@@ -217,7 +208,7 @@ namespace Pulsar4X.SDL2UI
                 else
                     alpha = predAlpha;
                 SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
-                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
+                DrawTools.DrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
                 alpha -= _alphaChangeAmount;
             }
         }

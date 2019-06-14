@@ -88,23 +88,7 @@ namespace Pulsar4X.SDL2UI
         PointD _bodyPosPnt;
         PointD _bodyEAPnt;
 
-        internal class ElementItem
-        {
-            internal string NameString;
-            internal double DataItem;
-            internal string DataString;
-            internal ComplexShape Shape;
-            internal SDL.SDL_Color[] Colour;
-            internal SDL.SDL_Color[] HighlightColour;
 
-            internal void SetHighlight(bool isHighlighted)
-            {
-                if (isHighlighted)
-                    Shape.Colors = HighlightColour;
-                else
-                    Shape.Colors = Colour;
-            }
-        }
 
         internal List<ElementItem> ElementItems = new List<ElementItem>();
         //updateables
@@ -114,6 +98,8 @@ namespace Pulsar4X.SDL2UI
         ElementItem _meanAnomalyItem;
         ElementItem _eccentricAnomalyItem;
         ElementItem _bodyPosItem;
+        ElementItem _headingItem;
+
         private List<ComplexShape> DrawComplexShapes = new List<ComplexShape>();
 
         public OrbitalDebugWidget(EntityState entityState) : base(entityState.OrbitIcon.BodyPositionDB)
@@ -148,12 +134,12 @@ namespace Pulsar4X.SDL2UI
             var periapsisPnt = new PointD() { X = cP.X - orbitIcon.SemiMaj, Y = cP.Y  };
             var apoapsisPnt = new PointD() { X = cP.X + orbitIcon.SemiMaj, Y = cP.Y  };
 
-            _cP = RotatePoint(cP, _loP);
-            _f1 = RotatePoint(f1, _loP);
-            _f2 = RotatePoint(f2, _loP);
-            _coVertex = RotatePoint(coVertex, _loP);
-            _periapsisPnt = RotatePoint(periapsisPnt, _loP);
-            _apoapsisPnt = RotatePoint(apoapsisPnt, _loP);
+            _cP = DrawTools.RotatePoint(cP, _loP);
+            _f1 = DrawTools.RotatePoint(f1, _loP);
+            _f2 = DrawTools.RotatePoint(f2, _loP);
+            _coVertex = DrawTools.RotatePoint(coVertex, _loP);
+            _periapsisPnt = DrawTools.RotatePoint(periapsisPnt, _loP);
+            _apoapsisPnt = DrawTools.RotatePoint(apoapsisPnt, _loP);
 
 
             _semiMajAxis = orbitIcon.SemiMaj;
@@ -174,16 +160,7 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        PointD RotatePoint(PointD point, double angle)
-        {
-            PointD newPoint = new PointD()
-            {
-                X = (point.X * Math.Cos(angle)) - (point.Y * Math.Sin(angle)),
-                Y = (point.X * Math.Sin(angle)) + (point.Y * Math.Cos(angle))
-            };
 
-            return newPoint;
-        }
 
         void CreateLines()
         {
@@ -207,10 +184,10 @@ namespace Pulsar4X.SDL2UI
                     _periapsisPnt
                 },
                     Colors = SMAColour,
-                    ColourChanges = new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(0,0),
-                },
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0)
+                    },
                     Scales = true
                 },
 
@@ -230,11 +207,11 @@ namespace Pulsar4X.SDL2UI
                     _apoapsisPnt
                 },
                 Colors = SMAColour,
-                ColourChanges = new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(0,0),
-                },
-                Scales = true
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0)
+                    },
+                    Scales = true
             } 
             };
             ElementItems.Add(sma2);
@@ -252,9 +229,9 @@ namespace Pulsar4X.SDL2UI
                     _coVertex
                     },
                     Colors = SMAColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
-                    new Tuple<int, int>(0,0),
+                        (0, 0)
                     },
                     Scales = true
                 }
@@ -272,10 +249,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     Points = listSMaj.ToArray(),
                     Colors = SMAColour,
-                    ColourChanges = new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(0,0),
-                },
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0)
+                    },
                     Scales = true
                 }
             };
@@ -301,11 +278,11 @@ namespace Pulsar4X.SDL2UI
                         _coVertex
                     },
                     Colors = SMinAColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0, 0)
                     },
-                        Scales = true
+                    Scales = true
                     }
             };
             ElementItems.Add(smina1);
@@ -348,10 +325,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     Points = listSMin.ToArray(),
                     Colors = SMinAColour,
-                    ColourChanges = new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(0,0),
-                },
+                    ColourChanges = new (int pointIndex, int colourIndex)[] 
+                    { 
+                        (0, 0) 
+                    },
                     Scales = true
                 }
             };
@@ -378,9 +355,9 @@ namespace Pulsar4X.SDL2UI
                         _f1
                     },
                     Colors = LeColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0, 0)
                     },
                     Scales = true
                 }
@@ -401,9 +378,9 @@ namespace Pulsar4X.SDL2UI
                         _f2
                     },
                     Colors = LeColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0, 0)
                     },
                     Scales = true
                 }
@@ -433,12 +410,12 @@ namespace Pulsar4X.SDL2UI
                     new PointD(){ X = 0 , Y =  0 + 8 }
                 },
                     Colors = F1PointColour,
-                    ColourChanges = new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(0,0),
-                    new Tuple<int, int>(1,1),
-                    new Tuple<int, int>(2,0),
-                },
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0),               
+                        (1,1),
+                        (2,0),
+                    },
                     Scales = false
                 }
             };
@@ -460,12 +437,12 @@ namespace Pulsar4X.SDL2UI
                     new PointD(){ X = 0 , Y =   + 8 }
                 },
                     Colors = F1PointColour,
-                    ColourChanges = new Tuple<int, int>[]
-                {
-                    new Tuple<int, int>(0,0),
-                    new Tuple<int, int>(1,1),
-                    new Tuple<int, int>(2,0),
-                },
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0),
+                        (1,1),
+                        (2,0),
+                    },
                     Scales = false
                 }
             };
@@ -494,11 +471,11 @@ namespace Pulsar4X.SDL2UI
                     new PointD(){ X = 0 , Y =   + 8 }
                     },
                     Colors = coVertexColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
-                    new Tuple<int, int>(0,0),
-                    new Tuple<int, int>(1,1),
-                    new Tuple<int, int>(2,0),
+                        (0, 0),
+                        (1,1),
+                        (2,0),
                     },
                     Scales = false
                 }
@@ -528,11 +505,11 @@ namespace Pulsar4X.SDL2UI
                     new PointD(){ X = 0 , Y =   + 8 }
                     },
                     Colors = objPntColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
-                    new Tuple<int, int>(0,0),
-                    new Tuple<int, int>(1,1),
-                    new Tuple<int, int>(2,0),
+                        (0, 0),
+                        (1,1),
+                        (2,0),
                     },
                     Scales = false
                 }
@@ -553,11 +530,11 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_loan).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, 0, -_loan, 128),
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, 0, _loan, 128),
                     Colors = loanColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0,0),
                     },
                     Scales = false
                 }
@@ -576,11 +553,11 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aop).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, -_loan, -_aop, 128),
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, _loan, _aop, 128),
                     Colors = aopColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int,int)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0,0)
                     },
                     Scales = false
                 }
@@ -599,12 +576,9 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_loP).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 65, 6, 0, -_loP, 128),
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 65, 6, 0, _loP, 128),
                     Colors = lopColour,
-                    ColourChanges = new Tuple<int, int>[]
-                    {
-                        new Tuple<int, int>(0,0),
-                    },
+                    ColourChanges = new (int pointIndex,int colourIndex)[]{ (0, 0) },
                     Scales = false
                 }
             };
@@ -630,11 +604,11 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_trueAnom).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 6, -_loP, -_trueAnom, 128),
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 6, _loP, _trueAnom, 128),
                 Colors = trueAnomColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int,int)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0,0),
                     },
                     Scales = false
             } };
@@ -653,9 +627,9 @@ namespace Pulsar4X.SDL2UI
                         _bodyPosPnt
                         },
                     Colors = trueAnomColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int,int)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0,0),
                     },
                     Scales = true
                 }
@@ -677,11 +651,11 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_meanAnom).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 67, 6, 0, -_meanAnom, 128),
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 67, 6, 0, _meanAnom, 128),
                     Colors = meanAnomColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int,int)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0,0),
                     },
                     Scales = false
                 }
@@ -701,17 +675,63 @@ namespace Pulsar4X.SDL2UI
                 Shape = new ComplexShape()
                 {
                     StartPoint = new PointD() { X = _cP.X, Y = _cP.Y },
-                    Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, -_loP, -_eccentricAnom, 128),
+                    Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, _loP, _eccentricAnom, 128),
                     Colors = eAnomColour,
-                    ColourChanges = new Tuple<int, int>[]
+                    ColourChanges = new (int,int)[]
                     {
-                        new Tuple<int, int>(0,0),
+                        (0,0),
                     },
                     Scales = false
                 }
             };
 
             ElementItems.Add(_eccentricAnomalyItem);
+
+
+            //EccentricAnom angle index 5
+            SDL.SDL_Color[] headingColour = 
+            { 
+                new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 100 },
+                new SDL.SDL_Color() {a = 0} 
+            };
+            SDL.SDL_Color[] headingHColour = 
+            { 
+                new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 255 },
+                new SDL.SDL_Color() {a = 0} 
+            };
+
+            var speed = OrbitMath.PreciseOrbitalSpeed(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU.Length(), _semiMajAxis);
+            speed = Distance.AuToKm(speed);
+            var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom);
+            heading += _loP;
+            var vector = OrbitMath.PreciseOrbitalVelocityVector(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU, _semiMajAxis, _orbitDB.Eccentricity, _trueAnom, _loP);
+            var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
+            var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
+            PointD[] headingLine = { new PointD() { X=0,Y=0 }, new PointD() { X = vnorm.X, Y = vnorm.Y }, };
+
+            _headingItem = new ElementItem()
+            {
+                NameString = "Heading",
+                Colour = headingColour,
+                HighlightColour = headingHColour,
+                //DataItem = Angle.ToDegrees(_eccentricAnom),
+                DataString = Angle.ToDegrees(heading).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    StartPoint = _bodyPosPnt,
+                    Points = headingPoints.Concat(headingLine).ToArray(),//CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, -heading, 128),
+                    Colors = headingColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0),
+                        (130,1),
+                        (131,0),
+                    },
+                    Scales = false
+                }
+            };
+
+            ElementItems.Add(_headingItem);
 
         }
 
@@ -721,9 +741,11 @@ namespace Pulsar4X.SDL2UI
             double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, systemDateTime);
             _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_orbitDB.MeanAnomalyAtEpoch, _orbitDB.MeanMotion, secondsFromEpoch);
-            _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
 
-            _trueAnomalyAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 4, -_loP, -_trueAnom, 128);
+            _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
+            var meanAnom2 = OrbitMath.GetMeanAnomaly(_orbitDB.Eccentricity, _eccentricAnom);
+
+            _trueAnomalyAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 4, _loP, _trueAnom, 128);
             _trueAnomalyAngleItem.DataItem = Angle.ToDegrees(_trueAnom);
             _trueAnomalyAngleItem.DataString = Angle.ToDegrees(_trueAnom).ToString() + "°";
 
@@ -734,11 +756,11 @@ namespace Pulsar4X.SDL2UI
             _radiusToBody.DataItem = _bodyPosition.RelativePosition_AU.Length();
             _radiusToBody.DataString = Distance.AuToKm(_bodyPosition.RelativePosition_AU.Length()) + "Km";
 
-            _meanAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 67, 6, 0, -_meanAnom, 128);
+            _meanAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 67, 6, 0, _meanAnom, 128);
             _meanAnomalyItem.DataItem = Angle.ToDegrees(_meanAnom);
             _meanAnomalyItem.DataString = Angle.ToDegrees(_meanAnom).ToString() + "°";
 
-            _eccentricAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, -_loP, -_eccentricAnom, 128);
+            _eccentricAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, _loP, _eccentricAnom, 128);
             _eccentricAnomalyItem.DataItem = Angle.ToDegrees(_eccentricAnom);
             _eccentricAnomalyItem.DataString = Angle.ToDegrees(_eccentricAnom).ToString() + "°";
 
@@ -749,22 +771,26 @@ namespace Pulsar4X.SDL2UI
             };
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt;
 
+
+            var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom);
+            heading += _loP;
+            var vector = OrbitMath.PreciseOrbitalVelocityVector(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU, _semiMajAxis, _orbitDB.Eccentricity, _trueAnom, _loP);
+            var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
+            var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
+            PointD[] headingLine = { new PointD() { X = 0, Y = 0 }, new PointD() { X = vnorm.X, Y = vnorm.Y }, };
+            //headingPoints.Concat(headingLine);
+            _headingItem.Shape.StartPoint = _bodyPosPnt;
+            _headingItem.Shape.Points = headingPoints.Concat(headingLine).ToArray(); // CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, -heading, 128);
+            _headingItem.DataString = Angle.ToDegrees(heading).ToString() + "°";
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
-
-            var camerapoint = camera.CameraViewCoordinate();
-            var vsp = new SDL.SDL_Point()
-            {
-                x = ViewScreenPos.x + camerapoint.x,
-                y = ViewScreenPos.y + camerapoint.y
-            };
-            ViewScreenPos = vsp;
-
-
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            Matrix nonZoomMatrix = new Matrix();
+            nonZoomMatrix.Mirror(true, false);
+ 
             DrawComplexShapes = new List<ComplexShape>() {};
 
             foreach (var item in ElementItems)
@@ -776,23 +802,18 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < shape.Points.Length; i++)
                 {
-                    var pnt = shape.Points[i];
+                    var pnt = shape.Points[i];;
 
                     int x;
                     int y;
-
+                    PointD transformedPoint;
                     if (shape.Scales)
-                    {
-
-                        var translated = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
-                        x = (int)(ViewScreenPos.x + translated.X + startPoint.X);
-                        y = (int)(ViewScreenPos.y + translated.Y + startPoint.Y);
-                    }
+                        transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
                     else
-                    {
-                        x = (int)(ViewScreenPos.x + pnt.Y + startPoint.X);
-                        y = (int)(ViewScreenPos.y + pnt.X + startPoint.Y);
-                    }
+                        transformedPoint = nonZoomMatrix.TransformD(pnt.X, pnt.Y);
+
+                    x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
+                    y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
                     points[i] = new PointD() { X = x, Y = y };
 
                 }
@@ -803,10 +824,6 @@ namespace Pulsar4X.SDL2UI
                     Colors = shape.Colors,
                     ColourChanges = shape.ColourChanges
                 });
-
-
-               
-
             }
         }
 
@@ -814,23 +831,23 @@ namespace Pulsar4X.SDL2UI
         {
             foreach (var shape in DrawComplexShapes)
             {
-                int colourIndex = 0;
-                var colour = shape.Colors[shape.ColourChanges[colourIndex].Item2];
+                int ci = 0;
+                var colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
                 SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    if(shape.ColourChanges.Length > i && shape.ColourChanges[colourIndex].Item1 == i)
+                    if(shape.ColourChanges.Length > i && shape.ColourChanges[ci].pointIndex == i)
                     {
-                        colour = shape.Colors[shape.ColourChanges[colourIndex].Item2];
+                        colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
                         SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
-                        colourIndex++;
+                        ci++;
                     }
                     int x1 = Convert.ToInt32(shape.Points[i].X);
                     int y1 = Convert.ToInt32(shape.Points[i].Y);
                     int x2 = Convert.ToInt32(shape.Points[i + 1].X);
                     int y2 = Convert.ToInt32(shape.Points[i + 1].Y);
-                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                    DrawTools.DrawLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
         }

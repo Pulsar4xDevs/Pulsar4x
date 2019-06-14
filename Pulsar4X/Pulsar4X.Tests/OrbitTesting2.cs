@@ -248,10 +248,11 @@ namespace Pulsar4X.Tests
                 Vector4 angularVelocity = Vector4.Cross(pos, vel);
                 double r = pos.Length();
                 double speedau = OrbitMath.PreciseOrbitalSpeed(sgp, r, o_a);
-                Tuple<double, double> polarVelocity = OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν, o_lop);
+                (double speed, double heading) polarVelocity = OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν, o_lop);
                 //Tuple<double, double> polarVelocity2 = OrbitMath.PreciseOrbitalVelocityPolarCoordinate2(sgp, pos, o_a, o_e, o_ν, o_lop);
-                double heading = OrbitMath.heading(pos, o_e, o_a, o_ν);
-                Assert.IsTrue(angularVelocity.Z > 0); //TODO:this will break if we test an anti clockwise orbit.
+                double heading = OrbitMath.HeadingFromPeriaps(pos, o_e, o_a, o_ν);
+                heading += o_lop;
+                //Assert.IsTrue(angularVelocity.Z > 0); //TODO:this will break if we test an anti clockwise orbit.
                 Assert.IsTrue(speedau > 0); //I'm assuming that speed will be <0 if retrograde orbit. 
                 Assert.AreEqual(vel.Length(), speedau, 1.0E-7);
                 Assert.AreEqual(vel.Length(), polarVelocity.Item1, 1.0E-7);

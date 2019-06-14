@@ -115,24 +115,14 @@ namespace Pulsar4X.SDL2UI
             if (_arriveIcon != null)
             {
                 _arriveIcon.OnFrameUpdate(matrix, camera);
-
-                var camerapoint = camera.CameraViewCoordinate();
-
                 _linePoints = new SDL_Point[2];
 
-                var depart = matrix.Transform(_departIcon.WorldPosition.X, _departIcon.WorldPosition.Y);
-                _linePoints[0] = new SDL_Point()
-                {
-                    x = (depart.x + camerapoint.x),
-                    y = (depart.y + camerapoint.y)
-                };
+                var dvsp = camera.ViewCoordinate(_departIcon.WorldPosition);
+                var avsp = camera.ViewCoordinate(_arriveIcon.WorldPosition);
+                _linePoints[0] = dvsp;
 
                 var arrive = matrix.Transform(_arriveIcon.WorldPosition.X, _arriveIcon.WorldPosition.Y);
-                _linePoints[1] = new SDL_Point()
-                {
-                    x = (arrive.x + camerapoint.x),
-                    y = (arrive.y + camerapoint.y)
-                };
+                _linePoints[1] = avsp;
             }
 
         }
@@ -145,7 +135,7 @@ namespace Pulsar4X.SDL2UI
                 _arriveIcon.Draw(rendererPtr, camera);
                 //draw the transitLine
                 SDL_SetRenderDrawColor(rendererPtr, TransitLineColor.r, TransitLineColor.g, TransitLineColor.b, TransitLineColor.a);
-                SDL_RenderDrawLine(rendererPtr, _linePoints[0].x, _linePoints[0].y, _linePoints[1].x, _linePoints[1].y);
+                DrawTools.DrawLine(rendererPtr, _linePoints[0].x, _linePoints[0].y, _linePoints[1].x, _linePoints[1].y);
 
             }
         }

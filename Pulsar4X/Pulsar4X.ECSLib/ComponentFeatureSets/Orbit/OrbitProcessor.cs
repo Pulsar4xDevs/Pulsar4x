@@ -312,12 +312,12 @@ namespace Pulsar4X.ECSLib
         /// <returns>item1 is speed, item2 angle</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
+        public static (double speed, double angle) PreciseOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
             var sma = orbit.SemiMajorAxis;
             if (orbit.GravitationalParameter == 0 || sma == 0)
-                return new Tuple<double, double>(0,0); //so we're not returning NaN;
+                return (0,0); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
             
             double e = orbit.Eccentricity;

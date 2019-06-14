@@ -9,14 +9,15 @@ namespace Pulsar4X.ECSLib
         public static Entity DefaultHumans(Game game, string name)
         {
             StarSystemFactory starfac = new StarSystemFactory(game);
-            StarSystem sol = starfac.CreateSol(game);
+            StarSystem solSys = starfac.CreateSol(game);
             //sol.ManagerSubpulses.Init(sol);
-            Entity earth = sol.Entities[3]; //should be fourth entity created 
+            Entity solStar = solSys.Entities[0];
+            Entity earth = solSys.Entities[3]; //should be fourth entity created 
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
 
-            var namedEntites = sol.GetAllEntitiesWithDataBlob<NameDB>();
+            var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
             {
                 var nameDB = entity.GetDataBlob<NameDB>();
@@ -24,7 +25,7 @@ namespace Pulsar4X.ECSLib
             }
 
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
-            Entity marsColony = ColonyFactory.CreateColony(factionEntity, speciesEntity, NameLookup.GetFirstEntityWithName(sol, "Mars"));
+            Entity marsColony = ColonyFactory.CreateColony(factionEntity, speciesEntity, NameLookup.GetFirstEntityWithName(solSys, "Mars"));
 
             ComponentTemplateSD mineSD = game.StaticData.ComponentTemplates[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
             ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mineSD, factionEntity.GetDataBlob<FactionTechDB>(), game.StaticData);
@@ -71,7 +72,7 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
 
 
-            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
 
             //test systems
             //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).Guid);
@@ -85,14 +86,30 @@ namespace Pulsar4X.ECSLib
             Entity shipClass = DefaultShipDesign(game, factionEntity);
             Entity gunShipClass = GunShipDesign(game, factionEntity);
 
-            Entity ship1 = ShipFactory.CreateShip(shipClass, sol, factionEntity, earth, sol, "Serial Peacemaker");
-            Entity ship2 = ShipFactory.CreateShip(shipClass, sol, factionEntity, earth, sol, "Ensuing Calm");
+            Entity ship1 = ShipFactory.CreateShip(shipClass, solSys, factionEntity, earth, solSys, "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipClass, solSys, factionEntity, earth, solSys, "Ensuing Calm");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
 
-            Entity gunShip = ShipFactory.CreateShip(gunShipClass, sol, factionEntity, earth, sol, "Prevailing Stillness");
+
+            double test_a = 0.5; //AU
+            double test_e = 0;
+            double test_i = 0;      //°
+            double test_loan = 0;   //°
+            double test_aop = 0;    //°
+            double test_M0 = 0;     //°
+            double test_bodyMass = ship2.GetDataBlob<MassVolumeDB>().Mass;
+            OrbitDB test_db = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
+            ship2.SetDataBlob(test_db);
+            ship2.GetDataBlob<PositionDB>().SetParent(solStar);
+            StaticRefLib.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship2, 0);
+
+
+
+
+            Entity gunShip = ShipFactory.CreateShip(gunShipClass, solSys, factionEntity, earth, solSys, "Prevailing Stillness");
             gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector4(8.52699302490434E-05, 0, 0, 0);
             StorageSpaceProcessor.AddCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //give the gunship a hypobolic orbit to test:
@@ -105,13 +122,13 @@ namespace Pulsar4X.ECSLib
             };
             gunShip.SetDataBlob<NewtonMoveDB>(nmdb);
 
-            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), sol, factionEntity, earth, sol, "Planet Express Ship");
+            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), solSys, factionEntity, earth, solSys, "Planet Express Ship");
             StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
-            sol.SetDataBlob(ship1.ID, new TransitableDB());
-            sol.SetDataBlob(ship2.ID, new TransitableDB());
-            sol.SetDataBlob(gunShip.ID, new TransitableDB());
-            sol.SetDataBlob(courier.ID, new TransitableDB());
+            solSys.SetDataBlob(ship1.ID, new TransitableDB());
+            solSys.SetDataBlob(ship2.ID, new TransitableDB());
+            solSys.SetDataBlob(gunShip.ID, new TransitableDB());
+            solSys.SetDataBlob(courier.ID, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB
@@ -123,9 +140,9 @@ namespace Pulsar4X.ECSLib
             //sol.SystemManager.SetDataBlob(ship.ID, new TransitableDB());
 
             //Entity rock = AsteroidFactory.CreateAsteroid2(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
-            Entity rock = AsteroidFactory.CreateAsteroid3(sol, earth, StaticRefLib.CurrentDateTime + TimeSpan.FromDays(365));
+            Entity rock = AsteroidFactory.CreateAsteroid3(solSys, earth, StaticRefLib.CurrentDateTime + TimeSpan.FromDays(365));
 
-            var entitiesWithSensors = sol.GetAllEntitiesWithDataBlob<SensorReceverAtbDB>();
+            var entitiesWithSensors = solSys.GetAllEntitiesWithDataBlob<SensorReceverAtbDB>();
             foreach (var entityItem in entitiesWithSensors)
             {
                 if(entityItem.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity != null) //don't do the designs, just the actual physical entity components. 

@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < 2; i++)
             {
                 X[i] = X[i] + x;
-                Y[i] = Y[i] - y;
+                Y[i] = Y[i] + y;
             }
         }
 
@@ -25,6 +25,28 @@ namespace Pulsar4X.SDL2UI
                 X[i] = X[i] * zoom;
                 Y[i] = Y[i] * zoom;
             }
+        }
+
+        /// <summary>
+        /// Mirrors around the given axis. (ie to flip y, x = true)
+        /// </summary>
+        public void Mirror(bool x, bool y)
+        {
+            if(x)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    Y[i] *= -1;
+                }
+            }
+            if (y)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    X[i] *= -1;
+                }
+            }
+
         }
 
         public void Rotate(double radians)
@@ -68,7 +90,7 @@ namespace Pulsar4X.SDL2UI
                 double y;
                 y = Y[0] * itemx;
                 y += Y[1] * itemy;
-                newPoint.y = -(int)y;
+                newPoint.y = (int)y;
 
 
             return newPoint;
@@ -91,7 +113,7 @@ namespace Pulsar4X.SDL2UI
             double y;
             y = Y[0] * itemx;
             y += Y[1] * itemy;
-            newPoint.Y = -y;
+            newPoint.Y = y; 
 
 
             return newPoint;
@@ -112,7 +134,7 @@ namespace Pulsar4X.SDL2UI
                 double y; 
                 y = Y[0] * item.x;
                 y += Y[1] * item.y;
-                newPoint.y = -(int)y;
+                newPoint.y = (int)y;
 
                 newPoints[i] = newPoint;
                 i++;
@@ -136,7 +158,7 @@ namespace Pulsar4X.SDL2UI
                 double y;
                 y = Y[0] * item.X;
                 y += Y[1] * item.Y;
-                newPoint.Y = -y;
+                newPoint.Y = y;
 
                 newPoints[i] = newPoint;
                 i++;

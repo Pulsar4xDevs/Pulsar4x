@@ -23,7 +23,7 @@ namespace Pulsar4X.SDL2UI
                 drawX = posX + (int)Math.Round(xRadius * Math.Sin(angle * i));
                 drawY = posY + (int)Math.Round(yRadius * Math.Cos(angle * i));
                 //SDL.SDL_RenderDrawPoint(renderer, drawX, drawY);
-                SDL.SDL_RenderDrawLine(renderer, lastX, lastY, drawX, drawY);
+                DrawTools.DrawLine(renderer, lastX, lastY, drawX, drawY);
                 lastX = drawX;
                 lastY = drawY;
             }
@@ -48,7 +48,7 @@ namespace Pulsar4X.SDL2UI
                     int dy = radius - h; // vertical offset
                     if ((dx * dx + dy * dy) <= (radius * radius))
                     {
-                        SDL.SDL_RenderDrawPoint(renderer, posX, posY);
+                        DrawTools.DrawPoint(renderer, posX, posY);
                     }
                 }
             }        
@@ -77,7 +77,7 @@ namespace Pulsar4X.SDL2UI
 
             for (int i = 0; i < points.Length - 1; i++)
             {
-                SDL.SDL_RenderDrawLine(renderer, points[i].x, points[i].y, points[i+1].x, points[i+1].y);
+                DrawTools.DrawLine(renderer, points[i].x, points[i].y, points[i+1].x, points[i+1].y);
             }
 
         }
@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
                 drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
-                SDL.SDL_RenderDrawLine(rendererPtr, lastX, lastY, drawX, drawY);
+                DrawTools.DrawLine(rendererPtr, lastX, lastY, drawX, drawY);
                 lastX = drawX;
                 lastY = drawY;
             }
@@ -173,26 +173,24 @@ namespace Pulsar4X.SDL2UI
 
             points[0] = new PointD()
             {
-                X = ctrPos.X + (radius + tipLen) * Math.Sin(startAngleRadians),
-                Y = ctrPos.Y + (radius + tipLen) * Math.Cos(startAngleRadians)
+                Y = ctrPos.Y + (radius + tipLen) * Math.Sin(startAngleRadians),
+                X = ctrPos.X + (radius + tipLen) * Math.Cos(startAngleRadians)
             };
-
 
             double incrementAngle = arcAngleRadians / segments;
 
-
-            for (int i = 1; i < segments + 2; i++)
+            for (int i = 0; i < points.Length - 2; i++)
             {
                 double nextAngle = startAngleRadians + incrementAngle * i;
-                drawX = ctrPos.X + radius * Math.Sin(nextAngle);
-                drawY = ctrPos.Y + radius * Math.Cos(nextAngle);
-                points[i] = new PointD() { X = drawX, Y = drawY };
+                drawY = ctrPos.Y + radius * Math.Sin(nextAngle);
+                drawX = ctrPos.X + radius * Math.Cos(nextAngle);
+                points[i+1] = new PointD() { X = drawX, Y = drawY };
             }
 
-            points[points.Length -1 ] = new PointD()
+            points[points.Length - 1] = new PointD()
             {
-                X = ctrPos.X + (radius + tipLen) * Math.Sin(startAngleRadians + arcAngleRadians),
-                Y = ctrPos.Y + (radius + tipLen) * Math.Cos(startAngleRadians + arcAngleRadians)
+                Y = ctrPos.Y + (radius + tipLen) * Math.Sin(startAngleRadians + arcAngleRadians),
+                X = ctrPos.X + (radius + tipLen) * Math.Cos(startAngleRadians + arcAngleRadians)
             };
             return points;
         }
@@ -382,7 +380,7 @@ namespace Pulsar4X.SDL2UI
                 //then go through each of the points and draw a line from one point to the next. 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
+                    DrawTools.DrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
                 }
             }
 

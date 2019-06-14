@@ -100,9 +100,9 @@ namespace Pulsar4X.SDL2UI
         {
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
-            var camerapoint = camera.CameraViewCoordinate();
-            int x = (int)(X + camerapoint.x + ViewOffset.x);
-            int y = (int)(Y + camerapoint.y + ViewOffset.y);
+
+            int x = (int)(X + ViewOffset.x);
+            int y = (int)(Y + ViewOffset.y);
             Vector2 pos = new Vector2(x, y);
 
 

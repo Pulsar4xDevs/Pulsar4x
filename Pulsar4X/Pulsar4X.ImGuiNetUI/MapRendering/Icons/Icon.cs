@@ -12,32 +12,7 @@ namespace Pulsar4X.SDL2UI
         void Draw(IntPtr rendererPtr, Camera camera);
     }
 
-    /// <summary>
-    /// A collection of points and a single color.
-    /// </summary>
-    public struct Shape
-    {
-        public SDL.SDL_Color Color;    //could change due to entity changes. 
-        public PointD[] Points; //ralitive to the IconPosition. could change with entity changes. 
-    }
 
-    public class MutableShape
-    {
-        public SDL.SDL_Color Color;
-        public List<PointD> Points;
-        public bool Scales = true;
-    }
-
-
-    public class ComplexShape
-    {
-        public PointD StartPoint;
-        public PointD[] Points;
-        public SDL.SDL_Color[] Colors;
-        public Tuple<int,int>[] ColourChanges; //at Points[item1] we change to Colors[item2]
-        public bool Scales;
-
-    }
 
     /// <summary>
     /// A Collection of Shapes which will make up an icon. 
@@ -82,37 +57,25 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            //matrix.Translate(WorldPosition.X + camerapoint.x, WorldPosition.Y + camerapoint.y);
-
-            //todo: proper matrix transformations might clean this code up a bit. I'm failing to get it working properly though. 
-            //Matrix matrix2 = new Matrix();
-            //matrix2.Translate(WorldPosition.X, WorldPosition.Y);
-            //matrix2.Scale(camera.ZoomLevel);
-            //matrix2.Translate(camerapoint.x, camerapoint.y);
-
-            var camerapoint = camera.CameraViewCoordinate();
-
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
-
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            Matrix nonZoomMatrix = new Matrix();
+            nonZoomMatrix.Mirror(true, false);
+            nonZoomMatrix.Scale(Scale);
+  
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
                 PointD[] drawPoints = new PointD[shape.Points.Length];
-                Matrix zoomMatrix;
+                
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     int x;
                     int y;
 
-
-                    zoomMatrix = new Matrix();
-                    zoomMatrix.Scale(Scale);
-                
-
-                    var tranlsatedPoint = zoomMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
-                    x = (int)(ViewScreenPos.x + tranlsatedPoint.X + camerapoint.x);
-                    y = (int)(ViewScreenPos.y + tranlsatedPoint.Y + camerapoint.y);
+                    var tranlsatedPoint = nonZoomMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
+                    x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
+                    y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
                     drawPoints[i2] = new PointD() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
@@ -129,7 +92,7 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, Convert.ToInt32(shape.Points[i].X), Convert.ToInt32(shape.Points[i].Y), Convert.ToInt32(shape.Points[i + 1].X), Convert.ToInt32(shape.Points[i + 1].Y));
+                    DrawTools.DrawLine(rendererPtr, Convert.ToInt32(shape.Points[i].X), Convert.ToInt32(shape.Points[i].Y), Convert.ToInt32(shape.Points[i + 1].X), Convert.ToInt32(shape.Points[i + 1].Y));
                 }
             }
 
@@ -175,19 +138,19 @@ namespace Pulsar4X.SDL2UI
                 var y0 = Convert.ToInt32(_drawShape.Points[i].Y);
                 var x1 = Convert.ToInt32(_drawShape.Points[i + 1].X);
                 var y1 = Convert.ToInt32(_drawShape.Points[i + 1].Y);
-                SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
+                DrawTools.DrawLine(rendererPtr, x0, y0, x1, y1);
             }
         }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            var camerapoint = camera.CameraViewCoordinate();
 
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
+
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
             var vsp = new PointD
             {
-                X = ViewScreenPos.x + camerapoint.x,
-                Y = ViewScreenPos.y + camerapoint.y
+                X = ViewScreenPos.x ,
+                Y = ViewScreenPos.y
             };
             PointD[] drawPoints = new PointD[_shape.Points.Length];
 
@@ -246,19 +209,17 @@ namespace Pulsar4X.SDL2UI
                 var y0 = Convert.ToInt32(_drawShape.Points[i].Y);
                 var x1 = Convert.ToInt32(_drawShape.Points[i + 1].X);
                 var y1 = Convert.ToInt32(_drawShape.Points[i + 1].Y);
-                SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
+                DrawTools.DrawLine(rendererPtr, x0, y0, x1, y1);
             }
         }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            var camerapoint = camera.CameraViewCoordinate();
-
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
             var vsp = new PointD
             {
-                X = ViewScreenPos.x + camerapoint.x,
-                Y = ViewScreenPos.y + camerapoint.y
+                X = ViewScreenPos.x,
+                Y = ViewScreenPos.y
             };
             PointD[] drawPoints = new PointD[_shape.Points.Length];
 

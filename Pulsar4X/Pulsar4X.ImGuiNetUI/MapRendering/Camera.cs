@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using SDL2;
-using System.Numerics;
 using Point = SDL2.SDL.SDL_Point;
 
 namespace Pulsar4X.SDL2UI
@@ -27,8 +27,8 @@ namespace Pulsar4X.SDL2UI
                 if (IsPinnedToEntity && _entityPosDB != null)
                     return new ECSLib.Vector4
                     {
-                        X = _camWorldPos.X - _entityPosDB.AbsolutePosition_AU.X,
-                        Y = -(_camWorldPos.Y - _entityPosDB.AbsolutePosition_AU.Y)
+                        X = _camWorldPos.X + _entityPosDB.AbsolutePosition_AU.X,
+                        Y = _camWorldPos.Y + _entityPosDB.AbsolutePosition_AU.Y
                     };
                 else
                     return _camWorldPos;
@@ -83,24 +83,23 @@ namespace Pulsar4X.SDL2UI
                 _camWorldPos = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
             }
         }
-
+        /*
         public Point CameraViewCoordinate()
         {
             Point point = new Point();
-            point.x = (int)(CameraWorldPosition.X * (ZoomLevel) + ViewPortCenter.X);
-            point.y = (int)(CameraWorldPosition.Y * (ZoomLevel) + ViewPortCenter.Y);
+            point.x = (int)(-CameraWorldPosition.X * ZoomLevel + ViewPortCenter.X);
+            point.y = (int)(-CameraWorldPosition.Y * ZoomLevel + ViewPortCenter.Y);
             return point;
-        }
+        }*/
         /// <summary>
-        /// THIS MAY RETURN INCORRECT VALUE TODO: Debug/Test this (might need to adjust for CameraWorldPosition)
         /// returns the viewCoordinate of a given world Coordinate 
         /// </summary>
         /// <param name="worldCoord"></param>
         /// <returns></returns>
         public Point ViewCoordinate(ECSLib.Vector4 worldCoord)
         {
-            int x = (int)(worldCoord.X * (ZoomLevel) + ViewPortCenter.X);
-            int y = (int)(worldCoord.Y * (ZoomLevel) + ViewPortCenter.Y);
+            int x = (int)((worldCoord.X - CameraWorldPosition.X) * ZoomLevel + ViewPortCenter.X);
+            int y = -(int)((worldCoord.Y - CameraWorldPosition.Y) * ZoomLevel - ViewPortCenter.Y);
             Point viewCoord = new Point() { x = x, y = y };
 
             return viewCoord;
@@ -180,13 +179,13 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsPinnedToEntity)
             {
-                _camWorldPos.X -= (float)(xOffset * 1.0f / ZoomLevel);
-                _camWorldPos.Y -= (float)(-yOffset * 1.0f / ZoomLevel);
+                _camWorldPos.X += (float)(xOffset * 1.0f / ZoomLevel);
+                _camWorldPos.Y += (float)(-yOffset * 1.0f / ZoomLevel);
             }
             else
             {
-                _camWorldPos.X -= (float)(xOffset * 1.0f / ZoomLevel);
-                _camWorldPos.Y -= (float)(yOffset * 1.0f / ZoomLevel);
+                _camWorldPos.X += (float)(xOffset * 1.0f / ZoomLevel);
+                _camWorldPos.Y += (float)(-yOffset * 1.0f / ZoomLevel);
             }
         }
 
@@ -232,6 +231,7 @@ namespace Pulsar4X.SDL2UI
         public Matrix GetZoomMatrix()
         {
             Matrix matrix = new Matrix();
+            matrix.Mirror(true,false);
             matrix.Scale(ZoomLevel);
             return matrix;
         }

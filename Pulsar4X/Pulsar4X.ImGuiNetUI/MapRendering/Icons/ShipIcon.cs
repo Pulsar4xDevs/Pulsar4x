@@ -44,11 +44,11 @@ namespace Pulsar4X.SDL2UI
             byte b = 200;
             byte a = 255;
             PointD[] points = {
-            new PointD { X = 0, Y = -5 },
-            new PointD { X = 5, Y = 5 },
+            new PointD { X = 0, Y = 5 },
+            new PointD { X = 5, Y = -5 },
             new PointD { X = 0, Y = 0 },
-            new PointD { X = -5, Y = 5 },
-            new PointD { X = 0, Y = -5 }
+            new PointD { X = -5, Y = -5 },
+            new PointD { X = 0, Y = 5 }
             };
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -187,15 +187,13 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            var zoomMatrix = new Matrix();
-            zoomMatrix.Scale(Scale);
-            var rotateMatrix = Matrix.GetRotationMatrix(Heading + Math.PI);
+            var shipMatrix = new Matrix();
+            shipMatrix.Mirror(true, false);
+            shipMatrix.Scale(Scale);
+            shipMatrix.Rotate(Heading);
 
-            var useMatrix = rotateMatrix * zoomMatrix;
 
-            var camerapoint = camera.CameraViewCoordinate();
-
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
 
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)
@@ -204,9 +202,9 @@ namespace Pulsar4X.SDL2UI
                 PointD[] drawPoints = new PointD[shape.Points.Length];
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
-                    var tranlsatedPoint = useMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
-                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X + camerapoint.x);
-                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y + camerapoint.y);
+                    var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
+                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
+                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
                     drawPoints[i2] = new PointD() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };

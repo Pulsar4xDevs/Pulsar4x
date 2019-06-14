@@ -171,6 +171,14 @@ namespace Pulsar4X.SDL2UI
                         }
 
                     }
+
+                    if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
+                    {
+                        var window = GraphicDebugWindow.GetWindow(_state);
+                        window.Display();
+                        window.Enable(true, _state);
+                    }
+
                     ImGui.Text("Selected Star System: " + _state.SelectedStarSysGuid);
                     ImGui.Text("Number Of Entites: " + _state.SelectedSystem.NumberOfEntites);
                     if(ImGui.CollapsingHeader("Log"))
