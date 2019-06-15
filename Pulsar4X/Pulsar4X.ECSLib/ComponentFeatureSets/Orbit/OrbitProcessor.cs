@@ -322,7 +322,8 @@ namespace Pulsar4X.ECSLib
             
             double e = orbit.Eccentricity;
             double trueAnomaly = OrbitProcessor.GetTrueAnomaly(orbit, atDateTime);
-            return OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly,  orbit.LongitudeOfAscendingNode + orbit.ArgumentOfPeriapsis);
+            double lop = Angle.ToRadians(orbit.LongitudeOfAscendingNode - orbit.ArgumentOfPeriapsis);
+            return OrbitMath.PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly,  lop);
         }
 
         /// <summary>

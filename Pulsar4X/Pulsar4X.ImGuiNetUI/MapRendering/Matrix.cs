@@ -9,63 +9,41 @@ namespace Pulsar4X.SDL2UI
         double[] X = new double[2] { 1, 0 };
         double[] Y = new double[2] { 0, 1 };
 
-        public void Translate(double x, double y)
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                X[i] = X[i] + x;
-                Y[i] = Y[i] + y;
-            }
-        }
 
-        public void Scale(double zoom)
-        {
-            for (int i = 0; i < 2; i++)
-            {
-                X[i] = X[i] * zoom;
-                Y[i] = Y[i] * zoom;
-            }
-        }
-
-        /// <summary>
-        /// Mirrors around the given axis. (ie to flip y, x = true)
-        /// </summary>
-        public void Mirror(bool x, bool y)
-        {
-            if(x)
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    Y[i] *= -1;
-                }
-            }
-            if (y)
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    X[i] *= -1;
-                }
-            }
-
-        }
-
-        public void Rotate(double radians)
-        {
-            X[0] = X[0] * Math.Cos(radians);
-            X[1] = X[1] * Math.Sin(radians);
-            Y[0] = Y[0] * -Math.Sin(radians);
-            Y[1] = Y[1] * Math.Cos(radians);
-        }
-
-        public static Matrix GetRotationMatrix(double radians)
+        public static Matrix NewScaleMatrix(double scaleX, double scaleY)
         {
             Matrix matrix = new Matrix()
             {
-                X = new double[2] {Math.Cos(radians) , Math.Sin(radians) },
-                Y = new double[2] {-Math.Sin(radians), Math.Cos(radians) }
+                X = new double[2] { scaleX, 0 },
+                Y = new double[2] { 0, scaleY }
             };
             return matrix;
         }
+
+
+        public static Matrix NewMirrorMatrix(bool x, bool y)
+        {
+            Matrix matrix = new Matrix();
+            if (y)
+                matrix.X = new double[2] { -1, 0 };
+            if (x)
+                matrix.Y = new double[2] { 0, -1 };
+
+            return matrix;
+        }
+
+
+        public static Matrix NewRotateMatrix(double radians)
+        {
+            Matrix matrix = new Matrix()
+            {
+                X = new double[2] { Math.Cos(radians), -Math.Sin(radians) },
+                Y = new double[2] { Math.Sin(radians), Math.Cos(radians) }
+            };
+            return matrix;
+        }
+
+
 
         public static Matrix operator *(Matrix matrixA, Matrix matrixB)
         {

@@ -230,37 +230,12 @@ namespace Pulsar4X.SDL2UI
         /// <returns>The zoom matrix.</returns>
         public Matrix GetZoomMatrix()
         {
-            Matrix matrix = new Matrix();
-            matrix.Mirror(true,false);
-            matrix.Scale(ZoomLevel);
-            return matrix;
+            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
+            var scaleMtx = Matrix.NewScaleMatrix(ZoomLevel, ZoomLevel);
+            return mirrorMatrix * scaleMtx;
         }
 
-        /// <summary>
-        /// Returns the translation matrix for a world position, relative to the camera position
-        /// </summary>
-        /// <param name="position">Position in World Units</param>
-        /// <returns></returns>
-        public Matrix GetViewProjectionMatrix(Vector2 position)
-        {
-            var transformMatrix = new Matrix();
-            double x = CameraWorldPosition.X + position.X;
-            double y = CameraWorldPosition.Y + position.Y;
-            transformMatrix.Translate(x, y);  //ViewCoordinate(x, y));
-            return transformMatrix;
-        }
 
-        /// <summary>
-        /// Returns the translation matrix for 0,0, relative to the camera position
-        /// </summary>
-        /// <returns></returns>
-        public Matrix GetViewProjectionMatrix()
-        {
-            var transformMatrix = new Matrix();
-
-            transformMatrix.Translate(CameraWorldPosition.X, CameraWorldPosition.Y);  //ViewCoordinate(x, y));
-            return transformMatrix;
-        }
     }
 
     /// <summary>

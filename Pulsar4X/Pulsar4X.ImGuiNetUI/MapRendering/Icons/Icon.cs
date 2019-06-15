@@ -58,10 +58,11 @@ namespace Pulsar4X.SDL2UI
 
 
             ViewScreenPos = camera.ViewCoordinate(WorldPosition);
-            Matrix nonZoomMatrix = new Matrix();
-            nonZoomMatrix.Mirror(true, false);
-            nonZoomMatrix.Scale(Scale);
-  
+
+            var mirrorMtx = Matrix.NewMirrorMatrix(true, false);
+            var scaleMtx = Matrix.NewScaleMatrix(Scale, Scale);
+            Matrix nonZoomMatrix = mirrorMtx * scaleMtx;
+
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)
             {

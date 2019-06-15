@@ -176,7 +176,7 @@ namespace Pulsar4X.SDL2UI
             if (_entity.HasDataBlob<OrbitDB>())
             {
                 var vector = OrbitProcessor.PreciseOrbitalVelocityPolarCoordinate(_entity.GetDataBlob<OrbitDB>(), atDateTime);
-                Heading = (float)vector.Item2;
+                Heading = (float)vector.angle;
             }
             else if (_entity.HasDataBlob<TranslateMoveDB>())
             {
@@ -187,10 +187,14 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            var shipMatrix = new Matrix();
-            shipMatrix.Mirror(true, false);
-            shipMatrix.Scale(Scale);
-            shipMatrix.Rotate(Heading);
+
+            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
+            var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
+            var rotateMatrix = Matrix.NewRotateMatrix(Heading);
+
+            var shipMatrix = scaleMatrix * rotateMatrix * mirrorMatrix ;
+            //shipMatrix.Scale(Scale);
+
 
 
             ViewScreenPos = camera.ViewCoordinate(WorldPosition);

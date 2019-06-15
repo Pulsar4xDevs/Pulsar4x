@@ -790,6 +790,22 @@ namespace Pulsar4X.ECSLib
 
         }
 
+        public static double GetLongditudeOfPeriapsis(double inclination, double aoP, double loAN)
+        {
+            double lop;
+            if (inclination > Math.PI * 0.5 && inclination < Math.PI * 1.5) 
+            {
+
+                lop = loAN - aoP;
+            }
+            else
+            {
+
+                lop = loAN + aoP;
+            }
+            return lop;
+        }
+
 
         /// <summary>
         /// Incorrect/Incomplete Unfinished DONOTUSE
