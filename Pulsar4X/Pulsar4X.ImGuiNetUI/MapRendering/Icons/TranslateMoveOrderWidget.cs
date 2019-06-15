@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
+using SDL2;
 using static SDL2.SDL;
 
 namespace Pulsar4X.SDL2UI
@@ -135,7 +136,7 @@ namespace Pulsar4X.SDL2UI
                 _arriveIcon.Draw(rendererPtr, camera);
                 //draw the transitLine
                 SDL_SetRenderDrawColor(rendererPtr, TransitLineColor.r, TransitLineColor.g, TransitLineColor.b, TransitLineColor.a);
-                DrawTools.DrawLine(rendererPtr, _linePoints[0].x, _linePoints[0].y, _linePoints[1].x, _linePoints[1].y);
+                SDL.SDL_RenderDrawLine(rendererPtr, _linePoints[0].x, _linePoints[0].y, _linePoints[1].x, _linePoints[1].y);
 
             }
         }

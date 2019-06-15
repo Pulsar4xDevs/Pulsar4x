@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         {
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, alpha); 
-                DrawTools.DrawLine(rendererPtr, _drawPoints[0].x, _drawPoints[0].y, _drawPoints[1].x, _drawPoints[1].y);
+                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[0].x, _drawPoints[0].y, _drawPoints[1].x, _drawPoints[1].y);
 
         }
     }

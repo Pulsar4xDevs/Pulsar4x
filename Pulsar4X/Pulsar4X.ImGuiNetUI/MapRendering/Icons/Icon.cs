@@ -93,7 +93,7 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    DrawTools.DrawLine(rendererPtr, Convert.ToInt32(shape.Points[i].X), Convert.ToInt32(shape.Points[i].Y), Convert.ToInt32(shape.Points[i + 1].X), Convert.ToInt32(shape.Points[i + 1].Y));
+                    SDL.SDL_RenderDrawLine(rendererPtr, Convert.ToInt32(shape.Points[i].X), Convert.ToInt32(shape.Points[i].Y), Convert.ToInt32(shape.Points[i + 1].X), Convert.ToInt32(shape.Points[i + 1].Y));
                 }
             }
 
@@ -139,7 +139,7 @@ namespace Pulsar4X.SDL2UI
                 var y0 = Convert.ToInt32(_drawShape.Points[i].Y);
                 var x1 = Convert.ToInt32(_drawShape.Points[i + 1].X);
                 var y1 = Convert.ToInt32(_drawShape.Points[i + 1].Y);
-                DrawTools.DrawLine(rendererPtr, x0, y0, x1, y1);
+                SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
             }
         }
 
@@ -210,7 +210,7 @@ namespace Pulsar4X.SDL2UI
                 var y0 = Convert.ToInt32(_drawShape.Points[i].Y);
                 var x1 = Convert.ToInt32(_drawShape.Points[i + 1].X);
                 var y1 = Convert.ToInt32(_drawShape.Points[i + 1].Y);
-                DrawTools.DrawLine(rendererPtr, x0, y0, x1, y1);
+                SDL.SDL_RenderDrawLine(rendererPtr, x0, y0, x1, y1);
             }
         }
 

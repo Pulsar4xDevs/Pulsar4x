@@ -23,7 +23,7 @@ namespace Pulsar4X.SDL2UI
                 drawX = posX + (int)Math.Round(xRadius * Math.Sin(angle * i));
                 drawY = posY + (int)Math.Round(yRadius * Math.Cos(angle * i));
                 //SDL.SDL_RenderDrawPoint(renderer, drawX, drawY);
-                DrawTools.DrawLine(renderer, lastX, lastY, drawX, drawY);
+                SDL.SDL_RenderDrawLine(renderer, lastX, lastY, drawX, drawY);
                 lastX = drawX;
                 lastY = drawY;
             }
@@ -48,7 +48,7 @@ namespace Pulsar4X.SDL2UI
                     int dy = radius - h; // vertical offset
                     if ((dx * dx + dy * dy) <= (radius * radius))
                     {
-                        DrawTools.DrawPoint(renderer, posX, posY);
+                        SDL.SDL_RenderDrawPoint(renderer, posX, posY);
                     }
                 }
             }        
@@ -77,7 +77,7 @@ namespace Pulsar4X.SDL2UI
 
             for (int i = 0; i < points.Length - 1; i++)
             {
-                DrawTools.DrawLine(renderer, points[i].x, points[i].y, points[i+1].x, points[i+1].y);
+                SDL.SDL_RenderDrawLine(renderer, points[i].x, points[i].y, points[i+1].x, points[i+1].y);
             }
 
         }
@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawX = posX + (int)Math.Round(xWidth * Math.Sin(nextAngle));
                 drawY = posY + (int)Math.Round(yWidth * Math.Cos(nextAngle));
-                DrawTools.DrawLine(rendererPtr, lastX, lastY, drawX, drawY);
+                SDL.SDL_RenderDrawLine(rendererPtr, lastX, lastY, drawX, drawY);
                 lastX = drawX;
                 lastY = drawY;
             }
@@ -380,7 +380,7 @@ namespace Pulsar4X.SDL2UI
                 //then go through each of the points and draw a line from one point to the next. 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    DrawTools.DrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, (int)shape.Points[i].X, (int)shape.Points[i].Y, (int)shape.Points[i + 1].X, (int)shape.Points[i + 1].Y);
                 }
             }
 

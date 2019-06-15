@@ -282,7 +282,7 @@ namespace Pulsar4X.SDL2UI
                     int y1 = Convert.ToInt32(shape.Points[i].Y);
                     int x2 = Convert.ToInt32(shape.Points[i + 1].X);
                     int y2 = Convert.ToInt32(shape.Points[i + 1].Y);
-                    DrawTools.DrawLine(rendererPtr, x1, y1, x2, y2);
+                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
         }

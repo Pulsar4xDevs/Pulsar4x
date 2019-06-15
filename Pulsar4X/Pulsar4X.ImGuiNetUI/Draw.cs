@@ -9,29 +9,6 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public static class DrawTools
     {
-        /// <summary>
-        /// Calls SDL_RenderDrawLine 
-        /// </summary>
-        /// <param name="rendererPtr">Renderer ptr.</param>
-        /// <param name="x1">The first x value.</param>
-        /// <param name="y1">The first y value.</param>
-        /// <param name="x2">The second x value.</param>
-        /// <param name="y2">The second y value.</param>
-        public static int DrawLine(IntPtr rendererPtr, int x1, int y1, int x2, int y2)
-        {
-            return SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
-        }
-
-        /// <summary>
-        /// Calls SDL_DrawPoint 
-        /// </summary>
-        /// <param name="rendererPtr">Renderer ptr.</param>
-        /// <param name="x">The x coordinate.</param>
-        /// <param name="y">The y coordinate.</param>
-        public static int DrawPoint(IntPtr rendererPtr, int x, int y)
-        {
-            return SDL.SDL_RenderDrawPoint(rendererPtr, x, y);
-        }
 
         /// <summary>
         /// Rotates a given point to a given angle.

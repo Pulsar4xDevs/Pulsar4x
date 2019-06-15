@@ -193,9 +193,6 @@ namespace Pulsar4X.SDL2UI
             var rotateMatrix = Matrix.NewRotateMatrix(Heading);
 
             var shipMatrix = scaleMatrix * rotateMatrix * mirrorMatrix ;
-            //shipMatrix.Scale(Scale);
-
-
 
             ViewScreenPos = camera.ViewCoordinate(WorldPosition);
 
