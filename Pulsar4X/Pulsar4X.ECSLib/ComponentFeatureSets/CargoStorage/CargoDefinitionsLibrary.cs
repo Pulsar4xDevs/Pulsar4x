@@ -127,7 +127,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage
 
         public bool IsOther(Guid id)
         {
-            return _definitions.ContainsKey(id);
+            return _definitions.ContainsKey(id) && (IsMineral(id) == false) && (IsMaterial(id) == false);
         }
 
         public ICargoable GetOther(string nameOfCargo)

@@ -34,6 +34,169 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void CargoDefinitionsLibrary_When_AskedIfSomethingIsAMineral_Should_CorrectlyRespond()
+        {
+            var minerals = new List<MineralSD>();
+            var mineralCargoTypeId = Guid.NewGuid();
+
+            var otherJunk = new List<ICargoable>();
+            var otherCargoTypeId = Guid.NewGuid();
+
+            var theDice = new Random();
+
+            var diceRollMinerals = theDice.Next(15, 20);
+            for (var i = 0; i < diceRollMinerals; i++)
+            {
+                var randomMineral = new MineralSD()
+                {
+                    ID = Guid.NewGuid(),
+                    CargoTypeID = mineralCargoTypeId,
+                    Mass = 1000,
+                    Name = "RandomMineral_" + i.ToString(),
+                    Description = "A random mineral."
+                };
+                minerals.Add(randomMineral);
+            }
+
+            var diceRoll = theDice.Next(15, 20);
+            for (var i = 0; i < diceRoll; i++)
+            {
+                var randomCargoThing = new JustSomeCargoThing()
+                {
+                    ID = Guid.NewGuid(),
+                    CargoTypeID = otherCargoTypeId,
+                    Mass = 1000,
+                    Name = "AThing_" + i.ToString()
+                };
+                otherJunk.Add(randomCargoThing);
+            }
+            
+            var library = new CargoDefinitionsLibrary();
+            library.LoadMineralDefinitions(minerals);
+            library.LoadOtherDefinitions(otherJunk);
+
+            for (var i = 0; i < diceRollMinerals; i++)
+            {
+                Assert.IsTrue(library.IsMineral(minerals[i].ID));
+            }
+            for (var i = 0; i < diceRoll; i++)
+            {
+                Assert.IsFalse(library.IsMineral(otherJunk[i].ID));
+            }
+        }
+
+        [Test]
+        public void CargoDefinitionsLibrary_When_AskedIfSomethingIsAMaterial_Should_CorrectlyRespond()
+        {
+            var materials = new List<ProcessedMaterialSD>();
+            var materialCargoTypeId = Guid.NewGuid();
+
+            var otherJunk = new List<ICargoable>();
+            var otherCargoTypeId = Guid.NewGuid();
+
+            var theDice = new Random();
+
+            var diceRollMaterials = theDice.Next(15, 20);
+            for (var i = 0; i < diceRollMaterials; i++)
+            {
+                var randomMaterial = new ProcessedMaterialSD()
+                {
+                    ID = Guid.NewGuid(),
+                    CargoTypeID = materialCargoTypeId,
+                    Mass = 1000,
+                    Name = "RandomMaterial_" + i.ToString(),
+                    Description = "A random material."
+                };
+                materials.Add(randomMaterial);
+            }
+
+            var diceRoll = theDice.Next(15, 20);
+            for (var i = 0; i < diceRoll; i++)
+            {
+                var randomCargoThing = new JustSomeCargoThing()
+                {
+                    ID = Guid.NewGuid(),
+                    CargoTypeID = otherCargoTypeId,
+                    Mass = 1000,
+                    Name = "AThing_" + i.ToString()
+                };
+                otherJunk.Add(randomCargoThing);
+            }
+
+            var library = new CargoDefinitionsLibrary();
+            library.LoadMaterialsDefinitions(materials);
+            library.LoadOtherDefinitions(otherJunk);
+
+            for (var i = 0; i < diceRollMaterials; i++)
+            {
+                Assert.IsTrue(library.IsMaterial(materials[i].ID));
+            }
+            for (var i = 0; i < diceRoll; i++)
+            {
+                Assert.IsFalse(library.IsMaterial(otherJunk[i].ID));
+            }
+        }
+
+        [Test]
+        public void CargoDefinitionsLibrary_When_AskedIfSomethingIsOtherCargo_Should_CorrectlyRespond()
+        {
+            var materials = new List<ProcessedMaterialSD>();
+            var materialCargoTypeId = Guid.NewGuid();
+
+            var otherJunk = new List<ICargoable>();
+            var otherCargoTypeId = Guid.NewGuid();
+
+            var theDice = new Random();
+
+            var diceRollMaterials = theDice.Next(15, 20);
+            for (var i = 0; i < diceRollMaterials; i++)
+            {
+                var randomMaterial = new ProcessedMaterialSD()
+                {
+                    ID = Guid.NewGuid(),
+                    CargoTypeID = materialCargoTypeId,
+                    Mass = 1000,
+                    Name = "RandomMaterial_" + i.ToString(),
+                    Description = "A random material."
+                };
+                materials.Add(randomMaterial);
+            }
+
+            var diceRoll = theDice.Next(15, 20);
+            for (var i = 0; i < diceRoll; i++)
+            {
+                var randomCargoThing = new JustSomeCargoThing()
+                {
+                    ID = Guid.NewGuid(),
+                    CargoTypeID = otherCargoTypeId,
+                    Mass = 1000,
+                    Name = "AThing_" + i.ToString()
+                };
+                otherJunk.Add(randomCargoThing);
+            }
+
+            var library = new CargoDefinitionsLibrary();
+            library.LoadMaterialsDefinitions(materials);
+            library.LoadOtherDefinitions(otherJunk);
+
+            for (var i = 0; i < diceRollMaterials; i++)
+            {
+                Assert.IsFalse(library.IsOther(materials[i].ID));
+            }
+            for (var i = 0; i < diceRoll; i++)
+            {
+                Assert.IsTrue(library.IsOther(otherJunk[i].ID));
+            }
+        }
+
+        [Test]
+        public void CargoDefinitionsLibrary_When_GEttingADefinitionFromTheLibraryThatDoesnotExist_Should_ReturnNull()
+        {
+            var library = new CargoDefinitionsLibrary();
+            Assert.IsNull(library.GetAny(Guid.NewGuid()));
+        }
+
+        [Test]
         public void StorageSpaceProcessor_When_AskedToCheckIfItHasACargoTypeThatItDoesnotHave_Should_ReturnFalse()
         {
             var cookies = SetupCookieTradeGood();
@@ -172,5 +335,16 @@ namespace Pulsar4X.Tests
 
             return rock;
         }
+    }
+
+    public class JustSomeCargoThing : ICargoable
+    {
+        public Guid ID { get; set; }
+
+        public string Name { get; set; }
+
+        public Guid CargoTypeID { get; set; }
+
+        public int Mass { get; set; }
     }
 }
