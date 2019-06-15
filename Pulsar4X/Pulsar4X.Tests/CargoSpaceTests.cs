@@ -125,23 +125,24 @@ namespace Pulsar4X.Tests
         [Test]
         public void StorageSpaceProcessor_When_AskedToCheckAvailableStorageSpace_Should_ReturnCorrectAnswerForTheRequestedCargoItem()
         {
-            var cookies = SetupCookieTradeGood();
+            var rocks = SetupRockTradeGood();
             var library = new CargoDefinitionsLibrary();
-            library.LoadOtherDefinitions(new List<ICargoable>() { cookies });
+            library.LoadOtherDefinitions(new List<ICargoable>() { rocks });
 
-            var cookiePile = new CargoStorageDB();
-            cookiePile.StoredCargoTypes.Add(cookies.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 35007, FreeCapacityKg = 32154 });
-            cookiePile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99998, FreeCapacityKg = 99997 });
-            cookiePile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99996, FreeCapacityKg = 99995 });
+            var rockPile = new CargoStorageDB();
+            rockPile.StoredCargoTypes.Add(rocks.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 35007, FreeCapacityKg = 32154 });
+            rockPile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99998, FreeCapacityKg = 99997 });
+            rockPile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99996, FreeCapacityKg = 99995 });
 
-            var canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpaceInItemCount(cookiePile, cookies.ID, library);
-            Assert.AreEqual(32154, canStoreThisManyItems);
+            var canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpace(rockPile, rocks.ID, library);
+            Assert.AreEqual(3215, canStoreThisManyItems.FreeCapacityItem);
+            Assert.AreEqual(32154, canStoreThisManyItems.FreeCapacityKg);
 
-            StorageSpaceProcessor.AddCargo(cookiePile, cookies, 2154);
+            StorageSpaceProcessor.AddCargo(rockPile, rocks, 215);
 
-            canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpaceInItemCount(cookiePile, cookies.ID, library);
-            Assert.AreEqual(30000, canStoreThisManyItems);
-
+            canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpace(rockPile, rocks.ID, library);
+            Assert.AreEqual(3000, canStoreThisManyItems.FreeCapacityItem);
+            Assert.AreEqual(30004, canStoreThisManyItems.FreeCapacityKg);
         }
 
         private ProcessedMaterialSD SetupCookieTradeGood()
@@ -156,6 +157,20 @@ namespace Pulsar4X.Tests
             };
 
             return cookies;
+        }
+
+        private ProcessedMaterialSD SetupRockTradeGood()
+        {
+            var rock = new ProcessedMaterialSD
+            {
+                Name = "Rock",
+                Description = "A pile of heavy rocks. Very useful. Trust me.",
+                ID = Guid.NewGuid(),
+                CargoTypeID = Guid.NewGuid(),
+                Mass = 10
+            };
+
+            return rock;
         }
     }
 }
