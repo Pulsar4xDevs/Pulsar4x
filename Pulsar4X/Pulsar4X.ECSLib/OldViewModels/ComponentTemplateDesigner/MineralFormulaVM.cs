@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
         {
             _dataStore = staticDataStore;
             Minerals = new DictionaryVM<Guid, string>(DisplayMode.Value);
-            foreach (var item in staticDataStore.Minerals.Values)
+            foreach (var item in staticDataStore.CargoGoods.GetMineralsList())
             {
                 Minerals.Add(item.ID, item.Name);
             }

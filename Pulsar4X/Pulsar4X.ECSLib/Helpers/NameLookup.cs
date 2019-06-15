@@ -48,26 +48,12 @@ namespace Pulsar4X.ECSLib
 
         internal static MineralSD GetMineralSD(Game game, string name)
         {
-            foreach (var kvp in game.StaticData.Minerals)
-            {
-                if (name == kvp.Value.Name)
-                {
-                    return kvp.Value;
-                }
-            }
-            throw new Exception(name + " not found");
+            return game.StaticData.CargoGoods.GetMineral(name);
         }
         
         internal static ProcessedMaterialSD GetMaterialSD(Game game, string name)
         {
-            foreach (var kvp in game.StaticData.ProcessedMaterials)
-            {
-                if (name == kvp.Value.Name)
-                {
-                    return kvp.Value;
-                }
-            }
-            throw new Exception(name + " not found");
+            return game.StaticData.CargoGoods.GetMaterial(name);
         }
 
         internal static ComponentTemplateSD GetTemplateSD(Game game, string name)

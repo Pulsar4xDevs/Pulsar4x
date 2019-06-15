@@ -133,7 +133,7 @@ namespace Pulsar4X.ECSLib
             _mineralDeposits.Clear();
             foreach (var kvp in minerals)
             {
-                MineralSD mineral = _staticData.Minerals[kvp.Key];
+                MineralSD mineral = _staticData.CargoGoods.GetMineral(kvp.Key);
                 if (!_mineralDeposits.ContainsKey(kvp.Key))
                     _mineralDeposits.Add(kvp.Key, new PlanetMineralInfoVM(mineral.Name, kvp.Value));
             }

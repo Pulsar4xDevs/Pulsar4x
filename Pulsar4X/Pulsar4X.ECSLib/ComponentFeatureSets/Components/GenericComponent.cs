@@ -131,7 +131,7 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in componentDesign.MineralCostValues)
             {
 
-                if (staticData.ProcessedMaterials.ContainsKey(kvp.Key))
+                if (staticData.CargoGoods.IsMaterial(kvp.Key))
                 {
                     materalCosts.Add(kvp.Key, kvp.Value);
                 }
@@ -139,7 +139,7 @@ namespace Pulsar4X.ECSLib
                 {
                     componentCosts.Add(kvp.Key, kvp.Value);
                 }
-                else if (staticData.Minerals.ContainsKey(kvp.Key))
+                else if (staticData.CargoGoods.IsMineral(kvp.Key))
                 {
                     mineralCosts.Add(kvp.Key, kvp.Value);
                 }

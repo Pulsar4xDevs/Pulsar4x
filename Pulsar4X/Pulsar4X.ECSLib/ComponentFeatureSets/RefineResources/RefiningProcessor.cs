@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
 
         public void Init(Game game)
         {
-            ProcessedMaterials = game.StaticData.ProcessedMaterials;
+            ProcessedMaterials = game.StaticData.CargoGoods.GetMaterials();
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
                     Dictionary<ICargoable, int> cargoablecosts = new Dictionary<ICargoable, int>();
                     foreach (var kvp in material.RawMineralCosts)
                     {
-                        ICargoable cargoItem = staticData.Minerals[kvp.Key];
+                        ICargoable cargoItem = staticData.CargoGoods.GetMineral(kvp.Key);
                         cargoablecosts.Add(cargoItem, kvp.Value);
                     }
                     
@@ -209,7 +209,7 @@ namespace Pulsar4X.ECSLib
             lock (refiningDB.JobBatchList) //prevent threaded race conditions
             {
                 //check if the job materialguid is valid, then add it if so.
-                if (staticData.ProcessedMaterials.ContainsKey(job.ItemGuid))
+                if (staticData.CargoGoods.IsMaterial(job.ItemGuid))
                 {
                     refiningDB.JobBatchList.Add(job);
                 }

@@ -322,14 +322,14 @@ namespace Pulsar4X.Tests
             var staticDataStore = game.StaticData;
 
             // store counts for later:
-            int mineralsNum = staticDataStore.Minerals.Count;
+            int mineralsNum = staticDataStore.CargoGoods.GetMineralsList().Count;
             int techNum = staticDataStore.Techs.Count;
-            int constructableObjectsNum = staticDataStore.ProcessedMaterials.Count;
+            int constructableObjectsNum = staticDataStore.CargoGoods.GetMaterialsList().Count;
 
             // check that data was loaded:
-            Assert.IsNotEmpty(staticDataStore.Minerals);
+            Assert.IsNotEmpty(staticDataStore.CargoGoods.GetMineralsList());
             Assert.IsNotEmpty(staticDataStore.AtmosphericGases);
-            Assert.IsNotEmpty(staticDataStore.ProcessedMaterials);
+            Assert.IsNotEmpty(staticDataStore.CargoGoods.GetMaterialsList());
             Assert.IsNotEmpty(staticDataStore.CargoTypes);
             Assert.IsNotEmpty(staticDataStore.Techs);
 
@@ -337,9 +337,9 @@ namespace Pulsar4X.Tests
             StaticDataManager.LoadData("Pulsar4x", game);
 
             // now check that overwriting occured and that there were no duplicates:
-            Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
+            Assert.AreEqual(mineralsNum, staticDataStore.CargoGoods.GetMineralsList().Count);
             Assert.AreEqual(techNum, staticDataStore.Techs.Count);
-            Assert.AreEqual(constructableObjectsNum, staticDataStore.ProcessedMaterials.Count);
+            Assert.AreEqual(constructableObjectsNum, staticDataStore.CargoGoods.GetMaterialsList().Count);
 
             // now lets test some malformed data folders.
             StaticDataLoadException ex = Assert.Throws<StaticDataLoadException>(
@@ -360,17 +360,17 @@ namespace Pulsar4X.Tests
             var staticDataStore = game.StaticData;
 
             // store counts for later:
-            int mineralsNum = staticDataStore.Minerals.Count;
+            int mineralsNum = staticDataStore.CargoGoods.GetMineralsList().Count;
             Guid someGuid = new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9");
-            string someName = staticDataStore.Minerals[someGuid].Name;
+            string someName = staticDataStore.CargoGoods.GetMineral(someGuid).Name;
             
             StaticDataManager.LoadData("Other", game);
             staticDataStore = game.StaticData;
             
             // now check that overwriting occured and that there were no duplicates:
-            Assert.AreEqual(mineralsNum, staticDataStore.Minerals.Count);
+            Assert.AreEqual(mineralsNum, staticDataStore.CargoGoods.GetMineralsList().Count);
             //check the name has been overwritten
-            Assert.AreNotEqual(someName, staticDataStore.Minerals[someGuid].Name);
+            Assert.AreNotEqual(someName, staticDataStore.CargoGoods.GetMineral(someGuid).Name);
         }
 
         [Test]
@@ -392,7 +392,7 @@ namespace Pulsar4X.Tests
             Assert.IsNull(testObj);
 
             // now lets test for values that are in the store:
-            Guid testID = staticDataStore.Minerals.FirstOrDefault().Key;
+            Guid testID = staticDataStore.CargoGoods.GetMinerals().FirstOrDefault().Key;
             testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
             Assert.AreEqual(testID, ((MineralSD)testObj).ID);

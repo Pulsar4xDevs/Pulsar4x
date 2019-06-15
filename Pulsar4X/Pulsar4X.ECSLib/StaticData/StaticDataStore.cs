@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace Pulsar4X.ECSLib
         /// Dictionary which stores all the Minerals.
         /// </summary>
         [JsonIgnore]
-        public Dictionary<Guid, MineralSD> Minerals = new Dictionary<Guid, MineralSD>();
+        public ICargoDefinitionsLibrary CargoGoods = new CargoDefinitionsLibrary();
 
         /// <summary>
         /// Dictionary which stores all the Technologies.
@@ -47,13 +48,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonIgnore]
         public Dictionary<Guid, TechSD> Techs = new Dictionary<Guid, TechSD>();
-
-        /// <summary>
-        /// Dictionary which stores all the Recipes.
-        /// </summary>
-        [JsonIgnore]
-        public Dictionary<Guid, ProcessedMaterialSD> ProcessedMaterials = new Dictionary<Guid, ProcessedMaterialSD>();
-
+        
         /// <summary>
         /// Dictionary which stores all Components.
         /// </summary>
@@ -178,14 +173,12 @@ namespace Pulsar4X.ECSLib
         [CanBeNull]
         public object FindDataObjectUsingID(Guid id)
         {
-            if (Minerals.ContainsKey(id))
-                return Minerals[id];
-
+            var cargoGood = CargoGoods.GetAny(id);
+            if (cargoGood != null)
+                return cargoGood;
+            
             if (Techs.ContainsKey(id))
                 return Techs[id];
-
-            if (ProcessedMaterials.ContainsKey(id))
-                return ProcessedMaterials[id];
 
             if (ComponentTemplates.ContainsKey(id))
                 return ComponentTemplates[id];
@@ -200,23 +193,17 @@ namespace Pulsar4X.ECSLib
         internal void SetStorageTypeMap()
         {
             StorageTypeMap.Clear();
-            foreach (var item in Minerals)          
-                StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);                       
-            foreach (var item in ProcessedMaterials)
+            var allCargoDefs = CargoGoods.GetAll();
+            foreach (var item in allCargoDefs)          
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
             foreach (var item in ComponentTemplates)
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
         }
 
 
-        public ICargoable GetICargoable(Guid ID)
+        public ICargoable GetICargoable(Guid id)
         {
-            if (Minerals.ContainsKey(ID))
-                return Minerals[ID];
-            if (ProcessedMaterials.ContainsKey(ID))
-                return ProcessedMaterials[ID];
-            else
-                return null;
+            return (ICargoable)CargoGoods.GetAny(id);
         }
 
         #endregion
@@ -280,10 +267,7 @@ namespace Pulsar4X.ECSLib
         {
             if (minerals != null)
             {
-                foreach (var mineral in minerals)
-                {
-                    Minerals[mineral.Key] = mineral.Value; // replace existing value or insert a new one as required.               
-                }
+                CargoGoods.LoadMineralDefinitions(minerals.Values.ToList());
             }
         }
 
@@ -307,8 +291,7 @@ namespace Pulsar4X.ECSLib
         {
             if (recipes != null)
             {
-                foreach (KeyValuePair<Guid, ProcessedMaterialSD> recipe in recipes)
-                    ProcessedMaterials[recipe.Key] = recipe.Value;
+                CargoGoods.LoadMaterialsDefinitions(recipes.Values.ToList());
             }
         }
 
@@ -371,24 +354,6 @@ namespace Pulsar4X.ECSLib
                 StaticDataManager.LoadData(dataSet, (Game)context.Context);
             }
             SetStorageTypeMap();
-        }
-
-        internal StaticDataStore Clone()
-        {
-            StaticDataStore clone = new StaticDataStore
-            {
-                AtmosphericGases = new WeightedList<AtmosphericGasSD>(AtmosphericGases),
-                CommanderNameThemes = new List<CommanderNameThemeSD>(CommanderNameThemes),
-                ComponentTemplates = new Dictionary<Guid, ComponentTemplateSD>(ComponentTemplates),
-                _loadedDataSets = new List<DataVersionInfo>(LoadedDataSets),
-                Minerals = new Dictionary<Guid, MineralSD>(Minerals),
-                ProcessedMaterials = new Dictionary<Guid, ProcessedMaterialSD>(ProcessedMaterials),
-                CargoTypes = new Dictionary<Guid, CargoTypeSD>(CargoTypes),
-                SystemGenSettings = SystemGenSettings, // Todo: Make this cloneable
-                Techs = new Dictionary<Guid, TechSD>(Techs)
-            };
-
-            return clone;
         }
         #endregion
 

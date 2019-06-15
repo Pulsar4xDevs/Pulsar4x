@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -44,6 +45,7 @@ namespace Pulsar4X.ECSLib
         {
             return storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts[itemGuid];
         }
+
         public static long GetAmount(CargoStorageDB storeDB, ICargoable item)
         {
             return storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID];
@@ -245,6 +247,18 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
+
+        public static CargoCapacityCheckResult GetAvailableSpace(CargoStorageDB storeDB, Guid itemGuid, ICargoDefinitionsLibrary library)
+        {
+            var cargoDefinition = library.GetOther(itemGuid);
+            if (cargoDefinition.Mass == 0)
+                return new CargoCapacityCheckResult(itemGuid, long.MaxValue, long.MaxValue);
+
+            return new CargoCapacityCheckResult(itemGuid, 
+                storeDB.StoredCargoTypes[cargoDefinition.CargoTypeID].FreeCapacityKg / cargoDefinition.Mass,
+                storeDB.StoredCargoTypes[cargoDefinition.CargoTypeID].FreeCapacityKg);
+        }
+
     }
 
 }
