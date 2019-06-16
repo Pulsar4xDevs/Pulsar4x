@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib
 {
@@ -9,7 +10,7 @@ namespace Pulsar4X.ECSLib
 
         public DateTime LastProcessDateTime { get; internal set; }
 
-        public Vector4 DeltaVToExpend_AU  { get; internal set; }
+        public Vector2 DeltaVToExpend_AU  { get; internal set; }
 
         public DateTime ActionOnDateTime { get; internal set; }
 
@@ -30,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public DateTime LastProcessDateTime = new DateTime();
 
         [JsonProperty]
-        public Vector4 SavedNewtonionVector_AU { get; internal set; }
+        public Vector2 SavedNewtonionVector_AU { get; internal set; }
 
         [JsonProperty]
         public Vector4 TranslateEntryPoint_AU { get; internal set; }

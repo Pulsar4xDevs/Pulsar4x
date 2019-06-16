@@ -175,7 +175,7 @@ namespace Pulsar4X.SDL2UI
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
             if (_entity.HasDataBlob<OrbitDB>())
             {
-                var vector = OrbitProcessor.PreciseOrbitalVelocityPolarCoordinate(_entity.GetDataBlob<OrbitDB>(), atDateTime);
+                var vector = OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate(_entity.GetDataBlob<OrbitDB>(), atDateTime);
                 Heading = (float)vector.angle;
             }
             else if (_entity.HasDataBlob<TranslateMoveDB>())
@@ -190,7 +190,7 @@ namespace Pulsar4X.SDL2UI
 
             var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
             var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
-            var rotateMatrix = Matrix.NewRotateMatrix(Heading);
+            var rotateMatrix = Matrix.NewRotateMatrix(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
 
             var shipMatrix = scaleMatrix * rotateMatrix * mirrorMatrix ;
 

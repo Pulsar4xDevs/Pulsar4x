@@ -39,7 +39,7 @@ namespace Pulsar4X.SDL2UI
 
         internal Camera Camera;// = new Camera();
         internal ImGuiSDL2CSWindow ViewPort;
-        internal Vector2 MainWinSize{get{return ViewPort.Size;}}
+        internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new Dictionary<Type, PulsarGuiWindow>();
         internal PulsarGuiWindow ActiveWindow { get; set; }

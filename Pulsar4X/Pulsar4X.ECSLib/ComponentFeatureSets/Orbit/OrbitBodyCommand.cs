@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using NUnit.Framework;
+using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib
 {
@@ -17,7 +15,7 @@ namespace Pulsar4X.ECSLib
 
         NewtonionMoveDB _db;
 
-        public static void CreateCommand(Game game, Entity faction, Entity orderEntity, DateTime actionDateTime, Vector4 expendDeltaV_AU)
+        public static void CreateCommand(Game game, Entity faction, Entity orderEntity, DateTime actionDateTime, Vector2 expendDeltaV_AU)
         {
             var cmd = new ChangeCurrentOrbitCommand()
             {
@@ -41,10 +39,11 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                 Entity parentEntity = EntityCommanding.GetDataBlob<OrbitDB>().Parent;
-                Vector4 newVector = OrbitProcessor.PreciseOrbitalVelocityVector(EntityCommanding.GetDataBlob<OrbitDB>(), _db.ActionOnDateTime);
+                Vector2 newVector = OrbitProcessor.InstantaneousOrbitalVelocityVector(EntityCommanding.GetDataBlob<OrbitDB>(), _db.ActionOnDateTime);
                 newVector += _db.DeltaVToExpend_AU;
                 var spdmps = Distance.AuToMt( newVector.Length());
-                OrbitDB newOrbit = OrbitDB.FromVector(parentEntity, EntityCommanding, newVector, _db.ActionOnDateTime);
+                Vector4 newVector3d = new Vector4(newVector.X, newVector.Y,0,0);
+                OrbitDB newOrbit = OrbitDB.FromVector(parentEntity, EntityCommanding, newVector3d, _db.ActionOnDateTime);
                 /*
                 if (newOrbit.Periapsis > targetSOI)
                 {
@@ -141,7 +140,7 @@ namespace Pulsar4X.ECSLib
                 var sgp = GameConstants.Science.GravitationalConstant * masses / 3.347928976e33;
 
                 //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
-                Vector4 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
+                Vector2 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
                 _db = new TranslateMoveDB(targetIntercept.Item1);
                 _db.TranslateRalitiveExit_AU = TargetOffsetPosition_AU;
                 _db.EntryDateTime = TransitStartDateTime;

@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         int _selectedItemIndex = -1;
         Guid _selectedFC;
         List<Guid> _selectedFCAssignedWeapons = new List<Guid>();
-        Vector2 _selectableBtnSize = new Vector2(100, 18);
+        System.Numerics.Vector2 _selectableBtnSize = new System.Numerics.Vector2(100, 18);
 
         Dictionary<Guid, string> _systemEntityNames = new Dictionary<Guid, string>();
         Dictionary<Guid, SensorContact> _sensorContacts = new Dictionary<Guid, SensorContact>();
@@ -158,8 +158,8 @@ namespace Pulsar4X.SDL2UI
                 PreFrameSetup();
             if (IsActive)
             {
-                Vector2 size = new Vector2(200, 100);
-                Vector2 pos = new Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
+                var size = new System.Numerics.Vector2(200, 100);
+                var pos = new System.Numerics.Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
 
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);

@@ -148,8 +148,8 @@ namespace Pulsar4X.SDL2UI
             DateTime systemDateTime = _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, systemDateTime);
             double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
-            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_orbitDB.MeanAnomalyAtEpoch, _orbitDB.MeanMotion, secondsFromEpoch);
-            
+            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(Angle.ToRadians(_orbitDB.MeanAnomalyAtEpoch), Angle.ToRadians(_orbitDB.MeanMotion), secondsFromEpoch);
+
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
             _bodyPosPnt = new PointD()
             {
@@ -700,11 +700,11 @@ namespace Pulsar4X.SDL2UI
                 new SDL.SDL_Color() {a = 0} 
             };
 
-            var speed = OrbitMath.PreciseOrbitalSpeed(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU.Length(), _semiMajAxis);
+            var speed = OrbitMath.InstantaneousOrbitalSpeed(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU.Length(), _semiMajAxis);
             speed = Distance.AuToKm(speed);
             var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom);
             heading += _loP;
-            var vector = OrbitMath.PreciseOrbitalVelocityVector(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU, _semiMajAxis, _orbitDB.Eccentricity, _trueAnom, _loP);
+            var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
             var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
             var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
             PointD[] headingLine = { new PointD() { X=0,Y=0 }, new PointD() { X = vnorm.X, Y = vnorm.Y }, };
@@ -740,7 +740,7 @@ namespace Pulsar4X.SDL2UI
             DateTime systemDateTime = _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime;
             double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, systemDateTime);
-            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_orbitDB.MeanAnomalyAtEpoch, _orbitDB.MeanMotion, secondsFromEpoch);
+            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(Angle.ToRadians(_orbitDB.MeanAnomalyAtEpoch), Angle.ToRadians( _orbitDB.MeanMotion), secondsFromEpoch);
 
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
             var meanAnom2 = OrbitMath.GetMeanAnomaly(_orbitDB.Eccentricity, _eccentricAnom);
@@ -774,7 +774,7 @@ namespace Pulsar4X.SDL2UI
 
             var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom);
             heading += _loP;
-            var vector = OrbitMath.PreciseOrbitalVelocityVector(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU, _semiMajAxis, _orbitDB.Eccentricity, _trueAnom, _loP);
+            var vector = OrbitMath.InstantaneousOrbitalVelocityVector(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU, _semiMajAxis, _orbitDB.Eccentricity, _trueAnom);
             var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
             var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
             PointD[] headingLine = { new PointD() { X = 0, Y = 0 }, new PointD() { X = vnorm.X, Y = vnorm.Y }, };

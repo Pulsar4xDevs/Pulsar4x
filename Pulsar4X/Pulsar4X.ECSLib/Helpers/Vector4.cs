@@ -1,4 +1,5 @@
 ﻿using System;
+using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib
 {
@@ -297,6 +298,12 @@ namespace Pulsar4X.ECSLib
             return new Vector4(left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W);
         }
 
+        public static Vector4 operator +(Vector4 left, Vector2 right)
+        {
+            return new Vector4(left.X + right.X, left.Y + right.Y, left.Z , left.W);
+        }
+
+
         /// <summary>
         /// Divides the first vector by the second. 
         /// </summary>
@@ -370,6 +377,13 @@ namespace Pulsar4X.ECSLib
             return new Vector4(-value.X, -value.Y, -value.Z, - value.W);
         }
 
+        public static explicit operator Vector4(Vector2 v2)  // explicit vector2 to vector4 conversion operator
+        {
+            return new Vector4(v2.X, v2.Y, 0, 0);
+        }
+
         #endregion
     }
+
+
 }

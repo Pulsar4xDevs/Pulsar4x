@@ -37,7 +37,7 @@ namespace Pulsar4X.Tests
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
             double sgpKm = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
-            var speedKm = OrbitMath.PreciseOrbitalSpeed(sgpKm, 405400, 384399);
+            var speedKm = OrbitMath.InstantaneousOrbitalSpeed(sgpKm, 405400, 384399);
             Assert.AreEqual(0.97, speedKm, 0.01);
         }
 
@@ -82,7 +82,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(Distance.AuToKm(elements.Periapsis), elementsKm.Periapsis, 0.001);
 
             //var ta = OrbitMath.TrueAnomalyFromEccentricAnomaly(elements.Eccentricity, elements.)
-            var speedAU = OrbitMath.PreciseOrbitalSpeed(sgp, position.Length(), elements.SemiMajorAxis);
+            var speedAU = OrbitMath.InstantaneousOrbitalSpeed(sgp, position.Length(), elements.SemiMajorAxis);
             //var speedVectorAU = OrbitMath.PreciseOrbitalVelocityVector(sgp, position, elements.SemiMajorAxis, elements.Eccentricity, elements.LoAN + elements.AoP);
             //Assert.AreEqual(speedAU, speedVectorAU.Length());
 
@@ -90,7 +90,7 @@ namespace Pulsar4X.Tests
 
 
             var speedKm = velocityKm.Length();
-            var speedKm2 = OrbitMath.PreciseOrbitalSpeed(sgpKm, postionKm.Length(), elementsKm.SemiMajorAxis);
+            var speedKm2 = OrbitMath.InstantaneousOrbitalSpeed(sgpKm, postionKm.Length(), elementsKm.SemiMajorAxis);
             Assert.AreEqual(speedKm, speedKm2, 0.001);
 
 

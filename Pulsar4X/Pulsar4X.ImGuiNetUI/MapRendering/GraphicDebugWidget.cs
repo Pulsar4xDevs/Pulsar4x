@@ -79,6 +79,13 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             ImGui.Text("y" + _debugWidget.ViewScreenPos.y);
 
+            ImGui.SliderFloat("MatrixArrow Scale X", ref _debugWidget.MtxArwScaleX, -10, 10);
+            ImGui.SliderFloat("MatrixArrow Scale Y", ref _debugWidget.MtxArwScaleY, -10, 10);
+            ImGui.SliderAngle("MatrixArrow Rotate", ref _debugWidget.MtxArwAngle);
+            ImGui.Checkbox("MatrixArrow Mirror X", ref _debugWidget.MtxArwMirrorX);
+            ImGui.Checkbox("MatrixArrow Mirror Y", ref _debugWidget.MtxArwMirrorY);
+            ImGui.Text("Mirrors *around* the given axis, ie mirroring around X will flip Y");
+
             ImGui.Checkbox("Scales With Zoom", ref _debugWidget.Scales);
             ImGui.SliderFloat("X offset in AU", ref _debugWidget.XOffset, -2, 2);
             ImGui.SliderFloat("Y offset in AU", ref _debugWidget.YOffset, -2, 2);
@@ -108,6 +115,15 @@ namespace Pulsar4X.SDL2UI
         PointD _ctrPnt { get { return new PointD() { X = XOffset, Y = YOffset }; } }
         ElementItem _anglelineItem;
         ElementItem _testAngleItem;
+
+        ElementItem _mtxArwItem;
+        internal float MtxArwAngle;
+        internal float MtxArwScaleX = 1;
+        internal float MtxArwScaleY = 1;
+        internal bool MtxArwMirrorX = true;
+        internal bool MtxArwMirrorY;
+
+
         public GraphicDebugWidget(Vector4 position) : base(position)
         {
 
@@ -195,6 +211,33 @@ namespace Pulsar4X.SDL2UI
                 }
             };
             ElementItems.Add(_testAngleItem);
+
+
+
+            SDL.SDL_Color[] matxRtArwColour =
+              
+  {new SDL.SDL_Color() {r=255, g=255, b= 255, a=100} };
+            SDL.SDL_Color[] matxRtArwHColour =
+                {new SDL.SDL_Color() {r=255, g=255, b= 255, a=255} };
+            _mtxArwItem = new ElementItem()
+            {
+                NameString = "Arrow",
+                Colour = matxRtArwColour,
+                HighlightColour = matxRtArwHColour,
+                DataItem = Angle.ToDegrees(MtxArwAngle),
+                DataString = Angle.ToDegrees(MtxArwAngle).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.CreateArrow(128),
+                    Colors = matxRtArwColour,
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                }
+            };
+     
         }
 
 
@@ -213,6 +256,9 @@ namespace Pulsar4X.SDL2UI
             };
             _testAngleItem.DataString = Angle.ToDegrees(TestingAngle).ToString() + "°";
             _testAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD(), 128, -16, 0, TestingAngle, 128);
+
+
+
         }
 
 
@@ -243,7 +289,7 @@ namespace Pulsar4X.SDL2UI
                     if (shape.Scales)
                         transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
                     else
-                       transformedPoint = nonZoomMatrix.TransformD(pnt.X, pnt.Y);
+                        transformedPoint = nonZoomMatrix.TransformD(pnt.X, pnt.Y);
 
                     x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
                     y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
@@ -258,6 +304,32 @@ namespace Pulsar4X.SDL2UI
                     ColourChanges = shape.ColourChanges
                 });
             }
+
+
+            PointD[] mtxArwPts = new PointD[_mtxArwItem.Shape.Points.Length];
+            var mm = Matrix.NewMirrorMatrix(MtxArwMirrorX, MtxArwMirrorY);
+            var mr = Matrix.NewRotateMatrix(MtxArwAngle);
+            var ms = Matrix.NewScaleMatrix(MtxArwScaleX, MtxArwScaleY);
+            var tl = mm * ms * mr;
+            for (int i = 0; i < _mtxArwItem.Shape.Points.Length; i++)
+            {
+                var pnt = _mtxArwItem.Shape.Points[i];
+                var transformedPoint = tl.TransformD(pnt.X, pnt.Y);
+                
+                mtxArwPts[i] = new PointD(){
+                 X = ViewScreenPos.x + transformedPoint.X,
+                 Y = ViewScreenPos.y + transformedPoint.Y 
+                 };
+            }
+
+           DrawComplexShapes.Add(new ComplexShape()
+            {
+                Points = mtxArwPts,
+                Colors = _mtxArwItem.Shape.Colors,
+                ColourChanges = _mtxArwItem.Shape.ColourChanges
+      
+            });
+
         }
 
 

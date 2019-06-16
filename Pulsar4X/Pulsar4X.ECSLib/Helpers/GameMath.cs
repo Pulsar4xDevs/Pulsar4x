@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib
 {
@@ -101,6 +102,10 @@ namespace Pulsar4X.ECSLib
         {
             return km / GameConstants.Units.KmPerAu;
         }
+        public static Vector2 KmToAU(Vector2 km)
+        {
+            return km / GameConstants.Units.KmPerAu;
+        }
         public static double AuToKm(double au)
         {
             return au * GameConstants.Units.KmPerAu;
@@ -109,10 +114,19 @@ namespace Pulsar4X.ECSLib
         {
             return new Vector4(AuToKm(Au.X), AuToKm(Au.Y), AuToKm(Au.Z), 0);
         }
+        public static Vector2 AuToKm(Vector2 Au)
+        {
+            return new Vector2(AuToKm(Au.X), AuToKm(Au.Y));
+        }
 
         public static Vector4 AuToMt(Vector4 au)
         {
             Vector4 meters = au * GameConstants.Units.MetersPerAu;
+            return meters;
+        }
+        public static Vector2 AuToMt(Vector2 au)
+        {
+            Vector2 meters = au * GameConstants.Units.MetersPerAu;
             return meters;
         }
         public static double AuToMt(double au)

@@ -1,4 +1,6 @@
 ﻿using System;
+using Pulsar4X.Vectors;
+
 namespace Pulsar4X.ECSLib
 {
 
@@ -351,45 +353,55 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region VelocityAndSpeed;
-            /*
+        /*
+    /// <summary>
+    /// 2d Velocity vector in polar coordinates.
+    /// </summary>
+    /// <returns>item1 is speed (distance/s), item2 is heading in radians.</returns>
+    /// <param name="sgp">Sgp.</param>
+    /// <param name="position">Position.</param>
+    /// <param name="sma">Sma.</param>
+    /// <param name="eccentricity">Eccentricity.</param>
+    /// <param name="loP">Lo p.</param>
+    public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double sma, double eccentricity, double loP)
+    {
+        var radius = position.Length();
+        var spd = PreciseOrbitalSpeed(sgp, radius, sma);
+
+        double linierEcc = EllipseMath.LinierEccentricityFromEccentricity(sma, eccentricity);
+
+        double referenceToPosAngle = Math.Atan2(position.X, -position.Y); //we switch x and y here so atan2 works in the y direction. 
+
+        double anglef = loP - referenceToPosAngle;
+
+        //find angle alpha using law of cos: (a^2 + b^2 - c^2) / 2ab
+        double sideA = radius;
+        double sideB = 2 * sma - radius;
+        double sideC = 2 * linierEcc;
+        double alpha = Math.Acos((sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB));
+
+        double angle = Math.PI - (referenceToPosAngle + ((Math.PI - alpha) * 0.5));
+
+        return new Tuple<double, double>(spd, angle);
+    }*/
+
         /// <summary>
-        /// 2d Velocity vector in polar coordinates.
+        /// This returns the heading mesured from the periapsis (AoP) in radians
+        /// Add the LoP to this to get the true heading in a 2d orbit. 
         /// </summary>
-        /// <returns>item1 is speed (distance/s), item2 is heading in radians.</returns>
+        /// <returns>The orbital velocity polar coordinate.</returns>
         /// <param name="sgp">Sgp.</param>
         /// <param name="position">Position.</param>
-        /// <param name="sma">Sma.</param>
+        /// <param name="semiMajorAxis">Semi major axis.</param>
         /// <param name="eccentricity">Eccentricity.</param>
-        /// <param name="loP">Lo p.</param>
-        public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double sma, double eccentricity, double loP)
+        /// <param name="trueAnomaly">True anomaly.</param>
+        public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double semiMajorAxis, double eccentricity, double trueAnomaly)
         {
             var radius = position.Length();
-            var spd = PreciseOrbitalSpeed(sgp, radius, sma);
-
-            double linierEcc = EllipseMath.LinierEccentricityFromEccentricity(sma, eccentricity);
-
-            double referenceToPosAngle = Math.Atan2(position.X, -position.Y); //we switch x and y here so atan2 works in the y direction. 
-
-            double anglef = loP - referenceToPosAngle;
-
-            //find angle alpha using law of cos: (a^2 + b^2 - c^2) / 2ab
-            double sideA = radius;
-            double sideB = 2 * sma - radius;
-            double sideC = 2 * linierEcc;
-            double alpha = Math.Acos((sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB));
-
-            double angle = Math.PI - (referenceToPosAngle + ((Math.PI - alpha) * 0.5));
-
-            return new Tuple<double, double>(spd, angle);
-        }*/
-
-        public static (double speed, double heading) PreciseOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double semiMajorAxis, double eccentricity, double trueAnomaly, double loP)
-        {
-            var radius = position.Length();
-            var spd = PreciseOrbitalSpeed(sgp, radius, semiMajorAxis);
+            var spd = InstantaneousOrbitalSpeed(sgp, radius, semiMajorAxis);
 
             var heading = HeadingFromPeriaps(position, eccentricity, semiMajorAxis, trueAnomaly);
-            heading +=  loP;
+
             return (spd, heading);
         }
 
@@ -422,17 +434,16 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// 2d! vector. 
+        /// vector ralitive to AoP 
         /// </summary>
-        /// <returns>The orbital vector ralitive to the parent</returns>
+        /// <returns>The orbital vector ralitive to the Argument Of Periapsis</returns>
         /// <param name="sgp">Standard Grav Perameter. in AU</param>
         /// <param name="position">Ralitive Position.</param>
         /// <param name="sma">SemiMajorAxis</param>
-        /// <param name="loP">Longditude of Periapsis (LoAN+ AoP) </param>
-        public static Vector4 PreciseOrbitalVelocityVector(double sgp, Vector4 position, double sma, double eccentricity, double trueAnomaly, double loP)
+        public static Vector2 InstantaneousOrbitalVelocityVector(double sgp, Vector4 position, double sma, double eccentricity, double trueAnomaly)
         {
-            (double speed, double angle) = PreciseOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly, loP);
-            var v = new Vector4()
+            (double speed, double angle) = InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly);
+            var v = new Vector2()
             {
                 Y = Math.Cos(angle) * speed,
                 X = Math.Sin(angle) * speed
@@ -444,6 +455,8 @@ namespace Pulsar4X.ECSLib
             return v;
         }
 
+
+
         /// <summary>
         /// returns the speed for an object of a given mass at a given radius from a body. this is the vis-viva calculation
         /// </summary>
@@ -451,7 +464,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="standardGravParameter">standardGravParameter.</param>
         /// <param name="distance">Radius.</param>
         /// <param name="semiMajAxis">Semi maj axis.</param>
-        public static double PreciseOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
+        public static double InstantaneousOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
         {
             var spd = Math.Sqrt(standardGravParameter * (2 / distance - 1 / semiMajAxis));
             if (double.IsNaN(spd))

@@ -45,9 +45,9 @@ namespace Pulsar4X.SDL2UI
 
         //public ImVec2 WorldPosition { get { return _cameraWorldPosition; } }
 
-        public Vector2 ViewPortCenter { get { return new Vector2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); } }
+        public System.Numerics.Vector2 ViewPortCenter { get { return new System.Numerics.Vector2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); } }
 
-        public Vector2 ViewPortSize { get { return _viewPort.Size; } }
+        public System.Numerics.Vector2 ViewPortSize { get { return _viewPort.Size; } }
         public float ZoomLevel { get; set; } = 200;
         public float zoomSpeed { get; set; } = 1.25f;
 
@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
 
         public ECSLib.Vector4 MouseWorldCoordinate()
         {
-            Vector2 mouseCoord = ImGui.GetMousePos();
+            System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
             double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) - CameraWorldPosition.X;
             double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
             return new ECSLib.Vector4(x, y, 0, 0);
@@ -164,9 +164,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewSize"></param>
         /// <returns></returns>
-        public Vector2 WorldSize(Vector2 viewSize)
+        public System.Numerics.Vector2 WorldSize(System.Numerics.Vector2 viewSize)
         {
-            return new Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
+            return new System.Numerics.Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
         }
 
 

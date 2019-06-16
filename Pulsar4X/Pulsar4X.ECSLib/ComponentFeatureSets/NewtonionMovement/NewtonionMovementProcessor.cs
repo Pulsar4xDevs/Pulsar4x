@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
                 Vector4 totalForce = gravForceVector + newtonMoveDB.ThrustVector;
 
                 Vector4 acceleration_mps = totalForce / Mass_Kg;
-                Vector4 newVelocity = newtonMoveDB.CurrentVector_kms + (acceleration_mps * timeStep * 0.001);
+                Vector4 newVelocity = (acceleration_mps * timeStep * 0.001) + newtonMoveDB.CurrentVector_kms;
 
                 newtonMoveDB.CurrentVector_kms = newVelocity;
                 Vector4 deltaPos = (newtonMoveDB.CurrentVector_kms + newVelocity) / 2 * timeStep;
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
                     {
                         var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
                         newParent = orbitDB.Parent;
-                        var parentVelocity = OrbitProcessor.PreciseOrbitalVelocityVector(orbitDB, entity.Manager.ManagerSubpulses.StarSysDateTime);
+                        var parentVelocity = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, entity.Manager.ManagerSubpulses.StarSysDateTime);
                         parentRalitiveVector = Distance.KmToAU(newtonMoveDB.CurrentVector_kms) + parentVelocity;
                         var pvlen = Distance.AuToKm( parentVelocity.Length());
                         var vlen = newtonMoveDB.CurrentVector_kms.Length();

@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
 
         DateTime _departureDateTime;
         double _departureOrbitalSpeed = double.NaN;
-        ECSLib.Vector4 _departureOrbitalVelocity = ECSLib.Vector4.NaN;
+        Vectors.Vector2 _departureOrbitalVelocity = Vectors.Vector2.NaN;
         double _departureAngle = double.NaN;
 
         double _insertionOrbitalSpeed = double.NaN;
@@ -141,7 +141,7 @@ namespace Pulsar4X.SDL2UI
 
             //debug code:
             var sgpCur = _orderEntityOrbit.GravitationalParameterAU;
-            var ralitiveVel1 = OrbitProcessor.PreciseOrbitalVelocityVector(_orderEntityOrbit, _departureDateTime);
+            var ralitiveVel1 = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orderEntityOrbit, _departureDateTime);
             var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
             var smaCurrOrbtAU = _orderEntityOrbit.SemiMajorAxis;
             //var ralitiveVel2 = OrbitMath.PreciseOrbitalVelocityVector(_stdGravParamCurrentBody, ralPosCBAU, smaCurrOrbtAU, _orderEntityOrbit.Eccentricity, _orderEntityOrbit.LongitudeOfAscendingNode + _orderEntityOrbit.ArgumentOfPeriapsis); 
@@ -167,7 +167,7 @@ namespace Pulsar4X.SDL2UI
             InsertionCalcs();
 
 
-            Vector2 viewPortSize = _state.Camera.ViewPortSize;
+            System.Numerics.Vector2 viewPortSize = _state.Camera.ViewPortSize;
             float windowLen = Math.Min(viewPortSize.X, viewPortSize.Y);
             if (soiViewUnits < windowLen * 0.5)
             {
@@ -281,8 +281,8 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                Vector2 size = new Vector2(200, 100);
-                Vector2 pos = new Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
+                var size = new System.Numerics.Vector2(200, 100);
+                var pos = new System.Numerics.Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
 
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
@@ -417,7 +417,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text(_departureAngle.ToString("g3") + " radians or " + Angle.ToDegrees(_departureAngle).ToString("F") + " deg ");
 
-                    var pc = OrbitProcessor.PreciseOrbitalVelocityPolarCoordinate(_orderEntityOrbit, _departureDateTime);
+                    var pc = OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate(_orderEntityOrbit, _departureDateTime);
 
                     ImGui.Text("Departure Polar Coordinates: ");
                     ImGui.Text(pc.Item1.ToString() + " AU or " + Distance.AuToMt(pc.Item1).ToString("F") + " m/s");
@@ -501,7 +501,8 @@ namespace Pulsar4X.SDL2UI
             double y = (_radialDV * Math.Sin(_departureAngle)) + (_progradeDV * Math.Cos(_departureAngle));
             _deltaV_MS = new ECSLib.Vector4(x, y, 0, 0);
 
-            _insertionOrbitalVelocity = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+            var insertionVector2d = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+            _insertionOrbitalVelocity = new ECSLib.Vector4(insertionVector2d.X, insertionVector2d.Y, 0, 0);
 
             _insertionOrbitalVelocity += Distance.MToAU( _deltaV_MS);
             _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
