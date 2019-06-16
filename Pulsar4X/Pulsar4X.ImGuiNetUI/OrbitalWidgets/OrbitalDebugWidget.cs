@@ -774,8 +774,8 @@ namespace Pulsar4X.SDL2UI
 
             var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom);
             heading += _loP;
-            var vector = OrbitMath.InstantaneousOrbitalVelocityVector(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU, _semiMajAxis, _orbitDB.Eccentricity, _trueAnom);
-            var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
+            var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
+            var vnorm = Vectors.Vector2.Normalise(vector) * 64;
             var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
             PointD[] headingLine = { new PointD() { X = 0, Y = 0 }, new PointD() { X = vnorm.X, Y = vnorm.Y }, };
             //headingPoints.Concat(headingLine);

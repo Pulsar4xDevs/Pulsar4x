@@ -329,14 +329,11 @@ namespace Pulsar4X.ECSLib
             double trueAnomaly = GetTrueAnomaly(orbit, atDateTime);
             double loAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
             double aoP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            if (orbit.Inclination > 90 && orbit.Inclination < 270)
-            {
-                aoP = -aoP;
-                trueAnomaly = -trueAnomaly;
-            }
+            double inclination = Angle.ToRadians(orbit.Inclination);
+            var loP = OrbitMath.GetLongditudeOfPeriapsis(inclination, aoP, loAN);
 
             (double speed,double angle) polar = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly);
-            polar.angle += loAN + aoP;
+            polar.angle += loP;
             return polar;
             
         }
@@ -357,7 +354,15 @@ namespace Pulsar4X.ECSLib
       
             double e = orbit.Eccentricity;
             double trueAnomaly = OrbitProcessor.GetTrueAnomaly(orbit, atDateTime);
-            return OrbitMath.InstantaneousOrbitalVelocityVector(sgp, position, sma, e, trueAnomaly);
+
+            (double speed, double angle) polarvector = InstantaneousOrbitalVelocityPolarCoordinate(orbit, atDateTime);
+            var v = new Vector2()
+            {
+                Y = Math.Sin(polarvector.angle) * polarvector.speed,
+                X = Math.Cos(polarvector.angle) * polarvector.speed
+            };
+            return v;
+            //return OrbitMath.InstantaneousOrbitalVelocityVector(sgp, position, sma, e, trueAnomaly);
         }
 
         /// <summary>

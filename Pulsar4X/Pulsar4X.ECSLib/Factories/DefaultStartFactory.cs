@@ -104,6 +104,7 @@ namespace Pulsar4X.ECSLib
             double test_M0 = 0;     //°
             double test_bodyMass = ship2.GetDataBlob<MassVolumeDB>().Mass;
             OrbitDB testOrbtdb_ship2 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
+            ship2.RemoveDataBlob<OrbitDB>();
             ship2.SetDataBlob(testOrbtdb_ship2);
             ship2.GetDataBlob<PositionDB>().SetParent(solStar);
             StaticRefLib.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship2, 0);
@@ -112,6 +113,7 @@ namespace Pulsar4X.ECSLib
             test_i = 180;
             test_aop = 0;
             OrbitDB testOrbtdb_ship3 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
+            ship3.RemoveDataBlob<OrbitDB>();
             ship3.SetDataBlob(testOrbtdb_ship3);
             ship3.GetDataBlob<PositionDB>().SetParent(solStar);
             StaticRefLib.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship3, 0);

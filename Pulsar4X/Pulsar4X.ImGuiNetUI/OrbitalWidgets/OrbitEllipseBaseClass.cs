@@ -77,6 +77,7 @@ namespace Pulsar4X.SDL2UI
 
             _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
 
+            /*
             if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270) //orbitDB is in degrees.
             {
                 IsClockwiseOrbit = false;
@@ -88,8 +89,13 @@ namespace Pulsar4X.SDL2UI
                 _loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode + _orbitDB.ArgumentOfPeriapsis);
             }
             _loP_radians = (float)(Angle.ToRadians(_loP_Degrees));
-
-
+            */
+            var i = Angle.ToRadians(_orbitDB.Inclination);
+            var aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
+            var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
+            var lop = OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
+            _loP_radians = (float)lop;
+            _loP_Degrees = (float)Angle.ToDegrees(lop);
 
         }
         /// <summary>

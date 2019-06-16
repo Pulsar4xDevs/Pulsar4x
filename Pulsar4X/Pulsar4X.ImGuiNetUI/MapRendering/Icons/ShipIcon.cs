@@ -9,11 +9,27 @@ namespace Pulsar4X.SDL2UI
     {
         ShipInfoDB _shipInfo;
         ComponentInstancesDB _componentInstances;
+        OrbitDB _orbitDB;
+        TranslateMoveDB _tlmoveDB;
+        float _lop;
         Entity _entity;
         public ShipIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
         {
             _shipInfo = entity.GetDataBlob<ShipInfoDB>();
             _componentInstances = entity.GetDataBlob<ComponentInstancesDB>();
+            if (entity.HasDataBlob<OrbitDB>())
+            {
+                _orbitDB = entity.GetDataBlob<OrbitDB>();
+                var i = Angle.ToRadians(_orbitDB.Inclination);
+                var aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
+                var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
+                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
+            }
+            else if (entity.HasDataBlob<TranslateMoveDB>())
+                _tlmoveDB = entity.GetDataBlob<TranslateMoveDB>();
+            entity.ChangeEvent += Entity_ChangeEvent;
+
+
 
             _entity = entity;
             BasicShape();
@@ -27,6 +43,31 @@ namespace Pulsar4X.SDL2UI
             Reactors(100, 100, 0, 90);
             Engines(100, 60, 0, 130);
         }
+
+        void Entity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        {
+            if(changeType == EntityChangeData.EntityChangeType.DBAdded)
+            {
+                if (db is OrbitDB)
+                {
+                    _orbitDB = (OrbitDB)db;
+                    var i = Angle.ToRadians(_orbitDB.Inclination);
+                    var aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
+                    var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
+                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
+                }
+                else if (db is TranslateMoveDB)
+                    _tlmoveDB = (TranslateMoveDB)db;                    
+            }
+            else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
+            {
+                if (db is OrbitDB)
+                    _orbitDB = null;
+                else if (db is TranslateMoveDB)
+                    _tlmoveDB = null;
+            }
+        }
+
 
         void BasicShape()
         {
@@ -173,14 +214,17 @@ namespace Pulsar4X.SDL2UI
         {
 
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
-            if (_entity.HasDataBlob<OrbitDB>())
+            if (_orbitDB != null)
             {
-                var vector = OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate(_entity.GetDataBlob<OrbitDB>(), atDateTime);
-                Heading = (float)vector.angle;
+
+                //var ecAnom = Angle.ToRadians(_orbitDB.)
+                var truAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB,atDateTime);
+                var heading = OrbitMath.HeadingFromPeriaps(_positionDB.RelativePosition_AU, _orbitDB.Eccentricity, _orbitDB.SemiMajorAxis, truAnom);
+                Heading = (float)(heading + _lop);
             }
-            else if (_entity.HasDataBlob<TranslateMoveDB>())
+            else if (_tlmoveDB != null)
             {
-                Heading = _entity.GetDataBlob<TranslateMoveDB>().Heading_Radians;
+                Heading = _tlmoveDB.Heading_Radians;
             }
 
         }
@@ -192,7 +236,7 @@ namespace Pulsar4X.SDL2UI
             var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
             var rotateMatrix = Matrix.NewRotateMatrix(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
 
-            var shipMatrix = scaleMatrix * rotateMatrix * mirrorMatrix ;
+            var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
 
             ViewScreenPos = camera.ViewCoordinate(WorldPosition);
 

@@ -426,7 +426,7 @@ namespace Pulsar4X.ECSLib
             double bar = ((2 - 2 * e * e) / (k * (2 - k))) - 1 ;
             double foo = GMath.Clamp(bar, - 1, 1);
             double alpha = Math.Acos(foo);
-            if (trueAnomaly > Math.PI)
+            if (trueAnomaly > Math.PI || trueAnomaly < 0)
                 alpha = -alpha;
             double heading = f + ((Math.PI - alpha) / 2);
             return heading;
@@ -879,6 +879,21 @@ namespace Pulsar4X.ECSLib
             return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
         }
 
+        /// <summary>
+        /// Returns the LoP in 2d space (a retrograde orbits aop will be sign switched)
+        /// </summary>
+        /// <returns>The of periapsis2d.</returns>
+        /// <param name="loAN">Lo an.</param>
+        /// <param name="aoP">Ao p.</param>
+        /// <param name="inclination">Inclination.</param>
+        public static double LonditudeOfPeriapsis2d(double loAN, double aoP, double inclination)
+        {
+            if (inclination > Math.PI * 0.5 && inclination < Math.PI * 1.5)
+            {
+                aoP = -aoP;
+            }
+            return loAN + aoP;
+        }
 
         /// <summary>
         /// Tsiolkovsky's rocket equation.
