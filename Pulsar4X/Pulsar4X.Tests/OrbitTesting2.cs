@@ -160,7 +160,7 @@ namespace Pulsar4X.Tests
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                Vector4 vel = (Vector4)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
 
                 Vector4 angularVelocity = Vector4.Cross(pos, vel);
                 Vector4 nodeVector = Vector4.Cross(new Vector4(0, 0, 1, 0), angularVelocity);
@@ -197,23 +197,23 @@ namespace Pulsar4X.Tests
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                Vector4 vel = (Vector4)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
 
                 double aop = OrbitMath.ArgumentOfPeriapsis2(pos, i, o_Ω, o_ν);
                 double ea = o_e * o_a;
                 double eccentricAnomaly = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, o_a, ea, aop);
 
-                var ν1 = OrbitMath.TrueAnomaly(sgp, pos, vel);
+                double ν1 = OrbitMath.TrueAnomaly(sgp, pos, vel);
 
-                var ν2 = OrbitMath.TrueAnomaly(o_E, pos, vel);
-                var ν3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(o_e, eccentricAnomaly);
-                var ν4 = OrbitMath.TrueAnomalyFromEccentricAnomaly2(o_e, eccentricAnomaly);
+                double ν2 = OrbitMath.TrueAnomaly(o_E, pos, vel);
+                double ν3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(o_e, eccentricAnomaly);
+                double ν4 = OrbitMath.TrueAnomalyFromEccentricAnomaly2(o_e, eccentricAnomaly);
                 //var ν5 = OrbitMath.TrueAnomaly2(ev, pos, vel);
                 //var ν6 = OrbitMath.TrueAnomaly(pos, aop);
-                var d1 = Angle.ToDegrees(ν1);
-                var d2 = Angle.ToDegrees(ν2);
-                var d3 = Angle.ToDegrees(ν3);
-                var d4 = Angle.ToDegrees(ν4);
+                double d1 = Angle.ToDegrees(ν1);
+                double d2 = Angle.ToDegrees(ν2);
+                double d3 = Angle.ToDegrees(ν3);
+                double d4 = Angle.ToDegrees(ν4);
                 //var d5 = Angle.ToDegrees(ν5);
                 //var d6 = Angle.ToDegrees(ν6);
 
@@ -243,7 +243,7 @@ namespace Pulsar4X.Tests
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                var vel = (Vector4)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
 
                 Vector4 angularVelocity = Vector4.Cross(pos, vel);
                 double r = pos.Length();
@@ -313,7 +313,7 @@ namespace Pulsar4X.Tests
                 o_ν = OrbitProcessor.GetTrueAnomaly(testOrbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(testOrbitDB, segmentDatetime);
-                var vel = OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                var vel = (Vector4)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
 
                 var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, segmentDatetime);
 
