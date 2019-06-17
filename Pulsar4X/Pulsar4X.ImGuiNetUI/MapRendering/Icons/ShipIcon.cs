@@ -10,6 +10,7 @@ namespace Pulsar4X.SDL2UI
         ShipInfoDB _shipInfo;
         ComponentInstancesDB _componentInstances;
         OrbitDB _orbitDB;
+        NewtonMoveDB _newtonMoveDB;
         TranslateMoveDB _tlmoveDB;
         float _lop;
         Entity _entity;
@@ -25,6 +26,10 @@ namespace Pulsar4X.SDL2UI
                 var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
                 _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
             }
+            else if(entity.HasDataBlob<NewtonMoveDB>())
+            {
+                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>(); 
+            }
             else if (entity.HasDataBlob<TranslateMoveDB>())
                 _tlmoveDB = entity.GetDataBlob<TranslateMoveDB>();
             entity.ChangeEvent += Entity_ChangeEvent;
@@ -33,6 +38,7 @@ namespace Pulsar4X.SDL2UI
 
             _entity = entity;
             BasicShape();
+            OnPhysicsUpdate();
         }
 
         public ShipIcon(PositionDB position) : base(position)
@@ -221,6 +227,10 @@ namespace Pulsar4X.SDL2UI
                 var truAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB,atDateTime);
                 var heading = OrbitMath.HeadingFromPeriaps(_positionDB.RelativePosition_AU, _orbitDB.Eccentricity, _orbitDB.SemiMajorAxis, truAnom);
                 Heading = (float)(heading + _lop);
+            }
+            else if(_newtonMoveDB != null)
+            {
+                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_kms.Y, _newtonMoveDB.CurrentVector_kms.X); 
             }
             else if (_tlmoveDB != null)
             {

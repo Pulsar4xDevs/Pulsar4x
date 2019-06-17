@@ -83,19 +83,7 @@ namespace Pulsar4X.SDL2UI
                 _camWorldPos = entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
             }
         }
-        /*
-        public Point CameraViewCoordinate()
-        {
-            Point point = new Point();
-            point.x = (int)(-CameraWorldPosition.X * ZoomLevel + ViewPortCenter.X);
-            point.y = (int)(-CameraWorldPosition.Y * ZoomLevel + ViewPortCenter.Y);
-            return point;
-        }*/
-        /// <summary>
-        /// returns the viewCoordinate of a given world Coordinate 
-        /// </summary>
-        /// <param name="worldCoord"></param>
-        /// <returns></returns>
+
         public Point ViewCoordinate(ECSLib.Vector4 worldCoord)
         {
             int x = (int)((worldCoord.X - CameraWorldPosition.X) * ZoomLevel + ViewPortCenter.X);
@@ -104,7 +92,6 @@ namespace Pulsar4X.SDL2UI
 
             return viewCoord;
         }
-
 
         public ECSLib.Vector4 MouseWorldCoordinate()
         {

@@ -132,7 +132,7 @@ namespace Pulsar4X.ECSLib
             {
                 
 
-                (Vector4, DateTime) targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), TransitStartDateTime, TargetOffsetPosition_AU);
+                (Vector4 pos, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), TransitStartDateTime, TargetOffsetPosition_AU);
                 OrbitDB orbitDB = _entityCommanding.GetDataBlob<OrbitDB>();
                 Vector4 currentPos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, TransitStartDateTime);
                 var ralPos = OrbitProcessor.GetPosition_AU(orbitDB, TransitStartDateTime);
@@ -141,10 +141,10 @@ namespace Pulsar4X.ECSLib
 
                 //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
                 Vector2 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
-                _db = new TranslateMoveDB(targetIntercept.Item1);
+                _db = new TranslateMoveDB(targetIntercept.pos);
                 _db.TranslateRalitiveExit_AU = TargetOffsetPosition_AU;
                 _db.EntryDateTime = TransitStartDateTime;
-                _db.PredictedExitTime = targetIntercept.Item2;
+                _db.PredictedExitTime = targetIntercept.eti;
                 _db.TranslateEntryPoint_AU = currentPos;
                 _db.SavedNewtonionVector_AU = currentVec;
 

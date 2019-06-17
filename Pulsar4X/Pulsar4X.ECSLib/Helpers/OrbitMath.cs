@@ -406,7 +406,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// This returns the heading mesured from the periapsis (AoP)
+        /// This returns the heading mesured from the periapsis (AoP) and is on the plane of the object
         /// Add the LoP to this to get the true heading in a 2d orbit. 
         /// </summary>
         /// <returns>The from periaps.</returns>
@@ -434,7 +434,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// vector ralitive to AoP 
+        /// vector ralitive to AoP and on the plane of the object
         /// </summary>
         /// <returns>The orbital vector ralitive to the Argument Of Periapsis</returns>
         /// <param name="sgp">Standard Grav Perameter. in AU</param>
