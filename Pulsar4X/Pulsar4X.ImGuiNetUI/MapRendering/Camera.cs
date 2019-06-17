@@ -108,8 +108,8 @@ namespace Pulsar4X.SDL2UI
 
         public ECSLib.Vector4 MouseWorldCoordinate()
         {
-            System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
-            double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) - CameraWorldPosition.X;
+            Vector2 mouseCoord = ImGui.GetMousePos();
+            double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
             double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
             return new ECSLib.Vector4(x, y, 0, 0);
 
@@ -122,8 +122,8 @@ namespace Pulsar4X.SDL2UI
         /// <returns></returns>
         public ECSLib.Vector4 WorldCoordinate(int viewCoordinateX, int viewCoordinateY)
         {
-            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel) - CameraWorldPosition.X;
-            double y = ((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y;
+            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
+            double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
             return new ECSLib.Vector4(x, y, 0, 0);
         }
 
