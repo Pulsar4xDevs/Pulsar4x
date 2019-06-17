@@ -156,8 +156,8 @@ namespace Pulsar4X.SDL2UI
 
         //DateTime TransitDateTime;
         //Vector4 _transitPosition;
-
-
+        Shape _progradeArrow;
+        PointD[] _arrow;
 
         private TransitIcon(PositionDB parentPos) : base(parentPos)
         {
@@ -234,9 +234,8 @@ namespace Pulsar4X.SDL2UI
 
         void CreateProgradeArrow()
         {
-
-
-            PointD[] pnts = CreatePrimitiveShapes.CreateArrow(24);
+            PointD[] arrowPoints = CreatePrimitiveShapes.CreateArrow(24);
+            /*
             List<PointD> arrowPoints = new List<PointD>(pnts.Length);
             foreach (var point in pnts)
             {
@@ -244,17 +243,24 @@ namespace Pulsar4X.SDL2UI
                 double y = point.X * Math.Sin(ProgradeAngle) + point.Y * Math.Cos(ProgradeAngle);
                 arrowPoints.Add(new PointD() { X = x, Y = y });
             }
-
-            Shape vectorArrow = new Shape()
+            */
+            var rotate270 = Matrix.New270DegreeMatrix();
+            _arrow = new PointD[arrowPoints.Length];
+            for (int i = 0; i < _arrow.Length; i++)
             {
-                Points = arrowPoints.ToArray(),
+                _arrow[i] = rotate270.TransformD(arrowPoints[i]);
+            }
+
+            _progradeArrow = new Shape()
+            {
+                Points = _arrow,
                 Color = VectorColour
             };
 
             if (Shapes.Count < 1)
-                Shapes.Add(vectorArrow);
+                Shapes.Add(_progradeArrow);
             else
-                Shapes[0] = vectorArrow;
+                Shapes[0] = _progradeArrow;
 
         }
 
@@ -275,20 +281,29 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="progradeAngle">Prograde angle.</param>
         /// <param name="radius_AU">Radius au.</param>
+        /*
         public void SetTransitPostion(double progradeAngle, double radius_AU)
         {
             ProgradeAngle = progradeAngle;
             _arrivePntRadius = radius_AU;
-            var theta = progradeAngle + Math.PI * 0.5;
+            var theta = progradeAngle;// + Math.PI * 0.5;
             _worldPosition.X = Math.Sin(theta) * radius_AU;
             _worldPosition.Y = Math.Cos(theta) * radius_AU;
             OnPhysicsUpdate();
         }
-
+        */
 
         public override void OnPhysicsUpdate()
         {
-            CreateProgradeArrow();
+            //rotate the progradeArrow.
+            Matrix rotate = Matrix.NewRotateMatrix(ProgradeAngle);
+            _progradeArrow.Points = new PointD[_arrow.Length];
+            for (int i = 0; i < _arrow.Length; i++)
+            {
+                _progradeArrow.Points[i] = rotate.TransformD(_arrow[i]);
+            }
+            Shapes[0] = _progradeArrow;
+
         }
 
 

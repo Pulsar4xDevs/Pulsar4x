@@ -687,7 +687,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="mover">The entity that is trying to intercept a target.</param>
         /// <param name="targetOrbit">Target orbit.</param>
         /// <param name="atDateTime">Datetime of transit start</param>
-        public static (Vector4, DateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector4 offsetPosition = new Vector4())
+        public static (Vector4 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector4 offsetPosition = new Vector4())
         {
 
             Vector4 moverPos;
@@ -803,7 +803,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public static (Vector4, DateTime) GetInterceptPosition2(Vector4 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime, Vector4 offsetPosition = new Vector4())
+        public static (Vector4 position, DateTime etiDateTime) GetInterceptPosition2(Vector4 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime, Vector4 offsetPosition = new Vector4())
         {
 
             var pos = moverPos;

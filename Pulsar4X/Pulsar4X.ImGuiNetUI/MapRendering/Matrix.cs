@@ -43,7 +43,35 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
+        public static Matrix New90DegreeMatrix()
+        {
+            Matrix matrix = new Matrix()
+            {
+                X = new double[2] { 0, -1 },
+                Y = new double[2] { 1, 0 }
+            };
+            return matrix;
+        }
 
+        public static Matrix New180DegreeMatrix()
+        {
+            Matrix matrix = new Matrix()
+            {
+                X = new double[2] { -1, 0 },
+                Y = new double[2] { 0, -1 }
+            };
+            return matrix;
+        }
+
+        public static Matrix New270DegreeMatrix()
+        {
+            Matrix matrix = new Matrix()
+            {
+                X = new double[2] { 0, 1 },
+                Y = new double[2] { -1, 0 }
+            };
+            return matrix;
+        }
 
         public static Matrix operator *(Matrix matrixA, Matrix matrixB)
         {

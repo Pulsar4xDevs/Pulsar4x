@@ -484,18 +484,21 @@ namespace Pulsar4X.SDL2UI
 
         void DepartureCalcs()
         {
+
+            //OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate()
+
             _departureOrbitalVelocity = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _departureDateTime);
             _departureOrbitalSpeed = _departureOrbitalVelocity.Length();
-            _departureAngle = Math.Atan2(_departureOrbitalVelocity.X, _departureOrbitalVelocity.Y);
+            _departureAngle = Math.Atan2(_departureOrbitalVelocity.Y, _departureOrbitalVelocity.X);
             _moveWidget.SetDepartureProgradeAngle(_departureAngle);
         }
 
         void InsertionCalcs()
         {
             OrbitDB targetOrbit = TargetEntity.Entity.GetDataBlob<OrbitDB>();
-            (ECSLib.Vector4, DateTime) targetIntercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            (ECSLib.Vector4 position, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
-            DateTime estArivalDateTime = targetIntercept.Item2; //rough calc. 
+            DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
 
             double x = (_radialDV * Math.Cos(_departureAngle)) - (_progradeDV * Math.Sin(_departureAngle));
             double y = (_radialDV * Math.Sin(_departureAngle)) + (_progradeDV * Math.Cos(_departureAngle));
@@ -506,7 +509,7 @@ namespace Pulsar4X.SDL2UI
 
             _insertionOrbitalVelocity += Distance.MToAU( _deltaV_MS);
             _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
-            _insertionAngle = Math.Atan2(_insertionOrbitalVelocity.X, _insertionOrbitalVelocity.Y);
+            _insertionAngle = Math.Atan2(_insertionOrbitalVelocity.Y, _insertionOrbitalVelocity.X);
             _moveWidget.SetArivalProgradeAngle(_insertionAngle);
 
             /*
