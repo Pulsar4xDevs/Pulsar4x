@@ -499,9 +499,13 @@ namespace Pulsar4X.SDL2UI
             (ECSLib.Vector4 position, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
-
+            /*
             double x = (_radialDV * Math.Cos(_departureAngle)) - (_progradeDV * Math.Sin(_departureAngle));
             double y = (_radialDV * Math.Sin(_departureAngle)) + (_progradeDV * Math.Cos(_departureAngle));
+            */
+            var norm = Vectors.Vector2.Normalise( _departureOrbitalVelocity);
+            double x = norm.X * _radialDV;
+            double y = norm.Y * _progradeDV;
             _deltaV_MS = new ECSLib.Vector4(x, y, 0, 0);
 
             var insertionVector2d = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;

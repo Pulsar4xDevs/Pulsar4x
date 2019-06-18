@@ -73,7 +73,7 @@ namespace Pulsar4X.SDL2UI
             //these are ralitive to thier respective bodies, for the initial default, copying the position shoul be fine.
             //however a better default would djust the distance from the target to get a circular orbit and
             //check if it's above minimum and that the resulting orbit is within soi 
-             
+            _arriveIcon.ProgradeAngle = _departIcon.ProgradeAngle; 
             OnPhysicsUpdate();
         }
 
@@ -292,8 +292,7 @@ namespace Pulsar4X.SDL2UI
             OnPhysicsUpdate();
         }
         */
-
-        public override void OnPhysicsUpdate()
+        public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             //rotate the progradeArrow.
             Matrix rotate = Matrix.NewRotateMatrix(ProgradeAngle);
@@ -303,9 +302,7 @@ namespace Pulsar4X.SDL2UI
                 _progradeArrow.Points[i] = rotate.TransformD(_arrow[i]);
             }
             Shapes[0] = _progradeArrow;
-
+            base.OnFrameUpdate(matrix, camera);
         }
-
-
     }
 }
