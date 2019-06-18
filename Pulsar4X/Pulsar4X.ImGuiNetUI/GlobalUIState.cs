@@ -81,15 +81,15 @@ namespace Pulsar4X.SDL2UI
 
             MainMenuItems.GetInstance().IsActive = true;
 
-
-            LoadImg("Logo", "Resources/PulsarLogo.bmp");
-            LoadImg("PlayImg", "Resources/Play.bmp");
-            LoadImg("PauseImg", "Resources/Pause.bmp");
-            LoadImg("OneStepImg", "Resources/OneStep.bmp");
-            LoadImg("UpImg", "Resources/UpArrow.bmp");
-            LoadImg("DnImg", "Resources/DnArrow.bmp");
-            LoadImg("RepeatImg", "Resources/RepeatIco.bmp");
-            LoadImg("CancelImg", "Resources/CancelIco.bmp");
+            string rf = "Resources";
+            LoadImg("Logo", Path.Combine( rf,"PulsarLogo.bmp"));
+            LoadImg("PlayImg", Path.Combine( rf,"Play.bmp"));
+            LoadImg("PauseImg", Path.Combine( rf,"Pause.bmp"));
+            LoadImg("OneStepImg", Path.Combine( rf,"OneStep.bmp"));
+            LoadImg("UpImg", Path.Combine( rf,"UpArrow.bmp"));
+            LoadImg("DnImg", Path.Combine( rf,"DnArrow.bmp"));
+            LoadImg("RepeatImg", Path.Combine( rf,"RepeatIco.bmp"));
+            LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
 
             /*
             int gltxtrID;
