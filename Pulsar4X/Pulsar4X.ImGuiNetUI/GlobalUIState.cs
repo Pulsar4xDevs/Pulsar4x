@@ -19,12 +19,10 @@ namespace Pulsar4X.SDL2UI
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
-        internal IntPtr surfacePtr;
+
         internal IntPtr rendererPtr;
 
-        //internal MainMenuItems MainMenu { get; }
-        //internal NewGameOptions NewGameOptions { get; }
-        //internal SettingsWindow SettingsWindow { get; }
+
         internal GalacticMapRender GalacticMap;
 
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
@@ -33,8 +31,7 @@ namespace Pulsar4X.SDL2UI
         internal DateTime PrimarySystemDateTime; //= new DateTime();
 
         internal EntityContextMenu ContextMenu { get; set; }
-        //internal IOrderWindow ActiveOrderWidow { get; set; }
-        //internal DebugWindow Debug { get; set; }
+
         internal Dictionary<Guid, SystemState> StarSystemStates = new Dictionary<Guid, SystemState>();
 
         internal Camera Camera;// = new Camera();
@@ -63,8 +60,15 @@ namespace Pulsar4X.SDL2UI
             ViewPort = viewport;
             PulsarGuiWindow._state = this;
             var windowPtr = viewport.Handle;
-            surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
-            rendererPtr = SDL.SDL_GetRenderer(windowPtr);
+
+            //TODO: OK I don't understand this at all, in linux, there's already a Renderer, however on windows this returns Zero
+            //Hence checking it and creating it. I think the whole SDL setup needs looking at and tidying up. 
+            rendererPtr = SDL.SDL_GetRenderer(windowPtr); //
+            if (rendererPtr == IntPtr.Zero)
+            {
+                rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+                //rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_SOFTWARE);
+            }
 
             for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
             {
