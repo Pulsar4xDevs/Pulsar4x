@@ -4,6 +4,7 @@ using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
 using System.Numerics;
+//using Vector2 = ImGuiNET.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -21,7 +22,7 @@ namespace Pulsar4X.SDL2UI
         Guid _entityGuid;
         Guid _starSysGuid;
         public Dictionary<Guid, string> SubNames = new Dictionary<Guid, string>();
-        public ImVec2 ViewOffset { get; set; } = new ImVec2();
+        public Vector2 ViewOffset { get; set; } = new Vector2();
         public Rectangle ViewDisplayRect = new Rectangle();
         UserOrbitSettings.OrbitBodyType _bodyType = UserOrbitSettings.OrbitBodyType.Unknown;
         internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[(int)_bodyType]; } }
@@ -41,10 +42,10 @@ namespace Pulsar4X.SDL2UI
 
         public static NameIcon operator +(NameIcon nameIcon, SDL.SDL_Point point)
         {
-            ImVec2 newpoint = new ImVec2()
+            Vector2 newpoint = new Vector2()
             {
-                x = nameIcon.ViewOffset.x + point.x,
-                y = nameIcon.ViewOffset.y + point.y
+                X = nameIcon.ViewOffset.X + point.x,
+                Y = nameIcon.ViewOffset.Y + point.y
             };
             nameIcon.ViewOffset = newpoint;
 
@@ -68,7 +69,7 @@ namespace Pulsar4X.SDL2UI
             //DefaultViewOffset = new SDL.SDL_Point() { x = Width, y = -Height };
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
-            ImVec2 defualtOffset = new ImVec2(4,-(Height / 2));
+            Vector2 defualtOffset = new Vector2(4,-(Height / 2));
             ViewOffset = defualtOffset;
             base.OnFrameUpdate(matrix, camera);
 
@@ -101,9 +102,9 @@ namespace Pulsar4X.SDL2UI
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
 
-            int x = (int)(X + ViewOffset.x);
-            int y = (int)(Y + ViewOffset.y);
-            Vector2 pos = new Vector2(x, y);
+            int x = (int)(X + ViewOffset.X);
+            int y = (int)(Y + ViewOffset.Y);
+            System.Numerics.Vector2 pos = new System.Numerics.Vector2(x, y);
 
 
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
@@ -112,7 +113,7 @@ namespace Pulsar4X.SDL2UI
             //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));
             ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
 
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(1, 2));
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
 
             ImGui.Begin(NameString, ref IsActive, _flags);

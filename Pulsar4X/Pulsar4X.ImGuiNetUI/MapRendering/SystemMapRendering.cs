@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Numerics;
+using System.Collections.Generic;
+using System.Linq;
+using System.Collections.Concurrent;
 using Pulsar4X.ECSLib;
 using ImGuiSDL2CS;
 using SDL2;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using ImGuiNET;
-using System.Linq;
-using System.Collections.Concurrent;
+
 
 namespace Pulsar4X.SDL2UI
 {
@@ -369,7 +369,7 @@ namespace Pulsar4X.SDL2UI
             for (int i = 1; i < numTextIcons; i++)
             {
                 var item = texiconsCopy[i - 1];
-                ImVec2 height = new ImVec2() { x = 0, y = item.Height };
+                Vector2 height = new Vector2() { X = 0, Y = item.Height };
                 int lowestPosIndex = occupiedPosition.BinarySearch(item.ViewDisplayRect + height, byViewPos);
                 int lpi = lowestPosIndex;
                 if (lowestPosIndex < 0)
@@ -379,10 +379,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
                     {
-                        var newpoint = new ImVec2()
+                        var newpoint = new Vector2()
                         {
-                            x = item.ViewOffset.x,
-                            y = item.ViewOffset.Y - occupiedPosition[j].Height
+                            X = item.ViewOffset.X,
+                            Y = item.ViewOffset.Y - occupiedPosition[j].Height
                         };
                         item.ViewOffset = newpoint;
                     }

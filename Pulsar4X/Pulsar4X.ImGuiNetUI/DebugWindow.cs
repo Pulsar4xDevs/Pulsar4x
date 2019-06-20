@@ -5,6 +5,7 @@ using System.Numerics;
 using ImGuiNET;
 
 using Pulsar4X.ECSLib;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {

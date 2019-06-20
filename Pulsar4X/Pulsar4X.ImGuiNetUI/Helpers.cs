@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Numerics;
 using ImGuiNET;
+using Vector3 = System.Numerics.Vector3;
+
 namespace Pulsar4X.SDL2UI
 {
     public static class Helpers

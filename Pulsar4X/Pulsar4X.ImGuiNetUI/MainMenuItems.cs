@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using System.Numerics;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {

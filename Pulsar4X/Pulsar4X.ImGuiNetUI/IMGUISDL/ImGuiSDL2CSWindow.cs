@@ -7,6 +7,8 @@ using ImGuiNET;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Numerics;
+
+
 namespace ImGuiSDL2CS {
     public class ImGuiSDL2CSWindow : SDL2Window {
 
@@ -17,22 +19,22 @@ namespace ImGuiSDL2CS {
         protected float g_MouseWheel = 0.0f;
         protected IntPtr g_FontTexture = IntPtr.Zero;
 
-        public ImVec2 Position {
+        public Vector2 Position {
             get {
                 int x, y;
                 SDL.SDL_GetWindowPosition(Handle, out x, out y);
-                return new ImVec2(x, y);
+                return new Vector2(x, y);
             }
             set {
                 SDL.SDL_SetWindowPosition(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
             }
         }
 
-        public Vector2 Size {
+        public System.Numerics.Vector2 Size {
             get {
                 int x, y;
                 SDL.SDL_GetWindowSize(Handle, out x, out y);
-                return new Vector2(x, y);
+                return new System.Numerics.Vector2(x, y);
             }
             set {
                 SDL.SDL_SetWindowSize(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
@@ -79,7 +81,7 @@ namespace ImGuiSDL2CS {
             uint mouseMask = SDL.SDL_GetMouseState(out mouseX, out mouseY);
             if ((SDL.SDL_GetWindowFlags(Handle) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MOUSE_FOCUS) == 0)
                 mouseX = mouseY = -1;
-            ImGuiSDL2CSHelper.NewFrame(Size, Vector2.One, new Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
+            ImGuiSDL2CSHelper.NewFrame(Size, System.Numerics.Vector2.One, new System.Numerics.Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
 
             ImGuiLayout();
 

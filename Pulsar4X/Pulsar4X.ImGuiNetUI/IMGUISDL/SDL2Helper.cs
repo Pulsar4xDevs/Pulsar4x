@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,5 +36,11 @@ namespace ImGuiSDL2CS {
             SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, minorVersion);
         }
 
+    }
+    
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Int4
+    {
+        public readonly int X, Y, Z, W;
     }
 }

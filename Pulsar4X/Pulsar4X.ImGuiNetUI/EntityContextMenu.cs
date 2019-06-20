@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -10,7 +11,7 @@ namespace Pulsar4X.SDL2UI
 
         GlobalUIState _state;
         internal Entity ActiveEntity; //interacting with/ordering this entity
-        ImVec2 buttonSize = new ImVec2(100, 12);
+        Vector2 buttonSize = new Vector2(100, 12);
 
         EntityState _entityState;
 

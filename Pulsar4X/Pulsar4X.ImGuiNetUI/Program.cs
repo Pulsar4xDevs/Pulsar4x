@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Numerics;
 using SDL2;
 using ImGuiNET;
 using ImGuiSDL2CS;
@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
 
         //private FileDialog _Dialog = new FileDialog(false, false, true, false, false, false);
 
-        ImVec3 backColor = new ImVec3(0 / 255f, 0 / 255f, 28 / 255f);
+        Vector3 backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
 
         int mouseDownX;
         int mouseDownY;
@@ -54,7 +54,7 @@ namespace Pulsar4X.SDL2UI
                 _MemoryEditorData[i] = (byte)rnd.Next(255);
             }
             */
-            backColor = new ImVec3(0 / 255f, 0 / 255f, 28 / 255f);
+            backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
 
             _state.GalacticMap = new GalacticMapRender(this, _state);
             //_state.MapRendering = new SystemMapRendering(this, _state);

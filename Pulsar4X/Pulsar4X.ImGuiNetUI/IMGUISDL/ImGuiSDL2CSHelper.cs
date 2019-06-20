@@ -8,6 +8,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Vector2 = System.Numerics.Vector2;
 
 namespace ImGuiSDL2CS {
     public static class ImGuiSDL2CSHelper {

@@ -2,6 +2,8 @@
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Vectors;
+using Vector2 = Pulsar4X.Vectors.Vector2;
+
 //using System.Numerics;
 
 

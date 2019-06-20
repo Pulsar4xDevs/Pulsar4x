@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using System.Numerics;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {

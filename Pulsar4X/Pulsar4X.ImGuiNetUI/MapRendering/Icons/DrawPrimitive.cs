@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using ImGuiNET;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
@@ -446,12 +447,12 @@ namespace Pulsar4X.SDL2UI
 
         public float Height { get; set; }
 
-        public static Rectangle operator +(Rectangle rectangle, ImVec2 point)
+        public static Rectangle operator +(Rectangle rectangle, Vector2 point)
         {
             Rectangle newRect = new Rectangle();
 
-            newRect.X = rectangle.X + point.x;
-            newRect.Y = rectangle.Y + point.y;
+            newRect.X = rectangle.X + point.X;
+            newRect.Y = rectangle.Y + point.Y;
             return newRect;
 
         }

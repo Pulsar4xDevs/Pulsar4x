@@ -2,6 +2,8 @@
 using ImGuiNET;
 using System.Numerics;
 using System.Collections.Generic;
+using Vector2 = System.Numerics.Vector2;
+using Vector3 = System.Numerics.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {

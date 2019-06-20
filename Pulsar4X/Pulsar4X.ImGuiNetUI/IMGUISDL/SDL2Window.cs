@@ -85,7 +85,8 @@ namespace ImGuiSDL2CS {
             int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
             int width = 800, int height = 600,
             SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
-        ) {
+        ) 
+        {
             Init(title, x, y, width, height, flags);
         }
 

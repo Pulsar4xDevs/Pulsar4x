@@ -5,6 +5,7 @@ using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
+//using Vector2 = ImGuiNET.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -95,7 +96,7 @@ namespace Pulsar4X.SDL2UI
 
         public ECSLib.Vector4 MouseWorldCoordinate()
         {
-            Vector2 mouseCoord = ImGui.GetMousePos();
+            System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
             double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
             double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
             return new ECSLib.Vector4(x, y, 0, 0);
@@ -120,9 +121,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="worldSize"></param>
         /// <returns></returns>
-        public ImVec2 ViewSize(ImVec2 worldSize)
+        public Vector2 ViewSize(Vector2 worldSize)
         {
-            ImVec2 viewSize = new ImVec2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
+            Vector2 viewSize = new Vector2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
             return viewSize;
         }
 
