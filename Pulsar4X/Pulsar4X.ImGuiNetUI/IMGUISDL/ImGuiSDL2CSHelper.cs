@@ -14,7 +14,7 @@ namespace ImGuiSDL2CS {
 
         private static bool _Initialized = false;
         public static bool Initialized => _Initialized;
-        public static int FontTextureID;
+        public static IntPtr FontTextureID;
         public static void Init() {
             if (_Initialized)
                 return;
@@ -154,7 +154,7 @@ namespace ImGuiSDL2CS {
                         throw new NotImplementedException();
                         //pcmd.InvokeUserCallback(ref cmdList, ref pcmd);
                     }
-                    else if (FontTextureID == (int)pcmd.TextureId)
+                    else if (FontTextureID == pcmd.TextureId)
                     {
                         GL.BindTexture(GL.Enum.GL_TEXTURE_2D, (int)pcmd.TextureId);
                         GL.Scissor(

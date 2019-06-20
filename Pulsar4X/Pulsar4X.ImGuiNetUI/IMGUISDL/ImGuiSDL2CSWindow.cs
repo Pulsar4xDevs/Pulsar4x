@@ -15,7 +15,7 @@ namespace ImGuiSDL2CS {
         protected double g_Time = 0.0f;
         protected readonly bool[] g_MousePressed = { false, false, false };
         protected float g_MouseWheel = 0.0f;
-        protected int g_FontTexture = 0;
+        protected IntPtr g_FontTexture = IntPtr.Zero;
 
         public ImVec2 Position {
             get {
@@ -106,8 +106,9 @@ namespace ImGuiSDL2CS {
             GL.GetIntegerv(GL.Enum.GL_TEXTURE_BINDING_2D, out lastTexture);
 
             // Create OpenGL texture
-            GL.GenTextures(1, out g_FontTexture);
-            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, g_FontTexture);
+            int fonttxtureID;
+            GL.GenTextures(1, out fonttxtureID);
+            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, fonttxtureID);
             GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int) GL.Enum.GL_LINEAR);
             GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int) GL.Enum.GL_LINEAR);
             GL.PixelStorei(GL.Enum.GL_UNPACK_ROW_LENGTH, 0);
@@ -122,9 +123,9 @@ namespace ImGuiSDL2CS {
                 GL.Enum.GL_UNSIGNED_BYTE,
                 new IntPtr(pixels)
             );
-
+            g_FontTexture = new IntPtr(fonttxtureID);
             // Store the texture identifier in the ImFontAtlas substructure.
-            io.Fonts.SetTexID(new IntPtr( g_FontTexture));
+            io.Fonts.SetTexID(g_FontTexture);
             ImGuiSDL2CSHelper.FontTextureID = g_FontTexture;
             io.Fonts.ClearTexData(); // Clears CPU side texture data.
             GL.BindTexture(GL.Enum.GL_TEXTURE_2D, lastTexture);
@@ -141,12 +142,12 @@ namespace ImGuiSDL2CS {
 
             // Free unmanaged resources (unmanaged objects) and override a finalizer below.
             // Set large fields to null.
-            if (g_FontTexture != 0) {
+            if (g_FontTexture != IntPtr.Zero) {
                 // Texture gets deleted with the context.
                 // GL.DeleteTexture(g_FontTexture);
-                if ((int) io.Fonts.TexID == g_FontTexture)
+                if ( io.Fonts.TexID == g_FontTexture)
                     io.Fonts.TexID = IntPtr.Zero;
-                g_FontTexture = 0;
+                g_FontTexture = IntPtr.Zero;
             }
 
             base.Dispose(disposing);
