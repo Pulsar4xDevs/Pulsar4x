@@ -60,15 +60,11 @@ namespace Pulsar4X.SDL2UI
             ViewPort = viewport;
             PulsarGuiWindow._state = this;
             var windowPtr = viewport.Handle;
+            SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_DRIVER, "opengl");
+            //var surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
+            rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+            
 
-            //TODO: OK I don't understand this at all, in linux, there's already a Renderer, however on windows this returns Zero
-            //Hence checking it and creating it. I think the whole SDL setup needs looking at and tidying up. 
-            rendererPtr = SDL.SDL_GetRenderer(windowPtr); //
-            if (rendererPtr == IntPtr.Zero)
-            {
-                rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
-                //rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_SOFTWARE);
-            }
 
             for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
             {
@@ -112,6 +108,7 @@ namespace Pulsar4X.SDL2UI
         {
             IntPtr sdlSurface = SDL.SDL_LoadBMP(path);
             IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
+            
             SDLImageDictionary.Add(name, sdltexture);
         }
 
