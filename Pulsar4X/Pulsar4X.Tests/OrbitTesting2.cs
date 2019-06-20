@@ -5,7 +5,6 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture]
     public class OrbitTesting2
     {
         static Game game = new Game();
@@ -13,65 +12,60 @@ namespace Pulsar4X.Tests
         static Entity parentBody = TestingUtilities.BasicSol(starSys);
         static MassVolumeDB parentMassDB = parentBody.GetDataBlob<MassVolumeDB>();
         
-
-        public class TestOrbits
+    
+        static List<object> allTestOrbitData = new List<object>()
         {
-            public static List<object> allTestOrbitData = new List<object>()
-            {
-                 OrbitDB.FromAsteroidFormat
-                     (
-                     parentBody, 
-                     parentMassDB.Mass, 
-                     1000, 
-                     1, 
-                     0, 
-                     0, 
-                     0, 
-                     0, 
-                     0, 
-                     new System.DateTime()
-                     ),
-                 OrbitDB.FromAsteroidFormat(
-                     parentBody, 
-                     parentMassDB.Mass, 
-                     2.2e14,          //halleysBodyMass
-                     17.834,     //halleysSemiMajAxis 
-                     0.96714,     //halleysEccentricity
-                     0, 
-                     58.42, 
-                     111.33, 
-                     38.38, 
-                     new System.DateTime(1994, 2, 17)),
-                 OrbitDB.FromAsteroidFormat(
-                     parentBody, 
-                     parentMassDB.Mass, 
-                     2.2e14, 
-                     17.834,         //halleysSemiMajAxis , 
-                     0.96714,         //halleysEccentricity
-                     180,  
-                     58.42, 
-                     111.33, 
-                     38.38, 
-                     new System.DateTime(1994, 2, 17)),
-                 OrbitDB.FromAsteroidFormat(
-                     parentBody, 
-                     parentMassDB.Mass, 
-                     2.2e14, 
-                     17.834,     //halleysSemiMajAxis , 
-                     0.96714,     //halleysEccentricity
-                     162.26,     //halleys3dInclination, 
-                     58.42, 
-                     111.33, 
-                     38.38, 
-                     new System.DateTime(1994, 2, 17))
-            };
-
-        }
-
-
+             OrbitDB.FromAsteroidFormat
+                 (
+                 parentBody, 
+                 parentMassDB.Mass, 
+                 1000, 
+                 1, 
+                 0, 
+                 0, 
+                 0, 
+                 0, 
+                 0, 
+                 new System.DateTime()
+                 ),
+             OrbitDB.FromAsteroidFormat(
+                 parentBody, 
+                 parentMassDB.Mass, 
+                 2.2e14,          //halleysBodyMass
+                 17.834,     //halleysSemiMajAxis 
+                 0.96714,     //halleysEccentricity
+                 0, 
+                 58.42, //halleysLoAN
+                 111.33, //halleysAoP
+                 38.38,     //halleysMeanAnomaly at Epoch
+                 new System.DateTime(1994, 2, 17)),
+             OrbitDB.FromAsteroidFormat(
+                 parentBody, 
+                 parentMassDB.Mass, 
+                 2.2e14,             //halleysBodyMass
+                 17.834,         //halleysSemiMajAxis , 
+                 0.96714,         //halleysEccentricity
+                 180,  
+                 58.42, //halleysLoAN
+                 111.33,  //halleysAoP
+                 38.38,     //halleysMeanAnomaly at Epoch
+                 new System.DateTime(1994, 2, 17)),
+             OrbitDB.FromAsteroidFormat(
+                 parentBody, 
+                 parentMassDB.Mass, 
+                 2.2e14,            //halleysBodyMass
+                 17.834,     //halleysSemiMajAxis , 
+                 0.96714,     //halleysEccentricity
+                 162.26,     //halleys3dInclination, note retrograde orbit (> 90degrees)
+                 58.42, //halleysLoAN
+                 111.33, //halleysAoP
+                 38.38,     //halleysMeanAnomaly at Epoch
+                 new System.DateTime(1994, 2, 17))
+        };
+        
 
         
-        [Test, TestCaseSource(typeof(TestOrbits), nameof(TestOrbits.allTestOrbitData))]
+        [Test, TestCaseSource(nameof(allTestOrbitData))]
         public void TestEccentricAnomalyCalcs(OrbitDB orbitDB)
         {
             double sgp = orbitDB.GravitationalParameterAU; 
@@ -119,7 +113,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test, TestCaseSource(typeof(TestOrbits), nameof(TestOrbits.allTestOrbitData))]
+        [Test, TestCaseSource(nameof(allTestOrbitData))]
         public void TestMeanAnomalyCalcs(OrbitDB orbitDB)
         {
             double sgp = orbitDB.GravitationalParameterAU; 
@@ -157,7 +151,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test, TestCaseSource(typeof(TestOrbits), nameof(TestOrbits.allTestOrbitData))]
+        [Test, TestCaseSource(nameof(allTestOrbitData))]
         public void TestAngleOfPeriapsCalcs(OrbitDB orbitDB)
         {
             double sgp = orbitDB.GravitationalParameterAU; 
@@ -205,7 +199,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test, TestCaseSource(typeof(TestOrbits), nameof(TestOrbits.allTestOrbitData))]
+        [Test, TestCaseSource(nameof(allTestOrbitData))]
         public void TrueAnomalyCalcs(OrbitDB orbitDB)
         {
             double sgp = orbitDB.GravitationalParameterAU; 
@@ -263,7 +257,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test, TestCaseSource(typeof(TestOrbits), nameof(TestOrbits.allTestOrbitData))]
+        [Test, TestCaseSource(nameof(allTestOrbitData))]
         public void TestOrbitalVelocityCalcs(OrbitDB orbitDB)
         {
             double sgp = orbitDB.GravitationalParameterAU; 
@@ -341,7 +335,7 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test, TestCaseSource(typeof(TestOrbits), nameof(TestOrbits.allTestOrbitData))]
+        [Test, TestCaseSource(nameof(allTestOrbitData))]
         public void TestingKeplerConversions(OrbitDB orbitDB)
         {
             double sgp = orbitDB.GravitationalParameterAU; 
