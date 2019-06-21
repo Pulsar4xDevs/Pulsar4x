@@ -215,8 +215,7 @@ namespace Pulsar4X.SDL2UI
 
 
             SDL.SDL_Color[] matxRtArwColour =
-              
-  {new SDL.SDL_Color() {r=255, g=255, b= 255, a=100} };
+                {new SDL.SDL_Color() {r=255, g=255, b= 255, a=100} };
             SDL.SDL_Color[] matxRtArwHColour =
                 {new SDL.SDL_Color() {r=255, g=255, b= 255, a=255} };
             _mtxArwItem = new ElementItem()
@@ -322,7 +321,7 @@ namespace Pulsar4X.SDL2UI
                  };
             }
 
-           DrawComplexShapes.Add(new ComplexShape()
+            DrawComplexShapes.Add(new ComplexShape()
             {
                 Points = mtxArwPts,
                 Colors = _mtxArwItem.Shape.Colors,

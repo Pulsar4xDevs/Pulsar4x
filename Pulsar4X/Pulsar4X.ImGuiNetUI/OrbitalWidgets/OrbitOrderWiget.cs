@@ -290,8 +290,24 @@ namespace Pulsar4X.SDL2UI
             //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
 
-            SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 100);
+            /*
+            var soipnts = CreatePrimitiveShapes.BresenhamCircle(ViewScreenPos.x, ViewScreenPos.y, (int)_soiViewRadius);
+            for (int i = 0; i < soipnts.Count -1; i+=2)
+            {
+                SDL.SDL_RenderDrawLine(rendererPtr, soipnts[i].x, soipnts[i].y, soipnts[i + 1].x, soipnts[i + 1].y);
+                //SDL.SDL_RenderDrawPoint(rendererPtr, soipnts[i].x, soipnts[i].y);
+                //var err = SDL.SDL_GetError();
+            }
+           */
+
+            SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 255);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
+            var plntPts = CreatePrimitiveShapes.BresenhamCircle(ViewScreenPos.x, ViewScreenPos.y, (int)_targetViewRadius);
+            for (int i = 0; i < plntPts.Count -1; i++)
+            {
+                SDL.SDL_RenderDrawLine(rendererPtr, plntPts[i].x, plntPts[i].y, plntPts[i + 1].x, plntPts[i + 1].y);
+            }
+
             /*
              SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 100, 0, 160);
              DrawPrimitive.DrawArc(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, 63, 63, 0, _loAN); //draw LoAN angle

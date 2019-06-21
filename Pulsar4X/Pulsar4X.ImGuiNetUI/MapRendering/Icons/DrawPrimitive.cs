@@ -300,7 +300,49 @@ namespace Pulsar4X.SDL2UI
             }
             return points;
         }
+        
+        /// <summary>
+        /// CopyPasta straight from the french wikipedia page here: https://fr.wikipedia.org/wiki/Algorithme_de_trac%C3%A9_d%27arc_de_cercle_de_Bresenham#En_C#
+        /// </summary>
+        /// <param name="xc">center</param>
+        /// <param name="yc">center</param>
+        /// <param name="r">radius</param>
+        /// <returns></returns>
+        public static List<Point> BresenhamCircle(int xc,int yc,int r)
+        {
+            List<Point> ret = new List<Point>();
+            int x,y,p;
 
+            x=0;
+            y=r;
+
+            ret.Add(new Point(){x = xc+x,y = yc-y});
+
+            p=3-(2*r);
+
+            for(x=0;x<=y;x++)
+            {
+                if (p<0)
+                {
+                    p=(p+(4*x)+6);
+                }
+                else
+                {
+                    y-=1;
+                    p+=((4*(x-y)+10));
+                }
+
+                ret.Add(new Point(){x = xc+x,y = yc-y});
+                ret.Add(new Point(){x = xc-x,y = yc-y});
+                ret.Add(new Point(){x = xc+x,y = yc+y});
+                ret.Add(new Point(){x = xc-x,y = yc+y});
+                ret.Add(new Point(){x = xc+y,y = yc-x});
+                ret.Add(new Point(){x = xc-y,y = yc-x});
+                ret.Add(new Point(){x = xc+y,y = yc+x});
+                ret.Add(new Point(){x = xc-y,y = yc+x});
+            }
+            return ret;
+        }
         public static PointD[] Circle(int posX, int posY, double radius, short segments)
         {
             PointD[] points = new PointD[segments + 1];
