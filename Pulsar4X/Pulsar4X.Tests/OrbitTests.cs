@@ -24,7 +24,7 @@ namespace Pulsar4X.Tests
             parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
-            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
+            double sgp = OrbitMath.CalculateStandardGravityParameter(parentMass, objMass);
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp, position, velocity, new DateTime());
             Vector3 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
@@ -36,7 +36,7 @@ namespace Pulsar4X.Tests
         {
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
-            double sgpKm = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
+            double sgpKm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
             var speedKm = OrbitMath.InstantaneousOrbitalSpeed(sgpKm, 405400, 384399);
             Assert.AreEqual(0.97, speedKm, 0.01);
         }
@@ -66,12 +66,12 @@ namespace Pulsar4X.Tests
             Vector3 velocity = new Vector3() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
-            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
+            double sgp = OrbitMath.CalculateStandardGravityParameter(parentMass, objMass);
             KeplerElements elements = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, new DateTime());
 
             Vector3 postionKm = new Vector3() { X = 405400 };
             Vector3 velocityKm = new Vector3() { Y = 0.97 };
-            double sgpKm = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
+            double sgpKm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
 
             KeplerElements elementsKm = OrbitMath.KeplerFromPositionAndVelocity(sgpKm, postionKm, velocityKm, new DateTime());
 
@@ -174,15 +174,73 @@ namespace Pulsar4X.Tests
             velocity = new Vector3() { X = Distance.KmToAU(0), Y = Distance.KmToAU(1) };
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            /*
-            //this is something that is breaking ingame
-            parentMass = 1.989e30;
-            objMass = 10000;
-            position = new Vector4() { X = -0.208994076275941, Y = 0.955838328099748 };
-            velocity = new Vector4() { X = -2.1678187689294E-07, Y = -7.93096769486992E-08};
-            TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
-            */
+        }
 
+        [Test]
+        public void Distance_AuToMt_When_Given1_Should_Give149597870700()
+        {
+            Assert.AreEqual(149597870700d, Distance.AuToMt(1.0d));
+        }
+
+        [Test]
+        public void OrbitMath_CalculateAngularMomentum_When_ZeroXPositiveYVelocity_Should_GiveCorrectResults()
+        {
+            // To determine what the Kepler Elements should be, use : http://orbitsimulator.com/formulas/OrbitalElements.html
+            Vector3 position = new Vector3() { X = Distance.AuToMt(0.25), Y = Distance.AuToMt(0.25) };
+            Vector3 velocity = new Vector3() { X = 0, Y = Distance.KmToM(2) };
+            var expectedResult = new Vector3(
+                0,
+                0,
+                74798935350000.0
+            );
+            var calculatedResult = OrbitMath.CalculateAngularMomentum(position, velocity);
+            Assert.IsTrue(TestVectorsAreEqual(expectedResult, calculatedResult, 1.0d));
+        }
+
+        [Test]
+        public void OrbitMath_CalculateAngularMomentum_When_ZeroXNegativeYVelocity_Should_GiveCorrectResults()
+        {
+            // To determine what the Kepler Elements should be, use : http://orbitsimulator.com/formulas/OrbitalElements.html
+            Vector3 position = new Vector3() { X = Distance.AuToMt(0.25), Y = Distance.AuToMt(0.25) };
+            Vector3 velocity = new Vector3() { X = 0, Y = Distance.KmToM(-1) };
+            var expectedResult = new Vector3(
+                0,
+                0,
+                -37399467675000.0d
+            );
+            var calculatedResult = OrbitMath.CalculateAngularMomentum(position, velocity);
+            Assert.IsTrue(TestVectorsAreEqual(expectedResult, calculatedResult, 1.0d));
+        }
+
+        [Test]
+        public void OrbitMath_CalculateLongitudeOfAscendingNode_When_APositiveNodeVector_Should_GiveCorrectResult()
+        {
+            var nodeVector = new Vector3(
+                0,
+                0,
+                37399467675000.0d
+            );
+            var calculatedResult = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
+            Assert.AreEqual(0, calculatedResult, 0.000000001d);
+        }
+
+        [Test]
+        public void OrbitMath_CalculateLongitudeOfAscendingNode_When_ANegativeNodeVector_Should_GiveCorrectResult()
+        {
+            var nodeVector = new Vector3(
+                0,
+                0,
+                -37399467675000.0d
+            );
+            var calculatedResult = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
+            Assert.AreEqual(0.7853981767666225d, calculatedResult, 0.000000001d);
+        }
+
+        [Test]
+        public void OrbitMath_KeplerFromPositionAndVelocity_When_ZeroXPositiveYVelocity_Should_GiveCorrectResults()
+        {
+            double parentMass = 1.989e30;
+            double objMass = 10000;
 
 
         }
