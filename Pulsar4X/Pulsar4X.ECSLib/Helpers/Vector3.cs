@@ -108,6 +108,23 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Attempts a more precise result by casting to decimals. 
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static (decimal X, decimal Y, decimal Z) DividePrecise(Vector3 left, Vector3 right)
+        {
+            decimal lx = (decimal)left.X;
+            decimal ly = (decimal)left.Y;
+            decimal lz = (decimal)left.Z;
+            decimal rx = (decimal)right.X;
+            decimal ry = (decimal)right.Y;
+            decimal rz = (decimal)right.Z;
+            return (lx / rx, ly / ry, lz / rz);
+        }
+
+        /// <summary>
         /// Divides the specified vector by a specified scalar value. 
         /// </summary>
         public static Vector3 Divide(Vector3 left, double divisor)
@@ -128,6 +145,7 @@ namespace Pulsar4X.ECSLib
         
         /// <summary>
         /// attempts to get a more mathmaticaly precise result by casting to a decimal and back again.
+        /// due to not having a built in Sqrt function for decimal, we cast back before that is done.
         /// </summary>
         /// <param name="vector"></param>
         /// <returns></returns>
@@ -159,6 +177,23 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// attempts a more precise dotProduct by casting to decimals.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static decimal DotPrecise(Vector3 left, Vector3 right)
+        {
+            decimal lx = (decimal)left.X;
+            decimal ly = (decimal)left.Y;
+            decimal lz = (decimal)left.Z;
+            decimal rx = (decimal)right.X;
+            decimal ry = (decimal)right.Y;
+            decimal rz = (decimal)right.Z;
+            return (lx * rx + ly * ry + lz * rz);
+        }
+
+        /// <summary>
         /// Cross product of left and right. Note: this ignores the fourth (W) property and treats them as 3d vectors.
         /// </summary>
         public static Vector3 Cross(Vector3 left, Vector3 right)
@@ -169,6 +204,27 @@ namespace Pulsar4X.ECSLib
                 Y = left.Z * right.X - left.X * right.Z,
                 Z = left.X * right.Y - left.Y * right.X
             };
+        }
+        
+        /// <summary>
+        /// attempts a more precise cross product by casting to decimal.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static (decimal X, decimal Y, decimal Z) CrossPrecise(Vector3 left, Vector3 right)
+        {
+            decimal lx = (decimal)left.X;
+            decimal ly = (decimal)left.Y;
+            decimal lz = (decimal)left.Z;
+            decimal rx = (decimal)right.X;
+            decimal ry = (decimal)right.Y;
+            decimal rz = (decimal)right.Z;
+            decimal newx = ly * rz - lz * ry;
+            decimal newy = lz * rx - lx * rz;
+            decimal newz = lx * ry - ly * rx;
+            
+            return (newx, newy, newz);
         }
         
         /// <summary>
@@ -242,6 +298,23 @@ namespace Pulsar4X.ECSLib
         public static Vector3 Multiply(Vector3 left, Vector3 right)
         {
             return left * right;
+        }
+
+        /// <summary>
+        /// Attempts a more precise result by casting to a decimal
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static (decimal X, decimal Y, decimal Z) MultiplyPrecise(Vector3 left, Vector3 right)
+        {
+            decimal lx = (decimal)left.X;
+            decimal ly = (decimal)left.Y;
+            decimal lz = (decimal)left.Z;
+            decimal rx = (decimal)right.X;
+            decimal ry = (decimal)right.Y;
+            decimal rz = (decimal)right.Z;
+            return (lx * rx, ly * ry, lz * rz);
         }
 
         /// <summary>
