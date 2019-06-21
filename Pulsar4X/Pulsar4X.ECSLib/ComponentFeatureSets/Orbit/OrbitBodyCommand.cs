@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
                 Vector2 newVector = OrbitProcessor.InstantaneousOrbitalVelocityVector(EntityCommanding.GetDataBlob<OrbitDB>(), _db.ActionOnDateTime);
                 newVector += _db.DeltaVToExpend_AU;
                 var spdmps = Distance.AuToMt( newVector.Length());
-                Vector4 newVector3d = new Vector4(newVector.X, newVector.Y,0,0);
+                Vector3 newVector3d = new Vector3(newVector.X, newVector.Y,0);
                 OrbitDB newOrbit = OrbitDB.FromVector(parentEntity, EntityCommanding, newVector3d, _db.ActionOnDateTime);
                 /*
                 if (newOrbit.Periapsis > targetSOI)
@@ -91,9 +91,9 @@ namespace Pulsar4X.ECSLib
         public Guid TargetEntityGuid { get; set; }
 
         private Entity _targetEntity;
-        public Vector4 TargetOffsetPosition_AU;
+        public Vector3 TargetOffsetPosition_AU;
         public DateTime TransitStartDateTime;
-        public Vector4 ExpendDeltaV;
+        public Vector3 ExpendDeltaV;
 
         TranslateMoveDB _db;
 
@@ -108,7 +108,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="targetOffsetPos_AU">Target offset position in au.</param>
         /// <param name="transitStartDatetime">Transit start datetime.</param>
         /// <param name="expendDeltaV_AU">Amount of DV to expend to change the orbit in AU/s</param>
-        public static void CreateTransitCmd(Game game, Entity faction, Entity orderEntity, Entity targetEntity, Vector4 targetOffsetPos_AU, DateTime transitStartDatetime, Vector4 expendDeltaV_AU)
+        public static void CreateTransitCmd(Game game, Entity faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_AU, DateTime transitStartDatetime, Vector3 expendDeltaV_AU)
         {
             var cmd = new TransitToOrbitCommand()
             {
@@ -132,9 +132,9 @@ namespace Pulsar4X.ECSLib
             {
                 
 
-                (Vector4 pos, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), TransitStartDateTime, TargetOffsetPosition_AU);
+                (Vector3 pos, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), TransitStartDateTime, TargetOffsetPosition_AU);
                 OrbitDB orbitDB = _entityCommanding.GetDataBlob<OrbitDB>();
-                Vector4 currentPos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, TransitStartDateTime);
+                Vector3 currentPos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, TransitStartDateTime);
                 var ralPos = OrbitProcessor.GetPosition_AU(orbitDB, TransitStartDateTime);
                 var masses = _entityCommanding.GetDataBlob<MassVolumeDB>().Mass + orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
                 var sgp = GameConstants.Science.GravitationalConstant * masses / 3.347928976e33;

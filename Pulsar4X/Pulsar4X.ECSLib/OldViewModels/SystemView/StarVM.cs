@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Ralitive to parent orbit.
         /// </summary>
-        public Vector4 Position
+        public Vector3 Position
         {
             get { return _position; }
             private set
@@ -95,16 +95,16 @@ namespace Pulsar4X.ECSLib
                 OnPropertyChanged();
             }
         }
-        private Vector4 _position;
+        private Vector3 _position;
 
         /// <summary>
         /// 2d cartisian position ralitive to ancestor star (ancestor should be 0,0). 
         /// </summary>
-        public Vector4 SystemPosition
+        public Vector3 SystemPosition
         {
             get
             {
-                Vector4 parentPos = new Vector4();
+                Vector3 parentPos = new Vector3();
                 if (ParentStar != null)
                 {
                     parentPos = ParentStar.SystemPosition;

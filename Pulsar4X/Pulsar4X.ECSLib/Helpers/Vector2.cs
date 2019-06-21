@@ -294,7 +294,7 @@ namespace Pulsar4X.Vectors
             return new Vector2(-value.X, -value.Y);
         }
 
-        public static explicit operator Vector2(Vector4 v4)  // explicit vector4 to vector2 conversion operator
+        public static explicit operator Vector2(Vector3 v4)  // explicit vector4 to vector2 conversion operator
         {
             return new Vector2(v4.X, v4.Y);
         }

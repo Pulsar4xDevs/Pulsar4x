@@ -18,8 +18,8 @@ namespace Pulsar4X.ECSLib
         public double Mass_kg { get; set; }
         public double DesignMass_kg { get; set; }
 
-        public Vector4 AbsolutePosition { get; set; }
-        public Vector4 RalitivePosition { get; set; }
+        public Vector3 AbsolutePosition { get; set; }
+        public Vector3 RalitivePosition { get; set; }
         public Entity SOIParentEntity { get; set; }
 
 

@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
     public class NewtonBalisticDB : BaseDataBlob
     {
         [JsonProperty]
-        public Vector4 CurrentSpeed { get; set; } = new Vector4();
+        public Vector3 CurrentSpeed { get; set; } = new Vector3();
         [JsonProperty]
         public Guid TargetGuid;
         [JsonProperty]

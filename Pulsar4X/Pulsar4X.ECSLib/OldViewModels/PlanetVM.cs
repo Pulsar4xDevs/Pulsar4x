@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
 
         #region PositionDB Properties
 
-        public Vector4 Position
+        public Vector3 Position
         {
             get { return _position; }
             private set
@@ -42,13 +42,13 @@ namespace Pulsar4X.ECSLib
                 OnPropertyChanged();
             }
         }
-        private Vector4 _position;
+        private Vector3 _position;
 
-        public Vector4 SystemPosition
+        public Vector3 SystemPosition
         {
             get
             {
-                Vector4 parentPos;
+                Vector3 parentPos;
                 if (ParentPlanet != null)
                 {
                     parentPos = ParentPlanet.SystemPosition;

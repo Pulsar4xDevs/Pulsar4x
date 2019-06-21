@@ -71,10 +71,10 @@ namespace Pulsar4X.ECSLib
             var positionDB = entity.GetDataBlob<PositionDB>();
             var maxSpeedMS = propulsionDB.MaximumSpeed_MS;
             positionDB.SetParent(null);
-            Vector4 targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
-            Vector4 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
+            Vector3 targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
+            Vector3 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
 
-            Vector4 postionDelta = currentPositionMt - targetPosMt;
+            Vector3 postionDelta = currentPositionMt - targetPosMt;
             double totalDistance = postionDelta.Length();
 
             double maxKMeters = ShipMovementProcessor.CalcMaxFuelDistance_KM(entity);
@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
 
             if (fuelMaxDistanceMt >= totalDistance)
             {
-                var currentVelocityMS = Vector4.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
+                var currentVelocityMS = Vector3.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
                 propulsionDB.CurrentVectorMS = currentVelocityMS;
                 moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
                 moveDB.LastProcessDateTime = entity.Manager.ManagerSubpulses.StarSysDateTime;
@@ -117,9 +117,9 @@ namespace Pulsar4X.ECSLib
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
             var positionDB = entity.GetDataBlob<PositionDB>();
             var currentPositionAU = positionDB.AbsolutePosition_AU;
-            Vector4 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
+            Vector3 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
 
-            Vector4 targetPosMt;
+            Vector3 targetPosMt;
 
             targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
 
@@ -160,7 +160,7 @@ namespace Pulsar4X.ECSLib
         void SetOrbitHere(Entity entity, PropulsionAbilityDB propulsionDB, PositionDB positionDB, TranslateMoveDB moveDB, DateTime atDateTime)
         {
 
-            propulsionDB.CurrentVectorMS = new Vector4(0, 0, 0, 0);
+            propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
             double targetSOI = OrbitProcessor.GetSOI(moveDB.TargetEntity);
 
@@ -177,8 +177,8 @@ namespace Pulsar4X.ECSLib
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
             var orbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, atDateTime);
             var insertionVector2d = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
-            Vector4 parentOrbitalVector = new Vector4(orbitalVector.X, orbitalVector.Y, 0, 0);
-            Vector4 insertionVector = new Vector4(insertionVector2d.X, insertionVector2d.Y, 0, 0);
+            Vector3 parentOrbitalVector = new Vector3(orbitalVector.X, orbitalVector.Y, 0);
+            Vector3 insertionVector = new Vector3(insertionVector2d.X, insertionVector2d.Y, 0);
             insertionVector += moveDB.ExpendDeltaV_AU; //TODO: only use it if we have it. 
             propulsionDB.RemainingDV_MS -= (float)Distance.AuToMt(moveDB.ExpendDeltaV_AU).Length();
             OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector, atDateTime);

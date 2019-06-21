@@ -34,11 +34,11 @@ namespace Pulsar4X.ECSLib
         public Vector2 SavedNewtonionVector_AU { get; internal set; }
 
         [JsonProperty]
-        public Vector4 TranslateEntryPoint_AU { get; internal set; }
+        public Vector3 TranslateEntryPoint_AU { get; internal set; }
         [JsonProperty]
-        public Vector4 TranslateExitPoint_AU { get; internal set; }
+        public Vector3 TranslateExitPoint_AU { get; internal set; }
         [JsonProperty]
-        public Vector4 TranslateRalitiveExit_AU { get; internal set; }
+        public Vector3 TranslateRalitiveExit_AU { get; internal set; }
         [JsonProperty]
         public float Heading_Radians { get; internal set; }
         [JsonProperty]
@@ -47,13 +47,13 @@ namespace Pulsar4X.ECSLib
         public DateTime PredictedExitTime { get; internal set; }
 
         [JsonProperty]
-        internal Vector4 CurrentNonNewtonionVectorMS;
+        internal Vector3 CurrentNonNewtonionVectorMS;
 
         [JsonProperty]
         /// <summary>
         /// The amount of deltaV to expend, in AU/s.
         /// </summary>
-        internal Vector4 ExpendDeltaV_AU;
+        internal Vector3 ExpendDeltaV_AU;
 
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
         /// Use this one to move to a specific postion vector. 
         /// </summary>
         /// <param name="targetPosition_AU">Target position au.</param>
-        public TranslateMoveDB(Vector4 targetPosition_AU)
+        public TranslateMoveDB(Vector3 targetPosition_AU)
         {
             TranslateExitPoint_AU = targetPosition_AU;
             Heading_Radians = (float)Math.Atan2(targetPosition_AU.Y, targetPosition_AU.X);

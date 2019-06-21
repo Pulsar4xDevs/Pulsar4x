@@ -440,9 +440,9 @@ namespace Pulsar4X.SDL2UI
     }
     public static class PointDFunctions
     {
-        public static PointD NewFrom(ECSLib.Vector4 vector4)
+        public static PointD NewFrom(ECSLib.Vector3 vector3)
         {
-            return new PointD() { X = vector4.X, Y = vector4.Y };
+            return new PointD() { X = vector3.X, Y = vector3.Y };
         }
         public static PointD NewFrom(SDL.SDL_Point sDL_Point)
         {

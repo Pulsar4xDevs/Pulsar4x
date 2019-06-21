@@ -81,7 +81,7 @@ namespace Pulsar4X.SDL2UI
         float _alphaChangeAmount;
 
         double _eccentricity;
-        Vector4 _position;
+        Vector3 _position;
 
         #endregion
 
@@ -143,7 +143,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        public void SetParametersFromKeplerElements(KeplerElements ke, Vector4 position)
+        public void SetParametersFromKeplerElements(KeplerElements ke, Vector3 position)
         {
 
             _eccentricity = ke.Eccentricity;

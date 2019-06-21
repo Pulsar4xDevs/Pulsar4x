@@ -125,7 +125,7 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(shipClassNameDB.GetName(faction) == shipClassName);
 
             /////Ship/////
-            Vector4 pos = new Vector4(0,0,0,0);
+            Vector3 pos = new Vector3(0,0,0);
             Entity ship = ShipFactory.CreateShip(shipClass, starSystem, faction, pos, starSystem, shipName);
             ShipInfoDB shipInfo = ship.GetDataBlob<ShipInfoDB>();
             NameDB shipNameDB = ship.GetDataBlob<NameDB>();

@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
                 mass = 1.5e+12; //about 1.5 billion tonne
             else
                 mass = asteroidMass;
-            Vector4 velocity = new Vector4(8, 7, 0, 0);
+            Vector3 velocity = new Vector3(8, 7, 0);
 
             var position = new PositionDB(0, 0, 0, Guid.Empty);
             var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);
@@ -41,11 +41,11 @@ namespace Pulsar4X.ECSLib
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector3 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
-            Vector4 offset = velocity * timeToCollision.TotalSeconds;
+            Vector3 offset = velocity * timeToCollision.TotalSeconds;
             targetPos -=  Distance.KmToAU(offset);
             position.AbsolutePosition_AU = targetPos;
             position.SystemGuid = starSys.Guid;
@@ -78,7 +78,7 @@ namespace Pulsar4X.ECSLib
                 mass = 1.5e+12; //about 1.5 billion tonne
             else
                 mass = asteroidMass;
-            Vector4 velocity = new Vector4(8, 7, 0, 0);
+            Vector3 velocity = new Vector3(8, 7, 0);
 
             var position = new PositionDB(0, 0, 0, Guid.Empty);
             var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);
@@ -91,11 +91,11 @@ namespace Pulsar4X.ECSLib
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector3 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
-            Vector4 offset = velocity * timeToCollision.TotalSeconds;
+            Vector3 offset = velocity * timeToCollision.TotalSeconds;
             targetPos -= Distance.KmToAU(offset);
             position.AbsolutePosition_AU = targetPos;
             position.SystemGuid = starSys.Guid;
@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
                 mass = asteroidMass;
 
             var speed = Distance.KmToAU(40);
-            Vector4 velocity = new Vector4(speed, 0, 0, 0);
+            Vector3 velocity = new Vector3(speed, 0, 0);
 
 
             var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);
@@ -157,7 +157,7 @@ namespace Pulsar4X.ECSLib
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector4 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector3 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
             return newELE;
         }
 
-        public static Entity CreateAsteroid4(Vector4 position, OrbitDB origOrbit, DateTime atDateTime, double asteroidMass = -1.0)
+        public static Entity CreateAsteroid4(Vector3 position, OrbitDB origOrbit, DateTime atDateTime, double asteroidMass = -1.0)
         {
             //todo rand these a bit.
             double radius = Distance.KmToAU(0.5);
@@ -199,7 +199,7 @@ namespace Pulsar4X.ECSLib
                 mass = asteroidMass;
 
             var speed = Distance.KmToAU(40);
-            Vector4 velocity = new Vector4(speed, 0, 0, 0);
+            Vector3 velocity = new Vector3(speed, 0, 0);
 
 
             var massVolume = MassVolumeDB.NewFromMassAndRadius(mass, radius);

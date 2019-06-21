@@ -5,8 +5,8 @@ namespace Pulsar4X.ECSLib
 {
     public interface IPosition
     {
-        Vector4 AbsolutePosition_AU { get; }
-        Vector4 RelativePosition_AU { get; }
+        Vector3 AbsolutePosition_AU { get; }
+        Vector3 RelativePosition_AU { get; }
 
     }
     //TODO: get rid of AU, why are we using AU.
@@ -17,9 +17,9 @@ namespace Pulsar4X.ECSLib
         public Guid SystemGuid;
 
         /// <summary>
-        /// The Position as a Vec4, in AU.
+        /// The Position as a Vec3, in AU.
         /// </summary>
-        public Vector4 AbsolutePosition_AU
+        public Vector3 AbsolutePosition_AU
         {
             get
             {
@@ -47,12 +47,12 @@ namespace Pulsar4X.ECSLib
             }
         }
         [JsonProperty]
-        private Vector4 _position;
+        private Vector3 _position;
 
         /// <summary>
         /// Get or Set the position relative to the parent Entity's abolutePositon
         /// </summary>
-        public Vector4 RelativePosition_AU
+        public Vector3 RelativePosition_AU
         {
             get { return _position; }
             internal set { _position = value; }
@@ -91,10 +91,10 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Position as a vec4. This is a utility property that converts Position to Km on get and to AU on set.
         /// </summary>
-        public Vector4 PositionInKm
+        public Vector3 PositionInKm
         {
-            get { return new Vector4(Distance.AuToKm(AbsolutePosition_AU.X), Distance.AuToKm(AbsolutePosition_AU.Y), Distance.AuToKm(AbsolutePosition_AU.Z), 0); }
-            set { AbsolutePosition_AU = new Vector4(Distance.KmToAU(value.X), Distance.KmToAU(value.Y), Distance.KmToAU(value.Z), 0); }
+            get { return new Vector3(Distance.AuToKm(AbsolutePosition_AU.X), Distance.AuToKm(AbsolutePosition_AU.Y), Distance.AuToKm(AbsolutePosition_AU.Z)); }
+            set { AbsolutePosition_AU = new Vector3(Distance.KmToAU(value.X), Distance.KmToAU(value.Y), Distance.KmToAU(value.Z)); }
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Pulsar4X.ECSLib
             set { _position.Z = Distance.KmToAU(value); }
         }
 
-        public void AddMeters(Vector4 addVector)
+        public void AddMeters(Vector3 addVector)
         {
             _position += Distance.MToAU(addVector);
         }
@@ -140,11 +140,11 @@ namespace Pulsar4X.ECSLib
         /// <param name="z">Z value.</param>
         public PositionDB(double x, double y, double z, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition_AU = new Vector4(x, y, z, 0);
+            AbsolutePosition_AU = new Vector3(x, y, z);
             SystemGuid = systemGuid;
         }
 
-        public PositionDB(Vector4 pos, Guid systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(Vector3 pos, Guid systemGuid, Entity parent = null) : base(parent)
         {
             AbsolutePosition_AU = pos;
             SystemGuid = systemGuid;
@@ -152,8 +152,8 @@ namespace Pulsar4X.ECSLib
 
         public PositionDB(Guid systemGuid, Entity parent = null) : base(parent)
         {
-            Vector4? parentPos = (ParentDB as PositionDB)?.AbsolutePosition_AU;
-            AbsolutePosition_AU = parentPos ?? Vector4.Zero;
+            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition_AU;
+            AbsolutePosition_AU = parentPos ?? Vector3.Zero;
             SystemGuid = systemGuid;
         }
 
@@ -178,8 +178,8 @@ namespace Pulsar4X.ECSLib
         {
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
-            Vector4 currentAbsolute = this.AbsolutePosition_AU;
-            Vector4 newRelative;
+            Vector3 currentAbsolute = this.AbsolutePosition_AU;
+            Vector3 newRelative;
             if (newParent == null)
             {
                 newRelative = currentAbsolute;
@@ -201,7 +201,7 @@ namespace Pulsar4X.ECSLib
             return (posA.AbsolutePosition_AU - posB.AbsolutePosition_AU).Length();
         }
 
-        public static double GetDistanceBetween(Vector4 posA, PositionDB posB)
+        public static double GetDistanceBetween(Vector3 posA, PositionDB posB)
         {
             return (posA - posB.AbsolutePosition_AU).Length();
         }

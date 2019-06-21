@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
             double linierEcentricity = aphelionAU - semiMajAxisAU;
             double semiMinorAxsis =  Math.Sqrt(Math.Pow(semiMajAxisAU, 2) - Math.Pow(linierEcentricity, 2));
             double ecentricity = linierEcentricity / semiMajAxisAU;
-            Vector4 ralitivePos = myPosition.RelativePosition_AU; 
+            Vector3 ralitivePos = myPosition.RelativePosition_AU; 
              
             double angle = Math.Atan2(ralitivePos.Y, ralitivePos.X); 
             var theta = Angle.ToDegrees(angle);
@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
             double semiMajorAxsis = (perihelionAU + aphelionAU) / 2 ;
             double linierEcentricity = aphelionAU - semiMajorAxsis;
             double ecentricity = linierEcentricity / semiMajorAxsis;
-            Vector4 ralitivePos = (myPosition.AbsolutePosition_AU - parentPosition.AbsolutePosition_AU);
+            Vector3 ralitivePos = (myPosition.AbsolutePosition_AU - parentPosition.AbsolutePosition_AU);
             double inclination = 0;
             double loAN = 0; //longditude of Acending Node
             double aoP = Math.Tan(ralitivePos.X / ralitivePos.Y); ; //arguemnt of Periapsis

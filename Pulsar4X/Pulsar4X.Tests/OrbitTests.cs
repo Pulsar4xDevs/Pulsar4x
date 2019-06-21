@@ -16,8 +16,8 @@ namespace Pulsar4X.Tests
 
             double parentMass = 1.989e30;
             double objMass = 2.2e+15;
-            Vector4 position = new Vector4() { X = 0.57 }; //Halley's Comet at periapse aprox
-            Vector4 velocity = new Vector4() { Y = Distance.KmToAU(54) };
+            Vector3 position = new Vector3() { X = 0.57 }; //Halley's Comet at periapse aprox
+            Vector3 velocity = new Vector3() { Y = Distance.KmToAU(54) };
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(man.ManagerGuid) { X = 0, Y = 0, Z = 0 };
@@ -27,7 +27,7 @@ namespace Pulsar4X.Tests
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp, position, velocity, new DateTime());
-            Vector4 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
+            Vector3 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
         }
 
 
@@ -62,15 +62,15 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestKeplerElementsFromVectors()
         {
-            Vector4 position = new Vector4() { X = Distance.KmToAU(405400) }; //moon at apoapsis
-            Vector4 velocity = new Vector4() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
+            Vector3 position = new Vector3() { X = Distance.KmToAU(405400) }; //moon at apoapsis
+            Vector3 velocity = new Vector3() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
             KeplerElements elements = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, new DateTime());
 
-            Vector4 postionKm = new Vector4() { X = 405400 };
-            Vector4 velocityKm = new Vector4() { Y = 0.97 };
+            Vector3 postionKm = new Vector3() { X = 405400 };
+            Vector3 velocityKm = new Vector3() { Y = 0.97 };
             double sgpKm = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 1000000000;
 
             KeplerElements elementsKm = OrbitMath.KeplerFromPositionAndVelocity(sgpKm, postionKm, velocityKm, new DateTime());
@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
             //not sure it's worth the minor slowdown or complication, didn't seem to fix the problem I was seeing in anycase. 
             #region experimentation 
 
-            var H = Vector4.Cross(postionKm, velocityKm).Length();
+            var H = Vector3.Cross(postionKm, velocityKm).Length();
             var p = H * H / sgpKm;
             var sma = 1 / (2 / postionKm.Length() - velocityKm.Length() * velocityKm.Length() / sgpKm); //  semi-major axis
 
@@ -149,29 +149,29 @@ namespace Pulsar4X.Tests
         {
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
-            Vector4 position = new Vector4() { X = Distance.KmToAU(405400) }; //moon at apoapsis
-            Vector4 velocity = new Vector4() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
+            Vector3 position = new Vector3() { X = Distance.KmToAU(405400) }; //moon at apoapsis
+            Vector3 velocity = new Vector3() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
             //test high eccentricity orbit
             parentMass = 1.989e30;
             objMass = 2.2e+15;
-            position = new Vector4() { X = 0.57 }; //Halley's Comet at periapse aprox
-            velocity = new Vector4() { Y = Distance.KmToAU(54) };
+            position = new Vector3() { X = 0.57 }; //Halley's Comet at periapse aprox
+            velocity = new Vector3() { Y = Distance.KmToAU(54) };
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
 
 
             parentMass = 1.989e30;
             objMass = 2.2e+15;
-            position = new Vector4() { X = 0.25, Y = 0.25 }; 
-            velocity = new Vector4() { Y = Distance.KmToAU(54) };
+            position = new Vector3() { X = 0.25, Y = 0.25 }; 
+            velocity = new Vector3() { Y = Distance.KmToAU(54) };
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
             parentMass = 1.989e30;
             objMass = 10000;
-            position = new Vector4() { X = 0.25, Y = 0.25 };
-            velocity = new Vector4() { X = Distance.KmToAU(0), Y = Distance.KmToAU(1) };
+            position = new Vector3() { X = 0.25, Y = 0.25 };
+            velocity = new Vector3() { X = Distance.KmToAU(0), Y = Distance.KmToAU(1) };
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
             /*
@@ -192,22 +192,22 @@ namespace Pulsar4X.Tests
         {
             double parentMass = 1.989e30;
             double objMass = 10000;
-            Vector4 position = new Vector4() { X = 0.25, Y = 0.25 };
-            Vector4 velocity = new Vector4() { X = Distance.KmToAU(0), Y = Distance.KmToAU(1) }; //passes
+            Vector3 position = new Vector3() { X = 0.25, Y = 0.25 };
+            Vector3 velocity = new Vector3() { X = Distance.KmToAU(0), Y = Distance.KmToAU(1) }; //passes
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            velocity = new Vector4() { X = Distance.KmToAU(0), Y = -Distance.KmToAU(2) }; //fails
+            velocity = new Vector3() { X = Distance.KmToAU(0), Y = -Distance.KmToAU(2) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            velocity = new Vector4() { X = Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
+            velocity = new Vector3() { X = Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            velocity = new Vector4() { X = -Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
+            velocity = new Vector3() { X = -Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
         }
 
-        public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector4 position, Vector4 velocity)
+        public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector3 position, Vector3 velocity)
         {
             double angleΔ = 0.0000000001; 
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + objMass) / 3.347928976e33;
@@ -224,7 +224,7 @@ namespace Pulsar4X.Tests
 
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp, position, velocity, new DateTime());
-            Vector4 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
+            Vector3 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
 
             //check LoAN
             var objLoAN = Angle.ToRadians(objOrbit.LongitudeOfAscendingNode);
@@ -267,7 +267,7 @@ namespace Pulsar4X.Tests
             if (ke.TrueAnomalyAtEpoch != orbTrueAnom) 
             { 
 
-                Vector4 eccentVector = OrbitMath.EccentricityVector(sgp, position, velocity);
+                Vector3 eccentVector = OrbitMath.EccentricityVector(sgp, position, velocity);
                 var tacalc1 = OrbitMath.TrueAnomaly(eccentVector, position, velocity);
                 var tacalc2 = OrbitMath.TrueAnomaly(sgp, position, velocity);
 
@@ -305,13 +305,13 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(ke.Apoapsis, objOrbit.Apoapsis); 
             Assert.AreEqual(ke.Periapsis, objOrbit.Periapsis);
 
-            Vector4 posKM = Distance.AuToKm(position);
-            Vector4 resultKM = Distance.AuToKm(resultPos);
+            Vector3 posKM = Distance.AuToKm(position);
+            Vector3 resultKM = Distance.AuToKm(resultPos);
 
             double keslr = EllipseMath.SemiLatusRectum(ke.SemiMajorAxis, ke.Eccentricity);
             double keradius = OrbitMath.RadiusAtAngle(ke.TrueAnomalyAtEpoch, keslr, ke.Eccentricity);
-            Vector4 kemathPos = OrbitMath.GetRalitivePosition(ke.LoAN, ke.AoP, ke.Inclination, ke.TrueAnomalyAtEpoch, keradius);
-            Vector4 kemathPosKM = Distance.AuToKm(kemathPos);
+            Vector3 kemathPos = OrbitMath.GetRalitivePosition(ke.LoAN, ke.AoP, ke.Inclination, ke.TrueAnomalyAtEpoch, keradius);
+            Vector3 kemathPosKM = Distance.AuToKm(kemathPos);
             Assert.AreEqual(kemathPosKM.Length(), posKM.Length(), 0.01);
 
             Assert.AreEqual(posKM.Length(), resultKM.Length(), 0.01, "TA: " + orbtaDeg);
@@ -346,12 +346,12 @@ namespace Pulsar4X.Tests
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(mgr, parentblobs);
 
-            Vector4 currentPos = new Vector4 { X=-0.77473184638034, Y = 0.967145228951685 };
-            Vector4 currentVelocity = new Vector4 { Y = Distance.KmToAU(40) };
+            Vector3 currentPos = new Vector3 { X=-0.77473184638034, Y = 0.967145228951685 };
+            Vector3 currentVelocity = new Vector3 { Y = Distance.KmToAU(40) };
             double nonNewtSpeed = Distance.KmToAU( 283.018);
 
-            Vector4 targetObjPosition = new Vector4 { X = 0.149246434443459, Y=-0.712107888348067 };
-            Vector4 targetObjVelocity = new Vector4 { Y = Distance.KmToAU(35) };
+            Vector3 targetObjPosition = new Vector3 { X = 0.149246434443459, Y=-0.712107888348067 };
+            Vector3 targetObjVelocity = new Vector3 { Y = Distance.KmToAU(35) };
 
 
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
@@ -407,7 +407,7 @@ namespace Pulsar4X.Tests
             objBlobs1[1] = new MassVolumeDB() { Mass = 10000 };
             objBlobs1[2] = new NewtonMoveDB(parentEntity)
             {
-                CurrentVector_kms = new Vector4(-10.0, 0, 0, 0)
+                CurrentVector_kms = new Vector3(-10.0, 0, 0)
             };
             Entity objEntity1 = new Entity(mgr, objBlobs1);
             PositionDB pos2 = new PositionDB(mgr.ManagerGuid) { X = 0, Y = 8.52699302490434E-05, Z = 0 };
@@ -416,7 +416,7 @@ namespace Pulsar4X.Tests
             objBlobs2[1] = new MassVolumeDB() { Mass = 10000 };
             objBlobs2[2] = new NewtonMoveDB(parentEntity)
             {
-                CurrentVector_kms = new Vector4(-10.0, 0, 0, 0)
+                CurrentVector_kms = new Vector3(-10.0, 0, 0)
             };
             Entity objEntity2 = new Entity(mgr, objBlobs2);
 

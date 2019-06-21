@@ -6,10 +6,10 @@ namespace Pulsar4X.ECSLib
         internal DataFrom GetDataFrom = DataFrom.Parent;
         public PositionDB ActualEntityPositionDB; //the detected actual entity
         public PositionDB ParentPositionDB; //detected actual entity positional parent for ralitive positions.
-        public Vector4 MemoryRalitivePosition;
-        internal Vector4 AcuracyOffset = new Vector4();
+        public Vector3 MemoryRalitivePosition;
+        internal Vector3 AcuracyOffset = new Vector3();
 
-        public Vector4 AbsolutePosition_AU
+        public Vector3 AbsolutePosition_AU
         {
             get
             {
@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public Vector4 RelativePosition_AU
+        public Vector3 RelativePosition_AU
         {
             get
             {

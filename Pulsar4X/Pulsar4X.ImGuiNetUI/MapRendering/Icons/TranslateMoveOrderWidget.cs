@@ -28,8 +28,8 @@ namespace Pulsar4X.SDL2UI
 
         PositionDB _targetPositionDB;
 
-        Vector4 _transitLeavePositionRalitive; //ralitive to the parentBody
-        Vector4 _transitArrivePosition;
+        Vector3 _transitLeavePositionRalitive; //ralitive to the parentBody
+        Vector3 _transitArrivePosition;
 
         SDL_Point[] _linePoints;
 
@@ -77,7 +77,7 @@ namespace Pulsar4X.SDL2UI
             OnPhysicsUpdate();
         }
 
-        public void SetArrivalPosition(Vector4 ralitiveWorldPosition)
+        public void SetArrivalPosition(Vector3 ralitiveWorldPosition)
         {
             _transitArrivePosition = ralitiveWorldPosition;
             _arriveIcon.SetTransitPostion(_transitArrivePosition);
@@ -270,7 +270,7 @@ namespace Pulsar4X.SDL2UI
         /// Sets the transit postion.
         /// </summary>
         /// <param name="transitPositionOffset">Transit position offset, this is the world position ralitive to the parent body</param>
-        public void SetTransitPostion(Vector4 transitPositionOffset)
+        public void SetTransitPostion(Vector3 transitPositionOffset)
         {
             _worldPosition = transitPositionOffset;
             OnPhysicsUpdate();

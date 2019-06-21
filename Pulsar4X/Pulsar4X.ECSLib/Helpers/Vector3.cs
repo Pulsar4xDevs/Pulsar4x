@@ -9,87 +9,82 @@ namespace Pulsar4X.ECSLib
     /// See: https://msdn.microsoft.com/en-us/library/system.numerics.vector4(v=vs.110).aspx
     /// </summary>
     /// <typeparam name="T">An int, float, </typeparam>
-    public struct Vector4 : IEquatable<Vector4>, IFormattable
+    public struct Vector3 : IEquatable<Vector3>, IFormattable
     {
         public double X;
         public double Y;
         public double Z;
-        public double W;
 
         #region Constructors
 
-        public Vector4(double single)
+        public Vector3(double single)
         {
             X = single;
             Y = single;
             Z = single;
-            W = single;
         }
 
-        public Vector4(double x, double y, double z, double w)
+        public Vector3(double x, double y, double z)
         {
             X = x;
             Y = y;
             Z = z;
-            W = w;
         }
 
-        public Vector4(Vector4 position)
+        public Vector3(Vector3 position)
         {
             X = position.X;
             Y = position.Y;
             Z = position.Z;
-            W = position.W;
-
         }
 
         #endregion
 
         #region Static Properties
 
-        public static Vector4 NaN
+        public static Vector3 NaN
         {
-            get { return new Vector4(double.NaN, double.NaN, double.NaN, double.NaN); }
+            get { return new Vector3(double.NaN, double.NaN, double.NaN); }
         }
 
         /// <summary>
         /// Gets a vector whose 4 elements are equal to one. 
         /// </summary>
-        public static Vector4 One
+        public static Vector3 One
         {
-            get { return new Vector4(1,1,1,1); }
+            get { return new Vector3(1,1,1); }
         }
 
         /// <summary>
         /// Gets a vector whose 4 elements are equal to zero. 
         /// </summary>
-        public static Vector4 Zero
+        public static Vector3 Zero
         {
-            get { return new Vector4(0,0,0,0); }
+            get { return new Vector3(0,0,0); }
         }
 
         /// <summary>
         /// Gets the vector (1,0,0,0).
         /// </summary>
-        public static Vector4 UnitX
+        public static Vector3 UnitX
         {
-            get { return new Vector4(1,0,0,0); }
+            get { return new Vector3(1,0,0); }
         }
 
         /// <summary>
         /// Gets the vector (0,1,0,0).
         /// </summary>
-        public static Vector4 UnitY
+        public static Vector3 UnitY
         {
-            get { return new Vector4(0,1,0,0); }
+            get { return new Vector3(0,1,0); }
         }
 
         /// <summary>
         /// Gets the vector (0,0,1,0).
         /// </summary>
-        public static Vector4 UnitZ
+        public static Vector3 UnitZ
         {
-            get { return new Vector4(0,0,1,0); }
+            get { return new Vector3(0,0,1); }
         }
 
         #endregion
@@ -99,7 +94,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Adds two vectors together. 
         /// </summary>
-        public static Vector4 Add(Vector4 left, Vector4 right)
+        public static Vector3 Add(Vector3 left, Vector3 right)
         {
             return left + right;
         }
@@ -107,7 +102,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Divides the first vector by the second. 
         /// </summary>
-        public static Vector4 Divide(Vector4 left, Vector4 right)
+        public static Vector3 Divide(Vector3 left, Vector3 right)
         {
             return left / right;
         }
@@ -115,7 +110,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Divides the specified vector by a specified scalar value. 
         /// </summary>
-        public static Vector4 Divide(Vector4 left, double divisor)
+        public static Vector3 Divide(Vector3 left, double divisor)
         {
             return left / divisor;
 
@@ -125,12 +120,27 @@ namespace Pulsar4X.ECSLib
         /// Returns the magnitude of the vector.
         /// </summary>
         /// 
-        public static double Magnitude(Vector4 vector)
+        public static double Magnitude(Vector3 vector)
         {
-            return Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y) + (vector.Z * vector.Z) + (vector.W * vector.W));
+            return Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y) + (vector.Z * vector.Z));
         }
 
-        public static Vector4 Normalise(Vector4 vector)
+        
+        /// <summary>
+        /// attempts to get a more mathmaticaly precise result by casting to a decimal and back again.
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static double MagnitudePrecise(Vector3 vector)
+        {
+            decimal x = (decimal)vector.X;
+            decimal y = (decimal)vector.Y;
+            decimal z = (decimal)vector.Z;
+
+            return Math.Sqrt( (double)(x * x + y * y + z * z));
+        }
+
+        public static Vector3 Normalise(Vector3 vector)
         {
             double magnatude = Magnitude(vector);
             if (magnatude != 0)
@@ -143,17 +153,17 @@ namespace Pulsar4X.ECSLib
         /// Returns the dot product of two vectors
         /// </summary>
 
-        public static double Dot(Vector4 left, Vector4 right)
+        public static double Dot(Vector3 left, Vector3 right)
         {
-            return left.X * right.X + left.Y * right.Y + left.Z * right.Z + left.W * right.W;
+            return left.X * right.X + left.Y * right.Y + left.Z * right.Z;
         }
 
         /// <summary>
         /// Cross product of left and right. Note: this ignores the fourth (W) property and treats them as 3d vectors.
         /// </summary>
-        public static Vector4 Cross(Vector4 left, Vector4 right)
+        public static Vector3 Cross(Vector3 left, Vector3 right)
         {
-            return new Vector4()
+            return new Vector3()
             {
                 X = left.Y * right.Z - left.Z * right.Y,
                 Y = left.Z * right.X - left.X * right.Z,
@@ -165,7 +175,7 @@ namespace Pulsar4X.ECSLib
         /// Returns the angle between two vectors
         /// </summary>
 
-        public static double AngleBetween(Vector4 left, Vector4 right)
+        public static double AngleBetween(Vector3 left, Vector3 right)
         {
             return Math.Acos(Dot(left, right) / (Magnitude(left) * Magnitude(right)));
         }
@@ -175,18 +185,18 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (!(obj is Vector4))
+            if (!(obj is Vector3))
                 return false;
 
-            return Equals((Vector4)obj);
+            return Equals((Vector3)obj);
         }
 
         /// <summary>
         /// Returns a value that indicates whether this instance and another vector are equal. 
         /// </summary>
-        public bool Equals(Vector4 other)
+        public bool Equals(Vector3 other)
         {
-            return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z) && W.Equals(other.W);
+            return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z);
         }
 
         /// <summary>
@@ -199,8 +209,6 @@ namespace Pulsar4X.ECSLib
             h = h * 16777619 ^ X.GetHashCode();
             h = h * 16777619 ^ Y.GetHashCode();
             h = h * 16777619 ^ Z.GetHashCode();
-            h = h * 16777619 ^ W.GetHashCode();
-
             return (int)h;
         }
 
@@ -217,13 +225,13 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double LengthSquared()
         {
-            return (X * X) + (Y * Y) + (Z * Z) + (W * W);
+            return (X * X) + (Y * Y) + (Z * Z);
         }
 
         /// <summary>
         /// Multiplies a scalar value by a specified vector.
         /// </summary>
-        public static Vector4 Multiply(double left, Vector4 right)
+        public static Vector3 Multiply(double left, Vector3 right)
         {
             return right * left;
         }
@@ -231,7 +239,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Multiplies two vectors together. 
         /// </summary>
-        public static Vector4 Multiply(Vector4 left, Vector4 right)
+        public static Vector3 Multiply(Vector3 left, Vector3 right)
         {
             return left * right;
         }
@@ -239,7 +247,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Multiplies a vector by a specified scalar. 
         /// </summary>
-        public static Vector4 Multiply(Vector4 left, float right)
+        public static Vector3 Multiply(Vector3 left, float right)
         {
             return left * right;
         }
@@ -247,7 +255,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Negates a specified vector. 
         /// </summary>
-        public static Vector4 Negate(Vector4 value)
+        public static Vector3 Negate(Vector3 value)
         {
             return -value;
         }
@@ -255,7 +263,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Subtracts the second vector from the first. 
         /// </summary>
-        public static Vector4 Subtract(Vector4 left, Vector4 right)
+        public static Vector3 Subtract(Vector3 left, Vector3 right)
         {
             return left - right;
         }
@@ -265,7 +273,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public override string ToString()
         {
-            return String.Format("({0}, {1}, {2}, {3})", X, Y, Z, W);
+            return String.Format("({0}, {1}, {2})", X, Y, Z);
         }
 
         /// <summary>
@@ -273,7 +281,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public string ToString(string format)
         {
-            return String.Format("({0}, {1}, {2}, {3})", X.ToString(format), Y.ToString(format), Z.ToString(format), W.ToString(format));
+            return String.Format("({0}, {1}, {2})", X.ToString(format), Y.ToString(format), Z.ToString(format));
         }
 
         /// <summary>
@@ -282,8 +290,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            return String.Format("({0}, {1}, {2}, {3})", X.ToString(format, formatProvider), Y.ToString(format, formatProvider),
-                                                         Z.ToString(format, formatProvider), W.ToString(format, formatProvider));
+            return String.Format("({0}, {1}, {2})", X.ToString(format, formatProvider), Y.ToString(format, formatProvider),
+                                                         Z.ToString(format, formatProvider));
         }
 
         #endregion
@@ -293,54 +301,54 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Adds two vectors together. 
         /// </summary>
-        public static Vector4 operator +(Vector4 left, Vector4 right)
+        public static Vector3 operator +(Vector3 left, Vector3 right)
         {
-            return new Vector4(left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W);
+            return new Vector3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
         }
 
-        public static Vector4 operator +(Vector4 left, Vector2 right)
+        public static Vector3 operator +(Vector3 left, Vector2 right)
         {
-            return new Vector4(left.X + right.X, left.Y + right.Y, left.Z , left.W);
+            return new Vector3(left.X + right.X, left.Y + right.Y, left.Z);
         }
 
 
         /// <summary>
         /// Divides the first vector by the second. 
         /// </summary>
-        public static Vector4 operator /(Vector4 left, Vector4 right)
+        public static Vector3 operator /(Vector3 left, Vector3 right)
         {
-            var temp = new Vector4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
+            var temp = new Vector3(left.X / right.X, left.Y / right.Y, left.Z / right.Z);
             return temp;
         }
 
         /// <summary>
         /// Divides the specified vector by a specified scalar value.
         /// </summary>
-        public static Vector4 operator /(Vector4 left, double right)
+        public static Vector3 operator /(Vector3 left, double right)
         {
-            return new Vector4(left.X / right, left.Y / right, left.Z / right, left.W / right);
+            return new Vector3(left.X / right, left.Y / right, left.Z / right);
         }
 
         /// <summary>
         /// Returns a value that indicates whether each pair of elements in two specified vectors is equal. 
         /// </summary>
-        public static bool operator ==(Vector4 left, Vector4 right)
+        public static bool operator ==(Vector3 left, Vector3 right)
         {
-            return left.X == right.X && left.Y == right.Y && left.Z == right.Z && left.W == right.W;
+            return left.X == right.X && left.Y == right.Y && left.Z == right.Z;
         }
 
         /// <summary>
         /// Returns a value that indicates whether two specified vectors are not equal. 
         /// </summary>
-        public static bool operator !=(Vector4 left, Vector4 right)
+        public static bool operator !=(Vector3 left, Vector3 right)
         {
-            return left.X != right.X && left.Y != right.Y && left.Z != right.Z && left.W != right.W;
+            return left.X != right.X && left.Y != right.Y && left.Z != right.Z;
         }
 
         /// <summary>
         /// Multiples the scalar value by the specified vector. 
         /// </summary>
-        public static Vector4 operator *(double left, Vector4 right)
+        public static Vector3 operator *(double left, Vector3 right)
         {
             return right * left;
         }
@@ -348,38 +356,38 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Multiplies two vectors together.
         /// </summary>
-        public static Vector4 operator *(Vector4 left, Vector4 right)
+        public static Vector3 operator *(Vector3 left, Vector3 right)
         {
-            return new Vector4(left.X * right.X, left.Y * right.Y, left.Z * right.Z, left.W * right.W);
+            return new Vector3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
         }
 
         /// <summary>
         /// Multiples the specified vector by the specified scalar value. 
         /// </summary>
-        public static Vector4 operator *(Vector4 left, double right)
+        public static Vector3 operator *(Vector3 left, double right)
         {
-            return new Vector4(left.X * right, left.Y * right, left.Z * right, left.W * right);
+            return new Vector3(left.X * right, left.Y * right, left.Z * right);
         }
 
         /// <summary>
         /// Subtracts the second vector from the first. 
         /// </summary>
-        public static Vector4 operator -(Vector4 left, Vector4 right)
+        public static Vector3 operator -(Vector3 left, Vector3 right)
         {
-            return new Vector4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
+            return new Vector3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
         }
 
         /// <summary>
         /// Negates the specified vector. 
         /// </summary>
-        public static Vector4 operator -(Vector4 value)
+        public static Vector3 operator -(Vector3 value)
         {
-            return new Vector4(-value.X, -value.Y, -value.Z, - value.W);
+            return new Vector3(-value.X, -value.Y, -value.Z);
         }
 
-        public static explicit operator Vector4(Vector2 v2)  // explicit vector2 to vector4 conversion operator
+        public static explicit operator Vector3(Vector2 v2)  // explicit vector2 to vector4 conversion operator
         {
-            return new Vector4(v2.X, v2.Y, 0, 0);
+            return new Vector3(v2.X, v2.Y, 0);
         }
 
         #endregion

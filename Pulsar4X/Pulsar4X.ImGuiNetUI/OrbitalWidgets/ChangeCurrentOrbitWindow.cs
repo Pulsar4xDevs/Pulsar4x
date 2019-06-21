@@ -19,23 +19,23 @@ namespace Pulsar4X.SDL2UI
         float _progradeDV;
         float _radialDV;
 
-        ECSLib.Vector4 _deltaV_MS;
+        ECSLib.Vector3 _deltaV_MS;
 
         DateTime _actionDateTime;
 
         //double _origionalOrbitalSpeed = double.NaN;
-        ECSLib.Vector4 _orbitalVelocityAtChange = ECSLib.Vector4.NaN;
+        ECSLib.Vector3 _orbitalVelocityAtChange = ECSLib.Vector3.NaN;
         double _origionalAngle = double.NaN;
 
         double _newOrbitalSpeed = double.NaN;
-        ECSLib.Vector4 _newOrbitalVelocity = ECSLib.Vector4.NaN;
+        ECSLib.Vector3 _newOrbitalVelocity = ECSLib.Vector3.NaN;
         double _newAngle = double.NaN;
 
         double _massOrderingEntity = double.NaN;
         double _massParentBody = double.NaN;
         double _stdGravParam = double.NaN;
 
-        ECSLib.Vector4 _positonAtChange_AU;
+        ECSLib.Vector3 _positonAtChange_AU;
 
         KeplerElements _ke;
         //double _apoapsisKm;
@@ -100,7 +100,7 @@ namespace Pulsar4X.SDL2UI
 
             _positonAtChange_AU = OrbitProcessor.GetPosition_AU(_orderEntityOrbit, _actionDateTime);
             var velAtChange2d = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
-            _orbitalVelocityAtChange = new ECSLib.Vector4(velAtChange2d.X, velAtChange2d.Y, 0, 0);
+            _orbitalVelocityAtChange = new ECSLib.Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
             _origionalAngle = Math.Atan2(_orbitalVelocityAtChange.X, _orbitalVelocityAtChange.Y);
             IsActive = true;
         }
@@ -147,7 +147,7 @@ namespace Pulsar4X.SDL2UI
                 _actionDateTime = newDate;
                 _positonAtChange_AU = OrbitProcessor.GetPosition_AU(_orderEntityOrbit, _actionDateTime);
                 var vector2 = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
-                _orbitalVelocityAtChange = new ECSLib.Vector4(vector2.X, vector2.Y,0,0);
+                _orbitalVelocityAtChange = new ECSLib.Vector3(vector2.X, vector2.Y,0);
                 _origionalAngle = Math.Atan2(_orbitalVelocityAtChange.X, _orbitalVelocityAtChange.Y);
             }
         }
@@ -170,7 +170,7 @@ namespace Pulsar4X.SDL2UI
        
             double x = (_radialDV * Math.Cos(_origionalAngle)) - (_progradeDV * Math.Sin(_origionalAngle));
             double y = (_radialDV * Math.Sin(_origionalAngle)) + (_progradeDV * Math.Cos(_origionalAngle));
-            _deltaV_MS = new ECSLib.Vector4(x, y, 0, 0);
+            _deltaV_MS = new ECSLib.Vector3(x, y, 0);
 
 
             _newOrbitalVelocity = _orbitalVelocityAtChange + Distance.MToAU(_deltaV_MS);

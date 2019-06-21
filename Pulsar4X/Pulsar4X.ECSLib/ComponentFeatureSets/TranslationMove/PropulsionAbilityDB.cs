@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
     {
         //Non Newtonion:
         public int MaximumSpeed_MS { get; set; }
-        public Vector4 CurrentVectorMS { get; set; }
+        public Vector3 CurrentVectorMS { get; set; }
         public int TotalEnginePower { get; set; }
         public Dictionary<Guid, double> FuelUsePerKM { get; internal set; } = new Dictionary<Guid, double>();
 

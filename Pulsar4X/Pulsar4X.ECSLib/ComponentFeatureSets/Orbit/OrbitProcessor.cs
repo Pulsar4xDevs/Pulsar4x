@@ -84,7 +84,7 @@ namespace Pulsar4X.ECSLib
             // Get our Parent-Relative coordinates.
             try
             {
-                Vector4 newPosition = GetPosition_AU(entityOrbitDB, toDate);
+                Vector3 newPosition = GetPosition_AU(entityOrbitDB, toDate);
 
                 // Get our Absolute coordinates.
                 entityPosition.AbsolutePosition_AU = parentPositionDB.AbsolutePosition_AU + newPosition;
@@ -115,11 +115,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="time">Time position desired from.</param>
-        public static Vector4 GetPosition_AU(OrbitDB orbit, DateTime time)
+        public static Vector3 GetPosition_AU(OrbitDB orbit, DateTime time)
         {
             if (orbit.IsStationary)
             {
-                return new Vector4(0, 0, 0, 0);
+                return new Vector3(0, 0, 0);
             }
             return GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
         }
@@ -129,12 +129,12 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="time">Time position desired from.</param>
-        public static Vector4 GetAbsolutePosition_AU(OrbitDB orbit, DateTime time)
+        public static Vector3 GetAbsolutePosition_AU(OrbitDB orbit, DateTime time)
         {
             if (orbit.Parent == null)//if we're the parent sun
                 return GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
             //else if we're a child
-            Vector4 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+            Vector3 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
             if (orbit.IsStationary)
             {
                 return rootPos;
@@ -189,12 +189,12 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="trueAnomaly">Angle in Radians.</param>
-        public static Vector4 GetPosition_AU(OrbitDB orbit, double trueAnomaly)
+        public static Vector3 GetPosition_AU(OrbitDB orbit, double trueAnomaly)
         {
 
             if (orbit.IsStationary)
             {
-                return new Vector4(0, 0, 0, 0);
+                return new Vector3(0, 0, 0);
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
@@ -212,7 +212,7 @@ namespace Pulsar4X.ECSLib
             double y = Math.Sin(lofAN) * Math.Cos(tA) + Math.Cos(lofAN) * Math.Sin(tA) * Math.Cos(incl);
             double z = Math.Sin(incl) * Math.Sin(tA);
 
-            return new Vector4(x, y, z, 0) * radius;
+            return new Vector3(x, y, z) * radius;
         }
 
         /// <summary>

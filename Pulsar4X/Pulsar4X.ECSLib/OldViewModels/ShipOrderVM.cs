@@ -240,7 +240,7 @@ namespace Pulsar4X.ECSLib
                 if (SelectedMoveTarget == null)
                     return "N/A";
 
-                Vector4 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition_AU - SelectedMoveTarget.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+                Vector3 delta = SelectedShip.GetDataBlob<PositionDB>().AbsolutePosition_AU - SelectedMoveTarget.GetDataBlob<PositionDB>().AbsolutePosition_AU;
                 return Distance.AuToKm(delta.Length()).ToString("N2") ;
             }
         }

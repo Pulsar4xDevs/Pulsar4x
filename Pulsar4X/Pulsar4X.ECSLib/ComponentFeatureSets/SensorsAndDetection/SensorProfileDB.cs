@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
         /// <value>The reflected EMS pectra.</value>
         internal Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; set; } = new Dictionary<EMWaveForm, double>();
         internal DateTime LastDatetimeOfReflectionSet = new DateTime();
-        internal Vector4 LastPositionOfReflectionSet = new Vector4();
+        internal Vector3 LastPositionOfReflectionSet = new Vector3();
 
 
         /// <summary>

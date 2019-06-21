@@ -62,7 +62,7 @@ namespace Pulsar4X.Tests
             EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
             EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
 
-            Vector4 pos = new Vector4(0, 0, 0, 0);
+            Vector3 pos = new Vector3(0, 0, 0);
             int designEngineNumber = _shipClass.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid);
             Assert.AreEqual(2, designEngineNumber);
             _ship = ShipFactory.CreateShip(_shipClass, _starSystem, _faction, pos, _starSystem, "Serial Peacemaker");

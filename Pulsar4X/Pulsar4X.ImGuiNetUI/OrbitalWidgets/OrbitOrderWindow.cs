@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         float _progradeDV;
         float _radialDV;
 
-        ECSLib.Vector4 _deltaV_MS; 
+        ECSLib.Vector3 _deltaV_MS; 
 
         KeplerElements _ke;
         double _apoapsisKm;
@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
         double _departureAngle = double.NaN;
 
         double _insertionOrbitalSpeed = double.NaN;
-        ECSLib.Vector4 _insertionOrbitalVelocity = ECSLib.Vector4.NaN;
+        ECSLib.Vector3 _insertionOrbitalVelocity = ECSLib.Vector3.NaN;
         double _insertionAngle = double.NaN;
         //(Vector4, TimeSpan) _intercept;
 
@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
         enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked}
         Action[,] fsm;
 
-        ECSLib.Vector4 _targetInsertionPoint_AU;
+        ECSLib.Vector3 _targetInsertionPoint_AU;
 
         private OrbitOrderWindow(EntityState entity, bool smMode = false)
         {
@@ -473,11 +473,11 @@ namespace Pulsar4X.SDL2UI
 
 
 
-        ECSLib.Vector4 GetTargetPosition()
+        ECSLib.Vector3 GetTargetPosition()
         {
             return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
         }
-        ECSLib.Vector4 GetMyPosition()
+        ECSLib.Vector3 GetMyPosition()
         {
             return OrderingEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU;
         }
@@ -496,7 +496,7 @@ namespace Pulsar4X.SDL2UI
         void InsertionCalcs()
         {
             OrbitDB targetOrbit = TargetEntity.Entity.GetDataBlob<OrbitDB>();
-            (ECSLib.Vector4 position, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            (ECSLib.Vector3 position, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
             /*
@@ -506,10 +506,10 @@ namespace Pulsar4X.SDL2UI
             var norm = Vectors.Vector2.Normalise( _departureOrbitalVelocity);
             double x = norm.X * _radialDV;
             double y = norm.Y * _progradeDV;
-            _deltaV_MS = new ECSLib.Vector4(x, y, 0, 0);
+            _deltaV_MS = new ECSLib.Vector3(x, y, 0);
 
             var insertionVector2d = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
-            _insertionOrbitalVelocity = new ECSLib.Vector4(insertionVector2d.X, insertionVector2d.Y, 0, 0);
+            _insertionOrbitalVelocity = new ECSLib.Vector3(insertionVector2d.X, insertionVector2d.Y, 0);
 
             _insertionOrbitalVelocity += Distance.MToAU( _deltaV_MS);
             _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
@@ -533,7 +533,7 @@ namespace Pulsar4X.SDL2UI
             if(button == MouseButtons.Primary)
                 fsm[(byte)CurrentState, (byte)Events.SelectedEntity].Invoke();
         }
-        internal override void MapClicked(ECSLib.Vector4 worldPos, MouseButtons button)
+        internal override void MapClicked(ECSLib.Vector3 worldPos, MouseButtons button)
         {
             if (button == MouseButtons.Primary)
             {

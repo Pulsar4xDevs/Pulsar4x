@@ -20,8 +20,8 @@ namespace Pulsar4X.SDL2UI
     public class Icon : IDrawData
     {
         protected ECSLib.IPosition _positionDB;
-        protected ECSLib.Vector4 _worldPosition;
-        public ECSLib.Vector4 WorldPosition
+        protected ECSLib.Vector3 _worldPosition;
+        public ECSLib.Vector3 WorldPosition
         {
             get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
             _positionDB = positionDB;
             positionByDB = true;
         }
-        public Icon(ECSLib.Vector4 position)
+        public Icon(ECSLib.Vector3 position)
         {
             _worldPosition = position;
             positionByDB = false;
@@ -107,12 +107,12 @@ namespace Pulsar4X.SDL2UI
         Shape _shape;
         Shape _drawShape;
         protected ECSLib.IPosition _positionDB;
-        protected ECSLib.Vector4 _worldPosition;
+        protected ECSLib.Vector3 _worldPosition;
         public SDL.SDL_Point ViewScreenPos;
 
         bool positionByDB;
 
-        public ECSLib.Vector4 WorldPosition
+        public ECSLib.Vector3 WorldPosition
         {
             get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
@@ -176,12 +176,12 @@ namespace Pulsar4X.SDL2UI
         Shape _shape;
         Shape _drawShape;
         protected ECSLib.IPosition _positionDB;
-        protected ECSLib.Vector4 _worldPosition;
+        protected ECSLib.Vector3 _worldPosition;
         public SDL.SDL_Point ViewScreenPos;
 
         bool positionByDB;
 
-        public ECSLib.Vector4 WorldPosition
+        public ECSLib.Vector3 WorldPosition
         {
             get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }

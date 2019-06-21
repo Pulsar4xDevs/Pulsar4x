@@ -15,7 +15,7 @@ namespace Pulsar4X.SDL2UI
         public GraphicDebugWindow(GlobalUIState state)
         {
             _state = state;
-            _debugWidget = new GraphicDebugWidget(new Vector4());
+            _debugWidget = new GraphicDebugWidget(new Vector3());
         }
 
         public static GraphicDebugWindow GetWindow(GlobalUIState state)
@@ -124,7 +124,7 @@ namespace Pulsar4X.SDL2UI
         internal bool MtxArwMirrorY;
 
 
-        public GraphicDebugWidget(Vector4 position) : base(position)
+        public GraphicDebugWidget(Vector3 position) : base(position)
         {
 
 

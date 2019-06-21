@@ -5,8 +5,8 @@ namespace Pulsar4X.ECSLib
     public class NewtonMoveDB : BaseDataBlob
     {
         internal DateTime LastProcessDateTime = new DateTime();
-        public Vector4 ThrustVector { get; internal set; } = Vector4.Zero;
-        public Vector4 CurrentVector_kms { get; internal set; }
+        public Vector3 ThrustVector { get; internal set; } = Vector3.Zero;
+        public Vector3 CurrentVector_kms { get; internal set; }
 
         public Entity SOIParent { get; internal set; }
         public double ParentMass { get; internal set; }

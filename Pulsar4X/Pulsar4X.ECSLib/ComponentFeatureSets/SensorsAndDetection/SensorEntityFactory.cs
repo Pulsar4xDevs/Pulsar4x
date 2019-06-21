@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
 
                 sensorEntityMove.TargetPositionDB = null; //the sensorEntity shouldn't know the final destination. 
 
-                Vector4 velocityDetectionInacuracy = new Vector4() { }; //some random noise depending on quality value
+                Vector3 velocityDetectionInacuracy = new Vector3() { }; //some random noise depending on quality value
 
                 sensorEntityMove.CurrentNonNewtonionVectorMS = detectedEntitiesMove.CurrentNonNewtonionVectorMS + velocityDetectionInacuracy;
             }

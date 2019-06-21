@@ -161,7 +161,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            Vector4 pos = BodyPositionDB.RelativePosition_AU; 
+            Vector3 pos = BodyPositionDB.RelativePosition_AU; 
             _bodyRalitivePos = new PointD() { X = pos.X, Y = pos.Y };
 
             double minDist = CalcDistance(_bodyRalitivePos, _points[_index]);

@@ -20,13 +20,13 @@ namespace Pulsar4X.SDL2UI
         internal bool IsPinnedToEntity { get; private set; }
         internal Guid PinnedEntityGuid;
         PositionDB _entityPosDB;
-        ECSLib.Vector4 _camWorldPos = new ECSLib.Vector4();
-        public ECSLib.Vector4 CameraWorldPosition
+        ECSLib.Vector3 _camWorldPos = new ECSLib.Vector3();
+        public ECSLib.Vector3 CameraWorldPosition
         {
             get
             {
                 if (IsPinnedToEntity && _entityPosDB != null)
-                    return new ECSLib.Vector4
+                    return new ECSLib.Vector3
                     {
                         X = _camWorldPos.X + _entityPosDB.AbsolutePosition_AU.X,
                         Y = _camWorldPos.Y + _entityPosDB.AbsolutePosition_AU.Y
@@ -71,7 +71,7 @@ namespace Pulsar4X.SDL2UI
             if (entity.HasDataBlob<PositionDB>())
             {
                 _entityPosDB = entity.GetDataBlob<PositionDB>();
-                _camWorldPos = new ECSLib.Vector4(); //zero on it. 
+                _camWorldPos = new ECSLib.Vector3(); //zero on it. 
                 IsPinnedToEntity = true;
                 PinnedEntityGuid = entity.Guid;
             }
@@ -85,7 +85,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public Point ViewCoordinate(ECSLib.Vector4 worldCoord)
+        public Point ViewCoordinate(ECSLib.Vector3 worldCoord)
         {
             int x = (int)((worldCoord.X - CameraWorldPosition.X) * ZoomLevel + ViewPortCenter.X);
             int y = -(int)((worldCoord.Y - CameraWorldPosition.Y) * ZoomLevel - ViewPortCenter.Y);
@@ -94,12 +94,12 @@ namespace Pulsar4X.SDL2UI
             return viewCoord;
         }
 
-        public ECSLib.Vector4 MouseWorldCoordinate()
+        public ECSLib.Vector3 MouseWorldCoordinate()
         {
             System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
             double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
             double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
-            return new ECSLib.Vector4(x, y, 0, 0);
+            return new ECSLib.Vector3(x, y, 0);
 
         }
 
@@ -108,11 +108,11 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewCoordinate"></param>
         /// <returns></returns>
-        public ECSLib.Vector4 WorldCoordinate(int viewCoordinateX, int viewCoordinateY)
+        public ECSLib.Vector3 WorldCoordinate(int viewCoordinateX, int viewCoordinateY)
         {
             double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
             double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
-            return new ECSLib.Vector4(x, y, 0, 0);
+            return new ECSLib.Vector3(x, y, 0);
         }
 
 
@@ -232,7 +232,7 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     class CursorCrosshair : Icon
     {
-        public CursorCrosshair(ECSLib.Vector4 position) : base(position)
+        public CursorCrosshair(ECSLib.Vector3 position) : base(position)
         {
             var colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
 

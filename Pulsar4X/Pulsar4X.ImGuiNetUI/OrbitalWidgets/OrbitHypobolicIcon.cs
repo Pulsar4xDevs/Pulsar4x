@@ -73,9 +73,9 @@ namespace Pulsar4X.SDL2UI
         internal void CreatePointArray()
         {
 
-            Vector4 vel = Distance.KmToAU(_newtonMoveDB.CurrentVector_kms);
-            Vector4 pos = myPosDB.RelativePosition_AU;
-            Vector4 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            Vector3 vel = Distance.KmToAU(_newtonMoveDB.CurrentVector_kms);
+            Vector3 pos = myPosDB.RelativePosition_AU;
+            Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
             double e = eccentVector.Length();
             double r = pos.Length();
             double v = vel.Length();
@@ -86,7 +86,7 @@ namespace Pulsar4X.SDL2UI
 
             //longditudeOfPeriapsis;
             double _lop = Math.Atan2(eccentVector.Y, eccentVector.X);
-            if (Vector4.Cross(pos, vel).Z < 0) //anti clockwise orbit
+            if (Vector3.Cross(pos, vel).Z < 0) //anti clockwise orbit
                 _lop = Math.PI * 2 - _lop;
 
             double p = EllipseMath.SemiLatusRectum(a, e);
@@ -176,7 +176,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            Vector4 pos = myPosDB.RelativePosition_AU;
+            Vector3 pos = myPosDB.RelativePosition_AU;
             var ralitivePos = new PointD() { X = pos.X, Y = pos.Y };
 
             double minDist = PointDFunctions.Length(PointDFunctions.Sub(ralitivePos, _points[_index]));

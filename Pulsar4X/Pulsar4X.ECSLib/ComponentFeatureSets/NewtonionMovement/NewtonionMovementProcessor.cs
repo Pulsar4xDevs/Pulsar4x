@@ -72,15 +72,15 @@ namespace Pulsar4X.ECSLib
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
                 double gravForce = GameConstants.Science.GravitationalConstant * (Mass_Kg * ParentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector4 gravForceVector = gravForce * -Vector4.Normalise(positionDB.RelativePosition_AU);
+                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_AU);
                 double distance = Distance.AuToKm(positionDB.RelativePosition_AU).Length();
-                Vector4 totalForce = gravForceVector + newtonMoveDB.ThrustVector;
+                Vector3 totalForce = gravForceVector + newtonMoveDB.ThrustVector;
 
-                Vector4 acceleration_mps = totalForce / Mass_Kg;
-                Vector4 newVelocity = (acceleration_mps * timeStep * 0.001) + newtonMoveDB.CurrentVector_kms;
+                Vector3 acceleration_mps = totalForce / Mass_Kg;
+                Vector3 newVelocity = (acceleration_mps * timeStep * 0.001) + newtonMoveDB.CurrentVector_kms;
 
                 newtonMoveDB.CurrentVector_kms = newVelocity;
-                Vector4 deltaPos = (newtonMoveDB.CurrentVector_kms + newVelocity) / 2 * timeStep;
+                Vector3 deltaPos = (newtonMoveDB.CurrentVector_kms + newVelocity) / 2 * timeStep;
                 //Vector4 deltaPos = newtonMoveDB.CurrentVector_kms * timeStep;
 
                 positionDB.RelativePosition_AU += Distance.KmToAU(deltaPos);
@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
                 if (positionDB.RelativePosition_AU.Length() >= sOIRadius_AU)
                 {
                     Entity newParent;
-                    Vector4 parentRalitiveVector;
+                    Vector3 parentRalitiveVector;
                     //if our parent is a regular kepler object (normaly this is the case)
                     if (newtonMoveDB.SOIParent.HasDataBlob<OrbitDB>())
                     {
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
                     }
                     double newParentMass = newParent.GetDataBlob<MassVolumeDB>().Mass;
                     double sgp = GameConstants.Science.GravitationalConstant * (newParentMass + Mass_Kg) / 3.347928976e33;
-                    Vector4 posRalitiveToNewParent = positionDB.AbsolutePosition_AU - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+                    Vector3 posRalitiveToNewParent = positionDB.AbsolutePosition_AU - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
                     var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector, dateTime);

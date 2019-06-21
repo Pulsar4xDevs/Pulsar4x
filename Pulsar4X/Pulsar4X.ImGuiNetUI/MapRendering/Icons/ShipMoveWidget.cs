@@ -7,15 +7,15 @@ namespace Pulsar4X.SDL2UI
     public class ShipMoveWidget : Icon
     {
         //PositionDB _positionDB;
-        Vector4 _translateStartPoint = new Vector4();
-        Vector4 _translateEndPoint = new Vector4();
-        Vector4 _currentPosition = new Vector4();
+        Vector3 _translateStartPoint = new Vector3();
+        Vector3 _translateEndPoint = new Vector3();
+        Vector3 _currentPosition = new Vector3();
         public byte Red = 255;
         public byte Grn = 255;
         public byte Blu = 0;
         byte alpha = 100;
         SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[2];
-        public ShipMoveWidget(Entity entity): base(new Vector4())
+        public ShipMoveWidget(Entity entity): base(new Vector3())
         {
             if (entity.HasDataBlob<TranslateMoveDB>())
             {

@@ -120,7 +120,7 @@ namespace Pulsar4X.ECSLib
 
 
             Entity gunShip = ShipFactory.CreateShip(gunShipClass, solSys, factionEntity, earth, solSys, "Prevailing Stillness");
-            gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector4(8.52699302490434E-05, 0, 0, 0);
+            gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
             StorageSpaceProcessor.AddCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //give the gunship a hypobolic orbit to test:
             var velInAU = Distance.KmToAU(25);
@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
             gunShip.RemoveDataBlob<OrbitDB>();
             var nmdb = new NewtonMoveDB(earth)
             {
-                CurrentVector_kms = new Vector4(0, -10.0, 0, 0)
+                CurrentVector_kms = new Vector3(0, -10.0, 0)
             };
             gunShip.SetDataBlob<NewtonMoveDB>(nmdb);
 

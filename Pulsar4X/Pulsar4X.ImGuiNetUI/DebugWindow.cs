@@ -129,7 +129,7 @@ namespace Pulsar4X.SDL2UI
         }
 
         DateTime lastDate = new DateTime();
-        ECSLib.Vector4 pos = new ECSLib.Vector4();
+        ECSLib.Vector3 pos = new ECSLib.Vector3();
         double truAnomoly = 0;
 
         internal override void Display()
@@ -418,7 +418,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("NonNewt Engine Power: " + propulsionDB.TotalEnginePower);
                                     ImGui.Text("Max Speed: " + propulsionDB.MaximumSpeed_MS);
                                     ImGui.Text("CurrentVector: " + propulsionDB.CurrentVectorMS);
-                                    ImGui.Text("Current Speed: " + ECSLib.Vector4.Magnitude( propulsionDB.CurrentVectorMS));
+                                    ImGui.Text("Current Speed: " + ECSLib.Vector3.Magnitude( propulsionDB.CurrentVectorMS));
                                     if (_state.LastClickedEntity.Entity.HasDataBlob<CargoStorageDB>())
                                     {
                                         var fuelsGuid = propulsionDB.FuelUsePerKM;

@@ -49,7 +49,7 @@ namespace Pulsar4X.SDL2UI
 
         public event EntityClickedEventHandler EntityClickedEvent;
         internal EntityState LastClickedEntity;
-        internal ECSLib.Vector4 LastWorldPointClicked;
+        internal ECSLib.Vector3 LastWorldPointClicked;
 
 
 
@@ -141,7 +141,7 @@ namespace Pulsar4X.SDL2UI
             GalacticMap.SetFaction();
         }
 
-        internal void MapClicked(ECSLib.Vector4 worldCoord, MouseButtons button)
+        internal void MapClicked(ECSLib.Vector3 worldCoord, MouseButtons button)
         {
             if (button == MouseButtons.Primary)
                 LastWorldPointClicked = worldCoord;
@@ -210,7 +210,7 @@ namespace Pulsar4X.SDL2UI
 
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
 
-        internal virtual void MapClicked(ECSLib.Vector4 worldPos, MouseButtons button) { }
+        internal virtual void MapClicked(ECSLib.Vector3 worldPos, MouseButtons button) { }
 
         internal void Destroy()
         {

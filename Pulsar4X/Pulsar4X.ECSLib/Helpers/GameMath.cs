@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public static class Distance
     {
-        public static Vector4 MToAU(Vector4 meters)
+        public static Vector3 MToAU(Vector3 meters)
         {
             return meters / GameConstants.Units.MetersPerAu;
         }
@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
         {
             return km / GameConstants.Units.KmPerAu;
         }
-        public static Vector4 KmToAU(Vector4 km)
+        public static Vector3 KmToAU(Vector3 km)
         {
             return km / GameConstants.Units.KmPerAu;
         }
@@ -110,18 +110,18 @@ namespace Pulsar4X.ECSLib
         {
             return au * GameConstants.Units.KmPerAu;
         }
-        public static Vector4 AuToKm(Vector4 Au)
+        public static Vector3 AuToKm(Vector3 Au)
         {
-            return new Vector4(AuToKm(Au.X), AuToKm(Au.Y), AuToKm(Au.Z), 0);
+            return new Vector3(AuToKm(Au.X), AuToKm(Au.Y), AuToKm(Au.Z));
         }
         public static Vector2 AuToKm(Vector2 Au)
         {
             return new Vector2(AuToKm(Au.X), AuToKm(Au.Y));
         }
 
-        public static Vector4 AuToMt(Vector4 au)
+        public static Vector3 AuToMt(Vector3 au)
         {
-            Vector4 meters = au * GameConstants.Units.MetersPerAu;
+            Vector3 meters = au * GameConstants.Units.MetersPerAu;
             return meters;
         }
         public static Vector2 AuToMt(Vector2 au)
@@ -134,7 +134,7 @@ namespace Pulsar4X.ECSLib
             return au * GameConstants.Units.MetersPerAu; 
         }
 
-        public static double DistanceBetween(Vector4 p1, Vector4 p2)
+        public static double DistanceBetween(Vector3 p1, Vector3 p2)
         {
             return (p1 - p2).Length();
         }
@@ -519,21 +519,18 @@ namespace Pulsar4X.ECSLib
         /// <param name="currentPosition">Current position.</param>
         /// <param name="targetPosition">Target position.</param>
         /// <param name="speedMagnitude_AU">Speed magnitude.</param>
-        public static Vector4 GetVector(Vector4 currentPosition, Vector4 targetPosition, double speedMagnitude_AU)
+        public static Vector3 GetVector(Vector3 currentPosition, Vector3 targetPosition, double speedMagnitude_AU)
         {
-            Vector4 speed = new Vector4(0, 0, 0, 0);
+            Vector3 speed = new Vector3(0, 0, 0);
             double length;
 
 
-            Vector4 speedMagInAU = new Vector4(0, 0, 0, 0);
+            Vector3 speedMagInAU = new Vector3(0, 0, 0);
 
-            Vector4 direction = new Vector4(0, 0, 0, 0);
+            Vector3 direction = new Vector3(0, 0, 0);
             direction.X = targetPosition.X - currentPosition.X;
             direction.Y = targetPosition.Y - currentPosition.Y;
             direction.Z = targetPosition.Z - currentPosition.Z;
-            direction.W = 0;
-
-
 
             length = direction.Length(); // Distance between targets in AU
             if (length != 0)
@@ -623,7 +620,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="mover">Mover.</param>
         /// <param name="targetOrbit">Target orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static (Vector4, TimeSpan) FTLIntercept(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
+        public static (Vector3, TimeSpan) FTLIntercept(Entity mover, OrbitDB targetOrbit, DateTime atDateTime)
         {
 
             //OrbitDB targetOrbit = target.GetDataBlob<OrbitDB>();
@@ -631,15 +628,15 @@ namespace Pulsar4X.ECSLib
             //PositionDB moverPosition = mover.GetDataBlob<PositionDB>();
 
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
-            Vector4 moverPosInKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(moverOrbit, atDateTime));
+            Vector3 moverPosInKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(moverOrbit, atDateTime));
 
             PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
 
-            Vector4 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime)));
+            Vector3 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime)));
 
             int speed = 25000;//moverPropulsion.MaximumSpeed * 100; //299792458;
 
-            (Vector4, TimeSpan) intercept = (new Vector4(), TimeSpan.Zero);
+            (Vector3, TimeSpan) intercept = (new Vector3(), TimeSpan.Zero);
 
 
 
@@ -648,7 +645,7 @@ namespace Pulsar4X.ECSLib
             DateTime edi = atDateTime;
             DateTime edi_prev = atDateTime;
 
-            Vector4 predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, edi_prev));
+            Vector3 predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, edi_prev));
             double distance = (predictedPosKM - moverPosInKM).Length();
             eti = TimeSpan.FromSeconds((distance * 1000) / speed);
 
@@ -687,10 +684,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="mover">The entity that is trying to intercept a target.</param>
         /// <param name="targetOrbit">Target orbit.</param>
         /// <param name="atDateTime">Datetime of transit start</param>
-        public static (Vector4 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector4 offsetPosition = new Vector4())
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
 
-            Vector4 moverPos;
+            Vector3 moverPos;
             if (mover.HasDataBlob<OrbitDB>())
             {
                 //moverPos = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(mover.GetDataBlob<OrbitDB>(), atDateTime));
@@ -797,13 +794,13 @@ namespace Pulsar4X.ECSLib
 
         struct obit
         {
-            public Vector4 position;
+            public Vector3 position;
             public double T;
 
 
         }
 
-        public static (Vector4 position, DateTime etiDateTime) GetInterceptPosition2(Vector4 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime, Vector4 offsetPosition = new Vector4())
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition2(Vector3 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
 
             var pos = moverPos;
@@ -821,7 +818,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-            Vector4 p;
+            Vector3 p;
             int i;
             double tt, t, dt, a0, a1, T;
             // find orbital position with min error (coarse)
@@ -833,7 +830,7 @@ namespace Pulsar4X.ECSLib
             {
                 p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
                 p += offsetPosition;
-                tt = Vector4.Magnitude(p - pos) / speed;  //length(p - pos) / speed;
+                tt = Vector3.Magnitude(p - pos) / speed;  //length(p - pos) / speed;
                 a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                 a0 /= pl.T;                                   // remove full periods from the difference
                 a0 -= Math.Floor(a0);
@@ -850,7 +847,7 @@ namespace Pulsar4X.ECSLib
                 {
                     p = OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
                     p += offsetPosition;    
-                    tt = Vector4.Magnitude(p - pos) / speed;  //tt = length(p - pos) / speed;
+                    tt = Vector3.Magnitude(p - pos) / speed;  //tt = length(p - pos) / speed;
                     a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                     a0 /= pl.T;                                   // remove full periods from the difference
                     a0 -= Math.Floor(a0);

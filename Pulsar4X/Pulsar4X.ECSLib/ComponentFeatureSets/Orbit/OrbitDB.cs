@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="parent">Parent.</param>
         /// <param name="entity">Entity.</param>
         /// <param name="velocityAU">Velocity.</param>
-        public static OrbitDB FromVector(Entity parent, Entity entity, Vector4 velocityAU, DateTime atDateTime)
+        public static OrbitDB FromVector(Entity parent, Entity entity, Vector3 velocityAU, DateTime atDateTime)
         {
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
             var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
@@ -164,7 +164,7 @@ namespace Pulsar4X.ECSLib
             return orbit;
         }
 
-        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime atDateTime)
+        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector3 position, Vector3 velocity, DateTime atDateTime)
         {
             if (position.Length() > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");
@@ -183,7 +183,7 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public static OrbitDB FromVectorKM(Entity parent, double myMass, double parentMass, double sgp, Vector4 position, Vector4 velocity, DateTime atDateTime)
+        public static OrbitDB FromVectorKM(Entity parent, double myMass, double parentMass, double sgp, Vector3 position, Vector3 velocity, DateTime atDateTime)
         {
             if (Distance.KmToAU(position.Length()) > OrbitProcessor.GetSOI(parent))
                 throw new Exception("Entity not in target SOI");

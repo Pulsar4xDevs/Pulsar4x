@@ -6,6 +6,7 @@ using ImGuiSDL2CS;
 using System.Drawing;
 using Pulsar4X.ECSLib;
 using System.Linq;
+using Vector3 = System.Numerics.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {
