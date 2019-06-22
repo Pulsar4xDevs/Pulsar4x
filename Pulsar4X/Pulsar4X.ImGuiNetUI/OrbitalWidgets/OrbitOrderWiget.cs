@@ -281,25 +281,50 @@ namespace Pulsar4X.SDL2UI
             float alpha = MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
+                var err1 = SDL.SDL_GetError();
+                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
+                var err2 = SDL.SDL_GetError();
                 SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
+                var err3 = SDL.SDL_GetError();
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
                 alpha -= _alphaChangeAmount;
+                var err4 = SDL.SDL_GetError();
             }
 
             SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
             //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
-            DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
+            //DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
 
-            /*
-            var soipnts = CreatePrimitiveShapes.BresenhamCircle(ViewScreenPos.x, ViewScreenPos.y, (int)_soiViewRadius);
-            for (int i = 0; i < soipnts.Count -1; i+=2)
+            
+            var soipnts = CreatePrimitiveShapes.BresenhamCircle(0, 0, (int)_soiViewRadius);
+            
+            //SDL.SDL_RenderDrawPoints(rendererPtr, soipnts.ToArray(), soipnts.Count);
+            var lasty = 0;
+            for (int i = 0; i < soipnts.Count ; i+=2)
             {
-                SDL.SDL_RenderDrawLine(rendererPtr, soipnts[i].x, soipnts[i].y, soipnts[i + 1].x, soipnts[i + 1].y);
-                //SDL.SDL_RenderDrawPoint(rendererPtr, soipnts[i].x, soipnts[i].y);
-                //var err = SDL.SDL_GetError();
+                var x = soipnts[i].x;
+                var y = soipnts[i].y;
+                if(y != lasty)
+                    SDL.SDL_RenderDrawLine(rendererPtr, ViewScreenPos.x -x, ViewScreenPos.y -y, ViewScreenPos.x + x, ViewScreenPos.y - y);
+                lasty = y;
             }
-           */
 
+            
+/*
+            for (int i = 0; i < soipnts.Count -1; i++)
+            {
+                //var err = SDL.SDL_GetError();
+                //SDL.SDL_RenderDrawLine(rendererPtr, soipnts[i].x, soipnts[i].y, soipnts[i + 1].x, soipnts[i + 1].y);
+                if (SDL.SDL_RenderDrawPoint(rendererPtr, soipnts[i].x, soipnts[i].y) < 0)
+                {
+                    var err = SDL.SDL_GetError();
+                }
+
+                //SDL.SDL_RenderDrawLine(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, soipnts[i].x, soipnts[i].y);
+                //var err2 = SDL.SDL_GetError();
+            }
+  */         
+            
             SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 255);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
             var plntPts = CreatePrimitiveShapes.BresenhamCircle(ViewScreenPos.x, ViewScreenPos.y, (int)_targetViewRadius);
