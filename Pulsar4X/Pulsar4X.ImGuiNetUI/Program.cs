@@ -169,6 +169,28 @@ namespace Pulsar4X.SDL2UI
         {
             if (_state.ShowImgDbg)
             {
+                
+                ImGui.NewLine();
+                SDL.SDL_RendererInfo renderInfo;
+                SDL.SDL_GetRendererInfo(_state.rendererPtr, out renderInfo);
+                ImGui.Text("SDL RenderInfo:");
+                ImGui.Text("Name : " + renderInfo.name.ToString());
+                ImGui.Text("Flags: " +renderInfo.flags.ToString());
+                ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
+                ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
+                ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
+                //ImGui.Text("Flags: " +renderInfo.texture_formats.ToString());
+                        
+                        
+                SDL.SDL_GetRenderDriverInfo(0, out renderInfo);
+                ImGui.Text("SDL RenderDriverInfo:");
+                ImGui.Text("Name : " + renderInfo.name.ToString());
+                ImGui.Text("Flags: " +renderInfo.flags.ToString());
+                ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
+                ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
+                ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
+                ImGui.NewLine();
+                
                 foreach (var kvp in _state.SDLImageDictionary)
                 {
                     int h, w, a;
