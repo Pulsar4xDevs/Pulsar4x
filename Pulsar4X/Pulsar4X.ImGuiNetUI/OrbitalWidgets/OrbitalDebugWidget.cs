@@ -83,24 +83,41 @@ namespace Pulsar4X.SDL2UI
         double _loP;
 
         double _trueAnom;
+        double _trueAnom_FromEVec;
+        double _trueAnom_FromStateVec;
+        
         double _eccentricAnom;
+        double _eccentricAnom_FromTrueAnom;
+        double _ecctricAnom_FromStateVectors;
+        double _ecctricAnom_FromStateVectors2;
+        
+        
         double _meanAnom;
         PointD _bodyPosPnt;
         PointD _bodyEAPnt;
 
-
-
+        double _sgp;
+        double _ae;
+        
         internal List<ElementItem> ElementItems = new List<ElementItem>();
         //updateables
         ElementItem _trueAnomalyAngleItem;
+        
+        ElementItem _trueAnomItem_FromEVec;
+        ElementItem _trueAnomItem_FromStateVec;
+        
         ElementItem _radiusToBody;
 
         ElementItem _meanAnomalyItem;
         ElementItem _eccentricAnomalyItem;
+        ElementItem _eccentricAnomItem_FromTrueAnom;
+        ElementItem _eccentricAnomItem_FromStateVec;
+        ElementItem _eccentricAnomItem_FromStateVec2;
+        
         ElementItem _bodyPosItem;
         ElementItem _headingItem;
 
-        private List<ComplexShape> DrawComplexShapes = new List<ComplexShape>();
+        List<ComplexShape> _drawComplexShapes = new List<ComplexShape>();
 
         public OrbitalDebugWidget(EntityState entityState) : base(entityState.OrbitIcon.BodyPositionDB)
         {
@@ -144,13 +161,28 @@ namespace Pulsar4X.SDL2UI
 
             _semiMajAxis = orbitIcon.SemiMaj;
             _semiMinAxis = orbitIcon.SemiMinor;
-
+            _sgp = _orbitDB.GravitationalParameterAU;
+            _ae = _semiMajAxis * _orbitDB.Eccentricity;
+            
             DateTime systemDateTime = _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, systemDateTime);
+
+            
+            var pos = _bodyPosition.RelativePosition_AU;
+            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, systemDateTime);
+            var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
+            _trueAnom_FromEVec = OrbitMath.TrueAnomaly(ecvec, pos, (Vector3)vel);
+            _trueAnom_FromStateVec = OrbitMath.TrueAnomaly(_sgp, pos, (Vector3)vel);
+            
             double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
             _meanAnom = OrbitMath.GetMeanAnomalyFromTime(Angle.ToRadians(_orbitDB.MeanAnomalyAtEpoch), Angle.ToRadians(_orbitDB.MeanMotion), secondsFromEpoch);
 
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
+            _eccentricAnom_FromTrueAnom = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(_trueAnom, _orbitDB.Eccentricity);
+            _ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
+            _ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
+            
+            
             _bodyPosPnt = new PointD()
             {
                 X = (_bodyPosition.AbsolutePosition_AU + _worldPosition).X,
@@ -584,6 +616,8 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(lopAngle);
 
+            #region TrueAnomaly
+            
             //trueAnom angle index 3
             SDL.SDL_Color[] trueAnomColour = 
             {   
@@ -613,6 +647,46 @@ namespace Pulsar4X.SDL2UI
                     Scales = false
             } };
             ElementItems.Add(_trueAnomalyAngleItem);
+            
+            _trueAnomItem_FromEVec = new ElementItem()
+            {
+                NameString = "True Anomoly ν - EcentrictyVectorCalc",
+                Colour = trueAnomColour,
+                HighlightColour = trueAnomHColour,
+                DataItem = Angle.ToDegrees(_trueAnom_FromEVec),
+                DataString = Angle.ToDegrees(_trueAnom_FromEVec).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 80, 6, _loP, _trueAnom_FromEVec, 128),
+                    Colors = trueAnomColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                } };
+            ElementItems.Add(_trueAnomItem_FromEVec);
+            
+            _trueAnomItem_FromStateVec = new ElementItem()
+            {
+                NameString = "True Anomoly ν - StateVectorsCalc",
+                Colour = trueAnomColour,
+                HighlightColour = trueAnomHColour,
+                DataItem = Angle.ToDegrees(_trueAnom_FromStateVec),
+                DataString = Angle.ToDegrees(_trueAnom_FromStateVec).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 84, 6, _loP, _trueAnom_FromStateVec, 128),
+                    Colors = trueAnomColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                } };
+            ElementItems.Add(_trueAnomItem_FromStateVec);
+            #endregion
+            
             _radiusToBody = new ElementItem()
             {
                 NameString = "Radius (r)",
@@ -662,6 +736,8 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(_meanAnomalyItem);
 
+            #region EccentricAnomaly
+
             //EccentricAnom angle index 5
             SDL.SDL_Color[] eAnomColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 100 } };
             SDL.SDL_Color[] eAnomHColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 255 } };
@@ -684,11 +760,74 @@ namespace Pulsar4X.SDL2UI
                     Scales = false
                 }
             };
-
             ElementItems.Add(_eccentricAnomalyItem);
 
-
-            //EccentricAnom angle index 5
+            _eccentricAnomItem_FromTrueAnom = new ElementItem()
+            {
+                NameString = "Eccentric Anomoly (E) - From True Anom Calc",
+                Colour = eAnomColour,
+                HighlightColour = eAnomHColour,
+                DataItem = Angle.ToDegrees(_eccentricAnom_FromTrueAnom),
+                DataString = Angle.ToDegrees(_eccentricAnom_FromTrueAnom).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    StartPoint = new PointD() { X = _cP.X, Y = _cP.Y },
+                    Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 73, 6, _loP, _eccentricAnom_FromTrueAnom, 128),
+                    Colors = eAnomColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_eccentricAnomItem_FromTrueAnom);
+            
+            _eccentricAnomItem_FromStateVec = new ElementItem()
+            {
+                NameString = "Eccentric Anomoly (E) - From State Vec Calc",
+                Colour = eAnomColour,
+                HighlightColour = eAnomHColour,
+                DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors),
+                DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    StartPoint = new PointD() { X = _cP.X, Y = _cP.Y },
+                    Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 75, 6, _loP, _ecctricAnom_FromStateVectors, 128),
+                    Colors = eAnomColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_eccentricAnomItem_FromStateVec);
+            
+            _eccentricAnomItem_FromStateVec2 = new ElementItem()
+            {
+                NameString = "Eccentric Anomoly (E) - From State Vec Calc2",
+                Colour = eAnomColour,
+                HighlightColour = eAnomHColour,
+                DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors2),
+                DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors2).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    StartPoint = new PointD() { X = _cP.X, Y = _cP.Y },
+                    Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 77, 6, _loP, _ecctricAnom_FromStateVectors2, 128),
+                    Colors = eAnomColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_eccentricAnomItem_FromStateVec2);
+            
+            #endregion
+            
+            
             SDL.SDL_Color[] headingColour = 
             { 
                 new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 100 },
@@ -743,12 +882,29 @@ namespace Pulsar4X.SDL2UI
             _meanAnom = OrbitMath.GetMeanAnomalyFromTime(Angle.ToRadians(_orbitDB.MeanAnomalyAtEpoch), Angle.ToRadians( _orbitDB.MeanMotion), secondsFromEpoch);
 
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
+            
+            
             var meanAnom2 = OrbitMath.GetMeanAnomaly(_orbitDB.Eccentricity, _eccentricAnom);
 
-            _trueAnomalyAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 4, _loP, _trueAnom, 128);
+            _trueAnomalyAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 80, 4, _loP, _trueAnom, 128);
             _trueAnomalyAngleItem.DataItem = Angle.ToDegrees(_trueAnom);
             _trueAnomalyAngleItem.DataString = Angle.ToDegrees(_trueAnom).ToString() + "°";
 
+            
+            var pos = _bodyPosition.RelativePosition_AU;
+            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, systemDateTime);
+            var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
+            _trueAnom_FromEVec = OrbitMath.TrueAnomaly(ecvec, pos, (Vector3)vel);
+            _trueAnom_FromStateVec = OrbitMath.TrueAnomaly(_sgp, pos, (Vector3)vel);
+            
+            _trueAnomItem_FromEVec.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 82, 4, _loP, _trueAnom_FromEVec, 128);
+            _trueAnomItem_FromEVec.DataItem = Angle.ToDegrees(_trueAnom_FromEVec);
+            _trueAnomItem_FromEVec.DataString = Angle.ToDegrees(_trueAnom_FromEVec).ToString() + "°";
+            
+            _trueAnomItem_FromStateVec.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 84, 4, _loP, _trueAnom_FromStateVec, 128);
+            _trueAnomItem_FromStateVec.DataItem = Angle.ToDegrees(_trueAnom_FromStateVec);
+            _trueAnomItem_FromStateVec.DataString = Angle.ToDegrees(_trueAnom_FromStateVec).ToString() + "°";
+            
             _radiusToBody.Shape.Points = new PointD[]
             {
                 new PointD{X = _f1.X, Y = _f1.Y },
@@ -760,10 +916,27 @@ namespace Pulsar4X.SDL2UI
             _meanAnomalyItem.DataItem = Angle.ToDegrees(_meanAnom);
             _meanAnomalyItem.DataString = Angle.ToDegrees(_meanAnom).ToString() + "°";
 
+            _eccentricAnom_FromTrueAnom = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(_trueAnom, _orbitDB.Eccentricity);
+            _ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
+            _ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
+            
             _eccentricAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, _loP, _eccentricAnom, 128);
             _eccentricAnomalyItem.DataItem = Angle.ToDegrees(_eccentricAnom);
             _eccentricAnomalyItem.DataString = Angle.ToDegrees(_eccentricAnom).ToString() + "°";
 
+            _eccentricAnomItem_FromTrueAnom.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 73, 6, _loP, _eccentricAnom_FromTrueAnom, 128);
+            _eccentricAnomItem_FromTrueAnom.DataItem = Angle.ToDegrees(_eccentricAnom_FromTrueAnom);
+            _eccentricAnomItem_FromTrueAnom.DataString = Angle.ToDegrees(_eccentricAnom_FromTrueAnom).ToString() + "°";
+            
+            
+            _eccentricAnomItem_FromStateVec.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 75, 6, _loP, _ecctricAnom_FromStateVectors, 128);
+            _eccentricAnomItem_FromStateVec.DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors);
+            _eccentricAnomItem_FromStateVec.DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors).ToString() + "°";
+            
+            _eccentricAnomItem_FromStateVec2.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 77, 6, _loP, _ecctricAnom_FromStateVectors2, 128);
+            _eccentricAnomItem_FromStateVec2.DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors2);
+            _eccentricAnomItem_FromStateVec2.DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors2).ToString() + "°";
+            
             _bodyPosPnt = new PointD() 
             { 
                 X = (_bodyPosition.AbsolutePosition_AU + _worldPosition).X, 
@@ -790,7 +963,7 @@ namespace Pulsar4X.SDL2UI
             ViewScreenPos = camera.ViewCoordinate(WorldPosition);
             Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
  
-            DrawComplexShapes = new List<ComplexShape>() {};
+            _drawComplexShapes = new List<ComplexShape>() {};
 
             foreach (var item in ElementItems)
             {
@@ -817,7 +990,7 @@ namespace Pulsar4X.SDL2UI
 
                 }
 
-                DrawComplexShapes.Add( new ComplexShape()
+                _drawComplexShapes.Add( new ComplexShape()
                 {
                     Points = points,
                     Colors = shape.Colors,
@@ -828,7 +1001,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
-            foreach (var shape in DrawComplexShapes)
+            foreach (var shape in _drawComplexShapes)
             {
                 int ci = 0;
                 var colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
