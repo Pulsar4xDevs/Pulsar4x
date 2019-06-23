@@ -589,10 +589,20 @@ namespace Pulsar4X.ECSLib
             return eca;
         }
 
+        /// <summary>
+        /// Calculates the Eccentric Anomaly given True Anomaly and eccentricity. 
+        /// </summary>
+        /// <param name="ν"></param>
+        /// <param name="eccentricity"></param>
+        /// <returns></returns>
         public static double GetEccentricAnomalyFromTrueAnomaly(double ν, double eccentricity)
         {
-            return Math.Acos((Math.Cos(ν) + eccentricity) / (1 + eccentricity * Math.Cos(ν)));
+            var E = Math.Acos((Math.Cos(ν) + eccentricity) / (1 + eccentricity * Math.Cos(ν)));
+            if( ν < 0)
+                E = -E;
+            return E;
         }
+        
 
         public static double GetEccentricAnomalyFromStateVectors(Vector3 position, double semiMajAxis, double linierEccentricity, double aop)
         {
