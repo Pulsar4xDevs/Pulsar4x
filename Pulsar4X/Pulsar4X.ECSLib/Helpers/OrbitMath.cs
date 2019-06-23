@@ -104,11 +104,13 @@ namespace Pulsar4X.ECSLib
                 loANlen = GMath.Clamp(loANlen, -1, 1);
             if(loANlen != 0)
                 longdOfAN = Math.Acos(loANlen); //RAAN or LoAN or Ω
-                
 
-            double eccentricAnomoly = GetEccentricAnomalyFromStateVectors2(standardGravParam, semiMajorAxis, position, velocity);
 
-            double trueAnomaly = TrueAnomalyFromEccentricAnomaly(eccentricity, eccentricAnomoly);
+            double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
+
+            double eccentricAnomoly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
+
+            
             double argOfPeriaps = ArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
 
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
@@ -216,35 +218,43 @@ namespace Pulsar4X.ECSLib
             Vector3 angularMomentum = Vector3.Cross(position, velocity);
             Vector3 foo1 = Vector3.Cross(velocity, angularMomentum) / sgp;
             var foo2 = position / position.Length();
-            return foo1 - foo2;
+            var E = foo1 - foo2;
+            if (E.Length() < 1.0E-7)
+            {
+                return new Vector3(0, 0, 0);
+            }
+            else
+                return E;
         }
 
+        /// <summary>
+        /// Slighty different way of calculating eccentrictyVector.
+        /// keep around till profiling pass to see which is faster. 
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="position"></param>
+        /// <param name="velocity"></param>
+        /// <returns></returns>
         public static Vector3 EccentricityVector2(double sgp, Vector3 position, Vector3 velocity)
         {
             var speed = velocity.Length();
             var radius = position.Length();
             var foo1 = (speed * speed - sgp / radius) * position ;
             var foo2 = Vector3.Dot(position, velocity) * velocity;
-            var foo3 = (foo1 - foo2) / sgp;
-            return foo3;
+            var E = (foo1 - foo2) / sgp;
+            if (E.Length() < 1.0E-7)
+            {
+                return new Vector3(0, 0, 0);
+            }
+            else
+                return E;
         }
 
         #endregion
 
         #region TrueAnomaly
 
-        /*
-        /// <summary>
-        /// The True Anomaly in radians
-        /// </summary>
-        /// <returns>The anomaly.</returns>
-        /// <param name="position">Position.</param>
-        /// <param name="loP">Lo p.</param>
-        public static double TrueAnomaly(Vector4 position, double loP)
-        {
-            return Math.Atan2(position.Y, position.X) - loP; 
-        }
-        */
+        
         /// <summary>
         /// The True Anomaly in radians
         /// https://en.wikipedia.org/wiki/True_anomaly#From_state_vectors
@@ -255,39 +265,32 @@ namespace Pulsar4X.ECSLib
         /// <param name="velocity">Velocity ralitive to parent</param>
         public static double TrueAnomaly(Vector3 eccentVector, Vector3 position, Vector3 velocity)
         {
-            var dotEccPos = Vector3.Dot(eccentVector, position);
-            var talen = eccentVector.Length() * position.Length();
-            talen = dotEccPos / talen;
-            talen = GMath.Clamp(talen, -1, 1);
-            var trueAnomoly = Math.Acos(talen);
-
-            if (Vector3.Dot(position, velocity) < 0)
-                trueAnomoly = Math.PI * 2 - trueAnomoly;
-
-            return trueAnomoly;
-        }
-        /*
-        public static double TrueAnomaly2(Vector4 eccentVector, Vector4 position, Vector4 velocity)
-        {
-            var r = Math.Sqrt(Vector4.Dot(position, position));
-            var b = new Vector4{X = -eccentVector.Y, Y = eccentVector.X};
-            var cos_TA = Vector4.Dot(position, eccentVector) / r;
-            var sin_TA = Vector4.Dot(position, b) / r;
-            double trueAnomoly = 0;
-            if (sin_TA >= 0)
+            double e = eccentVector.Length(); //eccentricity
+            double r = position.Length();
+            
+            if (e > 1.0e-7) //if eccentricity is bigger than a tiny amount, it's a circular orbit.
             {
-                trueAnomoly = Math.Acos(cos_TA);
+                double dotEccPos = Vector3.Dot(eccentVector, position);
+                double talen = e * r;
+                talen = dotEccPos / talen;
+                talen = GMath.Clamp(talen, -1, 1);
+                var trueAnomoly = Math.Acos(talen);
+
+                if (Vector3.Dot(position, velocity) < 0)
+                    trueAnomoly = Math.PI * 2 - trueAnomoly;
+
+                return trueAnomoly;
             }
-            else if (sin_TA < 0)
+            else
             {
-                trueAnomoly = 2 * Math.PI - Math.Acos(cos_TA);
+                return Math.Atan2(position.Y, position.X); //circular orbit, assume AoP is 0;
             }
-            return trueAnomoly;
         }
-        */
+
 
         /// <summary>
-        /// The True Anomaly in radians
+        /// The True Anomaly in radians NOTE: this will break if eccentricy is close to 0
+        /// In such cases it'll return inconsistant values.
         /// </summary>
         /// <returns>The True Anomaly in radians</returns>
         /// <param name="sgp">Sgp.</param>
@@ -295,11 +298,11 @@ namespace Pulsar4X.ECSLib
         /// <param name="velocity">Velocity.</param>
         public static double TrueAnomaly(double sgp, Vector3 position, Vector3 velocity)
         {
-            var H = Vector3.Cross(position, velocity).Length();
-            var R = position.Length();
-            var q = Vector3.Dot(position, velocity);  // dot product of r*v
-            var TAx = H * H / (R * sgp) - 1;
-            var TAy = H * q / (R * sgp);
+            var H = Vector3.Cross(position, velocity).Length();    //angular momentum?
+            var r = position.Length();                                      //radius
+            var q = Vector3.Dot(position, velocity);               //dot product of r*v
+            var TAx = H * H / (r * sgp) - 1;
+            var TAy = H * q / (r * sgp);
             var TA = Math.Atan2(TAy, TAx);
             return TA;
         }
@@ -317,38 +320,7 @@ namespace Pulsar4X.ECSLib
             var y = 1 - eccentricity * Math.Cos(eccentricAnomaly);
             return Math.Acos(x / y);
         }
-
-        /// <summary>
-        /// This does not apear to work correctly. don't know why.
-        /// </summary>
-        /// <returns>The anomaly from eccentric anomaly3.</returns>
-        /// <param name="eccentricity">Eccentricity.</param>
-        /// <param name="eccentricAnomaly">Eccentric anomaly.</param>
-        /// 
-        /*
-        public static double TrueAnomalyFromEccentricAnomaly3(double eccentricity, double eccentricAnomaly)
-        {
-            var x = Math.Sqrt(1 - Math.Pow(eccentricity, 2)) * Math.Sin(eccentricAnomaly);
-            var y = 1 - eccentricity * Math.Cos(eccentricAnomaly);
-            return Math.Asin(x / y);
-        }
-        */
-        /*
-        public static double GetTrueAnomaly(Vector4 eccentricityVector, Vector4 positionVector)
-        {
-            var a = Vector4.Dot(eccentricityVector, positionVector);
-            var h = eccentricityVector.Length() * positionVector.Length();
-            var ta = Math.Acos(a / h);
-            double b = 0;
-
-            if(a/b > 1 || a/b < 1)
-            {
-                b = Math.Sqrt(a * a + b * b);
-                ta = Math.Atan(b / a);
-            }
-            return ta;
-        }
-        */
+        
 
         #endregion
 
@@ -445,8 +417,8 @@ namespace Pulsar4X.ECSLib
             (double speed, double angle) = InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly);
             var v = new Vector2()
             {
-                Y = Math.Cos(angle) * speed,
-                X = Math.Sin(angle) * speed
+                X = Math.Cos(angle) * speed,
+                Y = Math.Sin(angle) * speed
             };
 
             if (double.IsNaN(v.X) || double.IsNaN(v.Y))
@@ -592,13 +564,13 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Calculates the Eccentric Anomaly given True Anomaly and eccentricity. 
         /// </summary>
-        /// <param name="ν"></param>
+        /// <param name="trueAnomaly"></param>
         /// <param name="eccentricity"></param>
         /// <returns></returns>
-        public static double GetEccentricAnomalyFromTrueAnomaly(double ν, double eccentricity)
+        public static double GetEccentricAnomalyFromTrueAnomaly(double trueAnomaly, double eccentricity)
         {
-            var E = Math.Acos((Math.Cos(ν) + eccentricity) / (1 + eccentricity * Math.Cos(ν)));
-            if( ν < 0)
+            var E = Math.Acos((Math.Cos(trueAnomaly) + eccentricity) / (1 + eccentricity * Math.Cos(trueAnomaly)));
+            if( trueAnomaly < 0)
                 E = -E;
             return E;
         }
@@ -612,14 +584,22 @@ namespace Pulsar4X.ECSLib
             return Math.Acos(foo);
         }
 
+        /// <summary>
+        /// Note: Will fail on circular (eccentricity aproaching 0) orbits (ie will return inconsistant values)
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="semiMajorAxis"></param>
+        /// <param name="position"></param>
+        /// <param name="velocity"></param>
+        /// <returns></returns>
         public static double GetEccentricAnomalyFromStateVectors2(double sgp, double semiMajorAxis, Vector3 position, Vector3 velocity)
         {
             var radius = position.Length();
             var q = Vector3.Dot(position, velocity);
             var Ex = 1 - radius / semiMajorAxis;
             var Ey = q / Math.Sqrt(semiMajorAxis * sgp);
-            var u = Math.Atan2(Ey, Ex); // eccentric anomoly 
-            return u;
+            var E = Math.Atan2(Ey, Ex); // eccentric anomoly 
+            return E;
         }
 
         #endregion

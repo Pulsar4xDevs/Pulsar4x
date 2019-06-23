@@ -358,8 +358,8 @@ namespace Pulsar4X.ECSLib
             (double speed, double angle) polarvector = InstantaneousOrbitalVelocityPolarCoordinate(orbit, atDateTime);
             var v = new Vector2()
             {
+                X = Math.Cos(polarvector.angle) * polarvector.speed,
                 Y = Math.Sin(polarvector.angle) * polarvector.speed,
-                X = Math.Cos(polarvector.angle) * polarvector.speed
             };
             return v;
             //return OrbitMath.InstantaneousOrbitalVelocityVector(sgp, position, sma, e, trueAnomaly);

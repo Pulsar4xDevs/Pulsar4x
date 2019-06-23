@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
         ElementItem _eccentricAnomItem_FromTrueAnom;
         ElementItem _eccentricAnomItem_FromStateVec;
         ElementItem _eccentricAnomItem_FromStateVec2;
-        
+        ElementItem _eccentricityVectorItem;
         ElementItem _bodyPosItem;
         ElementItem _headingItem;
 
@@ -269,6 +269,7 @@ namespace Pulsar4X.SDL2UI
                 }
             };
             ElementItems.Add(sma3);
+            
             var listSMaj = new List<PointD>();
             listSMaj.AddRange(CreatePrimitiveShapes.Circle(_cP, _semiMajAxis, 255));
             ElementItem sma4 = new ElementItem()
@@ -824,8 +825,46 @@ namespace Pulsar4X.SDL2UI
                 }
             };
             ElementItems.Add(_eccentricAnomItem_FromStateVec2);
+
+            
+            var pos = _bodyPosition.RelativePosition_AU;
+            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
+            var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
+            var ecvec2 = OrbitMath.EccentricityVector2(_sgp, pos, (Vector3)vel);
+            var evenorm = Vector3.Normalise(ecvec) * 84;
+            var evenorm2 = Vector3.Normalise(ecvec2) * 84;
+            PointD[] evLine =
+            {
+                new PointD() { X = 0, Y = 0 }, 
+                new PointD(){X=evenorm.X, Y = evenorm.Y},
+                new PointD() { X = 0, Y = 0 },
+                new PointD(){X= evenorm2.X, Y = evenorm2.Y}
+            };
+            
+            _eccentricityVectorItem = new ElementItem()
+            {
+                NameString = "EccentricityVector",
+                Colour = eAnomColour,
+                HighlightColour = eAnomHColour,
+                //DataItem = Angle.ToDegrees(_eccentricAnom),
+                //DataString = Angle.ToDegrees(heading).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    StartPoint = _f1,
+                    Points =  evLine,
+                    Colors = eAnomColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                }
+            };
+
+            ElementItems.Add(_eccentricityVectorItem);
             
             #endregion
+            
             
             
             SDL.SDL_Color[] headingColour = 
@@ -863,8 +902,6 @@ namespace Pulsar4X.SDL2UI
                     ColourChanges = new (int,int)[]
                     {
                         (0,0),
-                        (130,1),
-                        (131,0),
                     },
                     Scales = false
                 }
@@ -894,6 +931,7 @@ namespace Pulsar4X.SDL2UI
             var pos = _bodyPosition.RelativePosition_AU;
             var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, systemDateTime);
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
+            var ecvec2 = OrbitMath.EccentricityVector2(_sgp, pos, (Vector3)vel);
             _trueAnom_FromEVec = OrbitMath.TrueAnomaly(ecvec, pos, (Vector3)vel);
             _trueAnom_FromStateVec = OrbitMath.TrueAnomaly(_sgp, pos, (Vector3)vel);
             
@@ -936,6 +974,19 @@ namespace Pulsar4X.SDL2UI
             _eccentricAnomItem_FromStateVec2.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 77, 6, _loP, _ecctricAnom_FromStateVectors2, 128);
             _eccentricAnomItem_FromStateVec2.DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors2);
             _eccentricAnomItem_FromStateVec2.DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors2).ToString() + "°";
+
+
+            var evenorm = Vector3.Normalise(ecvec) * 84;
+            var evenorm2 = Vector3.Normalise(ecvec2) * 84;
+            
+            PointD[] evLine =
+            {
+                new PointD() { X = _f1.X, Y = _f1.Y }, 
+                new PointD(){X= _f1.X + evenorm.X, Y = _f1.X+ evenorm.Y},
+                new PointD() { X = _f1.X, Y = _f1.Y },
+                new PointD(){X= _f1.X + evenorm2.X, Y = _f1.X+ evenorm2.Y}
+            };
+            _eccentricityVectorItem.Shape.Points = evLine;
             
             _bodyPosPnt = new PointD() 
             { 

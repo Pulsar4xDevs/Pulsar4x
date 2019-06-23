@@ -93,7 +93,7 @@ namespace Pulsar4X.Tests
                 double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
-                var vel = OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                var o_v = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, segmentDatetime);
 
                 double linierEccentricity = o_e * o_a;
 
@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
                 var E2 = OrbitMath.GetEccentricAnomalyNewtonsMethod2(o_e, o_M); //newtons method. 
                 var E3 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
                 var E4 = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, o_a, linierEccentricity, o_ω);
-                var E5 = OrbitMath.GetEccentricAnomalyFromStateVectors2(sgp, o_a, pos, (Vector3)vel);
+                var E5 = OrbitMath.GetEccentricAnomalyFromStateVectors2(sgp, o_a, pos, (Vector3)o_v);
                 Assert.Multiple(() =>
                 {
                     Assert.AreEqual(o_E, E1, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E1));// these two should be calculatd the same way.  
@@ -143,7 +143,7 @@ namespace Pulsar4X.Tests
                 double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
-                var vel = OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                var o_v = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, segmentDatetime);
 
                 var M1 = OrbitMath.GetMeanAnomaly(o_e, o_E);
 
@@ -178,11 +178,11 @@ namespace Pulsar4X.Tests
                 double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
-                Vector3 vel = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                var o_v = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, segmentDatetime);
 
-                Vector3 angularVelocity = Vector3.Cross(pos, vel);
+                Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)o_v);
                 Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
-                Vector3 eccentVector = OrbitMath.EccentricityVector(sgp, pos, vel);
+                Vector3 eccentVector = OrbitMath.EccentricityVector(sgp, pos, (Vector3)o_v);
 
 
                 //var ω1 = OrbitMath.ArgumentOfPeriapsis(nodeVector, eccentVector, position, velocity);
@@ -227,32 +227,33 @@ namespace Pulsar4X.Tests
                 double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
-                Vector3 vel = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
+                var o_v = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, segmentDatetime);
 
                 double aop = OrbitMath.ArgumentOfPeriapsis2(pos, i, o_Ω, o_ν);
                 double ea = o_e * o_a;
                 double eccentricAnomaly = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, o_a, ea, aop);
 
-                double ν1 = OrbitMath.TrueAnomaly(sgp, pos, vel);
-
-                //double ν2 = OrbitMath.TrueAnomaly(o_E, pos, vel);
+                double ν1 = OrbitMath.TrueAnomaly(sgp, pos, (Vector3)o_v);
+                Vector3 ev = OrbitMath.EccentricityVector(sgp, pos, (Vector3)o_v);
+                double ν2 = OrbitMath.TrueAnomaly(ev, pos, (Vector3)o_v);
                 double ν3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(o_e, o_E);
                 double ν4 = OrbitMath.TrueAnomalyFromEccentricAnomaly2(o_e, o_E);
-                //var ν5 = OrbitMath.TrueAnomaly2(ev, pos, vel);
-                //var ν6 = OrbitMath.TrueAnomaly(pos, aop);
+
+                double d0 = Angle.ToDegrees(o_ν);
                 double d1 = Angle.ToDegrees(ν1);
-                //double d2 = Angle.ToDegrees(ν2);
+                double d2 = Angle.ToDegrees(ν2);
                 double d3 = Angle.ToDegrees(ν3);
                 double d4 = Angle.ToDegrees(ν4);
-                //var d5 = Angle.ToDegrees(ν5);
-                //var d6 = Angle.ToDegrees(ν6);
 
-                Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν1), 1.0E-7, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ν1));
-                //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν2), 1.0E-7, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ν2));
-                Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν3), 1.0E-7, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ν3));
-                Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν4), 1.0E-7, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ν4));
-                //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - ν5), angleΔ);
-                //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(directAngle, aop - ν6), angleΔ);
+                if(o_e > 1.0e-7) // because this test will fail if we have a circular orbit. 
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν1), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d1);
+                else
+                    Assert.AreEqual(0, ev.Length());
+                
+                Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν2), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d2);
+                Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν3), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d3);
+                //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν4), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d4);
+
 
             }
         }
@@ -282,55 +283,27 @@ namespace Pulsar4X.Tests
                 double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
                 double o_E = OrbitProcessor.GetEccentricAnomaly(orbitDB, o_M);
                 double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
-
+                var o_v = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, segmentDatetime);
+                var o_pv = OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate(orbitDB, segmentDatetime);
+                
+                
+                
+                
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
                 var vel = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν);
-
-                Vector3 angularVelocity = Vector3.Cross(pos, vel);
-                double r = pos.Length();
-                double speedau = OrbitMath.InstantaneousOrbitalSpeed(sgp, r, o_a);
-                (double speed, double heading) polarVelocity = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν);
-                //Tuple<double, double> polarVelocity2 = OrbitMath.PreciseOrbitalVelocityPolarCoordinate2(sgp, pos, o_a, o_e, o_ν, o_lop);
-                double heading = OrbitMath.HeadingFromPeriaps(pos, o_e, o_a, o_ν);
-                heading += o_lop;
-                //Assert.IsTrue(angularVelocity.Z > 0); //TODO:this will break if we test an anti clockwise orbit.
-                Assert.IsTrue(speedau > 0); //I'm assuming that speed will be <0 if retrograde orbit. 
-                Assert.AreEqual(vel.Length(), speedau, 1.0E-7);
-                Assert.AreEqual(vel.Length(), polarVelocity.Item1, 1.0E-7);
-
-                double hackHeading = OrbitMath.HackVelocityHeading(orbitDB, segmentDatetime);
-                double hackheadD = Angle.ToDegrees(hackHeading);
-                double headingD = Angle.ToDegrees(heading);
-
-
-                if (o_e == 0)//we can make this work with ellipses if we add the lop to the position. 
-                {
-                    if (pos.X > 0 && pos.Y > 0)//top right quadrant
-                    {
-                        //Assert.IsTrue(polarVelocity.Item2 > Math.PI * 0.5 && polarVelocity.Item2 < Math.PI);
-                        //Assert.IsTrue(hackHeading > Math.PI * 0.5 && hackHeading < Math.PI);
-                        Assert.IsTrue(heading >= Math.PI * 0.5 && heading <= Math.PI);
-                    }
-                    if (pos.X < 0 && pos.Y > 0)//top left quadrant
-                    {
-                        //Assert.IsTrue(polarVelocity.Item2 > Math.PI && polarVelocity.Item2 < Math.PI * 1.5);
-                        //Assert.IsTrue(hackHeading > Math.PI && hackHeading < Math.PI * 1.5);
-                        Assert.IsTrue(heading >= Math.PI && heading <= Math.PI * 1.5);
-                    }
-                    if (pos.X < 0 && pos.Y < 0)//bottom left quadrant
-                    {
-                        //Assert.IsTrue(polarVelocity.Item2 > Math.PI * 1.5 && polarVelocity.Item2 < Math.PI * 2); 
-                        //Assert.IsTrue(hackHeading > Math.PI * 1.5 && hackHeading < Math.PI * 2);
-                        Assert.IsTrue(heading >= Math.PI * 1.5 && heading <= Math.PI * 2);
-                    }
-                    if (pos.X > 0 && pos.Y < 0)//bottom right quadrant
-                    {
-                        //Assert.IsTrue(polarVelocity.Item2 > 0 && polarVelocity.Item2 < Math.PI * 0.5);
-                        //Assert.IsTrue(hackHeading > 0 && hackHeading < Math.PI * 0.5);
-                        Assert.IsTrue(heading >= 0 && heading <= Math.PI * 0.5);
-                    }
-                }
-
+                var ev = OrbitMath.EccentricityVector(sgp, pos, (Vector3)o_v);
+                var ev2 = OrbitMath.EccentricityVector(sgp, pos, vel);
+                
+                
+                
+                Assert.AreEqual(o_v.X, vel.X, 1.0e-10);
+                Assert.AreEqual(o_v.Y, vel.Y, 1.0e-10);
+                Assert.AreEqual(o_v.Length(), o_pv.speed, 1.0e-10);
+                
+                Assert.AreEqual(ev.X, ev2.X, 1.0e-10);
+                Assert.AreEqual(ev.Y, ev2.Y, 1.0e-10);
+                Assert.AreEqual(o_e, ev.Length(), 1.0e-10);
+                Assert.AreEqual(o_e, ev2.Length(), 1.0e-10);
             }
         }
 
