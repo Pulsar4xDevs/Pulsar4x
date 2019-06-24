@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.AccessControl;
 using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib
@@ -34,6 +35,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class OrbitMath
     {
+        private const double SmallNumber = 1.0e-15; //TODO: test how low we can go
 
         /// <summary>
         /// Kepler elements from velocity and position.
@@ -137,42 +139,42 @@ namespace Pulsar4X.ECSLib
         }
 
         #region ArgumentOfPeriapsis
-        /*
-        public static double ArgumentOfPeriapsis(Vector4 nodeVector, Vector4 eccentVector, Vector4 pos, Vector4 vel, double loAN)
+        
+        public static double ArgumentOfPeriapsis(Vector3 nodeVector, Vector3 eccentVector, Vector3 pos, Vector3 vel, double loAN)
         {
             double eccentricity = eccentVector.Length();
             double argOfPeriaps;
             if (loAN == 0)
             {
                 argOfPeriaps = Math.Atan2(eccentVector.Y, eccentVector.X);
-                if (Vector4.Cross(pos, vel).Z < 0) //anti clockwise orbit
+                if (Vector3.Cross(pos, vel).Z < 0) 
                     argOfPeriaps = Math.PI * 2 - argOfPeriaps;
             }
 
             else
             {
-                double aopLen = Vector4.Dot(nodeVector, eccentVector);
+                double aopLen = Vector3.Dot(nodeVector, eccentVector);
                 aopLen = aopLen / (nodeVector.Length() * eccentricity);
                 aopLen = GMath.Clamp(aopLen, -1, 1);
                 argOfPeriaps = Math.Acos(aopLen);
-                if (eccentVector.Z < 0) //anti clockwise orbit.
+                if (eccentVector.Z < 0) 
                     argOfPeriaps = Math.PI * 2 - argOfPeriaps;
             }
             return argOfPeriaps;
         }
 
-        public static double ArgumentOfPeriapsis(Vector4 nodeVector, Vector4 eccentricityVector, Vector4 pos, Vector4 vel)
+        public static double ArgumentOfPeriapsis(Vector3 nodeVector, Vector3 eccentricityVector, Vector3 pos, Vector3 vel)
         {
             double aop;
             if (nodeVector.Length() == 0)
             {
                 aop = Math.Atan2(eccentricityVector.Y, eccentricityVector.X);
-                if(Vector4.Cross(pos, vel).Z < 0)
+                if(Vector3.Cross(pos, vel).Z < 0)
                     aop = 2 * Math.PI + aop;
             }
             else
             {
-                var foo = Vector4.Dot(nodeVector, eccentricityVector);
+                var foo = Vector3.Dot(nodeVector, eccentricityVector);
                 var foo2 = nodeVector.Length() * eccentricityVector.Length();
                 aop = Math.Acos(foo / foo2);
                 if (eccentricityVector.Z < 0)
@@ -180,8 +182,36 @@ namespace Pulsar4X.ECSLib
             }
             return aop;
         }
-        */
-        public static double ArgumentOfPeriapsis2(Vector3 pos, double incl, double lan, double trueAnomaly)
+        
+
+        public static double GetArgumentOfPeriapsis(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
+        {
+            double aoP = 0;
+            double e = eccentricityVector.Length();
+            if(Math.Abs(inclination) < SmallNumber)
+            {
+                if (Math.Abs(e) < SmallNumber)
+                    aoP = 0;
+                else
+                    aoP = Math.Acos(eccentricityVector.X / e);
+            }
+            else
+            {
+                var foo = Vector3.Dot(nodeVector, eccentricityVector);
+                var foo2 = nodeVector.Length() * e;
+                aoP = Math.Acos(foo / foo2);
+            }
+
+            if (Math.Abs(e) > SmallNumber && eccentricityVector.Z < 0)
+            {
+                aoP = 2 * Math.PI - aoP;
+            }
+
+            return aoP;
+        }
+        
+
+        public static double ArgumentOfPeriapsis2(Vector3 pos, double incl, double loAN, double trueAnomaly)
         {
             double Sw = 0;
             double Rx = pos.X;
@@ -189,10 +219,10 @@ namespace Pulsar4X.ECSLib
             double Rz = pos.Z;
             double R = pos.Length();
             double TA = trueAnomaly;
-            var Cw = (Rx * Math.Cos(lan) + Ry * Math.Sin(lan)) / R;
+            var Cw = (Rx * Math.Cos(loAN) + Ry * Math.Sin(loAN)) / R;
 
             if (incl == 0 || incl == Math.PI)
-            { Sw = (Ry * Math.Cos(lan) - Rx * Math.Sin(lan)) / R; }
+            { Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R; }
             else
             { Sw = Rz / (R * Math.Sin(incl)); }
 
@@ -219,7 +249,7 @@ namespace Pulsar4X.ECSLib
             Vector3 foo1 = Vector3.Cross(velocity, angularMomentum) / sgp;
             var foo2 = position / position.Length();
             var E = foo1 - foo2;
-            if (E.Length() < 1.0E-7)
+            if (E.Length() < SmallNumber)
             {
                 return new Vector3(0, 0, 0);
             }
@@ -242,7 +272,7 @@ namespace Pulsar4X.ECSLib
             var foo1 = (speed * speed - sgp / radius) * position ;
             var foo2 = Vector3.Dot(position, velocity) * velocity;
             var E = (foo1 - foo2) / sgp;
-            if (E.Length() < 1.0E-7)
+            if (E.Length() < SmallNumber)
             {
                 return new Vector3(0, 0, 0);
             }
@@ -578,7 +608,7 @@ namespace Pulsar4X.ECSLib
 
         public static double GetEccentricAnomalyFromStateVectors(Vector3 position, double semiMajAxis, double linierEccentricity, double aop)
         {
-            var x = (position.X * Math.Cos(-aop)) - (position.Y * Math.Sin(-aop));
+            var x = (position.X * Math.Cos(aop)) + (position.Y * Math.Sin(aop));
             x = linierEccentricity + x;
             double foo = GMath.Clamp(x / semiMajAxis, -1, 1); //because sometimes we were getting a floating point error that resulted in numbers infinatly smaller than -1
             return Math.Acos(foo);

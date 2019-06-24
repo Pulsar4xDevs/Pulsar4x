@@ -316,7 +316,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>item1 is speed, item2 angle</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static (double speed, double angle) InstantaneousOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
+        public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
             var sma = orbit.SemiMajorAxis;
@@ -332,8 +332,8 @@ namespace Pulsar4X.ECSLib
             double inclination = Angle.ToRadians(orbit.Inclination);
             var loP = OrbitMath.GetLongditudeOfPeriapsis(inclination, aoP, loAN);
 
-            (double speed,double angle) polar = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly);
-            polar.angle += loP;
+            (double speed,double heading) polar = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly);
+            polar.heading += loP;
             return polar;
             
         }
