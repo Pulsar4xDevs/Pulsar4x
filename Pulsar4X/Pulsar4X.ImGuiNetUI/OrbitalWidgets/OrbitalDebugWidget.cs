@@ -85,6 +85,11 @@ namespace Pulsar4X.SDL2UI
         double _trueAnom;
         double _trueAnom_FromEVec;
         double _trueAnom_FromStateVec;
+
+        double _aopFromCalc1;
+        double _aopFromCalc2;
+        double _aopFromCalc3;
+        double _aopFromCalc4;
         
         double _eccentricAnom;
         double _eccentricAnom_FromTrueAnom;
@@ -101,6 +106,12 @@ namespace Pulsar4X.SDL2UI
         
         internal List<ElementItem> ElementItems = new List<ElementItem>();
         //updateables
+
+        ElementItem _aopItem_FromCalc1;
+        ElementItem _aopItem_FromCalc2;
+        ElementItem _aopItem_FromCalc3;
+        ElementItem _aopItem_FromCalc4;
+        
         ElementItem _trueAnomalyAngleItem;
         
         ElementItem _trueAnomItem_FromEVec;
@@ -182,6 +193,13 @@ namespace Pulsar4X.SDL2UI
             _ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
             _ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
             
+            Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)vel);
+            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            
+            _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
+            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, Angle.ToRadians(_orbitDB.Inclination), _loan, _trueAnom);
+            _aopFromCalc3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, ecvec, pos, (Vector3)vel, _loan);
+            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis4(Angle.ToRadians(_orbitDB.Inclination), ecvec, nodeVector);
             
             _bodyPosPnt = new PointD()
             {
@@ -597,6 +615,88 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(aopAngle);
 
+
+            
+            _aopItem_FromCalc1 = new ElementItem()
+            {
+                NameString = "Argument Of Periapsis (ω) - using vector calc1",
+                Colour = aopColour,
+                HighlightColour = aopHColour,
+                DataItem = Angle.ToDegrees(_aopFromCalc1),
+                DataString = Angle.ToDegrees(_aopFromCalc1).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 90, -6, _loan, _aopFromCalc1, 128),
+                    Colors = aopColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0)
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_aopItem_FromCalc1);
+            
+            _aopItem_FromCalc2 = new ElementItem()
+            {
+                NameString = "Argument Of Periapsis (ω) - using vector calc2",
+                Colour = aopColour,
+                HighlightColour = aopHColour,
+                DataItem = Angle.ToDegrees(_aopFromCalc2),
+                DataString = Angle.ToDegrees(_aopFromCalc2).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 93, -6, _loan, _aopFromCalc2, 128),
+                    Colors = aopColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0)
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_aopItem_FromCalc2);
+
+            _aopItem_FromCalc3 = new ElementItem()
+            {
+                NameString = "Argument Of Periapsis (ω) - using vector calc3",
+                Colour = aopColour,
+                HighlightColour = aopHColour,
+                DataItem = Angle.ToDegrees(_aopFromCalc2),
+                DataString = Angle.ToDegrees(_aopFromCalc2).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 96, -6, _loan, _aopFromCalc3, 128),
+                    Colors = aopColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0)
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_aopItem_FromCalc3);
+            
+            _aopItem_FromCalc4 = new ElementItem()
+            {
+                NameString = "Argument Of Periapsis (ω) - using vector calc4",
+                Colour = aopColour,
+                HighlightColour = aopHColour,
+                DataItem = Angle.ToDegrees(_aopFromCalc4),
+                DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    Points = CreatePrimitiveShapes.AngleArc(_cP, 99, -6, _loan, _aopFromCalc4, 128),
+                    Colors = aopColour,
+                    ColourChanges = new (int,int)[]
+                    {
+                        (0,0)
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_aopItem_FromCalc4);
+            
             //lop angle
             SDL.SDL_Color[] lopColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 100 } };
             SDL.SDL_Color[] lopHColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 255 } };
@@ -880,7 +980,7 @@ namespace Pulsar4X.SDL2UI
 
             var speed = OrbitMath.InstantaneousOrbitalSpeed(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU.Length(), _semiMajAxis);
             speed = Distance.AuToKm(speed);
-            var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom);
+            var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, Angle.ToRadians(_orbitDB.Inclination));
             heading += _loP;
             var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
             var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
@@ -996,7 +1096,32 @@ namespace Pulsar4X.SDL2UI
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt;
 
 
-            var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom);
+            Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)vel);
+            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+
+
+
+            _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
+            _aopItem_FromCalc1.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 90, -6, _loan, _aopFromCalc1, 128);
+            _aopItem_FromCalc1.DataItem = Angle.ToDegrees(_aopFromCalc1);
+            _aopItem_FromCalc1.DataString = Angle.ToDegrees(_aopFromCalc1).ToString() + "°";
+            
+            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, Angle.ToRadians(_orbitDB.Inclination), _loan, _trueAnom);
+            _aopItem_FromCalc2.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 93, -6, _loan, _aopFromCalc2, 128);
+            _aopItem_FromCalc2.DataItem = Angle.ToDegrees(_aopFromCalc2);
+            _aopItem_FromCalc2.DataString = Angle.ToDegrees(_aopFromCalc2).ToString() + "°";
+
+            _aopFromCalc3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, ecvec, pos, (Vector3)vel, _loan); 
+            _aopItem_FromCalc3.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 96, -6, _loan, _aopFromCalc3, 128);
+            _aopItem_FromCalc3.DataItem = Angle.ToDegrees(_aopFromCalc3);
+            _aopItem_FromCalc3.DataString = Angle.ToDegrees(_aopFromCalc3).ToString() + "°";
+
+            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis4(Angle.ToRadians(_orbitDB.Inclination), ecvec, nodeVector);
+            _aopItem_FromCalc4.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 99, -6, _loan, _aopFromCalc4, 128);
+            _aopItem_FromCalc4.DataItem = Angle.ToDegrees(_aopFromCalc4);
+            _aopItem_FromCalc4.DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°";
+            
+            var heading = OrbitMath.HeadingFromPeriaps(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, Angle.ToRadians(_orbitDB.Inclination));
             heading += _loP;
             var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
             var vnorm = Vectors.Vector2.Normalise(vector) * 64;

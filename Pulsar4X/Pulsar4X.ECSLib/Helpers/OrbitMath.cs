@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
             double eccentricAnomoly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
 
             
-            double argOfPeriaps = ArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
+            double argOfPeriaps = GetArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
 
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
 
@@ -140,7 +140,49 @@ namespace Pulsar4X.ECSLib
 
         #region ArgumentOfPeriapsis
         
-        public static double ArgumentOfPeriapsis(Vector3 nodeVector, Vector3 eccentVector, Vector3 pos, Vector3 vel, double loAN)
+        
+        public static double GetArgumentOfPeriapsis1(Vector3 nodeVector, Vector3 eccentricityVector, Vector3 pos, Vector3 vel)
+        {
+            double aop;
+            if (nodeVector.Length() == 0)
+            {
+                aop = Math.Atan2(eccentricityVector.Y, eccentricityVector.X);
+                if(Vector3.Cross(pos, vel).Z < 0)
+                    aop = 2 * Math.PI + aop;
+            }
+            else
+            {
+                var foo = Vector3.Dot(nodeVector, eccentricityVector);
+                var foo2 = nodeVector.Length() * eccentricityVector.Length();
+                aop = Math.Acos(foo / foo2);
+                if (eccentricityVector.Z < 0)
+                    aop = 2 * Math.PI + aop;
+            }
+            return aop;
+        }
+        
+        public static double GetArgumentOfPeriapsis2(Vector3 pos, double incl, double loAN, double trueAnomaly)
+        {
+            double Sw = 0;
+            double Rx = pos.X;
+            double Ry = pos.Y;
+            double Rz = pos.Z;
+            double R = pos.Length();
+            double TA = trueAnomaly;
+            var Cw = (Rx * Math.Cos(loAN) + Ry * Math.Sin(loAN)) / R;
+
+            if (incl == 0 || incl == Math.PI)
+            { Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R; }
+            else
+            { Sw = Rz / (R * Math.Sin(incl)); }
+
+            var W = Math.Atan2(Sw, Cw) - TA;
+            if (W < 0) { W = 2 * Math.PI + W; }
+
+            return W;
+        }   
+      
+        public static double GetArgumentOfPeriapsis3(Vector3 nodeVector, Vector3 eccentVector, Vector3 pos, Vector3 vel, double loAN)
         {
             double eccentricity = eccentVector.Length();
             double argOfPeriaps;
@@ -163,28 +205,8 @@ namespace Pulsar4X.ECSLib
             return argOfPeriaps;
         }
 
-        public static double ArgumentOfPeriapsis(Vector3 nodeVector, Vector3 eccentricityVector, Vector3 pos, Vector3 vel)
-        {
-            double aop;
-            if (nodeVector.Length() == 0)
-            {
-                aop = Math.Atan2(eccentricityVector.Y, eccentricityVector.X);
-                if(Vector3.Cross(pos, vel).Z < 0)
-                    aop = 2 * Math.PI + aop;
-            }
-            else
-            {
-                var foo = Vector3.Dot(nodeVector, eccentricityVector);
-                var foo2 = nodeVector.Length() * eccentricityVector.Length();
-                aop = Math.Acos(foo / foo2);
-                if (eccentricityVector.Z < 0)
-                    aop = 2 * Math.PI + aop;
-            }
-            return aop;
-        }
         
-
-        public static double GetArgumentOfPeriapsis(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
+        public static double GetArgumentOfPeriapsis4(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
         {
             double aoP = 0;
             double e = eccentricityVector.Length();
@@ -211,26 +233,7 @@ namespace Pulsar4X.ECSLib
         }
         
 
-        public static double ArgumentOfPeriapsis2(Vector3 pos, double incl, double loAN, double trueAnomaly)
-        {
-            double Sw = 0;
-            double Rx = pos.X;
-            double Ry = pos.Y;
-            double Rz = pos.Z;
-            double R = pos.Length();
-            double TA = trueAnomaly;
-            var Cw = (Rx * Math.Cos(loAN) + Ry * Math.Sin(loAN)) / R;
 
-            if (incl == 0 || incl == Math.PI)
-            { Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R; }
-            else
-            { Sw = Rz / (R * Math.Sin(incl)); }
-
-            var W = Math.Atan2(Sw, Cw) - TA;
-            if (W < 0) { W = 2 * Math.PI + W; }
-
-            return W;
-        }
 
         #endregion
 
@@ -257,6 +260,9 @@ namespace Pulsar4X.ECSLib
                 return E;
         }
 
+ 
+
+        
         /// <summary>
         /// Slighty different way of calculating eccentrictyVector.
         /// keep around till profiling pass to see which is faster. 
@@ -298,7 +304,7 @@ namespace Pulsar4X.ECSLib
             double e = eccentVector.Length(); //eccentricity
             double r = position.Length();
             
-            if (e > 1.0e-7) //if eccentricity is bigger than a tiny amount, it's a circular orbit.
+            if (e > SmallNumber) //if eccentricity is bigger than a tiny amount, it's a circular orbit.
             {
                 double dotEccPos = Vector3.Dot(eccentVector, position);
                 double talen = e * r;
@@ -397,12 +403,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="semiMajorAxis">Semi major axis.</param>
         /// <param name="eccentricity">Eccentricity.</param>
         /// <param name="trueAnomaly">True anomaly.</param>
-        public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(double sgp, Vector3 position, double semiMajorAxis, double eccentricity, double trueAnomaly)
+        public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(double sgp, Vector3 position, double semiMajorAxis, double eccentricity, double trueAnomaly, double inclination)
         {
             var radius = position.Length();
             var spd = InstantaneousOrbitalSpeed(sgp, radius, semiMajorAxis);
 
-            var heading = HeadingFromPeriaps(position, eccentricity, semiMajorAxis, trueAnomaly);
+            var heading = HeadingFromPeriaps(position, eccentricity, semiMajorAxis, trueAnomaly, inclination);
 
             return (spd, heading);
         }
@@ -416,7 +422,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="eccentcity">Eccentcity.</param>
         /// <param name="semiMajorAxis">Semi major axis.</param>
         /// <param name="trueAnomaly">True anomaly.</param>
-        public static double HeadingFromPeriaps(Vector3 pos, double eccentcity, double semiMajorAxis, double trueAnomaly)
+        public static double HeadingFromPeriaps(Vector3 pos, double eccentcity, double semiMajorAxis, double trueAnomaly, double inclination)
         {
 
             double r = pos.Length();
@@ -427,10 +433,12 @@ namespace Pulsar4X.ECSLib
 
             double bar = ((2 - 2 * e * e) / (k * (2 - k))) - 1 ;
             double foo = GMath.Clamp(bar, - 1, 1);
-            double alpha = Math.Acos(foo);
-            if (trueAnomaly > Math.PI || trueAnomaly < 0)
-                alpha = -alpha;
-            double heading = f + ((Math.PI - alpha) / 2);
+            double alpha = Math.Acos(foo);           
+            //if (trueAnomaly > Math.PI || trueAnomaly < 0)
+            //    alpha = -alpha;
+            double heading = ((Math.PI - alpha) / 2) + f;
+            //if (inclination > Math.PI * 0.5 && inclination < Math.PI * 1.5) //retrogradeOrbit
+            //    heading =  (((Math.PI - alpha) / 2) -f) + Math.PI;
             return heading;
 
         }
@@ -442,9 +450,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="sgp">Standard Grav Perameter. in AU</param>
         /// <param name="position">Ralitive Position.</param>
         /// <param name="sma">SemiMajorAxis</param>
-        public static Vector2 InstantaneousOrbitalVelocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly)
+        public static Vector2 InstantaneousOrbitalVelocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double inclination)
         {
-            (double speed, double angle) = InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly);
+            (double speed, double angle) = InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly, inclination);
             var v = new Vector2()
             {
                 X = Math.Cos(angle) * speed,

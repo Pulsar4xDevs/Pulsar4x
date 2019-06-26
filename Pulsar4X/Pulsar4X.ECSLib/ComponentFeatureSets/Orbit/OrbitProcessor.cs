@@ -332,7 +332,7 @@ namespace Pulsar4X.ECSLib
             double inclination = Angle.ToRadians(orbit.Inclination);
             var loP = OrbitMath.GetLongditudeOfPeriapsis(inclination, aoP, loAN);
 
-            (double speed,double heading) polar = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly);
+            (double speed,double heading) polar = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly, inclination);
             polar.heading += loP;
             return polar;
             
