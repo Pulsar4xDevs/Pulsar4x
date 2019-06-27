@@ -264,7 +264,14 @@ namespace Pulsar4X.Tests
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
         }
+        public bool TestVectorsAreEqual(Vector3 expected, Vector3 actual, double requiredAccuracy = 0.01)
+        {
+            Assert.AreEqual(expected.X, actual.X, requiredAccuracy);
+            Assert.AreEqual(expected.Y, actual.Y, requiredAccuracy);
+            Assert.AreEqual(expected.Z, actual.Z, requiredAccuracy);
 
+            return true;
+        }
         public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector3 position, Vector3 velocity)
         {
             double angleΔ = 0.0000000001; 
