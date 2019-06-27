@@ -33,6 +33,19 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// returns a number between 0 and 2 * pi
+        /// </summary>
+        /// <param name="radians"></param>
+        /// <returns></returns>
+        public static double NormaliseRadiansPositive(double radians)
+        {
+            radians = NormaliseRadians(radians);
+            if (radians < 0)
+                radians += (2 *Math.PI);
+            return radians;
+        }
+
+        /// <summary>
         /// returns a number between -360 and 360
         /// </summary>
         /// <returns>The degrees.</returns>

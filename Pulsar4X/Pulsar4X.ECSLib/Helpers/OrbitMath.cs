@@ -158,6 +158,9 @@ namespace Pulsar4X.ECSLib
                 if (eccentricityVector.Z < 0)
                     aop = 2 * Math.PI + aop;
             }
+
+            aop = Angle.NormaliseRadians(aop);
+            
             return aop;
         }
         
@@ -434,8 +437,8 @@ namespace Pulsar4X.ECSLib
             double bar = ((2 - 2 * e * e) / (k * (2 - k))) - 1 ;
             double foo = GMath.Clamp(bar, - 1, 1);
             double alpha = Math.Acos(foo);           
-            //if (trueAnomaly > Math.PI || trueAnomaly < 0)
-            //    alpha = -alpha;
+            if (trueAnomaly > Math.PI || trueAnomaly < 0)
+                alpha = -alpha;
             double heading = ((Math.PI - alpha) / 2) + f;
             //if (inclination > Math.PI * 0.5 && inclination < Math.PI * 1.5) //retrogradeOrbit
             //    heading =  (((Math.PI - alpha) / 2) -f) + Math.PI;
