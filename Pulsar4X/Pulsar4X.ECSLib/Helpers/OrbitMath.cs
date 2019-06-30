@@ -439,6 +439,20 @@ namespace Pulsar4X.ECSLib
         return new Tuple<double, double>(spd, angle);
     }*/
 
+        public static Vector3 ParentLocalVeclocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double inclination, double loAN)
+        {
+            //TODO: is it worth storing the resulting matrix somewhere, and then just doing the transform on it?
+            //since loAN and incl don't change, it could be stored in orbitDB if we're doing this often enoguh. 
+            var orbitLocal = (Vector3)InstantaneousOrbitalVelocityVector(sgp, position, sma, eccentricity, trueAnomaly, inclination);
+            var mtxloAN = Matrix3d.IDRotateZ(-loAN);
+            var mtxincl = Matrix3d.IDRotateX(inclination);
+            var mtxLoANback = Matrix3d.IDRotateZ(loAN);
+            var mtx = mtxloAN * mtxincl * mtxLoANback;
+
+            return mtx.Transform(orbitLocal);
+
+        }
+
         /// <summary>
         /// This returns the heading mesured from the periapsis (AoP) in radians
         /// Add the LoP to this to get the true heading in a 2d orbit. 
