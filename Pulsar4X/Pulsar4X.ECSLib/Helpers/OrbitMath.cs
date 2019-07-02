@@ -439,17 +439,21 @@ namespace Pulsar4X.ECSLib
         return new Tuple<double, double>(spd, angle);
     }*/
 
-        public static Vector3 ParentLocalVeclocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double inclination, double loAN)
+        public static Vector3 ParentLocalVeclocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double arguemntOfPeriapsis, double inclination, double loAN)
         {
             //TODO: is it worth storing the resulting matrix somewhere, and then just doing the transform on it?
             //since loAN and incl don't change, it could be stored in orbitDB if we're doing this often enoguh. 
-            var orbitLocal = (Vector3)InstantaneousOrbitalVelocityVector(sgp, position, sma, eccentricity, trueAnomaly, inclination);
-            var mtxloAN = Matrix3d.IDRotateZ(-loAN);
+            var orbitLocal = (Vector3)InstantaneousOrbitalVelocityVector(sgp, position, sma, eccentricity, trueAnomaly, arguemntOfPeriapsis);
+            
             var mtxincl = Matrix3d.IDRotateX(inclination);
-            var mtxLoANback = Matrix3d.IDRotateZ(loAN);
-            var mtx = mtxloAN * mtxincl * mtxLoANback;
+            var mtxLoAN = Matrix3d.IDRotateZ(loAN);
+            
+            //var mtxLoANback = Matrix3d.IDRotateZ(loAN);
+            var mtx = mtxincl * mtxLoAN;
 
-            return mtx.Transform(orbitLocal);
+            
+            var transformedVector = mtxincl.Transform(orbitLocal);
+            return transformedVector;
 
         }
 
@@ -463,12 +467,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="semiMajorAxis">Semi major axis.</param>
         /// <param name="eccentricity">Eccentricity.</param>
         /// <param name="trueAnomaly">True anomaly.</param>
-        public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(double sgp, Vector3 position, double semiMajorAxis, double eccentricity, double trueAnomaly, double inclination)
+        public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(double sgp, Vector3 position, double semiMajorAxis, double eccentricity, double trueAnomaly, double argumentOfPeriapsis)
         {
             var radius = position.Length();
             var spd = InstantaneousOrbitalSpeed(sgp, radius, semiMajorAxis);
 
-            var heading = HeadingFromPeriaps(position, eccentricity, semiMajorAxis, trueAnomaly, inclination);
+            var heading = HeadingFromPeriaps(position, eccentricity, semiMajorAxis, trueAnomaly, argumentOfPeriapsis);
 
             return (spd, heading);
         }
@@ -482,7 +486,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="eccentcity">Eccentcity.</param>
         /// <param name="semiMajorAxis">Semi major axis.</param>
         /// <param name="trueAnomaly">True anomaly.</param>
-        public static double HeadingFromPeriaps(Vector3 pos, double eccentcity, double semiMajorAxis, double trueAnomaly, double inclination)
+        public static double HeadingFromPeriaps(Vector3 pos, double eccentcity, double semiMajorAxis, double trueAnomaly, double argumentOfPeriapsis)
         {
 
             double r = pos.Length();
@@ -497,8 +501,8 @@ namespace Pulsar4X.ECSLib
             if (trueAnomaly > Math.PI || trueAnomaly < 0)
                 alpha = -alpha;
             double heading = ((Math.PI - alpha) / 2) + f;
-            //if (inclination > Math.PI * 0.5 && inclination < Math.PI * 1.5) //retrogradeOrbit
-            //    heading =  (((Math.PI - alpha) / 2) -f) + Math.PI;
+            heading += argumentOfPeriapsis;
+            Angle.NormaliseRadiansPositive(heading);
             return heading;
 
         }
@@ -510,9 +514,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="sgp">Standard Grav Perameter. in AU</param>
         /// <param name="position">Ralitive Position.</param>
         /// <param name="sma">SemiMajorAxis</param>
-        public static Vector2 InstantaneousOrbitalVelocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double inclination)
+        public static Vector2 InstantaneousOrbitalVelocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double argumentOfPeriapsis)
         {
-            (double speed, double angle) = InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly, inclination);
+            (double speed, double angle) = InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly, argumentOfPeriapsis);
             var v = new Vector2()
             {
                 X = Math.Cos(angle) * speed,

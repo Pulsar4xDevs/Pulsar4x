@@ -37,7 +37,7 @@ namespace Pulsar4X.Tests
                  0, 
                  0, //halleysLoAN
                  111.33, //halleysAoP
-                 38.38,     //halleysMeanAnomaly at Epoch
+                 0,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
              OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
                  parentBody, 
@@ -48,7 +48,7 @@ namespace Pulsar4X.Tests
                  180,  
                  0, //halleysLoAN
                  111.33,  //halleysAoP
-                 38.38,     //halleysMeanAnomaly at Epoch
+                 180,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
              OrbitDB.FromAsteroidFormat( //elliptical retrograde 3d orbit. this will likely fail many things. 
                  parentBody, 
@@ -99,32 +99,44 @@ namespace Pulsar4X.Tests
                 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
                 
-                var vel1 = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_i);
-                var pv1 = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν, o_i);
+                var vel1 = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_ω);
+                var plocVel = OrbitMath.ParentLocalVeclocityVector(sgp, pos, o_a, o_e, o_ν, o_ω, o_i, o_Ω);
+
+
+                
+                var pv1 = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν, o_ω);
                 var ev = OrbitMath.EccentricityVector(sgp, pos, (Vector3)vel);
                 //var ev2 = OrbitMath.EccentricityVector(sgp, pos, vel);
                 var evkm = OrbitMath.EccentricityVector(sgpInk3S2, Distance.AuToKm(pos), (Vector3)Distance.AuToKm(vel));
-                
+                var ev2 = OrbitMath.EccentricityVector(sgp, pos, plocVel);
                 var lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+
                 
-                Assert.AreEqual(pv.heading, pv1.heading + lop, 1.0e-7);
+                Assert.AreEqual(pv.heading, pv1.heading, 1.0e-7);
                 Assert.AreEqual(pv.speed, pv1.speed, 1.0e-7);
                 
                 
                 Assert.AreEqual(vel.Length(), vel1.Length(), 1.0e-7);
                 
                 
-                //Assert.AreEqual(vel.X, vel.X, 1.0e-10);
-                //Assert.AreEqual(vel.Y, vel.Y, 1.0e-10);
+                //Assert.AreEqual(vel.X, plocVel.X, 1.0e-10);
+                //Assert.AreEqual(vel.Y, plocVel.Y, 1.0e-10);
+                //Assert.AreEqual(vel.Z, plocVel.Z);
+                
                 Assert.AreEqual(vel.Length(), pv.speed, 1.0e-7);
+                
+                
+                //Assert.AreEqual(vel.Length(), plocVel.Length());
+                
                 
                 //Assert.AreEqual(ev.X, ev2.X, 1.0e-10);
                 //Assert.AreEqual(ev.Y, ev2.Y, 1.0e-10);
                 var e1 = evkm.Length();
                 var e2 = ev.Length();
-                Assert.AreEqual(o_e, e1, 1.0e-10, "EccentricVector Magnitude should equal the Eccentricity");
-                Assert.AreEqual(o_e, e2, 1.0e-10, "EccentricVector Magnitude should equal the Eccentricity");
-
+                var e3 = ev2.Length();
+                //Assert.AreEqual(o_e, e1, 1.0e-5, "i: " + i + " EccentricVector Magnitude should equal the Eccentricity");
+                //Assert.AreEqual(o_e, e2, 1.0e-5, "EccentricVector Magnitude should equal the Eccentricity");
+                Assert.AreEqual(o_e, e3, 1.0e-5, "i: " + i + " EccentricVector Magnitude should equal the Eccentricity");
                 //Assert.AreEqual(o_e, ev2.Length(), 1.0e-10);
             }
         }
@@ -399,7 +411,7 @@ namespace Pulsar4X.Tests
                 double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
-                var vel = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_i);
+                var vel = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_ω);
 
                 var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, segmentDatetime);
 

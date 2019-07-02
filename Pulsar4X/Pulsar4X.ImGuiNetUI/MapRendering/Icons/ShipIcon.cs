@@ -225,7 +225,7 @@ namespace Pulsar4X.SDL2UI
 
                 //var ecAnom = Angle.ToRadians(_orbitDB.)
                 var truAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB,atDateTime);
-                var heading = OrbitMath.HeadingFromPeriaps(_positionDB.RelativePosition_AU, _orbitDB.Eccentricity, _orbitDB.SemiMajorAxis, truAnom, Angle.ToRadians(_orbitDB.Inclination));
+                var heading = OrbitMath.HeadingFromPeriaps(_positionDB.RelativePosition_AU, _orbitDB.Eccentricity, _orbitDB.SemiMajorAxis, truAnom, Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis));
                 Heading = (float)(heading + _lop);
             }
             else if(_newtonMoveDB != null)
