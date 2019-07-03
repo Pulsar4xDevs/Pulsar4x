@@ -54,7 +54,7 @@ namespace Pulsar4X.Tests
                  17.834,         //halleysSemiMajAxis , 
                  0.96714,         //halleysEccentricity
                  72.26,  
-                 58.42, //halleysLoAN
+                 0, //halleysLoAN
                  111.33,  //halleysAoP
                  38.38,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
@@ -128,43 +128,33 @@ namespace Pulsar4X.Tests
                 
                 var vel1 = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_ω);
                 var plocVel = OrbitMath.ParentLocalVeclocityVector(sgp, pos, o_a, o_e, o_ν, o_ω, o_i, o_Ω);
-
-
+                
                 
                 var pv1 = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν, o_ω);
-                var ev = OrbitMath.EccentricityVector(sgp, pos, (Vector3)vel);
-                //var ev2 = OrbitMath.EccentricityVector(sgp, pos, vel);
-                var evkm = OrbitMath.EccentricityVector(sgpInk3S2, Distance.AuToKm(pos), (Vector3)Distance.AuToKm(vel));
                 var ev2 = OrbitMath.EccentricityVector(sgp, pos, plocVel);
-                var lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
 
+                var hackspeed = OrbitMath.Hackspeed(orbitDB, segmentDatetime);
+                var hackVector = OrbitMath.HackVelocityVector(orbitDB, segmentDatetime);
                 
+                Assert.AreEqual(hackspeed, hackVector.Length(), 1.0e-10, "TestData: " + testData.TestName +"\n iteration: " + i);
+                Assert.AreEqual(vel1.Length(), plocVel.Length(), 1.0e-10, "TestData: " + testData.TestName +"\n iteration: " + i);
+                Assert.AreEqual(hackspeed, vel1.Length(), 1.0e-10, "TestData: " + testData.TestName +"\n iteration: " + i);
+                
+                
+                Assert.AreEqual(hackVector.X, plocVel.X, 1.0e-10);
+                Assert.AreEqual(hackVector.Y, plocVel.Y, 1.0e-10);
+                Assert.AreEqual(hackVector.Z, plocVel.Z, 1.0e-10);
                 Assert.AreEqual(pv.heading, pv1.heading, 1.0e-7);
                 Assert.AreEqual(pv.speed, pv1.speed, 1.0e-7);
-                
-                
                 Assert.AreEqual(vel.Length(), vel1.Length(), 1.0e-7);
-                
-                
-                //Assert.AreEqual(vel.X, plocVel.X, 1.0e-10);
-                //Assert.AreEqual(vel.Y, plocVel.Y, 1.0e-10);
-                //Assert.AreEqual(vel.Z, plocVel.Z);
-                
                 Assert.AreEqual(vel.Length(), pv.speed, 1.0e-7);
                 
-                
-                //Assert.AreEqual(vel.Length(), plocVel.Length());
-                
-                
-                //Assert.AreEqual(ev.X, ev2.X, 1.0e-10);
-                //Assert.AreEqual(ev.Y, ev2.Y, 1.0e-10);
-                var e1 = evkm.Length();
-                var e2 = ev.Length();
+    
+   
                 var e3 = ev2.Length();
-                //Assert.AreEqual(o_e, e1, 1.0e-5, "i: " + i + " EccentricVector Magnitude should equal the Eccentricity");
-                //Assert.AreEqual(o_e, e2, 1.0e-5, "EccentricVector Magnitude should equal the Eccentricity");
-                Assert.AreEqual(o_e, e3, 1.0e-5, "TestData: " + testData.TestName + " iteration: " + i + " EccentricVector Magnitude should equal the Eccentricity");
-                //Assert.AreEqual(o_e, ev2.Length(), 1.0e-10);
+    
+                Assert.AreEqual(o_e, e3, 1.0e-5, "TestData: " + testData.TestName +"\n iteration: " + i + "\n EccentricVector Magnitude should equal the Eccentricity");
+
             }
         }
         
@@ -204,7 +194,7 @@ namespace Pulsar4X.Tests
                 var nodeVector = OrbitMath.CalculateNode(OrbitMath.CalculateAngularMomentum(pos, (Vector3)vel));
                 double loAN = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
                 
-                Assert.AreEqual(o_Ω, loAN);
+                Assert.AreEqual(o_Ω, loAN, 1.0e-10);
 
             }
         }
@@ -400,8 +390,8 @@ namespace Pulsar4X.Tests
 
                 
                 var ω1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, eccentVector, pos, (Vector3)vel);
-                var ω2 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, eccentVector, pos, (Vector3)vel, o_Ω);
-                var ω3 = OrbitMath.GetArgumentOfPeriapsis2(pos, o_i, o_Ω, o_ν);
+                var ω2 = OrbitMath.GetArgumentOfPeriapsis2(pos, o_i, o_Ω, o_ν);
+                var ω3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, eccentVector, pos, (Vector3)vel, o_Ω);
                 var ω4 = OrbitMath.GetArgumentOfPeriapsis4(o_i, eccentVector, nodeVector);
 
                 Assert.Multiple(() =>

@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
 
         DateTime _departureDateTime;
         double _departureOrbitalSpeed = double.NaN;
-        Vectors.Vector2 _departureOrbitalVelocity = Vectors.Vector2.NaN;
+        ECSLib.Vector3 _departureOrbitalVelocity = ECSLib.Vector3.NaN;
         double _departureAngle = double.NaN;
 
         double _insertionOrbitalSpeed = double.NaN;
@@ -503,7 +503,7 @@ namespace Pulsar4X.SDL2UI
             double x = (_radialDV * Math.Cos(_departureAngle)) - (_progradeDV * Math.Sin(_departureAngle));
             double y = (_radialDV * Math.Sin(_departureAngle)) + (_progradeDV * Math.Cos(_departureAngle));
             */
-            var norm = Vectors.Vector2.Normalise( _departureOrbitalVelocity);
+            var norm = ECSLib.Vector3.Normalise( _departureOrbitalVelocity);
             double x = norm.X * _radialDV;
             double y = norm.Y * _progradeDV;
             _deltaV_MS = new ECSLib.Vector3(x, y, 0);

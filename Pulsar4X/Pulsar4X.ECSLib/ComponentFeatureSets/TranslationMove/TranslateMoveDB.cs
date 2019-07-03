@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public DateTime LastProcessDateTime = new DateTime();
 
         [JsonProperty]
-        public Vector2 SavedNewtonionVector_AU { get; internal set; }
+        public Vector3 SavedNewtonionVector_AU { get; internal set; }
 
         [JsonProperty]
         public Vector3 TranslateEntryPoint_AU { get; internal set; }

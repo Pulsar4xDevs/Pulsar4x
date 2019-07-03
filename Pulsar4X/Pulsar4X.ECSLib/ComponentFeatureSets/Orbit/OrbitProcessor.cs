@@ -268,13 +268,12 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector.</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector2 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
+        public static Vector3 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
         {
 
 
             if (UseRalitiveVelocity)
             {
-                Vector2 vector = InstantaneousOrbitalVelocityVector(orbit, atDateTime);
                 return InstantaneousOrbitalVelocityVector(orbit, atDateTime);
             }
             else
@@ -283,7 +282,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public static Vector2 GetOrbitalInsertionVector(Vector2 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
+        public static Vector3 GetOrbitalInsertionVector(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
         {
             if (UseRalitiveVelocity)
                 return departureVelocity;
@@ -300,9 +299,9 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector, ralitive to the root object (ie sun)</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector2 AbsoluteOrbitalVector(OrbitDB orbit, DateTime atDateTime)       
+        public static Vector3 AbsoluteOrbitalVector(OrbitDB orbit, DateTime atDateTime)       
         {
-            Vector2 vector = InstantaneousOrbitalVelocityVector(orbit, atDateTime);
+            Vector3 vector = InstantaneousOrbitalVelocityVector(orbit, atDateTime);
             if(orbit.Parent != null)
                 vector += AbsoluteOrbitalVector((OrbitDB)orbit.ParentDB, atDateTime);
             return vector;
@@ -343,17 +342,22 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector ralitive to the parent</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector2 InstantaneousOrbitalVelocityVector(OrbitDB orbit, DateTime atDateTime)
+        public static Vector3 InstantaneousOrbitalVelocityVector(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
             var sma = orbit.SemiMajorAxis;
             if (orbit.GravitationalParameter == 0 || sma == 0)
-                return new Vector2(); //so we're not returning NaN;
+                return new Vector3(); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
       
             double e = orbit.Eccentricity;
             double trueAnomaly = OrbitProcessor.GetTrueAnomaly(orbit, atDateTime);
+            double aoP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+            double i = Angle.ToRadians(orbit.Inclination);
+            double loAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
+            return OrbitMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
 
+            /*
             (double speed, double angle) polarvector = InstantaneousOrbitalVelocityPolarCoordinate(orbit, atDateTime);
             var v = new Vector2()
             {
@@ -362,6 +366,7 @@ namespace Pulsar4X.ECSLib
             };
             return v;
             //return OrbitMath.InstantaneousOrbitalVelocityVector(sgp, position, sma, e, trueAnomaly);
+            */
         }
 
         /// <summary>

@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                 Entity parentEntity = EntityCommanding.GetDataBlob<OrbitDB>().Parent;
-                Vector2 newVector = OrbitProcessor.InstantaneousOrbitalVelocityVector(EntityCommanding.GetDataBlob<OrbitDB>(), _db.ActionOnDateTime);
+                Vector3 newVector = OrbitProcessor.InstantaneousOrbitalVelocityVector(EntityCommanding.GetDataBlob<OrbitDB>(), _db.ActionOnDateTime);
                 newVector += _db.DeltaVToExpend_AU;
                 var spdmps = Distance.AuToMt( newVector.Length());
                 Vector3 newVector3d = new Vector3(newVector.X, newVector.Y,0);
@@ -140,7 +140,7 @@ namespace Pulsar4X.ECSLib
                 var sgp = GameConstants.Science.GravitationalConstant * masses / 3.347928976e33;
 
                 //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
-                Vector2 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
+                Vector3 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
                 _db = new TranslateMoveDB(targetIntercept.pos);
                 _db.TranslateRalitiveExit_AU = TargetOffsetPosition_AU;
                 _db.EntryDateTime = TransitStartDateTime;

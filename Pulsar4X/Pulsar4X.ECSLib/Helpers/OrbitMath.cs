@@ -445,14 +445,15 @@ namespace Pulsar4X.ECSLib
             //since loAN and incl don't change, it could be stored in orbitDB if we're doing this often enoguh. 
             var orbitLocal = (Vector3)InstantaneousOrbitalVelocityVector(sgp, position, sma, eccentricity, trueAnomaly, arguemntOfPeriapsis);
             
-            var mtxincl = Matrix3d.IDRotateX(inclination);
-            var mtxLoAN = Matrix3d.IDRotateZ(loAN);
+            var mtxincl = Matrix3d.IDRotateX(-inclination);
+            var mtxLoAN = Matrix3d.IDRotateZ(-loAN);
             
-            //var mtxLoANback = Matrix3d.IDRotateZ(loAN);
-            var mtx = mtxincl * mtxLoAN;
+            var mtxLoANback = Matrix3d.IDRotateZ(-loAN);
+            
+            var mtx = mtxLoAN * mtxincl;
 
             
-            var transformedVector = mtxincl.Transform(orbitLocal);
+            var transformedVector = mtx.Transform(orbitLocal);
             return transformedVector;
 
         }
