@@ -6,28 +6,40 @@ namespace Pulsar4X.SDL2UI
 {
     public class Matrix
     {
-        double[] X = new double[2] { 1, 0 };
-        double[] Y = new double[2] { 0, 1 };
-
+        double[] X = new double[3] { 1, 0, 0 };
+        double[] Y = new double[3] { 0, 1, 0};
+        double[] Z = new double[3] {0, 0, 1};
 
         public static Matrix NewScaleMatrix(double scaleX, double scaleY)
         {
             Matrix matrix = new Matrix()
             {
-                X = new double[2] { scaleX, 0 },
-                Y = new double[2] { 0, scaleY }
+                X = new double[3] { scaleX, 0, 0 },
+                Y = new double[3] { 0, scaleY, 0 },
+                Z = new double[3] {0, 0, 1}
             };
             return matrix;
         }
 
+        public static Matrix NewTranslateMatrix(double translateX, double tranlsateY)
+        {
+            Matrix matrix = new Matrix()
+            {
+                X = new double[3] { 1, 0, 0},
+                Y = new double[3] { 0, 1, 0 },
+                Z = new double[3] {translateX, tranlsateY, 1}
+            };
+            return matrix;
+            
+        }
 
         public static Matrix NewMirrorMatrix(bool x, bool y)
         {
             Matrix matrix = new Matrix();
             if (y)
-                matrix.X = new double[2] { -1, 0 };
+                matrix.X = new double[3] { -1, 0, 0 };
             if (x)
-                matrix.Y = new double[2] { 0, -1 };
+                matrix.Y = new double[3] { 0, -1, 0 };
 
             return matrix;
         }
@@ -37,8 +49,9 @@ namespace Pulsar4X.SDL2UI
         {
             Matrix matrix = new Matrix()
             {
-                X = new double[2] { Math.Cos(radians), -Math.Sin(radians) },
-                Y = new double[2] { Math.Sin(radians), Math.Cos(radians) }
+                X = new double[3] { Math.Cos(radians), -Math.Sin(radians), 0 },
+                Y = new double[3] { Math.Sin(radians), Math.Cos(radians), 0 },
+                Z = new double[3] {0, 0, 1}
             };
             return matrix;
         }
@@ -47,8 +60,9 @@ namespace Pulsar4X.SDL2UI
         {
             Matrix matrix = new Matrix()
             {
-                X = new double[2] { 0, -1 },
-                Y = new double[2] { 1, 0 }
+                X = new double[3] { 0, -1, 0 },
+                Y = new double[3] { 1, 0, 0 },
+                Z = new double[3] {0, 0, 1},
             };
             return matrix;
         }
@@ -57,8 +71,9 @@ namespace Pulsar4X.SDL2UI
         {
             Matrix matrix = new Matrix()
             {
-                X = new double[2] { -1, 0 },
-                Y = new double[2] { 0, -1 }
+                X = new double[3] { -1, 0, 0 },
+                Y = new double[3] { 0, -1, 0 },
+                Z = new double[3] {0, 0, 1},
             };
             return matrix;
         }
@@ -67,8 +82,9 @@ namespace Pulsar4X.SDL2UI
         {
             Matrix matrix = new Matrix()
             {
-                X = new double[2] { 0, 1 },
-                Y = new double[2] { -1, 0 }
+                X = new double[3] { 0, 1, 0 },
+                Y = new double[3] { -1, 0, 0 },
+                Z = new double[3] {0, 0, 1},
             };
             return matrix;
         }
@@ -76,29 +92,26 @@ namespace Pulsar4X.SDL2UI
         public static Matrix operator *(Matrix matrixA, Matrix matrixB)
         {
             Matrix newMatrix = new Matrix();
-            newMatrix.X[0] = matrixA.X[0] * matrixB.X[0] + matrixA.X[1] * matrixB.Y[0];
-            newMatrix.X[1] = matrixA.X[0] * matrixB.X[1] + matrixA.X[1] * matrixB.Y[1];
+            newMatrix.X[0] = matrixA.X[0] * matrixB.X[0] + matrixA.X[1] * matrixB.Y[0] + matrixA.X[2] * matrixB.Z[0];
+            newMatrix.X[1] = matrixA.X[0] * matrixB.X[1] + matrixA.X[1] * matrixB.Y[1] + matrixA.X[2] * matrixB.Z[1];
+            newMatrix.X[2] = matrixA.X[0] * matrixB.X[2] + matrixA.X[1] * matrixB.Y[2] + matrixA.X[2] * matrixB.Z[2];
 
-            newMatrix.Y[0] = matrixA.Y[0] * matrixB.X[0] + matrixA.Y[1] * matrixB.Y[0];
-            newMatrix.Y[1] = matrixA.Y[0] * matrixB.X[1] + matrixA.Y[1] * matrixB.Y[1];
+            newMatrix.Y[0] = matrixA.Y[0] * matrixB.X[0] + matrixA.Y[1] * matrixB.Y[0] + matrixA.Y[2] * matrixB.Z[0];
+            newMatrix.Y[1] = matrixA.Y[0] * matrixB.X[1] + matrixA.Y[1] * matrixB.Y[1] + matrixA.Y[2] * matrixB.Z[1];
+            newMatrix.Y[2] = matrixA.Y[0] * matrixB.X[2] + matrixA.Y[1] * matrixB.Y[2] + matrixA.Y[2] * matrixB.Z[2];
+            
+            newMatrix.Z[0] = matrixA.Z[0] * matrixB.X[0] + matrixA.Z[1] * matrixB.Y[0] + matrixA.Z[2] * matrixB.Z[0];
+            newMatrix.Z[1] = matrixA.Z[0] * matrixB.X[1] + matrixA.Z[1] * matrixB.Y[1] + matrixA.Z[2] * matrixB.Z[1];
+            newMatrix.Z[2] = matrixA.Z[0] * matrixB.X[2] + matrixA.Z[1] * matrixB.Y[2] + matrixA.Z[2] * matrixB.Z[2];
             return newMatrix;
         }
 
         public SDL.SDL_Point Transform(double itemx, double itemy)
         {
-
-                SDL.SDL_Point newPoint = new SDL.SDL_Point();
-                //multiply a 2x2 matrix by a 2x1 matrix
-                double x;
-                x = X[0] * itemx;
-                x += X[1] * itemy;
-                newPoint.x = (int)x;
-                double y;
-                y = Y[0] * itemx;
-                y += Y[1] * itemy;
-                newPoint.y = (int)y;
-
-
+            SDL.SDL_Point newPoint = new SDL.SDL_Point();
+            var newPointd = TransformD(itemx, itemy);
+            newPoint.x = (int)newPointd.X;
+            newPoint.y = (int)newPointd.Y;
             return newPoint;
         }
 
@@ -115,10 +128,12 @@ namespace Pulsar4X.SDL2UI
             double x;
             x = X[0] * itemx;
             x += X[1] * itemy;
+            x += X[2] * 1;
             newPoint.X = x;
             double y;
             y = Y[0] * itemx;
             y += Y[1] * itemy;
+            y += Y[2] * 1;
             newPoint.Y = y; 
 
 
@@ -131,18 +146,7 @@ namespace Pulsar4X.SDL2UI
             int i = 0;
             foreach (var item in points)
             {
-                SDL.SDL_Point newPoint = new SDL.SDL_Point();
-                //multiply a 2x2 matrix by a 2x1 matrix
-                double x;
-                x = X[0] * item.x;
-                x += X[1] * item.y;
-                newPoint.x = (int)x;
-                double y; 
-                y = Y[0] * item.x;
-                y += Y[1] * item.y;
-                newPoint.y = (int)y;
-
-                newPoints[i] = newPoint;
+                newPoints[i] = Transform(item.x, item.y);
                 i++;
             }
             return newPoints;
@@ -155,18 +159,7 @@ namespace Pulsar4X.SDL2UI
             int i = 0;
             foreach (var item in points)
             {
-                PointD newPoint = new PointD();
-                //multiply a 2x2 matrix by a 2x1 matrix
-                double x;
-                x = X[0] * item.X;
-                x += X[1] * item.Y;
-                newPoint.X = x;
-                double y;
-                y = Y[0] * item.X;
-                y += Y[1] * item.Y;
-                newPoint.Y = y;
-
-                newPoints[i] = newPoint;
+                newPoints[i] = TransformD(item);
                 i++;
             }
             return newPoints;
