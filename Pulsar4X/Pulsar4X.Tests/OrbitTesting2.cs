@@ -13,8 +13,10 @@ namespace Pulsar4X.Tests
         static MassVolumeDB parentMassDB = parentBody.GetDataBlob<MassVolumeDB>();
         
     
-        static List<object> _allTestOrbitData = new List<object>()
+        static List<(OrbitDB orbitDB, string TestName)> _allTestOrbitData = new List<(OrbitDB, string)>()
         {
+            
+            (
              OrbitDB.FromAsteroidFormat //circular orbit.
                  (
                  parentBody, 
@@ -28,6 +30,9 @@ namespace Pulsar4X.Tests
                  0, 
                  new System.DateTime()
                  ),
+             "Circular Orbit"
+            ),
+            (
              OrbitDB.FromAsteroidFormat( //elliptical orbit
                  parentBody, 
                  parentMassDB.Mass, 
@@ -37,20 +42,40 @@ namespace Pulsar4X.Tests
                  0, 
                  0, //halleysLoAN
                  111.33, //halleysAoP
-                 0,     //halleysMeanAnomaly at Epoch
+                 38.38,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
+             "Elliptical Orbit"
+             ),
+            (
              OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
                  parentBody, 
                  parentMassDB.Mass, 
                  2.2e14,             //halleysBodyMass
                  17.834,         //halleysSemiMajAxis , 
                  0.96714,         //halleysEccentricity
-                 180,  
-                 0, //halleysLoAN
+                 72.26,  
+                 58.42, //halleysLoAN
                  111.33,  //halleysAoP
-                 180,     //halleysMeanAnomaly at Epoch
+                 38.38,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
-             OrbitDB.FromAsteroidFormat( //elliptical retrograde 3d orbit. this will likely fail many things. 
+             "Elliptical 2d retrograde Orbit"
+            ),
+            (
+             OrbitDB.FromAsteroidFormat( //elliptical 3d orbit. 
+                 parentBody, 
+                 parentMassDB.Mass, 
+                 2.2e14,            //halleysBodyMass
+                 17.834,     //halleysSemiMajAxis , 
+                 0.96714,     //halleysEccentricity
+                 72.26,     //halleys3dInclination, note retrograde orbit (> 90degrees)
+                 58.42, //halleysLoAN
+                 111.33, //halleysAoP
+                 38.38,     //halleysMeanAnomaly at Epoch
+                 new System.DateTime(1994, 2, 17)),
+             "Elliptical 3d Orbit"
+            ),
+            (
+             OrbitDB.FromAsteroidFormat( //elliptical retrograde 3d orbit. 
                  parentBody, 
                  parentMassDB.Mass, 
                  2.2e14,            //halleysBodyMass
@@ -60,12 +85,14 @@ namespace Pulsar4X.Tests
                  58.42, //halleysLoAN
                  111.33, //halleysAoP
                  38.38,     //halleysMeanAnomaly at Epoch
-                 new System.DateTime(1994, 2, 17))
+                 new System.DateTime(1994, 2, 17)),
+             "Elliptical Retrograde 3d Orbit")
         };
         
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestOrbitalVelocityCalcs(OrbitDB orbitDB)
+        public void TestOrbitalVelocityCalcs((OrbitDB orbitDB, string TestName) testData)
         {
+            var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
             double o_a = orbitDB.SemiMajorAxis; 
@@ -136,14 +163,16 @@ namespace Pulsar4X.Tests
                 var e3 = ev2.Length();
                 //Assert.AreEqual(o_e, e1, 1.0e-5, "i: " + i + " EccentricVector Magnitude should equal the Eccentricity");
                 //Assert.AreEqual(o_e, e2, 1.0e-5, "EccentricVector Magnitude should equal the Eccentricity");
-                Assert.AreEqual(o_e, e3, 1.0e-5, "i: " + i + " EccentricVector Magnitude should equal the Eccentricity");
+                Assert.AreEqual(o_e, e3, 1.0e-5, "TestData: " + testData.TestName + " iteration: " + i + " EccentricVector Magnitude should equal the Eccentricity");
                 //Assert.AreEqual(o_e, ev2.Length(), 1.0e-10);
             }
         }
         
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestLoANCalc(OrbitDB orbitDB)
+        public void TestLoANCalc((OrbitDB orbitDB, string TestName) testData)
         {
+            var orbitDB = testData.orbitDB;
+            
             double sgp = orbitDB.GravitationalParameterAU; 
             double o_a = orbitDB.SemiMajorAxis; 
             double o_e = orbitDB.Eccentricity; 
@@ -182,8 +211,10 @@ namespace Pulsar4X.Tests
         
         
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TrueAnomalyCalcs(OrbitDB orbitDB)
+        public void TrueAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
         {
+            var orbitDB = testData.orbitDB;
+            
             double sgp = orbitDB.GravitationalParameterAU; 
             double o_a = orbitDB.SemiMajorAxis; 
             double o_e = orbitDB.Eccentricity; 
@@ -242,8 +273,10 @@ namespace Pulsar4X.Tests
 
         
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestEccentricAnomalyCalcs(OrbitDB orbitDB)
+        public void TestEccentricAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
         {
+            var orbitDB = testData.orbitDB;
+            
             double sgp = orbitDB.GravitationalParameterAU; 
             double o_a = orbitDB.SemiMajorAxis; 
             double o_e = orbitDB.Eccentricity; 
@@ -291,8 +324,10 @@ namespace Pulsar4X.Tests
         }
 
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestMeanAnomalyCalcs(OrbitDB orbitDB)
+        public void TestMeanAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
         {
+            var orbitDB = testData.orbitDB;
+            
             double sgp = orbitDB.GravitationalParameterAU; 
             double o_a = orbitDB.SemiMajorAxis; 
             double o_e = orbitDB.Eccentricity; 
@@ -329,8 +364,10 @@ namespace Pulsar4X.Tests
         }
 
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestAngleOfPeriapsCalcs(OrbitDB orbitDB)
+        public void TestAngleOfPeriapsCalcs((OrbitDB orbitDB, string TestName) testData)
         {
+            var orbitDB = testData.orbitDB;
+            
             double sgp = orbitDB.GravitationalParameterAU; 
             double o_a = orbitDB.SemiMajorAxis; 
             double o_e = orbitDB.Eccentricity; 
@@ -381,8 +418,10 @@ namespace Pulsar4X.Tests
 
 
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestingKeplerConversions(OrbitDB orbitDB)
+        public void TestingKeplerConversions((OrbitDB orbitDB, string TestName) testData)
         {
+            var orbitDB = testData.orbitDB;
+            
             double sgp = orbitDB.GravitationalParameterAU; 
             double o_a = orbitDB.SemiMajorAxis; 
             double o_e = orbitDB.Eccentricity; 
