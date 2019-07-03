@@ -68,8 +68,8 @@ namespace Pulsar4X.ECSLib
             return new Matrix3d()
             {
                 X = new double[4] { 1, 0,                 0,                 0 },
-                Y = new double[4] { 0, Math.Cos(theta),   Math.Sin(theta),   0 },
-                Z = new double[4] { 0, -Math.Sin(theta),  Math.Cos(theta),   0 },
+                Y = new double[4] { 0, Math.Cos(theta),   -Math.Sin(theta),   0 },
+                Z = new double[4] { 0, Math.Sin(theta),  Math.Cos(theta),   0 },
                 W = new double[4] { 0, 0,                 0,                 1 }
             };
         }
