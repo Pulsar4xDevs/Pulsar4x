@@ -210,32 +210,9 @@ namespace Pulsar4X.ECSLib
 
             return W;
         }   
-      
-        public static double GetArgumentOfPeriapsis3(Vector3 nodeVector, Vector3 eccentVector, Vector3 pos, Vector3 vel, double loAN)
-        {
-            double eccentricity = eccentVector.Length();
-            double argOfPeriaps;
-            if (loAN == 0)
-            {
-                argOfPeriaps = Math.Atan2(eccentVector.Y, eccentVector.X);
-                if (Vector3.Cross(pos, vel).Z < 0) 
-                    argOfPeriaps = Math.PI * 2 - argOfPeriaps;
-            }
-
-            else
-            {
-                double aopLen = Vector3.Dot(nodeVector, eccentVector);
-                aopLen = aopLen / (nodeVector.Length() * eccentricity);
-                aopLen = GMath.Clamp(aopLen, -1, 1);
-                argOfPeriaps = Math.Acos(aopLen);
-                if (eccentVector.Z < 0) 
-                    argOfPeriaps = Math.PI * 2 - argOfPeriaps;
-            }
-            return argOfPeriaps;
-        }
 
         
-        public static double GetArgumentOfPeriapsis4(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
+        public static double GetArgumentOfPeriapsis3(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
         {
             double aoP = 0;
             double e = eccentricityVector.Length();

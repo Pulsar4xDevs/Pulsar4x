@@ -5,7 +5,7 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
-    public class OrbitTesting2
+    public class OrbitFuzzTesting
     {
         static Game game = new Game();
         static StarSystem starSys = new StarSystem(game, "Sol", -1);
@@ -381,20 +381,18 @@ namespace Pulsar4X.Tests
 
                 Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)vel);
                 Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
-                Vector3 eccentVector = OrbitMath.EccentricityVector(sgp, pos, (Vector3)vel);
+                Vector3 eccentVector = OrbitMath.EccentricityVector(sgp, pos, vel);
 
                 
-                var ω1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, eccentVector, pos, (Vector3)vel);
+                var ω1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, eccentVector, pos, vel);
                 var ω2 = OrbitMath.GetArgumentOfPeriapsis2(pos, o_i, o_Ω, o_ν);
-                var ω3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, eccentVector, pos, (Vector3)vel, o_Ω);
-                var ω4 = OrbitMath.GetArgumentOfPeriapsis4(o_i, eccentVector, nodeVector);
+                var ω3 = OrbitMath.GetArgumentOfPeriapsis3(o_i, eccentVector, nodeVector);
 
                 Assert.Multiple(() =>
                 {
                     Assert.AreEqual(o_ω, ω1, 1.0E-7, "i"+i+" AoP ω1 expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ω1));
                     Assert.AreEqual(o_ω, ω2, 1.0E-7, "i"+i+" AoP ω2 expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ω2));
-                    Assert.AreEqual(o_ω, ω3, 1.0E-7, "i"+i+" AoP ω3 expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ω3));
-                    Assert.AreEqual(o_ω, ω4, 1.0E-7, "i"+i+" AoP ω4 expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ω4));
+                    Assert.AreEqual(o_ω, ω3, 1.0E-7, "i"+i+" AoP ω4 expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ω3));
                 });
 
             }
