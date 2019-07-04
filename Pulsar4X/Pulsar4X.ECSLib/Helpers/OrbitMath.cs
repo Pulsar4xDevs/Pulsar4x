@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class OrbitMath
     {
-        private const double SmallNumber = 1.0e-15; //TODO: test how low we can go
+        private const double Epsilon = 1.0e-15; //TODO: test how low we can go
 
         /// <summary>
         /// Kepler elements from velocity and position.
@@ -239,9 +239,9 @@ namespace Pulsar4X.ECSLib
         {
             double aoP = 0;
             double e = eccentricityVector.Length();
-            if(Math.Abs(inclination) < SmallNumber)
+            if(Math.Abs(inclination) < Epsilon)
             {
-                if (Math.Abs(e) < SmallNumber)
+                if (Math.Abs(e) < Epsilon)
                     aoP = 0;
                 else
                     aoP = Math.Acos(eccentricityVector.X / e);
@@ -253,7 +253,7 @@ namespace Pulsar4X.ECSLib
                 aoP = Math.Acos(foo / foo2);
             }
 
-            if (Math.Abs(e) > SmallNumber && eccentricityVector.Z < 0)
+            if (Math.Abs(e) > Epsilon && eccentricityVector.Z < 0)
             {
                 aoP = 2 * Math.PI - aoP;
             }
@@ -281,7 +281,7 @@ namespace Pulsar4X.ECSLib
             Vector3 foo1 = Vector3.Cross(velocity, angularMomentum) / sgp;
             var foo2 = position / position.Length();
             var E = foo1 - foo2;
-            if (E.Length() < SmallNumber)
+            if (E.Length() < Epsilon)
             {
                 return new Vector3(0, 0, 0);
             }
@@ -307,7 +307,7 @@ namespace Pulsar4X.ECSLib
             var foo1 = (speed * speed - sgp / radius) * position ;
             var foo2 = Vector3.Dot(position, velocity) * velocity;
             var E = (foo1 - foo2) / sgp;
-            if (E.Length() < SmallNumber)
+            if (E.Length() < Epsilon)
             {
                 return new Vector3(0, 0, 0);
             }
@@ -333,7 +333,7 @@ namespace Pulsar4X.ECSLib
             double e = eccentVector.Length(); //eccentricity
             double r = position.Length();
             
-            if (e > SmallNumber) //if eccentricity is bigger than a tiny amount, it's a circular orbit.
+            if (e > Epsilon) //if eccentricity is bigger than a tiny amount, it's a circular orbit.
             {
                 double dotEccPos = Vector3.Dot(eccentVector, position);
                 double talen = e * r;
@@ -344,11 +344,11 @@ namespace Pulsar4X.ECSLib
                 if (Vector3.Dot(position, velocity) < 0)
                     trueAnomoly = Math.PI * 2 - trueAnomoly;
 
-                return trueAnomoly;
+                return Angle.NormaliseRadiansPositive( trueAnomoly);
             }
             else
             {
-                return Math.Atan2(position.Y, position.X); //circular orbit, assume AoP is 0;
+                return Angle.NormaliseRadiansPositive(Math.Atan2(position.Y, position.X)); //circular orbit, assume AoP is 0;
             }
         }
 
@@ -376,15 +376,9 @@ namespace Pulsar4X.ECSLib
         {
             var x = Math.Sqrt(1 - Math.Pow(eccentricity, 2)) * Math.Sin(eccentricAnomaly);
             var y = Math.Cos(eccentricAnomaly) - eccentricity;
-            return Math.Atan2(x, y);
+            return Angle.NormaliseRadiansPositive( Math.Atan2(x, y));
         }
 
-        public static double TrueAnomalyFromEccentricAnomaly2(double eccentricity, double eccentricAnomaly)
-        {
-            var x = Math.Cos(eccentricAnomaly) - eccentricity;
-            var y = 1 - eccentricity * Math.Cos(eccentricAnomaly);
-            return Math.Acos(x / y);
-        }
         
 
         #endregion
@@ -628,13 +622,13 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Calculates the Eccentric Anomaly given True Anomaly and eccentricity. 
         /// </summary>
-        /// <param name="trueAnomaly"></param>
+        /// <param name="trueAnomaly">Should be a normalised angle between 2pi and -2pi</param>
         /// <param name="eccentricity"></param>
         /// <returns></returns>
         public static double GetEccentricAnomalyFromTrueAnomaly(double trueAnomaly, double eccentricity)
         {
             var E = Math.Acos((Math.Cos(trueAnomaly) + eccentricity) / (1 + eccentricity * Math.Cos(trueAnomaly)));
-            if( trueAnomaly < 0)
+            if(trueAnomaly > Math.PI || trueAnomaly < 0 && trueAnomaly > -Math.PI)
                 E = -E;
             return E;
         }

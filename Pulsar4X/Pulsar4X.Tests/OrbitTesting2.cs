@@ -231,33 +231,27 @@ namespace Pulsar4X.Tests
 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
                 var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, segmentDatetime);
-
-                double aop = OrbitMath.GetArgumentOfPeriapsis2(pos, i, o_Ω, o_ν);
-                double ea = o_e * o_a;
-                double eccentricAnomaly = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, o_a, ea, aop);
-
-                double ν1 = OrbitMath.TrueAnomaly(sgp, pos, (Vector3)vel);
+                
                 Vector3 ev = OrbitMath.EccentricityVector(sgp, pos, (Vector3)vel);
+                
+                
+                double ν1 = OrbitMath.TrueAnomaly(sgp, pos, (Vector3)vel);
                 double ν2 = OrbitMath.TrueAnomaly(ev, pos, (Vector3)vel);
                 double ν3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(o_e, o_E);
-                double ν4 = OrbitMath.TrueAnomalyFromEccentricAnomaly2(o_e, o_E);
+
 
                 double d0 = Angle.ToDegrees(o_ν);
                 double d1 = Angle.ToDegrees(ν1);
                 double d2 = Angle.ToDegrees(ν2);
                 double d3 = Angle.ToDegrees(ν3);
-                double d4 = Angle.ToDegrees(ν4);
+
 
                 if(o_e > 1.0e-7) // because this test will fail if we have a circular orbit. 
                     Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν1), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d1);
-                else
-                    Assert.AreEqual(0, ev.Length());
                 
                 Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν2), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d2);
                 Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν3), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d3);
-                //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν4), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d4);
-
-
+                
             }
         }
 
@@ -301,12 +295,13 @@ namespace Pulsar4X.Tests
                 var E3 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
                 var E4 = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, o_a, linierEccentricity, o_ω);
                 var E5 = OrbitMath.GetEccentricAnomalyFromStateVectors2(sgp, o_a, pos, (Vector3)vel);
+
                 Assert.Multiple(() =>
                 {
                     
-                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, E1), "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E1));// these two should be calculatd the same way.  
-                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, E2), 1.0E-7, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E2));
-                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, E3), 1.0E-7, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E3));
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, E1), "EccentricAnomaly E1 expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E1));// these two should be calculatd the same way.  
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, E2), 1.0E-7, "EccentricAnomaly E2 expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E2));
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, E3), 1.0E-7, "EccentricAnomaly E3 expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E3));
                     //Assert.AreEqual(o_E, E4, 1.0E-7, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E4));
                     //Assert.AreEqual(o_E, E5, 1.0E-7, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(E5));
                 });
@@ -519,13 +514,17 @@ namespace Pulsar4X.Tests
                 
                 Vector3 eccentricityVector = OrbitMath.EccentricityVector(sgp, pos, vel);
                 double ke_ν = OrbitMath.TrueAnomaly(eccentricityVector, pos, vel);
+                
                 double ke_E = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(ke_ν, ke_e);
-
-                var ke_E2 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
+                double ke_E2 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
+         
+                
                 
                 
                 Assert.Multiple(() =>
                 {
+                    Assert.AreEqual(o_ν, ke_ν, 1.0E-10);
+                    Assert.AreEqual(o_e, ke_e, 1.0E-10);
                     Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke_E, ke_E2), 1.0E-10);
                     Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ke_ν), 1.0E-7, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ke_ν));
                     Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, ke_E), 1.0E-7, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(ke_E));
