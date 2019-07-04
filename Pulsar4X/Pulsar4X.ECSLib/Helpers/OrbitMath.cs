@@ -51,14 +51,11 @@ namespace Pulsar4X.ECSLib
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
 
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
-
-            //Vector4 eccentVector2 = EccentricityVector2(standardGravParam, position, velocity);
-
+            
             double eccentricity = eccentVector.Length();
 
             double specificOrbitalEnergy = Math.Pow(velocity.Length(),2) * 0.5 - standardGravParam / position.Length();
-
-
+            
             double semiMajorAxis;
             double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
             if (Math.Abs(eccentricity) > 1) //hypobola
@@ -76,19 +73,7 @@ namespace Pulsar4X.ECSLib
                 p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
                 semiMajorAxis = double.MaxValue;
             }
-
-            /*
-            if (Math.Abs(eccentricity - 1.0) > 1e-15)
-            {
-                semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
-                p = semiMajorAxis * (1 - eccentricity * eccentricity);
-            }
-            else //parabola
-            {
-                p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
-                semiMajorAxis = double.MaxValue;
-            }
-*/
+            
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
             double linierEccentricity = eccentricity * semiMajorAxis;
@@ -100,16 +85,14 @@ namespace Pulsar4X.ECSLib
             
             double longdOfAN = CalculateLongitudeOfAscendingNode(nodeVector);
 
+            
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
+            double argOfPeriaps = GetArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
+            var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
+            
 
             double eccentricAnomoly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
-
-            
-            double argOfPeriaps = GetArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
-
-            var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
-
-            var meanAnomaly = eccentricAnomoly - eccentricity * Math.Sin(eccentricAnomoly);
+            var meanAnomaly = GetMeanAnomaly(eccentricity, eccentricAnomoly);
 
             ke.SemiMajorAxis = semiMajorAxis;
             ke.SemiMinorAxis = semiMinorAxis;
@@ -407,43 +390,25 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region VelocityAndSpeed;
-        /*
-    /// <summary>
-    /// 2d Velocity vector in polar coordinates.
-    /// </summary>
-    /// <returns>item1 is speed (distance/s), item2 is heading in radians.</returns>
-    /// <param name="sgp">Sgp.</param>
-    /// <param name="position">Position.</param>
-    /// <param name="sma">Sma.</param>
-    /// <param name="eccentricity">Eccentricity.</param>
-    /// <param name="loP">Lo p.</param>
-    public static Tuple<double, double> PreciseOrbitalVelocityPolarCoordinate(double sgp, Vector4 position, double sma, double eccentricity, double loP)
-    {
-        var radius = position.Length();
-        var spd = PreciseOrbitalSpeed(sgp, radius, sma);
+ 
 
-        double linierEcc = EllipseMath.LinierEccentricityFromEccentricity(sma, eccentricity);
-
-        double referenceToPosAngle = Math.Atan2(position.X, -position.Y); //we switch x and y here so atan2 works in the y direction. 
-
-        double anglef = loP - referenceToPosAngle;
-
-        //find angle alpha using law of cos: (a^2 + b^2 - c^2) / 2ab
-        double sideA = radius;
-        double sideB = 2 * sma - radius;
-        double sideC = 2 * linierEcc;
-        double alpha = Math.Acos((sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB));
-
-        double angle = Math.PI - (referenceToPosAngle + ((Math.PI - alpha) * 0.5));
-
-        return new Tuple<double, double>(spd, angle);
-    }*/
-
+        /// <summary>
+        /// Instantanious Orbital Veclocity
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="position"></param>
+        /// <param name="sma"></param>
+        /// <param name="eccentricity"></param>
+        /// <param name="trueAnomaly"></param>
+        /// <param name="arguemntOfPeriapsis"></param>
+        /// <param name="inclination"></param>
+        /// <param name="loAN"></param>
+        /// <returns></returns>
         public static Vector3 ParentLocalVeclocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double arguemntOfPeriapsis, double inclination, double loAN)
         {
             //TODO: is it worth storing the resulting matrix somewhere, and then just doing the transform on it?
             //since loAN and incl don't change, it could be stored in orbitDB if we're doing this often enoguh. 
-            var orbitLocal = (Vector3)InstantaneousOrbitalVelocityVector(sgp, position, sma, eccentricity, trueAnomaly, arguemntOfPeriapsis);
+            var orbitLocal = (Vector3)ObjectLocalVelocityVector(sgp, position, sma, eccentricity, trueAnomaly, arguemntOfPeriapsis);
             
             var mtxLoAN = Matrix3d.IDRotateZ(-loAN);
             var mtxincl = Matrix3d.IDRotateX(inclination);
@@ -454,67 +419,17 @@ namespace Pulsar4X.ECSLib
             return transformedVector;
 
         }
-
+        
         /// <summary>
-        /// This returns the heading mesured from the periapsis (AoP) in radians
-        /// Add the LoP to this to get the true heading in a 2d orbit. 
-        /// </summary>
-        /// <returns>The orbital velocity polar coordinate.</returns>
-        /// <param name="sgp">Sgp.</param>
-        /// <param name="position">Position.</param>
-        /// <param name="semiMajorAxis">Semi major axis.</param>
-        /// <param name="eccentricity">Eccentricity.</param>
-        /// <param name="trueAnomaly">True anomaly.</param>
-        public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(double sgp, Vector3 position, double semiMajorAxis, double eccentricity, double trueAnomaly, double argumentOfPeriapsis)
-        {
-            var radius = position.Length();
-            var spd = InstantaneousOrbitalSpeed(sgp, radius, semiMajorAxis);
-
-            var heading = HeadingFromPeriaps(position, eccentricity, semiMajorAxis, trueAnomaly, argumentOfPeriapsis);
-
-            return (spd, heading);
-        }
-
-        /// <summary>
-        /// This returns the heading mesured from the periapsis (AoP) and is on the plane of the object
-        /// Add the LoP to this to get the true heading in a 2d orbit. 
-        /// </summary>
-        /// <returns>The from periaps.</returns>
-        /// <param name="pos">Position.</param>
-        /// <param name="eccentcity">Eccentcity.</param>
-        /// <param name="semiMajorAxis">Semi major axis.</param>
-        /// <param name="trueAnomaly">True anomaly.</param>
-        public static double HeadingFromPeriaps(Vector3 pos, double eccentcity, double semiMajorAxis, double trueAnomaly, double argumentOfPeriapsis)
-        {
-
-            double r = pos.Length();
-            double a = semiMajorAxis;
-            double e = eccentcity;
-            double k = r / a;
-            double f = trueAnomaly;
-
-            double bar = ((2 - 2 * e * e) / (k * (2 - k))) - 1 ;
-            double foo = GMath.Clamp(bar, - 1, 1);
-            double alpha = Math.Acos(foo);           
-            if (trueAnomaly > Math.PI || trueAnomaly < 0)
-                alpha = -alpha;
-            double heading = ((Math.PI - alpha) / 2) + f;
-            heading += argumentOfPeriapsis;
-            Angle.NormaliseRadiansPositive(heading);
-            return heading;
-
-        }
-
-        /// <summary>
-        /// vector ralitive to AoP and on the plane of the object
+        /// Instantanious Orbital Velocity
         /// </summary>
         /// <returns>The orbital vector ralitive to the Argument Of Periapsis</returns>
         /// <param name="sgp">Standard Grav Perameter. in AU</param>
         /// <param name="position">Ralitive Position.</param>
         /// <param name="sma">SemiMajorAxis</param>
-        public static Vector2 InstantaneousOrbitalVelocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double argumentOfPeriapsis)
+        public static Vector2 ObjectLocalVelocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double argumentOfPeriapsis)
         {
-            (double speed, double angle) = InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, eccentricity, trueAnomaly, argumentOfPeriapsis);
+            (double speed, double angle) = ObjectLocalVelocityPolar(sgp, position, sma, eccentricity, trueAnomaly, argumentOfPeriapsis);
             var v = new Vector2()
             {
                 X = Math.Cos(angle) * speed,
@@ -527,8 +442,57 @@ namespace Pulsar4X.ECSLib
             return v;
         }
 
+        /// <summary>
+        /// This returns the heading mesured from the periapsis (AoP) in radians
+        /// Add the LoP to this to get the true heading in a 2d orbit. 
+        /// </summary>
+        /// <returns>The orbital velocity polar coordinate.</returns>
+        /// <param name="sgp">Sgp.</param>
+        /// <param name="position">Position.</param>
+        /// <param name="semiMajorAxis">Semi major axis.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        /// <param name="trueAnomaly">True anomaly.</param>
+        public static (double speed, double heading) ObjectLocalVelocityPolar(double sgp, Vector3 position, double semiMajorAxis, double eccentricity, double trueAnomaly, double argumentOfPeriapsis)
+        {
+            var radius = position.Length();
+            var spd = InstantaneousOrbitalSpeed(sgp, radius, semiMajorAxis);
 
+            var heading = ObjectLocalHeading(position, eccentricity, semiMajorAxis, trueAnomaly, argumentOfPeriapsis);
 
+            return (spd, heading);
+        }
+
+        /// <summary>
+        /// Heading on the orbital plane.
+        /// </summary>
+        /// <returns>The from periaps.</returns>
+        /// <param name="pos">Position.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        /// <param name="semiMajAxis">Semi major axis.</param>
+        /// <param name="trueAnomaly">True anomaly.</param>
+        /// <param name="aoP">Argument Of Periapsis</param>
+        /// 
+        public static double ObjectLocalHeading(Vector3 pos, double eccentricity, double semiMajAxis, double trueAnomaly, double aoP)
+        {
+
+            double r = pos.Length();
+            double a = semiMajAxis;
+            double e = eccentricity;
+            double k = r / a;
+            double f = trueAnomaly;
+
+            double bar = ((2 - 2 * e * e) / (k * (2 - k))) - 1 ;
+            double foo = GMath.Clamp(bar, - 1, 1);
+            double alpha = Math.Acos(foo);           
+            if (trueAnomaly > Math.PI || trueAnomaly < 0)
+                alpha = -alpha;
+            double heading = ((Math.PI - alpha) / 2) + f;
+            heading += aoP;
+            Angle.NormaliseRadiansPositive(heading);
+            return heading;
+
+        }
+        
         /// <summary>
         /// returns the speed for an object of a given mass at a given radius from a body. this is the vis-viva calculation
         /// </summary>
@@ -776,13 +740,13 @@ namespace Pulsar4X.ECSLib
         /// Untested
         /// </summary>
         /// <returns>The position.</returns>
-        /// <param name="combinedMass">Combined mass.</param>
-        /// <param name="semiMajAxis">Semi maj axis.</param>
+        /// <param name="combinedMass">Parent + object mass</param>
+        /// <param name="semiMajAxis">SemiMajorAxis.</param>
         /// <param name="meanAnomaly">Mean anomaly.</param>
         /// <param name="eccentricity">Eccentricity.</param>
-        /// <param name="aoP">AngleOfPeriapsis.</param>
+        /// <param name="aoP">ArgumentOfPeriapsis.</param>
         /// <param name="loAN">LongditudeOfAccendingNode.</param>
-        /// <param name="i">I don't even remmebr what this is inclination maybe</param>
+        /// <param name="i"> inclination </param>
         public static Vector3 Pos(double combinedMass, double semiMajAxis, double meanAnomaly, double eccentricity, double aoP, double loAN, double i)
         {
             var G = 6.6725985e-11;

@@ -126,11 +126,11 @@ namespace Pulsar4X.Tests
                 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
                 
-                var vel1 = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_ω);
+                var vel1 = (Vector3)OrbitMath.ObjectLocalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_ω);
                 var plocVel = OrbitMath.ParentLocalVeclocityVector(sgp, pos, o_a, o_e, o_ν, o_ω, o_i, o_Ω);
                 
                 
-                var pv1 = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, pos, o_a, o_e, o_ν, o_ω);
+                var pv1 = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, o_a, o_e, o_ν, o_ω);
                 var ev2 = OrbitMath.EccentricityVector(sgp, pos, plocVel);
 
                 var hackspeed = OrbitMath.Hackspeed(orbitDB, segmentDatetime);
@@ -408,7 +408,7 @@ namespace Pulsar4X.Tests
 
 
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestingKeplerConversions((OrbitDB orbitDB, string TestName) testData)
+        public void TestingStaticKeplerConversions((OrbitDB orbitDB, string TestName) testData)
         {
             var orbitDB = testData.orbitDB;
             
@@ -440,8 +440,7 @@ namespace Pulsar4X.Tests
                 double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
 
                 var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
-                var vel = (Vector3)OrbitMath.InstantaneousOrbitalVelocityVector(sgp, pos, o_a, o_e, o_ν, o_ω);
-
+                var vel = OrbitProcessor.AbsoluteOrbitalVector(orbitDB, segmentDatetime);
                 var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, segmentDatetime);
 
                 var ke_epoch = ke.Epoch;
@@ -452,11 +451,14 @@ namespace Pulsar4X.Tests
                 double ke_M0 = ke.MeanAnomalyAtEpoch;
                 double ke_n = ke.MeanMotion;
                 double ke_ω = ke.AoP;
+                
+                Vector3 eccentricityVector = OrbitMath.EccentricityVector(sgp, pos, vel);
+                double ke_ν = OrbitMath.TrueAnomaly(eccentricityVector, pos, vel);
+                double ke_E = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(ke_ν, ke_e);
 
-                double ke_E = OrbitMath.GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, ke_M0);
-                double ke_ν = OrbitMath.TrueAnomalyFromEccentricAnomaly(ke_e, ke_E);
-
-
+                var E3 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
+                //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke_E, E3), 1.0E-10);
+                
                 Assert.Multiple(() =>
                 {
                     //these should not change (other than floating point errors) between each itteration
@@ -466,12 +468,69 @@ namespace Pulsar4X.Tests
                     Assert.AreEqual(o_Ω, ke_Ω, 1.0E-7, "LoAN Ω expected: " + Angle.ToDegrees(o_Ω) + " was: " + Angle.ToDegrees(ke_Ω));
                     Assert.AreEqual(o_ω, ke_ω, 1.0E-7, "AoP ω expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ke_ω));
                     Assert.AreEqual(o_n, ke_n, 1.0E-7, "MeanMotion n expected: " + Angle.ToDegrees(o_n) + " was: " + Angle.ToDegrees(ke_n));
+                });
+            }
+        }
+        
+                [Test, TestCaseSource(nameof(_allTestOrbitData))]
+        public void TestingVariableKeplerConversions((OrbitDB orbitDB, string TestName) testData)
+        {
+            var orbitDB = testData.orbitDB;
+            
+            double sgp = orbitDB.GravitationalParameterAU; 
+            double o_a = orbitDB.SemiMajorAxis; 
+            double o_e = orbitDB.Eccentricity; 
+            double o_i = Angle.ToRadians(orbitDB.Inclination); 
+            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
+            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
+            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
+            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
+            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+        
+            DateTime o_epoch = orbitDB.Epoch; 
 
-                    //these will change between itterations:
+            double periodInSeconds = OrbitMath.GetOrbitalPeriodInSeconds(sgp, o_a);
+            Assert.AreEqual(periodInSeconds, orbitDB.OrbitalPeriod.TotalSeconds, 0.1);
 
-                    Assert.AreEqual(o_E, ke_E, 1.0E-7, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(ke_E));
-                    Assert.AreEqual(o_ν, ke_ν, 1.0E-7, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ke_ν));
-                    Assert.AreEqual(o_M, ke_M0, 1.0E-7, "MeanAnomaly M expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(ke_M0));
+            //lets break the orbit up and check the rest of the paremeters at different points of the orbit:
+            double segmentTime = periodInSeconds / 16;
+
+            for (int i = 0; i < 16; i++)
+            {
+                TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
+                DateTime segmentDatetime = o_epoch + timeSinceEpoch;
+
+                double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
+                double o_E = OrbitProcessor.GetEccentricAnomaly(orbitDB, o_M);
+                double o_ν = OrbitProcessor.GetTrueAnomaly(orbitDB, segmentDatetime);
+
+                var pos = OrbitProcessor.GetPosition_AU(orbitDB, segmentDatetime);
+                var vel = OrbitProcessor.AbsoluteOrbitalVector(orbitDB, segmentDatetime);
+                var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, segmentDatetime);
+
+                var ke_epoch = ke.Epoch;
+                double ke_a = ke.SemiMajorAxis;
+                double ke_e = ke.Eccentricity;
+                double ke_i = ke.Inclination;
+                double ke_Ω = ke.LoAN;
+                double ke_M0 = ke.MeanAnomalyAtEpoch;
+                double ke_n = ke.MeanMotion;
+                double ke_ω = ke.AoP;
+                
+                Vector3 eccentricityVector = OrbitMath.EccentricityVector(sgp, pos, vel);
+                double ke_ν = OrbitMath.TrueAnomaly(eccentricityVector, pos, vel);
+                double ke_E = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(ke_ν, ke_e);
+
+                var ke_E2 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
+                
+                
+                Assert.Multiple(() =>
+                {
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke_E, ke_E2), 1.0E-10);
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ke_ν), 1.0E-7, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ke_ν));
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, ke_E), 1.0E-7, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(ke_E));
+                    //we're testing ke_M0 here because epoch for ke is *now*.
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_M, ke_M0), 1.0E-7, "MeanAnomaly M expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(ke_M0));
 
                 });
             }

@@ -330,7 +330,7 @@ namespace Pulsar4X.ECSLib
             double aoP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
             
 
-            (double speed,double heading) polar = OrbitMath.InstantaneousOrbitalVelocityPolarCoordinate(sgp, position, sma, e, trueAnomaly, aoP);
+            (double speed,double heading) polar = OrbitMath.ObjectLocalVelocityPolar(sgp, position, sma, e, trueAnomaly, aoP);
             
             return polar;
             
