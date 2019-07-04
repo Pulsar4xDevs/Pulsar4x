@@ -26,10 +26,11 @@ namespace Pulsar4X.SDL2UI
         internal float SemiMinor;
         protected float _loP_Degrees; //longditudeOfPeriapsis (loan + aop) 
         internal float _loP_radians; //longditudeOfPeriapsis (loan + aop) in radians
+        internal float _aop;
         internal float _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
         protected PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
-        protected bool IsClockwiseOrbit = true;
+        protected bool IsRetrogradeOrbit = false;
         #endregion
 
         #region Dynamic Properties
@@ -77,12 +78,13 @@ namespace Pulsar4X.SDL2UI
 
             _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
 
-            /*
+            
             if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270) //orbitDB is in degrees.
             {
-                IsClockwiseOrbit = false;
-                _loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
+                IsRetrogradeOrbit = true;
+                //_loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
             }
+            /*
             else
             {
 
@@ -91,9 +93,9 @@ namespace Pulsar4X.SDL2UI
             _loP_radians = (float)(Angle.ToRadians(_loP_Degrees));
             */
             var i = Angle.ToRadians(_orbitDB.Inclination);
-            var aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
+            var _aoP = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
             var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
-            var lop = OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
+            var lop = OrbitMath.GetLongditudeOfPeriapsis(i, _aoP, loan);
             _loP_radians = (float)lop;
             _loP_Degrees = (float)Angle.ToDegrees(lop);
 

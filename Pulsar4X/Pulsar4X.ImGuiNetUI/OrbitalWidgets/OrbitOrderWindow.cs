@@ -441,7 +441,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text((_ke.LoAN + _ke.AoP).ToString("g3") + " radians or " + Angle.ToDegrees(_ke.LoAN + _ke.AoP).ToString("F") + " deg ");
 
                     if(_orbitWidget != null)
-                        ImGui.Text("Clockwise " +  _orbitWidget.IsClockwiseOrbit.ToString());
+                        ImGui.Text("Clockwise " +  _orbitWidget.IsRetrogradeOrbit.ToString());
 
 
 
@@ -508,8 +508,8 @@ namespace Pulsar4X.SDL2UI
             double y = norm.Y * _progradeDV;
             _deltaV_MS = new ECSLib.Vector3(x, y, 0);
 
-            var insertionVector2d = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
-            _insertionOrbitalVelocity = new ECSLib.Vector3(insertionVector2d.X, insertionVector2d.Y, 0);
+            var insertionVector = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+            _insertionOrbitalVelocity = insertionVector;
 
             _insertionOrbitalVelocity += Distance.MToAU( _deltaV_MS);
             _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();

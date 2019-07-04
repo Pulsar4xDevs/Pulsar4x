@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
         internal double OrbitEllipseSemiMaj;
         internal double OrbitEllipseSemiMinor;
 
-        internal double OrbitAngleRadians; //the orbit is an ellipse which is rotated arround one of the focal points. this is eqal to the LoAN + AoP 
+        internal double LonditudeOfPeriapsis; //the orbit is an ellipse which is rotated arround one of the focal points. this is eqal to the LoAN + AoP 
 
         double _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
 
@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         //change each game update
         float _ellipseStartArcAngleRadians;
         int _index;
-        internal bool IsClockwiseOrbit = true;
+        internal bool IsRetrogradeOrbit = false;
         public float EllipseSweepRadians = 4.71239f;
 
         //32 is a good low number, slightly ugly.  180 is a little overkill till you get really big orbits. 
@@ -132,7 +132,7 @@ namespace Pulsar4X.SDL2UI
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)MaxAlpha - MinAlpha) / _numberOfDrawSegments;
-            _ellipseStartArcAngleRadians = (float)OrbitAngleRadians;
+            _ellipseStartArcAngleRadians = (float)LonditudeOfPeriapsis;
 
 
 
@@ -169,16 +169,16 @@ namespace Pulsar4X.SDL2UI
             */
             if (ke.Inclination > Math.PI * 0.5 && ke.Inclination < Math.PI * 1.5) //ke inclination is in radians.
             {
-                IsClockwiseOrbit = false;
-                OrbitAngleRadians = ke.LoAN - ke.AoP;
+                IsRetrogradeOrbit = true;
             }
             else
             {
-                IsClockwiseOrbit = true;
-                OrbitAngleRadians = ke.LoAN + ke.AoP;
+                IsRetrogradeOrbit = false;
             }
+
             _position = position;
 
+            LonditudeOfPeriapsis = ke.LoAN + ke.AoP;
             _loAN = ke.LoAN;
             _aoP = ke.AoP;
             _trueAnomaly = ke.TrueAnomalyAtEpoch;
@@ -187,6 +187,10 @@ namespace Pulsar4X.SDL2UI
 
         void CreatePointArray()
         {
+
+            var coslop = 1 * Math.Cos(LonditudeOfPeriapsis);
+            var sinlop = 1 * Math.Sin(LonditudeOfPeriapsis);
+            
             _points = new PointD[_numberOfArcSegments + 1];
             double angle = 0;
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
@@ -194,15 +198,25 @@ namespace Pulsar4X.SDL2UI
                 double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
                 double y1 = OrbitEllipseSemiMinor * Math.Cos(angle);
 
-                //double x1 = _orbitEllipseSemiMinor * Math.Cos(angle);
-                //double y1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the linearEccentricity so the focal point is "center"
-
-
                 //rotates the points to allow for the LongditudeOfPeriapsis. 
-                double x2 = (x1 * Math.Cos(OrbitAngleRadians)) - (y1 * Math.Sin(OrbitAngleRadians));
-                double y2 = (x1 * Math.Sin(OrbitAngleRadians)) + (y1 * Math.Cos(OrbitAngleRadians));
-                angle += _segmentArcSweepRadians;
+                double x2 = (x1 * coslop) - (y1 * sinlop);
+                double y2 = (x1 * sinlop) + (y1 * coslop);
                 _points[i] = new PointD() { X = x2, Y = y2 };
+                angle += _segmentArcSweepRadians;
+            }
+            
+            
+            if (IsRetrogradeOrbit)
+            {
+                var mtxr1 = Matrix3d.IDRotateZ(-LonditudeOfPeriapsis);
+                var mtxri = Matrix3d.IDRotateX(Math.PI);
+                var mtxr2 = Matrix3d.IDRotateZ(LonditudeOfPeriapsis);
+                var mtxr = mtxr1 * mtxri * mtxr2;
+                for (int i = 0; i < _points.Length; i++)
+                {
+                    var pnt = mtxr.Transform(new Vector3(_points[i].X, _points[i].Y, 0));
+                    _points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
+                }
             }
         }
 
@@ -248,21 +262,12 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
+                if (index < _numberOfArcSegments - 1)
 
-                if (IsClockwiseOrbit)
-                {
-                    if (index < _numberOfArcSegments - 1)
-
-                        index++;
-                    else
-                        index = 0; 
-                }
-                else if (index > 0)
-                {
-                    index--;
-                }
+                    index++;
                 else
-                    index = _numberOfArcSegments - 1;
+                    index = 0; 
+                
                     
                 translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
@@ -281,14 +286,13 @@ namespace Pulsar4X.SDL2UI
             float alpha = MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                var err1 = SDL.SDL_GetError();
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
-                var err2 = SDL.SDL_GetError();
+
                 SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
-                var err3 = SDL.SDL_GetError();
+;
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
                 alpha -= _alphaChangeAmount;
-                var err4 = SDL.SDL_GetError();
+
             }
 
             SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);

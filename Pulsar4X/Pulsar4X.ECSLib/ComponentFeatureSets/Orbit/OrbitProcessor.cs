@@ -337,7 +337,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// 2d vector
+        /// Parent ralitive velocity vector. 
         /// </summary>
         /// <returns>The orbital vector ralitive to the parent</returns>
         /// <param name="orbit">Orbit.</param>
@@ -356,17 +356,6 @@ namespace Pulsar4X.ECSLib
             double i = Angle.ToRadians(orbit.Inclination);
             double loAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
             return OrbitMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
-
-            /*
-            (double speed, double angle) polarvector = InstantaneousOrbitalVelocityPolarCoordinate(orbit, atDateTime);
-            var v = new Vector2()
-            {
-                X = Math.Cos(polarvector.angle) * polarvector.speed,
-                Y = Math.Sin(polarvector.angle) * polarvector.speed,
-            };
-            return v;
-            //return OrbitMath.InstantaneousOrbitalVelocityVector(sgp, position, sma, e, trueAnomaly);
-            */
         }
 
         /// <summary>

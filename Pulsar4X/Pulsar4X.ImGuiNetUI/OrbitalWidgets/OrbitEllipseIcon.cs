@@ -47,78 +47,49 @@ namespace Pulsar4X.SDL2UI
         protected override void CreatePointArray()
         {
             _points = new PointD[_numberOfArcSegments + 1];
+
+            var loAN = Angle.ToRadians(-_orbitDB.LongitudeOfAscendingNode);
+            var incl = Angle.ToRadians(_orbitDB.Inclination);
+            var mtxloan = Matrix3d.IDRotateZ(loAN);
+            var mtxincl = Matrix3d.IDRotateX(incl); 
+            var mtxaop = Matrix3d.IDRotateZ(_aop);
+
+            //var mtx =  mtxaop * mtxincl * mtxloan;
+            var mtx =  mtxaop * mtxloan;
             double angle = 0;
 
-
+            var coslop = 1 * Math.Cos(_loP_radians);
+            var sinlop = 1 * Math.Sin(_loP_radians);
+            //TODO: figure out propper matrix rotations for this, will be a bit more elegent. 
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
 
                 double x1 = SemiMaj *  Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
                 double y1 = SemiMinor * Math.Cos(angle);
-
-                //double x1 = _orbitEllipseSemiMinor * Math.Cos(angle);
-                //double y1 = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the linearEccentricity so the focal point is "center"
-
-
-                //rotates the points to allow for the LongditudeOfPeriapsis. 
-                double x2 = (x1 * Math.Cos(_loP_radians)) - (y1 * Math.Sin(_loP_radians));
-                double y2 = (x1 * Math.Sin(_loP_radians)) + (y1 * Math.Cos(_loP_radians));
-                angle += _segmentArcSweepRadians;
+                
+                double x2 = (x1 * coslop) - (y1 * sinlop);
+                double y2 = (x1 * sinlop) + (y1 * coslop);
+                
+                //Vector3 pnt = new Vector3(x1, y1, 0);
+                //pnt = mtx.Transform(pnt);
+                //_points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
                 _points[i] = new PointD() { X = x2, Y = y2 };
+                angle += _segmentArcSweepRadians;
             }
 
-            /* This should give smoother ellipses by having more points at the sharper ends of the ellipse
-             * unused due to position being wrong.            
-            var dtheta = 2 * Math.PI / _numberOfArcSegments;
-            var ct = Math.Cos(_orbitAngleRadians);
-            var st = Math.Sin(_orbitAngleRadians);
-            var cdp = Math.Cos(dtheta);
-            var sdp = Math.Sin(dtheta);
-            var cndp = 1.0;
-            var sndp = 0.0;
-            var xc = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity;
-            var yc = 0;
-            for (int i = 0; i < _numberOfArcSegments + 1; i++)
+            if (IsRetrogradeOrbit)
             {
-                var x1 = _orbitEllipseSemiMaj * cndp;
-                var y1 = _orbitEllipseSemiMinor * sndp;
-                var xn = xc + x1 * ct - y1 * st;
-                var yn = yc + x1 * st + y1 * ct;
-
-                _points[i] = new PointD() { X = xn, Y = yn };
-
-                var tmp = cndp * cdp - sndp * sdp;
-                sndp = sndp * cdp + cndp * sdp;
-                cndp = tmp; 
+                var mtxr1 = Matrix3d.IDRotateZ(-_loP_radians);
+                var mtxr2 = Matrix3d.IDRotateZ(_loP_radians);
+                var mtxr = mtxr1 * mtxincl * mtxr2;
+                for (int i = 0; i < _points.Length; i++)
+                {
+                    var pnt = mtxr.Transform(new Vector3(_points[i].X, _points[i].Y, 0));
+                        _points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
+                }
             }
-            */
-            /* this is suposed to be a more efficent version of the above, but there's a mistake somewhere. 
-            var dtheta = 2 * Math.PI / _numberOfArcSegments;
-            var ct = Math.Cos(_orbitAngleRadians);
-            var st = Math.Sin(_orbitAngleRadians);
-            var cdp = Math.Cos(dtheta);
-            var sdp = Math.Sin(dtheta);
+            //TODO: try a Chaikins curve for this and increase the points depending on zoom and curviture.   
 
-            var fooA = cdp + sdp * st * ct * (_orbitEllipseSemiMaj / _orbitEllipseMinor - _orbitEllipseMinor / _orbitEllipseMajor);
-            var fooB = -sdp * (Math.Pow(_orbitEllipseMinor * st, 2) + Math.Pow(_orbitEllipseMajor * ct, 2)) / (_orbitEllipseSemiMaj * _orbitEllipseSemiMinor);
-            var fooC = sdp * (Math.Pow(_orbitEllipseSemiMinor * ct, 2) + Math.Pow(_orbitEllipseSemiMaj * st, 2)) / (_orbitEllipseSemiMaj * _orbitEllipseSemiMinor);
-            var fooD = cdp + sdp * (st * ct * (_orbitEllipseSemiMinor / _orbitEllipseSemiMaj - _orbitEllipseSemiMaj / _orbitEllipseSemiMinor));
-            fooD = fooD - (fooC * fooB) / fooA;
-            fooC = fooC / fooA;
-            var x1 = _orbitEllipseSemiMaj * ct;
-            var y1 = _orbitEllipseSemiMaj * st;
-
-            var xc = _orbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity;
-            var yc = 0;
-            for (int i = 0; i < _numberOfArcSegments + 1; i++)
-            {
-                var xn = xc + x1;
-                var yn = yc + y1;
-                _points[i] = new PointD() { X = xn, Y = yn };
-                x1 = fooA * x1 + fooB * y1;
-                y1 = fooC * x1 + fooD * y1;
-            }
-            */
         }
 
 
@@ -185,30 +156,14 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            /*
-            ViewScreenPos = matrix.Transform(WorldPosition.X, WorldPosition.Y);//sets the zoom position. 
 
-
-            //get matrix transformations for zoom
-            //Matrix matrix2 = new Matrix();
-            //matrix2.Scale(camera.ZoomLevel);
-
-
-            var camerapoint = camera.CameraViewCoordinate();
-
-            var vsp = new PointD
-            {
-                X = ViewScreenPos.x + camerapoint.x,
-                Y = ViewScreenPos.y + camerapoint.y
-            };
-            */
             var foo = camera.ViewCoordinate(WorldPosition);
             var vsp = new PointD
             {
                 X = foo.x,
                 Y = foo.y
             };
-            //var vsp = camera.ViewCoordinate(WorldPosition);
+
 
             int index = _index;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
@@ -221,8 +176,13 @@ namespace Pulsar4X.SDL2UI
 
             for (int i = 1; i < _numberOfDrawSegments; i++)
             {
+                if (index < _numberOfArcSegments - 1)
 
-                if (IsClockwiseOrbit) 
+                    index++;
+                else
+                    index = 0;
+/*
+                if (IsRetrogradeOrbit) 
                 {
                     if (index < _numberOfArcSegments - 1)
 
@@ -236,7 +196,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 else
                     index = _numberOfArcSegments -1;
-
+*/
                 translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
                 //translate everything to viewscreen & camera positions

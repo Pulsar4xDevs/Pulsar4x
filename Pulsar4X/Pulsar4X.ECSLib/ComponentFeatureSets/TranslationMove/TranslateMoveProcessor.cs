@@ -176,9 +176,9 @@ namespace Pulsar4X.ECSLib
             }
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
             var orbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, atDateTime);
-            var insertionVector2d = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
+            
             Vector3 parentOrbitalVector = new Vector3(orbitalVector.X, orbitalVector.Y, 0);
-            Vector3 insertionVector = new Vector3(insertionVector2d.X, insertionVector2d.Y, 0);
+            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
             insertionVector += moveDB.ExpendDeltaV_AU; //TODO: only use it if we have it. 
             propulsionDB.RemainingDV_MS -= (float)Distance.AuToMt(moveDB.ExpendDeltaV_AU).Length();
             OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector, atDateTime);
