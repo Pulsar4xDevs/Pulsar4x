@@ -309,16 +309,16 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("y: " + pos.Y);
                                     ImGui.Text("z: " + pos.Z);
                                     ImGui.Text("Eccentricity: " + orbitDB.Eccentricity);
-                                    ImGui.Text("AoP:" + orbitDB.ArgumentOfPeriapsis);
+                                    ImGui.Text("AoP:" + orbitDB.ArgumentOfPeriapsis_Degrees);
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
-                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion + " in Deg/s");
+                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
                                     ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
                                     ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI(_state.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
-                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis);
-                                    ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis).ToString("g3") + " Km");
-                                    ImGui.Text("Appoapsis: " + Distance.AuToKm(orbitDB.Apoapsis).ToString("g3") + " Km");
+                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxisAU);
+                                    ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis_AU).ToString("g3") + " Km");
+                                    ImGui.Text("Appoapsis: " + Distance.AuToKm(orbitDB.Apoapsis_AU).ToString("g3") + " Km");
                                     if (orbitDB.Parent != null)
                                         ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
                                     if (orbitDB.Children.Count > 0)

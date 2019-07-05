@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
             var targetEntity = orbitDB.Parent;
             _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
 
-            OrbitEllipseSemiMaj = (float)orbitDB.SemiMajorAxis;
+            OrbitEllipseSemiMaj = (float)orbitDB.SemiMajorAxisAU;
             _eccentricity = orbitDB.Eccentricity;
             EllipseMath.SemiMinorAxis(OrbitEllipseSemiMaj, _eccentricity);
             _linearEccentricity = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);

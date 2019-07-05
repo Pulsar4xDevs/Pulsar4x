@@ -292,23 +292,23 @@ namespace Pulsar4X.Tests
             Vector3 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
 
             //check LoAN
-            var objLoAN = Angle.ToRadians(objOrbit.LongitudeOfAscendingNode);
+            var objLoAN = objOrbit.LongitudeOfAscendingNode;
             var keLoAN = ke.LoAN;
             var loANDifference = objLoAN - keLoAN;
             Assert.AreEqual(keLoAN, objLoAN, angleΔ);
 
             //check AoP
-            var objAoP = Angle.ToRadians(objOrbit.ArgumentOfPeriapsis);
+            var objAoP = objOrbit.ArgumentOfPeriapsis;
             var keAoP = ke.AoP;
             var difference = objAoP - keAoP;
             Assert.AreEqual(keAoP, objAoP, angleΔ);
 
 
             //check MeanAnomalyAtEpoch
-            var objM0 = Angle.ToRadians(objOrbit.MeanAnomalyAtEpoch);
+            var objM0 = objOrbit.MeanAnomalyAtEpoch;
             var keM0 = ke.MeanAnomalyAtEpoch;
             Assert.AreEqual(keM0, objM0, angleΔ);
-            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, objOrbit.MeanMotion, 0), "meanAnomalyError");
+            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, objOrbit.MeanMotion_DegreesSec, 0), "meanAnomalyError");
 
             //checkEpoch
             var objEpoch = objOrbit.Epoch;
@@ -318,7 +318,7 @@ namespace Pulsar4X.Tests
             
             
             //check EccentricAnomaly:
-            var objE = (OrbitProcessor.GetEccentricAnomaly(objOrbit, objOrbit.MeanAnomalyAtEpoch));
+            var objE = (OrbitProcessor.GetEccentricAnomaly(objOrbit, objOrbit.MeanAnomalyAtEpoch_Degrees));
             //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinierEccentricity, ke.AoP));
             /*
             if (objE != keE)
@@ -353,14 +353,14 @@ namespace Pulsar4X.Tests
                 "ke Angle: " + Angle.ToDegrees(ke.TrueAnomalyAtEpoch) + " obj Angle: " + Angle.ToDegrees(orbTrueAnom));
                 
             Assert.AreEqual(ke.Eccentricity, objOrbit.Eccentricity);
-            Assert.AreEqual(ke.SemiMajorAxis, objOrbit.SemiMajorAxis);
+            Assert.AreEqual(ke.SemiMajorAxis, objOrbit.SemiMajorAxisAU);
 
 
             var lenke1 = ke.SemiMajorAxis * 2;
             var lenke2 = ke.Apoapsis + ke.Periapsis;
             Assert.AreEqual(lenke1, lenke2, 1.0E-10);
-            var lendb1 = objOrbit.SemiMajorAxis * 2;
-            var lendb2 = objOrbit.Apoapsis + objOrbit.Periapsis;
+            var lendb1 = objOrbit.SemiMajorAxisAU * 2;
+            var lendb2 = objOrbit.Apoapsis_AU + objOrbit.Periapsis_AU;
             Assert.AreEqual(lendb1, lendb2, 1.0E-10 );
             Assert.AreEqual(lenke1, lendb1, 1.0E-10 );
             Assert.AreEqual(lenke2, lendb2, 1.0E-10 );
@@ -368,10 +368,10 @@ namespace Pulsar4X.Tests
 
 
             var ke_apkm = Distance.AuToKm(ke.Apoapsis);
-            var db_apkm = Distance.AuToKm(objOrbit.Apoapsis);
+            var db_apkm = Distance.AuToKm(objOrbit.Apoapsis_AU);
             var differnce = ke_apkm - db_apkm;
-            Assert.AreEqual(ke.Apoapsis, objOrbit.Apoapsis); 
-            Assert.AreEqual(ke.Periapsis, objOrbit.Periapsis);
+            Assert.AreEqual(ke.Apoapsis, objOrbit.Apoapsis_AU); 
+            Assert.AreEqual(ke.Periapsis, objOrbit.Periapsis_AU);
 
             Vector3 posKM = Distance.AuToKm(position);
             Vector3 resultKM = Distance.AuToKm(resultPos);
@@ -390,7 +390,7 @@ namespace Pulsar4X.Tests
             if (velocity.Z == 0)
             {
                 Assert.IsTrue(ke.Inclination == 0);
-                Assert.IsTrue(objOrbit.Inclination == 0);
+                Assert.IsTrue(objOrbit.Inclination_Degrees == 0);
             }
 
             //var speedVectorAU = OrbitProcessor.PreciseOrbitalVector(sgp, position, ke.SemiMajorAxis);

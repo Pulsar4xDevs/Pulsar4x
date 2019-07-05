@@ -171,8 +171,8 @@ namespace Pulsar4X.ECSLib
                 orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
             }
 
-            double m0 = Angle.ToRadians(orbit.MeanAnomalyAtEpoch);
-            double n = Angle.ToRadians(orbit.MeanMotion);
+            double m0 = orbit.MeanAnomalyAtEpoch;
+            double n = orbit.MeanMotion;
             double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, timeSinceEpoch.TotalSeconds);
 
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
@@ -198,19 +198,18 @@ namespace Pulsar4X.ECSLib
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+            double radius = orbit.SemiMajorAxisAU * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
 
-            double inclination = Angle.ToRadians(orbit.Inclination);
+            double incl = orbit.Inclination;
 
             //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
-            double lofAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
+            double lofAN = orbit.LongitudeOfAscendingNode;
             //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double tA = trueAnomaly + Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double incl = inclination;
+            double angleFromLoAN = trueAnomaly + orbit.ArgumentOfPeriapsis;
 
-            double x = Math.Cos(lofAN) * Math.Cos(tA) - Math.Sin(lofAN) * Math.Sin(tA) * Math.Cos(incl);
-            double y = Math.Sin(lofAN) * Math.Cos(tA) + Math.Cos(lofAN) * Math.Sin(tA) * Math.Cos(incl);
-            double z = Math.Sin(incl) * Math.Sin(tA);
+            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
 
             return new Vector3(x, y, z) * radius;
         }
@@ -318,18 +317,15 @@ namespace Pulsar4X.ECSLib
         public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
-            var sma = orbit.SemiMajorAxis;
-            if (orbit.GravitationalParameter == 0 || sma == 0)
+            var sma = orbit.SemiMajorAxisAU;
+            if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
                 return (0,0); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
             
             double e = orbit.Eccentricity;
-
             double trueAnomaly = GetTrueAnomaly(orbit, atDateTime);
-            double loAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
-            double aoP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+            double aoP = orbit.ArgumentOfPeriapsis;
             
-
             (double speed,double heading) polar = OrbitMath.ObjectLocalVelocityPolar(sgp, position, sma, e, trueAnomaly, aoP);
             
             return polar;
@@ -345,16 +341,16 @@ namespace Pulsar4X.ECSLib
         public static Vector3 InstantaneousOrbitalVelocityVector(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
-            var sma = orbit.SemiMajorAxis;
-            if (orbit.GravitationalParameter == 0 || sma == 0)
+            var sma = orbit.SemiMajorAxisAU;
+            if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
                 return new Vector3(); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
       
             double e = orbit.Eccentricity;
-            double trueAnomaly = OrbitProcessor.GetTrueAnomaly(orbit, atDateTime);
-            double aoP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double i = Angle.ToRadians(orbit.Inclination);
-            double loAN = Angle.ToRadians(orbit.LongitudeOfAscendingNode);
+            double trueAnomaly = GetTrueAnomaly(orbit, atDateTime);
+            double aoP = orbit.ArgumentOfPeriapsis;
+            double i = orbit.Inclination;
+            double loAN = orbit.LongitudeOfAscendingNode;
             return OrbitMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
         }
 
@@ -368,7 +364,7 @@ namespace Pulsar4X.ECSLib
             var orbitDB = entity.GetDataBlob<OrbitDB>();
             if (orbitDB.Parent != null) //if we're not the parent star
             {
-                var semiMajAxis = orbitDB.SemiMajorAxis;
+                var semiMajAxis = orbitDB.SemiMajorAxisAU;
 
                 var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
 

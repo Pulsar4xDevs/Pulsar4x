@@ -48,8 +48,8 @@ namespace Pulsar4X.SDL2UI
         {
             _points = new PointD[_numberOfArcSegments + 1];
 
-            var loAN = Angle.ToRadians(-_orbitDB.LongitudeOfAscendingNode);
-            var incl = Angle.ToRadians(_orbitDB.Inclination);
+            var loAN = -_orbitDB.LongitudeOfAscendingNode;
+            var incl = _orbitDB.Inclination;
             var mtxloan = Matrix3d.IDRotateZ(loAN);
             var mtxincl = Matrix3d.IDRotateX(incl); 
             var mtxaop = Matrix3d.IDRotateZ(_aop);

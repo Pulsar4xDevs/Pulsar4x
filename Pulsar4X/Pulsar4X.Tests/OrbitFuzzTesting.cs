@@ -95,22 +95,21 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
-        
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
+
             DateTime o_epoch = orbitDB.Epoch; 
             
             double periodInSeconds = orbitDB.OrbitalPeriod.TotalSeconds;
             double segmentTime = periodInSeconds / 16;
 
 
-            double sgpInk3S2 = orbitDB.GravitationalParameter;
+            double sgpInk3S2 = orbitDB.GravitationalParameter_Km3S2;
             
             //lets break the orbit up and check the paremeters at different points of the orbit:
             for (int i = 0; i < 16; i++)
@@ -164,14 +163,13 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
         
             DateTime o_epoch = orbitDB.Epoch; 
 
@@ -206,14 +204,13 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
         
             DateTime o_epoch = orbitDB.Epoch; 
 
@@ -262,14 +259,13 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
         
             DateTime o_epoch = orbitDB.Epoch; 
             
@@ -314,14 +310,13 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
         
             DateTime o_epoch = orbitDB.Epoch; 
 
@@ -354,14 +349,13 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
         
             DateTime o_epoch = orbitDB.Epoch; 
 
@@ -406,14 +400,13 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
         
             DateTime o_epoch = orbitDB.Epoch; 
 
@@ -471,14 +464,13 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis; 
+            double o_a = orbitDB.SemiMajorAxisAU; 
             double o_e = orbitDB.Eccentricity; 
-            double o_i = Angle.ToRadians(orbitDB.Inclination); 
-            double o_Ω = Angle.ToRadians(orbitDB.LongitudeOfAscendingNode); 
-            double o_M0 = Angle.ToRadians(orbitDB.MeanAnomalyAtEpoch); 
-            double o_n = Angle.ToRadians(orbitDB.MeanMotion); 
-            double o_ω = Angle.ToRadians(orbitDB.ArgumentOfPeriapsis); 
-            double o_lop = OrbitMath.LonditudeOfPeriapsis2d(o_Ω, o_ω, o_i);
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
         
             DateTime o_epoch = orbitDB.Epoch; 
 

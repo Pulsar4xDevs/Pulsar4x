@@ -151,8 +151,8 @@ namespace Pulsar4X.SDL2UI
 
             EntityGuid = entityState.Entity.Guid;
 
-            _loan = Angle.ToRadians( _orbitDB.LongitudeOfAscendingNode);
-            _aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
+            _loan =  _orbitDB.LongitudeOfAscendingNode;
+            _aop = _orbitDB.ArgumentOfPeriapsis;
             _loP = orbitIcon._loP_radians;
 
             var cP = new PointD() { X = orbitIcon.WorldPosition.X, Y = orbitIcon.WorldPosition.Y };
@@ -188,7 +188,7 @@ namespace Pulsar4X.SDL2UI
             _trueAnom_FromStateVec = OrbitMath.TrueAnomaly(_sgp, pos, (Vector3)vel);
             
             double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
-            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(Angle.ToRadians(_orbitDB.MeanAnomalyAtEpoch), Angle.ToRadians(_orbitDB.MeanMotion), secondsFromEpoch);
+            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_orbitDB.MeanAnomalyAtEpoch, _orbitDB.MeanMotion, secondsFromEpoch);
 
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
             _eccentricAnom_FromTrueAnom = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(_trueAnom, _orbitDB.Eccentricity);
@@ -199,9 +199,9 @@ namespace Pulsar4X.SDL2UI
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
             
             _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
-            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, Angle.ToRadians(_orbitDB.Inclination), _loan, _trueAnom);
+            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, _orbitDB.Inclination, _loan, _trueAnom);
             //_aopFromCalc3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, ecvec, pos, (Vector3)vel, _loan);
-            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(Angle.ToRadians(_orbitDB.Inclination), ecvec, nodeVector);
+            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
             
             _bodyPosPnt = new PointD()
             {
@@ -982,7 +982,7 @@ namespace Pulsar4X.SDL2UI
 
             var speed = OrbitMath.InstantaneousOrbitalSpeed(_orbitDB.GravitationalParameterAU, _bodyPosition.RelativePosition_AU.Length(), _semiMajAxis);
             speed = Distance.AuToKm(speed);
-            var heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis));
+            var heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, _orbitDB.ArgumentOfPeriapsis);
             heading += _loP;
             var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
             var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
@@ -1018,7 +1018,7 @@ namespace Pulsar4X.SDL2UI
             DateTime systemDateTime = _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime;
             double secondsFromEpoch = (systemDateTime - _orbitDB.Epoch).TotalSeconds;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_orbitDB, systemDateTime);
-            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(Angle.ToRadians(_orbitDB.MeanAnomalyAtEpoch), Angle.ToRadians( _orbitDB.MeanMotion), secondsFromEpoch);
+            _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_orbitDB.MeanAnomalyAtEpoch, _orbitDB.MeanMotion, secondsFromEpoch);
 
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
             
@@ -1108,7 +1108,7 @@ namespace Pulsar4X.SDL2UI
             _aopItem_FromCalc1.DataItem = Angle.ToDegrees(_aopFromCalc1);
             _aopItem_FromCalc1.DataString = Angle.ToDegrees(_aopFromCalc1).ToString() + "°";
             
-            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, Angle.ToRadians(_orbitDB.Inclination), _loan, _trueAnom);
+            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, _orbitDB.Inclination, _loan, _trueAnom);
             _aopItem_FromCalc2.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 93, -6, _loan, _aopFromCalc2, 128);
             _aopItem_FromCalc2.DataItem = Angle.ToDegrees(_aopFromCalc2);
             _aopItem_FromCalc2.DataString = Angle.ToDegrees(_aopFromCalc2).ToString() + "°";
@@ -1118,12 +1118,12 @@ namespace Pulsar4X.SDL2UI
             _aopItem_FromCalc3.DataItem = Angle.ToDegrees(_aopFromCalc3);
             _aopItem_FromCalc3.DataString = Angle.ToDegrees(_aopFromCalc3).ToString() + "°";
 */
-            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(Angle.ToRadians(_orbitDB.Inclination), ecvec, nodeVector);
+            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
             _aopItem_FromCalc4.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 99, -6, _loan, _aopFromCalc4, 128);
             _aopItem_FromCalc4.DataItem = Angle.ToDegrees(_aopFromCalc4);
             _aopItem_FromCalc4.DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°";
             
-            var heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis));
+            var heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, _orbitDB.ArgumentOfPeriapsis);
             heading += _loP;
             var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
             var vnorm = Vector3.Normalise(vector) * 64;

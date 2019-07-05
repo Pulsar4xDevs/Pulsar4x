@@ -143,7 +143,7 @@ namespace Pulsar4X.SDL2UI
             var sgpCur = _orderEntityOrbit.GravitationalParameterAU;
             var ralitiveVel1 = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orderEntityOrbit, _departureDateTime);
             var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
-            var smaCurrOrbtAU = _orderEntityOrbit.SemiMajorAxis;
+            var smaCurrOrbtAU = _orderEntityOrbit.SemiMajorAxisAU;
             //var ralitiveVel2 = OrbitMath.PreciseOrbitalVelocityVector(_stdGravParamCurrentBody, ralPosCBAU, smaCurrOrbtAU, _orderEntityOrbit.Eccentricity, _orderEntityOrbit.LongitudeOfAscendingNode + _orderEntityOrbit.ArgumentOfPeriapsis); 
         }
 
@@ -253,7 +253,7 @@ namespace Pulsar4X.SDL2UI
                         DepartureCalcs();
 
                         var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
-                        var smaCurrOrbtAU = _orderEntityOrbit.SemiMajorAxis;
+                        var smaCurrOrbtAU = _orderEntityOrbit.SemiMajorAxisAU;
 
                     }
 

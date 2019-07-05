@@ -70,16 +70,16 @@ namespace Pulsar4X.SDL2UI
                 _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position. 
             }
 
-            SemiMaj = (float)_orbitDB.SemiMajorAxis;
+            SemiMaj = (float)_orbitDB.SemiMajorAxisAU;
 
-            SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
+            SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxisAU, _orbitDB.Eccentricity);
 
 
 
-            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis); //linear ecentricity
+            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxisAU); //linear ecentricity
 
             
-            if (_orbitDB.Inclination > 90 && _orbitDB.Inclination < 270) //orbitDB is in degrees.
+            if (_orbitDB.Inclination_Degrees > 90 && _orbitDB.Inclination_Degrees < 270) //orbitDB is in degrees.
             {
                 IsRetrogradeOrbit = true;
                 //_loP_Degrees = (float)(_orbitDB.LongitudeOfAscendingNode - _orbitDB.ArgumentOfPeriapsis);
@@ -92,9 +92,9 @@ namespace Pulsar4X.SDL2UI
             }
             _loP_radians = (float)(Angle.ToRadians(_loP_Degrees));
             */
-            var i = Angle.ToRadians(_orbitDB.Inclination);
-            var _aoP = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
-            var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
+            var i = _orbitDB.Inclination;
+            var _aoP = _orbitDB.ArgumentOfPeriapsis;
+            var loan = _orbitDB.LongitudeOfAscendingNode;
             var lop = OrbitMath.GetLongditudeOfPeriapsis(i, _aoP, loan);
             _loP_radians = (float)lop;
             _loP_Degrees = (float)Angle.ToDegrees(lop);

@@ -535,6 +535,16 @@ namespace Pulsar4X.ECSLib
             return mass * GameConstants.Science.GravitationalConstant;
         }
 
+        public static double GravitationalParameter_Km3s2(double mass)
+        {
+            return GameConstants.Science.GravitationalConstant * mass / 1000000000; // (1000^3)
+        }
+
+        public static double GrabitiationalParameter_Au3s2(double mass)
+        {
+            return GameConstants.Science.GravitationalConstant * mass / 3.347928976e33; // (149597870700^3)
+        }
+
         /// <summary>
         /// calculates a vector from two positions and a magnatude
         /// </summary>
@@ -837,7 +847,7 @@ namespace Pulsar4X.ECSLib
                 T = targetOrbit.OrbitalPeriod.TotalSeconds,
             };
 
-            double a = targetOrbit.SemiMajorAxis * 2;
+            double a = targetOrbit.SemiMajorAxisAU * 2;
 
 
 

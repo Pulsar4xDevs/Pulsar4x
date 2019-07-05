@@ -603,13 +603,13 @@ namespace Pulsar4X.ECSLib
                 _parentStarGuid = orbitDB.Parent.GetDataBlob<OrbitDB>().Parent.Guid;
             }
 
-            SemiMajorAxis = orbitDB.SemiMajorAxis;
-            Apoapsis = orbitDB.Apoapsis;
-            Periapsis = orbitDB.Periapsis;
-            ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis;
-            LongitudeOfAscendingNode = orbitDB.LongitudeOfAscendingNode;
+            SemiMajorAxis = orbitDB.SemiMajorAxisAU;
+            Apoapsis = orbitDB.Apoapsis_AU;
+            Periapsis = orbitDB.Periapsis_AU;
+            ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis_Degrees;
+            LongitudeOfAscendingNode = orbitDB.LongitudeOfAscendingNode_Degrees;
             Eccentricity = orbitDB.Eccentricity;
-            Inclination = orbitDB.Inclination;
+            Inclination = orbitDB.Inclination_Degrees;
             OrbitalPeriod = orbitDB.OrbitalPeriod;
         }
 

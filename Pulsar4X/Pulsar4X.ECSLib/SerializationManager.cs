@@ -601,15 +601,15 @@ namespace Pulsar4X.ECSLib
 
             // add orbit details:
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SemiMajorAxis", "NS");
-            varNode.InnerText = orbit.SemiMajorAxis.ToString("N3");
+            varNode.InnerText = orbit.SemiMajorAxisAU.ToString("N3");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Apoapsis", "NS");
-            varNode.InnerText = orbit.Apoapsis.ToString("N3");
+            varNode.InnerText = orbit.Apoapsis_AU.ToString("N3");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Periapsis", "NS");
-            varNode.InnerText = orbit.Periapsis.ToString("N3");
+            varNode.InnerText = orbit.Periapsis_AU.ToString("N3");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Year", "NS");
@@ -621,7 +621,7 @@ namespace Pulsar4X.ECSLib
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Inclination", "NS");
-            varNode.InnerText = orbit.Inclination.ToString("N2");
+            varNode.InnerText = orbit.Inclination_Degrees.ToString("N2");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Children", "NS");

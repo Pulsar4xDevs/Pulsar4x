@@ -21,9 +21,9 @@ namespace Pulsar4X.SDL2UI
             if (entity.HasDataBlob<OrbitDB>())
             {
                 _orbitDB = entity.GetDataBlob<OrbitDB>();
-                var i = Angle.ToRadians(_orbitDB.Inclination);
-                var aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
-                var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
+                var i = _orbitDB.Inclination;
+                var aop = _orbitDB.ArgumentOfPeriapsis;
+                var loan = _orbitDB.LongitudeOfAscendingNode;
                 _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
             }
             else if(entity.HasDataBlob<NewtonMoveDB>())
@@ -57,9 +57,9 @@ namespace Pulsar4X.SDL2UI
                 if (db is OrbitDB)
                 {
                     _orbitDB = (OrbitDB)db;
-                    var i = Angle.ToRadians(_orbitDB.Inclination);
-                    var aop = Angle.ToRadians(_orbitDB.ArgumentOfPeriapsis);
-                    var loan = Angle.ToRadians(_orbitDB.LongitudeOfAscendingNode);
+                    var i = _orbitDB.Inclination;
+                    var aop = _orbitDB.ArgumentOfPeriapsis;
+                    var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
                 else if (db is TranslateMoveDB)

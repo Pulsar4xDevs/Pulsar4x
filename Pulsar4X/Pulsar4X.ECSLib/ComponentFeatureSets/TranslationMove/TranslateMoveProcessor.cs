@@ -182,11 +182,11 @@ namespace Pulsar4X.ECSLib
             insertionVector += moveDB.ExpendDeltaV_AU; //TODO: only use it if we have it. 
             propulsionDB.RemainingDV_MS -= (float)Distance.AuToMt(moveDB.ExpendDeltaV_AU).Length();
             OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector, atDateTime);
-            if (newOrbit.Periapsis > targetSOI)
+            if (newOrbit.Periapsis_AU > targetSOI)
             {
                 //TODO: find who's SOI we're currently in and create an orbit for that;
             }
-            if (newOrbit.Apoapsis > targetSOI)
+            if (newOrbit.Apoapsis_AU > targetSOI)
             {
                 //TODO: change orbit to new parent at SOI change
             }
