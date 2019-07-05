@@ -260,7 +260,7 @@ namespace Pulsar4X.Tests
             velocity = new Vector3() { X = Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            velocity = new Vector3() { X = -Distance.KmToAU(1), Y = Distance.KmToAU(0) }; //fails
+            velocity = new Vector3() { X = Distance.KmToAU(-1), Y = Distance.KmToAU(0) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
         }
@@ -315,15 +315,18 @@ namespace Pulsar4X.Tests
             var keEpoch = ke.Epoch;
             Assert.AreEqual(keEpoch, objEpoch);
 
+            
+            
             //check EccentricAnomaly:
             var objE = (OrbitProcessor.GetEccentricAnomaly(objOrbit, objOrbit.MeanAnomalyAtEpoch));
-            var keE =   (OrbitMath.GetEccentricAnomalyFromStateVectors(position, ke.SemiMajorAxis, ke.LinierEccentricity, ke.AoP));
+            //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinierEccentricity, ke.AoP));
+            /*
             if (objE != keE)
             {
                 var dif = objE - keE;
-                //Assert.AreEqual(keE, objE, angleΔ);
+                Assert.AreEqual(keE, objE, angleΔ);
             }
-
+*/
             //check trueAnomaly 
             var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
             var orbtaDeg = Angle.ToDegrees(orbTrueAnom);
@@ -355,12 +358,12 @@ namespace Pulsar4X.Tests
 
             var lenke1 = ke.SemiMajorAxis * 2;
             var lenke2 = ke.Apoapsis + ke.Periapsis;
-            Assert.AreEqual(lenke1, lenke2);
+            Assert.AreEqual(lenke1, lenke2, 1.0E-10);
             var lendb1 = objOrbit.SemiMajorAxis * 2;
             var lendb2 = objOrbit.Apoapsis + objOrbit.Periapsis;
-            Assert.AreEqual(lendb1, lendb2 );
-            Assert.AreEqual(lenke1, lendb1);
-            Assert.AreEqual(lenke2, lendb2);
+            Assert.AreEqual(lendb1, lendb2, 1.0E-10 );
+            Assert.AreEqual(lenke1, lendb1, 1.0E-10 );
+            Assert.AreEqual(lenke2, lendb2, 1.0E-10 );
 
 
 

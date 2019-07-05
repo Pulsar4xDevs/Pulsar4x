@@ -610,7 +610,7 @@ namespace Pulsar4X.ECSLib
             return E;
         }
         
-
+/*
         public static double GetEccentricAnomalyFromStateVectors(Vector3 position, double semiMajAxis, double linierEccentricity, double aop)
         {
             var x = (position.X * Math.Cos(aop)) + (position.Y * Math.Sin(aop));
@@ -636,7 +636,7 @@ namespace Pulsar4X.ECSLib
             var E = Math.Atan2(Ey, Ex); // eccentric anomoly 
             return E;
         }
-
+*/
         #endregion
 
         #region MeanAnomaly

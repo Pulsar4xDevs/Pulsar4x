@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
@@ -122,8 +124,8 @@ namespace Pulsar4X.SDL2UI
         ElementItem _meanAnomalyItem;
         ElementItem _eccentricAnomalyItem;
         ElementItem _eccentricAnomItem_FromTrueAnom;
-        ElementItem _eccentricAnomItem_FromStateVec;
-        ElementItem _eccentricAnomItem_FromStateVec2;
+        //ElementItem _eccentricAnomItem_FromStateVec;
+        //ElementItem _eccentricAnomItem_FromStateVec2;
         ElementItem _eccentricityVectorItem;
         ElementItem _bodyPosItem;
         ElementItem _headingItem;
@@ -190,8 +192,8 @@ namespace Pulsar4X.SDL2UI
 
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_orbitDB, _meanAnom);
             _eccentricAnom_FromTrueAnom = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(_trueAnom, _orbitDB.Eccentricity);
-            _ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
-            _ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
+            //_ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
+            //_ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
             
             Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)vel);
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
@@ -679,7 +681,7 @@ namespace Pulsar4X.SDL2UI
             */
             _aopItem_FromCalc4 = new ElementItem()
             {
-                NameString = "Argument Of Periapsis (ω) - using vector calc4",
+                NameString = "Argument Of Periapsis (\uCF89) - using vector calc4",
                 Colour = aopColour,
                 HighlightColour = aopHColour,
                 DataItem = Angle.ToDegrees(_aopFromCalc4),
@@ -883,7 +885,7 @@ namespace Pulsar4X.SDL2UI
                 }
             };
             ElementItems.Add(_eccentricAnomItem_FromTrueAnom);
-            
+            /*
             _eccentricAnomItem_FromStateVec = new ElementItem()
             {
                 NameString = "Eccentric Anomoly (E) - From State Vec Calc",
@@ -926,7 +928,7 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(_eccentricAnomItem_FromStateVec2);
 
-            
+            */
             var pos = _bodyPosition.RelativePosition_AU;
             var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
@@ -1055,8 +1057,8 @@ namespace Pulsar4X.SDL2UI
             _meanAnomalyItem.DataString = Angle.ToDegrees(_meanAnom).ToString() + "°";
 
             _eccentricAnom_FromTrueAnom = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(_trueAnom, _orbitDB.Eccentricity);
-            _ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
-            _ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
+            //_ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
+            //_ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
             
             _eccentricAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 69, 6, _loP, _eccentricAnom, 128);
             _eccentricAnomalyItem.DataItem = Angle.ToDegrees(_eccentricAnom);
@@ -1067,13 +1069,13 @@ namespace Pulsar4X.SDL2UI
             _eccentricAnomItem_FromTrueAnom.DataString = Angle.ToDegrees(_eccentricAnom_FromTrueAnom).ToString() + "°";
             
             
-            _eccentricAnomItem_FromStateVec.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 75, 6, _loP, _ecctricAnom_FromStateVectors, 128);
-            _eccentricAnomItem_FromStateVec.DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors);
-            _eccentricAnomItem_FromStateVec.DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors).ToString() + "°";
+            //_eccentricAnomItem_FromStateVec.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 75, 6, _loP, _ecctricAnom_FromStateVectors, 128);
+            //_eccentricAnomItem_FromStateVec.DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors);
+            //_eccentricAnomItem_FromStateVec.DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors).ToString() + "°";
             
-            _eccentricAnomItem_FromStateVec2.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 77, 6, _loP, _ecctricAnom_FromStateVectors2, 128);
-            _eccentricAnomItem_FromStateVec2.DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors2);
-            _eccentricAnomItem_FromStateVec2.DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors2).ToString() + "°";
+            //_eccentricAnomItem_FromStateVec2.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 77, 6, _loP, _ecctricAnom_FromStateVectors2, 128);
+            //_eccentricAnomItem_FromStateVec2.DataItem = Angle.ToDegrees(_ecctricAnom_FromStateVectors2);
+            //_eccentricAnomItem_FromStateVec2.DataString = Angle.ToDegrees(_ecctricAnom_FromStateVectors2).ToString() + "°";
 
 
             var evenorm = Vector3.Normalise(ecvec) * 84;
