@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                if (Parent == null)
+                if ( Parent == null || !Parent.IsValid ) //migth be better than crashing if parent is suddenly not valid. should be handled before this though. 
                     return _position;
                 else if (Parent == OwningEntity)
                     throw new Exception("Infinite loop triggered");
