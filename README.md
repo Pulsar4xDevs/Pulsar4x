@@ -32,7 +32,8 @@ Installing via this script: https://github.com/cra0zy/monodevelop-run-installer
 is an option, and will run/debug, however version control is currently disabled due to a missing dependency. 
 Also note that eto.forms plugin for MD is currently not as feature complete as it is for VS. 
 
-For the current UI to work, you'll need SDL version 2.0.5 or higher, if you're running Ubuntu < than 18, you'll likely need to compile and install SDL from source, if your update repositories are high enough you should be fine. This shouldnt be a problem in Windows since the dll is included for the Windows build. 
+For the current UI to work, you'll need SDL version 2.0.5 or higher, if you're running Ubuntu < than 18, you'll likely need to compile and install SDL from source, if your update repositories are high enough you should be fine. 
+This shouldnt be a problem on Windows since the dll is included for the Windows build. 
 
 ### Mac
 mono + GTK + Xamarin Studio
@@ -43,12 +44,12 @@ http://www.monodevelop.com/download/
 Another IDE option is the cross platform [Rider](https://www.jetbrains.com/rider/) from JetBrains.
 I'm currently using this under Linux and it's a good option. A bit heavier than MonoDevelop but it's lighter and more responsive than Visual Studio. 
 Even though it is in beta, it appears to have all the bells and whistles. Easier to setup than MD and faster to install than VS.
-Currently only tested in Linux (and Mac?)
+Currently only tested on Linux (and Mac?)
 There is currently no Eto.forms plugin for Rider. 
 
 ## Instructions:
 
-NOTE: you'll need a 64-bit PC. possibly 32-bit Windows could work but some libraries are not availible in 32-bit Linux. 
+NOTE: you'll need a 64-bit PC. possibly 32-bit Windows could work but some libraries are not available on 32-bit Linux. 
 You'll need SDL2 installed. 
 
 1. Clone the Git Repo.
@@ -63,7 +64,7 @@ You'll need SDL2 installed.
 
 4. Set the imguinetUI project as the startup project. and run/debug to compile.  
 
-**Important: there are a number of nuget packages that VS/Monodevelop should automaticaly get the first time you attempt to build. 
+**Important: there are a number of NuGet packages that VS/Monodevelop should automaticaly get the first time you attempt to build. 
 The IDE will have a number of errors but build the solution anyway, VS will get the packages for you.**
 
 ## Working with the code:
