@@ -10,7 +10,7 @@ However, due to Steve Walmsley picking up development on his own C# version of A
 Main forum at: http://aurora2.pentarch.org/index.php/board,169.0.html
 
 IRC channel #Pulsar4x on [Freenode](https://webchat.freenode.net/).  
-Pulsar4x on [Gitter](https://gitter.im/Pulsar4x/Lobby#)<br />
+Pulsar4x on [Gitter](https://gitter.im/Pulsar4x/Lobby#).<br />
 Gitter is a chat system that uses your git account. Messages are persistent and you can paste/drag and drop screenshots directly to the chat.
 
 Bugs can be reported on the [issue tracker](https://github.com/Pulsar4xDevs/Pulsar4x/issues).
