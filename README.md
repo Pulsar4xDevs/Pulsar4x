@@ -1,6 +1,5 @@
-Status: [![Build status](https://ci.appveyor.com/api/projects/status/owpp4y7ruyn0skm1/branch/Master?svg=true)](https://ci.appveyor.com/project/intercross21/pulsar4x/branch/Master)
 # Pulsar4x
-
+[![Build status](https://ci.appveyor.com/api/projects/status/owpp4y7ruyn0skm1/branch/Master?svg=true)](https://ci.appveyor.com/project/intercross21/pulsar4x/branch/Master)
 [![Join the chat at https://gitter.im/Pulsar4x/Lobby](https://badges.gitter.im/Pulsar4x/Lobby.svg)](https://gitter.im/Pulsar4x/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A fan work recreation of Aurora, a 4x space sim created by Steve Walmsley. Pulsar4x is developed in C#. The long term goal of the project was originally to reproduce a feature-complete clone of [Aurora](http://aurora2.pentarch.org/index.php).
@@ -66,5 +65,5 @@ You'll need SDL2 installed.
 **Important: there are a number of nuget packages that VS/Monodevelop should automaticaly get the first time you attempt to build. 
 The IDE will have a number of errors but build the solution anyway, VS will get the packages for you.**
 
-##Working with the code:
-I need to flesh this section out a bit more, but for now, read the pages in the wiki, or ask me on IRC.
+## Working with the code:
+This section is a work in progress. Read the pages on the wiki, or ask me questions on IRC. 
