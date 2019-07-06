@@ -9,13 +9,13 @@ However, due to Steve Walmsley picking up development on his own C# version of A
 
 Main forum at: http://aurora2.pentarch.org/index.php/board,169.0.html
 
-IRC channel #Pulsar4x on [Freenode](https://webchat.freenode.net/).  
 Pulsar4x on [Gitter](https://gitter.im/Pulsar4x/Lobby#).<br />
 Gitter is a chat system that uses your git account. Messages are persistent and you can paste/drag and drop screenshots directly to the chat.
 
-Bugs can be reported on the [issue tracker](https://github.com/Pulsar4xDevs/Pulsar4x/issues).
+Bugs can be reported on the [issue tracker](https://github.com/Pulsar4xDevs/Pulsar4x/issues).  
+The [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki) has a good amount of information, though is not always up to date.
 
-## Compiling Pulsar4x ECS-CrossPlatform branch:
+## Compiling Pulsar4x Master branch:
 
 To compile Pulsar4x we recommend [VisualStudio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). We're starting to use a bit of C#6, so 2013 is not recommended unless you know what you're doing.  
 Xamarin Studio does work under Windows, and the process is the same as for VS2015.
@@ -25,12 +25,6 @@ MonoDevelop
 Mono-Complete
 and we recomended that you also install:
 Monodevelop-nunit (to run the unit tests)
-In monodevelop Tools -> Addin Manager -> Gallery 
-install Eto.Forms Support Addin (this adds some autocomplete to the eto.forms xaml, and shows a live preview of forms as you code them, and adds some Templates for the eto.forms stuff. 
-Note that the latest flatpack versions of MonoDevelop has issues due to running in a sandbox: currently, I am unable to get the game to run/debug under the latest flatpack version of MD.
-Installing via this script: https://github.com/cra0zy/monodevelop-run-installer
-is an option, and will run/debug, however version control is currently disabled due to a missing dependency. 
-Also note that eto.forms plugin for MD is currently not as feature complete as it is for VS. 
 
 For the current UI to work, you'll need SDL version 2.0.5 or higher, if you're running Ubuntu < than 18, you'll likely need to compile and install SDL from source, if your update repositories are high enough you should be fine. 
 This shouldnt be a problem on Windows since the dll is included for the Windows build. 
@@ -68,4 +62,4 @@ You'll need SDL2 installed.
 The IDE will have a number of errors but build the solution anyway, VS will get the packages for you.**
 
 ## Working with the code:
-This section is a work in progress. Read the pages on the wiki, or ask me questions on IRC. 
+This section is a work in progress. Read the pages on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki), or ask me questions on [Gitter](https://gitter.im/Pulsar4x/Lobby#), Discord, or create an [issue](https://github.com/Pulsar4xDevs/Pulsar4x/issues). 
