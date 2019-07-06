@@ -114,6 +114,7 @@ namespace Pulsar4X.Tests
 
             ComponentDesign cargoDesign = GenericComponentFactory.StaticToDesign(cargo, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
             cargoDesign.ComponentDesignAttributes[0].SetValue();
+ 
             Entity cargoEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, cargoDesign);
 
             CargoStorageAtbDB attributeDB = cargoEntity.GetDataBlob<CargoStorageAtbDB>();
@@ -546,16 +547,30 @@ namespace Pulsar4X.Tests
             ComponentTemplateAbilitySD genralCargoAbility = new ComponentTemplateAbilitySD();
             genralCargoAbility.Name = "Storage Capacity";
             genralCargoAbility.Description = "";
-            genralCargoAbility.GuiHint = GuiHint.None;
+            genralCargoAbility.GuiHint = GuiHint.GuiTextDisplay;
             genralCargoAbility.AbilityFormula = "100";
             component.ComponentAbilitySDs.Add(genralCargoAbility);
 
+            ComponentTemplateAbilitySD rate = new ComponentTemplateAbilitySD();
+            rate.Name = "Transfer Rate";
+            rate.Description = "";
+            rate.GuiHint = GuiHint.GuiTextDisplay;
+            rate.AbilityFormula = "50000";
+            component.ComponentAbilitySDs.Add(rate);
+            
+            ComponentTemplateAbilitySD range = new ComponentTemplateAbilitySD();
+            range.Name = "Transfer Dv Range";
+            range.Description = "";
+            range.GuiHint = GuiHint.GuiTextDisplay;
+            range.AbilityFormula = "50000";
+            component.ComponentAbilitySDs.Add(range);
+            
             ComponentTemplateAbilitySD generalCargoCapacityAbility = new ComponentTemplateAbilitySD();
             generalCargoCapacityAbility.Name = "Construction Points";
             generalCargoCapacityAbility.Description = "";
             generalCargoCapacityAbility.GuiHint = GuiHint.None;
             generalCargoCapacityAbility.AbilityDataBlobType = typeof(CargoStorageAtbDB).ToString();
-            generalCargoCapacityAbility.AbilityFormula = "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'))";
+            generalCargoCapacityAbility.AbilityFormula = "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(1), Ability(2))";
             component.ComponentAbilitySDs.Add(generalCargoCapacityAbility);
 
             return component;
