@@ -6,8 +6,9 @@ namespace Pulsar4X.ECSLib
     public interface IPosition
     {
         Vector3 AbsolutePosition_AU { get; }
+        Vector3 AbsolutePosition_m { get; }
         Vector3 RelativePosition_AU { get; }
-
+        Vector3 RelativePosition_m { get; }
     }
     //TODO: get rid of AU, why are we using AU.
     public class PositionDB : TreeHierarchyDB, IGetValuesHash, IPosition
@@ -21,10 +22,16 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public Vector3 AbsolutePosition_AU
         {
+            get { return Distance.MToAU(AbsolutePosition_m); }
+            internal set { AbsolutePosition_m = Distance.AuToMt(value); }
+        }
+
+        public Vector3 AbsolutePosition_m 
+        {             
             get
             {
                 if ( Parent == null || !Parent.IsValid ) //migth be better than crashing if parent is suddenly not valid. should be handled before this though. 
-                    return _position;
+                    return _positionInMeters;
                 else if (Parent == OwningEntity)
                     throw new Exception("Infinite loop triggered");
                 else
@@ -32,30 +39,36 @@ namespace Pulsar4X.ECSLib
                     PositionDB parentpos = (PositionDB)ParentDB;
                     if(parentpos == this)
                         throw new Exception("Infinite loop triggered");
-                    return parentpos.AbsolutePosition_AU + _position;
+                    return parentpos.AbsolutePosition_m + _positionInMeters;
                 }
             }
             internal set
             {
                 if (Parent == null)
-                    _position = value;
+                    _positionInMeters = value;
                 else
                 {
                     PositionDB parentpos = (PositionDB)ParentDB;
-                    _position = value - parentpos.AbsolutePosition_AU;
+                    _positionInMeters = value - parentpos.AbsolutePosition_m;
                 }
-            }
-        }
+            } }
+
         [JsonProperty]
-        private Vector3 _position;
+        private Vector3 _positionInMeters;
 
         /// <summary>
         /// Get or Set the position relative to the parent Entity's abolutePositon
         /// </summary>
         public Vector3 RelativePosition_AU
         {
-            get { return _position; }
-            internal set { _position = value; }
+            get { return Distance.MToAU(_positionInMeters); }
+            internal set { _positionInMeters = Distance.AuToMt(value); }
+        }
+
+        public Vector3 RelativePosition_m         
+        {
+            get { return _positionInMeters; }
+            internal set { _positionInMeters = value; }
         }
 
 
@@ -65,7 +78,7 @@ namespace Pulsar4X.ECSLib
         public double X
         {
             get { return AbsolutePosition_AU.X; }
-            internal set { _position.X = value; }
+            internal set { _positionInMeters.X = value; }
         }
 
         /// <summary>
@@ -74,7 +87,7 @@ namespace Pulsar4X.ECSLib
         public double Y
         {
             get { return AbsolutePosition_AU.Y; }
-            internal set { _position.Y = value; }
+            internal set { _positionInMeters.Y = value; }
         }
 
         /// <summary>
@@ -83,7 +96,7 @@ namespace Pulsar4X.ECSLib
         public double Z
         {
             get { return AbsolutePosition_AU.Z; }
-            internal set { _position.Z = value; }
+            internal set { _positionInMeters.Z = value; }
         }
 
         #region Unit Conversion Properties
@@ -103,7 +116,7 @@ namespace Pulsar4X.ECSLib
         public double XInKm
         {
             get { return Distance.AuToKm(AbsolutePosition_AU.X); }
-            set { _position.X = Distance.KmToAU(value); }
+            set { _positionInMeters.X = Distance.KmToAU(value); }
         }
 
         /// <summary>
@@ -112,7 +125,7 @@ namespace Pulsar4X.ECSLib
         public double YInKm
         {
             get { return Distance.AuToKm(AbsolutePosition_AU.Y); }
-            set { _position.Y = Distance.KmToAU(value); }
+            set { _positionInMeters.Y = Distance.KmToAU(value); }
         }
 
         /// <summary>
@@ -121,12 +134,12 @@ namespace Pulsar4X.ECSLib
         public double ZInKm
         {
             get { return Distance.AuToKm(AbsolutePosition_AU.Z); }
-            set { _position.Z = Distance.KmToAU(value); }
+            set { _positionInMeters.Z = Distance.KmToAU(value); }
         }
 
         public void AddMeters(Vector3 addVector)
         {
-            _position += Distance.MToAU(addVector);
+            _positionInMeters += Distance.MToAU(addVector);
         }
 
         #endregion
@@ -189,7 +202,7 @@ namespace Pulsar4X.ECSLib
                 newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
             }
             base.SetParent(newParent);
-            _position = newRelative;
+            _positionInMeters = newRelative;
         }
 
         /// <summary>
