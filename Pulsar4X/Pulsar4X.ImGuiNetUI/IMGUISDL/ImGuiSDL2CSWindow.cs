@@ -19,24 +19,30 @@ namespace ImGuiSDL2CS {
         protected float g_MouseWheel = 0.0f;
         protected IntPtr g_FontTexture = IntPtr.Zero;
 
-        public Vector2 Position {
-            get {
+        public Vector2 Position
+        {
+            get 
+            {
                 int x, y;
                 SDL.SDL_GetWindowPosition(Handle, out x, out y);
                 return new Vector2(x, y);
             }
-            set {
+            set 
+            {
                 SDL.SDL_SetWindowPosition(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
             }
         }
 
-        public System.Numerics.Vector2 Size {
-            get {
+        public System.Numerics.Vector2 Size
+        {
+            get
+            {
                 int x, y;
                 SDL.SDL_GetWindowSize(Handle, out x, out y);
                 return new System.Numerics.Vector2(x, y);
             }
-            set {
+            set
+            {
                 SDL.SDL_SetWindowSize(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
             }
         }
@@ -52,13 +58,14 @@ namespace ImGuiSDL2CS {
             ImGuiSDL2CSHelper.Init();
             OnEvent = ImGuiOnEvent;
             OnLoop = ImGuiOnLoop;
-
         }
 
-        public override void Run() {
+        public override void Run() 
+        {
             if (!File.Exists("imgui.ini"))
+            {
                 File.WriteAllText("imgui.ini", "");
-
+            }
             Create();
 
             base.Run();
@@ -80,7 +87,9 @@ namespace ImGuiSDL2CS {
             int mouseX, mouseY;
             uint mouseMask = SDL.SDL_GetMouseState(out mouseX, out mouseY);
             if ((SDL.SDL_GetWindowFlags(Handle) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MOUSE_FOCUS) == 0)
+            {
                 mouseX = mouseY = -1;
+            }
             ImGuiSDL2CSHelper.NewFrame(Size, System.Numerics.Vector2.One, new System.Numerics.Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
 
             ImGuiLayout();
@@ -90,9 +99,13 @@ namespace ImGuiSDL2CS {
 
         public virtual void ImGuiLayout() {
             if (_IsSuperClass)
+            {
                 ImGui.Text($"Create a new class inheriting {GetType().FullName}, overriding {nameof(ImGuiLayout)}!");
+            }
             else
+            {
                 ImGui.Text($"Override {nameof(ImGuiLayout)} in {GetType().FullName}!");
+            }
         }
 
         protected unsafe virtual void Create() {
@@ -100,7 +113,7 @@ namespace ImGuiSDL2CS {
 
             // Build texture atlas
             byte* pixels;
-            int width, height, bytesPerPixel;
+            int width, height;
 
             io.Fonts.GetTexDataAsAlpha8(out pixels, out width, out height);
             
@@ -138,13 +151,15 @@ namespace ImGuiSDL2CS {
         protected override void Dispose(bool disposing) {
             ImGuiIOPtr io = ImGui.GetIO();
 
-            if (disposing) {
+            if (disposing) 
+            {
                 // Dispose managed state (managed objects).
             }
 
             // Free unmanaged resources (unmanaged objects) and override a finalizer below.
             // Set large fields to null.
-            if (g_FontTexture != IntPtr.Zero) {
+            if (g_FontTexture != IntPtr.Zero) 
+            {
                 // Texture gets deleted with the context.
                 // GL.DeleteTexture(g_FontTexture);
                 if ( io.Fonts.TexID == g_FontTexture)
@@ -155,7 +170,8 @@ namespace ImGuiSDL2CS {
             base.Dispose(disposing);
         }
 
-        ~ImGuiSDL2CSWindow() {
+        ~ImGuiSDL2CSWindow() 
+        {
             Dispose(false);
         }
 

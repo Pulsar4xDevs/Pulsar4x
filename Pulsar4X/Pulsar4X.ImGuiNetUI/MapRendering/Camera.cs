@@ -26,20 +26,18 @@ namespace Pulsar4X.SDL2UI
             get
             {
                 if (IsPinnedToEntity && _entityPosDB != null)
+                {
                     return new ECSLib.Vector3
                     {
                         X = _camWorldPos.X + _entityPosDB.AbsolutePosition_AU.X,
                         Y = _camWorldPos.Y + _entityPosDB.AbsolutePosition_AU.Y
                     };
-                else
-                    return _camWorldPos;
+                }
+                return _camWorldPos;
             }
             set
             {
-                if (IsPinnedToEntity)
-                {
-                    IsPinnedToEntity = false;
-                }
+                IsPinnedToEntity = false;
                 _camWorldPos = value;
             }
         }
@@ -62,8 +60,6 @@ namespace Pulsar4X.SDL2UI
         public Camera(ImGuiSDL2CSWindow viewPort)
         {
             _viewPort = viewPort;
-            //_viewPort.SizeChanged += _viewPort_SizeChanged;
-
         }
 
         public void PinToEntity(Entity entity)
@@ -89,9 +85,7 @@ namespace Pulsar4X.SDL2UI
         {
             int x = (int)((worldCoord.X - CameraWorldPosition.X) * ZoomLevel + ViewPortCenter.X);
             int y = -(int)((worldCoord.Y - CameraWorldPosition.Y) * ZoomLevel - ViewPortCenter.Y);
-            Point viewCoord = new Point() { x = x, y = y };
-
-            return viewCoord;
+            return new Point() { x = x, y = y };
         }
 
         public ECSLib.Vector3 MouseWorldCoordinate()
@@ -123,8 +117,7 @@ namespace Pulsar4X.SDL2UI
         /// <returns></returns>
         public Vector2 ViewSize(Vector2 worldSize)
         {
-            Vector2 viewSize = new Vector2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
-            return viewSize;
+            return new Vector2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
         }
 
         /// <summary>
@@ -165,16 +158,8 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void WorldOffset(double xOffset, double yOffset)
         {
-            if (IsPinnedToEntity)
-            {
-                _camWorldPos.X += (float)(xOffset * 1.0f / ZoomLevel);
-                _camWorldPos.Y += (float)(-yOffset * 1.0f / ZoomLevel);
-            }
-            else
-            {
-                _camWorldPos.X += (float)(xOffset * 1.0f / ZoomLevel);
-                _camWorldPos.Y += (float)(-yOffset * 1.0f / ZoomLevel);
-            }
+            _camWorldPos.X += (float)(xOffset * 1.0f / ZoomLevel);
+            _camWorldPos.Y += (float)(-yOffset * 1.0f / ZoomLevel);
         }
 
 
@@ -184,7 +169,6 @@ namespace Pulsar4X.SDL2UI
         /// <param name="zoomCoords">The coordinates of the panel to zoom in</param>
         public void ZoomIn(int mouseX, int mouseY)
         {
-            var worldCoord = WorldCoordinate(mouseX, mouseY);
             if (ZoomLevel < MAX_ZOOMLEVEL)
             {
                 ZoomLevel *= zoomSpeed;
@@ -201,8 +185,6 @@ namespace Pulsar4X.SDL2UI
         /// <param name="zoomCoords">The coordinates of the panel to soom out from</param>
         public void ZoomOut(int mouseX, int mouseY)
         {
-            var worldCoord = WorldCoordinate(mouseX, mouseY);
-
             if (ZoomLevel > 0)
             {
                 ZoomLevel /= zoomSpeed;

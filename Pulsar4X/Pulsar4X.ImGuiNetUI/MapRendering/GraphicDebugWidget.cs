@@ -30,25 +30,27 @@ namespace Pulsar4X.SDL2UI
 
         public void Enable(bool enable, GlobalUIState state)
         {
-
-            if (enable && !_isEnabled)
+            var extras = state.SelectedSysMapRender.SelectedEntityExtras;
+            if (enable)
             {
-                if (!state.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
-                    state.SelectedSysMapRender.SelectedEntityExtras.Add(_debugWidget);
+                if (!extras.Contains(_debugWidget))
+                {
+                    extras.Add(_debugWidget);
+                }
                 _isEnabled = true;
             }
-            else if (!enable && _isEnabled)
+            else
             {
-                if (state.SelectedSysMapRender.SelectedEntityExtras.Contains(_debugWidget))
-                    state.SelectedSysMapRender.SelectedEntityExtras.Remove(_debugWidget);
+                if (extras.Contains(_debugWidget))
+                {
+                    extras.Remove(_debugWidget);
+                }
                 _isEnabled = false;
             }
         }
 
         internal void Display()
         {
-
-
             ImGui.Text("Cursor World Coordinate:");
             var mouseWorldCoord = _state.Camera.MouseWorldCoordinate();
             ImGui.Text("x" + mouseWorldCoord.X);
@@ -66,13 +68,6 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text("x" + cameraWorldCoord.X);
             ImGui.SameLine();
             ImGui.Text("y" + cameraWorldCoord.Y);
-            /*
-            ImGui.Text("Camera View Coordinate:");
-            var cameraViewCoord = _state.Camera.CameraViewCoordinate();
-            ImGui.Text("x" + cameraViewCoord.x);
-            ImGui.SameLine();
-            ImGui.Text("y" + cameraViewCoord.y);
-            */
 
             ImGui.Text("VSP");
             ImGui.Text("x" + _debugWidget.ViewScreenPos.x);
@@ -94,9 +89,13 @@ namespace Pulsar4X.SDL2UI
             {
                 ImGui.Text(item.NameString);
                 if (ImGui.IsItemHovered())
+                {
                     item.SetHighlight(true);
+                }
                 else
+                {
                     item.SetHighlight(false);
+                }
                 ImGui.SameLine();
                 ImGui.Text(item.DataString);
             }
@@ -242,11 +241,10 @@ namespace Pulsar4X.SDL2UI
 
         void UpdateElements()
         {
-            foreach (var item in ElementItems)
-            {
+            ElementItems.ForEach(item => {
                 item.Shape.StartPoint = _ctrPnt;
                 item.Shape.Scales = Scales;
-            }
+            });
 
             _anglelineItem.Shape.Points = new PointD[] 
             { 
@@ -271,7 +269,7 @@ namespace Pulsar4X.SDL2UI
 
             DrawComplexShapes = new List<ComplexShape>() { };
 
-            foreach (var item in ElementItems)
+            ElementItems.ForEach(item =>
             {
                 var shape = item.Shape;
                 var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
@@ -293,7 +291,6 @@ namespace Pulsar4X.SDL2UI
                     x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
                     y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
                     points[i] = new PointD() { X = x, Y = y };
-
                 }
 
                 DrawComplexShapes.Add(new ComplexShape()
@@ -302,7 +299,7 @@ namespace Pulsar4X.SDL2UI
                     Colors = shape.Colors,
                     ColourChanges = shape.ColourChanges
                 });
-            }
+            });
 
 
             PointD[] mtxArwPts = new PointD[_mtxArwItem.Shape.Points.Length];
@@ -315,10 +312,11 @@ namespace Pulsar4X.SDL2UI
                 var pnt = _mtxArwItem.Shape.Points[i];
                 var transformedPoint = tl.TransformD(pnt.X, pnt.Y);
                 
-                mtxArwPts[i] = new PointD(){
-                 X = ViewScreenPos.x + transformedPoint.X,
-                 Y = ViewScreenPos.y + transformedPoint.Y 
-                 };
+                mtxArwPts[i] = new PointD()
+                {
+                    X = ViewScreenPos.x + transformedPoint.X,
+                    Y = ViewScreenPos.y + transformedPoint.Y 
+                };
             }
 
             DrawComplexShapes.Add(new ComplexShape()
@@ -326,16 +324,15 @@ namespace Pulsar4X.SDL2UI
                 Points = mtxArwPts,
                 Colors = _mtxArwItem.Shape.Colors,
                 ColourChanges = _mtxArwItem.Shape.ColourChanges
-      
             });
-
+            
         }
 
 
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
-            foreach (var shape in DrawComplexShapes)
+            DrawComplexShapes.ForEach(shape =>
             {
                 int ci = 0;
                 var colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
@@ -355,7 +352,7 @@ namespace Pulsar4X.SDL2UI
                     int y2 = Convert.ToInt32(shape.Points[i + 1].Y);
                     SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
                 }
-            }
+            });
         }
     }
 }

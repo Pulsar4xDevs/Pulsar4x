@@ -21,16 +21,12 @@ namespace Pulsar4X.SDL2UI
 
         public virtual void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
-
             _starIcon.OnFrameUpdate(matrix, camera);
         }
-
 
         public virtual void Draw(IntPtr rendererPtr, Camera camera)
         {
             _starIcon.Draw(rendererPtr, camera);
-
         }
     }
     public class GalaxyMap : PulsarGuiWindow
@@ -65,8 +61,10 @@ namespace Pulsar4X.SDL2UI
             {
                 instance = new GalaxyMap(faction);
             }
-            else 
-            instance = (GalaxyMap)_state.LoadedWindows[typeof(GalaxyMap)];
+            else
+            {
+                instance = (GalaxyMap)_state.LoadedWindows[typeof(GalaxyMap)];
+            }
             instance._window = window;
 
             return instance;
@@ -75,24 +73,17 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             if(IsActive)            
-            { 
-
-
-
-
-
-
+            {
+                //TODO
             }
         }
 
         internal void Draw(IntPtr renderPtr, Camera camera)
         {
-            foreach (var icon in SystemIcons)
+            foreach (var icon in SystemIcons.Values)
             {
-                icon.Value.Draw(renderPtr, camera);
+                icon.Draw(renderPtr, camera);
             }
-
-
         }
     }
 }

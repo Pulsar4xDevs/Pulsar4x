@@ -54,8 +54,9 @@ namespace ImGuiSDL2CS {
 
             // If no font added, add default font.
             if (io.Fonts.Fonts.Size == 0)
+            {
                 io.Fonts.AddFontDefault();
-            string rf = "Resources";
+            }
             
             //io.Fonts.AddFontFromFileTTF(Path.Combine(rf,"Cousine-Regular.ttf"), 13);
             //io.Fonts.AddFontFromFileTTF(Path.Combine(rf,"DejaVuMathTeXGyre.ttf"), 13);

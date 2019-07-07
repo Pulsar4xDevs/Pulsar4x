@@ -126,36 +126,28 @@ namespace Pulsar4X.SDL2UI
             {
                 _sysState.StarSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateChange;
                 _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
-
             }
             if (_state.StarSystemStates.ContainsKey(starSys.Guid))
+            {
                 _sysState = _state.StarSystemStates[starSys.Guid];
+            }
             else
             {
                 _sysState = new SystemState(starSys, _state.Faction);
                 _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
             }
 
-
             _faction = _state.Faction;
-
-
 
             starSys.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
             _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
-
 
             _sensorChanges = _sensorMgr.Changes.Subscribe();
             foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
             {
                 AddIconable(entityItem);
             }
-
-            //_state.LastClickedEntity = _sysState.EntityStates.Values.ElementAt(0);
-
-
         }
-
 
         void AddIconable(EntityState entityState)
         {
@@ -433,18 +425,6 @@ namespace Pulsar4X.SDL2UI
 
                 var matrix = _camera.GetZoomMatrix();
 
-                /*
-                if (SysMap == null)
-                {
-                    foreach (var icon in _testIcons.Values)
-                    {
-                        icon.ViewScreenPos = matrix.Transform(icon.WorldPosition.X, icon.WorldPosition.Y);
-                        icon.Draw(rendererPtr, _camera);
-                    }
-                }
-                else
-                {
-                */
                 UpdateAndDraw(UIWidgets, matrix);
 
                 UpdateAndDraw(_orbitRings, matrix);
@@ -454,7 +434,6 @@ namespace Pulsar4X.SDL2UI
                 UpdateAndDraw(_entityIcons, matrix);
 
                 UpdateAndDraw(SelectedEntityExtras, matrix);
-
 
                 //because _nameIcons are imgui not sdl, we don't draw them here.
                 //we draw them in PulsarMainWindow.ImGuiLayout
@@ -514,9 +493,13 @@ namespace Pulsar4X.SDL2UI
         void UpdateAndDraw(ConcurrentDictionary<Guid, IDrawData> icons, Matrix matrix)
         {
             foreach (var item in icons.Values)
+            {
                 item.OnFrameUpdate(matrix, _camera);
+            }
             foreach (var item in icons.Values)
+            {
                 item.Draw(rendererPtr, _camera);
+            }
         }
     }
 }

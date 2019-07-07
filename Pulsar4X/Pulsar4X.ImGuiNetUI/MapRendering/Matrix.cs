@@ -37,10 +37,13 @@ namespace Pulsar4X.SDL2UI
         {
             Matrix matrix = new Matrix();
             if (y)
+            {
                 matrix.X = new double[3] { -1, 0, 0 };
+            }
             if (x)
+            {
                 matrix.Y = new double[3] { 0, -1, 0 };
-
+            }
             return matrix;
         }
 
