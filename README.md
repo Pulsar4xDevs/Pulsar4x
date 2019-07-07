@@ -17,7 +17,7 @@ The [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki) has a good amount of i
 
 ## Compiling Pulsar4x Master branch:
 
-To compile Pulsar4x we recommend [VisualStudio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). We're starting to use a bit of C#6, so 2013 is not recommended unless you know what you're doing.  
+To compile and debug Pulsar4x we recommend [VisualStudio 2019 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). We're starting to use a bit of C#6, ~~so 2013 is not recommended unless you know what you're doing.~~ won't even load the newer csproj files.  2015 *might* work?
 Xamarin Studio does work under Windows, and the process is the same as for VS2015.
 
 ### Linux
