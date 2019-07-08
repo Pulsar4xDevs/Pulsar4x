@@ -189,7 +189,7 @@ namespace Pulsar4X.ECSLib
             var posdb = entity.GetDataBlob<PositionDB>();
             posdb.SetParent(parent);
             var ralitivePos = posdb.RelativePosition_AU;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
-            if (ralitivePos.Length() > OrbitProcessor.GetSOI(parent))
+            if (ralitivePos.Length() > OrbitProcessor.GetSOI_AU(parent))
                 throw new Exception("Entity not in target SOI");
 
             var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
@@ -230,7 +230,7 @@ namespace Pulsar4X.ECSLib
 
         public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector3 position, Vector3 velocity, DateTime atDateTime)
         {
-            if (position.Length() > OrbitProcessor.GetSOI(parent))
+            if (position.Length() > OrbitProcessor.GetSOI_AU(parent))
                 throw new Exception("Entity not in target SOI");
             //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, atDateTime);
@@ -249,7 +249,7 @@ namespace Pulsar4X.ECSLib
 
         public static OrbitDB FromVectorKM(Entity parent, double myMass, double parentMass, double sgp, Vector3 position, Vector3 velocity, DateTime atDateTime)
         {
-            if (Distance.KmToAU(position.Length()) > OrbitProcessor.GetSOI(parent))
+            if (Distance.KmToAU(position.Length()) > OrbitProcessor.GetSOI_AU(parent))
                 throw new Exception("Entity not in target SOI");
             //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, atDateTime);
@@ -277,6 +277,44 @@ namespace Pulsar4X.ECSLib
                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
                        ke.Epoch);// - TimeSpan.FromSeconds(ke.Epoch));
             //var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
+            return orbit;
+        }
+
+        /// <summary>
+        /// Circular orbit from position. 
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="obj"></param>
+        /// <param name="atDatetime"></param>
+        /// <returns></returns>
+        public static OrbitDB FromPosition(Entity parent, Entity obj, DateTime atDatetime)
+        {
+            
+            var parpos = parent.GetDataBlob<PositionDB>();
+            var objPos = obj.GetDataBlob<PositionDB>();
+            var ralpos = objPos.AbsolutePosition_m - parpos.AbsolutePosition_m;
+            var r = ralpos.Length();
+            var i = Math.Atan2(r, ralpos.Z);
+            var m0 = Math.Atan2(ralpos.Y, ralpos.X);
+            var orbit = new OrbitDB(parent)
+            {
+                SemiMajorAxis = r,
+                Eccentricity = 0,
+                Inclination_Degrees = i,
+                LongitudeOfAscendingNode = 0,
+                ArgumentOfPeriapsis = 0,
+                MeanAnomalyAtEpoch = m0,
+                Epoch = atDatetime,
+
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
+                _myMass = obj.GetDataBlob<MassVolumeDB>().Mass
+
+                
+                
+            };
+            orbit.IsStationary = false;
+            orbit.CalculateExtendedParameters();
+
             return orbit;
         }
 

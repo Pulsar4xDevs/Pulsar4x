@@ -61,33 +61,32 @@ namespace Pulsar4X.ECSLib
             double secondsToItterate = deltaT;
             while (secondsToItterate > 0) 
             {
-                double speed_kms = newtonMoveDB.CurrentVector_kms.Length();
 
 
                 //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
                 //timeStep = Math.Min(timeStep, secondsToItterate);
                 double timeStep = 1;//because the above seems unstable and looses energy. 
-                double distanceToParent_m = Distance.AuToMt(positionDB.GetDistanceTo(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>()));
+                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
                 double gravForce = GameConstants.Science.GravitationalConstant * (Mass_Kg * ParentMass_kg / Math.Pow(distanceToParent_m, 2));
-                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_AU);
-                double distance = Distance.AuToKm(positionDB.RelativePosition_AU).Length();
+                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_m);
+           
                 Vector3 totalForce = gravForceVector + newtonMoveDB.ThrustVector;
 
                 Vector3 acceleration_mps = totalForce / Mass_Kg;
-                Vector3 newVelocity = (acceleration_mps * timeStep * 0.001) + newtonMoveDB.CurrentVector_kms;
+                Vector3 newVelocity = (acceleration_mps * timeStep) + newtonMoveDB.CurrentVector_ms;
 
-                newtonMoveDB.CurrentVector_kms = newVelocity;
-                Vector3 deltaPos = (newtonMoveDB.CurrentVector_kms + newVelocity) / 2 * timeStep;
+                newtonMoveDB.CurrentVector_ms = newVelocity;
+                Vector3 deltaPos = (newtonMoveDB.CurrentVector_ms + newVelocity) / 2 * timeStep;
                 //Vector4 deltaPos = newtonMoveDB.CurrentVector_kms * timeStep;
 
-                positionDB.RelativePosition_AU += Distance.KmToAU(deltaPos);
+                positionDB.RelativePosition_m += deltaPos;
 
-                double sOIRadius_AU = OrbitProcessor.GetSOI(newtonMoveDB.SOIParent);
+                double sOIRadius = OrbitProcessor.GetSOI_m(newtonMoveDB.SOIParent);
 
-                if (positionDB.RelativePosition_AU.Length() >= sOIRadius_AU)
+                if (positionDB.RelativePosition_m.Length() >= sOIRadius)
                 {
                     Entity newParent;
                     Vector3 parentRalitiveVector;
@@ -97,22 +96,22 @@ namespace Pulsar4X.ECSLib
                         var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
                         newParent = orbitDB.Parent;
                         var parentVelocity = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, entity.Manager.ManagerSubpulses.StarSysDateTime);
-                        parentRalitiveVector = Distance.KmToAU(newtonMoveDB.CurrentVector_kms) + parentVelocity;
-                        var pvlen = Distance.AuToKm( parentVelocity.Length());
-                        var vlen = newtonMoveDB.CurrentVector_kms.Length();
-                        var rvlen = Distance.AuToKm( parentRalitiveVector.Length());
+                        parentVelocity = Distance.AuToMt(parentVelocity);
+                        parentRalitiveVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
+           
                     }
                     else //if (newtonMoveDB.SOIParent.HasDataBlob<NewtonMoveDB>())
                     {   //this will pretty much never happen.
                         newParent = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().SOIParent;
-                        var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().CurrentVector_kms;
-                        parentRalitiveVector = Distance.KmToAU(newtonMoveDB.CurrentVector_kms + parentVelocity);
+                        var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().CurrentVector_ms;
+                        parentRalitiveVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
                     }
                     double newParentMass = newParent.GetDataBlob<MassVolumeDB>().Mass;
-                    double sgp = GameConstants.Science.GravitationalConstant * (newParentMass + Mass_Kg) / 3.347928976e33;
-                    Vector3 posRalitiveToNewParent = positionDB.AbsolutePosition_AU - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+                    
+                    Vector3 posRalitiveToNewParent = positionDB.AbsolutePosition_m - newParent.GetDataBlob<PositionDB>().AbsolutePosition_m;
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
+                    double sgp = GMath.StandardGravitationalParameter(newParentMass + Mass_Kg);
                     var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector, dateTime);
 
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
@@ -125,7 +124,7 @@ namespace Pulsar4X.ECSLib
                             kE,
                             dateTime);
                             */
-                        var newOrbit = OrbitDB.FromVector(newParent, entity, parentRalitiveVector, dateTime);
+                        var newOrbit = OrbitDB.FromVector(newParent, entity, Distance.MToAU(parentRalitiveVector), dateTime);
                         entity.RemoveDataBlob<NewtonMoveDB>();
                         entity.SetDataBlob(newOrbit);
                         positionDB.SetParent(newParent);

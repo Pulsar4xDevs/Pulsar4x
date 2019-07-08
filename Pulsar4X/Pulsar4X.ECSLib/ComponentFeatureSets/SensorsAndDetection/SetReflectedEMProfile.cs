@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (emittingEntity != entity) // don't reflect our own emmision. 
                 {
-                    double distance = PositionDB.GetDistanceBetween(position, emittingEntity.GetDataBlob<PositionDB>());
+                    double distance = PositionDB.GetDistanceBetween_AU(position, emittingEntity.GetDataBlob<PositionDB>());
                     var emmissionDB = emittingEntity.GetDataBlob<SensorProfileDB>();
 
                     foreach (var emitedItem in emmissionDB.EmittedEMSpectra)

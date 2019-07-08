@@ -8,17 +8,16 @@ namespace Pulsar4X.ECSLib
     {
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
         {
-            Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            var distanceFromParent = parent.GetDataBlob<MassVolumeDB>().Radius * 2;
+            Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            var distanceFromParent = Distance.AuToMt( parent.GetDataBlob<MassVolumeDB>().Radius * 2);
             position.X += distanceFromParent;
-            Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction,  position, starsys, shipName);
+            Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction, position, starsys, shipName);
             ship.GetDataBlob<PositionDB>().SetParent(parent);
-            var orbitDB = ShipMovementProcessor.CreateOrbitHereWithSemiMajAxis(ship, parent, Distance.AuToKm(distanceFromParent), systemEntityManager.ManagerSubpulses.StarSysDateTime);
-
+            var orbitDB = OrbitDB.FromPosition(parent, ship, systemEntityManager.ManagerSubpulses.StarSysDateTime);
             ship.SetDataBlob(orbitDB);
-
             return ship;
         }
+
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Vector3 pos, StarSystem starsys, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
@@ -40,7 +39,7 @@ namespace Pulsar4X.ECSLib
             OrderableDB orderableDB = new OrderableDB();
             protoShip.SetDataBlob(orderableDB);
 
-            PositionDB position = new PositionDB(pos, starsys.Guid);
+            PositionDB position = new PositionDB(Distance.MToAU(pos), starsys.Guid);
             protoShip.SetDataBlob(position);
 
 

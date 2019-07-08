@@ -228,7 +228,7 @@ namespace Pulsar4X.SDL2UI
             }
             else if(_newtonMoveDB != null)
             {
-                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_kms.Y, _newtonMoveDB.CurrentVector_kms.X); 
+                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_ms.Y, _newtonMoveDB.CurrentVector_ms.X); 
             }
             else if (_tlmoveDB != null)
             {

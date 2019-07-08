@@ -162,11 +162,11 @@ namespace Pulsar4X.ECSLib
 
             propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
-            double targetSOI = OrbitProcessor.GetSOI(moveDB.TargetEntity);
+            double targetSOI = OrbitProcessor.GetSOI_AU(moveDB.TargetEntity);
 
             Entity targetEntity;
 
-            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo(positionDB) > targetSOI)
+            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_AU(positionDB) > targetSOI)
             {
                 targetEntity = moveDB.TargetEntity.GetDataBlob<OrbitDB>().Parent; //TODO: it's concevable we could be in another SOI not the parent (ie we could be in a target's moon's SOI)
             }

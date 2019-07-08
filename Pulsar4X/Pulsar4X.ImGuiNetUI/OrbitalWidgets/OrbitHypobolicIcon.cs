@@ -73,7 +73,7 @@ namespace Pulsar4X.SDL2UI
         internal void CreatePointArray()
         {
 
-            Vector3 vel = Distance.KmToAU(_newtonMoveDB.CurrentVector_kms);
+            Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
             Vector3 pos = myPosDB.RelativePosition_AU;
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
             double e = eccentVector.Length();
@@ -82,7 +82,7 @@ namespace Pulsar4X.SDL2UI
             double a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
             double linierEccentricity = e * a;
-            double soi = OrbitProcessor.GetSOI(_newtonMoveDB.SOIParent);
+            double soi = OrbitProcessor.GetSOI_AU(_newtonMoveDB.SOIParent);
 
             //longditudeOfPeriapsis;
             double _lop = Math.Atan2(eccentVector.Y, eccentVector.X);

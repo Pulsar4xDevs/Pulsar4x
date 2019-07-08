@@ -266,7 +266,6 @@ namespace Pulsar4X.SDL2UI
                                     SetTargetFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, item.Key);
                                 }
                             }
-
                         }
                         ImGui.EndGroup();
                         ImGui.SameLine();
@@ -276,7 +275,7 @@ namespace Pulsar4X.SDL2UI
                             foreach (var item in _sensorContacts)
                             {
                                 var targetEntity = _sensorContacts[item.Key];
-                                double distance = _orderingEntity.GetDataBlob<PositionDB>().GetDistanceTo(targetEntity.Position);
+                                double distance = _orderingEntity.GetDataBlob<PositionDB>().GetDistanceTo_AU(targetEntity.Position);
                                 ImGui.Text(distance.ToString());
                             }
 

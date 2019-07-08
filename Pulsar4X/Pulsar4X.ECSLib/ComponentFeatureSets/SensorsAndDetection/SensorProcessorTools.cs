@@ -20,11 +20,11 @@ namespace Pulsar4X.ECSLib
 
             TimeSpan timeSinceLastCalc = atDate - sensorProfile.LastDatetimeOfReflectionSet;
             PositionDB positionOfSensorProfile = detectableEntity.GetDataBlob<PositionDB>();//sensorProfile.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
-            double distanceInAUSinceLastCalc = PositionDB.GetDistanceBetween(sensorProfile.LastPositionOfReflectionSet, positionOfSensorProfile);
+            double distanceSinceLastCalc = PositionDB.GetDistanceBetween_m(sensorProfile.LastPositionOfReflectionSet, positionOfSensorProfile);
 
             //Only set the reflectedEMProfile of the target if it's not been done recently:
             //TODO: is this still neccicary now that I've found and fixed the loop? (refelctions were getting bounced around)
-            if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceInAUSinceLastCalc > 0.1) //TODO: move the time and distance numbers here to settings?
+            if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceSinceLastCalc > 5000) //TODO: move the time and distance numbers here to settings?
                SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
             
 
@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
             else
                 targetPosition = detectableEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//target may be a componentDB. not a shipDB
 
-            var distance = PositionDB.GetDistanceBetween(receverPos, targetPosition);
+            var distance = PositionDB.GetDistanceBetween_AU(receverPos, targetPosition);
             SensorReturnValues detectionValues = DetectonQuality(receverDB, AttenuatedForDistance(sensorProfile, distance));
             SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)

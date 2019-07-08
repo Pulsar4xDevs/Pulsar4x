@@ -11,64 +11,7 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-
-
-        /// <summary>
-        /// Creates orbit here using the current distance between the two entites as aphelion(furthest distance) and a given semiMajorAxis
-        /// *NOTE BUG* this only returns a correct orbit DB if the position is y=0 and is +x (ie the position is in the reference direction)
-        /// </summary>
-        /// <returns>An OrbitDB. Does Not set DB to Entity.</returns>
-        /// <param name="shipEntity">Ship entity.</param>
-        /// <param name="parentEntity">The Entity to orbit</param>
-        /// <param name="semiMajorAxsis">Largest Radius</param>
-        public static OrbitDB CreateOrbitHereWithSemiMajAxis(Entity shipEntity, Entity parentEntity, double semiMajAxsisKM, DateTime time)
-        {
-            PositionDB parentPosition = parentEntity.GetDataBlob<PositionDB>();
-            PositionDB myPosition = shipEntity.GetDataBlob<PositionDB>();
-            double parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
-            double myMass = shipEntity.GetDataBlob<MassVolumeDB>().Mass;
-            double aphelionAU = PositionDB.GetDistanceBetween(parentPosition, myPosition);
-            double semiMajAxisAU = semiMajAxsisKM / GameConstants.Units.KmPerAu;
-            double linierEcentricity = aphelionAU - semiMajAxisAU;
-            double semiMinorAxsis =  Math.Sqrt(Math.Pow(semiMajAxisAU, 2) - Math.Pow(linierEcentricity, 2));
-            double ecentricity = linierEcentricity / semiMajAxisAU;
-            Vector3 ralitivePos = myPosition.RelativePosition_AU; 
-             
-            double angle = Math.Atan2(ralitivePos.Y, ralitivePos.X); 
-            var theta = Angle.ToDegrees(angle);
-            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajAxisAU, ecentricity, 0, 0, angle, angle, time);
-            var pos = OrbitProcessor.GetPosition_AU(newOrbit, time);
-            var pos2 = Distance.AuToKm(pos);
-            return newOrbit;
-        }
-
-        /// <summary>
-        /// Creates orbit here using the current distance between the two entites as aphelion(furthest distance) and a given perihelion
-        /// </summary>
-        /// <returns>An OrbitDB. Does Not set DB to Entity.</returns>
-        /// <param name="shipEntity">Ship entity.</param>
-        /// <param name="parentEntity">The Entity to orbit</param>
-        /// <param name="perihelionKM">closest distance to the parent in KM</param>
-        public static OrbitDB CreateOrbitHereWithPerihelion(Entity shipEntity, Entity parentEntity, double perihelionKM, DateTime time)
-        {
-            PositionDB parentPosition = parentEntity.GetDataBlob<PositionDB>();
-            PositionDB myPosition = shipEntity.GetDataBlob<PositionDB>();
-            double parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
-            double myMass = shipEntity.GetDataBlob<MassVolumeDB>().Mass;
-            double aphelionAU = PositionDB.GetDistanceBetween(parentPosition, myPosition);
-            double perihelionAU = perihelionKM / GameConstants.Units.KmPerAu;
-            double semiMajorAxsis = (perihelionAU + aphelionAU) / 2 ;
-            double linierEcentricity = aphelionAU - semiMajorAxsis;
-            double ecentricity = linierEcentricity / semiMajorAxsis;
-            Vector3 ralitivePos = (myPosition.AbsolutePosition_AU - parentPosition.AbsolutePosition_AU);
-            double inclination = 0;
-            double loAN = 0; //longditude of Acending Node
-            double aoP = Math.Tan(ralitivePos.X / ralitivePos.Y); ; //arguemnt of Periapsis
-            //double ecentricAnomaly = 0;
-            double meanAnomaly = 0; //ecentricAnomaly - ecentricity * Math.Sin(ecentricAnomaly);
-            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(parentEntity, parentMass, myMass, semiMajorAxsis, ecentricity, inclination, loAN, aoP, meanAnomaly, time);
-            return newOrbit;
-        }
+        
 
         public static double CalcMaxFuelDistance_KM(Entity shipEntity)
         {

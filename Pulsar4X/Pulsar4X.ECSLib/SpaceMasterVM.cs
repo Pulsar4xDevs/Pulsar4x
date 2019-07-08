@@ -10,8 +10,8 @@ namespace Pulsar4X.ECSLib
         public void SMSetOrbitToEntity(Entity entity, Entity parentEntity, double perihelionKM, DateTime time)
         {
 
-            var db = ShipMovementProcessor.CreateOrbitHereWithPerihelion(entity, parentEntity, perihelionKM, time);
-            entity.SetDataBlob(db);
+            //var db = ShipMovementProcessor.CreateOrbitHereWithPerihelion(entity, parentEntity, perihelionKM, time);
+            //entity.SetDataBlob(db);
         }
     }
 }

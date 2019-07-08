@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
             var designAtb = beamWeapon.GetDataBlob<DesignInfoDB>().DesignEntity.GetDataBlob<SimpleBeamWeaponAtbDB>();
             int damageAmount = designAtb.DamageAmount; // TODO: Better damage calculation
 
-            double range = myPos.GetDistanceTo(targetPos);
+            double range = myPos.GetDistanceTo_AU(targetPos);
 
             // only fire if target is in range TODO: fire anyway, but miss. TODO: this will be wrong if we do movement last, this needs to be done after movement. 
             if (range <= designAtb.MaxRange)//TODO: firecontrol shoudl have max range too?: Math.Min(designAtb.MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))

@@ -359,7 +359,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <returns>The SOI radius in AU</returns>
         /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
-        public static double GetSOI(Entity entity)
+        public static double GetSOI_AU(Entity entity)
         {
             var orbitDB = entity.GetDataBlob<OrbitDB>();
             if (orbitDB.Parent != null) //if we're not the parent star
@@ -373,6 +373,23 @@ namespace Pulsar4X.ECSLib
                 return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
             }
             else return double.MaxValue; //if we're the parent star, then soi is infinate. 
+        }
+
+        public static double GetSOI_m(Entity entity)
+        {
+            
+            var orbitDB = entity.GetDataBlob<OrbitDB>();
+            if (orbitDB.Parent != null) //if we're not the parent star
+            {
+                var semiMajAxis = orbitDB.SemiMajorAxis;
+
+                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+
+                return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
+            }
+            else return double.PositiveInfinity; //if we're the parent star, then soi is infinate.
         }
 
         private class OrbitProcessorException : Exception

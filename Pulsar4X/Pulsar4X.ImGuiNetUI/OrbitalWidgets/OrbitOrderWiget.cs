@@ -102,7 +102,7 @@ namespace Pulsar4X.SDL2UI
 
             _linearEccentricity = 0;
 
-            _soiWorldRadius = OrbitProcessor.GetSOI(targetEntity);
+            _soiWorldRadius = OrbitProcessor.GetSOI_AU(targetEntity);
             _targetWorldRadius = targetEntity.GetDataBlob<MassVolumeDB>().Radius;
             Setup();
 
@@ -118,7 +118,7 @@ namespace Pulsar4X.SDL2UI
             EllipseMath.SemiMinorAxis(OrbitEllipseSemiMaj, _eccentricity);
             _linearEccentricity = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);
 
-            _soiWorldRadius = OrbitProcessor.GetSOI(targetEntity);
+            _soiWorldRadius = OrbitProcessor.GetSOI_AU(targetEntity);
             _targetWorldRadius = targetEntity.GetDataBlob<MassVolumeDB>().Radius;
             Setup();
         }

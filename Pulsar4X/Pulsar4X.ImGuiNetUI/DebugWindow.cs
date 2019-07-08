@@ -283,7 +283,7 @@ namespace Pulsar4X.SDL2UI
                                     SimpleCircle cir; 
                                     if (_drawSOI)
                                     {
-                                        var soiradius = OrbitProcessor.GetSOI(_selectedEntity);
+                                        var soiradius = OrbitProcessor.GetSOI_AU(_selectedEntity);
                                         var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                         cir = new SimpleCircle(_selectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
 
@@ -314,7 +314,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
                                     ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
-                                    ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI(_state.LastClickedEntity.Entity)));
+                                    ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI_AU(_state.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxisAU);
                                     ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis_AU).ToString("g3") + " Km");
@@ -346,14 +346,14 @@ namespace Pulsar4X.SDL2UI
                                         var pObt = parent.GetDataBlob<OrbitDB>();
                                         var cnmve = _selectedEntity.GetDataBlob<NewtonMoveDB>();
 
-                                        var soiradius = OrbitProcessor.GetSOI(parent);
+                                        var soiradius = OrbitProcessor.GetSOI_AU(parent);
                                         var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                         psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
                                         var pmass = parent.GetDataBlob<MassVolumeDB>().Mass;
                                         var mymass = _selectedEntity.GetDataBlob<MassVolumeDB>().Mass;
 
                                         var sgp = GameConstants.Science.GravitationalConstant * (pmass + mymass) / 3.347928976e33;
-                                        var vel = Distance.KmToAU(cnmve.CurrentVector_kms);
+                                        var vel = Distance.KmToAU(cnmve.CurrentVector_ms);
                                         var cpos = myPos.RelativePosition_AU;
                                         var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
                                         double ce = eccentVector.Length();

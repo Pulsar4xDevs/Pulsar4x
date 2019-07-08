@@ -75,28 +75,28 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// System X coordinate in AU
         /// </summary>
-        public double X
+        public double X_AU
         {
             get { return AbsolutePosition_AU.X; }
-            internal set { _positionInMeters.X = value; }
+            internal set {  _positionInMeters.X = Distance.AuToMt(value); }
         }
 
         /// <summary>
         /// System Y coordinate in AU
         /// </summary>
-        public double Y
+        public double Y_AU
         {
             get { return AbsolutePosition_AU.Y; }
-            internal set { _positionInMeters.Y = value; }
+            internal set { _positionInMeters.Y = Distance.AuToMt(value); }
         }
 
         /// <summary>
         /// System Z coordinate in AU
         /// </summary>
-        public double Z
+        public double Z_AU
         {
             get { return AbsolutePosition_AU.Z; }
-            internal set { _positionInMeters.Z = value; }
+            internal set { _positionInMeters.Z = Distance.AuToMt(value); }
         }
 
         #region Unit Conversion Properties
@@ -173,9 +173,8 @@ namespace Pulsar4X.ECSLib
         public PositionDB(PositionDB positionDB)
             : base(positionDB.Parent)
         {
-            this.X = positionDB.X;
-            this.Y = positionDB.Y;
-            this.Z = positionDB.Z;
+            _positionInMeters = positionDB._positionInMeters;
+
             this.SystemGuid = positionDB.SystemGuid;
         }
 
@@ -191,7 +190,7 @@ namespace Pulsar4X.ECSLib
         {
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
-            Vector3 currentAbsolute = this.AbsolutePosition_AU;
+            Vector3 currentAbsolute = this.AbsolutePosition_m;
             Vector3 newRelative;
             if (newParent == null)
             {
@@ -199,7 +198,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition_m;
             }
             base.SetParent(newParent);
             _positionInMeters = newRelative;
@@ -209,24 +208,33 @@ namespace Pulsar4X.ECSLib
         /// Static function to find the distance in AU between two positions.
         /// </summary>
         /// <returns>Distance between posA and posB.</returns>
-        public static double GetDistanceBetween(IPosition posA, IPosition posB)
+        public static double GetDistanceBetween_AU(IPosition posA, IPosition posB)
         {
             return (posA.AbsolutePosition_AU - posB.AbsolutePosition_AU).Length();
         }
-
-        public static double GetDistanceBetween(Vector3 posA, PositionDB posB)
+        public static double GetDistanceBetween_m(IPosition posA, IPosition posB)
         {
-            return (posA - posB.AbsolutePosition_AU).Length();
+            return (posA.AbsolutePosition_m - posB.AbsolutePosition_m).Length();
+        }
+        public static double GetDistanceBetween_m(Vector3 posA, PositionDB posB)
+        {
+            return (posA - posB.AbsolutePosition_m).Length();
         }
 
         /// <summary>
+        /// 
         /// Instance function for those who don't like static functions. In AU
         /// </summary>
-        public double GetDistanceTo(IPosition otherPos)
+        public double GetDistanceTo_m(IPosition otherPos)
         {
-            return GetDistanceBetween(this, otherPos);
+            return GetDistanceBetween_m(this, otherPos);
         }
 
+        public double GetDistanceTo_AU(IPosition otherPos)
+        {
+            return GetDistanceBetween_AU(this, otherPos);
+        }
+        
         /// <summary>
         /// Static Function to find the Distance Squared betweeen two positions.
         /// </summary>
@@ -270,9 +278,9 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(X, hash);
-            hash = Misc.ValueHash(Y, hash);
-            hash = Misc.ValueHash(Z, hash);
+            hash = Misc.ValueHash(X_AU, hash);
+            hash = Misc.ValueHash(Y_AU, hash);
+            hash = Misc.ValueHash(Z_AU, hash);
             hash = Misc.ValueHash(SystemGuid, hash);
             return hash;
         }

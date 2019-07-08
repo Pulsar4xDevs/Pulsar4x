@@ -123,13 +123,11 @@ namespace Pulsar4X.ECSLib
             gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
             StorageSpaceProcessor.AddCargo(gunShipClass.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //give the gunship a hypobolic orbit to test:
-            var velInAU = Distance.KmToAU(25);
+
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
             gunShip.RemoveDataBlob<OrbitDB>();
-            var nmdb = new NewtonMoveDB(earth)
-            {
-                CurrentVector_kms = new Vector3(0, -10.0, 0)
-            };
+            var nmdb = new NewtonMoveDB(earth, new Vector3(0, -10000.0, 0));
+  
             gunShip.SetDataBlob<NewtonMoveDB>(nmdb);
 
             Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), solSys, factionEntity, earth, solSys, "Planet Express Ship");

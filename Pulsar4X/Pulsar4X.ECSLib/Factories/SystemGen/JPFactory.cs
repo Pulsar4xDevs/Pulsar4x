@@ -22,17 +22,17 @@ namespace Pulsar4X.ECSLib
             
             var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Max);
 
-            jpPositionDB.X = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
-            jpPositionDB.Y = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
+            jpPositionDB.X_AU = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
+            jpPositionDB.Y_AU = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
 
             // Randomly flip the position sign to allow negative values.
             if (system.RNG.Next(0, 100) < 50)
             {
-                jpPositionDB.X = 0 - jpPositionDB.X;
+                jpPositionDB.X_AU = 0 - jpPositionDB.X_AU;
             }
             if (system.RNG.Next(0, 100) < 50)
             {
-                jpPositionDB.Y = 0 - jpPositionDB.Y;
+                jpPositionDB.Y_AU = 0 - jpPositionDB.Y_AU;
             }
 
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};

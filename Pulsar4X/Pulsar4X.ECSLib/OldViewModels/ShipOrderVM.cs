@@ -207,7 +207,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return SelectedShip.GetDataBlob<PositionDB>().X.ToString("N5");
+                return SelectedShip.GetDataBlob<PositionDB>().X_AU.ToString("N5");
             }
         }
 
@@ -217,7 +217,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return SelectedShip.GetDataBlob<PositionDB>().Y.ToString("N5");
+                return SelectedShip.GetDataBlob<PositionDB>().Y_AU.ToString("N5");
             }
         }
 
