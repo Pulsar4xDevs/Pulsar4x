@@ -109,7 +109,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public double GravitationalParameterAU { get; private set; }
 
-        
+        public double SOI_m { get; private set; }
         
         
         /// <summary>
@@ -140,10 +140,10 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public double Apoapsis_AU
         {
-            get { return Distance.MToAU(Aposapsis);}
-            private set { Aposapsis = Distance.AuToMt(value); }
+            get { return Distance.MToAU(Apoapsis);}
+            private set { Apoapsis = Distance.AuToMt(value); }
         }
-        public double Aposapsis { get; private set; }
+        public double Apoapsis { get; private set; }
         
         /// <summary>
         /// Point in orbit closest to the ParentBody. Measured in AU.
@@ -265,18 +265,26 @@ namespace Pulsar4X.ECSLib
             return orbit;
         }
 
-        public static OrbitDB FromKeplerElements(Entity parent, double parentMass, double myMass, KeplerElements ke, DateTime atDateTime)
+        public static OrbitDB FromKeplerElements(Entity parent, double myMass, KeplerElements ke, DateTime atDateTime)
         {
 
-            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
-                       ke.SemiMajorAxis,
-                       ke.Eccentricity,
-                       Angle.ToDegrees(ke.Inclination),
-                       Angle.ToDegrees(ke.LoAN),
-                       Angle.ToDegrees(ke.AoP),
-                       Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
-                       ke.Epoch);// - TimeSpan.FromSeconds(ke.Epoch));
-            //var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
+            OrbitDB orbit = new OrbitDB(parent)
+            {
+                SemiMajorAxis = ke.SemiMajorAxis,
+                Eccentricity = ke.Eccentricity,
+                Inclination_Degrees = ke.Inclination,
+                LongitudeOfAscendingNode = ke.LoAN,
+                ArgumentOfPeriapsis = ke.AoP,
+                MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
+                Epoch = atDateTime,
+
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
+                _myMass = myMass
+
+            };
+            
+            orbit.IsStationary = false;
+            orbit.CalculateExtendedParameters();
             return orbit;
         }
 
@@ -444,6 +452,9 @@ namespace Pulsar4X.ECSLib
 
             Apoapsis_AU = (1 + Eccentricity) * SemiMajorAxisAU;
             Periapsis_AU = (1 - Eccentricity) * SemiMajorAxisAU;
+
+            SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
+
         }
 
         [OnDeserialized]

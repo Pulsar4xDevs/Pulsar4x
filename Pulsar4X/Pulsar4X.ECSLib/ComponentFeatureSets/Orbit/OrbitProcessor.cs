@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib
@@ -390,6 +391,51 @@ namespace Pulsar4X.ECSLib
                 return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
             }
             else return double.PositiveInfinity; //if we're the parent star, then soi is infinate.
+        }
+
+        public static Entity FindSOIForPosition(StarSystem starSys, Vector3 AbsolutePosition)
+        {
+            var orbits = starSys.GetAllDataBlobsOfType<OrbitDB>();
+            var withinSOIOf = new List<Entity>(); 
+            foreach (var orbit in orbits)
+            {
+                var subOrbit = FindSOIForOrbit(orbit, AbsolutePosition);
+                if(subOrbit != null)
+                    withinSOIOf.Add(subOrbit.OwningEntity);
+            }
+
+
+            var closestDist = double.PositiveInfinity;
+            Entity closestEntity = orbits[0].Root;
+            foreach (var entity in withinSOIOf)
+            {
+                var pos = entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+                var distance = (AbsolutePosition - pos).Length();
+                if (distance < closestDist)
+                {
+                    closestDist = distance;
+                    closestEntity = entity;
+                }
+
+            }
+            return closestEntity;
+        }
+
+        public static OrbitDB FindSOIForOrbit(OrbitDB orbit, Vector3 AbsolutePosition)
+        {
+            var soi = orbit.SOI_m;
+            var pos = orbit.OwningEntity.GetDataBlob<PositionDB>();
+            if (PositionDB.GetDistanceBetween_m(AbsolutePosition, pos) < soi)
+            {
+                foreach (OrbitDB subOrbit in orbit.ChildrenDBs)
+                {
+                    var suborbitb = FindSOIForOrbit(subOrbit, AbsolutePosition);
+                    if (suborbitb != null)
+                        return suborbitb;
+                }
+            }
+
+            return null;
         }
 
         private class OrbitProcessorException : Exception

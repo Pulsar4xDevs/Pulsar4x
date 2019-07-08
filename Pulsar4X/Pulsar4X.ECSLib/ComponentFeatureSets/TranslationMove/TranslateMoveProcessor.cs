@@ -162,11 +162,11 @@ namespace Pulsar4X.ECSLib
 
             propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
-            double targetSOI = OrbitProcessor.GetSOI_AU(moveDB.TargetEntity);
+            double targetSOI = OrbitProcessor.GetSOI_m(moveDB.TargetEntity);
 
             Entity targetEntity;
 
-            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_AU(positionDB) > targetSOI)
+            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
             {
                 targetEntity = moveDB.TargetEntity.GetDataBlob<OrbitDB>().Parent; //TODO: it's concevable we could be in another SOI not the parent (ie we could be in a target's moon's SOI)
             }
@@ -178,24 +178,35 @@ namespace Pulsar4X.ECSLib
             var orbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, atDateTime);
             
             Vector3 parentOrbitalVector = new Vector3(orbitalVector.X, orbitalVector.Y, 0);
-            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
-            insertionVector += moveDB.ExpendDeltaV_AU; //TODO: only use it if we have it. 
-            propulsionDB.RemainingDV_MS -= (float)Distance.AuToMt(moveDB.ExpendDeltaV_AU).Length();
-            OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector, atDateTime);
-            if (newOrbit.Periapsis_AU > targetSOI)
+            Vector3 insertionVector_AU = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
+            insertionVector_AU += Distance.MToAU(moveDB.ExpendDeltaV); //TODO: only use it if we have it. 
+            propulsionDB.RemainingDV_MS -= (float)(moveDB.ExpendDeltaV).Length();
+            OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector_AU, atDateTime);
+            
+            entity.RemoveDataBlob<TranslateMoveDB>();
+            
+            if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
             {
-                //TODO: find who's SOI we're currently in and create an orbit for that;
+                entity.SetDataBlob(newOrbit);
             }
-            if (newOrbit.Apoapsis_AU > targetSOI)
+            else if (newOrbit.Periapsis > targetSOI) //closest point outside soi
             {
-                //TODO: change orbit to new parent at SOI change
+                //find who's SOI we are in, and create an orbit around that.
+                targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition_m);
+                newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector_AU, atDateTime);
+                entity.SetDataBlob(newOrbit);
+                
             }
-
+            else //closest point inside soi, but furtherest point outside. make a newtonion trajectory. 
+            {
+                var newtmove = new NewtonMoveDB(targetEntity, Distance.AuToMt( insertionVector_AU));
+                entity.SetDataBlob(newtmove);
+            }
+            
             positionDB.SetParent(targetEntity);
             moveDB.IsAtTarget = true;
-            entity.RemoveDataBlob<TranslateMoveDB>();
-            entity.SetDataBlob(newOrbit);
-            newOrbit.SetParent(targetEntity);
+            
+
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)

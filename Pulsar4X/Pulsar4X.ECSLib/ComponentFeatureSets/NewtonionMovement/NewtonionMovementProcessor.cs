@@ -80,7 +80,6 @@ namespace Pulsar4X.ECSLib
 
                 newtonMoveDB.CurrentVector_ms = newVelocity;
                 Vector3 deltaPos = (newtonMoveDB.CurrentVector_ms + newVelocity) / 2 * timeStep;
-                //Vector4 deltaPos = newtonMoveDB.CurrentVector_kms * timeStep;
 
                 positionDB.RelativePosition_m += deltaPos;
 
@@ -116,21 +115,16 @@ namespace Pulsar4X.ECSLib
 
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
                     {
-                        /*
+                        
                         var newOrbit = OrbitDB.FromKeplerElements(
-                            newParent, 
-                            newParentMass, 
+                            newParent,
                             Mass_Kg, 
                             kE,
                             dateTime);
-                            */
-                        var newOrbit = OrbitDB.FromVector(newParent, entity, Distance.MToAU(parentRalitiveVector), dateTime);
                         entity.RemoveDataBlob<NewtonMoveDB>();
                         entity.SetDataBlob(newOrbit);
                         positionDB.SetParent(newParent);
-                        var currentPos = Distance.AuToKm(positionDB.RelativePosition_AU);
                         var newPos = OrbitProcessor.GetPosition_AU(newOrbit, dateTime);
-                        var newPosKM = Distance.AuToKm(newPos);
                         positionDB.RelativePosition_AU = newPos;
                         break;
                     }

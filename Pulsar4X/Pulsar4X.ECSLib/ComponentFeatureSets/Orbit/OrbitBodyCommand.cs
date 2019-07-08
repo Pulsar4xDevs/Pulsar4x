@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib
                 _db.TranslateEntryPoint_AU = currentPos;
                 _db.SavedNewtonionVector_AU = currentVec;
 
-                _db.ExpendDeltaV_AU = ExpendDeltaV;
+                _db.ExpendDeltaV = ExpendDeltaV;
                 if (_targetEntity.HasDataBlob<SensorInfoDB>())
                 {
                     _db.TargetEntity = _targetEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;

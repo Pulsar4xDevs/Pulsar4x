@@ -5,20 +5,6 @@ using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib
 {
-    public class NewtonionMoveDB : BaseDataBlob
-    {
-
-        public DateTime LastProcessDateTime { get; internal set; }
-
-        public Vector2 DeltaVToExpend_AU  { get; internal set; }
-
-        public DateTime ActionOnDateTime { get; internal set; }
-
-        public override object Clone()
-        {
-            throw new NotImplementedException();
-        }
-    }
 
 
     /// <summary>
@@ -47,13 +33,13 @@ namespace Pulsar4X.ECSLib
         public DateTime PredictedExitTime { get; internal set; }
 
         [JsonProperty]
-        internal Vector3 CurrentNonNewtonionVectorMS;
+        internal Vector3 CurrentNonNewtonionVectorMS { get; set; }
 
-        [JsonProperty]
         /// <summary>
-        /// The amount of deltaV to expend, in AU/s.
+        /// m/s
         /// </summary>
-        internal Vector3 ExpendDeltaV_AU;
+        [JsonProperty]
+        internal Vector3 ExpendDeltaV { get; set; }
 
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
@@ -86,7 +72,7 @@ namespace Pulsar4X.ECSLib
             TranslateEntryPoint_AU = db.TranslateEntryPoint_AU;
             TranslateExitPoint_AU = db.TranslateExitPoint_AU;
             CurrentNonNewtonionVectorMS = db.CurrentNonNewtonionVectorMS;
-            ExpendDeltaV_AU = db.ExpendDeltaV_AU;
+            ExpendDeltaV = db.ExpendDeltaV;
             IsAtTarget = db.IsAtTarget;
             TargetEntity = db.TargetEntity;
 

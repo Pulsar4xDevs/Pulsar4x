@@ -1,5 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Pulsar4X.Vectors;
+
 namespace Pulsar4X.ECSLib
 {
     public class NewtonMoveDB : BaseDataBlob
@@ -34,4 +36,21 @@ namespace Pulsar4X.ECSLib
             return new NewtonMoveDB(this);
         }
     }
+    
+    //TODO: merge this with the above NewtonMoveDB. 
+    public class NewtonionMoveDB : BaseDataBlob
+    {
+
+        public DateTime LastProcessDateTime { get; internal set; }
+
+        public Vector2 DeltaVToExpend_AU  { get; internal set; }
+
+        public DateTime ActionOnDateTime { get; internal set; }
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 }
