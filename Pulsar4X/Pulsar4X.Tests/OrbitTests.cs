@@ -370,8 +370,8 @@ namespace Pulsar4X.Tests
             var ke_apkm = Distance.AuToKm(ke.Apoapsis);
             var db_apkm = Distance.AuToKm(objOrbit.Apoapsis_AU);
             var differnce = ke_apkm - db_apkm;
-            Assert.AreEqual(ke.Apoapsis, objOrbit.Apoapsis_AU); 
-            Assert.AreEqual(ke.Periapsis, objOrbit.Periapsis_AU);
+            Assert.AreEqual(ke.Apoapsis, objOrbit.Apoapsis_AU, 1.0E-10 );
+            Assert.AreEqual(ke.Periapsis, objOrbit.Periapsis_AU, 1.0E-10 );
 
             Vector3 posKM = Distance.AuToKm(position);
             Vector3 resultKM = Distance.AuToKm(resultPos);
