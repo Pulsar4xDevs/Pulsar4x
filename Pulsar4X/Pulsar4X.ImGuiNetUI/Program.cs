@@ -127,7 +127,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL)
+            if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL &! ImGui.GetIO().WantCaptureMouse)
             {
                 if (e.wheel.y > 0)
                 {   
@@ -219,8 +219,6 @@ namespace Pulsar4X.SDL2UI
 
             //because the nameIcons are IMGUI not SDL we draw them here. 
             _state.GalacticMap.DrawNameIcons();
-
-            ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
         }
 
