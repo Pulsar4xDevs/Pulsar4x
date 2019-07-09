@@ -123,6 +123,7 @@ namespace Pulsar4X.SDL2UI
         internal bool MtxArwMirrorX = true;
         internal bool MtxArwMirrorY;
 
+        private BezierCurve _bc;
 
         public GraphicDebugWidget(Vector3 position) : base(position)
         {
@@ -236,7 +237,15 @@ namespace Pulsar4X.SDL2UI
                     Scales = false
                 }
             };
-     
+
+
+            var bcp0 = new PointD(0,0);
+            var bcp1 = new PointD(0.5, 0) ;
+            var bcp2 = new PointD(0, 0) ;
+            var bcp3 = new PointD(0, 0.5) ;
+             _bc   = new BezierCurve(bcp0, bcp1, bcp2, bcp3);
+             _bc.SetLinePoints(0.01f);
+            
         }
 
 
@@ -263,6 +272,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
+            _bc.OnFrameUpdate(matrix, camera);
             UpdateElements();
 
             ViewScreenPos = camera.ViewCoordinate(WorldPosition);
@@ -356,6 +366,7 @@ namespace Pulsar4X.SDL2UI
                     SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
+            _bc.Draw(rendererPtr, camera);
         }
     }
 }

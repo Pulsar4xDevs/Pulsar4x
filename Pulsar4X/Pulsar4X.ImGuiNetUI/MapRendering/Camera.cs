@@ -223,6 +223,13 @@ namespace Pulsar4X.SDL2UI
             return mirrorMatrix * scaleMtx;
         }
 
+        public Matrix GetPanMatrix()
+        {
+            int x = (int)((0 - CameraWorldPosition.X) * ZoomLevel + ViewPortCenter.X);
+            int y = -(int)((0 - CameraWorldPosition.Y) * ZoomLevel - ViewPortCenter.Y);
+            return Matrix.NewTranslateMatrix(x, y);
+        }
+
 
     }
 

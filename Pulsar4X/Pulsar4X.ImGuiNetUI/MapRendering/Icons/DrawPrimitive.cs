@@ -435,6 +435,12 @@ namespace Pulsar4X.SDL2UI
 
     public struct PointD
     {
+        public PointD(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+
         public double X;
         public double Y;
     }

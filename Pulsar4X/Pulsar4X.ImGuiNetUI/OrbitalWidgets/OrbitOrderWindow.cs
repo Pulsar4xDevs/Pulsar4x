@@ -2,6 +2,7 @@
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
+using Vector3 = Pulsar4X.ECSLib.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -336,24 +337,7 @@ namespace Pulsar4X.SDL2UI
                                     _eccentricity = ke.Eccentricity;
                                     break;
                                 }
-                            /*
-                        case States.NeedsSecondApsis:
-                            {
-                                 TODO: when we've got newtonion engines, allow second apsis choice and expend Dv.
-                                var mousePos = ImGui.GetMousePos();
 
-                                var mouseWorldPos = _state.Camera.MouseWorldCoordinate();
-
-                                var ralitivePos = (GetTargetPosition() - mouseWorldPos);
-                                _orbitWidget.SetPeriapsis(ralitivePos.X, ralitivePos.Y);
-
-                                //_periapsisKM = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
-                                var distanceSelected = Distance.AuToKm((GetTargetPosition() - mouseWorldPos).Length());
-                                var d1 = Math.Max(_peMin, distanceSelected); //can't be lower than body radius
-                                _periapsisKM = Math.Min(d1, _apoapsisKm);  //can't be higher than apoapsis. 
-
-                                break;
-                            }*/
                             case States.NeedsActioning:
                                 {
                                     var maxprogradeDV = _maxDV - Math.Abs(_radialDV);
@@ -387,63 +371,70 @@ namespace Pulsar4X.SDL2UI
                         ImGui.SameLine();
                         ImGui.Text(TargetEntity.Name);
                     }
-                    ImGui.Text("Apoapsis: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_apoapsisKm.ToString("g3") + " (Alt: " + _apAlt.ToString("g3") + ")");
-
-                    ImGui.Text("Periapsis: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_periapsisKM.ToString("g3") + " (Alt: " + _peAlt.ToString("g3") + ")");
-
-                    ImGui.Text("DepartureVelocity: ");
-                    //ImGui.SameLine();
-                    ImGui.Text(_departureOrbitalSpeed.ToString() + " AU");
-                    ImGui.Text(Distance.AuToKm(_departureOrbitalSpeed).ToString() + " KM");
-
-                    ImGui.Text("InsertionVelocity: ");
-                    //ImGui.SameLine();
-                    ImGui.Text(_insertionOrbitalSpeed.ToString() + " AU");
-                    ImGui.Text(Distance.AuToKm(_insertionOrbitalSpeed).ToString() + " KM");
-
+                    
                     ImGui.Text("Eccentricity: ");
                     ImGui.Text(_eccentricity.ToString("g3"));
 
-                    ImGui.Text("Departure Vector: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_departureOrbitalVelocity.ToString("g3"));
-                    ImGui.Text(Distance.AuToMt( _departureOrbitalVelocity).ToString("N") + "m/s");
+                    if (ImGui.CollapsingHeader("Orbit Data"))
+                    {
 
-                    ImGui.Text("Departure Angle: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_departureAngle.ToString("g3") + " radians or " + Angle.ToDegrees(_departureAngle).ToString("F") + " deg ");
+                        ImGui.Text("Apoapsis: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_apoapsisKm.ToString("g3") + " (Alt: " + _apAlt.ToString("g3") + ")");
 
-                    var pc = OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate(_orderEntityOrbit, _departureDateTime);
+                        ImGui.Text("Periapsis: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_periapsisKM.ToString("g3") + " (Alt: " + _peAlt.ToString("g3") + ")");
 
-                    ImGui.Text("Departure Polar Coordinates: ");
-                    ImGui.Text(pc.Item1.ToString() + " AU or " + Distance.AuToMt(pc.Item1).ToString("F") + " m/s");
-                    ImGui.Text(pc.Item2.ToString("g3") + " radians or " + Angle.ToDegrees(pc.Item2).ToString("F") + " deg ");;
+                        ImGui.Text("DepartureVelocity: ");
+                        //ImGui.SameLine();
+                        ImGui.Text(_departureOrbitalSpeed.ToString() + " AU");
+                        ImGui.Text(Distance.AuToKm(_departureOrbitalSpeed).ToString() + " KM");
 
-
-                    ImGui.Text("Insertion Vector: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_insertionOrbitalVelocity.ToString("g3"));
-
-                    ImGui.Text("LoAN: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_ke.LoAN.ToString("g3"));
-
-                    ImGui.Text("AoP: ");
-                    ImGui.SameLine();
-                    ImGui.Text(_ke.AoP.ToString("g3"));
-
-                    ImGui.Text("LoP Angle: ");
-                    ImGui.SameLine();
-                    ImGui.Text((_ke.LoAN + _ke.AoP).ToString("g3") + " radians or " + Angle.ToDegrees(_ke.LoAN + _ke.AoP).ToString("F") + " deg ");
-
-                    if(_orbitWidget != null)
-                        ImGui.Text("Clockwise " +  _orbitWidget.IsRetrogradeOrbit.ToString());
+                        ImGui.Text("InsertionVelocity: ");
+                        //ImGui.SameLine();
+                        ImGui.Text(_insertionOrbitalSpeed.ToString() + " AU");
+                        ImGui.Text(Distance.AuToKm(_insertionOrbitalSpeed).ToString() + " KM");
 
 
+
+                        ImGui.Text("Departure Vector: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_departureOrbitalVelocity.ToString("g3"));
+                        ImGui.Text(Distance.AuToMt(_departureOrbitalVelocity).ToString("N") + "m/s");
+
+                        ImGui.Text("Departure Angle: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_departureAngle.ToString("g3") + " radians or " + Angle.ToDegrees(_departureAngle).ToString("F") + " deg ");
+
+                        var pc = OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate(_orderEntityOrbit, _departureDateTime);
+
+                        ImGui.Text("Departure Polar Coordinates: ");
+                        ImGui.Text(pc.Item1.ToString() + " AU or " + Distance.AuToMt(pc.Item1).ToString("F") + " m/s");
+                        ImGui.Text(pc.Item2.ToString("g3") + " radians or " + Angle.ToDegrees(pc.Item2).ToString("F") + " deg ");
+                        ;
+
+
+                        ImGui.Text("Insertion Vector: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_insertionOrbitalVelocity.ToString("g3"));
+
+                        ImGui.Text("LoAN: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_ke.LoAN.ToString("g3"));
+
+                        ImGui.Text("AoP: ");
+                        ImGui.SameLine();
+                        ImGui.Text(_ke.AoP.ToString("g3"));
+
+                        ImGui.Text("LoP Angle: ");
+                        ImGui.SameLine();
+                        ImGui.Text((_ke.LoAN + _ke.AoP).ToString("g3") + " radians or " + Angle.ToDegrees(_ke.LoAN + _ke.AoP).ToString("F") + " deg ");
+
+                        if (_orbitWidget != null)
+                            ImGui.Text("Is Retrograde " + _orbitWidget.IsRetrogradeOrbit.ToString());
+
+                    }
 
                     //if (CurrentState != States.NeedsActioning) //use alpha on the button if it's not useable. 
                     //ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
@@ -499,16 +490,13 @@ namespace Pulsar4X.SDL2UI
             (ECSLib.Vector3 position, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(OrderingEntity.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
-            /*
-            double x = (_radialDV * Math.Cos(_departureAngle)) - (_progradeDV * Math.Sin(_departureAngle));
-            double y = (_radialDV * Math.Sin(_departureAngle)) + (_progradeDV * Math.Cos(_departureAngle));
-            */
-            var norm = ECSLib.Vector3.Normalise( _departureOrbitalVelocity);
+
+            var norm = Vector3.Normalise( _departureOrbitalVelocity);
             double x = norm.X * _radialDV;
             double y = norm.Y * _progradeDV;
-            _deltaV_MS = new ECSLib.Vector3(x, y, 0);
+            _deltaV_MS = new Vector3(x, y, 0);
 
-            var insertionVector = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
             _insertionOrbitalVelocity = insertionVector;
 
             _insertionOrbitalVelocity += Distance.MToAU( _deltaV_MS);
@@ -550,7 +538,8 @@ namespace Pulsar4X.SDL2UI
             IsActive = false;
             CurrentState = States.NeedsEntity;
             _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
-
+            _progradeDV = 0;
+            _radialDV = 0;
             if (_orbitWidget != null)
             {
                 _state.SelectedSysMapRender.UIWidgets.Remove(nameof(_orbitWidget));
