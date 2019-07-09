@@ -17,8 +17,10 @@ The [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki) has a good amount of i
 
 ## Compiling Pulsar4x Master branch:
 
+### Windows
 To compile and debug Pulsar4x we recommend [VisualStudio 2019 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). We're starting to use a bit of C#6, ~~so 2013 is not recommended unless you know what you're doing.~~ won't even load the newer csproj files.  2015 *might* work?
 Xamarin Studio does work under Windows, and the process is the same as for VS2015.
+Rider also works under windows. 
 
 ### Linux
 MonoDevelop
@@ -28,6 +30,7 @@ Monodevelop-nunit (to run the unit tests)
 
 For the current UI to work, you'll need SDL version 2.0.5 or higher, if you're running Ubuntu < than 18, you'll likely need to compile and install SDL from source, if your update repositories are high enough you should be fine. 
 This shouldnt be a problem on Windows since the dll is included for the Windows build. 
+Note, you may have a permissions problem that I've been unable to fully figure out: https://github.com/Pulsar4xDevs/Pulsar4x/issues/216
 
 ### Mac
 mono + GTK + Xamarin Studio
@@ -37,9 +40,7 @@ http://www.monodevelop.com/download/
 ### Cross Platforms:
 Another IDE option is the cross platform [Rider](https://www.jetbrains.com/rider/) from JetBrains.
 I'm currently using this under Linux and it's a good option. A bit heavier than MonoDevelop but it's lighter and more responsive than Visual Studio. 
-Even though it is in beta, it appears to have all the bells and whistles. Easier to setup than MD and faster to install than VS.
-Currently only tested on Linux (and Mac?)
-There is currently no Eto.forms plugin for Rider. 
+Another option is [VSCode](https://code.visualstudio.com/) which is light, but required a bit of setup. 
 
 ## Instructions:
 
@@ -48,18 +49,20 @@ You'll need SDL2 installed.
 
 1. Clone the Git Repo.
 
-2. Open the solution file "Pulsar4X\Pulsar4X.sln". in Monodevelop or Visual Studio.
+2. Open the solution file "Pulsar4X\Pulsar4X.sln". in Monodevelop, Visual Studio, or Rider.
 
-	a. If you're running Windows: Let me know, as of 2019.07, this is not yet tested. 
+	a. If you're running Windows: Should work. 
 
 	b. If you're running Linux: Should work.
 
 	c. If you're running Mac: you'll need xamarin studio to compile it for Mac. Let me know, as of 2019.07, this is not yet tested.
 
-4. Set the imguinetUI project as the startup project. and run/debug to compile.  
+4. Set the imguinetUI project as the startup project. 
+
+5. Run/debug to compile and run the project.  
 
 **Important: there are a number of NuGet packages that VS/Monodevelop should automaticaly get the first time you attempt to build. 
 The IDE will have a number of errors but build the solution anyway, VS will get the packages for you.**
 
 ## Working with the code:
-This section is a work in progress. Read the pages on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki), or ask me questions on [Gitter](https://gitter.im/Pulsar4x/Lobby#), Discord, or create an [issue](https://github.com/Pulsar4xDevs/Pulsar4x/issues). 
+This section is a work in progress. Read the pages on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki), which includes some [style guidelines](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Formating-rules-and-guidelines) or ask me questions on [Gitter](https://gitter.im/Pulsar4x/Lobby#), [Discord](https://discord.gg/qy8eZHh), or create an [issue](https://github.com/Pulsar4xDevs/Pulsar4x/issues). 
