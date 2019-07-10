@@ -219,6 +219,7 @@ namespace Pulsar4X.SDL2UI
 
             //because the nameIcons are IMGUI not SDL we draw them here. 
             _state.GalacticMap.DrawNameIcons();
+            ImGui.GetForegroundDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
 
         }
 
