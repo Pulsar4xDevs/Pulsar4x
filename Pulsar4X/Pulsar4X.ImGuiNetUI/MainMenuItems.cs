@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
                     _state.EnableGameMaster();
                     this.IsActive = false;
                 }
-                    
+                //ImGui.GetForegroundDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
                 //if (_saveGame)
 
                 ImGui.End();

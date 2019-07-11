@@ -681,7 +681,7 @@ namespace Pulsar4X.SDL2UI
             */
             _aopItem_FromCalc4 = new ElementItem()
             {
-                NameString = "Argument Of Periapsis (\uCF89) - using vector calc4",
+                NameString = "Argument Of Periapsis (ω) - using vector calc4",
                 Colour = aopColour,
                 HighlightColour = aopHColour,
                 DataItem = Angle.ToDegrees(_aopFromCalc4),

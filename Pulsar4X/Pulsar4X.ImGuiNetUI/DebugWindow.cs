@@ -147,6 +147,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text("y" + mouseWorldCoord.Y);
 
+                    ImGui.Text("Special Chars");
+                    //ImGui.Text("\u03A9, Ω, ω, ν");
                     if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
 

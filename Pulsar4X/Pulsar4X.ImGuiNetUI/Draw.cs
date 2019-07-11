@@ -58,7 +58,7 @@ namespace Pulsar4X.SDL2UI
     {
         internal string NameString;
         internal double DataItem;
-        internal string DataString;
+        internal string DataString = "";
         internal ComplexShape Shape;
         internal SDL.SDL_Color[] Colour;
         internal SDL.SDL_Color[] HighlightColour;

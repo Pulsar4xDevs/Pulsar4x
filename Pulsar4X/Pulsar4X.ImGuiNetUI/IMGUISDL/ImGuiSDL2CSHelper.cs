@@ -52,14 +52,24 @@ namespace ImGuiSDL2CS {
 
             //io.SetSetClipboardTextFn((userData, text) => SDL.SDL_SetClipboardText(text));
 
-            // If no font added, add default font.
+            
+            unsafe
+            {
+                string rf = "Resources";
+                ImFontAtlasPtr fontAtlas = ImGui.GetIO().Fonts;
+                var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+                builder.AddText("Ωων");
+                //builder.AddRanges(fontAtlas.GetGlyphRangesDefault());
+                builder.BuildRanges(out ImVector ranges);
+                fontAtlas.AddFontFromFileTTF(Path.Combine(rf, "ProggyClean.ttf"), 13);
+                ImFontConfig* rawPtr = ImGuiNative.ImFontConfig_ImFontConfig();
+                ImFontConfigPtr config = new ImFontConfigPtr(rawPtr);
+                config.MergeMode = true;
+                fontAtlas.AddFontFromFileTTF(Path.Combine(rf, "DejaVuSans.ttf"), 13, config, ranges.Data);
+            }
+            
             if (io.Fonts.Fonts.Size == 0)
                 io.Fonts.AddFontDefault();
-            string rf = "Resources";
-            
-            //io.Fonts.AddFontFromFileTTF(Path.Combine(rf,"Cousine-Regular.ttf"), 13);
-            //io.Fonts.AddFontFromFileTTF(Path.Combine(rf,"DejaVuMathTeXGyre.ttf"), 13);
-            //io.Fonts.AddFontFromFileTTF(Path.Combine(rf,"DejaVuSans.ttf"), 12);
         }
 
 
