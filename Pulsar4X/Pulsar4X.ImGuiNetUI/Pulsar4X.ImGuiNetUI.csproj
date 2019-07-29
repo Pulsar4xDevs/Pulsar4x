@@ -83,6 +83,12 @@
     <None Remove="Resources\DnArrow.bmp" />
     <None Remove="Resources\RepeatIco.bmp" />
     <None Remove="Resources\UpArrow.bmp" />
+    <None Update="Resources\ProggyClean.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\DejaVuSans.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
     <None Include="Libs\cimgui\linux-x64\cimgui.so" Visable="false">

@@ -2,6 +2,7 @@
 using ImGuiNET;
 using System.Numerics;
 using System.Collections.Generic;
+using Pulsar4X.SDL2UI.Combat;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
@@ -48,12 +49,21 @@ namespace Pulsar4X.SDL2UI
 
                 if (ImGui.Begin("Settings", ref IsActive, _flags))
                 {
-                
+
                     ImGui.Checkbox("Show Pulsar Debug Window", ref DebugWindow.GetInstance().IsActive);
                     ImGui.Checkbox("Show ImguiMetrix", ref _state.ShowMetrixWindow);
                     ImGui.Checkbox("Show ImgDebug", ref _state.ShowImgDbg);
                     ImGui.Checkbox("DemoWindow", ref _state.ShowDemoWindow);
+                    if (ImGui.Checkbox("DamageWindow", ref _state.ShowDamageWindow))
+                    {
+                        if (_state.ShowDamageWindow)
+                            DamageViewer.GetInstance().IsActive = true;
+                        else
+                            DamageViewer.GetInstance().IsActive = false;
                         
+                    }
+
+
                     if (ImGui.CollapsingHeader("Process settings", _xpanderFlags))
                     {
                         if (ImGui.Checkbox("MultiThreaded", ref IsThreaded))

@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
-
+        internal bool ShowDamageWindow;
         internal IntPtr rendererPtr;
 
 

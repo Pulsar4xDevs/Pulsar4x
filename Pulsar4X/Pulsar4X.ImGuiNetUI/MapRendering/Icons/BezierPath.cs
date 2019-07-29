@@ -28,14 +28,14 @@ namespace Pulsar4X.SDL2UI
             _linePoints = new List<PointD>();
             for (float t = 0.0f; t < 1.0; t += dt)
             {
-                var x = ComponentCalc(t, _controlPoints[0].X, _controlPoints[1].X, _controlPoints[2].X, _controlPoints[3].X);
-                var y = ComponentCalc(t, _controlPoints[0].Y, _controlPoints[1].Y, _controlPoints[2].Y, _controlPoints[3].Y);
+                var x = BezCalc(t, _controlPoints[0].X, _controlPoints[1].X, _controlPoints[2].X, _controlPoints[3].X);
+                var y = BezCalc(t, _controlPoints[0].Y, _controlPoints[1].Y, _controlPoints[2].Y, _controlPoints[3].Y);
                 
                 _linePoints.Add(new PointD() {X = x, Y = y});
             }
         }
 
-        private static double ComponentCalc(double t, double a0, double a1, double a2, double a3)
+        private static double BezCalc(double t, double a0, double a1, double a2, double a3)
         {
             double foo = a0 * Math.Pow((1 - t), 3); 
             foo += a1 * 3 * t * Math.Pow((1 - t), 2); 

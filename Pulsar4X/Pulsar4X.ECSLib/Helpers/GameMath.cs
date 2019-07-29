@@ -197,6 +197,17 @@ namespace Pulsar4X.ECSLib
         {
             _percent = (byte)(percent * 255);
         }
+        
+
+        public static PercentValue SetRawValue(byte rawValue)
+        {
+            return new PercentValue(){_percent = rawValue};
+        }
+
+        public static byte GetRawValue(PercentValue percentValue)
+        {
+            return percentValue._percent;
+        }
 
         public static implicit operator float(PercentValue percentValue)
         {

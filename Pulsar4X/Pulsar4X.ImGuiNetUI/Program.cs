@@ -6,6 +6,7 @@ using ImGuiSDL2CS;
 using System.Drawing;
 using Pulsar4X.ECSLib;
 using System.Linq;
+using Pulsar4X.SDL2UI.Combat;
 using Vector3 = System.Numerics.Vector3;
 
 namespace Pulsar4X.SDL2UI
@@ -212,6 +213,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.ShowDemoWindow();
                 ImGui.ShowUserGuide();
             }
+
+            
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {
                 item.Display();
