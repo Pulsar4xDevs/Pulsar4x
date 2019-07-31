@@ -17,7 +17,8 @@ The [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki) has a good amount of i
 
 ## Compiling Pulsar4x Master branch:
 
-You will need .net sdk 4.7
+You will need:
+- .net sdk 4.7
 
 
 ### Windows
@@ -26,10 +27,10 @@ Xamarin Studio does work under Windows, and the process is the same as for VS201
 Rider also works under windows. 
 
 ### Linux
-MonoDevelop or Rider
-Mono-Complete
+- MonoDevelop or Rider
+- Mono-Complete
 and we recomended that you also install:
-Monodevelop-nunit (to run the unit tests)
+- Monodevelop-nunit (to run the unit tests)
 
 For the current UI to work, you'll need SDL version 2.0.5 or higher, if you're running Ubuntu < than 18, you'll likely need to compile and install SDL from source, if your update repositories are high enough you should be fine. 
 This shouldnt be a problem on Windows since the dll is included for the Windows build. 
@@ -40,7 +41,7 @@ mono + GTK + Xamarin Studio
 http://www.monodevelop.com/download/
 
 
-### Cross Platforms:
+### Cross Platform editors/ide:
 Another IDE option is the cross platform [Rider](https://www.jetbrains.com/rider/) from JetBrains.
 I'm currently using this under Linux and it's a good option. A bit heavier than MonoDevelop but it's lighter and more responsive than Visual Studio. 
 Another option is [VSCode](https://code.visualstudio.com/) which is light, but required a bit of setup. 
