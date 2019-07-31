@@ -17,13 +17,16 @@ The [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki) has a good amount of i
 
 ## Compiling Pulsar4x Master branch:
 
+You will need .net sdk 4.7
+
+
 ### Windows
 To compile and debug Pulsar4x we recommend [VisualStudio 2019 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs). We're starting to use a bit of C#6, ~~so 2013 is not recommended unless you know what you're doing.~~ won't even load the newer csproj files.  2015 *might* work?
 Xamarin Studio does work under Windows, and the process is the same as for VS2015.
 Rider also works under windows. 
 
 ### Linux
-MonoDevelop
+MonoDevelop or Rider
 Mono-Complete
 and we recomended that you also install:
 Monodevelop-nunit (to run the unit tests)
