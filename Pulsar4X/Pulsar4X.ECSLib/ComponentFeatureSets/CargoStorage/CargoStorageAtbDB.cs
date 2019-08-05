@@ -60,12 +60,15 @@ namespace Pulsar4X.ECSLib
         {
             return new CargoStorageAtbDB(this);
         }
-
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!parentEntity.HasDataBlob<CargoStorageDB>())
-                parentEntity.SetDataBlob(new CargoStorageDB());
-            StorageSpaceProcessor.ReCalcCapacity(parentEntity);
+            {
+                var db = new CargoStorageDB();
+                parentEntity.SetDataBlob(db);
+                StorageSpaceProcessor.ReCalcCapacity(parentEntity);
+            }
         }
     }
 

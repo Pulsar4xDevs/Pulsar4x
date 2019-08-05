@@ -86,9 +86,9 @@ namespace Pulsar4X.Tests
 
         public Entity GreyAlienSpecies { get; set; }
 
-        public Entity DefaultEngineDesign { get; set; }
+        public ComponentDesign DefaultEngineDesign { get; set; }
 
-        public Entity DefaultWeaponDesign { get; set; }
+        public ComponentDesign DefaultWeaponDesign { get; set; }
 
         public Entity DefaultShipDesign { get; set; }
 
@@ -132,7 +132,7 @@ namespace Pulsar4X.Tests
             DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
 
             Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, Sol, HumanFaction, position, Sol, "Serial Peacemaker");
+            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Sol, "Serial Peacemaker");
             Sol.SetDataBlob(DefaultShip.ID, new TransitableDB());
         }
 

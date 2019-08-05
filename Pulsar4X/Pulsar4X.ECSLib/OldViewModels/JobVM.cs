@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
                 {
                     Entity faction;
                     _colonyEntity.Manager.FindEntityByGuid(_colonyEntity.FactionOwner, out faction);
-                    return faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<NameDB>().DefaultName;
+                    return faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].Name;
                 }
                 else
                     return "Unknown Jobtype";
@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
             if (_job is RefineingJob)
                 _jobTotalPoints = _staticData.CargoGoods.GetMaterial(_job.ItemGuid).RefineryPointCost;
             else if (_job is ConstructionJob)
-                _jobTotalPoints = _colonyEntity.GetDataBlob<ObjectOwnershipDB>().Parent.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].GetDataBlob<ComponentInfoDB>().BuildPointCost;
+                _jobTotalPoints = _colonyEntity.GetDataBlob<ObjectOwnershipDB>().Parent.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].BuildPointCost;
 
             JobPriorityCommand = new JobPriorityCommand<TDataBlob, TJob>(this);
         }

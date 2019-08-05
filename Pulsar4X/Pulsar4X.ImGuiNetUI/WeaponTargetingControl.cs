@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
 
         FireControlAbilityDB _shipFCDB;
         int _selectedItemIndex = -1;
-        Guid _selectedFC;
+        Guid _selectedFCGuid;
         List<Guid> _selectedFCAssignedWeapons = new List<Guid>();
         System.Numerics.Vector2 _selectableBtnSize = new System.Numerics.Vector2(100, 18);
 
@@ -32,9 +32,9 @@ namespace Pulsar4X.SDL2UI
             IsActive = true;
         }
 
-        private void OpenFire(FireControlInstanceStateDB fc, SetOpenFireControlOrder.FireModes mode)
+        private void OpenFire(Guid fcID, SetOpenFireControlOrder.FireModes mode)
         {
-            SetOpenFireControlOrder.CreateCmd(_state.Game, _state.Faction, _orderingEntity, fc.OwningEntity.Guid, mode);
+            SetOpenFireControlOrder.CreateCmd(_state.Game, _state.Faction, _orderingEntity, fcID, mode);
         }
 
         internal static WeaponTargetingControl GetInstance(EntityState entity)
@@ -62,18 +62,30 @@ namespace Pulsar4X.SDL2UI
             _unAssignedWeapons = new List<Guid>();
             _systemEntityNames = new Dictionary<Guid, string>();
             _sensorContacts = new Dictionary<Guid, SensorContact>();
-            for (int fcInstanceIndex = 0; fcInstanceIndex < _shipFCDB.FireControlInsances.Count; fcInstanceIndex++)
+
+            var instancesDB = entity.Entity.GetDataBlob<ComponentInstancesDB>();
+            
+            if( instancesDB.TryGetComponentsByAttribute<BeamFireControlAtbDB>(out var fcinstances))
             {
-                var fireControlInstance = _shipFCDB.FireControlComponents[fcInstanceIndex].GetDataBlob<ComponentInstanceInfoDB>();
+                foreach (var instanceData in fcinstances)
+                {
+                    var fcdata = instanceData.Design.GetAttribute<BeamFireControlAtbDB>();
+                    
+                }
+                
             }
-            for (int weaponInstanceIndex = 0; weaponInstanceIndex < _shipFCDB.WeaponInstanceStates.Count; weaponInstanceIndex++)
+        
+            
+  
+            for (int weaponInstanceIndex = 0; weaponInstanceIndex < _shipFCDB.WeaponInstances.Count; weaponInstanceIndex++)
             {
-                var weaponInstanace = _shipFCDB.WeaponComponents[weaponInstanceIndex].GetDataBlob<ComponentInstanceInfoDB>();
+                var weaponInstanace = _shipFCDB.WeaponInstances[weaponInstanceIndex];
+                
                 string wpnname = weaponInstanace.GetName();
-                _weaponNames.Add(weaponInstanace.OwningEntity.Guid, wpnname);
+                _weaponNames.Add(weaponInstanace.ID, wpnname);
                 //_weapons.Add(wpnname);
-                if (weaponInstanace.OwningEntity.GetDataBlob<WeaponInstanceStateDB>().FireControl == null)
-                    _unAssignedWeapons.Add(weaponInstanace.OwningEntity.Guid);
+                if (weaponInstanace.GetAbilityState<WeaponState>().FireControl == null)
+                    _unAssignedWeapons.Add(weaponInstanace.ID);
             }
             foreach (var item in _state.SelectedSystem.GetSensorContacts(_state.Faction.Guid).GetAllContacts())
             {
@@ -170,18 +182,17 @@ namespace Pulsar4X.SDL2UI
                     int selectable = 0;
                     bool selected = false;
                     ImGui.BeginGroup();
-                    foreach (var fc in _shipFCDB.FireControlInsances)
+                    foreach (var fc in _shipFCDB.FireControlInstances)
                     {
-                        
-
+                        var fcAbility = fc.GetAbilityState<FireControlAbilityState>();
                         if (ImGui.Selectable("FC " + selectable, selected, ImGuiSelectableFlags.None, _selectableBtnSize))
                         {
                             _selectedItemIndex = selectable;
-                            _selectedFC = fc.OwningEntity.Guid;
+                            _selectedFCGuid = fc.ID;
                             _selectedFCAssignedWeapons = new List<Guid>();
-                            foreach (var item in fc.AssignedWeapons)
+                            foreach (var item in fcAbility.AssignedWeapons)
                             {
-                                _selectedFCAssignedWeapons.Add(item.Guid);
+                                _selectedFCAssignedWeapons.Add(item.ID);
                             }
 
                         }
@@ -197,21 +208,21 @@ namespace Pulsar4X.SDL2UI
                         }*/
                         ImGui.Text("Target: ");
                         ImGui.SameLine();
-                        if (fc.Target == null || !fc.Target.IsValid)
+                        if (fcAbility.Target == null || !fcAbility.Target.IsValid)
                             ImGui.Text("No Target");
                         else
-                            ImGui.Text(fc.Target.GetDataBlob<NameDB>().GetName(_state.Faction));
+                            ImGui.Text(fcAbility.Target.GetDataBlob<NameDB>().GetName(_state.Faction));
                         selectable++;
 
-                        if (fc.IsEngaging)
+                        if (fcAbility.IsEngaging)
                         {
                             if (ImGui.Button("Cease Fire"))
-                                OpenFire(fc, SetOpenFireControlOrder.FireModes.CeaseFire);
+                                OpenFire(fc.ID, SetOpenFireControlOrder.FireModes.CeaseFire);
                         }
                         else
                         {
                             if (ImGui.Button("Open Fire"))
-                                OpenFire(fc, SetOpenFireControlOrder.FireModes.OpenFire);
+                                OpenFire(fc.ID, SetOpenFireControlOrder.FireModes.OpenFire);
                         }
                     }
                     ImGui.EndGroup();
@@ -232,7 +243,7 @@ namespace Pulsar4X.SDL2UI
                                     
                                     _unAssignedWeapons.Add(wpn);
                                     _selectedFCAssignedWeapons.Remove(wpn);
-                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
+                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFCGuid, _selectedFCAssignedWeapons);
                                 }
                             }
                             ImGui.EndGroup();
@@ -247,7 +258,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     _selectedFCAssignedWeapons.Add(wpn);
                                     _unAssignedWeapons.Remove(wpn);
-                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, _selectedFCAssignedWeapons);
+                                    SetWeaponsFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFCGuid, _selectedFCAssignedWeapons);
                                 }
                             }
                             ImGui.EndGroup();
@@ -263,7 +274,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 if (ImGui.SmallButton(item.Value))
                                 {
-                                    SetTargetFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFC, item.Key);
+                                    SetTargetFireControlOrder.CreateCommand(_state.Game, _state.PrimarySystemDateTime, _state.Faction.Guid, _orderingEntity.Guid, _selectedFCGuid, item.Key);
                                 }
                             }
                         }

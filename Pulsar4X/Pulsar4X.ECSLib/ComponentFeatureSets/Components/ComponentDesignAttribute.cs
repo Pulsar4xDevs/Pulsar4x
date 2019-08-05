@@ -8,10 +8,19 @@ namespace Pulsar4X.ECSLib
     public interface IComponentDesignAttribute
     {
         //void OnComponentInstantiation(Entity component);
-        void OnComponentInstalation(Entity parentEntity, Entity componentInstance);
+        void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance);
         //void OnComponentDeInstalation(Entity ship, Entity component);
     }
-    
+
+    public class ComponentDesignAtbData
+    {
+        public string Name;
+        public string Description;
+        public Type DataBlobType;
+        internal ComponentDesigner ParentComponent;
+        public double Value;
+    }
+
     public class ComponentDesignAttribute
     {
         public string Name;
@@ -20,8 +29,8 @@ namespace Pulsar4X.ECSLib
         public GuiHint GuiHint;
         public Type DataBlobType;
         //public BaseDataBlob DataBlob;
-        internal ComponentDesign ParentComponent; 
-        public ComponentDesignAttribute(ComponentDesign parentComponent)
+        internal ComponentDesigner ParentComponent; 
+        public ComponentDesignAttribute(ComponentDesigner parentComponent)
         {
             ParentComponent = parentComponent;
         }
@@ -85,7 +94,7 @@ namespace Pulsar4X.ECSLib
     {
         private StaticDataStore _staticDataStore;
         private FactionTechDB _factionTechDB;
-        private ComponentDesign _design;
+        private ComponentDesigner _designer;
         private ComponentDesignAttribute _designAttribute;
         private Expression _expression;
 
@@ -169,14 +178,14 @@ namespace Pulsar4X.ECSLib
         /// Primary Constructor for ComponentDesignDB
         /// </summary>
         /// <param name="expressionString"></param>
-        /// <param name="design"></param>
+        /// <param name="designer"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        internal ChainedExpression(string expressionString, ComponentDesign design, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        internal ChainedExpression(string expressionString, ComponentDesigner designer, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
-            _design = design;
+            _designer = designer;
             ReplaceExpression(expressionString);
         }
 
@@ -192,7 +201,7 @@ namespace Pulsar4X.ECSLib
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
-            _design = designAbility.ParentComponent;
+            _designer = designAbility.ParentComponent;
             _designAttribute = designAbility;
             ReplaceExpression(expressionString);
         }
@@ -201,14 +210,14 @@ namespace Pulsar4X.ECSLib
         /// a private constructor that is used internaly for a one use Expression 
         /// </summary>
         /// <param name="expression"></param>
-        /// <param name="design"></param>
+        /// <param name="designer"></param>
         /// <param name="factionTech"></param>
         /// <param name="staticDataStore"></param>
-        private ChainedExpression(Expression expression, ComponentDesign design, FactionTechDB factionTech, StaticDataStore staticDataStore)
+        private ChainedExpression(Expression expression, ComponentDesigner designer, FactionTechDB factionTech, StaticDataStore staticDataStore)
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
-            _design = design;
+            _designer = designer;
             _expression = expression;
             SetupExpression();
 
@@ -225,7 +234,7 @@ namespace Pulsar4X.ECSLib
         {
             _staticDataStore = staticDataStore;
             _factionTechDB = factionTech;
-            _design = designAbility.ParentComponent;
+            _designer = designAbility.ParentComponent;
             _designAttribute = designAbility;
             _expression = expression;
             SetupExpression();
@@ -307,41 +316,41 @@ namespace Pulsar4X.ECSLib
         {
             if (name == "Mass")
             {
-                MakeThisDependant(_design.MassFormula);
-                args.Result = _design.MassValue;
+                MakeThisDependant(_designer.MassFormula);
+                args.Result = _designer.MassValue;
             }
             if (name == "Volume")
             {
-                MakeThisDependant(_design.VolumeFormula);
-                args.Result = _design.VolumeFormula;
+                MakeThisDependant(_designer.VolumeFormula);
+                args.Result = _designer.VolumeFormula;
             }
             if (name == "Crew")
             {
-                MakeThisDependant(_design.CrewFormula);
-                args.Result = _design.CrewReqValue;
+                MakeThisDependant(_designer.CrewFormula);
+                args.Result = _designer.CrewReqValue;
             }
             if (name == "HTK")
             {
-                MakeThisDependant(_design.HTKFormula);
-                args.Result = _design.HTKValue;
+                MakeThisDependant(_designer.HTKFormula);
+                args.Result = _designer.HTKValue;
             }
             if (name == "ResearchCost")
             {
-                MakeThisDependant(_design.ResearchCostFormula);
-                args.Result = _design.ResearchCostValue;
+                MakeThisDependant(_designer.ResearchCostFormula);
+                args.Result = _designer.ResearchCostValue;
             }
             if (name == "MineralCosts")
             {
-                foreach (var formula in _design.MineralCostFormulas.Values)
+                foreach (var formula in _designer.MineralCostFormulas.Values)
                 {
                     MakeThisDependant(formula);
                 }
-                args.Result = _design.MineralCostValues;
+                args.Result = _designer.MineralCostValues;
             }
             if (name == "CreditCost")
             {
-                MakeThisDependant(_design.CreditCostFormula);
-                args.Result = _design.ResearchCostValue;
+                MakeThisDependant(_designer.CreditCostFormula);
+                args.Result = _designer.ResearchCostValue;
             }
             if (name == "GuidDict")
             {
@@ -370,7 +379,7 @@ namespace Pulsar4X.ECSLib
                 {
                     index = (int)args.Parameters[0].Evaluate();
 
-                    ChainedExpression result = _design.ComponentDesignAttributes[index].Formula;
+                    ChainedExpression result = _designer.ComponentDesignAttributes[index].Formula;
                     if (result.Result == null)
                         result.Evaluate();
                     MakeThisDependant(result);
@@ -387,7 +396,7 @@ namespace Pulsar4X.ECSLib
                 {
                     index = (int)args.Parameters[0].Evaluate();
 
-                    ChainedExpression expression = _design.ComponentDesignAttributes[index].Formula;
+                    ChainedExpression expression = _designer.ComponentDesignAttributes[index].Formula;
                     expression.SetResult = args.Parameters[1].Evaluate();
 
                 }

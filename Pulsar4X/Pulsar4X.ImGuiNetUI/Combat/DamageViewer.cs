@@ -41,7 +41,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private int _showFrameNum = 0;
         private IntPtr _showDmgFrametx;
 
-        private ComponentPlacement.ShipProfile _profile;
+        private EntityDamageProfileDB _profile;
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
         

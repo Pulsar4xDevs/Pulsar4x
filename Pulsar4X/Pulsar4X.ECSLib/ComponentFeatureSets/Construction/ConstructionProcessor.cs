@@ -53,10 +53,10 @@ namespace Pulsar4X.ECSLib
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
             foreach (ConstructionJob batchJob in constructionJobs.ToArray())
             {
-                var designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid].GetDataBlob<ComponentInfoDB>();
+                var designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid];
                 ConstructionType conType = batchJob.ConstructionType;
                 //total number of resources requred for a single job in this batch
-                int resourcePoints = designInfo.MinerialCosts.Sum(item => item.Value);
+                int resourcePoints = designInfo.MineralCosts.Sum(item => item.Value);
                 resourcePoints += designInfo.MaterialCosts.Sum(item => item.Value);
                 resourcePoints += designInfo.ComponentCosts.Sum(item => item.Value);
 
@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib
                     ConsumeResources(stockpile, batchJob.MaterialsRequired);
                     ConsumeResources(stockpile, batchJob.ComponentsRequired);
 
-                    int useableResourcePoints = designInfo.MinerialCosts.Sum(item => item.Value) - batchJob.MineralsRequired.Sum(item => item.Value);
+                    int useableResourcePoints = designInfo.MineralCosts.Sum(item => item.Value) - batchJob.MineralsRequired.Sum(item => item.Value);
                     useableResourcePoints += designInfo.MaterialCosts.Sum(item => item.Value) - batchJob.MaterialsRequired.Sum(item => item.Value);
                     useableResourcePoints += designInfo.ComponentCosts.Sum(item => item.Value) - batchJob.ComponentsRequired.Sum(item => item.Value);
                     //how many construction points each resourcepoint is worth.
@@ -92,16 +92,16 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void BatchJobItemComplete(Entity colonyEntity, CargoStorageDB storage, ConstructionJob batchJob, ComponentInfoDB designInfo)
+        private static void BatchJobItemComplete(Entity colonyEntity, CargoStorageDB storage, ConstructionJob batchJob, ComponentDesign designInfo)
         {
             var colonyConstruction = colonyEntity.GetDataBlob<ConstructionDB>();
             batchJob.NumberCompleted++;
             batchJob.ProductionPointsLeft = designInfo.BuildPointCost;
-            batchJob.MineralsRequired = designInfo.MinerialCosts;
+            batchJob.MineralsRequired = designInfo.MineralCosts;
             batchJob.MineralsRequired = designInfo.MaterialCosts;
             batchJob.MineralsRequired = designInfo.ComponentCosts;
 
-            Entity specificComponent = ComponentInstanceFactory.NewInstanceFromDesignEntity(designInfo.OwningEntity, colonyEntity.FactionOwner, colonyEntity.Manager);
+            ComponentInstance specificComponent = new ComponentInstance(designInfo);
             if (batchJob.InstallOn != null)
             {
                 if (batchJob.InstallOn == colonyEntity || StorageSpaceProcessor.HasEntity(storage, colonyEntity.GetDataBlob<CargoAbleTypeDB>()))
@@ -112,7 +112,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                StorageSpaceProcessor.AddCargo(storage, specificComponent.GetDataBlob<CargoAbleTypeDB>(), 1);
+                StorageSpaceProcessor.AddCargo(storage, specificComponent, 1);
             }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
@@ -176,42 +176,20 @@ namespace Pulsar4X.ECSLib
                 {ConstructionType.Ships, 0},
             };
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
-
-            var designs = instancesDB.GetDesignsByType(typeof(ConstructionAtbDB));
-
-            foreach (var design in designs)
+            
+            if (instancesDB.TryGetComponentsByAttribute<ConstructionAtbDB>(out var instances))
             {
-                var componentDesign = design.GetDataBlob<ConstructionAtbDB>();
-                foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
+                foreach (var instance in instances)
                 {
-                    //TODO: need to check availible workers. 
-                    if (instanceInfo.IsEnabled)
+                    float healthPercent = instance.HealthPercent();
+                    var designInfo = instance.Design.GetAttribute<ConstructionAtbDB>();
+                    foreach (var item in designInfo.InternalConstructionPoints)
                     {
-                        var healthPercent = instanceInfo.HealthPercent();
-                        foreach (var item in componentDesign.InternalConstructionPoints)
-                        {
-                            typeRates.SafeValueAdd(item.Key, (int)(item.Value * healthPercent));
-                        }
+                        typeRates.SafeValueAdd(item.Key, (int)(item.Value * healthPercent));
                     }
                 }
-
             }
-
-
-            /*
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> factoryEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<ConstructionAtbDB>()).ToList();
-            foreach (var factoryDesignList in factoryEntities)
-            {
-                foreach (var factoryInstance in factoryDesignList.Value)
-                {
-                    //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
-                    foreach (var item in factoryDesignList.Key.GetDataBlob<ConstructionAtbDB>().InternalConstructionPoints)
-                    {
-                        typeRates.SafeValueAdd(item.Key, item.Value);
-                    }
-                }
-            }*/
-
+            
 
             colonyEntity.GetDataBlob<ConstructionDB>().ConstructionRates = typeRates;
             int maxPoints = 0;

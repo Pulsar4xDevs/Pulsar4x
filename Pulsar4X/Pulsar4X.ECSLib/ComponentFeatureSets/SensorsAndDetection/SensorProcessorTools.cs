@@ -32,9 +32,8 @@ namespace Pulsar4X.ECSLib
             PositionDB targetPosition;
             if (detectableEntity.HasDataBlob<PositionDB>())
                 targetPosition = detectableEntity.GetDataBlob<PositionDB>();
-            else
-                targetPosition = detectableEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();//target may be a componentDB. not a shipDB
-
+            else throw new NotImplementedException("This might be a colony on a planet, not sure how I'll handle that yet");
+ 
             var distance = PositionDB.GetDistanceBetween_AU(receverPos, targetPosition);
             SensorReturnValues detectionValues = DetectonQuality(receverDB, AttenuatedForDistance(sensorProfile, distance));
             SensorInfoDB sensorInfo;

@@ -58,8 +58,8 @@ namespace Pulsar4X.ECSLib
             }
             return totalConstructionPoints;
         }
-
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!parentEntity.HasDataBlob<ConstructionDB>())
                 parentEntity.SetDataBlob(new ConstructionDB());

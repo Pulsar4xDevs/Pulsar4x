@@ -82,28 +82,21 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid,int> rates = new Dictionary<Guid, int>();
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
-            //List<KeyValuePair<Entity, List<Entity>>> mineEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<MineResourcesAtbDB>()).ToList();
-            var designs = instancesDB.GetDesignsByType(typeof(MineResourcesAtbDB));
-            foreach (var design in designs)
+
+            if (instancesDB.TryGetComponentsByAttribute<MineResourcesAtbDB>(out var instances))
             {
-                var designAmount = design.GetDataBlob<MineResourcesAtbDB>().ResourcesPerEconTick;
-                foreach (var item in designAmount)
+                foreach (var instance in instances)
                 {
-                    rates.SafeValueAdd(item.Key, item.Value);
-                }
-            }  
-            /*
-            foreach (var mineComponentDesignList in mineEntities)
-            {
-                foreach (var mineInstance in mineComponentDesignList.Value)
-                {
-                    //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
-                    foreach (var item in mineComponentDesignList.Key.GetDataBlob<MineResourcesAtbDB>().ResourcesPerEconTick)
+                    float healthPercent = instance.HealthPercent();
+                    var designInfo = instance.Design.GetAttribute<MineResourcesAtbDB>();
+     
+                    foreach (var item in designInfo.ResourcesPerEconTick)
                     {
-                        rates.SafeValueAdd(item.Key, item.Value);
-                    }                    
+                        rates.SafeValueAdd(item.Key, (int)(item.Value * healthPercent)); 
+                    }
                 }
-            }*/
+            }
+            
             colonyEntity.GetDataBlob<MiningDB>().MineingRate = rates;
         }
 

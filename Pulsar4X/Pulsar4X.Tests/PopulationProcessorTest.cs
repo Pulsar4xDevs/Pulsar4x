@@ -48,10 +48,8 @@ namespace Pulsar4X.Tests
 
 
             ComponentTemplateSD infrastructureSD = _game.Game.StaticData.ComponentTemplates[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
-            ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>(), _game.Game.StaticData);
-            Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game.Game, _game.HumanFaction, infrastructureDesign);
-
-            EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureEntity);
+            ComponentDesigner infrastructureDesigner = new ComponentDesigner(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>());
+            EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesigner.CreateDesign(_game.HumanFaction));
 
             ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
@@ -99,8 +97,10 @@ namespace Pulsar4X.Tests
 
             Guid infGUID = new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb");
             ComponentTemplateSD infrastructureSD = _game.Game.StaticData.ComponentTemplates[infGUID];
-            ComponentDesign infrastructureDesign = GenericComponentFactory.StaticToDesign(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>(), _game.Game.StaticData);
-            Entity infrastructureEntity = GenericComponentFactory.DesignToDesignEntity(_game.Game, _game.HumanFaction, infrastructureDesign);
+            
+            
+            ComponentDesigner infrastructureDesigner = new ComponentDesigner(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>());
+            ComponentDesign infrastructureDesign = infrastructureDesigner.CreateDesign(_game.HumanFaction);
 
             Dictionary<Entity, long> pop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.Tests
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureEntity);
+                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesign);
                 ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
 
@@ -150,7 +150,7 @@ namespace Pulsar4X.Tests
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureEntity);
+                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesign);
                 ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
                 for (j = 0; j < basePop.Length; j++)
@@ -216,7 +216,7 @@ namespace Pulsar4X.Tests
             long popSupportValue = 0;
             foreach (var design in popSupportTypes)
             {
-                var designValue = design.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
+                var designValue = design.GetAttribute<PopulationSupportAtbDB>().PopulationCapacity;
                 var numberOf = instancesDB.GetNumberOfComponentsOfDesign(design.Guid);
                 popSupportValue = designValue * numberOf;
             }

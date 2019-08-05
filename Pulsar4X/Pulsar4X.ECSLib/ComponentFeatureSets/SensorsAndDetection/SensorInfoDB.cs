@@ -4,6 +4,10 @@ using static Pulsar4X.ECSLib.SensorProcessorTools;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// This datablob goes into the sensor contact.
+    /// TODO: I can't see this actualy getting added to an entity anywhere, maybe it does not need to be a datablob.
+    /// </summary>
     public class SensorInfoDB : BaseDataBlob, IGetValuesHash
     {
         [JsonProperty]

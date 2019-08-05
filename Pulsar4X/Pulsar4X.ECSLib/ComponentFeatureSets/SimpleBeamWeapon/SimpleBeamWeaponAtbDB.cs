@@ -37,18 +37,20 @@ namespace Pulsar4X.ECSLib
             return new SimpleBeamWeaponAtbDB(this);
         }
 
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
+            var instancesDB = parentEntity.GetDataBlob<ComponentInstancesDB>();
             if (!parentEntity.HasDataBlob<FireControlAbilityDB>())
             {
                 var fcdb = new FireControlAbilityDB();
                 parentEntity.SetDataBlob(fcdb);
             }
-            var ability = parentEntity.GetDataBlob<FireControlAbilityDB>();
-            if (!componentInstance.HasDataBlob<WeaponInstanceStateDB>())
-                componentInstance.SetDataBlob(new WeaponInstanceStateDB());
-            ability.AddWeaponToParentEntity(componentInstance);
+           
+            if (!componentInstance.HasAblity<WeaponState>())
+                componentInstance.SetAbilityState<WeaponState>(new WeaponState());
+            
 
         }
+
     }
 }

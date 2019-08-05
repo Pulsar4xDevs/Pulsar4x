@@ -4,15 +4,15 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    public class WeaponInstanceStateDB : BaseDataBlob
+    public class WeaponState : ComponentAbilityState
     {
         [JsonProperty]
         public DateTime CoolDown { get; internal set; }
         [JsonProperty]
         public bool ReadyToFire { get; internal set; }
         [JsonProperty]
-        private Entity _fireControl;
-        public Entity FireControl
+        private ComponentInstance _fireControl;
+        public ComponentInstance FireControl
         {
             get
             {
@@ -23,27 +23,24 @@ namespace Pulsar4X.ECSLib
             {
                 if (value == null)
                     _fireControl = null;
-                else if (value.HasDataBlob<FireControlInstanceStateDB>())
+                else if (value.HasAblity<FireControlAbilityState>())
                     _fireControl = value;
                 else
                     _fireControl = null;
             }
         }
 
-        public WeaponInstanceStateDB()
+        public WeaponState()
         {
             FireControl = null;
         }
 
-        public WeaponInstanceStateDB(WeaponInstanceStateDB db)
+        public WeaponState(WeaponState db)
         {
             CoolDown = db.CoolDown;
+            ReadyToFire = db.ReadyToFire;
             FireControl = db.FireControl;
         }
-
-        public override object Clone()
-        {
-            return new WeaponInstanceStateDB(this);
-        }
+        
     }
 }

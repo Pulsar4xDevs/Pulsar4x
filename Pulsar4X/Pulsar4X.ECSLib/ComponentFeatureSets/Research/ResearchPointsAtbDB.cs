@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class ResearchPointsAtbDB : BaseDataBlob
+    public class ResearchPointsAtbDB : IComponentDesignAttribute
     {
         [JsonProperty]
         private int _pointsPerEconTick;        
@@ -26,9 +26,17 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public override object Clone()
+        public object Clone()
         {
             return new ResearchPointsAtbDB(this);
+        }
+
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<EntityResearchDB>())
+            {
+                parentEntity.SetDataBlob(new EntityResearchDB());
+            }
         }
     }
 }

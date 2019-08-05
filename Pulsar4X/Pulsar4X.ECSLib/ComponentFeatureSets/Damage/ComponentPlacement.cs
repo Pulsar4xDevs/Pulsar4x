@@ -8,19 +8,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
     public static class ComponentPlacement
     {
         
-        public struct ShipProfile
-        {
-            public DamageResist Armor;
-            public List<(Guid id, int count)> PlacementOrder;
-            //public List<(int index, int size)> Bulkheads; maybe connect armor/skin at these points.
-            //if we get around to doing technical stuff like being able to break a ship into two pieces,
-            //and having longditudinal structural parts...
-            public RawBmp ShipDamageProfile;
-            public Dictionary<Guid, RawBmp> TypeBitmaps;
-        }
-        
-
-        public static ShipProfile CreateShipMap(List<(ComponentProfile component, int count)> components, DamageResist armor)
+        public static EntityDamageProfileDB CreateShipMap(List<(ComponentProfile component, int count)> components, DamageResist armor)
         {
 
             int minWidth = 0;
@@ -36,7 +24,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             int maxWidthIndex = -1;
 
 
-            ShipProfile shipProfile = new ShipProfile();
+            EntityDamageProfileDB shipProfile = new EntityDamageProfileDB();
             
             Dictionary<Guid, int> typeCount = new Dictionary<Guid, int>();
             Dictionary<Guid, RawBmp> typeBitmap = new Dictionary<Guid, RawBmp>();
@@ -133,7 +121,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             return shipProfile;
         }
 
-        public static RawBmp CreateShipBmp(ShipProfile shipProfile)
+        public static RawBmp CreateShipBmp(EntityDamageProfileDB shipProfile)
         {
             var armorID = shipProfile.Armor.IDCode;
             var po = shipProfile.PlacementOrder;

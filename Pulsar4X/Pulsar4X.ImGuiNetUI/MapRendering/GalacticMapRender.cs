@@ -48,7 +48,7 @@ namespace Pulsar4X.SDL2UI
             float angleIncrease = (float)Math.Max(0.78539816339, 6.28318530718 / _state.StarSystemStates.Count);
             int startR = 200;
             int radInc = 5;
-            foreach (var item in _state.StarSystemStates)
+            foreach (KeyValuePair<Guid, SystemState> item in _state.StarSystemStates)
             {
 
                 SystemMapRendering map = new SystemMapRendering(_window, _state);

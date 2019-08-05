@@ -101,8 +101,8 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private DictionaryVM<Entity, string> _fireControlList = new DictionaryVM<Entity, string>();
-        public DictionaryVM<Entity, string> FireControlList
+        private DictionaryVM<ComponentInstance, string> _fireControlList = new DictionaryVM<ComponentInstance, string>();
+        public DictionaryVM<ComponentInstance, string> FireControlList
         {
             get
             {
@@ -116,8 +116,8 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private DictionaryVM<Entity, string> _attachedBeamList = new DictionaryVM<Entity, string>();
-        public DictionaryVM<Entity, string> AttachedBeamList
+        private DictionaryVM<ComponentInstance, string> _attachedBeamList = new DictionaryVM<ComponentInstance, string>();
+        public DictionaryVM<ComponentInstance, string> AttachedBeamList
         {
             get
             {
@@ -131,8 +131,8 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private DictionaryVM<Entity, string> _freeBeamList = new DictionaryVM<Entity, string>();
-        public DictionaryVM<Entity, string> FreeBeamList
+        private DictionaryVM<ComponentInstance, string> _freeBeamList = new DictionaryVM<ComponentInstance, string>();
+        public DictionaryVM<ComponentInstance, string> FreeBeamList
         {
             get
             {
@@ -152,9 +152,9 @@ namespace Pulsar4X.ECSLib
         public BaseOrder SelectedMoveOrder { get { return _moveOrderList.SelectedKey; } }
         public Entity SelectedMoveTarget { get { return _moveTargetList.SelectedKey; } }
         public Entity SelectedAttackTarget { get { return _attackTargetList.SelectedKey; } }
-        public Entity SelectedFireControl { get { return _fireControlList.SelectedKey; } }
-        public Entity SelectedAttachedBeam { get { return _attachedBeamList.SelectedKey; } }
-        public Entity SelectedFreeBeam { get { return _freeBeamList.SelectedKey; } }
+        public ComponentInstance SelectedFireControl { get { return _fireControlList.SelectedKey; } }
+        public ComponentInstance SelectedAttachedBeam { get { return _attachedBeamList.SelectedKey; } }
+        public ComponentInstance SelectedFreeBeam { get { return _freeBeamList.SelectedKey; } }
 
         private Entity _targetedEntity;
         public string TargetedEntity {
@@ -402,7 +402,7 @@ namespace Pulsar4X.ECSLib
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
                 return; 
 
-            _targetedEntity = SelectedFireControl.GetDataBlob<FireControlInstanceStateDB>().Target;
+            _targetedEntity = SelectedFireControl.GetAbilityState<FireControlAbilityState>().Target;
             OnPropertyChanged(TargetedEntity);
         }
 
@@ -481,12 +481,14 @@ namespace Pulsar4X.ECSLib
 
         
             var instanceDB = SelectedShip.GetDataBlob<ComponentInstancesDB>();
-            var fcList = instanceDB.GetDesignsByType(typeof(BeamFireControlAtbDB));
-            int fcCount = 0;
-            foreach (var item in fcList)
+            if (instanceDB.TryGetComponentsByAttribute<BeamFireControlAtbDB>(out var fcList))
             {
-                fcCount++;
-                _fireControlList.Add(item, item.GetDataBlob<NameDB>().DefaultName + fcCount); 
+                int fcCount = 0;
+                foreach (var item in fcList)
+                {
+                    fcCount++;
+                    _fireControlList.Add(item, item.GetName());
+                }
             }
 
             //List<KeyValuePair<Entity, List<Entity>>> fcList = EntityStoreHelpers.GetComponentsOfType<BeamFireControlAtbDB>(instanceDB.SpecificInstances);
@@ -526,10 +528,10 @@ namespace Pulsar4X.ECSLib
             if (_fireControlList.Count > 0 && _fireControlList.SelectedIndex != -1)
             {
                 int beamCount = 0;
-                foreach (Entity beam in SelectedFireControl.GetDataBlob<FireControlInstanceStateDB>().AssignedWeapons)
+                foreach (ComponentInstance beam in SelectedFireControl.GetAbilityState<FireControlAbilityState>().AssignedWeapons)
                 {
                     beamCount++;
-                    _attachedBeamList.Add(beam, beam.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity.GetDataBlob<NameDB>().DefaultName + " " + beamCount);
+                    _attachedBeamList.Add(beam, beam.GetName());
                 }
 
             }
@@ -544,8 +546,8 @@ namespace Pulsar4X.ECSLib
                 foreach (var instance in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     int beamCount = 0;
-                    if (instance.OwningEntity.GetDataBlob<WeaponInstanceStateDB>().FireControl == null)
-                        _freeBeamList.Add(new KeyValuePair<Entity, string>(instance.ParentEntity, design.GetDataBlob<NameDB>().DefaultName + " " + ++beamCount));
+                    if (instance.GetAbilityState<WeaponState>().FireControl == null)
+                        _freeBeamList.Add(new KeyValuePair<ComponentInstance, string>(instance, instance.GetName()));
 
                 }
             }
@@ -580,7 +582,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        private bool IsBeamInFireControlList(Entity beam)
+        private bool IsBeamInFireControlList(ComponentInstance beam)
         {
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
                 return false;
@@ -593,7 +595,7 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var fc in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
-                    if (fc.ParentEntity.GetDataBlob<FireControlInstanceStateDB>().AssignedWeapons.Contains(beam))
+                    if (fc.GetAbilityState<FireControlAbilityState>().AssignedWeapons.Contains(beam))
                         return true;
                 }
 
@@ -665,7 +667,7 @@ namespace Pulsar4X.ECSLib
 
         public void OnAddBeam()
         {
-            Entity beam = SelectedFreeBeam;
+            ComponentInstance beam = SelectedFreeBeam;
 
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
                 return;
@@ -673,18 +675,18 @@ namespace Pulsar4X.ECSLib
             if (SelectedFreeBeam == null || _freeBeamList.SelectedIndex == -1)
                 return;
 
-            List<Entity> weaponList = SelectedFireControl.GetDataBlob<FireControlInstanceStateDB>().AssignedWeapons;
+            List<ComponentInstance> weaponList = SelectedFireControl.GetAbilityState<FireControlAbilityState>().AssignedWeapons;
             weaponList.Add(SelectedFreeBeam);
 
             // @todo: set the fire control for the beam
-            beam.GetDataBlob<WeaponInstanceStateDB>().FireControl = SelectedFireControl;
+            beam.GetAbilityState<WeaponState>().FireControl = SelectedFireControl;
 
             RefreshBeamWeaponsList(0, 0);
         }
 
         public void OnRemoveBeam()
         {
-            Entity beam = SelectedAttachedBeam;
+            ComponentInstance beam = SelectedAttachedBeam;
 
 
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
@@ -693,19 +695,19 @@ namespace Pulsar4X.ECSLib
             if (SelectedAttachedBeam == null || _attachedBeamList.SelectedIndex == -1)
                 return;
 
-            List<Entity> weaponList = SelectedFireControl.GetDataBlob<FireControlInstanceStateDB>().AssignedWeapons;
+            List<ComponentInstance> weaponList = SelectedFireControl.GetAbilityState<FireControlAbilityState>().AssignedWeapons;
             weaponList.Remove(SelectedAttachedBeam);
 
             // @todo: unset the fire control for the beam
 
-            beam.GetDataBlob<WeaponInstanceStateDB>().FireControl = null;
+            beam.GetAbilityState<WeaponState>().FireControl = null;
 
             RefreshBeamWeaponsList(0, 0);
         }
 
         public void OnAddTarget()
         {
-            Entity fc = SelectedFireControl;
+            ComponentInstance fc = SelectedFireControl;
             Entity target = SelectedAttackTarget;
 
             if (SelectedFireControl == null || _fireControlList.SelectedIndex == -1)
@@ -714,7 +716,7 @@ namespace Pulsar4X.ECSLib
             if (SelectedAttackTarget == null || _attackTargetList.SelectedIndex == -1)
                 return;
 
-            fc.GetDataBlob<FireControlInstanceStateDB>().Target = target;
+            fc.GetAbilityState<FireControlAbilityState>().Target = target;
             // Get the currently selected ship and fire control and the currently selected list of targets
             // Add the currently selected target to the selected ship's target
             // Update GUI

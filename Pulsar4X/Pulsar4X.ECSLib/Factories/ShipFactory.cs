@@ -6,19 +6,19 @@ namespace Pulsar4X.ECSLib
 {
     public static class ShipFactory
     {
-        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
+        public static Entity CreateShip(Entity classEntity,  Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
         {
             Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
             var distanceFromParent = Distance.AuToMt( parent.GetDataBlob<MassVolumeDB>().Radius * 2);
             position.X += distanceFromParent;
-            Entity ship = CreateShip(classEntity, systemEntityManager, ownerFaction, position, starsys, shipName);
+            Entity ship = CreateShip(classEntity, ownerFaction, position, starsys, shipName);
             ship.GetDataBlob<PositionDB>().SetParent(parent);
-            var orbitDB = OrbitDB.FromPosition(parent, ship, systemEntityManager.ManagerSubpulses.StarSysDateTime);
+            var orbitDB = OrbitDB.FromPosition(parent, ship, starsys.ManagerSubpulses.StarSysDateTime);
             ship.SetDataBlob(orbitDB);
             return ship;
         }
 
-        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, Vector3 pos, StarSystem starsys, string shipName = null)
+        public static Entity CreateShip(Entity classEntity, Entity ownerFaction, Vector3 pos, StarSystem starsys, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
             // @todo: make sure each component design and component instance is unique, not duplicated
@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib
             ComponentInstancesDB classInstances = classEntity.GetDataBlob<ComponentInstancesDB>();
 
 
-            Entity shipEntity = new Entity(systemEntityManager, ownerFaction.Guid, protoShip);
+            Entity shipEntity = new Entity(starsys, ownerFaction.Guid, protoShip);
             shipEntity.RemoveDataBlob<ComponentInstancesDB>();
             shipEntity.SetDataBlob(new ComponentInstancesDB());
             if(shipEntity.HasDataBlob<FireControlAbilityDB>())
@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
             {
                 for (int i = 0; i < designKVP.Value; i++)
                 {
-                    Entity newInstance = ComponentInstanceFactory.NewInstanceFromDesignEntity(designKVP.Key, ownerFaction.Guid, systemEntityManager);
+                    var newInstance = new ComponentInstance(designKVP.Key); 
                     EntityManipulation.AddComponentToEntity(shipEntity, newInstance);
                 }
             }
@@ -76,10 +76,9 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var instance in shipComponentInstanceDB.GetComponentsBySpecificDesign(design.Guid))
                 {
-                    var sensor = design.GetDataBlob<SensorReceverAtbDB>();
+                    SensorReceverAtbDB sensor = (SensorReceverAtbDB)design.AttributesByType[typeof(SensorReceverAtbDB)];
                     DateTime nextDatetime = shipEntity.Manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(sensor.ScanTime);
-                    shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan().TypeName, instance.OwningEntity);
-
+                    shipEntity.Manager.ManagerSubpulses.AddEntityInterupt(nextDatetime, new SensorScan().TypeName, instance.ParentEntity);
                 }
             }   
             

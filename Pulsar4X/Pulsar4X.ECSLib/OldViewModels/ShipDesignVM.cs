@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
         /// this is a list of all components designed and availible to this empire. it should probibly include components designed but not yet researched. 
         /// these are what get generated from the DesignToEntity factory.
         /// </summary>
-        public List<Entity> ComponentsDesigned { get { return _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToList(); } }
+        public List<ComponentDesign> ComponentsDesigned { get { return _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToList(); } }
         //public List<ComponentListVM> ComponentsDesignedLists { get; set; }
         public ComponentListVM ComponentsDesignedLists { get; set; }
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
             Engines = new ObservableCollection<ComponentListEngineVM>();
             foreach (var componentDesign in factionInfo.ComponentDesigns.Values)
             {
-                if (componentDesign.HasDataBlob<EnginePowerAtbDB>())
+                if (componentDesign.HasAttribute<EnginePowerAtbDB>())
                 {
                     Engines.Add(new ComponentListEngineVM(componentDesign));
                 }
@@ -98,22 +98,22 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentListComponentVM : IViewModel
     {
-        protected Entity _componentEntity_;
-        private ComponentInfoDB _designDB;
+        
+        private ComponentDesign _designDB;
 
         public string Name { get; private set ; }
-        public float Size { get { return _designDB.SizeInTons; } }
-        public int CrewReq { get { return _designDB.CrewRequrements; } }
+        public float Size { get { return _designDB.Mass; } }
+        public int CrewReq { get { return _designDB.CreditCost; } }
 
         public int AbilityAmount { get; protected set; }
 
 
-        public ComponentListComponentVM(Entity component)
+        public ComponentListComponentVM(ComponentDesign component)
         {
-            _componentEntity_ = component;
-            _designDB = component.GetDataBlob<ComponentInfoDB>();
+            
+            _designDB = component;
 
-            Name = component.GetDataBlob<NameDB>().DefaultName;
+            Name = component.Name;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -126,9 +126,9 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentListEngineVM : ComponentListComponentVM
     {
-        public ComponentListEngineVM(Entity component) : base(component)
+        public ComponentListEngineVM(ComponentDesign component) : base(component)
         {
-            AbilityAmount = _componentEntity_.GetDataBlob<EnginePowerAtbDB>().EnginePower;
+            AbilityAmount = component.GetAttribute<EnginePowerAtbDB>().EnginePower;
         }
     }
 

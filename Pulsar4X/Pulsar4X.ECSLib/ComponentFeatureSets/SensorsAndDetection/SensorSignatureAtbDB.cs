@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class SensorSignatureAtbDB : BaseDataBlob
+    public class SensorSignatureAtbDB : IComponentDesignAttribute
     {
         [JsonProperty]
         public int ThermalSig { get; internal set; }
@@ -20,9 +20,16 @@ namespace Pulsar4X.ECSLib
             ElectroMagneticSig = electroMagneticSig;
         }
 
-        public override object Clone()
+        public object Clone()
         {
             return new SensorSignatureAtbDB(ThermalSig, ElectroMagneticSig);
+        }
+
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if(!parentEntity.HasDataBlob<SensorProfileDB>())
+                parentEntity.SetDataBlob(new SensorProfileDB());
+            
         }
     }
 }

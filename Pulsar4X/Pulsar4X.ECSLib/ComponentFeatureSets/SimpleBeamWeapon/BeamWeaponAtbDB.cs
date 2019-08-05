@@ -80,10 +80,10 @@ namespace Pulsar4X.ECSLib
             return new BeamWeaponAtbDB(MaxRange, BaseDamage, AccuracyMultiplier, PowerRequired, PowerRechargeRate, ShotsPerVolley, WeaponType);
         }
 
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!componentInstance.HasDataBlob<WeaponInstanceStateDB>())
-                componentInstance.SetDataBlob(new WeaponInstanceStateDB());
+            if (!componentInstance.HasAblity<WeaponState>())
+                componentInstance.SetAbilityState<WeaponState>(new WeaponState());
         }
     }
 }

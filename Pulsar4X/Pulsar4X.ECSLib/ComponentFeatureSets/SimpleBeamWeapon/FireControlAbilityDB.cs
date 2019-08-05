@@ -8,39 +8,25 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// Other than giving an entity a datablob that says it can do fire control,
+    /// it just links component instsances for convenience.  
+    /// </summary>
     public class FireControlAbilityDB : BaseDataBlob
     {
-        [JsonProperty]
-        public List<Entity> FireControlComponents = new List<Entity>();
-
         [JsonIgnore]
-        public List<FireControlInstanceStateDB> FireControlInsances = new List<FireControlInstanceStateDB>();
-
-        [JsonProperty]
-        public List<Entity> WeaponComponents = new List<Entity>();
-
+        public List<ComponentInstance> FireControlInstances = new List<ComponentInstance>();
         [JsonIgnore]
-        public List<WeaponInstanceStateDB> WeaponInstanceStates = new List<WeaponInstanceStateDB>();
+        public List<ComponentInstance> WeaponInstances = new List<ComponentInstance>();
 
-        public FireControlAbilityDB() { }
 
-        public void AddFirecontrolToParentEntity(Entity fireControl)
+        public FireControlAbilityDB()
         {
-            FireControlInsances.Add(fireControl.GetDataBlob<FireControlInstanceStateDB>());
-            FireControlComponents.Add(fireControl);
-        }
-        public void AddWeaponToParentEntity(Entity weapon)
-        {
-            WeaponInstanceStates.Add(weapon.GetDataBlob<WeaponInstanceStateDB>());
-            WeaponComponents.Add(weapon);
         }
 
-        public FireControlAbilityDB(FireControlAbilityDB toClone)
+        FireControlAbilityDB(FireControlAbilityDB db)
         {
-            FireControlComponents = new List<Entity>(toClone.FireControlComponents);
-            FireControlInsances = new List<FireControlInstanceStateDB>(toClone.FireControlInsances);
-            WeaponComponents = new List<Entity>(toClone.WeaponComponents);
-            WeaponInstanceStates = new List<WeaponInstanceStateDB>(toClone.WeaponInstanceStates);
+            
         }
 
         public override object Clone()
@@ -52,45 +38,43 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
-            //TODO: maybe we can get the ComponentInstanceDB from the context, and rebuild everything, and not have anything saved to json.
-            FireControlInsances = new List<FireControlInstanceStateDB>();
-            foreach (var fc in FireControlComponents)
+            var instancesDB = OwningEntity.GetDataBlob<ComponentInstancesDB>();
+            if (instancesDB.TryGetComponentsByAttribute<BeamFireControlAtbDB>(out var fireControlInstances))
             {
-                FireControlInsances.Add(fc.GetDataBlob<FireControlInstanceStateDB>());
+                foreach (var fc in fireControlInstances)
+                {
+                    FireControlInstances.Add(fc);
+                }
             }
-            WeaponInstanceStates = new List<WeaponInstanceStateDB>();
-            foreach (var weapon in WeaponComponents)
+            if (instancesDB.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out var weaponInstances))
             {
-                WeaponInstanceStates.Add(weapon.GetDataBlob<WeaponInstanceStateDB>());
+                foreach (var gun in weaponInstances)
+                {
+                    WeaponInstances.Add(gun);
+                }
             }
         }
     }
 
     /// <summary>
-    /// Fire control instance ability db.
-    /// This goes on each fire control component entity
-    /// maybe this should be just a non db class and reside as a list on the ship firecontrolDB
+    /// Fire control instance ability state.
+    /// This goes on each fire control component instance
     /// </summary>
-    public class FireControlInstanceStateDB : BaseDataBlob
+    public class FireControlAbilityState : ComponentAbilityState
     {
         public Entity Target { get; internal set; }
 
-        public List<Entity> AssignedWeapons { get; internal set; } = new List<Entity>();
+        public List<ComponentInstance> AssignedWeapons { get; internal set; } = new List<ComponentInstance>();
 
         public bool IsEngaging { get; internal set; } = false;
 
-        public FireControlInstanceStateDB() { }
+        public FireControlAbilityState() { }
 
-        public FireControlInstanceStateDB(FireControlInstanceStateDB db)
+        public FireControlAbilityState(FireControlAbilityState db)
         {
             Target = db.Target;
-            AssignedWeapons = new List<Entity>(db.AssignedWeapons);
+            AssignedWeapons = new List<ComponentInstance>(db.AssignedWeapons);
             IsEngaging = db.IsEngaging;
-        }
-
-        public override object Clone()
-        {
-            return new FireControlInstanceStateDB(this);
         }
     }
 }

@@ -34,9 +34,9 @@ namespace Pulsar4X.ECSLib
         public List<Entity> ShipClasses { get; internal set; } = new List<Entity>();
 
 
-        public ReadOnlyDictionary<Guid, Entity> ComponentDesigns => new ReadOnlyDictionary<Guid, Entity>(InternalComponentDesigns);
+        public ReadOnlyDictionary<Guid, ComponentDesign> ComponentDesigns => new ReadOnlyDictionary<Guid, ComponentDesign>(InternalComponentDesigns);
         [JsonProperty]
-        internal Dictionary<Guid, Entity> InternalComponentDesigns = new Dictionary<Guid, Entity>();
+        internal Dictionary<Guid, ComponentDesign> InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>();
 
 
         [PublicAPI]
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
             Colonies = colonies;
             ShipClasses = shipClasses;
             KnownFactions = new List<Entity>();
-            InternalComponentDesigns = new Dictionary<Guid, Entity>();
+            InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>();
         }
         
 
@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Colonies = new List<Entity>(factionDB.Colonies);
             ShipClasses = new List<Entity>(factionDB.ShipClasses);
-            InternalComponentDesigns = new Dictionary<Guid, Entity>(factionDB.ComponentDesigns);
+            InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
             InternalMissileDesigns = new Dictionary<Guid, Entity>(factionDB.MissileDesigns);
             InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>(factionDB.KnownJumpPoints);
         }

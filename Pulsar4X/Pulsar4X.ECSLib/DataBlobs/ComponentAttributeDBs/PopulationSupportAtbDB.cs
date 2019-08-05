@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
             throw new System.NotImplementedException();
         }
 
-        public void OnComponentInstalation(Entity ship, Entity component)
+        public void OnComponentInstallation(Entity ship, ComponentInstance component)
         {
             throw new System.NotImplementedException();
         }

@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
             ItemDictionary = new DictionaryVM<Guid, string>(DisplayMode.Value);
             foreach (var kvp in _factionInfo.ComponentDesigns)
             {
-                ItemDictionary.Add(kvp.Key, kvp.Value.GetDataBlob<NameDB>().DefaultName);
+                ItemDictionary.Add(kvp.Key, kvp.Value.Name);
             }
             //NewJobSelectedItem = ItemDictionary.SelectedKey;
             NewJobSelectedIndex = 0;
@@ -28,9 +28,9 @@ namespace Pulsar4X.ECSLib
 
         public override void OnNewBatchJob()
         {
-            ComponentInfoDB componentInfo = _factionInfo.ComponentDesigns[NewJobSelectedItem].GetDataBlob<ComponentInfoDB>();
+            ComponentDesign componentInfo = _factionInfo.ComponentDesigns[NewJobSelectedItem];
             int buildpointCost = componentInfo.BuildPointCost;
-            Dictionary<Guid, int> mineralCost = componentInfo.MinerialCosts;
+            Dictionary<Guid, int> mineralCost = componentInfo.MineralCosts;
             Dictionary<Guid, int> materialCost = componentInfo.MaterialCosts;
             Dictionary<Guid, int> componentCost = componentInfo.ComponentCosts;
 

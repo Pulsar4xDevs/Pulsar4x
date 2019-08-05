@@ -145,44 +145,21 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, int> rates = new Dictionary<Guid, int>();
             ComponentInstancesDB instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
 
-            var designs = instancesDB.GetDesignsByType(typeof(RefineResourcesAtbDB));
-
-            foreach (var design in designs)
+  
+            
+            if (instancesDB.TryGetComponentsByAttribute<RefineResourcesAtbDB>(out var instances))
             {
-                var componentDesign = design.GetDataBlob<RefineResourcesAtbDB>();
-                foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
+                foreach (var instance in instances)
                 {
-                    //TODO: need to check availible workers. 
-                    if (instanceInfo.IsEnabled)
+                    float healthPercent = instance.HealthPercent();
+                    var designInfo = instance.Design.GetAttribute<RefineResourcesAtbDB>();
+                    foreach (var item in designInfo.RefinableMatsList)
                     {
-                        var healthPercent = instanceInfo.HealthPercent();
-                        foreach (var item in componentDesign.RefinableMatsList)
-                        {
-                            rates.SafeValueAdd(item, (int)(componentDesign.RefineryPoints * healthPercent));
-                        }
+                        rates.SafeValueAdd(item, (int)(designInfo.RefineryPoints * healthPercent));
                     }
                 }
             }
-
-
-
-
-
-            /*
-            List<KeyValuePair<Entity, PrIwObsList<Entity>>> refineingEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<RefineResourcesAtbDB>()).ToList();
-            foreach (var refiningComponentDesignList in refineingEntities)
-            {
-                RefineResourcesAtbDB refineblob = refiningComponentDesignList.Key.GetDataBlob<RefineResourcesAtbDB>();
-                foreach (var mineInstance in refiningComponentDesignList.Value)
-                {
-                    //todo check if it's damaged, check if it's enabled, check if there's enough workers here to.
-                    foreach (var item in refineblob.RefinableMatsList)
-                    {
-                        rates.SafeValueAdd(item, refineblob.RefineryPoints);
-                    }
-                }
-            }
-            */
+            
             int maxPoints = 0;
             foreach (int p in rates.Values)
             {

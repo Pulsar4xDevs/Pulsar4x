@@ -90,7 +90,8 @@ namespace Pulsar4X.SDL2UI
             LoadImg("DnImg", Path.Combine( rf,"DnArrow.bmp"));
             LoadImg("RepeatImg", Path.Combine( rf,"RepeatIco.bmp"));
             LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
-
+            LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
+            LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
@@ -181,7 +182,10 @@ namespace Pulsar4X.SDL2UI
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
         internal static GlobalUIState _state;
-
+        public void SetActive()
+        {
+            IsActive = true;
+        }
        
 
         protected PulsarGuiWindow()

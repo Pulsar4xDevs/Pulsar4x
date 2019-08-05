@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
             return new RefineResourcesAtbDB(this);
         }
 
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!parentEntity.HasDataBlob<RefiningDB>())
                 parentEntity.SetDataBlob(new RefiningDB());

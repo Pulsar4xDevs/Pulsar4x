@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
             return new MineResourcesAtbDB(this);
         }
 
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!parentEntity.HasDataBlob<MiningDB>())
                 parentEntity.SetDataBlob(new MiningDB());

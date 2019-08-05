@@ -104,6 +104,7 @@ namespace Pulsar4X.SDL2UI
             DebugWindow.GetInstance().SetGameEvents();
             IsActive = false;
             TimeControl.GetInstance().IsActive = true;
+            ToolBarUI.GetInstance().IsActive = true;
         }
     }
 }

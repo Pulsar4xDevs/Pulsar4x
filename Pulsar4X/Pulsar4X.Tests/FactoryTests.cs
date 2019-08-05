@@ -126,7 +126,7 @@ namespace Pulsar4X.Tests
 
             /////Ship/////
             Vector3 pos = new Vector3(0,0,0);
-            Entity ship = ShipFactory.CreateShip(shipClass, starSystem, faction, pos, starSystem, shipName);
+            Entity ship = ShipFactory.CreateShip(shipClass, faction, pos, starSystem, shipName);
             ShipInfoDB shipInfo = ship.GetDataBlob<ShipInfoDB>();
             NameDB shipNameDB = ship.GetDataBlob<NameDB>();
 

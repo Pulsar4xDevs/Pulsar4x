@@ -29,8 +29,8 @@ namespace Pulsar4X.ECSLib
                 foreach (var component in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     if (component.IsEnabled)
-                    {     
-                        popSupportValue += (long)(design.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity * component.HealthPercent());
+                    {
+                        popSupportValue += (long)(design.GetAttribute<PopulationSupportAtbDB>().PopulationCapacity * component.HealthPercent());
                     }
                 }
 
@@ -111,7 +111,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (var design in infrastructureDesigns)
             {
-                int designPopCap = design.GetDataBlob<PopulationSupportAtbDB>().PopulationCapacity;
+                int designPopCap = design.GetAttribute<PopulationSupportAtbDB>().PopulationCapacity;
                 foreach (var infrastructureInstance in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
                     if (infrastructureInstance.IsEnabled)

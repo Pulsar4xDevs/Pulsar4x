@@ -5,6 +5,31 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
+
+    public class SensorReceverAbility : ComponentAbilityState
+    {
+        [JsonProperty]
+        internal Dictionary<Guid, SensorInfoDB> KnownSensorContacts = new Dictionary<Guid, SensorInfoDB>();
+    }
+
+    public class SensorAbilityDB : BaseDataBlob
+    {
+        
+
+        public SensorAbilityDB()
+        {
+        }
+
+        public SensorAbilityDB(SensorAbilityDB db)
+        {
+        }
+
+        public override object Clone()
+        {
+            return new SensorAbilityDB(this);
+        }
+    }
+
     public class SensorReceverAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
@@ -24,8 +49,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         internal int ScanTime; //the time it takes to complete a full 360 degree sweep. 
         //internal int Size; //basicly increases sensitivity at the cost of mass
-        [JsonProperty]
-        internal Dictionary<Guid, SensorInfoDB> KnownSensorContacts = new Dictionary<Guid, SensorInfoDB>();
+
 
 
         [JsonConstructor]
@@ -71,11 +95,15 @@ namespace Pulsar4X.ECSLib
             return new SensorReceverAtbDB(this);
         }
 
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             //we're cloning the design to the instance here. when we do another pass on the sensors we'll likely change this. 
-            if (!componentInstance.HasDataBlob<SensorReceverAtbDB>())
-                componentInstance.SetDataBlob(new SensorReceverAtbDB(this));//'this' should be the instance's designs db.
+            if (!componentInstance.HasAblity<SensorReceverAbility>())
+                componentInstance.SetAbilityState<SensorReceverAbility>(new SensorReceverAbility());//'this' should be the instance's designs db.
+            if (!parentEntity.HasDataBlob<SensorAbilityDB>())
+            {
+                parentEntity.SetDataBlob(new SensorAbilityDB());
+            }
             //SensorProcessorTools.(componentInstance);
 
         }

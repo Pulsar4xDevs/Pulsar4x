@@ -70,21 +70,17 @@ namespace Pulsar4X.ECSLib
         {
             return new CargoAbleTypeDB(this);
         }
-
-        public void OnComponentInstantiation(Entity componentInstance)
-        {
-            if (!componentInstance.HasDataBlob<CargoAbleTypeDB>())
-                componentInstance.SetDataBlob(new CargoAbleTypeDB(this)); //basicaly just clone the design to the instance. 
-        }
-
-        public void OnComponentInstalation(Entity parentEntity, Entity component)
-        {
-
-        }
-
+        
+        
         public void OnComponentDeInstalation(Entity ship, Entity component)
         {
             throw new NotImplementedException();
+        }
+
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<CargoAbleTypeDB>())
+                parentEntity.SetDataBlob(new CargoAbleTypeDB(this)); //basicaly just clone the design to the instance. 
         }
     }
 }

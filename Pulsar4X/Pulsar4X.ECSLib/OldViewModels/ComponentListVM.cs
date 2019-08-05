@@ -34,10 +34,10 @@ namespace Pulsar4X.ECSLib
         {
             if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                foreach (var item in e.NewItems)
+                foreach (object item in e.NewItems)
                 {
-                    KeyValuePair<Entity, PrIwObsList<Entity>> kvp = (KeyValuePair<Entity, PrIwObsList<Entity>>)item;
-                    var newDesigns = new ComponentSpecificDesignVM(kvp.Key, kvp.Value);
+                    KeyValuePair<Entity, PrIwObsList<ComponentInstance>> kvp = (KeyValuePair<Entity, PrIwObsList<ComponentInstance>>)item;
+                    ComponentSpecificDesignVM newDesigns = new ComponentSpecificDesignVM(kvp.Key, kvp.Value);
                     Designs.Add(newDesigns);
                 }
             }
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
         private string _headerText = "";
         public string HeaderText { get { return _headerText; } set { _headerText = value; OnPropertyChanged(); } }
 
-        public ComponentSpecificDesignVM(Entity designEntity, PrIwObsList<Entity> specificInstances)
+        public ComponentSpecificDesignVM(Entity designEntity, PrIwObsList<ComponentInstance> specificInstances)
         {
             _designEntity = designEntity;
             specificInstances.CollectionChanged += SpecificInstances_CollectionChanged;
@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
         private void SpecificInstances_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if(e.Action == NotifyCollectionChangedAction.Add)
-            foreach (Entity item in e.NewItems)
+            foreach (ComponentInstance item in e.NewItems)
             {
                 Instances.Add(new ComponentSpecificInstanceVM(item));
             }
@@ -76,15 +76,14 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentSpecificInstanceVM
     {
-        private Entity _componentEntity;
-        private ComponentInstanceInfoDB _instanceInfoDB;
+        
+        private ComponentInstance _instance;
 
-        public string HealthPercent { get { return (_instanceInfoDB?.HealthPercent() * 100).ToString() + "%" ?? " "; } }
-        public string IsEnabled { get { return _instanceInfoDB?.IsEnabled.ToString() ?? ""; } }
-        public ComponentSpecificInstanceVM(Entity instance)
+        public string HealthPercent { get { return (_instance?.HealthPercent() * 100).ToString() + "%" ?? " "; } }
+        public string IsEnabled { get { return _instance?.IsEnabled.ToString() ?? ""; } }
+        public ComponentSpecificInstanceVM(ComponentInstance instance)
         {
-            _componentEntity = instance;
-            _instanceInfoDB = instance.GetDataBlob<ComponentInstanceInfoDB>();           
+            _instance = instance;
         }
     }
 

@@ -179,7 +179,7 @@ namespace Pulsar4X.ECSLib
         }
         public void Refresh(bool partialRefresh = false)
         {
-            List<Entity> labDesigns = _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Where(item => item.HasDataBlob<ResearchPointsAtbDB>()).ToList();
+            List<ComponentDesign> labDesigns = _factionEntity.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Where(item => item.HasAttribute<ResearchPointsAtbDB>()).ToList();
 
             _allLabs = new Dictionary<Guid, int>();
 

@@ -18,7 +18,7 @@ namespace Pulsar4X.Tests
         private StarSystem _starSystem;
         private Entity _shipClass;
         private Entity _ship;
-        private Entity _engineComponentDesign;
+        private ComponentDesign _engineComponentDesign;
         private ComponentTemplateSD _engineSD;
 
         [SetUp]
@@ -46,13 +46,15 @@ namespace Pulsar4X.Tests
         public void TestShipCreation()
         {
 
-            ComponentDesign engineDesign;// = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
+            ComponentDesigner engineDesigner;// = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
       
             _engineSD = NameLookup.GetTemplateSD(_game, "Engine");
-            engineDesign = GenericComponentFactory.StaticToDesign(_engineSD, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            engineDesign.ComponentDesignAttributes[0].SetValueFromInput(5); //size = 25 power.
-                                    
-            _engineComponentDesign = GenericComponentFactory.DesignToDesignEntity(_game, _faction, engineDesign);
+            engineDesigner = new ComponentDesigner(_engineSD, _faction.GetDataBlob<FactionTechDB>());
+            engineDesigner.ComponentDesignAttributes[0].SetValueFromInput(5); //size = 25 power.
+            
+            
+            
+            _engineComponentDesign = engineDesigner.CreateDesign(_faction);
 
             _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
 
@@ -65,7 +67,7 @@ namespace Pulsar4X.Tests
             Vector3 pos = new Vector3(0, 0, 0);
             int designEngineNumber = _shipClass.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid);
             Assert.AreEqual(2, designEngineNumber);
-            _ship = ShipFactory.CreateShip(_shipClass, _starSystem, _faction, pos, _starSystem, "Serial Peacemaker");
+            _ship = ShipFactory.CreateShip(_shipClass, _faction, pos, _starSystem, "Serial Peacemaker");
             Assert.AreEqual(designEngineNumber, _ship.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid), "Number of engine components not the same as design");
 
             PropulsionAbilityDB propulsion = _ship.GetDataBlob<PropulsionAbilityDB>();

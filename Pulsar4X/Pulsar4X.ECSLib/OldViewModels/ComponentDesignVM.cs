@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
     {
         //public Dictionary<string, Guid> ComponentTypes { get; set; }
         public DictionaryVM<string, Guid> ComponentTypes { get; } = new DictionaryVM<string, Guid>(DisplayMode.Key);
-        public ComponentDesign Design { get; private set; }
+        public ComponentDesigner Designer { get; private set; }
         
         private readonly StaticDataStore _staticData;
         private readonly Entity _factionEntity;
@@ -48,38 +48,35 @@ namespace Pulsar4X.ECSLib
         {
             ComponentTemplateSD componentSD = _staticData.ComponentTemplates[componentGuid];
 
-            Design = GenericComponentFactory.StaticToDesign(componentSD, _factionTech, _staticData);
+            Designer = new ComponentDesigner(componentSD, _factionTech);
 
             AbilityList = new List<ComponentAbilityDesignVM>();
-            foreach (var componentAbility in Design.ComponentDesignAttributes)
+            foreach (var componentAbility in Designer.ComponentDesignAttributes)
             {
                 AbilityList.Add(new ComponentAbilityDesignVM(this, componentAbility, _staticData));
             }            
         }
 
-        public void CreateComponent()
-        {
-            GenericComponentFactory.DesignToDesignEntity(_gameVM.Game, _factionEntity, Design);             
-        }
+
 
         public string StatsText
         {
             get
             {
                 string text = "";
-                if (Design != null)
+                if (Designer != null)
                 {
-                    text = Design.Name + Environment.NewLine;
-                    text += "Size: " + Design.MassValue + Environment.NewLine;
-                    text += "HTK: " + Design.HTKValue + Environment.NewLine;
-                    text += "Crew: " + Design.CrewReqValue + Environment.NewLine;
-                    text += "ResearchCost: " + Design.ResearchCostValue + Environment.NewLine;
-                    foreach (var kvp in Design.MineralCostValues)
+                    text = Designer.Name + Environment.NewLine;
+                    text += "Size: " + Designer.MassValue + Environment.NewLine;
+                    text += "HTK: " + Designer.HTKValue + Environment.NewLine;
+                    text += "Crew: " + Designer.CrewReqValue + Environment.NewLine;
+                    text += "ResearchCost: " + Designer.ResearchCostValue + Environment.NewLine;
+                    foreach (var kvp in Designer.MineralCostValues)
                     {
                         string mineralName = _staticData.CargoGoods.GetMineral(kvp.Key).Name;
                         text += mineralName + ": " + kvp.Value + Environment.NewLine;
                     }
-                    text += "Credit Cost: " + Design.CreditCostValue + Environment.NewLine;
+                    text += "Credit Cost: " + Designer.CreditCostValue + Environment.NewLine;
                 }
                 return text;
             }

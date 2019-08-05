@@ -27,6 +27,7 @@ namespace Pulsar4X.ECSLib
         public static void OnTakingDamage(Entity damageableEntity, int damageAmount, DateTime atDateTime)
         {
         
+            /*
             if (damageableEntity.HasDataBlob<AsteroidDamageDB>())
             {
                 AsteroidDamageDB AstDmgDB = damageableEntity.GetDataBlob<AsteroidDamageDB>();
@@ -47,7 +48,7 @@ namespace Pulsar4X.ECSLib
                 if (!game.Systems.TryGetValue(ShipPosition.SystemGuid, out mySystem))
                     throw new GuidNotFoundException(ShipPosition.SystemGuid);
 
-                ComponentInstancesDB ShipInst = damageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are ship components in this context
+                ComponentInstancesDB instancesDB = damageableEntity.GetDataBlob<ComponentInstancesDB>(); //These are ship components in this context
 
                 int damageAttempt = 0;
                 while (damageAmount > 0)
@@ -55,58 +56,7 @@ namespace Pulsar4X.ECSLib
 
                     int randValue = mySystem.RNG.Next((int)(damageableEntity.GetDataBlob<MassVolumeDB>().VolumeM3)); //volume in m^3
 
-                    foreach (KeyValuePair<Entity, double> pair in ShipInst.ComponentDictionary)
-                    {
-                        if (pair.Value > randValue)
-                        {
-                            //check if this component is destroyed
-                            //if it isn't get density
-                            MassVolumeDB mvDB = pair.Key.GetDataBlob<MassVolumeDB>();
-
-                            double DensityThreshold = 1.0; //what should this be?
-                            double dmgPercent = DensityThreshold * mvDB.Density * 1000;
-
-                            int dmgDone = (int)(damageAmount * dmgPercent);
-
-                            ComponentInfoDB ciDB = pair.Key.GetDataBlob<ComponentInfoDB>();
-                            ComponentInstanceInfoDB ciiDB = pair.Key.GetDataBlob<ComponentInstanceInfoDB>();
-
-                            if (ciiDB.HTKRemaining > 0) //component is not destroyed yet
-                            {
-                                if (dmgDone >= ciiDB.HTKRemaining) //component is definitely wrecked
-                                {
-                                    damageAmount = damageAmount - ciiDB.HTKRemaining;
-                                    ciiDB.HTKRemaining = 0;
-                                }
-                                else
-                                {
-                                    ciiDB.HTKRemaining = ciiDB.HTKRemaining - damageAmount;
-                                    damageAmount = 0;
-
-                                }
-                            }
-                            else
-                            {
-                                damageAttempt++;
-                                if (damageAttempt == 20) // Aurora default, seems like an ok number to use for now.
-                                    break;
-                                /// <summary>
-                                /// Need to pick a new component to try and destroy.
-                                /// Should any damage get absorbed by the wreck?
-                                /// How many of these failures should I run into before declaring the ship destroyed?
-                                /// Should ship distruction happen differently?
-                                /// </summary>
-                                continue;
-                            }
-
-
-                            //compare this density to some density value to calculate how much to modify damage by
-                            //if damage is greater than the HTK then the component is destroyed. modify damageAmount and move onto the next component.
-                            //leave this loop if damage is zero.
-
-                            break;
-                        }
-                    }
+          
                     if (damageAttempt == 20) // need to copy this to fully break out of the loop;
                         break;
                 }
@@ -167,18 +117,18 @@ namespace Pulsar4X.ECSLib
                             int dmgDone = (int)(damageAmount * dmgPercent);
 
                             ComponentInfoDB ciDB = pair.Key.GetDataBlob<ComponentInfoDB>();
-                            ComponentInstanceInfoDB ciiDB = pair.Key.GetDataBlob<ComponentInstanceInfoDB>();
+                            ComponentInstanceData cii = pair.Key.GetDataBlob<ComponentInstanceData>();
 
-                            if (ciiDB.HTKRemaining > 0) //Installation is not destroyed yet
+                            if (cii.HTKRemaining > 0) //Installation is not destroyed yet
                             {
-                                if (dmgDone >= ciiDB.HTKRemaining) //Installation is definitely wrecked
+                                if (dmgDone >= cii.HTKRemaining) //Installation is definitely wrecked
                                 {
-                                    damageAmount = damageAmount - ciiDB.HTKRemaining;
-                                    ciiDB.HTKRemaining = 0;
+                                    damageAmount = damageAmount - cii.HTKRemaining;
+                                    cii.HTKRemaining = 0;
                                 }
                                 else
                                 {
-                                    ciiDB.HTKRemaining = ciiDB.HTKRemaining - damageAmount;
+                                    cii.HTKRemaining = cii.HTKRemaining - damageAmount;
                                     damageAmount = 0;
 
                                 }
@@ -201,6 +151,7 @@ namespace Pulsar4X.ECSLib
                 //This will need to be updated to deal with colonies.
                 ReCalcProcessor.ReCalcAbilities(damageableEntity);
             }
+            */
         }
 
         /// <summary>

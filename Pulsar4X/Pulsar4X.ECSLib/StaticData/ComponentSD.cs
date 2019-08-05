@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         public string VolumeFormula;
         public string HTKFormula;       
         public string CrewReqFormula;
-        public Dictionary<Guid,string> MineralCostFormula;
+        public Dictionary<Guid,string> MineralCostFormula; //mats and components can also be included here.
         public string ResearchCostFormula;
         public string CreditCostFormula;
         public string BuildPointCostFormula;

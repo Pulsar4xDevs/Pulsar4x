@@ -53,8 +53,8 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
-                    var power = instanceInfo.DesignEntity.GetDataBlob<EnginePowerAtbDB>();
-                    var fuelUsage = instanceInfo.DesignEntity.GetDataBlob<ResourceConsumptionAtbDB>();
+                    var power = (EnginePowerAtbDB)instanceInfo.Design.AttributesByType[typeof(EnginePowerAtbDB)];
+                    var fuelUsage = (ResourceConsumptionAtbDB)instanceInfo.Design.AttributesByType[typeof(ResourceConsumptionAtbDB)];
                     if (instanceInfo.IsEnabled)
                     {
                         totalEnginePower += (int)(power.EnginePower * instanceInfo.HealthPercent());

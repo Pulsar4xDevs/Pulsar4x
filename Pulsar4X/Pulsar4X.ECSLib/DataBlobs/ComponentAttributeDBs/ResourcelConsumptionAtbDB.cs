@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public class ResourceConsumptionAtbDB : BaseDataBlob
+    public class ResourceConsumptionAtbDB : IComponentDesignAttribute
     {
         [JsonProperty]
         public Dictionary<Guid, int> MaxUsage { get; internal set; } = new Dictionary<Guid, int>();
@@ -45,9 +45,14 @@ namespace Pulsar4X.ECSLib
             MinUsage = new Dictionary<Guid, int>(db.MinUsage);
         }
 
-        public override object Clone()
+        public object Clone()
         {
             return new ResourceConsumptionAtbDB(this);
+        }
+
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            
         }
     }
 }

@@ -8,10 +8,7 @@ using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {
-    public class Damage
-    {
-        
-    }
+
     [Flags]
     public enum Connections
     {

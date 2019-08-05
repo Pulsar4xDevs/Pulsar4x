@@ -158,42 +158,36 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<Guid, long> calculatedMaxStorage = new Dictionary<Guid, long>();
 
-            var instances = parentEntity.GetDataBlob<ComponentInstancesDB>();
-            var designs = instances.GetDesignsByType(typeof(CargoStorageAtbDB));
+            var instancesDB = parentEntity.GetDataBlob<ComponentInstancesDB>();
+
             double transferRate = 0;
-            double transferRange = 0;
+            double transferRange = 0; 
+            
             int i = 0;
-            foreach (var design in designs)
+            
+            if( instancesDB.TryGetComponentsByAttribute<CargoStorageAtbDB>(out var componentInstances))
             {
-                foreach (var instanceInfo in instances.GetComponentsBySpecificDesign(design.Guid))
+                
+                foreach (var instance in componentInstances)
                 {
-                    var componentDesign = instanceInfo.DesignEntity.GetDataBlob<CargoStorageAtbDB>();
-                    long allowableSpace = 0;
+                    var design = instance.Design;
+                    var atbdata = design.GetAttribute<CargoStorageAtbDB>();
 
-                    Guid cargoTypeID = componentDesign.CargoTypeGuid;
-
-                    var healthPercent = instanceInfo.HealthPercent();
-                    if (healthPercent > 0.75) //hardcoded health percent at 3/4, cargo is delecate? TODO: streach goal make this modable
-                        allowableSpace = componentDesign.StorageCapacity;
-
-                    calculatedMaxStorage.SafeValueAdd(cargoTypeID, allowableSpace);
-
-                    transferRate += componentDesign.TransferRate;
-                    transferRange += componentDesign.TransferRange;
-                    i++;
-
+                    if (instance.HealthPercent() > 0.75)
+                    {
+                        calculatedMaxStorage[atbdata.CargoTypeGuid] = atbdata.StorageCapacity;
+                        transferRate += atbdata.TransferRate;
+                        transferRange += atbdata.TransferRange;
+                        i++;
+                    }
                 }
             }
-
-
+            
             //transfer rate and ranges are averaged. 
             cargoStorageDB.TransferRateInKgHr = (int)(transferRate / i);
             cargoStorageDB.TransferRangeDv = (transferRange / i);
 
-
-
-
-
+            
 
             //List<KeyValuePair<Entity, PrIwObsList<Entity>>> storageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();
 

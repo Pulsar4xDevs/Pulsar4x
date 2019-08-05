@@ -58,11 +58,11 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestEngineComponentFactory()
         {
-            ComponentTemplateSD engine = EngineComponentSD();
+            ComponentTemplateSD componentTemplateSD = EngineComponentSD();
 
-            ComponentDesign design = GenericComponentFactory.StaticToDesign(engine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
+            ComponentDesigner designer = new ComponentDesigner(componentTemplateSD, _faction.GetDataBlob<FactionTechDB>());
 
-            foreach (var ability in design.ComponentDesignAttributes)
+            foreach (var ability in designer.ComponentDesignAttributes)
             {
                 if (ability.GuiHint == GuiHint.GuiTechSelectionList)
                 {
@@ -78,14 +78,14 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
-            design.ComponentDesignAttributes[0].SetValueFromInput(250);
+            designer.ComponentDesignAttributes[0].SetValueFromInput(250);
 
-            Entity engineEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, design);
+            ComponentDesign engineDesign = designer.CreateDesign(_faction);
 
-            Assert.AreEqual(250, engineEntity.GetDataBlob<ComponentInfoDB>().SizeInTons);
+            Assert.AreEqual(250, engineDesign.Mass);
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
-            componentsDict.Add(engine.ID, engine);
+            componentsDict.Add(componentTemplateSD.ID, componentTemplateSD);
             StaticDataManager.ExportStaticData(componentsDict, "EngineComponentTest.json");
 
         }
@@ -95,11 +95,11 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD mine = MineInstallation();
 
-            ComponentDesign mineDesign = GenericComponentFactory.StaticToDesign(mine, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            mineDesign.ComponentDesignAttributes[0].SetValue();
-            Entity mineEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, mineDesign);
+            ComponentDesigner mineDesigner = new ComponentDesigner(mine, _faction.GetDataBlob<FactionTechDB>());
+            mineDesigner.ComponentDesignAttributes[0].SetValue();
+            ComponentDesign mineDesign = mineDesigner.CreateDesign(_faction);
 
-            Assert.AreEqual(10, mineEntity.GetDataBlob<MineResourcesAtbDB>().ResourcesPerEconTick.Values.ElementAt(0));
+            Assert.AreEqual(10, mineDesign.GetAttribute<MineResourcesAtbDB>().ResourcesPerEconTick.Values.ElementAt(0));
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(mine.ID, mine);
@@ -112,12 +112,14 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD cargo = GeneralCargo();
 
-            ComponentDesign cargoDesign = GenericComponentFactory.StaticToDesign(cargo, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            cargoDesign.ComponentDesignAttributes[0].SetValue();
+            ComponentDesigner cargoDesigner = new ComponentDesigner(cargo, _faction.GetDataBlob<FactionTechDB>());
+            cargoDesigner.ComponentDesignAttributes[0].SetValue();
  
-            Entity cargoEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, cargoDesign);
-
-            CargoStorageAtbDB attributeDB = cargoEntity.GetDataBlob<CargoStorageAtbDB>();
+            ComponentDesign cargoDesign = cargoDesigner.CreateDesign(_faction);
+            
+            bool hasAttribute = cargoDesign.TryGetAttribute<CargoStorageAtbDB>(out var attributeDB);
+            Assert.IsTrue(hasAttribute);
+            
 
             
             CargoTypeSD cargotype = _game.StaticData.CargoTypes[attributeDB.CargoTypeGuid];
@@ -135,11 +137,11 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD factory = Factory();
 
-            ComponentDesign facDesign = GenericComponentFactory.StaticToDesign(factory, _faction.GetDataBlob<FactionTechDB>(), _game.StaticData);
-            facDesign.ComponentDesignAttributes[0].SetValue();
-            Entity facDesignEntity = GenericComponentFactory.DesignToDesignEntity(_game, _faction, facDesign);
+            ComponentDesigner facDesigner = new ComponentDesigner(factory, _faction.GetDataBlob<FactionTechDB>());
+            facDesigner.ComponentDesignAttributes[0].SetValue();
+            ComponentDesign facDesign = facDesigner.CreateDesign(_faction);
 
-            ConstructionAtbDB attributeDB = facDesignEntity.GetDataBlob<ConstructionAtbDB>();
+            ConstructionAtbDB attributeDB = facDesign.GetAttribute<ConstructionAtbDB>();
 
             Assert.AreEqual(100, attributeDB.ConstructionPoints[ConstructionType.ShipComponents]);
 

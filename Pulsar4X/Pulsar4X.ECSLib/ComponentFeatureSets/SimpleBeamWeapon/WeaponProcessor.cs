@@ -1,50 +1,50 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 namespace Pulsar4X.ECSLib
 {
     public class WeaponProcessor : IInstanceProcessor
     {
-        internal override void ProcessEntity(Entity beamWeapon, DateTime atDate)
+        internal override void ProcessEntity(Entity entity, DateTime atDate)
         {
-            WeaponInstanceStateDB stateInfo = beamWeapon.GetDataBlob<WeaponInstanceStateDB>();
-            if (stateInfo.FireControl != null) 
+            var instances = entity.GetDataBlob<ComponentInstancesDB>();
+            var fireControl = entity.GetDataBlob<FireControlAbilityDB>();
+            
+            if(instances.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out var wpnList))
             {
-                FireControlInstanceStateDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceStateDB>();
-                if (fireControl.IsEngaging)
+                foreach (var wpn in wpnList)
                 {
-                    if (!stateInfo.ReadyToFire)
+                    var wpnState = wpn.GetAbilityState<WeaponState>();
+                    if (wpn.IsEnabled && wpnState.CoolDown <= atDate)
                     {
-                        if (stateInfo.CoolDown <= atDate)
+                        var fc = wpnState.FireControl;
+                        if (wpnState.FireControl != null)
                         {
-                            stateInfo.ReadyToFire = true;
-                            FireBeamWeapons(beamWeapon, atDate);
+                            var fcstate = fc.GetAbilityState<FireControlAbilityState>();
+                            if (fcstate.IsEngaging)
+                            {
+                                wpnState.ReadyToFire = true;
+                                FireBeamWeapons(wpn, atDate);
+                            }
                         }
                     }
-                    else
-                        FireBeamWeapons(beamWeapon, atDate);
-                    if(fireControl.IsEngaging)
-                        beamWeapon.Manager.ManagerSubpulses.AddEntityInterupt(stateInfo.CoolDown, nameof(WeaponProcessor), beamWeapon);
                 }
             }
-
-            
-
-
-            
-            
-            
         }
 
-        public static void FireBeamWeapons(Entity beamWeapon, DateTime atDate)
-        {
+   
 
-            WeaponInstanceStateDB stateInfo = beamWeapon.GetDataBlob<WeaponInstanceStateDB>();
-            FireControlInstanceStateDB fireControl = stateInfo.FireControl.GetDataBlob<FireControlInstanceStateDB>();
+        public static void FireBeamWeapons(ComponentInstance beamWeapon, DateTime atDate)
+        {
+            //TODO: all this needs to get re-written. 
+            WeaponState stateInfo = beamWeapon.GetAbilityState<WeaponState>();
+            FireControlAbilityState fireControl = stateInfo.FireControl.GetAbilityState<FireControlAbilityState>();
             if(!fireControl.Target.IsValid)
             {
                 fireControl.Target = null;
@@ -52,24 +52,33 @@ namespace Pulsar4X.ECSLib
                 return;
             }
 
-            var myPos = beamWeapon.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
+            //var myPos = beamWeapon.GetDataBlob<ComponentInstanceData>().ParentEntity.GetDataBlob<PositionDB>();
             var targetPos = fireControl.Target.GetDataBlob<PositionDB>();
 
 
             //TODO chance to hit
             //int damageAmount = 10;//TODO damageAmount calc
-            var designAtb = beamWeapon.GetDataBlob<DesignInfoDB>().DesignEntity.GetDataBlob<SimpleBeamWeaponAtbDB>();
+            var designAtb = beamWeapon.Design.GetAttribute<SimpleBeamWeaponAtbDB>();
             int damageAmount = designAtb.DamageAmount; // TODO: Better damage calculation
 
-            double range = myPos.GetDistanceTo_AU(targetPos);
+            double range = 1000;// myPos.GetDistanceTo_AU(targetPos);
 
             // only fire if target is in range TODO: fire anyway, but miss. TODO: this will be wrong if we do movement last, this needs to be done after movement. 
             if (range <= designAtb.MaxRange)//TODO: firecontrol shoudl have max range too?: Math.Min(designAtb.MaxRange, stateInfo.FireControl.GetDataBlob<BeamFireControlAtbDB>().Range))
             {
-                DamageProcessor.OnTakingDamage(fireControl.Target, damageAmount, atDate);
+                /*
+                DamageFragment damage = new DamageFragment()
+                {
+                    Density = 
+                };
+                
+                DamageTools.DealDamage(fireControl.Target, new DamageFragment())
+                //DamageProcessor.OnTakingDamage(, damageAmount, atDate);
+                */
                 int reloadRate = designAtb.ReloadRate;
                 stateInfo.CoolDown = atDate + TimeSpan.FromSeconds(reloadRate);
                 stateInfo.ReadyToFire = false;    
+                
             }
 
 
@@ -103,7 +112,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (var beamWeapon in beamWeaponEntites)
             {
-                var design = beamWeapon.GetDataBlob<ComponentInstanceInfoDB>().DesignEntity;
+                //var design = beamWeapon.GetDataBlob<ComponentInstanceData>().Design;
 
 
             }
@@ -149,34 +158,28 @@ namespace Pulsar4X.ECSLib
 
     public static class FireControlProcessor
     {
-
-        public static void SetWeaponToFC(Entity fireControlInstance, Entity weaponInstance)
+        public static void SetWeaponToFC(ComponentInstance fireControlInstance, ComponentInstance weaponInstance)
         {
-            if (fireControlInstance.HasDataBlob<FireControlInstanceStateDB>() && weaponInstance.HasDataBlob<WeaponInstanceStateDB>())
-                weaponInstance.GetDataBlob<WeaponInstanceStateDB>().FireControl = fireControlInstance;
+            if (fireControlInstance.HasAblity<FireControlAbilityState>() && weaponInstance.TryGetAbilityState<WeaponState>(out var wpnState))
+                wpnState.FireControl = fireControlInstance;
             else
                 throw new Exception("needs FireContInstanceAbilityDB on fireControlInstance, and WeaponStateDB on weaponInstance");
         }
 
-        public static void RemoveWeaponFromFC(Entity weaponInstance)
+        public static void RemoveWeaponFromFC(ComponentInstance weaponInstance)
         {
-            if (weaponInstance.HasDataBlob<WeaponInstanceStateDB>())
-                weaponInstance.GetDataBlob<WeaponInstanceStateDB>().FireControl = null;
+            if (weaponInstance.TryGetAbilityState<WeaponState>(out var wpnState))
+                wpnState.FireControl = null;
             else
                 throw new Exception("needs WeaponStateDB on weaponInstance");
         }
 
-        public static void SetTarget(Entity fireControlInstance, Entity target)
+        public static void SetTarget(ComponentInstance fireControlInstance, Entity target)
         {
-            if (fireControlInstance.HasDataBlob<FireControlInstanceStateDB>())
-                fireControlInstance.GetDataBlob<FireControlInstanceStateDB>().Target = target;
+            if (fireControlInstance.TryGetAbilityState<FireControlAbilityState>(out var fcState))
+                fcState.Target = target;
             else
                 throw new Exception("No FireContInstanceAbilityDB on entity");
         }
-
     }
-
-
-
-
 }

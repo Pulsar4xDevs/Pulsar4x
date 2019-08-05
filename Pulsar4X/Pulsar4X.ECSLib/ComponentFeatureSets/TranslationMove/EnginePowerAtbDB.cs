@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
             return new EnginePowerAtbDB(this);
         }
 
-        public void OnComponentInstalation(Entity parentEntity, Entity componentInstance)
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!parentEntity.HasDataBlob<PropulsionAbilityDB>())
                 parentEntity.SetDataBlob(new PropulsionAbilityDB());

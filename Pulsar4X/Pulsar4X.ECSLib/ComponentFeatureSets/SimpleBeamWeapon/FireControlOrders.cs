@@ -21,10 +21,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid FireControlGuid;
         [JsonIgnore]
-        private Entity _fireControlComponent;
+        private ComponentInstance _fireControlComponent;
 
         public List<Guid> WeaponsAssigned = new List<Guid>();
-        private List<Entity> _weaponsAssigned = new List<Entity>();
+        private List<ComponentInstance> _weaponsAssigned = new List<ComponentInstance>();
 
 
         public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, List<Guid> weaponsAssigned)
@@ -46,11 +46,11 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>();
+                var fcinstance = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
                 fcinstance.AssignedWeapons = _weaponsAssigned;
                 foreach (var wpn in _weaponsAssigned)
                 {
-                    wpn.GetDataBlob<WeaponInstanceStateDB>().FireControl = _fireControlComponent;
+                    wpn.GetAbilityState<WeaponState>().FireControl = _fireControlComponent;
                 }
                 IsRunning = true;
             }
@@ -67,15 +67,26 @@ namespace Pulsar4X.ECSLib
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.FindEntityByGuid(FireControlGuid, out _fireControlComponent))
+                var instancesdb = _entityCommanding.GetDataBlob<ComponentInstancesDB>();
+
+                if (instancesdb.AllComponents.TryGetValue(FireControlGuid, out var fc))
                 {
-                    Entity weaponEntity;
-                    foreach (var item in WeaponsAssigned)
+                    if (fc.HasAblity<FireControlAbilityState>())
                     {
-                        if (game.GlobalManager.FindEntityByGuid(item, out weaponEntity))
-                            _weaponsAssigned.Add(weaponEntity);
+                        _fireControlComponent = fc;
+                        
+                        foreach (var wpnGuid in WeaponsAssigned)
+                        {
+                            if (instancesdb.AllComponents.TryGetValue(wpnGuid, out var wpn))
+                            {
+                                if (wpn.HasAblity<WeaponState>())
+                                {
+                                    _weaponsAssigned.Add(wpn);
+                                }
+                            }
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
             return false;
@@ -103,7 +114,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid FireControlGuid;
         [JsonIgnore]
-        private Entity _fireControlComponent;
+        private ComponentInstance _fireControlComponent;
 
 
         public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, Guid targetGuid)
@@ -125,7 +136,7 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>().Target = _targetActualEntity;
+                _fireControlComponent.GetAbilityState<FireControlAbilityState>().Target = _targetActualEntity;
             }
 
         }
@@ -153,9 +164,17 @@ namespace Pulsar4X.ECSLib
                         _targetActualEntity = _targetSensorEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
                     else
                         _targetActualEntity = _targetSensorEntity;
+                    var instancesdb = _entityCommanding.GetDataBlob<ComponentInstancesDB>();
 
-                    if (game.GlobalManager.FindEntityByGuid(FireControlGuid, out _fireControlComponent))
-                        return true;
+                    if (instancesdb.AllComponents.TryGetValue(FireControlGuid, out var fc))
+                    {
+                        if (fc.HasAblity<FireControlAbilityState>())
+                        {
+                            _fireControlComponent = fc;
+
+                            return true;
+                        }
+                    }
                 }
             }
             return false;
@@ -184,7 +203,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid FireControlGuid;
         [JsonIgnore]
-        private Entity _fireControlComponent;
+        private ComponentInstance _fireControlComponent;
 
         public FireModes IsFiring;
 
@@ -205,13 +224,13 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetDataBlob<FireControlInstanceStateDB>();
+                var fcinstance = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
                 if (IsFiring == FireModes.OpenFire)
                 {
                     fcinstance.IsEngaging = true;
-                    DateTime dateTimeNow = _fireControlComponent.Manager.ManagerSubpulses.StarSysDateTime;
+                    DateTime dateTimeNow = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
                     foreach (var wpn in fcinstance.AssignedWeapons)
-                        StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor), wpn, dateTimeNow);
+                        StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
                 }
                 else if (IsFiring == FireModes.CeaseFire)
                 {
@@ -232,9 +251,15 @@ namespace Pulsar4X.ECSLib
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.FindEntityByGuid(FireControlGuid, out _fireControlComponent))
+                var instancesdb = _entityCommanding.GetDataBlob<ComponentInstancesDB>();
+                if (instancesdb.AllComponents.TryGetValue(FireControlGuid, out var fc))
                 {
-                    return true;
+                    if (fc.HasAblity<FireControlAbilityState>())
+                    {
+                        _fireControlComponent = fc;
+
+                        return true;
+                    }
                 }
             }
             return false;
