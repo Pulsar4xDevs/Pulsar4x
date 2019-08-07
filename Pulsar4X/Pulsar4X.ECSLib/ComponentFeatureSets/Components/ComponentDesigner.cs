@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 
 namespace Pulsar4X.ECSLib
@@ -37,6 +38,10 @@ namespace Pulsar4X.ECSLib
         //public List<ComponentDesignAtbData> ComponentDesignAttributes;
         public Dictionary<Type, IComponentDesignAttribute> AttributesByType = new Dictionary<Type, IComponentDesignAttribute>();
 
+        public Connections Connections = 0;
+        public float AspectRatio = 1f;
+        public DamageResist DamageResistance;
+        
         public bool HasAttribute<T>()
             where T : IComponentDesignAttribute
         {
@@ -298,7 +303,7 @@ namespace Pulsar4X.ECSLib
         }
 
         
-        public Dictionary<Guid, int> MineralCostValues {get{return  _design.MineralCosts;}}
+        public Dictionary<Guid, int> MineralCostValues => _design.MineralCosts;
         internal Dictionary<Guid, ChainedExpression> MineralCostFormulas { get; set; }
         public void SetMineralCosts()
         {
@@ -311,7 +316,7 @@ namespace Pulsar4X.ECSLib
             _design.MineralCosts = dict;
         }
         
-        public Dictionary<Guid, int> MaterialCostValues {get{return  _design.MaterialCosts;}}
+        public Dictionary<Guid, int> MaterialCostValues => _design.MaterialCosts;
         internal Dictionary<Guid, ChainedExpression> MaterialCostFormulas { get; set; }
         public void SetMaterialCosts()
         {
@@ -321,10 +326,10 @@ namespace Pulsar4X.ECSLib
                 kvp.Value.Evaluate();
                 dict.Add(kvp.Key, kvp.Value.IntResult);  
             }
-            _design.MineralCosts = dict;
+            _design.MaterialCosts = dict;
         }
         
-        public Dictionary<Guid, int> ComponentCostValues {get{return  _design.ComponentCosts;}}
+        public Dictionary<Guid, int> ComponentCostValues => _design.ComponentCosts;
         internal Dictionary<Guid, ChainedExpression> ComponentCostFormulas { get; set; }
         public void SetComponentCosts()
         {
@@ -338,7 +343,7 @@ namespace Pulsar4X.ECSLib
         }
         
         
-        public int CreditCostValue { get { return _design.CreditCost; } }
+        public int CreditCostValue => _design.CreditCost;
         internal ChainedExpression CreditCostFormula { get; set; }
         public void SetCreditCost()
         {

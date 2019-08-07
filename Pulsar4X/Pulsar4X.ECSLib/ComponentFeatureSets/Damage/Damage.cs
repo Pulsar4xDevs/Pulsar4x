@@ -18,19 +18,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         Sides = 8,
         Structural = 15
     }
-    public class ComponentProfile
-    {
-        public Guid DesignGuid;
-        public Guid ObjGuid;
-        public Connections Connections = 0;
-        public float Volume = 100;
-        public float AspectRatio = 0.5f; //len vs width
-        public DamageResist Mats;
-        public RawBmp DamageMap;
-        public Vector2 position;
-
-
-    }
 
     public struct DamageResist
     {
@@ -117,19 +104,19 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             return DamageResistsLookupTable[id];
         }
         
-        public static RawBmp CreateComponentByteArray(ComponentProfile componentProfile)
+        public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign, byte typeID)
         {
             //cm resolution
-            var vol = componentProfile.Volume * 100 / 3;
+            var vol = componentDesign.Volume * 100 / 3;
 
-            int width = (int)Math.Sqrt(vol * componentProfile.AspectRatio);
-            int height = (int)(componentProfile.AspectRatio * width);
+            int width = (int)Math.Sqrt(vol * componentDesign.AspectRatio);
+            int height = (int)(componentDesign.AspectRatio * width);
             int v2d = height * width;
 
-            if (componentProfile.AspectRatio > 1)
+            if (componentDesign.AspectRatio > 1)
             {
-                width = (int)(width / componentProfile.AspectRatio);
-                height = (int)(height / componentProfile.AspectRatio);
+                width = (int)(width / componentDesign.AspectRatio);
+                height = (int)(height / componentDesign.AspectRatio);
             }
 
             int depth = 4;
@@ -142,8 +129,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             {
                 for (int iy = 0; iy < height; iy++)
                 {
-                    byte c = componentProfile.Mats.IDCode;
-                    RawBmp.SetPixel(ref buffer, stride, depth, ix, iy, c, 0,0, 255);
+                    byte c = typeID;
+                    RawBmp.SetPixel(ref buffer, stride, depth, ix, iy, 255, 255,c, 255);
                 }
             }
 

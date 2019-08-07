@@ -7,8 +7,43 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {
     public static class ComponentPlacement
     {
-        
-        public static EntityDamageProfileDB CreateShipMap(List<(ComponentProfile component, int count)> components, DamageResist armor)
+
+        public static EntityDamageProfileDB CreateDamageProfileDB(List<(ComponentDesign component, int count)> components, (string name, double density, float thickness) armor)
+        {
+  
+            List<(Guid, RawBmp)> typeBitmap = new List<(Guid, RawBmp)>();
+            List<(Guid id, int count)> placementOrder = new List<(Guid, int)>();
+            List<ComponentInstance> instances = new List<ComponentInstance>();
+            foreach (var componenttype in components)
+            {
+                
+                Guid typeGuid = componenttype.component.Guid;
+                
+                RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component, (byte)typeBitmap.Count);
+                typeBitmap.Add((typeGuid, compBmp));
+                
+
+                placementOrder.Add((typeGuid, componenttype.count));
+                for (int i = 0; i < componenttype.count; i++)
+                {
+                    ComponentInstance newInstance = new ComponentInstance(componenttype.component);
+                    instances.Add(newInstance);
+                }
+            }
+            
+            EntityDamageProfileDB shipProfile = new EntityDamageProfileDB();
+            shipProfile.PlacementOrder = placementOrder;
+            shipProfile.TypeBitmaps = typeBitmap;
+            shipProfile.Armor = armor;
+            shipProfile.ComponentLookupTable = instances;
+            shipProfile.ShipDamageProfile = CreateShipBmp(shipProfile);
+            
+            return shipProfile;
+        }
+
+        /*
+        [Obsolete]
+        public static EntityDamageProfileDB CreateShipMap(List<(ComponentDesign component, int count)> components, (string name, double density, double thickness) armor)
         {
 
             int minWidth = 0;
@@ -35,12 +70,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
             Dictionary<Guid, int> UnplacedComponents = new Dictionary<Guid, int>();
 
-            Dictionary<Guid, ComponentProfile> AllComponentsByDesign = new Dictionary<Guid, ComponentProfile>();
+            Dictionary<Guid, ComponentDesign> AllComponentsByDesign = new Dictionary<Guid, ComponentDesign>();
             foreach (var componenttype in components)
             {
 
                 RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component);
-                Guid typeGuid = componenttype.component.DesignGuid;
+                Guid typeGuid = componenttype.component.Guid;
 
                 typeCount.Add(typeGuid, componenttype.count);
                 typeBitmap.Add(typeGuid, compBmp);
@@ -65,7 +100,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             bool canTakeBackConnections = true;
             foreach (var compkvp in UnplacedComponents)
             {
-                ComponentProfile component = AllComponentsByDesign[compkvp.Key];
+                ComponentDesign component = AllComponentsByDesign[compkvp.Key];
                 Guid compID = compkvp.Key;
                 int compCount = compkvp.Value;
                 
@@ -114,29 +149,32 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             }
 
             shipProfile.PlacementOrder = placementOrder;
-            shipProfile.TypeBitmaps = typeBitmap;
+            //shipProfile.TypeBitmaps = typeBitmap;
             shipProfile.Armor = armor;
             shipProfile.ShipDamageProfile = CreateShipBmp(shipProfile);
             
             return shipProfile;
         }
-
+*/
         public static RawBmp CreateShipBmp(EntityDamageProfileDB shipProfile)
         {
-            var armorID = shipProfile.Armor.IDCode;
+            byte armorID = 255;//shipProfile.Armor.IDCode;
             var po = shipProfile.PlacementOrder;
-            Dictionary<Guid, RawBmp> typeBitmaps = shipProfile.TypeBitmaps;
+            List<(Guid typeID, RawBmp bmp)> typeBitmaps = shipProfile.TypeBitmaps;
             int componentWidthNum = 0;
 
             int totalLen = 0;
             var totalWidth = 0;
             int widestPoint = 0;
             int widestLen = 0;
-            foreach (var componentkvp in po)
+            for (int i = 0; i < po.Count; i++)
             {
-                var typeid = componentkvp.id;
-                var count = componentkvp.count;
-                var typeBmp = typeBitmaps[typeid];
+                
+                var typeid = po[i].id;
+                var count = po[i].count;
+                var typeBmp = typeBitmaps[i].bmp;
+
+  
                 if (count > componentWidthNum)
                     componentWidthNum = count;
 
@@ -168,12 +206,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             byte[] shipByteArray = new byte[size];
 
             int offsetx = 4;
-            foreach (var componentkvp in po)
+            for (int i = 0; i < po.Count; i++)
             {
                 
-                var typeid = componentkvp.id;
-                var count = componentkvp.count;
-                var typeBmp = typeBitmaps[typeid];
+                var typeid = po[i].id;
+                var count = po[i].count;
+                var typeBmp = typeBitmaps[i].bmp;
 
                 int pixHeight = typeBmp.Height * count;
 
@@ -181,12 +219,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
                 int bytesPerLine = 4 * typeBmp.Width;
 
-                for (int i = 0; i < count; i++)
+                for (int j = 0; j < count; j++)
                 {
                     for (int pxstrip = 0; pxstrip < typeBmp.Height; pxstrip++)
                     {
                         int srcpos = typeBmp.Stride * pxstrip;
-                        int destPos = shipBmp.GetOffset(offsetx, offsety + pxstrip + (typeBmp.Height * i));
+                        int destPos = shipBmp.GetOffset(offsetx, offsety + pxstrip + (typeBmp.Height * j));
 
                         Buffer.BlockCopy(typeBmp.ByteArray, srcpos, shipByteArray, destPos, bytesPerLine);
                     }
@@ -209,8 +247,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             controlPointsFore[3] = (widestPoint - widestLen, 2);
             
             (int x, int y)[] controlPointsAft = new (int x, int y)[4];
-            int lastbmpHeight = typeBitmaps[po[po.Count -1].id].Height * po[po.Count -1].count / 2;
-            int lastbmpLen = typeBitmaps[po[po.Count -1].id].Width ;
+            int lastbmpHeight = typeBitmaps[po.Count -1].bmp.Height * po[po.Count -1].count / 2;
+            int lastbmpLen = typeBitmaps[po.Count -1].bmp.Width ;
             
             controlPointsAft[0] = (widestPoint + 3 , 2); //add three for the extra canvas size
             controlPointsAft[1] = (totalLen - lastbmpLen, 2 + lastbmpHeight);
@@ -238,23 +276,30 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             }
             
             //set the pixels in teh bitmap for the bezier curves.
-            
-            foreach (var coord in linePoints)
+            var coordStart = linePoints[0];
+            for (int i = 1; i < linePoints.Count; i++)
             {
-                shipBmp.SetPixel(coord.x, coord.y, armorID, 200, 200, 255);
-                shipBmp.SetPixel(coord.x, canvasWidth -  coord.y, armorID, 200, 200, 255);
+                var coordEnd = linePoints[i];
+                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+                //Mirror:
+                coordStart = (coordStart.x, canvasWidth - coordStart.y);
+                coordEnd = (coordEnd.x, canvasWidth - coordEnd.y);
+                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+                coordStart = linePoints[i];
             }
             
             //connect the front and rear armor/skin.
             //TODO: handle angles, currently expects start and end y to be the same.
             (int x, int y) straightStart = controlPointsFore[3];
             (int x, int y) straightEnd = controlPointsAft[0];
-            int straightArmorLen = straightEnd.x - straightStart.x;
-            for (int i = 0; i < straightArmorLen; i++)
-            {
-                shipBmp.SetPixel(straightStart.x + i, straightStart.y, armorID, 200, 200, 255);
-                shipBmp.SetPixel(straightStart.x + i, canvasWidth - straightStart.y, armorID, 200, 200, 255);
-            }
+            
+            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+            //Mirror:
+            straightStart = (straightStart.x, canvasWidth - straightStart.y);
+            straightEnd = (straightEnd.x, canvasWidth - straightEnd.y);
+            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+
+        
 
             
             shipProfile.ShipDamageProfile = shipBmp;
@@ -272,5 +317,47 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
 
 
+        static void ThickLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float wd, byte r, byte g, byte b, byte a)
+        {
+            var x0 = coordStart.x;
+            var y0 = coordStart.y;
+            var x1 = coordEnd.x;
+            var y1 = coordEnd.y;
+            
+            int dx = Math.Abs(x1 - x0);
+            int sx = x0 < x1 ? 1 : -1; 
+            int dy = Math.Abs(y1-y0), sy = y0 < y1 ? 1 : -1; 
+            int err = dx-dy, e2, x2, y2;                          /* error value e_xy */
+            float ed = (float)( dx+dy == 0 ? 1 : Math.Sqrt((float)dx*dx+(float)dy*dy));
+            byte alph = a;
+            for (wd = (wd+1)/2; ; ) 
+            {                                   /* pixel loop */
+                alph = (byte)Math.Max(0, r * Math.Abs(err-dx+dy)/ed-wd+1);
+                bmp.SetPixel(x0, y0, r, g, b, alph);
+                e2 = err; x2 = x0;
+                if (2*e2 >= -dx) 
+                {                                           /* x step */
+                    for (e2 += dy, y2 = y0; e2 < ed * wd && (y1 != y2 || dx > dy); e2 += dx)
+                    {
+                        alph = (byte)Math.Max(0, a * (Math.Abs(e2) / ed - wd + 1));
+                        bmp.SetPixel(x0, y2 += sy, r, g, b, alph);
+                    }
+
+                    if (x0 == x1) break;
+                    e2 = err; err -= dy; x0 += sx; 
+                } 
+                if (2*e2 <= dy) 
+                {                                            /* y step */
+                    for (e2 = dx - e2; e2 < ed * wd && (x1 != x2 || dx < dy); e2 += dy)
+                    {
+                        alph = (byte)Math.Max(0, a * (Math.Abs(e2) / ed - wd + 1));
+                        bmp.SetPixel(x2 += sx, y0, r, g, b, alph);
+                    }
+
+                    if (y0 == y1) break;
+                    err += dx; y0 += sy; 
+                }
+            }
+        }
     }
 }

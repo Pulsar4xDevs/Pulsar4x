@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 namespace Pulsar4X.ECSLib
 {
@@ -22,10 +23,13 @@ namespace Pulsar4X.ECSLib
         public Guid ID { get; }
         public string Name { get; }
         public Guid CargoTypeID { get; }
-        public int Mass { get; }
+        public int Mass
+        {
+            get { return Design.Mass; }
+        }
         
         #endregion
-        
+
         /// <summary>
         /// This is the entity that this component  is mounted on. 
         /// </summary>

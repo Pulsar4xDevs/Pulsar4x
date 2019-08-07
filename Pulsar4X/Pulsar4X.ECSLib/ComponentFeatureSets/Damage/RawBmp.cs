@@ -10,9 +10,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         public int Width;
         public int Height;
         
+        
+        
         public void SetPixel( int x, int y, byte r, byte g, byte b, byte a)
         {
-            int offset = (Stride*y) + (x*4); //TODO: 4 is going to change with depth I think... maybe depth should be number of bytes.
+            int offset = (Stride * y) + (Depth * x); 
             ByteArray[offset] = r;
             ByteArray[offset+1] = g;
             ByteArray[offset+2] = b;
@@ -21,7 +23,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
         public static void SetPixel(ref Byte[] buffer, int stride, int depth, int x, int y, byte r, byte g, byte b, byte a)
         {
-            int offset = (stride*y) + (depth * x);
+            int offset = (stride * y) + (depth * x);
             buffer[offset] = r;
             buffer[offset+1] = g;
             buffer[offset+2] = b;

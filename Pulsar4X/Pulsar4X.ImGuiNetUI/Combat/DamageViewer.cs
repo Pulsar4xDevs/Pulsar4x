@@ -10,11 +10,12 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.Vectors;
 using SDL2;
 
+
 namespace Pulsar4X.SDL2UI.Combat
 {
     public class DamageViewer : PulsarGuiWindow
     {
-        private ComponentProfile _componentProfile = new ComponentProfile();
+        private ComponentDesign _componentDesign;
 
         int _newmatIDCode;
         int _newmatHitPoints = 10;
@@ -55,7 +56,7 @@ namespace Pulsar4X.SDL2UI.Combat
             DamageResist steelStainless =  new DamageResist(255, 255, 7900);
             
             
-            _componentProfile.Mats = aluminium;
+            _componentDesign.DamageResistance = aluminium;
 
         }
 
@@ -78,38 +79,39 @@ namespace Pulsar4X.SDL2UI.Combat
                     {
                         if (ImGui.Button("CreateShip"))
                         {
+                            /*
 
-                            ComponentProfile thruster = new ComponentProfile();
-                            thruster.DesignGuid = Guid.NewGuid();
+                            ComponentDesign thruster = new ComponentDesign();
+                            thruster.Guid = Guid.NewGuid();
                             thruster.Connections = Connections.Front | Connections.Sides;
                             thruster.Volume = 10;
                             thruster.AspectRatio = 1;
-                            thruster.Mats = DamageTools.DamageResistsLookupTable[200];
+                            thruster.DamageResistance = DamageTools.DamageResistsLookupTable[200];
 
 
-                            ComponentProfile fuel = new ComponentProfile();
-                            fuel.DesignGuid = Guid.NewGuid();
+                            ComponentDesign fuel = new ComponentDesign();
+                            fuel.Guid = Guid.NewGuid();
                             fuel.Connections = Connections.Front | Connections.Sides | Connections.Back;
                             fuel.Volume = 100;
                             fuel.AspectRatio = 2f;
-                            fuel.Mats = DamageTools.DamageResistsLookupTable[100];
+                            fuel.DamageResistance = DamageTools.DamageResistsLookupTable[100];
 
-                            ComponentProfile lifeSuport = new ComponentProfile();
-                            lifeSuport.DesignGuid = Guid.NewGuid();
+                            ComponentDesign lifeSuport = new ComponentDesign();
+                            lifeSuport.Guid = Guid.NewGuid();
                             lifeSuport.Connections = Connections.Front | Connections.Sides | Connections.Back;
                             lifeSuport.Volume = 5;
                             lifeSuport.AspectRatio = 1;
-                            lifeSuport.Mats = DamageTools.DamageResistsLookupTable[150];
+                            lifeSuport.DamageResistance = DamageTools.DamageResistsLookupTable[150];
 
 
-                            ComponentProfile cargo = new ComponentProfile();
-                            cargo.DesignGuid = Guid.NewGuid();
+                            ComponentDesign cargo = new ComponentDesign();
+                            cargo.Guid = Guid.NewGuid();
                             cargo.Connections = Connections.Front | Connections.Sides | Connections.Back;
                             cargo.Volume = 100;
                             cargo.AspectRatio = 0.5f;
-                            cargo.Mats = DamageTools.DamageResistsLookupTable[230];
+                            cargo.DamageResistance = DamageTools.DamageResistsLookupTable[230];
 
-                            List<(ComponentProfile component, int count)> componentTypes = new List<(ComponentProfile component, int count)>();
+                            List<(ComponentDesign component, int count)> componentTypes = new List<(ComponentDesign component, int count)>();
 
                             componentTypes.Add((thruster, 2));
                             componentTypes.Add((fuel, 1));
@@ -123,6 +125,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _rawShipImage = _profile.ShipDamageProfile;
                             _shipImgPtr = CreateSDLTexture(_profile.ShipDamageProfile);
                             _firePos.x = _rawShipImage.Width / 2;
+                            */
                         }
 
                         if (_shipImgPtr != IntPtr.Zero)
