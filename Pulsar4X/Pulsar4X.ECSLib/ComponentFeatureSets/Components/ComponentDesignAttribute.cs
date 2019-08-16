@@ -60,6 +60,7 @@ namespace Pulsar4X.ECSLib
                 input = MaxValue;
             Formula.ReplaceExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
             Formula.Evaluate();//force dependants to recalc.
+            ParentComponent.EvalAll();// this recalcs mass etc. which don't seem to be dependants? TODO: mass, volume etc etc should get the dependant handle if needed.
         }
 
         public double Value { get { return Formula.DResult; } }

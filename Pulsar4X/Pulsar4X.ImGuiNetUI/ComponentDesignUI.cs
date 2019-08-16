@@ -44,6 +44,7 @@ namespace Pulsar4X.SDL2UI
             if (IsActive && ImGui.Begin("Component Design", ref IsActive, _flags))
             {
 
+                ImGui.Columns(2);
                 if (ImGui.ListBox("Type", ref _designType, _designTypes, _designTypes.Length))
                 {
                     var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
@@ -83,10 +84,65 @@ namespace Pulsar4X.SDL2UI
                     {
                          _componentDesigner.CreateDesign(_state.Faction);
                     }
-
+                ImGui.NextColumn();
+                ImGui.BeginChild("ComponentData");
+                ImGui.Columns(2);
+                ImGui.Text("Mass");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.MassValue.ToString());
+                ImGui.NextColumn();
+                
+                ImGui.Text("Volume");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.VolumeValue.ToString());
+                ImGui.NextColumn();
+                
+                ImGui.Text("Crew Requred");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.CrewReqValue.ToString());
+                ImGui.NextColumn();
+                
+                ImGui.Text("Cost");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.CreditCostValue.ToString());
+                ImGui.NextColumn();
+                
+                ImGui.Text("Research Cost");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.ResearchCostValue.ToString());
+                ImGui.NextColumn();
+                
+                ImGui.Text("Build Cost");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.BuildPointCostValue.ToString());
+                ImGui.NextColumn();
+                
+                ImGui.Text("Minerals");
+                ImGui.NextColumn();
+                ImGui.NextColumn();
+                foreach (var mineral in _componentDesigner.MineralCostValues)
+                {
+                    var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
+                    ImGui.Text(mineralSD.Name);
+                    ImGui.NextColumn();
+                    ImGui.Text(mineral.Value.ToString());
+                    ImGui.NextColumn();
+                }
+/*
+                ImGui.Text("Materials");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.MassValue.ToString());
+                ImGui.NextColumn();
+                
+                ImGui.Text("Components");
+                ImGui.NextColumn();
+                ImGui.Text(_componentDesigner.MassValue.ToString());
+                ImGui.NextColumn();
+*/
 
                 }
                 
+
 
                 ImGui.End();
             }
@@ -129,7 +185,11 @@ namespace Pulsar4X.SDL2UI
                 }
                 //ImGui.DragScalar("##slider" + attribute.Name, ImGuiDataType.Double, valPtr, 1f, minPtr, maxPtr);
                 if (ImGui.SliderScalar("##scaler" + attribute.Name, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
+                {
                     attribute.SetValueFromInput(val);
+                    
+                    
+                }
                 if(ImGui.InputScalar("##input" + attribute.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
                     attribute.SetValueFromInput(val);
             }
