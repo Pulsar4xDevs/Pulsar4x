@@ -11,11 +11,15 @@ namespace Pulsar4X.SDL2UI
 {
     public class ShipDesignUI : PulsarGuiWindow
     {
+        private string _designName = "foo";
+
+        private string[] _exsistingDesigns;
+        private List<Entity> _exsistingClasses;
+        
         private ComponentDesign[] _componentDesigns;
         private string[] _componentNames;
         private int _selectedDesignsIndex;
-
-
+        
         private string[] _shipComponentNames;
         private int _selectedShipIndex;
  
@@ -41,6 +45,7 @@ namespace Pulsar4X.SDL2UI
                 _componentNames[i] = _componentDesigns[i].Name;
             }
             
+            //TODO: this is temporary armor info, needs to be added to the game proper
             _armorSelection.Add(("None", 0)    );
             _armorSelection.Add(("Polyprop", 1175f)    );
             _armorSelection.Add(("Aluminium", 2700f)    );
@@ -53,9 +58,9 @@ namespace Pulsar4X.SDL2UI
             {
                 _armorNames[i]= _armorSelection[i].name;
             }
-            
 
-            
+
+            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipClasses;
         }
 
         internal static ShipDesignUI GetInstance()
@@ -78,9 +83,29 @@ namespace Pulsar4X.SDL2UI
             if (IsActive && ImGui.Begin("Ship Design", ref IsActive, _flags))
             {
                 var designChanged = false;
-                //ImGui.BeginChild("Component Selection");
                 
-                ImGui.Columns(2);
+                
+                ImGui.Columns(3);
+
+                if (ImGui.CollapsingHeader("Exsisting Designs"))
+                {
+                    ImGui.BeginChild("exsistingdesigns");
+
+                    for (int i = 0; i < _exsistingClasses.Count; i++)
+                    {
+                        var shipinfodb = _exsistingClasses[i].GetDataBlob<ShipInfoDB>();
+                        //ImGui.Selectable(shipinfodb.)
+                        
+                    }
+                    
+                    
+                    ImGui.EndChild();
+                    
+
+                }
+                ImGui.NextColumn();
+                
+                
                 ImGui.BeginChild("ComponentSelection");
                 //ImGui.BeginGroup();
                 ImGui.Columns(3);
@@ -126,10 +151,6 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.Text(selectedComponent.Name);
                 ImGui.Text(selectedComponent.Description);
-
-
-                
-                
                 
                 
                 
@@ -286,9 +307,12 @@ namespace Pulsar4X.SDL2UI
                 
                 ImGui.Text("Ship Stats");
                 
-                
-                
+                var _nameInputBuffer = _designName.ToByteArray();
+                ImGui.InputText("Design Name", _nameInputBuffer, (uint)_nameInputBuffer.Length);
                 ImGui.Columns(1);
+                if(ImGui.Button("Create Design"))
+                {
+                }
 
 
 

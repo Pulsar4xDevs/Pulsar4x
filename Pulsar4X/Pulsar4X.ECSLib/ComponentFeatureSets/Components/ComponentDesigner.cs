@@ -210,7 +210,16 @@ namespace Pulsar4X.ECSLib
             //TODO: does this save? this is a bit of a hack iirc since static data shouldn't technicaly be created mid game...
             //'tech' is TechSD (static data)
             factionTech.ResearchableTechs.Add(tech, 0); //add it to researchable techs 
-            
+            SetMass();
+            SetVolume();
+            SetCreditCost();
+            SetCrew();
+            SetHTK();
+            SetResearchCost();
+            SetBuildCost();
+            SetMineralCosts();
+            SetMaterialCosts();
+            SetComponentCosts();
             foreach (var designAttribute in ComponentDesignAttributes)
             {
                 if (designAttribute.DataBlobType != null)
