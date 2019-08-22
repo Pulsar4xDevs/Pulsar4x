@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public List<Entity> ShipClasses { get; internal set; } = new List<Entity>();
-
+        public List<ShipFactory.ShipDesign> ShipDesigns = new List<ShipFactory.ShipDesign>();
 
         public ReadOnlyDictionary<Guid, ComponentDesign> ComponentDesigns => new ReadOnlyDictionary<Guid, ComponentDesign>(InternalComponentDesigns);
         [JsonProperty]

@@ -13,11 +13,23 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         //and having longditudinal structural parts...
         public RawBmp ShipDamageProfile;
         
-        public List<ComponentInstance> ComponentLookupTable = new List<ComponentInstance>(); 
-        
+        public List<ComponentInstance> ComponentLookupTable = new List<ComponentInstance>();
+
+        public EntityDamageProfileDB()
+        {
+        }
+
+        public EntityDamageProfileDB(EntityDamageProfileDB db )
+        {
+            Armor = db.Armor;
+            PlacementOrder = db.PlacementOrder;
+            TypeBitmaps = db.TypeBitmaps;
+            ShipDamageProfile = db.ShipDamageProfile;
+        }
+
         public override object Clone()
         {
-            throw new System.NotImplementedException();
+            return new EntityDamageProfileDB(this);
         }
     }
 }

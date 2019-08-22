@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 namespace Pulsar4X.ECSLib
 {
@@ -87,6 +88,68 @@ namespace Pulsar4X.ECSLib
             return shipEntity;
         }
 
+        public class ShipDesign
+        {
+            private Guid DesignID;
+            public string DesignName;
+            public int DesignVersion;
+            public bool IsObsolete = false;
+            public double Mass;
+            public double Volume;
+            public List<(ComponentDesign design, int count)> Components;
+            public (string name, double density, float thickness) Armor;
+            public Dictionary<MineralSD, int> MineralCost;
+            public Dictionary<ProcessedMaterialSD, int> MaterialCost;
+            public Dictionary<ComponentDesign, int> ComponentCost;
+            public int CrewReq;
+            public int BuildPointCost;
+            public int CreditCost;
+            public EntityDamageProfileDB DamageProfileDB;
+
+
+            public ShipDesign(FactionInfoDB factionInfoDB )
+            {
+                DesignID = Guid.NewGuid();
+                factionInfoDB.ShipDesigns.Add(this);
+                
+            }
+
+        }
+
+        public static Entity ShipFromDesign(ShipDesign design, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
+        {
+            Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            var distanceFromParent = Distance.AuToMt( parent.GetDataBlob<MassVolumeDB>().Radius * 2);
+            position.X += distanceFromParent;
+            List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
+
+            
+            var mvdb = MassVolumeDB.NewFromMassAndVolume(design.Mass, design.Volume);
+            dataBlobs.Add(mvdb);
+            PositionDB posdb = new PositionDB(position, starsys.Guid, parent);
+            dataBlobs.Add(posdb);
+            EntityDamageProfileDB damagedb = (EntityDamageProfileDB)design.DamageProfileDB.Clone(); 
+            dataBlobs.Add(damagedb);
+            ComponentInstancesDB compInstances = new ComponentInstancesDB();
+            dataBlobs.Add(compInstances);
+
+            var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
+            
+            //some DB's need tobe created after the entity.
+            var namedb = new NameDB(ship.Guid.ToString());
+            namedb.SetName(ownerFaction.Guid, shipName);
+            OrbitDB orbit = OrbitDB.FromPosition(parent, ship, starsys.ManagerSubpulses.StarSysDateTime);
+            ship.SetDataBlob(namedb);
+            ship.SetDataBlob(orbit);
+
+            foreach (var item in design.Components)
+            {
+                EntityManipulation.AddComponentToEntity(ship, item.design, item.count);
+            }
+            
+            return ship;
+        }
+
         public static Entity CreateNewShipClass(Game game, Entity faction, string className = null)
         {
             //check className before any to use it in NameDB constructor
@@ -138,18 +201,7 @@ namespace Pulsar4X.ECSLib
 
             // now lets set some ship info:
             shipInfo.ShipClassDefinition = Guid.Empty; // just make sure it is marked as a class and not a ship.
-
-            // now lets add some components:
-            ///< @todo Add ship components
-            // -- basic armour of current faction tech level
-            // -- minimum crew quaters defaulting to 3 months deployment time.
-            // -- a bridge
-            // -- an engineering space
-            // -- a fuel tank
             
-            // now update the ship system DBs to reflect the components:
-            ///< @todo update ship to reflect added components
-
             return shipClassEntity;
         }
 

@@ -144,6 +144,14 @@
     <Content Include="Resources\UpArrow.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Remove="Resources\DesignShipIco.bmp" />
+    <Content Include="Resources\DesignShipIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Remove="Resources\DesignComponentIco.bmp" />
+    <Content Include="Resources\DesignComponentIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Colony\" />

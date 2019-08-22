@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing.Printing;
 using System.Linq;
 using ImGuiNET;
 using ImGuiSDL2CS;
@@ -15,6 +16,7 @@ namespace Pulsar4X.SDL2UI
 
         private string[] _exsistingDesigns;
         private List<Entity> _exsistingClasses;
+        private int _selectedDesign = -1;
         
         private ComponentDesign[] _componentDesigns;
         private string[] _componentNames;
@@ -86,7 +88,8 @@ namespace Pulsar4X.SDL2UI
                 
                 
                 ImGui.Columns(3);
-
+                ImGui.SetColumnWidth(0, 200);
+                ImGui.SetColumnWidth(1, 350);
                 if (ImGui.CollapsingHeader("Exsisting Designs"))
                 {
                     ImGui.BeginChild("exsistingdesigns");
@@ -95,21 +98,25 @@ namespace Pulsar4X.SDL2UI
                     {
                         var shipinfodb = _exsistingClasses[i].GetDataBlob<ShipInfoDB>();
                         //ImGui.Selectable(shipinfodb.)
-                        
+                        string name = _exsistingClasses[i].GetDataBlob<NameDB>().GetName(_state.Faction);
+                        if(ImGui.Selectable(name))
+                        {
+                            _selectedDesign = i;
+                        }
                     }
                     
                     
                     ImGui.EndChild();
-                    
-
                 }
-                ImGui.NextColumn();
                 
+                ImGui.NextColumn();
                 
                 ImGui.BeginChild("ComponentSelection");
                 //ImGui.BeginGroup();
                 ImGui.Columns(3);
-                
+                ImGui.SetColumnWidth(0, 150);
+                ImGui.SetColumnWidth(1, 100);
+                ImGui.SetColumnWidth(2, 100);
                 //ImGui.ListBox("##Components", ref _selectedDesignsIndex, _componentNames, _componentNames.Length);
 
                 
@@ -312,6 +319,12 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Columns(1);
                 if(ImGui.Button("Create Design"))
                 {
+                    ShipFactory.ShipDesign design = new ShipFactory.ShipDesign(_state.Faction.GetDataBlob<FactionInfoDB>());
+                    design.Armor = _armor;
+                    design.DesignName = _designName;
+                    design.Components = _shipComponents;
+                    
+
                 }
 
 

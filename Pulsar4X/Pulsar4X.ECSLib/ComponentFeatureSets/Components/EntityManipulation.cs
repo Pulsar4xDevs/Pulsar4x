@@ -30,14 +30,17 @@ namespace Pulsar4X.ECSLib
             else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
         }
         
-        internal static void AddComponentToEntity(Entity parentEntity, ComponentDesign componentDesign)
+        internal static void AddComponentToEntity(Entity parentEntity, ComponentDesign componentDesign, int count = 1)
         {
             ComponentInstance instance;
 
             if (parentEntity.HasDataBlob<ComponentInstancesDB>())
             {
-                instance = new ComponentInstance(componentDesign);
-                AddComponentInstanceToEntity(parentEntity, instance);
+                for (int i = 0; i < count; i++)
+                {
+                    instance = new ComponentInstance(componentDesign);
+                    AddComponentInstanceToEntity(parentEntity, instance);
+                }
             }
             else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
             
