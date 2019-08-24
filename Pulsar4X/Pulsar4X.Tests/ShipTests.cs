@@ -16,10 +16,11 @@ namespace Pulsar4X.Tests
         private MineralSD _duraniumSD;
         private MineralSD _corundiumSD;
         private StarSystem _starSystem;
-        private Entity _shipClass;
+        private ShipFactory.ShipClass _shipClass;
         private Entity _ship;
         private ComponentDesign _engineComponentDesign;
         private ComponentTemplateSD _engineSD;
+        private Entity _sol;
 
         [SetUp]
         public void Init()
@@ -34,11 +35,12 @@ namespace Pulsar4X.Tests
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"), 1); //Nuclear Thermal Engine Technology
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
             _starSystem = new StarSystem(_game, "Sol", -1);
+            _sol = TestingUtilities.BasicSol(_starSystem);
             /////Ship Class/////
-           
 
 
-                
+
+
         }
 
 
@@ -56,19 +58,25 @@ namespace Pulsar4X.Tests
             
             _engineComponentDesign = engineDesigner.CreateDesign(_faction);
 
-            _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "Ob'enn dropship");
+            
+            
+            _shipClass = DefaultStartFactory.DefaultShipDesign(_game, _faction);
+            _ship = ShipFactory.CreateShip(_shipClass, _faction, _sol, _starSystem, "Testship");
 
-            Assert.True(_shipClass.FactionOwner == _faction.Guid);
-
-
-            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
-            EntityManipulation.AddComponentToEntity(_shipClass, _engineComponentDesign);
-
-            Vector3 pos = new Vector3(0, 0, 0);
-            int designEngineNumber = _shipClass.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid);
-            Assert.AreEqual(2, designEngineNumber);
-            _ship = ShipFactory.CreateShip(_shipClass, _faction, pos, _starSystem, "Serial Peacemaker");
-            Assert.AreEqual(designEngineNumber, _ship.GetDataBlob<ComponentInstancesDB>().GetNumberOfComponentsOfDesign(_engineComponentDesign.Guid), "Number of engine components not the same as design");
+            
+            ComponentInstancesDB instancesdb = _ship.GetDataBlob<ComponentInstancesDB>();
+            instancesdb.TryGetComponentsByAttribute<EnginePowerAtbDB>(out var instances1);
+            int origionalEngineNumber = instances1.Count;
+            
+            EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
+            EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
+            
+            
+            instancesdb.TryGetComponentsByAttribute<EnginePowerAtbDB>(out var instances2);
+            int add2engineNumber = instances2.Count;
+            
+                
+            Assert.AreEqual(origionalEngineNumber + 2, add2engineNumber);
 
             PropulsionAbilityDB propulsion = _ship.GetDataBlob<PropulsionAbilityDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();

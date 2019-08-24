@@ -15,7 +15,7 @@ namespace Pulsar4X.SDL2UI
         private string _designName = "foo";
 
         private string[] _exsistingDesigns;
-        private List<Entity> _exsistingClasses;
+        private List<ShipFactory.ShipClass> _exsistingClasses;
         private int _selectedDesign = -1;
         
         private ComponentDesign[] _componentDesigns;
@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipClasses;
+            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns;
         }
 
         internal static ShipDesignUI GetInstance()
@@ -96,9 +96,8 @@ namespace Pulsar4X.SDL2UI
 
                     for (int i = 0; i < _exsistingClasses.Count; i++)
                     {
-                        var shipinfodb = _exsistingClasses[i].GetDataBlob<ShipInfoDB>();
-                        //ImGui.Selectable(shipinfodb.)
-                        string name = _exsistingClasses[i].GetDataBlob<NameDB>().GetName(_state.Faction);
+
+                        string name = _exsistingClasses[i].DesignName;
                         if(ImGui.Selectable(name))
                         {
                             _selectedDesign = i;
@@ -319,10 +318,10 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Columns(1);
                 if(ImGui.Button("Create Design"))
                 {
-                    ShipFactory.ShipDesign design = new ShipFactory.ShipDesign(_state.Faction.GetDataBlob<FactionInfoDB>());
-                    design.Armor = _armor;
-                    design.DesignName = _designName;
-                    design.Components = _shipComponents;
+                    ShipFactory.ShipClass @class = new ShipFactory.ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>());
+                    @class.Armor = _armor;
+                    @class.DesignName = _designName;
+                    @class.Components = _shipComponents;
                     
 
                 }

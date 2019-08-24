@@ -17,7 +17,7 @@ namespace Pulsar4X.Tests
         private MineralSD _duraniumSD;
         private MineralSD _corundiumSD;
         private StarSystem _starSystem;
-        private Entity _shipClass;
+        //private Entity _shipClass;
         private Entity _ship;
         private Entity _engineComponent;
         [SetUp]
@@ -35,7 +35,7 @@ namespace Pulsar4X.Tests
             _faction.GetDataBlob<FactionTechDB>().ResearchedTechs.Add(new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"), 1);
             _starSystem = new StarSystem(_game, "Sol", -1);
             /////Ship Class/////
-            _shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "TestClass");
+            //_shipClass = ShipFactory.CreateNewShipClass(_game, _faction, "TestClass");
         }
 
         [Test]

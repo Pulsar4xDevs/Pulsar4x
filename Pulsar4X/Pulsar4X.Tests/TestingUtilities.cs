@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 namespace Pulsar4X.Tests
 {
     internal static class TestingUtilities
     {
+
+        
         public static Entity BasicSol(EntityManager mgr)
         {
             double parentMass = 1.989e30;
@@ -90,7 +93,7 @@ namespace Pulsar4X.Tests
 
         public ComponentDesign DefaultWeaponDesign { get; set; }
 
-        public Entity DefaultShipDesign { get; set; }
+        public ShipFactory.ShipClass DefaultShipDesign { get; set; }
 
         public Entity EarthColony { get; set; }
 
@@ -132,7 +135,7 @@ namespace Pulsar4X.Tests
             DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
 
             Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Sol, "Serial Peacemaker");
+            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  Sol, "Serial Peacemaker");
             Sol.SetDataBlob(DefaultShip.ID, new TransitableDB());
         }
 

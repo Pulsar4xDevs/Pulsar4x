@@ -29,18 +29,7 @@ namespace Pulsar4X.Tests
             _pop1 = new Dictionary<Entity, long> { { _species1, 10 } };
             _pop2 = new Dictionary<Entity, long> { { _species1, 5 } };
         }
-
-        [Test]
-        [Ignore("Stress Test.")]
-        public void CloneStress()
-        {
-            Entity humanFaction = FactionFactory.CreateFaction(_game, "Humans");
-            Entity harbingerShipClass =  ShipFactory.CreateNewShipClass(_game, humanFaction, "Harbinger");
-            for (int i = 0; i < 1000000; i++)
-            {
-                harbingerShipClass.Clone(_game.GlobalManager);
-            }
-        }
+        
 
         [Test]
         public void TestSelfReferencingEntity()
