@@ -172,7 +172,7 @@ namespace Pulsar4X.ECSLib
             //sol.SystemManager.SetDataBlob(ship.ID, new TransitableDB());
 
             //Entity rock = AsteroidFactory.CreateAsteroid2(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
-            Entity rock = AsteroidFactory.CreateAsteroid3(solSys, earth, StaticRefLib.CurrentDateTime + TimeSpan.FromDays(365));
+            Entity rock = AsteroidFactory.CreateAsteroid(solSys, earth, StaticRefLib.CurrentDateTime + TimeSpan.FromDays(365));
 
             var entitiesWithSensors = solSys.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
             foreach (var entityItem in entitiesWithSensors)

@@ -101,6 +101,12 @@ namespace Pulsar4X.SDL2UI
                         if(ImGui.Selectable(name))
                         {
                             _selectedDesign = i;
+                            _designName = _exsistingClasses[i].DesignName;
+                            _shipComponents = _exsistingClasses[i].Components;
+                            _armor = _exsistingClasses[i].Armor;
+                            _profile = ComponentPlacement.CreateDamageProfileDB(_shipComponents, _armor);
+                            _rawShipImage = _profile.ShipDamageProfile;
+                            _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
                         }
                     }
                     
@@ -116,8 +122,6 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SetColumnWidth(0, 150);
                 ImGui.SetColumnWidth(1, 100);
                 ImGui.SetColumnWidth(2, 100);
-                //ImGui.ListBox("##Components", ref _selectedDesignsIndex, _componentNames, _componentNames.Length);
-
                 
                 ImGui.Text("Component");
                 ImGui.NextColumn();
@@ -163,6 +167,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.BeginChild("ShipDesign");
                 
                 ImGui.Columns(2, "Ship Components", true);
+                ImGui.SetColumnWidth(0, 150);
+                ImGui.SetColumnWidth(1, 124);
                 ImGui.Text("Component");
                 ImGui.NextColumn();
                 ImGui.Text("Count"); ImGui.NextColumn();
@@ -273,10 +279,20 @@ namespace Pulsar4X.SDL2UI
                 }
  
                 ImGui.NextColumn();
+                ImGui.Columns(1);
+                ImGui.Text("Ship Stats");
+                var _nameInputBuffer = _designName.ToByteArray();
+                ImGui.InputText("Design Name", _nameInputBuffer, (uint)_nameInputBuffer.Length);
+                
                 
                 ImGui.Separator();
+                
+                ImGui.EndChild();
+                ImGui.NextColumn();
+                ImGui.Separator();
                 //ImGui.EndChild();
-
+                ImGui.Columns(1);
+                
                 if (designChanged)
                 {
                     _profile = ComponentPlacement.CreateDamageProfileDB(_shipComponents, _armor);
@@ -288,7 +304,7 @@ namespace Pulsar4X.SDL2UI
                 if (_shipImgPtr != IntPtr.Zero)
                 {
                     
-                    float maxwidth = ImGui.GetColumnWidth();;// ImGui.GetWindowWidth();
+                    float maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;// 
                     float maxheigh = 512;//ImGui.GetWindowHeight() / 2;
                     int w = _rawShipImage.Width; 
                     int h = _rawShipImage.Height;
@@ -309,20 +325,22 @@ namespace Pulsar4X.SDL2UI
                     
                     ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w * scale, h * scale));
                 }
-                ImGui.NextColumn();
+                //ImGui.NextColumn();
                 
-                ImGui.Text("Ship Stats");
-                
-                var _nameInputBuffer = _designName.ToByteArray();
-                ImGui.InputText("Design Name", _nameInputBuffer, (uint)_nameInputBuffer.Length);
-                ImGui.Columns(1);
+
                 if(ImGui.Button("Create Design"))
                 {
-                    ShipFactory.ShipClass @class = new ShipFactory.ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>());
-                    @class.Armor = _armor;
-                    @class.DesignName = _designName;
-                    @class.Components = _shipComponents;
-                    
+                    int version = 0;
+                    foreach (var shipclass in _exsistingClasses)
+                    {
+                        if (shipclass.DesignName == _designName)
+                        {
+                            if (shipclass.DesignVersion >= version)
+                                version = shipclass.DesignVersion + 1;
+                        }
+                    }
+                    ShipFactory.ShipClass shipClass = new ShipFactory.ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>(), _designName, _shipComponents, _armor);
+                    shipClass.DesignVersion = version;
 
                 }
 
